@@ -10,6 +10,7 @@ export class FrameStats {
     const avg = a.reduce((s, v) => s + v, 0) / len;
     return { avg, p50: a[len >> 1], p95: a[Math.floor(len * 0.95)], max: a[len - 1], fps: 1000 / avg };
   }
+  values(): number[] { return Array.from(this.samples.subarray(0, Math.min(this.n, this.samples.length))); }
   reset() { this.n = 0; }
 }
 

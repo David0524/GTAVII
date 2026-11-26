@@ -8,7 +8,7 @@ import { union, intersect, difference, bufferLines } from './clip.ts';
 import { CHUNK_SIZE, GRID_ROTATION_DEG, REGION, project, chunkKey } from '../../src/shared/geo.ts';
 import {
   BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter, PaintKind,
-  type WBuilding, type WGround, type WPoi, type WPaint,
+  type WBuilding, type WGround, type WPoi, type WPaint, type DoorRecC, type DoorStyle,
 } from '../../src/shared/chunkFormat.ts';
 import { RAW, OUT, ROOT, ensureDir, log } from './common.ts';
 import { dateBuilding, osmYear, type Dating } from './dating.ts';
@@ -327,6 +327,58 @@ for (const r of RESTORED_BUILDINGS) {
   log(`no-floating pass: ${lowered} raised parts lowered onto their real support`);
 }
 
+// Overlap pass (user report 2026-11-26, iPhone: "the building is weird"). Footprints from different sources
+// can overlap in volume (758 pairs): both drew walls and window grids in the same place, and the grids fought.
+// Taller buildings win: each lower building that a taller one covers from its base up is clipped by it.
+// Exact duplicates vanish; partial overlaps leave the lower building's real remainder.
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  const add = (k: number) => { const bb = bbox(buildings[k].poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } };
+  buildings.forEach((_b, k) => add(k));
+  const order = buildings.map((_b, k) => k).sort((a, b) => buildings[b].height - buildings[a].height || polyArea(buildings[b].poly) - polyArea(buildings[a].poly));
+  const rank = new Map(order.map((k, r) => [k, r]));
+  let clipped = 0, removed = 0, pieces = 0; const drop = new Set<number>(); const extra: Bldg[] = [];
+  for (const k of order) {
+    const b = buildings[k]; const bb = bbox(b.poly); const cutters: Poly[] = []; const seen = new Set<number>();
+    for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) for (const o of index.get(`${gx},${gz}`) ?? []) {
+      if (o === k || seen.has(o) || drop.has(o) || rank.get(o)! > rank.get(k)!) continue; seen.add(o);
+      const a = buildings[o];
+      if (a.minHeight > b.minHeight + 1) continue; // a starts above b's base: clipping would leave a hole under it
+      if (Math.min(a.height, b.height) <= Math.max(a.minHeight, b.minHeight) + 1) continue; // no vertical overlap
+      const ob = bbox(a.poly); if (ob.maxX <= bb.minX || ob.minX >= bb.maxX || ob.maxZ <= bb.minZ || ob.minZ >= bb.maxZ) continue;
+      cutters.push(a.poly);
+    }
+    if (!cutters.length) continue;
+    const before = polyArea(b.poly);
+    const rest = difference([b.poly], cutters).map((q) => cleanPoly(q)).filter((q): q is Poly => !!q && polyArea(q) >= 4).sort((x, y) => polyArea(y) - polyArea(x));
+    const after = rest.reduce((sum, q) => sum + polyArea(q), 0);
+    if (after > before - 0.5) continue; // touching only
+    if (!rest.length) { drop.add(k); removed++; continue; }
+    clipped++; b.poly = rest[0];
+    for (const q of rest.slice(1)) { extra.push({ ...b, id: nextId++, poly: q, name: undefined, flags: b.flags & ~BuildingFlag.Hero }); pieces++; }
+  }
+  const kept = buildings.filter((_b, k) => !drop.has(k));
+  buildings.length = 0; buildings.push(...kept, ...extra);
+  log(`overlap pass: ${clipped} buildings clipped by taller neighbours, ${removed} duplicates removed, ${pieces} split pieces`);
+}
+
+// Floor sanity (same report: some windows looked ~3 m wide). Floor-to-floor height comes from height / floors,
+// but source floor counts are sometimes wrong for the modelled height. Outside period-plausible ranges per
+// style, floors are re-derived from the height and the style's typical floor-to-floor.
+{
+  const TYPICAL: Record<number, [number, number, number]> = { // [min, typical, max] metres
+    0: [2.8, 3.5, 4.6], 1: [2.8, 3.2, 3.8], 2: [3.4, 4.4, 5.4], 3: [3.2, 4.0, 5.0], 4: [3.2, 3.8, 4.6], 5: [3.2, 3.7, 4.4],
+    6: [2.7, 3.0, 3.8], 7: [3.0, 4.0, 5.5], 8: [3.0, 5.0, 9.0], 9: [3.3, 3.75, 4.2], 10: [3.3, 4.0, 4.8], 11: [3.2, 3.6, 4.2],
+  };
+  let fixed = 0;
+  for (const b of buildings) {
+    const [lo, typ, hi] = TYPICAL[b.style] ?? TYPICAL[0];
+    const h = b.height - b.minHeight; const f = b.floors > 0 ? h / b.floors : 0;
+    if (f < lo || f > hi) { b.floors = Math.max(1, Math.round(h / typ)); fixed++; }
+  }
+  log(`floor sanity: ${fixed} buildings re-derived floors from height (period floor-to-floor by style)`);
+}
+
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
 const DRIVABLE = new Set(['motorway', 'motorway_link', 'trunk', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'residential', 'unclassified', 'living_street']);
 interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean }
@@ -486,6 +538,50 @@ function wallAO(b: Bldg): [number, number][][] {
   log(`wall occlusion baked for ${n} buildings in ${((Date.now() - t) / 1000).toFixed(1)} s`);
 }
 
+// ------------------------------------------------------------------ doors (one per building, on the street frontage)
+// User: "not sure if we have doors in all the buildings". Every building gets a door on its longest wall that
+// faces open space, centred on the facade grid's nearest bay (src/shared/facade.ts), in a period style by
+// building type. Same fields as interiors' DoorRec; interiors' doorsForChunk replaces these at its merge.
+const doorOf = new Map<number, DoorRecC>();
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } });
+  const open = (p: P) => !(index.get(`${Math.floor(p[0] / GRID)},${Math.floor(p[1] / GRID)}`) ?? []).some((k) => pointInPoly(p, buildings[k].poly));
+  const rnd = (id: number, k: number) => { let h = Math.imul(id ^ (k * 0x9e3779b1), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const DIMS: Record<string, [number, number]> = { shop: [1.0, 2.3], shop_recessed: [1.0, 2.3], stoop: [1.1, 2.5], vestibule: [1.1, 2.4], brass_double: [1.8, 2.7], revolving: [2.2, 2.6], freight: [3.0, 3.2], church: [1.8, 3.0] };
+  const BAY: Record<number, number> = { 9: 1.55, 10: 1.8, 11: 2.4, 1: 2.6, 2: 3.3, 3: 3.3, 6: 1.9 };
+  let n = 0;
+  for (const b of buildings) {
+    if (b.minHeight > 0 || polyArea(b.poly) < 20 || b.height < 2.5) continue;
+    const r = b.poly[0]; const N = r.length;
+    const along: number[] = [0]; for (let k = 0; k < N; k++) { const a = r[k], c = r[(k + 1) % N]; const L = Math.hypot(c[0] - a[0], c[1] - a[1]); along.push(along[k] + (L < 1e-3 ? 0 : L)); }
+    let best = -1, bestL = 0, bn: P = [0, 0];
+    for (let k = 0; k < N; k++) {
+      const a = r[k], c = r[(k + 1) % N]; const L = Math.hypot(c[0] - a[0], c[1] - a[1]); if (L < 3.2 || L <= bestL) continue;
+      let nx = (c[1] - a[1]) / L, nz = -(c[0] - a[0]) / L; const m: P = [(a[0] + c[0]) / 2, (a[1] + c[1]) / 2];
+      if (pointInRing([m[0] + nx * 0.4, m[1] + nz * 0.4], r)) { nx = -nx; nz = -nz; }
+      if (!open([m[0] + nx * 4, m[1] + nz * 4]) || !open([m[0] + nx * 1.5, m[1] + nz * 1.5])) continue;
+      best = k; bestL = L; bn = [nx, nz];
+    }
+    if (best < 0) continue;
+    const st = b.style, big = b.height > 80;
+    const style: DoorStyle = b.flags & BuildingFlag.Hero ? (b.name === 'Empire State Building' ? 'revolving' : 'brass_double')
+      : st === 1 ? (rnd(b.id, 1) < 0.55 ? 'stoop' : 'vestibule')
+      : st === 2 || st === 3 ? (rnd(b.id, 2) < 0.3 ? 'freight' : 'shop')
+      : st === 4 || st === 5 ? (big && rnd(b.id, 3) < 0.4 ? 'revolving' : 'brass_double')
+      : st === 6 ? 'brass_double' : st === 8 ? 'church' : rnd(b.id, 4) < 0.5 ? 'shop' : 'shop_recessed';
+    const [w, h] = DIMS[style];
+    const a = r[best], c = r[(best + 1) % N]; const L = bestL, ux = (c[0] - a[0]) / L, uz = (c[1] - a[1]) / L;
+    const bay = BAY[st] ?? 2.45, mid = along[best] + L / 2;
+    let sAlong = (Math.round(mid / bay - 0.5) + 0.5) * bay - along[best]; // centre of the nearest bay
+    sAlong = Math.min(L - w / 2 - 0.3, Math.max(w / 2 + 0.3, sAlong));
+    const x = a[0] + ux * sAlong, z = a[1] + uz * sAlong;
+    doorOf.set(b.id, { buildingId: b.id, x, z, yaw: Math.atan2(-bn[0], -bn[1]), style, width: w, height: h, rise: style === 'stoop' ? 0.75 : style === 'church' ? 0.45 : 0, nightGate: style === 'shop' || style === 'shop_recessed', enterable: false });
+    n++;
+  }
+  log(`doors: ${n} buildings got a street door`);
+}
+
 const toLocal = (poly: Poly, ox: number, oz: number): [number, number][][] => poly.map((r) => r.map(([x, z]) => [x - ox, z - oz] as [number, number]));
 const signals: P[] = [], entrances: P[] = [];
 for (const e of osm) if (e.type === 'node' && e.tags) {
@@ -520,7 +616,8 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
   ];
   const paintHere = paintStrokes.filter((st) => { const m: P = [(st.pts[0][0] + st.pts[st.pts.length - 1][0]) / 2, (st.pts[0][1] + st.pts[st.pts.length - 1][1]) / 2]; return m[0] >= minX && m[0] < maxX && m[1] >= minZ && m[1] < maxZ; })
     .map((st) => ({ ...st, pts: st.pts.map(([x, z]) => [x - ox, z - oz] as [number, number]) }));
-  const bytes = writeChunk(i, j, bl, ground, pois, paintHere);
+  const doorsHere = bl.map((b) => doorOf.get(b.id)).filter((d): d is DoorRecC => !!d).map((d) => ({ ...d, x: d.x - ox, z: d.z - oz }));
+  const bytes = writeChunk(i, j, bl, ground, pois, paintHere, doorsHere);
   fs.writeFileSync(path.join(OUT, 'chunks', `${chunkKey(i, j)}.bin`), bytes);
   totalBytes += bytes.length;
   const maxH = bl.reduce((m, b) => Math.max(m, b.height), 0);

@@ -7,6 +7,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import net from 'node:net';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
@@ -70,10 +71,10 @@ const VIEWS: { name: string; cam?: string; at?: string }[] = [
 ];
 
 async function main() {
-  const port = 4173;
+  const port = await new Promise<number>((res) => { const srv = net.createServer(); srv.listen(0, () => { const p = (srv.address() as net.AddressInfo).port; srv.close(() => res(p)); }); });
   const p3 = phase === 'phase3';
-  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'pipe' });
-  await new Promise((r) => setTimeout(r, 2500));
+  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'ignore', detached: true });
+  for (let k = 0; k < 120; k++) { try { if ((await fetch(`http://localhost:${port}/`)).ok) break; } catch { /* not up */ } await new Promise((r) => setTimeout(r, 500)); }
   const browser = await chromium.launch({
     args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
@@ -105,6 +106,6 @@ async function main() {
   }
   fs.writeFileSync(path.join(outDir, 'report.json'), JSON.stringify({ quality, forceWebGL, date: new Date().toISOString(), ua: await page.evaluate(() => navigator.userAgent), views: report, logs: logs.slice(0, 200) }, null, 2));
   await browser.close();
-  server.kill();
+  (() => { try { process.kill(-server.pid!, 'SIGTERM'); } catch { /* gone */ } })();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

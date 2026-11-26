@@ -1,4 +1,5 @@
 import RAPIER from '@dimforge/rapier3d-compat';
+import { loadReport } from '../engine/debug/LoadReport';
 import type * as THREE from 'three/webgpu';
 import { GROUPS } from '../shared/physicsGroups';
 
@@ -48,7 +49,7 @@ export class Physics {
       if (d <= this.radius && !c.colliders && built < 2) { c.colliders = this.build(c.geo); built++; }
       else if (d > this.radius + 120 && c.colliders) { this.drop(c.colliders); c.colliders = null; }
     }
-    if (built) this.stats.buildMs = performance.now() - t0;
+    if (built) { this.stats.buildMs = performance.now() - t0; loadReport.colliders(this.stats.buildMs); }
     let n = 0, k = 0; for (const c of this.chunks.values()) if (c.colliders) { n += c.colliders.length; k++; }
     this.stats.colliders = n; this.stats.chunksWithColliders = k;
   }

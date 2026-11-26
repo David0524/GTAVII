@@ -7,7 +7,7 @@ export async function createRenderer(container: HTMLElement, pixelRatio: number)
   const params = new URLSearchParams(location.search);
   const forceWebGL = params.has('webgl') || !('gpu' in navigator);
   // GPU timestamps for the device perf report (?hud=1 or ?gpu=1); WebGPU only where 'timestamp-query' exists
-  const trackTimestamp = params.get('hud') === '1' || params.has('gpu');
+  const trackTimestamp = (params.get('hud') === '1' || params.get('gpu') === '1') && params.get('gpu') !== '0'; // ?gpu=0: A/B the query cost
   const renderer = new THREE.WebGPURenderer({ antialias: true, forceWebGL, powerPreference: 'high-performance', trackTimestamp });
   await renderer.init();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, matchMedia("(pointer: coarse)").matches ? 1.5 : 2) * pixelRatio);

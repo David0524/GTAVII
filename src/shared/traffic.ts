@@ -28,6 +28,8 @@ export const VEHICLE_CLASSES = [
   'motorcycle',
   'police_motorcycle',
   'bicycle', // messengers
+  'tow_truck', // sim request 8 (towing, parking enforcement)
+  'street_sweeper', // sim request 8 (Sanitation street cleaning)
 ] as const;
 export type VehicleClass = (typeof VEHICLE_CLASSES)[number];
 
