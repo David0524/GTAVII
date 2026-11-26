@@ -8,6 +8,10 @@ import earcut from 'earcut';
 import type { BuildingRec } from '../../shared/chunkFormat';
 import type { BuildingIdx } from '../indexFormat';
 import { facadeOpenings } from '../facade';
+import { pushWindow } from '../windowRooms';
+import { buildingCondition } from '../../shared/condition';
+
+export interface WindowArrays { position: number[]; normal: number[]; wuv: number[]; wtan: number[]; wdat: number[]; index: number[] }
 
 export interface ShellArrays { position: number[]; normal: number[]; color: number[]; index: number[] }
 type RGB = [number, number, number];
@@ -33,7 +37,7 @@ export function shellOpenings(b: BuildingIdx, x0: number, z0: number, x1: number
 }
 
 /** rec rings are chunk-local; ox/oz = chunk centre. Output in chunk-local coordinates. */
-export function buildShell(out: ShellArrays, rec: BuildingRec, ox: number, oz: number, b: BuildingIdx | undefined, hf: (x: number, z: number) => number, roofHoles: number[][] = []) {
+export function buildShell(out: ShellArrays, rec: BuildingRec, ox: number, oz: number, b: BuildingIdx | undefined, hf: (x: number, z: number) => number, roofHoles: number[][] = [], win?: WindowArrays) {
   const ring = rec.rings[0]; let gMin = Infinity, gSum = 0;
   for (let k = 0; k < ring.length; k += 2) { const h = hf(ring[k], ring[k + 1]); gMin = Math.min(gMin, h); gSum += h; }
   const gAvg = gSum / (ring.length / 2), top = gAvg + Math.max(rec.height, rec.minHeight + 0.5), bottom = rec.minHeight > 0 ? gAvg + rec.minHeight : gMin - 0.6;
@@ -47,6 +51,15 @@ export function buildShell(out: ShellArrays, rec: BuildingRec, ox: number, oz: n
       const dx = x1 - x0, dz = z1 - z0, L = Math.hypot(dx, dz); if (L < 1e-3) continue;
       let nx = dz / L, nz = -dx / L; if (!ccw) { nx = -nx; nz = -nz; }
       const ops = b && r === 0 ? shellOpenings(b, x0 + ox, z0 + oz, x1 + ox, z1 + oz) : [];
+      // Tier C: window grid on street-facing edges above the ground floor
+      if (win && b && r === 0 && rec.floors > 1 && b.frontage.some((e) => Math.hypot(e[0] - (x0 + ox), e[1] - (z0 + oz)) + Math.hypot(e[2] - (x1 + ox), e[3] - (z1 + oz)) < L + 0.5)) {
+        const fh = (top - gAvg) / rec.floors, cols = Math.floor((L - 0.6) / 2.1), cond = buildingCondition({ id: rec.id, year: rec.year, style: rec.style, use: rec.use, floors: rec.floors, flags: rec.flags });
+        for (let f = 1; f < rec.floors; f++) for (let q = 0; q < cols; q++) {
+          const s = (L - cols * 2.1) / 2 + q * 2.1 + 0.55, y = gAvg + f * fh + 0.85;
+          let hsh = Math.imul(rec.id * 131 + k * 17 + f * 7 + q, 0x9e3779b1); hsh ^= hsh >>> 15;
+          pushWindow(win, [x0 + (dx / L) * s + ox, y, z0 + (dz / L) * s + oz], [dx / L, 0, dz / L], [nx, 0, nz], 1.0, Math.min(1.7, fh - 1.2), [((hsh >>> 0) % 10000) / 10000, rec.use, f, cond]);
+        }
+      }
       const ss = [0, L, ...ops.flatMap((q) => [q.s0, q.s1])].sort((p, q) => p - q);
       const ys = [bottom, top, ...ops.flatMap((q) => [q.y0, q.y1])].sort((p, q) => p - q);
       const dark: RGB = [col[0] * 0.8, col[1] * 0.8, col[2] * 0.8];

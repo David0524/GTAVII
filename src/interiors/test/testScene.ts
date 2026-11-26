@@ -26,7 +26,9 @@ import { FlyCamera } from '../../camera/FlyCamera';
 import { Input } from '../../input/Input';
 import { FrameStats } from '../../engine/debug/DebugHud';
 import { createInteriors } from '../index';
-import { buildShell, type ShellArrays } from './testShell';
+import { buildShell, type ShellArrays, type WindowArrays } from './testShell';
+import { createWindowRoomMaterial } from '../windowRooms';
+import { roofHatchesWorld } from '../layout';
 import { buildInterior } from '../build';
 import type { BuildingIdx, UnitRec } from '../indexFormat';
 import { createInteriorMaterial, createGlassMaterial, type InteriorLook } from '../runtime/material';
@@ -118,7 +120,10 @@ export async function runInteriorsTest() {
   const byBuilding = new Map<number, BuildingIdx>(); for (const b of interiors.index.buildings) byBuilding.set(b.id, b);
   const R = 420, ENTER_R = 260;
   const ci0 = Math.floor((start.x - R) / 200), ci1 = Math.floor((start.x + R) / 200), cj0 = Math.floor((start.z - R) / 200), cj1 = Math.floor((start.z + R) / 200);
-  let shellCount = 0;
+  let shellCount = 0, windowCount = 0;
+  const wroom = createWindowRoomMaterial();
+  wroom.uniforms.minutes.value = minutes; wroom.uniforms.daylight.value = day; wroom.uniforms.power.value = params.get('power') === 'off' ? 0 : params.get('power') === 'dim' ? 0.45 : 1;
+  const winAll: WindowArrays = { position: [], normal: [], wuv: [], wtan: [], wdat: [], index: [] };
   await Promise.all(Array.from({ length: (ci1 - ci0 + 1) * (cj1 - cj0 + 1) }, async (_, k) => {
     const i = ci0 + (k % (ci1 - ci0 + 1)), j = cj0 + Math.floor(k / (ci1 - ci0 + 1));
     const r = await fetch(`${base}chunks/${i}_${j}.bin`); if (!r.ok) return;
@@ -128,7 +133,7 @@ export async function runInteriorsTest() {
     const keep = data.buildings.filter((rec) => {
       const b = byBuilding.get(rec.id);
       const near = Math.hypot(ox + rec.rings[0][0] - start.x, oz + rec.rings[0][1] - start.z) < ENTER_R;
-      if (b && near && rec.minHeight === 0) { buildShell(shells, rec, ox, oz, b, hf); shellCount++; return false; }
+      if (b && near && rec.minHeight === 0) { const holes = roofHatchesWorld(b).map((r) => r.map((v, q) => v - (q % 2 ? oz : ox))); buildShell(shells, rec, ox, oz, b, hf, holes, winAll); shellCount++; return false; }
       return true;
     });
     const mesh = buildChunk({ ...data, buildings: keep }, 200, hf);
@@ -140,6 +145,12 @@ export async function runInteriorsTest() {
     physics.addChunk({ key: `${i}_${j}`, ox, oz, parts });
   }));
   scene.add(interiors.object);
+  if (winAll.index.length) {
+    const wg = new THREE.BufferGeometry();
+    wg.setAttribute('position', new THREE.Float32BufferAttribute(winAll.position, 3)); wg.setAttribute('normal', new THREE.Float32BufferAttribute(winAll.normal, 3));
+    wg.setAttribute('wuv', new THREE.Float32BufferAttribute(winAll.wuv, 2)); wg.setAttribute('wtan', new THREE.Float32BufferAttribute(winAll.wtan, 3)); wg.setAttribute('wdat', new THREE.Float32BufferAttribute(winAll.wdat, 4));
+    wg.setIndex(winAll.index); const wm = new THREE.Mesh(wg, wroom.material); wm.name = 'tierC_windows'; scene.add(wm); windowCount = winAll.index.length / 6;
+  }
 
   const input = new Input(renderer.domElement);
   const startY = heightAt(start.x, start.z) + SIDEWALK_H;
@@ -184,7 +195,7 @@ export async function runInteriorsTest() {
 
   // ------------------------------------------------------------------ loop
   const timer = new THREE.Timer(); let jump = false, syncT = 0, hudT = 0, overT = 0, frameCount = 0;
-  debug.player = player; debug.physics = physics; debug.orbit = orbit; debug.fly = fly; debug.RAPIER = RAPIER; debug.shells = shellCount;
+  debug.player = player; debug.physics = physics; debug.orbit = orbit; debug.fly = fly; debug.RAPIER = RAPIER; debug.shells = shellCount; debug.windows = windowCount; debug.windowRooms = wroom;
   debug.setMode = (m: 'onfoot' | 'photo') => { mode = m; };
   debug.teleport = (x: number, y: number, z: number, deg: number) => { player.teleport(x, y, z, THREE.MathUtils.degToRad(deg)); orbit.snap({ x, y, z }, THREE.MathUtils.degToRad(deg)); };
   debug.whenIdle = () => new Promise<void>((res) => { const t = () => (frameCount > 20 && interiors.stats.pending === 0 && (mode === 'photo' || player.active) ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); });
