@@ -52,7 +52,7 @@ against until it ships. The engine team owns all decisions here.
 
 ## 5. Switching between playable characters
 - **What:** Three playable characters (`char.teddy_arce`, `char.delphine_moore`,
-  `char.ezra_lomax`), each with their own position, wardrobe, money and inventory. We
+  `char.nick_varelas`), each with their own position, wardrobe, money and inventory. We
   need:
   - a switch action in free roam (between missions), with the camera cutting to the
     other character wherever they are in their own daily schedule;

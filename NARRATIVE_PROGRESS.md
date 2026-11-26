@@ -38,20 +38,33 @@ and `public/data/world.json`.
 - **Sensitive subjects are fine. Prostitution should be present in the world.**
 
 Applied in the bible:
-- Delphine Moore (§3b) and Ezra Lomax (§3c) added as leads.
-- A 32-mission rotation table (§6.0): Delphine arrives in M6, Ezra in M15, all three are
+- Delphine Moore (§3b) and a third lead (§3c) added.
+- A 32-mission rotation table (§6.0): Delphine arrives in M6, the third lead in M15, all three are
   playable by M17, and there are 10 joint missions.
 - Sensitive-subject handling rules rewritten (§7).
 - ENGINE_REQUESTS #5 (switching leads).
 
+**26 Nov 2026, N1 review 2.** The reviewer said: *"Cut Ezra. Make him a rich business man."*
+Applied:
+- Ezra Lomax was removed completely (including the gay double-life storyline and the
+  photo-blackmail thread).
+- The third lead is now **Nikos "Nick" Varelas**, 51, a self-made Kastorian fur magnate who
+  is cash-poor, pays everyone, and is the buyer of record of the Corwin (bible §3c).
+- Augie Lomax stays as the trucking boss, with no son.
+- Missions 15–32 were re-pointed to Nick: his vaults fail on the first brownout, he meets
+  Delphine over a lease, and the three-lead vault job becomes his insurance scheme.
+- A name check found no notable real "Nikos/Nick Varelas" in the fur trade. Real fur houses
+  at 143 and 210 W 29th St are noted, and those addresses are off-limits for invented
+  businesses.
+
 ## Current proposal
 - **Leads:** Teddy Arce (ex-cop, night clerk: *access*), Delphine Moore (former presser,
   works the Eighth Ave strip and banks the women's savings club: *reading people, photo
-  evidence, on foot*), Ezra Lomax (the trucking boss's gay son, who drives the surcharge
-  pad: *wheels*).
+  evidence, on foot*), Nick Varelas (fur magnate, buyer of record of the Corwin: *money
+  and leverage, night driving, rich interiors*).
 - **Premise:** a post-Knapp syndicate rebuilds the payoff "pad" as legal-looking
   paperwork. Each lead is one moving part of it: Teddy collects, Delphine's club gets
-  taxed, Ezra drives.
+  taxed, Nick pays.
 - **Dramatic question:** Can you protect your block when every kind of protection is for
   sale, without becoming the one who sells it?
 - **Pillars:** P1 Follow the money · P2 The grid is the game · P3 Everybody's on a shift
@@ -202,7 +215,7 @@ Each period claim that drives a story beat is listed here. Secondary sources are
   the jobs. Sources: [Battle, "On the Auction Block", ILWCH (2022)](https://doi.org/10.1017/s0147547922000059);
   [Freeman, *Working-Class New York*, ch. 9](https://rodriguez21lpol301.commons.gc.cuny.edu/wp-content/blogs.dir/17962/files/2021/10/Working-Class-New-York-Joshua-Freeman-Chap-9.pdf).
   *Drives:* Delphine's backstory.
-- **[S21] Policing of gay New Yorkers around 1974:** entrapment for cruising was curtailed
+- **[S21] (Unused since review 2, when Ezra was cut; kept for reference.) Policing of gay New Yorkers around 1974:** entrapment for cruising was curtailed
   in the late 1960s; bar raids continued after Stonewall (for example the 1970 Snake Pit
   raid); serious harassment had become less common by the early 1970s. Sources:
   [NCJRS abstract, police harassment 1960–1980](https://ojp.gov/ncjrs/virtual-library/abstracts/police-harassment-homosexual-women-and-men-new-york-city-1960-1980);

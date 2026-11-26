@@ -15,9 +15,9 @@
 ### Logline (approved; revised for three leads)
 > Summer 1974. The men who walked away clean from the police corruption purge are
 > rebuilding the old payoff machine. This time it runs through lawyers, trucks and
-> vacate notices instead of envelopes. It needs three people who don't know each other:
+> vacate notices instead of envelopes. It runs on three people who don't know each other:
 > a disgraced ex-cop on an SRO hotel's night desk, the woman who holds the Eighth Avenue
-> strip's savings, and the trucking boss's son who drives the money. Over one summer
+> strip's savings, and the rich fur man whose money fills the envelopes. Over one summer
 > each of them learns what the machine is carrying, and decides whether to break it
 > together.
 
@@ -63,9 +63,9 @@ something left: his mother at Penn South, the 200 residents of the Corwin, and t
 one clean thing he did. The machine has two other moving parts that will become
 playable. **Delphine Moore** is a former garment presser whose shop ran south. She works
 the Eighth Avenue strip and quietly banks the savings of the women on it, and the new
-"tax" is coming for that money. **Ezra Lomax** is the trucking boss's son. He drives the
-combine's trucks by day and spends his nights in the bars at the Chelsea edge, and a
-plainclothes lieutenant holds a photograph that could end his double life. By Labor Day
+"tax" is coming for that money. **Nikos "Nick" Varelas** is a self-made fur magnate from
+Kastoria. He's rich on paper and short on cash, he pays everybody, and his name is on the
+deed to the Corwin, a hotel he has never set foot in. By Labor Day
 the three of them decide who the new machine belongs to, or whether it gets built at all.
 
 ### Central dramatic question
@@ -127,16 +127,17 @@ someone's money** along **real one-ways**, by someone **coming off a shift**.
 
 Three leads, chosen to differ on every axis that matters in play:
 
-| | **Teddy Arce** (lead) | **Delphine Moore** | **Ezra Lomax** |
+| | **Teddy Arce** (lead) | **Delphine Moore** | **Nick Varelas** |
 |---|---|---|---|
-| Age | 34 | 29 | 24 |
-| Relation to the law | Ex-cop, disgraced | Outside it; arrested regularly | Protected by his father's money, until he isn't |
-| Relation to the money | Asked to **collect** it | **Banks** it (for the women on the strip) | **Drives** it (the combine's trucks) |
-| Home turf | The Corwin, Broadway in the 30s; the night desk | Eighth Ave 34th–42nd; the Deuce; hotel bars | The Carriers' garage on the far west side; Garment District streets; the Chelsea-edge bars |
-| Hours | Night shift (23:00–07:00) | Late evening to dawn | Dawn to dusk (trucks); nights out |
-| Gameplay identity | **Access:** keys, favours, talk, interiors, cab fares; avoids fights | **Reading people:** tails, blending in crowds, instant-camera evidence (photo mode), escaping on foot along routes she knows | **Wheels:** box trucks, cars, deliveries against the clock, one-way routing, chases |
-| Inner wound | The night he waited in the car | The work she came north for went south without her | The life he can't tell his father about |
-| What he or she wants by Labor Day | Save the Corwin | Get the women's money out of the tax's reach, and own something | Get out from under Augie without destroying him |
+| Age | 34 | 29 | 51 |
+| Class | Broke; lives in an SRO room | Poor, with cash she can't bank | Rich on paper, short on cash |
+| Relation to the law | Ex-cop, disgraced | Outside it; arrested regularly | Respectable; pays the law to leave him alone |
+| Relation to the money | Asked to **collect** it | **Banks** it (for the women on the strip) | **Pays** it, and owns the buildings it's buying |
+| Home turf | The Corwin, Broadway in the 30s; the night desk | Eighth Ave 34th–42nd; the Deuce; hotel bars | His loft and vaults on W 30th St; the showroom; the Hotel Pennsylvania ballroom; Seventh Ave restaurants |
+| Hours | Night shift (23:00–07:00) | Late evening to dawn | Business hours, then late nights at the vault and in his car |
+| Gameplay identity | **Access:** keys, favours, talk, interiors, cab fares; avoids fights | **Reading people:** tails, blending in crowds, instant-camera evidence (photo mode), escaping on foot along routes she knows | **Money and leverage:** buying, hiring, bribing, lending, owning; night driving in a big sedan; social missions in rich interiors. He can't blend in and can't fight. |
+| Inner wound | The night he waited in the car | The work she came north for went south without her | He swore he'd never be poor again, and kept the promise at a price |
+| What he or she wants by Labor Day | Save the Corwin | Get the women's money out of the tax's reach, and own something | Save his firm before the fall season without losing the buildings |
 
 The structure borrows only the *mechanic* of rotating leads from the genre. The
 characters, their setups and the ending are our own, and no lead is modelled on any
@@ -226,31 +227,46 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
 
 ---
 
-### 3c. Ezra Lomax (char.ezra_lomax). Introduced in mission 15, about 19 July.
-- 24. Born in Bay Ridge, Brooklyn. His father is **Augie Lomax**, a former driver who
-  became dispatcher-boss of the Seventh Avenue Carriers' Association. Ezra did two years
-  of engineering at a city college, quit when his mother died, and has driven the
-  combine's box trucks ever since. He can fix anything with an engine.
-- **The money he drives:** the trucks carry the "surcharge" pad without anyone saying so:
-  the extra on every rack of dresses, every box of fur, every flower delivery. Ezra
-  knows the routes and the stops, but not the totals.
-- **The private life:** Ezra is gay. He lives a careful double life. By day it's the
-  garage and the loading docks. At night it's the bars at the Chelsea edge and the far
-  west side. Routine raids and entrapment had declined by the early 1970s, though they
-  hadn't stopped **[S21]**. The danger to Ezra is **exposure**, not arrest: Lt. Wurtz has a
-  photograph of him leaving a bar, and he's using it to make sure the combine's son does
-  what he's told.
-- **Gameplay identity:** wheels. Box trucks in the Garment District at rush hour,
-  deliveries against the clock, routing around 1974 one-ways, chases, repairs and getaway
-  driving. He's the best driver of the three and the worst liar.
-- **Want:** a truck of his own and a life he doesn't have to hide. **Need:** to stop
-  protecting his father from the truth about either of them.
-- **How he meets the others:** he drives through the first brownout night (19 July) and
-  is the one who sees which fur-vault compressors stopped. Delphine recognises his photo
-  in Wurtz's collection (she has copies of her own). Teddy knew Augie Lomax from the
-  station-house Christmas collection.
-- **Mirror:** Delphine collects photographs of cops; Wurtz collects photographs of
-  people like Ezra. The game's evidence mechanic cuts both ways.
+### 3c. Nikos "Nick" Varelas (char.nick_varelas). Introduced in mission 15, about 19 July.
+- 51. Born in Kastoria, Greece, in 1923. He came to New York in 1948, after the civil war,
+  as one of the thousands of Kastorians who took the place of the aging Jewish furriers
+  **[S12]**. He started as a nailer on W 29th St and bought his first shop in 1955.
+- Today he owns **Varelas & Co.** (provisional name), a fur manufacturing house with a
+  12-storey loft on W 30th St between Sixth and Seventh Aves. Its basement **cold-storage
+  vaults** hold uptown customers' coats through the summer. Since 1970 he has also bought
+  buildings cheaply, from owners leaving the city.
+- He lives on the Upper East Side, which is off the map and never shown. His world in the
+  game is the penthouse office above the W 30th loft, his table at a steakhouse on W 36th
+  (invented), trade dinners in the Hotel Pennsylvania ballroom, the fur salon at the
+  Herald Square department store, and the driver's seat of a long black sedan (an invented
+  make). He likes to drive it himself at night.
+- **The money:** he's rich on paper and short on cash. It was a bad season, the banks are
+  nervous about anything in New York **[S3]**, and he borrowed against the vault building
+  to buy hotels. **He is the buyer of record of the Corwin.** "Corwin Residential
+  Associates" is his name on Lisle's paperwork, and he has never been inside the hotel.
+- **What makes him different:** he's on the paying side of the pad, at the top. He pays
+  the trucking surcharge on every fur shipment, the plainclothes unit for "no trouble" at
+  his showroom, and Lisle for everything. He tells himself this is how business is done in
+  America.
+- **Gameplay identity:** money and leverage. He solves problems by spending, and spending
+  is a verb in his missions: pay off a super, buy out a lease, hire a cab to block a
+  street, lend to the wrong man. He drives a big sedan fast on the avenues at night, and
+  plays social missions in rich interiors. He can't blend in on Eighth Avenue and he can't
+  fight. When money doesn't work he's helpless, and that's when he needs the other two.
+- **Want:** to keep the house he built from going under before the fall season.
+  **Need:** to see what his money does after it leaves his hands.
+- **How he meets the others:** on the first brownout night his vault compressors stop
+  with customers' furs inside. He's at the vault in a dinner jacket when Teddy arrives,
+  sent by Mayhew to collect the monthly "no trouble". So the first time Teddy sees the man
+  who owns his hotel, he's begging for ice trucks. Separately, Delphine wants the lease on
+  a closed beauty shop on W 37th St. The building is Nick's, and his agent won't rent to
+  her.
+- **Mirrors:** Teddy carried the envelope, and Nick filled it. Delphine runs a bank for
+  people the banks won't serve, and Nick is a man the banks have stopped serving.
+- **Handling:** he's a self-made immigrant businessman, written with full interiority and
+  pride rather than as a greedy-landlord caricature. His arc is judged by what he does with
+  the Corwin. Other Greek characters in the Fur District (his cutters, a union steward, a
+  rival house) are distinct people, not defined by him.
 
 ---
 
@@ -291,7 +307,7 @@ Ave South. Real blocks, invented occupants. **Day** is roughly 07:00–19:00 and
                                           Sgt. Carl Mayhew  ←  needs a civilian collector
                                                                = TEDDY
        Opposition (fragmented): the Special Prosecutor's investigator (Ruth Calloway),
-       the Corwin tenants' committee, the cab drivers, the garment operators, Delphine's club, Ezra (inside the combine).
+       the Corwin tenants' committee, the cab drivers, the garment operators, Delphine's club, and Nick, if he turns.
 ```
 
 ---
@@ -326,18 +342,18 @@ epilogue in October. Three acts and an epilogue, with **32 story missions**.
 
 Rules:
 1. **One lead at a time in the first half.** Teddy is alone for the first five missions.
-   Delphine arrives in mission 6, about 20% of the way in. Ezra arrives in mission 15,
+   Delphine arrives in mission 6, about 20% of the way in. Nick arrives in mission 15,
    about 45% in. All three are playable by mission 17, which is the midpoint.
 2. **Every lead gets a solo mission before sharing one.** Each lead's own turf, hours
    and gameplay identity are taught before they're mixed.
 3. **Joint missions are the key beats.** They mark act turns, branch points and set
    pieces. Each joint mission has a short section where the player can **switch** leads
-   (for example, Ezra drives while Delphine tails on foot). Fallback without the engine
+   (for example, Nick drives the sedan while Delphine tails on foot). Fallback without the engine
    feature: see ENGINE_REQUESTS #5.
 4. **Free roam:** once a lead has been introduced, the player can switch to them between
    missions. Each lead has their own side activities (§ to come in N4): cab fares and
    hotel favours for Teddy, the club's collections and photo jobs for Delphine, deliveries
-   and street races for Ezra.
+   and buying, lending and night driving for Nick.
 
 | # | Date (1974) | Lead(s) | Working title | Purpose |
 |---|---|---|---|---|
@@ -355,26 +371,26 @@ Rules:
 | 12 | Mon 15 Jul | T+D | Lunch Counter | Calloway approaches; **Branch A** (pending) |
 | 13 | Wed 17 Jul | D | Contact Prints | Delphine's photo file on the plainclothes unit |
 | 14 | Thu 18 Jul | T | Cold Room | Fur District collections; the vaults are mapped |
-| 15 | Fri 19 Jul | **E** | Brownout | **Ezra introduced:** driving through the first brownout night |
-| 16 | Mon 22 Jul | E | Seventh Avenue Rush | Deliveries against the clock; Augie |
-| 17 | Wed 24 Jul | **D+E** | The Photograph | Delphine finds Ezra's photo in Wurtz's file. **Midpoint: all three are playable.** |
-| 18 | Fri 26 Jul | **T+D+E** | Cold Storage | **First three-lead mission:** the second brownout and the fur-vault job |
+| 15 | Fri 19 Jul | **N** | Brownout | **Nick introduced:** his vault compressors stop on the first brownout night, and Teddy arrives to collect |
+| 16 | Mon 22 Jul | N | Margin Call | His bank wants cash; selling furs in high summer; Lisle's offer |
+| 17 | Wed 24 Jul | **D+N** | The Lease | Delphine walks into Nick's office for the W 37th St lease. **Midpoint: all three are playable.** |
+| 18 | Fri 26 Jul | **T+D+N** | Cold Storage | **First three-lead mission:** the second brownout. Nick plans to fake a vault loss for the insurance; Teddy and Delphine have their own reasons to be inside. |
 | 19 | Mon 29 Jul | T | Rewiring | The Corwin's power is cut; Mr. Hollis is found dead |
-| 20 | Thu 1 Aug | E | Dad's Garage | Where the surcharge ledger lives |
-| 21 | Tue 6 Aug | **T+E** | Carbon Copy | Copy or steal the ledger. **End of Act 2** (7 Aug). |
-| 22 | Thu 8 Aug | **T+D+E** | The Address | The resignation is on every radio, and the syndicate panics |
+| 20 | Thu 1 Aug | N | Partners' Meeting | In Lisle's office Nick learns the surcharge ledger exists, and that his name is on all of it |
+| 21 | Tue 6 Aug | **T+N** | Carbon Copy | Copy or steal the ledger. **End of Act 2** (7 Aug). |
+| 22 | Thu 8 Aug | **T+D+N** | The Address | The resignation is on every radio, and the syndicate panics |
 | 23 | Mon 12 Aug | D | Shoebox | Moving the club out of Wurtz's reach |
-| 24 | Wed 14 Aug | E | Flip | Augie is pressured to turn; Ezra has to choose a side |
+| 24 | Wed 14 Aug | N | Flip | Calloway offers Nick a deal to testify against Lisle |
 | 25 | Fri 16 Aug | T | The Car | The truth about the 1971 meet |
 | 26 | Tue 20 Aug | **T+D** | Fire Watch | Stake-out to prevent the arson at the Corwin |
-| 27 | Thu 22 Aug | **D+E** | Exposure | Wurtz uses the photograph; Delphine uses hers |
-| 28 | Fri 23 Aug | **T+D+E** | The March | Tenants and garment operators march from the Corwin to Herald Square |
+| 27 | Thu 22 Aug | **D+N** | Collateral | Wurtz squeezes the club and the showroom at once. She has photographs, and he has money. |
+| 28 | Fri 23 Aug | **T+D+N** | The March | Tenants and garment operators march from the Corwin to Herald Square |
 | 29 | Wed 28 Aug | T | The Ledger | **Branch B** (pending) |
-| 30 | Fri 30 Aug | E | Last Load | Ezra's final run for the combine |
+| 30 | Fri 30 Aug | N | Closing | Nick decides the Corwin's fate: sell it, keep it, or sell it to its tenants as a co-op |
 | 31 | Sat 31 Aug | D | Lease | The W 37th St beauty shop, or not |
-| 32 | Mon 2 Sep | **T+D+E** | Labor Day | Finale: a night run from the Garment District to the Flatiron |
+| 32 | Mon 2 Sep | **T+D+N** | Labor Day | Finale: a night run from the Garment District to the Flatiron |
 
-Counts: Teddy solo 11 · Delphine solo 6 · Ezra solo 5 · joint 10 (including 4 with all three).
+Counts: Teddy solo 11 · Delphine solo 6 · Nick solo 5 · joint 10 (including 4 with all three).
 
 ### Act 1: "Dusk" (21 June – 4 July). Missions 1–9.
 *Teddy agrees to "just carry messages"; Delphine's savings club comes into view.*
@@ -389,14 +405,15 @@ Counts: Teddy solo 11 · Delphine solo 6 · Ezra solo 5 · joint 10 (including 4
 - World state: clear evenings, long dusks, a busy Garment District, few closures.
 
 ### Act 2: "Heat" (5 July – 7 August). Missions 10–21.
-*Teddy becomes the bagman; Ezra arrives; the three discover what the trucks carry.*
+*Teddy becomes the bagman; Nick arrives; the three discover what the pad is buying.*
 - Collection runs across trades: florists at 05:00, furriers at noon, the arcades at
   midnight.
 - Calloway approaches Teddy. **Branch A (pending): wear the wire, or burn it.**
 - Brownout nights (invented, consistent with the power company's real projected August
-  shortfall **[S15]**). Ezra drives the first one, and all three work the fur-vault job on
+  shortfall **[S15]**). Nick's vaults fail on the first one, and all three work the fur-vault job on
   the second.
-- Delphine and Ezra are bound by the photographs: hers of the cops, Wurtz's of Ezra.
+- Delphine and Nick are bound by a lease and by a secret: her photographs show the cops
+  he pays.
 - A Corwin resident dies in the heat after the new owners cut the power to "upgrade the
   wiring" (approved; handling in §7).
 - World state: humid, with more rain and overcast; streetlights out on brownout nights;
@@ -423,15 +440,16 @@ All three leads are playable in free roam, and each one's turf reflects the endi
 
 ### Endings (candidates, decided in N3)
 The ending turns on Branch B. Each lead's fate also depends on their own arc: whether
-Delphine gets the lease and whether Ezra's secret is kept, told or taken from him. **No
+Delphine gets the lease, and whether Nick's firm survives and what he does with the
+Corwin. **No
 ending requires one lead to kill another.** That's a deliberate break from genre habit.
 1. **Testimony:** Lisle indicted; Teddy testifies and leaves the district; the Corwin
-   saved. Delphine's club survives, because the photos go in as evidence. Ezra testifies
-   against his father, or refuses.
+   saved. Delphine's club survives, because the photos go in as evidence. Nick testifies
+   against Lisle, or refuses.
 2. **The Ledger Goes Public:** a scandal; the syndicate scatters; the plainclothes unit is
    disbanded. All three stay, but Calloway can't protect them.
 3. **The New Pad:** Teddy keeps the ledger and runs the Tenderloin's money "fairly".
-   Delphine and Ezra each decide whether to stay in his orbit. The game frames this as a
+   Delphine and Nick each decide whether to stay in his orbit. The game frames this as a
    tragedy, never as a power fantasy.
 
 ---
@@ -449,7 +467,7 @@ apply, and these are the handling rules we hold ourselves to:
 | A Corwin resident dies after the power is cut | Mission 19 | It happens off screen and is discovered and mourned. It's never a gameplay mechanic. Invented, modelled on the general pattern of SRO harassment **[S6]**. |
 | Arson threat to the Corwin | Mission 26 | The player prevents it with a stake-out. Nobody dies in a fire. |
 | Heroin market in Bryant Park | Act 2–3 ambient; informant pressure | Dealers and users are people. There's no player drug use and no recipes or methods. The 1973 drug laws **[S14]** show up as pressure that creates informants. |
-| A gay lead in 1974 | Ezra | The threat is exposure and blackmail, consistent with the period **[S21]**. He's written from inside, not as a reveal or a punchline. Nothing sexual on screen (the same rule as for every lead). |
+| A rich lead in a poor district | Nick | Written with interiority and pride, not as a greedy-landlord caricature. His arc is judged by what he does with the Corwin. No ethnic shorthand, and other Greek characters are distinct from him. |
 | Presidential resignation | Act 3 backdrop | Radio and newspaper texture only. No named or depicted real person. |
 | 1974 WTC high-wire walk (7 Aug) | Not used | It involved a real living person, so it's excluded by content rule 1, not by sensitivity. |
 
@@ -463,11 +481,12 @@ Days of the week were checked against the 1974 calendar.
 ### Before the game
 | Date | R/I | Event |
 |---|---|---|
+| 1948 | INV | Nikos Varelas arrives from Kastoria and starts as a nailer on W 29th St (following the real pattern in [S12]) |
 | 1962 | REAL | Penn South co-op opens on Eighth Ave, sponsored by the garment workers' union **[S9]** |
 | 1963 | INV | Delphine Moore comes to Harlem from Wilmington, NC |
 | 1964 | INV | Teddy joins the NYPD |
 | 1969 | INV | Delphine's dress shop moves south; she's out of work |
-| 1970 | INV | Ezra's mother dies; he leaves college and drives for the combine |
+| 1970–73 | INV | Nick buys buildings cheaply from owners leaving the city |
 | 1970 | REAL | The mayor appoints the Knapp Commission to investigate police corruption **[S1]** |
 | 1971 (autumn) | INV | Teddy drives Mayhew to the "meet" and waits in the car |
 | Aug 1972 / Dec 1972 | REAL | Knapp Commission preliminary report (Aug) and final report (Dec), which distinguish "grass-eaters" from "meat-eaters" **[S1]** |
@@ -493,8 +512,8 @@ Days of the week were checked against the 1974 calendar.
 | 4 Jul | Thu | 1 | INV | **Act 1 ends.** Teddy's first collection is from Delphine, through an empty holiday district; a rival crew hits the handover. Fireworks on the rivers are heard, not seen. |
 | 5–12 Jul | | 2 | INV | Collection runs (flowers, fur, garment, arcades); Teddy maps the surcharge |
 | 15 Jul | Mon | 2 | INV | Calloway approaches Teddy at the Herald Square department store's lunch counter. **Branch A.** |
-| 19–20 Jul | Fri–Sat | 2 | INV | First brownout night: **Ezra introduced**, driving through it; voltage dips in the Fur District and vault compressors stop |
-| 22–24 Jul | | 2 | INV | Ezra's deliveries; Delphine finds Ezra's photo in Wurtz's file (midpoint) |
+| 19–20 Jul | Fri–Sat | 2 | INV | First brownout night: **Nick introduced**; his vault compressors stop and Teddy arrives to collect |
+| 22–24 Jul | | 2 | INV | Nick's margin call; Delphine walks into his office for the W 37th St lease (midpoint) |
 | 26 Jul | Fri | 2 | INV | Second brownout; the fur-vault job, the first mission with all three leads |
 | 29 Jul | Mon | 2 | INV | The Corwin's power is cut for "rewiring"; Mr. Hollis is found dead on the 11th floor (pending sign-off) |
 | 2–6 Aug | | 2 | INV | Teddy steals the surcharge ledger (or copies it for Calloway) |
