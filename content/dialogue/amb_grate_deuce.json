@@ -1,0 +1,19 @@
+{
+  "id": "dlg.amb_grate_deuce",
+  "context": "42nd St grate under the marquees.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "wry",
+      "text": "Three features for a dollar, and I slept through all three."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "dry",
+      "text": "Best hotel in the city."
+    }
+  ]
+}

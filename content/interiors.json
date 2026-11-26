@@ -296,6 +296,39 @@
         "two old chairs",
         "papered window"
       ]
+    },
+    {
+      "id": "interior.feld_loft",
+      "address": "W 37th St, 7th–8th Aves, south side (9th floor)",
+      "facade": "street",
+      "name": "Feld Frocks, 9th-floor loft",
+      "kind": "loft",
+      "hours": [
+        "07:00",
+        "19:00"
+      ],
+      "contains": [
+        "sewing machines",
+        "cutting tables",
+        "time clock",
+        "freight elevator"
+      ]
+    },
+    {
+      "id": "interior.velvet_moon_lobby",
+      "address": "W 42nd St, 7th–8th Aves, north side",
+      "facade": "street",
+      "name": "The Velvet Moon, lobby",
+      "kind": "cinema",
+      "hours": [
+        "10:00",
+        "04:00"
+      ],
+      "contains": [
+        "ticket booth",
+        "lobby",
+        "doors to the auditorium (not enterable)"
+      ]
     }
   ]
 }

@@ -11,8 +11,8 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 | N3. Story structure | **Done** → `narrative/N3_STRUCTURE.md` (32-mission chain, branches, endings, relationships, act-by-act world) |
 | N4. Mission specs and side activities | **Done.** All 32 missions in `content/missions/`; 20 side activities in `content/activities.json`; M1 fully playable. Validator: 0 errors (104 warnings = dialogue scripts due in N5). |
 | N5. Dialogue and barks | **Done.** 155 dialogue scripts (about 790 lines: all 32 missions + 44 side-activity scenes), 57 NPC archetypes, 21 bark pools (477 lines; 12 core pools with 31+ each), plus 78 edge barks. Validator: 0 errors, 0 warnings. |
-| N6. Ambient world and business registry | **Next.** Trademark-search and register every invented name; signage, weekly front pages, radio, graffiti, posters, overheard talk, interiors per act. |
-| N7. Integration | — (waits on engine Phase 7 hooks) |
+| N6. Ambient world and business registry | **Done.** 44-name registry (`content/BUSINESS_NAMES.md`, 4 names rejected after search); 15 weekly front pages (with ending variants); 4 radio stations (22 invented songs, 27 DJ lines); 8 tags, 13 slogans, 14 posters; 6 overheard grate scenes; 12 dressed interiors (4 per act). |
+| N7. Integration | **Static pre-pass next** (reachability, date order, pacing). Engine schema checker and headless play-through wait on engine Phase 7. |
 
 ## Files
 ```
@@ -31,6 +31,8 @@ narrative/tools/build_act23_missions.py  authoring source for M10–M32 mission 
 content/npc_archetypes/    53 archetypes (contract shape), built by narrative/tools/build_archetypes.py
 content/barks/             21 bark pools, built by narrative/tools/build_barks.py
 narrative/tools/dlg_act1.py, dlg_act2.py, dlg_act3.py, dlg_activities.py  authoring sources for all dialogue (edit there, re-run, validate)
+content/businesses.json, BUSINESS_NAMES.md, newspapers.json  (narrative/tools/build_world.py)
+content/radio.json, street_text.json, interior_dressing.json, amb_grate_* dialogue and triggers  (narrative/tools/build_world_b.py)
 content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.
@@ -540,3 +542,52 @@ calls":
   documented.
 - **Thin spots:** the Read the Room puzzles rely on the engine showing per-NPC "tell" lines,
   which aren't written yet. N6 will add them as interior ambient text.
+
+---
+
+## Phase N6 self-critique
+**What was delivered:**
+- **The business registry**, with signage text, era notes and the collision check for each
+  name.
+- **Weekly front pages** in two invented mastheads. Weeks 1–10 echo story progress with real
+  background (sourced). Week 11 has four variants, one per ending. The epilogue page
+  carries the real $1.5B budget-gap headline.
+- **Radio:** four invented stations (deliberately no call letters or frequencies, since every
+  real NYC dial position belongs to a real station), 22 invented songs, and DJ patter keyed to
+  brownouts, 8 Aug and the march.
+- **Street text:** graffiti (invented writers' tags; well-known real 1970s tags avoided),
+  slogans by act and flag, and 14 posters (invented films and boxers).
+- **Overheard talk:** six subway-grate scenes on the ambient channel.
+- **Interiors:** twelve dressed interiors (four per act), including the Read the Room "tells"
+  that N5 flagged as missing.
+
+**Name checks, honestly:**
+- **Rejected after searching:** Fun-O-Rama (a real arcade), Fifth Avenue Trust (a real
+  historic bank), Clarion (a fictional paper in an existing franchise), and Lamplight and
+  Halyard (real production companies).
+- **18 ambient names were checked with multi-name queries.** The search engine may ignore OR
+  syntax, so they're marked "batch-checked (weak)". **Before ship:** re-check each name on
+  its own and run a USPTO trademark search on the story names.
+- **Not searched (low risk):** descriptive or generic names (Lisle & Associates,
+  luncheonettes and the like).
+- **Song titles** aren't trademarks, but they mustn't be real songs. I chose unusual titles
+  without checking them one by one, so they need a quick check before the Audio stream
+  records them.
+
+**Against the content rules**
+- No real people: the President, the mayor and the comptroller appear only by office.
+  "Knapp" no longer appears in-game.
+- No real brands: the department store, the utility and the bank are all invented
+  replacements.
+- The grindhouse titles were reviewed, and one that leaned on an ethnic place name was
+  replaced.
+- Children appear only in a hydrant reference and the Korean-class poster.
+
+**Against the pillars**
+- The papers and the radio make P5 audible and readable every week.
+- The tenant slogans turn P5 around in Act 3.
+- Signage and sign prices (85¢ tuna, 30¢ pie, 15¢ paper) carry P1's texture.
+
+**Gap:** the brief asks for neon and sign text per business. This exists for the registry,
+but the engine still has to map shopfronts to real facades (a Phase 3 facade-generation
+dependency).

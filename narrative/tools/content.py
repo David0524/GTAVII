@@ -240,6 +240,27 @@ def main():
     for b in bnd.get("blockers", []):
         if b.get("barks") and b["barks"] not in pool_ids: E(f"{b['id']}: bark pool {b['barks']} missing")
 
+    # N6 world data
+    if (C / "street_text.json").exists():
+        st = jl(C / "street_text.json")
+        for x in st.get("slogans", []) + st.get("posters", []):
+            req_ok("street_text", x.get("requires"))
+    if (C / "interior_dressing.json").exists():
+        for act, rooms in jl(C / "interior_dressing.json")["acts"].items():
+            for rm in rooms:
+                if rm["interior"] not in interiors: E(f"interior_dressing act {act}: unknown {rm['interior']}")
+                for pp in rm.get("people", []):
+                    if pp.startswith("char.") and pp not in cast: E(f"interior_dressing: unknown {pp}")
+                    if pp.startswith("npc.") and pp not in archs: E(f"interior_dressing: unknown archetype {pp}")
+                for f in rm.get("afterFlag", {}): flag_ok("interior_dressing afterFlag", f)
+    if (C / "newspapers.json").exists():
+        for pg in jl(C / "newspapers.json")["pages"]:
+            req_ok(pg["id"], pg.get("requires"))
+    if (C / "radio.json").exists():
+        for stn in jl(C / "radio.json")["stations"]:
+            for l in stn["patter"]:
+                if len(l["text"]) > LINE_MAX: E(f"{stn['id']}: DJ line over {LINE_MAX}: {l['text']}")
+
     # flags: documented but never set by written content -> info only
     set_somewhere = set()
     def walk(x):

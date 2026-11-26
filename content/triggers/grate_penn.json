@@ -1,0 +1,28 @@
+{
+  "id": "trigger.grate_penn",
+  "volume": {
+    "at": "8th Ave & W 33rd St",
+    "radius": 10
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "07:00",
+      "02:00"
+    ],
+    "weather": [
+      "any"
+    ]
+  },
+  "once": false,
+  "cooldownMin": 240,
+  "do": [
+    {
+      "type": "overhear",
+      "script": "dlg.amb_grate_penn",
+      "at": "8th Ave & W 33rd St",
+      "radius": 10,
+      "falloff": "soft"
+    }
+  ]
+}
