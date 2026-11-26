@@ -61,3 +61,25 @@ Roof dressing streams with the interior (within 30 m), but wooden water tanks ar
 features visible from far away. **Ask:** the engine draws the far-LOD tank (one instanced
 cylinder + cone) from `roofFeatures(buildingId)`, which interiors will export. Interiors swaps in
 its detailed one near the roof.
+
+## From interiors: 6b. Tier C hook for `src/render/FacadeMaterial.ts` (concrete proposal)
+`src/interiors/windowRooms.ts` exports `interiorRoomNode({ wuv, id, use, floor, cond, minutes, power, daylight, n?, t? })`.
+It is a pure TSL node: no textures and no extra vertex attributes. It returns the radiance seen through the glass: the room
+(by use, hour and power), the shade at a random drop, TV flicker, a ceiling-fan shadow, an occasional figure crossing, and an
+AC unit in about one window in six. Every input already exists in FacadeMaterial per window cell:
+```ts
+// inside the window cell (upperMask), FacadeMaterial.ts:
+const wuv = vec2(fu.sub(float(0.5).sub(halfW)).div(winFrac), fv.sub(sill).div(head.sub(sill)));
+const room = interiorRoomNode({ wuv, id: rnd, use: useAttr /* or style-derived: resid ? 2 : 5 */, floor: floorIdx, cond,
+  minutes: facadeUniforms.minutes, power: areaPower /* 0 | 0.45 | 1 */, daylight: float(1).sub(facadeUniforms.night) });
+// near LOD only (lodFade < 1); far LOD keeps the current averaged emission
+const tierC = select(boarded.or(inStore), vec3(0), room).mul(float(1).sub(lodFade));
+m.emissiveNode = select(isRoof, vec3(0), mix(emissiveWin, tierC.add(emissiveWin.mul(lodFade)), upperMask).mul(winMask).mul(facadeUniforms.litScale));
+```
+- **Needs from the engine:** a `minutes` uniform (or hour) next to `night`; per-area `power` (N2 brownouts); and, ideally,
+  PLUTO `use` per building (chunk records already have it). Without `use`, style 1/6 = residential and others = office
+  works.
+- **Cost:** measured in SwiftShader only (no GPU here). One ray–box intersection plus about 15 hash and noise evaluations per window
+  pixel, run only where the window mask covers the pixel and only at near LOD. The brief's ≤0.3 ms GPU at 1080p needs a phone
+  or desktop GPU run via `?hud=1`.
+- **Demo:** `?interiors=1&t=21:30` shows it on the test block (`createWindowRoomMaterial`, same node).

@@ -14,7 +14,7 @@
  * about one window in six (STYLE_GUIDE §3). No textures.
  */
 import * as THREE from 'three/webgpu';
-import { Fn, attribute, uniform, vec2, vec3, float, floor, fract, sin, abs, mix, step, smoothstep, max, min, dot, normalize, positionWorld, cameraPosition, normalWorld, time, select, clamp, If, cos, atan } from 'three/tsl';
+import { Fn, attribute, uniform, vec2, vec3, float, floor, fract, sin, abs, mix, step, smoothstep, max, min, dot, normalize, positionWorld, cameraPosition, normalWorld, time, select, clamp, If, cos, atan, fwidth } from 'three/tsl';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type N = any;
@@ -26,20 +26,47 @@ export function createWindowRoomMaterial(): { material: THREE.MeshBasicNodeMater
   const minutes = uniform(20 * 60), power = uniform(1), daylight = uniform(0);
   const mat = new THREE.MeshBasicNodeMaterial();
   const wuv = attribute('wuv', 'vec2'), wtan = attribute('wtan', 'vec3'), wdat = attribute('wdat', 'vec4');
+  const n0 = normalize(normalWorld), t0 = normalize(wtan);
+  const room = interiorRoomNode({ wuv, id: wdat.x, use: wdat.y, floor: wdat.z, cond: wdat.w, minutes, power, daylight, n: n0, t: t0 });
   mat.colorNode = Fn(() => {
-    const id = wdat.x, use = wdat.y, flr = wdat.z, cond = wdat.w;
-    const n = normalize(normalWorld), t = normalize(wtan);
+    const cond = wdat.w, n = n0;
+    const V = normalize(positionWorld.sub(cameraPosition));
+    // glass: sky/street reflection by fresnel, grime by condition
+    const fres = float(1).sub(abs(dot(V, n))).pow(4);
+    const skyRefl = mix(vec3(0.05, 0.05, 0.07), vec3(0.55, 0.6, 0.66), daylight);
+    const grime = float(4).sub(cond).mul(0.05);
+    // window frame (sash) and a mullion
+    const frame = float(1).sub(step(0.04, wuv.x).mul(step(wuv.x, 0.96)).mul(step(0.03, wuv.y).mul(step(wuv.y, 0.97))));
+    const sash = step(abs(wuv.y.sub(0.52)), 0.018);
+    const glassC = mix(room, skyRefl, clamp(fres.add(daylight.mul(0.25)).add(grime), 0, 0.85));
+    return mix(glassC, vec3(0.16, 0.12, 0.09), max(frame, sash));
+  })();
+  void If; void cos; void vec2;
+  return { material: mat, uniforms: { minutes, power, daylight } as unknown as WindowRoomUniforms };
+}
+
+/**
+ * Tier C room radiance for one window cell (TSL). Everything the engine's FacadeMaterial already computes per window:
+ *   wuv   vec2 0..1 inside the window   id    float hash 0..1 per window   use  PLUTO land use (residential <= 4)
+ *   floor floor index                  cond  0..4 condition               minutes/power/daylight  shared uniforms
+ *   n, t  optional world normal / facade tangent (defaults: geometry normal, horizontal tangent)
+ * Returns the colour seen through the glass (room, shade, AC unit), to be used as emissive behind the engine's glass.
+ */
+export function interiorRoomNode(o: { wuv: N; id: N; use: N; floor: N; cond: N; minutes: N; power: N; daylight: N; n?: N; t?: N }): N {
+  return Fn(() => {
+    const { wuv, id, use, floor: flr, cond, minutes, power, daylight } = o;
+    const n: N = normalize(o.n ?? normalWorld); const t: N = normalize(o.t ?? vec3(n.z, 0, n.x.negate()));
     const V = normalize(positionWorld.sub(cameraPosition));
     // tangent space: x along facade, y up, z into the room
     const vx = dot(V, t), vy = V.y, vz = max(dot(V, n.negate()), 0.05);
     const D = float(1.1).add(h1(id.add(3)).mul(0.8)); // room depth in window-widths
-    const o = vec3(wuv.x, wuv.y, 0);
+    const org = vec3(wuv.x, wuv.y, 0);
     const dir = vec3(vx, vy.mul(0.62), vz); // windows are ~1.6x taller than wide: rooms scale in y
-    const tx = select(dir.x.greaterThan(0), float(1).sub(o.x), o.x.negate()).div(dir.x.add(select(dir.x.greaterThan(0), 1e-4, -1e-4)));
-    const ty = select(dir.y.greaterThan(0), float(1).sub(o.y), o.y.negate()).div(dir.y.add(select(dir.y.greaterThan(0), 1e-4, -1e-4)));
+    const tx = select(dir.x.greaterThan(0), float(1).sub(org.x), org.x.negate()).div(dir.x.add(select(dir.x.greaterThan(0), 1e-4, -1e-4)));
+    const ty = select(dir.y.greaterThan(0), float(1).sub(org.y), org.y.negate()).div(dir.y.add(select(dir.y.greaterThan(0), 1e-4, -1e-4)));
     const tz = D.div(dir.z);
     const tHit = min(min(tx, ty), tz);
-    const p = o.add(dir.mul(tHit));
+    const p = org.add(dir.mul(tHit));
     // which face
     const isBack = step(tz, min(tx, ty));
     const isFloor = step(ty, min(tx, tz)).mul(step(dir.y, 0));
@@ -82,7 +109,7 @@ export function createWindowRoomMaterial(): { material: THREE.MeshBasicNodeMater
     const dayIn = vec3(0.22, 0.2, 0.18).mul(daylight);
     let room: N = col.mul(lampLight.add(tvLight).add(ambientNight).add(dayIn)).mul(float(1).sub(fan));
     // a figure crossing mid-room now and then (lit rooms only)
-    const zf = D.mul(0.45), tf = zf.div(dir.z), pf = o.add(dir.mul(tf));
+    const zf = D.mul(0.45), tf = zf.div(dir.z), pf = org.add(dir.mul(tf));
     const px = fract(time.mul(0.05).add(h1(id.add(41))).mul(1.0)).mul(3.0).sub(1.0);
     const fig = lit.mul(step(tf, tHit)).mul(step(abs(pf.x.sub(px)), 0.07)).mul(step(pf.y, 0.82)).mul(step(0.2, pf.y)).mul(step(0.55, h1(id.add(floor(time.mul(0.05)).mul(0.71)))));
     room = mix(room, room.mul(0.15), fig);
@@ -90,25 +117,15 @@ export function createWindowRoomMaterial(): { material: THREE.MeshBasicNodeMater
     const drop = h1(id.add(51)).mul(0.85);
     const shade = step(float(1).sub(drop), wuv.y);
     const blinds = mix(vec3(0.72, 0.66, 0.5), vec3(0.6, 0.38, 0.26), step(0.5, h1(id.add(52))));
-    const slats = step(0.5, fract(wuv.y.mul(28))).mul(0.15).add(0.85);
+    const slats = mix(step(0.5, fract(wuv.y.mul(28))).mul(0.15).add(0.85), float(0.925), smoothstep(0.02, 0.05, fwidth(wuv.y)));
     const shadeLit = blinds.mul(slats).mul(lampLight.mul(0.6).add(ambientNight).add(dayIn.mul(1.5)).add(tvLight.mul(0.3)));
     room = mix(room, shadeLit, shade);
     // AC unit in ~1 window in 6: lower 30% of the window
     const ac = step(h1(id.add(61)), 0.17).mul(step(wuv.y, 0.3)).mul(step(abs(wuv.x.sub(0.5)), 0.32));
-    const grille = step(0.5, fract(wuv.y.mul(40))).mul(0.2).add(0.8);
+    const grille = mix(step(0.5, fract(wuv.y.mul(40))).mul(0.2).add(0.8), float(0.9), smoothstep(0.015, 0.04, fwidth(wuv.y)));
     room = mix(room, vec3(0.6, 0.57, 0.5).mul(grille).mul(daylight.mul(0.8).add(0.1)), ac);
-    // glass: sky/street reflection by fresnel, grime by condition
-    const fres = float(1).sub(abs(dot(V, n))).pow(4);
-    const skyRefl = mix(vec3(0.05, 0.05, 0.07), vec3(0.55, 0.6, 0.66), daylight);
-    const grime = float(4).sub(cond).mul(0.05);
-    // window frame (sash) and a mullion
-    const frame = float(1).sub(step(0.04, wuv.x).mul(step(wuv.x, 0.96)).mul(step(0.03, wuv.y).mul(step(wuv.y, 0.97))));
-    const sash = step(abs(wuv.y.sub(0.52)), 0.018);
-    const glassC = mix(room, skyRefl, clamp(fres.add(daylight.mul(0.25)).add(grime), 0, 0.85));
-    return mix(glassC, vec3(0.16, 0.12, 0.09), max(frame, sash));
+    return room;
   })();
-  void If; void cos; void vec2;
-  return { material: mat, uniforms: { minutes, power, daylight } as unknown as WindowRoomUniforms };
 }
 
 /** Helper for builders: append one window quad (world space) with the attributes above. */
