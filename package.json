@@ -1,0 +1,32 @@
+{
+  "name": "tenderloin-74",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser open-world engine and city: Manhattan's Tenderloin, summer 1974.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "data:fetch": "tsx tools/pipeline/fetch.ts",
+    "data:build": "tsx tools/pipeline/build.ts",
+    "data": "npm run data:fetch && npm run data:build",
+    "shots": "tsx tools/shots/capture.ts"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "0.21.0",
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@types/earcut": "3.0.0",
+    "@types/node": "26.6.11",
+    "@types/three": "0.187.0",
+    "clipper-lib": "6.4.2",
+    "earcut": "3.2.4",
+    "playwright": "1.63.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "8.4.0"
+  }
+}

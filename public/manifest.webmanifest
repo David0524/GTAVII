@@ -1,0 +1,9 @@
+{
+  "name": "Tenderloin '74",
+  "short_name": "T'74",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0c0b0a",
+  "theme_color": "#0c0b0a",
+  "start_url": "/"
+}

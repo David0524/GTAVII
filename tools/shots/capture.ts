@@ -1,0 +1,86 @@
+/**
+ * Headless screenshot rig: serves the built game, visits fixed viewpoints, waits for
+ * streaming to settle, captures PNGs + frame-time stats into shots/<phase>/.
+ *   npm run build && npm run shots -- --phase phase1 [--webgl] [--quality high]
+ */
+import { chromium } from 'playwright';
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const args = process.argv.slice(2);
+const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
+const phase = arg('phase', 'phase1');
+const quality = arg('quality', 'high');
+const forceWebGL = args.includes('--webgl');
+const ROOT = path.resolve(import.meta.dirname, '../..');
+const outDir = path.join(ROOT, 'shots', phase);
+fs.mkdirSync(outDir, { recursive: true });
+const world = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/world.json'), 'utf8'));
+const hero = (n: string) => world.heroes.find((h: any) => h.name === n);
+const look = (from: [number, number, number], to: [number, number, number]) => {
+  const dx = to[0] - from[0], dy = to[1] - from[1], dz = to[2] - from[2];
+  const yaw = (Math.atan2(-dx, -dz) * 180) / Math.PI, pitch = (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI;
+  return `${from.join(',')},${yaw.toFixed(2)},${pitch.toFixed(2)}`;
+};
+const streets = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/streets.json'), 'utf8')) as { n: string; p: number[] }[];
+/** Nearest point on a named street centreline to (x,z): keeps viewpoints in the roadway, never inside a building. */
+const on = (name: string, x: number, z: number, y = 1.8): [number, number, number] => {
+  let best = Infinity, out: [number, number, number] = [x, y, z];
+  for (const s of streets) if (s.n === name) for (let k = 2; k < s.p.length; k += 2) {
+    const ax = s.p[k - 2], az = s.p[k - 1], dx = s.p[k] - ax, dz = s.p[k + 1] - az;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz || 1)));
+    const px = ax + dx * t, pz = az + dz * t, d = Math.hypot(px - x, pz - z);
+    if (d < best) { best = d; out = [+px.toFixed(1), y, +pz.toFixed(1)]; }
+  }
+  if (!Number.isFinite(best)) throw new Error(`street not found: ${name}`);
+  return out;
+};
+const esb = hero('Empire State Building'), macys = hero("Macy's"), msg = hero('Madison Square Garden'), chelsea = hero('Hotel Chelsea'), flat = hero('Flatiron Building');
+
+/** Fixed viewpoints. 'spawn' uses the game's own spawn logic (no cam param). */
+const VIEWS: { name: string; cam?: string }[] = [
+  { name: '01_spawn_flatiron_up_broadway' },
+  { name: '02_flatiron_from_madison_sq', cam: look([25, 1.8, -150], [flat.x, 30, flat.z]) },
+  { name: '03_empire_state_from_fifth', cam: look(on('5th Avenue', esb.x, esb.z + 380), [esb.x, 160, esb.z]) },
+  { name: '04_herald_square', cam: look(on('Broadway', macys.x, macys.z + 200), [macys.x, 25, macys.z]) },
+  { name: '05_penn_msg_seventh_ave', cam: look(on('7th Avenue', msg.x, msg.z + 160), [msg.x, 20, msg.z]) },
+  { name: '06_hotel_chelsea_23rd', cam: look(on('West 23rd Street', chelsea.x + 90, chelsea.z), [chelsea.x, 22, chelsea.z]) },
+  { name: '07_aerial_overview_north', cam: look([350, 420, 650], [-250, 0, -800]) },
+  { name: '08_downtown_skyline_wtc', cam: look([-60, 140, 260], [-1800, 120, 4200]) },
+];
+
+async function main() {
+  const port = 4173;
+  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'pipe' });
+  await new Promise((r) => setTimeout(r, 2500));
+  const browser = await chromium.launch({
+    args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+  });
+  const page = await browser.newPage({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1 });
+  const logs: string[] = [];
+  page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
+  page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
+  const report: any[] = [];
+  for (const v of VIEWS) {
+    const q = new URLSearchParams({ quality, ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}) });
+    await page.goto(`http://localhost:${port}/?${q}`);
+    await page.waitForFunction(() => (window as any).__T74, null, { timeout: 120_000 });
+    await page.evaluate(() => (window as any).__T74.whenIdle());
+    // Measure steady-state frame times for 3 s after streaming settles.
+    await page.evaluate(() => (window as any).__T74.frames.reset());
+    await page.waitForTimeout(3000);
+    const stats = await page.evaluate(() => {
+      const t = (window as any).__T74; const s = t.frames.summary(); const i = t.renderer.info.render;
+      return { backend: t.backend, ...s, drawCalls: i.drawCalls, triangles: i.triangles, chunks: { ...t.world.stats } };
+    });
+    const file = path.join(outDir, `${v.name}.png`);
+    await page.screenshot({ path: file });
+    report.push({ view: v.name, cam: v.cam ?? 'spawn', ...stats });
+    console.log(v.name, `${stats.backend} avg ${stats.avg.toFixed(1)} ms p95 ${stats.p95.toFixed(1)} draws ${stats.drawCalls} tris ${stats.triangles}`);
+  }
+  fs.writeFileSync(path.join(outDir, 'report.json'), JSON.stringify({ quality, forceWebGL, date: new Date().toISOString(), ua: await page.evaluate(() => navigator.userAgent), views: report, logs: logs.slice(0, 200) }, null, 2));
+  await browser.close();
+  server.kill();
+}
+main().catch((e) => { console.error(e); process.exit(1); });
