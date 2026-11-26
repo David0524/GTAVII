@@ -19,6 +19,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Police agents (Gameplay spec) | **First pass**: `spawnPolice`, `setPoliceGoal` (patrol / goto / search / pursue / boxIn / roadblock), `setSiren`, `despawnPolice`, `police: PoliceView[]`, events `policeArrived`, `policeBlocked`. Plus `setGoal({kind:'act'})`, `nerve` on PedView, `kill()`, `takeVehicle()` → `vehicleStolen` |
 | Emergency & service traffic, player cab rides | **First pass**: `dispatch('ambulance'|'fire', x, z)` (+ ambient ambulance runs), mail trucks, soft-serve truck; `callCab` / `boardCab` / `leaveCab` with `cabReady`, `cabTurnAhead`, `cabRideArrived`; left-kerb pickups on one-way streets |
 | Parking enforcement, tows, street cleaning | **Done (first pass)**: `parkingRule(x,z,minute?,dow?)`, `hydrantsNear`, `setDay`, `registerParkedCar`/`unregisterParkedCar`; traffic agents ticket (`ticketIssued`), tow trucks tow (`towDispatched`, `vehicleTowed`), street sweepers run alternate-side windows (`sweeperOut`) |
+| Subway schedule and platform crowds | **Done (first pass)**: 20 stations from entrance clusters on 5 trunk lines; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
@@ -146,8 +147,8 @@ Units with sirens (police, ambulance, fire) now get real priority, the way 1970s
   free lane spot ~24 s of siren driving away (32 s for the ladder truck).
 - **On scene** within 45 m of the scene (scenes inside parks/blocks count from the nearest kerb).
 - **Test assertion** (`docs/sim_test_report.json` `response`): first unit on scene after dispatch,
-  rush hour (17:30) Herald Square 17.6 s and 42nd St & 7th Ave 10.5 s (target <= 60 s); off-peak
-  (11:00) Herald Square 27.9 s and Flatiron 16.5 s (target <= 40 s).
+  rush hour (17:30) Herald Square 14.3 s and 42nd St & 7th Ave 15.0 s (target <= 60 s); off-peak
+  (11:00) Herald Square 24.3 s and Flatiron 8.3 s (target <= 40 s). Also checked on seed 7.
 - Gameplay owns pacing; numbers sent to them for confirmation.
 
 ### Police (`src/sim/police.ts`)
@@ -206,6 +207,20 @@ documented, so these are plausible rather than historical claims):
   (577 of 590 are); siren gutter runs, pull-overs, cab pickups/drop-offs and service stops only use those.
 - Pedestrian `goto` now walks to the exact kerb spot along the target sidewalk (not just the nearest
   corner), and crosswalk fairness compares how long the pedestrian and the waiting car have waited.
+
+### Subway (`src/sim/subway.ts`)
+A logical layer over the street entrances (underground geometry belongs to the engine/interiors).
+- Stations: the 108 mapped entrances in bounds clustered by the avenue they sit on (within 140 m along
+  it): 20 stations on the Eighth Avenue, Seventh Avenue, Sixth Avenue, Broadway and Lexington lines,
+  named by the nearest numbered cross street. `LINES` is a plain table; the narrative team verifies
+  1974 service and can rename or correct it (no route letters are claimed).
+- Timetable: a pure function of the clock. Headway 4 min at the rush hours, 6 midday, 8 evening,
+  12-20 at night; run time between stations from distance at ~10 m/s plus 25 s dwell; both directions
+  staggered. `nextTrains(station)` answers instantly (cops can be sent to the next station ahead).
+- Platforms: per station and direction, riders accumulate (people who go down the stairs plus an
+  ambient rate by time of day) and board each train; alighting riders (more at rush hour) surface at
+  the station's entrances near the focus (`subwayExit`). `boardSubway(pedId)` walks a ped to the
+  nearest entrance and down. In the 10-min test: 76 train calls, 117 riders up the stairs.
 
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,

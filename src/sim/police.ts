@@ -200,7 +200,15 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
   if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && d < 45 && v.stopLink !== v.link) {
     const at = v.s + Math.max(4, v.v * v.v / 5);
     if (at < net.len[v.link] - 4) { v.stopLink = v.link; v.stopAt = at; v.stopKind = 'police'; }
+    else if (L.kind === LinkKind.Lane && net.len[v.link] - 4 > v.s + 2) { v.stopLink = v.link; v.stopAt = net.len[v.link] - 4; v.stopKind = 'police'; } // brake hard to the end of the block
     else if (v.v < 2 && L.kind === LinkKind.Lane) { v.stopLink = v.link; v.stopAt = v.s; v.stopKind = 'police'; } // no room ahead: this is the spot
+    else c.pullInNext = true;
+  }
+  // carried over from the previous block: pull in at the start of this one
+  if (c.pullInNext && L.kind === LinkKind.Lane && v.stopLink !== v.link && !c.arrived) {
+    c.pullInNext = false;
+    const at = Math.max(v.s + 3, Math.min(8, net.len[v.link] - 4));
+    if (at < net.len[v.link] - 2) { v.stopLink = v.link; v.stopAt = at; v.stopKind = 'police'; }
   }
   if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && v.stopLink === v.link && v.s >= v.stopAt - 3 && v.v < 1) {
     v.stopLink = -1; v.stopAt = -1; v.v = 0;

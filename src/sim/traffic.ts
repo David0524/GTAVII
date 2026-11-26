@@ -500,7 +500,7 @@ function laneChangeLogic(S: SimCore, v: Vehicle, obs: Obs) {
   const aggressive = v.kind === 'cab' || v.arch.aggression > 0.7 || (v.kind === 'bus' && v.stopLink >= 0);
   // mandatory: curb lane for stops, desired turn lane
   let target = -1;
-  if (v.pullT > 0 && L.right >= 0 && gutterSideOf(S, L) < 0) { if (tryLaneChange(S, v, L.right, true)) return; } // one-way: civilians pull right
+  if (v.pullT > 0 && L.right >= 0 && gutterSideOf(S, L) < 0 && v.v > 3) { if (tryLaneChange(S, v, L.right, false)) return; } // one-way: civilians pull right (while still moving)
   if (v.cop?.siren && v.lcT >= 1) { // sirens move across to the gutter-side lane
     const step = gutterSideOf(S, L) < 0 ? L.left : L.right;
     if (step >= 0 && tryLaneChange(S, v, step, true)) return;
@@ -757,7 +757,7 @@ export function stepVehicles(S: SimCore, dt: number) {
       const gside = gutterSideOf(S, L);
       if (L.kind === LinkKind.Lane && v.state === 'drive' && gutterLat(S, L) !== 0) {
         // kerb-side lane next to the siren's gutter: stop and lean away from it
-        a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren'; v.latTarget = -gside * 0.3;
+        a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren'; if (Math.abs(v.latTarget) <= 0.35) v.latTarget = -gside * 0.3; // (not while passing a double-parker)
       } else if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive' && gside < 0) {
         // one-way street: pull right into the parking lane, unless something is parked there (then just stop)
         a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren';

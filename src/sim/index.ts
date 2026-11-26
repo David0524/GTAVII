@@ -16,6 +16,8 @@ export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
 import { boardCab, callCab, dispatchResponders, leaveCab } from './service';
 import { Parking, type ParkingRule } from './parking';
+import { Subway, type Station, type TrainCall } from './subway';
+export type { Station, TrainCall } from './subway';
 export type { ParkingRule } from './parking';
 import { policePedTick, removePolice, setCopGoal, spawnPolice as spawnCop, type PoliceGoal, type PoliceView } from './police';
 export type { PoliceGoal, PoliceView } from './police';
@@ -133,6 +135,7 @@ export class Simulation {
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Connector) core.preds[l.next[0]].push(i); });
     this.core = core;
     this.parking = new Parking(core);
+    this.subway = new Subway(core);
     this.wild = new Wildlife(core, g.wild, Math.round(this.opts.maxPeds * 0.5), Math.round(this.opts.maxPeds * 0.15));
     g.links.forEach((l, i) => {
       if (l.kind !== LinkKind.Lane || !net.isSignal(l.endJ)) return;
@@ -185,6 +188,7 @@ export class Simulation {
     vehicleContacts(S, this.contactCd);
     this.wild.step(h);
     this.parking.step(h);
+    this.subway.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -318,6 +322,25 @@ export class Simulation {
   registerParkedCar(id: string, x: number, z: number) { this.parking.register(id, x, z); }
   unregisterParkedCar(id: string) { this.parking.unregister(id); }
 
+  // ---------------------------------------------------------------- subway (logical layer over the street entrances)
+  private subway!: Subway;
+  /** Stations (clusters of street entrances) with their line, name and entrances. */
+  subwayStations(): readonly Station[] { return this.subway.stations; }
+  /** Next trains at a station, both directions, soonest first (deterministic timetable). */
+  nextTrains(stationId: number, n = 4): TrainCall[] { return this.subway.nextTrains(stationId, n); }
+  /** Riders waiting on the platforms. */
+  platformCrowd(stationId: number) { return this.subway.platformCrowd(stationId); }
+  stationNear(x: number, z: number, r = 150): number { return this.subway.stationNear(x, z, r); }
+  /** Send a pedestrian down the nearest station's stairs (they leave the street; counted on the platform). */
+  boardSubway(pedId: number): boolean {
+    const p = this.core.pedById.get(pedId); if (!p || !p.alive) return false;
+    const st = this.subway.stationNear(p.x, p.z, 400); if (st < 0) return false;
+    const e = this.subway.stations[st].entrances.reduce((b, q) => (Math.hypot(q.x - p.x, q.z - p.z) < Math.hypot(b.x - p.x, b.z - p.z) ? q : b));
+    setPedGoal(this.core, p, { kind: 'goto', x: e.x, z: e.z, then: 'subway' }); return true;
+  }
+  /** Subway counters (tests/debug). */
+  debugSubway() { return { stations: this.subway.stations.length, arrivals: this.subway.arrivals, boarded: Math.round(this.subway.boarded), alighted: this.subway.alighted }; }
+
   // ---------------------------------------------------------------- violence and theft (gameplay)
   /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */
   kill(pedId: number, bodySeconds = 120): boolean {
@@ -396,7 +419,8 @@ export class Simulation {
   }
 
   on(type: SimEventType | string, cb: (e: any) => void): void { (this.listeners.get(type) ?? this.listeners.set(type, []).get(type)!).push(cb); }
-  private fire(type: string, e: Record<string, unknown>) { const l = this.listeners.get(type); if (l) { e.type = type; e.t = this.core.t; for (const cb of l) cb(e); } }
+  private fire(type: string, e: Record<string, unknown>) {
+    if (type === 'subwayEnter' && this.subway) this.subway.riderEntered(e.x as number, e.z as number); const l = this.listeners.get(type); if (l) { e.type = type; e.t = this.core.t; for (const cb of l) cb(e); } }
 
   // ---------------------------------------------------------------- gameplay / narrative hooks
   /**

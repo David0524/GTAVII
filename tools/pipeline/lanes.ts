@@ -787,7 +787,7 @@ const wild: WildSpot[] = [];
     if ((sp.kind === SpotKind.Storefront || sp.kind === SpotKind.Stoop) && hash2(sp.z, sp.x) % 4 === 0) {
       const e = walkEdges[sp.edge], o = [0, 0, 0, 0];
       sampleAt(e.pts, cumLengths(e.pts), sp.s, o);
-      const lr = -e.side * e.half; // kerb side of the walking band
+      const lr = -e.side * Math.max(0, e.half - 0.5); // near the kerb, inside the walking band (rats dash around it)
       const x = o[0] - o[3] * lr, z = o[1] + o[2] * lr;
       if (okPoint(x, z)) wild.push({ kind: WildKind.RatTrash, x, z, y: 0, heading: sp.heading });
     } else if (sp.kind === SpotKind.Subway) wild.push({ kind: WildKind.RatSubway, x: sp.x, z: sp.z, y: 0, heading: sp.heading });

@@ -247,7 +247,7 @@ export class Wildlife {
     for (const r of g.animals) {
       if (r.hidden || r.state === 'flee') continue;
       const a = S.rng.next() * Math.PI * 2;
-      r.tx = w.x + Math.cos(a) * 0.9; r.tz = w.z + Math.sin(a) * 0.9; r.state = 'flee'; r.timer = S.rng.range(8, 25); any = true;
+      r.tx = w.x + Math.cos(a) * 0.45; r.tz = w.z + Math.sin(a) * 0.45; r.state = 'flee'; r.timer = S.rng.range(8, 25); any = true;
     }
     if (any) { this.scatters++; S.emit('ratScatter', { x: w.x, z: w.z, count: g.animals.length, cause }); }
   }
@@ -268,7 +268,7 @@ export class Wildlife {
         else { r.x += (dx / d) * sp * dt; r.z += (dz / d) * sp * dt; r.yaw = Math.atan2(-dx, -dz); r.speed = sp; }
       } else if (r.timer <= 0) {
         // short dash along the kerb / round the bags
-        const a = S.rng.next() * Math.PI * 2, rad = S.rng.range(0.2, 0.6);
+        const a = S.rng.next() * Math.PI * 2, rad = S.rng.range(0.15, 0.4);
         r.tx = w.x + Math.cos(a) * rad; r.tz = w.z + Math.sin(a) * rad; r.state = 'dash';
       }
       r.y = groundY(r.x, r.z);

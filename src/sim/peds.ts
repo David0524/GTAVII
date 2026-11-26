@@ -420,7 +420,9 @@ function walk(S: SimCore, p: Ped, dt: number) {
   p.s += p.dir * p.v * dt;
   const len = net.walkLen[p.edge];
   if (p.goal?.kind === 'goto' && p.goal.edge === p.edge && !p.path.length && Math.abs(p.s - (p.goal.s ?? -9)) < 0.8) {
-    placeOnEdge(S, p); p.state = 'hold'; p.v = 0; S.emit('goalReached', { id: p.id, x: p.x, z: p.z }); return;
+    placeOnEdge(S, p); p.state = 'hold'; p.v = 0; S.emit('goalReached', { id: p.id, x: p.x, z: p.z });
+    if (p.goal.then === 'subway') { const tx = p.goal.x!, tz = p.goal.z!; p.goal = null; goFree(p, tx, tz, 'vanish'); }
+    return;
   }
   if (p.s >= len || p.s <= 0) { p.s = Math.max(0, Math.min(len, p.s)); placeOnEdge(S, p); arriveNode(S, p); placeOnEdge(S, p); return; }
   placeOnEdge(S, p);

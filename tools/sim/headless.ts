@@ -86,7 +86,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
   const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0, fire: 0, cab: -1, parkRule: '' };
-  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen', 'dispatched', 'responderArrived', 'responderLeft', 'mailStop', 'iceCreamStop', 'iceCreamChime', 'cabCalled', 'cabReady', 'cabDeparted', 'cabTurnAhead', 'cabRideArrived', 'cabGaveUp', 'ticketIssued', 'towDispatched', 'vehicleTowed', 'sweeperOut']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
+  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen', 'dispatched', 'responderArrived', 'responderLeft', 'mailStop', 'iceCreamStop', 'iceCreamChime', 'cabCalled', 'cabReady', 'cabDeparted', 'cabTurnAhead', 'cabRideArrived', 'cabGaveUp', 'ticketIssued', 'towDispatched', 'vehicleTowed', 'sweeperOut', 'trainArriving', 'trainDeparted']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
   const examples: Record<string, string[]> = {};
@@ -240,7 +240,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    hooks, wildlife: (() => { const W = sim.debugWildlife(); return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
+    hooks, subway: sim.debugSubway(), wildlife: (() => { const W = sim.debugWildlife(); return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
   };
 }
 
@@ -309,6 +309,7 @@ async function main() {
     if (r.firstUnitSec === null || r.firstUnitSec > limit) problems.push(`response ${r.label}: first unit ${r.firstUnitSec ?? 'never'} s (target <= ${limit} s)`);
   }
   // police arrival is asserted by the dedicated response-time runs below
+  if (!full.subway.stations || !full.events.trainArriving) problems.push(`subway inactive: ${JSON.stringify(full.subway)}`);
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;
   fs.writeFileSync(path.join(ROOT, 'docs/sim_test_report.json'), JSON.stringify(report, null, 2));

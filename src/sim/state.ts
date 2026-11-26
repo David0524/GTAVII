@@ -63,6 +63,8 @@ export interface CopState {
   id: number; kind: 'foot' | 'car'; role?: 'police' | 'ambulance' | 'fire' | 'tow'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
   x: number; z: number; cx: number; cz: number; radius: number; yaw: number; target: string | null; urgent: boolean; siren: boolean; maxSpeed: number;
   route: number[]; arrived: boolean; stuckT: number; blockIds: number;
+  /** passed the scene at speed with no room on that block: pull in on the next one */
+  pullInNext?: boolean;
 }
 
 /** Scripted goal for one pedestrian (gameplay / narrative hooks). */
@@ -74,6 +76,8 @@ export interface PedGoal {
   until?: number;
   /** urgent: cross against the light when traffic allows (police, panicked owners) */
   urgent?: boolean;
+  /** goto: what to do on arrival ('subway' = go down the stairs and leave the street) */
+  then?: 'subway';
   x?: number; z?: number; speed?: number;
   /** follow/escort: external actor id (default 'player') or numeric agent id to pace against */
   target?: string | number;
