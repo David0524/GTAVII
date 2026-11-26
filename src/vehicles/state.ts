@@ -29,7 +29,8 @@ export function trimFor(spec: ModelSpec, r: () => number): TrimTier {
     case 'police': return 'police';
     case 'coupe': return 'luxury';
     case 'compact': return 'economy';
-    case 'taxi': case 'bus': case 'boxtruck': case 'stepvan': case 'garbage': return 'commercial';
+    case 'taxi': case 'bus': case 'boxtruck': case 'stepvan': case 'garbage':
+    case 'ambulance': case 'fire': case 'ladder': case 'mail': case 'icecream': return 'commercial';
     case 'sedan': { const x = r(); return x < 0.25 ? 'economy' : x < 0.8 ? 'standard' : 'luxury'; }
     case 'wagon': return r() < 0.7 ? 'standard' : 'economy';
     default: return 'standard';
@@ -47,8 +48,8 @@ export interface Condition {
 
 /** Condition from the variant seed: correlated with mileage; cabs and trucks run high miles. */
 export function deriveCondition(spec: ModelSpec, r: () => number): Condition {
-  const heavyUse = spec.cls === 'taxi' || spec.cls === 'bus' || spec.cls === 'boxtruck' || spec.cls === 'stepvan' || spec.cls === 'garbage';
-  const police = spec.cls === 'police';
+  const heavyUse = !['sedan', 'police', 'coupe', 'compact', 'wagon'].includes(spec.cls);
+  const police = spec.cls === 'police' || spec.cls === 'fire' || spec.cls === 'ladder' || spec.cls === 'ambulance'; // fleet-maintained
   const age = Math.pow(r(), heavyUse ? 0.6 : 1.1); // 0 new .. 1 old
   const mileage = Math.round((heavyUse ? 40000 + age * 210000 : 4000 + age * 120000) / 100) * 100;
   const wear = (k: number) => Math.min(1, Math.max(0, age * k * (0.55 + r() * 0.9) - (police ? 0.25 : 0)));
@@ -121,6 +122,7 @@ export function trunkCapacity(spec: ModelSpec): number {
     case 'wagon': return 20;
     case 'boxtruck': case 'stepvan': return 60;
     case 'bus': case 'garbage': return 0;
+    case 'mail': return 80; case 'ambulance': return 30; case 'fire': case 'ladder': return 40; case 'icecream': return 20;
     case 'compact': return 8;
     default: return 12;
   }
@@ -147,7 +149,7 @@ export function trunkRemove(t: Trunk, id: string, qty = 1): number {
 export function plateFor(spec: ModelSpec, r: () => number): string {
   const L = 'ABCDEFGHJKLMNPRSTUVWXYZ', D = '0123456789';
   const l = () => L[Math.floor(r() * L.length)], d = () => D[Math.floor(r() * 10)];
-  const commercial = spec.cls === 'boxtruck' || spec.cls === 'stepvan' || spec.cls === 'garbage' || spec.cls === 'bus';
+  const commercial = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(spec.cls);
   return commercial ? `${d()}${d()}${d()}${d()}-${l()}${l()}` : `${l()}${l()}${l()} ${d()}${d()}${d()}`;
 }
 
@@ -331,7 +333,7 @@ export class EngineSystems {
 
 /** Default tank size (litres) by class. */
 export function tankLitres(spec: ModelSpec) {
-  switch (spec.cls) { case 'compact': return 60; case 'bus': return 300; case 'boxtruck': case 'garbage': return 190; case 'stepvan': return 110; default: return 85; }
+  switch (spec.cls) { case 'compact': return 60; case 'bus': return 300; case 'boxtruck': case 'garbage': case 'fire': case 'ladder': return 190; case 'stepvan': case 'ambulance': case 'icecream': case 'mail': return 110; default: return 85; }
 }
 
 // ============================================================================ save format

@@ -1,10 +1,10 @@
 import * as THREE from 'three/webgpu';
 import { GeoBuilder, type Slot, type V3, clamp, lerp, pw, smooth } from './builder';
-import { type ModelSpec, type GlassKind, sMid } from './spec';
+import { type ModelSpec, type GlassKind, type CargoSpec, sMid } from './spec';
 
 /** Where decals (canvas textures) go; created by decals.ts. */
 export interface DecalAnchor {
-  kind: 'fare' | 'police' | 'unit' | 'taxiSign' | 'destSign' | 'fleet' | 'operator';
+  kind: 'fare' | 'police' | 'unit' | 'taxiSign' | 'destSign' | 'fleet' | 'operator' | 'ambulance' | 'fireDept' | 'mail' | 'icecream';
   pos: V3; normal: V3; w: number; h: number;
 }
 export interface WheelMount { x: number; y: number; z: number; front: boolean; side: 1 | -1; dual: boolean; r: number }
@@ -246,7 +246,8 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       b.box('indicator', sx * (centers[0] + 0.02), m.bumper.y + m.bumper.h + 0.05, faceZ(0, m.bumper.y + 0.1) - 0.015, 0.16, 0.05, 0.02);
     }
   }
-  const lastCargo = m.cargo?.length ? m.cargo[m.cargo.length - 1] : null;
+  const bodies = (m.cargo ?? []).filter((c) => c.kind === 'box' || c.kind === 'packer');
+  const lastCargo = bodies.length ? bodies[bodies.length - 1] : null;
   bumper(b, m.bumper, 'front', m, Z, halfW, lod);
   bumper(b, m.rearBumper ?? m.bumper, 'rear', m, Z, halfW, lod, lastCargo ? { s: lastCargo.s1, hw: lastCargo.hw } : undefined);
 
@@ -302,6 +303,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   // ---------------------------------------------------------------- extras
   const decals: DecalAnchor[] = [];
   let beacon: THREE.BufferGeometry | null = null;
+  const bb = new GeoBuilder(); // emergency lights (animated separately: taillamp slot -> beacon material)
   const gh = m.gh;
   const roofTop = gh.roofY + gh.crown;
   const roofMidZ = Z((gh.sA1 + gh.sC1) / 2);
@@ -311,16 +313,37 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       b.box('white', 0, roofTop + 0.13, roofMidZ - 0.1, 0.56, 0.18, 0.2);
       for (const f of [-1, 1]) decals.push({ kind: 'taxiSign', pos: [0, roofTop + 0.13, roofMidZ - 0.1 + f * 0.102], normal: [0, 0, f], w: 0.54, h: 0.16 });
     } else if (e === 'bubble') {
-      const bb = new GeoBuilder();
       const segs = lod === 0 ? 14 : 8;
       bb.add('chrome', new THREE.CylinderGeometry(0.12, 0.13, 0.05, segs), new THREE.Matrix4().makeTranslation(0, roofTop + 0.025, roofMidZ - 0.15));
       bb.add('taillamp', new THREE.SphereGeometry(0.11, segs, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.Matrix4().makeTranslation(0, roofTop + 0.05, roofMidZ - 0.15).multiply(new THREE.Matrix4().makeScale(1, 1.5, 1)));
-      beacon = bb.build();
+    } else if (e === 'lightBar') {
+      // period twin-beacon bar on the cab roof, plus a siren can in the middle
+      const segs = lod === 0 ? 12 : 6, z = Z(gh.sA1 + 0.25);
+      bb.add('chrome', new THREE.BoxGeometry(gh.roofHalfW * 1.6, 0.06, 0.22), new THREE.Matrix4().makeTranslation(0, roofTop + 0.03, z));
+      for (const sx of [-1, 1]) bb.add('taillamp', new THREE.SphereGeometry(0.1, segs, 5, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.Matrix4().makeTranslation(sx * gh.roofHalfW * 0.62, roofTop + 0.06, z).multiply(new THREE.Matrix4().makeScale(1, 1.6, 1)));
+      bb.add('chrome', new THREE.CylinderGeometry(0.09, 0.09, 0.16, segs), new THREE.Matrix4().makeTranslation(0, roofTop + 0.11, z).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2)));
+    } else if (e === 'boxBeacons') {
+      const c = m.cargo?.find((k) => k.kind === 'box');
+      if (c) for (const sx of [-1, 1]) for (const ss of [c.s0 + 0.12, c.s1 - 0.12]) bb.add('taillamp', new THREE.SphereGeometry(0.08, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.Matrix4().makeTranslation(sx * (c.hw - 0.12), c.y1, Z(ss)).multiply(new THREE.Matrix4().makeScale(1, 1.4, 1)));
+    } else if (e === 'coneSign') {
+      // roof sign: a giant cone with a swirl of soft-serve (original shape, no character or face)
+      const c = m.cargo?.find((k) => k.kind === 'box');
+      const y = (c ? c.y1 : roofTop) + 0.05, z = Z(c ? c.s0 + 0.6 : gh.sA1 + 0.6);
+      b.add('paint2', new THREE.ConeGeometry(0.22, 0.7, lod === 0 ? 12 : 6), new THREE.Matrix4().makeTranslation(0, y + 0.35, z).multiply(new THREE.Matrix4().makeRotationX(Math.PI)));
+      for (let k = 0; k < (lod === 0 ? 3 : 1); k++) b.add('white', new THREE.SphereGeometry(0.24 - k * 0.06, lod === 0 ? 12 : 6, 6), new THREE.Matrix4().makeTranslation(0, y + 0.75 + k * 0.16, z));
+    } else if (e === 'serviceWindow') {
+      const c = m.cargo?.find((k) => k.kind === 'box');
+      const s0 = c ? c.s0 + 0.5 : 2, len = 1.3, x = (c ? c.hw : m.W / 2) + 0.006, yb = (c ? c.y0 : m.beltY) + 0.75;
+      b.box('interior', x, yb + 0.4, Z(s0 + len / 2), 0.012, 0.8, len);
+      b.box('chrome', x + 0.03, yb - 0.02, Z(s0 + len / 2), 0.1, 0.04, len + 0.1); // counter
+      b.box('paint2', x + 0.25, yb + 0.92, Z(s0 + len / 2), 0.5, 0.03, len + 0.2, 0, 0, -0.25); // awning
+    } else if (e === 'bell' && lod === 0) {
+      b.add('chrome', new THREE.SphereGeometry(0.1, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.6), new THREE.Matrix4().makeTranslation(-0.5, m.bumper.y + m.bumper.h + 0.12, Z(0) - m.bumper.depth * 0.5).multiply(new THREE.Matrix4().makeRotationX(Math.PI)));
     } else if (e === 'roofRack' && lod === 0) {
       for (const sx of [-1, 1]) b.sweep('chrome', [[sx * (gh.roofHalfW - 0.08), roofTop - 0.005, Z(gh.sA1 + 0.35)], [sx * (gh.roofHalfW - 0.08), roofTop + 0.04, Z(gh.sA1 + 0.45)], [sx * (gh.roofHalfW - 0.08), roofTop + 0.04, Z(gh.sC1 - 0.1)], [sx * (gh.roofHalfW - 0.08), roofTop - 0.02, Z(gh.sC1)]], [[-0.012, -0.012], [0.012, -0.012], [0.012, 0.012], [-0.012, 0.012]]);
       for (let k = 0; k < 3; k++) b.box('chrome', 0, roofTop + 0.045, Z(lerp(gh.sA1 + 0.6, gh.sC1 - 0.25, k / 2)), gh.roofHalfW * 2 - 0.16, 0.015, 0.03);
     } else if ((e === 'mirrorL' || e === 'mirrorsBoth') && lod === 0) {
-      const big = m.cls === 'bus' || m.cls === 'boxtruck' || m.cls === 'garbage' || m.cls === 'stepvan';
+      const big = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(m.cls);
       for (const sx of e === 'mirrorsBoth' ? [-1, 1] : [-1]) {
         const x = sx * (halfW(gh.sA0) - gh.beltInset + (big ? 0.18 : 0.06));
         const y = m.beltY + (big ? 0.35 : 0.09), z = Z(gh.sA0 + 0.12);
@@ -350,6 +373,16 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       for (const sx of [-1, 1]) b.box('interior', sx * (halfW(0.9) + 0.003), (m.sillY + m.beltY) / 2 + 0.05, Z(0.95), 0.01, m.beltY - m.sillY - 0.1, 0.62);
     }
   }
+  if (bb.pos.length) beacon = bb.build();
+  const sideOf = (c: { hw: number }) => c.hw + 0.012;
+  const box0 = m.cargo?.find((k) => k.kind === 'box');
+  if (m.cls === 'ambulance' && box0) {
+    for (const sx of [1, -1]) decals.push({ kind: 'ambulance', pos: [sx * sideOf(box0), box0.y0 + 0.95, Z((box0.s0 + box0.s1) / 2)], normal: [sx, 0, 0], w: (box0.s1 - box0.s0) * 0.7, h: 0.34 });
+    decals.push({ kind: 'ambulance', pos: [0, box0.y1 - 0.45, Z(box0.s1) + 0.015], normal: [0, 0, 1], w: box0.hw * 1.6, h: 0.3 });
+  }
+  if (m.cls === 'fire' || m.cls === 'ladder') for (const sx of [1, -1]) decals.push({ kind: 'fireDept', pos: [sx * (sideX(gh.sA0 + 0.5, m.beltY - 0.35) + 0.01), m.beltY - 0.35, Z(gh.sA0 + 0.5)], normal: [sx, 0, 0], w: 0.9, h: 0.45 });
+  if (m.cls === 'mail') for (const sx of [1, -1]) decals.push({ kind: 'mail', pos: [sx * (halfW(m.L * 0.6) + 0.01), m.beltY + 0.45, Z(m.L * 0.6)], normal: [sx, 0, 0], w: 1.4, h: 0.4 });
+  if (m.cls === 'icecream' && box0) for (const sx of [1, -1]) decals.push({ kind: 'icecream', pos: [sx * sideOf(box0), box0.y1 - 0.42, Z((box0.s0 + box0.s1) / 2)], normal: [sx, 0, 0], w: (box0.s1 - box0.s0) * 0.85, h: 0.42 });
   if (m.cls === 'taxi') {
     const sFare = lerp(gh.sA0, gh.sC0, 0.7); // middle of the rear door
     for (const sx of [1, -1]) decals.push({ kind: 'fare', pos: [sx * (sideX(sFare, 0.62) + 0.008), 0.62, Z(sFare)], normal: [sx, 0, 0], w: 0.42, h: 0.21 });
@@ -389,7 +422,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   }, {
     cx: 0, cy: (m.beltY + gh.roofY) / 2 + 0.02, cz: Z((gh.sA0 + gh.sA1 + gh.sC1 + gh.sC0) / 4), hx: (gh.roofHalfW + halfW(gh.sA0) - gh.beltInset) / 2, hy: (gh.roofY - m.beltY) / 2, hz: ((gh.sC0 + gh.sC1) / 2 - (gh.sA0 + gh.sA1) / 2) / 2,
   }];
-  for (const c of m.cargo ?? []) colliders.push({ cx: 0, cy: (c.y0 + c.y1) / 2, cz: Z((c.s0 + c.s1) / 2), hx: c.hw, hy: (c.y1 - c.y0) / 2, hz: (c.s1 - c.s0) / 2 });
+  for (const c of m.cargo ?? []) if (!c.dressing) colliders.push({ cx: 0, cy: (c.y0 + c.y1) / 2, cz: Z((c.s0 + c.s1) / 2), hx: c.hw, hy: (c.y1 - c.y0) / 2, hz: (c.s1 - c.s0) / 2 });
 
   const body = b.build();
   const hood = lod === 0 && m.hood && hoodB.pos.length ? hoodB.build() : null;
@@ -492,7 +525,21 @@ function greenhouse(b: GeoBuilder, m: ModelSpec, o: GenOptions, Z: (s: number) =
 }
 
 // ======================================================================= cargo modules
-function cargo(b: GeoBuilder, c: { kind: 'box' | 'packer'; s0: number; s1: number; y0: number; y1: number; hw: number; slot: Slot; ribs?: number }, Z: (s: number) => number, lod: 0 | 1) {
+function cargo(b: GeoBuilder, c: CargoSpec, Z: (s: number) => number, lod: 0 | 1) {
+  if (c.kind === 'ladder') {
+    // two rails with rungs, rising from y0 at s1 (base) to y1 at s0 (tip)
+    const len = c.s1 - c.s0, rise = c.y1 - c.y0, ang = Math.atan2(rise, len);
+    const mid = (c.y0 + c.y1) / 2, zc = Z((c.s0 + c.s1) / 2);
+    for (const sx of [-1, 1]) b.box(c.slot, sx * c.hw, mid, zc, 0.07, 0.16, Math.hypot(len, rise), 0, ang);
+    const n = lod === 0 ? Math.floor(len / 0.35) : Math.floor(len / 1.2);
+    for (let i = 1; i < n; i++) { const t = i / n; b.box(c.slot, 0, lerp(c.y1, c.y0, t), Z(lerp(c.s0, c.s1, t)), c.hw * 2, 0.035, 0.035); }
+    return;
+  }
+  if (c.kind === 'turntable') {
+    b.add(c.slot, new THREE.CylinderGeometry(c.hw, c.hw * 1.05, c.y1 - c.y0, lod === 0 ? 16 : 8), new THREE.Matrix4().makeTranslation(0, (c.y0 + c.y1) / 2, Z((c.s0 + c.s1) / 2)));
+    return;
+  }
+  if (c.band) for (const sx of [-1, 1]) b.box(c.band[2], sx * (c.hw + 0.006), (c.band[0] + c.band[1]) / 2, Z((c.s0 + c.s1) / 2), 0.012, c.band[1] - c.band[0], c.s1 - c.s0 - 0.02);
   const r = 0.06;
   // rounded-corner rectangular section lofted along s
   const sec = (s: number, y0: number, y1: number, hw: number): V3[] => {
@@ -523,7 +570,7 @@ function cargo(b: GeoBuilder, c: { kind: 'box' | 'packer'; s0: number; s1: numbe
   const ribs = lod === 0 ? c.ribs ?? 0 : 0;
   for (let i = 1; i < ribs; i++) {
     const s = lerp(c.s0 + 0.1, c.kind === 'packer' ? c.s1 - 1.5 : c.s1 - 0.1, i / ribs);
-    for (const sx of [-1, 1]) b.box('trim', sx * (c.hw + 0.012), (c.y0 + c.y1) / 2, Z(s), 0.025, c.y1 - c.y0 - 0.04, 0.05);
+    for (const sx of [-1, 1]) b.box(c.ribSlot ?? 'trim', sx * (c.hw + 0.012), (c.y0 + c.y1) / 2, Z(s), 0.025, c.y1 - c.y0 - 0.04, 0.05);
   }
   if (c.kind === 'box') { // rear door seam + hinges + latch bar
     b.box('trim', 0, (c.y0 + c.y1) / 2, Z(c.s1) + 0.012, 0.02, c.y1 - c.y0 - 0.08, 0.02);

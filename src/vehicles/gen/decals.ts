@@ -76,6 +76,36 @@ function draw(kind: DecalAnchor['kind'], seed: number): { c: HTMLCanvasElement; 
       g.fillText(seed % 2 ? 'CITY TRANSIT' : 'CITY SANITATION', 512, 66);
       return { c, emissive: false };
     }
+    case 'ambulance': {
+      const c = canvas(1024, 128), g = c.getContext('2d')!;
+      g.fillStyle = '#b8231c'; g.font = `112px ${GOTHIC}`; g.textBaseline = 'middle'; g.textAlign = 'center';
+      g.fillText('A M B U L A N C E', 512, 70);
+      return { c, emissive: false };
+    }
+    case 'fireDept': {
+      // generic door shield: no real department name, crest or seal
+      const c = canvas(512, 256), g = c.getContext('2d')!;
+      g.strokeStyle = '#e8d49a'; g.lineWidth = 10;
+      g.beginPath(); g.moveTo(256, 18); g.lineTo(470, 70); g.lineTo(440, 180); g.lineTo(256, 240); g.lineTo(72, 180); g.lineTo(42, 70); g.closePath(); g.stroke();
+      g.fillStyle = '#e8d49a'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = `600 42px ${GROT}`; g.fillText('FIRE DEPT.', 256, 95);
+      g.font = `96px ${GOTHIC}`; g.fillText(`ENGINE ${10 + Math.floor(r() * 80)}`, 256, 168);
+      return { c, emissive: false };
+    }
+    case 'mail': {
+      const c = canvas(1024, 256), g = c.getContext('2d')!;
+      g.fillStyle = '#1f3566'; g.fillRect(0, 150, 1024, 46);
+      g.font = `600 120px ${GROT}`; g.textBaseline = 'middle'; g.textAlign = 'center';
+      g.fillText('MAIL', 512, 82);
+      return { c, emissive: false };
+    }
+    case 'icecream': {
+      const c = canvas(1024, 192), g = c.getContext('2d')!;
+      g.fillStyle = '#7a2a4a'; g.textBaseline = 'middle'; g.textAlign = 'center';
+      g.font = `italic 800 92px ${GROT}`; g.fillText('Soft Ice Cream', 512, 70, 980);
+      g.font = `600 40px ${GROT}`; g.fillText('CONES  ·  SUNDAES  ·  SHAKES  ·  15¢', 512, 158, 980);
+      return { c, emissive: false };
+    }
     case 'fleet':
     default: {
       const c = canvas(1024, 256), g = c.getContext('2d')!;

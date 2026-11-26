@@ -35,15 +35,23 @@ export interface GreenhouseSpec {
 }
 
 export interface CargoSpec {
-  kind: 'box' | 'packer';
+  /** box/packer: bodies. ladder: rails + rungs at y0 (aerial ladder or side ladder). turntable: ladder base. */
+  kind: 'box' | 'packer' | 'ladder' | 'turntable';
   s0: number; s1: number; y0: number; y1: number; hw: number;
   slot: Slot;
   ribs?: number;
+  /** Rib slot (chrome compartment doors on fire apparatus). */
+  ribSlot?: Slot;
+  /** Livery band along the sides: [y0, y1, slot]. */
+  band?: [number, number, Slot];
+  /** Excluded from collision / impostor (thin dressing like ladders). */
+  dressing?: boolean;
 }
 
 export interface ModelSpec {
   id: string;
-  cls: 'sedan' | 'police' | 'coupe' | 'compact' | 'wagon' | 'taxi' | 'bus' | 'boxtruck' | 'stepvan' | 'garbage';
+  cls: 'sedan' | 'police' | 'coupe' | 'compact' | 'wagon' | 'taxi' | 'bus' | 'boxtruck' | 'stepvan' | 'garbage'
+    | 'ambulance' | 'fire' | 'ladder' | 'mail' | 'icecream';
   displayName: string;
   /** Loft (body/cab) length and width. */
   L: number; W: number;
@@ -77,7 +85,8 @@ export interface ModelSpec {
   wood?: { s0: number; s1: number; y0: number; y1: number };
   wheelStyle: 'fullcover' | 'hubcap' | 'dogdish' | 'truck' | 'wire';
   whitewall: boolean;
-  extras: ('taxiLight' | 'bubble' | 'roofRack' | 'destSign' | 'mirrorL' | 'mirrorsBoth' | 'spotlight' | 'busDoor' | 'stepDoor' | 'antenna' | 'hoodPrism')[];
+  extras: ('taxiLight' | 'bubble' | 'roofRack' | 'destSign' | 'mirrorL' | 'mirrorsBoth' | 'spotlight' | 'busDoor' | 'stepDoor' | 'antenna' | 'hoodPrism'
+    | 'lightBar' | 'boxBeacons' | 'coneSign' | 'serviceWindow' | 'bell')[];
   /** Seats relative to the vehicle origin. */
   seats: { driver: [number, number, number]; passenger: [number, number, number] };
   /** Paint palette (sRGB hex) for variants; paint2/roof colours when fixed. */

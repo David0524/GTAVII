@@ -21,8 +21,20 @@ export const CLASS_MODELS: Record<VehicleClass, [string, number][]> = {
   garbage: [['b80', 1]],
 };
 
-export function resolve(vclass: VehicleClass, variant: number): { modelId: string; paint: string } {
-  const opts = CLASS_MODELS[vclass];
+/**
+ * Classes proposed to the engine for src/shared/traffic.ts (ENGINE_REQUESTS "From vehicles: 7").
+ * resolve() accepts them now so the sim can start using them as soon as the contract lands.
+ */
+export const PROPOSED_CLASS_MODELS: Record<string, [string, number][]> = {
+  ambulance: [['medic', 1]],
+  fire_engine: [['pumper', 1]],
+  ladder_truck: [['ladder', 1]],
+  mail_truck: [['courier', 1]],
+  ice_cream: [['scoop', 1]],
+};
+
+export function resolve(vclass: VehicleClass | keyof typeof PROPOSED_CLASS_MODELS, variant: number): { modelId: string; paint: string } {
+  const opts = (CLASS_MODELS as Record<string, [string, number][]>)[vclass] ?? PROPOSED_CLASS_MODELS[vclass];
   if (!opts) throw new Error(`no vehicle model for class "${vclass}"`);
   let pick = opts[0][0];
   if (opts.length > 1) {

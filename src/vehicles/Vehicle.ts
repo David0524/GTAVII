@@ -103,7 +103,6 @@ export class Vehicle {
   private hoodPivot: THREE.Group | null = null;
   private hoodAngle = 0;
   private wheelObjs: { lod: THREE.LOD; pivot: THREE.Object3D; spin: THREE.Object3D }[] = [];
-  private beacon: THREE.Mesh | null = null;
   private beaconMat: THREE.MeshStandardNodeMaterial | null = null;
   private decals: ReturnType<typeof buildDecals>;
   private plateMeshes: THREE.Mesh[] = [];
@@ -164,12 +163,11 @@ export class Vehicle {
     if (g0.beacon) {
       this.beaconMat = new THREE.MeshStandardNodeMaterial({ color: 0x8a0e0a, emissive: 0xff2010, emissiveIntensity: 0.1, roughness: 0.2 });
       const arr = this.mats.array.map((m) => (m === this.mats.bySlot.taillamp ? this.beaconMat! : m));
-      this.beacon = new THREE.Mesh(g0.beacon, arr);
-      lod0.add(this.beacon);
+      lod0.add(new THREE.Mesh(g0.beacon, arr));
     }
     // plates (visible, swappable)
     {
-      const commercial = ['boxtruck', 'stepvan', 'garbage', 'bus'].includes(spec.cls);
+      const commercial = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(spec.cls);
       this.plateTex = new THREE.CanvasTexture(drawPlate(this.plate, { commercial }));
       this.plateTex.colorSpace = THREE.SRGBColorSpace; this.plateTex.anisotropy = 4;
       const pm = new THREE.MeshStandardNodeMaterial({ map: this.plateTex, roughness: 0.45, metalness: 0.2, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
@@ -280,7 +278,7 @@ export class Vehicle {
   /** Seats that exist on this model (two-door cars and trucks have no rear doors). */
   get seats(): SeatId[] {
     const c = this.asset.spec.cls;
-    return c === 'coupe' || c === 'boxtruck' || c === 'stepvan' || c === 'garbage' || c === 'bus' ? ['driver', 'passenger'] : ['driver', 'passenger', 'rearLeft', 'rearRight'];
+    return ['sedan', 'police', 'compact', 'wagon', 'taxi'].includes(c) ? ['driver', 'passenger', 'rearLeft', 'rearRight'] : ['driver', 'passenger'];
   }
   seatPose(seat: SeatId): THREE.Matrix4 {
     const s = this.seatLocal(seat);
@@ -340,7 +338,7 @@ export class Vehicle {
   setPlate(text: string) {
     this.plate = text;
     if (this.plateTex) {
-      const commercial = ['boxtruck', 'stepvan', 'garbage', 'bus'].includes(this.asset.spec.cls);
+      const commercial = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(this.asset.spec.cls);
       this.plateTex.image = drawPlate(text, { commercial });
       this.plateTex.needsUpdate = true;
     }
@@ -629,7 +627,6 @@ export class Vehicle {
     if (this.beaconMat) {
       const phase = (this.t * 2.4) % 1;
       this.beaconMat.emissiveIntensity = alive && this.lights.beacon ? (phase < 0.35 ? 6 : 0.3) : 0.05;
-      if (this.beacon) this.beacon.rotation.y = this.t * 8;
     }
 
     // hood: pops above 45% front damage, flutters with the body's vertical motion

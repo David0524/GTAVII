@@ -63,7 +63,7 @@ function impostor(spec: ModelSpec, g: GeneratedModel): THREE.BufferGeometry {
   b.box('paint', 0, (spec.sillY + spec.beltY) / 2, zc(g.minZ, cabEnd), g.halfW * 2, spec.beltY - spec.sillY, cabEnd - g.minZ);
   const gh = spec.gh;
   b.box('glass', 0, (spec.beltY + gh.roofY) / 2, zc(gh.sA0 - mid, gh.sC0 - mid) + 0.1, gh.roofHalfW * 2 + 0.1, gh.roofY - spec.beltY, (gh.sC0 + gh.sC1) / 2 - (gh.sA0 + gh.sA1) / 2);
-  for (const c of spec.cargo ?? []) b.box('paint2', 0, (c.y0 + c.y1) / 2, zc(c.s0 - mid, c.s1 - mid), c.hw * 2, c.y1 - c.y0, c.s1 - c.s0);
+  for (const c of (spec.cargo ?? []).filter((k) => !k.dressing)) b.box(c.slot === 'paint' ? 'paint' : 'paint2', 0, (c.y0 + c.y1) / 2, zc(c.s0 - mid, c.s1 - mid), c.hw * 2, c.y1 - c.y0, c.s1 - c.s0);
   for (const w of g.wheels) b.box('rubber', w.x, w.r, w.z, spec.tireW, w.r * 2, w.r * 2);
   return b.build();
 }

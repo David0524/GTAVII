@@ -27,7 +27,7 @@ function splitForInstancing(spec: ModelSpec, g: THREE.BufferGeometry) {
     if (slot === 'paint' || (slot === 'roof' && roofFixed === null)) target = 'paint';
     else if (slot === 'taillamp') target = 'tail';
     else if (slot === 'headlamp') target = 'head';
-    else if (slot === 'white' && (spec.cls === 'taxi' || spec.cls === 'police')) target = 'sign'; // roof light box / beacon
+    else if (slot === 'white' && spec.cls !== 'icecream' && (spec.cls === 'taxi' || !!getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle }).lod1.beacon)) target = 'sign'; // roof light box / beacons
     else {
       target = 'fixed';
       col = slot === 'paint2' ? spec.paint2 ?? 0xdddddd : slot === 'roof' ? roofFixed! : trafficSlotColor(slot) ?? 0x888888;
@@ -182,7 +182,7 @@ export class TrafficRenderer {
       b.tail.setColorAt(i, flash ? L.amber : lt & VehicleLights.Brake ? L.brake : lt & VehicleLights.Reverse ? L.reverse : lt & VehicleLights.Head ? L.tailRun : L.tailOff);
       b.head.setColorAt(i, lt & VehicleLights.Head ? L.headOn : L.headOff);
       if (b.sign) {
-        const police = r.modelId === 'bancroft_patrol';
+        const police = MODEL_BY_ID.get(r.modelId)!.cls !== 'taxi'; // emergency beacons follow the Siren bit
         b.sign.setColorAt(i, police ? (lt & VehicleLights.Siren && blink ? L.beacon : L.beaconOff) : lt & VehicleLights.RoofLight ? L.signOn : L.signOff);
       }
     }

@@ -250,5 +250,116 @@ const b80: ModelSpec = {
   physics: truckPhysics({ mass: 12500, comY: 1.2, frontWeight: 0.33, torque: 1150, cdA: 6.5, brakeForce: 0.55 }),
 };
 
-export const MODELS: readonly ModelSpec[] = [bancroft, police, bancroftCab, tiverton, ferris, homestead, fareway, ct40, b60, walkin, b80];
+// ============================================================ emergency & service (original designs)
+const FIRE_RED = 0xa8221a, CAB_WHITE = 0xe8e4d8;
+
+const medic: ModelSpec = {
+  id: 'medic', cls: 'ambulance', displayName: 'Halloran Medic 3 Modular Ambulance',
+  L: 2.55, W: 2.0, sF: 0.75, wheelbase: 3.4, wheelR: 0.4, tireW: 0.22, track: 1.7, trackR: 1.65, dualRear: true,
+  sillY: 0.5, beltY: 1.15,
+  top: [[0, 0.95], [0.06, 1.02], [0.62, 1.1], [0.7, 1.15], [2.55, 1.15]],
+  crown: 0.02, cornerF: 0.18, cornerR: 0.05, noseRake: 0.05, tailRake: 0, crease: 0.5, archGap: 0.05,
+  hood: [0.05, 0.65],
+  gh: { sA0: 0.72, sA1: 1.05, sC1: 2.45, sC0: 2.5, roofY: 2.1, beltInset: 0.03, roofHalfW: 0.92, crown: 0.04, bow: 0.04,
+    bands: [{ u: 0, k: 'pillar' }, { u: 0.05, k: 'glass' }, { u: 0.6, k: 'pillar' }], winV: [0.05, 0.9], backlight: 'blank', splitWindshield: true },
+  cargo: [{ kind: 'box', s0: 2.55, s1: 6.0, y0: 0.78, y1: 2.75, hw: 1.1, slot: 'paint', band: [1.15, 1.35, 'paint2'] }],
+  grille: { kind: 'horiz', hw: 0.45, y0: 0.55, y1: 0.85, bars: 4 },
+  headlamps: { kind: 'dualRound', y: 0.78, xOut: 0.16, size: 0.18, housing: 'trim' },
+  taillamps: { kind: 'truck', y0: 0.95, y1: 1.1 },
+  bumper: { kind: 'chrome', y: 0.42, h: 0.16, depth: 0.08, wrap: 0.1 },
+  rearBumper: { kind: 'painted', y: 0.6, h: 0.14, depth: 0.12, wrap: 0.02 },
+  trim: {},
+  wheelStyle: 'truck', whitewall: false,
+  extras: ['lightBar', 'boxBeacons', 'mirrorsBoth'],
+  seats: { driver: [-0.45, 1.25, -0.85], passenger: [0.45, 1.25, -0.85] },
+  palette: [0xe8e6de], paint2: 0xd2521e, roofColor: 'paint',
+  metallicChance: 0, vinylChance: 0,
+  physics: truckPhysics({ mass: 3900, comY: 1.0, frontWeight: 0.45, torque: 520, peakRpm: 2400, redline: 4000, gears: [2.5, 1.5, 1.0], finalDrive: 4.1, reverseRatio: 2.2, cdA: 4.8, freqF: 1.3, freqR: 1.45, brakeForce: 0.75, steerRate: 1.8 }),
+};
+
+/** Cab-forward fire-apparatus cab shared by the pumper and the ladder truck. */
+const fireCab = (wheelbase: number): Pick<ModelSpec, 'L' | 'W' | 'sF' | 'wheelbase' | 'wheelR' | 'tireW' | 'track' | 'trackR' | 'dualRear' | 'sillY' | 'beltY' | 'top' | 'crown' | 'cornerF' | 'cornerR' | 'noseRake' | 'tailRake' | 'crease' | 'archGap' | 'hood' | 'gh'> => ({
+  L: 3.0, W: 2.45, sF: 1.35, wheelbase, wheelR: 0.52, tireW: 0.3, track: 2.0, trackR: 1.85, dualRear: true,
+  sillY: 0.62, beltY: 1.55, top: [[0, 1.55], [3.0, 1.55]], crown: 0, cornerF: 0.15, cornerR: 0.05, noseRake: 0, tailRake: 0, crease: 0.5, archGap: 0.06,
+  hood: null,
+  gh: { sA0: 0.06, sA1: 0.25, sC1: 2.9, sC0: 3.0, roofY: 2.75, beltInset: 0.0, roofHalfW: 1.18, crown: 0.03, bow: 0.04,
+    bands: [{ u: 0, k: 'pillar' }, { u: 0.04, k: 'glass' }, { u: 0.38, k: 'pillar' }, { u: 0.43, k: 'glass' }, { u: 0.78, k: 'pillar' }], winV: [0.06, 0.85], splitWindshield: true, backlight: 'blank' },
+});
+const fireFront: Pick<ModelSpec, 'grille' | 'headlamps' | 'taillamps' | 'bumper' | 'rearBumper' | 'trim' | 'wheelStyle' | 'whitewall' | 'palette' | 'paint2' | 'roofColor' | 'metallicChance' | 'vinylChance'> = {
+  grille: { kind: 'truck', hw: 0.55, y0: 0.75, y1: 1.35, bars: 6 },
+  headlamps: { kind: 'quadRound', y: 1.05, xOut: 0.18, size: 0.15, housing: 'chrome' },
+  taillamps: { kind: 'truck', y0: 0.95, y1: 1.1 },
+  bumper: { kind: 'chrome', y: 0.45, h: 0.25, depth: 0.35, wrap: 0.05 },
+  rearBumper: { kind: 'painted', y: 0.7, h: 0.14, depth: 0.1, wrap: 0.02 },
+  trim: {}, wheelStyle: 'truck', whitewall: false,
+  palette: [FIRE_RED, 0x9e1f18], paint2: 0xd8d6cf, roofColor: CAB_WHITE, metallicChance: 0, vinylChance: 0,
+};
+const pumper: ModelSpec = {
+  id: 'pumper', cls: 'fire', displayName: 'Halloran Cab-Forward Pumper',
+  ...fireCab(5.0), ...fireFront,
+  cargo: [
+    { kind: 'box', s0: 3.05, s1: 8.6, y0: 0.95, y1: 2.35, hw: 1.22, slot: 'paint', ribs: 6, ribSlot: 'chrome', band: [1.0, 1.08, 'chrome'] },
+    { kind: 'ladder', s0: 3.3, s1: 8.4, y0: 2.42, y1: 2.42, hw: 0.28, slot: 'chrome', dressing: true },
+  ],
+  extras: ['lightBar', 'bell', 'mirrorsBoth'],
+  seats: { driver: [-0.55, 1.75, -2.85], passenger: [0.55, 1.75, -2.85] },
+  physics: truckPhysics({ mass: 13500, comY: 1.25, frontWeight: 0.38, torque: 1250, peakRpm: 1800, redline: 2800, gears: [4.5, 2.6, 1.55, 1.0], finalDrive: 4.9, cdA: 7, brakeForce: 0.55, maxSteer: 0.6 }),
+};
+const ladder: ModelSpec = {
+  id: 'ladder', cls: 'ladder', displayName: 'Halloran Rear-Mount Aerial Ladder',
+  ...fireCab(5.8), ...fireFront,
+  cargo: [
+    { kind: 'box', s0: 3.05, s1: 10.0, y0: 0.95, y1: 1.85, hw: 1.22, slot: 'paint', ribs: 8, ribSlot: 'chrome', band: [1.0, 1.08, 'chrome'] },
+    { kind: 'turntable', s0: 9.0, s1: 9.6, y0: 1.85, y1: 2.15, hw: 0.55, slot: 'trim', dressing: true },
+    { kind: 'ladder', s0: 0.4, s1: 9.4, y0: 2.3, y1: 3.0, hw: 0.45, slot: 'chrome', dressing: true },
+  ],
+  extras: ['lightBar', 'mirrorsBoth'],
+  seats: { driver: [-0.55, 1.75, -3.25], passenger: [0.55, 1.75, -3.25] },
+  physics: truckPhysics({ mass: 16500, comY: 1.35, frontWeight: 0.36, torque: 1300, peakRpm: 1800, redline: 2800, gears: [4.5, 2.6, 1.55, 1.0], finalDrive: 5.2, cdA: 7.5, brakeForce: 0.5, maxSteer: 0.62 }),
+};
+
+const courier: ModelSpec = {
+  id: 'courier', cls: 'mail', displayName: 'Halloran Courier Right-Hand-Drive Mail Van',
+  L: 4.4, W: 1.85, sF: 0.65, wheelbase: 2.8, wheelR: 0.36, tireW: 0.2, track: 1.55,
+  sillY: 0.45, beltY: 1.05,
+  top: [[0, 0.88], [0.05, 0.95], [0.45, 1.02], [0.5, 1.05], [4.4, 1.05]],
+  crown: 0.02, cornerF: 0.14, cornerR: 0.06, noseRake: 0.04, tailRake: 0, crease: 0.5, archGap: 0.05,
+  hood: [0.05, 0.45],
+  gh: { sA0: 0.52, sA1: 0.7, sC1: 4.35, sC0: 4.4, roofY: 2.25, beltInset: 0.01, roofHalfW: 0.88, crown: 0.05, bow: 0.03,
+    bands: [{ u: 0, k: 'pillar' }, { u: 0.015, k: 'door' }, { u: 0.17, k: 'blank' }], winV: [0.0, 0.8], backlight: 'twoWindows', splitWindshield: true },
+  grille: { kind: 'horiz', hw: 0.38, y0: 0.5, y1: 0.78, bars: 3 },
+  headlamps: { kind: 'dualRound', y: 0.68, xOut: 0.14, size: 0.17, housing: 'trim' },
+  taillamps: { kind: 'vertical', y0: 0.6, y1: 0.95 },
+  bumper: { kind: 'painted', y: 0.35, h: 0.16, depth: 0.08, wrap: 0.05 },
+  trim: {}, wheelStyle: 'truck', whitewall: false,
+  extras: ['mirrorsBoth', 'stepDoor'],
+  // right-hand drive, as period mail vans were
+  seats: { driver: [0.45, 1.1, -0.85], passenger: [-0.45, 1.1, -0.85] },
+  palette: [0xe4e2da], metallicChance: 0, vinylChance: 0,
+  physics: truckPhysics({ mass: 2300, comY: 0.85, frontWeight: 0.5, torque: 300, peakRpm: 2400, redline: 4000, gears: [2.5, 1.5, 1.0], finalDrive: 3.9, reverseRatio: 2.1, cdA: 3.2, freqF: 1.4, freqR: 1.5, brakeForce: 0.7, maxSteer: 0.65, steerRate: 1.8 }),
+};
+
+const scoop: ModelSpec = {
+  id: 'scoop', cls: 'icecream', displayName: 'Halloran Walk-In Soft-Serve Truck',
+  L: 2.2, W: 2.0, sF: 0.75, wheelbase: 3.3, wheelR: 0.4, tireW: 0.22, track: 1.7,
+  sillY: 0.5, beltY: 1.15,
+  top: [[0, 0.95], [0.05, 1.02], [0.55, 1.1], [0.62, 1.15], [2.2, 1.15]],
+  crown: 0.02, cornerF: 0.16, cornerR: 0.05, noseRake: 0.04, tailRake: 0, crease: 0.5, archGap: 0.05,
+  hood: [0.05, 0.58],
+  gh: { sA0: 0.65, sA1: 0.95, sC1: 2.1, sC0: 2.15, roofY: 2.1, beltInset: 0.03, roofHalfW: 0.9, crown: 0.04, bow: 0.04,
+    bands: [{ u: 0, k: 'pillar' }, { u: 0.05, k: 'glass' }, { u: 0.75, k: 'pillar' }], winV: [0.05, 0.9], backlight: 'blank', splitWindshield: true },
+  cargo: [{ kind: 'box', s0: 2.22, s1: 5.9, y0: 0.8, y1: 2.6, hw: 1.08, slot: 'paint', band: [1.0, 1.14, 'paint2'] }],
+  grille: { kind: 'horiz', hw: 0.42, y0: 0.55, y1: 0.85, bars: 4 },
+  headlamps: { kind: 'dualRound', y: 0.78, xOut: 0.16, size: 0.18, housing: 'chrome' },
+  taillamps: { kind: 'truck', y0: 0.95, y1: 1.1 },
+  bumper: { kind: 'chrome', y: 0.42, h: 0.16, depth: 0.08, wrap: 0.1 },
+  rearBumper: { kind: 'chrome', y: 0.6, h: 0.14, depth: 0.1, wrap: 0.02 },
+  trim: {}, wheelStyle: 'hubcap', whitewall: false,
+  extras: ['coneSign', 'serviceWindow', 'mirrorsBoth'],
+  seats: { driver: [-0.45, 1.25, -1.0], passenger: [0.45, 1.25, -1.0] },
+  palette: [0xefe6cf, 0xeee9dc], paint2: 0xd98aa6, roofColor: 'paint', metallicChance: 0, vinylChance: 0,
+  physics: truckPhysics({ mass: 3600, comY: 1.0, frontWeight: 0.45, torque: 420, peakRpm: 2200, redline: 3800, gears: [2.5, 1.5, 1.0], finalDrive: 4.1, reverseRatio: 2.2, cdA: 4.6, freqF: 1.35, freqR: 1.5, brakeForce: 0.7, steerRate: 1.7 }),
+};
+
+export const MODELS: readonly ModelSpec[] = [bancroft, police, bancroftCab, tiverton, ferris, homestead, fareway, ct40, b60, walkin, b80, medic, pumper, ladder, courier, scoop];
 export const MODEL_BY_ID = new Map(MODELS.map((m) => [m.id, m]));
