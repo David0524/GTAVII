@@ -247,7 +247,9 @@ test('balance: hourly earnings against missions match the ECONOMY.md targets', (
   console.log(`best legal ${rates.legalBest.id} ${rates.legalBest.ratio.toFixed(3)}x | best crime ${rates.crimeBest.id} ${rates.crimeBest.ratio.toFixed(3)}x | property mean ${rates.propertyMean.toFixed(3)}x`);
   assert.ok(rates.legalBest.ratio >= 0.4 && rates.legalBest.ratio <= 0.5, `best legal job ${rates.legalBest.ratio}`);
   assert.ok(rates.crimeBest.ratio >= 0.6 && rates.crimeBest.ratio <= 0.8, `best crime ${rates.crimeBest.ratio}`);
-  for (const p of rates.property) assert.ok(p.ratio >= 0.2 && p.ratio <= 0.4, `${p.id} passive ${p.ratio}`);
+  // small early, big late (user decision 2026-11-26): starters below the brief's band, mid inside it, big above it
+  const BAND = { starter: [0.1, 0.22], mid: [0.2, 0.4], big: [0.45, 0.9] } as const;
+  for (const p of rates.property) { const t = E.DEFAULT_BUSINESSES.find((b) => b.id === p.id)!.tier; assert.ok(p.ratio >= BAND[t][0] && p.ratio <= BAND[t][1], `${p.id} (${t}) passive ${p.ratio}`); }
   // nothing in free roam beats the best of its class, and crime beats legal, but nothing beats missions
   for (const r of rates.jobs) assert.ok(r.ratio <= 0.5 && r.activeRatio <= 0.5, `${r.id} legal job above 0.5x`);
   for (const r of rates.crimes) assert.ok(r.ratio <= 0.8 && r.activeRatio <= 0.8, `${r.id} crime above 0.8x`);
@@ -259,7 +261,7 @@ test('balance: hourly earnings against missions match the ECONOMY.md targets', (
 test('no runaway wealth: 20 hours of mixed play and of pure free-roam grinding stay under the cap', () => {
   // Cap = starting cash + 1.5x what the same hours would earn on missions alone. Every free-roam activity is
   // held at or below 0.8x of missions per active hour (asserted above), so even a free-roam-only grinder earns less
-  // than the mission-only player; property passive income (<=0.4x per business, two bought at most, and only
+  // than the mission-only player; property passive income (starters only in 20 hours, and only
   // after the purchase price) is what the extra 0.5x of headroom covers.
   const missionOnly = DEFAULTS.realHours * DEFAULTS.missionCentsPerRealHour;
   const grind = [1974, 7, 99].map((seed) => runPlaythrough({ seed, greedy: true, missionShare: 0 }));
@@ -269,6 +271,16 @@ test('no runaway wealth: 20 hours of mixed play and of pure free-roam grinding s
     assert.ok(r.total + r.assets <= cap, `net worth ${(r.total + r.assets) / 100} over cap ${cap / 100}`);
   }
   for (const g of grind) assert.ok(g.total <= g.startTotal + missionOnly, 'a free-roam-only grinder does not out-earn missions');
+  // small early, big late: every mixed run buys a starter in the first few hours, and nothing big in 20 hours
+  for (const r of [mixed, ...mixedSeeds]) {
+    const first = r.bought[0];
+    assert.ok(first && first.tier === 'starter' && first.realHour <= 6, `first business ${JSON.stringify(first)}`);
+    assert.ok(!r.bought.some((b) => b.tier === 'big'), 'no big property inside 20 hours');
+  }
+  const cheapestBig = Math.min(...E.DEFAULT_BUSINESSES.filter((b) => b.tier === 'big').map((b) => b.price));
+  const richest = Math.max(...mixed.curve.flatMap((c) => Object.values(c.cash)));
+  assert.ok(cheapestBig > 4 * richest, `big property is a late-game goal (${cheapestBig / 100} vs best single-lead cash ${richest / 100})`);
+  assert.ok(E.DEFAULT_BUSINESSES.filter((b) => b.lead === 'char.nick_varelas').every((b) => b.tier === 'big'), "Nick's tier is big");
   // the mixed run is a sensible curve: it grows, and every lead is checkpointed every real hour
   assert.equal(mixed.curve.length, 21);
   assert.ok(mixed.curve[20].total > mixed.curve[0].total, 'the money curve rises');
@@ -344,7 +356,7 @@ test('economy curve: print the money curve and write shots/gameplay/economy_curv
     final: Object.fromEntries(Object.entries(mixed.final).map(([k, v]) => [names[k], dollars(v)])),
     totalCash: dollars(mixed.total), assetsAtPurchasePrice: dollars(mixed.assets), startCash: dollars(mixed.startTotal),
     earned: Object.fromEntries(Object.entries(mixed.earned).map(([k, v]) => [k, dollars(v)])), spent: Object.fromEntries(Object.entries(mixed.spent).map(([k, v]) => [k, dollars(v)])),
-    hoursByCategory: mixed.hoursBy, attempts: mixed.attempts, owned: mixed.owned,
+    hoursByCategory: mixed.hoursBy, attempts: mixed.attempts, owned: mixed.owned, bought: mixed.bought.map((b) => ({ ...b, realHour: +b.realHour.toFixed(2) })), businesses: E.DEFAULT_BUSINESSES.map((b) => ({ id: b.id, tier: b.tier, price: b.price / 100, lead: b.lead })),
     hourlyVsMissions: {
       bestLegal: { id: rates.legalBest.id, ratio: +rates.legalBest.ratio.toFixed(3) }, bestCrime: { id: rates.crimeBest.id, ratio: +rates.crimeBest.ratio.toFixed(3) }, propertyMean: +rates.propertyMean.toFixed(3),
       all: Object.fromEntries([...rates.jobs, ...rates.crimes, ...rates.property].map((r) => [r.id, { sustained: +r.ratio.toFixed(3), active: +r.activeRatio.toFixed(3), centsPerGameHour: Math.round(r.centsPerGameHour) }])),

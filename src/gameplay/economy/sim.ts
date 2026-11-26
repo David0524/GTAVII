@@ -109,6 +109,8 @@ export interface SimResult {
   earned: Earnings; earnedBy: Record<string, number>; hoursBy: Record<keyof Earnings, number>;
   spent: Record<string, number>;
   owned: string[]; cars: string[];
+  /** each business bought, with when (real hours into the run) and its tier */
+  bought: { id: string; tier: string; realHour: number; lead: string }[];
   attempts: Record<string, number>; visibleCrimes: number;
   /** realised cents per game hour per category in this playthrough */
   rates: Record<keyof Earnings, number>;
@@ -130,6 +132,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
   const startTotal = total();
 
   const earned: Earnings = { mission: 0, legal: 0, crime: 0, gamble: 0, property: 0 };
+  const bought: SimResult['bought'] = [];
   const hoursBy: Earnings = { mission: 0, legal: 0, crime: 0, gamble: 0, property: 0 };
   const spent: Record<string, number> = {};
   const attempts: Record<string, number> = {};
@@ -159,8 +162,13 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
   const buy = (l: string, cents: number, reason: string) => inv.spend(l, cents, reason);
 
   /** Shopping and chores, done between actions by whoever is playing. */
+  const lastCollect = new Map<string, number>();
   const chores = (lead: string) => {
     const p = plan.get(lead)!, c = cash(lead);
+    // an owner drops by the business about once a game day to empty the till (a real player passes it on the way)
+    if (eco.property.ownedBy(lead).length && eco.nowH() - (lastCollect.get(lead) ?? -1e9) >= 24 && eco.availability(lead, 'property.collect') > 0) {
+      lastCollect.set(lead, eco.nowH()); attempts['property.collect'] = (attempts['property.collect'] ?? 0) + 1; after(lead, eco.attempt(lead, 'property.collect'), 'property');
+    }
     // Nick's loans: borrow only when stuck near zero; repay when flush
     if (lead !== NICK && c < usd(15) && eco.loans.outstanding(lead) === 0) eco.lend(NICK, lead, usd(60));
     if (lead !== NICK && c > usd(250) && eco.loans.outstanding(lead) > 0) eco.repay(lead, Math.min(c - usd(100), eco.loans.outstanding(lead)));
@@ -169,9 +177,13 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     if (lead === DELPHINE && inv.count(lead, 'item.film_pack') < 2 && buy(lead, usd(5.49), 'film')) inv.give(lead, 'item.film_pack', 1);
     if (!p.licence && lead !== TEDDY && c >= usd(75) + usd(400) && buy(lead, usd(75), 'licence')) { rig.flags.add(`hack_licence.${lead}`); p.licence = true; }
     // a business once there is real cash to spare; at most two across the three leads
-    if (eco.property.owned.size < 2 && cash(lead) >= usd(1100) + usd(100)) {
-      const pick = [...eco.property.defs.values()].filter((b) => !eco.property.owned.has(b.id) && b.price + usd(100) <= cash(lead)).sort((a, b) => a.price - b.price)[0];
-      if (pick) eco.buyBusiness(lead, pick.id);
+    // small early, big late: a starter as soon as it's affordable with a cushion, a mid business later, big ones only with a deep cushion
+    {
+      const cushion = { starter: usd(75), mid: usd(200), big: usd(1500) } as const;
+      const pick = [...eco.property.defs.values()]
+        .filter((b) => !eco.property.owned.has(b.id) && (!b.lead || b.lead === lead) && eco.property.owned.size < 3 && !eco.property.ownedBy(lead).some((o) => eco.property.defs.get(o.def)!.tier === b.tier) && b.price + cushion[b.tier] <= cash(lead))
+        .sort((a, b) => a.price - b.price)[0];
+      if (pick && eco.buyBusiness(lead, pick.id)) bought.push({ id: pick.id, tier: pick.tier, realHour: (eco.nowH() - startH) / GAME_HOURS_PER_REAL_HOUR, lead });
     }
     if (eco.property.owned.size > 0 && !rig.flags.has(`car.${lead}`) && cash(lead) >= p.carPrice + usd(100) && buy(lead, p.carPrice, 'car')) rig.flags.add(`car.${lead}`);
     for (const b of eco.property.ownedBy(lead)) for (const u of eco.property.defs.get(b.def)!.upgrades) if (cash(lead) >= u.price + usd(600)) eco.buyUpgrade(lead, b.def, u.id);
@@ -238,6 +250,6 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     seed, gameHours: endH, realHours, curve, final, total: total(),
     assets: [...eco.property.owned.keys()].reduce((a, id) => a + eco.property.defs.get(id)!.price, 0) + LEADS.filter((l) => rig.flags.has(`car.${l}`)).reduce((a, l) => a + plan.get(l)!.carPrice, 0), earned, earnedBy, hoursBy, spent,
     owned: [...eco.property.owned.keys()], cars: LEADS.filter((l) => rig.flags.has(`car.${l}`)),
-    attempts, visibleCrimes, rates, startTotal,
+    attempts, visibleCrimes, rates, startTotal, bought,
   };
 }

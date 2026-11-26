@@ -297,18 +297,24 @@ Both are cheap to cache.
   - **Rates:**
     - best legal job: cab, 0.44×;
     - best crime: the chop list, 0.71×;
-    - property: 0.28–0.31×.
+    - property, tiered ("small early, big late", the user's decision of 2026-11-26):
+      - starters (newsstand $300, laundromat $800): 0.16–0.19×;
+      - mid (pool hall $1,000, diner $1,400): 0.30–0.31×;
+      - big (Deuce arcade $7,500, parking garage $9,500, rooming house $14,000, and Nick's supper club at $22,000, Nick only): 0.55–0.82×.
+    - Weekly trouble scales with the size of the business.
   - **Exploits are bounded:** robbing the same register again pays $87, then $23 over the next
     ten; fencing ten fur lots to one fence gets $536 against $1,440 at full price.
-  - **The 20-hour run:** cash goes from $365 to $1,275, peaking at $1,782 before a $1,100
-    newsstand purchase.
+  - **The 20-hour run (seed 1974):** cash goes from $365 to $2,040.
+    - Every mixed seed buys a starter between real hours 2.5 and 5.2. That run collects $438 from its till.
+    - Nobody reaches a mid business. Teddy peaks at about $860; Nick's loans or pooled money would be the way there.
+    - Nothing big is bought. The cheapest big property costs more than 4× the best single-lead cash at any checkpoint, so all of them are late-game goals (asserted).
   - **My reservation:** the targets are partly met through long attempt cycles. A chop delivery
     counts about 57 game hours, roughly 1.9 real hours. In play that would feel slow.
     - The rebalance: raise the mission reference once narrative's mission pay is settled
       (missions currently pay almost nothing), shorten the cycles to the real time an attempt
       takes, and let supply caps (pools, the weekly list, fence saturation) do the bounding.
-    - Business payback, at 5–10 game weeks, is longer than a 20-hour playthrough. It needs a
-      decision on whether property is late-game.
+    - Property payback is decided (small early, big late). A starter pays back in about 2 game weeks, about 11 real hours. A big one takes 15–25 game weeks, so it's an endgame income and a prestige goal, not a money printer.
+    - Honest gap: mid-tier is out of reach for one lead in 20 hours. If playtests want a mid business around hour 12–15, cut mid prices again or let one lead's business till feed another lead.
   - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
     witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
 - **Content is placeholder:** gameplay's own invented weapons, shops and prices run unless
