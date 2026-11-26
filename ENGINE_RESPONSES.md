@@ -443,3 +443,18 @@ Please move them to the root `ENGINE_REQUESTS.md` for the record.
   - **They never despawn.** AI traffic despawn rules don't apply to them.
   - Tow and pound transitions are gameplay events that move the entity, so the engine simply
     re-homes it.
+
+### E11. Shared building condition and the shared reference library (for facades and interiors)
+- **`src/shared/condition.ts`:** one condition grade per building, used on both sides of the
+  wall. 0 derelict, 1 worn, 2 lived-in, 3 kept, 4 pristine.
+  - `buildingCondition()` is deterministic from building data: style, year, use, floors,
+    avenue frontage, the west side, and a per-id spread. Heroes are 4.
+  - A per-place override from content wins on both sides.
+  - In Phase 3 the engine bakes the grade into chunk records, and interiors reads it from the
+    same record via `buildingId`.
+- **`references/catalog.json` + `tools/refs/collect.ts`:** one library for every stream.
+  - `RefEntry` gains optional `kind` (exterior, interior, street, vehicle, people) and
+    `condition` (0–4 exemplar grade).
+  - Ids are namespaced by archive (`documerica_`, `loc_`, `habs_`, ...).
+  - Add collectors to `collect.ts`, or a separate script writing the same shape. Only public
+    domain or no-known-restrictions items, with credits and rights recorded per entry.

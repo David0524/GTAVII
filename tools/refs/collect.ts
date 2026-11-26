@@ -27,9 +27,18 @@ async function get(url: string, tries = 4): Promise<Response> {
 const decode = (s: string) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 70);
 
+/**
+ * Shared reference library format (engine facades + interiors + any stream). Streams add sources by
+ * appending collectors below or their own script that writes the same RefEntry shape into
+ * references/catalog.json (ids are namespaced by archive: documerica_, loc_, habs_ ...).
+ *   kind      : 'exterior' | 'interior' | 'street' | 'vehicle' | 'people'   (what the image is mainly of)
+ *   condition : 0..4 on the shared scale in src/shared/condition.ts, when an image is used as a grade exemplar
+ */
 export interface RefEntry {
   id: string; file: string; title: string; date: string; author: string; place: string;
   topics: string[]; source: string; archive: string; rights: string;
+  kind?: 'exterior' | 'interior' | 'street' | 'vehicle' | 'people';
+  condition?: 0 | 1 | 2 | 3 | 4;
 }
 
 /** What each reference is for. A file is kept only if its title matches at least one topic. */
