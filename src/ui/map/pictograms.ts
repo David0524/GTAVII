@@ -5,13 +5,14 @@
  * blitted, so drawing 100 icons a frame is 100 drawImage calls.
  * The red cross is a protected emblem, so the hospital uses an H.
  */
+import { F_UI } from '../fonts';
 import { CATEGORIES, type Category } from './places';
 
 type G = CanvasRenderingContext2D;
 const GLYPH: Record<Category, (g: G) => void> = {
   home: (g) => { g.beginPath(); g.moveTo(-5, 0); g.lineTo(0, -5); g.lineTo(5, 0); g.lineTo(3.5, 0); g.lineTo(3.5, 5); g.lineTo(-3.5, 5); g.lineTo(-3.5, 0); g.closePath(); g.fill(); },
   safehouse: (g) => { GLYPH.home(g); g.save(); g.globalCompositeOperation = 'destination-out'; g.fillRect(-1, 1.5, 2, 3.5); g.restore(); },
-  property: (g) => { g.font = '800 11px Archivo, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('$', 0, 0.5); },
+  property: (g) => { g.font = `700 11px ${F_UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('$', 0, 0.5); },
   forsale: (g) => { g.fillRect(-5, -4, 10, 6); g.fillRect(-0.8, 2, 1.6, 4); g.save(); g.globalCompositeOperation = 'destination-out'; g.fillRect(-3.5, -2.5, 7, 1); g.fillRect(-3.5, -0.5, 5, 1); g.restore(); },
   food: (g) => { // cup and saucer with steam
     g.beginPath(); g.moveTo(-4.5, -1); g.lineTo(3, -1); g.lineTo(2.2, 3.5); g.lineTo(-3.7, 3.5); g.closePath(); g.fill();
@@ -37,12 +38,12 @@ const GLYPH: Record<Category, (g: G) => void> = {
     g.beginPath(); g.moveTo(-1.5, 1.5); g.lineTo(3, -5.5); g.moveTo(1.5, 1.5); g.lineTo(-3, -5.5); g.stroke();
   },
   police: (g) => { g.beginPath(); g.moveTo(0, -5.5); g.lineTo(5, -3.5); g.lineTo(4, 2); g.lineTo(0, 5.5); g.lineTo(-4, 2); g.lineTo(-5, -3.5); g.closePath(); g.fill(); },
-  hospital: (g) => { g.font = '800 11px Archivo, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('H', 0, 0.5); },
+  hospital: (g) => { g.font = `700 11px ${F_UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('H', 0, 0.5); },
   crime: (g) => { // fedora
     g.beginPath(); g.ellipse(0, 2.5, 6, 1.6, 0, 0, Math.PI * 2); g.fill(); g.beginPath(); g.moveTo(-3.6, 2); g.lineTo(-3, -3.5); g.quadraticCurveTo(0, -1.5, 3, -3.5); g.lineTo(3.6, 2); g.closePath(); g.fill();
   },
   job: (g) => { g.fillRect(-5, -2, 10, 7); g.lineWidth = 1.3; g.strokeRect(-2, -4.5, 4, 2.5); },
-  stranger: (g) => { g.font = '800 12px Fraunces, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 0, 0.5); },
+  stranger: (g) => { g.font = `700 12px ${F_UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 0, 0.5); },
   mission: (g) => { g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 2.4 : 5.6; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); },
   landmark: (g) => { g.fillRect(-1.6, -5.5, 3.2, 11); g.fillRect(-4, -1, 8, 6.5); },
   collectible: (g) => { g.beginPath(); g.moveTo(0, -5); g.lineTo(4, 0); g.lineTo(0, 5); g.lineTo(-4, 0); g.closePath(); g.fill(); },

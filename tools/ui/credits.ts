@@ -18,7 +18,8 @@ for (const dep of Object.keys(pkg.dependencies)) {
   if (!lf) throw new Error(`no licence file in ${dep}`);
   out.push({ name: dep, version: p.version, licence: p.license, text: fs.readFileSync(path.join(dir, lf), 'utf8').trim() });
 }
-out.push({ name: 'Fonts: Fraunces, League Gothic, Archivo, Courier Prime', version: 'latin subsets', licence: 'OFL-1.1', text: fs.readFileSync(path.join(ROOT, 'public/fonts/OFL.txt'), 'utf8').trim() });
+out.push({ name: 'Fonts: TeX Gyre Heros, Heros Cn, Schola, Cursor (subsets renamed T74 …), by B. Jackowski and J. M. Nowacki (GUST e-foundry)', version: 'latin subsets', licence: 'GUST Font License (LPPL 1.3c)', text: fs.readFileSync(path.join(ROOT, 'public/fonts/GUST-FONT-LICENSE.txt'), 'utf8').trim() });
+out.push({ name: 'Font: Libre Franklin, The Libre Franklin Project Authors', version: 'latin subset, weights 500–900', licence: 'OFL-1.1', text: fs.readFileSync(path.join(ROOT, 'public/fonts/OFL-LibreFranklin.txt'), 'utf8').trim() });
 fs.mkdirSync(path.join(ROOT, 'public/data/ui'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'public/data/ui/licences.json'), JSON.stringify(out));
 console.log(out.map((o) => `${o.name}@${o.version} ${o.licence} (${o.text.length} chars)`).join('\n'));

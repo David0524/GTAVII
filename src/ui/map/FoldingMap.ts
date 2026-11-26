@@ -9,6 +9,7 @@
  * (pan), triggers (zoom), confirm (select the place under the reticle, or pencil a waypoint there),
  * and 'use' to clear the waypoint. Redraws only when something changed.
  */
+import { F_BODY, F_COND, F_UI } from '../fonts';
 import { landmarks } from './landmarkData';
 import { PLAYABLE } from '../../shared/bounds';
 import type { StreetRec } from './grid';
@@ -212,7 +213,7 @@ export class FoldingMap {
     g.restore();
     g.save(); g.strokeStyle = 'rgba(46,23,29,.8)'; g.lineWidth = 1.6; g.setLineDash([9, 4, 2, 4]); g.strokeRect(px0, pz0, px1 - px0, pz1 - pz0); g.restore();
     if (Z < 0.7) {
-      g.save(); g.font = "400 11px 'League Gothic', sans-serif"; g.fillStyle = 'rgba(46,23,29,.75)'; g.textAlign = 'center';
+      g.save(); g.font = `700 11px ${F_COND}`; g.fillStyle = 'rgba(46,23,29,.75)'; g.textAlign = 'center';
       const note = 'C O V E R A G E   O F   T H I S   S H E E T   E N D S   ·   A D J O I N I N G   S H E E T S   S O L D   S E P A R A T E L Y';
       g.fillText(note, (px0 + px1) / 2, pz0 - 8); g.fillText(note, (px0 + px1) / 2, pz1 + 16); g.restore();
     }
@@ -256,11 +257,11 @@ export class FoldingMap {
     g.fillStyle = '#2e171d';
     for (const h of this.heroes) {
       g.fillStyle = '#2e171d'; g.beginPath(); g.rect(tx(h.x) - 3, tz(h.z) - 3, 6, 6); g.fill();
-      if (Z > 0.22) L.point(g, landmarks.short(h.name), tx(h.x), tz(h.z), { font: `600 ${Math.max(10, Math.min(12.5, Z * 26))}px 'Courier Prime', monospace`, colour: '#2e171d', symbol: 6, leader: true });
+      if (Z > 0.22) L.point(g, landmarks.short(h.name), tx(h.x), tz(h.z), { font: `700 ${Math.max(10, Math.min(12.5, Z * 26))}px ${F_UI}`, colour: '#2e171d', symbol: 6, leader: true });
     }
     // 2. pencil notes on lead homes
     for (const d of drawnPlaces) if (d.p.cat === 'home' && Z > 0.2) {
-      const t = this.ownerNotes[d.p.id] ?? d.p.name; g.font = 'italic 500 13px Fraunces, Georgia, serif';
+      const t = this.ownerNotes[d.p.id] ?? d.p.name; g.font = `italic 400 13px ${F_BODY}`;
       const w = g.measureText(t).width;
       for (const [dx, dy] of [[icon / 2 + 4, 4], [-icon / 2 - 4 - w, 4], [-w / 2, -icon / 2 - 6], [-w / 2, icon / 2 + 14]]) {
         const b: [number, number, number, number] = [d.x + dx, d.y + dy - 12, d.x + dx + w, d.y + dy + 3];
@@ -271,14 +272,14 @@ export class FoldingMap {
     for (const name of AVES) {
       const s = this.streets.filter((r) => r.n === name && r.p.length >= 4).sort((a, b) => b.p.length - a.p.length)[0]; if (!s) continue;
       const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
-      L.line(g, name.replace('Avenue', 'Ave.').replace('South', 'So.').toUpperCase(), pts, { font: `italic 600 ${Math.max(9.5, Math.min(13, Z * 30))}px Fraunces, Georgia, serif`, colour: '#3d2a20', offset: s.w * Z / 2 + 2 });
+      L.line(g, name.replace('Avenue', 'Ave.').replace('South', 'So.').toUpperCase(), pts, { font: `700 ${Math.max(9.5, Math.min(13, Z * 30))}px ${F_COND}`, colour: '#3d2a20', offset: s.w * Z / 2 + 2 });
     }
     // 3. district names (period names; inside the coverage only), spaced capitals
     g.textAlign = 'center';
     const dSize = Math.max(11, Math.min(24, Z * 54));
     for (const [n, x, z] of DISTRICTS) {
       if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue;
-      L.point(g, n.split('').join(' '), tx(x), tz(z), { font: `400 ${dSize}px 'League Gothic', sans-serif`, colour: 'rgba(120,40,30,.5)', symbol: 0 });
+      L.point(g, n.split('').join(' '), tx(x), tz(z), { font: `700 ${dSize}px ${F_UI}`, colour: 'rgba(120,40,30,.5)', symbol: 0 });
     }
     // 5. cross streets at street zoom
     if (Z > 0.5) {
@@ -287,22 +288,22 @@ export class FoldingMap {
         const mm = s.n.match(/^(West|East) (\d+)(st|nd|rd|th) Street$/); if (!mm || done.has(s.n)) continue;
         const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
         if (!pts.some((v, i) => (i % 2 ? v > 0 && v < H : v > 0 && v < W))) continue;
-        if (L.line(g, `${mm[1][0]}. ${mm[2]} ST.`, pts, { font: `600 ${Math.min(11, Z * 14)}px Archivo, sans-serif`, colour: 'rgba(61,42,32,.85)', offset: s.w * Z / 2 + 1 })) done.add(s.n);
+        if (L.line(g, `${mm[1][0]}. ${mm[2]} ST.`, pts, { font: `400 ${Math.min(11, Z * 14)}px ${F_COND}`, colour: 'rgba(61,42,32,.85)', offset: s.w * Z / 2 + 1 })) done.add(s.n);
       }
     }
     // 6. place names at close zoom
     if (Z > 0.75) for (const d of drawnPlaces) {
       if (d.p.cat === 'payphone' || d.p.cat === 'callbox' || d.p.cat === 'subway' || d.p.cat === 'home') continue;
-      L.point(g, d.p.name, d.x, d.y, { font: "500 10px 'Courier Prime', monospace", colour: 'rgba(46,23,29,.85)', symbol: icon });
+      L.point(g, d.p.name, d.x, d.y, { font: `400 10px ${F_UI}`, colour: 'rgba(46,23,29,.85)', symbol: icon });
     }
     g.textAlign = 'left';
     // cartouche
     if (cart) {
       const { bx, bz } = cart;
       g.fillStyle = PAPER; g.strokeStyle = '#3d2a20'; g.lineWidth = 1.5; g.fillRect(bx, bz, 236, 78); g.strokeRect(bx + 3, bz + 3, 230, 72);
-      g.fillStyle = '#2e171d'; g.font = 'italic 800 17px Fraunces, serif'; g.fillText('Midtown Manhattan', bx + 12, bz + 26);
-      g.font = "400 12px 'League Gothic', sans-serif"; g.fillText('S T R E E T   G U I D E   ·   1 9 7 4   E D I T I O N', bx + 12, bz + 44);
-      g.font = "10px 'Courier Prime', monospace"; g.fillText('Hollis & Crane Map Co. · 50¢ · one-way arrows current', bx + 12, bz + 62);
+      g.fillStyle = '#2e171d'; g.font = `700 16px ${F_UI}`; g.fillText('Midtown Manhattan', bx + 12, bz + 26);
+      g.font = `400 11px ${F_UI}`; g.fillText('S T R E E T   G U I D E   ·   1 9 7 4   E D I T I O N', bx + 12, bz + 44);
+      g.font = `400 10px ${F_UI}`; g.fillText('Hollis & Crane Map Co. · 50¢ · one-way arrows current', bx + 12, bz + 62);
     }
 
     // ---------------------------------------------------------------- the player's pencil

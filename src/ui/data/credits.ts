@@ -29,10 +29,8 @@ export const CREDITS: CreditSection[] = [
     { role: 'Music', text: 'Placeholder generative beds until the music source is decided.' },
   ] },
   { title: 'Type', lines: [
-    { role: 'Fraunces', text: 'Copyright 2018 The Fraunces Project Authors. SIL Open Font License 1.1.' },
-    { role: 'League Gothic', text: 'Copyright 2020 The League Gothic Project Authors. SIL Open Font License 1.1.' },
-    { role: 'Archivo', text: 'Copyright 2017 The Archivo Project Authors. SIL Open Font License 1.1.' },
-    { role: 'Courier Prime', text: 'Copyright 2015 The Courier Prime Project Authors. SIL Open Font License 1.1.' },
+    { role: 'TeX Gyre Heros, Heros Cn, Schola, Cursor', text: 'Copyright 2006, 2009 B. Jackowski and J. M. Nowacki on behalf of TeX users groups (GUST e-foundry). GUST Font License. Shipped as renamed subsets ("T74 …").' },
+    { role: 'Libre Franklin', text: 'Copyright 2020 The Libre Franklin Project Authors. SIL Open Font License 1.1.' },
   ] },
   { title: 'Software', lines: [
     { role: 'three.js', text: 'Copyright © 2010–2026 three.js authors. MIT License.' },

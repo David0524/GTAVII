@@ -13,10 +13,16 @@
   --sodium: #ff9a3c;
   --dim: rgba(239, 227, 196, 0.62);
   --hair: rgba(239, 227, 196, 0.22);
-  --f-display: 'Fraunces', Georgia, serif;
-  --f-head: 'League Gothic', 'Arial Narrow', sans-serif;
-  --f-ui: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --f-type: 'Courier Prime', ui-monospace, monospace;
+  /* Type direction A, "Transit Authority" (user's pick): one neo-grotesque for everything you navigate by,
+     condensed for tabs and plates, Century for reading, Franklin for newspaper heads, Courier for typed forms. */
+  --f-ui: 'T74 Heros', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --f-cond: 'T74 Heros Cn', 'Helvetica Neue Condensed', 'Arial Narrow', sans-serif;
+  --f-body: 'T74 Schola', 'Century Schoolbook', Georgia, serif;
+  --f-news: 'Libre Franklin', 'Franklin Gothic Medium', Arial, sans-serif;
+  --f-type: 'T74 Cursor', 'Courier New', Courier, monospace;
+  /* legacy names, mapped onto the new set until every rule is restyled */
+  --f-display: var(--f-ui);
+  --f-head: var(--f-cond);
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
   --safe-t: env(safe-area-inset-top, 0px);

@@ -4,6 +4,8 @@
  * pencil rings, rubber stamps and a coffee ring. All deterministic (seeded), so the map looks the
  * same every frame and every visit.
  */
+
+import { F_BODY, F_COND } from '../fonts';
 type G = CanvasRenderingContext2D;
 
 export const PAPER = '#ebdfc3';
@@ -91,7 +93,7 @@ export function pencilCross(g: G, x: number, y: number, s = 9, seed = 3) {
 /** Rubber stamp: a double-ruled box with spaced capitals, uneven ink. */
 export function stamp(g: G, text: string, x: number, y: number, rot: number, colour = '#9e2a24', size = 13, seed = 5) {
   g.save(); g.translate(x, y); g.rotate(rot);
-  g.font = `400 ${size}px 'League Gothic', 'Arial Narrow', sans-serif`;
+  g.font = `700 ${size}px ${F_COND}`;
   const t = text.toUpperCase().split('').join(' ');
   const w = g.measureText(t).width + size * 1.2, h = size * 1.7;
   g.globalAlpha = 0.78; g.strokeStyle = colour; g.fillStyle = colour;
@@ -117,10 +119,10 @@ export function coffeeRing(g: G, x: number, y: number, r: number, seed = 9) {
   g.restore();
 }
 
-/** Pencil handwriting stand-in: Fraunces italic in graphite with a tiny baseline wobble per word. */
+/** The player's pencilled notes: Century italic in graphite with a tiny baseline wobble per word. */
 export function pencilText(g: G, text: string, x: number, y: number, size = 12, rot = -0.04, seed = 2) {
   g.save(); g.translate(x, y); g.rotate(rot);
-  g.font = `italic 500 ${size}px Fraunces, Georgia, serif`; g.fillStyle = `${GRAPHITE}0.82)`;
+  g.font = `italic 400 ${size}px ${F_BODY}`; g.fillStyle = `${GRAPHITE}0.82)`;
   let cx = 0;
   for (const [i, w] of text.split(' ').entries()) { g.fillText(w, cx, (hash(seed + i) - 0.5) * 1.6); cx += g.measureText(`${w} `).width; }
   g.restore();
