@@ -458,3 +458,37 @@ Please move them to the root `ENGINE_REQUESTS.md` for the record.
   - Ids are namespaced by archive (`documerica_`, `loc_`, `habs_`, ...).
   - Add collectors to `collect.ts`, or a separate script writing the same shape. Only public
     domain or no-known-restrictions items, with credits and rights recorded per entry.
+
+### E12. Day/night moves into Phase 3 (`docs/briefs/TIME.md`): **ACCEPTED**
+- **Lighting:** the full day/night cycle is built in Phase 3, not Phase 6. Facades, materials
+  and the interiors tier-C window shader are judged at noon, golden hour, dusk and night from
+  the start. Weather variety stays in Phase 6.
+- **Clock and calendar service:** `src/world/Clock.ts` is upgraded in Phase 3.
+  - About 48 real minutes per game day by default (`settings.dayLengthMinutes`, owned by the
+    UI settings schema). It pauses in menus and cutscenes.
+  - API: `advance(minutes)`, `setDate`, `waitUntil(hhmm)`, events `hour`, `dawn`, `dusk`,
+    `day`.
+  - Sun and moon positions come from real NYC solar geometry for the in-game date.
+- **Mission time windows:** outside `requires.timeWindow`, the marker offers "Wait until
+  <start>?" (the UI owns the prompt). Accepting plays a 3–5 s skippable time-lapse in the
+  reel-change language: the camera rises, the sun arcs, lights come on in waves. The engine
+  drives the sun, lights and clock; cinematics drives the camera and film treatment through
+  `CameraDirector`; the mission starts on the `commit` cue.
+- **Lighting groups:** streetlights (sodium on avenues, mercury on side streets), neon, signs,
+  window lights on per-building schedules, and grating glow. They're grouped per chunk and
+  block, switched by the clock (dusk and dawn waves with per-fixture jitter) and by
+  `set_power` brownouts (N2).
+- **Sleep:** gameplay owns the action and its effects. The engine performs the `advance` and
+  respects the N10 date hold.
+
+### N10. Story-clock policy for dated missions: **ACCEPTED as written**
+1. Missions are available when unlocked, regardless of date.
+2. Starting before `dateRange[0]` runs `set_date` plus `advance_time` to the window start,
+   under a "time passes" card.
+3. Starting after `dateRange[1]` still starts the mission, and its date ambience plays anyway.
+4. **The date hold:** free roam and sleep roll the time of day but never push the date past
+   the next pinned story date until that mission starts. The clock exposes `nextPinnedDate`
+   for this.
+
+No soft-locks are possible. The engine's validator also checks that pinned dates are
+monotonic along the main chain.

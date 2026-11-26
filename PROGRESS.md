@@ -15,10 +15,10 @@ Source of truth across sessions. Read this first; update it last.
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
 | 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
 | UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/`; **handed to the UI and cinematics stream** at the freeze commit |
-| 3. Rendering pipeline + facade generation | **Next** (after integrating stream milestones) |
+| 3. Rendering pipeline + facade generation **+ full day/night lighting cycle** (moved from Phase 6, per TIME.md) | **Next** |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
-| 6. Weather, day/night, polish, optimisation | — |
+| 6. Weather variety, polish, optimisation (day/night moved to Phase 3) | — |
 | 7. Hook APIs + docs for the narrative team | Contract drafted in NARRATIVE_BRIEF.md; implementation pending |
 
 ## Architecture
@@ -282,9 +282,19 @@ land in these bands:
   30 fps on a laptop. Proven on the user's devices with COPY PERF REPORT, not in this
   container.
 
-**Shot list for judging:** the Phase 2 rig viewpoints, re-shot, placed side by side with frames
-A–D at matching angles: 42nd St & 7th, Sixth Ave & 32nd, a Garment District side street, and
-Herald Square.
+**Times of day:** every look check runs at **noon, golden hour (about 7:30 PM), dusk
+(8:14 PM, the spawn) and night (about 11 PM)**.
+- **Noon:** hard, high sun; deep canyon shadows; haze-bleached sky slots (frame C).
+- **Golden hour:** warm low sun on west faces (frame A).
+- **Night is a showcase:**
+  - sodium on the avenues against mercury blue-green on the side streets;
+  - neon bleeding into haze;
+  - windows lit on per-building schedules (incandescent, TV-blue, office fluorescent);
+  - headlights, grating glow, and wet-street reflections when it rains.
+
+**Shot list for judging:** the Phase 2 rig viewpoints, re-shot at all four times. Four of them
+go side by side with frames A–D at matching angles: 42nd St & 7th, Sixth Ave & 32nd, a Garment
+District side street, and Herald Square.
 
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
