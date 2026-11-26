@@ -1,0 +1,181 @@
+{
+  "backend": "webgl2",
+  "scene": "hair",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "people": [
+    {
+      "seed": 1675521106,
+      "sex": 1,
+      "age": 19,
+      "hair": "feathered",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 10733,
+      "draws": 2,
+      "buildMs": 189.1
+    },
+    {
+      "seed": 3224417134,
+      "sex": 0,
+      "age": 44,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "platform",
+      "hat": null,
+      "props": [
+        "shoulderBag",
+        "shoppingBag"
+      ],
+      "tris": 10887,
+      "draws": 2,
+      "buildMs": 105.2
+    },
+    {
+      "seed": 378660224,
+      "sex": 0,
+      "age": 27,
+      "hair": "bob",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "tote"
+      ],
+      "tris": 10478,
+      "draws": 2,
+      "buildMs": 60.7
+    },
+    {
+      "seed": 2524651022,
+      "sex": 0,
+      "age": 34,
+      "hair": "flip",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "platform",
+      "hat": null,
+      "props": [],
+      "tris": 11012,
+      "draws": 2,
+      "buildMs": 45.7
+    },
+    {
+      "seed": 2449513041,
+      "sex": 0,
+      "age": 23,
+      "hair": "longStraight",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "shorts",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "tote"
+      ],
+      "tris": 9713,
+      "draws": 2,
+      "buildMs": 62.2
+    },
+    {
+      "seed": 3602879698,
+      "sex": 0,
+      "age": 19,
+      "hair": "ponytail",
+      "facialHair": "none",
+      "top": "knitPolo",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "sandal",
+      "hat": null,
+      "props": [],
+      "tris": 10800,
+      "draws": 2,
+      "buildMs": 65.6
+    },
+    {
+      "seed": 1900501518,
+      "sex": 0,
+      "age": 29,
+      "hair": "updo",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "clog",
+      "hat": null,
+      "props": [
+        "tote"
+      ],
+      "tris": 9956,
+      "draws": 2,
+      "buildMs": 76.8
+    },
+    {
+      "seed": 974015921,
+      "sex": 0,
+      "age": 76,
+      "hair": "setCurls",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "slipOn",
+      "hat": null,
+      "props": [
+        "shoppingBag"
+      ],
+      "tris": 9992,
+      "draws": 2,
+      "buildMs": 40.4
+    },
+    {
+      "seed": 2520908685,
+      "sex": 1,
+      "age": 31,
+      "hair": "afro",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "sneaker",
+      "hat": null,
+      "props": [
+        "newspaper",
+        "cigarette"
+      ],
+      "tris": 10703,
+      "draws": 2,
+      "buildMs": 46.9
+    }
+  ],
+  "updateMs": [
+    0.1,
+    0,
+    0,
+    0.1,
+    0,
+    0.1,
+    0,
+    0.1,
+    0
+  ],
+  "renderMsSoftware": [
+    3.300000000745058,
+    1.799999998882413,
+    1.900000000372529
+  ]
+}
