@@ -206,10 +206,10 @@ export class Witnesses extends Emitter<WitnessEvents> {
     return 'panicked';
   }
   /** Pay a witness to forget. $5 is a coin flip for the timid; $20 buys most people. */
-  pay(ped: string, cents: number): boolean {
+  pay(ped: string, cents: number, payroll = false): boolean {
     const w = this.list.get(ped);
     if (!w || w.state === 'filed' || w.state === 'silenced') return false;
-    const p = Math.min(0.95, (cents / 2000) * (1.2 - w.nerve * 0.6));
+    const p = Math.min(0.95, ((payroll ? cents / 0.65 : cents) / 2000) * (1.2 - w.nerve * 0.6));
     w.attempts++;
     if (w.attempts <= 2 && this.rng.chance(p)) { w.state = 'silenced'; w.t = 0; this.port.command(ped, { type: 'release' }); this.emit('silenced', { ped, how: 'paid' }); return true; }
     return false;

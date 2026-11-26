@@ -55,6 +55,7 @@ export const ITEMS: ItemDef[] = [
   I({ id: 'item.film_pack', name: 'Instant film (10 exposures)', kind: 'photo', price: 549, stack: 10, sellable: false }),
   I({ id: 'item.plates', name: 'Set of plates', kind: 'misc', price: 4000, stack: 2, sellable: false, illicit: true, note: 'Chop-shop plate swap breaks the plate part of a description.' }),
   I({ id: 'item.key_corwin', name: 'Corwin pass key', kind: 'key', price: 0, stack: 1, sellable: false }),
+  I({ id: 'item.photo_evidence', name: 'Instant photo: a cop with his hand out', kind: 'photo', price: 0, stack: 20, sellable: false }),
   I({ id: 'item.bag', name: 'Gym bag', kind: 'misc', price: 450, stack: 1, sellable: true, note: 'Hides one long gun; you must take it out to use it.' }),
   I({ id: 'item.ledger_page', name: 'Ledger page', kind: 'evidence', price: 0, stack: 20, sellable: false }),
 ];

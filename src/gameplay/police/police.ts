@@ -33,6 +33,8 @@ export interface Unit {
   post: [number, number] | null;
   /** foot cops tire in a chase (and radio for backup when they do) */
   stamina: StaminaState; calledBackup: boolean;
+  /** who last paid this cop, and when (Delphine's Evidence) */
+  tookFrom: string | null; tookAt: number; tookReport: number | null;
 }
 export interface Report {
   id: number; precinct: string; kinds: CrimeKind[]; heat: number; description: Description; lastKnown: [number, number]; crimeAt: [number, number];
@@ -40,7 +42,7 @@ export interface Report {
   /** crimes already counted (several witnesses to one gunshot add one shots-fired, not five) */
   crimeIds: Set<number>;
 }
-export interface SuspectCtx { id: string; pos: [number, number, number]; appearance: Appearance; speed: number; weaponDrawn: boolean; bleeding: boolean; indoors: boolean; subway: boolean; inVehicle: boolean; surrendered: boolean; oddLook?: boolean }
+export interface SuspectCtx { id: string; pos: [number, number, number]; appearance: Appearance; speed: number; weaponDrawn: boolean; bleeding: boolean; indoors: boolean; subway: boolean; inVehicle: boolean; surrendered: boolean; oddLook?: boolean; /** 0..1 how well a crowd hides them right now (blend × crowd density) */ crowd?: number }
 
 export interface PoliceEvents extends Record<string, unknown> {
   reportFiled: { report: Report; via: string; merged: boolean };
@@ -60,6 +62,8 @@ export interface PoliceEvents extends Record<string, unknown> {
 }
 
 export const TIER_HEAT = [0.5, 1.8, 2.8, 3.8, 4.8] as const;
+/** Payroll: Nick's bribes work as if 1/0.65 ≈ 1.54× bigger (35% cheaper). */
+export const PAYROLL_DISCOUNT = 0.65;
 export const DECAY = 1 / 60;                         // heat per second, unwatched
 export const OFFICER_DOWN_DECAY = 0.12;              // a dead cop is remembered ~8x longer
 export const STOP_MATCH = 0.55, LOSE_TIME = { foot: 12, car: 18 } as const;
@@ -111,6 +115,8 @@ export class Police extends Emitter<PoliceEvents> {
   placeName: (x: number, z: number) => string = (x, z) => `${x.toFixed(0)}, ${z.toFixed(0)}`;
   /** Lead-specific: how good they are at buying people. */
   bribeSkill: (suspect: string) => number = () => 0;
+  /** Lead abilities (narrative 11): payroll = Nick, crowd = Delphine's blend 0..1 at the suspect's spot. */
+  payroll: (suspect: string) => boolean = () => false;
 
   constructor(private precincts: readonly PrecinctDef[], private world: WorldQuery, private rng: Rng) { super(); }
 
@@ -188,7 +194,7 @@ export class Police extends Emitter<PoliceEvents> {
       corrupt: o.corrupt ?? this.rollCorrupt(pct, kind), investigator: o.investigator ?? kind === 'plainclothes',
       recog: 0, lastSeen: null, lostFor: 0, searchPts: [], searchFor: 0, bribeAttempts: 0, ownDesc: null, speed: 0, sight: sp.sight, fov: (sp.fov * Math.PI) / 180,
       post: (o.state ?? 'post') === 'post' ? [x, z] : null,
-      stamina: makeStamina(kind === 'foot' || kind === 'plainclothes' ? this.rng.range(70, 110) : 1e6), calledBackup: false,
+      stamina: makeStamina(kind === 'foot' || kind === 'plainclothes' ? this.rng.range(70, 110) : 1e6), calledBackup: false, tookFrom: null, tookAt: -1e9, tookReport: null,
     };
     if (u.investigator) u.corrupt = 0;
     this.units.set(u.id, u);
@@ -322,7 +328,8 @@ export class Police extends Emitter<PoliceEvents> {
     if (seen) u.lostFor = 0;
     if (u.state === 'pursuit' || u.state === 'approach') {
       if (!seen) u.lostFor += dt;
-      const lim = u.kind === 'foot' ? LOSE_TIME.foot : LOSE_TIME.car;
+      const crowd = suspects[0]?.crowd ?? 0;
+      const lim = (u.kind === 'foot' ? LOSE_TIME.foot : LOSE_TIME.car) * (1 - 0.6 * crowd); // Disappear: crowds swallow her
       if (u.lostFor > lim && r) {
         this.emit('lost', { unit: u.id, report: r.id, at: u.lastSeen ?? r.lastKnown });
         this.emit('radio', { precinct: r.precinct, at: u.lastSeen ?? r.lastKnown, text: `${this.pct(r.precinct).name}, lost him around ${this.placeName(...(u.lastSeen ?? r.lastKnown))}. ${capital(describeText(u.ownDesc ?? r.description))}` });
@@ -441,9 +448,13 @@ export class Police extends Emitter<PoliceEvents> {
     }
     u.bribeAttempts++;
     const exp = expectedBribe(heat);
-    if (cents < exp * 0.4) return res('refused');
-    const p = Math.max(0, Math.min(0.97, u.corrupt * Math.min(1.4, cents / exp) + (suspect ? this.bribeSkill(suspect.id) : 0) + this.payoffOf(u.precinct) * 0.25 - witnessesNear * 0.08));
+    // Payroll (Nick): his money goes further, and a bent cop never turns him down at low heat
+    const payroll = !!suspect && this.payroll(suspect.id);
+    const worth = payroll ? cents / PAYROLL_DISCOUNT : cents;
+    if (worth < exp * 0.4) return res('refused');
+    const p = payroll && heat < 2 ? 1 : Math.max(0, Math.min(0.97, u.corrupt * Math.min(1.4, worth / exp) + (suspect ? this.bribeSkill(suspect.id) : 0) + this.payoffOf(u.precinct) * 0.25 - witnessesNear * 0.08));
     if (!this.rng.chance(p)) return res('refused');
+    u.tookFrom = suspect?.id ?? null; u.tookAt = this.time; u.tookReport = r?.id ?? null;
     if (!pay(cents)) return res('refused');
     if (r) { if (r.heat <= 4) this.clear(r, 'bribe'); else { r.heat -= 3; u.report = null; r.units = r.units.filter((x) => x !== u.id); } }
     this.setState(u, 'leave'); u.recog = 0; u.ownDesc = null;
@@ -465,6 +476,28 @@ export class Police extends Emitter<PoliceEvents> {
     }
     for (const r of this.reports) { r.units = []; r.spawned = {}; }
     this.relays.length = 0;
+  }
+
+  /** Evidence (Delphine): a photo of a cop who took money in the last minute cancels his reports on
+   *  her and cools the whole house by 1. Never touches officer-down. */
+  evidence(unitId: string, perp: string): boolean {
+    const u = this.units.get(unitId);
+    if (!u || u.tookFrom !== perp || this.time - u.tookAt > 60) return false;
+    for (const r of [...this.reports]) {
+      if (r.precinct !== u.precinct || this.isCitywide(r)) continue;
+      if (r.perp === perp && (r.units.includes(unitId) || u.report === r.id || u.tookReport === r.id)) this.clear(r, 'bribe');
+      else r.heat = Math.max(0.5, r.heat - 1);
+    }
+    this.emit('radio', { precinct: u.precinct, at: [u.x, u.z], text: `${this.pct(u.precinct).name}, disregard that last, nothing further.` });
+    return true;
+  }
+  /** Old Beat (Teddy): a word at the desk downgrades one report in that house by 2 heat (never below
+   *  tier 1, never officer-down). The caller enforces once-a-day and the desk-sergeant relationship. */
+  oldBeat(precinct: string, perp: string): boolean {
+    const r = this.reports.filter((x) => x.precinct === precinct && x.perp === perp && !this.isCitywide(x)).sort((a, b) => b.heat - a.heat)[0];
+    if (!r) return false;
+    r.heat = Math.max(TIER_HEAT[0], r.heat - 2);
+    return true;
   }
 
   /** Where a chase stands, for HUD cues, audio and missions (CORE_SYSTEMS §1): read from the world, not a meter. */

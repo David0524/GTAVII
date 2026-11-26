@@ -150,6 +150,7 @@ export class Gameplay {
     this.witnesses.maxCandidates = this.budget.witnesses * 4;
     this.outcomes = new Outcomes(this.reg, this.inv, this.healthSys, this.policeSys, this.rng);
     this.outcomes.flag = (f) => this.flags.has(f);
+    this.policeSys.payroll = (id) => id === this.player?.id && this.hasAbility('payroll');
     this.policeSys.priorsOf = (perp, pct) => (perp === this.player?.id ? this.outcomes.priors(this.player.lead, pct) : 0);
     this.wire();
   }
@@ -338,6 +339,24 @@ export class Gameplay {
     }
     return null;
   }
+  hasAbility(a: string) { return !!this.player && (this.reg.lead(this.player.lead).abilities ?? []).includes(a as any); }
+  /** Delphine's instant camera on a cop who just took money (needs film). */
+  photographCop(unitId: string) {
+    if (!this.player || !this.hasAbility('evidence') || !this.inv.take(this.player.lead, 'item.film_pack')) return false;
+    const ok = this.policeSys.evidence(unitId, this.player.id);
+    if (ok) this.inv.give(this.player.lead, 'item.photo_evidence');
+    this.emit('notice', { kind: ok ? 'evidencePhoto' : 'photoNothing', unit: unitId });
+    return ok;
+  }
+  private oldBeatDay = -1;
+  /** Teddy's word at the desk: once a game day, if the desk sergeant thinks well of him (relationship flag). */
+  oldBeat(precinct: string) {
+    if (!this.player || !this.hasAbility('old_beat') || this.oldBeatDay === this.clock.clock.day) return false;
+    if (!this.flags.has(`rel.desk.${precinct}`) && !this.flags.has('rel.kearney_2')) return false;
+    const ok = this.policeSys.oldBeat(precinct, this.player.id);
+    if (ok) this.oldBeatDay = this.clock.clock.day;
+    return ok;
+  }
   /** One tap clears a jam (JAM_CLEAR s). */
   clearJam() { const gs = this.gunState(); if (gs?.jammed && this.pc.jamClear <= 0) { this.pc.jamClear = JAM_CLEAR; this.emit('notice', { kind: 'clearingJam' }); return true; } return false; }
   /** Put the gun away (it's concealed again if the outfit allows). */
@@ -365,7 +384,7 @@ export class Gameplay {
   }
   payWitness(pedId: string, cents: number) {
     if (!this.player || this.inv.ensure(this.player.lead).money < cents) return false;
-    const ok = this.witnesses.pay(pedId, cents);
+    const ok = this.witnesses.pay(pedId, cents, this.hasAbility('payroll'));
     if (ok) this.inv.spend(this.player.lead, cents, 'witness');
     this.emit('witness', { kind: 'pay', ped: pedId, cents, result: ok });
     return ok;
@@ -770,9 +789,15 @@ export class Gameplay {
     const p = this.player; if (!p) return null;
     const h = this.healthSys.state(p.id);
     return {
-      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false,
+      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false, crowd: this.crowdAt(p.position()),
       bleeding: !!h && h.bleeds.length > 0, indoors: this.pc.indoors, subway: this.pc.subway, inVehicle: !!this.pc.vehicle, surrendered: this.pc.surrendered,
     };
+  }
+  /** Crowd cover at a point: pedestrians within 6 m (4+ = a crowd) × the lead's blend. */
+  crowdAt(pos: V3) {
+    if (!this.player) return 0;
+    let n = 0; for (const q of this.port.peds()) if (q.alive && Math.hypot(q.x - pos[0], q.z - pos[2]) < 6) n++;
+    return Math.min(1, n / 4) * (this.reg.lead(this.player.lead).crowdCover ?? 0.3);
   }
   hitboxes(): ActorHitbox[] {
     const out: ActorHitbox[] = [];
