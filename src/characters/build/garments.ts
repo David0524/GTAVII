@@ -113,9 +113,18 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   };
   // Drape: shirts and jackets hang off the shoulders and chest instead of printing every muscle.
   // Their base surface is a Taubin-smoothed copy of the torso (close LODs only; arms stay exact so cuffs cut cleanly).
-  const drape = ctx.lod <= 2
-    ? taubin(P, F.tris('body', Math.min(4, ctx.lod + 2)), (k) => F.part[k] === PART.torso || F.part[k] === PART.neck, 12, (k) => F.part[k] === PART.neck)
-    : undefined;
+  // Smoothing may only move cloth outwards (bridge hollows); convex shapes stay, so the shell
+  // never sinks inside the body and skin can't show through.
+  const drape = ctx.lod <= 2 ? (() => {
+    const sm = taubin(P, F.tris('body', Math.min(4, ctx.lod + 2)), (k) => F.part[k] === PART.torso || F.part[k] === PART.neck, 12, (k) => F.part[k] === PART.neck);
+    const Nb = F.normals.get('body')!;
+    for (const [k, q] of sm) {
+      const d = (q[0] - P[k * 3]) * Nb[k * 3] + (q[1] - P[k * 3 + 1]) * Nb[k * 3 + 1] + (q[2] - P[k * 3 + 2]) * Nb[k * 3 + 2];
+      const out = Math.max(0, d);
+      sm.set(k, [P[k * 3] + Nb[k * 3] * out, P[k * 3 + 1] + Nb[k * 3 + 1] * out, P[k * 3 + 2] + Nb[k * 3 + 2] * out]);
+    }
+    return sm;
+  })() : undefined;
 
   // ---- top ---------------------------------------------------------------------------------------
   const t = outfit.top;
