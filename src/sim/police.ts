@@ -65,6 +65,13 @@ export function nearestLane(S: SimCore, x: number, z: number): { lane: number; s
   }
   return { lane: best, s: bs, d: bd };
 }
+/** Driving distance (m) along the legal shortest route between two lane groups (Infinity if unreachable). */
+export function routeCost(S: SimCore, from: number, to: number): number {
+  const path = routeGroups(S, from, to);
+  if (!path.length) return Infinity;
+  let d = 0; for (const g of path) d += S.net.len[S.net.groups.get(g)![0]];
+  return d;
+}
 /** Group path from `from` to `to` (inclusive), or [] if unreachable. */
 function routeGroups(S: SimCore, from: number, to: number): number[] {
   if (from === to) return [from];
@@ -104,23 +111,30 @@ function pickInRadius(S: SimCore, c: CopState, cx: number, cz: number) {
 // ------------------------------------------------------------------ cars
 /** Connector a police car takes at the end of its current lane (route following), or -1 for default. */
 export function policeConnector(S: SimCore, v: Vehicle): number {
-  const c = v.cop!, net = S.net, L = net.g.links[v.link];
+  const c = v.cop!, L = S.net.g.links[v.link];
   if (L.kind !== LinkKind.Lane || c.mode === 'idle') return -1;
   const [gx, gz] = goalPoint(S, c);
-  const goal = nearestLane(S, gx, gz);
-  if (goal.lane < 0) return -1;
-  const path = routeGroups(S, L.group, net.g.links[goal.lane].group);
-  c.route = path;
-  if (path.length < 2) return -1;
+  const r = routeConnectorTo(S, v, gx, gz);
+  c.route = r.path;
+  return r.conn;
+}
+
+/** Connector at the end of v's current lane on the shortest legal route to (gx,gz); -1 when already on the goal block. */
+export function routeConnectorTo(S: SimCore, v: Vehicle, gx: number, gz: number, goalGroup = -1): { conn: number; path: number[] } {
+  const net = S.net, L = net.g.links[v.link];
+  if (L.kind !== LinkKind.Lane) return { conn: -1, path: [] };
+  if (goalGroup < 0) { const goal = nearestLane(S, gx, gz); if (goal.lane < 0) return { conn: -1, path: [] }; goalGroup = net.g.links[goal.lane].group; }
+  const path = routeGroups(S, L.group, goalGroup);
+  if (path.length < 2) return { conn: -1, path };
   const nextG = path[1];
   // prefer a connector from the current lane, else any lane of the group (forces a lane change)
   let best = -1;
   for (const lane of net.groups.get(L.group)!) for (const cn of net.g.links[lane].next) {
     if (net.g.links[net.g.links[cn].next[0]].group !== nextG) continue;
-    if (lane === v.link) return cn;
+    if (lane === v.link) return { conn: cn, path };
     if (best < 0) best = cn;
   }
-  return best;
+  return { conn: best, path };
 }
 
 /** Per-step police car behaviour (called before the vehicle's period behaviour). Returns true if it handled the vehicle. */
@@ -148,11 +162,14 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
       if (Math.abs(sHere - v.s) < 12 || sHere < v.s) { arrive(S, c); pickInRadius(S, c, c.cx, c.cz); }
       return false;
     }
-    if (sHere > v.s + 2) { v.stopLink = v.link; v.stopAt = sHere; v.stopKind = 'police'; }
-    if (v.s >= sHere - 3 && v.v < 1) {
+    // stop at the goal point; if we entered the block already past it (but close), pull in just ahead
+    const target = sHere > v.s + 2 ? sHere : d < 45 ? v.s + 8 : -1;
+    if (target > 0 && target < net.len[v.link] - 4 && v.stopLink !== v.link) { v.stopLink = v.link; v.stopAt = target; v.stopKind = 'police'; }
+    const sGoal = v.stopLink === v.link ? v.stopAt : sHere;
+    if (v.stopLink === v.link && v.s >= sGoal - 3 && v.v < 1) {
       v.stopLink = -1; v.stopAt = -1; v.v = 0;
       if (c.mode === 'roadblock') startRoadblock(S, v);
-      else { v.state = 'onScene'; v.dwell = Infinity; v.latTarget = L.laneIndex === 0 ? (L.width - v.wid) / 2 + 1.1 : 0; }
+      else { v.state = 'onScene'; v.dwell = c.role === 'ambulance' ? S.rng.range(40, 80) : c.role === 'fire' ? S.rng.range(120, 240) : Infinity; v.latTarget = L.laneIndex === 0 ? (L.width - v.wid) / 2 + 1.1 : 0; }
       arrive(S, c);
     }
   }
@@ -162,7 +179,8 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
 function arrive(S: SimCore, c: CopState) {
   if (c.arrived) return;
   c.arrived = true;
-  S.emit('policeArrived', { id: c.id });
+  if (!c.role || c.role === 'police') S.emit('policeArrived', { id: c.id });
+  else S.emit('responderArrived', { id: c.id, role: c.role });
 }
 
 /** Stop across the street: the car turns broadside and every lane of this direction is closed just behind it. */
@@ -282,3 +300,6 @@ export function removePolice(S: SimCore, agent: Vehicle | Ped, car: boolean) {
   if (car) { const v = agent as Vehicle; clearRoadblock(S, v); despawnVehicle(S, v); }
   else { const p = agent as Ped; p.cop2 = null; despawnPed(S, p); S.stats.despawnedP++; }
 }
+
+/** Car-only goal setter (responders reuse police routing). */
+export function setCopGoalCar(S: SimCore, c: CopState, v: Vehicle, goal: PoliceGoal) { setCopGoal(S, c, v, goal); }

@@ -17,6 +17,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Gameplay hooks | **First pass**: `perceive()`, `setGoal()` (goto/follow/escort/flee/flagDownCar), `emit({type:'gunfire'})` with distance-scaled panic, civilians pull over for `siren` actors. Police pursuit/foot-cop AI: not yet |
 | Economy hook | `blockAt(x,z)` + `footTraffic(blockId)` rolling peds/min |
 | Police agents (Gameplay spec) | **First pass**: `spawnPolice`, `setPoliceGoal` (patrol / goto / search / pursue / boxIn / roadblock), `setSiren`, `despawnPolice`, `police: PoliceView[]`, events `policeArrived`, `policeBlocked`. Plus `setGoal({kind:'act'})`, `nerve` on PedView, `kill()`, `takeVehicle()` → `vehicleStolen` |
+| Emergency & service traffic, player cab rides | **First pass**: `dispatch('ambulance'|'fire', x, z)` (+ ambient ambulance runs), mail trucks, soft-serve truck; `callCab` / `boardCab` / `leaveCab` with `cabReady`, `cabTurnAhead`, `cabRideArrived`; left-kerb pickups on one-way streets |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
@@ -150,6 +151,27 @@ Gameplay keeps every decision (reports, recognition, bribes, arrests, stamina); 
   few blocks away, because the one-way detours are long and it queues behind cars stopped at reds.
   Next: let siren cars use the left lanes freed by pull-over, and let civilians stopped at a red
   creep through to clear the way.
+
+### Emergency, service traffic and cab rides (`src/sim/service.ts`)
+- **Responders** (`dispatch`): ambulance, or fire engine + ladder truck, spawn 150-250 m out on a free
+  lane, run with sirens using police routing (careful reds, civilians pull over), work the scene with
+  hazards (ambulance 40-80 s, fire 120-240 s), then leave with the siren off and despawn out of range.
+  An ambient ambulance run happens every 2.5-5 sim-minutes. Events: dispatched, responderArrived,
+  responderLeft. Honest: at rush hour a responder can need 3-6 minutes for a few blocks (one-way
+  detours, heavy crossing traffic at Herald Square); Gameplay accepted this as period-true for police.
+- **Mail trucks** (08:00-17:30) stop mid-block at the kerb with hazards, 15-30 s, block after block.
+  **Soft-serve** (12:00-21:00) crawls side streets chiming every 15 s (`iceCreamChime`), pulls in where
+  there are people and a few walkers and loiterers stroll over (`iceCreamStop`).
+- **Player cab rides**: `callCab(x,z)` picks the free cab with the shortest *legal* drive (one-way loops
+  make straight-line distance useless), routes it to the lane along the caller's kerb, and if the
+  one-ways won't bring it there it pulls over at the nearest reachable kerb within ~60 m (`cabReady`
+  reports where). `boardCab(id, dest)` drives the shortest legal route, emitting `cabTurnAhead {dir,
+  street, distance}` at each turn (for "Call Your Turns"), and `cabRideArrived` at the kerb.
+  Routed vehicles (ride cabs, police, responders) hold at the line to merge into their turn lane
+  instead of missing the turn (up to 20 s of green), then take the long way round.
+- **Hails**: cabs now also pick up from the left kerb on one-way streets (leftmost lane, pulls left).
+- **Crosswalk starvation fix**: a car that has waited at the line more than 6 s gets a gap; pedestrians
+  hold back for it (the Flatiron crossing could otherwise block turning cars for minutes).
 
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,

@@ -14,6 +14,7 @@ import { despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spaw
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
+import { boardCab, callCab, dispatchResponders, leaveCab } from './service';
 import { policePedTick, removePolice, setCopGoal, spawnPolice as spawnCop, type PoliceGoal, type PoliceView } from './police';
 export type { PoliceGoal, PoliceView } from './police';
 export type { WildlifeView } from './wildlife';
@@ -186,7 +187,7 @@ export class Simulation {
       if (!v.alive) continue;
       const d = Math.hypot(v.x - S.focus.x, v.z - S.focus.z);
       const dwelling = v.state !== 'drive';
-      if (v.cop) continue; // police leave only via despawnPolice
+      if (v.ride || (v.cop && (!v.cop.role || v.cop.role === 'police' || v.cop.mode !== 'idle'))) continue; // police, working responders and ride cabs stay
       if (d > rV + 30) despawnVehicle(S, v);
       else if (!dwelling && v.blockedBy !== 'red' && ((v.stopT > 60 && d > 70) || v.stopT > 150)) { despawnVehicle(S, v); S.stats.stuckDespawn++; const k = `${v.blockedBy || 'queue'}`; this.stuckWhy[k] = (this.stuckWhy[k] ?? 0) + 1; if (this.stuckLog.length < 60) this.stuckLog.push(this.queueHead(v)); }
     }
@@ -201,6 +202,12 @@ export class Simulation {
     if (this.contactCd.size > 500) for (const [k, t] of this.contactCd) if (t < S.t) this.contactCd.delete(k);
     spawnVehicles(S, 2, false);
     spawnPeds(S, 3, false);
+    // now and then an ambulance runs through with its siren on (ambient; Gameplay dispatches the rest)
+    if ((this.ambulanceT -= h) <= 0) {
+      this.ambulanceT = S.rng.range(150, 320);
+      const a = S.rng.next() * Math.PI * 2, r = S.rng.range(40, S.ringV[0]);
+      dispatchResponders(S, 'ambulance', S.focus.x + Math.cos(a) * r, S.focus.z + Math.sin(a) * r);
+    }
     // foot traffic: once a sim minute, fold counts into a rolling per-minute average (observed blocks only)
     if (Math.floor(S.t / 60) !== Math.floor((S.t - h) / 60)) {
       for (const e of this.net.sidewalksNear(S.focus.x, S.focus.z, S.ringP[0], new Set())) {
@@ -253,7 +260,7 @@ export class Simulation {
 
   private writePolice() {
     const out = this.policeViews; let n = 0;
-    for (const v of this.core.vehicles) if (v.cop) { out[n++] = { id: v.cop.id, kind: 'car', x: v.x, z: v.z, yaw: v.yaw, speed: v.v, mode: v.cop.mode, siren: v.cop.siren, agentId: v.id }; }
+    for (const v of this.core.vehicles) if (v.cop && (!v.cop.role || v.cop.role === 'police')) { out[n++] = { id: v.cop.id, kind: 'car', x: v.x, z: v.z, yaw: v.yaw, speed: v.v, mode: v.cop.mode, siren: v.cop.siren, agentId: v.id }; }
     for (const p of this.core.peds) if (p.cop2) { out[n++] = { id: p.cop2.id, kind: 'foot', x: p.x, z: p.z, yaw: p.yaw, speed: p.v, mode: p.cop2.mode, siren: false, agentId: p.id }; }
     out.length = n;
   }
@@ -281,6 +288,18 @@ export class Simulation {
     for (const p of this.core.peds) if (p.cop2?.id === id && p.alive) return { cop: p.cop2, agent: p as Vehicle | Ped };
     return null;
   }
+
+  // ---------------------------------------------------------------- emergency, service, cab rides
+  /** Send an ambulance (or a fire engine + ladder truck) to a scene, sirens on. Returns vehicle ids.
+   *  Events: dispatched, responderArrived {id, role}, responderLeft. */
+  dispatch(role: 'ambulance' | 'fire', x: number, z: number): number[] { return dispatchResponders(this.core, role, x, z); }
+  /** Player cab: the nearest free cab comes to the kerb by (x,z). Returns cab id or -1. Event `cabReady {cabId}` when waiting. */
+  callCab(x: number, z: number): number { return callCab(this.core, x, z); }
+  /** Player gets in: the cab drives to `dest` by the legal shortest route. Events: cabTurnAhead {dir, street, distance}, cabRideArrived. */
+  boardCab(cabId: number, dest: { x: number; z: number }): boolean { return boardCab(this.core, cabId, dest); }
+  /** Player gets out (or cancels): the cab goes back to cruising. */
+  leaveCab(cabId: number): boolean { return leaveCab(this.core, cabId); }
+  private ambulanceT = 120;
 
   // ---------------------------------------------------------------- violence and theft (gameplay)
   /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */

@@ -11,13 +11,15 @@
 import type { Network } from './network';
 
 export type Behaviour = 'walker' | 'loiterer' | 'vendor' | 'commuter' | 'driver' | 'beat_cop' | 'worker' | 'critter';
-export type VehicleKind = 'car' | 'cab' | 'truck' | 'bus' | 'police';
+export type VehicleKind = 'car' | 'cab' | 'truck' | 'bus' | 'police' | 'service' | 'emergency';
 export interface ArchetypeDef {
   id: string; behaviour: Behaviour; palette?: string[]; wardrobe?: string; props?: string[];
   schedule?: { from: string; to: string; area?: string; activity?: string }[];
   density?: { day?: number; night?: number }; barks?: string;
   params?: { walkSpeed?: number; jaywalk?: number; hail?: number; patience?: number; aggression?: number; nerve?: number };
   vehicle?: VehicleKind;
+  /** service/emergency drivers: the shared vehicle class (src/shared/traffic.ts) */
+  vclass?: string;
 }
 export interface ArchetypeRt {
   def: ArchetypeDef; index: number; behaviour: Behaviour; vehicle: VehicleKind | null;
@@ -46,6 +48,11 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
   { id: 'npc.police_officer', behaviour: 'beat_cop', palette: ['#1f2a44', '#c0c0c0'], wardrobe: 'Generic dark-blue patrol uniform, cap', props: ['nightstick'],
     density: { day: 0, night: 0 }, barks: 'barks.beat_cop', params: { walkSpeed: 1.2, jaywalk: 0, nerve: 0.95 } },
   { id: 'npc.police_driver', behaviour: 'driver', vehicle: 'police', props: ['police'], density: { day: 0, night: 0 }, barks: 'barks.police_radio', params: { patience: 4, aggression: 0.6 } },
+  // Service and emergency traffic (generic; nothing narrative)
+  { id: 'npc.mail_carrier', behaviour: 'driver', vehicle: 'service', vclass: 'mail_truck', schedule: [{ from: '08:00', to: '17:30', activity: 'deliver' }], density: { day: 0.1, night: 0 }, params: { patience: 8, aggression: 0.2 } },
+  { id: 'npc.soft_serve', behaviour: 'driver', vehicle: 'service', vclass: 'ice_cream', schedule: [{ from: '12:00', to: '21:00', activity: 'sell' }], density: { day: 0.06, night: 0 }, params: { patience: 10, aggression: 0.1 } },
+  { id: 'npc.emt_driver', behaviour: 'driver', vehicle: 'emergency', vclass: 'ambulance', density: { day: 0, night: 0 }, params: { patience: 3, aggression: 0.7 } },
+  { id: 'npc.fire_driver', behaviour: 'driver', vehicle: 'emergency', vclass: 'fire_engine', density: { day: 0, night: 0 }, params: { patience: 3, aggression: 0.6 } },
   // Wildlife (behaviour 'critter': flocks and swarms run by src/sim/wildlife.ts, not as pedestrians)
   { id: 'npc.pigeon_flock', behaviour: 'critter', palette: ['#8C8C8C', '#4B0082'], wardrobe: 'Pigeons', schedule: [{ from: '05:00', to: '21:00', activity: 'loiter' }], density: { day: 0.5, night: 0 } },
   { id: 'npc.rat_swarm', behaviour: 'critter', palette: ['#3B3B3B'], wardrobe: 'Rats', schedule: [{ from: '00:00', to: '24:00', activity: 'loiter' }], density: { day: 0.1, night: 0.4 } },

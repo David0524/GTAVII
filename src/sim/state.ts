@@ -19,7 +19,17 @@ export interface Vehicle {
   stopT: number; waitT: number; honkCd: number; greenWait: number; force: boolean; pullT: number; atLine: boolean;
   /** lane group a cab was on when it claimed a hail on the next block */
   hailFrom: number;
+  /** time a routed vehicle has held at the line (on green) waiting to merge into its turn lane */
+  laneWaitT: number;
   cop: CopState | null; owner: number;
+  /** which kerb a curb stop pulls to: +1 right (normal), -1 left (one-way streets) */
+  kerb: number;
+  /** generic destination routing (player cab rides) */
+  dest: { x: number; z: number } | null;
+  /** player cab ride: pickup -> waiting -> riding -> arrived */
+  ride: { phase: 'pickup' | 'waiting' | 'riding' | 'arrived'; t: number } | null;
+  /** service vehicles: next timed stop / chime */
+  svcT: number;
   x: number; z: number; yaw: number; px: number; pz: number; pyaw: number;
   fare: boolean; fareT: number; hail: Hail | null; stopAt: number; stopLink: number; stopKind: string;
   dpDone: boolean; busServed: number; blockedBy: string;
@@ -50,7 +60,7 @@ export interface Hail { ped: number; road: number; side: number; x: number; z: n
 export interface Actor { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle'; /** emergency siren on: civilians pull over */ siren?: boolean }
 /** Police locomotion state for a foot cop or a police car (decisions stay with Gameplay). */
 export interface CopState {
-  id: number; kind: 'foot' | 'car'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
+  id: number; kind: 'foot' | 'car'; role?: 'police' | 'ambulance' | 'fire'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
   x: number; z: number; cx: number; cz: number; radius: number; yaw: number; target: string | null; urgent: boolean; siren: boolean; maxSpeed: number;
   route: number[]; arrived: boolean; stuckT: number; blockIds: number;
 }

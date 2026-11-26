@@ -84,8 +84,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   sim.setClock(17 * 60 + 30);
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
-  const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0 };
-  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
+  const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0, fire: 0, cab: -1 };
+  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen', 'dispatched', 'responderArrived', 'responderLeft', 'mailStop', 'iceCreamStop', 'iceCreamChime', 'cabCalled', 'cabReady', 'cabDeparted', 'cabTurnAhead', 'cabRideArrived', 'cabGaveUp']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
   const examples: Record<string, string[]> = {};
@@ -130,6 +130,13 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (ps[1]) hooks.kills += sim.kill(ps[1].id, 30) ? 1 : 0;
       const car = sim.debugAgents().vehicles.find((v) => v.kind === 'car' && v.state === 'drive' && Math.hypot(v.x - f.x, v.z - f.z) < 80);
       if (car && sim.takeVehicle(car.id)) hooks.stolen++;
+    }
+    // emergency + player cab ride (seg 0 at the Flatiron, so the ride has time)
+    if (k === Math.round(20 / SIM_DT)) {
+      hooks.fire = sim.dispatch('fire', f.x + 40, f.z - 80).length;
+      hooks.cab = sim.callCab(f.x + 8, f.z);
+      sim.on('cabReady', (e) => { if (e.cabId === hooks.cab) sim.boardCab(e.cabId, { x: f.x - 250, z: f.z - 350 }); });
+      sim.on('cabRideArrived', (e) => { if (e.cabId === hooks.cab) sim.leaveCab(e.cabId); });
     }
     if (k === Math.round(590 / SIM_DT)) for (const pv of [...sim.police]) sim.despawnPolice(pv.id);
     // escort + goto goals on two nearby peds (narrative N4, gameplay scripted goals)

@@ -155,10 +155,15 @@ function trafficClearForCrosswalk(S: SimCore, walkEdge: number): boolean {
   for (const c of S.crossConns.get(walkEdge) ?? []) if (S.occ[c].length) return false;
   const lanes = net.approachLanes.get(e.owner * 16 + e.arm) ?? [];
   for (const l of lanes) for (const v of S.occ[l]) if (net.len[l] - v.s < 35 && v.v > 1) return false;
-  // vehicles about to turn through it from other arms
+  // vehicles about to turn through it from other arms; and a car that has waited at the line for a
+  // while gets to go (New York drivers nudge through a stream of walkers; it also prevents starvation)
   const J = net.g.junctions[e.owner];
+  const xc = S.crossConns.get(walkEdge) ?? [];
   for (let k = 0; k < J.arms.length; k++) for (const l of net.approachLanes.get(e.owner * 16 + k) ?? []) for (const v of S.occ[l]) {
-    if (v.next >= 0 && net.len[l] - v.s < 25 && v.v > 0.5 && (S.crossConns.get(walkEdge) ?? []).includes(v.next)) return false;
+    if (v.next < 0 || !xc.includes(v.next)) continue;
+    const dEnd = net.len[l] - v.s;
+    if (dEnd < 25 && v.v > 0.5) return false;
+    if (dEnd < v.len / 2 + 4 && v.waitT > 6 && net.laneSignal(l, S.t) !== 2 /* not red */) return false;
   }
   return true;
 }
