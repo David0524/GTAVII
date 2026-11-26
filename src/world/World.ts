@@ -40,6 +40,9 @@ function toGeometry(m: MeshArrays): THREE.BufferGeometry {
  */
 export class World {
   readonly root = new THREE.Group();
+  /** Chunk lifecycle hooks (physics colliders, later: props, audio emitters). */
+  readonly onChunkReady = new Set<(c: { key: string; ox: number; oz: number; parts: THREE.BufferGeometry[] }) => void>();
+  readonly onChunkUnload = new Set<(key: string) => void>();
   manifest!: WorldManifest;
   private chunks = new Map<string, ChunkState>();
   private workers: Worker[] = [];
@@ -158,6 +161,7 @@ export class World {
     group.userData = { chunk: m.key, stats: m.stats };
     this.root.add(group);
     this.stats.ready++;
+    for (const cb of this.onChunkReady) cb({ key: m.key, ox: c.cx, oz: c.cz, parts: [b.geometry, g.geometry] });
   }
 
   private setLod(c: ChunkState, lod: -1 | 0 | 1) {
@@ -173,5 +177,6 @@ export class World {
     this.root.remove(c.group);
     Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, status: 'idle', lod: -1 });
     this.stats.ready--;
+    for (const cb of this.onChunkUnload) cb(c.key);
   }
 }

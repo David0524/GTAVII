@@ -4,11 +4,12 @@
  * no console-maker logos.
  */
 import type { ButtonAction, Input } from '../input/Input';
+import { settings } from '../settings/Settings';
 
 type Style = 'xbox' | 'playstation' | 'keyboard' | 'touch';
 
 const PAD_LABEL: Partial<Record<ButtonAction, { xbox: string; ps: string }>> = {
-  sprint: { xbox: 'A', ps: 'cross' }, jump: { xbox: 'X', ps: 'square' }, use: { xbox: 'Y', ps: 'triangle' },
+  sprint: { xbox: 'L3', ps: 'L3' }, jump: { xbox: 'A', ps: 'cross' }, use: { xbox: 'Y', ps: 'triangle' },
   confirm: { xbox: 'A', ps: 'cross' }, back: { xbox: 'B', ps: 'circle' }, photo: { xbox: 'R3', ps: 'R3' },
   map: { xbox: 'VIEW', ps: 'CREATE' }, pause: { xbox: 'MENU', ps: 'OPTIONS' }, hud: { xbox: 'D-UP', ps: 'D-UP' },
   rise: { xbox: 'RT', ps: 'R2' }, sink: { xbox: 'LT', ps: 'L2' }, tabPrev: { xbox: 'LB', ps: 'L1' }, tabNext: { xbox: 'RB', ps: 'R1' },
@@ -38,7 +39,12 @@ export const PROMPT_CSS = `
 export function glyph(action: ButtonAction, style: Style): string {
   if (style === 'keyboard') return `<span class="t74-key">${KEY_LABEL[action] ?? action.toUpperCase()}</span>`;
   if (style === 'touch') return `<span class="t74-pill">${action.toUpperCase()}</span>`;
-  const l = PAD_LABEL[action];
+  let l = PAD_LABEL[action];
+  const preset = settings.get('controlPreset');
+  if (preset === 'classic' && action === 'sprint') l = { xbox: 'A', ps: 'cross' };
+  if (preset === 'classic' && action === 'jump') l = { xbox: 'X', ps: 'square' };
+  if (preset === 'lefthanded' && action === 'sprint') l = { xbox: 'R3', ps: 'R3' };
+  if (preset === 'lefthanded' && action === 'photo') l = { xbox: 'L3', ps: 'L3' };
   if (!l) return `<span class="t74-pill">${action.toUpperCase()}</span>`;
   if (style === 'xbox') {
     const c = XBOX_COLORS[l.xbox];

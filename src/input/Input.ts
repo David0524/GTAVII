@@ -26,13 +26,18 @@ const KEYMAP: Record<string, ButtonAction> = {
   BracketLeft: 'tabPrev', BracketRight: 'tabNext',
 };
 
-/** Gamepad button -> actions (a button may serve gameplay and menus; context decides which is read). */
-const PADMAP: [Btn, ButtonAction][] = [
-  [Btn.A, 'sprint'], [Btn.L3, 'sprint'], [Btn.X, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'],
-  [Btn.View, 'map'], [Btn.Menu, 'pause'], [Btn.Up, 'hud'],
+/** Gamepad button -> actions per preset (docs/CONTROLS.md). A button may serve gameplay and menus;
+ *  context decides which action is read. Menu navigation is identical across presets. */
+const MENU_PAD: [Btn, ButtonAction][] = [
   [Btn.A, 'confirm'], [Btn.B, 'back'], [Btn.Up, 'navUp'], [Btn.Down, 'navDown'], [Btn.Left, 'navLeft'], [Btn.Right, 'navRight'],
-  [Btn.LB, 'tabPrev'], [Btn.RB, 'tabNext'],
+  [Btn.LB, 'tabPrev'], [Btn.RB, 'tabNext'], [Btn.Menu, 'pause'], [Btn.View, 'map'], [Btn.Up, 'hud'],
 ];
+export const PAD_PRESETS: Record<'standard' | 'classic' | 'lefthanded', [Btn, ButtonAction][]> = {
+  standard: [[Btn.L3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], ...MENU_PAD],
+  classic: [[Btn.A, 'sprint'], [Btn.X, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], ...MENU_PAD],
+  // left-handed: same face buttons as standard; sticks (and stick clicks) are swapped in poll()
+  lefthanded: [[Btn.R3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.L3, 'photo'], ...MENU_PAD],
+};
 
 const MAX_YAW_RATE = 2.8; // rad/s at full stick, sensitivity 1
 const MAX_PITCH_RATE = 1.9;
@@ -102,13 +107,15 @@ export class Input {
     const k = this.keys;
     let x = (k.has('KeyD') || k.has('ArrowRight') ? 1 : 0) - (k.has('KeyA') || k.has('ArrowLeft') ? 1 : 0);
     let y = (k.has('KeyW') || k.has('ArrowUp') ? 1 : 0) - (k.has('KeyS') || k.has('ArrowDown') ? 1 : 0);
-    x += this.touchMove.x + this.pad.ls[0];
-    y += this.touchMove.y - this.pad.ls[1];
+    const lefty = s.controlPreset === 'lefthanded';
+    const ls = lefty ? this.pad.rs : this.pad.ls, rs = lefty ? this.pad.ls : this.pad.rs;
+    x += this.touchMove.x + ls[0];
+    y += this.touchMove.y - ls[1];
     const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
     this.move.x = x; this.move.y = y;
 
     // Stick look: rate-based, response curve keeps fine aim near centre and fast turns at the rim.
-    const [rx, ry] = this.pad.rs;
+    const [rx, ry] = rs;
     const mag = Math.hypot(rx, ry);
     if (mag > 0) {
       const curved = Math.pow(mag, s.padLookCurve) / mag;
@@ -118,7 +125,7 @@ export class Input {
     this.held.clear();
     for (const [code, a] of Object.entries(KEYMAP)) if (k.has(code)) this.held.add(a);
     for (const a of this.touchHeld) this.held.add(a);
-    for (const [b, a] of PADMAP) { if (this.pad.down(b)) this.held.add(a); if (this.pad.pressed(b)) this.edges.add(a); }
+    for (const [b, a] of PAD_PRESETS[s.controlPreset] ?? PAD_PRESETS.standard) { if (this.pad.down(b)) this.held.add(a); if (this.pad.pressed(b)) this.edges.add(a); }
 
     const kv = (this.held.has('rise') || this.held.has('jump') ? 1 : 0) - (this.held.has('sink') ? 1 : 0);
     this.vertical = Math.max(-1, Math.min(1, kv + this.pad.rt - this.pad.lt));
