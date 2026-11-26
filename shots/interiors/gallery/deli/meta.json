@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "deli #0  b474 25 WEST 24 STREET  1920 use 5 style 4  7.4x15.0 m  tenderloin  West 24th Street\nbuild 122 ms (main thread, medium)  verts 27685 tris 22626 cells 2 slots 1 markers 4 colliders 43  [webgl2]",
+  "stats": {
+   "verts": 27685,
+   "tris": 22626,
+   "genMs": 16.9,
+   "bakeMs": 105.3,
+   "cells": 2
+  },
+  "ms": 122.29999999981374,
+  "slots": 1,
+  "markers": 4,
+  "colliders": 43,
+  "building": 474,
+  "unit": "b474u0"
+ }
+]

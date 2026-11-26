@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "gym #0  b8261 1097 BROADWAY  1909 use 5 style 4  3.0x7.0 m  tenderloin  West 23rd Street\nbuild 119 ms (main thread, medium)  verts 9530 tris 10540 cells 2 slots 3 markers 2 colliders 22  [webgl2]",
+  "stats": {
+   "verts": 9530,
+   "tris": 10540,
+   "genMs": 7.2,
+   "bakeMs": 112.1,
+   "cells": 2
+  },
+  "ms": 119.40000000037253,
+  "slots": 3,
+  "markers": 2,
+  "colliders": 22,
+  "building": 8261,
+  "unit": "b8261u11"
+ }
+]

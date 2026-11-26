@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "laundromat #0  b7610 1107 BROADWAY  1915 use 4 style 3  5.0x16.0 m  tenderloin  West 24th Street\nbuild 35 ms (main thread, medium)  verts 5933 tris 4048 cells 2 slots 4 markers 3 colliders 65  [webgl2]",
+  "stats": {
+   "verts": 5933,
+   "tris": 4048,
+   "genMs": 2.9,
+   "bakeMs": 32.2,
+   "cells": 2
+  },
+  "ms": 35.200000000186265,
+  "slots": 4,
+  "markers": 3,
+  "colliders": 65,
+  "building": 7610,
+  "unit": "b7610u9"
+ }
+]

@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "liquor #0  b3542 17 WEST 24 STREET  1920 use 5 style 4  8.3x15.0 m  tenderloin  West 24th Street\nbuild 129 ms (main thread, medium)  verts 46487 tris 38815 cells 2 slots 1 markers 5 colliders 33  [webgl2]",
+  "stats": {
+   "verts": 46487,
+   "tris": 38815,
+   "genMs": 20.8,
+   "bakeMs": 107.9,
+   "cells": 2
+  },
+  "ms": 128.6999999997206,
+  "slots": 1,
+  "markers": 5,
+  "colliders": 33,
+  "building": 3542,
+  "unit": "b3542u0"
+ }
+]

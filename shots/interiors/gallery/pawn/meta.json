@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "pawn #0  b6146 43 WEST 23 STREET  1894 use 5 style 2  6.5x15.0 m  tenderloin  West 23rd Street\nbuild 54 ms (main thread, medium)  verts 9495 tris 6476 cells 2 slots 1 markers 5 colliders 40  [webgl2]",
+  "stats": {
+   "verts": 9495,
+   "tris": 6476,
+   "genMs": 7.4,
+   "bakeMs": 46.8,
+   "cells": 2
+  },
+  "ms": 54.3000000002794,
+  "slots": 1,
+  "markers": 5,
+  "colliders": 40,
+  "building": 6146,
+  "unit": "b6146u1"
+ }
+]

@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "clothing #0  b4356 1115 BROADWAY  1914 use 5 style 4  7.0x15.0 m  tenderloin  West 25th Street\nbuild 71 ms (main thread, medium)  verts 12242 tris 8230 cells 2 slots 1 markers 4 colliders 42  [webgl2]",
+  "stats": {
+   "verts": 12242,
+   "tris": 8230,
+   "genMs": 7.5,
+   "bakeMs": 63.5,
+   "cells": 2
+  },
+  "ms": 71.09999999962747,
+  "slots": 1,
+  "markers": 4,
+  "colliders": 42,
+  "building": 4356,
+  "unit": "b4356u4"
+ }
+]

@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "office_lobby #0  b2177 18 WEST 25 STREET  1920 use 5 style 4  9.3x9.5 m  tenderloin  West 25th Street\nbuild 38 ms (main thread, medium)  verts 3034 tris 2640 cells 1 slots 3 markers 3 colliders 16  [webgl2]",
+  "stats": {
+   "verts": 3034,
+   "tris": 2640,
+   "genMs": 3.8,
+   "bakeMs": 33.8,
+   "cells": 1
+  },
+  "ms": 37.700000000186265,
+  "slots": 3,
+  "markers": 3,
+  "colliders": 16,
+  "building": 2177,
+  "unit": "b2177"
+ }
+]

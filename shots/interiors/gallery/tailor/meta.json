@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "tailor #0  b6477 35 WEST 23 STREET  1880 use 4 style 1  5.0x15.0 m  tenderloin  West 23rd Street\nbuild 50 ms (main thread, medium)  verts 3821 tris 3146 cells 2 slots 2 markers 5 colliders 25  [webgl2]",
+  "stats": {
+   "verts": 3821,
+   "tris": 3146,
+   "genMs": 2,
+   "bakeMs": 47.5,
+   "cells": 2
+  },
+  "ms": 49.5,
+  "slots": 2,
+  "markers": 5,
+  "colliders": 25,
+  "building": 6477,
+  "unit": "b6477u2"
+ }
+]

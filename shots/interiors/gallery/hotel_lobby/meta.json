@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "hotel_lobby #0  b104 16 WEST 46 STREET  1913 use 5 style 4  7.9x18.0 m  midtown  West 46th Street\nbuild 47 ms (main thread, medium)  verts 9301 tris 6344 cells 1 slots 1 markers 5 colliders 16  [webgl2]",
+  "stats": {
+   "verts": 9301,
+   "tris": 6344,
+   "genMs": 5.7,
+   "bakeMs": 40.7,
+   "cells": 1
+  },
+  "ms": 46.59999999962747,
+  "slots": 1,
+  "markers": 5,
+  "colliders": 16,
+  "building": 104,
+  "unit": "b104"
+ }
+]

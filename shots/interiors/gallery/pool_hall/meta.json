@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "pool_hall #0  b6146 43 WEST 23 STREET  1894 use 5 style 2  3.0x7.0 m  tenderloin  West 23rd Street\nbuild 211 ms (main thread, medium)  verts 25875 tris 21922 cells 2 slots 23 markers 4 colliders 54  [webgl2]",
+  "stats": {
+   "verts": 25875,
+   "tris": 21922,
+   "genMs": 15.8,
+   "bakeMs": 194.7,
+   "cells": 2
+  },
+  "ms": 210.60000000009313,
+  "slots": 23,
+  "markers": 4,
+  "colliders": 54,
+  "building": 6146,
+  "unit": "b6146u2"
+ }
+]

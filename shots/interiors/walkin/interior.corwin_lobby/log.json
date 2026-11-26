@@ -1,0 +1,98 @@
+[
+ {
+  "d": 8,
+  "inside": null,
+  "live": 15,
+  "visCells": 7,
+  "draws": 78,
+  "extHidden": false
+ },
+ {
+  "d": 5,
+  "inside": null,
+  "live": 15,
+  "visCells": 7,
+  "draws": 75,
+  "extHidden": false
+ },
+ {
+  "d": 3,
+  "inside": null,
+  "live": 15,
+  "visCells": 7,
+  "draws": 75,
+  "extHidden": false
+ },
+ {
+  "d": 1.5,
+  "inside": null,
+  "live": 15,
+  "visCells": 6,
+  "draws": 71,
+  "extHidden": false
+ },
+ {
+  "d": 0.5,
+  "inside": null,
+  "live": 15,
+  "visCells": 6,
+  "draws": 71,
+  "extHidden": false
+ },
+ {
+  "d": -0.5,
+  "inside": {
+   "interiorId": "interior.corwin_lobby",
+   "kind": "hero",
+   "roomVolume": 402,
+   "reverb": "hall",
+   "cell": "corwin_lobby"
+  },
+  "live": 16,
+  "visCells": 11,
+  "draws": 89,
+  "extHidden": false
+ },
+ {
+  "d": -1.5,
+  "inside": {
+   "interiorId": "interior.corwin_lobby",
+   "kind": "hero",
+   "roomVolume": 402,
+   "reverb": "hall",
+   "cell": "corwin_lobby"
+  },
+  "live": 16,
+  "visCells": 10,
+  "draws": 85,
+  "extHidden": false
+ },
+ {
+  "d": -3,
+  "inside": {
+   "interiorId": "interior.corwin_lobby",
+   "kind": "hero",
+   "roomVolume": 402,
+   "reverb": "hall",
+   "cell": "corwin_lobby"
+  },
+  "live": 16,
+  "visCells": 10,
+  "draws": 84,
+  "extHidden": false
+ },
+ {
+  "d": -5,
+  "inside": {
+   "interiorId": "interior.corwin_lobby",
+   "kind": "hero",
+   "roomVolume": 402,
+   "reverb": "hall",
+   "cell": "corwin_lobby"
+  },
+  "live": 16,
+  "visCells": 9,
+  "draws": 79,
+  "extHidden": false
+ }
+]
