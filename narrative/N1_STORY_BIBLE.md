@@ -203,8 +203,8 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
   pattern of "runaway shops" **[S4][S20]**.
 - Since 1970 she has worked the Eighth Avenue strip and the bars of the old hotels in the
   30s. She's sharp, private and funny, and she has a rule for everything.
-- **What makes her different:** she is the strip's **banker**. About twenty women trust
-  her with their savings because no bank will open an account for them and every pimp
+- **What makes her different:** she is the strip's **banker**. About twenty women (women
+  who work the avenue, hotel maids, waitresses) trust her with their savings because no bank will open an account for them and every pimp
   and cop wants a cut. She keeps it in a rotating savings "club" and pays out one woman
   each month. The ledger is in her head and in a shoebox at a W 39th St hotel. (P1.)
 - **The pressure:** Lt. Wurtz's plainclothes unit has started a regular "tax" on the
@@ -312,7 +312,7 @@ Ave South. Real blocks, invented occupants. **Day** is roughly 07:00–19:00 and
 
 ---
 
-## 5. Antagonist and principal forces (sketch; full cast in N2)
+## 5. Antagonist and principal forces (sketch; superseded by `narrative/N2_CAST.md`)
 
 - **Howard Lisle** (char.howard_lisle). A former assistant DA who became real-estate and
   "trade association" counsel. He understood Knapp better than the cops did: an

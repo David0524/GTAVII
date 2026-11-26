@@ -6,8 +6,8 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 ## Status
 | Phase | State |
 |---|---|
-| N1. Story bible | **Revised after review 1** (three leads); branch points pending → `narrative/N1_STORY_BIBLE.md` |
-| N2. Cast | — (blocked on N1 review) |
+| N1. Story bible | **Approved** (after reviews 1–3) → `narrative/N1_STORY_BIBLE.md` |
+| N2. Cast | **Draft done, awaiting review** → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
 | N3. Story structure | — |
 | N4. Mission specs and side activities | — |
 | N5. Dialogue and barks | — |
@@ -18,6 +18,10 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 ```
 NARRATIVE_PROGRESS.md      this file (status, decisions, open questions, SOURCES, critiques)
 narrative/N1_STORY_BIBLE.md  premise, loglines, pillars, PC, social geography, acts, timeline
+narrative/N2_CAST.md       GENERATED cast sheets; edit content/cast/*.json and re-run the tool
+narrative/tools/cast.py    validates the cast (line length, 24h schedules, ids, edges, places) and renders N2_CAST.md
+content/cast/*.json        cast source of truth: leads, principals, secondary
+content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.
 ```
@@ -57,6 +61,12 @@ Applied:
   at 143 and 210 W 29th St are noted, and those addresses are off-limits for invented
   businesses.
 
+**26 Nov 2026, N1 review 3.** The reviewer said: *"All your calls. Begin N2."*
+- **Branch A approved:** in M12, Teddy wears Calloway's wire or burns it.
+- **Branch B approved:** in M29, who gets the ledger (the prosecutor, the tenants and the
+  press, or Teddy keeps it).
+- No third branch: two is enough, and the brief allows two or three.
+
 ## Current proposal
 - **Leads:** Teddy Arce (ex-cop, night clerk: *access*), Delphine Moore (former presser,
   works the Eighth Ave strip and banks the women's savings club: *reading people, photo
@@ -73,9 +83,7 @@ Applied:
   (M22–32, to Labor Day) · Epilogue "October".
 
 ## Still awaiting the reviewer
-1. **Branch points** (the brief says to ask before adding them). A: Teddy wears
-   Calloway's wire or burns it (M12). B: who gets the ledger (M29). Both are still
-   marked pending.
+1. N2 cast review (see the self-critique below).
 2. ENGINE_REQUESTS #1 (calendar) and #5 (switching leads) are needed for the structure
    as designed. Both have fallbacks.
 
@@ -272,4 +280,77 @@ Each period claim that drives a story beat is listed here. Secondary sources are
 in an open world. N2 should give him a daily route (lunch at a fixed counter, a walk to
 the courthouse buses, a car with a driver) so the player can tail and photograph him.
 
-**Stop.** N1 is ready for review. N2 (Cast) starts once the decisions above are answered.
+**N1 outcome:** approved after three reviews. Teddy is the lead, with three converging
+leads; the third lead was changed to Nick Varelas; both branches were approved.
+
+---
+
+## Phase N2 self-critique
+
+**What was delivered:** 3 leads, 12 principals and 26 secondary characters (41 in total).
+Each has an id, age and birth year, origin, occupation, want, need, secret, speech pattern
+with three subtitle-safe sample lines, home and haunts at real intersections, a 24-hour
+weekday schedule, relationship edges (156, weighted −3 to +3), an act arc, a wardrobe and
+silhouette brief with a palette, and mission appearances. `narrative/tools/cast.py`
+enforces the brief's mechanical constraints. I tested it by injecting five faults and it
+caught all five.
+
+**Against the pillars**
+- P1 (Follow the money): every principal is placed on the payment graph as a payer,
+  collector, banker or ledger-keeper. Three people now hold independent copies of the
+  evidence (Kearney's Christmas list, Marjorie's carbons, Wurtz's locker). That gives N3
+  several routes to the ledger and stops Branch B from being a single point of failure.
+- P2 (The grid): every haunt and schedule entry is a real intersection or a pinned block
+  face. **Gap:** `content/places.json` puts invented businesses on real block faces without
+  checking what stands there in the engine's footprints. N4 must check each one against
+  `world.json`, and must avoid live businesses at real addresses (I've noted the real fur
+  houses at 143 and 210 W 29th St).
+- P3 (Shifts): every character has a working day. The three leads' hours barely overlap
+  (Nick by day, Teddy at night, Delphine late night), which suits switching. The cost is
+  that joint missions must be set at the edges of shifts (dawn, dusk, brownout nights).
+  M9, M18 and M32 already are.
+- P4 (Owed): the edges seed the save-state `relationships`. **Missing:** what moves the
+  weights, and the thresholds that change outcomes. That belongs in N3.
+- P5 (Running out): Feld's runaway shop, Nick's double pledge, Calloway's funding deadline
+  and Augie's illness all run on clocks.
+
+**Against the content rules**
+- All 41 characters are invented. A web check of the principal names found no notable
+  real namesakes. While drafting I renamed three secondaries whose original names belonged
+  to real public figures. Secondary names weren't web-searched one by one; they're common
+  name combinations with no fame attached. **Risk accepted:** re-check before ship.
+- Representation audit: every community in the district has sympathetic principals or
+  secondaries in legitimate trades: Puerto Rican (Carmen, Navarro, Inez), Black American
+  (Odessa, Calloway, Marcus, Delroy), Greek (Yiannis, Eleni), Korean (both Baeks), Chinese
+  (Mei-lin), Italian (Moretti, a legitimate florist who refuses the pad, not a mobster),
+  Jewish (Ostrow, Feld) and Irish (Kearney). Corrupt figures are spread across
+  backgrounds. One fix was made in this phase: Claudette was changed from a hotel-bar
+  worker to a chambermaid, so the sex-work cast isn't drawn mostly from one group and the
+  club reads as a working women's bank. **N5/N6 must** keep the ambient sex-worker
+  archetypes mixed in background.
+- Sex work: Delphine, Tina and Rita (retired) are written with goals, humour and money
+  sense. The pimp, Lonnie, has a motive (debt) and is deliberately unglamorous. Nothing
+  sexual appears in any sample line or schedule.
+- Minors: Inez's children are referenced only. They have no ages on file, and a rule keeps
+  them off the map during M26. Dwayne is 19.
+- Drugs: Ricky is a person under the 1973 laws, not a mechanic. There's no use gameplay.
+- Real institutions only by office: the Special Prosecutor's office, the ILGWU (Carmen's
+  union), the furriers' union, the Public Library. The department store and the newspaper
+  stay generic until N6.
+
+**Against the mobile rules**
+- Every sample line is 90 characters or fewer (enforced), and none depends on audio.
+  Objective-text limits (40 characters) apply in N4.
+- Schedules give the NPC system fixed, findable positions (for example Lisle at
+  12:40 at the luncheonette), so tails and meets can rely on map knowledge rather than
+  fast reflexes.
+
+**Weak spots to fix in N3**
+- Ruth Calloway and Nora Finch both want the ledger, and their roles overlap. N3 should
+  give them opposed constraints, so Branch B is a real choice between two flawed outlets.
+- Nick has few warm relationships (Eleni +2, Yiannis +1). That's on purpose, but his
+  playable arc needs at least one non-transactional bond. Candidate: Odessa, after M30.
+- Mayhew has the richest backstory but appears in only 10 missions. The 1971 secret needs
+  mid-game seeding (Act 2), not just the M25 payoff.
+
+**Stop.** N2 is ready for review. N3 (Story structure) starts after it.
