@@ -13,16 +13,18 @@
  * footsteps and headlights. Startle, never damage.
  */
 import { heightAt, CURB_HEIGHT } from '../shared/terrain';
-import { hash2 } from './geom';
+import { hash2, sampleAt } from './geom';
+import { WalkKind } from './laneFormat';
+const tmp4 = [0, 0, 0, 0];
 import { WildKind, type WildSpot } from './laneFormat';
 import type { SimCore, Ped } from './state';
 import type { ArchetypeRt } from './archetypes';
 import { spawnPedNear } from './peds';
 
 export interface WildlifeView {
-  id: number; species: 'pigeon' | 'rat';
+  id: number; species: 'pigeon' | 'rat' | 'cat' | 'dog';
   x: number; y: number; z: number; yaw: number; speed: number;
-  /** pigeon: peck | walk | fly | perch ; rat: scurry | flee */
+  /** pigeon: peck | walk | fly | perch ; rat/cat: scurry | dash | flee ; dog: trot | sniff | flee */
   state: string; variant: number;
 }
 
@@ -39,8 +41,11 @@ interface Group {
   spot: number; kind: number; animals: Animal[];
   /** pigeons: index of the place they currently sit on (home or a ledge) */
   at: number; mode: 'ground' | 'air' | 'perch'; timer: number;
-  cx: number; cz: number; feeder: number; hour: number;
+  cx: number; cz: number; feeder: number; hour: number; cat?: boolean;
 }
+
+/** A stray dog trotting the sidewalk graph. */
+interface Dog extends Animal { edge: number; s: number; dir: number; lat: number }
 
 const PIGEON_R = 110, RAT_R = 55;
 const groundY = (x: number, z: number) => heightAt(x, z) + CURB_HEIGHT;
@@ -67,11 +72,22 @@ export class Wildlife {
   private scan() {
     const S = this.S, f = S.focus, hour = Math.floor(S.minute / 60);
     for (const [i, g] of this.groups) {
-      const w = this.spots[i], d = Math.hypot(w.x - f.x, w.z - f.z);
+      const w = this.spots[g.spot], d = Math.hypot(w.x - f.x, w.z - f.z);
       const R = this.isPigeon(g.kind) ? PIGEON_R : RAT_R;
       if (d > R + 25 || (g.hour !== hour && d > 60)) this.drop(i, g);
     }
     let [birds, rats] = this.counts();
+    // stray cats at the kerbside trash, mostly at night (key offset so they coexist with the rats)
+    const night = S.minute < 6 * 60 || S.minute >= 20 * 60;
+    for (let i = 0; i < this.spots.length; i++) {
+      const w = this.spots[i]; if (w.kind !== WildKind.RatTrash) continue;
+      const key = 1e6 + i; if (this.groups.has(key)) continue;
+      if (Math.hypot(w.x - f.x, w.z - f.z) > RAT_R || rats >= this.maxRats) continue;
+      const roll = (hash2(i * 3.1 + hour, w.z - w.x) % 10000) / 10000;
+      if (roll >= (night ? 0.3 : 0.05)) continue;
+      const g: Group = { spot: i, kind: WildKind.RatTrash, animals: [this.newAnimal({ spot: i, kind: WildKind.RatTrash } as Group, 0)], at: i, mode: 'ground', timer: 0, cx: w.x, cz: w.z, feeder: -1, hour, cat: true };
+      this.groups.set(key, g); rats++;
+    }
     const pa = this.arch('npc.pigeon_flock'), ra = this.arch('npc.rat_swarm');
     for (let i = 0; i < this.spots.length; i++) {
       if (this.groups.has(i)) continue;
@@ -254,7 +270,7 @@ export class Wildlife {
 
   private stepRats(g: Group, dt: number) {
     const S = this.S, w = this.spots[g.spot];
-    const why = this.disturbance(w.x, w.z, 5, true);
+    const why = this.disturbance(w.x, w.z, g.cat ? 4 : 5, true);
     if (why) this.scatter(g, why);
     for (const r of g.animals) {
       r.timer -= dt;
@@ -276,7 +292,50 @@ export class Wildlife {
   }
 
   // ---------------------------------------------------------------- tick + views
+  private dogs: Dog[] = [];
+  private stepDogs(dt: number) {
+    const S = this.S, net = S.net, f = S.focus;
+    const maxDogs = this.maxRats >= 40 ? 3 : 1;
+    this.dogs = this.dogs.filter((d) => Math.hypot(d.x - f.x, d.z - f.z) < S.ringP[1] + 20);
+    if (this.dogs.length < maxDogs && S.rng.chance(dt * 0.05)) for (let tries = 0; tries < 12; tries++) {
+      const e = net.sidewalkIds[S.rng.int(net.sidewalkIds.length)];
+      const E = net.g.walkEdges[e]; sampleAt(E.pts, net.walkCum[e], net.walkLen[e] / 2, tmp4);
+      const dd = Math.hypot(tmp4[0] - f.x, tmp4[1] - f.z);
+      if (dd > 30 && dd < S.ringP[0]) {
+        const a = this.newAnimal({ spot: 0, kind: WildKind.RatTrash } as Group, 0);
+        this.dogs.push({ ...a, edge: e, s: net.walkLen[e] / 2, dir: S.rng.chance(0.5) ? 1 : -1, lat: S.rng.range(-0.5, 0.5) * E.half, state: 'trot', hidden: false });
+        break;
+      }
+    }
+    for (const d of this.dogs) {
+      d.px = d.x; d.py = d.y; d.pz = d.z; d.pyaw = d.yaw;
+      d.timer -= dt;
+      const scared = this.disturbance(d.x, d.z, 3, false);
+      if (scared && d.state !== 'flee') { d.state = 'flee'; d.timer = S.rng.range(3, 6); }
+      if (d.state === 'sniff') { d.speed = 0; if (d.timer <= 0) { d.state = 'trot'; d.timer = S.rng.range(5, 20); } }
+      else {
+        if (d.state === 'flee' && d.timer <= 0) d.state = 'trot';
+        if (d.state === 'trot' && d.timer <= 0 && S.rng.chance(0.4)) { d.state = 'sniff'; d.timer = S.rng.range(2, 6); continue; }
+        if (d.state === 'trot' && d.timer <= 0) d.timer = S.rng.range(5, 20);
+        const sp = d.state === 'flee' ? 4 : 1.4;
+        d.speed = sp; d.s += d.dir * sp * dt;
+        const L = net.walkLen[d.edge];
+        if (d.s >= L || d.s <= 0) {
+          const E = net.g.walkEdges[d.edge], node = d.s >= L ? E.b : E.a;
+          const opts = net.walkAdj[node].filter(([e2]) => e2 !== d.edge && net.g.walkEdges[e2].kind === WalkKind.Sidewalk);
+          if (!opts.length) { d.dir = -d.dir; d.s = Math.max(0, Math.min(L, d.s)); }
+          else { const [e2] = opts[S.rng.int(opts.length)]; const N = net.g.walkEdges[e2]; d.edge = e2; d.dir = N.a === node ? 1 : -1; d.s = d.dir > 0 ? 0 : net.walkLen[e2]; d.lat = Math.max(-N.half, Math.min(N.half, d.lat)); }
+        }
+      }
+      const E = net.g.walkEdges[d.edge];
+      sampleAt(E.pts, net.walkCum[d.edge], Math.max(0, Math.min(net.walkLen[d.edge], d.s)), tmp4);
+      d.x = tmp4[0] - tmp4[3] * d.lat; d.z = tmp4[1] + tmp4[2] * d.lat; d.y = groundY(d.x, d.z);
+      d.yaw = Math.atan2(-tmp4[2] * d.dir, -tmp4[3] * d.dir);
+    }
+  }
+
   step(dt: number) {
+    this.stepDogs(dt);
     if ((this.scanT -= dt) <= 0) { this.scanT = 1; this.scan(); }
     for (const g of this.groups.values()) {
       for (const a of g.animals) { a.px = a.x; a.py = a.y; a.pz = a.z; a.pyaw = a.yaw; }
@@ -288,19 +347,25 @@ export class Wildlife {
     const out = this.views;
     let n = 0;
     for (const g of this.groups.values()) {
-      const species = this.isPigeon(g.kind) ? 'pigeon' : 'rat';
+      const species = this.isPigeon(g.kind) ? 'pigeon' : g.cat ? 'cat' : 'rat';
       for (const a of g.animals) {
         if (a.hidden) continue;
-        const o = out[n] ?? (out[n] = { id: 0, species: 'pigeon', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
+        const o = out[n] ?? (out[n] = { id: 0, species: 'pigeon' as WildlifeView['species'], x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
         o.id = a.id; o.species = species; o.variant = a.variant; o.state = a.state; o.speed = a.speed;
         o.x = a.px + (a.x - a.px) * alpha; o.y = a.py + (a.y - a.py) * alpha; o.z = a.pz + (a.z - a.pz) * alpha; o.yaw = a.yaw;
         n++;
       }
+    }
+    for (const d of this.dogs) {
+      const o = out[n] ?? (out[n] = { id: 0, species: 'dog', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
+      o.id = d.id; o.species = 'dog'; o.variant = d.variant; o.state = d.state; o.speed = d.speed;
+      o.x = d.px + (d.x - d.px) * alpha; o.y = d.py + (d.y - d.py) * alpha; o.z = d.pz + (d.z - d.pz) * alpha; o.yaw = d.yaw;
+      n++;
     }
     out.length = n;
   }
 
   /** Debug/test access. */
   get groupCount() { return this.groups.size; }
-  allAnimals() { const r: { species: string; a: Animal; ground: boolean }[] = []; for (const g of this.groups.values()) for (const a of g.animals) r.push({ species: this.isPigeon(g.kind) ? 'pigeon' : 'rat', a, ground: a.state !== 'fly' && a.state !== 'perch' && !a.hidden }); return r; }
+  allAnimals() { const r: { species: string; a: Animal; ground: boolean }[] = []; for (const g of this.groups.values()) for (const a of g.animals) r.push({ species: this.isPigeon(g.kind) ? 'pigeon' : g.cat ? 'cat' : 'rat', a, ground: a.state !== 'fly' && a.state !== 'perch' && !a.hidden }); for (const d of this.dogs) r.push({ species: 'dog', a: d, ground: true }); return r; }
 }

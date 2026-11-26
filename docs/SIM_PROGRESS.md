@@ -135,6 +135,11 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
   (`npc.pigeon_feeder`) sit by park flocks by day and the birds crowd their feet. Event `flockStartle`.
 - Rats dash around trash and subway entrances, mostly at night, and vanish from footsteps and
   headlights, re-emerging later. Event `ratScatter`. Startle, never damage.
+- Strays: lone cats at kerbside trash (rolled per place and hour, ~30% at night, 5% by day; they share
+  the rat cap and the rat scurry/flee states, species `cat`). Stray dogs (max 3 on High, 1 on Low) trot
+  the sidewalk graph, stop to sniff, and flee from runners, gunfire and the player; species `dog`.
+- Mounted police: `npc.mounted_officer` (props `horse`) patrols Times Square, Herald Square and Penn
+  Station 10:00–22:00 as a beat cop with a 1.1 m avoidance radius so crowds part around the horse.
 
 ### Siren priority and response times
 Units with sirens (police, ambulance, fire) now get real priority, the way 1970s radio cars drove:
@@ -350,10 +355,9 @@ What doesn't (yet):
 - [ ] Police vehicle agents (pursuit, box-in, roadblocks), foot cops on the walk graph, car-owner
       reactions, plate/description recognition: Gameplay will request these through ENGINE_REQUESTS.
 - [ ] Edge layer 3 extras: rubbernecking at edge blockers, chase roadblocks; retune when bounds shrink.
-- [ ] Interiors door hand-off: walk graph needs door nodes (`doorsForChunk`) + an `enter`/`exit` ped state.
-- [ ] Police pursuit (box-in, roadblocks, foot cops that tire, officer-down surges, car owners,
-      rubbernecking) is next per the coordinator's order; then emergency/service traffic + cab rides,
-      parking enforcement/tow/street cleaning, subway trains, Interiors doors, mounted police + strays.
+- [x] Coordinator's order complete (police, responders + cabs, siren priority, parking/tow/sweepers,
+      subway, Interiors doors, mounted police + strays). Next: the engine's integration pass.
+- [ ] Mounted officer renders as a ped with a `horse` prop until the engine has a horse rig.
 - [ ] Wildlife: rats on actual subway tracks need the engine's track geometry; pigeons don't yet react
       to the player's car specifically (only generic external vehicles).
 - [ ] Real-hardware timing (desktop + phone); move to a worker if High > 2 ms on device.

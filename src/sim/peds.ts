@@ -392,7 +392,8 @@ function walk(S: SimCore, p: Ped, dt: number) {
   let speed = want;
   let myRight = p.lat * p.dir; // my lateral offset to my right
   let goalR = p.latGoal;       // keep to the right
-  const rad = p.arch.def.props?.includes('handcart') ? 0.8 : 0.4;
+  const props = p.arch.def.props;
+  const rad = props?.includes('horse') ? 1.1 : props?.includes('handcart') ? 0.8 : 0.4; // crowds give a horse room
   S.pGrid.query(p.x, p.z, 2.4, (j) => {
     const q = S.peds[j]; if (q === p || !q.alive) return;
     const rx = q.x - p.x, rz = q.z - p.z;
