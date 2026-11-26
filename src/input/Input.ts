@@ -91,6 +91,9 @@ export class Input {
   readonly touchPedals = { gas: 0, brake: 0 };
   gas = 0;
   brake = 0;
+  /** Vehicles request 12 naming: throttle = gas (0..1); steer = move.x (-1..1). */
+  get throttle() { return this.gas; }
+  get steer() { return this.move.x; }
   isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   wheel = 0;
   private keymap = buildKeymap(settings.get('bindings'));

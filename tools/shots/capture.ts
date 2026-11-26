@@ -21,7 +21,7 @@ const ROOT = path.resolve(import.meta.dirname, '../..');
 const outDir = path.join(ROOT, 'shots', phase);
 fs.mkdirSync(outDir, { recursive: true });
 const world = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/world.json'), 'utf8'));
-const hero = (n: string) => world.heroes.find((h: any) => h.name === n);
+const hero = (id: string) => world.heroes.find((h: any) => h.id === id); // stable ids (display names come from content/landmarks.json)
 const look = (from: [number, number, number], to: [number, number, number]) => {
   const dx = to[0] - from[0], dy = to[1] - from[1], dz = to[2] - from[2];
   const yaw = (Math.atan2(-dx, -dz) * 180) / Math.PI, pitch = (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI;
@@ -40,7 +40,7 @@ const on = (name: string, x: number, z: number, y = 1.8): [number, number, numbe
   if (!Number.isFinite(best)) throw new Error(`street not found: ${name}`);
   return out;
 };
-const esb = hero('Empire State Building'), macys = hero("Macy's"), msg = hero('Madison Square Garden'), chelsea = hero('Hotel Chelsea'), flat = hero('Flatiron Building');
+const esb = hero('lm.empire_state'), macys = hero('lm.macys'), msg = hero('lm.msg'), chelsea = hero('lm.hotel_chelsea'), flat = hero('lm.flatiron');
 
 /** Phase 3 judged set (PROGRESS.md look target): matched to reference frames A-D, each at four times of day. */
 const P3_TIMES = ['12:30', '19:30', '20:14', '23:00'];

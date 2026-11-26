@@ -3,7 +3,7 @@
  * picked by the user, stored by narrative in content/landmarks.json). Every UI label for a landmark goes
  * through here, so the swap is instant when the file lands; until then the current names show.
  *
- * Expected shape (any of `real` / `aliases` / `id` may match what world.json or places.json carry):
+ * Expected shape (any of `real` / `name` / `aliases` / `id` may match; world.json now carries display names what world.json or places.json carry):
  *   { "landmarks": [ { "id": "lm.met_life", "real": "Metropolitan Life Insurance Company Tower",
  *                      "aliases": ["Met Life Tower"], "name": "<display name>", "short": "<map label>" } ] }
  */
@@ -15,7 +15,7 @@ const FALLBACK_SHORT: Record<string, string> = { 'Flatiron Building': 'Flatiron 
 export class Landmarks {
   private byKey = new Map<string, LandmarkEntry>();
   constructor(entries: LandmarkEntry[] = []) {
-    for (const e of entries) for (const k of [e.id, e.real, ...(e.aliases ?? [])]) if (k) this.byKey.set(norm(k), e);
+    for (const e of entries) for (const k of [e.id, e.real, e.name, ...(e.aliases ?? [])]) if (k) this.byKey.set(norm(k), e);
   }
   get size() { return new Set(this.byKey.values()).size; }
   /** Full display name ("location reveal" style). */

@@ -676,3 +676,61 @@ not rushed").
     `RAPIER` from `src/shared/rapier.ts`, never from the package directly. Two wasm instances
     cannot share one physics world.
   - This lands with the vehicles merge, not before.
+
+## Batch of 2026-11-26 (late): audio 11, characters 4, interiors 6b, vehicles 12, iOS fullscreen
+- **Vehicles 12, analog pedal axes: SHIPPED.**
+  - `input.gas` and `input.brake` (0..1) merge pad RT/LT, touch pedals and W/S. The touch UI
+    writes them to `input.touchPedals`.
+  - `input.throttle` aliases `gas`, and `input.steer` is `move.x` (−1..1).
+  - The settings keys (`steerAssist`, `steerAssistStrength`, `autoAccelerate`, `autoCruise`) go
+    in the UI-owned settings store. That's a request to the UI chat; the engine doesn't edit
+    `Settings.ts`.
+- **Interiors 6b, Tier C hook: ACCEPTED, at the interiors merge**, as proposed.
+  - **Shipped now:** `facadeUniforms.minutes` (game clock) and `facadeUniforms.areaPower` (0, 0.45
+    or 1, per area when N2 lands).
+  - **`use`:** the engine adds it as a third component of the `wallAO` vertex attribute at the
+    merge, taken from the chunk record.
+  - **Note:** `lodFade` now comes from distance and viewing angle, not `fwidth`, which makes it
+    rotation-invariant (the window-lights bug). It also fades later: it starts at a 4 px bay and
+    is complete at 1.5 px. Your `(1 − lodFade)` gate works unchanged and now covers more windows,
+    so measure the cost on `?hud=1` after the merge.
+- **Characters 4: SHIPPED.** `docs/ART_SOURCES.md` now exists as the shared log, with the six
+  fabric scans.
+- **Audio 11, rendered speech in the build:** **NEEDS THE USER.** It's a hosting choice: build
+  the renders at deploy time (the build image would need espeak-ng and ffmpeg, which Vercel's
+  default doesn't ship), or use a prebuilt artefact (Git LFS or a release asset). It goes to the
+  oversight session for the user. The placeholder voice fallback stays meanwhile.
+- **iOS fullscreen (oversight, user report):** **REDIRECTED to the UI chat** for the button.
+  - The ⛶ button is in `src/ui/TouchControls.ts`, which the UI chat owns. On iOS WebKit (every
+    iOS browser) it should become the "Add to Home Screen for fullscreen" card, hidden when
+    `display-mode: standalone` or `navigator.standalone`.
+  - **Engine side shipped:** the manifest now has icons (192, 512 and maskable 512) and
+    `display_override: [fullscreen, standalone]`, with landscape orientation. `index.html` has
+    `apple-touch-icon` and `apple-mobile-web-app-title`; `viewport-fit=cover` and
+    `apple-mobile-web-app-capable` were already present.
+
+## Engine notice E14 (2026-11-26): landmark display names and the device perf report
+- **Landmark names: SHIPPED** (the user's decision, via oversight and narrative 64f0d3b and 6cb2501).
+  - The pipeline reads `content/landmarks.json` (copied unchanged from narrative). `world.json`
+    heroes now carry `{ id, name, short }` display names, for example `lm.macys` → "Lacy's".
+    Real names never reach the data.
+  - Engine lookups use `id`. The old UI pause map falls back to `hero.name`, so it already shows
+    the new names. Its `SHORT_NAMES` table of real names is dead code in `src/ui/StreetMap.ts`;
+    UI chat, please drop it (it's retired on your branch).
+  - **Build check:** `tests/brands.test.ts` builds a denylist from the registry's `real` names and
+    aliases. It fails on any match in `world.json`, street names or district names. It's proven
+    against the old `world.json`, where it caught every real name.
+- **Perf report (`?hud=1` copy):**
+  - New fields: real frame interval, JS time per frame, and GPU time per frame (WebGPU timestamp
+    queries with `?hud=1` or `?gpu=1`, where the adapter has them; reported as unavailable
+    otherwise).
+  - A diagnosis line says whether the frame is vsync-locked with headroom (a cap such as iOS Low
+    Power Mode) or actually busy.
+  - Also: the device hint (`&device=…`), screen, cores, memory, standalone launch, load phases,
+    adaptive DPR state and LOD radii.
+- **Adaptive resolution** (on by default on touch; `?adaptive=0` or `?adaptive=1` to force): the
+  render scale climbs while frames keep their locked interval and backs off when they slip, up to
+  min(device DPR, 2).
+- **Low-preset triangles:** props (fire escapes, AC units, water towers, awnings) were about 65% of
+  each near chunk's triangles. They now have their own draw distance: Low 180 m, Medium 300 m,
+  High 450 m, Ultra 700 m.

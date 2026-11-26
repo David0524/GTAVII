@@ -13,11 +13,15 @@ test('landmark labels come from the registry, by real name, alias or id; unknown
   assert.equal(lm.name('Corwin Hotel'), 'Corwin Hotel');
 });
 
-test("the shipped registry renames every world.json hero that has a brand or trademarked name", async () => {
+test("no world.json hero carries a real brand name, and each renamed hero gets the registry's map label", async () => {
   const fs = await import('node:fs');
-  const reg = new Landmarks(JSON.parse(fs.readFileSync('content/landmarks.json', 'utf8')).landmarks);
+  const entries = JSON.parse(fs.readFileSync('content/landmarks.json', 'utf8')).landmarks as { real: string; name: string; short?: string }[];
+  const reg = new Landmarks(entries);
   const heroes: { name: string }[] = JSON.parse(fs.readFileSync('public/data/world.json', 'utf8')).heroes;
-  // Flatiron: a building name, kept as a place name (user decision).
-  const KEEP = new Set(['Flatiron Building']);
-  for (const h of heroes) if (!KEEP.has(h.name)) assert.notEqual(reg.short(h.name), h.name, `${h.name} is shown under its real name`);
+  const real = new Set(entries.map((e) => e.real));
+  for (const h of heroes) {
+    assert.ok(!real.has(h.name), `${h.name} is a real name in world.json`);
+    const e = entries.find((x) => x.name === h.name);
+    if (e) assert.equal(reg.short(h.name), e.short ?? e.name);
+  }
 });

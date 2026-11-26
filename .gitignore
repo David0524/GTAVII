@@ -8,3 +8,4 @@ dist-test/
 .claude/worktrees/
 __pycache__/
 tools/ui/tmp/
+dist-*/
