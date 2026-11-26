@@ -319,9 +319,7 @@ Both are cheap to cache.
   - **Runs in live play, not only on sleep/wait** (fixed 2026-11-26). The engine's per-frame `setClock` used to move the clock silently, so tills, loan interest, the daily number, weekly trouble and shop restocks only ever happened on a skip. Now forward movement is reported as `timeAdvanced {how: 'live'}` in 5-game-minute batches, and midnight wraps when only minutes are sent. A single jump of more than 2 game hours (a load, a debug set) is treated as a set, with no effects. Test: `time.test.ts`.
   - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
     witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
-- **Content is placeholder:** gameplay's own invented weapons, shops and prices run unless
-  narrative's adapter content is passed in. The adapter works on a snapshot, but the scene
-  doesn't load narrative's files yet.
+- **Content: placeholders by default; narrative's content on request.** `?gameplay=1&content=narrative` runs the scene on narrative's items, guns, shops and precincts through the adapter. It reads the real `/content` files once narrative's branch is merged, and gameplay's test snapshot until then; both load lazily. The snapshot matched narrative's latest files on 2026-11-26. Frames 18–19 show their shops, names and 1974 prices in the browser. Gameplay's archetype guns stay registered so NPC loadouts resolve. It isn't the default yet, because the recorded scenarios and the director script still use placeholder IDs.
 - **Perf is CPU-only and partly contended:**
   - the clean bench meets budgets with margin;
   - rare single-frame spikes (JIT/GC) are unexplained beyond that;

@@ -112,7 +112,8 @@ export function adaptNarrative(f: NarrativeFiles, warn: (m: string) => void = ()
   // keep gameplay's placeholders for anything narrative hasn't written yet
   const out: GameplayContent = {
     items: [...items, ...DEFAULT_CONTENT.items.filter((d) => !items.some((i) => i.id === d.id) && (d.kind !== 'weapon' || weapons.some((w) => w.id === d.weapon)) && (d.kind !== 'ammo' || true))],
-    weapons,
+    // narrative's guns first; gameplay's archetypes stay registered for NPC loadouts and scripted fights
+    weapons: [...weapons, ...DEFAULT_CONTENT.weapons.filter((d) => !weapons.some((w) => w.id === d.id))],
     shops: shops.length ? shops : DEFAULT_CONTENT.shops,
     outfits: DEFAULT_CONTENT.outfits, garments: DEFAULT_CONTENT.garments,
     precincts: precincts.length ? precincts : DEFAULT_CONTENT.precincts,

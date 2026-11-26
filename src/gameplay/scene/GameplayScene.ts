@@ -63,7 +63,11 @@ export async function runGameplayScene() {
   if (input.isTouch || params.has('touch')) { input.isTouch = true; new TouchControls(input, [{ label: 'JUMP', action: 'jump', hold: true }, { label: 'RUN', action: 'sprint', hold: true }]); document.body.classList.add('touch'); }
 
   // ---------------------------------------------------------------- gameplay core
-  const g = new Gameplay({ quality: quality.name, content: { items: null, shops: null, weapons: null } });
+  // ?content=narrative runs on narrative's items, guns, shops and precincts (adapter); default is gameplay's placeholders
+  const narrative = params.get('content') === 'narrative' ? await (await import('./narrativeContent')).loadNarrativeContent() : null;
+  if (narrative) console.info(`[gameplay] narrative content from ${narrative.source}`, narrative.warnings);
+  const g = new Gameplay({ quality: quality.name, content: narrative ? (narrative.content as any) : { items: null, shops: null, weapons: null } });
+  const pctAt = (x: number, z: number) => g.policeSys.precinctAt(x, z).id;
   const rq = new RapierWorldQuery(physics);
   g.bindWorld(rq);
   const sim = new StandInSim(new Rng(74));
@@ -165,12 +169,12 @@ export async function runGameplayScene() {
   }
   const propMeshes = new PropMeshes(propDefs); scene.add(propMeshes.root);
   // the precinct's beat cop and a parked radio car on the block (Midtown Central's station house is on this block)
-  const beat = g.registerPolice('foot', 'pct.midtown_central', -630, BLOCK.zS + 1.5, { corrupt: 0.7 }); // the corner post at 7th Ave
+  const beat = g.registerPolice('foot', pctAt(-630, BLOCK.zS), -630, BLOCK.zS + 1.5, { corrupt: 0.7 }); // the corner post at 7th Ave
   beat.yaw = Math.PI / 2;
   car('b_radio', -735, heightAt(-735, BLOCK.zS - 2.3), BLOCK.zS - 2.3, -Math.PI / 2, 0x1f2a44, true);
   car('b_sedan', -690, heightAt(-690, BLOCK.zN + 2.2), BLOCK.zN + 2.2, Math.PI / 2, 0x5a3326);
   car('b_cab', -780, heightAt(-780, BLOCK.zN + 2.2), BLOCK.zN + 2.2, Math.PI / 2, 0xe3a92a);
-  const parkedRadio = g.registerPolice('radio_car', 'pct.midtown_central', -735, BLOCK.zS - 2.3, { corrupt: 0 });
+  const parkedRadio = g.registerPolice('radio_car', pctAt(-735, BLOCK.zS), -735, BLOCK.zS - 2.3, { corrupt: 0 });
   parkedRadio.yaw = -Math.PI / 2;
   (parkedRadio as any).parked = true;
 
@@ -221,7 +225,7 @@ export async function runGameplayScene() {
     if (k === 'KeyT') { const l = ['torso', 'head', 'legs'] as const; g.setLimb(l[(l.indexOf(g.aimer.limb) + 1) % 3]); }
     if (k === 'Tab') { e.preventDefault(); g.cycleLock(1); }
     if (k === 'KeyB') intimidate();
-    if (k === 'KeyH') g.use('item.bandage');
+    if (k === 'KeyH') g.use(g.reg.items.has('item.bandage') ? 'item.bandage' : 'item.first_aid');
     if (k === 'KeyO') overlays.setEnabled(!overlays.enabled);
     if (k === 'KeyE') interact();
     if (/^Digit[1-7]$/.test(k)) { const ws = g.inv.weapons(lead); const w = ws[+k.slice(5) - 1]; if (w) g.equip(w); }
@@ -252,13 +256,13 @@ export async function runGameplayScene() {
   let guardAt = 0;
 
   // ---------------------------------------------------------------- interactions: shop, closet, phones, encounters
-  const shopList = ['shop.test_diner', 'shop.test_pharmacy', 'shop.test_hardware', 'shop.test_newsstand', 'shop.test_liquor', 'shop.test_pawn', 'shop.test_fence'];
+  const shopList = narrative ? [...g.reg.shops.keys()].filter((id) => g.reg.shops.get(id)!.kind !== 'clothing').slice(0, 8) : ['shop.test_diner', 'shop.test_pharmacy', 'shop.test_hardware', 'shop.test_newsstand', 'shop.test_liquor', 'shop.test_pawn', 'shop.test_fence'];
   (g.reg.shops as Map<string, any>).set('shop.test_clothier', { id: 'shop.test_clothier', name: 'Clothier (test)', kind: 'clothing', markup: 1, buyback: 0, stock: [] });
   let shopTab = 0;
   const openShop = () => {
     const P = hud.panel; P.innerHTML = ''; P.style.display = 'block';
     const tabs = el('div', ''); tabs.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px';
-    [...shopList, 'shop.test_clothier', 'closet'].forEach((s, i) => { const b = btn(s === 'closet' ? 'closet' : g.reg.shops.get(s)!.kind, i === shopTab ? 'y' : '', () => { shopTab = i; openShop(); }); b.style.minHeight = '30px'; b.style.padding = '3px 6px'; tabs.appendChild(b); });
+    [...shopList, 'shop.test_clothier', 'closet'].forEach((s, i) => { const b = btn(s === 'closet' ? 'closet' : narrative ? g.reg.shops.get(s)!.name.replace(/^The /, '').split(/[\s']/)[0].slice(0, 10) : g.reg.shops.get(s)!.kind, i === shopTab ? 'y' : '', () => { shopTab = i; openShop(); }); b.style.minHeight = '30px'; b.style.padding = '3px 6px'; tabs.appendChild(b); });
     P.appendChild(tabs);
     const id = [...shopList, 'shop.test_clothier', 'closet'][shopTab];
     const h = el('h3', ''); P.appendChild(h);
@@ -565,6 +569,8 @@ export async function runGameplayScene() {
       return ids;
     },
     plates: () => plateFor('b_sedan'),
+    openShop: (i = 0) => { shopTab = i; openShop(); },
+    narrative: narrative ? { source: narrative.source, warnings: narrative.warnings, shops: shopList } : null,
     blockY, lotY, LOT, BLOCK, propDefs, humanoidHitbox,
   };
   (window as unknown as { __GP: typeof director }).__GP = director;

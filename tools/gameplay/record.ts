@@ -131,6 +131,17 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
       await shot('16_hydrant_geyser', 'A hydrant opened with a length of pipe on a hot afternoon: it geysers for 90 s and pushes people back. Opening it is vandalism, and the witnesses treat it like any other crime.');
     },
   },
+  narrative: {
+    url: 'station=shop&content=narrative',
+    run: async ({ ev, wait, shot }) => {
+      const info = await ev<any>(`JSON.stringify(__GP.narrative)`);
+      console.log('narrative content:', info);
+      await ev(`__GP.openShop(0)`); await wait(1);
+      await shot('18_narrative_shop', "The shop panel running on narrative's own content through the adapter: their item names and 1974 dollar prices, gameplay's numbers behind them.");
+      await ev(`__GP.openShop(2)`); await wait(1);
+      await shot('19_narrative_shop_2', "A second narrative shop on the same content (\`?gameplay=1&content=narrative\`).");
+    },
+  },
   touch: {
     url: 'station=lot&touch=1',
     viewport: { width: 844, height: 390 },

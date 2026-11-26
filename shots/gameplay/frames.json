@@ -523,5 +523,59 @@
         }
       }
     }
+  },
+  {
+    "file": "18_narrative_shop.png",
+    "note": "The shop panel running on narrative's own content through the adapter: their item names and 1974 dollar prices, gameplay's numbers behind them.",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.3694444444425042,
+        "gameplayP95": 1.099999999976717,
+        "frameAvg": 14.469444444458027,
+        "frameP95": 97.40000000002328,
+        "combat": {
+          "combatMs": 0.09999999997671694,
+          "policeMs": 0,
+          "totalMs": 0.19999999995343387,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "19_narrative_shop_2.png",
+    "note": "A second narrative shop on the same content (`?gameplay=1&content=narrative`).",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.31224489795300653,
+        "gameplayP95": 1.099999999976717,
+        "frameAvg": 11.591836734708133,
+        "frameP95": 26.400000000023283,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0.09999999997671694,
+          "totalMs": 0.09999999997671694,
+          "ballisticsMs": 0
+        }
+      }
+    }
   }
 ]
