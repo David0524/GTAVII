@@ -6,8 +6,9 @@ Source of truth across sessions. Read this first; update it last.
 | Phase | State |
 |---|---|
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
-| 2. Walkable player, camera, collision (+ local saves) | **Core done** (verification pass below); UI pass next |
-| 3. Rendering pipeline + facade generation | — |
+| 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
+| UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/` |
+| 3. Rendering pipeline + facade generation | **Next** (after integrating stream milestones) |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
 | 6. Weather, day/night, polish, optimisation | — |
@@ -123,6 +124,40 @@ Am Building has been added). The method, results and the list of 46 flagged rows
 `docs/PERIOD_AUDIT.md`, and `docs/period_audit.csv` has one row per building.
 Remaining limits: rooftop additions on old buildings (only 1107 Broadway is corrected), and
 stand-ins that are period-typical rather than the exact lost building.
+
+## Phase 2 critique (screenshots: `shots/phase2/`, render set via WebGL2/SwiftShader; UI set in `shots/phase2/ui/`)
+**What works:**
+- **Movement.** You can walk the real streets on the real hills, and the collision tests pass:
+  - you stop at walls;
+  - curbs and stoops are auto-stepped;
+  - ledges of 1.2 and 1.8 m are climbed, and 2.6 m is refused.
+- **Camera.** The over-the-shoulder camera keeps buildings out of the line to the player.
+- **Saves.** They survive reloads, export and import with a checksum, and rotate through
+  the autosave ring.
+- **The UI reads as period and premium:**
+  - the poster title with its marquee;
+  - the amber clock radio;
+  - the Fraunces location reveal, using real 1974 district names, at the real intersection;
+  - the folding 1974 street map that ends at the paper's edge;
+  - full controller, keyboard and touch navigation, with a landscape phone layout.
+
+**What doesn't (honestly):**
+- **The player is a capsule.** That's correct per scope, but it makes every on-foot shot read
+  as a prototype. Fixing it means merging the characters stream.
+- **No turn-in-place or animation blending,** so heading snaps feel floaty at low speed.
+- **Camera control is basic.** There's no auto-recentre behind the player while moving and no
+  separate on-foot/vehicle sensitivity yet (both are on the settings roadmap).
+- **Some viewpoints are poor.** The on-foot Herald Square shot faced a wall because of the rig's
+  heading choice; the rig is fixed for next time.
+- **Ground geometry is heavy:** about 360k triangles in the High-preset spawn view. That's fine
+  on desktop, but it needs Phase 3 LOD for phones.
+- **The bundle is 5.2 MB** because the Rapier WASM is inlined.
+- **Parking lots z-fought with the sidewalk on slopes** (speckling in shot 11). Fixed after the
+  capture by raising lots to 4 cm.
+- **The west edge (Hudson) still reads as fog over a void,** and the rail cut isn't modelled.
+  This is boundary Layers 0 and 1, scheduled.
+- **No real-GPU numbers yet.** Every frame time here is software rendering, so the user's
+  phone or Vercel tests with COPY PERF REPORT are the first real data.
 
 ## Phase 1 critique (screenshots: `shots/phase1/`, WebGL2 via SwiftShader)
 What works:
