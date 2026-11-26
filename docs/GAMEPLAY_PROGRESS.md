@@ -283,6 +283,15 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
   - touch lock-on wins a fight with the camera pointed at the sky (`touch.test`).
 
 ### What still looks and feels like a prototype
+- **Today's integrations are tested only against fakes.** That covers:
+  - the pursuit roles (tail, box, corner cut-offs);
+  - the sim's responders and the metered cab;
+  - the touch-control hooks;
+  - doors and talk.
+
+  Every one passes against stand-ins with the published shapes. None has run with the real sim, UI or interiors code, because those branches aren't merged into the engine branch yet. Corner cut-offs use a ±250 m placeholder for intersections until sim provides real ones.
+- **The arcade is played by bots, not people.** Night Owl's physics is plausible and skill shows in the numbers, but the cabinet art is a plain 2D canvas. Flipper feel on a phone (touch latency, flip strength) needs a human playtest.
+- **The economy curve meets the user's "small early, big late" decision,** but no single lead reaches a mid-tier business in 20 hours. Whether that's right depends on playtests and narrative's mission pay.
 - **Presentation is placeholder:**
   - capsule-and-box people with rigid poses, no animation, no ragdoll;
   - block-out cars; flat-shaded city; WebGL2 in software rendering.
