@@ -9,3 +9,5 @@ dist-test/
 __pycache__/
 tools/ui/tmp/
 dist-*/
+shots/ui/**/*.png
+shots/cine/**/*.png
