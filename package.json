@@ -14,6 +14,8 @@
     "preview": "vite preview --port 4173",
     "shots": "tsx tools/shots/capture.ts",
     "test": "node --import tsx --test tests/*.test.ts",
+    "test:viewport": "vite build && tsx tools/tests/viewport.ts",
+    "test:load": "vite build && tsx tools/tests/loadtime.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

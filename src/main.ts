@@ -16,6 +16,7 @@ import { loadTerrain, heightAt } from './shared/terrain';
 import { Input } from './input/Input';
 import { TouchControls } from './ui/TouchControls';
 import { promptStrip, PROMPT_CSS } from './ui/Prompts';
+import { loadReport } from './engine/debug/LoadReport';
 import { buildReport, mountReportButton } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
 import RAPIER from '@dimforge/rapier3d-compat';
@@ -46,19 +47,27 @@ type Screen = 'title' | 'play' | 'paused';
 
 async function main() {
   if (new URLSearchParams(location.search).has('interiors')) return void (await import('./interiors/test/testScene')).runInteriorsTest(); // interiors workstream test scene
+  loadReport.mark('main');
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
+  loadReport.mark('renderer');
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
   const atmosphere = new Atmosphere(scene);
+  if (params.has('ao')) facadeUniforms.aoStrength.value = Number(params.get('ao'));
+  // sky IBL: opt-in until verified against the look target; ?env=<intensity> (the raw sky is ~20x brighter than the fill)
+  atmosphere.envEnabled = params.has('env') && params.get('env') !== '0';
+  if (atmosphere.envEnabled) atmosphere.envIntensity = Number(params.get('env')) || 0.05;
   if (quality.shadows && params.get('shadows') !== '0') atmosphere.enableShadows(renderer, quality.name === 'high' || quality.name === 'ultra' ? 2048 : 1024);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
+  loadReport.mark('physics+terrain');
   const world = new World(quality);
   await world.load();
+  loadReport.mark('manifest');
   scene.add(world.root);
   world.onChunkReady.add((c) => physics.addChunk(c));
   world.onChunkUnload.add((k) => physics.removeChunk(k));
@@ -70,6 +79,7 @@ async function main() {
   scene.add(skyline);
   const streetLights = buildStreetLights(streets);
   scene.add(streetLights);
+  loadReport.mark('streets+lights');
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
@@ -102,7 +112,8 @@ async function main() {
   let mode: Mode = 'onfoot';
   const camParam = params.get('cam');
   if (camParam) {
-    const [x, y, z, yaw, pitch] = camParam.split(',').map(Number);
+    const [x, y0, z, yaw, pitch] = camParam.split(',').map(Number);
+    const y = params.has('camrel') ? y0 + heightAt(x, z) + SIDEWALK_H : y0; // ?camrel=1: y is height above the ground
     fly.set(x, y, z, THREE.MathUtils.degToRad(yaw), THREE.MathUtils.degToRad(pitch || 0));
     mode = 'photo';
   }
@@ -150,15 +161,39 @@ async function main() {
   if (params.get('hud') !== '1') hud.toggle(false);
   const minimap = params.get('minimap') === '0' ? null : new Minimap(document.body, streets, world.manifest.region, world.manifest.heroes);
 
-  const onResize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  // Viewport sync. The canvas fills #app via CSS; every frame we compare its real client size (and the
+  // device pixel ratio) with what the renderer was last sized to, and resize on any change. Resize events
+  // alone are not enough on iOS Safari: on rotation it can fire 'resize' with the pre-rotation
+  // innerWidth and no follow-up event, leaving a portrait-width frame on a landscape screen (bug report
+  // 2026-11-26, iPhone landscape: 3D covered the left ~45% only).
+  const view = renderer.domElement; view.classList.add('t74-view');
+  let lastW = 0, lastH = 0, lastDpr = 0, lastFov = -1;
+  const onResize = (force = false) => {
+    const w = view.clientWidth || window.innerWidth, h = view.clientHeight || window.innerHeight;
+    const dpr = window.devicePixelRatio || 1, fov = settings.get('fov');
+    if (!force && w === lastW && h === lastH && dpr === lastDpr && fov === lastFov) return;
+    if (dpr !== lastDpr && lastDpr) renderer.setPixelRatio(Math.min(dpr, matchMedia('(pointer: coarse)').matches ? 1.5 : 2) * quality.pixelRatio);
+    lastW = w; lastH = h; lastDpr = dpr; lastFov = fov;
+    camera.aspect = w / h;
     // Keep the horizontal field of view sane on very wide phone screens (19.5:9 landscape).
-    camera.fov = settings.get('fov') - (camera.aspect > 2 ? 8 : 0);
+    camera.fov = fov - (camera.aspect > 2 ? 8 : 0);
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h, false); // CSS owns the element size; this sets the drawing buffer + viewport
   };
-  window.addEventListener('resize', onResize); onResize();
-  settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
+  window.addEventListener('resize', () => onResize());
+  window.addEventListener('orientationchange', () => onResize());
+  window.visualViewport?.addEventListener('resize', () => onResize());
+  // The canvas's own layout size: fires on any change, whatever window events iOS does or doesn't send.
+  new ResizeObserver(() => onResize()).observe(view);
+  onResize(true);
+  // Per-frame safety net. It only DETECTS a change; the resize itself runs as a separate task, never
+  // inside the frame callback (resizing the WebGPU canvas mid-frame broke rendering).
+  let resizeQueued = false;
+  const checkSize = () => {
+    if (resizeQueued || (view.clientWidth === lastW && view.clientHeight === lastH && (window.devicePixelRatio || 1) === lastDpr)) return;
+    resizeQueued = true; setTimeout(() => { resizeQueued = false; onResize(); }, 0);
+  };
+  settings.subscribe((_s, k) => { if (k === 'fov') onResize(true); });
 
   // ?time=HH:MM sets the clock (screenshot rig), ?timescale=0 freezes it; ?night= overrides window lighting.
   if (params.has('time')) setTime(params.get('time')!);
@@ -171,7 +206,7 @@ async function main() {
   const clock = new THREE.Timer();
   let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, load: loadReport, renderer, scene, camera, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return screen; }, get hudUi() { return gameHud; }, get pause() { return pause; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || screen === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -216,6 +251,7 @@ async function main() {
       const last = await saves.latest().catch(() => null);
       if (last) { try { await saves.load(last.slot); } catch (e) { toast(`Could not load: ${(e as Error).message}`); return; } }
     } else {
+      loadReport.mark('new-game');
       const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H;
       player.teleport(spawn.x, y, spawn.z, spawn.heading); player.active = false; orbit.snap(player.pos, spawn.heading);
     }
@@ -236,6 +272,8 @@ async function main() {
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.name === 'Flatiron Building') ?? { x: 0, z: 0 };
   let titleT = 0;
+  const TITLE_RADIUS = 300; // m around the title camera's target
+  let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const attributionEl = document.getElementById('attribution');
   const fsEl = document.querySelector('.t74-fs') as HTMLElement | null;
 
@@ -261,8 +299,10 @@ async function main() {
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
+    const cpu0 = performance.now();
     clock.update(t);
-    const dt = Math.min(clock.getDelta(), 0.1);
+    const rawDt = clock.getDelta(); loadReport.frame(rawDt * 1000);
+    const dt = Math.min(rawDt, 0.1);
     frames.push(dt * 1000);
     facadeUniforms.time.value += dt;
     input.poll(dt);
@@ -271,9 +311,16 @@ async function main() {
       const a = -0.35 + titleT * 0.018, r = 150;
       fly.set(flat.x + Math.sin(a) * r, 26 + Math.sin(titleT * 0.05) * 4, flat.z - 40 - Math.cos(a) * r, 0, 0);
       director.gameplay.lookAt(flat.x, 34, flat.z);
-      const wanted = world.stats.ready + world.stats.loading;
-      title!.progress(wanted ? world.stats.ready / wanted : 0);
-      if (world.idle && frameCount > 10) { if (!titleReady) { titleReady = true; void saves.latest().then((l) => title!.setReady(l ? l.label : null)); } }
+      // Gate the title on the first view only (chunks around the Flatiron + compiled shaders); the rest of
+      // the city keeps streaming behind the menu and play (load bug 2026-11-26: it waited for ~114 chunks).
+      const near = world.progressNear(flat.x, flat.z - 40, TITLE_RADIUS);
+      title!.progress(near.total ? (near.ready / near.total) * (shadersReady ? 1 : 0.92) : 0);
+      if (!shaderWarm && near.ready > 0) {
+        shaderWarm = (renderer as unknown as { compileAsync(s: THREE.Object3D, c: THREE.Camera): Promise<void> }).compileAsync(scene, camera)
+          .catch(() => undefined).then(() => { shadersReady = true; loadReport.mark('shaders'); });
+        setTimeout(() => { shadersReady = true; }, 8000); // never block the menu on a slow/failed warm-up
+      }
+      if (near.ready === near.total && shadersReady && frameCount > 3) { if (!titleReady) { titleReady = true; loadReport.mark('title-ready'); console.info('[T74 load]\n' + loadReport.text()); void saves.latest().then((l) => title!.setReady(l ? l.label : null)); } }
       if (pause.open) pause.update(dt); else title!.update(dt);
     } else if (screen === 'paused' || pause.open) {
       pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw };
@@ -293,6 +340,7 @@ async function main() {
     if (playing && mode === 'onfoot' && player.active) saves.tick(dt);
     if (playing) tickClock(dt); // the clock pauses in menus, the title and cutscenes
     const light = atmosphere.update();
+    atmosphere.updateEnvironment(renderer);
     facadeUniforms.night.value = nightOverride ?? light.night;
     streetLightUniforms.lightsOn.value = light.lightsOn;
     renderer.toneMappingExposure = light.exposure;
@@ -301,7 +349,7 @@ async function main() {
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }
-    if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) player.active = true;
+    if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) { player.active = true; if (screen === 'play') { loadReport.mark('playable'); } }
 
     if (!playing && screen !== 'title') {
       // paused: world frozen, camera holds
@@ -321,7 +369,10 @@ async function main() {
     input.endFrame();
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
+    checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
     if (postfx) postfx.render(); else renderer.render(scene, camera);
+    if (frameCount === 0) loadReport.mark('first-frame');
+    loadReport.frameCpu(performance.now() - cpu0);
     frameCount++;
 
     const p = mode === 'onfoot' ? body.object.position : camera.position;
