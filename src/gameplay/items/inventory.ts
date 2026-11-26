@@ -74,7 +74,7 @@ export class Inventory extends Emitter<InvEvents> {
     if (add <= 0) return 0;
     l.items.set(id, have + add);
     if (def.kind === 'weapon' && def.weapon && !l.loaded.has(def.weapon)) l.loaded.set(def.weapon, 0);
-    if (def.kind === 'weapon' && def.weapon && this.reg.weapon(def.weapon).class !== 'melee' && !l.guns.has(def.weapon)) l.guns.set(def.weapon, { ...DEFAULT_GUN });
+    if (def.kind === 'weapon' && def.weapon && this.reg.weapon(def.weapon).class !== 'melee' && !l.guns.has(def.weapon)) l.guns.set(def.weapon, { ...DEFAULT_GUN, ...(def.tier ? { tier: def.tier } : {}) });
     this.emit('changed', { lead, id, delta: add, qty: have + add });
     return add;
   }

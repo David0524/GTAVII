@@ -43,6 +43,7 @@ export function gunValue(basePrice: number, g: GunState) { return Math.round(bas
 /** How big a thing is to hide. */
 export type Bulk = 'pocket' | 'belt' | 'coat' | 'long';
 export function bulkOf(w: WeaponDef): Bulk {
+  if (w.bulk) return w.bulk;
   switch (w.id) {
     case 'weapon.fists': case 'weapon.knife': case 'weapon.snub': return 'pocket';
     case 'weapon.service': case 'weapon.pistol': case 'weapon.nightstick': case 'weapon.bottle': return 'belt';

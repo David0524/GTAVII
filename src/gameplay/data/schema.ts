@@ -27,6 +27,8 @@ export interface ItemDef {
   heal?: number;              // hp restored (consumables)
   stopsBleeding?: boolean;
   armor?: number;             // armor points (vest)
+  /** firearm quality tier for new instances (street | service | quality) */
+  tier?: 'street' | 'service' | 'quality';
   note?: string;
 }
 
@@ -58,6 +60,8 @@ export interface WeaponDef {
   concealable: boolean;       // does carrying it in hand count as "brandishing" at a glance
   melee?: { light: number; heavy: number; reach: number; speed: number; breaks?: number; bleed?: number };
   driveBy?: boolean;          // usable from a vehicle seat
+  /** how big it is to hide (items/guns.ts concealment); derived from class when absent */
+  bulk?: 'pocket' | 'belt' | 'coat' | 'long';
 }
 
 export interface ShopDef {
@@ -173,7 +177,8 @@ export function validateContent(c: GameplayContent): GameplayContent {
     uniq(o.id, 'outfit.'); isCents(o.price, o.id);
     for (const p of o.pieces) if (!garments.has(p.garment)) errs.push(`${o.id}: unknown garment ${p.garment}`);
   }
-  for (const p of c.precincts) { uniq(p.id, 'pct.'); if (p.area.length < 6 || p.area.length % 2) errs.push(`${p.id}: area must be a polygon of x,z pairs`); }
+  // narrative uses precinct.*, the placeholders pct.*
+  for (const p of c.precincts) { uniq(p.id, p.id.startsWith('precinct.') ? 'precinct.' : 'pct.'); if (p.area.length < 6 || p.area.length % 2) errs.push(`${p.id}: area must be a polygon of x,z pairs`); }
   for (const l of c.leads) {
     uniq(l.id, 'char.'); isCents(l.startMoney, l.id);
     for (const it of l.startItems) if (!items.has(it.id)) errs.push(`${l.id}: unknown start item ${it.id}`);
