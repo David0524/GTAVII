@@ -15,7 +15,7 @@ let n = 0;
 
 async function step(page: Page, name: string, fn: () => Promise<void>) {
   try { await fn(); await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `${String(++n).padStart(2, '0')}_${name}.png`) }); log.push(`✓ ${name}`); }
-  catch (e) { log.push(`✗ ${name}: ${(e as Error).message.split('\n')[0]}`); await page.screenshot({ path: path.join(OUT, `${String(++n).padStart(2, '0')}_FAILED_${name}.png`) }); }
+  catch (e) { const m = (e as Error).message.split('\n'); log.push(`✗ ${name}: ${m[0]} ${m.filter((l) => /intercepts|not stable|not visible|outside|detached/.test(l)).slice(-2).join(' ')}`); await page.screenshot({ path: path.join(OUT, `${String(++n).padStart(2, '0')}_FAILED_${name}.png`) }); }
 }
 const tap = async (l: Locator) => { await l.first().waitFor({ state: 'visible', timeout: 15000 }); await l.first().tap(); };
 
