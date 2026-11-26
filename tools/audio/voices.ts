@@ -16,7 +16,9 @@
  * reads the pronouns the narrative's own cast descriptions use (never names) and the age.
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
+import ffmpegPath from 'ffmpeg-static';
+import EspeakModule from '@echogarden/espeak-ng-emscripten';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { voiceKey, castVoice, type VoiceCast } from '../../src/audio/dialogue/voiceKey';
@@ -27,7 +29,13 @@ const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return
 const CONTENT = opt('content', 'public/content'), OUT = 'public/audio/voice', JOBS = +opt('jobs', '4');
 const TARGET_LUFS = -20;
 
-if (spawnSync('espeak-ng', ['--version']).status !== 0) { console.error('espeak-ng not found (apt-get install espeak-ng)'); process.exit(1); }
+// eSpeak NG compiled to WASM (npm, GPL-3.0) and a static ffmpeg (npm, GPL-3.0): build-time tools only, so this
+// runs on any Node build host (Vercel included) without apt. Neither is imported by game code or shipped.
+const espeak: any = new ((await (EspeakModule as any)()) as any).eSpeakNGWorker();
+const FFMPEG = ffmpegPath as unknown as string;
+if (!FFMPEG) { console.error('ffmpeg-static has no binary for this platform'); process.exit(1); }
+const SR_TTS: number = espeak.get_samplerate();
+const VOL_DB: Record<string, number> = { soft: -3, medium: 0, loud: 2 };
 if (!existsSync(CONTENT)) { console.error(`no content at ${CONTENT}`); process.exit(1); }
 mkdirSync(OUT, { recursive: true });
 
@@ -73,16 +81,8 @@ const EMO: Record<string, [number, number, string]> = { // rate %, pitch %, volu
   alarmed: [15, 15, 'loud'], crisp: [10, 2, 'medium'], soft: [-10, -2, 'soft'], serious: [-5, -6, 'medium'], grave: [-12, -10, 'medium'], startled: [15, 15, 'loud'],
   alert: [10, 5, 'medium'], panicked: [25, 20, 'loud'], sad: [-15, -8, 'soft'], cheerful: [10, 12, 'medium'], impatient: [15, 6, 'loud'], radio: [5, 4, 'loud'],
 };
-const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 function run(cmd: string, a: string[]): Promise<void> {
   return new Promise((res, rej) => { const p = spawn(cmd, a, { stdio: ['ignore', 'ignore', 'pipe'] }); let e = ''; p.stderr.on('data', (d) => (e += d)); p.on('close', (c) => (c === 0 ? res() : rej(new Error(`${cmd} ${c}: ${e.slice(0, 300)}`)))); });
-}
-function readWavMono(path: string): { x: Float32Array; sr: number } {
-  const b = readFileSync(path); let o = 12, sr = 22050, bits = 16, ch = 1, data: Buffer | null = null;
-  while (o < b.length - 8) { const id = b.toString('ascii', o, o + 4), len = b.readUInt32LE(o + 4); if (id === 'fmt ') { ch = b.readUInt16LE(o + 10); sr = b.readUInt32LE(o + 12); bits = b.readUInt16LE(o + 22); } if (id === 'data') { data = b.subarray(o + 8, o + 8 + len); break; } o += 8 + len + (len & 1); }
-  if (!data || bits !== 16) throw new Error('unexpected wav');
-  const n = Math.floor(data.length / 2 / ch), x = new Float32Array(n); for (let i = 0; i < n; i++) x[i] = data.readInt16LE(i * 2 * ch) / 32768;
-  return { x, sr };
 }
 function writeWav(path: string, x: Float32Array, sr: number) {
   const b = Buffer.alloc(44 + x.length * 2); b.write('RIFF', 0); b.writeUInt32LE(36 + x.length * 2, 4); b.write('WAVE', 8); b.write('fmt ', 12); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(x.length * 2, 40);
@@ -95,23 +95,25 @@ const files: Record<string, { dur: number; bytesOpus: number; bytesAac: number; 
 let done = 0, skipped = 0; const t0 = Date.now();
 async function render(j: Job) {
   const webm = join(OUT, `${j.key}.webm`), m4a = join(OUT, `${j.key}.m4a`); const c = castOf(j.speaker);
-  const voiceStr = `en-us+${c.variant} p${c.pitch} s${c.speed}`;
+  const voiceStr = `wasm en-us+${c.variant} p${c.pitch} s${c.speed}`;
   if (old.files[j.key]?.voice === voiceStr && existsSync(webm) && existsSync(m4a)) { files[j.key] = old.files[j.key]; skipped++; return; }
   const [rate, pitch, vol] = EMO[j.emotion] ?? [0, 0, 'medium'];
-  const tmp = join(tmpdir(), `t74v-${j.key}.wav`), tmp2 = join(tmpdir(), `t74v-${j.key}-n.wav`);
-  const ssml = `<speak><prosody rate="${100 + rate}%" pitch="${pitch >= 0 ? '+' : ''}${pitch}%" volume="${vol}">${esc(j.text)}</prosody></speak>`;
-  await run('espeak-ng', ['-m', '-v', `en-us+${c.variant}`, '-p', String(c.pitch), '-s', String(c.speed), '-g', String(c.gap), '-w', tmp, ssml]);
+  const tmp2 = join(tmpdir(), `t74v-${j.key}-n.wav`);
+  // Emotion as rate/pitch offsets (synthesis is synchronous; ffmpeg encodes run in parallel below).
+  espeak.set_voice(`en-us+${c.variant}`); espeak.set_rate(Math.round(c.speed * (1 + rate / 100))); espeak.set_pitch(Math.max(0, Math.min(99, Math.round(c.pitch * (1 + pitch / 100)))));
+  const parts: Int16Array[] = []; espeak.synthesize(j.text, (d: Int16Array) => { if (d) parts.push(d); return 0; });
+  const x = new Float32Array(parts.reduce((s2, p2) => s2 + p2.length, 0)); { let o = 0; for (const p2 of parts) { for (let i = 0; i < p2.length; i++) x[o + i] = p2[i] / 32768; o += p2.length; } }
+  const sr = SR_TTS;
   // Trim leading/trailing silence, gentle high-pass, and normalise every line to the same loudness.
-  const { x, sr } = readWavMono(tmp);
   let a = 0, b = x.length - 1; while (a < b && Math.abs(x[a]) < 0.004) a++; while (b > a && Math.abs(x[b]) < 0.004) b--;
   const pad = Math.round(sr * 0.04); const y = x.slice(Math.max(0, a - pad), Math.min(x.length, b + pad));
   let hp = 0, prev = 0; const k = Math.exp(-2 * Math.PI * 90 / sr); for (let i = 0; i < y.length; i++) { const v = y[i]; hp = k * (hp + v - prev); prev = v; y[i] = hp; }
-  const m = measure(resampleTo48(y, sr), resampleTo48(y, sr), 48000); const g = isFinite(m.integrated) ? Math.pow(10, (TARGET_LUFS - m.integrated) / 20) : 1;
+  const m = measure(resampleTo48(y, sr), resampleTo48(y, sr), 48000); const g = isFinite(m.integrated) ? Math.pow(10, (TARGET_LUFS + (VOL_DB[vol] ?? 0) - m.integrated) / 20) : 1;
   let peak = 0; for (let i = 0; i < y.length; i++) { y[i] *= g; peak = Math.max(peak, Math.abs(y[i])); } if (peak > 0.9) for (let i = 0; i < y.length; i++) y[i] *= 0.9 / peak;
   writeWav(tmp2, y, sr);
-  await run('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', tmp2, '-c:a', 'libopus', '-b:a', '16k', '-application', 'voip', '-map_metadata', '-1', webm]);
-  await run('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', tmp2, '-ar', '16000', '-c:a', 'aac', '-b:a', '20k', '-movflags', '+faststart', '-map_metadata', '-1', m4a]);
-  rmSync(tmp); rmSync(tmp2);
+  await run(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-i', tmp2, '-c:a', 'libopus', '-b:a', '16k', '-application', 'voip', '-map_metadata', '-1', webm]);
+  await run(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-i', tmp2, '-ar', '16000', '-c:a', 'aac', '-b:a', '20k', '-movflags', '+faststart', '-map_metadata', '-1', m4a]);
+  rmSync(tmp2);
   files[j.key] = { dur: +(y.length / sr).toFixed(3), bytesOpus: statSync(webm).size, bytesAac: statSync(m4a).size, speaker: j.speaker, emotion: j.emotion, voice: voiceStr };
   if (++done % 50 === 0) console.log(`${done} rendered, ${skipped} unchanged (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
 }
@@ -125,7 +127,7 @@ for (const f of readdirSync(OUT)) { const key = f.replace(/\.(webm|m4a)$/, ''); 
 const castTable: Record<string, VoiceCast & { from: string }> = {};
 for (const j of jobs.values()) if (!castTable[j.speaker]) castTable[j.speaker] = { ...castOf(j.speaker), from: overrides[j.speaker] ? 'override' : cast.get(j.speaker)?.pron ? `cast pronouns (${cast.get(j.speaker)!.pron}), age ${cast.get(j.speaker)!.age ?? '?'}` : 'neutral spread (no cast entry)' };
 const totals = Object.values(files).reduce((s, f) => ({ dur: s.dur + f.dur, opus: s.opus + f.bytesOpus, aac: s.aac + f.bytesAac }), { dur: 0, opus: 0, aac: 0 });
-writeFileSync(manifestPath, JSON.stringify({ engine: 'eSpeak NG 1.51 (formant synthesis), rendered offline by tools/audio/voices.ts', targetLufs: TARGET_LUFS, totals, cast: castTable, files }, null, 1) + '\n');
+writeFileSync(manifestPath, JSON.stringify({ engine: 'eSpeak NG (Emscripten/WASM build @echogarden/espeak-ng-emscripten 0.3.5, formant synthesis), rendered at build time by tools/audio/voices.ts', targetLufs: TARGET_LUFS, totals, cast: castTable, files }, null, 1) + '\n');
 console.log(`${jobs.size} lines (${done} rendered, ${skipped} unchanged): ${(totals.dur / 60).toFixed(1)} min, opus ${(totals.opus / 1048576).toFixed(1)} MB, aac ${(totals.aac / 1048576).toFixed(1)} MB`);
 
 // Per-file provenance table (docs/AUDIO_SOURCES_VOICES.md), regenerated with the renders.
