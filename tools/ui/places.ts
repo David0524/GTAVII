@@ -44,6 +44,17 @@ function addressOf(x: number, z: number): string {
 const tooClose = (x: number, z: number, m: number) => places.some((p) => Math.hypot(p.x - x, p.z - z) < m);
 
 // ------------------------------------------------------------ 1. narrative
+/** narrative's per-place `discovery` field (content/places.json) -> catalogue reveal rules. Homes stay
+ *  known from the start for their own lead (HOMES_AND_CARS) whatever the field says. */
+interface NarrDiscovery { via?: string[]; sightM?: number; shady?: boolean; hiddenUntilIntroduced?: boolean; tipFrom?: string[]; mission?: string; note?: string }
+function narrativeDiscovery(d: NarrDiscovery | undefined, fallback: Place['reveal']): Pick<Place, 'reveal' | 'sightM' | 'shady'> {
+  if (!d?.via?.length || fallback.includes('start')) return { reveal: fallback, sightM: 35 };
+  const map: Record<string, Place['reveal'][number]> = { landmark: 'sight', sight: 'sight', tip: 'tip', overheard: 'overheard', newspaper: 'news', news: 'news', card: 'card', mission: 'mission', call: 'call', enter: 'enter' };
+  const hidden = !!(d.shady || d.hiddenUntilIntroduced);
+  const reveal = [...new Set(d.via.map((v) => map[v]).filter(Boolean))].filter((v) => !(hidden && v === 'sight'));
+  if (!reveal.includes('mission')) reveal.push('mission');
+  return { reveal, sightM: d.sightM ?? (d.via.includes('landmark') ? 60 : 35), shady: hidden || undefined };
+}
 const KIND: Record<string, Category> = {
   landmark: 'landmark', sro: 'mission', precinct: 'police', bar: 'bar', residence: 'mission', office: 'mission', diner: 'food',
   garage: 'garage', loft: 'mission', restaurant: 'food', cafe: 'food', shop: 'shop', stand: 'service',
@@ -52,7 +63,7 @@ const np = content('places.json');
 const leads = JSON.parse(content('cast/leads.json') ?? '[]') as { id: string; name: string; home: string }[];
 const homes = new Map(leads.map((l) => [l.home, l]));
 if (np) {
-  for (const p of (JSON.parse(np) as { places: { id: string; name: string; at: string; between?: string[]; side?: string; kind: string; invented: boolean }[] }).places) {
+  for (const p of (JSON.parse(np) as { places: { id: string; name: string; at: string; between?: string[]; side?: string; kind: string; invented: boolean; discovery?: NarrDiscovery }[] }).places) {
     const at = idx.resolve(p.at, p.between, p.side);
     if (!at) { warn.push(`unresolved narrative place ${p.id} "${p.at}"`); continue; }
     const lead = homes.get(p.id);
@@ -61,8 +72,8 @@ if (np) {
     places.push({
       id: p.id, name, cat, x: +at[0].toFixed(1), z: +at[1].toFixed(1),
       address: p.between ? `${shortStreet(normaliseStreet(p.at))}, ${shortStreet(normaliseStreet(p.between[0]))}–${shortStreet(normaliseStreet(p.between[1]))}` : p.at.split('&').map((s) => shortStreet(normaliseStreet(s))).join(' & '),
-      reveal: lead ? ['start'] : cat === 'landmark' ? ['sight', 'mission'] : ['mission', 'tip', 'enter', 'sight'],
-      sightM: 35, lead: lead?.id, source: 'narrative',
+      ...narrativeDiscovery(p.discovery, lead ? ['start'] : cat === 'landmark' ? ['sight', 'mission'] : ['mission', 'tip', 'enter', 'sight']),
+      lead: lead?.id, source: 'narrative',
       blurb: lead ? `${lead.name.replace(/“.*?”\s*/, '')} lives here.` : undefined,
     });
   }

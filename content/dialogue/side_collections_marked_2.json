@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_collections_marked_2",
+  "context": "A stop's quiet scene (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.anna_moretti",
+      "emotion": "tired",
+      "text": "Here. Same as always. You look like you're carrying more than envelopes, collector."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Just the usual, Mrs. Moretti."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "dlg.side_collections_marked_1",
+  "context": "Calloway marks bills for the collection rounds (Teddy, wire branch).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "These twenties are marked. Swap them into two envelopes. Which two is your call."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "And if they find out?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.ruth_calloway",
+      "emotion": "dry",
+      "text": "Then you'll be very convincing about how surprised you are."
+    }
+  ]
+}

@@ -68,7 +68,7 @@ export function validateCutscene(c: Cutscene): string[] {
   c.shots.forEach((s, i) => {
     const p = `shots[${i}]${s?.id ? ` (${s.id})` : ''}`;
     if (!s.id) errs.push(`${p}.id`); else if (ids.has(s.id)) errs.push(`${p}.id duplicate`); else ids.add(s.id);
-    if (!(s.durationSec > 0) && !(s.waitFor && s.durationSec === 0)) errs.push(`${p}.durationSec`);
+    if (!(s.durationSec > 0) && !(s.waitFor && !s.durationSec)) errs.push(`${p}.durationSec`);
     if (s.waitFor === 'choice' && !/^dlg\.[\w.]+#\w+$/.test(s.choices ?? '')) errs.push(`${p}.choices (expected dlg.<script>#<choice id>)`);
     const keys = s.camera?.keys;
     if (keys) {
@@ -88,6 +88,9 @@ export function validateCutscene(c: Cutscene): string[] {
   });
   return errs;
 }
+
+/** A choice hold may omit durationSec (it holds until the choice resolves): treat it as 0. */
+export function normaliseCutscene(c: Cutscene): Cutscene { for (const s of c.shots ?? []) if (s.waitFor && s.durationSec === undefined) (s as { durationSec: number }).durationSec = 0; return c; }
 
 /** Vertical field of view (degrees) for a 35 mm-film focal length (24 mm gate height). */
 export function lensToFov(mm: number) { return (2 * Math.atan(12 / mm) * 180) / Math.PI; }

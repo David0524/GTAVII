@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m07_revolver",
+  "context": "M7 o8. The Shamrock Rail, after the yes. Mayhew slides a paper bag along the bar.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "low",
+      "text": "Your old service piece. I kept it when they took your shield. Kept it oiled."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "I gave that up, Carl."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "You gave up the badge. The streets didn't give up anything. Take it."
+    },
+    {
+      "id": "l4",
+      "speaker": "npc.off_duty_cop",
+      "emotion": "alarmed",
+      "text": "Back door! Somebody's at the back door with a gun!"
+    }
+  ]
+}

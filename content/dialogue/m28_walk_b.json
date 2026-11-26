@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m28_walk_b",
+  "context": "M28 escort leg 2: Broadway & W 32nd to Herald Square. The crowd swells. Moretti hands out flowers.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.anna_moretti",
+      "emotion": "loud",
+      "text": "Flowers for the marchers! Moretti says take one! Mind the fronds!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.dwayne_little",
+      "emotion": "cocky",
+      "text": "Used-to-be! You're in front! Look at you, used-to-be!"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "We closed the shop for this. Mrs. Baek says it's an investment."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "proud",
+      "text": "Who owns the Tenderloin, Mr. Arce?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Today? You do."
+    }
+  ]
+}

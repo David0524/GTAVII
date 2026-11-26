@@ -1,0 +1,77 @@
+{
+  "id": "dlg.m31_lease",
+  "context": "M31 o3. The shop on W 37th. A key on a string in Delphine's palm, or an empty hand.",
+  "lines": [
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Take the lease.",
+          "goto": "l_shop",
+          "setFlags": [
+            "flag.delphine_shop"
+          ],
+          "requires": {
+            "all": [
+              "flag.club_count_settled"
+            ],
+            "relationship": {
+              "char.delphine_moore/char.nick_varelas": ">=1"
+            }
+          },
+          "disabledText": "Needs a clean count and Nick's word."
+        },
+        {
+          "text": "Keep the club moving.",
+          "goto": "l_club"
+        },
+        {
+          "text": "Merge with the kye.",
+          "goto": "l_kye",
+          "setFlags": [
+            "flag.club_merged_kye"
+          ],
+          "requires": {
+            "relationship": {
+              "char.delphine_moore/char.mi_sook_baek": ">=1"
+            }
+          },
+          "disabledText": "Mrs. Baek hasn't agreed."
+        }
+      ]
+    },
+    {
+      "id": "l_shop",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Two chairs. A sink. A window. Rule one: I don't hold money I can't count."
+    },
+    {
+      "id": "l_shop2",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Rule sixteen: sometimes you spend it. On something real.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_club",
+      "speaker": "char.delphine_moore",
+      "emotion": "steady",
+      "text": "No shop. Not yet. The club's the shop. Twenty women, one table.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_kye",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Twelve families and twenty women. One pot. Mrs. Baek counts. I count. Nobody steals.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "The women voted. I didn't decide for them. That's the rule that matters."
+    }
+  ]
+}

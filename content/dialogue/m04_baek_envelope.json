@@ -1,0 +1,72 @@
+{
+  "id": "dlg.m04_baek_envelope",
+  "context": "M4 o5. W 29th St. A Carriers' truck idles outside Seoul Star Imports. The driver waits.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.hector_villalba",
+      "emotion": "radio",
+      "text": "Unit four. Collect at twenty-nine and Broadway. Don't take no for an answer."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "calm",
+      "text": "You want twenty dollars for protection. From what? Please, show me."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "calm",
+      "text": "I pay for delivery. I pay rent. I pay tax. What is this, the weather?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Step in.",
+          "goto": "l_in",
+          "setFlags": [
+            "flag.teddy_stepped_in_baek"
+          ],
+          "setRelationships": {
+            "char.teddy_arce/char.jung_ho_baek": 1,
+            "char.teddy_arce/char.augie_lomax": -1
+          }
+        },
+        {
+          "text": "Walk on.",
+          "goto": "l_on",
+          "setRelationships": {
+            "char.teddy_arce/char.jung_ho_baek": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_in",
+      "speaker": "char.teddy_arce",
+      "emotion": "firm",
+      "text": "He's asking a fair question, pal. What's the twenty for?"
+    },
+    {
+      "id": "l_in2",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Thank you. Now two of us are confused. Better.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_on",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "cold",
+      "text": "You see? Nobody sees. Fine. I pay. Give me a receipt."
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.dwayne_little",
+      "emotion": "low",
+      "text": "Every truck on Thirty-Seventh got a little envelope on the dash. I see 'em."
+    }
+  ]
+}

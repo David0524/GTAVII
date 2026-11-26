@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m04_feld",
+  "context": "M4 o1. Feld Frocks, 9th floor, W 37th St. Machines roaring. Carmen waves from row three.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.sam_feld",
+      "emotion": "weary",
+      "text": "Arce. Your mother says you can carry. My truck didn't come. Can you carry?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Why didn't the truck come?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.sam_feld",
+      "emotion": "weary",
+      "text": "Surcharge, tax, fee. My grandfather paid the czar less."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.sam_feld",
+      "emotion": "weary",
+      "text": "Twenty dollars. Two deliveries. Dwayne knows the way. Don't let him show off."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.dwayne_little",
+      "emotion": "cocky",
+      "text": "Mister, I push forty racks a day. You ain't fast, you're in my way."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.carmen_arce",
+      "emotion": "proud",
+      "text": "That's my son! Be nice to him, Dwayne, he used to be police."
+    },
+    {
+      "id": "l7",
+      "speaker": "char.dwayne_little",
+      "emotion": "cocky",
+      "text": "Used to be. Okay. Keep up, used-to-be."
+    }
+  ]
+}

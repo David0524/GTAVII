@@ -1,0 +1,12 @@
+{
+  "id": "dlg.act_payphone_eleni",
+  "context": "Payphone: Eleni.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.eleni_varelas",
+      "emotion": "dry",
+      "text": "Nikos. The green ledger. It's in your car. Where you put it. Where you always put it."
+    }
+  ]
+}

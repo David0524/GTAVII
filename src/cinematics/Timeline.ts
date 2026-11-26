@@ -10,7 +10,7 @@
  *    plus a 0.25 s breath), which is also how long the subtitle stays up.
  */
 import type { Cutscene, Shot, CamKey, ActorKey, V3, DialogueLine } from './schema';
-import { lensToFov } from './schema';
+import { lensToFov, normaliseCutscene } from './schema';
 
 export interface CamPose { pos: V3; look: V3; fov: number; lensMm: number; focusM: number; fStop: number; roll: number }
 export interface ScheduledLine { t0: number; t1: number; ref: string; speaker: string; text: string; shot: string }
@@ -32,6 +32,7 @@ export class Timeline {
   private actorKeys = new Map<string, (ActorKey & { abs: number })[]>();
 
   constructor(readonly scene: Cutscene, dialogue: (ref: string) => DialogueLine | null = () => null, speakerName: (id: string) => string = (s) => s) {
+    normaliseCutscene(scene);
     let t = 0;
     for (const s of scene.shots) { this.shotStart.push(t); t += s.durationSec; }
     this.duration = t;

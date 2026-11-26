@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_collections_marked_3",
+  "context": "Reporting back (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ruth_calloway",
+      "emotion": "satisfied",
+      "text": "Two marked envelopes went into Mayhew's glove box. They'll come out somewhere interesting."
+    }
+  ]
+}

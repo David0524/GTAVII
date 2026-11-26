@@ -1,0 +1,82 @@
+{
+  "id": "dlg.m16_baeks",
+  "context": "M16 o6. Seoul Star Imports. The Baeks behind the counter. Mrs. Baek holds an envelope.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "formal",
+      "text": "Mr. Varelas. You own our building. We would like to own it instead."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Kye is twelve families, one pot. The pot is here. Cash, today."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "surprised",
+      "text": "You'd buy a building in this city, now? Everyone else is leaving."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Everyone else is leaving. Prices are good."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Sell them the building.",
+          "goto": "l_sell",
+          "setFlags": [
+            "flag.baek_bought_building"
+          ],
+          "setRelationships": {
+            "char.nick_varelas/char.jung_ho_baek": 2,
+            "char.nick_varelas/char.mi_sook_baek": 2
+          }
+        },
+        {
+          "text": "Not yet. Ask me in August.",
+          "goto": "l_wait"
+        }
+      ]
+    },
+    {
+      "id": "l_sell",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "Sold. To the only optimists in Manhattan. Eleni will draw the papers."
+    },
+    {
+      "id": "l_sell2",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "satisfied",
+      "text": "Good. Now the only landlord we fear is us.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_wait",
+      "speaker": "char.nick_varelas",
+      "emotion": "evasive",
+      "text": "Ask me in August. I have… other paper first."
+    },
+    {
+      "id": "l_wait2",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "August. Fine. We will still be optimists in August. Probably.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Twelve families and a cigar box. More honest than my bank."
+    }
+  ]
+}

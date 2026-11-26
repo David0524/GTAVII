@@ -1,0 +1,24 @@
+{
+  "id": "dlg.m03_runner_caught",
+  "context": "M3 o6c. The fare who ran with Delroy's cash box, caught on W 41st St.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.fare_runner",
+      "emotion": "panicked",
+      "text": "Okay! Okay! It's all there! I got laid off Tuesday, man!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "So did half the city. Give me the box. Go home."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Somebody on the corner saw that. A report with my shirt in it. Note to self: new shirt."
+    }
+  ]
+}

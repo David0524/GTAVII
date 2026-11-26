@@ -1,0 +1,18 @@
+{
+  "id": "dlg.act_desk_locked_out",
+  "context": "Desk request: Inez locked out.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.inez_rivera",
+      "emotion": "annoyed",
+      "text": "Locked out. Key's at the laundromat on Thirtieth, in my other pants. Probably."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "Probably. I'll go. You watch the desk. Don't rent any rooms."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m01_stickup_after",
+  "context": "M1 o8. After the stick-up at the desk. A resident ran for the police call box on Broadway.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "shaken",
+      "text": "Mr. Arce. Mr. Lefkowitz ran for the call box. In his slippers."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Call box on the corner. Somebody gives a description. A report gets written. Mine."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "He was a trucker out of work, Mrs. Pruitt. He'll sleep it off at Midtown Central."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "And you'll sleep it off behind the glass. Here. The master keys. Manny forgot them."
+    }
+  ]
+}

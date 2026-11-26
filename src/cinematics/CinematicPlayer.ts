@@ -37,6 +37,7 @@ export class CinematicPlayer {
   private bodies = new Map<string, THREE.Group>();
   private fx = document.createElement('div');
   private skipHeld = 0;
+  private lastSkipT = 0;
   private opts: PlayOptions = {};
   private lastLine = '';
   private cardEls: HTMLElement[] = [];
@@ -126,8 +127,9 @@ export class CinematicPlayer {
     const inp = this.host.input;
     if (inp.pressed('pause')) this.setPaused(!this.paused);
     if (this.scene!.skippable !== false && !this.paused) {
-      const holding = inp.isHeld('skip') || this.touchHold();
-      this.skipHeld = holding ? this.skipHeld + dt : Math.max(0, this.skipHeld - dt * 2);
+      // wall-clock, not frame dt: dt is clamped, so on a slow device a dt-based hold would take longer than a second
+      const holding = inp.isHeld('skip') || this.touchHold(), now = performance.now() / 1000, real = this.lastSkipT ? now - this.lastSkipT : 0; this.lastSkipT = now;
+      this.skipHeld = holding ? this.skipHeld + real : Math.max(0, this.skipHeld - real * 2);
       (this.fx.querySelector('.cine-skip i') as HTMLElement).style.width = `${Math.min(1, this.skipHeld / 1) * 100}%`;
       this.fx.classList.toggle('skipping', this.skipHeld > 0.05);
       if (this.skipHeld >= 1) { this.stop(true); return; }

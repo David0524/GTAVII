@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_locksmith_1",
+  "context": "Krause Hardware (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.otto_krause",
+      "emotion": "gentle",
+      "text": "Lady on Thirty-Fourth locked out. Dead husband's place. Be gentle."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "I'm always gentle with doors."
+    }
+  ]
+}

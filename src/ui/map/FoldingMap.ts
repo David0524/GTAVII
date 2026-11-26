@@ -45,6 +45,8 @@ export class FoldingMap {
   player = { x: 0, z: 0, yaw: 0, lead: '' };
   owned = new Set<string>();
   ownerNotes: Record<string, string> = {};
+  /** Screen rects covered by the map screen's own UI (filter rail, buttons, card): no type goes under them. */
+  occluders: [number, number, number, number][] = [];
   /** Story mission markers (printed as red stars; tapping opens their card). */
   missions: { id: string; title: string; x: number; z: number; window?: [string, string]; blurb?: string }[] = [];
   showReticle = false;
@@ -238,8 +240,16 @@ export class FoldingMap {
     for (const h of this.heroes) L.reserve([tx(h.x) - 3, tz(h.z) - 3, tx(h.x) + 3, tz(h.z) + 3]);
     for (const ms of this.missions) L.reserve([tx(ms.x) - 11, tz(ms.z) - 11, tx(ms.x) + 11, tz(ms.z) + 11]);
     L.reserve([tx(this.player.x) - 9, tz(this.player.z) - 11, tx(this.player.x) + 9, tz(this.player.z) + 10]);
-    // printed furniture reserves its space so no type runs through it
-    const cart = Z < 0.6 ? { bx: x0 + 18, bz: z1 - 96 } : null;
+    for (const o of this.occluders) L.reserve(o);
+    // the pencilled route reserves its path, so printed type never hides under the graphite
+    if (m.route) for (let k = 0; k < m.route.pts.length; k += 2) { const x = tx(m.route.pts[k]), y = tz(m.route.pts[k + 1]); L.reserve([x - 4, y - 4, x + 4, y + 4]); if (k) { const px = tx(m.route.pts[k - 2]), py = tz(m.route.pts[k - 1]), n = Math.ceil(Math.hypot(x - px, y - py) / 8); for (let i = 1; i < n; i++) { const ix = px + (x - px) * i / n, iy = py + (y - py) * i / n; L.reserve([ix - 4, iy - 4, ix + 4, iy + 4]); } } }
+    // printed furniture reserves its space so no type runs through it; the cartouche takes the first
+    // sheet corner that isn't under the screen's UI
+    let cart: { bx: number; bz: number } | null = null;
+    if (Z < 0.6) {
+      const corners = [{ bx: x0 + 18, bz: z1 - 96 }, { bx: x1 - 254, bz: z1 - 96 }, { bx: x0 + 18, bz: z0 + 18 }, { bx: x1 - 254, bz: z0 + 18 }];
+      cart = corners.find((c) => L.free([c.bx, c.bz, c.bx + 236, c.bz + 78])) ?? corners[0];
+    }
     if (cart) L.reserve([cart.bx, cart.bz, cart.bx + 236, cart.bz + 78]);
     if (Z < 0.7) { const hw = 330; L.reserve([(px0 + px1) / 2 - hw, pz0 - 20, (px0 + px1) / 2 + hw, pz0 - 4]); L.reserve([(px0 + px1) / 2 - hw, pz1 + 4, (px0 + px1) / 2 + hw, pz1 + 20]); }
     // 1. printed landmarks (famous public buildings only; the player's own knowledge is pencil)

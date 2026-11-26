@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m15_compressors",
+  "context": "M15 o4. Varelas vaults, emergency lantern. Yiannis with a thermometer. Silence where the hum should be.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "urgent",
+      "text": "Compressors stopped twenty minutes ago. Forty-one degrees. Climbing."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "urgent",
+      "text": "How long before damage?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "Mink, six hours. Fox, less. Customers' coats, Niko. Not ours."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "deciding",
+      "text": "Ice. Every block in the city. The ice house on Tenth."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "Ice house wants cash. In a brownout everybody wants cash."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.nick_varelas",
+      "emotion": "grim",
+      "text": "Everybody gets paid. That's not corruption. That's payroll. Come on."
+    }
+  ]
+}

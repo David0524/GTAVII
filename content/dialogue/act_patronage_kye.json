@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_patronage_kye",
+  "context": "Patronage: Hanyang House back room.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Mrs. Baek. A donation. For the kye. For the optimists."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Kye doesn't take donations. Kye takes members. Five dollars a week. Join or go."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "amused",
+      "text": "…Five dollars. Put me down."
+    }
+  ]
+}

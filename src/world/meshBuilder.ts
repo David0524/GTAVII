@@ -7,6 +7,8 @@
  */
 import earcut from 'earcut';
 import { type ChunkData, type BuildingRec, GroundKind, Style, BuildingFlag } from '../shared/chunkFormat';
+import { buildingCondition } from '../shared/condition';
+import { buildProps } from './props';
 
 export const SIDEWALK_H = 0.15;
 /** Ground height in chunk-local coordinates (road surface). */
@@ -18,6 +20,10 @@ export interface MeshArrays {
   normal: Float32Array;
   color: Float32Array;
   index: Uint32Array;
+  /** Facade coordinates in metres: u = distance along the wall, v = height above the building's ground. Roofs: local x,z. */
+  uv?: Float32Array;
+  /** Per-building facade record: style, condition (0..4), floor height (m), seed (0..1). */
+  facade?: Float32Array;
 }
 export interface ChunkMeshes {
   key: string;
@@ -28,6 +34,8 @@ export interface ChunkMeshes {
   ground: MeshArrays;
   /** LOD1: tall-building shells only (no ground clutter, merged). */
   buildingsLod1: MeshArrays;
+  /** LOD0 props: water towers, fire escapes, AC units, awnings (vertex colours). */
+  props: MeshArrays;
   stats: { buildings: number; tris: number; trisLod1: number };
   /** Axis-aligned bounds (chunk-local). */
   maxHeight: number;
@@ -35,13 +43,21 @@ export interface ChunkMeshes {
 
 class Builder {
   p: number[] = []; n: number[] = []; c: number[] = []; idx: number[] = [];
+  uv: number[] = []; fac: number[] = [];
+  /** When set, every vert() also records facade uv + attributes (building meshes). */
+  facadeMode = false;
+  curUV: [number, number] = [0, 0];
+  curFac: [number, number, number, number] = [0, 0, 3.4, 0];
   get vcount() { return this.p.length / 3; }
   vert(x: number, y: number, z: number, nx: number, ny: number, nz: number, col: [number, number, number]) {
     this.p.push(x, y, z); this.n.push(nx, ny, nz); this.c.push(col[0], col[1], col[2]);
+    if (this.facadeMode) { this.uv.push(this.curUV[0], this.curUV[1]); this.fac.push(...this.curFac); }
   }
   quad(a: number, b: number, c: number, d: number) { this.idx.push(a, b, c, a, c, d); }
   finish(): MeshArrays {
-    return { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx) };
+    const m: MeshArrays = { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx) };
+    if (this.facadeMode) { m.uv = new Float32Array(this.uv); m.facade = new Float32Array(this.fac); }
+    return m;
   }
 }
 
@@ -83,7 +99,7 @@ function ringSignedArea(r: Float32Array) {
 }
 
 /** Walls + flat roof for one building (or building part). */
-function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: HeightFn) {
+function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: HeightFn, cond = 2) {
   // Heights are relative to the ground under the footprint: walls start below its lowest point
   // (no gaps on slopes), roofs sit at mean ground + height.
   const outer = rec.rings[0]; let gMin = Infinity, gSum = 0;
@@ -91,28 +107,29 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
   const gAvg = gSum / (outer.length / 2);
   const top = gAvg + Math.max(rec.height, rec.minHeight + 0.5);
   const bottom = rec.minHeight > 0 ? gAvg + rec.minHeight : gMin - 0.6; // sink into the ground: no light leaks at the sidewalk
+  // Facade record: real floor-to-floor height from the data (clamped to period-plausible values).
+  const floorH = rec.floors > 0 ? Math.min(5.6, Math.max(2.9, rec.height / Math.max(1, rec.floors))) : 3.5;
+  const seed = ((Math.imul(rec.id, 2654435761) >>> 0) % 100000) / 100000;
+  b.curFac = [rec.style, cond, floorH, seed];
   for (let r = 0; r < rec.rings.length; r++) {
     const ring = rec.rings[r];
     const n = ring.length / 2;
-    // Outer rings are CCW in (x,z) math orientation, holes CW; outward normal = (dz, -dx) for CCW... in x/z with y up,
-    // a CCW ring in (x,z) is clockwise when viewed from above (+Y looking down maps x->x, z->down-screen). Compute directly:
     const ccw = ringSignedArea(ring) > 0;
+    let along = 0; // facade u in metres, continuous around the ring
     for (let k = 0; k < n; k++) {
       const j = (k + 1) % n;
       const x0 = ring[2 * k], z0 = ring[2 * k + 1], x1 = ring[2 * j], z1 = ring[2 * j + 1];
       const dx = x1 - x0, dz = z1 - z0; const L = Math.hypot(dx, dz); if (L < 1e-3) continue;
-      // Outward normal for a CCW (x,z) ring is (dz, -dx)/L... verified by the sign test below.
       let nx = dz / L, nz = -dx / L;
       if (!ccw) { nx = -nx; nz = -nz; }
-      // Wall shading: slight darkening toward the base (cheap AO stand-in until Phase 3).
-      const base: RGB = [col[0] * 0.8, col[1] * 0.8, col[2] * 0.8];
       const v = b.vcount;
-      b.vert(x0, bottom, z0, nx, 0, nz, base);
-      b.vert(x1, bottom, z1, nx, 0, nz, base);
-      b.vert(x1, top, z1, nx, 0, nz, col);
-      b.vert(x0, top, z0, nx, 0, nz, col);
-      // Winding: front face must face (nx, nz). For outward normal (dz,-dx) with ccw ring, order v,v+3,v+2,v+1 is CCW from outside.
+      const vb = bottom - gAvg, vt = top - gAvg;
+      b.curUV = [along, vb]; b.vert(x0, bottom, z0, nx, 0, nz, col);
+      b.curUV = [along + L, vb]; b.vert(x1, bottom, z1, nx, 0, nz, col);
+      b.curUV = [along + L, vt]; b.vert(x1, top, z1, nx, 0, nz, col);
+      b.curUV = [along, vt]; b.vert(x0, top, z0, nx, 0, nz, col);
       b.idx.push(v, v + 3, v + 2, v, v + 2, v + 1);
+      along += L;
     }
   }
   // Roof
@@ -123,9 +140,8 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
   }
   const tris = earcut(flat, holes, 2);
   const v0 = b.vcount;
-  for (let k = 0; k < flat.length; k += 2) b.vert(flat[k], top, flat[k + 1], 0, 1, 0, roofCol);
+  for (let k = 0; k < flat.length; k += 2) { b.curUV = [flat[k], flat[k + 1]]; b.vert(flat[k], top, flat[k + 1], 0, 1, 0, roofCol); }
   for (let k = 0; k < tris.length; k += 3) {
-    // Ensure upward facing: (x,z) CCW triangle seen from +Y is clockwise on screen -> reverse.
     const a = tris[k], c = tris[k + 1], d = tris[k + 2];
     const ax = flat[2 * a], az = flat[2 * a + 1], cx = flat[2 * c], cz = flat[2 * c + 1], dx2 = flat[2 * d], dz2 = flat[2 * d + 1];
     const cross = (cx - ax) * (dz2 - az) - (cz - az) * (dx2 - ax);
@@ -164,6 +180,7 @@ function groundPoly(b: Builder, rings: Float32Array[], yOff: number, col: RGB, s
   // Curb faces: every edge of a raised polygon that is not on the chunk boundary drops to road level,
   // split into <= MAX_EDGE segments so the curb follows the slope.
   const curb: RGB = [0.5, 0.48, 0.45];
+  const prevFac = b.curFac; b.curFac = [10, 0, 0, 0];
   const onEdge = (x: number, z: number) => Math.abs(Math.abs(x) - half) < 0.02 || Math.abs(Math.abs(z) - half) < 0.02;
   for (const ring of rings) {
     const n = ring.length / 2; const ccw = ringSignedArea(ring) > 0;
@@ -184,30 +201,34 @@ function groundPoly(b: Builder, rings: Float32Array[], yOff: number, col: RGB, s
       }
     }
   }
+  b.curFac = prevFac;
 }
 
-export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = () => 0): ChunkMeshes {
-  const bAll = new Builder();
-  const bLod = new Builder();
-  const g = new Builder();
+export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = () => 0, ox = 0): ChunkMeshes {
+  const bAll = new Builder(); bAll.facadeMode = true;
+  const bLod = new Builder(); bLod.facadeMode = true;
+  const g = new Builder(); g.facadeMode = true; // ground: facade.x = surface kind (GroundKind; 10 = curb face)
   let maxHeight = 0;
   for (const rec of data.buildings) {
     let col = jitter(rec.id, STYLE_COLORS[rec.style] ?? STYLE_COLORS[0]);
     if (rec.flags & BuildingFlag.Hero) col = [col[0] * HERO_TINT[0], col[1] * HERO_TINT[1], col[2] * HERO_TINT[2]];
-    extrude(bAll, rec, col, ROOF, hf);
-    if (rec.height >= 12) extrude(bLod, rec, col, ROOF, hf);
+    const cond = buildingCondition({ id: rec.id, year: rec.year, style: rec.style, use: rec.use, floors: rec.floors, flags: rec.flags, x: ox + rec.rings[0][0] });
+    extrude(bAll, rec, col, ROOF, hf, cond);
+    if (rec.height >= 12) extrude(bLod, rec, col, ROOF, hf, cond);
     maxHeight = Math.max(maxHeight, rec.height);
   }
   const half = chunkSize / 2;
   for (const gr of data.ground) {
     const col = GROUND_COLORS[gr.kind] ?? GROUND_COLORS[GroundKind.Sidewalk];
+    g.curFac = [gr.kind, 0, 0, 0];
     if (gr.kind === GroundKind.Road) groundPoly(g, gr.rings, 0, col, false, half, hf);
     else if (gr.kind === GroundKind.Lot) groundPoly(g, gr.rings, SIDEWALK_H + 0.04, col, false, half, hf); // 4 cm: different tessellation from the sidewalk below must not z-fight on slopes
     else groundPoly(g, gr.rings, SIDEWALK_H, col, true, half, hf);
   }
   const buildings = bAll.finish(), ground = g.finish(), buildingsLod1 = bLod.finish();
+  const props = buildProps(data, hf);
   return {
-    key: `${data.i}_${data.j}`, i: data.i, j: data.j, buildings, ground, buildingsLod1, maxHeight,
+    key: `${data.i}_${data.j}`, i: data.i, j: data.j, buildings, ground, buildingsLod1, props, maxHeight,
     stats: { buildings: data.buildings.length, tris: (buildings.index.length + ground.index.length) / 3, trisLod1: buildingsLod1.index.length / 3 },
   };
 }

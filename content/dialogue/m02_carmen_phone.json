@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m02_carmen_phone",
+  "context": "M2 o6. The desk phone rings at 22:50.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carmen_arce",
+      "emotion": "scolding",
+      "text": "Mijo. It's your mother. You know, the one who fed you for thirty years?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Hola, Ma. I'm working."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carmen_arce",
+      "emotion": "warm",
+      "text": "Tomorrow, Sunday, two o'clock. Arroz con pollo. You come in a clean shirt."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carmen_arce",
+      "emotion": "probing",
+      "text": "And you tell me why Carl Mayhew was looking for you at the bodega."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "evasive",
+      "text": "Old times, Ma. He's lonely."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.carmen_arce",
+      "emotion": "dry",
+      "text": "Lonely men don't buy cigars for the whole counter. Two o'clock."
+    }
+  ]
+}

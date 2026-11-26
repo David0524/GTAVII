@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m11_tina",
+  "context": "M11 o3. Royal Cafeteria. Tina picks at pie and won't look up.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.tina_mercado",
+      "emotion": "funny",
+      "text": "Del! Rule twelve: there is no rule twelve. I'm tired of rules."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Rule six, then. You're two weeks behind. That's not like you."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.tina_mercado",
+      "emotion": "deflecting",
+      "text": "Family stuff. My cousin. Lawyers cost money. I'll catch up."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "noticing",
+      "text": "Your cousin is standing at the window, Tina. Waving at me."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.lonnie_gage",
+      "emotion": "smooth",
+      "text": "Del, baby. A bank needs a guard. I'm offering to be the guard."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Rule seven: nobody guards my money but me. Excuse me."
+    }
+  ]
+}

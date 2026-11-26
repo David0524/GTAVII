@@ -1,0 +1,28 @@
+{
+  "id": "dlg.sys_bail_n_d",
+  "context": "Bail-out: char.nick_varelas bails out char.delphine_moore at a precinct desk (CORE_SYSTEMS arrest flow). Remembered: relationship +1 both ways.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "Miss Moore. Bail and a car. I'll drive you to the Arden."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Penn South. I don't sleep where I work."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "surprised",
+      "text": "…Neither do I, it turns out. Penn South.",
+      "setRelationships": {
+        "char.nick_varelas/char.delphine_moore": 1,
+        "char.delphine_moore/char.nick_varelas": 1
+      }
+    }
+  ]
+}

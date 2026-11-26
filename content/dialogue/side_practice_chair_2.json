@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_practice_chair_2",
+  "context": "The regulars talk while Tina works (Delphine).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.hotel_bar_regular",
+      "emotion": "chatty",
+      "text": "Forty years I've come here. Never once a lady barber. I like it. Don't tell my wife."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ezekiel_barber",
+      "emotion": "dry",
+      "text": "Hair's patient, young lady. People ain't. You'll do fine."
+    }
+  ]
+}

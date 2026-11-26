@@ -139,3 +139,16 @@ class MinHeap {
     return top;
   }
 }
+
+/** Narrative's call-out pool (content/barks/route_calls.json): lines with {street}/{avenue} slots, tagged
+ *  by voice. Picks a line that agrees with the turn (direction word and street vs avenue), so a voiced
+ *  line can never contradict the call-out the HUD prints. Returns null when no line fits. */
+export interface CallLine { context: string; text: string; emotion?: string }
+export function voicedCallout(t: Turn, voice: string, pool: CallLine[], seed = 0): string | null {
+  const isAve = /Avenue$|^Broadway$/.test(t.onto), dir = t.dir.includes('left') ? 'left' : 'right', other = dir === 'left' ? 'right' : 'left';
+  const name = callout(t).replace(/^.*? on /, '');
+  const ok = pool.filter((l) => l.context === voice && new RegExp(`\\b${dir}\\b`, 'i').test(l.text) && !new RegExp(`\\b${other}\\b`, 'i').test(l.text)
+    && (isAve ? l.text.includes('{avenue}') : l.text.includes('{street}')));
+  if (!ok.length) return null;
+  return ok[Math.abs(seed) % ok.length].text.replace('{street}', name).replace('{avenue}', name);
+}

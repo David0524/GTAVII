@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_wanted_1971_2",
+  "context": "The first poster (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "'Wanted: assault, W 35th St, October.' The trucker. The case Lisle made go away."
+    }
+  ]
+}

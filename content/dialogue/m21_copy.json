@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m21_copy",
+  "context": "M21 o8 (wire branch). Lisle's office in lamplight. The ledger on a photocopier in the hall.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Forty pages. The machine is slow. Every page sounds like a gunshot."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "First page: October seventy-one. C.M. Carl. The night I waited in the car."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Back in the cabinet, exactly. He measures the gaps. Marjorie said so."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Calloway's wire is hot under my shirt. Everybody sweats."
+    }
+  ]
+}

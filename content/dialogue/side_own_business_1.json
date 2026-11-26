@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_own_business_1",
+  "context": "The sale terms.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Half of Hanyang House. Four thousand. You keep the books honest or you keep nothing."
+    }
+  ]
+}

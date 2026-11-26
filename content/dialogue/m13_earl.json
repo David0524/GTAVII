@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m13_earl",
+  "context": "M13 o2. Earl's stand in the rain under an awning. He opens a small cloth-bound book.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Every man on this street plays a number. Cops play the biggest."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Thirty years I've written down who I pay. Dates. Amounts. Badge numbers."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "careful",
+      "text": "Why show me, Earl?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "State's got a lottery and I'm still here. I want to be here when they're not."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Brannock comes at eleven. Stand under the theatre awning. Good light there."
+    }
+  ]
+}

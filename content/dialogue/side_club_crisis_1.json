@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_club_crisis_1",
+  "context": "A club member's emergency (Delphine).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.club_waitress",
+      "emotion": "panicked",
+      "text": "Del, the landlord changed my lock. My kid's inside with my sister. My rent's paid!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "steady",
+      "text": "Rule one: I count everything. Including landlords. Show me the receipt."
+    }
+  ]
+}

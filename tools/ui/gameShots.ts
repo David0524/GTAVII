@@ -22,7 +22,13 @@ async function run(page: Page, size: string, base: string, errs: string[]) {
   await page.waitForSelector('.t74-menu button', { timeout: 240_000 });
   await page.evaluate(() => document.fonts.ready);
   await shot('01_title');
-  await page.locator('.t74-menu button', { hasText: /new game/i }).click();
+  await page.locator('.t74-menu button', { hasText: /new game/i }).click({ noWaitAfter: true, timeout: 120_000 });
+  // New game opens on M1's scene: hold skip like a player would (Enter on desktop, the touch button on phones)
+  await page.waitForFunction(() => (window as any).__T74.ui.state === 'cutscene', null, { timeout: 30_000 });
+  await page.waitForTimeout(1500);
+  await shot('01b_opening_cutscene');
+  if (size === 'phone') { const b = page.locator('.cine-skip'); const bb = (await b.boundingBox())!; await page.mouse.move(bb.x + 20, bb.y + 20); await b.dispatchEvent('pointerdown'); await page.waitForFunction(() => (window as any).__T74.ui.state === 'play', null, { timeout: 60_000 }); await b.dispatchEvent('pointerup'); }
+  else { await page.keyboard.down('Enter'); await page.waitForFunction(() => (window as any).__T74.ui.state === 'play', null, { timeout: 60_000 }); await page.keyboard.up('Enter'); }
   await page.waitForFunction(() => (window as any).__T74.ui.state === 'play', null, { timeout: 30_000 });
   await page.evaluate(() => (window as any).__T74.whenIdle());
   await page.waitForTimeout(2500);

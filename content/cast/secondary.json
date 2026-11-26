@@ -1,0 +1,2234 @@
+[
+  {
+    "id": "char.walter_hollis",
+    "tier": "secondary",
+    "name": "Walter Hollis",
+    "age": 74,
+    "born": 1900,
+    "origin": "Baltimore; merchant seaman (galley cook) 1918–64",
+    "occupation": "Retired; Corwin resident, room 1112",
+    "want": "Live to see his old ship's reunion in October.",
+    "need": "Ask for help before it's too late.",
+    "secret": "His heart is failing, and Odessa has been paying for his pills.",
+    "speech": {
+      "pattern": "Sea stories, port names, calls everyone 'shipmate', makes light of everything.",
+      "samples": [
+        "Forty years at sea and I die in a hotel? Not this hotel, shipmate.",
+        "Ran a galley through two wars. A busted boiler don't scare me.",
+        "Fan's broke. Window's stuck. Otherwise it's a palace."
+      ]
+    },
+    "home": "loc.corwin_hotel",
+    "haunts": [
+      {
+        "at": "Broadway & W 32nd St",
+        "why": "Newsstand: shipping news"
+      },
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Lobby, radio on his knee"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "21:00",
+        "to": "06:00",
+        "at": "loc.corwin_hotel",
+        "activity": "sleep"
+      },
+      {
+        "from": "06:00",
+        "to": "09:00",
+        "at": "loc.corwin_hotel",
+        "activity": "home"
+      },
+      {
+        "from": "09:00",
+        "to": "11:00",
+        "at": "Broadway & W 32nd St",
+        "activity": "errand"
+      },
+      {
+        "from": "11:00",
+        "to": "16:00",
+        "at": "loc.corwin_hotel",
+        "activity": "socialize"
+      },
+      {
+        "from": "16:00",
+        "to": "21:00",
+        "at": "loc.corwin_hotel",
+        "activity": "home"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.odessa_pruitt",
+        "kind": "cared_for_by",
+        "weight": 3
+      },
+      {
+        "to": "char.teddy_arce",
+        "kind": "friend",
+        "weight": 2
+      }
+    ],
+    "arc": "The lobby's storyteller in Acts 1 and 2. Found dead in the heat after the power cut (M19), off screen. His radio passes to Teddy and keeps playing in the lobby for the rest of the game.",
+    "visual": {
+      "palette": [
+        "#1F3A5F",
+        "#F5F5F5",
+        "#6B6B6B"
+      ],
+      "silhouette": "Thin and bent, quick hands.",
+      "wardrobe": "Ribbed undershirt and suspenders, navy watch cap even in July, canvas shoes.",
+      "props": [
+        "transistor radio",
+        "tin coffee cup",
+        "a ship's photo in his wallet"
+      ]
+    },
+    "missions": [
+      2,
+      7,
+      19
+    ]
+  },
+  {
+    "id": "char.manny_soto",
+    "tier": "secondary",
+    "name": "Manuel “Manny” Soto",
+    "age": 58,
+    "born": 1916,
+    "origin": "Havana; came in 1951",
+    "occupation": "Corwin day clerk (07:00–15:00)",
+    "want": "Keep his job under the new owners.",
+    "need": "Find his courage.",
+    "secret": "The new owners pay him $20 a week to report which tenants are behind on rent.",
+    "speech": {
+      "pattern": "Polite and apologetic; baseball metaphors; sighs before bad news.",
+      "samples": [
+        "Teddy, they gave me a new rule book. It's mostly the word 'no'.",
+        "Two strikes on the boiler, one on the elevator. We're still batting.",
+        "Don't look at me like that. I got a daughter in college."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Behind the glass"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "15:30",
+        "to": "06:30",
+        "at": "off_map",
+        "activity": "home",
+        "note": "Washington Heights"
+      },
+      {
+        "from": "06:30",
+        "to": "07:00",
+        "at": "Broadway & W 31st St",
+        "activity": "commute"
+      },
+      {
+        "from": "07:00",
+        "to": "15:00",
+        "at": "loc.corwin_hotel",
+        "activity": "work"
+      },
+      {
+        "from": "15:00",
+        "to": "15:30",
+        "at": "Broadway & W 31st St",
+        "activity": "commute"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.teddy_arce",
+        "kind": "coworker",
+        "weight": 1
+      },
+      {
+        "to": "char.vic_prentiss",
+        "kind": "paid_by",
+        "weight": -1
+      }
+    ],
+    "arc": "Informs on the tenants in Act 1. Confesses to Teddy in Act 2. In Act 3 he helps or hinders the fire watch depending on Teddy's relationship score.",
+    "visual": {
+      "palette": [
+        "#F0E68C",
+        "#2F4F4F",
+        "#8B0000"
+      ],
+      "silhouette": "Small and neat; pencil moustache.",
+      "wardrobe": "Pressed guayabera, grey slacks, polished shoes.",
+      "props": [
+        "rule book",
+        "baseball radio",
+        "rubber stamp"
+      ]
+    },
+    "missions": [
+      2,
+      19,
+      26
+    ]
+  },
+  {
+    "id": "char.bernard_ostrow",
+    "tier": "secondary",
+    "name": "Bernard Ostrow",
+    "age": 69,
+    "born": 1905,
+    "origin": "Lower East Side",
+    "occupation": "Retired court stenographer; Corwin resident, room 703",
+    "want": "Be useful again.",
+    "need": "Forgive himself for what he typed and kept quiet about.",
+    "secret": "He took dictation in Lisle's old bureau and knows Lisle's phrasing by heart.",
+    "speech": {
+      "pattern": "Verbatim recall; jokes about punctuation; dry Yiddish asides.",
+      "samples": [
+        "Mr. Lisle writes 'notwithstanding' when he means 'we are stealing'.",
+        "I took down eleven thousand trials. I know what a lie looks like typed.",
+        "Comma, period, eviction. Same sentence every time."
+      ]
+    },
+    "home": "loc.corwin_hotel",
+    "haunts": [
+      {
+        "at": "loc.nypl_main",
+        "why": "Reading room, mornings"
+      },
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Committee table in the lobby"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "22:00",
+        "to": "07:00",
+        "at": "loc.corwin_hotel",
+        "activity": "sleep"
+      },
+      {
+        "from": "07:00",
+        "to": "09:00",
+        "at": "loc.corwin_hotel",
+        "activity": "home"
+      },
+      {
+        "from": "09:00",
+        "to": "13:00",
+        "at": "loc.nypl_main",
+        "activity": "errand"
+      },
+      {
+        "from": "13:00",
+        "to": "22:00",
+        "at": "loc.corwin_hotel",
+        "activity": "socialize"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.odessa_pruitt",
+        "kind": "committee",
+        "weight": 2
+      },
+      {
+        "to": "char.howard_lisle",
+        "kind": "recognises",
+        "weight": -2
+      }
+    ],
+    "arc": "Reads the vacate notices aloud in Act 1. In Act 2 he identifies Lisle's hand in the ledger copy. In Act 3 he's a witness if Branch B goes to the prosecutor.",
+    "visual": {
+      "palette": [
+        "#8B0000",
+        "#FAF0E6",
+        "#556B2F"
+      ],
+      "silhouette": "Round and slow; magnifying glass on a cord.",
+      "wardrobe": "Short-sleeve shirt, red bow tie, suspenders.",
+      "props": [
+        "steno pad",
+        "magnifying glass"
+      ]
+    },
+    "missions": [
+      2,
+      21,
+      29
+    ]
+  },
+  {
+    "id": "char.inez_rivera",
+    "tier": "secondary",
+    "name": "Inez Rivera",
+    "age": 31,
+    "born": 1943,
+    "origin": "Santurce, Puerto Rico; came in 1960",
+    "occupation": "Placed at the Corwin by the welfare department with her two children; does piecework at home",
+    "want": "An apartment with a kitchen.",
+    "need": "Stop being ashamed of wanting out.",
+    "secret": "She has already taken Prentiss's $500 relocation bonus, and she hasn't moved.",
+    "speech": {
+      "pattern": "Practical and sharp; Spanish under her breath; protective.",
+      "samples": [
+        "Two kids, one hot plate, one window. You call that emergency? I call it July.",
+        "Five hundred dollars, Teddy. You got five hundred? Then don't tell me no.",
+        "My kids go to day camp at eight. Whatever happens here happens after eight."
+      ]
+    },
+    "home": "loc.corwin_hotel",
+    "haunts": [
+      {
+        "at": "Broadway & W 30th St",
+        "why": "Laundromat"
+      },
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Third floor, door propped for air"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "22:00",
+        "to": "06:30",
+        "at": "loc.corwin_hotel",
+        "activity": "sleep"
+      },
+      {
+        "from": "06:30",
+        "to": "08:00",
+        "at": "loc.corwin_hotel",
+        "activity": "home"
+      },
+      {
+        "from": "08:00",
+        "to": "09:00",
+        "at": "Broadway & W 30th St",
+        "activity": "errand",
+        "note": "Walks the children to the day-camp bus"
+      },
+      {
+        "from": "09:00",
+        "to": "16:00",
+        "at": "loc.corwin_hotel",
+        "activity": "work",
+        "note": "Piecework"
+      },
+      {
+        "from": "16:00",
+        "to": "22:00",
+        "at": "loc.corwin_hotel",
+        "activity": "home"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.odessa_pruitt",
+        "kind": "committee",
+        "weight": 1
+      },
+      {
+        "to": "char.vic_prentiss",
+        "kind": "took_money_from",
+        "weight": -1
+      }
+    ],
+    "arc": "Takes the buyout in Act 1. In Act 3 she's Prentiss's proof that the arson plan exists. Her children are never on screen in any danger. Content rule: they're at camp or with a sister during M26.",
+    "visual": {
+      "palette": [
+        "#20B2AA",
+        "#FFFFFF",
+        "#8B4513"
+      ],
+      "silhouette": "Young and tired; hair in a scarf.",
+      "wardrobe": "Cotton house dress, canvas sneakers.",
+      "props": [
+        "laundry bag",
+        "hot plate",
+        "bundle of piecework collars"
+      ]
+    },
+    "missions": [
+      2,
+      26
+    ]
+  },
+  {
+    "id": "char.gus_wilkie",
+    "tier": "secondary",
+    "name": "Gus Wilkie",
+    "age": 55,
+    "born": 1919,
+    "origin": "Scranton, Pennsylvania",
+    "occupation": "Corwin superintendent; lives in the basement",
+    "want": "Keep his basement apartment.",
+    "need": "Say no to letterhead.",
+    "secret": "He threw the switch that cut power to the eleventh floor, on Prentiss's orders.",
+    "speech": {
+      "pattern": "Mumbles; mechanic's jargon; defensive.",
+      "samples": [
+        "Boiler's from 1911. I'm not a super, I'm a priest. I do last rites.",
+        "Orders come on letterhead. I don't argue with letterhead.",
+        "I turned the switch. That's all. I just turned the switch."
+      ]
+    },
+    "home": "loc.corwin_hotel",
+    "haunts": [
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Boiler room"
+      },
+      {
+        "at": "6th Ave & W 31st St",
+        "why": "Hardware store, beer after"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "22:00",
+        "to": "06:00",
+        "at": "loc.corwin_hotel",
+        "activity": "sleep"
+      },
+      {
+        "from": "06:00",
+        "to": "15:00",
+        "at": "loc.corwin_hotel",
+        "activity": "work"
+      },
+      {
+        "from": "15:00",
+        "to": "18:00",
+        "at": "6th Ave & W 31st St",
+        "activity": "drink"
+      },
+      {
+        "from": "18:00",
+        "to": "22:00",
+        "at": "loc.corwin_hotel",
+        "activity": "home"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.vic_prentiss",
+        "kind": "takes_orders_from",
+        "weight": -1
+      },
+      {
+        "to": "char.teddy_arce",
+        "kind": "afraid_of",
+        "weight": -1
+      }
+    ],
+    "arc": "An obstacle in Act 1. The guilty man in Act 2. In Act 3 he's the key witness to the arson plan, if Teddy reaches him before Prentiss does.",
+    "visual": {
+      "palette": [
+        "#708090",
+        "#2F4F4F",
+        "#CD853F"
+      ],
+      "silhouette": "Stooped and heavy-handed.",
+      "wardrobe": "Grey coveralls, tool belt, rubber boots.",
+      "props": [
+        "giant key ring",
+        "flashlight",
+        "pipe wrench"
+      ]
+    },
+    "missions": [
+      2,
+      19,
+      26
+    ]
+  },
+  {
+    "id": "char.pat_kearney",
+    "tier": "secondary",
+    "name": "Sgt. Patrick Kearney",
+    "age": 57,
+    "born": 1917,
+    "origin": "Inwood, Manhattan",
+    "occupation": "Desk sergeant, Midtown Central",
+    "want": "Retire in December without a scandal.",
+    "need": "Tell what he knows.",
+    "secret": "He kept the station house's old 1969–71 'Christmas list' (who paid and who collected) in his desk drawer.",
+    "speech": {
+      "pattern": "Gruff and formal; Irish cadence; calls everyone 'son'.",
+      "samples": [
+        "Front desk is for complaints, son. Yours I've heard. Next.",
+        "Took a turkey every Christmas for twenty years. Never a dollar. Write that.",
+        "Mayhew sells his own furniture and calls it moving."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.station_house",
+        "why": "The front desk, which he has made his throne"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "16:30",
+        "to": "07:30",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "07:30",
+        "to": "08:00",
+        "at": "7th Ave & W 31st St",
+        "activity": "commute"
+      },
+      {
+        "from": "08:00",
+        "to": "16:00",
+        "at": "loc.station_house",
+        "activity": "work"
+      },
+      {
+        "from": "16:00",
+        "to": "16:30",
+        "at": "7th Ave & W 31st St",
+        "activity": "commute"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.carl_mayhew",
+        "kind": "despises",
+        "weight": -2
+      },
+      {
+        "to": "char.teddy_arce",
+        "kind": "old_boss",
+        "weight": 1
+      },
+      {
+        "to": "char.luis_navarro",
+        "kind": "protects",
+        "weight": 1
+      }
+    ],
+    "arc": "The front desk in every station-house scene. In Act 3 he hands Teddy the Christmas list, or burns it.",
+    "visual": {
+      "palette": [
+        "#1C2541",
+        "#C0C0C0",
+        "#FFFFFF"
+      ],
+      "silhouette": "Big and grey; immovable.",
+      "wardrobe": "Uniform shirt with sergeant's stripes, reading glasses.",
+      "props": [
+        "the desk blotter",
+        "a chipped mug"
+      ]
+    },
+    "missions": [
+      7,
+      22,
+      25
+    ]
+  },
+  {
+    "id": "char.luis_navarro",
+    "tier": "secondary",
+    "name": "Ptl. Luis Navarro",
+    "age": 27,
+    "born": 1947,
+    "origin": "East Harlem",
+    "occupation": "Patrolman, Midtown Central; Teddy's former rookie",
+    "want": "Make detective clean.",
+    "need": "Learn that clean isn't the same as enough.",
+    "secret": "Internal Affairs has placed him in the station house as a confidential field associate to watch Wurtz's unit.",
+    "speech": {
+      "pattern": "Earnest and by the book; Spanish with Teddy; a beat too eager.",
+      "samples": [
+        "You taught me never take the coffee, Teddy. I don't even drink coffee now.",
+        "Paperwork is a weapon. Everybody forgets that but me.",
+        "Sarge says I'm too clean for the street. I say the street needs a shower."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.station_house",
+        "why": "Muster"
+      },
+      {
+        "at": "Broadway & W 34th St",
+        "why": "Foot post at Herald Square"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "16:00",
+        "to": "07:30",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "07:30",
+        "to": "08:00",
+        "at": "loc.station_house",
+        "activity": "work"
+      },
+      {
+        "from": "08:00",
+        "to": "16:00",
+        "at": "Broadway & W 34th St",
+        "activity": "work",
+        "note": "Foot post"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.teddy_arce",
+        "kind": "mentee_of",
+        "weight": 2
+      },
+      {
+        "to": "char.dennis_wurtz",
+        "kind": "watches",
+        "weight": -2
+      },
+      {
+        "to": "char.ruth_calloway",
+        "kind": "ally",
+        "weight": 1
+      }
+    ],
+    "arc": "A friendly face at Herald Square in Act 1. In Act 2 his cover is at risk. In Act 3 he backs whichever side Teddy chooses in Branch B, at a cost.",
+    "visual": {
+      "palette": [
+        "#1C2541",
+        "#FFFFFF",
+        "#000000"
+      ],
+      "silhouette": "Lean and upright; fresh haircut.",
+      "wardrobe": "Patrolman's summer uniform, short sleeves, eight-point cap.",
+      "props": [
+        "memo book",
+        "whistle"
+      ]
+    },
+    "missions": [
+      3,
+      12,
+      22,
+      29
+    ]
+  },
+  {
+    "id": "char.jimmy_brannock",
+    "tier": "secondary",
+    "name": "Det. Jimmy Brannock",
+    "age": 33,
+    "born": 1941,
+    "origin": "Staten Island",
+    "occupation": "Plainclothes officer in Wurtz's unit; the unit's collector",
+    "want": "Money.",
+    "need": "None he knows about.",
+    "secret": "He skims from Wurtz's envelopes and keeps the skim in his car's spare-tyre well.",
+    "speech": {
+      "pattern": "Laconic; threats delivered as jokes; never uses names.",
+      "samples": [
+        "Tax is due, sweetheart. City's broke, didn't you hear?",
+        "I don't make the rules. I just enforce the ones that pay.",
+        "Smile for the camera? Lady, I am the camera."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "8th Ave & W 38th St",
+        "why": "Collection corner"
+      },
+      {
+        "at": "loc.cop_bar",
+        "why": "After tour"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "04:00",
+        "to": "18:30",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "18:30",
+        "to": "19:00",
+        "at": "loc.station_house",
+        "activity": "commute"
+      },
+      {
+        "from": "19:00",
+        "to": "03:00",
+        "at": "8th Ave & W 38th St",
+        "activity": "work"
+      },
+      {
+        "from": "03:00",
+        "to": "04:00",
+        "at": "loc.cop_bar",
+        "activity": "drink"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.dennis_wurtz",
+        "kind": "serves",
+        "weight": 0
+      },
+      {
+        "to": "char.lonnie_gage",
+        "kind": "partner",
+        "weight": 1
+      },
+      {
+        "to": "char.delphine_moore",
+        "kind": "extorts",
+        "weight": -2
+      }
+    ],
+    "arc": "The face of the tax in Acts 1 and 2. Delphine's photographs of him start the evidence file (M8). In Act 3 his skim makes him easy to turn.",
+    "visual": {
+      "palette": [
+        "#3E2723",
+        "#C2B280",
+        "#000000"
+      ],
+      "silhouette": "Big, moustached, aviator sunglasses at night.",
+      "wardrobe": "Brown leather car coat even in heat, open-collar shirt, slacks.",
+      "props": [
+        "envelope",
+        "keys to an unmarked sedan"
+      ]
+    },
+    "missions": [
+      6,
+      8,
+      9,
+      11,
+      13,
+      23,
+      27
+    ]
+  },
+  {
+    "id": "char.marjorie_kell",
+    "tier": "secondary",
+    "name": "Marjorie Kell",
+    "age": 44,
+    "born": 1930,
+    "origin": "Flushing, Queens",
+    "occupation": "Lisle's secretary and office manager for fifteen years",
+    "want": "The pension Lisle never set up for her.",
+    "need": "See herself as a person, not office furniture.",
+    "secret": "She keeps a carbon of everything. A second copy of the ledger is in her hall closet in Flushing.",
+    "speech": {
+      "pattern": "Telephone-polite, efficient, with sudden bitterness.",
+      "samples": [
+        "Mr. Lisle is in conference. Mr. Lisle is always in conference.",
+        "I typed every word of it. Nobody ever asks the typist.",
+        "Carbons, Mr. Arce. Nothing in this office happens only once."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.lisle_office",
+        "why": "Outer office"
+      },
+      {
+        "at": "loc.lisle_luncheonette",
+        "why": "Eats at 12:00, before he does"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "18:00",
+        "to": "08:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "08:00",
+        "to": "12:00",
+        "at": "loc.lisle_office",
+        "activity": "work"
+      },
+      {
+        "from": "12:00",
+        "to": "12:35",
+        "at": "loc.lisle_luncheonette",
+        "activity": "eat"
+      },
+      {
+        "from": "12:35",
+        "to": "18:00",
+        "at": "loc.lisle_office",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.howard_lisle",
+        "kind": "works_for",
+        "weight": -1
+      },
+      {
+        "to": "char.teddy_arce",
+        "kind": "potential_ally",
+        "weight": 0
+      }
+    ],
+    "arc": "A voice on the phone in Act 1. In Act 2 she's the way to the ledger (M21). In Act 3 her copy is the fallback if the original is lost.",
+    "visual": {
+      "palette": [
+        "#9370DB",
+        "#FFF5EE",
+        "#696969"
+      ],
+      "silhouette": "Prim; quick little steps.",
+      "wardrobe": "Cardigan over her shoulders, A-line skirt, cat-eye glasses.",
+      "props": [
+        "steno pad",
+        "ledger key on a chain"
+      ]
+    },
+    "missions": [
+      5,
+      20,
+      21
+    ]
+  },
+  {
+    "id": "char.vic_prentiss",
+    "tier": "secondary",
+    "name": "Vic Prentiss",
+    "age": 40,
+    "born": 1934,
+    "origin": "Jersey City",
+    "occupation": "'Relocation consultant' for Lisle: empties SRO hotels with buyouts and harassment",
+    "want": "A fee for every empty room.",
+    "need": "None.",
+    "secret": "He arranged the arson plan for the Corwin (M26) through a man Gus knows.",
+    "speech": {
+      "pattern": "Friendly salesman; uses first names at once; euphemism for everything.",
+      "samples": [
+        "Odessa! Can I call you Odessa? Five hundred, cash, and a bus ticket anywhere.",
+        "Nobody's evicting anybody. I'm in the moving business.",
+        "Old wiring, Gus. Terrible thing. Nobody's fault."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Floor-by-floor 'visits'"
+      },
+      {
+        "at": "loc.lisle_office",
+        "why": "Reports at five"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "19:00",
+        "to": "10:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "10:00",
+        "to": "17:00",
+        "at": "loc.corwin_hotel",
+        "activity": "work"
+      },
+      {
+        "from": "17:00",
+        "to": "19:00",
+        "at": "loc.lisle_office",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.howard_lisle",
+        "kind": "works_for",
+        "weight": 1
+      },
+      {
+        "to": "char.gus_wilkie",
+        "kind": "gives_orders_to",
+        "weight": 0
+      },
+      {
+        "to": "char.odessa_pruitt",
+        "kind": "targets",
+        "weight": -3
+      }
+    ],
+    "arc": "The smiling face of eviction in Acts 1 and 2. The would-be arsonist in Act 3. Caught, paid off or let go depending on M26.",
+    "visual": {
+      "palette": [
+        "#B22222",
+        "#F5DEB3",
+        "#FFFFFF"
+      ],
+      "silhouette": "Glad-handing; always leaning in.",
+      "wardrobe": "Plaid sport coat with wide lapels, white loafers, too much cologne.",
+      "props": [
+        "envelope of cash",
+        "clipboard of room numbers"
+      ]
+    },
+    "missions": [
+      2,
+      7,
+      19,
+      26
+    ]
+  },
+  {
+    "id": "char.hector_villalba",
+    "tier": "secondary",
+    "name": "Héctor Villalba",
+    "age": 50,
+    "born": 1924,
+    "origin": "Ponce, Puerto Rico; came in 1946",
+    "occupation": "Dispatcher at the Carriers' garage; Augie's right hand",
+    "want": "Buy into the Association when Augie sells.",
+    "need": "None.",
+    "secret": "He's negotiating with Lisle behind Augie's back, and his men sabotaged Moretti's trucks.",
+    "speech": {
+      "pattern": "Radio-dispatch shorthand; cool; no wasted words.",
+      "samples": [
+        "Unit nine, Thirty-Eighth and Seventh, double park, ten minutes, no more.",
+        "Augie thinks it's his. Lisle thinks it's his. The trucks know whose it is.",
+        "You want the route sheet, you want my job. You can't have my job."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.carriers_garage",
+        "why": "The radio desk"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "15:00",
+        "to": "05:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "05:00",
+        "to": "15:00",
+        "at": "loc.carriers_garage",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.augie_lomax",
+        "kind": "betrays",
+        "weight": -1
+      },
+      {
+        "to": "char.howard_lisle",
+        "kind": "dealing_with",
+        "weight": 1
+      },
+      {
+        "to": "char.anna_moretti",
+        "kind": "sabotages",
+        "weight": -2
+      }
+    ],
+    "arc": "A voice on the radio in Act 1. A rival for the route sheet in Act 2. Augie's betrayer in Act 3.",
+    "visual": {
+      "palette": [
+        "#2F4F4F",
+        "#F5F5F5",
+        "#DAA520"
+      ],
+      "silhouette": "Compact, still, headset on.",
+      "wardrobe": "Short-sleeve white shirt, slicked hair, gold watch.",
+      "props": [
+        "dispatch headset",
+        "route sheets"
+      ]
+    },
+    "missions": [
+      4,
+      16,
+      24
+    ]
+  },
+  {
+    "id": "char.dwayne_little",
+    "tier": "secondary",
+    "name": "Dwayne Little",
+    "age": 19,
+    "born": 1955,
+    "origin": "Central Harlem",
+    "occupation": "Pushboy moving racks on Seventh Ave, 35th–39th; sketches dresses",
+    "want": "Get his sketchbook in front of a real manufacturer.",
+    "need": "Believe it's possible.",
+    "secret": "He runs numbers slips for Earl Poole along his rack routes.",
+    "speech": {
+      "pattern": "Quick, cocky and observant; narrates the street.",
+      "samples": [
+        "Mister, I push forty racks a day. You ain't fast, you're in my way.",
+        "I'm not a pushboy. I'm a designer with a commute.",
+        "Every truck on Thirty-Seventh got a little envelope on the dash. I see 'em."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "W 37th St & 7th Ave",
+        "why": "Rack traffic"
+      },
+      {
+        "at": "loc.poole_shine",
+        "why": "Drops slips at noon"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "18:00",
+        "to": "06:30",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "06:30",
+        "to": "07:00",
+        "at": "7th Ave & W 35th St",
+        "activity": "commute"
+      },
+      {
+        "from": "07:00",
+        "to": "12:00",
+        "at": "W 37th St & 7th Ave",
+        "activity": "work"
+      },
+      {
+        "from": "12:00",
+        "to": "12:30",
+        "at": "loc.poole_shine",
+        "activity": "errand"
+      },
+      {
+        "from": "12:30",
+        "to": "18:00",
+        "at": "W 37th St & 7th Ave",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.earl_poole",
+        "kind": "runs_for",
+        "weight": 2
+      },
+      {
+        "to": "char.sam_feld",
+        "kind": "admires",
+        "weight": 1
+      }
+    ],
+    "arc": "The Garment District guide in Act 1 (M4). Brings the surcharge totals by eye in Act 2. In Act 3 Feld sees his sketches, or not.",
+    "visual": {
+      "palette": [
+        "#FF4500",
+        "#FFFFFF",
+        "#000080"
+      ],
+      "silhouette": "Lean and fast; cap backwards.",
+      "wardrobe": "Canvas apron, T-shirt, jeans, high-top sneakers.",
+      "props": [
+        "garment rack",
+        "sketchbook in his back pocket"
+      ]
+    },
+    "missions": [
+      4,
+      14,
+      28
+    ]
+  },
+  {
+    "id": "char.sam_feld",
+    "tier": "secondary",
+    "name": "Sam Feld",
+    "age": 63,
+    "born": 1911,
+    "origin": "Lower East Side",
+    "occupation": "Dress manufacturer, Feld Frocks, W 37th St; forty employees",
+    "want": "Survive.",
+    "need": "Tell his workers the truth.",
+    "secret": "He has already signed a lease in Ponce, and the cutting tables are sold.",
+    "speech": {
+      "pattern": "Weary jokes; Yiddish asides; talks to his machines.",
+      "samples": [
+        "Surcharge, tax, fee. My grandfather paid the czar less.",
+        "The landlord wants double, the trucks want double. Ponce wants me.",
+        "Carmen, I'm telling you first. Don't tell your son. He'll want to fix it."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.feld_loft",
+        "why": "Glass office at the end of the floor"
+      },
+      {
+        "at": "loc.steakhouse",
+        "why": "Lunch with buyers he can't afford"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "19:00",
+        "to": "07:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "07:00",
+        "to": "12:30",
+        "at": "loc.feld_loft",
+        "activity": "work"
+      },
+      {
+        "from": "12:30",
+        "to": "13:30",
+        "at": "loc.steakhouse",
+        "activity": "eat"
+      },
+      {
+        "from": "13:30",
+        "to": "19:00",
+        "at": "loc.feld_loft",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.carmen_arce",
+        "kind": "employer_of",
+        "weight": 1
+      },
+      {
+        "to": "char.augie_lomax",
+        "kind": "charged_by",
+        "weight": -2
+      },
+      {
+        "to": "char.mei_lin_chow",
+        "kind": "employer_of",
+        "weight": 0
+      }
+    ],
+    "arc": "A surcharge victim in Act 1 (M4). His runaway shop is revealed in Act 2. In Act 3 he pays severance or slips away at night.",
+    "visual": {
+      "palette": [
+        "#8B4513",
+        "#F5F5DC",
+        "#696969"
+      ],
+      "silhouette": "Rumpled and stooped.",
+      "wardrobe": "Cardigan over a white shirt, tape measure round his neck.",
+      "props": [
+        "tape measure",
+        "cold cigar"
+      ]
+    },
+    "missions": [
+      4,
+      19,
+      28
+    ]
+  },
+  {
+    "id": "char.mei_lin_chow",
+    "tier": "secondary",
+    "name": "Chow Mei-lin",
+    "age": 45,
+    "born": 1929,
+    "origin": "Taishan, Guangdong; came in 1965",
+    "occupation": "Sewing-machine operator at Feld Frocks; also does piecework at home in Chinatown",
+    "want": "Her own machines in her own shop.",
+    "need": "Trust the union lady.",
+    "secret": "She's organising the operators to demand severance before Feld leaves.",
+    "speech": {
+      "pattern": "Few words, exact numbers; borrows Carmen's Spanish phrases.",
+      "samples": [
+        "Carmen, he's moving. The cutting table is sold. I asked the buyer.",
+        "Piece rate is a liar. Count the pieces, not the rate.",
+        "Union lady says wait. Machines don't wait."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.feld_loft",
+        "why": "Machine next to Carmen's"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "17:00",
+        "to": "07:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "07:00",
+        "to": "07:30",
+        "at": "7th Ave & W 37th St",
+        "activity": "commute"
+      },
+      {
+        "from": "07:30",
+        "to": "16:30",
+        "at": "loc.feld_loft",
+        "activity": "work"
+      },
+      {
+        "from": "16:30",
+        "to": "17:00",
+        "at": "7th Ave & W 37th St",
+        "activity": "commute"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.carmen_arce",
+        "kind": "coworker",
+        "weight": 2
+      },
+      {
+        "to": "char.sam_feld",
+        "kind": "organises_against",
+        "weight": -1
+      }
+    ],
+    "arc": "Carmen's quiet partner. Leads the severance fight in Act 2. Marches in Act 3.",
+    "visual": {
+      "palette": [
+        "#4682B4",
+        "#FFFFFF",
+        "#2F4F4F"
+      ],
+      "silhouette": "Small and precise.",
+      "wardrobe": "Smock with sleeve guards, trousers, cloth shoes.",
+      "props": [
+        "bundle of cut pieces",
+        "lunch tin"
+      ]
+    },
+    "missions": [
+      19,
+      28
+    ]
+  },
+  {
+    "id": "char.anna_moretti",
+    "tier": "secondary",
+    "name": "Anna Moretti",
+    "age": 50,
+    "born": 1924,
+    "origin": "Bensonhurst, Brooklyn",
+    "occupation": "Wholesale florist, Moretti & Sons, W 28th St (second generation)",
+    "want": "Keep her father's shop alive.",
+    "need": "Allies.",
+    "secret": "Someone keeps slashing her delivery truck's tyres, and she thinks it's Augie.",
+    "speech": {
+      "pattern": "Loud and fast; uses flower names as insults; tender with plants.",
+      "samples": [
+        "Five a.m. I've got gladiolus, roses and a cop who wants twenty. One of those wilts.",
+        "My father paid nobody in 1931. I'm not paying in 1974.",
+        "You want to help? Grab a palm. Mind the fronds."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.moretti_flowers",
+        "why": "Sidewalk jungle"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "13:00",
+        "to": "04:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "04:00",
+        "to": "04:30",
+        "at": "6th Ave & W 28th St",
+        "activity": "commute"
+      },
+      {
+        "from": "04:30",
+        "to": "13:00",
+        "at": "loc.moretti_flowers",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.augie_lomax",
+        "kind": "feuds_with",
+        "weight": -2
+      },
+      {
+        "to": "char.teddy_arce",
+        "kind": "collected_by",
+        "weight": -1
+      }
+    ],
+    "arc": "Refuses Teddy's collection at dawn (M10). In Act 2 the truth about the tyres turns her from enemy to ally. Flowers for the march in Act 3.",
+    "visual": {
+      "palette": [
+        "#228B22",
+        "#FFFFFF",
+        "#DC143C"
+      ],
+      "silhouette": "Solid and fast-moving; wet arms.",
+      "wardrobe": "Rubber apron, rolled sleeves, kerchief, rubber boots.",
+      "props": [
+        "pruning shears",
+        "galvanised pail"
+      ]
+    },
+    "missions": [
+      10,
+      28
+    ]
+  },
+  {
+    "id": "char.stavros_kallis",
+    "tier": "secondary",
+    "name": "Stavros Kallis",
+    "age": 60,
+    "born": 1914,
+    "origin": "Kastoria, Greece; came in 1937",
+    "occupation": "Owner of Kallis Fur Salon; Nick's rival",
+    "want": "Buy Nick's firm cheap.",
+    "need": "None.",
+    "secret": "He tipped Nick's bank about the double pledge.",
+    "speech": {
+      "pattern": "Courtly and cutting; proverbs; never raises his voice.",
+      "samples": [
+        "Niko, in a hot summer every furrier becomes a philosopher.",
+        "I offer you a fair price. Fair for July.",
+        "The bank asked me about your vault. I said nothing. Loudly."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.kallis_furs",
+        "why": "Front window"
+      },
+      {
+        "at": "loc.kafeneio",
+        "why": "Holds court"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "19:00",
+        "to": "09:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "09:00",
+        "to": "16:00",
+        "at": "loc.kallis_furs",
+        "activity": "work"
+      },
+      {
+        "from": "16:00",
+        "to": "19:00",
+        "at": "loc.kafeneio",
+        "activity": "socialize"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.nick_varelas",
+        "kind": "rival",
+        "weight": -2
+      },
+      {
+        "to": "char.gordon_whitlock",
+        "kind": "informant_to",
+        "weight": 1
+      },
+      {
+        "to": "char.yiannis_doukas",
+        "kind": "courts",
+        "weight": 1
+      }
+    ],
+    "arc": "The vulture in Act 2. In Act 3 he buys Nick's firm or loses the crew to the march.",
+    "visual": {
+      "palette": [
+        "#FFFFF0",
+        "#D2B48C",
+        "#000000"
+      ],
+      "silhouette": "Upright, with a cane.",
+      "wardrobe": "White linen suit, panama hat.",
+      "props": [
+        "silver cigarette case",
+        "cane"
+      ]
+    },
+    "missions": [
+      16,
+      30
+    ]
+  },
+  {
+    "id": "char.lonnie_gage",
+    "tier": "secondary",
+    "name": "Lonnie Gage",
+    "age": 38,
+    "born": 1936,
+    "origin": "North Philadelphia",
+    "occupation": "Pimp controlling women outside Delphine's club; works with Brannock",
+    "want": "Control the club's money.",
+    "need": "None. He's drowning and he'll pull anyone under.",
+    "secret": "He owes Bauer $3,000, and Wurtz knows it. That's why Lonnie does what Brannock says.",
+    "speech": {
+      "pattern": "Smooth, then cruel; calls everyone 'baby'; philosophises. Never glamorous: his suit is fraying.",
+      "samples": [
+        "Del, baby, a bank needs a guard. I'm offering to be the guard.",
+        "Everybody on this avenue works for somebody. You just don't know who.",
+        "I'm not the problem. I'm the price of the problem."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "8th Ave & W 37th St",
+        "why": "Leans on his car"
+      },
+      {
+        "at": "loc.arden_hotel",
+        "why": "Rita won't serve him"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "05:00",
+        "to": "16:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "16:00",
+        "to": "20:00",
+        "at": "loc.eighth_ave_cafeteria",
+        "activity": "socialize"
+      },
+      {
+        "from": "20:00",
+        "to": "05:00",
+        "at": "8th Ave & W 37th St",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.tina_mercado",
+        "kind": "cousin_of",
+        "weight": -1
+      },
+      {
+        "to": "char.jimmy_brannock",
+        "kind": "partner",
+        "weight": 0
+      },
+      {
+        "to": "char.ray_bauer",
+        "kind": "debtor_of",
+        "weight": -2
+      },
+      {
+        "to": "char.delphine_moore",
+        "kind": "threatens",
+        "weight": -3
+      }
+    ],
+    "arc": "A threat in Act 1. Uses Tina in Act 2. In Act 3 he's exposed in M27, and loses his hold whichever choice the player makes.",
+    "visual": {
+      "palette": [
+        "#F5F5DC",
+        "#8B0000",
+        "#000000"
+      ],
+      "silhouette": "Lounging; too much jewellery on thin hands.",
+      "wardrobe": "Cream suit fraying at the cuffs, two-tone shoes, wide-collar shirt.",
+      "props": [
+        "toothpick",
+        "keys to an aging convertible"
+      ]
+    },
+    "missions": [
+      6,
+      11,
+      23,
+      27
+    ]
+  },
+  {
+    "id": "char.rita_haines",
+    "tier": "secondary",
+    "name": "Rita Haines",
+    "age": 44,
+    "born": 1930,
+    "origin": "Detroit",
+    "occupation": "Bartender at the Arden's lobby bar (Bauer's concession); retired from the street; the club's elder",
+    "want": "The bar licence in her own name.",
+    "need": "Stop mothering women who want a partner.",
+    "secret": "She knows Bauer informs to Calloway, and she's been selling that knowledge slowly.",
+    "speech": {
+      "pattern": "Dry and motherly; bar-room wisdom; calls people 'sugar'.",
+      "samples": [
+        "Sit down, sugar. Nobody makes a good decision standing up.",
+        "Twenty years on that avenue. Knees like a trucker, memory like a cop.",
+        "Bauer owns the bar. I own the people who drink at it."
+      ]
+    },
+    "home": "loc.arden_hotel",
+    "haunts": [
+      {
+        "at": "loc.arden_hotel",
+        "why": "Behind the bar"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "03:00",
+        "to": "12:00",
+        "at": "loc.arden_hotel",
+        "activity": "sleep"
+      },
+      {
+        "from": "12:00",
+        "to": "16:00",
+        "at": "8th Ave & W 39th St",
+        "activity": "errand"
+      },
+      {
+        "from": "16:00",
+        "to": "03:00",
+        "at": "loc.arden_hotel",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.delphine_moore",
+        "kind": "mentor_of",
+        "weight": 2
+      },
+      {
+        "to": "char.ray_bauer",
+        "kind": "works_for",
+        "weight": 0
+      },
+      {
+        "to": "char.lonnie_gage",
+        "kind": "bars",
+        "weight": -2
+      }
+    ],
+    "arc": "The hub of Delphine's interior in every act. In Act 3 her knowledge of Bauer becomes a bargaining chip.",
+    "visual": {
+      "palette": [
+        "#B8860B",
+        "#2F2F2F",
+        "#FFFFFF"
+      ],
+      "silhouette": "Solid and planted.",
+      "wardrobe": "Wig, apron over a dark dress, reading glasses, gold hoops.",
+      "props": [
+        "bar towel",
+        "book of tabs"
+      ]
+    },
+    "missions": [
+      6,
+      8,
+      13,
+      23,
+      31
+    ]
+  },
+  {
+    "id": "char.claudette_bijou",
+    "tier": "secondary",
+    "name": "Claudette Bijou",
+    "age": 33,
+    "born": 1941,
+    "origin": "Port-au-Prince, Haiti; came in 1964",
+    "occupation": "Chambermaid at the Hotel Pennsylvania; club member; sends money home",
+    "want": "Bring her mother to New York.",
+    "need": "Trust the club with more than ten dollars.",
+    "secret": "She keeps half her savings outside the club, sewn into a coat lining.",
+    "speech": {
+      "pattern": "Formal English; French and Kreyòl asides; exact and composed.",
+      "samples": [
+        "I send forty dollars home each week. The club is how I keep the other ten.",
+        "At home the police also taxed us. Here they tax the maids too.",
+        "Delphine, I trust your head. I don't trust your shoebox."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.hotel_pennsylvania",
+        "why": "Works the 14th to 18th floors"
+      },
+      {
+        "at": "loc.arden_hotel",
+        "why": "Club meetings"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "16:30",
+        "to": "06:30",
+        "at": "off_map",
+        "activity": "home",
+        "note": "Flatbush"
+      },
+      {
+        "from": "06:30",
+        "to": "07:00",
+        "at": "7th Ave & W 33rd St",
+        "activity": "commute"
+      },
+      {
+        "from": "07:00",
+        "to": "15:00",
+        "at": "loc.hotel_pennsylvania",
+        "activity": "work"
+      },
+      {
+        "from": "15:00",
+        "to": "16:00",
+        "at": "6th Ave & W 34th St",
+        "activity": "errand",
+        "note": "Money-order office"
+      },
+      {
+        "from": "16:00",
+        "to": "16:30",
+        "at": "loc.arden_hotel",
+        "activity": "socialize",
+        "note": "Club business on Sundays"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.delphine_moore",
+        "kind": "club_member",
+        "weight": 2
+      },
+      {
+        "to": "char.tina_mercado",
+        "kind": "club_member",
+        "weight": 1
+      }
+    ],
+    "arc": "The club's sceptic, proof that the club is wider than the strip: maids, waitresses and the women who work the avenue. In Act 3 she demands the count that exposes the shortfall.",
+    "visual": {
+      "palette": [
+        "#1E90FF",
+        "#FFFFFF",
+        "#DAA520"
+      ],
+      "silhouette": "Tall and composed.",
+      "wardrobe": "Grey chambermaid's uniform and white apron by day; a blue headwrap and simple dark dress after work.",
+      "props": [
+        "money-order envelopes",
+        "a ring of floor pass keys"
+      ]
+    },
+    "missions": [
+      6,
+      23,
+      31
+    ]
+  },
+  {
+    "id": "char.marcus_teague",
+    "tier": "secondary",
+    "name": "Marcus Teague",
+    "age": 52,
+    "born": 1922,
+    "origin": "Central Harlem; Army in Europe 1943–45",
+    "occupation": "Night porter at the Hotel Arden",
+    "want": "A quiet night.",
+    "need": "None. He's the steadiest man in the game.",
+    "secret": "The club's shoebox lives in the Arden's boiler room, not in Delphine's room. Only he and she know.",
+    "speech": {
+      "pattern": "Few words; formal ('Miss Moore'); reports facts, never feelings.",
+      "samples": [
+        "Miss Moore, there's a car outside with its lights off and its motor on.",
+        "Carried luggage forty years. I know what's heavy and what's money.",
+        "Back stairs are open. Back stairs are always open for you."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.arden_hotel",
+        "why": "Porter's stool by the service door"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "07:00",
+        "to": "18:30",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "18:30",
+        "to": "19:00",
+        "at": "8th Ave & W 39th St",
+        "activity": "commute"
+      },
+      {
+        "from": "19:00",
+        "to": "07:00",
+        "at": "loc.arden_hotel",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.delphine_moore",
+        "kind": "protects",
+        "weight": 3
+      },
+      {
+        "to": "char.rita_haines",
+        "kind": "friend",
+        "weight": 2
+      }
+    ],
+    "arc": "Delphine's lookout and escape route in every act (M8's back stairs).",
+    "visual": {
+      "palette": [
+        "#800000",
+        "#FFFFFF",
+        "#000000"
+      ],
+      "silhouette": "Upright, grey moustache, white gloves.",
+      "wardrobe": "Maroon porter's jacket, cap, black trousers.",
+      "props": [
+        "luggage cart",
+        "ring of service keys"
+      ]
+    },
+    "missions": [
+      8,
+      23,
+      27
+    ]
+  },
+  {
+    "id": "char.nora_finch",
+    "tier": "secondary",
+    "name": "Nora Finch",
+    "age": 35,
+    "born": 1939,
+    "origin": "Cleveland",
+    "occupation": "Reporter at an invented evening tabloid (masthead assigned in N6)",
+    "want": "The front page.",
+    "need": "Protect her sources even when it costs her the story.",
+    "secret": "Her editor's brother-in-law is a silent partner in Lisle's hotel purchases.",
+    "speech": {
+      "pattern": "Rapid questions; talks in headlines; chain-smokes.",
+      "samples": [
+        "Give me a name, a date and a dollar figure. I'll give you a front page.",
+        "My editor likes scandal on Sundays and silence on weekdays.",
+        "City's going broke and somebody's buying hotels. That's a headline."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.cop_bar",
+        "why": "Buys rounds for sources"
+      },
+      {
+        "at": "loc.corwin_hotel",
+        "why": "Interviews in the lobby (Act 3)"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "02:00",
+        "to": "10:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "10:00",
+        "to": "18:00",
+        "at": "off_map",
+        "activity": "work",
+        "note": "Newsroom"
+      },
+      {
+        "from": "18:00",
+        "to": "02:00",
+        "at": "loc.cop_bar",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.ruth_calloway",
+        "kind": "rival",
+        "weight": -1
+      },
+      {
+        "to": "char.teddy_arce",
+        "kind": "courts",
+        "weight": 1
+      },
+      {
+        "to": "char.odessa_pruitt",
+        "kind": "interviews",
+        "weight": 1
+      }
+    ],
+    "arc": "Sniffing around from Act 2. In Act 3, if Branch B goes to the press, her editor's conflict becomes the last obstacle.",
+    "visual": {
+      "palette": [
+        "#C19A6B",
+        "#FFFFFF",
+        "#333333"
+      ],
+      "silhouette": "Wiry; trench coat; pencil stuck in her hair.",
+      "wardrobe": "Trench coat, slacks, a man's wristwatch.",
+      "props": [
+        "press card",
+        "notebook",
+        "pocketful of dimes for payphones"
+      ]
+    },
+    "missions": [
+      22,
+      28,
+      29
+    ]
+  },
+  {
+    "id": "char.delroy_tate",
+    "tier": "secondary",
+    "name": "Delroy Tate",
+    "age": 40,
+    "born": 1934,
+    "origin": "Bedford-Stuyvesant, Brooklyn; Army in Korea",
+    "occupation": "Yellow-cab driver on leased shifts; works the Penn Station line",
+    "want": "His own medallion.",
+    "need": "Stop taking the easy fare.",
+    "secret": "On weekends he drives for the car service Lisle uses, and he's driven Lisle twice.",
+    "speech": {
+      "pattern": "A cabbie philosopher; teaches the grid in every line; sports talk.",
+      "samples": [
+        "Sixth goes up, Seventh comes down, Broadway does what it wants.",
+        "Medallion costs more than a house in Queens. I'll die in a rented seat.",
+        "I don't ask where they're going. I ask which side of the street."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.penn_hack_stand",
+        "why": "Fourth cab in line"
+      },
+      {
+        "at": "W 29th St & 7th Ave",
+        "why": "Coffee at the cops' counter"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "04:00",
+        "to": "15:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "15:00",
+        "to": "04:00",
+        "at": "loc.penn_hack_stand",
+        "activity": "drive"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.teddy_arce",
+        "kind": "friend",
+        "weight": 2
+      },
+      {
+        "to": "char.howard_lisle",
+        "kind": "drives",
+        "weight": 0
+      }
+    ],
+    "arc": "The tutor of the cab-fare tutorial in Act 1 (M3). In Act 2 his account of a weekend drive puts Lisle at a meeting. Wheelman in the finale.",
+    "visual": {
+      "palette": [
+        "#FFD700",
+        "#2F4F4F",
+        "#FFFFFF"
+      ],
+      "silhouette": "Big, easy and slow-moving.",
+      "wardrobe": "Cabbie cap, short-sleeve plaid shirt, slacks.",
+      "props": [
+        "cigar box of change",
+        "the cab (vehicle_role.cab)"
+      ]
+    },
+    "missions": [
+      3,
+      21,
+      32
+    ]
+  },
+  {
+    "id": "char.mi_sook_baek",
+    "tier": "secondary",
+    "name": "Baek Mi-sook",
+    "age": 38,
+    "born": 1936,
+    "origin": "Seoul; came in 1971",
+    "occupation": "Co-owner of Seoul Star Imports; runs the Korean merchants' rotating credit club (kye)",
+    "want": "Send their son to a good school.",
+    "need": "Let her husband see her be the boss.",
+    "secret": "She's the one who decides. Jung-ho is the front.",
+    "speech": {
+      "pattern": "Brief, sharp English; switches to Korean to end arguments.",
+      "samples": [
+        "My husband talks. I count. Today we counted wrong.",
+        "Kye is twelve families, one pot. Same as your friend's club, Miss Moore.",
+        "Protection from what? The only thing I fear is the landlord."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.baek_wholesale",
+        "why": "The back office"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "19:30",
+        "to": "08:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "08:00",
+        "to": "19:30",
+        "at": "loc.baek_wholesale",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.jung_ho_baek",
+        "kind": "spouse",
+        "weight": 3
+      },
+      {
+        "to": "char.delphine_moore",
+        "kind": "mirrors",
+        "weight": 1,
+        "note": "Two bankers for people banks won't serve"
+      }
+    ],
+    "arc": "In Act 2 she and Delphine compare notes on running a credit club. In Act 3 she finances the Baeks' purchase of the building.",
+    "visual": {
+      "palette": [
+        "#556B2F",
+        "#FFFFFF",
+        "#8B0000"
+      ],
+      "silhouette": "Brisk; pencil in hand.",
+      "wardrobe": "Practical skirt, blouse, cardigan, apron.",
+      "props": [
+        "account book"
+      ]
+    },
+    "missions": [
+      16,
+      30
+    ]
+  },
+  {
+    "id": "char.earl_poole",
+    "tier": "secondary",
+    "name": "Earl Poole",
+    "age": 61,
+    "born": 1913,
+    "origin": "Charleston, South Carolina",
+    "occupation": "Shoeshine stand at 42nd & Seventh; banker of the Deuce's numbers game",
+    "want": "Move his runners into legitimate jobs before he retires.",
+    "need": "Admit he's also the problem.",
+    "secret": "He pays the biggest envelope on 42nd St, straight to Wurtz.",
+    "speech": {
+      "pattern": "Slow and aphoristic; uses numbers as a language.",
+      "samples": [
+        "Shine's a dollar. Advice is free. The number today is seven-four-one.",
+        "Every man on this street plays a number. Cops play the biggest.",
+        "State's got a lottery and I'm still here. The state can't shine shoes."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.poole_shine",
+        "why": "His stand"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "20:00",
+        "to": "08:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "08:00",
+        "to": "20:00",
+        "at": "loc.poole_shine",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.dwayne_little",
+        "kind": "employs",
+        "weight": 2
+      },
+      {
+        "to": "char.dennis_wurtz",
+        "kind": "pays",
+        "weight": -1
+      },
+      {
+        "to": "char.delphine_moore",
+        "kind": "friend",
+        "weight": 1
+      }
+    ],
+    "arc": "The Deuce's elder. In Act 2 he explains the tax as an economist would. In Act 3 his ledger of payoffs to Wurtz corroborates hers.",
+    "visual": {
+      "palette": [
+        "#FFFFFF",
+        "#000000",
+        "#8B4513"
+      ],
+      "silhouette": "Seated, upright, elegant hands.",
+      "wardrobe": "White shirt, waistcoat, bow tie, polished shoes of his own.",
+      "props": [
+        "shine box",
+        "pad of slips"
+      ]
+    },
+    "missions": [
+      13,
+      27
+    ]
+  },
+  {
+    "id": "char.ricky_vail",
+    "tier": "secondary",
+    "name": "Ricky Vail",
+    "age": 24,
+    "born": 1950,
+    "origin": "Woodside, Queens",
+    "occupation": "Small-time heroin dealer in Bryant Park; Wurtz's informant",
+    "want": "Not go to prison for fifteen to life.",
+    "need": "Get clean, and get out.",
+    "secret": "He's Wurtz's source on everyone, including the club's meeting place.",
+    "speech": {
+      "pattern": "Jittery and apologetic; talks fast about the law.",
+      "samples": [
+        "Fifteen to life, man. For a bag. So yeah, I talk to cops. You would too.",
+        "Park's empty by nine. Everybody in it is buying or watching.",
+        "I'm not a rat. I'm a guy with a calendar."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.bryant_park",
+        "why": "West terrace benches"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "05:00",
+        "to": "15:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "15:00",
+        "to": "05:00",
+        "at": "loc.bryant_park",
+        "activity": "loiter"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.dennis_wurtz",
+        "kind": "informs_for",
+        "weight": -2
+      }
+    ],
+    "arc": "A face in the Bryant Park ambient. In Act 2 he leaks the club's location. In Act 3 he's either burned by Wurtz or helped out by Delphine. Shown with dignity; no drug-use gameplay.",
+    "visual": {
+      "palette": [
+        "#556B2F",
+        "#A9A9A9",
+        "#000000"
+      ],
+      "silhouette": "Thin and hunched.",
+      "wardrobe": "Army-surplus jacket, jeans, worn sneakers.",
+      "props": [
+        "paperback novel"
+      ]
+    },
+    "missions": [
+      13,
+      23
+    ]
+  },
+  {
+    "id": "char.gordon_whitlock",
+    "tier": "secondary",
+    "name": "Gordon Whitlock",
+    "age": 55,
+    "born": 1919,
+    "origin": "Darien, Connecticut",
+    "occupation": "Loan officer, Ashgrove Trust Company (invented bank), 34th St branch",
+    "want": "Get Nick's loan off his books before the auditors arrive.",
+    "need": "None.",
+    "secret": "The bank is quietly cutting its exposure to everything in New York.",
+    "speech": {
+      "pattern": "Club-man euphemism; golf metaphors.",
+      "samples": [
+        "Nick, the bank loves you. The bank simply loves you less in July.",
+        "We're not calling the loan. We're inviting it home.",
+        "A coat in a vault is collateral. The same coat twice is a crime."
+      ]
+    },
+    "home": "off_map",
+    "haunts": [
+      {
+        "at": "loc.bank_branch",
+        "why": "Corner office"
+      },
+      {
+        "at": "loc.steakhouse",
+        "why": "Lunch on Nick's tab"
+      }
+    ],
+    "schedule": [
+      {
+        "from": "17:00",
+        "to": "09:00",
+        "at": "off_map",
+        "activity": "home"
+      },
+      {
+        "from": "09:00",
+        "to": "12:30",
+        "at": "loc.bank_branch",
+        "activity": "work"
+      },
+      {
+        "from": "12:30",
+        "to": "14:00",
+        "at": "loc.steakhouse",
+        "activity": "eat"
+      },
+      {
+        "from": "14:00",
+        "to": "17:00",
+        "at": "loc.bank_branch",
+        "activity": "work"
+      }
+    ],
+    "edges": [
+      {
+        "to": "char.nick_varelas",
+        "kind": "creditor_of",
+        "weight": 0
+      },
+      {
+        "to": "char.stavros_kallis",
+        "kind": "listens_to",
+        "weight": 1
+      }
+    ],
+    "arc": "The margin call (M16). The squeeze that drives the vault job.",
+    "visual": {
+      "palette": [
+        "#87CEEB",
+        "#FFFFFF",
+        "#000080"
+      ],
+      "silhouette": "Tall and soft; perfectly barbered.",
+      "wardrobe": "Seersucker suit, club tie, loafers.",
+      "props": [
+        "fountain pen",
+        "golf tees in his pocket"
+      ]
+    },
+    "missions": [
+      16,
+      30
+    ]
+  }
+]

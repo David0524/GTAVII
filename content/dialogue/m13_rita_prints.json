@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m13_rita_prints",
+  "context": "M13 o8. Rita's bar after close. Prints laid out on the bar under a lamp.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Brannock taking. Wurtz with the park boy. Brannock again. You've got a file, sugar."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "tired",
+      "text": "Three pictures. Three men who'd lose everything if I mailed them anywhere."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.rita_haines",
+      "emotion": "warning",
+      "text": "Or three men who'd make you disappear first. Mail them nowhere. Yet."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "Rule nine: a picture you've never shown is worth more than one you have."
+    }
+  ]
+}

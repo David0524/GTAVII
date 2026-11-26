@@ -1,0 +1,90 @@
+{
+  "id": "dlg.m07_yes",
+  "context": "M7 o7. The Shamrock Rail, end of the bar. Mayhew alone with a beer and a racing form.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Kid. Sit. Knew you'd come. Nobody says no in July."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "The Corwin. They're giving old men thirty days."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "So say yes, and I make a call, and the Corwin stays open through Labor Day."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Yes. The Corwin stays open.",
+          "goto": "l_yes"
+        },
+        {
+          "text": "Yes. For two hundred a week.",
+          "goto": "l_money"
+        },
+        {
+          "text": "Show him the photograph.",
+          "goto": "l_photo",
+          "if": "flag.saw_lisle_mayhew",
+          "setFlags": [
+            "flag.mayhew_saw_photo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l_photo",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Before I say anything. You and H. Lisle, counsel. Pennsylvania lobby. Friday."
+    },
+    {
+      "id": "l_photo2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "shaken",
+      "text": "Where'd you get a camera? Put that away. Put it away, Teddy."
+    },
+    {
+      "id": "l_photo3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "shaken",
+      "text": "He's a lawyer. I know lawyers. Everybody knows lawyers. Yes or no?"
+    },
+    {
+      "id": "l_photo4",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Yes. And the Corwin stays open.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_yes",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Yes. And the Corwin stays open. Every room.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_money",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Yes. Two hundred. In advance.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.carl_mayhew",
+      "emotion": "relieved",
+      "text": "Here's the first week and the list. Collect Thursday. Fourth of July, nice and quiet."
+    }
+  ]
+}

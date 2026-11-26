@@ -66,3 +66,14 @@ test('validation catches broken layouts with precise paths', () => {
   assert.ok(errs.some((e) => /shots\[1\].*keys\[1\]\.t outside/.test(e)));
   assert.ok(errs.some((e) => /shots\[2\].*dialogue/.test(e)));
 });
+
+test("every cutscene narrative ships validates and times (script-only files play with placeholders)", () => {
+  for (const f of fs.readdirSync('content/cutscenes')) {
+    const c = JSON.parse(fs.readFileSync(`content/cutscenes/${f}`, 'utf8')) as Cutscene;
+    const tl = new Timeline(c);
+    assert.ok(Number.isFinite(tl.duration) && tl.duration > 0, `${f}: duration ${tl.duration}`);
+    const errs = validateCutscene(c).filter((e) => !/not in cast/.test(e));
+    assert.deepEqual(errs, [], `${f}: ${errs.join('; ')}`);
+    for (let t = 0; t <= tl.duration; t += 0.5) { const p = tl.camera(t); assert.ok(p.pos.every(Number.isFinite), `${f} camera NaN at ${t}`); }
+  }
+});

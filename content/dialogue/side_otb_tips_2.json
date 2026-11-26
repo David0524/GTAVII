@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_otb_tips_2",
+  "context": "The Teletrack window.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.bank_teller",
+      "emotion": "flat",
+      "text": "Brass Token, fourth race, win. Ten dollars. Good luck. Nobody here has had any."
+    }
+  ]
+}

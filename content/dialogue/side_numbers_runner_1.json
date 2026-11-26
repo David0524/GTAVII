@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_numbers_runner_1",
+  "context": "Earl's stand at 9 a.m.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Slips from the barber, the newsstand, the candy store. Back by noon. Walk, don't run."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Running looks like news. Walking looks like a Tuesday."
+    }
+  ]
+}

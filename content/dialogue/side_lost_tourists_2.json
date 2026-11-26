@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_lost_tourists_2",
+  "context": "Their thanks.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_fare_tourist",
+      "emotion": "warm",
+      "text": "Here's a dollar. Don't argue, my wife says. My wife's in charge of dollars."
+    }
+  ]
+}

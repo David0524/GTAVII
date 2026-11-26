@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m01_walk_c",
+  "context": "M1 escort leg 3: W 28th to W 31st. The Empire State lights up ahead.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "There she is. Lights come on, she looks rich. Like the rest of us."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "probing",
+      "text": "You still park on Thirty-Fifth, Carl?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "uneasy",
+      "text": "Not anymore. Not since… Just walk, kid."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "City's broke. Department's scared. And the money? It didn't go anywhere."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "It's just waiting for somebody to pick it up."
+    }
+  ]
+}

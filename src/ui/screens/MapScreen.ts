@@ -34,6 +34,7 @@ export class MapScreen {
     this.card.className = 't74-card'; this.card.style.display = 'none';
     this.btns.className = 't74-mapbtns';
     this.el.append(this.map.canvas, this.side, this.card, this.btns);
+    addEventListener('resize', () => { if (this.el.offsetParent) { this.measureOccluders(); this.map.draw(true); } });
     this.map.onSelect = (s) => this.select(s);
   }
 
@@ -47,7 +48,14 @@ export class MapScreen {
     this.map.centerOn(p.x, p.z, Math.max(this.map.zoom, 0.42));
     this.card.style.display = 'none';
     this.renderSide();
+    this.measureOccluders();
     this.map.draw(true);
+  }
+
+  /** Screen areas the map's own UI covers (measured on open and resize, never per frame). */
+  measureOccluders() {
+    const c = this.map.canvas.getBoundingClientRect();
+    this.map.occluders = [this.side, this.btns, this.card].filter((e) => e.offsetParent).map((e) => { const r = e.getBoundingClientRect(); return [r.left - c.left - 4, r.top - c.top - 4, r.right - c.left + 4, r.bottom - c.top + 4] as [number, number, number, number]; });
   }
 
   private renderSide() {
@@ -108,6 +116,7 @@ export class MapScreen {
     if (this.model.annotations.length) acts.push(['RUB OUT MY MARKS', () => { this.model.annotations = []; this.model.version++; c.style.display = 'none'; }]);
     acts.push(['CLOSE', () => { c.style.display = 'none'; this.renderSide(); }]);
     const box = c.querySelector('.acts')!;
+    requestAnimationFrame(() => { this.measureOccluders(); this.map.draw(true); });
     const items: NavItem[] = acts.map(([l, fn]) => { const b = document.createElement('button'); b.textContent = l; box.appendChild(b); return { el: b, activate: fn }; });
     this.onNav?.(items);
   }
@@ -120,5 +129,5 @@ export class MapScreen {
 
   update(dt: number) { this.map.update(dt, this.host.input); }
   get cardOpen() { return this.card.style.display !== 'none'; }
-  closeCard() { this.card.style.display = 'none'; this.renderSide(); }
+  closeCard() { this.card.style.display = 'none'; this.renderSide(); this.measureOccluders(); this.map.draw(true); }
 }

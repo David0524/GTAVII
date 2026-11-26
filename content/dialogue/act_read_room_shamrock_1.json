@@ -1,0 +1,56 @@
+{
+  "id": "dlg.act_read_room_shamrock_1",
+  "context": "Read the Room at the Shamrock Rail. Tap patrons for their tell lines first (engine), then choose.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Somebody in here is a cop. Which one, sugar?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Every man at the bar",
+          "goto": "l_right",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 1
+          }
+        },
+        {
+          "text": "The bartender",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The man asleep in the booth",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The pay phone",
+          "goto": "l_wrong"
+        }
+      ]
+    },
+    {
+      "id": "l_right",
+      "speaker": "char.rita_haines",
+      "emotion": "pleased",
+      "text": "It's the Shamrock Rail. They're all cops. That was a joke round.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_wrong",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "No, sugar. It's the Shamrock Rail. They're all cops. That was a joke round.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule nineteen: the cop is the one who isn't enjoying himself."
+    }
+  ]
+}

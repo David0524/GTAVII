@@ -54,6 +54,18 @@ export class StreetIndex {
     return best;
   }
 
+  /** Where a numbered street *would* cross an avenue when that block of it doesn't exist (superblocks like
+   *  Penn South): halfway between the neighbouring streets' crossings. */
+  interpolated(street: string, ave: string): [number, number] | null {
+    const m = normaliseStreet(street).match(/^(West|East) (\d+)(st|nd|rd|th) Street$/); if (!m) return null;
+    const n = +m[2], name = (k: number) => `${m[1]} ${ordinal(k)} Street`;
+    for (let d = 1; d <= 2; d++) {
+      const lo = this.intersect(name(n - d), ave), hi = this.intersect(name(n + d), ave);
+      if (lo && hi) return [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2];
+    }
+    return null;
+  }
+
   /** Mean direction (unit) of a named street near a point. */
   direction(name: string, x: number, z: number): [number, number] {
     let best = Infinity, dir: [number, number] = [1, 0];
@@ -99,7 +111,7 @@ export class StreetIndex {
       }
       if (pts.length) p = [pts.reduce((s, q) => s + q[0], 0) / pts.length, pts.reduce((s, q) => s + q[1], 0) / pts.length];
     } else if (parts.length === 1 && between?.length === 2) {
-      const a = this.intersect(parts[0], between[0]), b = this.intersect(parts[0], between[1]);
+      const a = this.intersect(parts[0], between[0]) ?? this.interpolated(parts[0], between[0]), b = this.intersect(parts[0], between[1]) ?? this.interpolated(parts[0], between[1]);
       if (a && b) p = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
     }
     if (!p) return null;

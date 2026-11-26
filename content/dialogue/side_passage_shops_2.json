@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_passage_shops_2",
+  "context": "A dead shoeshine stand behind the gate (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "A customer list from forty-eight. Names, shoe sizes, tips. A whole city, polished."
+    }
+  ]
+}

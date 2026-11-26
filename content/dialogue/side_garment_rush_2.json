@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_garment_rush_2",
+  "context": "Pay at the loft door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.dwayne_little",
+      "emotion": "impressed",
+      "text": "Under seven minutes. Through that? Okay. You're not a used-to-be. You're a might-be."
+    }
+  ]
+}

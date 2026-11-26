@@ -1,0 +1,46 @@
+{
+  "id": "dlg.m14_mayhew",
+  "context": "M14 o6. Kafeneio Kastoria, W 29th & 8th. Backgammon clacks. Mayhew sweats over Greek coffee.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Furs paid? Good. Kallis is a gentleman. Varelas is a gentleman with a bank problem."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Carl. Who's H. Lisle?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "shaken",
+      "text": "Where'd you— He's a lawyer. Everybody's got a lawyer.",
+      "setRelationships": {
+        "char.teddy_arce/char.carl_mayhew": -1
+      }
+    },
+    {
+      "id": "l3b",
+      "speaker": "char.carl_mayhew",
+      "emotion": "cold",
+      "text": "You showed me his picture once already, kid. Don't make it a habit.",
+      "if": "flag.mayhew_saw_photo"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "He dropped his toothpick. Carl hasn't dropped a toothpick since nineteen sixty-four."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.carl_mayhew",
+      "emotion": "forced",
+      "text": "Drink your coffee. Greeks make it like mud. Good mud."
+    }
+  ]
+}

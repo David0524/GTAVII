@@ -1,0 +1,24 @@
+{
+  "id": "dlg.m21_steal",
+  "context": "M21 o8b (burned branch). Lisle's office, lamplight. Teddy lifts the whole ledger.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "No copies. No wire. Just the book. He'll know by morning."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "First page: October seventy-one. C.M. Carl. The night I waited in the car."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Whoever holds this owns the Tenderloin. Tonight that's me."
+    }
+  ]
+}

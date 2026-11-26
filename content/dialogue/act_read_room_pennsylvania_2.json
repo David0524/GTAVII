@@ -1,0 +1,56 @@
+{
+  "id": "dlg.act_read_room_pennsylvania_2",
+  "context": "Read the Room at the Pennsylvania bar. Tap patrons for their tell lines first (engine), then choose.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Somebody in here is a cop. Which one, sugar?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "The fellow with the wedding ring in his ",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The quiet man who faces the door",
+          "goto": "l_right",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 1
+          }
+        },
+        {
+          "text": "The two nurses",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The man with the cello case",
+          "goto": "l_wrong"
+        }
+      ]
+    },
+    {
+      "id": "l_right",
+      "speaker": "char.rita_haines",
+      "emotion": "pleased",
+      "text": "Faces the door, back to the wall, never checks the mirror. That's a cop.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_wrong",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "No, sugar. Faces the door, back to the wall, never checks the mirror. That's a cop.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule nineteen: the cop is the one who isn't enjoying himself."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_old_beat_2",
+  "context": "The favour's story (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.pat_kearney",
+      "emotion": "quiet",
+      "text": "His father walked a beat with me in '49. Never took a dime. Died poor. That's the story."
+    }
+  ]
+}

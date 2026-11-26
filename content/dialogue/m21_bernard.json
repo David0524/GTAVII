@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m21_bernard",
+  "context": "M21 o10. Corwin lobby, midnight. Bernard reads with a magnifying glass. Hollis's radio plays softly.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Notwithstanding. Heretofore. Consideration. It's him. Every page is his voice."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "grave",
+      "text": "Twenty hotels, Mr. Arce. Ours is page nine. Mrs. Pruitt is a 'unit'."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "Then we're not a unit. We're a page. Pages can be read in court."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "And the first page is Carl's. And mine. I was in the car."
+    }
+  ]
+}

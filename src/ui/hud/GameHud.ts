@@ -17,7 +17,8 @@ import { CATEGORIES, type RevealVia } from '../map/places';
 import { pictogramURL } from '../map/pictograms';
 import { uiSettings, type Mode3, type UiSettingsData } from '../settings/uiSettings';
 import { radioLine } from './radio';
-import { callout } from '../map/Route';
+import { callout, voicedCallout, type CallLine } from '../map/Route';
+const CALL_POOL = (Object.values(import.meta.glob<{ lines: CallLine[] }>('/content/barks/route_calls.json', { eager: true, import: 'default' }))[0]?.lines) ?? [];
 import { esc, money, blocks, distance } from '../util';
 import { promptStrip } from '../Prompts';
 
@@ -229,7 +230,16 @@ export class GameHud {
       const next = m.turns.find((t) => Math.hypot(w.x - t.x, w.z - t.z) < dw - 5);
       if (next) {
         const dd = Math.hypot(next.x - x, next.z - z);
-        if (dd < 160) html = `<small>${inVehicle ? 'THE CABBIE' : 'YOUR PENCIL MARKS'}</small>${esc(callout(next))} · ${distance(dd, uiSettings.get('units') === 'metric')}`;
+        if (dd < 160) {
+          html = `<small>${inVehicle ? 'THE CABBIE' : 'YOUR PENCIL MARKS'}</small>${esc(callout(next))} · ${distance(dd, uiSettings.get('units') === 'metric')}`;
+          // a passenger voices it once per turn (audio stream speaks it; the HUD line above always shows it)
+          const key = `${next.x | 0},${next.z | 0}`;
+          if (inVehicle && this.last.called !== key) {
+            this.last.called = key;
+            const line = voicedCallout(next, 'cabbie', CALL_POOL, (next.x * 7 + next.z) | 0);
+            if (line) this.host.commit?.('audio:route_call', { voice: 'cabbie', text: line });
+          }
+        }
       }
     }
     this.set('.u-turn', html); this.show('.u-turn', !!html);

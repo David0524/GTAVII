@@ -1,0 +1,89 @@
+{
+  "id": "dlg.m23_tina",
+  "context": "M23 o7. Rita's bar after close. Tina at the end of the bar, makeup off.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.tina_mercado",
+      "emotion": "breaking",
+      "text": "Del. Lonnie's my cousin. My mother's sister's kid. I been telling him things."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.tina_mercado",
+      "emotion": "breaking",
+      "text": "Sunday nights. Where the box was. The eleven hundred went to his lawyer."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "I covered for that eleven hundred, Tina. Out of my own pocket. Nobody knows."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.tina_mercado",
+      "emotion": "breaking",
+      "text": "I know. That's why I'm telling you. I'm tired of rules. I'm tired of him."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Forgive her.",
+          "goto": "l_forgive",
+          "setFlags": [
+            "flag.delphine_forgave_tina"
+          ],
+          "setRelationships": {
+            "char.delphine_moore/char.tina_mercado": 2
+          }
+        },
+        {
+          "text": "Make her tell the club.",
+          "goto": "l_confront",
+          "setRelationships": {
+            "char.delphine_moore/char.tina_mercado": -1
+          }
+        },
+        {
+          "text": "Pay the club back myself.",
+          "goto": "l_pay",
+          "setFlags": [
+            "flag.club_count_settled"
+          ],
+          "setRelationships": {
+            "char.delphine_moore/char.claudette_bijou": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_forgive",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Come here. Rule one still stands. Count everything. Including friends.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_confront",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Sunday you tell the table. All of it. Then they decide. Not me.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_pay",
+      "speaker": "char.delphine_moore",
+      "emotion": "tired",
+      "text": "I'll put the eleven hundred back. My shop money. The count will be clean.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.tina_mercado",
+      "emotion": "quiet",
+      "text": "I'm gonna do hair, Del. Hair don't hit you. Hair don't ask for a cut."
+    }
+  ]
+}

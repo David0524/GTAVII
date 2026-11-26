@@ -1,0 +1,18 @@
+{
+  "id": "dlg.act_desk_fan",
+  "context": "Desk request: a fan for a hot room.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.sro_resident",
+      "emotion": "tired",
+      "text": "Room's a hundred degrees. Window's painted shut. Anything, Mr. Arce."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Hardware store on Sixth has fans. I'll bring one up. Don't pay me back."
+    }
+  ]
+}

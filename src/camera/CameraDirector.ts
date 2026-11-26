@@ -14,7 +14,8 @@ export class CameraDirector {
   constructor(readonly camera: THREE.PerspectiveCamera) {}
 
   get currentOwner() { return this.owner; }
-  acquire(owner: string): THREE.PerspectiveCamera { this.owner = owner; this.blend = null; return this.camera; }
+  private baseFov = 60;
+  acquire(owner: string): THREE.PerspectiveCamera { if (this.owner === 'gameplay') this.baseFov = this.camera.fov; this.owner = owner; this.blend = null; return this.camera; }
   release(blendSeconds = 0.8) {
     if (this.owner === 'gameplay') return;
     this.owner = 'gameplay';
@@ -32,6 +33,7 @@ export class CameraDirector {
       const u = Math.min(1, b.t / b.dur), e = u * u * (3 - 2 * u);
       c.position.lerpVectors(b.fromPos, g.position, e);
       c.quaternion.slerpQuaternions(b.fromQuat, g.quaternion, e);
+      c.fov = b.fromFov + (this.baseFov - b.fromFov) * e; c.updateProjectionMatrix(); // back to the player's FOV setting
       if (u >= 1) this.blend = null;
     } else { c.position.copy(g.position); c.quaternion.copy(g.quaternion); }
   }

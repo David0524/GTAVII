@@ -1,0 +1,116 @@
+{
+  "id": "dlg.m12_calloway",
+  "context": "M12 o2. Herald Square lunch counter. Calloway two stools from the end, accordion file at her elbow. **Branch A.**",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Mr. Arce. I've watched you walk past my car four times. Tuna or egg salad?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "You're the woman in the parked car on Fifth."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Ruth Calloway. Special Prosecutor's office. Don't look around. Eat."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "You collect for Carl Mayhew. Mayhew collects for a lieutenant. Who collects for a lawyer."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "I'm not asking you to be brave, Mr. Arce. I'm asking you to be audible."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Wear a wire on your rounds. Your record goes away. And I protect you."
+    },
+    {
+      "id": "l7",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Protect me how long?"
+    },
+    {
+      "id": "l8",
+      "speaker": "char.ruth_calloway",
+      "emotion": "evasive",
+      "text": "As long as it takes."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Wear the wire.",
+          "goto": "l_wire",
+          "confirm": "This choice can't be undone.",
+          "setFlags": [
+            "flag.branch_a_wire"
+          ],
+          "setRelationships": {
+            "char.teddy_arce/char.ruth_calloway": 2,
+            "char.teddy_arce/char.luis_navarro": 1
+          }
+        },
+        {
+          "text": "Burn it. I'm not a rat.",
+          "goto": "l_burn",
+          "confirm": "This choice can't be undone.",
+          "setFlags": [
+            "flag.branch_a_burned"
+          ],
+          "setRelationships": {
+            "char.teddy_arce/char.ruth_calloway": -3,
+            "char.teddy_arce/char.carl_mayhew": 1,
+            "char.teddy_arce/char.dennis_wurtz": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_wire",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Give me the thing. Before I finish this sandwich and change my mind."
+    },
+    {
+      "id": "l_wire2",
+      "speaker": "char.ruth_calloway",
+      "emotion": "relieved",
+      "text": "It goes under the undershirt. You'll sweat. Everybody sweats.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_burn",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "I waited in a car once and said nothing. I'm good at it. Find another man."
+    },
+    {
+      "id": "l_burn2",
+      "speaker": "char.ruth_calloway",
+      "emotion": "cold",
+      "text": "Then you're a witness I'll subpoena instead of a witness I protect. Your choice.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.ruth_calloway",
+      "emotion": "dry",
+      "text": "I have a budget for coffee and a budget for you. Guess which is bigger."
+    }
+  ]
+}

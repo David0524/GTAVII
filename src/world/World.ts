@@ -3,6 +3,8 @@ import type { ChunkRequest, ChunkResponse } from './chunkWorker';
 import type { ChunkMeshes, MeshArrays } from './meshBuilder';
 import type { QualitySettings } from '../engine/quality';
 import { heightAt, terrainLoaded } from '../shared/terrain';
+import { createFacadeMaterial } from '../render/FacadeMaterial';
+import { createGroundMaterial } from '../render/GroundMaterial';
 
 export interface WorldManifest {
   region: { minX: number; maxX: number; minZ: number; maxZ: number };
@@ -28,6 +30,8 @@ function toGeometry(m: MeshArrays): THREE.BufferGeometry {
   g.setAttribute('normal', new THREE.BufferAttribute(m.normal, 3));
   g.setAttribute('color', new THREE.BufferAttribute(m.color, 3));
   g.setIndex(new THREE.BufferAttribute(m.index, 1));
+  if (m.uv) g.setAttribute('uv', new THREE.BufferAttribute(m.uv, 2));
+  if (m.facade) g.setAttribute('facade', new THREE.BufferAttribute(m.facade, 4));
   g.computeBoundingSphere();
   g.computeBoundingBox();
   return g;
@@ -49,8 +53,9 @@ export class World {
   private busy: boolean[] = [];
   private queue: string[] = [];
   private pending = new Map<number, string>();
-  readonly buildingMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, metalness: 0 });
-  readonly groundMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
+  readonly buildingMat = createFacadeMaterial();
+  readonly groundMat = createGroundMaterial();
+  readonly propMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.05 });
   stats = { ready: 0, lod0: 0, lod1: 0, loading: 0, parseMsTotal: 0, failed: 0 };
 
   constructor(private quality: QualitySettings, private base = import.meta.env.BASE_URL + 'data/') {
@@ -153,7 +158,8 @@ export class World {
     const b = new THREE.Mesh(toGeometry(m.buildings), this.buildingMat); b.name = 'buildings';
     const g = new THREE.Mesh(toGeometry(m.ground), this.groundMat); g.name = 'ground';
     b.castShadow = b.receiveShadow = true; g.receiveShadow = true;
-    lod0.add(b, g);
+    const pr = new THREE.Mesh(toGeometry(m.props), this.propMat); pr.name = 'props'; pr.castShadow = true; pr.receiveShadow = true;
+    lod0.add(b, g, pr);
     const lod1 = new THREE.Mesh(toGeometry(m.buildingsLod1), this.buildingMat); lod1.name = 'lod1';
     group.add(lod0, lod1);
     lod0.visible = false; lod1.visible = false;
@@ -161,7 +167,7 @@ export class World {
     group.userData = { chunk: m.key, stats: m.stats };
     this.root.add(group);
     this.stats.ready++;
-    for (const cb of this.onChunkReady) cb({ key: m.key, ox: c.cx, oz: c.cz, parts: [b.geometry, g.geometry] });
+    for (const cb of this.onChunkReady) cb({ key: m.key, ox: c.cx, oz: c.cz, parts: [b.geometry, g.geometry, pr.geometry] });
   }
 
   private setLod(c: ChunkState, lod: -1 | 0 | 1) {

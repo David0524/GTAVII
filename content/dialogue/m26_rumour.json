@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m26_rumour",
+  "context": "M26 o1. Night desk. Manny stayed late. Inez in the lobby with her laundry.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.manny_soto",
+      "emotion": "ashamed",
+      "text": "Teddy. Prentiss asked me which rooms are empty on four. Tonight. Why tonight?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.inez_rivera",
+      "emotion": "urgent",
+      "text": "I took his five hundred. He told me 'Leave by Tuesday. For your own good.'"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.inez_rivera",
+      "emotion": "firm",
+      "text": "My kids are at my sister's. I'm staying. I want to see his face."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Buildings burn, old wiring, nobody's fault. I've heard that speech."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "decisive",
+      "text": "Nobody sleeps on four tonight. Manny, keep the service door. Inez, wake the floors at two."
+    }
+  ]
+}

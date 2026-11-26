@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m17_eleni",
+  "context": "M17 o6. (Nick.) Eleni steps out of her glass office with the club's figures, written on a napkin.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.eleni_varelas",
+      "emotion": "dry",
+      "text": "Nikos, I read her numbers. They balance. Ours don't."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Eleni, she's a… she works on Eighth Avenue."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.eleni_varelas",
+      "emotion": "cold",
+      "text": "And you work on Thirtieth Street and owe the bank nine hundred coats."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.eleni_varelas",
+      "emotion": "dry",
+      "text": "In this family I'm the one who reads. Give her the lease after the season."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "After the season. If there's a season."
+    }
+  ]
+}

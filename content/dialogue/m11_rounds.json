@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m11_rounds",
+  "context": "M11 o1. Rita's bar, afternoon. Delphine sets out her day.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Brannock's car's been on Thirty-Eighth since noon. Watching the door."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Then we move the club's money today. While he's watching the wrong door."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "Where to? Under the bed? Under my bed?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Boiler room. Marcus's boiler room. Nobody steals from a boiler."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.rita_haines",
+      "emotion": "warm",
+      "text": "Collect the Royal first. Tina's always late. Today, be early."
+    }
+  ]
+}

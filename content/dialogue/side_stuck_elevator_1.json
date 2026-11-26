@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_stuck_elevator_1",
+  "context": "A brownout. An office lobby on Fifth.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.hotel_bellhop",
+      "emotion": "frantic",
+      "text": "Elevator's stuck between nine and ten! Machine room's on the roof! The super's in Jersey!"
+    }
+  ]
+}

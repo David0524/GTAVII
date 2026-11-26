@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_fight_door_2",
+  "context": "At the door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.holiday_stroller",
+      "emotion": "drunk",
+      "text": "This ticket's real, pal! I printed it myself!"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.holiday_stroller",
+      "emotion": "drunk",
+      "text": "Okay, okay. I'm going. I'll watch through the window. There's no window?"
+    }
+  ]
+}

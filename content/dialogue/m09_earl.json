@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m09_earl",
+  "context": "M9 o2. 42nd & Seventh, July 4th night, the street nearly empty. Earl closes up his shine stand.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Shine's a dollar. Advice is free. The number today is seven-four-one."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "So Carl's got himself a civilian. You know what you are now, Mr. Arce?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "A courier."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "A tax with legs. Every man on this street plays a number. Cops play the biggest."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Here's the envelope. Count it. I already know you won't. You're that kind."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.dwayne_little",
+      "emotion": "cocky",
+      "text": "Used-to-be! You collecting now? That's cold, man. That's cold."
+    }
+  ]
+}

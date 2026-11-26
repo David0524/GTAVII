@@ -1,0 +1,30 @@
+{
+  "id": "dlg.act_canvass_h8th",
+  "context": "Tenant canvass at an Eighth Ave hotel (Act 3).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "earnest",
+      "text": "Tenants' petition. The march is the twenty-third. Will you sign?"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.sro_resident",
+      "emotion": "suspicious",
+      "text": "You were police. I remember you. …You're asking, not taking? Huh."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.sro_resident",
+      "emotion": "proud",
+      "text": "Merchant seaman, thirty years. Ships to everywhere. I'll sign."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Thank you. Bring a chair on the twenty-third."
+    }
+  ]
+}

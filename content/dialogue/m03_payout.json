@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m03_payout",
+  "context": "M3 o8. Back at the cab line. Delroy counts the meter money on the fender.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "Three fares, no dents, and the lady from Chelsea tipped a dollar? You're hired."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "Fourteen for you. Come back any night. The cab don't sleep and neither do you."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Thanks, Delroy."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delroy_tate",
+      "emotion": "wry",
+      "text": "Hey. Saw Carl Mayhew at the stand Friday. Asking who drives nights. Funny, huh?"
+    }
+  ]
+}

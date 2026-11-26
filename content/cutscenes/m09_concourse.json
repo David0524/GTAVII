@@ -1,0 +1,103 @@
+{
+  "id": "cut.m09_concourse",
+  "mission": "mission.independence_day",
+  "before": "o10",
+  "time": "22:40",
+  "date": "1974-07-04",
+  "skippable": true,
+  "logline": "Under Madison Square Garden, after the fight: two strangers who were on opposite sides of an envelope an hour ago.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "static",
+      "framing": "The 1968 concourse: low ceiling, fluorescent strips, a shuttered newsstand",
+      "blocking": "Teddy and Delphine burst through the Eighth Ave doors and slow to a walk",
+      "beats": [
+        "Fireworks thud far above, through concrete"
+      ],
+      "durationSec": 5,
+      "notes": "audio: distant fireworks; a train announcement, muffled | lighting: cold fluorescent; one tube flickering | film: grain; slight overexposure on the tubes"
+    },
+    {
+      "id": "s2",
+      "type": "two-shot",
+      "lensMm": 35,
+      "move": "handheld, settling",
+      "framing": "Both against a tiled pillar, breathing",
+      "blocking": "Teddy pats his jacket for the envelopes",
+      "beats": [
+        "l1–l2"
+      ],
+      "durationSec": 8,
+      "dialogue": [
+        "dlg.m09_concourse#l1",
+        "dlg.m09_concourse#l2"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Delphine, half-smile, eyes on the stairs behind him",
+      "blocking": "",
+      "beats": [
+        "l3: she followed him"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m09_concourse#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy, a laugh that doesn't make it out",
+      "blocking": "",
+      "beats": [
+        "l4"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m09_concourse#l4"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "choice hold",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "The envelope with her fifty, in his hand between them",
+      "blocking": "",
+      "beats": [
+        "The choice c1 is untimed; the envelope holds frame"
+      ],
+      "dialogue": [
+        "dlg.m09_concourse#c1"
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m09_concourse#c1"
+    },
+    {
+      "id": "s6",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "slow dolly back",
+      "framing": "The two of them small in the long concourse",
+      "blocking": "They walk toward the Seventh Ave exit together",
+      "beats": [
+        "l_end–l_end2: names exchanged"
+      ],
+      "durationSec": 7,
+      "dialogue": [
+        "dlg.m09_concourse#l_end",
+        "dlg.m09_concourse#l_end2"
+      ],
+      "notes": "film: fade to the Act 2 title card: HEAT"
+    }
+  ]
+}

@@ -45,3 +45,16 @@ test('turn call-outs read like a 1974 passenger', () => {
   assert.equal(callout({ atM: 0, dir: 'left', onto: 'West 34th Street', x: 0, z: 0 }), 'Left on Thirty-Fourth');
   assert.equal(callout({ atM: 0, dir: 'right', onto: '8th Avenue', x: 0, z: 0 }), 'Right on Eighth Avenue');
 });
+
+test('voiced call-outs never contradict the printed one', async () => {
+  const { voicedCallout } = await import('../src/ui/map/Route');
+  const pool = JSON.parse(fs.readFileSync('content/barks/route_calls.json', 'utf8')).lines;
+  const left = { atM: 0, dir: 'left' as const, onto: 'West 34th Street', x: 0, z: 0 };
+  for (let seed = 0; seed < 20; seed++) {
+    const l = voicedCallout(left, 'cabbie', pool, seed) ?? voicedCallout(left, 'fare', pool, seed);
+    if (l) { assert.doesNotMatch(l, /\bright\b/i); assert.match(l, /Thirty-Fourth/); }
+  }
+  const right = { atM: 0, dir: 'right' as const, onto: '8th Avenue', x: 0, z: 0 };
+  const r = voicedCallout(right, 'fare', pool, 1);
+  assert.ok(r === null || (/\bright\b/i.test(r) && /Eighth Avenue/.test(r)), String(r));
+});

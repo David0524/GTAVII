@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m19_hollis",
+  "context": "M19 o5. 11th floor, Room 1112. Camera holds on Teddy's face and Odessa behind him. Nothing else is shown.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Mr. Hollis? It's Teddy. I'm coming in."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "quiet",
+      "text": "…Oh. Oh, Walter."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "His radio's still on. Shipping news. Ships leaving for everywhere."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "Close his eyes, Mr. Arce. Then call somebody. Then come back and sit with me."
+    }
+  ]
+}
