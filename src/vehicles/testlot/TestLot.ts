@@ -12,6 +12,7 @@ import { MODELS } from '../models';
 import { BIKES } from '../twowheel/bikes';
 import type { TwoWheeler } from '../twowheel/TwoWheeler';
 import { SubwayTrain } from '../subway/SubwayTrain';
+import { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS } from '../assist';
 import { ZONES } from '../gen/morphs';
 import { VehicleLights, type VehicleClass } from '../../shared/traffic';
 
@@ -325,6 +326,9 @@ export async function runTestLot() {
     document.body.classList.add('touch');
   }
   let auto: { throttle: number; brake: number; steer: number; handbrake: boolean } | null = null;
+  // driver assist: touch default (analog pedals + steering assist); ?assist=0/1, ?auto=1 for auto-accelerate
+  const assistOn = params.has('assist') ? params.get('assist') !== '0' : input.isTouch;
+  let assist: DriverAssist | null = assistOn ? new DriverAssist({ ...TOUCH_DEFAULTS, autoAccelerate: params.get('auto') === '1' }) : null;
   let camMode = 0; // 0 chase, 1 hood, 2 orbit
   const keys = new Set<string>();
   window.addEventListener('keydown', (e) => {
@@ -401,7 +405,7 @@ export async function runTestLot() {
       return { throttle: Math.max(0, mv.y), brake: Math.max(0, -mv.y, input.isHeld('sink') ? 1 : 0), steer: steerKey, handbrake: input.isHeld('jump') };
     })();
     if (riding) { riding.setInput(i); player.setInput({ throttle: 0, brake: 1, steer: 0, handbrake: true }); }
-    else if (!turntable && !lineup) player.setInput(i);
+    else if (!turntable && !lineup) player.setInput(assist ? assist.apply(i, player, DT) : i);
     player.update(DT);
     for (const b of bikes) b.update(DT);
     for (const v of parked) v.update(DT);
@@ -439,6 +443,9 @@ export async function runTestLot() {
     },
     trafficMs: () => traffic?.lastMs ?? 0,
     bikes,
+    /** Set or clear the driver assist (null = raw input). */
+    setAssist(o: Partial<typeof TOUCH_DEFAULTS> | null) { assist = o ? new DriverAssist({ ...TOUCH_DEFAULTS, ...o }) : null; },
+    get assist() { return assist; }, PAD_DEFAULTS,
     get train() { return train; }, trainSim,
     get riding() { return riding; },
     /** Spawn a two-wheeler and ride it (input + camera). */

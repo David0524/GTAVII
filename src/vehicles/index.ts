@@ -35,6 +35,7 @@ export { UPGRADES, TRIM } from './state';
 export type { TrafficInstance, VehicleClass } from '../shared/traffic';
 export { CLASS_MODELS } from './registry';
 export { MODELS } from './models';
+export { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS, type AssistSettings } from './assist';
 
 export interface VehicleFactory {
   models: readonly { id: string; class: string; displayName: string }[];

@@ -4,6 +4,38 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 3c: touch driving (user decision: analog gas and brake pedals by default)
+- **Physics:**
+  - Torque-converter **idle creep**: 2.3 mph with no pedals; any brake holds the car.
+  - **Park** via `setParked()`.
+  - **Reverse needs a firm brake** (over 0.6) held at a standstill for 0.5 s, so a light thumb
+    hold at a red light just holds.
+  - Assist counter-steer goes through `steerExtra` (radians) and bypasses the speed-sensitive
+    reduction.
+- **`DriverAssist`** (`src/vehicles/assist.ts`, pure, 4 Node tests): pedal response curves,
+  steering smoothing, a speed-sensitive ratio, yaw-stabilisation counter-steer with a throttle
+  lift, and auto-accelerate with a cruise governor. Touch defaults: assist on at 0.6,
+  auto-accelerate off.
+- **Measured (Bancroft, scripted thumb inputs):**
+  - A 20% thumb on the gas gives 3.3 mph and 30% gives 6.3 mph (fine creeping).
+  - A gentle stop from 30 mph at 45% brake takes 4.2 s and 89 ft with no lock-up. Holding there
+    5 s doesn't select reverse; a firm hold does.
+  - Full lock in parking: 4.9 m radius.
+- **Wet tail-out slides** (handbrake and full lock, then hands off), heading change after 2.5 s:
+
+  | case | assist off | assist on |
+  |---|---|---|
+  | Bancroft at 40 mph | 63° (still rotating) | 17° (stopped rotating) |
+  | Tiverton at 45 mph | 69° | 31° (stopped rotating) |
+  | Bancroft at 50 mph | 81° | 62° |
+  | Ferris at 40 mph | 87° | 63° |
+
+  The harsh cases are reduced, not saved: the assist is deliberately light. Its strength is a
+  setting.
+- **Honest:** a first version measured slip at the centre of mass and fought ordinary cornering
+  (a feedback loop). It was replaced by yaw-rate stabilisation, which only acts on rotation
+  beyond what the steering asks for.
+
 ## Session 3b: look pass against the references (oversight review of the lineup)
 **Fresh comparison:** `shots/vehicles/lineup_vs_references.png`. Each render is now framed like
 its photo: the Tiverton as in 549851, the Bancroft cab as in 554331, the CT-40 as in 549921.

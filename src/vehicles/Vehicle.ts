@@ -252,9 +252,14 @@ export class Vehicle {
   get temperature() { return this.engine.temp; }
   get engineRunning() { return this.engine.running; }
 
+  /** Park: no creep, wheels held (call when the driver gets out with the engine running). */
+  setParked(p: boolean) { this.physics.parked = p; }
+  /** Steering geometry for the driver assist. */
+  get handling() { return { wheelbase: this.asset.spec.wheelbase, maxSteer: this.physics.p.maxSteer }; }
+
   setInput(i: DriveInput) {
     const inp = this.physics.input;
-    inp.throttle = i.throttle; inp.brake = i.brake; inp.steer = i.steer; inp.handbrake = i.handbrake;
+    inp.throttle = i.throttle; inp.brake = i.brake; inp.steer = i.steer; inp.handbrake = i.handbrake; inp.steerExtra = i.steerExtra ?? 0;
   }
 
   on(type: VehicleEventType, cb: (e: unknown) => void) {

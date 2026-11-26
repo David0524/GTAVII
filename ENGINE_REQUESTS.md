@@ -96,3 +96,18 @@ Status as of the engine merge at a24eda4. Already answered by the engine, so **n
     (set `vehicle.driverId`) and `closingSpeed`.
   - `component`, `engine` and `theft` events are new.
 - **Fallback:** n/a. Please relay this to the gameplay stream.
+
+## From vehicles: 12. Analog pedal axes for touch and pad (TOUCH_CONTROLS.md)
+- **What:** `Input` exposes analog `throttle` and `brake` 0..1 from the UI's touch pedals (thumb
+  position on the pedal) and from pad triggers, plus `steer` −1..1. Settings keys go in the UI's
+  settings store: `steerAssist` (on for touch), `steerAssistStrength` (0.6), `autoAccelerate`
+  (off) and `autoCruise` (m/s).
+- **Why:** the user chose analog gas and brake pedals as the touch default. `DriverAssist`
+  (`src/vehicles/assist.ts`) shapes them: pedal curves, steering smoothing, a speed-sensitive
+  ratio, counter-steer by yaw stabilisation with a throttle lift, and auto-accelerate with a
+  cruise governor.
+- **Fallback:** the test lot maps `move.y` to throttle and brake. `?assist=1` turns the assist
+  on, and `?auto=1` turns on auto-accelerate.
+- **Usage:** `vehicle.setInput(assist.apply(rawPedals, vehicle, dt))` each fixed step. Call
+  `vehicle.setParked(true)` when the driver gets out with the engine running; the automatic
+  creeps otherwise.

@@ -7,7 +7,11 @@ import { GROUPS, G as CG, groups } from '../shared/physicsGroups';
 /** Wheel rays ride on the world, other vehicles and props; never on people (shared contract). */
 export const WHEEL_RAY_GROUPS = groups(0xffff, CG.WORLD | CG.VEHICLE | CG.PROP);
 
-export interface DriveInput { throttle: number; brake: number; steer: number; handbrake: boolean }
+export interface DriveInput {
+  throttle: number; brake: number; steer: number; handbrake: boolean;
+  /** Extra steering angle (rad) that bypasses the speed-sensitive reduction: assist counter-steer. */
+  steerExtra?: number;
+}
 
 export interface WheelState {
   /** Local mount (hardpoint) and wheel geometry. */
@@ -53,6 +57,13 @@ export class VehiclePhysics {
   readonly mods = { brake: 1, mu: 1, steerBias: 0, engineOn: true };
   private comZ = 0; private inertia = { x: 1, y: 1, z: 1 };
   private shiftT = 0; private revT = 0; private steerNow = 0;
+  /** Brake level (0..1) that, held at a standstill for reverseDelay seconds, selects reverse. */
+  reverseBrakeThreshold = 0.6;
+  reverseDelay = 0.5;
+  /** Idle creep of the automatic in Drive/Reverse (fraction of g), as period torque converters did. */
+  creep = 0.035;
+  /** Transmission in Park: no creep, wheels held (set when the driver gets out). */
+  parked = false;
   private ray: RAPIER.Ray;
   private zF: number; private zR: number;
 
@@ -141,18 +152,20 @@ export class VehiclePhysics {
     let thr = THREE.MathUtils.clamp(this.input.throttle, -1, 1), brk = THREE.MathUtils.clamp(this.input.brake, 0, 1);
     if (thr < 0) { brk = Math.max(brk, 0); if (this.speed < 1) { this.reverse = true; } }
     if (!this.reverse) {
-      if (speedAbs < 0.6 && brk > 0.1 && thr <= 0.05) { this.revT += dt; if (this.revT > 0.25) this.reverse = true; } else this.revT = 0;
+      // Reverse needs a FIRM brake held at a standstill: a light analog hold at a red light just holds.
+      if (speedAbs < 0.4 && brk > this.reverseBrakeThreshold && thr <= 0.05) { this.revT += dt; if (this.revT > this.reverseDelay) this.reverse = true; } else this.revT = 0;
     } else {
-      if (thr > 0.1 && this.speed > -0.6) { this.reverse = false; this.revT = 0; }
+      if (thr > 0.02 && this.speed > -0.6) { this.reverse = false; this.revT = 0; }
     }
     let drive = 0, brake = brk;
+    if (this.parked) { thr = 0; brk = 1; brake = 1; this.reverse = false; this.revT = 0; }
     if (this.reverse) { drive = Math.max(brk, -thr); brake = Math.max(0, thr); }
     else drive = Math.max(0, thr);
     if (drive > 0 || brake > 0 || Math.abs(this.input.steer) > 0.01) body.wakeUp();
 
     // ---------------------------------------------------------- steering (slow, speed-sensitive)
     // alignment / bent-front pull grows with speed
-    const target = this.input.steer * p.maxSteer / (1 + speedAbs / 22) + mods.steerBias * Math.min(1, speedAbs / 8);
+    const target = THREE.MathUtils.clamp(this.input.steer * p.maxSteer / (1 + speedAbs / 22) + (this.input.steerExtra ?? 0), -p.maxSteer, p.maxSteer) + mods.steerBias * Math.min(1, speedAbs / 8);
     const rate = p.steerRate * (Math.abs(target) < Math.abs(this.steerNow) ? 1.6 : 1);
     this.steerNow += THREE.MathUtils.clamp(target - this.steerNow, -rate * dt, rate * dt);
     const wb = Math.abs(this.zR - this.zF);
@@ -184,6 +197,8 @@ export class VehiclePhysics {
     this.load = mods.engineOn ? drive * (this.shiftT > 0.2 ? 0.45 : 1) * this.power : 0;
     if (this.reverse) driveForce = -driveForce;
     // engine braking when off the throttle
+    // torque-converter creep: with no pedals the car rolls at walking pace; any brake holds it
+    if (mods.engineOn && brake < 0.02 && speedAbs < 2.2) driveForce += (this.reverse ? -1 : 1) * this.creep * p.mass * G * (1 - speedAbs / 2.2);
     const engBrake = mods.engineOn && drive < 0.05 && speedAbs > 1 ? Math.sign(this.speed) * Math.min(0.035 * p.mass * G, 6 * speedAbs * ratio) : 0;
 
     // ---------------------------------------------------------- per-wheel suspension + tyres
