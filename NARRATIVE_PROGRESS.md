@@ -675,4 +675,23 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
   - M9: a street firefight on Eighth Ave.
   - Durations rose by 2–3 minutes and checkpoints were re-spaced.
   - New: 5 archetypes, 7 dialogue scripts, and 1 flag.
-- **Next:** Acts 2–3, including the subway story mission, then step 3.
+- **Acts 2–3 (M10–M32):** every mission now has an action beat. Highlights:
+  - M14: a fur-vault stick-up.
+  - M15: looters at the ice truck.
+  - M18: a firefight over the hijacked truck.
+  - M25: protecting Mayhew from Lisle's clean-up men.
+  - M27: surviving Wurtz's unit at the lockers.
+  - M28: a non-lethal fight to defend the march.
+  - M32: a fight through the Penn concourse.
+
+  Cops and story characters are non-lethal targets.
+- **M23 is now the subway mission, "Below Thirty-Fourth":** the token booth, the real
+  half-abandoned 33rd Street passage, rats, a platform fight as a train arrives, and one stop
+  on the local.
+- **Subway stations:** `content/subway.json` lists the stations in bounds. Herald Square and
+  the passage are verified; the others are marked `to_verify`.
+- **Rats and pigeons** are added as ambient archetypes (the user's request).
+- **Validators:** 0 errors; 32/32 reachable.
+- **Still open in step 2:** the lead stats need agreement from the Gameplay chat (sent;
+  awaiting a reply).
+- **Next:** step 3 (police and precincts, items and guns, economy, homes and cars).
