@@ -2,6 +2,10 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three/webgpu';
 import type { ModelSpec, PhysicsSpec } from './gen/spec';
 import type { GeneratedModel } from './gen/body';
+import { GROUPS, G as CG, groups } from '../shared/physicsGroups';
+
+/** Wheel rays ride on the world, other vehicles and props; never on people (shared contract). */
+export const WHEEL_RAY_GROUPS = groups(0xffff, CG.WORLD | CG.VEHICLE | CG.PROP);
 
 export interface DriveInput { throttle: number; brake: number; steer: number; handbrake: boolean }
 
@@ -69,7 +73,8 @@ export class VehiclePhysics {
     gen.colliders.forEach((c, i) => {
       const cd = RAPIER.ColliderDesc.cuboid(c.hx, c.hy, c.hz).setTranslation(c.cx, c.cy, c.cz)
         .setFriction(0.3).setRestitution(0.05)
-        .setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+        .setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS)
+        .setCollisionGroups(GROUPS.vehicle);
       // NB: collider mass properties are expressed in the collider's own frame
       if (i === 0) cd.setMassProperties(p.mass, { x: -c.cx, y: p.comY - c.cy, z: comZ - c.cz }, inertia, { x: 0, y: 0, z: 0, w: 1 });
       else cd.setMass(0);
@@ -200,7 +205,7 @@ export class VehiclePhysics {
         const off = d * rr;
         this.ray.origin = { x: _hp.x + _f.x * off, y: _hp.y + _f.y * off, z: _hp.z + _f.z * off };
         this.ray.dir = { x: -_up.x, y: -_up.y, z: -_up.z };
-        const hit = this.world.castRayAndGetNormal(this.ray, maxT, true, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, undefined, undefined, body);
+        const hit = this.world.castRayAndGetNormal(this.ray, maxT, true, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, WHEEL_RAY_GROUPS, undefined, body);
         if (!hit) continue;
         const centerDist = hit.timeOfImpact - Math.sqrt(Math.max(0, rr * rr - off * off));
         if (centerDist < best) { best = centerDist; _n.set(hit.normal.x, hit.normal.y, hit.normal.z); w.ground = hit.collider; }

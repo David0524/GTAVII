@@ -5,6 +5,8 @@ import { drawPlate } from '../gen/decals';
 import { rng } from '../gen/rng';
 import type { DriveInput } from '../physics';
 import { buildBike, type BikeSpec, type BikeGeometry } from './bikes';
+import { GROUPS } from '../../shared/physicsGroups';
+import { WHEEL_RAY_GROUPS } from '../physics';
 
 export interface CrashEvent {
   vehicleId: string;
@@ -117,7 +119,7 @@ export class TwoWheeler {
     this.body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(pose.x, pose.y, pose.z).setRotation({ x: _q.x, y: _q.y, z: _q.z, w: _q.w })
       .enabledRotations(false, true, false).setLinearDamping(0.02).setAngularDamping(1.5).setCcdEnabled(true).setCanSleep(true));
     const len = g0.maxZ - g0.minZ;
-    const cd = RAPIER.ColliderDesc.cuboid(g0.halfW * 0.6, 0.35, len / 2 - 0.05).setTranslation(0, 0.65, 0).setFriction(0.5).setRestitution(0.05);
+    const cd = RAPIER.ColliderDesc.cuboid(g0.halfW * 0.6, 0.35, len / 2 - 0.05).setTranslation(0, 0.65, 0).setFriction(0.5).setRestitution(0.05).setCollisionGroups(GROUPS.vehicle);
     cd.setMassProperties(spec.mass + RIDER_KG, { x: 0, y: 0.1, z: 0 }, { x: 40, y: 40, z: 15 }, { x: 0, y: 0, z: 0, w: 1 });
     this.collider = world.createCollider(cd, this.body);
     if (save) this.applySave(save);
@@ -210,7 +212,7 @@ export class TwoWheeler {
     let grounded = 0, sumH = 0, hF = 0, hR = 0;
     for (const w of this.g.wheels) {
       const o = new THREE.Vector3(w.x, 0.8, w.z).applyQuaternion(_q).add(_v.set(tr.x, tr.y, tr.z));
-      const hit = this.world.castRay(new RAPIER.Ray({ x: o.x, y: o.y, z: o.z }, { x: 0, y: -1, z: 0 }), 1.6, true, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, undefined, undefined, body);
+      const hit = this.world.castRay(new RAPIER.Ray({ x: o.x, y: o.y, z: o.z }, { x: 0, y: -1, z: 0 }), 1.6, true, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, WHEEL_RAY_GROUPS, undefined, body);
       if (hit) { const gy = o.y - hit.timeOfImpact; grounded++; sumH += gy; if (w.front) hF = gy; else hR = gy; }
     }
     if (grounded) {

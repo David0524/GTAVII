@@ -10,6 +10,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { GeoBuilder, type Slot } from '../gen/builder';
 import { createMaterialSet, type MaterialSet, type Quality } from '../gen/materials';
 import { paintCarSide, paintInterior, paintCarCards } from './graffiti';
+import { GROUPS } from '../../shared/physicsGroups';
 
 export const CAR = {
   L: 15.5, W: 2.68, floorY: 1.12, cantY: 3.0, roofY: 3.55, sillY: 1.95, winTopY: 2.75,
@@ -187,7 +188,7 @@ export class SubwayTrain {
     });
     // kinematic body + colliders: floor, roof, ends, wall segments, sliding door leaves
     const body = this.world.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased());
-    const col = (hx: number, hy: number, hz: number, x: number, y: number, z: number) => this.world.createCollider(RAPIER.ColliderDesc.cuboid(hx, hy, hz).setTranslation(x, y, z).setFriction(0.9), body);
+    const col = (hx: number, hy: number, hz: number, x: number, y: number, z: number) => this.world.createCollider(RAPIER.ColliderDesc.cuboid(hx, hy, hz).setTranslation(x, y, z).setFriction(0.9).setCollisionGroups(GROUPS.vehicle), body);
     col(HW, 0.05, CAR.L / 2, 0, CAR.floorY - 0.05, 0);
     col(HW, 0.05, CAR.L / 2, 0, CAR.roofY - 0.1, 0);
     col(HW, (CAR.roofY - 0.3) / 2, 0.04, 0, (CAR.roofY - 0.3) / 2 + 0.3, -CAR.L / 2 + 0.04);
