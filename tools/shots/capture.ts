@@ -48,7 +48,7 @@ const VIEWS: { name: string; cam?: string; at?: string }[] = [
   { name: '06_hotel_chelsea_23rd', cam: look(on('West 23rd Street', chelsea.x + 90, chelsea.z), [chelsea.x, 22, chelsea.z]) },
   { name: '07_aerial_overview_north', cam: look([350, 420, 650], [-250, 0, -800]) },
   { name: '08_downtown_skyline_wtc', cam: look([-60, 140, 260], [-1800, 120, 4200]) },
-  { name: '09_onfoot_herald_square', at: `${macys.x + 60},${macys.z + 140},20` },
+  { name: '09_onfoot_herald_square', at: `${on('Broadway', macys.x, macys.z + 150)[0] + 8},${on('Broadway', macys.x, macys.z + 150)[2]},15` },
   { name: '10_onfoot_42nd_and_seventh', at: '-560,-1520,90' },
   { name: '11_aerial_hells_kitchen_rail_cut', cam: look([-900, 380, -400], [-1550, 0, -780]) },
   { name: '12_terrain_34th_toward_hudson', cam: look(on('East 34th Street', 380, -905, 14), [-900, 2, -905]) },
@@ -67,7 +67,7 @@ async function main() {
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
   const report: any[] = [];
   for (const v of VIEWS) {
-    const q = new URLSearchParams({ quality, fresh: '1', ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}) });
+    const q = new URLSearchParams({ quality, fresh: '1', title: '0', hud: '1', ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}) });
     await page.goto(`http://localhost:${port}/?${q}`);
     await page.waitForFunction(() => (window as any).__T74, null, { timeout: 120_000 });
     await page.evaluate(() => (window as any).__T74.whenIdle());

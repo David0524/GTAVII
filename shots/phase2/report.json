@@ -1,0 +1,242 @@
+{
+  "quality": "high",
+  "forceWebGL": true,
+  "date": "2026-11-26T15:20:03.351Z",
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+  "views": [
+    {
+      "view": "01_spawn_flatiron_up_broadway",
+      "cam": "spawn",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 143,
+      "triangles": 362509,
+      "chunks": {
+        "ready": 182,
+        "lod0": 48,
+        "lod1": 134,
+        "loading": 0,
+        "parseMsTotal": 3085.9000000031665,
+        "failed": 0
+      }
+    },
+    {
+      "view": "02_flatiron_from_madison_sq",
+      "cam": "25,1.8,-150,173.50,9.40",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 50,
+      "triangles": 245682,
+      "chunks": {
+        "ready": 182,
+        "lod0": 55,
+        "lod1": 127,
+        "loading": 0,
+        "parseMsTotal": 2625.4999999962747,
+        "failed": 0
+      }
+    },
+    {
+      "view": "03_empire_state_from_fifth",
+      "cam": "-18.8,1.8,-481.5,16.52,21.78",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 112,
+      "triangles": 328780,
+      "chunks": {
+        "ready": 182,
+        "lod0": 54,
+        "lod1": 128,
+        "loading": 0,
+        "parseMsTotal": 2882.300000006333,
+        "failed": 0
+      }
+    },
+    {
+      "view": "04_herald_square",
+      "cam": "-303.3,1.8,-812.9,51.50,5.94",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 90,
+      "triangles": 303812,
+      "chunks": {
+        "ready": 182,
+        "lod0": 54,
+        "lod1": 128,
+        "loading": 0,
+        "parseMsTotal": 2617.800000000745,
+        "failed": 0
+      }
+    },
+    {
+      "view": "05_penn_msg_seventh_ave",
+      "cam": "-604.4,1.8,-582.1,49.02,4.27",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 85,
+      "triangles": 308583,
+      "chunks": {
+        "ready": 182,
+        "lod0": 52,
+        "lod1": 130,
+        "loading": 0,
+        "parseMsTotal": 3127.200000002049,
+        "failed": 0
+      }
+    },
+    {
+      "view": "06_hotel_chelsea_23rd",
+      "cam": "-620.9,1.8,-31.7,107.05,12.11",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 57,
+      "triangles": 254454,
+      "chunks": {
+        "ready": 182,
+        "lod0": 50,
+        "lod1": 132,
+        "loading": 0,
+        "parseMsTotal": 4545.800000003539,
+        "failed": 0
+      }
+    },
+    {
+      "view": "07_aerial_overview_north",
+      "cam": "350,420,650,22.48,-14.98",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 186,
+      "triangles": 396282,
+      "chunks": {
+        "ready": 177,
+        "lod0": 21,
+        "lod1": 156,
+        "loading": 0,
+        "parseMsTotal": 4847.900000004098,
+        "failed": 0
+      }
+    },
+    {
+      "view": "08_downtown_skyline_wtc",
+      "cam": "-60,140,260,156.17,-0.27",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 24,
+      "triangles": 163166,
+      "chunks": {
+        "ready": 182,
+        "lod0": 40,
+        "lod1": 142,
+        "loading": 0,
+        "parseMsTotal": 3360.500000005588,
+        "failed": 0
+      }
+    },
+    {
+      "view": "09_onfoot_herald_square",
+      "cam": "spawn",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 88,
+      "triangles": 308864,
+      "chunks": {
+        "ready": 182,
+        "lod0": 53,
+        "lod1": 129,
+        "loading": 0,
+        "parseMsTotal": 4110.900000001304,
+        "failed": 0
+      }
+    },
+    {
+      "view": "10_onfoot_42nd_and_seventh",
+      "cam": "spawn",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 70,
+      "triangles": 267861,
+      "chunks": {
+        "ready": 182,
+        "lod0": 51,
+        "lod1": 131,
+        "loading": 0,
+        "parseMsTotal": 3676.3999999975786,
+        "failed": 0
+      }
+    },
+    {
+      "view": "11_aerial_hells_kitchen_rail_cut",
+      "cam": "-900,380,-400,59.69,-26.78",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 73,
+      "triangles": 295575,
+      "chunks": {
+        "ready": 182,
+        "lod0": 56,
+        "lod1": 126,
+        "loading": 0,
+        "parseMsTotal": 2736.500000002794,
+        "failed": 0
+      }
+    },
+    {
+      "view": "12_terrain_34th_toward_hudson",
+      "cam": "380,14,-907.4,90.11,-0.54",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 145,
+      "triangles": 362853,
+      "chunks": {
+        "ready": 182,
+        "lod0": 42,
+        "lod1": 140,
+        "loading": 0,
+        "parseMsTotal": 2658.8000000054017,
+        "failed": 0
+      }
+    }
+  ],
+  "logs": [
+    "[warning] [.WebGL-0x37f4003be000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x37f4003be000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x37f4003be000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x37f4003be000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}

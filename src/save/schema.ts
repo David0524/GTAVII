@@ -5,7 +5,7 @@
  *     tests/save-fixtures/vN.json (a real save of that version); the test suite loads every fixture.
  *  3. migrate() runs on every load and import, so old saves upgrade transparently.
  */
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export interface LeadSave {
   money: number;
@@ -30,11 +30,51 @@ export interface SaveV1 {
   };
 }
 
-export type SaveData = SaveV1; // the current version
+/**
+ * v2: adds `sections`: independently versioned blocks owned by workstreams (ui, gameplay, economy,
+ * ...). Each owner registers its section (version + migrations + validate) with registerSection();
+ * the engine never edits another stream's section shape. Unknown sections are preserved verbatim, so a
+ * save written by a newer build with an extra stream's data round-trips through an older build.
+ */
+export interface SectionBlob { v: number; data: unknown }
+export interface SaveV2 extends Omit<SaveV1, 'version'> {
+  version: 2;
+  sections: Record<string, SectionBlob>;
+}
+
+export type SaveData = SaveV2; // the current version
+
+export interface SectionDef<T = unknown> {
+  name: string;           // e.g. 'ui', 'gameplay', 'economy'
+  version: number;        // current version of this section's shape
+  migrations: Record<number, (data: any) => any>; // vN -> vN+1
+  validate?: (data: T) => void; // throw SaveFormatError on bad data
+  empty: () => T;          // value for saves that predate the section
+}
+const SECTIONS = new Map<string, SectionDef>();
+export function registerSection<T>(def: SectionDef<T>) { SECTIONS.set(def.name, def as SectionDef); }
+export function registeredSections() { return [...SECTIONS.values()]; }
+
+/** Bring every registered section to its current version (missing -> empty()). Unknown sections are kept. */
+export function migrateSections(sections: Record<string, SectionBlob>): Record<string, SectionBlob> {
+  const out: Record<string, SectionBlob> = { ...sections };
+  for (const def of SECTIONS.values()) {
+    let blob = out[def.name] ?? { v: def.version, data: def.empty() };
+    if (blob.v > def.version) throw new SaveFormatError(`section '${def.name}' is from a newer game version`);
+    while (blob.v < def.version) {
+      const step = def.migrations[blob.v];
+      if (!step) throw new SaveFormatError(`no migration for section '${def.name}' v${blob.v}`);
+      blob = { v: blob.v + 1, data: step(blob.data) };
+    }
+    def.validate?.(blob.data);
+    out[def.name] = blob;
+  }
+  return out;
+}
 
 /** vN -> vN+1 upgrade functions (input is the raw object of version N). */
 export const MIGRATIONS: Record<number, (s: any) => any> = {
-  // 1: (s) => ({ ...s, version: 2, newField: default }),
+  1: (s) => ({ ...s, version: 2, sections: {} }),
 };
 
 export class SaveFormatError extends Error {}
@@ -49,8 +89,10 @@ export function migrate(raw: unknown): SaveData {
     if (!step) throw new SaveFormatError(`no migration from v${s.version}`);
     s = step(s);
   }
-  validate(s as SaveData);
-  return s as SaveData;
+  const out = s as SaveData;
+  out.sections = migrateSections(out.sections ?? {});
+  validate(out);
+  return out;
 }
 
 /** Structural validation of the current version; throws SaveFormatError with a precise path. */
@@ -66,6 +108,8 @@ export function validate(s: SaveData): void {
     if (typeof c.money !== 'number' || !Array.isArray(c.inventory) || !c.at || ![c.at.x, c.at.y, c.at.z, c.at.heading].every(Number.isFinite)) fail(`party.characters.${id}`);
   }
   if (!s.narrative || typeof s.narrative.act !== 'number' || typeof s.narrative.flags !== 'object') fail('narrative');
+  if (!s.sections || typeof s.sections !== 'object') fail('sections');
+  for (const [k, b] of Object.entries(s.sections)) if (!b || typeof b.v !== 'number') fail(`sections.${k}`);
 }
 
 // ---------------------------------------------------------------- portable file format (export/import)

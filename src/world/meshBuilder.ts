@@ -202,7 +202,7 @@ export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = ()
   for (const gr of data.ground) {
     const col = GROUND_COLORS[gr.kind] ?? GROUND_COLORS[GroundKind.Sidewalk];
     if (gr.kind === GroundKind.Road) groundPoly(g, gr.rings, 0, col, false, half, hf);
-    else if (gr.kind === GroundKind.Lot) groundPoly(g, gr.rings, SIDEWALK_H + 0.01, col, false, half, hf);
+    else if (gr.kind === GroundKind.Lot) groundPoly(g, gr.rings, SIDEWALK_H + 0.04, col, false, half, hf); // 4 cm: different tessellation from the sidewalk below must not z-fight on slopes
     else groundPoly(g, gr.rings, SIDEWALK_H, col, true, half, hf);
   }
   const buildings = bAll.finish(), ground = g.finish(), buildingsLod1 = bLod.finish();
