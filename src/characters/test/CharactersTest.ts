@@ -28,9 +28,11 @@ export async function runCharactersTest() {
   world.fog = new THREE.Fog(0x2a2522, 60, 260);
   const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 400);
   // late-afternoon light: warm key, cool sky fill, back rim
+  if (scene !== 'street') { // the street scene uses the engine's atmosphere
   world.add(new THREE.HemisphereLight(0xc8d2e6, 0x4a3c30, 1.25));
   const sun = new THREE.DirectionalLight(0xffe8cc, 2.6); sun.position.set(4, 7, 6); world.add(sun);
   const rim = new THREE.DirectionalLight(0xc0d0ff, 1.0); rim.position.set(-5, 3, -6); world.add(rim);
+  }
   const quality = (qp.get('quality') ?? 'high') as 'low' | 'high';
   const factory = await createCharacterFactory({ quality });
   if (qp.get('dbg') === 'n') { const mm = characterMaterial(); mm.colorNode = normalGeometry.mul(0.5).add(0.5); mm.normalNode = null; }
@@ -42,6 +44,7 @@ export async function runCharactersTest() {
   if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair') tick = lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
+  else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
   const simT = qp.has('t') ? num('t', 0) : -1;
   const frameMs: number[] = [];
   if (simT >= 0) {
