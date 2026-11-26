@@ -625,7 +625,7 @@ export class Vehicle {
     const alive = this.stage !== 'destroyed';
     const blink = Math.floor(this.t * 1.6) % 2 === 0;
     (m.headlamp as THREE.MeshStandardNodeMaterial).emissiveIntensity = alive && !c.headlamps && this.lights.head ? 1.6 : 0;
-    (m.headlamp as THREE.MeshStandardNodeMaterial).color.setHex(c.headlamps ? 0x2a2a28 : 0xe8e4d8);
+    (m.headlamp as THREE.MeshStandardNodeMaterial).color.setHex(c.headlamps ? 0x2a2a28 : 0xd8dcdc);
     const brake = alive && this.brakeLight;
     (m.taillamp as THREE.MeshStandardNodeMaterial).emissiveIntensity = c.taillamps || !alive ? 0 : brake ? 2.4 : this.lights.head ? 0.3 : 0;
     (m.indicator as THREE.MeshStandardNodeMaterial).emissiveIntensity = alive && this.lights.hazard && blink ? 3 : 0;

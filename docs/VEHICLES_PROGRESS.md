@@ -28,14 +28,23 @@ its photo: the Tiverton as in 549851, the Bancroft cab as in 554331, the CT-40 a
 - **Budget:** LOD0 stays within the brief at 6.5–8.0k triangles per car. The trim tubes were
   coarsened to fit.
 
+**Follow-up polish (oversight's second review):**
+- Arches have 8 stations per side instead of 6; the flat runs have fewer.
+- A crisp upper character line just below the belt catches a highlight, and there is one
+  fewer crown point.
+- Round headlamps are dome lenses over a chrome reflector, in a glassy material instead of
+  flat white.
+- Fareway taxi: a lower nose, a low wide egg-crate grille level with the lamps, and a thin
+  wrap-around chrome bumper, as on the cabs in 554331.
+- LOD0 is now 6.7–8.0k per car, with the bus at 8.4k.
+
 **Still short of the photos (honest):**
 - **No film grade or grain yet.** That's the engine post stack, and it's the biggest remaining
   difference in mood. The references are warm and low-contrast; our renders are clean and grey.
 - **Shoulder highlights are weak.** The photographed cars show a strong reflected highlight
   along the fender crease. Our body sides are close to flat, so the highlight is weak. Next:
   a sharper upper character line with a slight tumblehome.
-- **Taxi front:** the photographed cabs have a lower, wider grille with a thin wrapping bumper.
-  Ours has a taller face with the lamps higher.
+- **Taxi front (Fareway):** addressed in the follow-up. The Bancroft cab keeps the sedan front.
 - **Missing details:** no interiors or people, and the glass is opaque, so nobody visible
   behind the windscreen as in 549851. Hood creases and the long hood centre crease seen on the
   cab in 554331 are also missing.

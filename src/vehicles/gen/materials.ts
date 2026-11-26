@@ -130,6 +130,7 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
   const glassL = makeGlass(panes.left.cracked, panes.left.broken), glassR = makeGlass(panes.right.cracked, panes.right.broken);
   const lamp = (c: number, e: number) => { const m = new THREE.MeshStandardNodeMaterial({ color: c, roughness: 0.15, metalness: 0, emissive: e, emissiveIntensity: 0 }); owned.push(m); return m; };
   const headlamp = lamp(0xe8e4d8, 0xfff0cc);
+  headlamp.metalness = 0.6; headlamp.roughness = 0.06; // glassy lens over a silvered reflector
   const taillamp = lamp(0x5a0806, 0xff1a0a);
   const indicator = lamp(0x8a4a08, 0xff8a10);
   const reverse = lamp(0xd8d6d0, 0xffffff);

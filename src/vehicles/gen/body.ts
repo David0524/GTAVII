@@ -93,19 +93,19 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     const creaseY = lerp(m.sillY, m.beltY, m.crease);
     // over the wheel arches the skin stays vertical (a clean cut-out), only the sill tucks under
     const arch = y0 > m.sillY + 0.01;
-    return hw * pw([[y0, arch ? 0.992 : 0.92], [y0 + 0.05, arch ? 0.998 : 0.985], [Math.max(y0 + 0.06, creaseY), 1], [yb - 0.05, 0.995], [yb, 0.975]], y);
+    return hw * pw([[y0, arch ? 0.992 : 0.92], [y0 + 0.05, arch ? 0.998 : 0.985], [Math.max(y0 + 0.06, creaseY), 1], [yb - 0.07, 0.994], [yb - 0.025, 1.0], [yb, 0.968]], y);
   };
 
   const section = (s: number): Section => {
     const hw = halfW(s), y0 = bottomY(s), yt = topY(s), yb = Math.min(beltAt(s), yt);
     const creaseY = lerp(m.sillY, m.beltY, m.crease);
-    let ys = [y0, y0 + 0.05, creaseY, yb - 0.05, yb];
+    let ys = [y0, y0 + 0.05, creaseY, yb - 0.07, yb - 0.025, yb];
     if (lod === 0) ys.push(...extraY);
     ys = [...new Set(ys.filter((y) => y >= y0 && y <= yb).map((y) => Math.round(y * 1000) / 1000))].sort((a, b) => a - b);
     const side: V3[] = ys.map((y) => [sideX(s, y), y, Z(s + rake(s, y))]);
     const crown = m.crown * (yt > yb + 0.02 ? 1 : 0);
     const topPts: [number, number][] = lod === 0
-      ? [[0.975, yb], [0.955, yt], [0.78, yt + crown * 0.45], [0.5, yt + crown * 0.8], [0.25, yt + crown * 0.95], [0, yt + crown]]
+      ? [[0.968, yb], [0.95, yt], [0.74, yt + crown * 0.5], [0.4, yt + crown * 0.88], [0, yt + crown]]
       : [[0.975, yb], [0.955, yt], [0.5, yt + crown * 0.8], [0, yt + crown]];
     const half = topPts.map(([f, y]) => [hw * f, y, Z(s + rake(s, y))] as V3);
     const top = [...half, ...half.slice(0, -1).reverse().map((p) => [-p[0], p[1], p[2]] as V3)];
@@ -114,10 +114,10 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
 
   // ---------------------------------------------------------------- stations
   const st = new Set<number>();
-  const n = Math.max(lod === 0 ? 24 : 7, Math.round(L / (lod === 0 ? 0.22 : 0.85)));
+  const n = Math.max(lod === 0 ? 16 : 7, Math.round(L / (lod === 0 ? 0.36 : 0.85)));
   for (let i = 0; i <= n; i++) st.add(L * i / n);
   for (const a of axles) {
-    const k = lod === 0 ? 6 : 1;
+    const k = lod === 0 ? 8 : 1;
     for (let i = -k; i <= k; i++) st.add(a.s + (archR * i) / k);
     st.add(a.s - archR - 0.01); st.add(a.s + archR + 0.01);
   }
@@ -236,8 +236,9 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
           const rot = new THREE.Matrix4().makeRotationX(Math.PI / 2);
           const bez = new THREE.CylinderGeometry(r * 1.18, r * 1.22, 0.035, segs, 1, true);
           b.add('chrome', bez, new THREE.Matrix4().makeTranslation(x, h.y, hz - 0.012).multiply(rot));
+          b.add('chrome', new THREE.SphereGeometry(r * 0.98, segs, 2, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.Matrix4().makeTranslation(x, h.y, hz + 0.02).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)).multiply(new THREE.Matrix4().makeScale(1, 0.45, 1))); // reflector bowl
           const lens = new THREE.SphereGeometry(r, segs, lod === 0 ? 3 : 1, 0, Math.PI * 2, 0, Math.PI / 2);
-          b.add('headlamp', lens, new THREE.Matrix4().makeTranslation(x, h.y, hz - 0.005).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)).multiply(new THREE.Matrix4().makeScale(1, 0.25, 1)));
+          b.add('headlamp', lens, new THREE.Matrix4().makeTranslation(x, h.y, hz - 0.005).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)).multiply(new THREE.Matrix4().makeScale(1, 0.35, 1)));
         } else {
           const w = h.size * 1.15, hh = h.size * 0.85;
           b.box('chrome', x, h.y, hz - 0.01, w + 0.03, hh + 0.03, 0.03);
@@ -303,13 +304,13 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     // wheel-lip mouldings follow the arch edge
     if (m.trim.wheelLip) for (const a of axles) for (const sx of [1, -1]) {
       const pts: V3[] = [];
-      for (let k = 0; k <= 9; k++) {
-        const s0 = a.s - archR + (2 * archR * k) / 9;
+      for (let k = 0; k <= 7; k++) {
+        const s0 = a.s - archR + (2 * archR * k) / 7;
         const y = bottomY(s0);
-        if (y <= m.sillY + 0.005 && k > 0 && k < 9) continue;
+        if (y <= m.sillY + 0.005 && k > 0 && k < 7) continue;
         pts.push([sx * (sideX(s0, y + 0.01) + 0.004), y + 0.008, Z(s0)]);
       }
-      if (pts.length > 2) b.tubePath('chrome', pts, 0.011, 4);
+      if (pts.length > 2) b.tubePath('chrome', pts, 0.011, 3);
     }
     // door shut lines + handles: front edge at the A-pillar foot, a seam at the B-pillar, the rear edge ahead of the rear arch
     if (m.trim.doors) {

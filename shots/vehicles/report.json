@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-26T16:44:09.287Z",
+  "date": "2026-11-26T16:47:02.350Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -244,83 +244,83 @@
   },
   "triangles": {
     "bancroft": {
-      "lod0": 7998,
-      "lod1": 1362,
+      "lod0": 7974,
+      "lod1": 1430,
       "lod2": 72
     },
     "bancroft_patrol": {
-      "lod0": 7634,
-      "lod1": 1482,
+      "lod0": 7762,
+      "lod1": 1550,
       "lod2": 72
     },
     "bancroft_cab": {
-      "lod0": 7398,
-      "lod1": 1386,
+      "lod0": 7526,
+      "lod1": 1454,
       "lod2": 72
     },
     "tiverton": {
-      "lod0": 7478,
-      "lod1": 1344,
+      "lod0": 7340,
+      "lod1": 1400,
       "lod2": 72
     },
     "ferris": {
-      "lod0": 6490,
-      "lod1": 1170,
+      "lod0": 6698,
+      "lod1": 1222,
       "lod2": 72
     },
     "homestead": {
-      "lod0": 7774,
-      "lod1": 1314,
+      "lod0": 7720,
+      "lod1": 1374,
       "lod2": 72
     },
     "fareway": {
-      "lod0": 7092,
-      "lod1": 1380,
+      "lod0": 7056,
+      "lod1": 1360,
       "lod2": 72
     },
     "ct40": {
-      "lod0": 8684,
-      "lod1": 2064,
+      "lod0": 8184,
+      "lod1": 2144,
       "lod2": 72
     },
     "b60": {
-      "lod0": 6012,
-      "lod1": 1370,
+      "lod0": 5932,
+      "lod1": 1414,
       "lod2": 84
     },
     "walkin": {
-      "lod0": 5454,
-      "lod1": 1148,
+      "lod0": 5488,
+      "lod1": 1204,
       "lod2": 72
     },
     "b80": {
-      "lod0": 6026,
-      "lod1": 1376,
+      "lod0": 5908,
+      "lod1": 1416,
       "lod2": 84
     },
     "medic": {
-      "lod0": 6172,
-      "lod1": 1664,
+      "lod0": 5978,
+      "lod1": 1700,
       "lod2": 84
     },
     "pumper": {
-      "lod0": 6332,
-      "lod1": 1548,
+      "lod0": 6362,
+      "lod1": 1584,
       "lod2": 84
     },
     "ladder": {
-      "lod0": 6466,
-      "lod1": 1616,
+      "lod0": 6496,
+      "lod1": 1652,
       "lod2": 84
     },
     "courier": {
-      "lod0": 5290,
-      "lod1": 1058,
+      "lod0": 5324,
+      "lod1": 1102,
       "lod2": 72
     },
     "scoop": {
-      "lod0": 5436,
-      "lod1": 1274,
+      "lod0": 5318,
+      "lod1": 1310,
       "lod2": 84
     }
   },
