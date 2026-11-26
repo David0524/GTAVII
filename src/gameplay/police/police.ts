@@ -38,6 +38,8 @@ export interface Unit {
   indoorCheck?: number;
   /** where this unit wants to be and how fast (for an external mover) */
   target?: [number, number] | null; pace?: number;
+  /** a stakeout: stand off this point (a subway exit) and watch it until `until` (police time) */
+  watch?: { at: [number, number]; until: number } | null;
 }
 export interface Report {
   id: number; precinct: string; kinds: CrimeKind[]; heat: number; description: Description; lastKnown: [number, number]; crimeAt: [number, number];
@@ -245,7 +247,17 @@ export class Police extends Emitter<PoliceEvents> {
     u.report = r.id; if (!r.units.includes(u.id)) r.units.push(u.id);
     u.searchPts = [at]; this.setState(u, 'enroute');
   }
-  private setState(u: Unit, s: UnitState) { u.state = s; u.t = 0; }
+  private setState(u: Unit, s: UnitState) { u.state = s; u.t = 0; if (s === 'pursuit' || s === 'combat' || s === 'leave' || s === 'post') u.watch = null; }
+  /** Send a unit to watch a point (a subway exit the suspect's train will stop at) with the report's description. */
+  stakeOut(unitId: string, at: [number, number], report: Report, arrived = false, watchSeconds = 600) {
+    const u = this.units.get(unitId); if (!u) return false;
+    if (!report.units.includes(u.id)) report.units.push(u.id);
+    u.report = report.id; u.ownDesc = u.ownDesc ?? report.description;
+    u.watch = { at, until: this.time + watchSeconds };
+    if (arrived) { const p = this.project(at[0] + 8, at[1]); u.x = p[0]; u.z = p[1]; u.yaw = Math.atan2(-(at[0] - u.x), -(at[1] - u.z)); u.searchPts = []; u.searchFor = 0; this.setState(u, 'search'); }
+    else { u.searchPts = [at]; this.setState(u, 'enroute'); }
+    return true;
+  }
 
   canSee(u: Unit, p: [number, number, number]) {
     const dx = p[0] - u.x, dz = p[2] - u.z, d = Math.hypot(dx, dz);
@@ -366,7 +378,7 @@ export class Police extends Emitter<PoliceEvents> {
     if (u.state === 'search') {
       u.searchFor += dt;
       const spec = SPEC[u.kind];
-      if (u.searchFor > spec.search && (!r || r.sinceSighting > 30)) {
+      if (u.searchFor > spec.search && (!r || r.sinceSighting > 30) && !(u.watch && this.time < u.watch.until)) {
         if (u.post) { u.report = null; u.searchPts = []; this.setState(u, 'post'); } // back to the beat
         else { this.setState(u, 'leave'); this.emit('standDown', { unit: u.id }); }
       }
@@ -410,6 +422,11 @@ export class Police extends Emitter<PoliceEvents> {
         break;
       }
       case 'search': {
+        if (u.watch && this.time < u.watch.until) {
+          // parked across from the exit, watching the stairs
+          target = null; u.yaw = Math.atan2(-(u.watch.at[0] - u.x), -(u.watch.at[1] - u.z));
+          break;
+        }
         if (!u.searchPts.length) {
           const r = this.report(u); const c = r?.lastKnown ?? [u.x, u.z];
           const rad = Math.min(150, 25 + (r?.sinceSighting ?? 30) * 1.2);
@@ -479,13 +496,18 @@ export class Police extends Emitter<PoliceEvents> {
   }
 
   /** Hours pass off-screen (sleep, custody, hospital): reports cool as if unwatched; everyone out searching has gone back. */
-  elapse(seconds: number, hidden = 2) {
+  /** Reports age and cool while the suspect is out of sight for `seconds` (a ride underground); units carry on. */
+  ageReports(seconds: number, hidden = 1) {
     for (const r of [...this.reports]) {
       const pad = this.isCitywide(r) ? 0 : this.payoffOf(r.precinct);
       r.heat -= DECAY * (this.isCitywide(r) ? OFFICER_DOWN_DECAY : 1) * (1 + 1.5 * pad) * hidden * 1.5 * seconds;
-      r.age += seconds; r.sinceSighting += seconds; r.pending = [];
+      r.age += seconds; r.sinceSighting += seconds;
       if (r.heat < 0.3) this.clear(r, 'decay');
     }
+  }
+  elapse(seconds: number, hidden = 2) {
+    this.ageReports(seconds, hidden);
+    for (const r of this.reports) r.pending = [];
     for (const u of [...this.units.values()]) {
       if (u.post) { u.x = u.post[0]; u.z = u.post[1]; u.report = null; u.recog = 0; u.ownDesc = null; u.stamina.value = u.stamina.max; u.stamina.exhausted = false; this.setState(u, 'post'); }
       else this.units.delete(u.id);

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { rig } from './harness';
-import { match, describeText } from '../police/description';
+import { match, describeText, observe } from '../police/description';
+import { Rng } from '../core/rng';
 import { STOP_MATCH, expectedBribe } from '../police/police';
 
 /** Teddy fires a revolver on an empty street with one witness and one call box. */
@@ -208,4 +209,44 @@ test('interiors: a searching cop checks the diner you ducked into; a hiding spot
   const a = run(false), b = run(true);
   assert.ok(a.has('police', 'checkInterior') && a.has('police', 'stop'), 'found in the diner');
   assert.ok(!b.has('police', 'stop'), 'not found in the hiding spot');
+});
+
+// ---- the subway in a chase (sim's subway layer: stations + timetable)
+test('subway: seen going underground, cars race the train to the next stops; get off there and they are waiting, ride past and you are clear', () => {
+  const r = rig();
+  // the Eighth Avenue line, a stop every ~300 m along z (uptown is -z)
+  const st = (id: string, z: number) => ({ id, name: id, line: 'eighth', x: 0, z, entrances: [{ x: 6, z }] });
+  const stations = [st('s23', 0), st('s34', -300), st('s42', -600), st('s50', -900), st('s14', 300)];
+  r.g.bindSubway({ subwayStations: () => stations, nextTrains: () => [{ line: 'eighth', dir: 'uptown', inSec: 60 }, { line: 'eighth', dir: 'downtown', inSec: 120 }] });
+  const sent: any[] = []; r.g.on('police', (e: any) => { if (e.kind === 'subwayStakeout') sent.push(e); });
+  // a shooting called in, and two radio cars nearby
+  r.g.policeSys.file({ witness: 'w', perp: 'player', kinds: ['shooting'], desc: { clothes: [] }, lastKnown: [0, 0], crimeAt: [0, 0], via: 'callbox', time: 0 } as any);
+  const a = r.g.registerPolice('radio_car', 'pct.gramercy', 40, -250, { corrupt: 0 });
+  const b = r.g.registerPolice('radio_car', 'pct.gramercy', -6000, 0, { corrupt: 0 }); // 6 km out: can't beat any train
+  // unseen: no stakeout
+  r.g.enterSubway(); assert.equal(sent.length, 0); assert.equal(r.g.subwayEntry?.seen, false);
+  r.g.setContext({ subway: false });
+  // seen: a unit in pursuit sees him go down the stairs
+  a.state = 'pursuit'; a.lostFor = 0;
+  a.ownDesc = observe(r.g.appearance(), 1, new Rng(1)); // he had a good look on the street
+  r.g.enterSubway();
+  assert.ok(r.g.subwayEntry?.seen);
+  assert.ok(sent.some((e) => e.unit === a.id && (e.station === 's34' || e.station === 's42')), `nearby car staked out an uptown stop: ${JSON.stringify(sent)}`);
+  assert.ok(!sent.some((e) => e.unit === b.id), 'a car that cannot beat the train is not sent');
+  assert.ok(r.events.some((e) => e.type === 'radio' && /subway at s23/.test(e.e.text)));
+  const watched = sent.find((e) => e.unit === a.id).station;
+  assert.equal(a.state, 'enroute');
+  // ride to a stop nobody is watching: contact broken
+  r.g.rideSubwayTo(0, -900);
+  assert.notEqual(a.state, 'pursuit');
+  assert.ok(r.g.subwayEntry!.staked.includes(a.id) && watched, 'the staked car is still watching its stop');
+  // the stakeout carries the chaser's own description
+  assert.ok(match(r.g.policeSys.reportFor('player')!.description, r.g.appearance()) > 0.6);
+  // ...and coming up the stairs at the watched stop: he's waiting with the description
+  const w = stations.find((s) => s.id === watched)!;
+  r.g.setContext({ subway: false });
+  r.pos[0] = w.entrances[0].x + 3; r.pos[2] = w.z;
+  let seenAgain = false; r.g.on('police', (e: any) => { if (e.kind === 'spotted' || e.kind === 'stop' || e.kind === 'pursuit') seenAgain = true; });
+  r.step(60, 1 / 10, () => {});
+  assert.ok(seenAgain, `met at ${watched}: ${a.state} at ${a.x.toFixed(0)},${a.z.toFixed(0)}`);
 });

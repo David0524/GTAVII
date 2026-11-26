@@ -28,6 +28,7 @@ import { CombatAI, type Faction, type CombatTarget } from './combat/ai';
 import { Gun, NEUTRAL_MODS, type ShooterMods, type ShotRay } from './combat/weapons';
 import { humanoidHitbox, resolveShots, type ActorHitbox, type ShotResult, type TyreShape } from './combat/ballistics';
 import { Witnesses, type ReportPoint } from './police/witnesses';
+import { merge as mergeDesc } from './police/description';
 import { Police, expectedBribe as expectedBribeOf, type SuspectCtx, type UnitKind } from './police/police';
 import { radiusOf as radiusOfCrime, type Crime, type CrimeKind } from './police/crime';
 import type { Appearance } from './police/description';
@@ -78,6 +79,9 @@ export interface DoorInfo { id: string; x: number; z: number; yaw: number; kind:
 export interface DoorsBinding { doorsForChunk(i: number, j: number): readonly DoorInfo[]; chunkSize?: number; open?(id: string): void }
 /** Engine mission/trigger runtime (ENGINE_REQUESTS 15): named characters and givers the player can talk to. */
 export interface TalkBinding { nearestTalkable(x: number, z: number, radius: number): { id: string; name: string; x: number; z: number } | null; talk(id: string): void }
+/** Sim's subway layer (claude/nice-sagan-2jh4m2): stations with entrances, and the deterministic timetable. */
+export interface SubwayStation { id: string; name: string; line: string; x: number; z: number; entrances: { x: number; z: number }[] }
+export interface SubwayBinding { subwayStations(): readonly SubwayStation[]; nextTrains?(stationId: string, n: number): { line: string; dir: 'uptown' | 'downtown'; inSec: number }[] }
 export interface VehiclesBinding { on(type: 'impact' | 'destroyed', cb: (e: any) => void): void }
 
 interface Actor { id: string; kind: 'player' | 'npc' | 'ped' | 'cop'; team: 'player' | 'enemy' | 'civilian' | 'police'; pos: () => V3; yaw: () => number; stance: () => 'stand' | 'crouch' | 'down'; vehicleId?: string }
@@ -621,6 +625,7 @@ export class Gameplay {
       this.ambulanceAt.push([x, z]); if (this.ambulanceAt.length > 8) this.ambulanceAt.shift();
       sim.dispatch?.('ambulance', x, z);
     });
+    if (typeof (sim as any).subwayStations === 'function') this.bindSubway(sim as unknown as SubwayBinding);
     for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
     sim.on('cabReady', (e) => { const c = this.cab; if (c && c.id === e.cabId) { c.state = 'ready'; c.kerb = [e.x, e.z]; this.emit('cab', { kind: 'ready', ...e }); } });
     sim.on('cabTurnAhead', (e) => { if (this.cab?.id === e.cabId) this.emit('cab', { kind: 'turn', ...e }); });
@@ -665,20 +670,74 @@ export class Gameplay {
     if (skip) this.passTime(minutes / 60, 'wait');
     return { ok: true as const, fare, tip: total - fare, minutes };
   }
+  // ------------------------------------------------------------------ the subway in a chase
+  private subway: SubwayBinding | null = null;
+  bindSubway(b: SubwayBinding) { this.subway = b; }
+  /** Seconds between stops (train running time plus dwell), for working out where a train will be. */
+  static SUBWAY_STOP_SECONDS = 95;
+  /** How long cars watch the stops after the suspect was seen going underground. */
+  static STAKEOUT_WINDOW = 600;
+  /** Where the player went underground, and whether the police saw it. */
+  subwayEntry: { station: SubwayStation; seen: boolean; at: number; staked: string[] } | null = null;
+  stationNear(x: number, z: number, r = 120) {
+    let best: SubwayStation | null = null, bd = r;
+    for (const s of this.subway?.subwayStations() ?? []) for (const e of [{ x: s.x, z: s.z }, ...s.entrances]) { const d = Math.hypot(e.x - x, e.z - z); if (d < bd) { bd = d; best = s; } }
+    return best;
+  }
+  /**
+   * Seen going down the stairs: the radio car calls it in, and free cars race the train to the next stops on the
+   * line (two each way). A car goes only where it can beat the train. A crowded platform and the right stop are the way out.
+   */
+  private stakeOutLine(from: SubwayStation) {
+    const rep = this.policeSys.reportFor(this.player!.id); if (!rep) return [];
+    const line = (this.subway!.subwayStations()).filter((s) => s.line === from.line && s.id !== from.id);
+    const trains = this.subway!.nextTrains?.(from.id, 4) ?? [];
+    const wait = (dir: 'uptown' | 'downtown') => trains.find((t) => t.line === from.line && t.dir === dir)?.inSec ?? 150;
+    // uptown is -z in the world frame
+    const ahead = (dir: 'uptown' | 'downtown') => line.filter((s) => (dir === 'uptown' ? s.z < from.z : s.z > from.z)).sort((a, b) => Math.abs(a.z - from.z) - Math.abs(b.z - from.z)).slice(0, 2);
+    const eyes = [...this.policeSys.units.values()].find((u) => u.ownDesc && (u.state === 'pursuit' || u.state === 'approach' || u.state === 'encounter'));
+    if (eyes?.ownDesc) rep.description = mergeDesc(rep.description, eyes.ownDesc);
+    const free = [...this.policeSys.units.values()].filter((u) => (u.kind === 'radio_car' || u.kind === 'sector_car' || u.kind === 'plainclothes') && !['combat', 'arrest', 'down', 'leave', 'roadblock'].includes(u.state));
+    const staked: string[] = [];
+    for (const dir of ['uptown', 'downtown'] as const) ahead(dir).forEach((st, i) => {
+      const trainEta = wait(dir) + (i + 1) * Gameplay.SUBWAY_STOP_SECONDS;
+      const exit = st.entrances[0] ?? { x: st.x, z: st.z };
+      const u = free.filter((q) => !staked.includes(q.id)).map((q) => ({ q, eta: this.policeSys.relayDelay + Math.hypot(q.x - exit.x, q.z - exit.z) / 13 })).filter((c) => c.eta < trainEta).sort((a, b) => a.eta - b.eta)[0];
+      if (u && this.policeSys.stakeOut(u.q.id, [exit.x, exit.z], rep)) { staked.push(u.q.id); this.emit('police', { kind: 'subwayStakeout', unit: u.q.id, station: st.id, name: st.name, trainEta: Math.round(trainEta), unitEta: Math.round(u.eta) }); }
+    });
+    this.emit('radio', { precinct: rep.precinct, at: [from.x, from.z], text: `${this.reg.precincts.find((q) => q.id === rep.precinct)?.name ?? 'Central'}, suspect went into the subway at ${from.name}. Cars to the next stops on the ${from.line === 'sixth' ? 'Sixth Avenue' : from.line === 'seventh' ? 'Seventh Avenue' : from.line === 'eighth' ? 'Eighth Avenue' : from.line === 'broadway' ? 'Broadway' : 'Lexington'} line.` });
+    return staked;
+  }
   /** Through the turnstile: a token, or jump it (a crime if the token clerk or a transit cop sees). */
   enterSubway(jump = false) {
     if (!this.player) return false;
     if (!jump && !this.inv.spend(this.player.lead, TOKEN, 'token')) return false;
     if (jump) this.crime('fare_evasion', { noise: 10 });
+    const p = this.player.position(), st = this.stationNear(p[0], p[2]);
+    if (st) {
+      const ph = this.policeSys.phase(this.player.id), seen = ph === 'pursuit' || ph === 'spotted';
+      this.subwayEntry = { station: st, seen, at: this.time, staked: seen ? this.stakeOutLine(st) : [] };
+    }
     this.setContext({ subway: true });
     return true;
   }
   /** Ride to a station at (x,z) and come up: contact with the police is broken; the clock moves on. */
   rideSubwayTo(x: number, z: number) {
     if (!this.player || !this.pc.subway) return null;
-    const p = this.player.position(), minutes = rideMinutes(p[0], p[2], x, z, SUBWAY_KMH) + 4;
-    this.passTime(minutes / 60, 'wait');
-    for (const u of this.policeSys.units.values()) if (['pursuit', 'approach', 'encounter', 'suspicious'].includes(u.state)) { u.state = 'search'; u.lostFor = 99; u.recog = 0; }
+    const p = this.player.position(), minutes = rideMinutes(p[0], p[2], x, z, SUBWAY_KMH) + 4, secs = minutes * 60;
+    // minutes underground: the reports cool (he's out of sight), but the cars keep working. The chasers lose
+    // him and search where he went down; the staked cars are at their stops when the train pulls in.
+    const staked = new Set(this.subwayEntry?.staked ?? []);
+    const stakes = [...staked].map((id) => { const u = this.policeSys.units.get(id); return u?.searchPts[0] ? { id, at: [...u.searchPts[0]] as [number, number] } : null; }).filter((q): q is { id: string; at: [number, number] } => !!q);
+    // seen going down, with cars at the next stops: they're watching for him (the report holds for the 10-minute
+    // stakeout window); otherwise the subway is the escape it always was (3x cooling, as in live play)
+    const watched = this.subwayEntry?.seen && stakes.length > 0 && this.time + secs - this.subwayEntry.at <= Gameplay.STAKEOUT_WINDOW;
+    this.policeSys.ageReports(secs, watched ? 0 : 3);
+    this.props.update(secs, [1e9, 1e9]);
+    this.clock.advance(minutes / 60, 'wait');
+    const rep = this.policeSys.reportFor(this.player.id);
+    for (const u of this.policeSys.units.values()) if (!staked.has(u.id) && ['pursuit', 'approach', 'encounter', 'suspicious'].includes(u.state)) { u.state = 'search'; u.lostFor = 99; u.recog = 0; }
+    if (rep) for (const k of stakes) this.policeSys.stakeOut(k.id, k.at, rep, true);
     this.setContext({ subway: false });
     return { minutes };
   }
