@@ -16,6 +16,9 @@ const PHONE = { ...devices['iPhone 13'], viewport: { width: 844, height: 390 }, 
 const DESKTOP = { viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1 };
 
 async function run(page: Page, size: string, base: string, errs: string[]) {
+  // font payload: every font file this page actually downloads
+  const fonts = new Map<string, number>();
+  page.on('response', async (r) => { if (/\.woff2(\?|$)/.test(r.url())) { try { fonts.set(r.url().replace(/^.*\//, ''), (await r.body()).length); } catch { /* ignore */ } } });
   const shot = async (n: string) => { await page.waitForTimeout(700); await page.screenshot({ path: path.join(OUT, `${n}_${size}.png`) }); console.log(`  ${n}_${size}`); };
   await page.goto(`${base}/?quality=low${size === 'phone' ? '&touch=1' : ''}`);
   await page.waitForFunction(() => (window as any).__T74?.ui?.state === 'title', null, { timeout: 180_000 });
@@ -35,12 +38,18 @@ async function run(page: Page, size: string, base: string, errs: string[]) {
   await shot('02_hud_street');
   await page.evaluate(() => (window as any).__T74.ui.show('map'));
   await shot('03_pause_map');
+  await page.evaluate(() => (window as any).__T74.ui.hub.select('pockets'));
+  await shot('03b_pockets');
+  await page.evaluate(() => (window as any).__T74.ui.hub.select('paper'));
+  await shot('03c_paper');
   await page.evaluate(() => (window as any).__T74.ui.hub.select('settings'));
   await shot('04_settings');
   await page.evaluate(() => (window as any).__T74.ui.hub.select('saves'));
   await shot('05_saves');
   const h = await page.evaluate(() => { const u = (window as any).__T74.ui; return { hud: u.hud.cost.frame, mm: u.hud.minimap.cost.draw }; });
   console.log(`  ${size}: hud ${h.hud.toFixed(3)} ms, minimap ${h.mm.toFixed(3)} ms (EMA, headless SwiftShader CPU)`);
+  const total = [...fonts.values()].reduce((a, b) => a + b, 0);
+  console.log(`  ${size}: fonts loaded ${fonts.size} files, ${(total / 1024).toFixed(1)} KB: ${[...fonts].map(([n, b]) => `${n} ${(b / 1024).toFixed(1)}K`).join(', ')}`);
   if (errs.length) console.log(`  ERRORS ${size}:`, errs.join(' | '));
 }
 

@@ -299,7 +299,7 @@ async function main() {
     }
     ui.update(dt);
     const playing = ui.state === 'play' && !ui.paused;
-    if (attributionEl) attributionEl.style.display = ui.state === 'title' || playing ? '' : 'none';
+    if (attributionEl) attributionEl.style.display = playing ? '' : 'none'; // the title prints its own credit line
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
     if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (playing && input.pressed('jump')) jumpLatch = true;

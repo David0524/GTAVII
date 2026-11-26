@@ -303,7 +303,7 @@ body.touch .ws-opt { width: 150px; min-height: 58px; }
 .st-group { display: flex; align-items: baseline; justify-content: space-between; }
 .st-reset { all: unset; cursor: pointer; font: 600 11px var(--f-ui); letter-spacing: .08em; color: var(--dim); padding: 6px 8px; border: 1px solid var(--hair); text-transform: none; }
 .st-reset:hover, .st-reset.is-focus { color: var(--taxi); border-color: var(--taxi); }
-.t74-row .k small.wait { color: #c89a6a; font-style: italic; }
+.t74-row .k small.wait { color: var(--dim); font-style: italic; } .t74-row.is-focus .k small.wait { color: #111b; }
 .st-remap { display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: 8px; align-items: center; padding: 5px 8px; background: rgba(239,227,196,.04); font: 500 14px var(--f-ui); }
 .st-remap.head { background: none; font: 700 13px var(--f-head); letter-spacing: .04em; color: var(--dim); text-transform: uppercase; }
 .st-remap i { font: italic 11px var(--f-ui); color: var(--taxi); }
