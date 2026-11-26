@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu';
+import './ui/theme.css';
 import { createRenderer } from './engine/renderer';
 import { qualityFromUrl } from './engine/quality';
 import { World } from './world/World';
@@ -23,14 +24,21 @@ import { Party } from './player/Party';
 import { SaveManager, iosEvictionRisk } from './save/SaveManager';
 import type { SaveData } from './save/schema';
 import { worldClock, clockLabel } from './world/Clock';
+import { Hud } from './ui/Hud';
+import { PauseMenu } from './ui/PauseMenu';
+import { TitleScreen } from './ui/TitleScreen';
+import { Locator } from './world/Districts';
+import { settings } from './settings/Settings';
 
 /**
  * URL parameters (all optional):
  *   quality=low|medium|high|ultra   webgl=1 (force WebGL2 backend)   hud=0|1   minimap=0   touch=1
  *   cam=x,y,z,yawDeg,pitchDeg        start in photo (free) camera at this pose (screenshot rig)
  *   at=x,z,headingDeg                start on foot at this point instead of the Flatiron spawn
+ *   title=0                          skip the title screen (implied by cam= and at=)
  */
 type Mode = 'onfoot' | 'photo';
+type Screen = 'title' | 'play' | 'paused';
 
 async function main() {
   const params = new URLSearchParams(location.search);
@@ -57,13 +65,14 @@ async function main() {
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
+  let touch: TouchControls | null = null;
   if (input.isTouch || params.has('touch')) {
     input.isTouch = true;
-    new TouchControls(input, [
+    touch = new TouchControls(input, [
       { label: 'JUMP', action: 'jump', hold: true },
       { label: 'RUN', action: 'sprint', hold: true },
       { label: 'CAM', action: 'photo', hold: false },
-      { label: 'HUD', action: 'hud', hold: false },
+      { label: 'MENU', action: 'pause', hold: false },
     ]);
     document.body.classList.add('touch');
   }
@@ -121,34 +130,34 @@ async function main() {
       orbit.snap(a, a.heading);
     },
   });
-  if (!params.has('fresh') && !params.has('cam') && !params.has('at')) {
-    const last = await saves.latest().catch(() => null);
-    if (last) { try { await saves.load(last.slot); } catch (e) { console.warn('could not load save', last.slot, e); } }
-  }
+  const skipTitle = params.get('title') === '0' || params.has('cam') || params.has('at');
+  let screen: Screen = skipTitle ? 'play' : 'title';
 
   // ---------------------------------------------------------------- HUD, minimap, report
   const hud = new DebugHud(document.body);
   // ?hud=1 forces the debug HUD on (phone testing), ?hud=0 forces it off; default: on for desktop, off for touch.
-  if (params.get('hud') === '0' || (input.isTouch && params.get('hud') !== '1')) hud.toggle(false);
+  // Debug HUD is a developer overlay: off unless ?hud=1 (F3 / D-pad up toggles it in play).
+  if (params.get('hud') !== '1') hud.toggle(false);
   const minimap = params.get('minimap') === '0' ? null : new Minimap(document.body, streets, world.manifest.region, world.manifest.heroes);
 
   const onResize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     // Keep the horizontal field of view sane on very wide phone screens (19.5:9 landscape).
-    camera.fov = camera.aspect > 2 ? 52 : 60;
+    camera.fov = settings.get('fov') - (camera.aspect > 2 ? 8 : 0);
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   };
   window.addEventListener('resize', onResize); onResize();
+  settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
 
   const frames = new FrameStats();
   const clock = new THREE.Timer();
-  let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0;
+  let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
   const debug = {
     backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, get saves() { return saves; },
-    get mode() { return mode; }, setMode,
+    get mode() { return mode; }, setMode, get screen() { return screen; }, get hudUi() { return gameHud; }, get pause() { return pause; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
-    whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active) ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
+    whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || screen === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
     setCamera: (x: number, y: number, z: number, yawDeg: number, pitchDeg = 0) => { setMode('photo'); fly.set(x, y, z, THREE.MathUtils.degToRad(yawDeg), THREE.MathUtils.degToRad(pitchDeg)); },
   };
   (window as unknown as { __T74: typeof debug }).__T74 = debug;
@@ -159,21 +168,19 @@ async function main() {
   report.show(hud.visible);
   document.getElementById('loading')?.remove();
 
-  // Controls hint (follows the active device and mode) and controller connect/disconnect toasts.
+  // Game UI: HUD (clock, location reveals, subtitles, prompts), pause menu, title screen.
   const style = document.createElement('style'); style.textContent = PROMPT_CSS; document.head.appendChild(style);
-  const hint = document.createElement('div');
-  Object.assign(hint.style, { position: 'fixed', right: '14px', bottom: '30px', color: '#e6dcc6', font: '12px Archivo, ui-sans-serif, sans-serif', textShadow: '0 1px 3px #000', pointerEvents: 'none', zIndex: '4' });
-  document.body.appendChild(hint);
+  const gameHud = new Hud();
+  const locator = new Locator(streets);
+  let district = '', crossing = '', locT = 0;
   function renderHint() {
     const d = input.activeDevice;
-    hint.style.display = d === 'touch' ? 'none' : '';
+    gameHud.prompts.style.display = d === 'touch' || screen !== 'play' ? 'none' : '';
     const items: Parameters<typeof promptStrip>[1] = mode === 'onfoot'
-      ? [['sprint', 'Sprint'], ['jump', 'Jump / climb'], ['photo', 'Free cam'], ['hud', 'Debug']]
+      ? [['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['pause', 'Pause']]
       : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']];
-    hint.innerHTML = promptStrip(input, items) + (d === 'kbm' ? `<span style="opacity:.7">WASD move · mouse look${mode === 'photo' ? ' · wheel speed' : ' · wheel zoom'}</span>` : '');
+    gameHud.prompts.innerHTML = promptStrip(input, items);
   }
-  renderHint();
-  input.onDeviceChange(renderHint);
   const toast = (msg: string) => {
     const t = document.createElement('div'); t.textContent = msg;
     Object.assign(t.style, { position: 'fixed', top: '14px', left: '50%', transform: 'translateX(-50%)', padding: '8px 14px', background: '#0d0b09dd', color: '#efe6d0', borderLeft: '3px solid #e8b92e', font: '600 13px Archivo, sans-serif', letterSpacing: '.04em', zIndex: '30', transition: 'opacity .4s' });
@@ -181,6 +188,39 @@ async function main() {
   };
   window.addEventListener('gamepadconnected', () => { toast(`Controller connected · ${input.pad.family === 'playstation' ? 'PlayStation' : input.pad.family === 'xbox' ? 'Xbox' : 'Gamepad'} layout`); input.rumble(0.4, 0.6, 180); });
   window.addEventListener('gamepaddisconnected', () => toast('Controller disconnected'));
+
+  const pause = new PauseMenu(input, streets, world.manifest.heroes, saves);
+  pause.onToast = toast;
+  pause.onLoaded = () => { mode = 'onfoot'; };
+  const title = skipTitle ? null : new TitleScreen(input, async (c) => {
+    if (c.kind === 'settings') { pause.show('settings'); return; }
+    if (c.kind === 'credits') { pause.show('credits'); return; }
+    if (c.kind === 'continue') {
+      const last = await saves.latest().catch(() => null);
+      if (last) { try { await saves.load(last.slot); } catch (e) { toast(`Could not load: ${(e as Error).message}`); return; } }
+    } else {
+      const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H;
+      player.teleport(spawn.x, y, spawn.z, spawn.heading); player.active = false; orbit.snap(player.pos, spawn.heading);
+    }
+    mode = 'onfoot'; title!.close(); screen = 'play'; district = ''; renderHint();
+    gameHud.setVisible(true);
+  });
+  if (title) { gameHud.setVisible(false); mode = 'photo'; }
+  pause.onClose = () => { if (screen === 'paused') { screen = 'play'; renderHint(); } };
+  const setScreenForPause = () => { screen = 'paused'; renderHint(); };
+  // Desktop: Esc releases the mouse before any key event reaches the page, so losing pointer lock
+  // during play is the pause signal (standard PC behaviour).
+  document.addEventListener('pointerlockchange', () => {
+    if (!document.pointerLockElement && screen === 'play' && !pause.open && input.activeDevice === 'kbm') {
+      pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: orbit.yaw }; pause.show(); setScreenForPause();
+    }
+  });
+  renderHint();
+  // title-screen camera: slow drift past the Flatiron at dusk
+  const flat = world.manifest.heroes.find((h) => h.name === 'Flatiron Building') ?? { x: 0, z: 0 };
+  let titleT = 0;
+  const attributionEl = document.getElementById('attribution');
+  const fsEl = document.querySelector('.t74-fs') as HTMLElement | null;
 
   // Quick save / load until the pause menu lands (UI pass): F5 / F9.
   window.addEventListener('keydown', async (e) => {
@@ -208,22 +248,47 @@ async function main() {
     const dt = Math.min(clock.getDelta(), 0.1);
     frames.push(dt * 1000);
     input.poll(dt);
-    if (input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
-    if (input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
-    if (input.pressed('jump')) jumpLatch = true;
-    if (mode === 'onfoot' && player.active) saves.tick(dt);
+    if (screen === 'title') {
+      titleT += dt;
+      const a = -0.35 + titleT * 0.018, r = 150;
+      fly.set(flat.x + Math.sin(a) * r, 26 + Math.sin(titleT * 0.05) * 4, flat.z - 40 - Math.cos(a) * r, 0, 0);
+      camera.lookAt(flat.x, 34, flat.z);
+      const wanted = world.stats.ready + world.stats.loading;
+      title!.progress(wanted ? world.stats.ready / wanted : 0);
+      if (world.idle && frameCount > 10) { if (!titleReady) { titleReady = true; void saves.latest().then((l) => title!.setReady(l ? l.label : null)); } }
+      if (pause.open) pause.update(dt); else title!.update(dt);
+    } else if (screen === 'paused' || pause.open) {
+      pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw };
+      pause.update(dt);
+    } else {
+      if (input.pressed('pause')) { pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: orbit.yaw }; pause.show(); setScreenForPause(); }
+      else if (input.pressed('map')) { pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: orbit.yaw }; pause.show('map'); setScreenForPause(); }
+    }
+    const playing = screen === 'play' && !pause.open;
+    gameHud.setVisible(playing);
+    if (attributionEl) attributionEl.style.display = screen === 'title' || playing ? '' : 'none';
+    if (fsEl) fsEl.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
+    if (touch) touch.root.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
+    if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
+    if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
+    if (playing && input.pressed('jump')) jumpLatch = true;
+    if (playing && mode === 'onfoot' && player.active) saves.tick(dt);
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }
     if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) player.active = true;
 
-    if (mode === 'onfoot') {
+    if (!playing && screen !== 'title') {
+      // paused: world frozen, camera holds
+    } else if (mode === 'onfoot') {
       physics.update(dt, (h) => { player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; });
       const rp = player.renderPos(physics.alpha);
       body.object.position.set(rp.x, rp.y, rp.z);
       body.setLocomotion(player.loco());
       body.update(dt);
       orbit.update(dt, rp);
+    } else if (screen === 'title') {
+      physics.update(dt, () => { jumpLatch = false; });
     } else {
       physics.update(dt, () => { jumpLatch = false; });
       fly.update(dt);
@@ -235,8 +300,10 @@ async function main() {
 
     const p = mode === 'onfoot' ? body.object.position : camera.position;
     const yaw = mode === 'onfoot' ? orbit.yaw : fly.yaw;
-    if ((streetT -= dt) <= 0 && minimap) { streetName = minimap.nearestStreet(p.x, p.z); streetLabel = streetName; streetT = 0.5; }
-    minimap?.draw(p.x, p.z, yaw);
+    if ((streetT -= dt) <= 0 && minimap) { streetName = minimap.nearestStreet(p.x, p.z); streetT = 0.5; }
+    if ((locT -= dt) <= 0) { locT = 0.5; district = locator.district(p.x, p.z); crossing = locator.intersection(p.x, p.z); streetLabel = crossing; }
+    if (screen === 'play') gameHud.update(dt, district, crossing);
+    if (minimap) { minimap.canvas.style.display = screen === 'play' && settings.get('hud') ? '' : 'none'; minimap.draw(p.x, p.z, yaw); }
     if ((hudT -= dt) <= 0) {
       hudT = 0.25;
       const s = frames.summary();

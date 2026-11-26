@@ -39,8 +39,8 @@ const on = (name: string, x: number, z: number, y = 1.8): [number, number, numbe
 const esb = hero('Empire State Building'), macys = hero("Macy's"), msg = hero('Madison Square Garden'), chelsea = hero('Hotel Chelsea'), flat = hero('Flatiron Building');
 
 /** Fixed viewpoints. 'spawn' uses the game's own spawn logic (no cam param). */
-const VIEWS: { name: string; cam?: string }[] = [
-  { name: '01_spawn_flatiron_up_broadway' },
+const VIEWS: { name: string; cam?: string; at?: string }[] = [
+  { name: '01_spawn_flatiron_up_broadway' }, // on foot, third person, at the game's own spawn
   { name: '02_flatiron_from_madison_sq', cam: look([25, 1.8, -150], [flat.x, 30, flat.z]) },
   { name: '03_empire_state_from_fifth', cam: look(on('5th Avenue', esb.x, esb.z + 380), [esb.x, 160, esb.z]) },
   { name: '04_herald_square', cam: look(on('Broadway', macys.x, macys.z + 200), [macys.x, 25, macys.z]) },
@@ -48,6 +48,10 @@ const VIEWS: { name: string; cam?: string }[] = [
   { name: '06_hotel_chelsea_23rd', cam: look(on('West 23rd Street', chelsea.x + 90, chelsea.z), [chelsea.x, 22, chelsea.z]) },
   { name: '07_aerial_overview_north', cam: look([350, 420, 650], [-250, 0, -800]) },
   { name: '08_downtown_skyline_wtc', cam: look([-60, 140, 260], [-1800, 120, 4200]) },
+  { name: '09_onfoot_herald_square', at: `${macys.x + 60},${macys.z + 140},20` },
+  { name: '10_onfoot_42nd_and_seventh', at: '-560,-1520,90' },
+  { name: '11_aerial_hells_kitchen_rail_cut', cam: look([-900, 380, -400], [-1550, 0, -780]) },
+  { name: '12_terrain_34th_toward_hudson', cam: look(on('East 34th Street', 380, -905, 14), [-900, 2, -905]) },
 ];
 
 async function main() {
@@ -63,7 +67,7 @@ async function main() {
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
   const report: any[] = [];
   for (const v of VIEWS) {
-    const q = new URLSearchParams({ quality, ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}) });
+    const q = new URLSearchParams({ quality, fresh: '1', ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}) });
     await page.goto(`http://localhost:${port}/?${q}`);
     await page.waitForFunction(() => (window as any).__T74, null, { timeout: 120_000 });
     await page.evaluate(() => (window as any).__T74.whenIdle());
