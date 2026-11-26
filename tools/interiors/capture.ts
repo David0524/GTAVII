@@ -108,6 +108,27 @@ async function main() {
         const f = path.join(ROOT, `shots/interiors/grades/${a}_${b ?? 0}_g${g}.png`); fs.mkdirSync(path.dirname(f), { recursive: true }); await page.screenshot({ path: f });
       }
     });
+  } else if (mode === 'tierc') {
+    // tierc <cam>: frame time with the Tier C window mesh on vs off (SwiftShader: relative cost only)
+    await withPage(async (page) => {
+      await page.goto(url(`cam=${a}`));
+      await page.waitForFunction(() => (window as any).__INT?.ready, null, { timeout: 180_000 });
+      await page.evaluate(() => (window as any).__INT.whenIdle());
+      const out: Record<string, unknown> = {};
+      await page.evaluate(() => (window as any).__INT.renderer.setAnimationLoop(null));
+      for (const on of [true, false, true, false]) {
+        const st = await page.evaluate(async (v) => {
+          const t = (window as any).__INT; t.tierCMesh.visible = v;
+          const r = t.renderer, gl = r.backend?.gl as WebGL2RenderingContext | undefined, px = new Uint8Array(4);
+          const times: number[] = [];
+          for (let i = 0; i < 12; i++) { const t0 = performance.now(); r.render(t.scene, t.camera); gl?.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); times.push(performance.now() - t0); }
+          times.sort((x, y) => x - y);
+          return { medianMs: +times[6].toFixed(1), minMs: +times[0].toFixed(1), windows: t.windows, draws: r.info.render.drawCalls, finish: !!gl };
+        }, on);
+        out[`${on ? 'on' : 'off'}_${Object.keys(out).length}`] = st; console.log(on ? 'tierC on ' : 'tierC off', JSON.stringify(st));
+      }
+      fs.writeFileSync(path.join(ROOT, 'docs/interiors/tierC_cost_swiftshader.json'), JSON.stringify({ note: 'SwiftShader software GL in a headless container, 1280x720. Relative only, not GPU ms.', cam: a, ...out }, null, 1));
+    });
   } else if (mode === 'url') {
     await withPage(async (page) => { const r = await shot(page, a, path.resolve(ROOT, b)); console.log(r); });
   }

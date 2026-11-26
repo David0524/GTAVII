@@ -153,6 +153,13 @@ Reads as a modern kit or is wrong:
 - **Ingest TODO:** draw the July 1974 date grid in-engine on `teddy_calendar` (the generated image has an empty grid; 1 July 1974 was a Monday).
 - The notice text uses "MGMT." to match the Corwin's exterior sign.
 
+## Tier C cost (honest)
+- `docs/interiors/tierC_cost_swiftshader.json`: 17,373 windows on the test block at 21:30, 1280×720, render plus a forced readback,
+  median of 12 frames. With Tier C: 994 and 1,048 ms. Without: 1,026 and 1,016 ms. The difference is inside SwiftShader's
+  run-to-run noise (about ±5%), so this proves nothing about GPU cost. The engine's new `lodFade` (a 4 → 1.5 px bay fade) widens
+  the near-LOD band, so the brief's ≤0.3 ms at 1080p still needs a real GPU: the Vercel build with `?hud=1` on the user's
+  phone, or any desktop GPU.
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.

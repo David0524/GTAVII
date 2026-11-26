@@ -1,0 +1,32 @@
+{
+ "note": "SwiftShader software GL in a headless container, 1280x720. Relative only, not GPU ms.",
+ "cam": "-265,2.0,-662,25,18",
+ "on_0": {
+  "medianMs": 993.6,
+  "minMs": 938.6,
+  "windows": 17373,
+  "draws": 756,
+  "finish": true
+ },
+ "off_1": {
+  "medianMs": 1026,
+  "minMs": 866.5,
+  "windows": 17373,
+  "draws": 744,
+  "finish": true
+ },
+ "on_2": {
+  "medianMs": 1048.3,
+  "minMs": 966,
+  "windows": 17373,
+  "draws": 756,
+  "finish": true
+ },
+ "off_3": {
+  "medianMs": 1015.8,
+  "minMs": 914.5,
+  "windows": 17373,
+  "draws": 744,
+  "finish": true
+ }
+}
