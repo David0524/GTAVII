@@ -43,6 +43,7 @@ import { Cars, type EntryMethod } from './cars/theft';
 import { FireSystem } from './props/fire';
 import { Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
+import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
@@ -526,6 +527,35 @@ export class Gameplay {
     if (how !== 'wait' || this.clock.clock.minutes + hours * 60 >= 24 * 60) this.shops.restock();
     this.clock.advance(hours, how);
     this.outcomes.day = this.clock.clock.day;
+  }
+
+  // ------------------------------------------------------------------ fast travel
+  /** Ride a cab to (x,z): pay the meter + tip, advance the clock by the ride (the engine teleports or plays it). */
+  cabTo(x: number, z: number, skip = true) {
+    if (!this.player) return null;
+    const p = this.player.position(), meters = Math.abs(x - p[0]) + Math.abs(z - p[2]);
+    const fare = cabFare(meters), total = fare + cabTip(fare);
+    if (!this.inv.spend(this.player.lead, total, 'cab')) return { ok: false as const, reason: 'broke' as const, fare };
+    const minutes = rideMinutes(p[0], p[2], x, z);
+    if (skip) this.passTime(minutes / 60, 'wait');
+    return { ok: true as const, fare, tip: total - fare, minutes };
+  }
+  /** Through the turnstile: a token, or jump it (a crime if the token clerk or a transit cop sees). */
+  enterSubway(jump = false) {
+    if (!this.player) return false;
+    if (!jump && !this.inv.spend(this.player.lead, TOKEN, 'token')) return false;
+    if (jump) this.crime('fare_evasion', { noise: 10 });
+    this.setContext({ subway: true });
+    return true;
+  }
+  /** Ride to a station at (x,z) and come up: contact with the police is broken; the clock moves on. */
+  rideSubwayTo(x: number, z: number) {
+    if (!this.player || !this.pc.subway) return null;
+    const p = this.player.position(), minutes = rideMinutes(p[0], p[2], x, z, SUBWAY_KMH) + 4;
+    this.passTime(minutes / 60, 'wait');
+    for (const u of this.policeSys.units.values()) if (['pursuit', 'approach', 'encounter', 'suspicious'].includes(u.state)) { u.state = 'search'; u.lostFor = 99; u.recog = 0; }
+    this.setContext({ subway: false });
+    return { minutes };
   }
 
   /** Mission "lose the police" gate: no open report on the player and no unit with eyes on / closing on them. */
