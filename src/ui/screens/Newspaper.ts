@@ -5,7 +5,7 @@
  * a mimeographed sheet tucked inside (the paper wouldn't print it). Classified ads can pencil a place
  * onto your map (discovery via 'news'). Bet on the number from here.
  */
-import type { UiHost } from '../host/types';
+import type { UiHost, ClassifiedAd } from '../host/types';
 import type { NavItem } from '../MenuNav';
 import type { Tab } from './PauseHub';
 import type { MapModel } from '../map/MapModel';
@@ -15,7 +15,7 @@ export class Newspaper implements Tab {
   id = 'paper'; label = 'PAPER';
   el = document.createElement('div');
   hint = 'Tap an ad to pencil it on your map';
-  private page: 'front' | 'inside' = 'front';
+  private page: 'front' | 'inside' | 'classifieds' = 'front';
   private setNav: (i: NavItem[], keep?: boolean) => void = () => {};
   onToast?: (t: string) => void;
 
@@ -26,7 +26,7 @@ export class Newspaper implements Tab {
     const n = this.host.newspaper();
     const items: NavItem[] = [];
     if (!n) { this.el.innerHTML = '<p class="hint" style="padding:30px">No paper today. Newsstands open at 5 AM.</p>'; this.setNav([]); return; }
-    const tabs = `<div class="np-pages"><button data-p="front" class="${this.page === 'front' ? 'on' : ''}">Front page</button><button data-p="inside" class="${this.page === 'inside' ? 'on' : ''}">Results & the number</button></div>`;
+    const tabs = `<div class="np-pages"><button data-p="front" class="${this.page === 'front' ? 'on' : ''}">Front page</button><button data-p="inside" class="${this.page === 'inside' ? 'on' : ''}">Results & the number</button><button data-p="classifieds" class="${this.page === 'classifieds' ? 'on' : ''}">Classifieds</button></div>`;
     if (this.page === 'front') {
       this.el.innerHTML = `${tabs}<article class="np-sheet">
         <header class="np-mast"><div class="ear l">${esc(n.edition)}<br>${esc(n.price)}</div><h1>${esc(n.masthead)}</h1><div class="ear r">NEW YORK'S PICTURE<br>NEWSPAPER</div></header>
@@ -45,6 +45,8 @@ export class Newspaper implements Tab {
           this.render();
         } });
       });
+    } else if (this.page === 'classifieds') {
+      this.classifieds(tabs, items);
     } else {
       this.el.innerHTML = `${tabs}<article class="np-sheet inside">
         <div class="np-cols two"><section><h3>AT THE TRACK</h3><table class="np-table">${n.races.map((r) => `<tr><td>${esc(r.track)} · ${r.race}th</td><td><b>${esc(r.winner)}</b></td><td>${esc(r.odds)}</td></tr>`).join('')}</table>
@@ -66,7 +68,27 @@ export class Newspaper implements Tab {
         items.push({ el: b, activate: () => { const r = this.host.act({ kind: 'betNumber', digits: d.join(''), stake: s }); this.onToast?.(r.text ?? ''); } });
       }
     }
-    this.el.querySelectorAll<HTMLElement>('.np-pages button').forEach((b) => items.unshift({ el: b, activate: () => { this.page = b.dataset.p as 'front' | 'inside'; this.render(); } }));
+    this.el.querySelectorAll<HTMLElement>('.np-pages button').forEach((b) => items.unshift({ el: b, activate: () => { this.page = b.dataset.p as 'front' | 'inside' | 'classifieds'; this.render(); } }));
     this.setNav(items, true);
+  }
+
+  /** Page three: the classified grid. Car ads say to call from a payphone; ads with a place pencil it on the map. */
+  private classifieds(tabs: string, items: NavItem[]) {
+    const ads = this.host.classifieds?.() ?? [];
+    const cols: [ClassifiedAd['kind'], string][] = [['car', 'Cars'], ['room', 'Rooms'], ['job', 'Help wanted'], ['misc', 'Misc']];
+    this.el.innerHTML = `${tabs}<article class="np-sheet cl-sheet"><header class="cl-mast"><h2>CLASSIFIED</h2><span>Read it, call it, pencil it · 20 words or less</span></header>
+      <div class="cl-grid">${cols.map(([k, h]) => `<section class="cl-col"><h3>${h}</h3>${ads.filter((a) => a.kind === k).map((a) => `<button class="cl-ad" data-id="${esc(a.id)}"><span class="tx">${esc(a.text)}</span> <b class="pr">${money(a.price, false)}${k === 'room' ? '/wk' : k === 'job' ? '/wk' : ''}</b> <span class="ph">${esc(a.phone)}</span>${a.placeId && this.model.discovery.isKnown(a.placeId) ? '<i>✓ on your map</i>' : ''}</button>`).join('') || '<p class="cl-none">No listings today.</p>'}</section>`).join('')}</div>
+      <div class="cl-foot">All ads payable in advance. The Courier is not responsible for errors after first insertion.</div></article>`;
+    this.el.querySelectorAll<HTMLElement>('.cl-ad').forEach((b) => {
+      const a = ads.find((x) => x.id === b.dataset.id)!;
+      items.push({ el: b, activate: () => {
+        if (a.kind === 'car') this.onToast?.('Call from a payphone to arrange a look');
+        if (!a.placeId) return;
+        const ok = this.model.discovery.reveal(a.placeId, 'news');
+        const p = this.model.discovery.place(a.placeId);
+        if (a.kind !== 'car') this.onToast?.(ok ? `Pencilled in: ${p?.name ?? 'the address'}` : 'Already on your map');
+        this.render();
+      } });
+    });
   }
 }

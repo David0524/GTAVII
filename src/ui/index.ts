@@ -17,6 +17,9 @@ import { Newspaper } from './screens/Newspaper';
 import { Business } from './screens/Business';
 import { Record as RecordTab } from './screens/Record';
 import { ShopCounter, LeadPicker, WeaponSelect, Choices } from './screens/Overlays';
+import { WaitPrompt, SleepMenu } from './screens/TimeScreens';
+import { CarLot, MyCarsTab, NoticeCard } from './screens/CarScreens';
+import { HomeUpgrades } from './screens/HomeScreens';
 import { Modal } from './screens/Modal';
 import { SettingsTab } from './screens/SettingsTab';
 import { SavesTab, CreditsTab } from './screens/FrontTabs';
@@ -34,7 +37,7 @@ export interface UiOptions { model: MapModel; heroes?: { name: string; x: number
 export interface UiRoot {
   hud: GameHud; hub: PauseHub; model: MapModel; mapScreen: MapScreen; title: TitleScreen | null;
   state: UiState;
-  /** Open a screen by name: 'hud', 'map', 'pockets', 'paper', 'business', 'record', 'saves', 'settings', 'credits', 'shop', 'leads', 'weapons', 'choices'. */
+  /** Open a screen by name: 'hud', 'map', 'pockets', 'paper', 'business', 'record', 'saves', 'settings', 'credits', 'shop', 'leads', 'weapons', 'choices', 'wait', 'sleep', 'carlot' (param lot), 'cars', 'home'. */
   show(name: string, params?: Record<string, string>): void;
   update(dt: number): void;
   readonly paused: boolean;
@@ -80,6 +83,8 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const pockets = new Pockets(host); pockets.onToast = toast; hub.add(pockets);
   const paper = new Newspaper(host, o.model); paper.onToast = toast; hub.add(paper);
   const business = new Business(host); business.onToast = toast; hub.add(business);
+  const myCars = new MyCarsTab(host); myCars.onToast = toast; hub.add(myCars);
+  myCars.onRoute = (x, z) => { const p = host.player(); o.model.setWaypoint({ x, z }, { x: p.x, z: p.z, inVehicle: p.inVehicle }); hub.select('map'); };
   hub.add(new RecordTab(host, o.model));
   const savesTab = new SavesTab(host.saves); savesTab.onToast = toast; hub.add(savesTab);
   const settingsTab = new SettingsTab(input); settingsTab.onToast = toast; hub.add(settingsTab);
@@ -88,14 +93,24 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const leads = new LeadPicker(input, host);
   const weapons = new WeaponSelect(input, host);
   const choices = new Choices(input);
-  const modals: Modal[] = [shop, leads, weapons, choices];
+  const waitPrompt = new WaitPrompt(input, host);
+  const sleep = new SleepMenu(input, host); sleep.onToast = toast;
+  const carLot = new CarLot(input, host); carLot.onToast = toast;
+  const home = new HomeUpgrades(input, host);
+  const modals: Modal[] = [shop, leads, weapons, choices, waitPrompt, sleep, carLot, home];
   host.on('choices', (e) => choices.ask(e.choices, e.resolve, { prompt: e.prompt }));
+  host.on('waitPrompt', (e) => waitPrompt.ask(e, e.resolve));
+  new NoticeCard(host);
   const extras = { newsRead: new Set<string>(), achievements: {} as Record<string, string>, cutscenesSeen: new Set<string>() };
 
   const screens = new Map<string, (p: Record<string, string>) => void>([
     ['shop', (p) => shop.openShop(p.shop ?? 'diner')],
     ['leads', (p) => leads.openPicker(p.reason === 'bail' ? 'bail' : 'switch')],
     ['weapons', () => weapons.openSelect()],
+    ['wait', () => waitPrompt.ask({ mission: 'm.demo', title: 'Dusk on Broadway: meet Mayhew at the Flatiron', windowStart: '21:00', windowEnd: '03:00' }, () => {})],
+    ['sleep', () => sleep.openMenu()],
+    ['carlot', (p) => carLot.openLot(p.lot ?? 'sal')],
+    ['home', () => home.openHome()],
     ['choices', () => choices.ask([
       { id: 'a', text: 'Tell him about Lisle.' }, { id: 'b', text: 'Say nothing. Pour the coffee.' },
       { id: 'c', text: '"Not tonight, Carl."' }, { id: 'd', text: 'Ask what he really wants.', disabled: 'He hasn\'t earned it yet' },

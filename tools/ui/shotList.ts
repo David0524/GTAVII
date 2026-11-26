@@ -13,4 +13,26 @@ export const SHOTS: Shot[] = [
   { name: 'leads', q: 'screen=leads' },
   { name: 'weapons', q: 'screen=weapons' },
   { name: 'choices', q: 'screen=choices' },
+  { name: 'wait', q: 'screen=wait' },
+  { name: 'sleep', q: 'screen=sleep' },
+  { name: 'carlot', q: 'screen=carlot&lot=sal' },
+  {
+    name: 'carlot_haggle', q: 'screen=carlot&lot=sal',
+    act: async (p) => {
+      await p.click('.car-card >> nth=0');
+      await p.waitForTimeout(150);
+      await p.click('.car-offer button[data-d="-100"]');
+      await p.waitForTimeout(150);
+      await p.click('.car-acts .u-btn.primary'); // Make offer: he counters
+    },
+  },
+  { name: 'cars', q: 'screen=cars' },
+  {
+    name: 'notice', q: 'screen=hud',
+    act: async (p) => {
+      await p.evaluate(() => (window as unknown as { __UI: { host: { emit(k: string, e: unknown): void } } }).__UI.host.emit('notice', { kind: 'ticket', car: 'car.monarch', text: 'Hydrant, within 15 ft', amount: 25 }));
+    },
+  },
+  { name: 'home', q: 'screen=home' },
+  { name: 'paper_classifieds', q: 'screen=paper', act: async (p) => { await p.click('.np-pages button[data-p=classifieds]'); } },
 ];
