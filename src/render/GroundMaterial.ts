@@ -40,12 +40,16 @@ export function createGroundMaterial(): THREE.MeshStandardNodeMaterial {
   const park = mix(vec3(0.05, 0.065, 0.022), vec3(0.08, 0.065, 0.04), smoothstep(0.4, 0.7, n1)); // olive grass / worn dirt
   const curb = vec3(0.17, 0.16, 0.15).mul(float(0.85).add(n3.mul(0.2)));
 
+  // road paint: worn, dirty white and faded yellow; patchy where traffic has scrubbed it off
+  const wear = smoothstep(0.35, 0.75, n2).mul(0.55).add(n3.mul(0.15).mul(fine));
+  const paintWhite = mix(vec3(0.42, 0.4, 0.36), asphalt, wear);
+  const paintYellow = mix(vec3(0.42, 0.29, 0.07), asphalt, wear);
   const k = kind;
-  const col = select(k.greaterThan(9.5), curb,
+  const col = select(k.greaterThan(20.5), paintYellow, select(k.greaterThan(19.5), paintWhite, select(k.greaterThan(9.5), curb,
     select(k.lessThan(0.5), asphalt,
       select(k.lessThan(1.5), concrete,
         select(k.lessThan(2.5), park,
-          select(k.lessThan(3.5), lot, concrete)))));
+          select(k.lessThan(3.5), lot, concrete)))))));
   m.colorNode = col;
   m.roughnessNode = select(k.lessThan(0.5).or(k.greaterThan(2.5).and(k.lessThan(3.5))), float(0.92).sub(patch.mul(0.12)), float(0.95));
   m.metalnessNode = float(0);

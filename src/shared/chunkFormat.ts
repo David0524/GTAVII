@@ -10,10 +10,11 @@
  *              height u16(dm) | minHeight u16(dm) | ringCount u16 | rings
  *     'GRND': count u32, then per polygon: kind u8 | ringCount u16 | rings
  *     'POIS': count u32, then per point:   kind u8 | x i16 | z i16 | heading i16 (centi-rad)
+ *     'PNT ': count u32, then per stroke:  kind u8 (PaintKind) | width u8 (cm) | n u16 | n*(x i16, z i16)   (road paint centrelines)
  *   ring  : n u16 | n * (x i16, z i16)    (first ring outer CCW in XZ-up view, rest holes)
  */
 export const MAGIC = 0x43343754; // 'T74C'
-export const VERSION = 1;
+export const VERSION = 2;
 
 export const enum BuildingFlag { Hero = 1, StandIn = 2, OsmPart = 4, Restored = 8 }
 
@@ -34,6 +35,9 @@ export const enum Style {
 }
 
 export const enum GroundKind { Road = 0, Sidewalk = 1, Park = 2, Lot = 3, Plaza = 4 }
+/** Road paint (1974 NYC): white dashed lane lines (10 ft / 30 ft), double yellow on two-way streets,
+ *  crosswalks as two parallel white lines, stop bars. */
+export const enum PaintKind { LaneDash = 1, Yellow = 2, CrosswalkLine = 3, StopBar = 4 }
 export const enum PoiKind { Signal = 1, SubwayEntrance = 2, Spawn = 3 }
 
 export interface Ring { pts: Int16Array } // interleaved x,z in cm
@@ -43,12 +47,14 @@ export interface BuildingRec {
 }
 export interface GroundRec { kind: number; rings: Float32Array[] }
 export interface PoiRec { kind: number; x: number; z: number; heading: number }
-export interface ChunkData { i: number; j: number; buildings: BuildingRec[]; ground: GroundRec[]; pois: PoiRec[] }
+export interface PaintRec { kind: number; width: number; pts: Float32Array }
+export interface ChunkData { i: number; j: number; buildings: BuildingRec[]; ground: GroundRec[]; pois: PoiRec[]; paint: PaintRec[] }
 
 const tag = (s: string) => s.charCodeAt(0) | (s.charCodeAt(1) << 8) | (s.charCodeAt(2) << 16) | (s.charCodeAt(3) << 24);
 export const TAG_BLDG = tag('BLDG') >>> 0;
 export const TAG_GRND = tag('GRND') >>> 0;
 export const TAG_POIS = tag('POIS') >>> 0;
+export const TAG_PNT = tag('PNT ') >>> 0;
 
 // ---------------------------------------------------------------- reader
 export function readChunk(buf: ArrayBuffer): ChunkData {
@@ -57,7 +63,7 @@ export function readChunk(buf: ArrayBuffer): ChunkData {
   if (dv.getUint32(0, true) !== MAGIC) throw new Error('bad chunk magic');
   const ver = dv.getUint16(4, true);
   if (ver !== VERSION) throw new Error(`chunk version ${ver} != ${VERSION}`);
-  const out: ChunkData = { i: dv.getInt16(8, true), j: dv.getInt16(10, true), buildings: [], ground: [], pois: [] };
+  const out: ChunkData = { i: dv.getInt16(8, true), j: dv.getInt16(10, true), buildings: [], ground: [], pois: [], paint: [] };
   o = 12;
   const rings = (): Float32Array[] => {
     const rc = dv.getUint16(o, true); o += 2;
@@ -85,6 +91,12 @@ export function readChunk(buf: ArrayBuffer): ChunkData {
       }
     } else if (t === TAG_GRND) {
       for (let k = 0; k < count; k++) { const kind = dv.getUint8(o); o += 1; out.ground.push({ kind, rings: rings() }); }
+    } else if (t === TAG_PNT) {
+      for (let k = 0; k < count; k++) {
+        const kind = dv.getUint8(o), width = dv.getUint8(o + 1) / 100, n = dv.getUint16(o + 2, true); o += 4;
+        const pts = new Float32Array(n * 2); for (let q = 0; q < n * 2; q++) { pts[q] = dv.getInt16(o, true) / 100; o += 2; }
+        out.paint.push({ kind, width, pts });
+      }
     } else if (t === TAG_POIS) {
       for (let k = 0; k < count; k++) {
         out.pois.push({ kind: dv.getUint8(o), x: dv.getInt16(o + 1, true) / 100, z: dv.getInt16(o + 3, true) / 100, heading: dv.getInt16(o + 5, true) / 100 });
@@ -127,8 +139,9 @@ function writeRings(w: ByteWriter, rings: [number, number][][]) {
 export interface WBuilding { id: number; year: number; use: number; style: number; floors: number; flags: number; height: number; minHeight: number; rings: [number, number][][] }
 export interface WGround { kind: number; rings: [number, number][][] }
 export interface WPoi { kind: number; x: number; z: number; heading: number }
+export interface WPaint { kind: number; width: number; pts: [number, number][] }
 
-export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p: WPoi[]): Uint8Array {
+export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p: WPoi[], paint: WPaint[] = []): Uint8Array {
   const w = new ByteWriter();
   w.u32(MAGIC); w.u16(VERSION); w.u16(0); w.i16(i); w.i16(j);
   const section = (t: number, count: number, body: () => void) => {
@@ -141,6 +154,9 @@ export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p
     }
   });
   section(TAG_GRND, g.length, () => { for (const x of g) { w.u8(x.kind); writeRings(w, x.rings); } });
+  section(TAG_PNT, paint.length, () => {
+    for (const x of paint) { w.u8(x.kind); w.u8(Math.min(255, Math.round(x.width * 100))); w.u16(x.pts.length); for (const [px, pz] of x.pts) { w.i16(clampI16(px * 100)); w.i16(clampI16(pz * 100)); } }
+  });
   section(TAG_POIS, p.length, () => {
     for (const x of p) { w.u8(x.kind); w.i16(clampI16(x.x * 100)); w.i16(clampI16(x.z * 100)); w.i16(clampI16(x.heading * 100)); }
   });

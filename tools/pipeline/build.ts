@@ -7,8 +7,8 @@ import path from 'node:path';
 import { union, intersect, difference, bufferLines } from './clip.ts';
 import { CHUNK_SIZE, GRID_ROTATION_DEG, REGION, project, chunkKey } from '../../src/shared/geo.ts';
 import {
-  BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter,
-  type WBuilding, type WGround, type WPoi,
+  BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter, PaintKind,
+  type WBuilding, type WGround, type WPoi, type WPaint,
 } from '../../src/shared/chunkFormat.ts';
 import { RAW, OUT, ROOT, ensureDir, log } from './common.ts';
 import { dateBuilding, osmYear, type Dating } from './dating.ts';
@@ -358,6 +358,63 @@ log(`streets: ${streets.length}; 1974 direction overrides applied to`, dirStats)
 
 // ------------------------------------------------------------------ ground polygons (per chunk)
 const roadLines = streets.map((s) => ({ pts: s.pts, half: s.width / 2, bb: bbox([s.pts]) }));
+
+// ------------------------------------------------------------------ road paint (1974 NYC markings)
+// White dashed lane lines (10 ft dash / 30 ft gap) between lanes, double yellow on two-way streets,
+// crosswalks as two parallel white lines (period style, not today's ladder bars). Dashes stop short of
+// intersections. Strokes are split into <= 20 m pieces and assigned to chunks by midpoint.
+const paintStrokes: WPaint[] = [];
+{
+  const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
+  const nodeUse = new Map<string, { p: P; legs: { dir: P; width: number }[] }>();
+  for (const s of streets) s.pts.forEach((p, k) => {
+    const e = nodeUse.get(key(p)) ?? nodeUse.set(key(p), { p, legs: [] }).get(key(p))!;
+    for (const nb of [s.pts[k - 1], s.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: s.width }); }
+  });
+  const junctions = [...nodeUse.values()].filter((n) => n.legs.length >= 3);
+  const jIndex = new Map<string, P[]>();
+  for (const j of junctions) { const k = `${Math.floor(j.p[0] / 40)},${Math.floor(j.p[1] / 40)}`; (jIndex.get(k) ?? jIndex.set(k, []).get(k)!).push(j.p); }
+  const nearJunction = (x: number, z: number, r: number) => { for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const q of jIndex.get(`${Math.floor(x / 40) + a},${Math.floor(z / 40) + b}`) ?? []) if (Math.hypot(q[0] - x, q[1] - z) < r) return true; return false; };
+  const DASH = 3.05, GAP = 9.15;
+  for (const s of streets) {
+    if (s.cls === 'motorway' || s.cls === 'motorway_link') continue;
+    const lanes = Math.max(1, Math.round(s.width / 3.4)), laneW = s.width / lanes;
+    const offsets: [number, number][] = []; // [offset, kind]
+    if (s.oneway === 0) {
+      offsets.push([-0.15, PaintKind.Yellow], [0.15, PaintKind.Yellow]);
+      for (let k = 1; k < lanes / 2; k++) { offsets.push([k * laneW, PaintKind.LaneDash], [-k * laneW, PaintKind.LaneDash]); }
+    } else for (let k = 1; k < lanes; k++) offsets.push([-s.width / 2 + k * laneW, PaintKind.LaneDash]);
+    for (const [off, kind] of offsets) {
+      let along = 0;
+      for (let k = 1; k < s.pts.length; k++) {
+        const a = s.pts[k - 1], b = s.pts[k]; const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz); if (L < 0.5) continue;
+        const ux = dx / L, uz = dz / L, nx = -uz * off, nz = ux * off;
+        const step = kind === PaintKind.Yellow ? 20 : DASH + GAP;
+        for (let t = kind === PaintKind.Yellow ? 0 : (DASH + GAP) - (along % (DASH + GAP)); t < L; t += step) {
+          const t1 = Math.min(L, t + (kind === PaintKind.Yellow ? 20 : DASH));
+          const p0: P = [a[0] + ux * t + nx, a[1] + uz * t + nz], p1: P = [a[0] + ux * t1 + nx, a[1] + uz * t1 + nz];
+          const mid: P = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];
+          if (!inRegion(mid) || nearJunction(mid[0], mid[1], s.width / 2 + 9)) continue;
+          paintStrokes.push({ kind, width: 0.11, pts: [p0, p1] });
+        }
+        along += L;
+      }
+    }
+  }
+  // crosswalks: two parallel lines across each leg, set back past the cross street's curb
+  for (const j of junctions) {
+    if (!inRegion(j.p)) continue;
+    const maxW = Math.max(...j.legs.map((l) => l.width));
+    for (const leg of j.legs) {
+      const half = leg.width / 2, nx = -leg.dir[1], nz = leg.dir[0];
+      for (const d of [maxW / 2 + 1.2, maxW / 2 + 4.2]) {
+        const cx = j.p[0] + leg.dir[0] * d, cz = j.p[1] + leg.dir[1] * d;
+        paintStrokes.push({ kind: PaintKind.CrosswalkLine, width: 0.3, pts: [[cx - nx * half, cz - nz * half], [cx + nx * half, cz + nz * half]] });
+      }
+    }
+  }
+  log(`road paint: ${paintStrokes.length} strokes, ${junctions.length} junctions`);
+}
 const parks: Poly[] = [];
 const PARK_TAGS = (t: any) => t.leisure === 'park' || t.leisure === 'garden' || t.landuse === 'grass' || t.leisure === 'playground';
 for (const w of ways) {
@@ -410,7 +467,9 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
     ...signals.filter(inChunk).map((p) => ({ kind: PoiKind.Signal, x: p[0] - ox, z: p[1] - oz, heading: 0 })),
     ...entrances.filter(inChunk).map((p) => ({ kind: PoiKind.SubwayEntrance, x: p[0] - ox, z: p[1] - oz, heading: 0 })),
   ];
-  const bytes = writeChunk(i, j, bl, ground, pois);
+  const paintHere = paintStrokes.filter((st) => { const m: P = [(st.pts[0][0] + st.pts[st.pts.length - 1][0]) / 2, (st.pts[0][1] + st.pts[st.pts.length - 1][1]) / 2]; return m[0] >= minX && m[0] < maxX && m[1] >= minZ && m[1] < maxZ; })
+    .map((st) => ({ ...st, pts: st.pts.map(([x, z]) => [x - ox, z - oz] as [number, number]) }));
+  const bytes = writeChunk(i, j, bl, ground, pois, paintHere);
   fs.writeFileSync(path.join(OUT, 'chunks', `${chunkKey(i, j)}.bin`), bytes);
   totalBytes += bytes.length;
   const maxH = bl.reduce((m, b) => Math.max(m, b.height), 0);

@@ -228,6 +228,25 @@ export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = ()
     else if (gr.kind === GroundKind.Lot) groundPoly(g, gr.rings, SIDEWALK_H + 0.04, col, false, half, hf); // 4 cm: different tessellation from the sidewalk below must not z-fight on slopes
     else groundPoly(g, gr.rings, SIDEWALK_H, col, true, half, hf);
   }
+  // road paint: thin quads on the road surface (terrain-following), kind 20 white / 21 yellow
+  for (const st of data.paint) {
+    g.curFac = [st.kind === 2 ? 21 : 20, 0, 0, 0];
+    for (let q = 2; q < st.pts.length; q += 2) {
+      const x0 = st.pts[q - 2], z0 = st.pts[q - 1], x1 = st.pts[q], z1 = st.pts[q + 1];
+      const L = Math.hypot(x1 - x0, z1 - z0); if (L < 0.05) continue;
+      const nx = -(z1 - z0) / L * st.width / 2, nz = (x1 - x0) / L * st.width / 2;
+      const segs = Math.max(1, Math.ceil(L / 6));
+      for (let k = 0; k < segs; k++) {
+        const ta = k / segs, tb = (k + 1) / segs;
+        const ax = x0 + (x1 - x0) * ta, az = z0 + (z1 - z0) * ta, bx = x0 + (x1 - x0) * tb, bz = z0 + (z1 - z0) * tb;
+        const v = g.vcount, white: RGB = [1, 1, 1];
+        g.vert(ax - nx, hf(ax, az) + 0.015, az - nz, 0, 1, 0, white); g.vert(ax + nx, hf(ax, az) + 0.015, az + nz, 0, 1, 0, white);
+        g.vert(bx + nx, hf(bx, bz) + 0.015, bz + nz, 0, 1, 0, white); g.vert(bx - nx, hf(bx, bz) + 0.015, bz - nz, 0, 1, 0, white);
+        const cross = (nx) * (bz - az) - (nz) * (bx - ax); // keep the quad facing up
+        if (cross > 0) g.idx.push(v, v + 2, v + 1, v, v + 3, v + 2); else g.idx.push(v, v + 1, v + 2, v, v + 2, v + 3);
+      }
+    }
+  }
   const buildings = bAll.finish(), ground = g.finish(), buildingsLod1 = bLod.finish();
   const props = buildProps(data, hf);
   return {
