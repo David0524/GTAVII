@@ -86,8 +86,10 @@ interface Vehicle {
 ```
 - **Input is device-agnostic.** The engine's `src/input/Input.ts` maps keyboard, gamepad and
   touch (landscape mobile) to actions, and you take `setInput` values only.
-- **Don't edit shared files** except one guarded line in `src/main.ts` for your test scene. Put
-  requests for the engine in `docs/ENGINE_REQUESTS.md`.
+- **Don't edit shared files** except one guarded line in `src/main.ts` for your test scene. Append
+  requests for the engine to the root `ENGINE_REQUESTS.md` under `## From vehicles: N. Title`
+  (what, why, fallback). Answers appear in `ENGINE_RESPONSES.md` on the engine branch: check it
+  each session.
 
 ## Budgets
 - **Player vehicle:** physics under 0.5 ms per frame.

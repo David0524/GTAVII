@@ -54,7 +54,13 @@ traffic and pedestrians as generic agents.** No story, no named characters, no l
    writes the content; you implement the runtime that honours it. Ship 4–6 neutral built-in
    archetypes (commuter, worker with handcart, shopper, loiterer, beat cop, vendor) as
    defaults and test data.
-5. **External actors:** an API for the player (on foot or driving) and scripted vehicles to be
+5. **Escort and companion locomotion** (narrative request N4): an NPC follows a route on the
+   sidewalk graph with pace-matching. It matches the player's speed within limits, waits when
+   the player falls more than a radius behind, and leads when the player gets ahead. Expose it
+   as `escort(agentId, route, opts)` and report progress per segment.
+6. **Dark signals** (narrative request N2, area brownouts): when the engine marks a signal
+   group unpowered, traffic treats it as an all-way stop.
+7. **External actors:** an API for the player (on foot or driving) and scripted vehicles to be
    obstacles agents react to: brake, swerve, honk, flee.
 
 ## Integration contract (keep to it; the engine session wires it in)
@@ -78,7 +84,8 @@ export class Simulation {
   signal states, behind `?sim=1`.
 - Your only edit to `src/main.ts` is one guarded line that calls an `attachSimDebug(scene,
   camera)` you export. Don't change any other shared file. If you need something from the
-  engine, write it in `docs/ENGINE_REQUESTS.md`.
+  engine, append it to the root `ENGINE_REQUESTS.md` under `## From sim: N. Title` (what, why,
+  fallback). Answers appear in `ENGINE_RESPONSES.md` on the engine branch: check it each session.
 - No Rapier dependency. Agents are kinematic, and the engine maps them to physics later.
 
 ## Budgets
