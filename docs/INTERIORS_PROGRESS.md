@@ -13,7 +13,7 @@ first and update it last.
 | `?interiors=1` test scene (street block with facade cuts, gallery, overlays) | **Done** (v1) |
 | Tier A heroes | **Hotel Corwin v1 done** (lobby, fire stair to roof, Teddy's 9F with the act 1 portrait, 11th-floor rooms 1104/1112, shared bath, a window to the Empire State checked by sightline). Other heroes next |
 | Tier C window shader | **v1 done** (`src/interiors/windowRooms.ts`), shown on test-block facades. Engine integration pending (request 6). GPU cost not measured (no GPU here) |
-| Reference library (interiors) + 5-grade condition boards | Not started (shared `condition.ts` merged) |
+| Reference library (interiors) + 5-grade condition boards | **v1:** 96 reviewed interior references in the shared `references/catalog.json`. Grades 0–4 are implemented (see the grade board); side-by-side boards against references are next |
 | Subway stations and tunnels, homes, hospital, booking room | Not started (new requirements) |
 | Walk-in frame sequences | **v1 done:** diner, bar, loft, tenement to roof, Corwin lobby, Corwin 11th-floor window (`docs/interiors/*.png`). Phone numbers are pending the user's device |
 
@@ -111,6 +111,20 @@ Reads as a modern kit or is wrong:
 - The lighting is plausible, but there's no bounce colour and no specular on linoleum or chrome beyond a fake environment term.
 - Nothing has been compared to period interior photos yet: there are no interior references in `references/`. Building
   the HABS and DOCUMERICA interior library is the next step before any "looks right" claim.
+
+## Interior reference library v1 (`tools/refs/collectInteriors.ts`, collected by a helper, reviewed by hand)
+- 96 interior entries:
+  - **Gottscho-Schleisner** (LOC, "no known restrictions on publication"): 1930s–60s restaurants, bars, hotel and office lobbies, all condition 3;
+  - **DOCUMERICA** (public domain): subway in 1973–74, condition 1;
+  - **HABS** (no known restrictions on US Government images): 451/455 Madison Ave rooms, condition 4.
+- Each entry is tagged by topic, condition (0–4) and a `reviewed` note. Rejected:
+  - 14 outdoor or storefront shots;
+  - 10 near-duplicate carved-panel close-ups.
+- **Gaps:** SRO rooms, tenement halls, diners and lunch counters, walk-up stairwells, garment lofts and worn or derelict
+  grades are missing. Those are exactly what the Corwin and most of Tier B need. Next searches: DOCUMERICA housing and
+  "welfare hotel" sets, HABS tenement documentation (97 Orchard St), and NYPL public-domain items.
+- **Caveat:** HABS rights say "images copied from other sources may be restricted". All 18 HABS items kept are HABS's
+  own 1976 photographs.
 
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
