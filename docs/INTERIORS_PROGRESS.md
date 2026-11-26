@@ -148,6 +148,11 @@ Reads as a modern kit or is wrong:
   panelling and linen.
 - Tier C: `interiorRoomNode()` is ready for FacadeMaterial (request 6b).
 
+## Art slots in the narrative prompt queue
+- Six Corwin slots are queued (narrative commit c88da12, `assets/prompts/sources/interiors.json`); files arrive as `int_<id>.png`, to ingest to `art/interiors/<id>.png`.
+- **Ingest TODO:** draw the July 1974 date grid in-engine on `teddy_calendar` (the generated image has an empty grid; 1 July 1974 was a Monday).
+- The notice text uses "MGMT." to match the Corwin's exterior sign.
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.
