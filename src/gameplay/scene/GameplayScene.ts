@@ -18,6 +18,7 @@ import { Rng } from '../core/rng';
 import { rayCapsule, type V3 } from '../core/vec';
 import { humanoidHitbox } from '../combat/ballistics';
 import type { PropType } from '../props/props';
+import { ArcadeOverlay } from './ArcadeOverlay';
 import { RapierWorldQuery } from './RapierWorldQuery';
 import { Body, bodyColor, carMesh, CLOTH, Fx, PropMeshes, type Pose } from './Visuals';
 import { Hud, btn, el } from './Hud';
@@ -229,6 +230,7 @@ export async function runGameplayScene() {
     if (k === 'KeyO') overlays.setEnabled(!overlays.enabled);
     if (k === 'KeyE') interact();
     if (/^Digit[1-7]$/.test(k)) { const ws = g.inv.weapons(lead); const w = ws[+k.slice(5) - 1]; if (w) g.equip(w); }
+    if (k === 'F9') cabinet.start('arcade.night_owl'); if (k === 'F10') cabinet.start('arcade.dead_eye');
     if (k === 'F5') go('lot'); if (k === 'F6') go('yard'); if (k === 'F7') go('block'); if (k === 'F8') go('shop');
   });
   window.addEventListener('keyup', (e) => { if (e.code === 'KeyX') g.setBlindFire(false); });
@@ -294,6 +296,8 @@ export async function runGameplayScene() {
     if (Math.hypot(p.x - (LOT.x - 36), p.z - (LOT.z + 12)) < 3) { shopTab = shopList.length + 1; return openShop(); }
   }
   const toast = (t: string) => hud.say('notice', t, 3);
+  // the Deuce arcade's cabinets (F9 pinball, F10 gallery; __GP.arcade(id) for the recorder)
+  const cabinet = new ArcadeOverlay(g.arcade, () => lead, toast);
   // encounter panel
   let encUnit: string | null = null;
   const showEncounter = (unit: string | null) => {
@@ -355,7 +359,7 @@ export async function runGameplayScene() {
     clock.update(t);
     const dt = Math.min(clock.getDelta(), 0.1);
     const f0 = performance.now();
-    input.poll(dt);
+    if (!cabinet.open) input.poll(dt); // at a cabinet, hands are on the machine
     if (input.pressed('jump')) jumpLatch = true;
     // pad combat mapping
     const pad = input.pad;
@@ -439,6 +443,7 @@ export async function runGameplayScene() {
     for (const p of sim.peds) { const push = g.props.geyserPush(p.x, p.z); if (push) { p.x += push[0] * dt; p.z += push[1] * dt; } }
     const gpt = performance.now();
     g.update(dt);
+    cabinet.update(dt);
     stats.gp.push(performance.now() - gpt); if (stats.gp.length > 600) stats.gp.shift();
     // melee pushes onto the player controller
     for (const e of pushes.splice(0)) if (e.id === 'player') player.teleport(player.pos.x + e.dx, player.pos.y, player.pos.z + e.dz, player.heading);
@@ -570,6 +575,7 @@ export async function runGameplayScene() {
     },
     plates: () => plateFor('b_sedan'),
     openShop: (i = 0) => { shopTab = i; openShop(); },
+    cabinet, arcade: (id: string) => cabinet.start(id),
     narrative: narrative ? { source: narrative.source, warnings: narrative.warnings, shops: shopList } : null,
     blockY, lotY, LOT, BLOCK, propDefs, humanoidHitbox,
   };

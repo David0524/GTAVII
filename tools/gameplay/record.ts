@@ -142,6 +142,23 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
       await shot('19_narrative_shop_2', "A second narrative shop on the same content (\`?gameplay=1&content=narrative\`).");
     },
   },
+  arcade: {
+    url: 'station=shop',
+    viewport: { width: 844, height: 390 },
+    run: async ({ ev, wait, shot }) => {
+      // a scripted player at the cabinet: launch, then flip when the ball comes onto a bat (the same bot the tests use)
+      await ev(`(() => { const G = __GP; G.g.inv.ensure('char.teddy_arce').money = 500; G.arcade('arcade.night_owl'); const p = G.cabinet.current; p.launch(0.85);
+        const hold = { L: 0, R: 0 }; let t = 0;
+        window.__bot = setInterval(() => { t += 1 / 60; if (p.ball.inLane) p.launch(0.8); for (const f of p.t.flippers) { const near = Math.hypot(p.ball.x - f.pivot.x, p.ball.y - f.pivot.y) < f.len * 1.1 && p.ball.y < f.pivot.y + 0.015; if (near && t > hold[f.side] + 0.3) hold[f.side] = t + 0.2; p.flip(f.side, t < hold[f.side]); } }, 16); })()`);
+      await wait(9);
+      await shot('20_arcade_pinball', 'Night Owl, an original 1974 electro-mechanical pinball table, on a phone in landscape. Pop bumpers, slingshots, the O-W-L rollovers and drop bank, a tilt bob and a replay score. Touch: left and right halves flip, pull down on the plunger, swipe to nudge. The physics runs at a fixed step and is the same code the headless tests play.');
+      await ev(`(() => { clearInterval(window.__bot); __GP.cabinet.close(); __GP.arcade('arcade.dead_eye'); const g = __GP.cabinet.current; let n = 0;
+        window.__bot = setInterval(() => { const row = g.rows[2]; const tgt = row.targets.filter(x => !x.down).sort((a, b) => Math.abs(a.x - g.aim.x) - Math.abs(b.x - g.aim.x))[0]; if (tgt) g.setAim(g.aim.x + Math.max(-0.2, Math.min(0.2, tgt.x - g.aim.x)), row.y); if (++n % 12 === 0) g.fire(); }, 16); })()`);
+      await wait(6);
+      await shot('21_arcade_gallery', 'Dead-Eye Gallery, an original electro-mechanical rifle gallery: tin ducks, rabbits and a slow owl on three chain belts, and a gold bell that adds ten seconds. Drag to aim, lift to fire. A dime a game; high scores go on the machine card and are saved.');
+      await ev(`clearInterval(window.__bot)`);
+    },
+  },
   touch: {
     url: 'station=lot&touch=1',
     viewport: { width: 844, height: 390 },

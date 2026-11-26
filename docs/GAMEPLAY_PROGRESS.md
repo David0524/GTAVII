@@ -33,6 +33,7 @@ plus a thin test scene.
 | `items/*` | `inventory.ts`: money in cents, savings, stash, gun states, skills, stamina. Also `shop.ts` (invariant-safe), `wardrobe.ts`, `phone.ts` (payphones, ringing, answering service), `guns.ts` (tiers, condition, jams, concealment) and `registry.ts`. |
 | `props/props.ts` | Breakable furniture with stages: a hydrant geyser, papers, glass, coins, call boxes and booths that stop working. Props reset after 10 min when unseen. |
 | `police/pursuit.ts` | Pursuit roles across the units chasing one suspect: **tail**, the car with eyes on them; **box**, the second car, only when the suspect is slowed below 4.5 m/s; **cutoff**, the rest, one per intersection ahead of or beside the projected route, never behind; **foot**; and **search**, spread along the projected route once contact is lost. The facade builds `PoliceMirror` in `bindSim` and feeds it the player's smoothed velocity, so the sim drives these as `pursue` / `boxIn` / urgent `goto` / `search` goals. These are 1974 tactics: no spike strips, no PIT. |
+| `arcade/*` | The Deuce arcade (FEATURE_AUDIT "Arcade games"), original machines with no real titles or tables. **Night Owl** is a 1974 electro-mechanical pinball: fixed-step 1/480 s physics, two flippers with surface velocity, three pop bumpers, slingshots that kick only from their rubber face, O-W-L rollovers that light the pops, a drop-target bank for the bonus multiplier, outlanes and inlanes, a tilt (3 nudges in 4 s), and a replay at 60,000. **Dead-Eye Gallery** is an EM rifle gallery: three chain belts, ducks/rabbits/owl, a gold bell for +10 s, 45 s or 30 shots. `Arcade` handles 1974 coins (25¢ pinball, 10¢ gallery), replay credits left on the machine, and a five-line high-score card per machine; it's saved. The scene draws the cabinets as a canvas overlay (`scene/ArcadeOverlay.ts`; F9/F10). Touch: screen halves flip, pull the plunger, swipe to nudge; drag to aim, lift to fire. |
 | `cars/theft.ts` | Car records: entry methods, owner reports with plate/colour/class, hot cars, plate swaps, respray, trunks |
 | `cars/ownership.ts` | Buying cars: a weekly lot and classifieds with hidden condition, inspection, haggling. Also titles, selling, lending, alternate-side tickets, the boot, the pound, garages. |
 | `props/fire.ts` | Firebombs, car and prop fires, spread by exposure, burning, arson as a crime, fire engines |
@@ -224,6 +225,15 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
    - original arcade games last.
 8. **Perf:** cut allocations in the AI/police think loops (the rare max spikes), and a
    real-phone measurement with `?gameplay=1&hud=1`.
+
+## Arcade measurements (`arcade.test.ts`, deterministic bots)
+- **Night Owl:** a simple flipping bot lasts 52 s and scores 42,060 a game (8 seeds). With no flipping it's 12 s and 861, so skill matters.
+- **Drain mix:**
+  - The first layout drained 77% of balls down the outlanes, because wall-huggers went straight in.
+  - Fixes: an orbit-exit deflector, slanted rubbers above the outlanes, a narrow outlane with an inlane guide to each flipper, and slings that only kick from the face.
+  - Now: 23% outlane, 75% between the flippers. That's harsh but fair for an EM table played by a crude bot.
+- **Dead-Eye:** aimed play scores 2,425 at a 90% hit rate, against 525 for random shots.
+- **Not measured:** feel on a real phone, which needs a playtest. The bot's flipper timing isn't a person's.
 
 ## Known issues
 - The stand-in sim walks in straight lines; police cars in the test scene drive straight down

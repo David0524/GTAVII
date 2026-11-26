@@ -664,5 +664,59 @@
         }
       }
     }
+  },
+  {
+    "file": "20_arcade_pinball.png",
+    "note": "Night Owl, an original 1974 electro-mechanical pinball table, on a phone in landscape. Pop bumpers, slingshots, the O-W-L rollovers and drop bank, a tilt bob and a replay score. Touch: left and right halves flip, pull down on the plunger, swipe to nudge. The physics runs at a fixed step and is the same code the headless tests play.",
+    "state": {
+      "hp": 100,
+      "money": 475,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.8901639344346267,
+        "gameplayP95": 2.199999999953434,
+        "frameAvg": 7.013934426223401,
+        "frameP95": 10.199999999953434,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "21_arcade_gallery.png",
+    "note": "Dead-Eye Gallery, an original electro-mechanical rifle gallery: tin ducks, rabbits and a slow owl on three chain belts, and a gold bell that adds ten seconds. Drag to aim, lift to fire. A dime a game; high scores go on the machine card and are saved.",
+    "state": {
+      "hp": 100,
+      "money": 465,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.7646739130432252,
+        "gameplayP95": 1.5,
+        "frameAvg": 5.71847826086425,
+        "frameP95": 8.399999999906868,
+        "combat": {
+          "combatMs": 0.09999999986030161,
+          "policeMs": 0,
+          "totalMs": 0.09999999986030161,
+          "ballisticsMs": 0
+        }
+      }
+    }
   }
 ]
