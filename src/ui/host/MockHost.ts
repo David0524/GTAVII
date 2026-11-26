@@ -57,18 +57,18 @@ const LOTS: Record<string, LotView> = {
   sal: { id: 'sal', name: 'Sal\'s Square Deal Motors', kind: 'lot', salesman: 'Sal Brunetti',
     patter: 'Kick a tire, friend, go ahead, she don\'t bite. Everything on this lot runs, and what don\'t run I tell you up front. Cash talks. Cash talks loud.',
     cars: [
-      { id: 'l.monarch', name: 'Monarch Brougham 4-dr', year: 1970, colour: 'Maroon', cls: 'Full-size sedan', trim: 'Brougham, vinyl top', condition: 0.62, mileage: 71400, asking: 895, notes: 'One owner, a deacon. Rear shocks are tired.' },
-      { id: 'l.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1969, colour: 'Harvest gold', cls: 'Two-door hardtop', trim: 'Sprint V8', condition: 0.48, mileage: 88200, asking: 650, notes: 'Pulls left under braking. Fast anyway.' },
-      { id: 'l.dunmore', name: 'Dunmore Villager wagon', year: 1968, colour: 'Avocado', cls: 'Station wagon', trim: 'Woodgrain panels', condition: 0.4, mileage: 102300, asking: 425, notes: 'Smells like a dog. A good dog.' },
-      { id: 'l.corsair', name: 'Corsair Commuter 2-dr', year: 1972, colour: 'Sky blue', cls: 'Compact', trim: 'Four-cylinder', condition: 0.78, mileage: 38900, asking: 1150, notes: 'Gets twenty-two to the gallon. Honest.' },
-      { id: 'l.lancaster', name: 'Lancaster Hauler pickup', year: 1966, colour: 'Primer grey', cls: 'Pickup', trim: 'Stepside', condition: 0.33, mileage: 121000, asking: 380, notes: 'Starts when she feels like it.' },
-      { id: 'l.halvorsen', name: 'Halvorsen Royale 4-dr', year: 1973, colour: 'Midnight green', cls: 'Full-size sedan', trim: 'Royale, 455 V8', condition: 0.88, mileage: 21500, asking: 2150, notes: 'Retired lady, Fort Lee. Tires like new.' },
+      { id: 'l.monarch', name: 'Monarch Brougham 4-dr', year: 1970, colour: 'Maroon', cls: 'Full-size sedan', trim: 'Brougham, vinyl top', condition: 0.62, mileage: 71400, asking: 1040, notes: 'One owner, a deacon. Rear shocks are tired.' },
+      { id: 'l.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1969, colour: 'Harvest gold', cls: 'Two-door hardtop', trim: 'Sprint V8', condition: 0.48, mileage: 88200, asking: 1220, notes: 'Pulls left under braking. Fast anyway.' },
+      { id: 'l.dunmore', name: 'Dunmore Villager wagon', year: 1968, colour: 'Avocado', cls: 'Station wagon', trim: 'Woodgrain panels', condition: 0.4, mileage: 102300, asking: 770, notes: 'Smells like a dog. A good dog.' },
+      { id: 'l.corsair', name: 'Corsair Commuter 2-dr', year: 1972, colour: 'Sky blue', cls: 'Compact', trim: 'Four-cylinder', condition: 0.78, mileage: 38900, asking: 885, notes: 'Gets twenty-two to the gallon. Honest.' },
+      { id: 'l.lancaster', name: 'Lancaster Hauler pickup', year: 1966, colour: 'Primer grey', cls: 'Pickup', trim: 'Stepside', condition: 0.33, mileage: 121000, asking: 975, notes: 'Starts when she feels like it.' },
+      { id: 'l.halvorsen', name: 'Halvorsen Royale 4-dr', year: 1973, colour: 'Midnight green', cls: 'Full-size sedan', trim: 'Royale, 455 V8', condition: 0.88, mileage: 21500, asking: 1270, notes: 'Retired lady, Fort Lee. Tires like new.' },
     ] },
   halvorsen: { id: 'halvorsen', name: 'Halvorsen Motors, Eighth Avenue', kind: 'showroom', salesman: 'Mr. Pruitt',
     patter: 'Good evening. May I interest you in something with a warranty? Nineteen seventy-four, sir: the year of the radial tire and the five-mile-an-hour bumper.',
     cars: [
-      { id: 's.royale', name: 'Halvorsen Royale 4-dr', year: 1974, colour: 'Candy apple red', cls: 'Full-size sedan', trim: 'Royale, 455 V8, AM/FM', condition: 1, mileage: 12, asking: 4895, notes: 'Factory air. 12 months or 12,000 miles.' },
-      { id: 's.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1974, colour: 'Bright yellow', cls: 'Two-door hardtop', trim: 'Sprint V8, four-on-the-floor', condition: 1, mileage: 9, asking: 3995 },
+      { id: 's.royale', name: 'Halvorsen Royale 4-dr', year: 1974, colour: 'Candy apple red', cls: 'Full-size sedan', trim: 'Royale, 455 V8, AM/FM', condition: 1, mileage: 12, asking: 9500, notes: 'Factory air. 12 months or 12,000 miles.' },
+      { id: 's.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1974, colour: 'Bright yellow', cls: 'Two-door hardtop', trim: 'Sprint V8, four-on-the-floor', condition: 1, mileage: 9, asking: 7800 },
       { id: 's.corsair', name: 'Corsair Commuter 2-dr', year: 1974, colour: 'Sky blue', cls: 'Compact', trim: 'Four-cylinder', condition: 1, mileage: 7, asking: 2495, notes: 'Gas is 55 cents. Think about it.' },
     ] },
 };
@@ -217,17 +217,23 @@ export class MockHost implements UiHost {
     };
   }
 
+  // lot prices follow gameplay's cars/ownership.ts: value = class base x (0.35 + 0.65 x condition), asking ~15% over value;
+  // the showroom matches its new-car list (luxury sedan $9,500, personal coupe $7,800)
   businesses(): BusinessView[] {
     const trend = (b: number) => Array.from({ length: 8 }, (_, i) => Math.round(b * (0.8 + 0.4 * Math.abs(Math.sin(i * 1.7 + b)))));
+    // numbers from gameplay's economy (claude/gameplay-74 src/gameplay/economy/property.ts, the 2026-11-26 rebalance):
+    // net a week = weeklyBase x block traffic - wages - pad
+    const net = (base: number, traffic: number, wages: number, pad: number) => Math.round(base * traffic - wages - pad);
+    const lw = net(4190, 0.95, 300, 150);
     return [
-      { id: 'biz.laundromat', name: 'Spin-Kleen Laundromat', kind: 'Laundromat', address: 'W 29 St, 7 Av–8 Av', owner: this.owned.has('biz.laundromat') ? this.lead : null, weeklyIncome: 185, trend: trend(185), manager: 'Mrs. Ocasio', staff: 2,
-        upgrades: [{ id: 'u.dryers', name: 'Six new dryers', cost: 900, owned: false, effect: '+$40 a week' }, { id: 'u.sign', name: 'Neon window sign', cost: 260, owned: true, effect: '+foot traffic' }, { id: 'u.drop', name: 'Numbers drop in the back', cost: 0, owned: false, effect: 'Side line: the daily number (illegal)' }],
-        trouble: [{ kind: 'shakedown', text: 'A sergeant from Midtown South wants $50 a week "for the inspector".', due: 'Monday' }, { kind: 'brownout', text: 'Brownout Friday: lost a day\'s takings.' }],
-        ledger: [{ week: 'Jun 9', gross: 410, payroll: 160, pad: 50, net: 200 }, { week: 'Jun 16', gross: 382, payroll: 160, pad: 50, net: 172 }] },
-      { id: 'biz.garage', name: 'Midtown Park & Lock', kind: 'Parking garage', address: 'W 35 St, 9 Av–10 Av', owner: null, price: 22000, weeklyIncome: 520, trend: trend(520), staff: 4,
-        upgrades: [{ id: 'u.storage', name: 'Back-row storage', cost: 1500, owned: false, effect: 'Store stolen cars (still hot)' }], trouble: [], ledger: [] },
-      { id: 'biz.newsstand', name: 'Newsstand at 34th & 7th', kind: 'Newsstand', address: '7 Av & W 34 St', owner: null, price: 3500, weeklyIncome: 90, trend: trend(90), staff: 1,
-        upgrades: [{ id: 'u.drop2', name: 'Numbers drop', cost: 0, owned: false, effect: 'Side line (illegal)' }], trouble: [], ledger: [] },
+      { id: 'biz.laundromat', name: 'Wash-and-Dry laundromat', kind: 'Laundromat', address: '9th Ave block', owner: this.owned.has('biz.laundromat') ? this.lead : null, weeklyIncome: lw, trend: trend(lw), manager: 'Mrs. Ocasio', staff: 2,
+        upgrades: [{ id: 'u.machines', name: 'Newer machines', cost: 290, owned: false, effect: '+12% takings' }, { id: 'u.alarm', name: 'Door alarm', cost: 50, owned: true, effect: 'Fewer break-ins' }, { id: 'u.side', name: 'Launder cash through it', cost: 0, owned: false, effect: 'Side line (illegal)' }],
+        trouble: [{ kind: 'shakedown', text: 'A sergeant from Midtown South wants $300 more a week "for the inspector".', due: 'Monday' }, { kind: 'brownout', text: 'Brownout Friday: lost a day\'s takings.' }],
+        ledger: [{ week: 'Jun 9', gross: 3980, payroll: 300, pad: 150, net: 3530 }, { week: 'Jun 16', gross: 3415, payroll: 300, pad: 150, net: 2965 }] },
+      { id: 'biz.newsstand', name: 'Eighth Ave newsstand', kind: 'Newsstand', address: '8th Ave block', owner: null, price: 1200, weeklyIncome: net(2210, 1.0, 0, 90), trend: trend(net(2210, 1.0, 0, 90)), staff: 1,
+        upgrades: [{ id: 'u.awning', name: 'New awning', cost: 120, owned: false, effect: '+10% takings' }, { id: 'u.drop', name: 'A numbers drop', cost: 0, owned: false, effect: 'Side line (illegal)' }], trouble: [], ledger: [] },
+      { id: 'biz.garage', name: 'Parking garage', kind: 'Parking garage', address: 'Garment District block', owner: null, price: 65000, weeklyIncome: net(22980, 1.1, 3000, 1100), trend: trend(net(22980, 1.1, 3000, 1100)), staff: 6,
+        upgrades: [{ id: 'u.lights', name: 'Lighting', cost: 3900, owned: false, effect: '+10% takings' }, { id: 'u.store', name: 'Stores cars', cost: 0, owned: false, effect: 'Keep hot cars out of sight' }], trouble: [], ledger: [] },
     ];
   }
 

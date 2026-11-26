@@ -328,7 +328,7 @@ body.touch .st-remap { grid-template-columns: 1fr 1fr 1fr auto; font-size: 12px;
 
 /* ------------------------------------------------------------------ accessibility: text scale, contrast, colour-blind palettes */
 html { font-size: calc(16px * var(--ui-scale, 1)); }
-.u-hud, .u-screen, .t74-screen { zoom: var(--ui-scale, 1); }
+.u-hud, .t74-screen { zoom: var(--ui-scale, 1); } .u-screen { zoom: calc(var(--ui-scale, 1) * var(--menu-zoom, 1)); } /* text size x desktop menu scale */
 :root[data-contrast="high"] { --dim: rgba(255,248,230,.9); --hair: rgba(255,248,230,.55); --panel: rgba(0,0,0,.92); }
 :root[data-contrast="high"] .u-hud { text-shadow: 0 0 3px #000, 0 0 6px #000; }
 /* concealment and police colours: red/green pairs become blue/orange with shapes kept */
