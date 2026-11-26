@@ -23,13 +23,15 @@ const report: Record<string, unknown> = { ...prevReport, date: new Date().toISOS
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare const window: any;
 
+/** Contact sheet, committed as JPEG (q85, at most 1600 px wide) to keep git history small. */
 async function sheet(page: Page, shots: Buffer[], cols: number, w: number, h: number, file: string, labels: string[] = []) {
   const prev = page.viewportSize()!;
+  if (w * cols > 1600) { const k = 1600 / (w * cols); w = Math.floor(w * k); h = Math.floor(h * k); }
   await page.setViewportSize({ width: w * cols, height: h * Math.ceil(shots.length / cols) });
-  const cells = shots.map((s, i) => `<div style="position:relative"><img style="display:block;width:${w}px;height:${h}px" src="data:image/png;base64,${s.toString('base64')}">` +
+  const cells = shots.map((s, i) => `<div style="position:relative"><img style="display:block;width:${w}px;height:${h}px;object-fit:cover" src="data:image/${s[0] === 0xff ? 'jpeg' : 'png'};base64,${s.toString('base64')}">` +
     (labels[i] ? `<div style="position:absolute;left:8px;top:6px;font:600 14px/1.2 sans-serif;color:#f0e8d8;text-shadow:0 1px 3px #000">${labels[i]}</div>` : '') + '</div>');
   await page.setContent(`<body style="margin:0;background:#000;display:grid;grid-template-columns:repeat(${cols},${w}px)">${cells.join('')}</body>`);
-  await page.screenshot({ path: path.join(OUT, file), fullPage: true });
+  await page.screenshot({ path: path.join(OUT, file), fullPage: true, type: 'jpeg', quality: 85 });
   await page.setViewportSize(prev);
 }
 
@@ -78,12 +80,12 @@ async function main() {
             shots.push(await snap(page));
           }
         }
-        await sheet(page, shots, 2, 800, 450, `turntable_${m.id}.png`);
+        await sheet(page, shots, 2, 800, 450, `turntable_${m.id}.jpg`);
         all.push(shots[0]); labels.push(m.displayName);
         tris[m.id] = await page.evaluate(() => { const a = window.__VEH.player.asset; const t = (g: any) => (g ? (g.index ? g.index.count : g.getAttribute('position').count) / 3 : 0); return { lod0: a.lod0.tris, lod1: a.lod1.tris, lod2: t(a.lod2) }; });
         console.log('turntable', m.id);
       }
-      await sheet(page, all, 4, 480, 270, 'turntable_all.png', labels);
+      await sheet(page, all, 4, 480, 270, 'turntable_all.jpg', labels);
       // variants of the sedan: paint, vinyl roof, wheel covers, grime
       const vars: Buffer[] = [];
       for (let v = 0; v < 8; v++) {
@@ -91,7 +93,7 @@ async function main() {
         await camRel(page, [4.2, 1.5, -5.4]);
         vars.push(await snap(page));
       }
-      await sheet(page, vars, 4, 400, 225, 'variants_bancroft.png', [...Array(8)].map((_, i) => `variant ${i}`));
+      await sheet(page, vars, 4, 400, 225, 'variants_bancroft.jpg', [...Array(8)].map((_, i) => `variant ${i}`));
       report.triangles = tris;
     }
 
@@ -114,10 +116,10 @@ async function main() {
         }, [id, c] as [string, number[]]);
         shots.push(await snap(page));
       }
-      await sheet(page, shots, 3, 640, 360, 'lineup_street.png');
+      await sheet(page, shots, 3, 640, 360, 'lineup_street.jpg');
       // side by side with reference photos (public domain, references/catalog.json)
       const refs = ['documerica_549851.jpg', 'documerica_554331.jpg', 'documerica_549921.jpg'].map((f) => fs.readFileSync(path.join(ROOT, 'references/img', f)));
-      await sheet(page, [shots[0], refs[0], shots[1], refs[1], shots[2], refs[2]], 2, 640, 420, 'lineup_vs_references.png',
+      await sheet(page, [shots[0], refs[0], shots[1], refs[1], shots[2], refs[2]], 2, 640, 420, 'lineup_vs_references.jpg',
         ['render: Delacorte Tiverton, framed like 549851', 'ref: DOCUMERICA 549851 (public domain)', 'render: Bancroft cab, framed like 554331', 'ref: DOCUMERICA 554331 (taxis, Lexington Ave)', 'render: CT-40 bus, framed like 549921', 'ref: DOCUMERICA 549921 (bus)']);
       console.log('lineup');
     }
@@ -151,7 +153,7 @@ async function main() {
       await camRel(page, [7, 1.3, 0], 40, 0.4); frames.push(await snap(page)); labels.push('parked on the 12% descent, handbrake on');
       await page.evaluate(() => { const V = window.__VEH, H = V.hill; V.setModel('fareway', 2, { x: H.x + 2.5, z: 140, yaw: Math.PI }); V.player.setPose({ x: H.x + 2.5, y: H.heightAt(H.x + 2.5, 140) + 0.4, z: 140, yaw: Math.PI }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: true }); V.simulate(2); });
       await camRel(page, [0, 1.4, -9], 40, 0.4); frames.push(await snap(page)); labels.push('parked on a crowned street with 5% cross-fall');
-      await sheet(page, frames, 3, 640, 360, 'drive_skids.png', labels);
+      await sheet(page, frames, 3, 640, 360, 'drive_skids.jpg', labels);
       console.log('drive');
     }
 
@@ -179,13 +181,13 @@ async function main() {
       await shotAt(`burning (${await page.evaluate(() => window.__VEH.player.stage)})`);
       await page.evaluate(() => window.__VEH.simulate(9));
       await shotAt(`burnt out (${await page.evaluate(() => window.__VEH.player.stage)})`);
-      await sheet(page, frames, 3, 640, 360, 'damage_stages.png', labels);
+      await sheet(page, frames, 3, 640, 360, 'damage_stages.jpg', labels);
       // close-up of the crumple from the front three-quarter
       await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 1, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4); V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.0); V.player.setPose({ x: 30, y: 0.2, z: 30, yaw: Math.PI / 2 }); V.simulate(0.6); });
       const close: Buffer[] = [];
       await camRel(page, [3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
       await camRel(page, [-3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
-      await sheet(page, close, 2, 640, 360, 'damage_crumple_closeup.png', ['taxi after a 30 mph wall hit', 'other side']);
+      await sheet(page, close, 2, 640, 360, 'damage_crumple_closeup.jpg', ['taxi after a 30 mph wall hit', 'other side']);
       console.log('damage');
     }
 
@@ -210,7 +212,7 @@ async function main() {
       await shot('chop shop: respray + new plates (description and plate history stay with gameplay)', [3.5, 1.2, 6.5], 0.3);
       await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft_patrol', 1, { x: -20, z: 40, yaw: 0 }); V.player.setLights({ beacon: true, head: true }); V.simulate(0.2); });
       await shot('police package: beacon, spotlight, HD suspension', [4.5, 1.6, -6], 0.4);
-      await sheet(page, frames, 3, 640, 360, 'systems.png', labels);
+      await sheet(page, frames, 3, 640, 360, 'systems.jpg', labels);
       report.systems = await page.evaluate(() => {
         const V = window.__VEH, DT = 1 / 60, o: any = {};
         const run = (id: string, v: number) => { V.setModel(id, v, { x: -300, z: 1500, yaw: 0 }); V.player.failureRate = 0; V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.5); V.setAuto({ throttle: 1, brake: 0, steer: 0, handbrake: false }); let t = 0, t60 = 0, top = 0; while (t < 40) { V.simulate(DT); t += DT; if (!t60 && V.player.speed > 26.82) t60 = t; top = Math.max(top, V.player.speed); } return { variant: v, trim: V.player.trim, mileage: Math.round(V.player.mileage), t0_60s: +t60.toFixed(1), topMph: +(top * 2.237).toFixed(0) }; };
@@ -243,7 +245,7 @@ async function main() {
       frames.push(Buffer.from(lean[0].split(',')[1], 'base64')); labels.push(`leaning ${lean[1]}° at 34 mph`);
       const crash = await page.evaluate(() => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); const bk = V.rideBike('calder650', { x: 40, z: 30, yaw: -Math.PI / 2 }, 3); let ev: any = null; bk.on('crash', (e: any) => (ev = e)); V.simulate(0.3); bk.body.setLinvel({ x: 12, y: 0, z: 0 }, true); V.simulate(2.5); const o = bk.object.position; V.setCamera(o.x - 4, 1.6, o.z - 3, o.x, 0.4, o.z, 45); return [V.capture(), ev ? `${ev.cause}, rider thrown at ${(ev.speed * 2.237).toFixed(0)} mph` : 'no crash']; });
       frames.push(Buffer.from(crash[0].split(',')[1], 'base64')); labels.push(`wall crash: ${crash[1]}`);
-      await sheet(page, frames, 3, 480, 300, 'bikes.png', labels);
+      await sheet(page, frames, 3, 480, 300, 'bikes.jpg', labels);
       report.bikes = await page.evaluate(() => {
         const V = window.__VEH, DT = 1 / 60, o: any = {};
         for (const id of ['calder650', 'calder_patrol', 'wexford_roadster', 'wexford_carrier']) {
@@ -269,7 +271,7 @@ async function main() {
       await cap('interior: benches, poles, straps, fluorescents, car cards', () => { const V = window.__VEH; const g = V.train.cars[1].group; const a = g.localToWorld(new g.position.constructor(0.3, 2.3, -7.2)), t = g.localToWorld(new g.position.constructor(0, 1.9, 6)); V.setCamera(a.x, a.y, a.z, t.x, t.y, t.z, 62); return V.capture(); });
       await cap('cab end', () => { const V = window.__VEH; const g = V.train.cars[0].group; const a = g.localToWorld(new g.position.constructor(2.5, 2.2, -14)), t = g.localToWorld(new g.position.constructor(0, 2, -7)); V.setCamera(a.x, a.y, a.z, t.x, t.y, t.z, 45); return V.capture(); });
       await cap('running', () => { const V = window.__VEH; V.trainSim.t = 20; V.simulate(6); const c = V.train.cars[2].group.position; V.setCamera(c.x + 8, 1.6, c.z - 10, c.x - 5, 2, c.z, 50); return V.capture(); });
-      await sheet(page, frames, 3, 640, 360, 'subway.png', labels);
+      await sheet(page, frames, 3, 640, 360, 'subway.jpg', labels);
       report.subway = await page.evaluate(() => { const V = window.__VEH; const t0 = performance.now(); for (let i = 0; i < 300; i++) V.train.update(); return { cars: V.train.cars.length, updateMs: +((performance.now() - t0) / 300).toFixed(3) }; });
       console.log('subway', JSON.stringify(report.subway));
     }
@@ -289,7 +291,7 @@ async function main() {
         await page.waitForTimeout(500);
         const draw = await page.evaluate(() => { window.__VEH.renderOnce(); const i = window.__VEH.renderer.info.render; return { drawCalls: i.drawCalls, triangles: i.triangles }; });
         res[`${q}_${n}`] = { ...r, ...draw };
-        if (q === 'high') fs.writeFileSync(path.join(OUT, 'traffic_150.png'), await snap(page));
+        if (q === 'high') { const img = await snap(page); await sheet(page, [img], 1, 800, 450, 'traffic_150.jpg'); }
       }
       report.traffic = res;
       console.log('traffic', res);

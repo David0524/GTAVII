@@ -60,7 +60,7 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   beyond what the steering asks for.
 
 ## Session 3b: look pass against the references (oversight review of the lineup)
-**Fresh comparison:** `shots/vehicles/lineup_vs_references.png`. Each render is now framed like
+**Fresh comparison:** `shots/vehicles/lineup_vs_references.jpg`. Each render is now framed like
 its photo: the Tiverton as in 549851, the Bancroft cab as in 554331, the CT-40 as in 549921.
 
 **Checked before changing anything:**
@@ -343,15 +343,15 @@ hood pops, headlamps break, glass cracks, and the radiator steams. Two more hits
 smoking and then burning.
 
 ## Shots (`shots/vehicles/`)
-- `turntable_<id>.png`: four views per model. `turntable_all.png` is the roster contact sheet,
-  and `variants_bancroft.png` shows 8 variants.
-- `lineup_street.png` and `lineup_vs_references.png`: every model parked on the block street,
+- `turntable_<id>.jpg`: four views per model. `turntable_all.jpg` is the roster contact sheet,
+  and `variants_bancroft.jpg` shows 8 variants.
+- `lineup_street.jpg` and `lineup_vs_references.jpg`: every model parked on the block street,
   next to DOCUMERICA photos 549851, 554331 and 549921.
-- `drive_skids.png`: wheelspin launch, locked-wheel panic stop, handbrake turn, power-on tail
+- `drive_skids.jpg`: wheelspin launch, locked-wheel panic stop, handbrake turn, power-on tail
   slide, nose dive (side view) and body roll (front view), with tyre marks.
-- `damage_stages.png`: intact, then the 30 mph wall hit, side hit, smoking, burning and burnt
-  out. `damage_crumple_closeup.png` shows a taxi after a 30 mph hit.
-- `traffic_150.png`: 150 instanced proxies on the block grid.
+- `damage_stages.jpg`: intact, then the 30 mph wall hit, side hit, smoking, burning and burnt
+  out. `damage_crumple_closeup.jpg` shows a taxi after a 30 mph hit.
+- `traffic_150.jpg`: 150 instanced proxies on the block grid.
 
 ## Critique: against the references
 **What reads right:**
@@ -361,7 +361,7 @@ smoking and then burning.
   wheel-to-body ratio and greenhouse share, sit comfortably among the photographed sedans and
   cabs.
 - The yellow-cab mass (yellow body, roof sign, rate card) gives the right "sea of taxis" read
-  from above (`traffic_150.png`).
+  from above (`traffic_150.jpg`).
 - The bus has a roller destination sign, split flat windshield, posts and livery band.
   Compared with photo 549921 it reads as a 1970s city transit bus without being that bus.
 - Trucks: the ribbed aluminium box, packer body and walk-in van all read at street distance.
