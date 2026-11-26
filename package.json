@@ -5,15 +5,16 @@
   "type": "module",
   "description": "Browser open-world engine and city: Manhattan's Tenderloin, summer 1974.",
   "scripts": {
-    "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --port 4173",
-    "typecheck": "tsc --noEmit",
-    "data:fetch": "tsx tools/pipeline/fetch.ts",
-    "data:build": "tsx tools/pipeline/build.ts",
     "data": "npm run data:fetch && npm run data:build && npm run data:audit",
+    "data:audit": "python3 tools/pipeline/audit_report.py",
+    "data:build": "tsx tools/pipeline/build.ts",
+    "data:fetch": "tsx tools/pipeline/fetch.ts",
+    "dev": "vite",
+    "preview": "vite preview --port 4173",
     "shots": "tsx tools/shots/capture.ts",
-    "data:audit": "python3 tools/pipeline/audit_report.py"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.21.0",

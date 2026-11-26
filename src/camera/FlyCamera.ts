@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import type { Input } from '../input/Input';
+import { heightAt } from '../shared/terrain';
 
 /**
  * Phase 1 debug camera: free-fly driven by the shared Input actions (keyboard/mouse or touch).
@@ -33,7 +34,7 @@ export class FlyCamera {
     p.x += (fx * inp.move.y - fz * inp.move.x) * v;
     p.z += (fz * inp.move.y + fx * inp.move.x) * v;
     p.y += inp.vertical * v;
-    p.y = Math.max(p.y, 0.4);
+    p.y = Math.max(p.y, heightAt(p.x, p.z) + 0.4);
     this.apply();
   }
 }
