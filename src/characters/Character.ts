@@ -9,7 +9,7 @@ import type { BodyModel } from './body/BodyModel';
 import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
-import { fitHead, headMesh, neckProfile, type HeadAsset } from './heads/rocketbox';
+import { fitHead, headMesh, neckProfile, neckSampler, type HeadAsset, type NeckData } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
 import { Animator, type LocoInput } from './anim/Animator';
@@ -60,9 +60,10 @@ export class Character {
   lastUpdateMs = 0;
   private rbFit: ReturnType<typeof fitHead> | null = null;
   private rbNeck: ReturnType<typeof neckProfile> | null = null;
+  private prebuiltHead: { joints: Float32Array; neck: NeckData } | null = null;
   readonly stats = { tris: 0, hairTris: 0, draws: 0, buildMs: 0 };
 
-  constructor(model: BodyModel, lib: AnimLibrary, desc: CharacterDesc, opts: { lod: number; build?: CharacterBuild; outfitCtx?: Partial<OutfitContext>; heat?: number; prebuilt?: Assembled; appearance?: Appearance; outfit?: Outfit }) {
+  constructor(model: BodyModel, lib: AnimLibrary, desc: CharacterDesc, opts: { lod: number; build?: CharacterBuild; outfitCtx?: Partial<OutfitContext>; heat?: number; prebuilt?: Assembled; appearance?: Appearance; outfit?: Outfit; prebuiltHead?: { joints: Float32Array; neck: NeckData } }) {
     this.model = model; this.lib = lib; this.desc = desc; this.lod = opts.lod;
     void this.lib;
     this.appearance = (opts.build?.appearance ?? (opts as { appearance?: Appearance }).appearance) ?? generateAppearance(desc.seed);
@@ -81,6 +82,7 @@ export class Character {
     this.outfitCtx = opts.outfitCtx;
     this.wardrobeSets = opts.build?.wardrobeSets;
     this.object.name = `character:${desc.hero ?? desc.archetype ?? 'ped'}:${desc.seed}`;
+    this.prebuiltHead = opts.prebuiltHead ?? null;
     this.build(opts.prebuilt);
     const formal = !!this.outfit.outer && (this.outfit.outer.kind === 'suitJacket' || this.outfit.outer.kind === 'sportCoat') || !!this.outfit.tie;
     this.animator = new Animator(lib, this.restPelvis, { stride: this.appearance.gait.stride, swing: this.appearance.gait.swing, bounce: this.appearance.gait.bounce, slump: this.appearance.slump, age: this.appearance.age, heat: opts.heat ?? 0.6, formal, girth: armGirth(this.appearance) });
@@ -91,7 +93,11 @@ export class Character {
 
   private build(prebuilt?: Assembled) {
     const t0 = performance.now();
-    if (prebuilt) this.asm = prebuilt;
+    if (prebuilt) {
+      this.asm = prebuilt;
+      const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
+      if (rb && this.prebuiltHead) { this.rbFit = fitHead(rb, this.prebuiltHead.joints); this.rbNeck = neckSampler(this.prebuiltHead.neck); }
+    }
     else {
       const shape = this.model.evaluate({ ...this.appearance.body, stature: this.appearance.stature });
       const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;

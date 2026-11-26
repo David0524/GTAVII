@@ -80,7 +80,7 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
       scene.add(ch.object);
       return ch;
     },
-    createCrowdRenderer(max) { return new CrowdRenderer(body, anims, { max, quality: opts.quality, ground: () => ground, archetypes, bodyUrl: base + bodyFile, nearLod: pedLod }); },
+    createCrowdRenderer(max) { return new CrowdRenderer(body, anims, { max, quality: opts.quality, ground: () => ground, archetypes, bodyUrl: base + bodyFile, nearLod: pedLod, heads }); },
     registerArchetypes(defs) { archetypes.register(defs); },
     registerCast(entries) { for (const e of entries) cast.set(e.id, e); },
     setGround(fn) { ground = fn; },

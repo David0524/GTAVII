@@ -101,7 +101,7 @@ async function loadHead(base: string, id: string): Promise<HeadAsset> {
 }
 
 /** Fit (uniform scale by interocular distance, eye midpoints coincide) and the seam height (pre-lift). */
-export function fitHead(h: HeadAsset, joints: Float32Array) {
+export function fitHead(h: { meta: Pick<HeadAsset['meta'], 'landmarks' | 'neckMinY'> }, joints: Float32Array) {
   const our = (j: number) => [joints[j * 3], joints[j * 3 + 1], joints[j * 3 + 2]];
   const oL = our(JI.eye_l), oR = our(JI.eye_r);
   const oMid = [(oL[0] + oR[0]) / 2, (oL[1] + oR[1]) / 2, (oL[2] + oR[2]) / 2];
@@ -117,9 +117,11 @@ export function fitHead(h: HeadAsset, joints: Float32Array) {
  * Radial profile of our neck around the neck joint (pre-lift), for stitching the head's neck ring
  * onto our body: radius at (height, angle).
  */
-export function neckProfile(pos: Float32Array, joints: Float32Array, y0: number, y1: number) {
+export interface NeckData { r: Float32Array; y0: number; y1: number; cx: number; cz: number }
+const NA = 32, NY = 8;
+/** Raw neck profile (transferable from the build worker). */
+export function neckProfileData(pos: Float32Array, joints: Float32Array, y0: number, y1: number): NeckData {
   const cx = joints[JI.neck_01 * 3], cz = joints[JI.neck_01 * 3 + 2];
-  const NA = 32, NY = 8;
   const r = new Float32Array(NA * NY);
   for (let k = 0; k < pos.length / 3; k++) {
     const x = pos[k * 3] - cx, y = pos[k * 3 + 1], z = pos[k * 3 + 2] - cz;
@@ -128,11 +130,16 @@ export function neckProfile(pos: Float32Array, joints: Float32Array, y0: number,
     r[b * NA + a] = Math.max(r[b * NA + a], Math.hypot(x, z));
   }
   for (let it = 0; it < 4; it++) for (let b = 0; b < NY; b++) for (let a = 0; a < NA; a++) if (!r[b * NA + a]) r[b * NA + a] = Math.max(r[b * NA + (a + 1) % NA], r[b * NA + (a + NA - 1) % NA], b > 0 ? r[(b - 1) * NA + a] : 0);
+  return { r, y0, y1, cx, cz };
+}
+export function neckSampler(d: NeckData) {
   return (x: number, y: number, z: number) => {
-    const a = Math.floor(((Math.atan2(x - cx, z - cz) + Math.PI) / (2 * Math.PI)) * NA) % NA, b = Math.min(NY - 1, Math.max(0, Math.floor(((y - y0) / (y1 - y0)) * NY)));
-    return { r: r[b * NA + a], cx, cz };
+    const a = Math.floor(((Math.atan2(x - d.cx, z - d.cz) + Math.PI) / (2 * Math.PI)) * NA) % NA, b = Math.min(NY - 1, Math.max(0, Math.floor(((y - d.y0) / (d.y1 - d.y0)) * NY)));
+    return { r: d.r[b * NA + a], cx: d.cx, cz: d.cz };
   };
 }
+/** Radial profile of our neck (pre-lift), for stitching the head's neck ring onto our body. */
+export function neckProfile(pos: Float32Array, joints: Float32Array, y0: number, y1: number) { return neckSampler(neckProfileData(pos, joints, y0, y1)); }
 
 export interface HeadMeshOpts {
   lift: number; tint?: [number, number, number]; neck?: ReturnType<typeof neckProfile>;

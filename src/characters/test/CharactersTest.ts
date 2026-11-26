@@ -80,7 +80,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     // Faces A/B: each lead with its altered Rocketbox-based head beside the same lead with our
     // generated head; then (pool=1) generated pedestrians with their matched pool heads.
     const act = num('act', 1);
-    for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
+    if (!qp.has('pool')) for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null } }));
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }

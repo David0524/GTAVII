@@ -14,13 +14,14 @@
 import * as THREE from 'three/webgpu';
 import type { BodyModel } from '../body/BodyModel';
 import type { AnimLibrary } from '../anim/AnimLibrary';
-import { generateAppearance, type Appearance } from '../body/appearance';
 import { generateOutfit, type Outfit } from '../wardrobe/outfit';
 import { assemble, type Assembled } from '../build/assemble';
 import type { GeoArrays } from '../build/MeshBuilder';
 import { crowdJoint } from '../rig';
 import { bakeTemplate, CROWD_INDEX, NB, CROWD_SET, type BakeClip } from './bake';
 import { crowdMaterial, ATLAS_ROWS } from './crowdMaterial';
+import { tintFor, type HeadLibrary, type HeadAsset } from '../heads/rocketbox';
+import { generateAppearance, type Appearance } from '../body/appearance';
 import { Character, armGirth, type GroundFn } from '../Character';
 import { hash2 } from '../util/rng';
 import type { ArchetypeRegistry } from '../archetypes';
@@ -33,7 +34,7 @@ interface Template {
   clips: BakeClip[]; frameBase: number; height: number;
   lods: { mesh: THREE.Mesh; geo: THREE.InstancedBufferGeometry; attrs: THREE.InstancedBufferAttribute[]; count: number; tris: number }[];
 }
-interface AgentState { phase: number; clip: number; tpl: number; lastX: number; lastZ: number; vx: number; vz: number; near: Character | null; pending: boolean }
+interface AgentState { phase: number; clip: number; tpl: number; lastX: number; lastZ: number; vx: number; vz: number; near: Character | null; pending: boolean; headId?: string | null; head?: HeadAsset | null }
 
 const QUALITY = {
   low: { templates: 12, near: 3, nearR: 9, midR: 30, farR: 90 },
@@ -67,6 +68,7 @@ export class CrowdRenderer {
   private worker: Worker | null = null;
   private workerReady = false;
   private nearPool = new Map<number, Character>();
+  private heads: HeadLibrary | null = null;
   private getGround: () => GroundFn | null;
   private max: number;
   private carts: THREE.InstancedMesh;
@@ -77,7 +79,8 @@ export class CrowdRenderer {
   get pendingBuilds() { let n = 0; for (const st of this.agents.values()) if (st.pending) n++; return n; }
   readonly stats = { cpuMs: 0, near: 0, mid: 0, far: 0, culled: 0, draws: 0, tris: 0, templatesReady: 0, nearBuilds: 0 };
 
-  constructor(body: BodyModel, lib: AnimLibrary, opts: { max: number; quality: keyof typeof QUALITY; ground: () => GroundFn | null; baseUrl?: string; archetypes?: ArchetypeRegistry; bodyUrl?: string; nearLod?: number }) {
+  constructor(body: BodyModel, lib: AnimLibrary, opts: { max: number; quality: keyof typeof QUALITY; ground: () => GroundFn | null; baseUrl?: string; archetypes?: ArchetypeRegistry; bodyUrl?: string; nearLod?: number; heads?: HeadLibrary | null }) {
+    this.heads = opts.heads ?? null;
     this.nearLod = opts.nearLod ?? 1;
     this.registry = opts.archetypes ?? null;
     this.body = body; this.lib = lib; this.max = opts.max; this.getGround = opts.ground;
@@ -183,13 +186,31 @@ export class CrowdRenderer {
     return { mesh, geo, attrs, count: 0, tris: g.index.length / 3 };
   }
 
+  /** Near-ring build: pick a Rocketbox head (no repeats among the near ring), then build headless in the worker. */
+  private requestNear(a: AgentView, st: AgentState) {
+    const seed = hash2(a.variant, 0xc0ffee);
+    const post = (head: HeadAsset | null) => {
+      st.head = head;
+      this.worker!.postMessage({ type: 'build', id: a.id, seed, archetype: a.archetype, lod: this.nearLod, head: head ? { landmarks: head.meta.landmarks, neckMinY: head.meta.neckMinY } : null });
+    };
+    if (!this.heads) { post(null); return; }
+    const used = new Set<string>();
+    for (const s of this.agents.values()) if (s.headId && (s.near || s.pending)) used.add(s.headId);
+    const id = this.heads.pick(generateAppearance(seed), used);
+    st.headId = id;
+    if (!id) { post(null); return; }
+    this.heads.load(id).then(post, () => { st.headId = null; post(null); });
+  }
+
   private onWorker(m: any) {
     if (m.type === 'ready') { this.workerReady = true; return; }
     if (m.type !== 'built') return;
     const st = this.agents.get(m.id);
     if (!st || !st.pending) return;
     st.pending = false;
-    const ch = new Character(this.body, this.lib, { seed: m.appearance.seed }, { lod: this.nearLod, prebuilt: m.asm, appearance: m.appearance, outfit: m.outfit });
+    const head = m.head && st.head ? st.head : null;
+    const overrides = head ? { rbHead: head, headTint: tintFor(head, m.appearance.skin.tone) } : undefined;
+    const ch = new Character(this.body, this.lib, { seed: m.appearance.seed, overrides }, { lod: this.nearLod, prebuilt: m.asm, appearance: m.appearance, outfit: m.outfit, prebuiltHead: head ? m.head : undefined });
     ch.setGround(this.getGround());
     st.near = ch;
     this.object.add(ch.object);
@@ -240,7 +261,7 @@ export class CrowdRenderer {
       if (nearIds.has(a.id)) {
         if (!st.near && !st.pending && this.worker && this.workerReady && this.stats.nearBuilds - this.nearPool.size < 1e9) {
           st.pending = true;
-          this.worker.postMessage({ type: 'build', id: a.id, seed: hash2(a.variant, 0xc0ffee), archetype: a.archetype, lod: this.nearLod });
+          this.requestNear(a, st);
         }
         if (st.near) {
           st.near.object.position.set(a.x, a.y, a.z);
@@ -250,7 +271,7 @@ export class CrowdRenderer {
           near++;
           continue;
         }
-      } else if (st.near) { st.near.dispose(); st.near = null; }
+      } else if (st.near) { st.near.dispose(); st.near = null; st.headId = null; st.head = null; }
       st.pending = st.pending && nearIds.has(a.id);
       if (!visible || d > this.q.farR) { culled++; continue; }
       // --- instanced: pick a baked clip from state and speed ---
@@ -282,7 +303,7 @@ export class CrowdRenderer {
       if (l.count) { draws++; tris += l.tris * l.count; for (const at of l.attrs) { at.needsUpdate = true; at.clearUpdateRanges(); at.addUpdateRange(0, l.count * 4); } }
     }
     for (const [id, st] of this.agents) if (!seen.has(id)) { st.near?.dispose(); this.agents.delete(id); }
-    for (const st of this.agents.values()) if (st.near) { draws += 2; tris += st.near.stats.tris; }
+    for (const st of this.agents.values()) if (st.near) { draws += st.near.stats.draws; tris += st.near.stats.tris; }
     Object.assign(this.stats, { cpuMs: performance.now() - t0, near, mid, far, culled, draws, tris });
   }
 
