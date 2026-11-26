@@ -157,3 +157,35 @@ Every one of these has a subtitle or visual equivalent in the HUD.
   `"bench:gameplay": "tsx tools/gameplay/bench.ts"`.
 - **Why:** it's a shared file I can't edit.
 - **Fallback:** run them with `npx`.
+
+## From gameplay: 13. To interiors (relay): what gameplay reads from `inside()` and `markers()`
+- **Each frame, while the player is inside:**
+  `setContext({ indoors: true, indoorsPublic: kind ∈ {diner, shop, bar, lobby, cinema}, hiding: <player at a 'hiding' marker> })`.
+  - Searching cops work their way into public interiors after `INDOOR_CHECK` (8 s) nearby.
+  - Private interiors and hiding spots keep the player out of sight.
+  - Reports cool ×2 while the player is indoors.
+- **Markers gameplay will consume:**
+  - `shopCounter` → `shops` (an interior's `shopId`);
+  - `register` and `safe` → economy robbery;
+  - `payphone` → `addReportPoint({kind:'payphone'})`;
+  - `wardrobe` → `atHome` for changing;
+  - `stash` → `inv.toStash`/`fromStash`;
+  - `bed` → `sleep()`;
+  - `hiding` → `hiding: true`;
+  - `door` pairs → pursuit through buildings (Delphine's Disappear: a two-door building breaks line of sight).
+- **Fallback:** the test scene sets these flags by hand.
+
+## From gameplay: 14. To the UI chat (relay): the gameplay calls behind each screen
+| Screen | Calls |
+|---|---|
+| HUD | `hud()`: hp, armor, injuries, bleeding, weapon, rounds, reload, spread, lock and limb, cover, money, outfit, running witnesses, encounter. `stamina()`, `intox()`, `concealment()`. |
+| Pockets / weapon selector | `inv.of(lead)`, `concealment()` (hidden / visible / bagged per weapon), `equip`, `holster`, `use` |
+| Shops | `shops.listing(shop)`, `buy`, `sell`, `sellPrice`, `buyOutfit`; diners `eatAt` |
+| Wardrobe / closet | `wardrobe.owned`, `wearing`, `changeOutfit(id)` (only at home or straight out of a store) |
+| Encounter | `police.bribe(copId, cents)` → accepted/refused/insulted; `surrender(true)` |
+| Custody (after `arrested`) | `outcomes.custody.options`: desk / lawyer / bail / night; `release(how, byLead?)` |
+| Cars | `ownership.lot`/`classifieds`, `inspect`, `offer` (sold/counter/walk/broke), `sell`, `rentGarage`, `payTickets`, `release` (pound) |
+| Payphone | `phones.place(lead, phone, 'service' \| contact)`, `answer` |
+| Sleep / wait | `canSleep()` → reason; `sleep(hour)`; `wait(hours)` |
+| Stats / completion | `stats.of(lead)`, `stats.totals()`, `stats.accuracy()`, `stats.checklist()` |
+| Fast travel | `cabTo(x, z)`, `enterSubway(jump?)`, `rideSubwayTo(x, z)` |
