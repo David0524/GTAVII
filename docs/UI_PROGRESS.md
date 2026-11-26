@@ -30,7 +30,8 @@ Source of truth for the UI & Cinematics stream (branch `claude/ui-cinematics`, f
 | Cinematics runtime | **Done.** Data timelines (`content/cutscenes/*.json`): Catmull-Rom camera with per-key easing, lens to FOV on 35 mm film geometry, period zooms, rack-focus data, lens-scaled handheld, gate weave, letterbox (2.39:1), grain, vignette, cards, subtitles, actor blocking across cuts, timed cues to the engine, choice holds, hold-to-skip, pause on touch. Seamless in and out via CameraDirector (`toGameplay` lands exactly on the live gameplay pose, then hands back with no blend and no black frame). 7 tests. |
 | Cutscene tool `?cine=` | **Done.** Script panel, scrub timeline (keys, dialogue bars, cues), fly camera with K to key, lens/focus/stop/roll, focus-on-actor, actor marks clicked onto the street, shot ops, validation, film-look preview, JSON export and local autosave. |
 | M1 opening | **Built with the tool** from narrative's shot list: 7 shots, 46 s, ending on the spawn shot and handing back to gameplay with the objective cue. New game plays it automatically. Frames: `shots/cine/m01_opening/`; the tool at work: `shots/cine/tool/`. |
-| TIME screens, HOMES_AND_CARS screens | In progress (a Sonnet helper builds them to spec; reviewed before merge). |
+| TIME screens | **Done.** "Wait until 9:00 PM?" prompt (window stamp, Wait / Not now); sleep menu (until morning, until evening, a chosen hour; without a bed only short waits; can't-sleep reasons; poor rest in the heat; "The story continues on…"); **time windows on mission stars and their map cards** ("Night only · 11 PM–5 AM"). |
+| HOMES_AND_CARS screens | **Done.** Used-car lot and showroom with haggling (salesman patter, offer stepper, counters, walk-away), the "Cars" hub tab (where each car is, tickets, boot, pound, trunk, pencil a route to it), parking-summons, tow and boot notices, home upgrades, classifieds page in the paper. Built by a Sonnet helper to my spec and reviewed; I corrected mock homes to match narrative. |
 
 ## Architecture
 ```
@@ -64,7 +65,7 @@ uilab.html + src/ui/lab/            every UI surface against the mock host, opti
   layout layer. Free text goes into `notes`, and the runtime reads only structured fields.
 - **Seamless blend:** the last shot keys `toGameplay`, so its final pose *is* the gameplay pose.
   FOV is restored to the pre-cutscene value (the director doesn't blend FOV; I told the engine).
-- **Settings honesty:** 46 of 74 keys are live today; the rest say which stream they wait on.
+- **Settings honesty:** 48 of 74 keys are live today (verified by script against the code that reads them); the rest say which stream they wait on.
 
 ## Performance (measured; honest)
 HUD + minimap, `ui.update()` wall time per frame, real rAF frames in the lab, the player walking
@@ -103,7 +104,10 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
   Before and after discovery: `map_before_*`, `map_after_*`, `hud_flat_*`.
 - [x] Every gameplay screen working against mock data (`shots/ui/*`; lab: `uilab.html?screen=…`).
 - [x] M1's opening built with the tool from narrative's script, captured as frames, blending into
-  gameplay (`shots/cine/m01_opening/`, `shots/cine/tool/`).
+  gameplay (`shots/cine/m01_opening/`, `shots/cine/tool/`). Blend: `90_blend_*` then
+  `99_gameplay_after_blend_*`, the same framing on both sides of the hand-back.
+- [x] HUD and minimap over the real city before and after discovery: `shots/ui/hud_city_before_*`,
+  `hud_city_after_*`.
 - [x] Touch-only run through every menu: 26 steps, taps only, no page errors
   (`tools/ui/touchRun.ts`, `shots/ui/touch/`). It caught and fixed a real bug (the hub opened from
   the title was drawn under it).
@@ -121,7 +125,7 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
 - **The HUD is rightly sparse:** heat is radio text plus cones, concealment is legible, and the
   minimap hides when you stand still.
 - **Systems are honest and tested:** the save section, settings that say when they aren't wired
-  yet, licence texts pulled from the bundle, and 30 unit tests.
+  yet, licence texts pulled from the bundle, and 21 UI and cinematics unit tests (30 in the repo).
 - **The cutscene pipeline is real:** narrative writes, the tool lays out, the runtime blends into
   play without a cut.
 
@@ -136,6 +140,8 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
 - **Pictograms and stamps are good at small sizes but basic at large ones.** A period sign
   painter's hand-drawn set would raise them.
 - **Lead portraits are silhouettes;** they need character renders.
+- **Mayhew vanishes at the blend:** the cutscene's stand-in leaves and nothing spawns him for the
+  escort yet (Phase 7 mission runtime and sim own that). The `mission.objective` cue fires on time.
 - **Perf on phones is still about 1.5× over budget at 4× throttle** (above).
 - **The map's first draw redraws vector streets:** fine on desktop, unmeasured on low-end phones.
 - **Two engine gaps:**

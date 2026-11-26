@@ -153,3 +153,4 @@ body.touch .t74-legend { display: none; }
 
 /* screen edge margin setting (safeZone 0.9..1): pull the HUD in from the edges */
 .u-hud { inset: calc((1 - var(--safe-zone, 1)) * 50vh) calc((1 - var(--safe-zone, 1)) * 50vw); }
+.u-window { display: inline-block; margin-top: 6px; padding: 2px 8px; border: 1.5px solid #3b2a20; font: 400 13px var(--f-head); letter-spacing: .18em; text-transform: uppercase; color: #3b2a20; transform: rotate(-1deg); }

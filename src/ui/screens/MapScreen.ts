@@ -9,6 +9,7 @@ import { pictogramURL } from '../map/pictograms';
 import type { UiHost } from '../host/types';
 import type { NavItem } from '../MenuNav';
 import { esc, gameTime } from '../util';
+import { windowLabel } from './TimeScreens';
 
 const VIA: Record<RevealVia, string> = {
   sight: 'You walked past it', enter: 'You went inside', tip: 'Somebody told you', overheard: 'You overheard it', news: 'An ad in the paper',
@@ -42,6 +43,7 @@ export class MapScreen {
     const leads = this.host.party();
     for (const pl of this.model.discovery.known()) if (pl.cat === 'home' && pl.lead) this.map.ownerNotes[pl.id] = `${leads.find((l) => l.id === pl.lead)?.short ?? ''}'s place`;
     this.map.owned = new Set(this.host.businesses().filter((b) => b.owner).map((b) => b.id.replace('biz.', 'ui.forsale.')));
+    this.map.missions = this.host.missionMarkers?.() ?? [];
     this.map.centerOn(p.x, p.z, Math.max(this.map.zoom, 0.42));
     this.card.style.display = 'none';
     this.renderSide();
@@ -82,7 +84,13 @@ export class MapScreen {
   private select(s: FoldingMapSelection) {
     const c = this.card; c.style.display = '';
     const acts: [string, () => void][] = [];
-    if (s.place) {
+    if (s.mission) {
+      const ms = s.mission;
+      c.innerHTML = `<div class="cat"><img alt="" src="${pictogramURL('mission', 18, 'print')}">STORY</div><h3>${esc(ms.title)}</h3>
+        ${ms.window ? `<div class="u-window">${esc(windowLabel(ms.window[0], ms.window[1]))}</div>` : ''}
+        ${ms.blurb ? `<div style="margin-top:6px">${esc(ms.blurb)}</div>` : ''}<div class="acts"></div>`;
+      acts.push(['PENCIL A ROUTE', () => this.setWaypoint({ x: ms.x, z: ms.z })]);
+    } else if (s.place) {
       const p = s.place, e = this.model.discovery.entry(p.id);
       c.innerHTML = `<div class="cat"><img alt="" src="${pictogramURL(p.cat, 18, 'print')}">${esc(CATEGORIES[p.cat].label)}</div>
         <h3>${esc(p.name)}</h3><div class="addr">${esc(p.address)}${p.hours ? ` · ${esc(p.hours)}` : ''}</div>

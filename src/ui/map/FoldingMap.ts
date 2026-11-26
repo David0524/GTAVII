@@ -31,7 +31,7 @@ const AVES = ['11th Avenue', '10th Avenue', '9th Avenue', '8th Avenue', '7th Ave
 function settingsIconScale() { return settings.get('mapIconSize') === 'large' ? 1.3 : 1; }
 const SHORT: Record<string, string> = { 'Metropolitan Life Insurance Company Tower': 'Met Life Tower', 'Empire State Building': 'Empire State Bldg.', 'Madison Square Garden': 'Madison Sq. Garden', 'New York Life Building': 'N.Y. Life Bldg.', 'Flatiron Building': 'Flatiron Bldg.', "Macy's": 'Herald Sq. store' };
 
-export interface FoldingMapSelection { place?: Place; at?: { x: number; z: number } }
+export interface FoldingMapSelection { place?: Place; at?: { x: number; z: number }; mission?: { id: string; title: string; x: number; z: number; window?: [string, string]; blurb?: string } }
 
 export class FoldingMap {
   readonly canvas = document.createElement('canvas');
@@ -45,6 +45,8 @@ export class FoldingMap {
   player = { x: 0, z: 0, yaw: 0, lead: '' };
   owned = new Set<string>();
   ownerNotes: Record<string, string> = {};
+  /** Story mission markers (printed as red stars; tapping opens their card). */
+  missions: { id: string; title: string; x: number; z: number; window?: [string, string]; blurb?: string }[] = [];
   showReticle = false;
   onSelect?: (s: FoldingMapSelection) => void;
   readonly cost = { draw: 0 };
@@ -97,6 +99,11 @@ export class FoldingMap {
   private toScreen(x: number, z: number): [number, number] { return [this.canvas.clientWidth / 2 + (x - this.cx) * this.zoom, this.canvas.clientHeight / 2 + (z - this.cz) * this.zoom]; }
 
   /** Nearest visible place to a screen point (within 22 px). */
+  pickMission(sx: number, sy: number) {
+    let best: FoldingMap['missions'][number] | null = null, bd = 22;
+    for (const m of this.missions) { const [x, y] = this.toScreen(m.x, m.z), d = Math.hypot(x - sx, y - sy); if (d < bd) { bd = d; best = m; } }
+    return best;
+  }
   pick(sx: number, sy: number): Place | null {
     let best: Place | null = null, bd = 22;
     for (const p of this.model.discovery.known()) {
@@ -107,6 +114,8 @@ export class FoldingMap {
     return best;
   }
   tap(sx: number, sy: number) {
+    const mi = this.pickMission(sx, sy);
+    if (mi) { this.onSelect?.({ mission: mi }); return; }
     const p = this.pick(sx, sy);
     if (p) { this.model.discovery.markSeen([p.id]); this.model.version++; this.onSelect?.({ place: p }); }
     else { const w = this.toWorld(sx, sy); if (w.x > PLAYABLE.minX && w.x < PLAYABLE.maxX && w.z > PLAYABLE.minZ && w.z < PLAYABLE.maxZ) this.onSelect?.({ at: w }); }
@@ -227,6 +236,7 @@ export class FoldingMap {
       L.reserve([x - icon / 2, y - icon / 2, x + icon / 2, y + icon / 2]);
     }
     for (const h of this.heroes) L.reserve([tx(h.x) - 3, tz(h.z) - 3, tx(h.x) + 3, tz(h.z) + 3]);
+    for (const ms of this.missions) L.reserve([tx(ms.x) - 11, tz(ms.z) - 11, tx(ms.x) + 11, tz(ms.z) + 11]);
     L.reserve([tx(this.player.x) - 9, tz(this.player.z) - 11, tx(this.player.x) + 9, tz(this.player.z) + 10]);
     // printed furniture reserves its space so no type runs through it
     const cart = Z < 0.6 ? { bx: x0 + 18, bz: z1 - 96 } : null;
@@ -298,6 +308,10 @@ export class FoldingMap {
       g.drawImage(spr, x - spr.width / dpr / 2, y - spr.height / dpr / 2, spr.width / dpr, spr.height / dpr);
       if (m.discovery.isNew(p.id)) pencilRing(g, x, y, icon / 2 + 5, hash(p.x * 3) * 99, 'rgba(158,42,36,.9)', 1.8);
       if (this.owned.has(p.id) && Z > 0.25) stamp(g, 'Ours', x, y - icon - 6, -0.12, '#9e2a24', 11, p.z | 0);
+    }
+    for (const ms of this.missions) {
+      const spr = pictogram('mission', 21, dpr, 'disc', '#b2302a'), x = tx(ms.x), y = tz(ms.z);
+      g.drawImage(spr, x - spr.width / dpr / 2, y - spr.height / dpr / 2, spr.width / dpr, spr.height / dpr);
     }
     // objective marker (story)
     g.restore();

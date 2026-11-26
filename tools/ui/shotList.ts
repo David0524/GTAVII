@@ -35,4 +35,7 @@ export const SHOTS: Shot[] = [
   },
   { name: 'home', q: 'screen=home' },
   { name: 'paper_classifieds', q: 'screen=paper', act: async (p) => { await p.click('.np-pages button[data-p=classifieds]'); } },
+  { name: 'hud_city_before', q: 'screen=hud&city=1&quality=high&discover=none&waypoint=0', wait: 2500 },
+  { name: 'hud_city_after', q: 'screen=hud&city=1&quality=high&discover=some', wait: 2500 },
+  { name: 'map_mission_card', q: 'screen=map&discover=some', act: async (p) => { await p.evaluate(() => { const w = window as any; const m = w.__UI.ui.mapScreen; const ms = m.map.missions[0]; m.map.centerOn(ms.x, ms.z, 0.7); m.map.onSelect({ mission: ms }); }); } },
 ];

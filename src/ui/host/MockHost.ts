@@ -152,6 +152,13 @@ export class MockHost implements UiHost {
     };
   }
   objective() { return this.obj; }
+  missionMarkers() {
+    return [
+      { id: 'mission.night_desk', title: 'Night Desk', x: -232, z: -655, window: ['23:00', '05:00'] as [string, string], lead: 'char.teddy_arce', blurb: 'The Corwin\'s night desk. Something is wrong on the ninth floor.' },
+      { id: 'mission.hack', title: 'Hack', x: -486, z: -712, window: ['19:00', '23:00'] as [string, string], lead: 'char.teddy_arce', blurb: 'Delroy needs a second driver at the Penn Station cab line.' },
+      { id: 'mission.lunch_counter', title: 'Lunch Counter', x: -440, z: -930, window: ['11:30', '14:00'] as [string, string], lead: 'char.teddy_arce', blurb: 'Meet Carmen at the department-store lunch counter.' },
+    ];
+  }
   private loc?: Locator;
   location() { this.loc ??= new Locator(this.streets); return { district: this.loc.district(this.pos.x, this.pos.z), crossing: this.loc.intersection(this.pos.x, this.pos.z) }; }
 

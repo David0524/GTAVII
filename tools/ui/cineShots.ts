@@ -38,11 +38,14 @@ await withServer(async (base) => {
   }
   // live blend out: seek 3 s before the end, play, capture through the hand-back
   await page.evaluate((d) => { const c = (window as any).__T74.ui.cinema; c.seek(d - 3); c.setPaused(false); }, info.dur);
-  for (let k = 0; k < 6; k++) {
+  let after = 0;
+  for (let k = 0; k < 40 && after < 3; k++) {
     await page.waitForTimeout(700);
+    if (await page.evaluate(() => (window as any).__T74.ui.state === 'play')) after++;
     const st = await page.evaluate(() => { const u = (window as any).__T74.ui; return `${u.state} t=${u.cinema.t.toFixed(2)}`; });
     await page.screenshot({ path: path.join(OUT, `90_blend_${k}_${size}.png`) });
     console.log(`blend ${k}: ${st}`);
+    if (after === 1) await page.screenshot({ path: path.join(OUT, `99_gameplay_after_blend_${size}.png`) });
   }
   if (errs.length) console.log('ERRORS', errs);
   await browser.close();

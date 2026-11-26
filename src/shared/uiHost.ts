@@ -160,6 +160,8 @@ export interface UiHost {
   classifieds?(): ClassifiedAd[];
   homes?(): HomeView[];
   sleepInfo?(): SleepInfo;
+  /** Story mission markers available now (map stars; cards show the time window, e.g. "Night only · 9 PM–3 AM"). */
+  missionMarkers?(): { id: string; title: string; x: number; z: number; window?: [string, string]; lead?: string; blurb?: string }[];
   on<K extends keyof UiEvents>(k: K, cb: (e: UiEvents[K]) => void): () => void;
   camera?: CameraHost;
   actors?: ActorHost;
