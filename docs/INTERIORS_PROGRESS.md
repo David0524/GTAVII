@@ -142,6 +142,12 @@ Reads as a modern kit or is wrong:
     no pattern on the bowl undersides. The ceiling cove and cornice are missing. Exposure is darker than the reference by
     design (1974 worn vs 1941 new), but it may be too dark on a real display.
 
+- `docs/interiors/walkin_corwin_v2.png`: the walk-in with lobby v2. The interior is resident at 8 m (15 live); the street door swings
+  open as you approach; inside you see the desk window grille, sofas and lamp table. 16 cells visible, 76 draws, headless.
+- `docs/interiors/grades_board_v2.png`: grade-driven fixtures. Derelict rooms are dark, boarded and lit by bare bulbs; pristine rooms get chandeliers,
+  panelling and linen.
+- Tier C: `interiorRoomNode()` is ready for FacadeMaterial (request 6b).
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.
