@@ -16,6 +16,7 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "test:viewport": "vite build && tsx tools/tests/viewport.ts",
     "test:load": "vite build && tsx tools/tests/loadtime.ts",
+    "test:windows": "vite build && tsx tools/tests/windows.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

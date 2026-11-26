@@ -745,3 +745,22 @@ look shots.
   engine adds the lines from `docs/interiors/ART_NOTES.md` to `docs/ART_SOURCES.md` in the commit
   where the first interior asset (CC0 material or generated art slot) lands.
 - **Sim 8:** already SHIPPED (84f71af). Sim's merge candidate is now 0447d43.
+
+## Engine notice E15 (2026-11-26): window lights changing as the camera turns, FIXED (c9678a3)
+- **Root cause:** per-building values (style, condition, seed) reach the facade shader as
+  interpolated vertex attributes, and interpolation of a constant is not exact. A style of 4 could
+  arrive as 3.9999998 at some pixels, depending on the view. The window id also truncated
+  `seed*1000` to an integer, so lamp colour and lit/unlit flipped per pixel as the camera moved.
+- **Fix:**
+  - Style and condition are rounded and the seed is quantised to an integer.
+  - Window ids combine seed, floor and bay in exact uint arithmetic.
+  - LOD1 uses the same material and attributes, so the lit set is identical across LOD.
+  - The earlier change (rotation-invariant window-LOD footprint, 3f61d34) stays. On its own it
+    was **not** the cause: it measured no better.
+- **Test:** `npm run test:windows` (`tools/tests/windows.ts`). It yaws a fixed night camera in
+  4° steps, re-projects each frame into the previous one (a pure-rotation homography), and
+  measures the share of lit-window pixels that changed. The limit is 3%.
+  - Old build: 7–19% at Madison Square and 17–48% on Broadway in the 30s.
+  - Fixed: 0.0–0.4%.
+- **For other streams that read per-building attributes in shaders** (interiors Tier C):
+  `floor(x + 0.5)` before any `equal()` or hash.
