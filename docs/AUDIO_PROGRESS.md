@@ -169,13 +169,18 @@ Reading the numbers honestly:
 bar and jukebox radios are silent. My commit wiring the narrative's 4 stations to procedural music
 (16:41) was finished just before the pause reached me; nothing further will be added until it lifts.
 
-## Voice renders are a build artefact, not committed (2026-11-26 ~17:45)
-The first render added ~35 MB (2,856 files) to git history in commit 6f7fb36. They are now removed from
-the tree and ignored (`public/audio/.gitignore`); `npm run audio:voices` regenerates them (needs the
-`espeak-ng` package). Provenance stays per file in `docs/AUDIO_SOURCES_VOICES.md`. Without renders the
-game plays the formant placeholder voice through the same API. Where the renders live for deployment
-(build step, Git LFS, or a release asset) is the user's decision; the files remain in history unless
-the user approves rewriting this branch's history before it merges.
+## Voice renders are a build artefact, rendered at build time (user-approved, 2026-11-26)
+User, in this chat: "Approved: (a) add @echogarden/espeak-ng-emscripten@0.3.5 and ffmpeg-static@5.3.0 as
+devDependencies, build-time only, never shipped; (b) rewrite claude/audio-tenderloin-74 history to drop
+public/audio/voice/, pushed with --force-with-lease."
+- `npm run audio:voices` renders with eSpeak NG compiled to WASM plus `ffmpeg-static`: no system packages,
+  so it runs on Vercel. Neither tool is imported by game code; checked: the production bundle contains
+  neither. Licence handling in AUDIO_SOURCES.md.
+- Measured (4 cores, CPU-only): full render 237 s for 1,428 lines (93.9 min of speech); with the
+  manifest cache, 1 s. Deployed output 38 MB (Opus 13.0 MB + AAC 18.4 MB + manifest), fetched per line.
+- Branch history rewritten and force-pushed (5f076a2 → 5497fca): no commit contains `public/audio/voice/`;
+  engine commits kept their hashes; the engine session was told.
+- The WASM build takes no SSML, so emotion is applied as rate, pitch and level offsets (was SSML prosody).
 
 ## Backlog relayed from the oversight session (2026-11-26; not in the original brief)
 Recorded as scope additions to plan for; the brief's "done means" came first.

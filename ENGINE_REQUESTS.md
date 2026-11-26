@@ -108,6 +108,8 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
   `public/content` (copy it in first). It needs no system packages: eSpeak NG is the npm WASM build
   and ffmpeg is `ffmpeg-static`, both devDependencies, both GPL-3.0, build-time only, never bundled.
   Output goes to `public/audio/voice/` (ignored by git). Cache that folder plus its `manifest.json`
-  between builds (Vercel build cache) so unchanged lines are skipped. Measured cost: see AUDIO_PROGRESS.
+  between builds (Vercel build cache) so unchanged lines are skipped. Measured here (4 cores, CPU-only):
+  full render of 1,428 lines 237 s; rerun with the cache 1 s. Deployed output 38 MB (Opus + AAC),
+  fetched per line on demand, never preloaded.
 - **Why:** keeps ~35 MB per narrative revision out of git, and keeps GPL code out of the shipped game.
 - **Fallback:** without renders, lines play the formant placeholder voice with correct subtitle timing.
