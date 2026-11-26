@@ -1,81 +1,81 @@
 {
   "note": "CPU-only, headless Node in the build container (no GPU, no rendering). Gameplay main-thread cost only; physics and rendering are the engine's.",
   "node": "v22.23.5",
-  "date": "2026-11-26T15:37:15.964Z",
+  "date": "2026-11-26T16:56:40.782Z",
   "high12": {
     "combatants": 11,
     "frames": 3479,
     "combat": {
-      "avg": 0.049,
-      "p95": 0.123,
-      "p99": 0.349,
-      "max": 3.024
+      "avg": 0.078,
+      "p95": 0.145,
+      "p99": 1.002,
+      "max": 9.43
     },
     "gameplayTotal": {
-      "avg": 0.054,
-      "p95": 0.133,
-      "p99": 0.368,
-      "max": 3.046
+      "avg": 0.093,
+      "p95": 0.174,
+      "p99": 1.38,
+      "max": 9.46
     },
-    "shotsPerSecond": 2.4,
+    "shotsPerSecond": 2.8,
     "aiStates": [
       "inCover",
+      "retreat",
       "flank",
+      "moveToCover",
       "dead",
-      "advance"
+      "flee"
     ]
   },
   "low6": {
     "combatants": 6,
     "frames": 3479,
     "combat": {
-      "avg": 0.022,
-      "p95": 0.057,
-      "p99": 0.218,
-      "max": 0.621
+      "avg": 0.025,
+      "p95": 0.042,
+      "p99": 0.117,
+      "max": 5.071
     },
     "gameplayTotal": {
-      "avg": 0.025,
-      "p95": 0.062,
-      "p99": 0.236,
-      "max": 0.635
+      "avg": 0.031,
+      "p95": 0.049,
+      "p99": 0.161,
+      "max": 8.143
     },
-    "shotsPerSecond": 1.9,
+    "shotsPerSecond": 1.7,
     "aiStates": [
       "inCover",
-      "advance",
-      "flank",
-      "moveToCover"
+      "flank"
     ]
   },
   "police400": {
     "peds": 400,
     "frames": 3569,
     "policeAndWitnesses": {
-      "avg": 0.027,
-      "p95": 0.172,
-      "p99": 0.4,
-      "max": 3.398
+      "avg": 0.06,
+      "p95": 0.157,
+      "p99": 0.395,
+      "max": 5.481
     },
-    "peakWitnesses": 50,
-    "units": 7,
-    "reports": 1
+    "peakWitnesses": 25,
+    "units": 6,
+    "reports": 0
   },
   "police120": {
     "peds": 120,
     "frames": 3569,
     "policeAndWitnesses": {
-      "avg": 0.013,
-      "p95": 0.049,
-      "p99": 0.131,
-      "max": 3.369
+      "avg": 0.024,
+      "p95": 0.058,
+      "p99": 0.153,
+      "max": 4.274
     },
-    "peakWitnesses": 42,
-    "units": 1,
-    "reports": 1
+    "peakWitnesses": 25,
+    "units": 6,
+    "reports": 0
   },
   "phoneEstimateX3": {
-    "combatLow6_phoneEstimate_ms": 0.066,
-    "police120_phoneEstimate_ms": 0.039
+    "combatLow6_phoneEstimate_ms": 0.075,
+    "police120_phoneEstimate_ms": 0.072
   }
 }
