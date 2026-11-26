@@ -185,6 +185,15 @@ Reads as a modern kit or is wrong:
 - Furniture form v2: the shared sofa and armchair props now have skirts, tapered legs, piped cushions and rolled arms
   (`Kit.tube`). They're used by every lobby, apartment and hotel generator (`docs/interiors/armchair_v2.png`).
 
+## Aligned with the engine's pipeline and facade grid (E16)
+- **Index regenerated** on the engine's new building ids: 3,078 ground buildings, every one with a door (assertion holds). Enterable: 75.4%
+  of buildings, 72.9% of commercial frontage, 54.7% with roofs. The Corwin still resolves to 1255 Broadway.
+- **Shared floor height:** `floorHeight()` from `src/shared/facade.ts` sets every building's `fh`.
+- **Upper-floor windows** in apartments, lofts, tenement halls and Corwin rooms now sit on the engine's bay grid
+  (`bayWidth`, `sillFrac`, plus FacadeMaterial's window fraction). Each unit stores `ringU`/`ringDir`, its position along the outer
+  ring from vertex 0, which is the facade shader's u. Checked: 1,587 sampled window centres sit mid-bay, 0 off-grid. Whether they
+  line up with the engine's drawn windows is verified only at merge, since both use the same chunk ring.
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.

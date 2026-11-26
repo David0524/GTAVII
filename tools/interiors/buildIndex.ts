@@ -20,6 +20,7 @@ import { districtAt, type District } from '../../src/interiors/grid';
 import { KINDS, shopWeights, type InteriorKind, type ShopKind, type CoreKind } from '../../src/interiors/catalog';
 import { execSync } from 'node:child_process';
 import { buildingCondition } from '../../src/shared/condition';
+import { floorHeight } from '../../src/shared/facade';
 import { normaliseStreet } from '../../src/interiors/grid';
 import { HERO_PLACEMENT } from '../../src/interiors/gen/heroes';
 import { encodeIndex, isCoreKind, type BuildingIdx, type IndexFile, type UnitRec } from '../../src/interiors/indexFormat';
@@ -287,7 +288,7 @@ for (const b of blds) {
     const e = [...edges].sort((p, q) => q.L - p.L)[0];
     const fd = e ? placeFacadeDoor(b, e, e.L / 2, facadeStyle(b, condB)) : rearDoor(b);
     if (!e && inPlay) { cov.rearOnly++; const px = fd.x - Math.sin(fd.yaw) * 1.2, pz = fd.z - Math.cos(fd.yaw) * 1.2; const nb = buildingAt(px, pz); if (nb >= 0) { cov.rearBlocked++; fd.style = 'internal'; fd.via = blds[nb].id; } }
-    out.push({ id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: Math.max(2.8, Math.min(5.2, b.floors > 0 ? b.height / b.floors : 3.2)), top: ga + Math.max(b.height, b.minHeight + 0.5), gAvg: ga, district, cond: condB, roof: false, units: [], facadeDoors: [fd], frontage: edges.map((q) => [+q.ax.toFixed(2), +q.az.toFixed(2), +q.bx.toFixed(2), +q.bz.toFixed(2), q.street]) });
+    out.push({ id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: floorHeight(b.height, b.minHeight, b.floors), top: ga + Math.max(b.height, b.minHeight + 0.5), gAvg: ga, district, cond: condB, roof: false, units: [], facadeDoors: [fd], frontage: edges.map((q) => [+q.ax.toFixed(2), +q.az.toFixed(2), +q.bx.toFixed(2), +q.bz.toFixed(2), q.street]) });
     if (inPlay) { cov.withDoor++; cov.facadeOnlyBuildings++; }
   };
   if (!edges.length || b.area < 30) { pushFacadeOnly(); continue; }
@@ -295,7 +296,7 @@ for (const b of blds) {
   // engine roof rule: mean ground over outer ring + height
   let gs = 0; const nv = b.ring.length / 2; for (let k = 0; k < b.ring.length; k += 2) gs += heightAt(b.ring[k], b.ring[k + 1]);
   const gAvg = gs / nv; const top = gAvg + Math.max(b.height, b.minHeight + 0.5);
-  const fh = Math.max(2.8, Math.min(5.2, b.floors > 0 ? b.height / b.floors : 3.2));
+  const fh = floorHeight(b.height, b.minHeight, b.floors); // shared with the facade shader (src/shared/facade.ts)
   const units: UnitRec[] = []; const taken: Rect[] = []; const wantD = new Map<number, number>();
   const h0 = hash(b.id, 1);
   const core = coreKindFor(b, district, h0);
@@ -382,6 +383,16 @@ for (const b of blds) {
   }
   if (!units.length) { pushFacadeOnly(); continue; }
   units.forEach((u, k) => { u.id = k === 0 && isCoreKind(u.kind) ? `b${b.id}` : `b${b.id}u${k}`; });
+  // ring position of each unit origin (facade shader's u runs along the outer ring from vertex 0)
+  for (const u of units) {
+    let acc = 0, best = Infinity; const r = b.ring, n = r.length / 2;
+    for (let k = 0; k < n; k++) {
+      const j = (k + 1) % n, ax = r[2 * k], az = r[2 * k + 1], bx = r[2 * j], bz = r[2 * j + 1], L = Math.hypot(bx - ax, bz - az); if (L < 1e-6) continue;
+      const ex = (bx - ax) / L, ez = (bz - az) / L, dx = u.ox - ax, dz = u.oz - az, t = dx * ex + dz * ez, off = Math.abs(dx * ez - dz * ex);
+      if (t > -0.05 && t < L + 0.05 && off < best) { best = off; u.ringU = +(acc + Math.max(0, Math.min(L, t))).toFixed(2); u.ringDir = ex * u.ux + ez * u.uz >= 0 ? 1 : -1; }
+      acc += L;
+    }
+  }
   const roofCore = units[0]?.kind;
   let roof = (roofCore === 'tenement' || roofCore === 'loft' || roofCore === 'sro' || roofCore === 'apartment_lobby') && b.floors <= 16;
   if ((roofCore === 'office_lobby' || roofCore === 'hotel_lobby') && b.floors <= 14 && units[0].d >= 9) roof = true;

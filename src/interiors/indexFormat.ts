@@ -25,6 +25,9 @@ export interface UnitRec {
   seed: number;
   /** this unit carries the building's roof access (ship's ladder in the back room of a low building) */
   roofAccess?: boolean;
+  /** position of the unit origin along the building's outer ring from vertex 0 (the facade shader's uv.x), and +1/-1 if
+   *  the unit's x runs with/against the ring: lets upper-floor windows seat on the engine's bay grid (src/shared/facade.ts) */
+  ringU?: number; ringDir?: number;
   /** hero interior id from content/interiors.json (kind === 'hero') */
   hero?: string;
 }
@@ -74,7 +77,7 @@ export function encodeIndex(f: IndexFile, kindHours: (k: string) => [string, str
     x.frontage.flatMap((e) => [r2(e[0], 10), r2(e[1], 10), r2(e[2], 10), r2(e[3], 10), e[4]]),
     x.units.map((u) => {
       const left = Math.abs(u.nx - -u.uz) < 0.01 && Math.abs(u.nz - u.ux) < 0.01; // n = (-uz, ux) is +90deg
-      return [ki(u.kind), r2(u.ox), r2(u.oz), r2(Math.atan2(u.uz, u.ux), 10000), r2(u.w), r2(u.d), r2(u.door.t), r2(u.door.w), r2(u.door.recess), r2(u.y), u.street, (u.avenue ? 1 : 0) | (u.locked ? 2 : 0) | (left ? 4 : 0) | (u.roofAccess ? 8 : 0), u.seed, ...(u.hero ? [u.hero] : [])];
+      return [ki(u.kind), r2(u.ox), r2(u.oz), r2(Math.atan2(u.uz, u.ux), 10000), r2(u.w), r2(u.d), r2(u.door.t), r2(u.door.w), r2(u.door.recess), r2(u.y), u.street, (u.avenue ? 1 : 0) | (u.locked ? 2 : 0) | (left ? 4 : 0) | (u.roofAccess ? 8 : 0), u.seed, u.hero ?? '', r2(u.ringU ?? 0), u.ringDir ?? 1];
     }), x.cond, x.facadeDoors.map((d) => [r2(d.x), r2(d.z), r2(d.y), r2(d.yaw, 1000), r2(d.w), r2(d.h), d.style, d.street, r2(d.rise), d.via ?? 0])]);
   return { v: 2, streets: f.streets, kinds, districts, coverage: f.coverage, b };
 }
@@ -87,7 +90,7 @@ export function decodeIndex(w: WireIndex, kindHours: (k: string) => [string, str
       const kind = w.kinds[u[0]] as UnitRec['kind'];
       const ux = Math.cos(u[3]), uz = Math.sin(u[3]); const left = (u[11] & 4) !== 0;
       return { id: u[13] ? (u[13] as unknown as string) : k === 0 && isCoreKind(kind) ? `b${id}` : `b${id}u${k}`, kind, ox: u[1], oz: u[2], ux, uz, nx: left ? -uz : uz, nz: left ? ux : -ux, w: u[4], d: u[5],
-        door: { t: u[6], w: u[7], recess: u[8] }, y: u[9], street: u[10], avenue: (u[11] & 1) !== 0, locked: (u[11] & 2) !== 0, roofAccess: (u[11] & 8) !== 0, seed: u[12], ...(u[13] ? { hero: u[13] as unknown as string } : {}), hours: kindHours(kind) };
+        door: { t: u[6], w: u[7], recess: u[8] }, y: u[9], street: u[10], avenue: (u[11] & 1) !== 0, locked: (u[11] & 2) !== 0, roofAccess: (u[11] & 8) !== 0, seed: u[12], ...(u[13] ? { hero: u[13] as unknown as string } : {}), ringU: (u[14] as number) ?? 0, ringDir: (u[15] as number) ?? 1, hours: kindHours(kind) };
     });
     const facadeDoors: FacadeDoor[] = (fd ?? []).map((q) => ({ x: q[0] as number, z: q[1] as number, y: q[2] as number, yaw: q[3] as number, w: q[4] as number, h: q[5] as number, style: q[6] as DoorStyle, street: q[7] as number, rise: q[8] as number, ...(q[9] ? { via: q[9] as number } : {}) }));
     return { id, i, j, use, style, year, floors, fh, top, gAvg, cond: cond ?? 2, facadeDoors, district: w.districts[d], roof: roof === 1, units, frontage, ...(address ? { address } : {}) };

@@ -11,7 +11,7 @@
 import { M, tint, type Mat } from '../../kit/materials';
 import * as P from '../../kit/props';
 import type { Kit } from '../../kit/Kit';
-import { type GenCtx, WALL_T, PARTY, fitRect } from '../common';
+import { type GenCtx, WALL_T, PARTY, fitRect, bayWindowSpans, floorWindowY } from '../common';
 import { coreFacade, stairTower } from '../vertical';
 import { towerLayout } from '../../layout';
 
@@ -218,7 +218,8 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
     k.portalRect(cell, rcell, q.door - 0.45, dz, q.door + 0.45, dz, y0, y0 + 2.05);
     const roomOps = { s0: q.front ? q.door - 0.45 - q.rc[0] : q.rc[2] - (q.door + 0.45), s1: q.front ? q.door + 0.45 - q.rc[0] : q.rc[2] - (q.door - 0.45), y0, y1: y0 + 2.05 };
     const atFacade = q.front && q.rc[1] <= WALL_T + 0.3;
-    const win = { s0: 1.0, s1: 2.0, y0: y0 + 0.85, y1: y0 + 2.35 };
+    const bw = bayWindowSpans(c, q.rc[0], q.rc[2])[0] ?? [q.rc[0] + 1.0, q.rc[0] + 2.0]; const [wy0, wy1] = floorWindowY(c, f);
+    const win = { s0: bw[0] - q.rc[0], s1: bw[1] - q.rc[0], y0: Math.max(y0 + 0.3, wy0), y1: Math.min(y0 + H - 0.2, wy1) };
     if (q === bath) {
       k.room(q.rc[0], q.rc[1], q.rc[2], q.rc[3], y0, y0 + H, { floor: M.hexWhite, wall: M.subway, ceiling: M.ceilingPlaster }, q.front ? { z1: [{ ...roomOps, s0: q.rc[2] - (q.door + 0.45), s1: q.rc[2] - (q.door - 0.45) }] } : { z0: [roomOps] });
       bathroom(k, q.rc, y0);

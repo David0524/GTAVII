@@ -6,7 +6,7 @@
  */
 import { M, type Mat, tint } from '../kit/materials';
 import * as P from '../kit/props';
-import { type GenCtx, WALL_T, fitRect, revealBox } from './common';
+import { type GenCtx, WALL_T, fitRect, revealBox, bayWindowSpans, floorWindowY } from './common';
 import { coreLayout, shopRoofHatch, type CoreLayout } from '../layout';
 import { facadeOpenings } from '../facade';
 
@@ -55,7 +55,7 @@ function apartment(c: GenCtx, side: 'x0' | 'x1', zDoor: number, y0: number, fh: 
   // windows: on the facade if the flat reaches it, else a rear/airshaft window on the far wall
   const atFacade = rc[1] <= WALL_T + 0.3;
   const winOps: { s0: number; s1: number; y0: number; y1: number }[] = [];
-  for (let x = rc[0] + 0.8; x + 0.9 < rc[2] - 0.4; x += 1.9) winOps.push({ s0: x - rc[0], s1: x - rc[0] + 0.9, y0: y0 + 0.8, y1: y0 + 2.3 });
+  { const [wy0, wy1] = floorWindowY(c, Math.round(y0 / fh)); for (const [a0, a1] of bayWindowSpans(c, rc[0], rc[2])) winOps.push({ s0: a0 - rc[0], s1: a1 - rc[0], y0: Math.max(y0 + 0.3, wy0), y1: Math.min(y0 + fh - 0.35, wy1) }); }
   if (atFacade) ops.z0 = winOps;
   k.room(rc[0], rc[1], rc[2], rc[3], y0, y0 + H, { floor: r.pick([M.planksWorn, M.lino, M.linoGreen]), wall: wallMat, ceiling: M.ceilingPlaster }, ops);
   if (atFacade) for (const q of winOps) {
@@ -207,8 +207,9 @@ export function genTenement(c: GenCtx, sro = false, mode: 'tenement' | 'loft' = 
     k.wall(L.x1, L.ze, L.x0, L.ze, y0, y0 + L.fh, st.wall, 1);
     if (f > 0) {
       // facade end of the upper hall: a window onto the street (engine facade has no hole here; its back face is culled)
-      const wx = (L.x0 + L.x1) / 2;
-      const wo = [{ s0: wx - 0.45, s1: wx + 0.45, y0: y0 + 0.9, y1: y0 + 2.35, depth: WALL_T }];
+      const sp = bayWindowSpans(c, L.x0, L.x1)[0] ?? [(L.x0 + L.x1) / 2 - 0.45, (L.x0 + L.x1) / 2 + 0.45];
+      const [hy0, hy1] = floorWindowY(c, f);
+      const wo = [{ s0: sp[0], s1: sp[1], y0: Math.max(y0 + 0.3, hy0), y1: Math.min(y0 + L.fh - 0.35, hy1), depth: WALL_T }];
       k.wall(0, WALL_T, u.w, WALL_T, y0, y0 + L.fh, st.wall, 1, wo.map((q) => ({ ...q, depth: 0 })));
       revealBox(k, wo[0].s0, wo[0].s1, wo[0].y0, wo[0].y1, st.wall, true);
       k.box(wo[0].s0, wo[0].y0, 0.06, wo[0].s1, wo[0].y1, 0.075, M.glass, { glass: true, occlude: false });
@@ -274,7 +275,7 @@ function loftFloor(c: GenCtx, rc: [number, number, number, number], y0: number, 
   const ops = side === 'x0' ? { x1: [{ ...op, s0: dz - 0.7 - rc[1], s1: dz + 0.7 - rc[1] }] } : { x0: [{ ...op, s0: rc[3] - (dz + 0.7), s1: rc[3] - (dz - 0.7) }] };
   const atFacade = rc[1] <= WALL_T + 0.3;
   const wins: { s0: number; s1: number; y0: number; y1: number }[] = [];
-  for (let x = rc[0] + 0.7; x + 1.3 < rc[2] - 0.5; x += 2.2) wins.push({ s0: x - rc[0], s1: x - rc[0] + 1.3, y0: y0 + 0.75, y1: y0 + H - 0.35 });
+  { const [wy0, wy1] = floorWindowY(c, f); for (const [a0, a1] of bayWindowSpans(c, rc[0], rc[2])) wins.push({ s0: a0 - rc[0], s1: a1 - rc[0], y0: Math.max(y0 + 0.3, wy0), y1: Math.min(y0 + H - 0.2, wy1) }); }
   k.room(rc[0], rc[1], rc[2], rc[3], y0, y0 + H, { floor: M.planksWorn, wall: r.pick([M.brickPainted, M.plasterCream, tint(M.plasterGreen, '#9aa286')]), ceiling: M.ceilingPlaster }, { ...ops, ...(atFacade ? { z0: wins } : {}) });
   if (atFacade) for (const q of wins) { k.portalRect(cell, -1, rc[0] + q.s0, rc[1], rc[0] + q.s1, rc[1], q.y0, q.y1); k.box(rc[0] + q.s0, q.y0, rc[1] - 0.02, rc[0] + q.s1, q.y1, rc[1] - 0.01, M.glass, { glass: true, occlude: false }); }
   if (hall >= 0) { k.portalRect(hall, cell, wallX, dz - 0.7, wallX, dz + 0.7, y0, y0 + 2.4); k.use(hall); k.door(`${c.unit.id}:loft${f}`, side === 'x0' ? L.x0 + 0.03 : L.x1 - 0.03, y0, side === 'x0' ? dz + 0.7 : dz - 0.7, 1.4, 2.4, side === 'x0' ? Math.PI / 2 : -Math.PI / 2, 1, { cellA: hall, cellB: cell, mat: tint(M.steel, '#6a6a5a'), locked: !(r.chance(0.75)) }); k.use(cell); }
