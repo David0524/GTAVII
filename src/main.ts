@@ -11,6 +11,7 @@ import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
 import { Input } from './input/Input';
 import { TouchControls } from './ui/TouchControls';
+import { promptStrip, PROMPT_CSS } from './ui/Prompts';
 
 /**
  * URL parameters (all optional):
@@ -44,7 +45,7 @@ async function main() {
       { label: 'UP', action: 'rise', hold: true },
       { label: 'FAST', action: 'sprint', hold: true },
       { label: 'DOWN', action: 'sink', hold: true },
-      { label: 'HUD', action: 'map', hold: false },
+      { label: 'HUD', action: 'hud', hold: false },
     ]);
     document.body.classList.add('touch');
   }
@@ -82,12 +83,34 @@ async function main() {
   (window as unknown as { __T74: typeof debug }).__T74 = debug;
   document.getElementById('loading')?.remove();
 
+  // Controls hint (follows the active device) and controller connect/disconnect toasts.
+  const style = document.createElement('style'); style.textContent = PROMPT_CSS; document.head.appendChild(style);
+  const hint = document.createElement('div');
+  Object.assign(hint.style, { position: 'fixed', right: '14px', bottom: '30px', color: '#e6dcc6', font: '12px Archivo, ui-sans-serif, sans-serif', textShadow: '0 1px 3px #000', pointerEvents: 'none', zIndex: '4' });
+  document.body.appendChild(hint);
+  const renderHint = () => {
+    const d = input.activeDevice;
+    hint.style.display = d === 'touch' ? 'none' : '';
+    hint.innerHTML = d === 'kbm'
+      ? promptStrip(input, [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['hud', 'Debug']]) + '<span style="opacity:.7">WASD move · mouse look · wheel speed</span>'
+      : promptStrip(input, [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['hud', 'Debug']]);
+  };
+  renderHint();
+  input.onDeviceChange(renderHint);
+  const toast = (msg: string) => {
+    const t = document.createElement('div'); t.textContent = msg;
+    Object.assign(t.style, { position: 'fixed', top: '14px', left: '50%', transform: 'translateX(-50%)', padding: '8px 14px', background: '#0d0b09dd', color: '#efe6d0', borderLeft: '3px solid #e8b92e', font: '600 13px Archivo, sans-serif', letterSpacing: '.04em', zIndex: '30', transition: 'opacity .4s' });
+    document.body.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 450); }, 2600);
+  };
+  window.addEventListener('gamepadconnected', (e) => { toast(`Controller connected · ${input.pad.family === 'playstation' ? 'PlayStation' : input.pad.family === 'xbox' ? 'Xbox' : 'Gamepad'} layout`); input.rumble(0.4, 0.6, 180); void e; });
+  window.addEventListener('gamepaddisconnected', () => toast('Controller disconnected'));
+
   renderer.setAnimationLoop((t) => {
     clock.update(t);
     const dt = Math.min(clock.getDelta(), 0.1);
     frames.push(dt * 1000);
-    input.poll();
-    if (input.pressed('map')) { hud.visible = !hud.visible; hud.el.style.display = hud.visible ? '' : 'none'; }
+    input.poll(dt);
+    if (input.pressed('hud')) hud.toggle();
     fly.update(dt);
     input.endFrame();
     world.update(camera.position);
@@ -109,7 +132,7 @@ async function main() {
         `chunks lod0 ${world.stats.lod0}  lod1 ${world.stats.lod1}  loading ${world.stats.loading}\n` +
         `pos ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}  ${lat.toFixed(5)}, ${lon.toFixed(5)}\n` +
         `near ${streetName}\n` +
-        (input.isTouch ? `left thumb move · right thumb look` : `WASD/QE move · shift fast · wheel speed · click to look · F3 HUD`),
+        `input ${input.activeDevice}${input.pad.connected ? ` (${input.pad.id.slice(0, 40)})` : ''}`,
       );
     }
   });

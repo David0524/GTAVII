@@ -32,8 +32,7 @@ export class FlyCamera {
     const p = this.camera.position;
     p.x += (fx * inp.move.y - fz * inp.move.x) * v;
     p.z += (fz * inp.move.y + fx * inp.move.x) * v;
-    if (inp.isHeld('rise') || inp.isHeld('jump')) p.y += v;
-    if (inp.isHeld('sink')) p.y -= v;
+    p.y += inp.vertical * v;
     p.y = Math.max(p.y, 0.4);
     this.apply();
   }
