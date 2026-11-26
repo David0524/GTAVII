@@ -7,9 +7,9 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 | Phase | State |
 |---|---|
 | N1. Story bible | **Approved** (after reviews 1–3) → `narrative/N1_STORY_BIBLE.md` |
-| N2. Cast | **Draft done, awaiting review** → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
-| N3. Story structure | — |
-| N4. Mission specs and side activities | — |
+| N2. Cast | **Done** (with appearance sheets; no review objections) → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
+| N3. Story structure | **Done** → `narrative/N3_STRUCTURE.md` (32-mission chain, branches, endings, relationships, act-by-act world) |
+| N4. Mission specs and side activities | **In progress.** Act 1 (M1–M9) specced in `content/missions/`; M1 fully playable (dialogue, trigger, spawns, interiors). Next: Acts 2–3 and side activities. |
 | N5. Dialogue and barks | — |
 | N6. Ambient world and business registry | — |
 | N7. Integration | — (waits on engine Phase 7 hooks) |
@@ -22,6 +22,10 @@ narrative/N2_CAST.md       GENERATED cast sheets; edit content/cast/*.json and r
 narrative/tools/cast.py    validates the cast (line length, 24h schedules, ids, edges, places) and renders N2_CAST.md
 content/cast/*.json        cast source of truth: leads, principals, secondary
 content/boundaries.json    map-edge blockers, invented film shoot and agencies, edge barks (with the oversight BOUNDARIES design)
+narrative/N3_STRUCTURE.md  acts, chapters, 32-mission chain, branches A/B, endings, relationship rules, world changes by act
+narrative/tools/content.py validates missions, dialogue, triggers, spawns, interiors and flags; renders content/FLAGS.md
+narrative/tools/build_act1_missions.py  authoring source for Act 1 mission JSON (edit here, re-run)
+content/missions/, content/dialogue/, content/triggers/, content/spawns.json, content/interiors.json, content/flags.json (+ FLAGS.md)
 content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.
@@ -392,4 +396,30 @@ caught all five.
 - Mayhew has the richest backstory but appears in only 10 missions. The 1971 secret needs
   mid-game seeding (Act 2), not just the M25 payoff.
 
-**Stop.** N2 is ready for review. N3 (Story structure) starts after it.
+**N2 outcome:** carried on under the standing instruction. Appearance sheets were added at
+the Characters stream's request.
+
+---
+
+## Phase N3 notes
+The self-critique is in `narrative/N3_STRUCTURE.md` §9. Creative calls made under "All your
+calls":
+- Branch B has four outcomes, including **B4 "Ashes"**, a complete bleak ending for players
+  who closed both doors.
+- Lead resolutions (Tina, the Corwin's fate, the lease) are labelled as resolutions, not
+  extra branches.
+- The Corwin can be given for $1 to an invented non-profit (the West Midtown Housing
+  Council). This is Nick's non-transactional bond with Odessa.
+- Calloway and Finch now have opposed constraints: a live witness and a September deadline,
+  against two corroborations and an editor's conflict.
+- The open order for M23–M25 gives Act 3 some player freedom.
+
+## Phase N4 progress
+- **Act 1 (M1–M9)** is specced to the contract, plus the extensions in ENGINE_REQUESTS 8.
+  Every objective's text is 40 characters or fewer, names a real place and was validated.
+- **M1 is playable end to end** once the engine hooks exist: 7 dialogue scripts, an
+  overheard trigger, spawns (including `spawn.player_start` at the prow, matching
+  `world.json`), and interior markers for the Corwin.
+- **Validator results:** 0 errors. 25 warnings, all for dialogue scripts scheduled for N5.
+  The validator caught one real mobile-rule break (M4 had too few checkpoints for its
+  length), which is now fixed.

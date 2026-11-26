@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m01_lobby",
+  "context": "M1 o5. Corwin lobby, about 21:45. Odessa waited up in her lobby chair.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "Mr. Arce. You're early, and you've been with a policeman. I smell the cigar."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Old friend, Mrs. Pruitt. Why are you still up?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "worried",
+      "text": "Somebody taped a paper on the mailboxes. It says 'new management.'"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "proud",
+      "text": "I came here in fifty-six. Nobody ever needed to manage me."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "gentle",
+      "text": "I'll read it on my shift. Go up. I've got the desk."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "firm",
+      "text": "Good night, Mr. Arce. Eleven-oh-four is still mine. Write that in your book."
+    }
+  ]
+}

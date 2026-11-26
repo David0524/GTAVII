@@ -144,3 +144,18 @@ against until it ships. The engine team owns all decisions here.
    needs as world events: 1974-07-04 (holiday quiet, fireworks heard), the brownout nights
    1974-07-19 and 1974-07-26 (provisional, set in N3), 1974-08-08 evening (radio address,
    every radio), 1974-08-09 noon (resignation takes effect), 1974-09-02 (Labor Day).
+
+## From narrative: 8. Mission-contract extensions used by the N4 specs
+Each extension the Act 1 missions (`content/missions/*.json`) use beyond the draft contract,
+with a fallback. Validation is in `narrative/tools/content.py`.
+| Extension | Shape | Why | Fallback |
+|---|---|---|---|
+| Per-lead relationships | `rewards.relationships` and dialogue `setRelationships`: `{ "char.<lead>/char.<npc>": delta }` | P4 with three leads; gates at +3 and −3 (N3 §5) | Store the composite keys as-is in the existing `relationships` map |
+| `evade` objective | `{ type: 'evade', from: [ids], breakDistanceM, safeZones: [interior/loc ids] }` | Escapes solved by route knowledge (two-door buildings), not speed (M8, M9) | `goto` the safe zone with `timeLimitSec`; timer fail means caught |
+| Fail types `spotted` and `caught` | `{ type: 'spotted', by, withinM }`, `{ type: 'caught' }` | Tails and escapes | `target_lost` and `timer` |
+| Photo with two subjects | `photo { subject, with, minScreenFraction }` | "Photograph who he's meeting" (M5, M8) | Single-subject photo of `subject` |
+| `start.type: 'auto'` | Starts when `requires` is met and the player is the `playAs` lead (with an optional `cut`) | Openers and lead introductions (M1, M6, M8, M9) | A `talk` start with the giver standing at the start point |
+| Mission metadata | `playAs`, `switchPoints`, `date`, `number`, `chapter`, `durationMin`, `pillars` | Switching (accepted N5), the clock (N1), pacing QA | Ignore the fields you don't use |
+| `requires.weekday` and `requires.dateRange` | Per the accepted N1 response | Sunday club night (M6), story dates | Flags |
+| `rewards.items`, `rewards.act` | Inventory items; act transition (M9 sets act 2) | Evidence items; act changes | `setFlags` (`flag.act2_started`) |
+| `escort.dialogue` as a list | One script per route leg | Segment-gated walk-and-talk (accepted N4) | Chain of goto objectives |

@@ -1,0 +1,135 @@
+{
+  "id": "mission.hack",
+  "title": "Hack",
+  "number": 3,
+  "act": 1,
+  "chapter": 1,
+  "playAs": "char.teddy_arce",
+  "date": "1974-06-24",
+  "durationMin": 14,
+  "pillars": [
+    "P2",
+    "P3"
+  ],
+  "giver": "char.delroy_tate",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "19:00",
+      "23:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-06-24",
+      "1974-07-04"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.delroy_tate",
+    "at": "loc.penn_hack_stand"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "script": "dlg.m03_delroy",
+      "text": "Talk to Delroy, Penn Station cab line"
+    },
+    {
+      "id": "o2",
+      "type": "enter_vehicle",
+      "vehicle": "vehicle_role.cab",
+      "text": "Get in Delroy's cab"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "to": "W 23rd St & 7th Ave",
+      "radius": 20,
+      "text": "Fare: down Seventh to 23rd St",
+      "hint": "Seventh runs downtown. Straight shot."
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "to": "W 34th St & 6th Ave",
+      "radius": 20,
+      "text": "Fare: up Sixth to Herald Square",
+      "hint": "Sixth runs uptown. Cut over on 23rd, it's two-way."
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "script": "dlg.m03_navarro",
+      "text": "Navarro's waving you down"
+    },
+    {
+      "id": "o6",
+      "type": "goto",
+      "to": "W 42nd St & 8th Ave",
+      "radius": 20,
+      "text": "Fare: up Eighth to 42nd St",
+      "hint": "Eighth runs uptown. Don't try Seventh."
+    },
+    {
+      "id": "o7",
+      "type": "goto",
+      "to": "loc.penn_hack_stand",
+      "radius": 15,
+      "text": "Bring the cab back to Penn Station"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "script": "dlg.m03_payout",
+      "text": "Square up with Delroy"
+    }
+  ],
+  "fail": [
+    {
+      "type": "vehicle_destroyed"
+    }
+  ],
+  "checkpoints": [
+    "o3",
+    "o5",
+    "o7"
+  ],
+  "rewards": {
+    "money": 14,
+    "setFlags": [],
+    "unlock": [
+      "mission.surcharge",
+      "activity.cab_fares"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.delroy_tate": 1,
+      "char.teddy_arce/char.luis_navarro": 1
+    }
+  },
+  "npcs": [
+    "char.delroy_tate",
+    "char.luis_navarro"
+  ],
+  "archetypes": [
+    "npc.cab_fare_businessman",
+    "npc.cab_fare_tourist",
+    "npc.cab_fare_night_worker"
+  ],
+  "vehicles": [
+    "vehicle_role.cab"
+  ],
+  "locations": [
+    "loc.penn_hack_stand",
+    "W 23rd St & 7th Ave",
+    "W 34th St & 6th Ave",
+    "W 42nd St & 8th Ave"
+  ],
+  "mobile": "No timers on fares (the meter is flavour). Wrong-way driving is allowed but honked at, and the fare complains, which teaches the one-ways without punishing. Hints are written as a 1974 New Yorker would give directions. The fare to 42nd St shows the Deuce's marquees for the first time.",
+  "design": "P2 tutorial. Each fare follows one avenue's 1974 direction. On the last fare, Teddy passes a woman in an oxblood dress at 8th & W 40th (Delphine, unnamed). It's foreshadowing only, with no interaction."
+}

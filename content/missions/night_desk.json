@@ -1,0 +1,117 @@
+{
+  "id": "mission.night_desk",
+  "title": "Night Desk",
+  "number": 2,
+  "act": 1,
+  "chapter": 1,
+  "playAs": "char.teddy_arce",
+  "date": "1974-06-22",
+  "durationMin": 10,
+  "pillars": [
+    "P3",
+    "P5"
+  ],
+  "giver": "char.odessa_pruitt",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "21:00",
+      "23:30"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-06-22",
+      "1974-07-04"
+    ]
+  },
+  "start": {
+    "type": "enter_interior",
+    "marker": "interior.corwin_lobby",
+    "at": "loc.corwin_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "script": "dlg.m02_notice",
+      "text": "Read the notice on the mailboxes"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "script": "dlg.m02_prentiss",
+      "text": "Meet the 'new management'"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "marker": "interior.corwin_floor11",
+      "text": "Check on Mr. Hollis, 11th floor"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "script": "dlg.m02_hollis",
+      "text": "Talk to Mr. Hollis, room 1112"
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "marker": "interior.corwin_lobby",
+      "text": "Back to the desk, lobby"
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "script": "dlg.m02_carmen_phone",
+      "text": "Answer the desk phone"
+    },
+    {
+      "id": "o7",
+      "type": "wait",
+      "until": "23:00",
+      "at": "interior.corwin_lobby",
+      "text": "Take the night desk at 11 p.m."
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3",
+    "o5"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.corwin_sold"
+    ],
+    "unlock": [
+      "mission.hack"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.odessa_pruitt": 1,
+      "char.teddy_arce/char.vic_prentiss": -1
+    }
+  },
+  "npcs": [
+    "char.odessa_pruitt",
+    "char.bernard_ostrow",
+    "char.vic_prentiss",
+    "char.walter_hollis",
+    "char.inez_rivera",
+    "char.gus_wilkie",
+    "char.carmen_arce"
+  ],
+  "archetypes": [
+    "npc.sro_resident"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.corwin_hotel"
+  ],
+  "mobile": "Interior-only hub tutorial: big USE prompts on the desk, the mailboxes, the elevator and room 1112. The elevator ride is a 3-second cut, not a control. No timers.",
+  "design": "Teaches the hub: desk ledger (save), room-key board (fast travel to floors), phone (calls from cast). Prentiss's first friendly offer establishes P5. Bernard reads the notice aloud and names 'Corwin Residential Associates, H. Lisle, counsel'."
+}
