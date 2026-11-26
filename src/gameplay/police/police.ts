@@ -35,6 +35,7 @@ export interface Unit {
   stamina: StaminaState; calledBackup: boolean;
   /** who last paid this cop, and when (Delphine's Evidence) */
   tookFrom: string | null; tookAt: number; tookReport: number | null;
+  indoorCheck?: number;
 }
 export interface Report {
   id: number; precinct: string; kinds: CrimeKind[]; heat: number; description: Description; lastKnown: [number, number]; crimeAt: [number, number];
@@ -42,7 +43,7 @@ export interface Report {
   /** crimes already counted (several witnesses to one gunshot add one shots-fired, not five) */
   crimeIds: Set<number>;
 }
-export interface SuspectCtx { id: string; pos: [number, number, number]; appearance: Appearance; speed: number; weaponDrawn: boolean; bleeding: boolean; indoors: boolean; subway: boolean; inVehicle: boolean; surrendered: boolean; oddLook?: boolean; /** 0..1 how well a crowd hides them right now (blend × crowd density) */ crowd?: number }
+export interface SuspectCtx { id: string; pos: [number, number, number]; appearance: Appearance; speed: number; weaponDrawn: boolean; bleeding: boolean; indoors: boolean; subway: boolean; inVehicle: boolean; surrendered: boolean; oddLook?: boolean; /** 0..1 how well a crowd hides them right now (blend × crowd density) */ crowd?: number; /** indoors somewhere the public can walk in (diner, shop, lobby) */ indoorsPublic?: boolean; /** in an Interiors hiding spot */ hiding?: boolean }
 
 export interface PoliceEvents extends Record<string, unknown> {
   reportFiled: { report: Report; via: string; merged: boolean };
@@ -59,6 +60,7 @@ export interface PoliceEvents extends Record<string, unknown> {
   cleared: { report: number; precinct: string; why: 'decay' | 'bribe' | 'arrest' };
   engage: { unit: string; suspect: string };
   investigate: { unit: string; at: [number, number] };
+  checkInterior: { unit: string; suspect: string };
 }
 
 export const TIER_HEAT = [0.5, 1.8, 2.8, 3.8, 4.8] as const;
@@ -66,6 +68,8 @@ export const TIER_HEAT = [0.5, 1.8, 2.8, 3.8, 4.8] as const;
 export const PAYROLL_DISCOUNT = 0.65;
 export const DECAY = 1 / 60;                         // heat per second, unwatched
 export const OFFICER_DOWN_DECAY = 0.12;              // a dead cop is remembered ~8x longer
+/** Seconds a searching cop spends near a public interior before he looks inside. */
+export const INDOOR_CHECK = 8;
 export const STOP_MATCH = 0.55, LOSE_TIME = { foot: 12, car: 18 } as const;
 const SPEC: Record<UnitKind, { delay: number; speed: number; fast: number; sight: number; fov: number; search: number }> = {
   foot: { delay: 15, speed: 1.6, fast: 4.6, sight: 35, fov: 140, search: 45 },
@@ -298,6 +302,12 @@ export class Police extends Emitter<PoliceEvents> {
     // look for anyone fitting a description this unit knows
     let seen = false;
     for (const s of suspects) {
+      // public interiors get checked: a searching cop within 20 m works his way inside after a while
+      if (s.indoors && s.indoorsPublic && !s.hiding && (u.state === 'search' || u.state === 'enroute') && u.report !== null && Math.hypot(s.pos[0] - u.x, s.pos[2] - u.z) < 20) {
+        u.indoorCheck = (u.indoorCheck ?? 0) + dt;
+        if (u.indoorCheck > INDOOR_CHECK) { u.indoorCheck = 0; this.emit('checkInterior', { unit: u.id, suspect: s.id }); const r2 = this.report(u); if (r2 && match(r2.description, s.appearance) >= STOP_MATCH) { u.lastSeen = [s.pos[0], s.pos[2]]; this.setState(u, 'approach'); this.emit('stop', { unit: u.id, suspect: s.id }); } }
+        continue;
+      }
       if (s.indoors || s.subway) continue;
       const desc = u.ownDesc ?? r?.description ?? null;
       const rep = r ?? this.reportFor(s.id);

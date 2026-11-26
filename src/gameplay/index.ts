@@ -79,6 +79,8 @@ export interface PlayerCombatState {
   vehicleYaw: number;
   /** crouched / sneaking (stealth) */
   crouch: boolean;
+  /** Interiors: inside a public place (diner, shop, lobby) / in a hiding spot marker */
+  indoorsPublic: boolean; hiding: boolean;
   lockLimb: Limb; device: 'touch' | 'pad' | 'mouse'; assist: AssistLevel;
 }
 
@@ -134,7 +136,7 @@ export class Gameplay {
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
-    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false,
+    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false, indoorsPublic: false, hiding: false,
   };
   /** Last frame's shot results (debug overlay tracers). */
   lastShots: ShotResult[] = [];
@@ -355,7 +357,7 @@ export class Gameplay {
   }
   setBlindFire(on: boolean) { this.pc.blind = on; }
   surrender(on: boolean) { this.pc.surrendered = on; }
-  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch'>>) { Object.assign(this.pc, c); }
+  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch' | 'indoorsPublic' | 'hiding'>>) { Object.assign(this.pc, c); }
   /** Take the gun and rounds off a downed enemy within reach. Guns come in random condition and tier. */
   loot(): { weapon: string | null; rounds: number } | null {
     if (!this.player) return null;
@@ -791,7 +793,7 @@ export class Gameplay {
     this.policeSys.on('reportFiled', (e) => this.emit('reportFiled', { precinct: e.report.precinct, severity: e.report.heat, description: e.report.description, lastKnown: e.report.lastKnown, via: e.via, merged: e.merged, id: e.report.id }));
     this.policeSys.on('radio', (e) => this.emit('radio', e));
     this.policeSys.on('dispatched', (e) => { this.registerCop(e.unit.id); this.emit('police', { kind: 'dispatched', unit: e.unit.id, unitKind: e.unit.kind, report: e.report.id }); });
-    for (const k of ['spotted', 'stop', 'pursuit', 'lost', 'bribe', 'roadblock', 'standDown', 'cleared', 'investigate'] as const) this.policeSys.on(k, (e: any) => this.emit('police', { kind: k, ...e }));
+    for (const k of ['spotted', 'stop', 'pursuit', 'lost', 'bribe', 'roadblock', 'standDown', 'cleared', 'investigate', 'checkInterior'] as const) this.policeSys.on(k, (e: any) => this.emit('police', { kind: k, ...e }));
     this.policeSys.on('engage', (e) => this.copEngage(e.unit));
     this.policeSys.on('arrested', (e) => {
       if (!this.player || e.suspect !== this.player.id) return;
@@ -973,7 +975,7 @@ export class Gameplay {
     const p = this.player; if (!p) return null;
     const h = this.healthSys.state(p.id);
     return {
-      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false, crowd: this.crowdAt(p.position()),
+      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false, crowd: this.crowdAt(p.position()), indoorsPublic: this.pc.indoorsPublic, hiding: this.pc.hiding,
       bleeding: !!h && h.bleeds.length > 0, indoors: this.pc.indoors, subway: this.pc.subway, inVehicle: !!this.pc.vehicle, surrendered: this.pc.surrendered,
     };
   }

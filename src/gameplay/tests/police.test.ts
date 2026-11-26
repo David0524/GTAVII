@@ -196,3 +196,16 @@ test('severity: repeats of one kind barely add; distinct kinds add more', async 
   assert.ok(reportSeverity(['weapon_seen', 'weapon_seen', 'weapon_seen', 'weapon_seen', 'weapon_seen', 'weapon_seen']) < 1.3);
   assert.ok(reportSeverity(['shots_fired', 'menacing']) > reportSeverity(['shots_fired', 'shots_fired']));
 });
+
+test('interiors: a searching cop checks the diner you ducked into; a hiding spot keeps you out of it', () => {
+  const run = (hiding: boolean) => {
+    const r = shooting();
+    r.until(() => r.has('police', 'dispatched'), 120);
+    r.g.setContext({ indoors: true, indoorsPublic: true, hiding });
+    r.until(() => r.has('police', 'stop'), 300);
+    return r;
+  };
+  const a = run(false), b = run(true);
+  assert.ok(a.has('police', 'checkInterior') && a.has('police', 'stop'), 'found in the diner');
+  assert.ok(!b.has('police', 'stop'), 'not found in the hiding spot');
+});
