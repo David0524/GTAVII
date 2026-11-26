@@ -36,11 +36,11 @@ PAY = {
  "mission.carbon_copy": ({T: 2500, N: 1500}, [{"flag": "flag.branch_a_burned", "lead": T, "money": 2500, "why": "the stolen ledger's cash drawer"}],
                          "Mayhew's last envelope to Teddy; Nick's kickback from Marjorie's carbons."),
  "mission.the_address": ({T: 2000, D: 1500, N: 3000}, [], "Resignation night panic: Mayhew's grab bag, the club's emergency fee, Nick's liquidated furs."),
- "mission.shoebox": ({D: 3000}, [], "Delphine's fee for carrying the club money underground. The club's $18,000 is moved, not earned."),
+ "mission.shoebox": ({D: 4000}, [], "Delphine's fee for carrying the club money underground. The club's $18,000 is moved, not earned."),
  "mission.flip": ({N: 8000}, [], "Calloway's deal and Augie's buy-out of the trucking contract."),
  "mission.the_car": ({}, [], "Exception: the truth about 1971. Nothing is paid."),
  "mission.fire_watch": ({T: 2000, D: 1500}, [], "The tenants' collection and the Corwin's fire insurer's reward."),
- "mission.exposure": ({D: 4000, N: 5000}, [], "Wurtz's locker cash, split."),
+ "mission.exposure": ({D: 6500, N: 3000}, [], "Wurtz's locker cash. Delphine found it, so she takes the larger share."),
  "mission.the_march": ({}, [], "Exception: the march. Nothing is paid."),
  "mission.the_ledger": ({}, [
      {"flag": "flag.ledger_to_prosecutor", "lead": T, "money": 7500, "why": "witness relocation stipend"},

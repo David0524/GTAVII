@@ -147,7 +147,7 @@
     "o9"
   ],
   "rewards": {
-    "money": 9000,
+    "money": 9500,
     "setFlags": [
       "flag.have_wurtz_locker"
     ],
@@ -160,10 +160,10 @@
       "char.nick_varelas/char.jimmy_brannock": 0
     },
     "moneyByLead": {
-      "char.delphine_moore": 4000,
-      "char.nick_varelas": 5000
+      "char.delphine_moore": 6500,
+      "char.nick_varelas": 3000
     },
-    "payNote": "Wurtz's locker cash, split."
+    "payNote": "Wurtz's locker cash. Delphine found it, so she takes the larger share."
   },
   "npcs": [
     "char.dennis_wurtz",
