@@ -59,5 +59,9 @@ look hand-made and period-true and can't come from scans:
 - **Owners:** engine (the asset spec per slot, the ingest pipeline, in-world placement), narrative
   (prompt text from its registries, with exact copy), UI (title, map and paper assets), interiors
   (shop interiors, posters, menus, packaging), oversight (the quality gate).
+- **One place (user instruction):** every image prompt from every chat goes into a single generated master queue,
+  `assets/prompts/ALL_PROMPTS.md` plus `prompts.json`, owned by narrative. Other chats send their prompt requests to narrative.
+  The user runs the whole queue in one batch later, using **Claude in Chrome** driving ChatGPT's image tool, so the queue
+  carries an unattended runbook (paste, check, retry, save with the exact filename, upload to `assets/incoming/`).
 - **Timing:** write the first prompt pack (the 40 storefronts of the vertical slice's blocks plus
   the Deuce marquees) once Phase 3 facades have sign slots; the user starts generating when ready.
