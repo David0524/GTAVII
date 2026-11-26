@@ -50,8 +50,9 @@ export class Simulation {
   /** Pigeons and rats near the focus (one view per animal; instance them). */
   get wildlife(): readonly WildlifeView[] { return this.wild?.views ?? []; }
   private wild!: Wildlife;
-  /** Wall-clock ms spent in the last update() call. */
+  /** Wall-clock ms spent in the last update() call, and how many fixed steps it ran. */
   lastUpdateMs = 0;
+  lastSteps = 0;
   private core!: SimCore;
   private net!: Network;
   private acc = 0;
@@ -153,6 +154,7 @@ export class Simulation {
     if (steps === 6) this.acc = 0;
     this.writeViews(this.acc / SIM_DT);
     this.lastUpdateMs = performance.now() - t0;
+    this.lastSteps = steps;
   }
 
   /** One fixed step. Public for tests. */

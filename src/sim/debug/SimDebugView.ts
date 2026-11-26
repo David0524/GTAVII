@@ -42,7 +42,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
   const hud = document.createElement('div');
   hud.style.cssText = 'position:fixed;right:8px;top:84px;z-index:20;font:11px/1.35 ui-monospace,monospace;color:#e8e2d0;background:rgba(10,10,12,.72);padding:6px 8px;border-radius:4px;pointer-events:none;white-space:pre';
   document.body.appendChild(hud);
-  const state = { ready: false, sim, ms: [] as number[], events: {} as Record<string, number> };
+  const state = { ready: false, sim, ms: [] as number[], stepMs: [] as number[], events: {} as Record<string, number> };
   (window as unknown as { __T74SIM: typeof state }).__T74SIM = state;
   for (const t of ['honk', 'hail', 'jaywalk', 'doubleParked', 'busStop', 'pickup', 'collision', 'nearMiss']) sim.on(t, () => { state.events[t] = (state.events[t] ?? 0) + 1; });
 
@@ -89,7 +89,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
     const loop = () => {
       const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now;
       sim.update(dt, { x: camera.position.x, z: camera.position.z });
-      state.ms.push(sim.lastUpdateMs); if (state.ms.length > 600) state.ms.shift();
+      state.ms.push(sim.lastUpdateMs); if (sim.lastSteps) state.stepMs.push(sim.lastUpdateMs / sim.lastSteps); if (state.stepMs.length > 600) state.stepMs.shift(); if (state.ms.length > 600) state.ms.shift();
       const vs = sim.vehicles;
       vMesh.count = Math.min(maxV, vs.length);
       for (let i = 0; i < vMesh.count; i++) {
@@ -131,7 +131,8 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
         const avg = ms.reduce((a, b) => a + b, 0) / Math.max(1, ms.length);
         const st = sim.stats;
         hud.textContent = `SIM  vehicles ${vs.length}  peds ${ps.length}\n` +
-          `update ${avg.toFixed(2)} ms avg  ${(ms[Math.floor(ms.length * 0.95)] ?? 0).toFixed(2)} p95\n` +
+          `update ${avg.toFixed(2)} ms/frame avg  ${(ms[Math.floor(ms.length * 0.95)] ?? 0).toFixed(2)} p95\n` +
+          `per step ${(state.stepMs.reduce((a, b) => a + b, 0) / Math.max(1, state.stepMs.length)).toFixed(2)} ms  sim t ${sim.time.toFixed(0)} s\n` +
           `honks ${st.honks}  hails ${st.hails}  jaywalks ${st.jaywalks}\n` +
           `double-parked ${st.doubleParks}  bus stops ${st.busStops}  fares ${st.boardings}\n` +
           `pigeons+rats ${sim.wildlife.length}`;
