@@ -30,6 +30,7 @@ import { VoiceLibrary } from './dialogue/voiceLibrary';
 import { Rng } from './worklets/dsp';
 import { readChunk, type ChunkData } from '../shared/chunkFormat';
 import { REGION } from '../shared/geo';
+import { loadTerrain } from '../shared/terrain';
 import type { Env, OneShotOpts, Power, Weather } from './env';
 
 export type { Vec3, BusId, QualityName };
@@ -125,6 +126,7 @@ export class AudioSystem {
     }
     // Pre-warm the HRTF database (Chrome loads it on the first HRTF panner: ~15 ms we don't want mid-game).
     if (this.quality.hrtf > 0) { const pn = this.runtime.ctx.createPanner(); pn.panningModel = 'HRTF'; pn.disconnect(); }
+    await loadTerrain(data + 'terrain.bin'); // ground heights for emitters and events (no-op when terrain is off)
     this.geo.build(chunks, streets!);
     this.env.map = new CityMap(streets!);
     await this.voiceLib?.init(this.useContent);

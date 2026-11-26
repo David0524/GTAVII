@@ -9,6 +9,7 @@ import type { TrafficVehicleView, VehicleClass } from '../../shared/traffic';
 import { VehicleLights } from '../../shared/traffic';
 import type { StreetRec } from '../acoustics/geometry';
 import { Rng } from '../worklets/dsp';
+import { heightAt } from '../../shared/terrain';
 
 interface Car extends TrafficVehicleView { street: number; s: number; dir: 1 | -1; lane: number; target: number; stopT: number; honkCool: number; nextStop: number }
 interface Ped { id: number; archetype: string; x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number; street: number; s: number; dir: 1 | -1; side: number }
@@ -71,7 +72,7 @@ export class MockSim {
   private place(c: Car) {
     const st = this.streets[c.street]; const [x, z, dx, dz] = this.at(c.street, c.s);
     const off = (st.w / 2 - 1.8 - c.lane * 3.3) * (st.o === 0 ? 1 : 0.6) * c.dir; // right-hand side of travel
-    c.x = x - dz * off; c.z = z + dx * off; c.yaw = Math.atan2(dx * c.dir, -dz * c.dir);
+    c.x = x - dz * off; c.z = z + dx * off; c.y = heightAt(c.x, c.z); c.yaw = Math.atan2(dx * c.dir, -dz * c.dir);
   }
 
   private spawnPed(fx: number, fz: number) {
@@ -79,7 +80,7 @@ export class MockSim {
     const p: Ped = { id: this.nextId++, archetype: 'npc.commuter', x: 0, y: 0.15, z: 0, yaw: 0, speed: this.rng.range(1.05, 1.6), state: 'walk', variant: this.rng.u32(), street: i, s: this.rng.next() * this.lens[i], dir: this.rng.next() < 0.5 ? 1 : -1, side: this.rng.next() < 0.5 ? 1 : -1 };
     this.placePed(p); this.peds.push(p);
   }
-  private placePed(p: Ped) { const st = this.streets[p.street]; const [x, z, dx, dz] = this.at(p.street, p.s); const off = (st.w / 2 + 2.4) * p.side; p.x = x - dz * off; p.z = z + dx * off; }
+  private placePed(p: Ped) { const st = this.streets[p.street]; const [x, z, dx, dz] = this.at(p.street, p.s); const off = (st.w / 2 + 2.4) * p.side; p.x = x - dz * off; p.z = z + dx * off; p.y = heightAt(p.x, p.z) + 0.15; }
 
   /** One sim step. `hour` scales density like the real sim's clock hook. */
   update(dt: number, focus: { x: number; z: number }, hour = 17.5) {
@@ -115,9 +116,9 @@ export class MockSim {
         // 1974 impatience: honking in queues, taxis twice as often.
         if ((c.honkCool -= dt) <= 0) {
           c.honkCool = this.rng.range(8, 40);
-          if (c.speed < 1.5 && this.rng.next() < (c.vclass === 'taxi' ? 0.5 : 0.25)) this.emit('honk', { vehicleId: c.id, x: c.x, y: 1, z: c.z, duration: this.rng.next() < 0.3 ? this.rng.range(0.8, 2) : this.rng.range(0.15, 0.5) });
+          if (c.speed < 1.5 && this.rng.next() < (c.vclass === 'taxi' ? 0.5 : 0.25)) this.emit('honk', { vehicleId: c.id, x: c.x, y: c.y + 1, z: c.z, duration: this.rng.next() < 0.3 ? this.rng.range(0.8, 2) : this.rng.range(0.15, 0.5) });
         }
-        if (Math.hypot(c.x - focus.x, c.z - focus.z) < 60 && c.speed > 6 && this.rng.next() < 0.002 * dt) this.emit('nearMiss', { x: c.x, y: 0.3, z: c.z, a: c.id });
+        if (Math.hypot(c.x - focus.x, c.z - focus.z) < 60 && c.speed > 6 && this.rng.next() < 0.002 * dt) this.emit('nearMiss', { x: c.x, y: c.y + 0.3, z: c.z, a: c.id });
       }
     }
     this.vehicles = this.vehicles.filter((c) => c.s >= -5 && c.s <= this.lens[c.street] + 5 && Math.hypot(c.x - focus.x, c.z - focus.z) < this.radius + 60);

@@ -14,6 +14,7 @@ import { SCENARIOS } from './scenarios';
 import { CityMap } from '../world/cityMap';
 import { ENGINE_PROFILES } from '../worklets/engineProfile';
 import { INTERIORS } from '../acoustics/canyon';
+import { heightAt } from '../../shared/terrain';
 import type { StreetRec } from '../acoustics/geometry';
 import type { QualityName, Vec3 } from '../config';
 
@@ -110,7 +111,7 @@ export async function startScene(params: URLSearchParams) {
   const intSel = document.createElement('select'); intSel.add(new Option('(outside)', '')); for (const k of Object.keys(INTERIORS)) intSel.add(new Option(k, k)); inter.appendChild(intSel);
   const blendIn = document.createElement('input'); blendIn.type = 'range'; blendIn.min = '0'; blendIn.max = '1'; blendIn.step = '0.01'; blendIn.value = '1'; blendIn.title = 'doorway blend'; inter.appendChild(blendIn);
   const applyInt = () => audio.setInterior(intSel.value || null, { blend: +blendIn.value }); intSel.onchange = applyInt; blendIn.oninput = applyInt;
-  btn(inter, 'step', () => audio.footstep({ position: [L.x, 0.15, L.z], who: 'player' }));
+  btn(inter, 'step', () => audio.footstep({ position: [L.x, heightAt(L.x, L.z) + 0.15, L.z], who: 'player' }));
 
   const radioRow = el('<h3>Radio (placeholder beds)</h3>').appendChild(document.createElement('div')); radioRow.className = 'row';
   btn(radioRow, 'off', () => audio.radio.setStation(null));
@@ -124,7 +125,7 @@ export async function startScene(params: URLSearchParams) {
   const dlg = el('<h3>Dialogue (placeholder voice)</h3>').appendChild(document.createElement('div')); dlg.className = 'row';
   btn(dlg, 'scene', async () => { for (const l of ['l1', 'l2', 'l3']) await audio.dialogue.play('dlg.audio_test', l); });
   let oh: { stop(): void } | null = null;
-  btn(dlg, 'overhear here', (b) => { oh?.stop(); oh = null; if (b.classList.contains('on')) oh = audio.dialogue.overhear({ script: 'dlg.audio_test', at: [L.x + 4, 1.6, L.z], radius: 12, loop: true }); }, true);
+  btn(dlg, 'overhear here', (b) => { oh?.stop(); oh = null; if (b.classList.contains('on')) oh = audio.dialogue.overhear({ script: 'dlg.audio_test', at: [L.x + 4, heightAt(L.x + 4, L.z) + 1.75, L.z], radius: 12, loop: true }); }, true);
   btn(dlg, 'phone', () => audio.dialogue.play('dlg.audio_test', 'l2', undefined, { filter: 'phone' }));
   btn(dlg, 'bark', () => audio.dialogue.bark('Placeholder bark.', ahead(5), 'npc.test', true));
 
@@ -164,12 +165,12 @@ export async function startScene(params: URLSearchParams) {
   }
 
   // ---------------------------------------------------------------- passing car
-  const ahead = (d: number): Vec3 => [L.x + Math.sin(L.yaw) * d, 1, L.z - Math.cos(L.yaw) * d];
+  const ahead = (d: number): Vec3 => { const x = L.x + Math.sin(L.yaw) * d, z = L.z - Math.cos(L.yaw) * d; return [x, heightAt(x, z) + 1, z]; };
   function passingCar(profile: string) {
     const c = audio.canyonRays.length ? audio.debug.env.canyon.state : { ax: 1, az: 0 } as { ax: number; az: number };
     const ax = c.ax, az = c.az, side = 4; const start = performance.now(); const speed = profile.startsWith('diesel') ? 11 : 16;
     const prof = ENGINE_PROFILES[profile];
-    const pos = (): Vec3 => { const t = (performance.now() - start) / 1000; const s = -130 + speed * t; return [L.x + ax * s - az * side, 0.6, L.z + az * s + ax * side]; };
+    const pos = (): Vec3 => { const t = (performance.now() - start) / 1000; const s = -130 + speed * t; const x = L.x + ax * s - az * side, z = L.z + az * s + ax * side; return [x, heightAt(x, z) + 0.6, z]; };
     const rpm = () => { const t = (performance.now() - start) / 1000; const v = Math.min(speed, 4 + t * 3.5); const g = v < 7 ? 2.45 : v < 13 ? 1.45 : 1; return Math.max(prof.idle, v / (2 * Math.PI * 0.36) * 60 * 3 * g); };
     const load = () => { const t = (performance.now() - start) / 1000; return t < 4 ? 0.8 : 0.35; };
     const detach = audio.attachVehicle({ id: `test${start}`, rpm, load, position: pos, speed: () => speed }, profile);
@@ -234,7 +235,7 @@ export async function startScene(params: URLSearchParams) {
     minutes = (minutes + (dt * timeScale) / 60) % 1440; if (document.activeElement !== timeIn) timeIn.value = String(Math.floor(minutes));
     audio.setClock(minutes, date);
     if (simOn) sim.update(dt, { x: L.x, z: L.z }, minutes / 60);
-    audio.update(dt, { position: [L.x, 1.65, L.z], forward: [fx, 0, fz], up: [0, 1, 0], velocity: [L.vx, 0, L.vz] });
+    audio.update(dt, { position: [L.x, heightAt(L.x, L.z) + 1.8, L.z], forward: [fx, 0, fz], up: [0, 1, 0], velocity: [L.vx, 0, L.vz] });
     draw();
     for (const [k, an] of Object.entries(meters)) {
       const row = meterRows[k]; if (!row || !an) continue; an.getFloatTimeDomainData(buf);

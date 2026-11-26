@@ -13,6 +13,7 @@ import type { StreetRec } from '../acoustics/geometry';
 import type { QualityName, LoudnessProfile } from '../config';
 import { AUDIO_PRESETS } from '../config';
 import { GROUPS } from '../assets/bank';
+import { heightAt } from '../../shared/terrain';
 
 // ---- connection bookkeeping (independent of the engine's own disposal code)
 const live = new Map<AudioNode, number>();
@@ -55,7 +56,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   sys.bindSim(sim);
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
-  const listener = () => ({ position: [x, 1.65, z] as [number, number, number], forward: [st.dx, 0, st.dz] as [number, number, number], up: [0, 1, 0] as [number, number, number], velocity: [st.dx * sc.walk, 0, st.dz * sc.walk] as [number, number, number] });
+  const listener = () => ({ position: [x, heightAt(x, z) + 1.8, z] as [number, number, number], forward: [st.dx, 0, st.dz] as [number, number, number], up: [0, 1, 0] as [number, number, number], velocity: [st.dx * sc.walk, 0, st.dz * sc.walk] as [number, number, number] });
   let minutes = sc.clock.minutes;
   const tick = () => {
     x += st.dx * sc.walk * step; z += st.dz * sc.walk * step; minutes += step / 60;

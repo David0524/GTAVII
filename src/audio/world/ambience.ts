@@ -24,6 +24,7 @@ import { Style } from '../../shared/chunkFormat';
 import { PoiKind } from '../../shared/chunkFormat';
 import { gratingSource, steamSource, acUnitSource, humSource, roarSource, windSource, workletSource, sirenSource, aircraftSource, type GratingHandle, type RoarHandle } from '../synth/live';
 import { Rng } from '../worklets/dsp';
+import { heightAt as gh } from '../../shared/terrain';
 import type { RadioSystem } from '../radio/radio';
 
 type EmitterKind = 'grating' | 'steam' | 'ac' | 'neon' | 'radio';
@@ -95,7 +96,8 @@ export class Ambience {
     this.stats.emitters = this.emitters.length;
   }
   private key(x: number, z: number) { return Math.floor(x / 50) * 100003 + Math.floor(z / 50); }
-  private addEmitter(e: Emitter) { this.emitters.push(e); const k = this.key(e.x, e.z); let a = this.grid.get(k); if (!a) this.grid.set(k, (a = [])); a.push(e); }
+  /** Emitter y is given above local ground; seat it on the terrain. */
+  private addEmitter(e: Emitter) { e.y += gh(e.x, e.z); this.emitters.push(e); const k = this.key(e.x, e.z); let a = this.grid.get(k); if (!a) this.grid.set(k, (a = [])); a.push(e); }
   emitterCounts() { const c: Record<string, number> = {}; for (const e of this.emitters) c[e.kind] = (c[e.kind] ?? 0) + 1; return c; }
 
   // ------------------------------------------------------------------ beds
@@ -115,11 +117,11 @@ export class Ambience {
     const side = (sgn: number) => (): Vec3 => {
       const l = this.env.vm.listener.position, c = this.env.canyon.state; const d = Math.max(3, Math.min(sgn < 0 ? c.dL : c.dR, 14) - 2.5);
       // Perpendicular to the street axis; listener-relative so the crowd stays on the sidewalks.
-      return [l[0] - c.az * d * sgn, 1.6, l[2] + c.ax * d * sgn];
+      const x = l[0] - c.az * d * sgn, z = l[2] + c.ax * d * sgn; return [x, gh(x, z) + 1.75, z];
     };
     worklet('t74-walla', 'wallaL', 2, { seed: 21, talkers: this.env.q.wallaTalkers }, side(-1));
     worklet('t74-walla', 'wallaR', 2, { seed: 22, talkers: this.env.q.wallaTalkers }, side(1));
-    worklet('t74-walla', 'kids', 2, { seed: 23, talkers: Math.max(4, this.env.q.wallaTalkers - 2) }, () => { const p = this.nearestPark(); return [p.x, 1.2, p.z]; });
+    worklet('t74-walla', 'kids', 2, { seed: 23, talkers: Math.max(4, this.env.q.wallaTalkers - 2) }, () => { const p = this.nearestPark(); return [p.x, gh(p.x, p.z) + 1.35, p.z]; });
     worklet('t74-rain', 'rain', 2, { seed: 24 });
   }
 
@@ -206,7 +208,7 @@ export class Ambience {
   }
   private around(minD: number, maxD: number, y = 1.5): Vec3 {
     const [x, , z] = this.env.vm.listener.position; const a = this.rng.next() * Math.PI * 2, d = this.rng.range(minD, maxD);
-    return [x + Math.cos(a) * d, y, z + Math.sin(a) * d];
+    const px = x + Math.cos(a) * d, pz = z + Math.sin(a) * d; return [px, gh(px, pz) + y, pz];
   }
 
   private events(dt: number) {
@@ -248,7 +250,7 @@ export class Ambience {
     }
     // Sunday church bells (generic bells; two real parish locations near Penn Station).
     if (wd === 0 && ((h > 8.75 && h < 9) || (h > 10.75 && h < 11))) {
-      if (this.every('bell', 0.9, dt)) for (const [x, z] of [[env.map.x('8th Avenue') + 130, env.map.z(30) - 30], [env.map.x('6th Avenue') - 140, env.map.z(31) + 20]] as [number, number][]) env.oneShot('bell', { category: 'siren', gain: 0.5, at: [x, 30, z], wet: 1.5 });
+      if (this.every('bell', 0.9, dt)) for (const [x, z] of [[env.map.x('8th Avenue') + 130, env.map.z(30) - 30], [env.map.x('6th Avenue') - 140, env.map.z(31) + 20]] as [number, number][]) env.oneShot('bell', { category: 'siren', gain: 0.5, at: [x, gh(x, z) + 30, z], wet: 1.5 });
     }
     // Fourth of July fireworks over the East River.
     if (env.clock.date.endsWith('-07-04') && h > 21.2 && h < 21.8 && this.every('firework', 1.5, dt)) env.oneShot('firework', { category: 'siren', gain: 0.8, at: [1600, 120, lz + this.rng.range(-800, 400)], wet: 2.2 });
@@ -258,7 +260,7 @@ export class Ambience {
       for (const s of this.signalPhase) {
         if (Math.abs(s.x - lx) > 25 || Math.abs(s.z - lz) > 25) continue;
         const ph = (t + s.off) % 1, prev = this.lastSig.get(s) ?? ph; this.lastSig.set(s, ph);
-        if ((prev < 0.5 && ph >= 0.5) || prev > ph) env.oneShot('signal.click', { category: 'footstep', gain: 0.35, at: [s.x, 2.5, s.z] });
+        if ((prev < 0.5 && ph >= 0.5) || prev > ph) env.oneShot('signal.click', { category: 'footstep', gain: 0.35, at: [s.x, gh(s.x, s.z) + 2.5, s.z] });
       }
     }
   }
@@ -271,7 +273,7 @@ export class Ambience {
     const it = cands[(this.rng.next() * cands.length) | 0]; const ns = g.nearestStreet(it.x, it.z, 20);
     const dx = ns ? ns.dx : 1, dz = ns ? ns.dz : 0, sp = this.rng.range(11, 17) * (this.rng.next() < 0.5 ? 1 : -1), dur = 35;
     const t0 = env.ctx.currentTime; const mode = (['wail', 'wail', 'yelp', 'hilo'] as const)[(this.rng.next() * 4) | 0];
-    const pos = (): Vec3 => { const t = env.ctx.currentTime - t0; return [it.x + dx * sp * t, 2, it.z + dz * sp * t]; };
+    const pos = (): Vec3 => { const t = env.ctx.currentTime - t0; const x = it.x + dx * sp * t, z = it.z + dz * sp * t; return [x, gh(x, z) + 2, z]; };
     const seed = this.rng.u32();
     const v = env.vm.play({ name: 'siren', bus: 'sfx', category: 'siren', priority: 5, duration: dur, gain: 1.6, at: pos, vel: () => [dx * sp, 0, dz * sp], doppler: true, occlude: true, wet: 1.6,
       build: (ctx) => { const s = sirenSource(ctx, mode, seed); const o = s.start.bind(s); s.start = (w, off) => { s.output.gain.setValueAtTime(0, w); s.output.gain.linearRampToValueAtTime(1, w + 2); s.output.gain.setValueAtTime(1, w + dur - 4); s.output.gain.linearRampToValueAtTime(0, w + dur - 0.5); o(w, off); }; return s; } });

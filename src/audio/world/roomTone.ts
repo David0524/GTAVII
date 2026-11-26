@@ -59,7 +59,7 @@ export class RoomTone {
     if (this.kind === 'precinct' && this.env.live && (this.typeT -= dt) <= 0) {
       // Typewriters: bursts of keys with the carriage bell now and then (baked UI tick doubles as a key).
       this.typeT = this.rng.range(0.08, 0.2) + (this.rng.next() < 0.08 ? this.rng.range(1, 4) : 0);
-      const l = this.env.vm.listener.position; this.env.oneShot(this.rng.next() < 0.03 ? 'ui.select' : 'ui.move', { category: 'emitter', bus: 'ambience', gain: 0.25 * this.voice.gain, at: [l[0] + 3, 1, l[2] + 2], rate: this.rng.range(0.85, 1.1) });
+      const l = this.env.vm.listener.position; this.env.oneShot(this.rng.next() < 0.03 ? 'ui.select' : 'ui.move', { category: 'emitter', bus: 'ambience', gain: 0.25 * this.voice.gain, at: [l[0] + 3, l[1] - 0.8, l[2] + 2], rate: this.rng.range(0.85, 1.1) });
     }
   }
   dispose() { this.voice?.stop(0.05); this.voice = null; }
