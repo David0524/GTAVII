@@ -6,7 +6,7 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 ## Status
 | Phase | State |
 |---|---|
-| N1. Story bible | **Approved** (after reviews 1–3) → `narrative/N1_STORY_BIBLE.md` |
+| N1. Story bible | **Approved; combat rework pending (step 2)** (after reviews 1–3) → `narrative/N1_STORY_BIBLE.md` |
 | N2. Cast | **Done** (with appearance sheets; no review objections) → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
 | N3. Story structure | **Done** → `narrative/N3_STRUCTURE.md` (32-mission chain, branches, endings, relationships, act-by-act world) |
 | N4. Mission specs and side activities | **Done.** All 32 missions in `content/missions/`; 20 side activities in `content/activities.json`; M1 fully playable. Validator: 0 errors (104 warnings = dialogue scripts due in N5). |
@@ -591,6 +591,55 @@ calls":
 **Gap:** the brief asks for neon and sign text per business. This exists for the registry,
 but the engine still has to map shopfronts to real facades (a Phase 3 facade-generation
 dependency).
+
+---
+
+## Direction changes (26 Nov 2026, relayed by the oversight session with the user's words verbatim)
+These messages arrived while N5 and N6 were being written (they crossed). Recorded verbatim:
+- **N2 review:** "All good". N2 approved.
+- **Combat:** "Full open world and missions like a GTA game". Police: "Witnesses + call boxes +
+  bribes (Recommended)". The Gameplay chat owns the systems
+  (`docs/briefs/GAMEPLAY_BRIEF.md` on `claude/awesome-keller-i9tmmu`).
+- **Side quests:** "We need side quests too. These can be the most creative and fun. Missions
+  can be what you mentioned but also stuff like driving around with NPC and collecting cash
+  from multiple places. That's just an example, don't use that exactly. Remember many
+  buildings should be able to be entered."
+- **Map size:** "The original thought was small map, very interactive." Bounds per engine E8:
+  mid-block 21st–22nd St to 43rd–44th St, and Madison–Park to mid-block 9th–10th Ave.
+- **Economy:** "Make sure there's a way for players to make money aside from missions."
+  (`docs/briefs/ECONOMY.md`)
+- **Core systems:** chases, arrests, death, inventory, car theft and gun quality
+  (`docs/briefs/CORE_SYSTEMS.md`).
+- **Feature audit:** "Don't forget the minimap… populate with new icons/tags throughout as you
+  discover more stuff. Not all at once. Really try to consider everything that GTA does.
+  Definitely should be some pigeons and rats. Don't forget cutscenes… There's gotta be subway
+  stations, right?? Maybe a mission in the subways." (`docs/briefs/FEATURE_AUDIT.md`)
+- **Homes and cars:** "The characters should all have their own home. Apartments should match
+  the characters. Should be able to buy/own cars too." (`docs/briefs/HOMES_AND_CARS.md`)
+
+**Impact on work already done:**
+- N5 dialogue and N6 world text were written before these arrived. Where the missions change
+  in the combat rework, the dialogue and newspapers will be revised in the same pass.
+- The validators make stale references show up immediately.
+
+**Agreed order (oversight):**
+1. Bounds
+2. Combat rework of N1, N3 and N4 (and revise the N5 dialogue it touches)
+3. Police, bribe, item, economy, homes and cars content
+4. N4b side content (40–60 pieces, ranked, top 5 for the slice)
+5. Cutscene scripts, starting with M1
+6. Revise N6 for the reworked story
+
+### Step 1: bounds (done)
+- `content/boundaries.json` is re-keyed to the E8 edges: 20 blockers, prioritising the 1974
+  outbound one-ways. The Lincoln Tunnel trench forms the west edge, and the rail yards and
+  the dead highway are horizon only.
+- Every content location north of 43rd St, west of 9th Ave or east of Madison was moved
+  inside, at least 60 m from an edge:
+  - M15's ice house is now W 37th St & 9th Ave, and M18's garage W 39th St & 9th Ave.
+  - M22's radio crowd is now at 42nd St & 7th Ave.
+  - Activity rows moved to Madison Ave and W 40th–42nd St.
+- Validators: 0 errors and 0 warnings; 32/32 missions reachable.
 
 ---
 

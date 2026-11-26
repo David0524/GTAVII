@@ -38,7 +38,7 @@ a("npc.plainclothes", "loiterer", ["#7F1D1D", "#D9C9A3", "#FFFFFF"], "Knit polos
 a("npc.off_duty_cop", "loiterer", ["#556B2F", "#F5F5DC", "#2B2B2B"], "Sport shirt, slacks, crepe-soled shoes, a short haircut that says cop.", ["beer glass"],
   s(("16:00", "02:00", "The Shamrock Rail and nearby bars", "drink")), 0.05, 0.1, "barks.plainclothes")
 a("npc.office_lunch_crowd", "commuter", ["#2F4F4F", "#FFFFFF", "#8B4513", "#B0C4DE"], "Men in short-sleeve dress shirts and wide ties, jackets over arms; women in A-line dresses, shirtwaists, pantsuits.",
-  ["briefcase", "newspaper", "paper lunch bag"], s(("08:00", "18:00", "Fifth Ave, Madison Sq, Herald Sq, Park Ave S", "work"), ("12:00", "13:30", "lunch counters", "eat")), 0.7, 0.05, "barks.office")
+  ["briefcase", "newspaper", "paper lunch bag"], s(("08:00", "18:00", "Fifth Ave, Madison Sq, Herald Sq, Madison Ave", "work"), ("12:00", "13:30", "lunch counters", "eat")), 0.7, 0.05, "barks.office")
 a("npc.lunch_counter_regular", "loiterer", ["#FFFFFF", "#000080"], "Office clothes, a hat on the next stool.", ["coffee cup"],
   s(("11:30", "14:30", "Lunch counters (Herald Sq store, Fifth Ave)", "eat")), 0.3, 0.0, "barks.office")
 a("npc.trade_dinner_guest", "loiterer", ["#000000", "#FFFFFF", "#DAA520"], "Dinner jackets and cocktail dresses, period formal.", ["cocktail glass"],
@@ -72,7 +72,7 @@ a("npc.truck_driver", "driver", ["#556B2F", "#A0522D", "#FFFFFF"], "Work shirt w
 a("npc.flower_truck_driver", "driver", ["#228B22", "#FFFFFF"], "Green work jacket, cap.", ["flower truck"],
   s(("04:00", "09:00", "W 28th St and deliveries", "drive")), 0.1, 0.05, "barks.truck_driver")
 a("npc.ice_house_worker", "worker", ["#B0C4DE", "#FFFFFF", "#000000"], "Rubber apron, heavy gloves, ice tongs.", ["ice tongs", "ice block"],
-  s(("06:00", "22:00", "Ice house, W 37th St & 10th Ave", "work")), 0.05, 0.05, "barks.truck_driver")
+  s(("06:00", "22:00", "Ice house, W 37th St & 9th Ave", "work")), 0.05, 0.05, "barks.truck_driver")
 a("npc.park_sleeper", "loiterer", ["#696969", "#8B7D6B"], "Layers despite the heat, worn shoes, a coat as a pillow.", ["paper bag", "coat"],
   s(("19:00", "08:00", "Madison Square Park, Bryant Park", "sleep")), 0.1, 0.2, "barks.park")
 a("npc.park_dealer", "loiterer", ["#556B2F", "#2F2F2F"], "Army-surplus jacket, sneakers.", ["paperback"],
@@ -94,7 +94,7 @@ a("npc.rental_agent", "worker", ["#556B2F", "#F5F5DC"], "Cheap suit, clip-on tie
 a("npc.marcher", "walker", ["#FFFFFF", "#4B0082", "#B22222"], "Sunday clothes, union T-shirts, church hats, aprons straight from work.", ["placard", "bedsheet banner", "flowers"],
   s(("10:00", "13:00", "Broadway, W 31st–34th St (23 Aug only)", "socialize")), 0.0, 0.0, "barks.marcher", scripted=True)
 a("npc.radio_crowd", "loiterer", ["#696969", "#F5F5DC"], "Whoever is out on a summer night.", ["transistor radio"],
-  s(("20:30", "00:30", "Times Square, Corwin lobby, bars (8 Aug only)", "socialize")), 0.0, 0.0, "barks.radio_crowd", scripted=True)
+  s(("20:30", "00:30", "42nd St, Corwin lobby, bars (8 Aug only)", "socialize")), 0.0, 0.0, "barks.radio_crowd", scripted=True)
 a("npc.brownout_crowd", "loiterer", ["#2F2F2F", "#F5DEB3"], "Stoop sitters, people with candles and transistor radios.", ["candle", "transistor radio"],
   s(("20:00", "03:00", "Brownout areas (power dim or off)", "socialize")), 0.0, 0.0, "barks.brownout_street", scripted=True)
 a("npc.lonnie_crew", "loiterer", ["#2F2F2F", "#8B0000"], "Leather jackets, wide collars, hats.", [], s(("20:00", "04:00", "8th Ave", "loiter")), 0.0, 0.0, "barks.street_tough", scripted=True,
@@ -104,10 +104,10 @@ a("npc.hired_firebug", "walker", ["#2F2F2F", "#696969"], "Work clothes, cap pull
 a("npc.editor_brother_in_law", "loiterer", ["#000080", "#FFFFFF"], "An expensive blazer and a club tie.", ["cocktail glass"], s(("20:00", "23:00", "Hotel Pennsylvania bar (M27 only)", "drink")), 0.0, 0.0, None, scripted=True)
 a("npc.firefighter", "worker", ["#000000", "#FFD700", "#B22222"], "Turnout coat, helmet (generic, no real insignia).", ["axe", "hose"], s(("00:00", "24:00", "Scripted scenes only", "work")), 0.0, 0.0, "barks.emergency", scripted=True)
 for pid, desc, area in [("npc.landlord_absentee", "Leisure suit, a car too nice for the block.", "W 29th St & 8th Ave"),
-                        ("npc.claimant", "Neck brace by day, handball shorts by evening.", "W 28th St & 10th Ave"),
+                        ("npc.claimant", "Neck brace by day, handball shorts by evening.", "W 26th St & 9th Ave"),
                         ("npc.fence", "Overcoat in July with pockets full of radios.", "W 39th St & 9th Ave"),
                         ("npc.bookie_runner", "Porkpie hat, racing form, quick walk.", "Penn Station cab line"),
-                        ("npc.contractor", "Hard hat that's never been on a site; a clipboard.", "E 37th St & Lexington Ave")]:
+                        ("npc.contractor", "Hard hat that's never been on a site; a clipboard.", "E 37th St & Madison Ave")]:
     a(pid, "loiterer", ["#8B4513", "#F5DEB3"], desc, [], s(("10:00", "18:00", area, "loiter")), 0.0, 0.0, "barks.deuce", scripted=True, note="Photo Jobs subject; keeps a fixed routine.")
 a("npc.cab_fare_businessman", "commuter", ["#2F4F4F", "#FFFFFF"], "Suit, briefcase.", ["briefcase"], s(("18:00", "04:00", "Cab pickups", "commute")), 0.0, 0.0, "barks.cab_fare", scripted=True)
 a("npc.cab_fare_tourist", "commuter", ["#FF6347", "#FFFACD"], "Sun hat, camera, map.", ["camera", "street map"], s(("18:00", "04:00", "Cab pickups", "commute")), 0.0, 0.0, "barks.cab_fare", scripted=True)
@@ -116,7 +116,7 @@ a("npc.wholesaler_gate", "vendor", ["#8B4513", "#F5DEB3"], "Shirt sleeves and ve
   note="Variant used by the M1 overheard trigger (closing gates).")
 
 for pid, desc, area, pal in [("npc.club_maid", "Hotel chambermaid's grey uniform and apron; a cardigan after work.", "Hotel Pennsylvania", ["#808080", "#FFFFFF"]),
-                             ("npc.club_hatcheck", "Black dress, white collar, a hat-check stub book.", "W 46th St supper clubs", ["#000000", "#FFFFFF"]),
+                             ("npc.club_hatcheck", "Black dress, white collar, a hat-check stub book.", "W 40th St supper clubs", ["#000000", "#FFFFFF"]),
                              ("npc.kafeneio_widow", "Black dress and cardigan, worry beads, a handbag held in both hands.", "Kafeneio Kastoria", ["#000000", "#696969"]),
                              ("npc.parish_priest", "Clerical black, a straw hat, a roof-fund envelope.", "The church on W 31st St", ["#000000", "#FFFFFF"])]:
     a(pid, "loiterer", pal, desc, [], s(("09:00", "20:00", area, "socialize")), 0.0, 0.0, None, scripted=True, note="Side-activity speaker (N5).")

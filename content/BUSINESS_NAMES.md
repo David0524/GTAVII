@@ -46,7 +46,7 @@
 | **Papadakis Pelts** | Fur skins dealer | W 29th St & 7th Ave | PAPADAKIS PELTS · MINK · FOX · PERSIAN | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **Zissis Cold Storage** | Fur storage | W 28th St & 8th Ave | ZISSIS · FUR COLD STORAGE · BONDED | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **The Velvet Moon** | Grindhouse cinema | W 42nd St, 7th–8th Aves | VELVET MOON · 3 FEATURES · CONTINUOUS · $1 | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
-| **The Orbit Lounge** | Bar | 8th Ave & W 44th St | ORBIT LOUNGE · COCKTAILS (neon Saturn) | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
+| **The Orbit Lounge** | Bar | 8th Ave & W 41st St | ORBIT LOUNGE · COCKTAILS (neon Saturn) | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **Mr. Lucky's Lunch** | Lunch counter | 8th Ave & W 41st St | MR. LUCKY'S LUNCH · HOT DOGS · PAPAYA DRINK | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **Ostrander Opticians** | Optician | Madison Ave & E 25th St | OSTRANDER OPTICIANS · EYES EXAMINED | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **The Penny Lantern Diner** | Diner | W 23rd St & 9th Ave | PENNY LANTERN DINER · BREAKFAST ALL DAY | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |

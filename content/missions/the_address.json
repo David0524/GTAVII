@@ -63,14 +63,14 @@
     {
       "id": "o5",
       "type": "goto",
-      "text": "The radio crowd, 45th & Seventh",
-      "to": "W 45th St & 7th Ave",
+      "text": "The radio crowd, 42nd & Seventh",
+      "to": "W 42nd St & 7th Ave",
       "radius": 30
     },
     {
       "id": "o6",
       "type": "dialogue",
-      "text": "Times Square listens to a cab radio",
+      "text": "42nd Street listens to a cab radio",
       "script": "dlg.m22_crowd"
     },
     {
@@ -137,7 +137,7 @@
   "locations": [
     "loc.corwin_hotel",
     "loc.cop_bar",
-    "W 45th St & 7th Ave",
+    "W 42nd St & 7th Ave",
     "loc.hotel_pennsylvania"
   ],
   "mobile": "Three short scenes, one per lead, with a checkpoint at each switch. The Times Square crowd stays 60 m or more inside the north edge (45th St, not 47th). No timers.",

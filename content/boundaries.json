@@ -1,5 +1,5 @@
 {
-  "_note": "Narrative contribution to docs/briefs/BOUNDARIES.md (layer 2: diegetic blockers). The engine owns placement, colliders and the schema (pending confirmation: ENGINE_REQUESTS 'From narrative: 7'). Segments are keyed by the real street that crosses the playable edge. Bounds (engine E4, src/shared/bounds.ts): west mid-block 10th–11th Aves; north mid-block 47th–48th Sts; east mid-block Lexington–3rd Aves; south mid-block 18th–19th Sts. Blockers sit within EDGE.BLOCKERS (60 m) of the edge. All names are invented; the police appear by office only. Bark lines are 90 characters or fewer.",
+  "_note": "Narrative contribution to docs/briefs/BOUNDARIES.md (layer 2: diegetic blockers). Schema ACCEPTED (ENGINE_RESPONSES N7, plus the optional offsetM and span fields). Segments are keyed '<street> @ <edge> edge'. Bounds per engine E8 (story core, 'small map, very interactive'): west mid-block 9th–10th Aves (the Lincoln Tunnel trench is the layer-0 edge); north mid-block 43rd–44th Sts (Times Square visible beyond); east mid-block Madison–Park; south mid-block 21st–22nd Sts. 'geography' placement is engine-owned. All names are invented; the police appear by office only. Barks are 90 characters or fewer.",
   "boundsPending": false,
   "fiction": {
     "film": {
@@ -55,7 +55,7 @@
     {
       "id": "blocker.film_night_rate",
       "kind": "film_shoot",
-      "segment": "W 44th St @ west edge",
+      "segment": "W 41st St @ west edge",
       "acts": [
         1,
         2
@@ -73,12 +73,12 @@
       },
       "replacedBy": "blocker.trench_hudson_west",
       "barks": "barks.film_pa",
-      "note": "The main unit, set in the Hell's Kitchen blocks west of Tenth. It wraps the day Act 3 begins; the PAs' last bark on 7 Aug is the wrap call. By day the trucks are parked across the street with no shoot."
+      "note": "The main unit, shooting toward the Lincoln Tunnel approach (a great backdrop). It wraps the day Act 3 begins, and the PAs' last bark on 7 Aug is the wrap call. By day the trucks are parked across the street with no shoot."
     },
     {
       "id": "blocker.trench_hudson_west",
       "kind": "utility_trench",
-      "segment": "W 44th St @ west edge",
+      "segment": "W 41st St @ west edge",
       "acts": [
         3
       ],
@@ -87,32 +87,43 @@
       "note": "Replaces the film shoot on the same street. A city with no money leaves the hole open."
     },
     {
-      "id": "blocker.rail_yard_fence",
+      "id": "blocker.tunnel_trench",
       "kind": "geography",
-      "segment": "W 30th–33rd Sts @ west edge",
+      "segment": "Dyer Ave trench (W 30s–40s) @ west edge",
       "acts": [
         1,
         2,
         3
       ],
-      "note": "Real: the West Side Yard, the Penn Central rail cut. A chain-link fence, rusted signal masts, freight cars. No barks; the audio team supplies yard ambience."
+      "note": "Real: the Lincoln Tunnel approach trench is the layer-0 west edge (engine-placed). Barks come only from the traffic jam into the tunnel (layer 3)."
+    },
+    {
+      "id": "blocker.rail_yard_horizon",
+      "kind": "geography",
+      "segment": "West Side Yard, beyond 10th Ave (horizon)",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "note": "Real: the Penn Central rail yards, visible past the west edge from W 30th–33rd. Not reachable."
     },
     {
       "id": "blocker.dead_highway",
       "kind": "geography",
-      "segment": "beyond 12th Ave (horizon only)",
+      "segment": "West Side Highway, beyond 12th Ave (horizon)",
       "acts": [
         1,
         2,
         3
       ],
       "sign": "ELEVATED HWY DIV. — STRUCTURE CLOSED",
-      "note": "Real: the elevated West Side Highway, closed after its December 1973 collapse. Visible from the western streets, rusting and empty."
+      "note": "Real: the elevated highway, closed after its December 1973 collapse. Visible from the western cross streets."
     },
     {
       "id": "blocker.block_party_west",
       "kind": "block_party",
-      "segment": "W 46th St @ west edge",
+      "segment": "W 35th St @ west edge",
       "acts": [
         1,
         2,
@@ -129,22 +140,24 @@
         ]
       },
       "barks": "barks.block_party",
-      "note": "A Hell's Kitchen block association's summer party: card tables, a bandstand of folding chairs, a salsa trio, and kids' races at the far end (away from traffic). Passable on foot; the crowd thickens into layer 3."
+      "span": "roadway",
+      "note": "A Hell's Kitchen block association's summer party: card tables, a bandstand, a salsa trio. Passable on foot; the crowd thickens into layer 3."
     },
     {
-      "id": "blocker.trench_west_38",
+      "id": "blocker.trench_west_31",
       "kind": "utility_trench",
-      "segment": "W 38th St @ west edge",
+      "segment": "W 31st St @ west edge",
       "acts": [
         1,
         2,
         3
       ],
       "barks": "barks.utility_crew",
-      "sign": "HUDSON UNION — STEAM — KEEP BACK"
+      "sign": "HUDSON UNION — STEAM — KEEP BACK",
+      "note": "W 31st is westbound and flows out here."
     },
     {
-      "id": "blocker.barricade_times_sq_north",
+      "id": "blocker.barricade_7th_north",
       "kind": "police_barricade",
       "segment": "7th Ave @ north edge",
       "acts": [
@@ -153,7 +166,7 @@
         3
       ],
       "barks": "barks.barricade_cop",
-      "note": "Wooden police sawhorses and a beat cop just past the north end of the bow-tie. This is the main chase roadblock for anything fleeing up Seventh or Broadway. On the night of 8 Aug (M22) a crowd gathers around a parked cab's radio."
+      "note": "Sawhorses at the south lip of Times Square, with the neon visible beyond. The main chase roadblock heading north. On the night of 8 Aug a crowd gathers around a parked cab's radio just inside, at 42nd & Seventh (M22)."
     },
     {
       "id": "blocker.barricade_broadway_north",
@@ -177,7 +190,7 @@
       ],
       "barks": "barks.utility_crew",
       "sign": "HUDSON UNION — STEAM — KEEP BACK",
-      "note": "Eighth Ave is northbound, so traffic flows out here; this is the busiest blocker. A striped steam chimney, steel plates and a night flasher. The work-suspended sign goes up in Act 3."
+      "note": "Eighth is northbound and flows out here; the busiest blocker. A striped steam chimney, steel plates and a night flasher. The work-suspended sign goes up in Act 3."
     },
     {
       "id": "blocker.trench_6th_north",
@@ -190,12 +203,12 @@
       ],
       "barks": "barks.utility_crew",
       "sign": "BUREAU OF STREET OPENINGS — PERMIT No. 74-2216",
-      "note": "Sixth Ave is northbound and flows out here."
+      "note": "Sixth is northbound and flows out here."
     },
     {
-      "id": "blocker.water_main_east",
+      "id": "blocker.water_main_madison_north",
       "kind": "water_main",
-      "segment": "E 29th St @ east edge",
+      "segment": "Madison Ave @ north edge",
       "acts": [
         2
       ],
@@ -207,18 +220,40 @@
       },
       "barks": "barks.utility_crew",
       "sign": "BD. OF MAINS & HYDRANTS — DANGER",
-      "note": "The heat-wave water-main break: a flooded block, a geyser, the Board's truck. Content rule: children appear only playing at an opened hydrant on a separate, safe corner, never in traffic or danger."
+      "note": "The heat-wave water-main break. Madison is northbound and flows out here. Content rule: children appear only at an opened hydrant on a separate, safe corner."
     },
     {
-      "id": "blocker.trench_east_37",
+      "id": "blocker.trench_madison_north",
       "kind": "utility_trench",
-      "segment": "E 37th St @ east edge",
+      "segment": "Madison Ave @ north edge",
+      "acts": [
+        1,
+        3
+      ],
+      "barks": "barks.utility_crew"
+    },
+    {
+      "id": "blocker.trench_east_36",
+      "kind": "utility_trench",
+      "segment": "E 36th St @ east edge",
       "acts": [
         1,
         2,
         3
       ],
-      "barks": "barks.utility_crew"
+      "barks": "barks.utility_crew",
+      "note": "Even-numbered streets run eastbound and flow out here."
+    },
+    {
+      "id": "blocker.barricade_east_28",
+      "kind": "police_barricade",
+      "segment": "E 28th St @ east edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.barricade_cop"
     },
     {
       "id": "blocker.film_second_unit_south",
@@ -247,7 +282,7 @@
         ]
       },
       "replacedBy": "blocker.barricade_5th_south",
-      "note": "The second unit of NIGHT RATE shooting a cab chase down Fifth, which is southbound and flows out here. Gives the south edge a reason on weeknights in Act 2."
+      "note": "The second unit of NIGHT RATE shooting a cab chase past the Flatiron, down Fifth (southbound, flows out)."
     },
     {
       "id": "blocker.barricade_5th_south",
@@ -259,19 +294,7 @@
         3
       ],
       "barks": "barks.barricade_cop",
-      "note": "Default occupant of this segment whenever the second unit isn't shooting."
-    },
-    {
-      "id": "blocker.barricade_7th_south",
-      "kind": "police_barricade",
-      "segment": "7th Ave @ south edge",
-      "acts": [
-        1,
-        2,
-        3
-      ],
-      "barks": "barks.barricade_cop",
-      "note": "Seventh is southbound and flows out here. The chase roadblock."
+      "note": "Default occupant of this segment when the second unit isn't shooting."
     },
     {
       "id": "blocker.trench_broadway_south",
@@ -284,7 +307,31 @@
       ],
       "barks": "barks.utility_crew",
       "sign": "HUDSON UNION — STEAM — KEEP BACK",
-      "note": "Broadway is southbound and flows out here."
+      "note": "Broadway is southbound and flows out here, just past the Flatiron."
+    },
+    {
+      "id": "blocker.barricade_7th_south",
+      "kind": "police_barricade",
+      "segment": "7th Ave @ south edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.barricade_cop",
+      "note": "Seventh is southbound and flows out here. The chase roadblock (M3, M32)."
+    },
+    {
+      "id": "blocker.trench_9th_south",
+      "kind": "utility_trench",
+      "segment": "9th Ave @ south edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.utility_crew",
+      "note": "Ninth is southbound and flows out here, past Penn South."
     }
   ],
   "brownoutVariant": {
@@ -294,7 +341,7 @@
   "actChanges": [
     {
       "act": 1,
-      "summary": "Every blocker is fresh and busy. NIGHT RATE shoots at night on the west edge; trenches are staffed; weekend block parties start."
+      "summary": "Every blocker is fresh and busy. NIGHT RATE shoots at night on W 41st St at the west edge; trenches are staffed; weekend block parties start."
     },
     {
       "act": 2,
@@ -302,7 +349,7 @@
     },
     {
       "act": 3,
-      "summary": "NIGHT RATE wraps (flag.act3_started), and its west-edge street becomes an abandoned trench, a hole the city can't afford to fill. Work-suspended signs are everywhere. On 8 Aug a crowd gathers at the north barricade around a cab radio."
+      "summary": "NIGHT RATE wraps (flag.act3_started), and W 41st St becomes an abandoned trench, a hole the city can't afford to fill. Work-suspended signs are everywhere. On 8 Aug a crowd gathers at the north barricade around a cab radio."
     },
     {
       "act": "epilogue",
@@ -650,14 +697,14 @@
     ]
   },
   "bounds": {
-    "west": "mid-block 10th–11th Aves",
-    "north": "mid-block W 47th–48th Sts",
-    "east": "mid-block Lexington–3rd Aves",
-    "south": "mid-block 18th–19th Sts",
-    "source": "engine E4, src/shared/bounds.ts (commit 444bcd4)"
+    "west": "mid-block 9th–10th Aves",
+    "north": "mid-block W 43rd–44th Sts",
+    "east": "mid-block Madison–Park Aves",
+    "south": "mid-block 21st–22nd Sts",
+    "source": "engine E8, src/shared/bounds.ts"
   },
   "defaultRotation": {
-    "_note": "For any edge-crossing street not listed above, the engine picks from this rotation (seeded by street name, so it's stable). Prioritise streets whose 1974 one-way direction flows OUT of the map: 5th Ave, Broadway and 7th Ave (south edge); 6th and 8th Aves (north edge); and odd-numbered westbound side streets at the west edge.",
+    "_note": "For any edge-crossing street not listed above, the engine picks from this rotation (seeded by street name). Priority goes to streets whose 1974 direction flows OUT: 5th, Broadway, 7th and 9th Aves (south); 6th, 8th and Madison (north); odd westbound side streets (west); even eastbound side streets (east).",
     "kinds": [
       "utility_trench",
       "police_barricade",

@@ -92,7 +92,7 @@ for id, name, trade, where, sign in [
     ("papadakis", "Papadakis Pelts", "Fur skins dealer", "W 29th St & 7th Ave", "PAPADAKIS PELTS · MINK · FOX · PERSIAN"),
     ("zissis", "Zissis Cold Storage", "Fur storage", "W 28th St & 8th Ave", "ZISSIS · FUR COLD STORAGE · BONDED"),
     ("velvet_moon", "The Velvet Moon", "Grindhouse cinema", "W 42nd St, 7th–8th Aves", "VELVET MOON · 3 FEATURES · CONTINUOUS · $1"),
-    ("orbit", "The Orbit Lounge", "Bar", "8th Ave & W 44th St", "ORBIT LOUNGE · COCKTAILS (neon Saturn)"),
+    ("orbit", "The Orbit Lounge", "Bar", "8th Ave & W 41st St", "ORBIT LOUNGE · COCKTAILS (neon Saturn)"),
     ("mr_lucky", "Mr. Lucky's Lunch", "Lunch counter", "8th Ave & W 41st St", "MR. LUCKY'S LUNCH · HOT DOGS · PAPAYA DRINK"),
     ("ostrander", "Ostrander Opticians", "Optician", "Madison Ave & E 25th St", "OSTRANDER OPTICIANS · EYES EXAMINED"),
     ("penny_lantern", "The Penny Lantern Diner", "Diner", "W 23rd St & 9th Ave", "PENNY LANTERN DINER · BREAKFAST ALL DAY"),

@@ -73,7 +73,7 @@ street = {"_note": "Graffiti tags (invented writers; real 1970s writers' tags av
  "tags": [{"tag": t, "style": s, "areas": a} for t, s, a in [
    ("RIZO 147", "subway-car tag, bubble letters", ["subway cars", "W 34th St station"]), ("NOVA 33", "marker, tall letters", ["8th Ave", "Penn Station"]),
    ("KITO 29", "spray, arrow tails", ["W 28th–29th Sts", "roll gates"]), ("LUZ 106", "small and neat, a star over the Z", ["Penn South", "W 26th St"]),
-   ("TOMBO 52", "big outline", ["11th Ave rail cut", "W 30s near 10th"]), ("SPIN 8", "drips", ["8th Ave", "the Deuce"]),
+   ("TOMBO 52", "big outline", ["W 30s near 9th Ave", "W 30s near 10th"]), ("SPIN 8", "drips", ["8th Ave", "the Deuce"]),
    ("DOC GREEN", "one colour, green", ["Bryant Park", "6th Ave"]), ("MOTOR 1", "fast tag", ["truck doors", "Garment District"])]],
  "slogans": [
    {"act": 1, "text": "BUY A COP A COFFEE (THEY CAN'T)", "where": "Station-house block, chalk", "note": "A joke about the post-Commission era, half scrubbed."},

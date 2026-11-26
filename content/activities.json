@@ -64,7 +64,7 @@
             "pickup": "W 23rd St & 7th Ave"
           },
           {
-            "pickup": "Park Ave S & E 28th St"
+            "pickup": "Madison Ave & E 28th St"
           }
         ],
         "drop": [
@@ -93,12 +93,12 @@
             "dropName": "the Flower District"
           },
           {
-            "drop": "W 46th St & 9th Ave",
+            "drop": "W 41st St & 9th Ave",
             "dropName": "Hell's Kitchen"
           },
           {
-            "drop": "Lexington Ave & E 30th St",
-            "dropName": "Lexington"
+            "drop": "Madison Ave & E 30th St",
+            "dropName": "Madison and 30th"
           }
         ]
       },
@@ -654,8 +654,8 @@
             "memberKey": "terminal"
           },
           {
-            "member": "W 46th St & 8th Ave",
-            "memberName": "the hat-check girl, 46th",
+            "member": "W 40th St & 8th Ave",
+            "memberName": "the hat-check girl, 40th",
             "memberKey": "hatcheck"
           }
         ]
@@ -722,7 +722,7 @@
             "subject": "npc.landlord_absentee"
           },
           {
-            "subjectAt": "W 28th St & 10th Ave",
+            "subjectAt": "W 26th St & 9th Ave",
             "subjectName": "the 'disabled' claimant",
             "subject": "npc.claimant"
           },
@@ -737,7 +737,7 @@
             "subject": "npc.bookie_runner"
           },
           {
-            "subjectAt": "Lexington Ave & E 37th St",
+            "subjectAt": "Madison Ave & E 37th St",
             "subjectName": "the trench contractor",
             "subject": "npc.contractor"
           }
@@ -814,7 +814,7 @@
           {
             "name": "a waitress",
             "destName": "her building",
-            "dest": "W 46th St & 9th Ave",
+            "dest": "W 41st St & 9th Ave",
             "npc": "npc.club_waitress",
             "key": "waitress"
           },
@@ -890,8 +890,8 @@
       "pool": {
         "spot": [
           {
-            "spot": "W 45th St & 9th Ave",
-            "spotName": "barber, 45th & 9th"
+            "spot": "W 40th St & 9th Ave",
+            "spotName": "barber, 40th & 9th"
           },
           {
             "spot": "8th Ave & W 40th St",
@@ -1037,12 +1037,12 @@
             "clientName": "the Herald Sq fur salon"
           },
           {
-            "client": "W 45th St & 8th Ave",
-            "clientName": "an agent on 45th St"
+            "client": "W 42nd St & 8th Ave",
+            "clientName": "an agent on 42nd St"
           },
           {
-            "client": "Park Ave S & E 27th St",
-            "clientName": "a widow, Park Ave S"
+            "client": "Madison Ave & E 27th St",
+            "clientName": "a widow on Madison Ave"
           }
         ]
       },
@@ -1124,8 +1124,8 @@
             "finishName": "Penn South"
           },
           {
-            "finish": "Lexington Ave & E 30th St",
-            "finishName": "Lexington and 30th"
+            "finish": "Madison Ave & E 30th St",
+            "finishName": "Madison and 30th"
           }
         ]
       },
@@ -1287,7 +1287,7 @@
             "sightKey": "garment"
           },
           {
-            "sight": "W 45th St & 7th Ave",
+            "sight": "W 42nd St & 7th Ave",
             "sightName": "Times Square",
             "sightKey": "times"
           },
@@ -1377,7 +1377,7 @@
             "landmarkName": "Bryant Park"
           },
           {
-            "landmark": "W 45th St & 7th Ave",
+            "landmark": "W 42nd St & 7th Ave",
             "landmarkName": "Times Square"
           },
           {

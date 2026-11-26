@@ -55,9 +55,9 @@
     {
       "id": "o3",
       "type": "deliver",
-      "text": "Bales to the garage, 39th & Tenth",
+      "text": "Bales to the garage, 39th & Ninth",
       "item": "item.fur_bales",
-      "to": "W 39th St & 10th Ave"
+      "to": "W 39th St & 9th Ave"
     },
     {
       "id": "o4",
@@ -163,7 +163,7 @@
   ],
   "locations": [
     "loc.varelas_loft",
-    "W 39th St & 10th Ave",
+    "W 39th St & 9th Ave",
     "W 30th St & 8th Ave"
   ],
   "mobile": "Five checkpoints across 20 minutes. Switches only at safe beats. The truck drive has no timer; the brownout's dark signals are all-way stops. The tail of Wurtz is generous because his car is slow and lit by its own headlights.",
