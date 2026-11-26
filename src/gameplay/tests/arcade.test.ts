@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Pinball, TABLE, BALLS } from '../arcade/pinball';
 import { Rng } from '../core/rng';
+import { Gallery, GALLERY } from '../arcade/gallery';
+import { rig } from './harness';
 
 /** A simple player: flips when the ball comes down onto a flipper, launches at a random pull. */
 function play(seed: number, skill: boolean, maxSeconds = 600) {
@@ -86,4 +88,52 @@ test('pinball: reaching the replay score knocks a free game once', () => {
   (p as any).add(100); assert.equal(p.credits, 1);
   (p as any).add(100000); assert.equal(p.credits, 1);
   assert.ok(p.events.some((e) => e.type === 'replay'));
+});
+
+// ---- Dead-Eye Gallery and the arcade
+
+function shootGallery(seed: number, aimed: boolean) {
+  const g = new Gallery(new Rng(seed)); const rng = new Rng(seed + 7);
+  let t = 0;
+  while (!g.over) {
+    g.step(1 / 30); t += 1 / 30;
+    if (Math.round(t * 30) % 20 !== 0) continue; // a shot every ~0.67 s
+    if (aimed) {
+      // lead the nearest standing target on the duck belt (the reticle drags, it doesn't teleport: 0.5 screen/s)
+      const row = g.rows[2]; const tgt = row.targets.filter((x) => !x.down).sort((a, b) => Math.abs(a.x - g.aim.x) - Math.abs(b.x - g.aim.x))[0];
+      if (tgt) g.setAim(g.aim.x + Math.max(-0.33, Math.min(0.33, tgt.x + row.speed * 0.05 - g.aim.x)), row.y);
+    } else g.setAim(rng.next(), rng.next());
+    g.fire();
+  }
+  return g;
+}
+
+test('gallery: ends on time or shots, aimed play beats spraying, the bell adds time, and it is deterministic', () => {
+  const aimed = [1, 2, 3, 4].map((s) => shootGallery(s, true)), wild = [1, 2, 3, 4].map((s) => shootGallery(s, false));
+  for (const g of [...aimed, ...wild]) assert.ok(g.over && (g.shots >= GALLERY.shots || g.timeLeft === 0));
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  const a = avg(aimed.map((g) => g.score)), w = avg(wild.map((g) => g.score));
+  console.log(`gallery aimed ${a} vs wild ${w}; hit rate ${(avg(aimed.map((g) => g.hits / g.shots)) * 100).toFixed(0)}%`);
+  assert.ok(a > w * 2, `aim matters (${a} vs ${w})`);
+  assert.equal(shootGallery(3, true).score, shootGallery(3, true).score);
+  const g = new Gallery(new Rng(1)); const bell = g.rows[2].targets.find((t) => t.kind === 'bell')!;
+  g.setAim(bell.x, g.rows[2].y); const before = g.timeLeft; g.fire();
+  assert.ok(g.timeLeft > before + 9, 'the bell adds ten seconds');
+});
+
+test('arcade: coins at 1974 prices, replays become machine credits, high-score cards, saved with the game', () => {
+  const r = rig(); const lead = 'char.teddy_arce';
+  const m0 = r.g.inv.ensure(lead).money;
+  const pin = r.g.arcade.play(lead, 'arcade.night_owl')!;
+  assert.equal(m0 - r.g.inv.ensure(lead).money, 25, 'a quarter a game');
+  assert.ok(r.g.arcade.play(lead, 'arcade.dead_eye')); assert.equal(m0 - r.g.inv.ensure(lead).money, 35, 'a dime for the gallery');
+  (pin as any).add(95000); // a career game: replay plus the top of the card
+  assert.equal(r.g.arcade.finish(lead, 'arcade.night_owl', pin, 'ted'), 1);
+  assert.equal(r.g.arcade.scores.get('arcade.night_owl')![0].initials, 'TED');
+  assert.equal(r.g.arcade.credits.get('arcade.night_owl'), 1, 'the replay is a credit on the machine');
+  const m1 = r.g.inv.ensure(lead).money; r.g.arcade.play(lead, 'arcade.night_owl'); assert.equal(r.g.inv.ensure(lead).money, m1, 'the free game costs nothing');
+  r.g.inv.ensure(lead).money = 0; assert.equal(r.g.arcade.play(lead, 'arcade.night_owl'), null, 'broke: no game');
+  const saved = JSON.parse(JSON.stringify(r.g.serialize()));
+  const r2 = rig(); r2.g.deserialize(saved);
+  assert.equal(r2.g.arcade.scores.get('arcade.night_owl')![0].score, 95000);
 });

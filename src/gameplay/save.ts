@@ -30,6 +30,8 @@ export interface SaveV3 {
   ownership?: unknown;
   stats?: unknown;
   economy?: unknown;
+  /** arcade credits and high-score cards (optional; absent in older saves) */
+  arcade?: unknown;
   activeLead?: string;
 }
 
