@@ -146,7 +146,7 @@
     "o8b"
   ],
   "rewards": {
-    "money": 0,
+    "money": 3500,
     "setFlags": [
       "flag.arson_stopped"
     ],
@@ -157,7 +157,12 @@
       "char.teddy_arce/char.manny_soto": 1,
       "char.teddy_arce/char.inez_rivera": 1,
       "char.delphine_moore/char.teddy_arce": 1
-    }
+    },
+    "moneyByLead": {
+      "char.teddy_arce": 2000,
+      "char.delphine_moore": 1500
+    },
+    "payNote": "The tenants' collection and the Corwin's fire insurer's reward."
   },
   "npcs": [
     "char.odessa_pruitt",

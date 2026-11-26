@@ -132,7 +132,7 @@
     "o7"
   ],
   "rewards": {
-    "money": -300,
+    "money": -6000,
     "setFlags": [],
     "unlock": [
       "mission.margin_call"
@@ -140,7 +140,11 @@
     "relationships": {
       "char.nick_varelas/char.yiannis_doukas": 1,
       "char.nick_varelas/char.teddy_arce": 0
-    }
+    },
+    "moneyByLead": {
+      "char.nick_varelas": -6000
+    },
+    "payNote": "Exception: Nick pays the ice trucks, the favours and Teddy's envelope out of his own pocket."
   },
   "npcs": [
     "char.nick_varelas",

@@ -122,7 +122,7 @@
     "o5"
   ],
   "rewards": {
-    "money": 0,
+    "money": 120,
     "setFlags": [
       "flag.corwin_sold"
     ],
@@ -132,7 +132,11 @@
     "relationships": {
       "char.teddy_arce/char.odessa_pruitt": 1,
       "char.teddy_arce/char.vic_prentiss": -1
-    }
+    },
+    "moneyByLead": {
+      "char.teddy_arce": 120
+    },
+    "payNote": "A week's wages at the night desk, in an envelope from Prentiss."
   },
   "npcs": [
     "char.odessa_pruitt",

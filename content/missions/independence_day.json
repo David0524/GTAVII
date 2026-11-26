@@ -163,7 +163,7 @@
     "o10"
   ],
   "rewards": {
-    "money": 0,
+    "money": 2600,
     "setFlags": [
       "flag.act2_started"
     ],
@@ -175,7 +175,12 @@
       "char.teddy_arce/char.delphine_moore": 1,
       "char.delphine_moore/char.teddy_arce": 1,
       "char.teddy_arce/char.earl_poole": 1
-    }
+    },
+    "moneyByLead": {
+      "char.teddy_arce": 2000,
+      "char.delphine_moore": 600
+    },
+    "payNote": "Teddy's cut of the holiday envelopes; Delphine keeps what Lonnie's crew dropped."
   },
   "npcs": [
     "char.earl_poole",

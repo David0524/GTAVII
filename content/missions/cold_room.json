@@ -116,11 +116,15 @@
     "o5"
   ],
   "rewards": {
-    "money": 0,
+    "money": 2000,
     "setFlags": [],
     "unlock": [
       "mission.brownout"
-    ]
+    ],
+    "moneyByLead": {
+      "char.teddy_arce": 2000
+    },
+    "payNote": "Fur District collections: the biggest week of the round."
   },
   "npcs": [
     "char.stavros_kallis",

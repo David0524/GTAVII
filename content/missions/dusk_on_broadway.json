@@ -142,7 +142,8 @@
     ],
     "items": [
       "item.corwin_master_keys"
-    ]
+    ],
+    "payNote": "Exception: Teddy refuses the offer. Nothing is paid."
   },
   "npcs": [
     "char.carl_mayhew",

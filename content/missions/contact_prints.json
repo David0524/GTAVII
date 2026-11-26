@@ -143,13 +143,17 @@
     "o7"
   ],
   "rewards": {
-    "money": 0,
+    "money": 1200,
     "setFlags": [
       "flag.photo_file_3"
     ],
     "unlock": [
       "mission.cold_room"
-    ]
+    ],
+    "moneyByLead": {
+      "char.delphine_moore": 1200
+    },
+    "payNote": "Ricky's leak is paid for; Earl's ledger copies are sold to the Dispatch's morgue."
   },
   "npcs": [
     "char.earl_poole",

@@ -122,7 +122,16 @@
     "setFlags": [],
     "unlock": [
       "mission.contact_prints"
-    ]
+    ],
+    "moneyIf": [
+      {
+        "flag": "flag.branch_a_wire",
+        "lead": "char.teddy_arce",
+        "money": 1000,
+        "why": "Calloway's witness expenses"
+      }
+    ],
+    "payNote": "No pay unless Teddy wears the wire (Branch A)."
   },
   "npcs": [
     "char.ruth_calloway",

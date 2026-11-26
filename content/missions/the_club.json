@@ -132,7 +132,7 @@
     "o5b"
   ],
   "rewards": {
-    "money": 0,
+    "money": 450,
     "setFlags": [
       "flag.tax_raised"
     ],
@@ -143,7 +143,11 @@
       "char.delphine_moore/char.claudette_bijou": 1,
       "char.delphine_moore/char.jimmy_brannock": -1,
       "char.delphine_moore/char.marcus_teague": 1
-    }
+    },
+    "moneyByLead": {
+      "char.delphine_moore": 450
+    },
+    "payNote": "Delphine's own week. The club's pot isn't hers and is never counted as income."
   },
   "npcs": [
     "char.rita_haines",

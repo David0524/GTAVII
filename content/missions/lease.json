@@ -99,11 +99,23 @@
     "o3"
   ],
   "rewards": {
-    "money": 0,
+    "money": 4000,
     "setFlags": [],
     "unlock": [
       "mission.labor_day"
-    ]
+    ],
+    "moneyByLead": {
+      "char.delphine_moore": 4000
+    },
+    "moneyIf": [
+      {
+        "flag": "flag.delphine_shop",
+        "lead": "char.delphine_moore",
+        "money": -3000,
+        "why": "the shop's first quarter's rent"
+      }
+    ],
+    "payNote": "The club's count settles and Delphine's share is paid out."
   },
   "npcs": [
     "char.claudette_bijou",

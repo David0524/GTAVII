@@ -119,7 +119,8 @@
     ],
     "relationships": {
       "char.teddy_arce/char.pat_kearney": 2
-    }
+    },
+    "payNote": "Exception: the truth about 1971. Nothing is paid."
   },
   "npcs": [
     "char.pat_kearney",

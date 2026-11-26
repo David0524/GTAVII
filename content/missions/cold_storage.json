@@ -160,7 +160,7 @@
     "o10"
   ],
   "rewards": {
-    "money": 0,
+    "money": 33500,
     "setFlags": [
       "flag.vault_claim_paid"
     ],
@@ -171,7 +171,13 @@
       "char.nick_varelas/char.yiannis_doukas": -1,
       "char.teddy_arce/char.nick_varelas": 1,
       "char.delphine_moore/char.nick_varelas": 0
-    }
+    },
+    "moneyByLead": {
+      "char.nick_varelas": 25000,
+      "char.teddy_arce": 5000,
+      "char.delphine_moore": 3500
+    },
+    "payNote": "THE HEIST. Nick's insurance claim on the 'missing' coats; Teddy's cut as the collector who saw it; Delphine's price for the negatives."
   },
   "npcs": [
     "char.eleni_varelas",

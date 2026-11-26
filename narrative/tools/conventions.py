@@ -60,5 +60,6 @@ def apply(missions, dialogue_speakers=None):
         m["essential"] = [{"character": c, "reason": "died"} for c in sorted(ess)]
         keep = [f for f in m.get("fail", []) if f["type"] not in ("player_down", "caught")]
         m["fail"] = keep + STANDARD_FAILS
+        import pay as _pay; _pay.apply_one(m)
         m["conventions"] = "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
     return missions

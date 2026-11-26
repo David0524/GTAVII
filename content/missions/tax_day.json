@@ -119,7 +119,7 @@
     "o5"
   ],
   "rewards": {
-    "money": 0,
+    "money": 1000,
     "setFlags": [],
     "unlock": [
       "mission.lunch_counter"
@@ -127,7 +127,11 @@
     "relationships": {
       "char.delphine_moore/char.ray_bauer": 1,
       "char.delphine_moore/char.tina_mercado": -1
-    }
+    },
+    "moneyByLead": {
+      "char.delphine_moore": 1000
+    },
+    "payNote": "Bauer's fee for keeping his name out of it."
   },
   "npcs": [
     "char.rita_haines",

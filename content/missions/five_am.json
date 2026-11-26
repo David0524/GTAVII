@@ -110,7 +110,7 @@
     "o5"
   ],
   "rewards": {
-    "money": 200,
+    "money": 1500,
     "setFlags": [],
     "unlock": [
       "mission.tax_day",
@@ -118,7 +118,11 @@
     ],
     "relationships": {
       "char.teddy_arce/char.anna_moretti": -1
-    }
+    },
+    "moneyByLead": {
+      "char.teddy_arce": 1500
+    },
+    "payNote": "The bagman's skim on the dawn collections."
   },
   "npcs": [
     "char.anna_moretti",

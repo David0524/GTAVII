@@ -122,7 +122,7 @@
     "o4"
   ],
   "rewards": {
-    "money": 0,
+    "money": 600,
     "setFlags": [
       "flag.photo_file_started"
     ],
@@ -135,7 +135,11 @@
     "relationships": {
       "char.delphine_moore/char.rita_haines": 1,
       "char.delphine_moore/char.jimmy_brannock": -1
-    }
+    },
+    "moneyByLead": {
+      "char.delphine_moore": 600
+    },
+    "payNote": "Delphine sells a print of Brannock collecting to a scandal sheet, with no name attached."
   },
   "npcs": [
     "char.jimmy_brannock",

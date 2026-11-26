@@ -140,13 +140,19 @@
     "o9"
   ],
   "rewards": {
-    "money": 0,
+    "money": 6500,
     "setFlags": [],
     "unlock": [
       "mission.shoebox",
       "mission.flip",
       "mission.the_car"
-    ]
+    ],
+    "moneyByLead": {
+      "char.teddy_arce": 2000,
+      "char.delphine_moore": 1500,
+      "char.nick_varelas": 3000
+    },
+    "payNote": "Resignation night panic: Mayhew's grab bag, the club's emergency fee, Nick's liquidated furs."
   },
   "npcs": [
     "char.odessa_pruitt",

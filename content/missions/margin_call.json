@@ -117,7 +117,7 @@
     "o7"
   ],
   "rewards": {
-    "money": 0,
+    "money": 4000,
     "setFlags": [],
     "unlock": [
       "mission.the_lease"
@@ -125,7 +125,11 @@
     "relationships": {
       "char.nick_varelas/char.gordon_whitlock": -1,
       "char.nick_varelas/char.stavros_kallis": -1
-    }
+    },
+    "moneyByLead": {
+      "char.nick_varelas": 4000
+    },
+    "payNote": "Kallis's bridge money, with strings that M24 pulls."
   },
   "npcs": [
     "char.gordon_whitlock",

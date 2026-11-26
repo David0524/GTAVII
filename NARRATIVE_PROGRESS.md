@@ -862,3 +862,11 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   Cormorant, The Gilded Lyre, The Pharaoh, The Comet), each exact-name searched and cleared.
 
 - **Cutscene branches:** the UI accepted `showIf {choice, option}` (UI commit cd3cd9d) and merged all 7 new scripts. Branch shot ids (s5a…, s6a…, s4a–s4d) freeze once a scene is laid out, the same rule as other shot ids.
+- **Mission pay (26 Nov 2026):** the user's words, verbatim: "Yes, but in GTA VI you can really rack up money. Like 10s of
+  thousands". The table is in `narrative/tools/pay.py`, applied through `conventions.apply`. It writes rewards.money (the total),
+  moneyByLead, moneyIf (branch adjustments keyed by flag) and payNote (where the money comes from in the fiction).
+  - Base story totals: Teddy $24,950, Delphine $28,850, Nick $52,500. Branch B adds $0–$35k for Teddy, and the Corwin's fate adds
+    −$10k to +$40k for Nick.
+  - Heists: Cold Storage pays $33.5k across the three leads; the finale pays $6k each.
+  - Exceptions: M1, M19, M25 and M28 pay $0; Brownout costs Nick $6k.
+  - Gameplay may tune the figures from its economy simulation.

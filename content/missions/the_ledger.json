@@ -131,7 +131,34 @@
     "unlock": [
       "mission.closing",
       "mission.lease"
-    ]
+    ],
+    "moneyIf": [
+      {
+        "flag": "flag.ledger_to_prosecutor",
+        "lead": "char.teddy_arce",
+        "money": 7500,
+        "why": "witness relocation stipend"
+      },
+      {
+        "flag": "flag.ledger_to_press",
+        "lead": "char.teddy_arce",
+        "money": 10000,
+        "why": "the Dispatch buys the story"
+      },
+      {
+        "flag": "flag.ledger_kept",
+        "lead": "char.teddy_arce",
+        "money": 35000,
+        "why": "the pad's first month, run by Teddy"
+      },
+      {
+        "flag": "flag.ledger_burned",
+        "lead": "char.teddy_arce",
+        "money": 0,
+        "why": "nothing: that's the point"
+      }
+    ],
+    "payNote": "Branch B sets the payout: Testimony $7.5k, Public $10k, New Pad $35k, Ashes $0."
   },
   "npcs": [
     "char.bernard_ostrow",

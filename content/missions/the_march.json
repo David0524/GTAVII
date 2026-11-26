@@ -138,7 +138,8 @@
     "relationships": {
       "char.nick_varelas/char.odessa_pruitt": 1,
       "char.teddy_arce/char.carmen_arce": 1
-    }
+    },
+    "payNote": "Exception: the march. Nothing is paid."
   },
   "npcs": [
     "char.odessa_pruitt",

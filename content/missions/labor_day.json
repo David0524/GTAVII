@@ -131,12 +131,18 @@
     "o7"
   ],
   "rewards": {
-    "money": 0,
+    "money": 18000,
     "setFlags": [
       "flag.epilogue_started"
     ],
     "unlock": [],
-    "setDate": "1974-10-01"
+    "setDate": "1974-10-01",
+    "moneyByLead": {
+      "char.teddy_arce": 6000,
+      "char.delphine_moore": 6000,
+      "char.nick_varelas": 6000
+    },
+    "payNote": "THE FINALE. The last load: an even split, as promised at the prow."
   },
   "npcs": [
     "char.teddy_arce",

@@ -161,7 +161,7 @@
     "o9"
   ],
   "rewards": {
-    "money": 0,
+    "money": 3000,
     "setFlags": [],
     "unlock": [
       "mission.fire_watch"
@@ -169,7 +169,11 @@
     "relationships": {
       "char.delphine_moore/char.mi_sook_baek": 1,
       "char.delphine_moore/char.marcus_teague": 1
-    }
+    },
+    "moneyByLead": {
+      "char.delphine_moore": 3000
+    },
+    "payNote": "Delphine's fee for carrying the club money underground. The club's $18,000 is moved, not earned."
   },
   "npcs": [
     "char.marcus_teague",

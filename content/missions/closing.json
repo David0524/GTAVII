@@ -115,7 +115,28 @@
     "setFlags": [],
     "unlock": [
       "mission.labor_day"
-    ]
+    ],
+    "moneyIf": [
+      {
+        "flag": "flag.corwin_sold_on",
+        "lead": "char.nick_varelas",
+        "money": 40000,
+        "why": "Lisle's people pay over the odds"
+      },
+      {
+        "flag": "flag.corwin_kept",
+        "lead": "char.nick_varelas",
+        "money": -10000,
+        "why": "real wiring and fans on eleven"
+      },
+      {
+        "flag": "flag.corwin_to_council",
+        "lead": "char.nick_varelas",
+        "money": -1,
+        "why": "a dollar the wrong way, on purpose"
+      }
+    ],
+    "payNote": "The Corwin's fate sets Nick's payout."
   },
   "npcs": [
     "char.eleni_varelas",

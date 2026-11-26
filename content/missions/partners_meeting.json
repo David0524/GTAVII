@@ -104,7 +104,7 @@
     "o5b"
   ],
   "rewards": {
-    "money": 0,
+    "money": 6000,
     "setFlags": [],
     "unlock": [
       "mission.carbon_copy"
@@ -112,7 +112,11 @@
     "relationships": {
       "char.nick_varelas/char.marjorie_kell": 1,
       "char.nick_varelas/char.howard_lisle": -2
-    }
+    },
+    "moneyByLead": {
+      "char.nick_varelas": 6000
+    },
+    "payNote": "Lisle's 'fee' for Nick's name on every hotel: the dirtiest money in the game."
   },
   "npcs": [
     "char.howard_lisle",

@@ -125,7 +125,7 @@
     "o9"
   ],
   "rewards": {
-    "money": 200,
+    "money": 1000,
     "setFlags": [
       "flag.vacate_notices",
       "flag.teddy_collector"
@@ -141,7 +141,19 @@
     "relationships": {
       "char.teddy_arce/char.carmen_arce": 1,
       "char.teddy_arce/char.pat_kearney": 1
-    }
+    },
+    "moneyByLead": {
+      "char.teddy_arce": 1000
+    },
+    "moneyIf": [
+      {
+        "flag": "flag.mayhew_saw_photo",
+        "lead": "char.teddy_arce",
+        "money": 500,
+        "why": "Mayhew pays more to make the photograph go away"
+      }
+    ],
+    "payNote": "Mayhew's first week and the start-up cash for the round. The dialogue's '$200 a week' is the salary; the rest is float to keep."
   },
   "npcs": [
     "char.vic_prentiss",

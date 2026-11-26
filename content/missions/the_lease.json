@@ -129,7 +129,7 @@
     "o7"
   ],
   "rewards": {
-    "money": 0,
+    "money": 1500,
     "setFlags": [],
     "unlock": [
       "mission.cold_storage"
@@ -137,7 +137,11 @@
     "relationships": {
       "char.delphine_moore/char.nick_varelas": 1,
       "char.nick_varelas/char.delphine_moore": 1
-    }
+    },
+    "moneyByLead": {
+      "char.delphine_moore": 1500
+    },
+    "payNote": "Nick's agent's goodwill deposit for the W 37th St shop, if Delphine signs."
   },
   "npcs": [
     "char.nick_varelas",

@@ -111,11 +111,15 @@
     "o6"
   ],
   "rewards": {
-    "money": 0,
+    "money": 8000,
     "setFlags": [],
     "unlock": [
       "mission.fire_watch"
-    ]
+    ],
+    "moneyByLead": {
+      "char.nick_varelas": 8000
+    },
+    "payNote": "Calloway's deal and Augie's buy-out of the trucking contract."
   },
   "npcs": [
     "char.ruth_calloway",

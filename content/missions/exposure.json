@@ -147,7 +147,7 @@
     "o9"
   ],
   "rewards": {
-    "money": 0,
+    "money": 9000,
     "setFlags": [
       "flag.have_wurtz_locker"
     ],
@@ -158,7 +158,12 @@
       "char.delphine_moore/char.nick_varelas": 1,
       "char.nick_varelas/char.delphine_moore": 1,
       "char.nick_varelas/char.jimmy_brannock": 0
-    }
+    },
+    "moneyByLead": {
+      "char.delphine_moore": 4000,
+      "char.nick_varelas": 5000
+    },
+    "payNote": "Wurtz's locker cash, split."
   },
   "npcs": [
     "char.dennis_wurtz",

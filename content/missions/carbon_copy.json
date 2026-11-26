@@ -158,14 +158,27 @@
     "o9"
   ],
   "rewards": {
-    "money": 0,
+    "money": 4000,
     "setFlags": [
       "flag.act3_started"
     ],
     "unlock": [
       "mission.the_address"
     ],
-    "act": 3
+    "act": 3,
+    "moneyByLead": {
+      "char.teddy_arce": 2500,
+      "char.nick_varelas": 1500
+    },
+    "moneyIf": [
+      {
+        "flag": "flag.branch_a_burned",
+        "lead": "char.teddy_arce",
+        "money": 2500,
+        "why": "the stolen ledger's cash drawer"
+      }
+    ],
+    "payNote": "Mayhew's last envelope to Teddy; Nick's kickback from Marjorie's carbons."
   },
   "npcs": [
     "char.bernard_ostrow",
