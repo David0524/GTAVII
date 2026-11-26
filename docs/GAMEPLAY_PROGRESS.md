@@ -111,12 +111,16 @@ The camera direction is set straight up for all of it.
 | Fire mode | `setContext({ fireMode: 'auto' \| 'tap' \| 'button' })`. With `auto` (the touch default), a gun out and a visible locked target, it fires by itself. With `tap` or `button`, the UI calls `setFiring` | `shot` |
 | One context button | `contextAction()` → `{kind, label, target?}` or null; `doContextAction(moveDir?)` performs it. Priority: surrender/payOff (cop encounter) > exit vehicle > pick up gun > takedown > answer phone > enter vehicle (keys/carjack/slim jim) > payphone > open hydrant > leave/take cover | `context` (fires only when it changes, checked 4×/s; `{kind:null}` when nothing applies) |
 
+| UiHost.touch helpers (UI 425f04e) | `touchMode()` returns 'drive' in a vehicle, and 'combat' with a weapon drawn, when shot at or hit in the last 6 s, or with a hostile in sight within 35 m; otherwise 'foot'. Also: `armed()`, `weaponList()` (wheel), `swapWeapon(±1)`, `drawWeapon()` (toggle, remembers the last gun), `coverLabel()` → Cover/Leave/Roll, `coverOrRoll(moveDir)` | — |
+
+Context labels are kept short enough for a button (≤ 14 chars): Pay off, Hands up, Pick up .38, Takedown, Answer, Get in, Carjack, Steal car, Phone 10¢, Open hydrant, Go in, Knock, Locked, Talk, Cover.
+
 **Talk** and **door** are covered through bindings, ENGINE_REQUESTS 15.
 - `bindTalk`: the engine's mission runtime gives named characters, who rank right after the car and phone actions.
 - `bindDoors`: Interiors' `doorsForChunk`. An unlocked door gives Go in; a locked one gives Knock during its hours and Locked outside them. Doors rank above cover.
 - Fallback: an ordinary sim ped within 2 m gives "Say something" (a bark), ranked last.
 
-Tests: `touch.test.ts` (10 cases; the camera aims at the sky in all of them).
+Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
 
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, 3,480 frames):

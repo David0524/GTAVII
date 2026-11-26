@@ -144,6 +144,32 @@ test('touch: context button opens doors (interiors list), knocks out of hours, a
   // engine talkables outrank doors; with none bound, a ped within 2 m gets a bark
   const talked: string[] = [];
   r.g.bindTalk({ nearestTalkable: (x, z) => (Math.hypot(x - 402, z) < 2 ? { id: 'char.mrs_k', name: 'Mrs. K', x: 402, z: 1 } : null), talk: (id) => talked.push(id) });
-  assert.equal(r.g.contextAction()?.label, 'Talk to Mrs. K');
+  assert.deepEqual([r.g.contextAction()?.kind, r.g.contextAction()?.target], ['talk', 'char.mrs_k']);
   r.g.doContextAction(); assert.deepEqual(talked, ['char.mrs_k']);
+});
+
+test('touch: UiHost.touch helpers: mode, armed, draw/swap, cover-or-roll, short labels', () => {
+  const r = touchRig();
+  r.step(0.1);
+  assert.equal(r.g.touchMode(), 'foot');
+  assert.ok(r.g.armed(), 'Teddy starts with his service revolver');
+  assert.notEqual(r.g.drawWeapon(), 'weapon.fists'); assert.equal(r.g.touchMode(), 'combat');
+  const drawn = r.g.pc.weapon;
+  assert.equal(r.g.drawWeapon(), 'weapon.fists'); assert.equal(r.g.touchMode(), 'foot');
+  assert.equal(r.g.drawWeapon(), drawn, 'draw brings back the last gun');
+  const order = r.g.weaponList().map((w) => w.id);
+  assert.equal(r.g.swapWeapon(1), order[(order.indexOf(drawn) + 1) % order.length]);
+  r.g.holster();
+  // a hostile in sight flips to combat
+  r.g.spawnCombatant({ id: 'e', faction: 'gang', squad: 's', pos: [0, 0, -15], weapon: null });
+  r.g.ai.alert('e', [0, 0], 'player'); r.step(0.3);
+  assert.equal(r.g.touchMode(), 'combat');
+  // cover-or-roll
+  assert.equal(r.g.coverLabel(), 'Roll');
+  r.g.addCar('car', 0, 0, -2.5, Math.PI / 2); r.pos[2] = -0.6;
+  assert.equal(r.g.coverLabel(), 'Cover'); assert.equal(r.g.coverOrRoll([0, -1]), 'Cover'); assert.equal(r.g.coverLabel(), 'Leave');
+  // labels fit a button
+  r.g.spawnCombatant({ id: 'd', faction: 'gang', squad: 's2', pos: [1, 0, -0.6], weapon: 'weapon.snub', hp: 1 });
+  r.g.ai.agents.get('d')!.alive = false;
+  const c = r.g.contextAction()!; assert.equal(c.kind, 'pickUp'); assert.ok(c.label.length <= 14, c.label);
 });

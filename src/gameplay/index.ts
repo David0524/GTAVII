@@ -624,21 +624,21 @@ export class Gameplay {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
-    if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay him off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
+    if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
     if (this.pc.vehicle) return { kind: 'exitVehicle', label: 'Get out' };
-    for (const a of this.ai.agents.values()) if (!a.alive && a.gun && !a.looted && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2.5) return { kind: 'pickUp', label: `Take the ${this.reg.weapon(a.gun.def.id).name}`, target: a.id };
-    for (const a of this.ai.agents.values()) if (this.ai.unaware(a.id) && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 1.4) return { kind: 'takedown', label: 'Take him down', target: a.id };
-    const ring = this.phones.pending.find((c) => c.ringing); if (ring) { const ph = this.phones.phones.get(ring.ringing!); if (ph && Math.hypot(ph.x - p[0], ph.z - p[2]) < 3) return { kind: 'answerPhone', label: 'Answer the phone', target: ph.id }; }
-    for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3) { const m = this.cars.methods(c.id, this.player.lead); if (m.length) return { kind: 'enterVehicle', label: m[0] === 'keys' || m[0] === 'unlocked' ? 'Get in' : m[0] === 'carjack' ? 'Pull him out' : 'Slim jim', target: c.id }; }
-    const ph = this.phones.nearest(p[0], p[2], 2.5); if (ph) return { kind: 'usePhone', label: 'Payphone (10¢)', target: ph.id };
-    if (this.reg.weapon(this.pc.weapon).family === 'blunt') for (const pr of this.props.list.values()) if (pr.type === 'hydrant' && !this.props.isBroken(pr.id) && Math.hypot(pr.x - p[0], pr.z - p[2]) < 1.6) return { kind: 'openHydrant', label: 'Open the hydrant', target: pr.id };
+    for (const a of this.ai.agents.values()) if (!a.alive && a.gun && !a.looted && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2.5) return { kind: 'pickUp', label: `Pick up ${this.shortName(a.gun.def.id)}`, target: a.id };
+    for (const a of this.ai.agents.values()) if (this.ai.unaware(a.id) && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 1.4) return { kind: 'takedown', label: 'Takedown', target: a.id };
+    const ring = this.phones.pending.find((c) => c.ringing); if (ring) { const ph = this.phones.phones.get(ring.ringing!); if (ph && Math.hypot(ph.x - p[0], ph.z - p[2]) < 3) return { kind: 'answerPhone', label: 'Answer', target: ph.id }; }
+    for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3) { const m = this.cars.methods(c.id, this.player.lead); if (m.length) return { kind: 'enterVehicle', label: m[0] === 'keys' || m[0] === 'unlocked' ? 'Get in' : m[0] === 'carjack' ? 'Carjack' : 'Steal car', target: c.id }; }
+    const ph = this.phones.nearest(p[0], p[2], 2.5); if (ph) return { kind: 'usePhone', label: 'Phone 10¢', target: ph.id };
+    if (this.reg.weapon(this.pc.weapon).family === 'blunt') for (const pr of this.props.list.values()) if (pr.type === 'hydrant' && !this.props.isBroken(pr.id) && Math.hypot(pr.x - p[0], pr.z - p[2]) < 1.6) return { kind: 'openHydrant', label: 'Open hydrant', target: pr.id };
     const t = this.nearestTalkable(p[0], p[2]);
-    if (t && !t.ped) return { kind: 'talk', label: `Talk to ${t.name}`, target: t.id };
+    if (t && !t.ped) return { kind: 'talk', label: `Talk`, target: t.id };
     const d = this.nearestDoor(p[0], p[2]);
     if (d) return { kind: 'door', label: d.locked ? (this.doorOpenNow(d) ? 'Knock' : 'Locked') : 'Go in', target: d.id };
     if (this.pc.cover) return { kind: 'leaveCover', label: 'Leave cover' };
     if (this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
-    if (t) return { kind: 'talk', label: 'Say something', target: t.id };
+    if (t) return { kind: 'talk', label: 'Talk', target: t.id };
     return null;
   }
   /** Do the context action (the bribe amount for payOff is the cop's expected price; the UI may offer more). */
@@ -676,6 +676,51 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ frame
   private ctxTimer = 0; private ctxKey = '';
+  // ------------------------------------------------------------------ UiHost.touch helpers (UI chat, claude/ui-cinematics 425f04e)
+  private lastThreatAt = -1e9; private lastGun = '';
+  /** Short display name for button labels: "Pick up .38" rather than the full model name. */
+  private shortName(weaponId: string) { const w = this.reg.weapon(weaponId); const cal = w.ammo?.replace(/^item\.ammo_/, ''); return cal ? (/^\d/.test(cal) && !cal.includes('ga') && cal.length <= 2 ? '.' + cal : cal) : w.name.split(' ').at(-1)!.toLowerCase(); }
+  /** Which control set the touch layer shows. "Under fire" = shot at or hit in the last 6 s, or a hostile in sight within 35 m. */
+  touchMode(): 'combat' | 'drive' | 'foot' {
+    if (this.pc.vehicle) return 'drive';
+    if (this.pc.weapon !== 'weapon.fists' || this.time - this.lastThreatAt < 6) return 'combat';
+    if (this.player) { const p = this.player.position(); if (this.aimTargets().some((t) => t.hostile && t.alive && t.visible && Math.hypot(t.chest[0] - p[0], t.chest[2] - p[2]) < 35)) return 'combat'; }
+    return 'foot';
+  }
+  /** The player owns a weapon other than fists. */
+  armed() { return !!this.player && this.inv.weapons(this.player.lead).some((w) => w !== 'weapon.fists'); }
+  /** For the weapon wheel: owned weapons with rounds loaded/reserve. */
+  weaponList() {
+    if (!this.player) return [];
+    const lead = this.player.lead;
+    return this.inv.weapons(lead).map((id) => { const w = this.reg.weapon(id); return { id, name: w.name, short: this.shortName(id), loaded: this.inv.ensure(lead).loaded.get(id) ?? 0, reserve: this.inv.reserve(lead, id), equipped: id === this.pc.weapon }; });
+  }
+  /** Swipe on the reload button: next/previous owned weapon (fists included). */
+  swapWeapon(dir: 1 | -1) {
+    if (!this.player) return null;
+    const ws = this.inv.weapons(this.player.lead); if (!ws.length) return null;
+    const i = Math.max(0, ws.indexOf(this.pc.weapon)); const next = ws[(i + dir + ws.length) % ws.length];
+    this.equip(next); if (next !== 'weapon.fists') this.lastGun = next; return next;
+  }
+  /** Tap: draw the last weapon used (or the first owned), or put it away. */
+  drawWeapon() {
+    if (!this.player) return null;
+    if (this.pc.weapon !== 'weapon.fists') { this.lastGun = this.pc.weapon; this.holster(); return 'weapon.fists'; }
+    const ws = this.inv.weapons(this.player.lead).filter((w) => w !== 'weapon.fists');
+    const pick = ws.includes(this.lastGun) ? this.lastGun : ws[0]; if (!pick) return null;
+    this.equip(pick); return pick;
+  }
+  coverLabel(): 'Cover' | 'Leave' | 'Roll' {
+    if (this.pc.cover) return 'Leave';
+    if (this.player) { const p = this.player.position(); if (this.cover.near(p[0], p[2], null, 2)) return 'Cover'; }
+    return 'Roll';
+  }
+  /** One button: take or leave cover when there is some, otherwise a dodge roll in moveDir (backwards if none). */
+  coverOrRoll(moveDir: [number, number] | null) {
+    const l = this.coverLabel();
+    if (l === 'Roll') return this.dodge(moveDir ?? [0, 1]) ? 'Roll' : null;
+    this.toggleCover(moveDir); return l;
+  }
   /** Swipe on the lock reticle: +1 right / −1 left (same as cycleLock). */
   swipeLock(dir: 1 | -1) { return this.cycleLock(dir); }
   update(dt: number) {
@@ -795,13 +840,14 @@ export class Gameplay {
       const target = this.actors.get(h.actorId);
       if (byPlayer && this.player) learn(this.inv.ensure(this.player.lead).skills, h.region === 'head' ? 'headshot' : 'shotHit');
       const res = this.applyDamage(h.actorId, { amount: h.damage, region: h.region, source: r.shooter, type: 'bullet', power: r.shot.power });
+      if (h.actorId === this.player?.id) this.lastThreatAt = this.time;
       this.emit('hit', { target: h.actorId, region: h.region, damage: res?.dealt ?? 0, point: h.point, shooter: r.shooter, killed: res?.killed, through: h.through });
       if (byPlayer && target) {
         const kind: CrimeKind = target.kind === 'cop' || this.policeSys.units.has(target.id) ? (res?.killed ? 'officer_down' : 'assault_officer') : res?.killed ? 'homicide' : 'shooting';
         this.crime(kind, { victim: target.id, noise: this.reg.weapon(r.shot.weapon).noise });
       }
     }
-    for (const n of r.nearMiss) { this.ai.suppress(n.actorId, 1); if (n.actorId === this.player?.id) this.emit('notice', { kind: 'nearMiss', dist: n.dist }); }
+    for (const n of r.nearMiss) { this.ai.suppress(n.actorId, 1); if (n.actorId === this.player?.id) { this.lastThreatAt = this.time; this.emit('notice', { kind: 'nearMiss', dist: n.dist }); } }
     for (const s of r.surfaces) {
       this.emit('impact', { point: s.point, material: s.material, id: s.id, penetrated: s.penetrated, weapon: r.shot.weapon });
       if (this.props.get(s.id)) this.damageProp(s.id, r.shot.damage, 'bullet', r.shooter);
