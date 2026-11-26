@@ -216,6 +216,15 @@ export function fluorescent(k: Kit, x: number, z: number, ceil: number, len = 1.
   if (Math.abs(Math.sin(yaw)) > 0.5) { k.light(x, ceil - 0.15, z - len * 0.3, [0.86, 0.95, 0.88], intensity / 2, 'bulb', flicker); k.light(x, ceil - 0.15, z + len * 0.3, [0.86, 0.95, 0.88], intensity / 2, 'bulb', flicker); }
   else k.light(x, ceil - 0.15, z, [0.86, 0.95, 0.88], intensity, 'tube', flicker);
 }
+/** Crystal-and-brass chandelier (pristine grade): a ring of candle bulbs and drops. */
+export function chandelier(k: Kit, x: number, z: number, ceil: number, intensity = 3.0) {
+  const brass = tint(M.chrome, '#b08a4a');
+  k.cyl(x, ceil - 0.5, z, 0.012, 0.5, brass, 4, { top: false });
+  k.cyl(x, ceil - 0.75, z, 0.08, 0.25, brass, 8, { r1: 0.04 });
+  for (let a = 0; a < 6; a++) { const ca = Math.cos(a * 1.047) * 0.38, sa = Math.sin(a * 1.047) * 0.38; k.cyl(x + ca, ceil - 0.8, z + sa, 0.02, 0.05, brass, 6); k.cyl(x + ca, ceil - 0.75, z + sa, 0.025, 0.08, M.bulb, 6); k.cyl(x + ca * 0.8, ceil - 0.95, z + sa * 0.8, 0.012, 0.14, M.glass, 4, { glass: true }); }
+  k.cyl(x, ceil - 0.82, z, 0.4, 0.015, brass, 16, { top: false });
+  k.light(x, ceil - 0.8, z, [1.0, 0.82, 0.58], intensity, 'bulb');
+}
 export function ceilingFan(k: Kit, x: number, z: number, ceil: number) {
   k.cyl(x, ceil - 0.35, z, 0.015, 0.35, M.woodDark, 5, { top: false });
   k.cyl(x, ceil - 0.48, z, 0.1, 0.13, M.woodDark, 10);
