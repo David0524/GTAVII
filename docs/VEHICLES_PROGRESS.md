@@ -4,6 +4,88 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 3: the user's "Yes all of it" (2026-11-26)
+The user confirmed the scope relayed by the oversight session: condition and breakdowns, the
+damage API, theft, ownership, and the new roster. Everything below is built and measured, and the
+numbers are in `shots/vehicles/report.json`.
+
+### What was built
+- **Trim tiers × condition** (`src/vehicles/state.ts`, pure and Node-tested).
+  - Tiers: economy, standard, luxury, police (heavy-duty package) and commercial.
+  - Condition comes from the variant seed: mileage, shocks, tyres, alignment pull, brakes, tired
+    engine, radiator, battery.
+  - Period upgrades: radial tyres, heavy-duty suspension, a four-barrel carburettor, the
+    police-package engine.
+  - Garage actions: `install()` / `uninstall()`, `service()`, `respray()`, `setTrim()`. These
+    retune the physics live.
+- **Police out-run the average civilian car:** police reach 0–60 in 9.0–9.2 s with a 107–112 mph
+  top speed. Civilian Bancrofts take 11.9–19.3 s and top out at 76–89 mph, depending on trim and
+  wear.
+- **1974 failure modes** (`EngineSystems`): coolant temperature with steam and power loss, vapour
+  lock after a hot stop, a flooded carburettor (clear it by flooring the throttle), a weak battery
+  with push starts, misfires and backfires, brake fade, and fuel (about 13 mpg cruising, with a
+  sputter then stall when empty).
+  - Each mode can be forced (`forceFailure()`) or suppressed (`failureRate = 0`) by missions.
+  - Calibration, in August stop-and-go traffic: a healthy car sits at 88–98 °C, a worn radiator
+    boils over after about 8 minutes (cruising cools it), and a holed radiator boils over in about
+    3 minutes.
+- **The damage API** is `applyHit({ point, normal, impulse, type, source })`. The contract
+  already uses `damage` for the damage number, so the method can't share the name.
+  - It resolves glass per pane (cracked, then shattered), tyres (flat: the car runs on the rim
+    and pulls), radiator (starts the overheating clock), engine (power, smoke), fuel tank (leak,
+    rare fire) and lamps, and leaves bullet holes.
+  - A bent front pulls. Flat front tyre: 4.4 m drift over 3 s hands-off at 40 mph.
+  - Rams credit the attacker: `impact` events carry `attackerId`, `attackerDriverId`,
+    `otherVehicleId` and `closingSpeed`. A test ram credited the right vehicle and driver.
+- **Weather:** rain on oily asphalt is worst in the first minutes. Braking from 40 mph: 86 ft
+  dry, 148 ft in early rain, 119 ft later in the rain, 93 ft on radials.
+- **Theft and ownership:**
+  - locks, keys left in, slim jim, window smash (a loud event), hot-wire, and ignition with auto
+    crank;
+  - `entryPoints()` for doors, windows, dash, trunk and hood;
+  - rear seats plus `windowPose()` for drive-bys;
+  - visible, swappable plates;
+  - a trunk with capacity and metadata;
+  - `serialize()` → JSON → `factory.restore()` reproduces the car exactly (0 diffs, about
+    1.3 KB, identical physics).
+- **Roster:**
+  - the `bancroft_cab` sedan taxi;
+  - an ambulance, a cab-forward pumper, a rear-mount aerial ladder truck, a right-hand-drive mail
+    van and a soft-serve truck;
+  - the Calder 650 and Patrol motorcycles, the Wexford messenger bicycle and the carrier trike;
+  - the Pell Type 7 subway car with 1970s graffiti, interior and sliding doors.
+- **Two-wheelers:** the body is held upright and the lean is visual (42° at the limit). Too much
+  steering or a hard hit causes a lowside, highside or impact crash. A `crash` event hands the
+  rider to the characters stream with their pre-impact velocity.
+  - Top speeds: Calder 650 93 mph (0–30 in 1.6 s), messenger bicycle 17 mph, trike 14 mph.
+- **Subway:** a rail-driven train with kinematic cars and sliding door colliders. The sim drives
+  `setState({ s, doorsOpen })`. A 4-car update costs 0.008 ms.
+
+### Budgets (headless SwiftShader; CPU numbers are valid)
+- Car update plus world step: about 0.03 ms. Bike update: about 0.003 ms.
+- Traffic, 150 instances: 0.08 ms. Draw calls are up to about 5 per model per LOD, because of
+  the new head and sign lamp parts.
+
+### Honest critique
+- **Physics:**
+  - Two-wheelers don't simulate balance. That's deliberate for phones, but they can't do
+    wheelies or stoppies and won't fall at a standstill.
+  - The trike doesn't lean or tip.
+  - Subway cars aren't in the traffic renderer, and two-wheelers aren't either.
+- **Subway interior:**
+  - The interior is lit, but the window glass is opaque, so you can't see out from inside (fine
+    in tunnels, wrong in stations).
+  - Graffiti tags are syllable-generated placeholders until the narrative stream supplies its tag
+    set.
+- **Damage:**
+  - Bullet holes are flat discs.
+  - Glass shatters to a dark opening rather than falling out.
+  - A fuel-tank fire is a probability, not a simulated leak and ignition.
+- **Ladder truck:** a rear-mount aerial, not NYC's iconic tractor-drawn tiller.
+- **Plates:** 1974 New York plate colours still need checking.
+- **Shots:** the systems sheet's theft frame shows the unsmashed side.
+- **Not done:** an in-car radio (the user said not now).
+
 ## Session 2: engine merge and integration (2026-11-26)
 - **Merged** `claude/tenderloin-74-engine-qi54lt` at a24eda4 with a merge commit. The only
   conflict was package.json; the test lot was ported to `Input.poll(dt)`.

@@ -13,7 +13,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
-const only = new Set(arg('only', 'turntable,lineup,drive,damage,traffic,metrics').split(','));
+const only = new Set(arg('only', 'turntable,lineup,drive,damage,systems,bikes,subway,traffic,metrics').split(','));
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
@@ -62,7 +62,7 @@ async function main() {
   try {
     await open(page, 'mode=turntable&quality=high');
     const pick = arg('models', '');
-    const models: { id: string; displayName: string }[] = (await page.evaluate(() => window.__VEH.factory.models)).filter((m: { id: string }) => !pick || pick.split(',').includes(m.id));
+    const models: { id: string; displayName: string }[] = (await page.evaluate(() => window.__VEH.factory.models)).filter((m: { id: string; class: string }) => !['motorcycle', 'bicycle', 'tricycle'].includes(m.class) && (!pick || pick.split(',').includes(m.id)));
 
     // ------------------------------------------------------------------ turntables
     if (only.has('turntable')) {
@@ -179,6 +179,91 @@ async function main() {
       await camRel(page, [-3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
       await sheet(page, close, 2, 640, 360, 'damage_crumple_closeup.png', ['taxi after a 30 mph wall hit', 'other side']);
       console.log('damage');
+    }
+
+    // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements
+    if (only.has('systems')) {
+      await open(page, 'mode=drive&quality=high');
+      const frames: Buffer[] = [], labels: string[] = [];
+      const shot = async (label: string, rel: [number, number, number], lookY = 0.4, fov = 40) => { await camRel(page, rel, fov, lookY); frames.push(await snap(page)); labels.push(label); };
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 6, { x: -20, z: 40, yaw: 0 }); V.player.setLights({ head: false }); V.simulate(0.5);
+        const g = V.player.asset.lod0, w = V.player.physics.wheels.find((x: any) => x.front && x.side < 0);
+        for (let i = 0; i < 7; i++) V.shoot({ x: -1.0, y: 0.45 + (i % 3) * 0.12, z: -0.6 + i * 0.25 }); // door panel holes
+        V.shoot({ x: -0.75, y: 1.15, z: 0.4 }); V.shoot({ x: -0.75, y: 1.1, z: 0.5 }); // left glass: crack then shatter
+        V.shoot({ x: w.hp.x - 0.1, y: w.hp.y - w.len, z: w.hp.z }); // front-left tyre
+        V.shoot({ x: 0, y: 1.15, z: g.minZ + 2.4 }); // windshield crack
+        V.simulate(1); });
+      await shot('bullets: door holes, shattered side glass, cracked windshield, flat front tyre', [-5.2, 1.4, -2.5]);
+      await page.evaluate(() => { const V = window.__VEH; const g = V.player.asset.lod0; V.shoot({ x: 0, y: 0.55, z: g.minZ + 0.25 }); V.shoot({ x: 0.2, y: 0.6, z: g.minZ + 0.25 }); V.player.engine.temp = 121; V.player.engine.overheating = true; V.simulate(2.5); });
+      await shot(`radiator holed: overheating, steam (${await page.evaluate(() => window.__VEH.player.engine.temp.toFixed(0))} °C)`, [3.5, 1.8, -6.5], 0.5);
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 8, { x: -20, z: 40, yaw: 0 }); V.player.security.keysIn = false; V.player.lock(); V.simulate(0.3); V.player.breakWindow('left'); V.player.hotwire(); V.simulate(0.5); });
+      await shot('theft: window smashed (loud), hot-wired', [-4.5, 1.5, -1.5]);
+      await page.evaluate(() => { const V = window.__VEH; V.player.respray(0x1f2a40); V.player.setPlate('KFZ 219'); V.simulate(0.2); });
+      await shot('chop shop: respray + new plates (description and plate history stay with gameplay)', [3.5, 1.2, 6.5], 0.3);
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft_patrol', 1, { x: -20, z: 40, yaw: 0 }); V.player.setLights({ beacon: true, head: true }); V.simulate(0.2); });
+      await shot('police package: beacon, spotlight, HD suspension', [4.5, 1.6, -6], 0.4);
+      await sheet(page, frames, 3, 640, 360, 'systems.png', labels);
+      report.systems = await page.evaluate(() => {
+        const V = window.__VEH, DT = 1 / 60, o: any = {};
+        const run = (id: string, v: number) => { V.setModel(id, v, { x: -300, z: 1500, yaw: 0 }); V.player.failureRate = 0; V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.5); V.setAuto({ throttle: 1, brake: 0, steer: 0, handbrake: false }); let t = 0, t60 = 0, top = 0; while (t < 40) { V.simulate(DT); t += DT; if (!t60 && V.player.speed > 26.82) t60 = t; top = Math.max(top, V.player.speed); } return { variant: v, trim: V.player.trim, mileage: Math.round(V.player.mileage), t0_60s: +t60.toFixed(1), topMph: +(top * 2.237).toFixed(0) }; };
+        o.police = [0, 1, 2].map((v) => run('bancroft_patrol', v));
+        o.civilian = [0, 1, 2, 3, 4, 5].map((v) => run('bancroft', v));
+        const stop = (wet: number, mins: number, radial: boolean) => { V.setModel('bancroft', 1, { x: -300, z: 1500, yaw: 0 }); if (radial) V.player.install('radialTyres'); V.player.setWetness(wet, mins); V.simulate(0.3); V.player.body.setLinvel({ x: 0, y: 0, z: -17.9 }, true); V.simulate(DT); const z0 = V.player.object.position.z; V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: false }); let k = 0; while (k < 900 && Math.abs(V.player.speed) > 0.2) { V.simulate(DT); k++; } V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); return +(Math.abs(V.player.object.position.z - z0) * 3.281).toFixed(0); };
+        o.brake40to0_ft = { dry: stop(0, 999, false), wetFirstMinutes: stop(1, 1, false), wetLater: stop(1, 30, false), wetRadials: stop(1, 30, true) };
+        V.setModel('bancroft', 2, { x: -300, z: 1500, yaw: 0 }); V.player.condition.alignment = 0; V.simulate(0.5);
+        const w = V.player.physics.wheels.find((x: any) => x.front && x.side > 0); V.shoot({ x: w.hp.x + 0.12, y: w.hp.y - w.len, z: w.hp.z });
+        V.player.body.setLinvel({ x: 0, y: 0, z: -17.9 }, true); V.setAuto({ throttle: 0.35, brake: 0, steer: 0, handbrake: false }); const x0 = V.player.object.position.x; V.simulate(3); o.flatFrontRightDrift3s_m = +(V.player.object.position.x - x0).toFixed(2);
+        V.setModel('tiverton', 4, { x: -300, z: 1500, yaw: 0 }); const A = V.player; V.simulate(0.5); A.applyDamage('left', 0.4, 'x'); V.shoot(); V.shoot(); A.install('hdSuspension'); A.respray(0x2c3a5a); A.setPlate('NIK 974'); A.trunkAdd({ id: 'briefcase', qty: 1, meta: { cash: 5000 } }); V.simulate(2);
+        const s1 = A.serialize(), json = JSON.stringify(s1); const R = V.factory.restore(V.world, V.scene, JSON.parse(json)); const s2 = R.serialize();
+        const diff: string[] = []; const cmp = (a: any, b: any, p: string) => { if (typeof a === 'number' && typeof b === 'number') { if (Math.abs(a - b) > 1e-4) diff.push(p); } else if (a && typeof a === 'object') { for (const k of new Set([...Object.keys(a), ...Object.keys(b || {})])) cmp(a[k], b?.[k], p + '.' + k); } else if (a !== b) diff.push(p); };
+        cmp(s1, s2, 'save'); o.saveRoundTrip = { diffs: diff, bytes: json.length, physicsIdentical: JSON.stringify(R.physics.p) === JSON.stringify(A.physics.p) }; R.dispose();
+        return o;
+      });
+      console.log('systems', JSON.stringify(report.systems));
+    }
+
+    // ------------------------------------------------------------------ two-wheelers
+    if (only.has('bikes')) {
+      await open(page, 'mode=drive&quality=high');
+      const frames: Buffer[] = [], labels: string[] = [];
+      const bikes: string[] = ['calder650', 'calder_patrol', 'wexford_roadster', 'wexford_carrier'];
+      for (const id of bikes) for (const rel of [[2.4, 1.3, -2.8], [3.4, 1.0, 0], [-2.4, 1.6, 2.8]] as [number, number, number][]) {
+        const d = await page.evaluate(([id, rel]: [string, number[]]) => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: false }); for (const b of V.bikes.splice(0)) b.dispose(); const bk = V.rideBike(id, { x: 0, z: 30, yaw: 0 }, 1); V.simulate(0.6); const o = bk.object.position; V.setCamera(o.x + rel[0], rel[1], o.z + rel[2], o.x, 0.6, o.z, 40); return [V.capture(), bk.spec.displayName]; }, [id, rel] as [string, number[]]);
+        frames.push(Buffer.from(d[0].split(',')[1], 'base64')); labels.push(d[1]);
+      }
+      const lean = await page.evaluate(() => { const V = window.__VEH; for (const b of V.bikes.splice(0)) b.dispose(); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); const bk = V.rideBike('calder650', { x: -300, z: 1500, yaw: 0 }, 2); V.simulate(0.3); bk.body.setLinvel({ x: 0, y: 0, z: -15 }, true); V.setAuto({ throttle: 0.4, brake: 0, steer: 0.45, handbrake: false }); V.simulate(1.2); const o = bk.object.position, f = new o.constructor(0, 0, -1).applyQuaternion(bk.object.quaternion); V.setCamera(o.x + f.x * 4.5, 1.0, o.z + f.z * 4.5, o.x, 0.7, o.z, 40); return [V.capture(), (bk.lean * 57.3).toFixed(0)]; });
+      frames.push(Buffer.from(lean[0].split(',')[1], 'base64')); labels.push(`leaning ${lean[1]}° at 34 mph`);
+      const crash = await page.evaluate(() => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); const bk = V.rideBike('calder650', { x: 40, z: 30, yaw: -Math.PI / 2 }, 3); let ev: any = null; bk.on('crash', (e: any) => (ev = e)); V.simulate(0.3); bk.body.setLinvel({ x: 12, y: 0, z: 0 }, true); V.simulate(2.5); const o = bk.object.position; V.setCamera(o.x - 4, 1.6, o.z - 3, o.x, 0.4, o.z, 45); return [V.capture(), ev ? `${ev.cause}, rider thrown at ${(ev.speed * 2.237).toFixed(0)} mph` : 'no crash']; });
+      frames.push(Buffer.from(crash[0].split(',')[1], 'base64')); labels.push(`wall crash: ${crash[1]}`);
+      await sheet(page, frames, 3, 480, 300, 'bikes.png', labels);
+      report.bikes = await page.evaluate(() => {
+        const V = window.__VEH, DT = 1 / 60, o: any = {};
+        for (const id of ['calder650', 'calder_patrol', 'wexford_roadster', 'wexford_carrier']) {
+          for (const b of V.bikes.splice(0)) b.dispose(); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false });
+          const bk = V.rideBike(id, { x: -300, z: 1500, yaw: 0 }); V.simulate(0.5); V.setAuto({ throttle: 1, brake: 0, steer: 0, handbrake: false });
+          let t = 0, t30 = 0, top = 0; while (t < 25) { V.simulate(DT); t += DT; if (!t30 && bk.speed > 13.41) t30 = t; top = Math.max(top, bk.speed); }
+          const t1 = performance.now(); for (let k = 0; k < 600; k++) bk.update(DT);
+          o[id] = { t0_30s: t30 ? +t30.toFixed(1) : null, topMph: +(top * 2.237).toFixed(0), updateMs: +((performance.now() - t1) / 600).toFixed(3) };
+        }
+        return o;
+      });
+      console.log('bikes', JSON.stringify(report.bikes));
+    }
+
+    // ------------------------------------------------------------------ subway
+    if (only.has('subway')) {
+      await open(page, 'mode=subway&quality=high');
+      const frames: Buffer[] = [], labels: string[] = [];
+      const cap = async (label: string, fn: () => string) => { frames.push(Buffer.from((await page.evaluate(fn)).split(',')[1], 'base64')); labels.push(label); };
+      await cap('three-quarter, doors closed', () => { const V = window.__VEH; V.trainSim.t = 0; V.simulate(0.2); const c = V.train.cars[0].group.position; V.setCamera(c.x + 12, 2.2, c.z - 14, c.x - 4, 2, c.z, 45); return V.capture(); });
+      await cap('side: whole-car pieces, throw-ups, tags', () => { const V = window.__VEH; const c = V.train.cars[1].group.position; V.setCamera(c.x, 1.8, c.z - 13, c.x, 2, c.z, 50); return V.capture(); });
+      await cap('dwell: doors open (graffiti slides with the leaves)', () => { const V = window.__VEH; V.trainSim.t = 0; V.simulate(4); const c = V.train.cars[0].group.position; V.setCamera(c.x - 1, 1.9, c.z - 5, c.x - 1, 2, c.z, 55); return V.capture(); });
+      await cap('interior: benches, poles, straps, fluorescents, car cards', () => { const V = window.__VEH; const g = V.train.cars[1].group; const a = g.localToWorld(new g.position.constructor(0.3, 2.3, -7.2)), t = g.localToWorld(new g.position.constructor(0, 1.9, 6)); V.setCamera(a.x, a.y, a.z, t.x, t.y, t.z, 62); return V.capture(); });
+      await cap('cab end', () => { const V = window.__VEH; const g = V.train.cars[0].group; const a = g.localToWorld(new g.position.constructor(2.5, 2.2, -14)), t = g.localToWorld(new g.position.constructor(0, 2, -7)); V.setCamera(a.x, a.y, a.z, t.x, t.y, t.z, 45); return V.capture(); });
+      await cap('running', () => { const V = window.__VEH; V.trainSim.t = 20; V.simulate(6); const c = V.train.cars[2].group.position; V.setCamera(c.x + 8, 1.6, c.z - 10, c.x - 5, 2, c.z, 50); return V.capture(); });
+      await sheet(page, frames, 3, 640, 360, 'subway.png', labels);
+      report.subway = await page.evaluate(() => { const V = window.__VEH; const t0 = performance.now(); for (let i = 0; i < 300; i++) V.train.update(); return { cars: V.train.cars.length, updateMs: +((performance.now() - t0) / 300).toFixed(3) }; });
+      console.log('subway', JSON.stringify(report.subway));
     }
 
     // ------------------------------------------------------------------ traffic renderer

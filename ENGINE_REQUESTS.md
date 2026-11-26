@@ -51,3 +51,48 @@ Status as of the engine merge at a24eda4. Already answered by the engine, so **n
   (one draw call, 3,000-quad ring buffer).
 - **Fallback:** add `SkidMarks.mesh` to the scene and call `skidMarks.add(e)` on each skid
   event.
+
+## From vehicles: 7. New shared vehicle classes in `src/shared/traffic.ts`
+- **What:** add `ambulance`, `fire_engine`, `ladder_truck`, `mail_truck`, `ice_cream`,
+  `motorcycle`, `police_motorcycle` and `bicycle` to `VEHICLE_CLASSES`.
+- **Why:** these are the user's roster additions (FEATURE_AUDIT, all confirmed by the user).
+  The sim needs them to spawn emergency responses, mail rounds, the summer soft-serve route and
+  messengers.
+- **Fallback:** `resolve()` already accepts the first five through `PROPOSED_CLASS_MODELS` in
+  `src/vehicles/registry.ts`. Two-wheelers aren't in the traffic renderer yet; the sim can spawn
+  them with `factory.spawnBike()`.
+
+## From vehicles: 8. Save sections for owned vehicles
+- **What:** a save section holding an array of `VehicleSave`, from `vehicle.serialize()`, and
+  `TwoWheelerSave`, from `bike.serialize()`. On load, pass them to `factory.restore()` and
+  `factory.restoreBike()`.
+- **Why:** the user wants to buy and own cars. A save covers model, variant, trim, condition,
+  mileage, damage, components, upgrades, respray, plate, trunk contents, fuel, engine state,
+  locks and keys, and the exact pose. The round trip is verified exact in `shots/vehicles/report.json`
+  (`systems.saveRoundTrip`), and a car is about 1.3 KB of JSON.
+- **Fallback:** gameplay can keep the JSON in its own section.
+
+## From vehicles: 9. Rider hand-off and moving platforms
+- **What:**
+  1. `TwoWheeler` emits `crash` with `riderPosition` and `riderVelocity` (the pre-impact
+     velocity). The characters stream should spawn the ragdoll from it.
+  2. Subway cars are kinematic bodies (`kinematicPositionBased`), so the player controller needs
+     moving-platform support to ride them (inherit the platform's velocity).
+- **Fallback:**
+  1. The test lot just logs the crash.
+  2. Characters can parent to `train.cars[i].group` while seated.
+
+## From vehicles: 10. Subway track data
+- **What:** the sim or interiors stream supplies the track centreline per line
+  (`train.setTrack(points)` at rail-top height) and drives `train.setState({ s, doorsOpen, lights })`.
+- **Fallback:** the test lot's `mode=subway` runs a straight demo track with a dwell and run cycle.
+
+## From vehicles: 11. Naming note: `vehicle.applyHit(hit)`, not `vehicle.damage(hit)`
+- **What:** the brief's contract already defines `readonly damage: number` on `Vehicle`, so the
+  gameplay hit entry point is `applyHit({ point, normal, impulse, type: 'bullet' | 'impact' | 'fire', source })`.
+  It returns `{ component }`.
+- **Related:**
+  - `impact` events now carry `vehicleId`, `otherVehicleId`, `attackerId`, `attackerDriverId`
+    (set `vehicle.driverId`) and `closingSpeed`.
+  - `component`, `engine` and `theft` events are new.
+- **Fallback:** n/a. Please relay this to the gameplay stream.
