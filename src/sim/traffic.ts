@@ -10,9 +10,10 @@ import { LinkFlag, LinkKind, RoadFlag, Turn, type Link } from './laneFormat';
 import { Sig } from './network';
 import type { SimCore, Vehicle, Hail } from './state';
 import { vehDensity } from './state';
-import type { VehicleKind } from './archetypes';
+import type { VehicleKind, ArchetypeRt } from './archetypes';
 import type { VehicleClass } from '../shared/traffic';
 import { edgeDistance, EDGE } from '../shared/bounds';
+import { policeConnector, policeVehicleTick } from './police';
 
 /** Body length/width by shared vehicle class (src/shared/traffic.ts). */
 const DIMS: Record<VehicleClass, [number, number]> = {
@@ -84,7 +85,7 @@ export function placeVehicle(S: SimCore, v: Vehicle) {
     const e = v.lcT * v.lcT * (3 - 2 * v.lcT);
     x = tmp2[0] + (tmp[0] - tmp2[0]) * e; z = tmp2[1] + (tmp[1] - tmp2[1]) * e;
   }
-  v.x = x; v.z = z; v.yaw = Math.atan2(-dx, -dz);
+  v.x = x; v.z = z; v.yaw = Math.atan2(-dx, -dz) + (v.state === 'roadblock' ? Math.PI / 2 : 0);
 }
 
 /** Connector chosen by default from a lane: matching turn, else straight, else first. */
@@ -102,6 +103,10 @@ function defaultConn(S: SimCore, lane: number, turn: number): number {
 function chooseRoute(S: SimCore, v: Vehicle) {
   const L = linkOf(S, v.link);
   if (L.kind !== LinkKind.Lane) { v.next = -1; v.want = -1; return; }
+  if (v.cop && v.cop.mode !== 'idle') {
+    const cn = policeConnector(S, v);
+    if (cn >= 0) { v.want = cn; v.next = S.srcLane[cn] === v.link ? cn : defaultConn(S, v.link, linkOf(S, cn).turn); return; }
+  }
   const grp = S.net.groups.get(L.group)!;
   const opts: number[] = [], w: number[] = [];
   let total = 0;
@@ -144,31 +149,40 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     const ramp = Math.max(0, Math.min(1, 1 - edgeDistance(tmp[0], tmp[1]) / EDGE.RAMP));
     if (!full && S.rng.next() > 0.45 + 0.55 * ramp) continue;
     const vclass = pickClass(S, kind);
-    const [vl, vw] = DIMS[vclass];
+    const [vl] = DIMS[vclass];
     if (kind === 'bus' && L.laneIndex !== 0 && L.laneCount > 2) continue;
     // free space on the lane
     let ok = true;
     for (const o of S.occ[lane]) if (Math.abs(o.s - s) < (o.len + vl) / 2 + 6) { ok = false; break; }
     if (ok) for (const o of S.vehicles) if (Math.hypot(o.x - tmp[0], o.z - tmp[1]) < (o.len + vl) / 2 + 3) { ok = false; break; }
     if (!ok) continue;
-    const ag = arch.aggression;
-    const v: Vehicle = {
-      id: S.nextId++, kind, vclass, lights: 0, arch, variant: S.rng.int(1 << 30), alive: true,
-      link: lane, prevLink: -1, s, v: L.speed * 0.6, acc: 0, len: vl, wid: vw, next: -1, want: -1,
-      v0f: (kind === 'bus' || kind === 'truck' ? 0.85 : 0.92 + 0.2 * ag) * S.rng.range(0.92, 1.08),
-      T: kind === 'cab' ? 0.9 : kind === 'bus' ? 1.6 : 1.3 - 0.4 * ag, aMax: kind === 'bus' || kind === 'truck' ? 1.1 : 1.8 + ag * 0.6,
-      bComf: 2.4, s0: kind === 'cab' ? 1.5 : 2.0,
-      state: 'drive', dwell: 0, lat: 0, latTarget: 0, passable: false, lcFrom: -1, lcT: 1, lcCd: S.rng.range(0, 1),
-      stopT: 0, waitT: 0, honkCd: S.rng.range(0, 4), greenWait: 0, force: false, pullT: 0, atLine: false, hailFrom: -1,
-      x: 0, z: 0, yaw: 0, px: 0, pz: 0, pyaw: 0,
-      fare: kind === 'cab' && S.rng.chance(0.5), fareT: S.rng.range(30, 160), hail: null, stopAt: -1, stopLink: -1, stopKind: '',
-      dpDone: !S.rng.chance(0.45), busServed: -1, blockedBy: '', why: '',
-    };
-    chooseRoute(S, v);
-    placeVehicle(S, v); v.px = v.x; v.pz = v.z; v.pyaw = v.yaw;
-    S.vehicles.push(v); occInsert(S, v); n++; budget--;
+    makeVehicle(S, kind, vclass, arch, lane, s); n++; budget--;
     S.stats.spawnedV++;
   }
+}
+
+/** Create and register a vehicle on a lane (ambient spawns, police, scripted). */
+export function makeVehicle(S: SimCore, kind: VehicleKind, vclass: VehicleClass, arch: ArchetypeRt, lane: number, s: number): Vehicle {
+  const L = S.net.g.links[lane];
+  const [vl, vw] = DIMS[vclass];
+  const ag = arch.aggression;
+  const v: Vehicle = {
+    id: S.nextId++, kind, vclass, lights: 0, arch, variant: S.rng.int(1 << 30), alive: true,
+    link: lane, prevLink: -1, s, v: L.speed * 0.6, acc: 0, len: vl, wid: vw, next: -1, want: -1,
+    v0f: (kind === 'bus' || kind === 'truck' ? 0.85 : 0.92 + 0.2 * ag) * S.rng.range(0.92, 1.08),
+    T: kind === 'cab' ? 0.9 : kind === 'bus' ? 1.6 : 1.3 - 0.4 * ag, aMax: kind === 'bus' || kind === 'truck' ? 1.1 : 1.8 + ag * 0.6,
+    bComf: 2.4, s0: kind === 'cab' ? 1.5 : 2.0,
+    state: 'drive', dwell: 0, lat: 0, latTarget: 0, passable: false, lcFrom: -1, lcT: 1, lcCd: S.rng.range(0, 1),
+    stopT: 0, waitT: 0, honkCd: S.rng.range(0, 4), greenWait: 0, force: false, pullT: 0, atLine: false, hailFrom: -1, cop: null, owner: -1,
+    x: 0, z: 0, yaw: 0, px: 0, pz: 0, pyaw: 0,
+    fare: kind === 'cab' && S.rng.chance(0.5), fareT: S.rng.range(30, 160), hail: null, stopAt: -1, stopLink: -1, stopKind: '',
+    dpDone: kind !== 'truck' || !S.rng.chance(0.45), busServed: -1, blockedBy: '', why: '',
+  };
+  chooseRoute(S, v);
+  placeVehicle(S, v); v.px = v.x; v.pz = v.z; v.pyaw = v.yaw;
+  S.vehicles.push(v); occInsert(S, v);
+  S.stats.spawnedV++;
+  return v;
 }
 
 export function despawnVehicle(S: SimCore, v: Vehicle) {
@@ -200,6 +214,20 @@ function roomFrom(S: SimCore, out: number, t: number): number {
     best = Math.max(best, net.len[c] + (ft ? ft.s - ft.len / 2 : net.len[tl]));
   }
   return len + best;
+}
+
+/** For a police car running a red with its siren: anything physically in the way inside the junction? */
+function sirenBlocked(S: SimCore, v: Vehicle): string {
+  const net = S.net, c = v.next;
+  if (c < 0) return '';
+  const C = net.g.links[c];
+  for (const cf of C.conflicts) if (vehiclesBeforePoint(S, cf.link, cf.sOther, v.wid + 1.0)) return 'conflict';
+  for (const cf of C.conflicts) { // vehicles about to enter on green: let them clear first
+    const src = S.srcLane[cf.link];
+    for (const w of S.occ[src]) if (w.next === cf.link && net.len[src] - w.s < 12 && w.v > 2) return 'yield';
+  }
+  for (const cr of C.crossings) { const peds = S.onWalk.get(cr.walkEdge); if (peds?.length) { sampleAt(C.pts, net.cum[c], cr.s, tmp); for (const p of peds) if (Math.hypot(p.x - tmp[0], p.z - tmp[1]) < 4.5) return 'peds'; } }
+  return '';
 }
 
 /** May vehicle v (on a lane, approaching its stop line) enter its chosen connector now? */
@@ -307,7 +335,11 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     const stopS = len - v.len / 2 - 0.4;
     let must = '';
     const sig = net.laneSignal(v.link, t);
-    if (sig === Sig.Red) must = 'red';
+    const siren = !!v.cop?.siren;
+    if (siren && (sig === Sig.Red || sig === Sig.Yellow)) {
+      // emergency: crawl up to the line and go only when no crossing traffic or pedestrians are in the way
+      if (dEnd < 25) { const c = sirenBlocked(S, v); if (c) must = c; else consider(Math.max(0.5, dEnd - v.len / 2), 3.0, 'siren'); }
+    } else if (sig === Sig.Red) must = 'red';
     else if (sig === Sig.Yellow && dEnd - v.len / 2 > (v.v * v.v) / (2 * 3.5) + 1) must = 'red';
     if (net.dark.has(L.endJ)) { // dead signal = all-way stop: come to a full stop at the line first
       if (dEnd - v.len / 2 < 3 && v.v < 0.3) v.atLine = true;
@@ -414,6 +446,7 @@ function laneChangeLogic(S: SimCore, v: Vehicle, obs: Obs) {
   const aggressive = v.kind === 'cab' || v.arch.aggression > 0.7 || (v.kind === 'bus' && v.stopLink >= 0);
   // mandatory: curb lane for stops, desired turn lane
   let target = -1;
+  if (v.pullT > 0 && L.right >= 0) { if (tryLaneChange(S, v, L.right, true)) return; }
   if (v.stopLink >= 0 && v.stopLink !== v.link && net.g.links[v.stopLink].group === L.group) target = v.stopLink;
   else if (v.want >= 0 && S.srcLane[v.want] !== v.link && net.g.links[S.srcLane[v.want]].group === L.group) target = S.srcLane[v.want];
   if (target >= 0) {
@@ -589,6 +622,8 @@ function updateLights(S: SimCore, v: Vehicle) {
     else if (L.kind === LinkKind.Connector && L.turn !== Turn.Straight) m |= L.turn === Turn.Left ? L_IND_L : L_IND_R;
   }
   if (v.vclass === 'taxi' && !v.fare) m |= L_ROOF;
+  if (v.cop?.siren) m |= 128 | L_HEAD; // Siren bit (VehicleLights.Siren): light bar + siren audio
+  if (v.state === 'onScene' || v.state === 'roadblock') m |= L_HAZARD;
   v.lights = m;
 }
 
@@ -597,6 +632,7 @@ const obs: Obs = { gap: Infinity, vl: 0, why: '', hard: Infinity };
 
 export function stepVehicles(S: SimCore, dt: number) {
   const net = S.net, t = S.t;
+  S.sirens = S.vehicles.filter((w) => w.alive && w.cop?.siren).map((w) => ({ id: w.id, x: w.x, z: w.z, vx: -Math.sin(w.yaw) * w.v, vz: -Math.cos(w.yaw) * w.v }));
   S.lcList = S.lcList.filter((w) => w.alive && w.lcT < 1 && w.lcFrom >= 0);
   const rainF = S.weather === 'rain' ? 0.85 : 1;
   for (const v of S.vehicles) {
@@ -607,6 +643,8 @@ export function stepVehicles(S: SimCore, dt: number) {
     v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * 1.4);
     const L = net.g.links[v.link];
 
+    if (v.cop) policeVehicleTick(S, v, dt);
+    if (v.state === 'roadblock' || v.state === 'onScene' || v.state === 'boxIn') { v.v = 0; v.acc = 0; v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * 1.4); placeVehicle(S, v); updateLights(S, v); continue; }
     if (v.state === 'doubleParked' || v.state === 'curb' || v.state === 'busStop') {
       v.dwell -= dt; v.v = 0; v.acc = 0;
       if (v.dwell <= 0 && Math.abs(v.lat - v.latTarget) < 0.05) {
@@ -625,19 +663,26 @@ export function stepVehicles(S: SimCore, dt: number) {
     const edgeF = ed < EDGE.BLOCKERS ? Math.max(0.12, ed / EDGE.BLOCKERS) : 1;
     const v0 = L.speed * v.v0f * rainF * edgeF;
     let a = idm(v, v0, obs.gap, obs.vl);
-    // sirens: pull to the kerb and stop until the emergency vehicle is past (period-true and good-looking)
+    // sirens: get out of the way. Kerb-lane cars pull into the parking lane and stop; cars in other lanes
+    // slow and move right. Nobody stops in the junction mouth, and a siren that isn't moving is ignored
+    // (otherwise a stuck police car would freeze everyone around it).
     v.pullT -= dt;
-    if (L.kind === LinkKind.Lane) for (const ac of S.actors) {
-      if (!ac.siren) continue;
+    const dEndP = net.len[v.link] - v.s;
+    if (L.kind === LinkKind.Lane && !v.cop && dEndP > 15) for (const ac of [...S.actors, ...S.sirens]) {
+      if (('siren' in ac && !ac.siren) || ac.id === v.id || Math.hypot(ac.vx, ac.vz) < 2) continue;
       const rx = ac.x - v.x, rz = ac.z - v.z, d = Math.hypot(rx, rz);
       if (d > 80) continue;
       const fx = -Math.sin(v.yaw), fz = -Math.cos(v.yaw), ahead = rx * fx + rz * fz, avf = ac.vx * fx + ac.vz * fz;
-      if ((ahead < 8 && avf > 1) || (ahead > 0 && avf < -1 && d < 60) || d < 25) v.pullT = 2.5;
+      if ((ahead < 8 && avf > 1) || (ahead > 0 && avf < -1 && d < 60)) v.pullT = 2.5;
     }
     if (v.pullT > 0) {
-      a = Math.min(a, v.v > 0.2 ? -2.8 : 0);
-      if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive') v.latTarget = (L.width - v.wid) / 2 + 1.1;
-      v.blockedBy = 'siren';
+      if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive') {
+        a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren';
+        // into the parking lane, unless something is parked or double-parked right there (then just stop)
+        const kerbBusy = S.occ[v.link].some((w) => w !== v && (w.state !== 'drive' || w.passable) && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 4);
+        if (!kerbBusy && v.latTarget >= 0) v.latTarget = (L.width - v.wid) / 2 + 1.1;
+      }
+      else if (v.v > 4) a = Math.min(a, -1.5); // slow down; laneChangeLogic moves right
     } else if (v.pullT > -0.1 && v.latTarget > 0 && v.state === 'drive') v.latTarget = 0;
     a = Math.max(-B_MAX, Math.min(v.aMax, a));
     let nv = Math.max(0, v.v + a * dt);
@@ -670,7 +715,7 @@ export function stepVehicles(S: SimCore, dt: number) {
       let nextLink: number;
       if (cur.kind === LinkKind.Lane) {
         nextLink = v.next >= 0 ? v.next : cur.next[0];
-        if (net.laneSignal(v.link, t) === Sig.Red) S.stats.redLight++;
+        if (net.laneSignal(v.link, t) === Sig.Red && !v.cop?.siren) S.stats.redLight++;
       } else nextLink = cur.next[0];
       occRemove(S, v);
       v.prevLink = v.link; v.link = nextLink; v.s = rem; v.lcFrom = -1; v.lcT = 1; v.atLine = false;
@@ -680,7 +725,8 @@ export function stepVehicles(S: SimCore, dt: number) {
     }
     // lane changes (staggered)
     if (v.lcCd <= 0) { v.lcCd = 0.5; laneChangeLogic(S, v, obs); }
-    periodBehaviour(S, v, dt);
+    if (!v.cop) periodBehaviour(S, v, dt);
+    else if (v.stopLink === v.link && v.stopAt >= 0) { /* police stop target handled by policeVehicleTick */ }
     placeVehicle(S, v); updateLights(S, v);
   }
 }

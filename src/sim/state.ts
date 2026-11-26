@@ -19,6 +19,7 @@ export interface Vehicle {
   stopT: number; waitT: number; honkCd: number; greenWait: number; force: boolean; pullT: number; atLine: boolean;
   /** lane group a cab was on when it claimed a hail on the next block */
   hailFrom: number;
+  cop: CopState | null; owner: number;
   x: number; z: number; yaw: number; px: number; pz: number; pyaw: number;
   fare: boolean; fareT: number; hail: Hail | null; stopAt: number; stopLink: number; stopKind: string;
   dpDone: boolean; busServed: number; blockedBy: string;
@@ -39,20 +40,37 @@ export interface Ped {
   /** What to do when a free move arrives: attach | loiter | vanish | hail | waitBus | flee | vendor */
   then: string; fleeSpeed: number; cop: boolean;
   goal: PedGoal | null; path: number[];
+  /** 0..1 courage (gameplay: who runs to a call box, who freezes) */
+  nerve: number; actName: string; actPrev: string;
+  /** police officer state (src/sim/police.ts) */
+  cop2: CopState | null;
 }
 
 export interface Hail { ped: number; road: number; side: number; x: number; z: number; claimedBy: number; t: number }
 export interface Actor { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle'; /** emergency siren on: civilians pull over */ siren?: boolean }
+/** Police locomotion state for a foot cop or a police car (decisions stay with Gameplay). */
+export interface CopState {
+  id: number; kind: 'foot' | 'car'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
+  x: number; z: number; cx: number; cz: number; radius: number; yaw: number; target: string | null; urgent: boolean; siren: boolean; maxSpeed: number;
+  route: number[]; arrived: boolean; stuckT: number; blockIds: number;
+}
+
 /** Scripted goal for one pedestrian (gameplay / narrative hooks). */
 export interface PedGoal {
-  kind: 'goto' | 'follow' | 'escort' | 'flee' | 'flagDownCar';
+  kind: 'goto' | 'follow' | 'escort' | 'flee' | 'flagDownCar' | 'act';
+  /** act: what the crowd renderer plays while the ped holds still (use_callbox, use_payphone, cower, hands_up, die, ...) */
+  name?: string; duration?: number;
+  /** sim time (s) when the goal lapses on its own */
+  until?: number;
+  /** urgent: cross against the light when traffic allows (police, panicked owners) */
+  urgent?: boolean;
   x?: number; z?: number; speed?: number;
   /** follow/escort: external actor id (default 'player') or numeric agent id to pace against */
   target?: string | number;
   waypoints?: { x: number; z: number }[]; segment?: number;
   waitRadius?: number; maxSpeed?: number; replanT?: number;
 }
-export interface Block { link: number; s: number; until: number }
+export interface Block { link: number; s: number; until: number; owner?: number }
 export interface Threat { x: number; z: number; r: number; until: number }
 
 export interface Stats {
@@ -83,6 +101,8 @@ export interface SimCore {
   busStopOf: Map<number, BusStop>;
   /** vehicles with a lane change blend in progress */
   lcList: Vehicle[];
+  /** police vehicles with sirens on this step (civilians pull over) */
+  sirens: { id: number; x: number; z: number; vx: number; vz: number }[];
   /** lane -> connectors that feed it */
   preds: number[][];
   /** walk edge -> connectors that cross it */

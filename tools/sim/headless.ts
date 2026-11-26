@@ -83,8 +83,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   sim.setClock(17 * 60 + 30);
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
-  const hooks = { escorts: 0, gotos: 0, witnesses: 0 };
-  for (const t of ['escortProgress', 'escortDone', 'goalReached']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
+  const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0 };
+  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
   const examples: Record<string, string[]> = {};
@@ -110,6 +110,27 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     if (k === Math.round(200 / SIM_DT)) { sim.setSignalPower({ x: f.x, z: f.z, radius: 180 }, false); powerChangedAt = sim.time; }
     if (k === Math.round(330 / SIM_DT)) { sim.setSignalPower({ x: f.x, z: f.z, radius: 5000 }, true); powerChangedAt = sim.time; }
     if (k === Math.round(420 / SIM_DT)) { sim.emit({ type: 'gunfire', x: f.x + 20, z: f.z, loudness: 150 }); hooks.witnesses = sim.perceive({ x: f.x + 20, z: f.z, loudness: 150, visibility: 60 }).peds.length; }
+    // police (gameplay API): urgent siren run, roadblock, foot pursuit of the player, foot patrol; then act / kill / stolen car
+    if (k === Math.round(440 / SIM_DT)) {
+      const a = sim.spawnPolice({ kind: 'car', x: f.x, z: f.z + 120, siren: true });
+      if (a >= 0) { hooks.police++; sim.setPoliceGoal(a, { kind: 'goto', x: f.x, z: f.z - 150, urgent: true }); }
+      const b = sim.spawnPolice({ kind: 'car', x: f.x + 60, z: f.z + 60 });
+      if (b >= 0) { hooks.police++; sim.setPoliceGoal(b, { kind: 'roadblock', x: f.x, z: f.z - 60 }); }
+      const c = sim.spawnPolice({ kind: 'foot', x: f.x + 20, z: f.z });
+      if (c >= 0) { hooks.police++; sim.setPoliceGoal(c, { kind: 'pursue', target: 'player', maxSpeed: 4 }); }
+      const d = sim.spawnPolice({ kind: 'foot', x: f.x - 30, z: f.z });
+      if (d >= 0) { hooks.police++; sim.setPoliceGoal(d, { kind: 'patrol', around: [f.x, f.z], radius: 70 }); }
+      const e = sim.spawnPolice({ kind: 'foot', x: f.x, z: f.z + 30 });
+      if (e >= 0) { hooks.police++; sim.setPoliceGoal(e, { kind: 'goto', x: f.x + 10, z: f.z - 20, urgent: true, maxSpeed: 3.5 }); }
+    }
+    if (k === Math.round(470 / SIM_DT)) {
+      const ps = sim.debugAgents().peds.filter((p) => p.state === 'walk' && !p.cop2);
+      if (ps[0]) hooks.acts += sim.setGoal(ps[0].id, { kind: 'act', name: 'use_callbox', duration: 8 }) ? 1 : 0;
+      if (ps[1]) hooks.kills += sim.kill(ps[1].id, 30) ? 1 : 0;
+      const car = sim.debugAgents().vehicles.find((v) => v.kind === 'car' && v.state === 'drive' && Math.hypot(v.x - f.x, v.z - f.z) < 80);
+      if (car && sim.takeVehicle(car.id)) hooks.stolen++;
+    }
+    if (k === Math.round(590 / SIM_DT)) for (const pv of [...sim.police]) sim.despawnPolice(pv.id);
     // escort + goto goals on two nearby peds (narrative N4, gameplay scripted goals)
     if (k === Math.round(30 / SIM_DT) || k === Math.round(230 / SIM_DT) || k === Math.round(430 / SIM_DT)) {
       const ps = sim.debugAgents().peds.filter((p) => p.state === 'walk' && Math.hypot(p.x - f.x, p.z - f.z) < 60);
@@ -160,7 +181,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
         // crossed the stop line during the last two steps: check both step times
         // signals are re-evaluated with today's power state; skip the instant power was switched (a car that crossed a dead signal is legal)
         const red = sim.time - powerChangedAt > 0.2 && net.laneSignal(pl, sim.time) === Sig.Red && net.laneSignal(pl, sim.time - SIM_DT) === Sig.Red && net.laneSignal(pl, sim.time - 2 * SIM_DT) === Sig.Red;
-        if (red) note('redLight', `#${v.id} ran red from lane ${pl} at t=${sim.time.toFixed(1)}`);
+        if (red && !v.cop?.siren) note('redLight', `#${v.id} ran red from lane ${pl} at t=${sim.time.toFixed(1)}`);
       }
       prevLink.set(v.id, v.link);
       // deadlock bookkeeping
@@ -239,6 +260,7 @@ async function main() {
   if (full.maxStationarySec > 180) problems.push(`deadlock: a vehicle stood still ${full.maxStationarySec} s (${full.maxStationaryWho})`);
   if (full.flow.minMovingFraction < 0.05) problems.push(`network-wide stall: moving fraction fell to ${full.flow.minMovingFraction}`);
   if (!report.determinism.equal) problems.push('non-deterministic');
+  if (!full.events.policeArrived) problems.push('police never arrived anywhere');
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;
   fs.writeFileSync(path.join(ROOT, 'docs/sim_test_report.json'), JSON.stringify(report, null, 2));

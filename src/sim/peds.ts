@@ -41,7 +41,7 @@ function newPed(S: SimCore, arch: ArchetypeRt, edge: number, s: number): Ped {
     lat: S.rng.range(-half, half) * 0.8, latGoal: 0, speed: arch.walkSpeed * S.rng.range(0.85, 1.15) * (S.weather === 'rain' ? 1.15 : 1), v: 0,
     state: 'walk', timer: 0, node: -1, prevEdge: -1, x: 0, z: 0, y: SIDEWALK_Y, yaw: 0, px: 0, pz: 0, pyaw: 0,
     tx: 0, tz: 0, toEdge: -1, toS: 0, spot: -1, goalSpot: -1, jayCd: S.rng.range(1, 10), hailCd: S.rng.range(5, 60), hail: null,
-    fleeX: 0, fleeZ: 0, onRoad: false, jaywalking: false, then: '', fleeSpeed: 0, cop: arch.behaviour === 'beat_cop', goal: null, path: [],
+    fleeX: 0, fleeZ: 0, onRoad: false, jaywalking: false, then: '', fleeSpeed: 0, cop: arch.behaviour === 'beat_cop', goal: null, path: [], nerve: Math.max(0, Math.min(1, arch.nerve + S.rng.range(-0.15, 0.15))), cop2: null, actName: '', actPrev: '',
   };
   p.latGoal = S.rng.range(0.1, 0.6) * half;
   return p;
@@ -270,7 +270,7 @@ function arriveNode(S: SimCore, p: Ped) {
   if (N.kind === WalkKind.Crosswalk && p.state !== 'flee') {
     const crossT = net.walkLen[next] / Math.max(0.8, p.speed);
     const sig = (net.g.junctions[N.owner].flags & JuncFlag.Signal) !== 0;
-    if ((sig ? net.walkAllowed(N.owner, N.arm, S.t, crossT) : true) && trafficClearForCrosswalk(S, next)) { enterEdge(S, p, next, node); return; }
+    if ((sig ? net.walkAllowed(N.owner, N.arm, S.t, crossT) || !!p.goal?.urgent : true) && trafficClearForCrosswalk(S, next)) { enterEdge(S, p, next, node); return; }
     if (E.kind === WalkKind.Crosswalk) leaveCrosswalk(S, p);
     p.state = 'waitCross'; p.toEdge = next; p.timer = 0; p.v = 0;
     return;
@@ -288,7 +288,13 @@ export function stepPeds(S: SimCore, dt: number) {
     if (!p.alive) continue;
     p.px = p.x; p.pz = p.z; p.pyaw = p.yaw;
     p.jayCd -= dt; p.hailCd -= dt;
+    if (p.goal?.until !== undefined && S.t > p.goal.until && p.state !== 'dead') setPedGoal(S, p, null);
     switch (p.state) {
+      case 'dead': p.v = 0; if ((p.timer -= dt) <= 0) { despawnPed(S, p); S.stats.despawnedP++; } break;
+      case 'act': // gameplay action (call box, payphone, hands up...): hold still, the crowd renderer animates
+        p.v = 0;
+        if ((p.timer -= dt) <= 0) { p.state = p.actPrev === 'free' ? 'free' : 'walk'; p.actName = ''; p.goal = null; }
+        break;
       case 'hold': { // scripted goal reached / escort waiting: stand, face the target, resume when told
         p.v = 0;
         if (p.goal?.kind === 'escort' || p.goal?.kind === 'follow') { const sp = goalSpeed(S, p); if (sp > 0.05 && p.path.length) { const E = g.walkEdges[p.edge]; enterEdge(S, p, p.path.shift()!, p.dir > 0 ? E.b : E.a); p.state = 'walk'; } }
@@ -456,7 +462,7 @@ function walk(S: SimCore, p: Ped, dt: number) {
 export function threaten(S: SimCore, x: number, z: number, r: number) {
   const net = S.net, g = net.g;
   for (const p of S.peds) {
-    if (!p.alive) continue;
+    if (!p.alive || p.state === 'dead' || p.state === 'act' || p.cop2) continue;
     const d = Math.hypot(p.x - x, p.z - z);
     if (d > r * 1.6) continue;
     if (p.hail) { const k = S.hails.indexOf(p.hail); if (k >= 0 && p.hail.claimedBy < 0) S.hails.splice(k, 1); p.hail = null; }
@@ -571,8 +577,14 @@ function goalSpeed(S: SimCore, p: Ped): number {
   return Math.max(0.8, Math.min(max, Math.hypot(t.vx, t.vz)));
 }
 export function setPedGoal(S: SimCore, p: Ped, goal: PedGoal | null) {
+  if (p.state === 'dead') return;
   p.goal = goal; p.path = [];
-  if (!goal) { if (p.state === 'hold') p.state = 'walk'; return; }
+  if (!goal) { if (p.state === 'hold') p.state = 'walk'; if (p.state === 'act') { p.state = p.actPrev === 'free' ? 'free' : 'walk'; p.actName = ''; } return; }
+  if (goal.kind === 'act') {
+    if (goal.name === 'die') { killPed(S, p, goal.duration ?? 120); return; }
+    p.actPrev = p.state === 'free' ? 'free' : 'walk'; p.state = 'act'; p.actName = goal.name ?? 'idle'; p.timer = goal.duration ?? Infinity; p.v = 0;
+    return;
+  }
   if (goal.kind === 'flee') { threatenOne(S, p, goal.x ?? p.x, goal.z ?? p.z, goal.speed); p.goal = null; return; }
   if (goal.kind === 'flagDownCar') {
     const E = S.net.g.walkEdges[p.edge];
@@ -604,7 +616,7 @@ function threatenOne(S: SimCore, p: Ped, x: number, z: number, speed?: number) {
 /** Gunfire: panic that scales with distance. Close: cower or flee hard; mid: flee; far: hurry away. */
 export function gunfire(S: SimCore, x: number, z: number, loudness: number) {
   for (const p of S.peds) {
-    if (!p.alive || p.goal) continue;
+    if (!p.alive || p.goal || p.cop2 || p.state === 'dead') continue;
     const d = Math.hypot(p.x - x, p.z - z);
     if (d > loudness) continue;
     const f = 1 - d / loudness; // 1 at the muzzle, 0 at the edge of hearing
@@ -613,4 +625,11 @@ export function gunfire(S: SimCore, x: number, z: number, loudness: number) {
     if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'feed') threaten(S, x, z, 0.1 + d / 1.6 + 0.01);
     else threatenOne(S, p, x, z, 2.2 + 2.6 * f);
   }
+}
+
+/** Stop simulating a ped and leave the body for `bodySeconds` (gameplay). */
+export function killPed(S: SimCore, p: Ped, bodySeconds: number) {
+  if (p.hail) { const k = S.hails.indexOf(p.hail); if (k >= 0) S.hails.splice(k, 1); p.hail = null; }
+  if (p.spot >= 0 && S.spotOwner[p.spot] === p.id) S.spotOwner[p.spot] = -1;
+  p.goal = null; p.path = []; p.state = 'dead'; p.v = 0; p.timer = bodySeconds; p.jaywalking = false;
 }

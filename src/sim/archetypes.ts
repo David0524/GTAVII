@@ -11,17 +11,17 @@
 import type { Network } from './network';
 
 export type Behaviour = 'walker' | 'loiterer' | 'vendor' | 'commuter' | 'driver' | 'beat_cop' | 'worker' | 'critter';
-export type VehicleKind = 'car' | 'cab' | 'truck' | 'bus';
+export type VehicleKind = 'car' | 'cab' | 'truck' | 'bus' | 'police';
 export interface ArchetypeDef {
   id: string; behaviour: Behaviour; palette?: string[]; wardrobe?: string; props?: string[];
   schedule?: { from: string; to: string; area?: string; activity?: string }[];
   density?: { day?: number; night?: number }; barks?: string;
-  params?: { walkSpeed?: number; jaywalk?: number; hail?: number; patience?: number; aggression?: number };
+  params?: { walkSpeed?: number; jaywalk?: number; hail?: number; patience?: number; aggression?: number; nerve?: number };
   vehicle?: VehicleKind;
 }
 export interface ArchetypeRt {
   def: ArchetypeDef; index: number; behaviour: Behaviour; vehicle: VehicleKind | null;
-  walkSpeed: number; jaywalk: number; hail: number; patience: number; aggression: number;
+  walkSpeed: number; jaywalk: number; hail: number; patience: number; aggression: number; nerve: number;
   windows: { from: number; to: number; area: Area | null; activity: string }[];
 }
 
@@ -43,6 +43,9 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
     schedule: [{ from: '08:00', to: '21:00', activity: 'sell' }], density: { day: 0.25, night: 0.03 }, barks: 'barks.vendor' },
   { id: 'npc.pigeon_feeder', behaviour: 'loiterer', palette: ['#5a5348', '#3c3a36', '#8a8070'], wardrobe: 'Old man, overcoat even in summer, paper bag of bread crumbs', props: ['bread_bag'],
     schedule: [{ from: '08:00', to: '18:00', activity: 'feed pigeons' }], density: { day: 0.03, night: 0 }, barks: 'barks.park', params: { walkSpeed: 0.8, jaywalk: 0.2 } },
+  { id: 'npc.police_officer', behaviour: 'beat_cop', palette: ['#1f2a44', '#c0c0c0'], wardrobe: 'Generic dark-blue patrol uniform, cap', props: ['nightstick'],
+    density: { day: 0, night: 0 }, barks: 'barks.beat_cop', params: { walkSpeed: 1.2, jaywalk: 0, nerve: 0.95 } },
+  { id: 'npc.police_driver', behaviour: 'driver', vehicle: 'police', props: ['police'], density: { day: 0, night: 0 }, barks: 'barks.police_radio', params: { patience: 4, aggression: 0.6 } },
   // Wildlife (behaviour 'critter': flocks and swarms run by src/sim/wildlife.ts, not as pedestrians)
   { id: 'npc.pigeon_flock', behaviour: 'critter', palette: ['#8C8C8C', '#4B0082'], wardrobe: 'Pigeons', schedule: [{ from: '05:00', to: '21:00', activity: 'loiter' }], density: { day: 0.5, night: 0 } },
   { id: 'npc.rat_swarm', behaviour: 'critter', palette: ['#3B3B3B'], wardrobe: 'Rats', schedule: [{ from: '00:00', to: '24:00', activity: 'loiter' }], density: { day: 0.1, night: 0.4 } },
@@ -56,6 +59,8 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
 
 const BEHAVIOURS: Behaviour[] = ['walker', 'loiterer', 'vendor', 'commuter', 'driver', 'beat_cop', 'worker', 'critter'];
 const DEFAULT_SPEED: Record<Behaviour, number> = { walker: 1.3, loiterer: 1.0, vendor: 1.0, commuter: 1.5, driver: 0, beat_cop: 1.0, worker: 1.1, critter: 0 };
+/** Courage by behaviour (gameplay: who runs to a call box, who freezes). */
+const DEFAULT_NERVE: Record<Behaviour, number> = { walker: 0.35, loiterer: 0.55, vendor: 0.5, commuter: 0.4, driver: 0.45, beat_cop: 0.9, worker: 0.55, critter: 0 };
 const DEFAULT_JAY: Record<Behaviour, number> = { walker: 0.3, loiterer: 0.5, vendor: 0.2, commuter: 0.45, driver: 0, beat_cop: 0, worker: 0.5, critter: 0 };
 
 export function parseTime(s: string): number {
@@ -183,7 +188,7 @@ export class ArchetypeRegistry {
       const rt: ArchetypeRt = {
         def: d, index: 0, behaviour, vehicle,
         walkSpeed: d.params?.walkSpeed ?? DEFAULT_SPEED[behaviour], jaywalk: d.params?.jaywalk ?? DEFAULT_JAY[behaviour],
-        hail: d.params?.hail ?? 0, patience: d.params?.patience ?? 5, aggression: d.params?.aggression ?? 0.4, windows,
+        hail: d.params?.hail ?? 0, patience: d.params?.patience ?? 5, aggression: d.params?.aggression ?? 0.4, nerve: d.params?.nerve ?? DEFAULT_NERVE[behaviour], windows,
       };
       const existing = this.list.findIndex((a) => a.def.id === d.id);
       if (existing >= 0) { rt.index = existing; this.list[existing] = rt; } else { rt.index = this.list.length; this.list.push(rt); }

@@ -16,6 +16,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Boundaries layer 3 (city thickens at the edge) | **First pass**: spawn density ramps up over the last `EDGE.RAMP` m; traffic crawls bumper-to-bumper inside `EDGE.BLOCKERS`; no lanes/walk graph beyond the playable edge. Rubbernecking at blockers and chase roadblocks: not yet |
 | Gameplay hooks | **First pass**: `perceive()`, `setGoal()` (goto/follow/escort/flee/flagDownCar), `emit({type:'gunfire'})` with distance-scaled panic, civilians pull over for `siren` actors. Police pursuit/foot-cop AI: not yet |
 | Economy hook | `blockAt(x,z)` + `footTraffic(blockId)` rolling peds/min |
+| Police agents (Gameplay spec) | **First pass**: `spawnPolice`, `setPoliceGoal` (patrol / goto / search / pursue / boxIn / roadblock), `setSiren`, `despawnPolice`, `police: PoliceView[]`, events `policeArrived`, `policeBlocked`. Plus `setGoal({kind:'act'})`, `nerve` on PedView, `kill()`, `takeVehicle()` → `vehicleStolen` |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
@@ -130,6 +131,25 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
   (`npc.pigeon_feeder`) sit by park flocks by day and the birds crowd their feet. Event `flockStartle`.
 - Rats dash around trash and subway entrances, mostly at night, and vanish from footsteps and
   headlights, re-emerging later. Event `ratScatter`. Startle, never damage.
+
+### Police (`src/sim/police.ts`)
+Gameplay keeps every decision (reports, recognition, bribes, arrests, stamina); the sim moves the agents.
+- **Cars** route over lane groups (Dijkstra) and never drive against a one-way (the lane graph has no
+  wrong-way lanes), so pursuits read as legal 1974 driving. With the siren on they crawl up to a red
+  and go only when no crossing traffic or pedestrians are in the way (exempt from the red-light check
+  only with the siren on); civilians ahead move right: kerb-lane cars pull into the parking lane and
+  stop, others slow and change lanes right. A siren that isn't moving is ignored, so a stuck police
+  car doesn't freeze the block.
+- **Modes**: patrol/search pick points inside a radius (search cruises at 60 %); goto stops at the kerb
+  with hazards (`onScene`); pursue keeps re-routing to the target's position; boxIn closes and stops
+  next to the target; roadblock stops broadside on the middle lane and closes every lane of that
+  direction 4 m behind it.
+- **Foot cops** walk the sidewalk graph; urgent goals cross against the light when traffic allows;
+  pursue = follow the target at `maxSpeed` (Gameplay's stamina cap).
+- **Weakness (honest):** in the 17:30 jam a police car with siren can need minutes to reach a point a
+  few blocks away, because the one-way detours are long and it queues behind cars stopped at reds.
+  Next: let siren cars use the left lanes freed by pull-over, and let civilians stopped at a red
+  creep through to clear the way.
 
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,

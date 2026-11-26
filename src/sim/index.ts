@@ -10,10 +10,12 @@ import type { TrafficVehicleView } from '../shared/traffic';
 import { heightAt, CURB_HEIGHT, loadTerrain, terrainLoaded } from '../shared/terrain';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
-import { despawnPed, dodgeActors, gunfire, setPedGoal, spawnPedAt, spawnPeds, stepPeds, threaten } from './peds';
+import { despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
+import { policePedTick, removePolice, setCopGoal, spawnPolice as spawnCop, type PoliceGoal, type PoliceView } from './police';
+export type { PoliceGoal, PoliceView } from './police';
 export type { WildlifeView } from './wildlife';
 import { despawnVehicle, honk, rebuildOcc, spawnVehicles, stepVehicles, vehicleContacts } from './traffic';
 
@@ -24,6 +26,8 @@ export { BUILTIN_ARCHETYPES, validateArchetype } from './archetypes';
 export type AgentView = PedView;
 /** Pedestrian view (contract). Vehicles use TrafficVehicleView from src/shared/traffic.ts. */
 export interface PedView {
+  /** nerve 0..1: courage (gameplay decides who runs to a call box and who freezes) */
+  nerve: number;
   id: number; archetype: string;
   x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number;
 }
@@ -115,7 +119,7 @@ export class Simulation {
       focus: { x: 0, z: 0 }, maxVehicles: this.opts.maxVehicles, maxPeds: this.opts.maxPeds,
       ringV: [rOutV * 0.6, rOutV], ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,
       emit: (type, e) => this.fire(type, e), stats: newStats(), nextId: 1, pedById: new Map(),
-      busStopOf: new Map(g.busStops.map((b) => [b.link, b])), crossConns, lcList: [], preds: g.links.map(() => []),
+      busStopOf: new Map(g.busStops.map((b) => [b.link, b])), crossConns, lcList: [], sirens: [], preds: g.links.map(() => []),
       footCount: new Float32Array(g.roads.length), footAvg: new Float32Array(g.roads.length),
       spawnPedAt: (x, z, reason) => spawnPedAt(core, x, z, reason),
       onBusStop: (spot, v) => {
@@ -172,6 +176,7 @@ export class Simulation {
     for (let i = 0; i < S.vehicles.length; i++) S.vGrid.add(S.vehicles[i].x, S.vehicles[i].z, i);
     stepVehicles(S, h);
     dodgeActors(S);
+    for (const p of S.peds) if (p.cop2 && p.alive) policePedTick(S, p);
     stepPeds(S, h);
     vehicleContacts(S, this.contactCd);
     this.wild.step(h);
@@ -181,10 +186,11 @@ export class Simulation {
       if (!v.alive) continue;
       const d = Math.hypot(v.x - S.focus.x, v.z - S.focus.z);
       const dwelling = v.state !== 'drive';
+      if (v.cop) continue; // police leave only via despawnPolice
       if (d > rV + 30) despawnVehicle(S, v);
       else if (!dwelling && v.blockedBy !== 'red' && ((v.stopT > 60 && d > 70) || v.stopT > 150)) { despawnVehicle(S, v); S.stats.stuckDespawn++; const k = `${v.blockedBy || 'queue'}`; this.stuckWhy[k] = (this.stuckWhy[k] ?? 0) + 1; if (this.stuckLog.length < 60) this.stuckLog.push(this.queueHead(v)); }
     }
-    for (const p of S.peds) if (p.alive && !p.goal && Math.hypot(p.x - S.focus.x, p.z - S.focus.z) > rP + 20) { despawnPed(S, p); S.stats.despawnedP++; }
+    for (const p of S.peds) if (p.alive && !p.goal && !p.cop2 && p.state !== 'dead' && Math.hypot(p.x - S.focus.x, p.z - S.focus.z) > rP + 20) { despawnPed(S, p); S.stats.despawnedP++; }
     // compact
     if (S.vehicles.some((v) => !v.alive)) S.vehicles = S.vehicles.filter((v) => v.alive);
     if (S.peds.some((p) => !p.alive)) {
@@ -219,6 +225,7 @@ export class Simulation {
   private writeViews(alpha: number) {
     const S = this.core;
     this.wild.writeViews(alpha);
+    this.writePolice();
     const lerpYaw = (a: number, b: number) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * alpha; };
     const vs = this.vehicles as TrafficVehicleView[];
     while (vs.length < S.vehicles.length) vs.push({ id: 0, vclass: 'sedan', variant: 0, x: 0, y: 0, z: 0, yaw: 0, speed: 0, lights: 0, state: '' });
@@ -232,16 +239,73 @@ export class Simulation {
         : v.state === 'doubleParked' ? 'doublePark' : v.state === 'curb' ? (v.stopKind || 'pickup') : v.state;
     });
     const ps = this.peds as PedView[];
-    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
+    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', nerve: 0, x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
     ps.length = S.peds.length;
     S.peds.forEach((p, i) => {
       const o = ps[i];
-      o.id = p.id; o.archetype = p.arch.def.id; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
+      o.id = p.id; o.archetype = p.arch.def.id; o.nerve = p.nerve; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
       // sidewalk top = road surface + kerb (src/shared/terrain.ts); in the roadway = road surface
       o.y = heightAt(o.x, o.z) + (p.y > 0 ? CURB_HEIGHT : 0);
       o.yaw = lerpYaw(p.pyaw, p.yaw); o.speed = p.v; o.variant = p.variant;
-      o.state = p.state === 'free' ? (p.jaywalking ? 'jaywalking' : p.then === 'flee' ? 'flee' : 'stepping') : p.onRoad ? (p.jaywalking ? 'jaywalking' : 'crossing') : p.state;
+      o.state = p.state === 'act' ? `act:${p.actName}` : p.state === 'free' ? (p.jaywalking ? 'jaywalking' : p.then === 'flee' ? 'flee' : 'stepping') : p.onRoad ? (p.jaywalking ? 'jaywalking' : 'crossing') : p.state;
     });
+  }
+
+  private writePolice() {
+    const out = this.policeViews; let n = 0;
+    for (const v of this.core.vehicles) if (v.cop) { out[n++] = { id: v.cop.id, kind: 'car', x: v.x, z: v.z, yaw: v.yaw, speed: v.v, mode: v.cop.mode, siren: v.cop.siren, agentId: v.id }; }
+    for (const p of this.core.peds) if (p.cop2) { out[n++] = { id: p.cop2.id, kind: 'foot', x: p.x, z: p.z, yaw: p.yaw, speed: p.v, mode: p.cop2.mode, siren: false, agentId: p.id }; }
+    out.length = n;
+  }
+  private policeViews: PoliceView[] = [];
+  /** Police agents (cars also appear in `vehicles` as vclass 'police'; foot cops in `peds`). */
+  get police(): readonly PoliceView[] { return this.policeViews; }
+
+  // ---------------------------------------------------------------- police (Gameplay keeps the decisions; the sim moves them)
+  /** Spawn a police car on the nearest lane or a foot cop on the nearest sidewalk. Returns the police id (== agent id), or -1. */
+  spawnPolice(opts: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean }): number {
+    const r = spawnCop(this.core, opts); return r ? r.cop.id : -1;
+  }
+  setPoliceGoal(id: number, goal: PoliceGoal): boolean {
+    const a = this.copAgent(id); if (!a) return false;
+    setCopGoal(this.core, a.cop, a.agent, goal); return true;
+  }
+  /** Siren on/off for a police car. */
+  setSiren(id: number, on: boolean) { const a = this.copAgent(id); if (a) a.cop.siren = on; }
+  despawnPolice(id: number): boolean {
+    const a = this.copAgent(id); if (!a) return false;
+    removePolice(this.core, a.agent, a.cop.kind === 'car'); return true;
+  }
+  private copAgent(id: number) {
+    for (const v of this.core.vehicles) if (v.cop?.id === id && v.alive) return { cop: v.cop, agent: v as Vehicle | Ped };
+    for (const p of this.core.peds) if (p.cop2?.id === id && p.alive) return { cop: p.cop2, agent: p as Vehicle | Ped };
+    return null;
+  }
+
+  // ---------------------------------------------------------------- violence and theft (gameplay)
+  /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */
+  kill(pedId: number, bodySeconds = 120): boolean {
+    const p = this.core.pedById.get(pedId); if (!p || !p.alive) return false;
+    killPed(this.core, p, bodySeconds); return true;
+  }
+  /**
+   * The player takes a sim car. The car leaves the sim (the engine spawns its own drivable copy from
+   * the returned class/variant/pose); its driver steps out at the kerb and gives chase on foot for a
+   * few seconds. Emits `vehicleStolen {vehicleId, ownerPedId, x, z}`.
+   */
+  takeVehicle(vehicleId: number): { ownerPedId: number; vclass: string; variant: number; x: number; z: number; yaw: number } | null {
+    const S = this.core, v = S.vehicles.find((w) => w.id === vehicleId && w.alive);
+    if (!v || v.cop) return null;
+    const res = { ownerPedId: -1, vclass: v.vclass as string, variant: v.variant, x: v.x, z: v.z, yaw: v.yaw };
+    despawnVehicle(S, v);
+    const arch = S.reg.list.find((a) => a.def.id === 'npc.commuter') ?? S.reg.list.find((a) => a.behaviour === 'walker');
+    const owner = arch ? spawnPedNear(S, res.x, res.z, arch, 30) : null;
+    if (owner) {
+      res.ownerPedId = owner.id; owner.nerve = Math.max(owner.nerve, 0.6);
+      setPedGoal(S, owner, { kind: 'follow', target: 'player', maxSpeed: 4.2, urgent: true, until: S.t + S.rng.range(6, 10) });
+    }
+    S.emit('vehicleStolen', { vehicleId, ownerPedId: res.ownerPedId, x: res.x, z: res.z });
+    return res;
   }
 
   /** Road (block-face) id of the sidewalk nearest to (x,z), or -1. Use with footTraffic(). */
