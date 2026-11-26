@@ -16,3 +16,7 @@ export function bayWidth(style: number): number {
 }
 /** Window sill as a fraction of the floor (must match FacadeMaterial's `sill`). */
 export function sillFrac(style: number): number { return style === 2 || style === 3 ? 0.2 : 0.3; }
+/** Window width as a fraction of the bay (must match FacadeMaterial's `winFrac`). */
+export function windowFrac(style: number): number {
+  return style === 9 ? 0.42 : style === 10 ? 0.58 : style === 2 || style === 3 ? 0.78 : style === 6 ? 0.82 : 0.5;
+}
