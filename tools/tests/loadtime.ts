@@ -13,14 +13,21 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
+import net from 'node:net';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const PORT = 4182;
+// a fresh free port every run: a leftover server from an earlier run must never answer for this one
+const PORT = await new Promise<number>((res) => { const srv = net.createServer(); srv.listen(0, () => { const p = (srv.address() as net.AddressInfo).port; srv.close(() => res(p)); }); });
 const BUDGET = { titleReady: 15_000, newGameToPlayable: 3_000 }; // ms, headless proxy
 
 async function main() {
-  const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: ROOT, stdio: 'ignore' });
-  await new Promise((r) => setTimeout(r, 2500));
+  // own process group + --bypass-lock: a leftover preview from an earlier run must not block this one
+  const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'ignore', detached: true });
+  const stopServer = () => { try { process.kill(-server.pid!, 'SIGTERM'); } catch { /* already gone */ } };
+  for (let k = 0; k < 120; k++) { // wait until the preview server answers (up to 60 s)
+    try { if ((await fetch(`http://localhost:${PORT}/`)).ok) break; } catch { /* not up yet */ }
+    await new Promise((r) => setTimeout(r, 500));
+  }
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   let fail = 0;
   try {
@@ -38,7 +45,7 @@ async function main() {
       const ok = t <= lim; if (!ok) fail++;
       console.log(`${ok ? 'PASS' : 'FAIL'} ${k} ${(t / 1000).toFixed(1)} s (budget ${(lim / 1000).toFixed(0)} s headless proxy)`);
     }
-  } finally { await browser.close(); server.kill(); }
+  } finally { await browser.close(); stopServer(); }
   process.exit(fail ? 1 : 0);
 }
 main();
