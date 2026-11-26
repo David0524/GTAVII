@@ -255,7 +255,7 @@ export class MockHost implements UiHost {
   carLot(id: string): LotView | null { const l = LOTS[id]; return l ? JSON.parse(JSON.stringify({ ...l, cars: l.cars.filter((c) => !this.sold.has(c.id)) })) : null; }
   classifieds(): ClassifiedAd[] { return mockClassifieds(); }
   homes(): HomeView[] {
-    const H: [string, string, string][] = [['char.teddy_arce', 'Room 614, Hotel Corwin', 'W 29 St near Broadway, sixth floor'], ['char.delphine_moore', 'Fourth-floor walk-up', 'W 44 St near 9 Av, rear'], ['char.nick_varelas', 'Two rooms over the bakery', 'Ditmars Blvd, Astoria']];
+    const H: [string, string, string][] = [['char.teddy_arce', 'Room 9F, Hotel Corwin', 'W 31 St, Broadway–6 Av, ninth floor'], ['char.delphine_moore', 'Room at the Hotel Arden', '8 Av & W 39 St'], ['char.nick_varelas', 'The office over the loft', 'Varelas & Co., W 30 St, 6 Av–7 Av']];
     return H.map(([lead, name, address]) => ({ id: `home.${lead.split('.')[1]}`, lead, name, address, upgrades: HOME_UPGRADES(this.homeOwned[lead] ?? []) }));
   }
   sleepInfo(): SleepInfo {
