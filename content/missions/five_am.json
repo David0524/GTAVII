@@ -6,7 +6,7 @@
   "chapter": 4,
   "playAs": "char.teddy_arce",
   "date": "1974-07-08",
-  "durationMin": 13,
+  "durationMin": 15,
   "pillars": [
     "P3",
     "P1"
@@ -49,6 +49,20 @@
       "script": "dlg.m10_moretti"
     },
     {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.carrier_muscle",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Catch the tyre-slashers in the palms",
+      "note": "Dawn, among Moretti's potted palms (soft collisions)"
+    },
+    {
       "id": "o3",
       "type": "goto",
       "text": "The Baeks' shop, W 29th St",
@@ -74,9 +88,15 @@
       "script": "dlg.m10_count"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
+    "o2b",
     "o4",
     "o5"
   ],
@@ -108,5 +128,5 @@
     "loc.cop_bar"
   ],
   "mobile": "Walking at dawn, two blocks between stops, no timers. Moretti's sidewalk jungle of potted palms is a soft-collision crowd, so take it slowly. Both collection choices are untimed.",
-  "design": "P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue)."
+  "design": "P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

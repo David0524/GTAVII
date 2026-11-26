@@ -6,7 +6,7 @@
   "chapter": 10,
   "playAs": "char.nick_varelas",
   "date": "1974-08-30",
-  "durationMin": 13,
+  "durationMin": 15,
   "pillars": [
     "P4",
     "P5"
@@ -54,6 +54,21 @@
       "script": "dlg.m30_baeks"
     },
     {
+      "id": "o3b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.carrier_muscle",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Kallis's men want the deed unsigned",
+      "protect": "char.jung_ho_baek",
+      "note": "Nick: hire muscle, pay them off, or fight badly."
+    },
+    {
       "id": "o4",
       "type": "goto",
       "text": "The Corwin, W 31st St",
@@ -73,9 +88,15 @@
       "script": "dlg.m30_odessa"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
+    "o3b",
     "o4",
     "o5"
   ],
@@ -109,5 +130,5 @@
     "loc.corwin_hotel"
   ],
   "mobile": "Two short drives and a lobby scene. The resolution choice is untimed. Gated options are greyed with a reason.",
-  "design": "Nick's resolution (N3 §3): sell on, keep, or give it to the council. Signing the Baeks' deed sets flag.baek_bought_building if it wasn't already set in M16. 'Nobody told me there were people in it' finally gets its answer from Odessa."
+  "design": "Nick's resolution (N3 §3): sell on, keep, or give it to the council. Signing the Baeks' deed sets flag.baek_bought_building if it wasn't already set in M16. 'Nobody told me there were people in it' finally gets its answer from Odessa. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

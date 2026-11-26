@@ -440,6 +440,91 @@ M.append(mission(32, "mission.labor_day", "Labor Day", 3, 10, N, "1974-09-02", (
   mobile="Five checkpoints across 20 minutes. Each lead's run is 3–5 minutes. Nick's drive follows Seventh's southbound one-way. Pursuers end on the south-edge barricade or in a jam if the player strays (content/boundaries.json). Delroy's cab can block a street if his relationship with Teddy is +2 or more (route knowledge, not reflexes).",
   design="The finale converges three runs on the prow where the game began. The ending-specific content in dlg.m32_prow and the pursuers' presence are keyed to the Branch B flags. The final shot follows N3 §4 ('who stands there, facing which way'). Rewards move the clock to the epilogue (1974-10-01)."))
 
+
+# ---------------------------------------------------------------- COMBAT REWORK, Acts 2-3 (26 Nov 2026)
+# User: "Full open world and missions like a GTA game". Each mission gets an action beat inserted
+# after the named objective, or an objective converted ('replace'). Missions at the 20-min cap
+# convert rather than add. Cops and story characters are non-lethal targets (lethal: false).
+def CB(i, mode, text, targets, **k):
+    o = {"id": i, "type": "combat", "mode": mode, "targets": targets, "nonLethalAllowed": True, "text": text}
+    o.update(k); return o
+A_ = lambda n, c=1: {"archetype": n, "count": c}
+COMBAT = {
+ "mission.five_am": ({"o2": [CB("o2b", "melee", "Catch the tyre-slashers in the palms", [A_("npc.carrier_muscle", 2)], note="Dawn, among Moretti's potted palms (soft collisions)")]}, 15, ["o2", "o2b", "o4", "o5"]),
+ "mission.tax_day": ({"o4": [CB("o4b", "melee", "Lonnie's boys corner you in the arcade", [A_("npc.lonnie_crew", 2)], weapons=["item.straight_razor"])]}, 14, ["o2", "o4", "o4b", "o5"]),
+ "mission.lunch_counter": ({"o5": [CB("o5b", "defend", "Two of Wurtz's men jump Calloway", [A_("npc.plainclothes", 2)], protect="char.ruth_calloway", note="Plainclothes cops: non-lethal only (killing police is a story-breaking crime)", lethal=False)]}, 16, ["o2", "o3", "o5", "o5b"]),
+ "mission.contact_prints": ({"o6": [CB("o6b", "takedown", "Brannock's partner grabs your camera", [A_("npc.plainclothes", 1)], lethal=False)]}, 15, ["o2", "o5", "o6b", "o7"]),
+ "mission.cold_room": ({"o4": [CB("o4b", "firefight", "Stick-up crew hits the fur vault", [A_("npc.stickup_man", 3)], weapons=["item.revolver_service"], cover=["garment racks", "vault door"], note="Midday fur-vault robbery. Yiannis's crew hides; Teddy holds the door.")]}, 15, ["o2", "o4", "o4b", "o5"]),
+ "mission.brownout": ({"o6": [CB("o6b", "defend", "Looters rush the ice truck in the dark", [A_("npc.brownout_looter", 4)], protect="vehicle_role.ice_truck", note="Nick: poor shot. Hire the ice men as muscle (Payroll) or pay the looters off (bribe).")]}, 18, ["o3", "o5", "o6b", "o7"]),
+ "mission.margin_call": ({"o4": [{"id": "o4b", "type": "chase", "target": "npc.kallis_driver", "catchDistanceM": 6, "vehicleAllowed": True, "invert": True,
+     "text": "Kallis's men are tailing you. Lose them.", "note": "Inverted chase: shake the pursuer using the 1974 one-ways (west on 29th, up Eighth)."}]}, 17, ["o2", "o4", "o4b", "o6", "o7"]),
+ "mission.the_lease": ({"o2": [CB("o2b", "melee", "Lonnie's boys are smashing the shop", [A_("npc.lonnie_crew", 2)], weapons=["item.straight_razor"])]}, 16, ["o2", "o2b", "o4", "o5", "o7"]),
+ "mission.cold_storage": ({"replace": {"o6": CB("o6", "firefight", "Villalba's men hijack the bales truck", [A_("npc.carrier_muscle", 4)], weapons=["item.revolver_service"], cover=["box trucks", "loading dock"], note="Converted from the tail (20-min cap). Teddy defends the truck he was sent to collect from.")}}, 20, ["o2", "o4", "o6", "o7", "o9", "o10"]),
+ "mission.rewiring": ({"o2": [CB("o2b", "melee", "Prentiss's men guard the panel", [A_("npc.prentiss_mover", 3)], note="Teddy forces his way to the switch. Power returns, but too late for Mr. Hollis.")]}, 15, ["o2", "o2b", "o4", "o6"]),
+ "mission.partners_meeting": ({"o5": [{"id": "o5b", "type": "chase", "target": "npc.plainclothes", "catchDistanceM": 6, "vehicleAllowed": True, "invert": True,
+     "text": "Wurtz's green sedan is behind you.", "note": "Inverted chase in the sedan; ends at a brownout-dark signal if lost."}]}, 15, ["o2", "o4", "o5b"]),
+ "mission.carbon_copy": ({"replace": {"o9": CB("o9", "firefight", "Lisle's security on the freight stairs", [A_("npc.night_watchman", 1), A_("npc.lisle_driver", 2)], weapons=["item.revolver_service"], note="The watchman is non-lethal; the driver's men are hired guns. Converted from the exit goto.", text_override=True)}}, 18, ["o2", "o4", "o6", "o9"]),
+ "mission.the_address": ({"o6": [CB("o6b", "melee", "Lonnie's crew moves on Tina in the crowd", [A_("npc.lonnie_crew", 2)], weapons=["item.straight_razor"])]}, 18, ["o3", "o4", "o6b", "o7", "o9"]),
+ "mission.flip": ({"o5": [CB("o5b", "firefight", "Villalba's drivers ambush the booth", [A_("npc.carrier_muscle", 4)], cover=["truck bays", "fuel drums"], note="Nick hires muscle beforehand or fights badly; Augie survives (lethal: false).")]}, 16, ["o2", "o3", "o5b", "o6"]),
+ "mission.the_car": ({"o4": [CB("o4b", "firefight", "Lisle sent men to clean up Mayhew", [A_("npc.lisle_driver", 3)], protect="char.carl_mayhew", weapons=["item.revolver_service"], cover=["parked cars", "the stoop"], note="Rain, W 35th St. Teddy protects the man he came to confront.")]}, 17, ["o2", "o3", "o4", "o4b"]),
+ "mission.fire_watch": ({"o8": [CB("o8b", "firefight", "The firebug's crew turns on you", [A_("npc.hired_firebug", 1), A_("npc.stickup_man", 2)], weapons=["item.revolver_service"], note="In the alley off W 31st; no fire is ever lit (content rule).")]}, 20, ["o2", "o3", "o6", "o8b"]),
+ "mission.exposure": ({"o7": [CB("o7b", "survive", "Wurtz's unit corners you at the lockers", [A_("npc.plainclothes", 3)], durationSec=60, lethal=False, note="Survive until Nick's hired muscle arrives (Payroll); then the Disappear exit through the concourse.")]}, 18, ["o3", "o5", "o7b", "o9"]),
+ "mission.the_march": ({"o2": [CB("o2b", "defend", "Prentiss's men try to break the march", [A_("npc.prentiss_mover", 4)], protect="char.odessa_pruitt", lethal=False, note="Non-lethal crowd fight on Broadway; marchers help.")]}, 18, ["o2", "o2b", "o3", "o5", "o7"]),
+ "mission.the_ledger": ({"o2": [CB("o2b", "firefight", "Wurtz's men want the ledger first", [A_("npc.plainclothes", 2), A_("npc.lisle_driver", 2)], weapons=["item.revolver_service"], note="Whatever Teddy chose, someone tries to take it on W 31st St. Plainclothes are non-lethal.")]}, 17, ["o1", "o2", "o2b", "o4"]),
+ "mission.closing": ({"o3": [CB("o3b", "defend", "Kallis's men want the deed unsigned", [A_("npc.carrier_muscle", 2)], protect="char.jung_ho_baek", note="Nick: hire muscle, pay them off, or fight badly.")]}, 15, ["o2", "o3b", "o4", "o5"]),
+ "mission.lease": ({"o2": [CB("o2b", "melee", "Lonnie's last try, at the shop door", [{"character": "char.lonnie_gage", "lethal": False}], weapons=["item.straight_razor"])]}, 14, ["o1", "o2", "o2b", "o3"]),
+ "mission.labor_day": ({"replace": {"o4": CB("o4", "survive", "Brannock's men in the Penn concourse", [A_("npc.plainclothes", 3), A_("npc.lisle_driver", 2)], durationSec=75, note="Converted from the evade (20-min cap): fight through, then out on Seventh.")}}, 20, ["o2", "o3", "o4", "o5", "o6", "o7"]),
+}
+for m in M:
+    c = COMBAT.get(m["id"])
+    if not c: continue
+    spec, dur, cps = c
+    objs = []
+    for o in m["objectives"]:
+        rep = spec.get("replace", {}).get(o["id"])
+        if rep:
+            r = dict(rep); r.pop("text_override", None); objs.append(r)
+        else:
+            objs.append(o)
+        objs.extend(spec.get(o["id"], []))
+    m["objectives"] = objs
+    m["durationMin"] = dur
+    m["checkpoints"] = cps
+    if not any(f["type"] == "player_down" for f in m["fail"]):
+        m["fail"] = m["fail"] + [{"type": "player_down", "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."}]
+    m["design"] += " COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+
+# ---------------------------------------------------------------- M23 becomes the subway mission
+for m in M:
+    if m["id"] != "mission.shoebox": continue
+    m["title"] = "Below Thirty-Fourth"
+    m["durationMin"] = 18
+    m["objectives"] = [
+     O("o1", "enter_interior", "The Arden boiler room. Get the box.", marker="interior.arden_back_stairs"),
+     O("o2", "dialogue", "Marcus: Ricky talked. They know.", script="dlg.m23_marcus"),
+     O("o3", "enter_interior", "Down into Herald Square station", marker="interior.herald_sq_station"),
+     O("o4", "dialogue", "A token, a turnstile, and Brannock", script="dlg.m23_token_booth"),
+     O("o5", "enter_interior", "Into the old 33rd Street passage", marker="interior.passage_33rd"),
+     O("o6", "evade", "Lose them in the dark passage", **{"from": ["char.jimmy_brannock", "npc.plainclothes"]}, breakDistanceM=60,
+       safeZones=["interior.penn_ind_platform"], hazards=["rats (swarm, startle)", "flooded section", "dead lights"],
+       fallback="goto interior.penn_ind_platform with timeLimitSec 150"),
+     CB("o7", "melee", "Brannock catches up on the platform", [{"character": "char.jimmy_brannock", "lethal": False}], weapons=["item.straight_razor"],
+        hazards=["platform edge", "an arriving train (timed, telegraphed)"], note="Content rule: no instructional detail about the third rail; it's a visible 'do not' hazard only."),
+     O("o8", "goto", "Take the downtown local to 23rd St", to="W 23rd St & 8th Ave", radius=20, note="Ride one stop; the train is a moving set (sway, flickering lights, graffiti cars)."),
+     O("o9", "deliver", "Box to Hanyang House, W 32nd St", item="item.club_shoebox", to="interior.hanyang_house"),
+     O("o10", "dialogue", "Mi-sook opens the back room", script="dlg.m23_mi_sook"),
+     O("o11", "enter_interior", "Back to the Arden. Tina's waiting.", marker="interior.arden_lobby"),
+     O("o12", "dialogue", "Tina tells you everything", script="dlg.m23_tina")]
+    m["checkpoints"] = ["o3", "o5", "o7", "o9"]
+    m["locations"] = ["loc.arden_hotel", "W 34th St & 6th Ave", "8th Ave & W 33rd St", "W 23rd St & 8th Ave", "loc.korean_restaurant"]
+    m["archetypes"] = sorted(set(m["archetypes"] + ["npc.subway_rider", "npc.token_clerk", "npc.rat_swarm"]))
+    m["mobile"] = ("The underground is navigated by lit signs and the passage's single track of bulbs; route knowledge (the passage links Herald Square to Penn "
+                   "Station) is the solution. Rats are a startle, not damage. The train arrival is telegraphed 6+ seconds ahead. Melee on soft lock.")
+    m["design"] = ("**The subway story mission** (user: 'Maybe a mission in the subways'). Uses what only the subway has: a token booth and turnstiles, "
+                   "a half-abandoned pedestrian passage from Herald Square toward Penn Station (real; sources differ on when it closed, 1970s or c.1990), "
+                   "rats, a platform fight with a train coming, and a one-stop ride on a graffiti-covered local. Content rule: the third rail is a "
+                   "visible hazard with no instructional detail. Then the kye hand-off and Tina's confession, as before.")
+
 for m in M:
     (OUT / f"{m['id'].split('.', 1)[1]}.json").write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n")
 print(len(M), "missions written")

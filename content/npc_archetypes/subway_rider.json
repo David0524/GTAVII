@@ -1,0 +1,29 @@
+{
+  "id": "npc.subway_rider",
+  "behaviour": "commuter",
+  "palette": [
+    "#696969",
+    "#F5DEB3",
+    "#2F4F4F"
+  ],
+  "wardrobe": "Straphangers: office clothes, work clothes, a sleeping man, a guitar case.",
+  "props": [
+    "newspaper",
+    "strap"
+  ],
+  "schedule": [
+    {
+      "from": "05:00",
+      "to": "01:00",
+      "area": "Subway platforms and cars",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.6,
+    "night": 0.2
+  },
+  "barks": "barks.commuter",
+  "scripted": false,
+  "note": ""
+}

@@ -9,7 +9,7 @@
     "o5"
   ],
   "date": "1974-07-24",
-  "durationMin": 13,
+  "durationMin": 16,
   "pillars": [
     "P4",
     "P1"
@@ -50,6 +50,22 @@
       "script": "dlg.m17_agent"
     },
     {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's boys are smashing the shop",
+      "weapons": [
+        "item.straight_razor"
+      ]
+    },
+    {
       "id": "o3",
       "type": "enter_interior",
       "text": "Go over his head: Varelas, W 30th St",
@@ -88,9 +104,15 @@
       "script": "dlg.m17_shop"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
+    "o2b",
     "o4",
     "o5",
     "o7"
@@ -121,5 +143,5 @@
     "loc.varelas_loft"
   ],
   "mobile": "Walk, talk and a short drive (three blocks). The midpoint mission is deliberately calm. No timers.",
-  "design": "**Midpoint: all three leads are playable.** Two people who bank for others meet. Eleni respects the club's books, while Nick is charmed and wary. The lease is promised 'after the season', which ties Delphine's resolution to Nick's survival (M31 gate)."
+  "design": "**Midpoint: all three leads are playable.** Two people who bank for others meet. Eleni respects the club's books, while Nick is charmed and wary. The lease is promised 'after the season', which ties Delphine's resolution to Nick's survival (M31 gate). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

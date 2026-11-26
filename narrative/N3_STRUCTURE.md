@@ -63,7 +63,7 @@ Time windows are in-game. Weather: **C** = clear, **O** = overcast, **R** = summ
 | 20 | mission.partners_meeting | N | 1 Aug | 10:00–13:00 | any | 12 | P1 | In Lisle's office Nick sees the ledger and his own name everywhere. Marjorie's look. | 21 |
 | 21 | mission.carbon_copy | T+N | 6 Aug | 19:00–23:00 | any | 18 | P1 P2 | Copy the ledger (Branch A: wire) or steal it (Branch A: burned). Marjorie, Bernard, Delroy. **End of Act 2.** | 22 |
 | 22 | mission.the_address | **T+D+N** | 8 Aug | 20:30–00:30 | O | 16 | P4 P5 | The resignation is on every radio. Three short scenes, one per lead, as the syndicate panics. Mayhew learns about the wire or the theft. | 23, 24, 25 |
-| 23 | mission.shoebox | D | 12 Aug | 21:00–02:00 | R | 14 | P1 P4 | Moving the club out of Wurtz's reach; Tina's confession; Ricky's leak. | 26 |
+| 23 | mission.shoebox | D | 12 Aug | 21:00–02:00 | R | 18 | P1 P2 P4 | **Below Thirty-Fourth (the subway mission).** Delphine carries the club money underground: the Herald Square token booth, the half-abandoned 33rd Street passage (rats, dead lights), a platform fight with Brannock as a train arrives, one stop on the local, then Hanyang House and Tina's confession. | 26 |
 | 24 | mission.flip | N | 14 Aug | 11:00–16:00 | any | 13 | P4 | Calloway offers Nick a deal. Augie squeezed; Villalba's betrayal. | 26 |
 | 25 | mission.the_car | T | 16 Aug | 22:00–01:00 | R | 14 | P4 | Mayhew's car, W 35th St, the same spot as 1971. The truth. Kearney's list. | 26 |
 | 26 | mission.fire_watch | T+D | 20 Aug | 23:00–05:00 | O | 18 | P5 P4 | Stake out the Corwin against Prentiss's arson plan. Gus, Manny and Inez decide which side they're on. | 27 |
@@ -76,6 +76,22 @@ Time windows are in-game. Weather: **C** = clear, **O** = overcast, **R** = summ
 
 Act 3's order is open between M23, M24 and M25: the player can do them in any order. M26
 needs all three done.
+
+## 2b. Combat rework (26 Nov 2026)
+User: *"Full open world and missions like a GTA game."*
+- **Every mission now has an action beat.** The full list is the `COMBAT` tables in
+  `narrative/tools/build_act1_missions.py` and `build_act23_missions.py`.
+- **Action starts in M1** with the stick-up at the night desk.
+- **Missions at the 20-minute cap** (M18, M32) convert existing steps instead of adding time.
+- **Non-lethal is always available to Teddy** (his arc: how often he reaches for the gun he
+  gave up).
+- **Plainclothes and beat cops are non-lethal targets.** Killing police is a story-breaking
+  crime, handled by Gameplay.
+- **Story characters can't be killed** (`lethal: false`): Lonnie, Brannock, Augie and
+  Mayhew.
+- **Mission durations in the table above are the originals.** The current values are in
+  `content/missions/*.json`, and `narrative/N7_PREPASS.md` gives the totals.
+- **M23 is now the subway mission** (user: *"Maybe a mission in the subways"*).
 
 ## 3. Branch points (approved)
 

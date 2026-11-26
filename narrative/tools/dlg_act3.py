@@ -107,6 +107,13 @@ S("dlg.m23_tina", "M23 o7. Rita's bar after close. Tina at the end of the bar, m
   L("l_confront", D, "cold", "Sunday you tell the table. All of it. Then they decide. Not me.", goto="l_end"),
   L("l_pay", D, "tired", "I'll put the eleven hundred back. My shop money. The count will be clean.", goto="l_end"),
   L("l_end", TIN, "quiet", "I'm gonna do hair, Del. Hair don't hit you. Hair don't ask for a cut."))
+S("dlg.m23_token_booth", "M23 o4. Herald Square station mezzanine. Delphine at the token booth with the shoebox in a shopping bag.",
+  (D, "brisk", "One token. And a minute of your time, if anyone asks."),
+  ("npc.token_clerk", "flat", "Thirty-five cents, lady. My time's not for sale. Neither's the minute."),
+  (D, "inner", "Brannock at the top of the stairs. White sneakers. Rule three."),
+  (BRA, "shouting", "Delphine! Hold it right there!"),
+  (D, "inner", "The old passage to Penn Station. Half the lights dead. Marcus says the rats own it."))
+
 # ---------------- M24 Flip
 S("dlg.m24_calloway", "M24 o2. (Nick.) Herald Square lunch counter. Calloway slides a single typed page across.",
   (CAL, "crisp", "Mr. Varelas. Insurance fraud in a brownout. Lieutenant's men on the corner. Photographs."),

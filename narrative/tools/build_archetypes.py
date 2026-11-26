@@ -129,6 +129,13 @@ for pid, desc, beh, props, note in [
     ("npc.lisle_driver", "Lisle's driver: dark suit, chauffeur's cap in his pocket, a weightlifter's neck.", "driver", ["sedan keys"], "M5 escape.")]:
     a(pid, beh, ["#2F2F2F", "#8B4513"], desc, props, s(("00:00", "24:00", "Scripted scenes only", "loiter")), 0.0, 0.0, "barks.street_tough", scripted=True, note=note)
 
+a("npc.brownout_looter", "walker", ["#2F2F2F", "#696969"], "Opportunists in the dark (adults): T-shirts, bandanas, crowbars.", ["crowbar"], s(("20:00", "03:00", "Brownout areas", "loiter")), 0.0, 0.0, "barks.street_tough", scripted=True, note="M15 only.")
+a("npc.kallis_driver", "driver", ["#FFFFF0", "#000000"], "Kallis's man in a cream sedan, sunglasses.", ["sedan"], s(("09:00", "18:00", "Fur District", "drive")), 0.0, 0.0, "barks.street_tough", scripted=True, note="M16 chase.")
+a("npc.subway_rider", "commuter", ["#696969", "#F5DEB3", "#2F4F4F"], "Straphangers: office clothes, work clothes, a sleeping man, a guitar case.", ["newspaper", "strap"], s(("05:00", "01:00", "Subway platforms and cars", "commute")), 0.6, 0.2, "barks.commuter")
+a("npc.token_clerk", "worker", ["#1C2541", "#FFFFFF"], "Transit clerk in a booth behind scratched glass.", ["token tray"], s(("00:00", "24:00", "Token booths", "work")), 0.1, 0.1, "barks.service")
+a("npc.rat_swarm", "critter", ["#3B3B3B"], "Rats: a skittering swarm that scatters from light and footsteps. Startle, never damage.", [], s(("00:00", "24:00", "Subway passages, alleys, trash at night", "loiter")), 0.1, 0.4, None, note="User: 'Definitely should be some pigeons and rats.' Non-human ambient.")
+a("npc.pigeon_flock", "critter", ["#8C8C8C", "#4B0082"], "Pigeons: flocks that burst up when you run through them.", [], s(("05:00", "21:00", "Parks, squares, ledges, rooftops", "loiter")), 0.5, 0.0, None, note="User: 'Definitely should be some pigeons and rats.' Non-human ambient.")
+
 for x in A:
     (OUT / f"{x['id'].split('.', 1)[1]}.json").write_text(json.dumps(x, ensure_ascii=False, indent=2) + "\n")
 print(len(A), "archetypes")

@@ -329,6 +329,66 @@
         "lobby",
         "doors to the auditorium (not enterable)"
       ]
+    },
+    {
+      "id": "interior.herald_sq_station",
+      "address": "W 34th St & 6th Ave (Herald Square subway entrances)",
+      "facade": "street",
+      "name": "34th St–Herald Square station (BMT Broadway / IND Sixth Ave)",
+      "kind": "subway",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "real": true,
+      "contains": [
+        "token booth",
+        "turnstiles",
+        "mezzanine",
+        "stairs to platforms",
+        "entrance to the old 33rd Street passage (half-shuttered)"
+      ],
+      "note": "Real station; line names per 1974 (BMT Broadway, IND Sixth Avenue). Graffiti on cars and walls per street_text."
+    },
+    {
+      "id": "interior.passage_33rd",
+      "address": "Beneath W 33rd St, 6th–7th Aves",
+      "facade": "street",
+      "name": "The old 33rd Street passage",
+      "kind": "subway",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "real": true,
+      "contains": [
+        "long tiled corridor",
+        "dead light bulbs",
+        "shuttered shop windows",
+        "a flooded dip",
+        "rats",
+        "a locked gate (Teddy's keys open it in side content)"
+      ],
+      "note": "Real underground passage from Herald Square toward Penn Station; sources differ on its closing (1970s or c.1990). Named after a real store, so in-game it's 'the old 33rd Street passage'."
+    },
+    {
+      "id": "interior.penn_ind_platform",
+      "address": "8th Ave & W 33rd St (Penn Station, IND Eighth Ave platforms)",
+      "facade": "avenue",
+      "name": "34th St–Penn Station, IND Eighth Avenue platform",
+      "kind": "subway",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "real": true,
+      "contains": [
+        "platform",
+        "yellow edge strip",
+        "track bed (hazard, no access)",
+        "benches",
+        "stairs up to the concourse"
+      ]
     }
   ]
 }

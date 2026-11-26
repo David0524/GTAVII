@@ -9,7 +9,7 @@
     "o3"
   ],
   "date": "1974-07-15",
-  "durationMin": 14,
+  "durationMin": 16,
   "pillars": [
     "P4",
     "P2"
@@ -72,6 +72,22 @@
       "keepWithinM": 60
     },
     {
+      "id": "o5b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Two of Wurtz's men jump Calloway",
+      "protect": "char.ruth_calloway",
+      "note": "Plainclothes cops: non-lethal only (killing police is a story-breaking crime)",
+      "lethal": false
+    },
+    {
       "id": "o6",
       "type": "dialogue",
       "text": "Ask her what she wants with him",
@@ -81,12 +97,17 @@
   "fail": [
     {
       "type": "target_lost"
+    },
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
     }
   ],
   "checkpoints": [
     "o2",
     "o3",
-    "o5"
+    "o5",
+    "o5b"
   ],
   "rewards": {
     "money": 0,
@@ -109,5 +130,5 @@
     "5th Ave & W 36th St"
   ],
   "mobile": "**Branch A** is an untimed two-option choice with a confirm step ('Are you sure?'), because it persists. Delphine's tail goes down Broadway and Sixth through lunch crowds, so it's generous.",
-  "design": "**Branch A.** Calloway offers the wire. Choices in dlg.m12_calloway set flag.branch_a_wire or flag.branch_a_burned and the N3 §3 relationship changes. Delphine, two stools down because she followed her fifty dollars, learns who Calloway is, which gives her leverage in P4."
+  "design": "**Branch A.** Calloway offers the wire. Choices in dlg.m12_calloway set flag.branch_a_wire or flag.branch_a_burned and the N3 §3 relationship changes. Delphine, two stools down because she followed her fifty dollars, learns who Calloway is, which gives her leverage in P4. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

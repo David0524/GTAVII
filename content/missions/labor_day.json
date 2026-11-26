@@ -59,16 +59,22 @@
     },
     {
       "id": "o4",
-      "type": "evade",
-      "text": "Through Penn Station, out on Seventh",
-      "from": [
-        "char.jimmy_brannock"
+      "type": "combat",
+      "mode": "survive",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 3
+        },
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 2
+        }
       ],
-      "breakDistanceM": 80,
-      "safeZones": [
-        "interior.penn_station_concourse"
-      ],
-      "fallback": "goto interior.penn_station_concourse with timeLimitSec 150"
+      "nonLethalAllowed": true,
+      "text": "Brannock's men in the Penn concourse",
+      "durationSec": 75,
+      "note": "Converted from the evade (20-min cap): fight through, then out on Seventh."
     },
     {
       "id": "o5",
@@ -105,11 +111,16 @@
     {
       "type": "caught",
       "note": "Proposed; fallback timer."
+    },
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
     }
   ],
   "checkpoints": [
     "o2",
     "o3",
+    "o4",
     "o5",
     "o6",
     "o7"
@@ -149,5 +160,5 @@
     "loc.flatiron_prow"
   ],
   "mobile": "Five checkpoints across 20 minutes. Each lead's run is 3–5 minutes. Nick's drive follows Seventh's southbound one-way. Pursuers end on the south-edge barricade or in a jam if the player strays (content/boundaries.json). Delroy's cab can block a street if his relationship with Teddy is +2 or more (route knowledge, not reflexes).",
-  "design": "The finale converges three runs on the prow where the game began. The ending-specific content in dlg.m32_prow and the pursuers' presence are keyed to the Branch B flags. The final shot follows N3 §4 ('who stands there, facing which way'). Rewards move the clock to the epilogue (1974-10-01)."
+  "design": "The finale converges three runs on the prow where the game began. The ending-specific content in dlg.m32_prow and the pursuers' presence are keyed to the Branch B flags. The final shot follows N3 §4 ('who stands there, facing which way'). Rewards move the clock to the epilogue (1974-10-01). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

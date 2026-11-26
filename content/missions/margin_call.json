@@ -6,7 +6,7 @@
   "chapter": 6,
   "playAs": "char.nick_varelas",
   "date": "1974-07-22",
-  "durationMin": 14,
+  "durationMin": 17,
   "pillars": [
     "P1",
     "P5"
@@ -59,6 +59,16 @@
       "script": "dlg.m16_kallis"
     },
     {
+      "id": "o4b",
+      "type": "chase",
+      "target": "npc.kallis_driver",
+      "catchDistanceM": 6,
+      "vehicleAllowed": true,
+      "invert": true,
+      "text": "Kallis's men are tailing you. Lose them.",
+      "note": "Inverted chase: shake the pursuer using the 1974 one-ways (west on 29th, up Eighth)."
+    },
+    {
       "id": "o5",
       "type": "goto",
       "text": "The Baeks' shop, W 29th St",
@@ -84,10 +94,16 @@
       "script": "dlg.m16_lisle"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
     "o4",
+    "o4b",
     "o6",
     "o7"
   ],
@@ -125,5 +141,5 @@
     "loc.lisle_office"
   ],
   "mobile": "Four short stops, any order after o2 (the engine can present o3–o8 as a list). Driving is optional because the stops are close. Choices are untimed.",
-  "design": "Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches."
+  "design": "Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

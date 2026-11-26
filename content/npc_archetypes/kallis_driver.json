@@ -1,0 +1,27 @@
+{
+  "id": "npc.kallis_driver",
+  "behaviour": "driver",
+  "palette": [
+    "#FFFFF0",
+    "#000000"
+  ],
+  "wardrobe": "Kallis's man in a cream sedan, sunglasses.",
+  "props": [
+    "sedan"
+  ],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "18:00",
+      "area": "Fur District",
+      "activity": "drive"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.street_tough",
+  "scripted": true,
+  "note": "M16 chase."
+}

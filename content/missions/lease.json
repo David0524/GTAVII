@@ -6,7 +6,7 @@
   "chapter": 10,
   "playAs": "char.delphine_moore",
   "date": "1974-08-31",
-  "durationMin": 12,
+  "durationMin": 14,
   "pillars": [
     "P4",
     "P1"
@@ -48,6 +48,22 @@
       "radius": 15
     },
     {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "character": "char.lonnie_gage",
+          "lethal": false
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's last try, at the shop door",
+      "weapons": [
+        "item.straight_razor"
+      ]
+    },
+    {
       "id": "o3",
       "type": "dialogue",
       "text": "Keys, or no keys",
@@ -61,10 +77,16 @@
       "if": "!flag.delphine_shop"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o1",
     "o2",
+    "o2b",
     "o3"
   ],
   "rewards": {
@@ -91,5 +113,5 @@
     "loc.korean_restaurant"
   ],
   "mobile": "Walking and talking only. The count is a dialogue, not arithmetic. Untimed choices.",
-  "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them."
+  "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

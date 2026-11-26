@@ -6,7 +6,7 @@
   "chapter": 9,
   "playAs": "char.teddy_arce",
   "date": "1974-08-23",
-  "durationMin": 15,
+  "durationMin": 18,
   "pillars": [
     "P5",
     "P3",
@@ -59,6 +59,22 @@
       ]
     },
     {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.prentiss_mover",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Prentiss's men try to break the march",
+      "protect": "char.odessa_pruitt",
+      "lethal": false,
+      "note": "Non-lethal crowd fight on Broadway; marchers help."
+    },
+    {
       "id": "o3",
       "type": "switch_to",
       "text": "(Delphine)",
@@ -92,9 +108,15 @@
       "script": "dlg.m28_owner"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
+    "o2b",
     "o3",
     "o5",
     "o7"
@@ -134,5 +156,5 @@
     "W 34th St & 7th Ave"
   ],
   "mobile": "Walking pace with the escort matching the player (Odessa uses a cane, so it's slow on purpose). The crowd is dense but passable. No timers. One untimed choice for Nick at the end.",
-  "design": "P5 turned around: the city's working people show up. Every community's sympathetic figure marches: Carmen and Mei-lin, Moretti with flowers, the Baeks, Dwayne. Nick's walk to Odessa builds the non-transactional bond (N3 §3) that gates the council resolution."
+  "design": "P5 turned around: the city's working people show up. Every community's sympathetic figure marches: Carmen and Mei-lin, Moretti with flowers, the Baeks, Dwayne. Nick's walk to Odessa builds the non-transactional bond (N3 §3) that gates the council resolution. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

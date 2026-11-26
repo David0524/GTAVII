@@ -6,7 +6,7 @@
   "chapter": 4,
   "playAs": "char.delphine_moore",
   "date": "1974-07-10",
-  "durationMin": 12,
+  "durationMin": 14,
   "pillars": [
     "P1",
     "P2"
@@ -66,6 +66,22 @@
       "fallback": "goto loc.bauer_arcade with timeLimitSec 120"
     },
     {
+      "id": "o4b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's boys corner you in the arcade",
+      "weapons": [
+        "item.straight_razor"
+      ]
+    },
+    {
       "id": "o5",
       "type": "dialogue",
       "text": "Bauer's nervous about something",
@@ -83,11 +99,16 @@
     {
       "type": "caught",
       "note": "Proposed; fallback timer."
+    },
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
     }
   ],
   "checkpoints": [
     "o2",
     "o4",
+    "o4b",
     "o5"
   ],
   "rewards": {
@@ -121,5 +142,5 @@
     "loc.bauer_arcade"
   ],
   "mobile": "The evade is solved by the arcade's two doors (42nd St and 8th Ave). Lonnie is slower in the crowd. No combat. Day-into-dusk light helps readability.",
-  "design": "Moving cash under surveillance (P1). Tina's lateness and Lonnie's tail are linked, which seeds her secret. Bauer hints that 'somebody downtown' asks about Wurtz."
+  "design": "Moving cash under surveillance (P1). Tina's lateness and Lonnie's tail are linked, which seeds her secret. Bauer hints that 'somebody downtown' asks about Wurtz. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

@@ -6,7 +6,7 @@
   "chapter": 5,
   "playAs": "char.delphine_moore",
   "date": "1974-07-17",
-  "durationMin": 13,
+  "durationMin": 15,
   "pillars": [
     "P1",
     "P2"
@@ -88,6 +88,20 @@
       }
     },
     {
+      "id": "o6b",
+      "type": "combat",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Brannock's partner grabs your camera",
+      "lethal": false
+    },
+    {
       "id": "o7",
       "type": "enter_interior",
       "text": "Back to Rita's bar, the Arden",
@@ -106,11 +120,16 @@
       "by": "char.dennis_wurtz",
       "withinM": 8,
       "note": "Proposed; fallback target_lost."
+    },
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
     }
   ],
   "checkpoints": [
     "o2",
     "o5",
+    "o6b",
     "o7"
   ],
   "rewards": {
@@ -142,5 +161,5 @@
     "loc.arden_hotel"
   ],
   "mobile": "Rain and darkness: photo targets get a subtle rim light (engine photo mode), and the size threshold is generous. Bryant Park's trees and benches give cover. Being spotted is warned twice.",
-  "design": "Delphine's file reaches three prints (Brannock from M8, Wurtz and Ricky now, and Brannock at Earl's stand if taken), which sets flag.photo_file_3, one corroboration for B2. Ricky is drawn with dignity: scared, and counting days."
+  "design": "Delphine's file reaches three prints (Brannock from M8, Wurtz and Ricky now, and Brannock at Earl's stand if taken), which sets flag.photo_file_3, one corroboration for B2. Ricky is drawn with dignity: scared, and counting days. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

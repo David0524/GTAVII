@@ -1,0 +1,25 @@
+{
+  "id": "npc.pigeon_flock",
+  "behaviour": "critter",
+  "palette": [
+    "#8C8C8C",
+    "#4B0082"
+  ],
+  "wardrobe": "Pigeons: flocks that burst up when you run through them.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "05:00",
+      "to": "21:00",
+      "area": "Parks, squares, ledges, rooftops",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.5,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": false,
+  "note": "User: 'Definitely should be some pigeons and rats.' Non-human ambient."
+}

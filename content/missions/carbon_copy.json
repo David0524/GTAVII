@@ -103,10 +103,24 @@
     },
     {
       "id": "o9",
-      "type": "goto",
-      "text": "Out by the freight stairs, W 37th St",
-      "to": "W 37th St & 5th Ave",
-      "radius": 20
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.night_watchman",
+          "count": 1
+        },
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lisle's security on the freight stairs",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "note": "The watchman is non-lethal; the driver's men are hired guns. Converted from the exit goto."
     },
     {
       "id": "o10",
@@ -121,6 +135,10 @@
       "by": "npc.night_watchman",
       "withinM": 5,
       "note": "Proposed; fallback timer."
+    },
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
     }
   ],
   "checkpoints": [
@@ -157,5 +175,5 @@
     "loc.steakhouse"
   ],
   "mobile": "The infiltration is about timing and doors (the watchman has a fixed loop shown on a radio clock), not stealth reflexes. Being spotted resets to the o7 checkpoint. Nick's dinner is a calm dialogue that the player can stretch with menu choices. Branch variants via `if` (ENGINE_REQUESTS 8).",
-  "design": "**End of Act 2.** Branch A pays off. With the wire, Marjorie lets Teddy in, he copies the ledger and returns it, and she hands over her carbons (flag.have_marjorie_carbons, set in dialogue). Burned, he steals it, and Lisle knows by morning. Either way the oldest page is Mayhew's."
+  "design": "**End of Act 2.** Branch A pays off. With the wire, Marjorie lets Teddy in, he copies the ledger and returns it, and she hands over her carbons (flag.have_marjorie_carbons, set in dialogue). Burned, he steals it, and Lisle knows by morning. Either way the oldest page is Mayhew's. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

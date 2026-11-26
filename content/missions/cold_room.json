@@ -6,7 +6,7 @@
   "chapter": 5,
   "playAs": "char.teddy_arce",
   "date": "1974-07-18",
-  "durationMin": 12,
+  "durationMin": 15,
   "pillars": [
     "P1",
     "P3"
@@ -59,6 +59,27 @@
       "script": "dlg.m14_yiannis"
     },
     {
+      "id": "o4b",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.stickup_man",
+          "count": 3
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Stick-up crew hits the fur vault",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "cover": [
+        "garment racks",
+        "vault door"
+      ],
+      "note": "Midday fur-vault robbery. Yiannis's crew hides; Teddy holds the door."
+    },
+    {
       "id": "o5",
       "type": "goto",
       "text": "Meet Mayhew at the kafeneio, 29th & 8th",
@@ -72,10 +93,17 @@
       "script": "dlg.m14_mayhew"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
-    "o4"
+    "o4",
+    "o4b",
+    "o5"
   ],
   "rewards": {
     "money": 0,
@@ -101,5 +129,5 @@
     "loc.kafeneio"
   ],
   "mobile": "Three short walks within the Fur District with no timers. The vault interior is cold, so breath shows (a visual cue only).",
-  "design": "Maps the vaults for M15 and M18. Seeds Mayhew's secret: if Teddy says 'Lisle', Mayhew drops his toothpick (N3 §6). Nick is absent ('Mr. Varelas is at the bank'), which builds anticipation."
+  "design": "Maps the vaults for M15 and M18. Seeds Mayhew's secret: if Teddy says 'Lisle', Mayhew drops his toothpick (N3 §6). Nick is absent ('Mr. Varelas is at the bank'), which builds anticipation. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

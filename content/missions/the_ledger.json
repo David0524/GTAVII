@@ -6,7 +6,7 @@
   "chapter": 10,
   "playAs": "char.teddy_arce",
   "date": "1974-08-28",
-  "durationMin": 14,
+  "durationMin": 17,
   "pillars": [
     "P4",
     "P1"
@@ -47,6 +47,27 @@
       "script": "dlg.m29_choice"
     },
     {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 2
+        },
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Wurtz's men want the ledger first",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "note": "Whatever Teddy chose, someone tries to take it on W 31st St. Plainclothes are non-lethal."
+    },
+    {
       "id": "o3a",
       "type": "goto",
       "text": "Calloway's car, Fifth & 36th",
@@ -82,10 +103,16 @@
       "script": "dlg.m29_handover"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o1",
     "o2",
+    "o2b",
     "o4"
   ],
   "rewards": {
@@ -115,5 +142,5 @@
     "loc.steakhouse"
   ],
   "mobile": "**Branch B** is an untimed choice with a confirm step. Unavailable options are shown greyed out, with the reason ('Needs a witness who'll testify'), so the player sees the cost of earlier choices. One short trip afterwards.",
-  "design": "**Branch B** (N3 §3). dlg.m29_choice gates options with `if`: B1 needs flag.branch_a_wire or flag.nick_flipped; B2 needs two corroborations plus flag.editor_neutralised; B3 and B4 are always available. o3c meets Lisle at the Iron Gate because it's dinnertime. In the New Pad epilogue Teddy takes Lisle's luncheonette stool."
+  "design": "**Branch B** (N3 §3). dlg.m29_choice gates options with `if`: B1 needs flag.branch_a_wire or flag.nick_flipped; B2 needs two corroborations plus flag.editor_neutralised; B3 and B4 are always available. o3c meets Lisle at the Iron Gate because it's dinnertime. In the New Pad epilogue Teddy takes Lisle's luncheonette stool. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

@@ -6,7 +6,7 @@
   "chapter": 8,
   "playAs": "char.teddy_arce",
   "date": "1974-08-16",
-  "durationMin": 14,
+  "durationMin": 17,
   "pillars": [
     "P4",
     "P2"
@@ -60,6 +60,28 @@
       "script": "dlg.m25_the_car"
     },
     {
+      "id": "o4b",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 3
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lisle sent men to clean up Mayhew",
+      "protect": "char.carl_mayhew",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "cover": [
+        "parked cars",
+        "the stoop"
+      ],
+      "note": "Rain, W 35th St. Teddy protects the man he came to confront."
+    },
+    {
       "id": "o5",
       "type": "goto",
       "text": "Walk back to the Corwin in the rain",
@@ -67,11 +89,17 @@
       "radius": 20
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
     "o3",
-    "o4"
+    "o4",
+    "o4b"
   ],
   "rewards": {
     "money": 0,
@@ -100,5 +128,5 @@
     "loc.corwin_hotel"
   ],
   "mobile": "The emotional peak is a dialogue in a parked car. The final walk home in the rain is optional pacing (it can be skipped by fast travel to the desk). No timers.",
-  "design": "Kearney gives Teddy the 1969–71 Christmas list (always, so it's a critical-path corroboration). In the car, Mayhew tells the truth: the 1971 meet was Lisle buying a case, and Teddy was the alibi. The final choice is to let him go or take him to Calloway (flag.teddy_spared_mayhew, in dialogue)."
+  "design": "Kearney gives Teddy the 1969–71 Christmas list (always, so it's a critical-path corroboration). In the car, Mayhew tells the truth: the 1971 meet was Lisle buying a case, and Teddy was the alibi. The final choice is to let him go or take him to Calloway (flag.teddy_spared_mayhew, in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

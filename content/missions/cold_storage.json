@@ -74,10 +74,24 @@
     },
     {
       "id": "o6",
-      "type": "follow",
-      "text": "Follow Wurtz's green sedan",
-      "target": "char.dennis_wurtz",
-      "keepWithinM": 90
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.carrier_muscle",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Villalba's men hijack the bales truck",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "cover": [
+        "box trucks",
+        "loading dock"
+      ],
+      "note": "Converted from the tail (20-min cap). Teddy defends the truck he was sent to collect from."
     },
     {
       "id": "o7",
@@ -121,11 +135,16 @@
     {
       "type": "target_lost",
       "objective": "o6"
+    },
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
     }
   ],
   "checkpoints": [
     "o2",
     "o4",
+    "o6",
     "o7",
     "o9",
     "o10"
@@ -167,5 +186,5 @@
     "W 30th St & 8th Ave"
   ],
   "mobile": "Five checkpoints across 20 minutes. Switches only at safe beats. The truck drive has no timer; the brownout's dark signals are all-way stops. The tail of Wurtz is generous because his car is slow and lit by its own headlights.",
-  "design": "**First mission with all three leads.** The insurance job: half the pledged coats go 'missing' in the dark. Wurtz's unit protects it for a cut, Teddy is the collector who sees it, and Delphine photographs the cut. In dlg.m18_count Yiannis gives the true count only if his relationship with Nick is +3. Otherwise he gives Nick the number Nick wants, which matters in M30."
+  "design": "**First mission with all three leads.** The insurance job: half the pledged coats go 'missing' in the dark. Wurtz's unit protects it for a cut, Teddy is the collector who sees it, and Delphine photographs the cut. In dlg.m18_count Yiannis gives the true count only if his relationship with Nick is +3. Otherwise he gives Nick the number Nick wants, which matters in M30. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }

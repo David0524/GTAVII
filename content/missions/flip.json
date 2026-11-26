@@ -6,7 +6,7 @@
   "chapter": 8,
   "playAs": "char.nick_varelas",
   "date": "1974-08-14",
-  "durationMin": 13,
+  "durationMin": 16,
   "pillars": [
     "P4",
     "P1"
@@ -65,6 +65,24 @@
       "script": "dlg.m24_villalba"
     },
     {
+      "id": "o5b",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.carrier_muscle",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Villalba's drivers ambush the booth",
+      "cover": [
+        "truck bays",
+        "fuel drums"
+      ],
+      "note": "Nick hires muscle beforehand or fights badly; Augie survives (lethal: false)."
+    },
+    {
       "id": "o6",
       "type": "goto",
       "text": "Back to the loft before Lisle calls",
@@ -72,11 +90,17 @@
       "radius": 20
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+    }
+  ],
   "checkpoints": [
     "o2",
     "o3",
-    "o5"
+    "o5b",
+    "o6"
   ],
   "rewards": {
     "money": 0,
@@ -104,5 +128,5 @@
     "loc.varelas_loft"
   ],
   "mobile": "Calm dialogue plus one cross-town drive (west on 37th, then up Ninth to the garage; back east on 38th, then down Seventh). No timers.",
-  "design": "Calloway's deal: testify against Lisle for immunity on the insurance fraud. Accepting sets flag.nick_flipped (in dialogue), which opens B1 even if Teddy burned the wire. Augie, sick, admits the sale. If Nick's relationship with Villalba is −3, Villalba tips Lisle about Nick's visit."
+  "design": "Calloway's deal: testify against Lisle for immunity on the insurance fraud. Accepting sets flag.nick_flipped (in dialogue), which opens B1 even if Teddy burned the wire. Augie, sick, admits the sale. If Nick's relationship with Villalba is −3, Villalba tips Lisle about Nick's visit. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
 }
