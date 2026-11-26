@@ -1,0 +1,166 @@
+{
+  "quality": "high",
+  "forceWebGL": true,
+  "date": "2026-11-26T14:08:29.313Z",
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+  "views": [
+    {
+      "view": "01_spawn_flatiron_up_broadway",
+      "cam": "spawn",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 87,
+      "triangles": 99754,
+      "chunks": {
+        "ready": 88,
+        "lod0": 38,
+        "lod1": 50,
+        "loading": 0,
+        "parseMsTotal": 997.0999999998603,
+        "failed": 0
+      }
+    },
+    {
+      "view": "02_flatiron_from_madison_sq",
+      "cam": "25,1.8,-150,173.50,9.40",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 31,
+      "triangles": 27991,
+      "chunks": {
+        "ready": 88,
+        "lod0": 44,
+        "lod1": 44,
+        "loading": 0,
+        "parseMsTotal": 865.9000000020023,
+        "failed": 0
+      }
+    },
+    {
+      "view": "03_empire_state_from_fifth",
+      "cam": "10,1.8,-520,22.52,17.75",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 71,
+      "triangles": 78221,
+      "chunks": {
+        "ready": 88,
+        "lod0": 49,
+        "lod1": 39,
+        "loading": 0,
+        "parseMsTotal": 837.3999999989755,
+        "failed": 0
+      }
+    },
+    {
+      "view": "04_herald_square",
+      "cam": "-357.8,1.8,-791.7,36.87,5.20",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 48,
+      "triangles": 45604,
+      "chunks": {
+        "ready": 88,
+        "lod0": 51,
+        "lod1": 37,
+        "loading": 0,
+        "parseMsTotal": 883.4000000017695,
+        "failed": 0
+      }
+    },
+    {
+      "view": "05_penn_msg_seventh_ave",
+      "cam": "-618.6,1.8,-702.1,76.76,4.32",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 25,
+      "triangles": 24320,
+      "chunks": {
+        "ready": 88,
+        "lod0": 42,
+        "lod1": 46,
+        "loading": 0,
+        "parseMsTotal": 869.8999999980442,
+        "failed": 0
+      }
+    },
+    {
+      "view": "06_hotel_chelsea_23rd",
+      "cam": "-680.9,1.8,-49.1,146.31,18.60",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 16,
+      "triangles": 23263,
+      "chunks": {
+        "ready": 88,
+        "lod0": 32,
+        "lod1": 56,
+        "loading": 0,
+        "parseMsTotal": 978.8000000005122,
+        "failed": 0
+      }
+    },
+    {
+      "view": "07_aerial_overview_north",
+      "cam": "350,420,650,22.48,-14.98",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 104,
+      "triangles": 120376,
+      "chunks": {
+        "ready": 88,
+        "lod0": 12,
+        "lod1": 76,
+        "loading": 0,
+        "parseMsTotal": 799.0999999986961,
+        "failed": 0
+      }
+    },
+    {
+      "view": "08_downtown_skyline_wtc",
+      "cam": "-60,140,260,156.17,-0.27",
+      "backend": "webgl2",
+      "avg": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 7,
+      "triangles": 11591,
+      "chunks": {
+        "ready": 88,
+        "lod0": 30,
+        "lod1": 58,
+        "loading": 0,
+        "parseMsTotal": 833.3000000000466,
+        "failed": 0
+      }
+    }
+  ],
+  "logs": [
+    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}
