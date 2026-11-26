@@ -1,0 +1,125 @@
+{
+  "id": "cut.m15_vault_door",
+  "mission": "mission.brownout",
+  "before": "o8",
+  "time": "00:35",
+  "date": "1974-07-20",
+  "skippable": true,
+  "logline": "A dark loading dock on W 30th St. Ice steaming, a rich man soaked to the elbows, and a collector in a cheap tan coat.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "slow crane down from the dark loft windows",
+      "framing": "W 30th St in the brownout: no streetlights, the ice truck's headlights the only light",
+      "blocking": "Men hand ice blocks down a chain into the vault",
+      "beats": [
+        "Steam rises off the ice in the headlights"
+      ],
+      "durationSec": 6,
+      "audio": [
+        "dripping",
+        "a compressor not running (silence)",
+        "a distant siren"
+      ],
+      "lighting": "headlights only; deep shadow",
+      "film": [
+        "grain heavy",
+        "lifted blacks"
+      ]
+    },
+    {
+      "id": "s2",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Nick in a dinner jacket, bow tie loose, sleeves rolled, lifting ice like a nailer",
+      "blocking": "Teddy steps into the headlight beam from the street",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m15_teddy_at_door#l1"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "over-the-shoulder",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Over Teddy's shoulder: Nick, incredulous",
+      "blocking": "",
+      "beats": [
+        "l2–l3"
+      ],
+      "durationSec": 7,
+      "dialogue": [
+        "dlg.m15_teddy_at_door#l2",
+        "dlg.m15_teddy_at_door#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "slow push in",
+      "framing": "Profile, the truck lights between them",
+      "blocking": "Yiannis hands Teddy an envelope without looking at either man",
+      "beats": [
+        "l4–l5"
+      ],
+      "durationSec": 7,
+      "dialogue": [
+        "dlg.m15_teddy_at_door#l4",
+        "dlg.m15_teddy_at_door#l5"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Nick's face, the steam behind him",
+      "blocking": "",
+      "beats": [
+        "l6: 'I own the Corwin. On paper.'"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m15_teddy_at_door#l6"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy, cold",
+      "blocking": "He turns and walks back into the dark",
+      "beats": [
+        "l7"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m15_teddy_at_door#l7"
+      ]
+    },
+    {
+      "id": "s7",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "static, long hold",
+      "framing": "Nick alone in the headlights, water dripping off his cuffs",
+      "blocking": "",
+      "beats": [
+        "l8 (inner)"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m15_teddy_at_door#l8"
+      ]
+    }
+  ]
+}

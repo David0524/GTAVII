@@ -1,0 +1,79 @@
+{
+  "id": "cut.m18_the_count",
+  "mission": "mission.cold_storage",
+  "before": "o10",
+  "time": "03:05",
+  "date": "1974-07-27",
+  "skippable": true,
+  "logline": "3 a.m. in a half-empty vault. The truth about the coats, depending on whether Yiannis still believes in Nick.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "static",
+      "framing": "The vault: half the racks bare, melting ice on the floor, one bulb",
+      "blocking": "Yiannis with a clipboard; Nick and Eleni at the door",
+      "beats": [
+        "The bare racks are the reveal"
+      ],
+      "durationSec": 5,
+      "lighting": "single bulb, hard shadows",
+      "film": [
+        "grain",
+        "slight gate weave"
+      ]
+    },
+    {
+      "id": "s2",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Yiannis's hands on the clipboard",
+      "blocking": "",
+      "beats": [
+        "Variant A (relationship +3): l1t–l2t, the true count",
+        "Variant B: l1f, the number Nick wants"
+      ],
+      "durationSec": 8,
+      "dialogue": [
+        "dlg.m18_count#l1t",
+        "dlg.m18_count#l2t",
+        "dlg.m18_count#l1f"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Nick, shaken",
+      "blocking": "",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m18_count#l1"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "slow drift",
+      "framing": "Eleni in the doorway",
+      "blocking": "",
+      "beats": [
+        "l2"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m18_count#l2"
+      ],
+      "film": [
+        "fade to black on the bulb"
+      ]
+    }
+  ]
+}

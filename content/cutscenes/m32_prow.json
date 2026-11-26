@@ -1,0 +1,119 @@
+{
+  "id": "cut.m32_prow",
+  "mission": "mission.labor_day",
+  "before": "o8",
+  "time": "20:30",
+  "date": "1974-09-02",
+  "skippable": false,
+  "logline": "Dusk on Broadway again. Three people at the Flatiron's prow, and whoever is facing which way.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "establishing aerial (crane down)",
+      "lensMm": 40,
+      "move": "the same crane as cut.m01_opening s1, mirrored",
+      "framing": "Madison Sq Park at Labor Day dusk; the lights coming on",
+      "blocking": "",
+      "beats": [
+        "Visual rhyme with the opening"
+      ],
+      "durationSec": 8,
+      "audio": [
+        "holiday quiet",
+        "a single cab horn"
+      ]
+    },
+    {
+      "id": "s2",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "static",
+      "framing": "The prow; Nick's sedan parked on the sidewalk; Delphine arriving on foot",
+      "blocking": "",
+      "beats": [
+        "l1–l2"
+      ],
+      "durationSec": 7,
+      "dialogue": [
+        "dlg.m32_prow#l1",
+        "dlg.m32_prow#l2"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "medium close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy, where he stood in the first shot of the game",
+      "blocking": "",
+      "beats": [
+        "l3a/l3b/l3c/l3d by ending"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m32_prow#l3a",
+        "dlg.m32_prow#l3b",
+        "dlg.m32_prow#l3c",
+        "dlg.m32_prow#l3d"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "two-shot",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Delphine and Nick",
+      "blocking": "",
+      "beats": [
+        "l4a/l4b/l4c and l5a/l5b/l5c by resolution"
+      ],
+      "durationSec": 8,
+      "dialogue": [
+        "dlg.m32_prow#l4a",
+        "dlg.m32_prow#l4b",
+        "dlg.m32_prow#l4c",
+        "dlg.m32_prow#l5a",
+        "dlg.m32_prow#l5b",
+        "dlg.m32_prow#l5c"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "slow push",
+      "framing": "Teddy, the line from the opening",
+      "blocking": "",
+      "beats": [
+        "l3: 'like a fire hydrant'"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m32_prow#l3"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "final",
+      "lensMm": 28,
+      "move": "Testimony: camera stays as Teddy walks downtown. Public: he walks uptown, as at the start. New Pad: a car pulls up and he gets in the back. Ashes: the prow empty, seen from a cab window.",
+      "framing": "Per N3 §4",
+      "blocking": "",
+      "beats": [
+        "l7a/l7b/l7c/l7d by ending",
+        "FADE OUT; credits over the dusk"
+      ],
+      "durationSec": 10,
+      "dialogue": [
+        "dlg.m32_prow#l7a",
+        "dlg.m32_prow#l7b",
+        "dlg.m32_prow#l7c",
+        "dlg.m32_prow#l7d"
+      ],
+      "film": [
+        "grain",
+        "end-of-reel flare"
+      ]
+    }
+  ]
+}

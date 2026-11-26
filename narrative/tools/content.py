@@ -267,6 +267,37 @@ def main():
             for l in stn["patter"]:
                 if len(l["text"]) > LINE_MAX: E(f"{stn['id']}: DJ line over {LINE_MAX}: {l['text']}")
 
+    # cutscenes: dialogue refs "dlg.x#line" must resolve
+    for f in sorted((C / "cutscenes").glob("*.json")) if (C / "cutscenes").exists() else []:
+        cs = jl(f)
+        for sh in cs.get("shots", []):
+            for ref in sh.get("dialogue", []):
+                sid, _, lid = ref.partition("#")
+                if sid not in dialogue or lid not in {l["id"] for l in dialogue[sid]["lines"]}:
+                    E(f"{cs['id']}.{sh['id']}: dialogue ref {ref} does not resolve")
+
+    # side specs (content/side/<id>.json, mission format with kind: side)
+    for f in sorted((C / "side").glob("*.json")):
+        if f.name == "side_content.json": continue
+        sp = jl(f); sw = sp.get("id", f.name)
+        if sp.get("kind") != "side": E(f"{sw}: kind must be 'side'")
+        oids = [o["id"] for o in sp.get("objectives", [])]
+        if not oids: E(f"{sw}: no objectives")
+        for o in sp.get("objectives", []):
+            ow = f"{sw}.{o['id']}"
+            if o["type"] not in OBJ_TYPES: E(f"{ow}: unknown objective type {o['type']}")
+            if len(o.get("text", "")) > OBJ_TEXT_MAX: E(f"{ow}: objective text over {OBJ_TEXT_MAX}: {o.get('text')}")
+            for k in ("to", "at"):
+                if isinstance(o.get(k), str): loc_ok(ow, o[k])
+            if o.get("marker") and o["marker"] not in interiors: E(f"{ow}: interior {o['marker']} unknown")
+            for k in ("who", "target", "subject"):
+                v = o.get(k)
+                if isinstance(v, str) and v.startswith("char.") and v not in cast: E(f"{ow}: {k} {v} unknown")
+            if o.get("script") and o["script"] not in dialogue: W(f"{ow}: side dialogue {o['script']} not written yet")
+        for cp in sp.get("checkpoints", []):
+            if cp not in oids: E(f"{sw}: checkpoint {cp} not an objective")
+        if not sp.get("mobile"): E(f"{sw}: missing mobile note")
+
     # flags: documented but never set by written content -> info only
     set_somewhere = set()
     def walk(x):

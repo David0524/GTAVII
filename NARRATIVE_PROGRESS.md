@@ -770,3 +770,15 @@ how GTA handles these things".
   pride, Delphine, Nick, the street) and the precinct's memory (bribes refused, patrols
   doubled, Kearney and Navarro −2, headline templates).
 - **Docs updated:** ENGINE_REQUESTS 12b and N3 §2b.
+
+### User instructions (26 Nov, verbatim via oversight)
+- "Sorry, don't do radio stations right now. Continue everyone else." `content/radio.json` is
+  frozen as it is: no new stations, patter, songs or ads. News bulletins and police dispatch
+  continue.
+- "Make sure everyone knows they can use Sonnet/Haiku helpers. Only if it makes sense though.
+  Want to do this right." Policy:
+  - **Haiku:** validator sweeps, stale-reference sweeps, first-pass name searches.
+  - **Sonnet:** filling JSON specs from my outlines.
+  - **Kept on my own model:** story, voice, dialogue, sensitive subjects and every final pass.
+  - Every helper output is validated (`content.py` now checks `content/side/*.json`) and
+    reviewed before commit.

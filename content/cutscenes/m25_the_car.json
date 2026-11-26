@@ -1,0 +1,124 @@
+{
+  "id": "cut.m25_the_car",
+  "mission": "mission.the_car",
+  "before": "o4",
+  "time": "23:30",
+  "date": "1974-08-16",
+  "skippable": true,
+  "logline": "W 35th St in the rain. The same car, the same seat, three years later. The truth about 1971.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 32,
+      "move": "static",
+      "framing": "Rain on W 35th St; one parked sedan, wipers off",
+      "blocking": "Teddy walks to the passenger door and gets in",
+      "beats": [
+        "Echo of 1971: framed exactly like the flashback still"
+      ],
+      "durationSec": 6,
+      "audio": [
+        "rain on the roof",
+        "a subway train rumbling under the street"
+      ],
+      "lighting": "sodium through rain-streaked glass"
+    },
+    {
+      "id": "s2",
+      "type": "two-shot",
+      "lensMm": 28,
+      "move": "static, interior",
+      "framing": "From the back seat: two silhouettes, the windshield running with water",
+      "blocking": "Nobody looks at anybody",
+      "beats": [
+        "l1–l2"
+      ],
+      "durationSec": 7,
+      "dialogue": [
+        "dlg.m25_the_car#l1",
+        "dlg.m25_the_car#l2"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Mayhew, profile, lit by a passing car",
+      "blocking": "",
+      "beats": [
+        "l3–l4"
+      ],
+      "durationSec": 9,
+      "dialogue": [
+        "dlg.m25_the_car#l3",
+        "dlg.m25_the_car#l4"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "close",
+      "lensMm": 85,
+      "move": "slow push",
+      "framing": "Mayhew breaking",
+      "blocking": "",
+      "beats": [
+        "l5"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m25_the_car#l5"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy",
+      "blocking": "",
+      "beats": [
+        "l6"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m25_the_car#l6"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "two-shot",
+      "lensMm": 35,
+      "move": "static",
+      "framing": "Both men, wipers suddenly on",
+      "blocking": "The choice c1 (untimed)",
+      "beats": [
+        "c1"
+      ],
+      "durationSec": 0,
+      "dialogue": [
+        "dlg.m25_the_car#c1"
+      ]
+    },
+    {
+      "id": "s7",
+      "type": "wide",
+      "lensMm": 32,
+      "move": "crane up",
+      "framing": "The car on the empty street",
+      "blocking": "",
+      "beats": [
+        "l_end (inner)"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m25_the_car#l_end"
+      ],
+      "film": [
+        "rain streaks",
+        "halation"
+      ]
+    }
+  ]
+}
