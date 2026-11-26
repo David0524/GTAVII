@@ -85,7 +85,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     // generated head; then (pool=1) generated pedestrians with their matched pool heads.
     const act = num('act', 1);
     if (!qp.has('pool')) for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
-      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null } }));
+      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: qp.has('rbhair') ? { hat: null, ourHair: false } : { hat: null } }));
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }
     if (qp.has('pool')) {
@@ -157,8 +157,8 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   if (zoom === 'hand') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.6, 0.95, 1.1); camera.lookAt(0.2, 0.8, 0); }
   else if (zoom === 'shoe') { camera.fov = 24; camera.updateProjectionMatrix(); camera.position.set(0.75, 0.22, 0.7); camera.lookAt(0.03, 0.06, 0.04); }
   else if (zoom === 'feet') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.5, 0.35, 1.3); camera.lookAt(0, 0.08, 0); }
+  else if (zoom === 'head') { camera.fov = 24; camera.position.set(0, 1.56, 1.0); camera.lookAt(0, 1.5, 0); camera.updateProjectionMatrix(); }
   else if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
-  else if (scene === 'hair' && zoom === 'head') { camera.fov = 24; camera.position.set(0, 1.62, 0.85); camera.lookAt(0, 1.6, 0); camera.updateProjectionMatrix(); }
   else if (scene === 'hair') { camera.fov = 22; camera.position.set(0, 1.56, 0.5 + n * 0.42); camera.lookAt(0, 1.52, 0); camera.updateProjectionMatrix(); }
   else if (scene === 'shoes') { const d = 0.6 + n * 0.32; camera.fov = 22; camera.position.set(0, 0.45, d); camera.lookAt(0, 0.1, 0); camera.updateProjectionMatrix(); }
   else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.2, Math.max(5.5, w * 1.12 + 1.5)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }

@@ -294,8 +294,9 @@ export function hairMaterial(rb?: HairFace): THREE.MeshPhysicalNodeMaterial {
     const tc = tex2D(rb.color, uvA).rgb.mul(vec3(rb.tint[0], rb.tint[1], rb.tint[2]));
     const nb = rb.bodyLin ? vec3(rb.bodyLin[0], rb.bodyLin[1], rb.bodyLin[2]) : tc;
     const neckC = nb.mul(dot(tc, vec3(0.3, 0.6, 0.1)).div(dot(nb, vec3(0.3, 0.6, 0.1)).add(1e-4)).clamp(0.6, 1.4));
-    const faceCol = mix(tc, neckC, m0.x.mul(rb.bodyLin ? 0.9 : 0));
-    m.colorNode = isFace.select(faceCol, m.colorNode as any) as any;
+    const faceCol = mix(tc, mix(neckC, nb, smoothstep(0.55, 1, m0.x)), m0.x.mul(rb.bodyLin ? 1 : 0));
+    const dbgRB = typeof location !== 'undefined' && location.search.includes('rbdbg');
+    m.colorNode = isFace.select(dbgRB ? vec3(1, 0, 1) : faceCol, m.colorNode as any) as any;
     m.opacityNode = isFace.select(float(1), m.opacityNode as any) as any;
     m.normalNode = isFace.select(normalMap(tex2D(rb.normal, uvA)), normalView);
     m.roughnessNode = isFace.select(float(0.5), float(0.62));

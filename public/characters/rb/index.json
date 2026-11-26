@@ -2,18 +2,6 @@
  "licence": "MIT (Microsoft Rocketbox); see LICENSE-Rocketbox.md",
  "heads": [
   {
-   "id": "lead_teddy",
-   "source": "Male_Adult_07",
-   "bytes": 267378,
-   "tag": null,
-   "skinRGB": [
-    185,
-    138,
-    103
-   ],
-   "lead": "lead_teddy"
-  },
-  {
    "id": "lead_nick",
    "source": "Male_Adult_14",
    "bytes": 196648,
@@ -756,6 +744,19 @@
     37
    ],
    "lead": "lead_delphine",
+   "ownHair": true
+  },
+  {
+   "id": "lead_teddy",
+   "source": "Male_Adult_07",
+   "bytes": 267378,
+   "tag": null,
+   "skinRGB": [
+    185,
+    138,
+    103
+   ],
+   "lead": "lead_teddy",
    "ownHair": true
   }
  ]

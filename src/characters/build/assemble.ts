@@ -30,7 +30,7 @@ export interface Assembled {
 
 /** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
 /** opts.headCutY: drop our head (skin above this height, eyes, teeth, hair) for a substituted head (evaluation). */
-export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; keepHair?: boolean } = {}): Assembled {
+export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean } = {}): Assembled {
   const t0 = performance.now();
   // heeled shoes stand the body on its heels (foot pitched in the bind pose)
   const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
@@ -86,16 +86,32 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
       m = { cA: tone, cB: [red, app.skin.freckles, app.skin.ageSpots], m0: [masks[0], masks[1], masks[2] * stubble, masks[5]], m1: [KIND.skin, app.skin.melanin, age01, app.skin.sheen] };
     }
     const isSkin = m.m1[0] === KIND.skin || m.m1[0] === KIND.hosiery;
-    v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer] : undefined);
+    let px = P[k * 3], pz = P[k * 3 + 2];
+    const py = P[k * 3 + 1];
+    // a substituted head: our neck conforms to its neck's cut edge just below the seam (the head's
+    // neck then continues it), so the two surfaces neither gap nor poke through each other
+    if (ring && opts.headRingR && opts.headAxis) {
+      const ry = ring(px, pz), w = Math.min(1, Math.max(0, (py - (ry - 0.035)) / 0.035));
+      if (w > 0 && py < ry + 0.03) {
+        const tr = opts.headRingR(px, pz) - 0.003, dx = px - opts.headAxis[0], dz = pz - opts.headAxis[1], d = Math.hypot(dx, dz) || 1;
+        if (tr > 0.02) { const ww = w * w * (3 - 2 * w), nd = d + (tr - d) * ww; px = opts.headAxis[0] + (dx / d) * nd; pz = opts.headAxis[1] + (dz / d) * nd; }
+      }
+    }
+    v = mb.vertex([px, py, pz], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer] : undefined);
     used[s] = v;
     return v;
   };
-  const cutY = opts.headCutY;
+  const cutY = opts.headCutY, ring = opts.headRing;
   const skinStart = mb.count, skinI0 = mb.indexCount;
   for (let i = 0; i < bodyIdx.length; i += 3) {
     const a = bodyIdx[i], b = bodyIdx[i + 1], c = bodyIdx[i + 2];
     if (covered[model.splitSrc[a]] && covered[model.splitSrc[b]] && covered[model.splitSrc[c]]) continue;
-    if (cutY !== undefined && [a, b, c].every((x) => { const k = model.splitSrc[x]; return F.part[k] === PART.head || P[k * 3 + 1] > cutY; })) continue;
+    // a substituted head: drop our skin above its neck seam (following the seam's slant when known)
+    if (cutY !== undefined) {
+      const above = (x: number, h: number) => { const k = model.splitSrc[x]; return ring ? P[k * 3 + 1] > ring(P[k * 3], P[k * 3 + 2]) + h : F.part[k] === PART.head || P[k * 3 + 1] > cutY; };
+      // fully past the seam, or reaching beyond the conformed band (it would poke through the head)
+      if ([a, b, c].every((x) => above(x, 0.003)) || (ring && [a, b, c].some((x) => above(x, 0.03)))) continue;
+    }
     mb.tri(skinVert(a), skinVert(b), skinVert(c));
   }
   smoothSkinNormals(mb, model, used, F, skinStart, skinI0);

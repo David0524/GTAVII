@@ -9,7 +9,7 @@
  * 2 draws: main (body, clothes) + head.
  */
 import * as THREE from 'three/webgpu';
-import { texture, uv, attribute, float, vec3, uniform, normalMap, normalView, mix, dot } from 'three/tsl';
+import { texture, uv, attribute, float, vec3, uniform, normalMap, normalView, mix, dot, smoothstep } from 'three/tsl';
 import { readContainer } from '../format';
 import type { GeoArrays } from '../build/MeshBuilder';
 import { hairMaterial } from '../render/materials';
@@ -20,7 +20,7 @@ export interface HeadTag { sex: 0 | 1; age: [number, number]; anc: [number, numb
 export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean }
 export interface HeadAsset {
   id: string;
-  meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
+  meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; neckRing?: number[]; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
   pos: Float32Array; nrm: Float32Array; uv: Float32Array; sj: Uint16Array; sw: Float32Array; kind: Float32Array; idx: Uint16Array | Uint32Array;
   color: THREE.Texture; normal: THREE.Texture; opacity: THREE.Texture | null;
   bytes: number;
@@ -99,11 +99,47 @@ async function loadHead(base: string, id: string): Promise<HeadAsset> {
   const tl = new THREE.TextureLoader();
   const load = async (f: string, srgb: boolean) => { const t = await tl.loadAsync(`${base}${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t; };
   const [color, normal, opacity] = await Promise.all([load(`${id}_c.webp`, true), load(`${id}_n.webp`, false), meta.cardIdx > 0 ? load(`${id}_o.webp`, true) : Promise.resolve(null)]);
+  if (!meta.neckRing) meta.neckRing = neckRingOf(meta.landmarks.Neck, pos, kind, B('idx'), meta.skinIdx);
   return { id, meta, pos, nrm, uv: uvs, sj, sw, kind, idx: B('idx'), color, normal, opacity, bytes: buf.byteLength };
 }
 
+const RING = 16;
+/**
+ * The bottom edge of the head's neck by angle around the neck landmark (head space): Rocketbox
+ * necks are cut on a slant (higher at the nape), so a level cut through our body leaves gaps.
+ */
+function neckRingOf(neck: number[], pos: Float32Array, kind: Float32Array, idx: ArrayLike<number>, nSkin: number) {
+  // boundary edges of the skin surface (used by one triangle) below the jaw are the neck's cut edge
+  const edges = new Map<number, number>(), n = kind.length;
+  for (let t = 0; t < nSkin; t += 3) for (let e = 0; e < 3; e++) {
+    const a = idx[t + e], b = idx[t + (e + 1) % 3], k = Math.min(a, b) * n + Math.max(a, b);
+    edges.set(k, (edges.get(k) ?? 0) + 1);
+  }
+  const sum = new Float64Array(RING), cnt = new Float64Array(RING), rsum = new Float64Array(RING);
+  for (const [k, c] of edges) {
+    if (c !== 1) continue;
+    for (const v of [Math.floor(k / n), k % n]) {
+      const x = pos[v * 3] - neck[0], y = pos[v * 3 + 1], z = pos[v * 3 + 2] - neck[2];
+      if (Math.hypot(x, z) > 0.1 || y > neck[1] + 0.08) continue;
+      const a = Math.floor(((Math.atan2(x, z) + Math.PI) / (2 * Math.PI)) * RING) % RING;
+      sum[a] += y; rsum[a] += Math.hypot(x, z); cnt[a]++;
+    }
+  }
+  const fill = (src: Float64Array) => {
+    const ring = Array.from(src, (v, a) => (cnt[a] ? v / cnt[a] : NaN));
+    // fill gaps from neighbours, then smooth once around the loop
+    for (let it = 0; it < RING; it++) for (let a = 0; a < RING; a++) if (Number.isNaN(ring[a])) {
+      const l = ring[(a + RING - 1) % RING], r = ring[(a + 1) % RING];
+      ring[a] = Number.isNaN(l) ? r : Number.isNaN(r) ? l : (l + r) / 2;
+    }
+    return ring.map((y, a) => (ring[(a + RING - 1) % RING] + 2 * y + ring[(a + 1) % RING]) / 4);
+  };
+  // [0, RING): edge height; [RING, 2 RING): edge radius around the neck landmark's vertical axis
+  return [...fill(sum), ...fill(rsum)];
+}
+
 /** Fit (uniform scale by interocular distance, eye midpoints coincide) and the seam height (pre-lift). */
-export function fitHead(h: { meta: Pick<HeadAsset['meta'], 'landmarks' | 'neckMinY'> }, joints: Float32Array) {
+export function fitHead(h: { meta: Pick<HeadAsset['meta'], 'landmarks' | 'neckMinY' | 'neckRing'> }, joints: Float32Array) {
   const our = (j: number) => [joints[j * 3], joints[j * 3 + 1], joints[j * 3 + 2]];
   const oL = our(JI.eye_l), oR = our(JI.eye_r);
   const oMid = [(oL[0] + oR[0]) / 2, (oL[1] + oR[1]) / 2, (oL[2] + oR[2]) / 2];
@@ -112,7 +148,21 @@ export function fitHead(h: { meta: Pick<HeadAsset['meta'], 'landmarks' | 'neckMi
   const s = Math.hypot(oL[0] - oR[0], oL[1] - oR[1], oL[2] - oR[2]) / Math.hypot(rL[0] - rR[0], rL[1] - rR[1], rL[2] - rR[2]);
   const map = (x: number, y: number, z: number): [number, number, number] => [(x - rMid[0]) * s + oMid[0], (y - rMid[1]) * s + oMid[1], (z - rMid[2]) * s + oMid[2]];
   const neckBottom = map(0, h.meta.neckMinY, 0)[1];
-  return { s, map, neckBottom, cutY: neckBottom + 0.018 };
+  // the seam by angle (our space, pre-lift): ring bottom around the mapped neck landmark
+  const ring = h.meta.neckRing, nk = map(h.meta.landmarks.Neck[0], h.meta.landmarks.Neck[1], h.meta.landmarks.Neck[2]);
+  const ringY = (x: number, z: number) => {
+    if (!ring) return neckBottom;
+    const f = (((Math.atan2(x - nk[0], z - nk[2]) + Math.PI) / (2 * Math.PI)) * RING) - 0.5;
+    const a0 = Math.floor(f), t = f - a0, a = (i: number) => ring[((i % RING) + RING) % RING];
+    return (a(a0) * (1 - t) + a(a0 + 1) * t - rMid[1]) * s + oMid[1];
+  };
+  const ringR = (x: number, z: number) => {
+    if (!ring || ring.length < 2 * RING) return 0;
+    const f = (((Math.atan2(x - nk[0], z - nk[2]) + Math.PI) / (2 * Math.PI)) * RING) - 0.5;
+    const a0 = Math.floor(f), t = f - a0, a = (i: number) => ring[RING + (((i % RING) + RING) % RING)];
+    return (a(a0) * (1 - t) + a(a0 + 1) * t) * s;
+  };
+  return { s, map, neckBottom, cutY: neckBottom + 0.018, ringY, ringR, neckAxis: [nk[0], nk[2]] as [number, number] };
 }
 
 /**
@@ -128,6 +178,8 @@ export function neckProfileData(pos: Float32Array, joints: Float32Array, y0: num
   for (let k = 0; k < pos.length / 3; k++) {
     const x = pos[k * 3] - cx, y = pos[k * 3 + 1], z = pos[k * 3 + 2] - cz;
     if (y < y0 || y > y1 || Math.abs(x) > 0.09 || Math.abs(z) > 0.09) continue;
+    // the jaw and chin overhang the front of the neck: keep the front to the throat
+    if (z > 0.015 && y > y0 + 0.042) continue;
     const a = Math.floor(((Math.atan2(x, z) + Math.PI) / (2 * Math.PI)) * NA) % NA, b = Math.min(NY - 1, Math.floor(((y - y0) / (y1 - y0)) * NY));
     r[b * NA + a] = Math.max(r[b * NA + a], Math.hypot(x, z));
   }
@@ -159,16 +211,16 @@ export function headMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, skeleton
     let p = fit.map(h.pos[v * 3], h.pos[v * 3 + 1], h.pos[v * 3 + 2]);
     // neck stitch: the bottom 25 mm of the head's neck blends onto our neck surface
     if (o.neck && !h.kind[v]) {
-      const w = sm(fit.neckBottom + 0.025, fit.neckBottom, p[1]);
+      const rb = fit.ringY(p[0], p[2]), w = sm(rb + 0.025, rb, p[1]);
       if (w > 0) {
         const { r, cx, cz } = o.neck(p[0], p[1], p[2]);
-        if (r > 0) { const dx = p[0] - cx, dz = p[2] - cz, d = Math.hypot(dx, dz) || 1; const tr = d + (r + 0.0012 - d) * w; p = [cx + (dx / d) * tr, p[1], cz + (dz / d) * tr]; }
+        if (r > 0) { const dx = p[0] - cx, dz = p[2] - cz, d = Math.hypot(dx, dz) || 1; const tr = d + (r + 0.002 - d) * w; p = [cx + (dx / d) * tr, p[1], cz + (dz / d) * tr]; }
       }
     }
     pos[v * 3] = p[0]; pos[v * 3 + 1] = p[1] + o.lift; pos[v * 3 + 2] = p[2];
   }
   const fade = new Float32Array(n);
-  for (let v = 0; v < n; v++) { const y = fit.map(h.pos[v * 3], h.pos[v * 3 + 1], h.pos[v * 3 + 2])[1]; fade[v] = h.kind[v] ? 0 : sm(fit.neckBottom + 0.065, fit.neckBottom + 0.01, y); }
+  for (let v = 0; v < n; v++) { const y = fit.map(h.pos[v * 3], h.pos[v * 3 + 1], h.pos[v * 3 + 2])[1]; if (h.kind[v]) { fade[v] = 0; continue; } const p = fit.map(h.pos[v * 3], h.pos[v * 3 + 1], h.pos[v * 3 + 2]), rb = fit.ringY(p[0], p[2]); fade[v] = sm(rb + 0.065, rb + 0.01, y); }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('hfade', new THREE.BufferAttribute(fade, 1));
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -195,12 +247,14 @@ function headMaterial(h: HeadAsset, tint: [number, number, number], bodyLin: [nu
   const to = texture(h.opacity ?? h.color, uv());
   const tintU = uniform(new THREE.Color(tint[0], tint[1], tint[2]));
   const neckU = uniform(bodyLin ? new THREE.Vector3(bodyLin[0], bodyLin[1], bodyLin[2]) : new THREE.Vector3());
-  const fadeW = attribute('hfade', 'float').mul(bodyLin ? 0.9 : 0);
+  const fadeW = attribute('hfade', 'float').mul(bodyLin ? 1 : 0);
   // keep the texture's fine detail (luminance ratio) while the colour moves to the body tone
   const skinC = tc.rgb.mul(tintU);
   const neckV = neckU;
   const neckC = neckV.mul(dot(skinC, vec3(0.3, 0.6, 0.1)).div(dot(neckV, vec3(0.3, 0.6, 0.1)).add(1e-4)).clamp(0.6, 1.4));
-  m.colorNode = isCard.select(to.rgb, mix(skinC, neckC, fadeW));
+  // at the seam itself the body colour wins outright (luminance too), so the edge disappears
+  const seamC = mix(neckC, neckV, smoothstep(0.55, 1, attribute('hfade', 'float')));
+  m.colorNode = isCard.select(to.rgb, mix(skinC, seamC, fadeW));
   m.opacityNode = isCard.select(h.opacity ? to.a : float(1), float(1));
   m.alphaTest = 0.4;
   m.alphaToCoverage = true;

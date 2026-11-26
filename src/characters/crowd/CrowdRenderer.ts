@@ -192,7 +192,7 @@ export class CrowdRenderer {
     const seed = hash2(a.variant, 0xc0ffee);
     const post = (head: HeadAsset | null) => {
       st.head = head;
-      this.worker!.postMessage({ type: 'build', id: a.id, seed, archetype: a.archetype, lod: this.nearLod, head: head ? { landmarks: head.meta.landmarks, neckMinY: head.meta.neckMinY } : null });
+      this.worker!.postMessage({ type: 'build', id: a.id, seed, archetype: a.archetype, lod: this.nearLod, head: head ? { landmarks: head.meta.landmarks, neckMinY: head.meta.neckMinY, neckRing: head.meta.neckRing } : null });
     };
     if (!this.heads) { post(null); return; }
     const used = new Set<string>();
