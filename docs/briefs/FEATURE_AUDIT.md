@@ -66,7 +66,7 @@ Status: ✅ designed/assigned · 🆕 newly assigned here · ❓ user decision.
 | Traffic, pedestrians, schedules | SIM_BRIEF | Sim | ✅ |
 | **Wildlife** | **Pigeons** (GPU flocks on ledges, sidewalks and coops; they scatter at running, cars and gunfire; old men feeding them in the parks), **rats** (subway tracks, alleys, garbage, they scatter from light), stray cats and dogs, the mounted police horse | Sim (behaviour) + Characters (bodies, animation) | 🆕 |
 | Random events | Street encounters (CORE/ECONOMY/N4b) | Gameplay + Narrative | ✅ |
-| Day and night, weather | Heat haze, thunderstorms, rain, fog, brownouts | Engine | ✅ |
+| Day and night, weather | **The full day/night cycle (TIME.md)**: missions with day or night windows skip time on start; sleep in your bed; heat haze, thunderstorms, rain, fog, brownouts | Engine + Gameplay + UI | 🆕 |
 | Hydrants, steam, garbage | Opened hydrants spraying the street, steam stacks, garbage piles; sanitation trucks | Sim + Engine + Gameplay | ✅ |
 | Graffiti | **1970s subway and wall graffiti** (original tags) that changes by act | Engine (decals) + Narrative (tags) | ✅ |
 
