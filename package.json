@@ -17,6 +17,7 @@
     "audio:bake": "tsx tools/audio/bake.ts",
     "audio:stems": "tsx tools/audio/stems.ts",
     "audio:voices": "tsx tools/audio/voices.ts",
+    "audio:voices:build": "tsx tools/audio/voices.ts --soft",
     "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit"
   },

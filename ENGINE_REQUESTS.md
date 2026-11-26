@@ -103,13 +103,17 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
   in `?audio=1`.
 
 ## From audio: 11. Build step for rendered speech (user approved build-time rendering, 2026-11-26)
-- **What:** rendered speech is a build artefact, not committed. In the deploy build, run
-  `npm run audio:voices` before `vite build`, with the narrative `content/` present at
-  `public/content` (copy it in first). It needs no system packages: eSpeak NG is the npm WASM build
-  and ffmpeg is `ffmpeg-static`, both devDependencies, both GPL-3.0, build-time only, never bundled.
-  Output goes to `public/audio/voice/` (ignored by git). Cache that folder plus its `manifest.json`
-  between builds (Vercel build cache) so unchanged lines are skipped. Measured here (4 cores, CPU-only):
-  full render of 1,428 lines 237 s; rerun with the cache 1 s. Deployed output 38 MB (Opus + AAC),
-  fetched per line on demand, never preloaded.
-- **Why:** keeps ~35 MB per narrative revision out of git, and keeps GPL code out of the shipped game.
+- **What:** in the deploy build, run `npm run audio:voices:build` before `vite build`, with the
+  narrative `content/` present at `public/content` (copy it in first).
+  - No system packages: eSpeak NG is the npm WASM build and ffmpeg is `ffmpeg-static`, both
+    devDependencies, GPL-3.0, build-time only, never bundled (verified against the production bundle).
+  - **Cache:** renders are keyed by hash(speaker|emotion|text|voice) in `node_modules/.cache/t74-voices/`,
+    which Vercel's build cache restores between builds, so a typical build only renders changed lines;
+    the step then copies the current lines into `public/audio/voice/` (ignored by git).
+  - **Never fails the build** (`--soft`): if content is missing, the WASM or ffmpeg can't load, or a line
+    fails, it logs a warning and exits 0; anything not rendered plays the placeholder voice.
+  - Measured (4 cores, CPU-only): cold cache — see AUDIO_PROGRESS; warm cache — about a second.
+    Deployed output 38 MB (Opus + AAC), fetched per line on demand.
+- **Why:** keeps ~35 MB per narrative revision out of git, keeps GPL code out of the shipped game, and
+  keeps preview deploys fast across branches.
 - **Fallback:** without renders, lines play the formant placeholder voice with correct subtitle timing.

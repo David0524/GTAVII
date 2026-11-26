@@ -15,7 +15,7 @@
  * Casting: tools/audio/casting.json (committed, editable) overrides the automatic casting, which
  * reads the pronouns the narrative's own cast descriptions use (never names) and the age.
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, copyFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import ffmpegPath from 'ffmpeg-static';
 import EspeakModule from '@echogarden/espeak-ng-emscripten';
@@ -27,17 +27,23 @@ import { measure } from './loudness';
 const args = process.argv.slice(2);
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
 const CONTENT = opt('content', 'public/content'), OUT = 'public/audio/voice', JOBS = +opt('jobs', '4');
+/** Renders live here keyed by hash; Vercel's build cache restores node_modules/.cache between builds. */
+const CACHE = opt('cache', 'node_modules/.cache/t74-voices');
+/** --soft (the deploy build): never fail the build; anything not rendered plays the placeholder voice. */
+const SOFT = args.includes('--soft');
+const bail = (msg: string): never => { if (SOFT) { console.warn(`[audio:voices] ${msg}; continuing without (re-)rendered speech (placeholder voice)`); process.exit(0); } console.error(msg); process.exit(1); };
 const TARGET_LUFS = -20;
 
 // eSpeak NG compiled to WASM (npm, GPL-3.0) and a static ffmpeg (npm, GPL-3.0): build-time tools only, so this
 // runs on any Node build host (Vercel included) without apt. Neither is imported by game code or shipped.
-const espeak: any = new ((await (EspeakModule as any)()) as any).eSpeakNGWorker();
+let espeak: any;
+try { espeak = new ((await (EspeakModule as any)()) as any).eSpeakNGWorker(); } catch (e) { bail(`eSpeak WASM failed to load: ${e}`); }
 const FFMPEG = ffmpegPath as unknown as string;
-if (!FFMPEG) { console.error('ffmpeg-static has no binary for this platform'); process.exit(1); }
+if (!FFMPEG || !existsSync(FFMPEG)) bail('ffmpeg-static has no binary for this platform');
 const SR_TTS: number = espeak.get_samplerate();
 const VOL_DB: Record<string, number> = { soft: -3, medium: 0, loud: 2 };
-if (!existsSync(CONTENT)) { console.error(`no content at ${CONTENT}`); process.exit(1); }
-mkdirSync(OUT, { recursive: true });
+if (!existsSync(CONTENT)) bail(`no narrative content at ${CONTENT}`);
+mkdirSync(OUT, { recursive: true }); mkdirSync(CACHE, { recursive: true });
 
 // ------------------------------------------------------------------ casting
 const castFiles = ['leads', 'principals', 'secondary'].map((f) => join(CONTENT, 'cast', `${f}.json`)).filter(existsSync);
@@ -89,12 +95,17 @@ function writeWav(path: string, x: Float32Array, sr: number) {
   for (let i = 0; i < x.length; i++) b.writeInt16LE(Math.max(-32768, Math.min(32767, Math.round(x[i] * 32767))), 44 + i * 2); writeFileSync(path, b);
 }
 
-const manifestPath = join(OUT, 'manifest.json');
-const old = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : { files: {} };
+const manifestPath = join(OUT, 'manifest.json'), cacheIndex = join(CACHE, 'index.json');
+let old: { files: Record<string, any> } = { files: {} };
+try { if (existsSync(cacheIndex)) old = JSON.parse(readFileSync(cacheIndex, 'utf8')); } catch { /* cold cache */ }
+let failed = 0;
 const files: Record<string, { dur: number; bytesOpus: number; bytesAac: number; speaker: string; emotion: string; voice: string }> = {};
 let done = 0, skipped = 0; const t0 = Date.now();
 async function render(j: Job) {
-  const webm = join(OUT, `${j.key}.webm`), m4a = join(OUT, `${j.key}.m4a`); const c = castOf(j.speaker);
+  try { await renderOne(j); } catch (e) { failed++; if (!SOFT) throw e; console.warn(`[audio:voices] ${j.key} (${j.speaker}) failed: ${String(e).slice(0, 200)}`); }
+}
+async function renderOne(j: Job) {
+  const webm = join(CACHE, `${j.key}.webm`), m4a = join(CACHE, `${j.key}.m4a`); const c = castOf(j.speaker);
   const voiceStr = `wasm en-us+${c.variant} p${c.pitch} s${c.speed}`;
   if (old.files[j.key]?.voice === voiceStr && existsSync(webm) && existsSync(m4a)) { files[j.key] = old.files[j.key]; skipped++; return; }
   const [rate, pitch, vol] = EMO[j.emotion] ?? [0, 0, 'medium'];
@@ -122,13 +133,15 @@ function resampleTo48(x: Float32Array, sr: number) { const n = Math.floor(x.leng
 
 const queue = [...jobs.values()];
 await Promise.all(Array.from({ length: JOBS }, async () => { while (queue.length) await render(queue.shift()!); }));
-// Remove renders no line refers to any more.
-for (const f of readdirSync(OUT)) { const key = f.replace(/\.(webm|m4a)$/, ''); if (f !== 'manifest.json' && !files[key]) rmSync(join(OUT, f)); }
+// Publish the current lines from the cache into public/, and drop anything no line refers to any more.
+for (const k of Object.keys(files)) for (const ext of ['webm', 'm4a']) { const src = join(CACHE, `${k}.${ext}`), dst = join(OUT, `${k}.${ext}`); if (!existsSync(dst) || statSync(dst).size !== statSync(src).size) copyFileSync(src, dst); }
+for (const dir of [OUT, CACHE]) for (const f of readdirSync(dir)) { const key = f.replace(/\.(webm|m4a)$/, ''); if (f !== 'manifest.json' && f !== 'index.json' && !files[key]) rmSync(join(dir, f)); }
+writeFileSync(cacheIndex, JSON.stringify({ files }));
 const castTable: Record<string, VoiceCast & { from: string }> = {};
 for (const j of jobs.values()) if (!castTable[j.speaker]) castTable[j.speaker] = { ...castOf(j.speaker), from: overrides[j.speaker] ? 'override' : cast.get(j.speaker)?.pron ? `cast pronouns (${cast.get(j.speaker)!.pron}), age ${cast.get(j.speaker)!.age ?? '?'}` : 'neutral spread (no cast entry)' };
 const totals = Object.values(files).reduce((s, f) => ({ dur: s.dur + f.dur, opus: s.opus + f.bytesOpus, aac: s.aac + f.bytesAac }), { dur: 0, opus: 0, aac: 0 });
 writeFileSync(manifestPath, JSON.stringify({ engine: 'eSpeak NG (Emscripten/WASM build @echogarden/espeak-ng-emscripten 0.3.5, formant synthesis), rendered at build time by tools/audio/voices.ts', targetLufs: TARGET_LUFS, totals, cast: castTable, files }, null, 1) + '\n');
-console.log(`${jobs.size} lines (${done} rendered, ${skipped} unchanged): ${(totals.dur / 60).toFixed(1)} min, opus ${(totals.opus / 1048576).toFixed(1)} MB, aac ${(totals.aac / 1048576).toFixed(1)} MB`);
+console.log(`${jobs.size} lines (${done} rendered, ${skipped} from cache, ${failed} failed): ${(totals.dur / 60).toFixed(1)} min, opus ${(totals.opus / 1048576).toFixed(1)} MB, aac ${(totals.aac / 1048576).toFixed(1)} MB`);
 
 // Per-file provenance table (docs/AUDIO_SOURCES_VOICES.md), regenerated with the renders.
 {
