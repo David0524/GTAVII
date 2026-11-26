@@ -19,7 +19,7 @@
       ],
       "tris": 10622,
       "draws": 2,
-      "buildMs": 112.7
+      "buildMs": 126.7
     },
     {
       "seed": 2486719551,
@@ -35,7 +35,7 @@
       "props": [],
       "tris": 9904,
       "draws": 2,
-      "buildMs": 103
+      "buildMs": 143.2
     },
     {
       "seed": 427522784,
@@ -51,9 +51,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 9316,
+      "tris": 9328,
       "draws": 2,
-      "buildMs": 76.4
+      "buildMs": 100.8
     },
     {
       "seed": 1048119932,
@@ -71,7 +71,7 @@
       ],
       "tris": 9185,
       "draws": 2,
-      "buildMs": 54.5
+      "buildMs": 84.5
     },
     {
       "seed": 1257398256,
@@ -89,7 +89,7 @@
       ],
       "tris": 9164,
       "draws": 2,
-      "buildMs": 52.1
+      "buildMs": 99.2
     },
     {
       "seed": 183788950,
@@ -103,9 +103,9 @@
       "shoes": "sneaker",
       "hat": null,
       "props": [],
-      "tris": 10398,
+      "tris": 10418,
       "draws": 2,
-      "buildMs": 56.8
+      "buildMs": 71.9
     },
     {
       "seed": 2289262834,
@@ -123,7 +123,7 @@
       ],
       "tris": 9997,
       "draws": 2,
-      "buildMs": 82.4
+      "buildMs": 84.4
     },
     {
       "seed": 3754428764,
@@ -139,9 +139,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 10936,
+      "tris": 10956,
       "draws": 2,
-      "buildMs": 121.6
+      "buildMs": 84.7
     },
     {
       "seed": 3119854232,
@@ -157,9 +157,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 9884,
+      "tris": 9860,
       "draws": 2,
-      "buildMs": 48.3
+      "buildMs": 48.2
     },
     {
       "seed": 3475696813,
@@ -173,26 +173,26 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 8734,
+      "tris": 8732,
       "draws": 2,
-      "buildMs": 56.5
+      "buildMs": 68
     }
   ],
   "updateMs": [
-    0,
-    0,
-    0,
     0.1,
     0,
     0,
     0,
     0,
     0,
+    0.1,
+    0,
+    0,
     0
   ],
   "renderMsSoftware": [
     3.7999999998137355,
-    2,
-    1.599999999627471
+    6.2000000001862645,
+    1.900000000372529
   ]
 }

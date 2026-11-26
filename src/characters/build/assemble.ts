@@ -29,7 +29,8 @@ export interface Assembled {
 
 
 /** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
-export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false): Assembled {
+/** opts.headCutY: drop our head (skin above this height, eyes, teeth, hair) for a substituted head (evaluation). */
+export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number } = {}): Assembled {
   const t0 = performance.now();
   // heeled shoes stand the body on its heels (foot pitched in the bind pose)
   const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
@@ -84,17 +85,19 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
     used[s] = v;
     return v;
   };
+  const cutY = opts.headCutY;
   const skinStart = mb.count, skinI0 = mb.indexCount;
   for (let i = 0; i < bodyIdx.length; i += 3) {
     const a = bodyIdx[i], b = bodyIdx[i + 1], c = bodyIdx[i + 2];
     if (covered[model.splitSrc[a]] && covered[model.splitSrc[b]] && covered[model.splitSrc[c]]) continue;
+    if (cutY !== undefined && [a, b, c].every((x) => { const k = model.splitSrc[x]; return F.part[k] === PART.head || P[k * 3 + 1] > cutY; })) continue;
     mb.tri(skinVert(a), skinVert(b), skinVert(c));
   }
   smoothSkinNormals(mb, model, used, F, skinStart, skinI0);
 
   mb.slot = 0;
   // --- eyes and teeth ---
-  if (lod <= 2) {
+  if (lod <= 2 && cutY === undefined) {
     eyes(model, shape, app, lod, mb);
     if (lod <= 1) teeth(model, shape, app, lod, mb);
   }
@@ -108,7 +111,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
   mb.slot = 5;
   buildAccessories({ ...ctx, face: ff, app }, mb);
 
-  const hair = lod <= 3 ? buildHair({ ...ctx, face: ff, app, covered }) : null;
+  const hair = lod <= 3 && cutY === undefined ? buildHair({ ...ctx, face: ff, app, covered }) : null;
 
   // --- shoe sole lift ---
   const lift = shoes.lift;

@@ -41,7 +41,7 @@ export async function runCharactersTest() {
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};
-  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair') tick = lineup(world, camera, factory, scene, report);
+  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox') tick = await lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
@@ -71,11 +71,27 @@ function floor(world: THREE.Scene, size = 60, color = 0x4c4642) {
 }
 
 // ------------------------------------------------------------------------------------------------
-function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: CharacterFactory, scene: string, report: any) {
+async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: CharacterFactory, scene: string, report: any) {
   floor(world);
   const chars: Character[] = [];
   const zoom = qp.get('zoom');
-  if (scene === 'hair') {
+  if (scene === 'rocketbox') {
+    // EVALUATION: Rocketbox heads (MIT) on our bodies in our 1974 wardrobe, each beside the same
+    // seed with our own generated head (A/B). Assets: tools/characters/build-rocketbox.ts.
+    const names = (qp.get('rb') ?? 'Male_Adult_12,Male_Adult_03,Female_Adult_11').split(',');
+    const { loadRocketboxHead } = await import('../eval/rocketbox');
+    const base = import.meta.env.BASE_URL + 'characters/';
+    for (const [i, name] of names.entries()) {
+      const head = await loadRocketboxHead(base, name);
+      const female = name.startsWith('Female'), old = name === 'Male_Adult_03';
+      let seed = 700 + i * 31;
+      for (let k = 0; k < 400; k++) { const a = generateAppearance(hash2(seed, k)); if ((a.sex < 0.5) === female && (old ? a.age > 55 : a.age > 25 && a.age < 45)) { seed = hash2(seed, k); break; } }
+      const ov = { hat: null };
+      chars.push(factory.spawn(world, { seed, overrides: { ...ov, rbHead: head } }));
+      chars.push(factory.spawn(world, { seed, overrides: ov }));
+      report.rocketbox = [...(report.rocketbox ?? []), { name, bytes: head.bytes, headTris: head.meta.counts.skinTris + head.meta.counts.opacityTris, tone: head.meta.tone }];
+    }
+  } else if (scene === 'hair') {
     // every hair style on a head; women's and men's styles on matching seeds; hats off
     const styles = (qp.get('styles') ?? 'short,sidePart,slick,combOver,pompadour,feathered,shag,earLength,bob,flip,longStraight,ponytail,braid,updo,setCurls,afro,afroShort,curlyMid,cornrows,buzz').split(',');
     const W = ['bob', 'flip', 'longStraight', 'ponytail', 'braid', 'updo', 'setCurls'];

@@ -113,6 +113,47 @@ props, hair, eyeballs, skin and cloth shading, the authored animation clips, the
 - **Shared log:** `docs/briefs/ART_ASSETS.md` asks for `docs/ART_SOURCES.md`; that is a shared
   file, so the entry is requested in `ENGINE_REQUESTS.md` (characters 4) instead of edited here.
 
+## 6. Microsoft Rocketbox (MIT): evaluation only, not shipped to players
+- **What:** heads (skin, eyes, teeth, eyelashes and hair cards; 1024² WebP colour, normal and
+  opacity textures) of three **adult** avatars: `Male_Adult_12`, `Male_Adult_03` and
+  `Female_Adult_11`. The library's `Children` folder is never used.
+- **Source:** https://github.com/microsoft/Microsoft-Rocketbox (fetched 2026-11-26; blobless
+  sparse clone, HEAD of `master`).
+- **Licence:** the repository's `LICENSE.md` is MIT; the README says "November 2020 License
+  Update: The library of avatars is now released under MIT License" (the older 2020 announcement
+  said research and academic use; the MIT update supersedes it). MIT permits redistribution in a
+  web game provided the copyright and permission notice ship with it, so a copy is at
+  `public/characters/eval/LICENSE-Rocketbox.md`. Full text:
+
+```
+MIT License
+
+Copyright (c) 2020 Microsoft
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+- **Edits:** head piece extracted by bone dominance; units to metres; bones remapped to our rig;
+  textures resized from 2048² TGA to 1024² WebP (q88). Built by
+  `tools/characters/build-rocketbox.ts`.
+- **Files:** `public/characters/eval/rb_<name>.bin` and `rb_<name>_{color,normal,opacity}.webp`.
+  They're used only by the `?characters=1&scene=rocketbox` evaluation scene.
+
 ## 4. Tooling (not shipped)
 - three 0.187.0 (MIT) is used inside the build scripts for maths.
 - Playwright (Apache-2.0) is used for screenshots.

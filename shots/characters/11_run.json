@@ -6,66 +6,66 @@
     {
       "foot": "l",
       "surface": "asphalt",
-      "x": -13.67,
+      "x": -13.7,
       "y": 0
     },
     {
       "foot": "r",
       "surface": "asphalt",
-      "x": -12.87,
+      "x": -12.86,
       "y": 0
     },
     {
       "foot": "l",
       "surface": "asphalt",
-      "x": -12.2,
+      "x": -12.18,
       "y": 0
     },
     {
       "foot": "r",
       "surface": "asphalt",
-      "x": -11.49,
+      "x": -11.44,
       "y": 0
     },
     {
       "foot": "l",
       "surface": "asphalt",
-      "x": -10.96,
+      "x": -11.04,
+      "y": 0
+    },
+    {
+      "foot": "l",
+      "surface": "asphalt",
+      "x": -11.08,
       "y": 0
     },
     {
       "foot": "r",
       "surface": "asphalt",
-      "x": -10.25,
+      "x": -10.14,
       "y": 0
     },
     {
       "foot": "l",
       "surface": "asphalt",
-      "x": -8.95,
+      "x": -8.8,
       "y": 0
     },
     {
       "foot": "r",
       "surface": "asphalt",
-      "x": -7.4,
-      "y": 0
-    },
-    {
-      "foot": "l",
-      "surface": "asphalt",
-      "x": -5.7,
+      "x": -7.2,
       "y": 0
     }
   ],
-  "updateMs": 0.2,
+  "updateMs": 0.1,
   "pos": [
-    -5.3,
+    -6.37,
     0
   ],
   "renderMsSoftware": [
-    2.3999999999068677,
-    1.5,
-    0.8999999999068677
+    2.3999999994412065,
+    1.400000000372529,
+    0.7000000001862645
   ]
 }
