@@ -1,0 +1,145 @@
+{
+  "id": "cut.m12_lunch_counter",
+  "mission": "mission.lunch_counter",
+  "before": "o2",
+  "time": "12:40",
+  "date": "1974-07-15",
+  "skippable": true,
+  "logline": "Branch A. A prosecutor with an egg-salad sandwich asks a bagman to be audible. Delphine, two stools down, hears all of it.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "slow track along the counter",
+      "framing": "Lacy's lunch counter at the lunch rush: shoppers, a cook at the griddle, a long chrome counter",
+      "blocking": "Calloway two stools from the end, accordion file at her elbow; Delphine two stools further, a coffee and a newspaper",
+      "beats": [
+        "Plant Delphine in the background before Teddy sits"
+      ],
+      "durationSec": 6,
+      "notes": "audio: griddle; cash register; a store announcement for the fur sale | lighting: flat fluorescent, chrome highlights"
+    },
+    {
+      "id": "s2",
+      "type": "two-shot",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Calloway and Teddy at the counter, eyes forward",
+      "blocking": "",
+      "beats": [
+        "l1–l3"
+      ],
+      "durationSec": 11.0,
+      "dialogue": [
+        "dlg.m12_calloway#l1",
+        "dlg.m12_calloway#l2",
+        "dlg.m12_calloway#l3"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Calloway, quiet and exact",
+      "blocking": "",
+      "beats": [
+        "l4–l6"
+      ],
+      "durationSec": 14.5,
+      "dialogue": [
+        "dlg.m12_calloway#l4",
+        "dlg.m12_calloway#l5",
+        "dlg.m12_calloway#l6"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "rack focus",
+      "lensMm": 85,
+      "move": "rack from Teddy (foreground) to Delphine (background)",
+      "framing": "Teddy asks; behind him Delphine's newspaper lowers an inch",
+      "blocking": "",
+      "beats": [
+        "l7–l8"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m12_calloway#l7",
+        "dlg.m12_calloway#l8"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "choice hold",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "Half a sandwich on a plate; Teddy's hand beside it",
+      "blocking": "",
+      "beats": [
+        "c1 (untimed). Branch A."
+      ],
+      "dialogue": [
+        "dlg.m12_calloway#c1"
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m12_calloway#c1"
+    },
+    {
+      "id": "s6a",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy pushes the plate away",
+      "blocking": "",
+      "beats": [
+        "Branch: wire"
+      ],
+      "durationSec": 7.4,
+      "dialogue": [
+        "dlg.m12_calloway#l_wire",
+        "dlg.m12_calloway#l_wire2"
+      ],
+      "showIf": {
+        "choice": "dlg.m12_calloway#c1",
+        "option": 0
+      }
+    },
+    {
+      "id": "s6b",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy finishes the sandwich",
+      "blocking": "",
+      "beats": [
+        "Branch: burned"
+      ],
+      "durationSec": 10.0,
+      "dialogue": [
+        "dlg.m12_calloway#l_burn",
+        "dlg.m12_calloway#l_burn2"
+      ],
+      "showIf": {
+        "choice": "dlg.m12_calloway#c1",
+        "option": 1
+      }
+    },
+    {
+      "id": "s7",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Calloway leaves money on the counter and goes",
+      "blocking": "Delphine folds her newspaper",
+      "beats": [
+        "l_end"
+      ],
+      "durationSec": 5.2,
+      "dialogue": [
+        "dlg.m12_calloway#l_end"
+      ]
+    }
+  ]
+}

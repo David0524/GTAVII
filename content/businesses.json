@@ -585,6 +585,58 @@
       "check": "descriptive or generic pattern; low risk; not searched",
       "story": false,
       "note": ""
+    },
+    {
+      "id": "biz.cormorant",
+      "name": "The Cormorant",
+      "trade": "Grindhouse cinema (ex-legit house)",
+      "where": "W 42nd St, 7th–8th Aves (north side)",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "CORMORANT · KUNG FU · HORROR · CONTINUOUS"
+      ],
+      "check": "cleared: exact-name search (Nov 2026), no NYC cinema/theatre of that name; avoided real Deuce houses (Lyric, Victory, Selwyn, Apollo, Times Square, Liberty, Empire, Harris, Anco, Cine 42, Times, Bryant)",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gilded_lyre",
+      "name": "The Gilded Lyre",
+      "trade": "Grindhouse cinema (gilt 1910s house, peeling)",
+      "where": "W 42nd St, 7th–8th Aves (south side)",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "GILDED LYRE · 2 HITS · AIR COOLED"
+      ],
+      "check": "cleared: exact-name search (Nov 2026), no NYC cinema/theatre of that name; avoided real Deuce houses (Lyric, Victory, Selwyn, Apollo, Times Square, Liberty, Empire, Harris, Anco, Cine 42, Times, Bryant)",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.pharaoh",
+      "name": "The Pharaoh",
+      "trade": "Grindhouse cinema (Egyptian-revival facade)",
+      "where": "W 42nd St, 7th–8th Aves (south side)",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "PHARAOH · ACTION · 24 HRS · 99¢"
+      ],
+      "check": "cleared: exact-name search (Nov 2026), no NYC cinema/theatre of that name; avoided real Deuce houses (Lyric, Victory, Selwyn, Apollo, Times Square, Liberty, Empire, Harris, Anco, Cine 42, Times, Bryant)",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.comet",
+      "name": "The Comet",
+      "trade": "Grindhouse cinema (narrow 1930s front)",
+      "where": "W 42nd St, west of 8th Ave",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "COMET · LATE SHOW · 3 FEATURES"
+      ],
+      "check": "cleared: exact-name search (Nov 2026), no NYC cinema/theatre of that name; avoided real Deuce houses (Lyric, Victory, Selwyn, Apollo, Times Square, Liberty, Empire, Harris, Anco, Cine 42, Times, Bryant)",
+      "story": false,
+      "note": ""
     }
   ]
 }
