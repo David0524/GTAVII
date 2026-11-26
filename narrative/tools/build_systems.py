@@ -279,16 +279,23 @@ pool("barks.cop_killed", "Consequences of killing a police officer (user: 'Fully
  ("street", "shocked", "They shot a cop. On Eighth Avenue. They shot a cop."),
  ("street", "low", "Get inside. Every cop in the city is coming here.")])
 
-pool("barks.route_calls", "No-GPS route call-outs (goto.routeCalledBy). {street}/{avenue} are filled by the UI's turn list; the HUD repeats each call with the speaker's name. 'voice' tags pick the pool by caller.", [
- ("fare", "brisk", "Left on {street}."), ("fare", "brisk", "Right on {avenue}. Then keep going."), ("fare", "impatient", "Not this one, the next one. {street}."),
- ("fare", "brisk", "Straight through the light. Straight."), ("fare", "relieved", "Here. Right here. Pull over."), ("fare", "annoyed", "You missed it! Go around the block. {street}'s one way."),
- ("fare_tourist", "nervous", "The map says left? On, um, {street}?"), ("fare_tourist", "happy", "Oh! That's it! That's the building!"),
- ("cabbie", "easy", "Take {avenue} up, it's faster than it looks."), ("cabbie", "easy", "{street} runs the other way. Next block, kid."),
- ("cabbie", "wry", "Broadway does what it wants. Stay on {avenue}."), ("cabbie", "easy", "Pull up by the hydrant. Nobody tickets a hack at the hydrant."),
- ("labour", "strained", "Left. On {street}. Hurry. Please hurry."), ("labour", "strained", "Pennington's on Ninth. Down {avenue}. Go!"),
- ("odessa", "steady", "Slowly, Mr. Arce. Left at {street}. I'm in no hurry. You are."),
- ("delphine", "brisk", "Rule nine: never take {avenue} after midnight. Take {street}."),
- ("nick", "expansive", "Turn here! No, here! I own a building on this block, I should know.")])
+pool("barks.route_calls", "No-GPS route call-outs (goto.routeCalledBy). Every voice covers left/right x {street}/{avenue} (UI test tests/ui-route.test.ts). The HUD prints the computed turn; a voiced line plays only if its direction and slot match.", [
+ ("fare", "brisk", "Left on {street}."), ("fare", "brisk", "Right on {street}, then straight."), ("fare", "brisk", "Hang a left on {avenue}."), ("fare", "brisk", "Right on {avenue}. Keep going."),
+ ("fare", "relieved", "Here. Right here. Pull over."), ("fare", "annoyed", "You missed it! Go around the block. {street}'s one way."),
+ ("fare_tourist", "nervous", "The map says left? On, um, {street}?"), ("fare_tourist", "nervous", "Right on {street}, I think. Is that a street or an avenue?"),
+ ("fare_tourist", "unsure", "Left onto {avenue}? The book says it's very long."), ("fare_tourist", "excited", "Right on {avenue}! Look, honey, the big one!"),
+ ("fare_tourist", "happy", "Oh! That's it! That's the building!"),
+ ("cabbie", "easy", "Hang a left on {street}, kid."), ("cabbie", "easy", "Right on {street}. Easy. Mind the hydrant."), ("cabbie", "easy", "Left on {avenue}. Faster than it looks."),
+ ("cabbie", "easy", "Swing right on {avenue}. Ride the lights."), ("cabbie", "wry", "Broadway does what it wants. Stay on {avenue}."),
+ ("cabbie", "easy", "Pull up by the hydrant. Nobody tickets a hack at the hydrant."),
+ ("labour", "strained", "Left. On {street}. Hurry. Please hurry."), ("labour", "strained", "Right on {street}! Right! Don't brake so hard!"),
+ ("labour", "strained", "Left on {avenue}. Breathe. Breathe and drive."), ("labour", "strained", "Right on {avenue}. Pennington's on Ninth. Go!"),
+ ("odessa", "steady", "Slowly, Mr. Arce. Left at {street}. I'm in no hurry. You are."), ("odessa", "steady", "Right on {street}. Mind the old man on the corner. That's me in ten years."),
+ ("odessa", "steady", "Left onto {avenue}, if you please."), ("odessa", "dry", "Right on {avenue}. Gently. I'm not a sack of laundry."),
+ ("delphine", "brisk", "Left on {street}. Rule nine: never the obvious way."), ("delphine", "brisk", "Right on {street}. Quick, before the light."),
+ ("delphine", "cool", "Left on {avenue}. Nobody watches the left."), ("delphine", "brisk", "Rule nine: never take {avenue} after midnight. Right on it anyway."),
+ ("nick", "expansive", "Left on {street}! I own a building on this block, I should know."), ("nick", "expansive", "Right on {street}. My first shop was here. Smaller than this car."),
+ ("nick", "expansive", "Left on {avenue}! No, here! Yes, here!"), ("nick", "expansive", "Right on {avenue}. Everybody gets paid on {avenue}.")])
 
 _rc = json.loads((C / "barks" / "route_calls.json").read_text())
 _rc["voiceByPassenger"] = {"npc.cab_fare_businessman": "fare", "npc.cab_fare_night_worker": "fare", "npc.cab_fare_tourist": "fare_tourist",
