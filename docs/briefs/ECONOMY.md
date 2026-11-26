@@ -5,6 +5,11 @@
 (UI, newspaper, save). Written by the oversight session at the user's request: *"Make sure there's a
 way for players to make money aside from missions."*
 
+## User decisions
+- Mission pay: *"Yes, but in GTA VI you can really rack up money. Like 10s of thousands"*. Missions pay well; big jobs
+  and heists pay $10k–$50k+; a story playthrough ends with tens of thousands; everyday 1974 prices stay real.
+- Property: *"Small early, big late"*.
+
 ## Principles
 - **Every lead can earn in free roam from the first hour,** legally and illegally. Missions pay
   best per hour, and free roam pays well enough to fund clothes, guns, cars, bribes and property.
