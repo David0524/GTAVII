@@ -63,7 +63,9 @@ export class Network {
   lanesNear(x: number, z: number, r: number, out: Set<number>) { cellsAround(this.laneCells, x, z, r, 25, out); return out; }
   sidewalksNear(x: number, z: number, r: number, out: Set<number>) { cellsAround(this.walkCells, x, z, r, 25, out); return out; }
 
-  isSignal(j: number) { return j >= 0 && (this.g.junctions[j].flags & JuncFlag.Signal) !== 0; }
+  /** Junctions whose signals are unpowered (brownout): treated as all-way stops. */
+  readonly dark = new Set<number>();
+  isSignal(j: number) { return j >= 0 && (this.g.junctions[j].flags & JuncFlag.Signal) !== 0 && !this.dark.has(j); }
 
   /** Signal state for a phase at time t (s). */
   phaseState(j: number, phase: number, t: number): Sig {

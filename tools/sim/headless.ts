@@ -83,6 +83,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   sim.setClock(17 * 60 + 30);
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
+  const hooks = { escorts: 0, gotos: 0, witnesses: 0 };
+  for (const t of ['escortProgress', 'escortDone', 'goalReached']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0 };
   const examples: Record<string, string[]> = {};
@@ -103,6 +105,16 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     if (k === Math.round(90 / SIM_DT)) sim.emit({ type: 'threat', x: f.x + 10, z: f.z - 30, radius: 25 });
     if (k === Math.round(150 / SIM_DT)) sim.emit({ type: 'blockLane', x: f.x, z: f.z - 60, until: sim.time + 90 });
     if (k === Math.round(260 / SIM_DT)) sim.emit({ type: 'closeStreet', x: f.x, z: f.z - 80, radius: 20, until: sim.time + 60 });
+    // brownout: dark signals = all-way stops (narrative N2)
+    if (k === Math.round(200 / SIM_DT)) sim.setSignalPower({ x: f.x, z: f.z, radius: 180 }, false);
+    if (k === Math.round(330 / SIM_DT)) sim.setSignalPower({ x: f.x, z: f.z, radius: 5000 }, true);
+    if (k === Math.round(420 / SIM_DT)) { sim.emit({ type: 'gunfire', x: f.x + 20, z: f.z, loudness: 150 }); hooks.witnesses = sim.perceive({ x: f.x + 20, z: f.z, loudness: 150, visibility: 60 }).peds.length; }
+    // escort + goto goals on two nearby peds (narrative N4, gameplay scripted goals)
+    if (k === Math.round(30 / SIM_DT) || k === Math.round(230 / SIM_DT) || k === Math.round(430 / SIM_DT)) {
+      const ps = sim.debugAgents().peds.filter((p) => p.state === 'walk' && Math.hypot(p.x - f.x, p.z - f.z) < 60);
+      if (ps[0]) hooks.escorts += sim.escort(ps[0].id, [{ x: f.x, z: f.z - 90 }, { x: f.x + 80, z: f.z - 90 }], { target: 'player', waitRadius: 400 }) ? 1 : 0;
+      if (ps[1]) hooks.gotos += sim.setGoal(ps[1].id, { kind: 'goto', x: f.x - 60, z: f.z + 40, speed: 3.5 }) ? 1 : 0;
+    }
     // external actors: the player walking a nearby sidewalk (ping-pong) and a scripted car following lanes
     if (k === 0 || seg !== actorSeg) {
       actorSeg = seg;
@@ -117,7 +129,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     sampleAt(g.links[carL].pts, net.cum[carL], carS, o);
     sim.setExternalActors([
       { id: 'player', x: px, z: pz, vx: pvx, vz: pvz, radius: 0.4, kind: 'player' },
-      { id: 'scripted_car', x: o[0], z: o[1], vx: o[2] * 8, vz: o[3] * 8, radius: 1.3, kind: 'vehicle' },
+      { id: 'scripted_car', x: o[0], z: o[1], vx: o[2] * 8, vz: o[3] * 8, radius: 1.3, kind: 'vehicle', siren: seg === 1 },
     ]);
     const t0 = performance.now();
     sim.update(SIM_DT, f);
@@ -182,7 +194,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
+    hooks, stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
   };
 }
 

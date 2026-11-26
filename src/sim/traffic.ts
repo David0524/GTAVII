@@ -159,7 +159,7 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
       T: kind === 'cab' ? 0.9 : kind === 'bus' ? 1.6 : 1.3 - 0.4 * ag, aMax: kind === 'bus' || kind === 'truck' ? 1.1 : 1.8 + ag * 0.6,
       bComf: 2.4, s0: kind === 'cab' ? 1.5 : 2.0,
       state: 'drive', dwell: 0, lat: 0, latTarget: 0, passable: false, lcFrom: -1, lcT: 1, lcCd: S.rng.range(0, 1),
-      stopT: 0, waitT: 0, honkCd: S.rng.range(0, 4), greenWait: 0, force: false,
+      stopT: 0, waitT: 0, honkCd: S.rng.range(0, 4), greenWait: 0, force: false, pullT: 0, atLine: false,
       x: 0, z: 0, yaw: 0, px: 0, pz: 0, pyaw: 0,
       fare: kind === 'cab' && S.rng.chance(0.5), fareT: S.rng.range(30, 160), hail: null, stopAt: -1, stopLink: -1, stopKind: '',
       dpDone: !S.rng.chance(0.45), busServed: -1, blockedBy: '', why: '',
@@ -225,7 +225,8 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
   // yield to approaching higher-priority movements (permissive left turns, unsignalized junctions)
   if (!v.force) for (const cf of C.conflicts) {
     const O = net.g.links[cf.link];
-    if (O.prio < C.prio) continue;
+    const allWay = net.dark.has(C.owner); // brownout: every approach is equal, first stopped goes first
+    if (!allWay && O.prio < C.prio) continue;
     const src = S.srcLane[cf.link];
     const sig = net.laneSignal(src, t);
     if (sig === Sig.Red) continue;
@@ -236,7 +237,8 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
       const dEnd = net.len[src] - w.s;
       const tta = dEnd / Math.max(w.v, 0.5);
       if (tta > 4 || dEnd > 45) continue;
-      if (O.prio > C.prio || w.waitT > v.waitT + 0.01 || (Math.abs(w.waitT - v.waitT) <= 0.01 && w.id < v.id)) return 'yield';
+      if (allWay && !w.atLine) continue; // at a dead signal only vehicles that have stopped count
+      if ((!allWay && O.prio > C.prio) || w.waitT > v.waitT + 0.01 || (Math.abs(w.waitT - v.waitT) <= 0.01 && w.id < v.id)) return 'yield';
     }
   }
   return '';
@@ -307,6 +309,10 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     const sig = net.laneSignal(v.link, t);
     if (sig === Sig.Red) must = 'red';
     else if (sig === Sig.Yellow && dEnd - v.len / 2 > (v.v * v.v) / (2 * 3.5) + 1) must = 'red';
+    if (net.dark.has(L.endJ)) { // dead signal = all-way stop: come to a full stop at the line first
+      if (dEnd - v.len / 2 < 3 && v.v < 0.3) v.atLine = true;
+      if (!v.atLine) must = 'stopSign';
+    }
     if (!must && dEnd < Math.max(18, (v.v * v.v) / (2 * v.bComf) + 10)) must = canEnter(S, v, t);
     if (must) {
       consider(dEnd - v.len / 2 - 0.4, 0, must);
@@ -378,8 +384,8 @@ function tryLaneChange(S: SimCore, v: Vehicle, toLane: number, aggressive: boole
     const g = s2 + (net.len[c] - w.s) - (w.len + v.len) / 2;
     if (g < behind) { behind = g; foll = w; }
   }
-  const needA = aggressive ? 1.5 : 3 + v.v * 0.4;
-  const needB = aggressive ? Math.max(1.0, (foll?.v ?? 0) * 0.35) : Math.max(3, (foll?.v ?? 0) * 0.9);
+  const needA = aggressive ? 2.0 : 3 + v.v * 0.4;
+  const needB = aggressive ? Math.max(2.0, (foll?.v ?? 0) * 0.35) : Math.max(3, (foll?.v ?? 0) * 0.9);
   if (ahead < needA || behind < needB) return false;
   // vehicles in the lane we leave that are alongside or just ahead would overlap during the blend
   for (const w of S.occ[v.link]) if (w !== v && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1) return false;
@@ -535,6 +541,7 @@ function updateLights(S: SimCore, v: Vehicle) {
   else if (v.state === 'curb' || v.state === 'busStop') m |= v.dwell <= 1 ? L_IND_L : v.kind === 'cab' ? L_HAZARD : L_IND_R;
   else {
     if (v.acc < -0.6 || v.v < 0.2) m |= L_BRAKE;
+    if (v.pullT > 0) m |= L_IND_R;
     if (v.lcT < 1 && v.lcFrom >= 0) m |= net.g.links[v.lcFrom].laneIndex > L.laneIndex ? L_IND_R : L_IND_L;
     else if (v.stopLink >= 0 && (v.stopLink !== v.link || v.stopAt - v.s < 40)) m |= L_IND_R;
     else if (L.kind === LinkKind.Lane && v.next >= 0 && net.len[v.link] - v.s < 45) { const t = net.g.links[v.next].turn; if (t === Turn.Left) m |= L_IND_L; else if (t === Turn.Right) m |= L_IND_R; }
@@ -577,6 +584,20 @@ export function stepVehicles(S: SimCore, dt: number) {
     const edgeF = ed < EDGE.BLOCKERS ? Math.max(0.12, ed / EDGE.BLOCKERS) : 1;
     const v0 = L.speed * v.v0f * rainF * edgeF;
     let a = idm(v, v0, obs.gap, obs.vl);
+    // sirens: pull to the kerb and stop until the emergency vehicle is past (period-true and good-looking)
+    v.pullT -= dt;
+    if (L.kind === LinkKind.Lane) for (const ac of S.actors) {
+      if (!ac.siren) continue;
+      const rx = ac.x - v.x, rz = ac.z - v.z, d = Math.hypot(rx, rz);
+      if (d > 80) continue;
+      const fx = -Math.sin(v.yaw), fz = -Math.cos(v.yaw), ahead = rx * fx + rz * fz, avf = ac.vx * fx + ac.vz * fz;
+      if ((ahead < 8 && avf > 1) || (ahead > 0 && avf < -1 && d < 60) || d < 25) v.pullT = 2.5;
+    }
+    if (v.pullT > 0) {
+      a = Math.min(a, v.v > 0.2 ? -2.8 : 0);
+      if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive') v.latTarget = (L.width - v.wid) / 2 + 1.1;
+      v.blockedBy = 'siren';
+    } else if (v.pullT > -0.1 && v.latTarget > 0 && v.state === 'drive') v.latTarget = 0;
     a = Math.max(-B_MAX, Math.min(v.aMax, a));
     let nv = Math.max(0, v.v + a * dt);
     let ds = v.v * dt + 0.5 * a * dt * dt;
@@ -611,7 +632,7 @@ export function stepVehicles(S: SimCore, dt: number) {
         if (net.laneSignal(v.link, t) === Sig.Red) S.stats.redLight++;
       } else nextLink = cur.next[0];
       occRemove(S, v);
-      v.prevLink = v.link; v.link = nextLink; v.s = rem; v.lcFrom = -1; v.lcT = 1;
+      v.prevLink = v.link; v.link = nextLink; v.s = rem; v.lcFrom = -1; v.lcT = 1; v.atLine = false;
       occInsert(S, v);
       if (net.g.links[nextLink].kind === LinkKind.Lane) { chooseRoute(S, v); v.busServed = v.busServed === nextLink ? v.busServed : -1; }
       else v.next = -1;

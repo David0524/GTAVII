@@ -10,8 +10,9 @@ import type { TrafficVehicleView } from '../shared/traffic';
 import { heightAt, CURB_HEIGHT, loadTerrain, terrainLoaded } from '../shared/terrain';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
-import { despawnPed, dodgeActors, spawnPedAt, spawnPeds, stepPeds, threaten } from './peds';
-import { newStats, type Actor, type Ped, type SimCore, type Stats, type Vehicle } from './state';
+import { despawnPed, dodgeActors, gunfire, setPedGoal, spawnPedAt, spawnPeds, stepPeds, threaten } from './peds';
+import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
+export type { PedGoal } from './state';
 import { despawnVehicle, honk, rebuildOcc, spawnVehicles, stepVehicles, vehicleContacts } from './traffic';
 
 export type { ArchetypeDef } from './archetypes';
@@ -34,6 +35,9 @@ export interface SimOptions {
   /** terrain.bin URL override (Node tests pass a data: URL). */
   terrainUrl?: string;
 }
+
+/** One agent that could notice an event (see Simulation.perceive). */
+export interface Witness { id: number; distance: number; saw: boolean; heard: boolean; archetype: string }
 
 /** Fixed internal timestep (s). */
 export const SIM_DT = 1 / 30;
@@ -171,7 +175,7 @@ export class Simulation {
       if (d > rV + 30) despawnVehicle(S, v);
       else if (!dwelling && v.blockedBy !== 'red' && ((v.stopT > 60 && d > 70) || v.stopT > 150)) { despawnVehicle(S, v); S.stats.stuckDespawn++; const k = `${v.blockedBy || 'queue'}`; this.stuckWhy[k] = (this.stuckWhy[k] ?? 0) + 1; if (this.stuckLog.length < 60) this.stuckLog.push(this.queueHead(v)); }
     }
-    for (const p of S.peds) if (p.alive && Math.hypot(p.x - S.focus.x, p.z - S.focus.z) > rP + 20) { despawnPed(S, p); S.stats.despawnedP++; }
+    for (const p of S.peds) if (p.alive && !p.goal && Math.hypot(p.x - S.focus.x, p.z - S.focus.z) > rP + 20) { despawnPed(S, p); S.stats.despawnedP++; }
     // compact
     if (S.vehicles.some((v) => !v.alive)) S.vehicles = S.vehicles.filter((v) => v.alive);
     if (S.peds.some((p) => !p.alive)) {
@@ -243,10 +247,14 @@ export class Simulation {
 
   setExternalActors(actors: Actor[]): void { if (this.core) this.core.actors = actors.slice(); }
 
-  emit(event: { type: 'threat' | 'blockLane' | 'closeStreet'; x: number; z: number; radius?: number; until?: number }): void {
+  emit(event: { type: 'threat' | 'blockLane' | 'closeStreet' | 'gunfire'; x: number; z: number; radius?: number; until?: number; loudness?: number }): void {
     const S = this.core, net = this.net;
     const until = event.until ?? S.t + 60;
-    if (event.type === 'threat') {
+    if (event.type === 'gunfire') {
+      const loud = event.loudness ?? event.radius ?? 120;
+      gunfire(S, event.x, event.z, loud);
+      for (const v of S.vehicles) if (Math.hypot(v.x - event.x, v.z - event.z) < loud * 0.5) honk(S, v, 'gunfire', 1);
+    } else if (event.type === 'threat') {
       const r = event.radius ?? 25;
       threaten(S, event.x, event.z, r);
       for (const v of S.vehicles) if (Math.hypot(v.x - event.x, v.z - event.z) < r * 1.5) honk(S, v, 'threat', 1);
@@ -278,6 +286,47 @@ export class Simulation {
   on(type: SimEventType | string, cb: (e: any) => void): void { (this.listeners.get(type) ?? this.listeners.set(type, []).get(type)!).push(cb); }
   private fire(type: string, e: Record<string, unknown>) { const l = this.listeners.get(type); if (l) { e.type = type; e.t = this.core.t; for (const cb of l) cb(e); } }
 
+  // ---------------------------------------------------------------- gameplay / narrative hooks
+  /**
+   * Who could notice an event at (x,z)? `loudness` = audible radius (m), `visibility` = visible radius (m).
+   * Peds see within a forward cone (not behind them); drivers see all around but hear less (windows up).
+   * Building occlusion is not modelled here: callers raycast against city colliders if they need it.
+   */
+  perceive(ev: { x: number; z: number; loudness?: number; visibility?: number }): { peds: Witness[]; vehicles: Witness[] } {
+    const S = this.core, loud = ev.loudness ?? 0, vis = ev.visibility ?? 0, r = Math.max(loud, vis);
+    const peds: Witness[] = [], vehicles: Witness[] = [];
+    for (const p of S.peds) {
+      const dx = ev.x - p.x, dz = ev.z - p.z, d = Math.hypot(dx, dz); if (d > r) continue;
+      const fx = -Math.sin(p.yaw), fz = -Math.cos(p.yaw), facing = d < 1e-3 ? 1 : (dx * fx + dz * fz) / d;
+      const saw = d <= vis && (facing > -0.3 || d < 4), heard = d <= loud;
+      if (saw || heard) peds.push({ id: p.id, distance: d, saw, heard, archetype: p.arch.def.id });
+    }
+    for (const v of S.vehicles) {
+      const d = Math.hypot(ev.x - v.x, ev.z - v.z); if (d > r) continue;
+      const saw = d <= vis, heard = d <= loud * 0.6;
+      if (saw || heard) vehicles.push({ id: v.id, distance: d, saw, heard, archetype: v.arch.def.id });
+    }
+    peds.sort((a, b) => a.distance - b.distance); vehicles.sort((a, b) => a.distance - b.distance);
+    return { peds, vehicles };
+  }
+  /** Give one pedestrian a scripted goal (goto / follow / escort / flee / flagDownCar); null clears it. Peds with goals don't despawn. */
+  setGoal(pedId: number, goal: PedGoal | null): boolean {
+    const p = this.core.pedById.get(pedId); if (!p || !p.alive) return false;
+    setPedGoal(this.core, p, goal); return true;
+  }
+  /**
+   * Escort / companion locomotion (narrative N4): walk `route` on the sidewalk graph, pacing against the
+   * player (or `opts.target`): waits when they fall more than `waitRadius` behind, leads when they get ahead.
+   * Emits `escortProgress {id, segment, of}` per waypoint and `escortDone {id}`.
+   */
+  escort(pedId: number, route: { x: number; z: number }[], opts: { waitRadius?: number; maxSpeed?: number; target?: string | number } = {}): boolean {
+    return this.setGoal(pedId, { kind: 'escort', waypoints: route, ...opts });
+  }
+  /** Brownout (narrative N2): signals inside the circle go dark (all-way stop) or come back. */
+  setSignalPower(area: { x: number; z: number; radius: number }, powered: boolean) {
+    this.net.g.junctions.forEach((j, i) => { if (Math.hypot(j.x - area.x, j.z - area.z) <= area.radius) { if (powered) this.net.dark.delete(i); else this.net.dark.add(i); } });
+  }
+
   setClock(minutesSinceMidnight: number): void { this.minute = ((minutesSinceMidnight % 1440) + 1440) % 1440; }
   setWeather(w: 'clear' | 'overcast' | 'rain'): void { this.weather = w; }
   /** Optional hook: spawn-probability multiplier (0..1) by place, e.g. per district. */
@@ -286,11 +335,11 @@ export class Simulation {
   registerArchetypes(defs: ArchetypeDef[]) { if (this.core) this.core.reg.register(defs); else this.pendingArchetypes.push(...defs); }
 
   /** Stop lines of signalized approaches with their current state (debug view). */
-  signalStates(out: { x: number; z: number; state: 'green' | 'yellow' | 'red' }[] = []) {
+  signalStates(out: { x: number; z: number; state: 'green' | 'yellow' | 'red' | 'dark' }[] = []) {
     out.length = 0;
     for (const s of this.stopLines) {
       const st = this.net.laneSignal(s.lane, this.core.t);
-      out.push({ x: s.x, z: s.z, state: st === Sig.Green ? 'green' : st === Sig.Yellow ? 'yellow' : 'red' });
+      out.push({ x: s.x, z: s.z, state: st === Sig.Green ? 'green' : st === Sig.Yellow ? 'yellow' : st === Sig.Red ? 'red' : 'dark' });
     }
     return out;
   }

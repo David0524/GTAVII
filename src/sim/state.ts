@@ -16,7 +16,7 @@ export interface Vehicle {
   state: string; dwell: number;
   lat: number; latTarget: number; passable: boolean;
   lcFrom: number; lcT: number; lcCd: number;
-  stopT: number; waitT: number; honkCd: number; greenWait: number; force: boolean;
+  stopT: number; waitT: number; honkCd: number; greenWait: number; force: boolean; pullT: number; atLine: boolean;
   x: number; z: number; yaw: number; px: number; pz: number; pyaw: number;
   fare: boolean; fareT: number; hail: Hail | null; stopAt: number; stopLink: number; stopKind: string;
   dpDone: boolean; busServed: number; blockedBy: string;
@@ -36,10 +36,20 @@ export interface Ped {
   fleeX: number; fleeZ: number; onRoad: boolean; jaywalking: boolean;
   /** What to do when a free move arrives: attach | loiter | vanish | hail | waitBus | flee | vendor */
   then: string; fleeSpeed: number; cop: boolean;
+  goal: PedGoal | null; path: number[];
 }
 
 export interface Hail { ped: number; road: number; side: number; x: number; z: number; claimedBy: number; t: number }
-export interface Actor { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle' }
+export interface Actor { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle'; /** emergency siren on: civilians pull over */ siren?: boolean }
+/** Scripted goal for one pedestrian (gameplay / narrative hooks). */
+export interface PedGoal {
+  kind: 'goto' | 'follow' | 'escort' | 'flee' | 'flagDownCar';
+  x?: number; z?: number; speed?: number;
+  /** follow/escort: external actor id (default 'player') or numeric agent id to pace against */
+  target?: string | number;
+  waypoints?: { x: number; z: number }[]; segment?: number;
+  waitRadius?: number; maxSpeed?: number; replanT?: number;
+}
 export interface Block { link: number; s: number; until: number }
 export interface Threat { x: number; z: number; r: number; until: number }
 

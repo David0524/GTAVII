@@ -6,7 +6,7 @@
  */
 import { projectOnPoly, sampleAt } from './geom';
 import { JuncFlag, SpotKind, WalkKind } from './laneFormat';
-import type { SimCore, Ped } from './state';
+import type { SimCore, Ped, PedGoal } from './state';
 import { pedDensity } from './state';
 import type { ArchetypeRt } from './archetypes';
 import { edgeDistance, EDGE } from '../shared/bounds';
@@ -41,7 +41,7 @@ function newPed(S: SimCore, arch: ArchetypeRt, edge: number, s: number): Ped {
     lat: S.rng.range(-half, half) * 0.8, latGoal: 0, speed: arch.walkSpeed * S.rng.range(0.85, 1.15) * (S.weather === 'rain' ? 1.15 : 1), v: 0,
     state: 'walk', timer: 0, node: -1, prevEdge: -1, x: 0, z: 0, y: SIDEWALK_Y, yaw: 0, px: 0, pz: 0, pyaw: 0,
     tx: 0, tz: 0, toEdge: -1, toS: 0, spot: -1, goalSpot: -1, jayCd: S.rng.range(1, 10), hailCd: S.rng.range(5, 60), hail: null,
-    fleeX: 0, fleeZ: 0, onRoad: false, jaywalking: false, then: '', fleeSpeed: 0, cop: arch.behaviour === 'beat_cop',
+    fleeX: 0, fleeZ: 0, onRoad: false, jaywalking: false, then: '', fleeSpeed: 0, cop: arch.behaviour === 'beat_cop', goal: null, path: [],
   };
   p.latGoal = S.rng.range(0.1, 0.6) * half;
   return p;
@@ -180,7 +180,9 @@ function vehicleInWay(S: SimCore, x: number, z: number, fx: number, fz: number, 
     const vx = -Math.sin(v.yaw), vz = -Math.cos(v.yaw);
     for (const f of [0.5, 1]) {
       const px = x + (qx - x) * f - v.x, pz = z + (qz - z) * f - v.z;
-      if (Math.abs(px * vx + pz * vz) < v.len / 2 + 0.6 + (v.v > 0.3 ? v.v * 0.6 : 0) && Math.abs(px * vz - pz * vx) < v.wid / 2 + 0.6) { hit = true; return; }
+      // moving cars get a generous margin; a stopped car (often waiting for us) only blocks if we'd walk into it
+      const m = v.v > 0.3 ? 0.6 : 0.2;
+      if (Math.abs(px * vx + pz * vz) < v.len / 2 + m + (v.v > 0.3 ? v.v * 0.6 : 0) && Math.abs(px * vz - pz * vx) < v.wid / 2 + m) { hit = true; return; }
     }
   });
   return hit;
@@ -236,7 +238,13 @@ function arriveNode(S: SimCore, p: Ped) {
   const net = S.net, E = net.g.walkEdges[p.edge];
   const node = p.dir > 0 ? E.b : E.a;
   p.node = node;
-  let next = chooseNext(S, p, node, p.edge);
+  let next = -1;
+  if (p.goal) {
+    if (p.path.length && !net.walkAdj[node].some(([e]) => e === p.path[0])) replan(S, p, node);
+    if (p.path.length) next = p.path.shift()!;
+    else { goalLegDone(S, p, node); if (!p.goal) next = chooseNext(S, p, node, p.edge); else if (p.path.length) next = p.path.shift()!; else { p.state = 'hold'; p.v = 0; return; } }
+  }
+  if (next < 0) next = chooseNext(S, p, node, p.edge);
   let N = net.g.walkEdges[next];
   if (N.kind === WalkKind.Crosswalk && p.state === 'flee' && !trafficClearForCrosswalk(S, next)) {
     // even panicking, people don't run into moving traffic: keep to the sidewalk
@@ -257,7 +265,7 @@ function arriveNode(S: SimCore, p: Ped) {
     return;
   }
   // beat cop pauses at corners now and then
-  if (p.cop && S.rng.chance(0.25)) { p.state = 'pause'; p.timer = S.rng.range(4, 14); p.toEdge = next; p.v = 0; if (E.kind === WalkKind.Crosswalk) leaveCrosswalk(S, p); return; }
+  if (p.cop && !p.goal && S.rng.chance(0.25)) { p.state = 'pause'; p.timer = S.rng.range(4, 14); p.toEdge = next; p.v = 0; if (E.kind === WalkKind.Crosswalk) leaveCrosswalk(S, p); return; }
   enterEdge(S, p, next, node);
 }
 
@@ -270,6 +278,12 @@ export function stepPeds(S: SimCore, dt: number) {
     p.px = p.x; p.pz = p.z; p.pyaw = p.yaw;
     p.jayCd -= dt; p.hailCd -= dt;
     switch (p.state) {
+      case 'hold': { // scripted goal reached / escort waiting: stand, face the target, resume when told
+        p.v = 0;
+        if (p.goal?.kind === 'escort' || p.goal?.kind === 'follow') { const sp = goalSpeed(S, p); if (sp > 0.05 && p.path.length) { const E = g.walkEdges[p.edge]; enterEdge(S, p, p.path.shift()!, p.dir > 0 ? E.b : E.a); p.state = 'walk'; } }
+        if (p.goal?.kind === 'follow' && (p.goal.replanT = (p.goal.replanT ?? 0) - dt) <= 0) { p.goal.replanT = 2; const E = g.walkEdges[p.edge]; replan(S, p, p.dir > 0 ? E.b : E.a); }
+        break;
+      }
       case 'vendor': case 'loiter': case 'hail': case 'waitBus': case 'cower': case 'pause': {
         p.timer -= dt; p.v = 0;
         if (p.state === 'hail' && p.hail && p.hail.claimedBy >= 0) p.timer = Math.max(p.timer, 2); // wait for the cab
@@ -339,7 +353,8 @@ function walk(S: SimCore, p: Ped, dt: number) {
   const net = S.net, g = net.g, E = g.walkEdges[p.edge];
   const flee = p.state === 'flee';
   if (flee) { p.timer -= dt; if (p.timer <= 0) { p.state = 'walk'; } }
-  const want = flee ? p.fleeSpeed : p.speed * (p.onRoad ? 1.15 : 1);
+  let want = flee ? p.fleeSpeed : p.speed * (p.onRoad ? 1.15 : 1);
+  if (p.goal && !flee) want = goalSpeed(S, p);
   // local frame
   sampleAt(E.pts, net.walkCum[p.edge], p.s, tmp);
   const fx = tmp[2] * p.dir, fz = tmp[3] * p.dir;
@@ -357,6 +372,7 @@ function walk(S: SimCore, p: Ped, dt: number) {
     if (ahead > 0 && ahead < 2.4 && Math.abs(side) < 0.75 + rad) {
       const qf = (q.x - q.px) * fx + (q.z - q.pz) * fz;
       if (qf < 0) goalR = Math.min(half, Math.max(goalR, side + 0.85)); // oncoming: sidestep right
+      else if (q.v < 0.2) { goalR = side > 0 ? side - 0.85 : side + 0.85; speed = Math.min(speed, 0.6); } // standing person: step around, never queue behind
       else if (q.v < speed && ahead < 1.3) speed = Math.min(speed, Math.max(0, q.v)); // follow slower ped
     }
   });
@@ -366,7 +382,9 @@ function walk(S: SimCore, p: Ped, dt: number) {
   }
   goalR = Math.max(-half, Math.min(half, goalR));
   myRight += Math.sign(goalR - myRight) * Math.min(Math.abs(goalR - myRight), dt * 0.9);
-  myRight = Math.max(-half, Math.min(half, myRight));
+  const endRoom = Math.min(p.s, net.walkLen[p.edge] - p.s); // corners: taper the band to the path
+  const halfHere = E.kind === WalkKind.Sidewalk ? Math.min(half, Math.max(0, endRoom * 0.6)) : half;
+  myRight = Math.max(-halfHere, Math.min(halfHere, myRight));
   p.lat = myRight * p.dir;
   if (p.onRoad && vehicleInWay(S, p.x, p.z, fx, fz, 0.6 + p.v * 0.6)) { speed = 0; p.v = 0; }
   p.v += Math.sign(speed - p.v) * Math.min(Math.abs(speed - p.v), dt * (p.onRoad ? 4 : 2));
@@ -374,7 +392,7 @@ function walk(S: SimCore, p: Ped, dt: number) {
   const len = net.walkLen[p.edge];
   if (p.s >= len || p.s <= 0) { p.s = Math.max(0, Math.min(len, p.s)); placeOnEdge(S, p); arriveNode(S, p); placeOnEdge(S, p); return; }
   placeOnEdge(S, p);
-  if (flee || E.kind !== WalkKind.Sidewalk) return;
+  if (flee || E.kind !== WalkKind.Sidewalk || p.goal) return;
   // reached the goal spot?
   if (p.goalSpot >= 0) {
     const sp = g.spots[p.goalSpot];
@@ -464,5 +482,119 @@ export function dodgeActors(S: SimCore) {
         }
       }
     });
+  }
+}
+
+// ------------------------------------------------------------------ scripted goals (gameplay / narrative hooks)
+/** Nearest walk node to a point. */
+export function nearestNode(S: SimCore, x: number, z: number): number {
+  const g = S.net.g;
+  let best = 0, bd = Infinity;
+  for (let i = 0; i < g.walkNodes.length; i++) { const n = g.walkNodes[i], d = (n.x - x) ** 2 + (n.z - z) ** 2; if (d < bd) { bd = d; best = i; } }
+  return best;
+}
+/** Shortest edge path on the walk graph (Dijkstra; ~1k nodes). Crosswalks cost a little extra. */
+export function walkPath(S: SimCore, from: number, to: number): number[] {
+  const net = S.net, N = net.g.walkNodes.length;
+  const dist = new Float64Array(N).fill(Infinity), via = new Int32Array(N).fill(-1), done = new Uint8Array(N);
+  dist[from] = 0;
+  for (;;) {
+    let u = -1, bd = Infinity;
+    for (let i = 0; i < N; i++) if (!done[i] && dist[i] < bd) { bd = dist[i]; u = i; }
+    if (u < 0 || u === to) break;
+    done[u] = 1;
+    for (const [e, o] of net.walkAdj[u]) {
+      const w = bd + net.walkLen[e] * (net.g.walkEdges[e].kind === WalkKind.Crosswalk ? 1.3 : 1);
+      if (w < dist[o]) { dist[o] = w; via[o] = e; }
+    }
+  }
+  const path: number[] = [];
+  for (let n = to; n !== from && via[n] >= 0;) { const e = via[n]; path.unshift(e); const E = net.g.walkEdges[e]; n = E.a === n ? E.b : E.a; }
+  return path;
+}
+function goalTarget(S: SimCore, p: Ped): { x: number; z: number; vx: number; vz: number } | null {
+  const G = p.goal!;
+  if (G.kind === 'escort' || G.kind === 'follow') {
+    const id = G.target ?? 'player';
+    if (typeof id === 'string') { const a = S.actors.find((x) => x.id === id || (id === 'player' && x.kind === 'player')); return a ? { x: a.x, z: a.z, vx: a.vx, vz: a.vz } : null; }
+    const q = S.pedById.get(id); return q ? { x: q.x, z: q.z, vx: (q.x - q.px) * 30, vz: (q.z - q.pz) * 30 } : null;
+  }
+  return null;
+}
+function replan(S: SimCore, p: Ped, node: number) {
+  const G = p.goal!;
+  let tx = G.x ?? p.x, tz = G.z ?? p.z;
+  if (G.kind === 'escort' && G.waypoints) { const w = G.waypoints[G.segment ?? 0]; tx = w.x; tz = w.z; }
+  if (G.kind === 'follow') { const t = goalTarget(S, p); if (t) { tx = t.x; tz = t.z; } }
+  p.path = walkPath(S, node, nearestNode(S, tx, tz));
+}
+function goalLegDone(S: SimCore, p: Ped, node: number) {
+  const G = p.goal!;
+  if (G.kind === 'escort' && G.waypoints) {
+    const seg = G.segment ?? 0;
+    S.emit('escortProgress', { id: p.id, segment: seg, of: G.waypoints.length });
+    if (seg + 1 < G.waypoints.length) { G.segment = seg + 1; replan(S, p, node); return; }
+    S.emit('escortDone', { id: p.id }); return; // stays in 'hold' with the goal until cleared
+  }
+  if (G.kind === 'follow') { G.replanT = 0; return; }
+  if (G.kind === 'goto') S.emit('goalReached', { id: p.id, x: p.x, z: p.z });
+}
+/** Escort pace matching: wait when the lead falls behind, lead when ahead, else match their speed. */
+function goalSpeed(S: SimCore, p: Ped): number {
+  const G = p.goal!;
+  const base = G.speed ?? p.speed;
+  if (G.kind !== 'escort' && G.kind !== 'follow') return base;
+  const t = goalTarget(S, p);
+  if (!t) return base;
+  const d = Math.hypot(t.x - p.x, t.z - p.z), wait = G.waitRadius ?? 8, max = G.maxSpeed ?? 2.2;
+  if (G.kind === 'follow') return d < 2.5 ? 0 : Math.min(max, d > 8 ? max : Math.hypot(t.vx, t.vz) + 0.3);
+  if (d > wait) return 0;
+  const wp = G.waypoints?.[G.segment ?? 0];
+  const leadAhead = wp ? Math.hypot(t.x - wp.x, t.z - wp.z) < Math.hypot(p.x - wp.x, p.z - wp.z) : false;
+  if (leadAhead) return Math.min(max, base * 1.4);
+  return Math.max(0.8, Math.min(max, Math.hypot(t.vx, t.vz)));
+}
+export function setPedGoal(S: SimCore, p: Ped, goal: PedGoal | null) {
+  p.goal = goal; p.path = [];
+  if (!goal) { if (p.state === 'hold') p.state = 'walk'; return; }
+  if (goal.kind === 'flee') { threatenOne(S, p, goal.x ?? p.x, goal.z ?? p.z, goal.speed); p.goal = null; return; }
+  if (goal.kind === 'flagDownCar') {
+    const E = S.net.g.walkEdges[p.edge];
+    if (E.kind !== WalkKind.Sidewalk) { p.goal = null; return; }
+    sampleAt(E.pts, S.net.walkCum[p.edge], p.s, tmp);
+    const lr = -E.side * E.half; p.toEdge = p.edge; p.toS = p.s; p.goal = null;
+    goFree(p, tmp[0] - tmp[3] * lr, tmp[1] + tmp[2] * lr, 'hail'); return;
+  }
+  if (goal.kind === 'escort') goal.segment = 0;
+  if (p.state !== 'walk' && p.state !== 'hold') {
+    // leave spots / waiting states and get back on the path first
+    if (p.spot >= 0 && S.spotOwner[p.spot] === p.id) S.spotOwner[p.spot] = -1;
+    p.spot = -1; p.goalSpot = -1;
+    if (p.state !== 'free') { const e = S.net.g.walkEdges[p.edge]; sampleAt(e.pts, S.net.walkCum[p.edge], p.s, tmp); p.toEdge = p.edge; p.toS = p.s; goFree(p, tmp[0], tmp[1], 'attach'); }
+  }
+  const E = S.net.g.walkEdges[p.edge];
+  replan(S, p, p.dir > 0 ? E.b : E.a);
+  if (p.state === 'hold') p.state = 'walk';
+}
+function threatenOne(S: SimCore, p: Ped, x: number, z: number, speed?: number) {
+  p.fleeX = x; p.fleeZ = z; p.fleeSpeed = speed ?? S.rng.range(3.4, 4.6); p.timer = S.rng.range(6, 12);
+  if (p.state === 'walk' || p.state === 'waitCross' || p.state === 'pause' || p.state === 'hold') {
+    p.state = 'flee';
+    const E = S.net.g.walkEdges[p.edge], A = S.net.g.walkNodes[E.a], B = S.net.g.walkNodes[E.b];
+    p.dir = Math.hypot(B.x - x, B.z - z) > Math.hypot(A.x - x, A.z - z) ? 1 : -1;
+  }
+}
+
+/** Gunfire: panic that scales with distance. Close: cower or flee hard; mid: flee; far: hurry away. */
+export function gunfire(S: SimCore, x: number, z: number, loudness: number) {
+  for (const p of S.peds) {
+    if (!p.alive || p.goal) continue;
+    const d = Math.hypot(p.x - x, p.z - z);
+    if (d > loudness) continue;
+    const f = 1 - d / loudness; // 1 at the muzzle, 0 at the edge of hearing
+    if (S.rng.next() > 0.25 + 0.75 * f) continue;
+    if (f > 0.75 && !p.onRoad && p.state !== 'free' && S.rng.chance(0.35)) { p.state = 'cower'; p.timer = S.rng.range(5, 12); continue; }
+    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus') threaten(S, x, z, 0.1 + d / 1.6 + 0.01);
+    else threatenOne(S, p, x, z, 2.2 + 2.6 * f);
   }
 }
