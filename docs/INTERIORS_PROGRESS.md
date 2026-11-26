@@ -180,6 +180,11 @@ Reads as a modern kit or is wrong:
   `via: <adjoining building id>`, so nothing is drawn into a wall. **Visible street or yard entrances: 2,654 of 3,072 (86.4%);
   the remaining 13.6% are reached through a neighbour.**
 
+- Back buildings (`internal` doors): oversight confirmed that no alley or areaway geometry is needed. Story places resolve only to buildings
+  with street frontage, so none of them carries a mission.
+- Furniture form v2: the shared sofa and armchair props now have skirts, tapered legs, piped cushions and rolled arms
+  (`Kit.tube`). They're used by every lobby, apartment and hotel generator (`docs/interiors/armchair_v2.png`).
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.

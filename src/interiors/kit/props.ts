@@ -78,9 +78,16 @@ export function bench(k: Kit, f: Frame, len: number, mat: Mat = M.wood) {
   for (const lx of [0.1, len - 0.1]) pbox(k, f, lx - 0.04, 0, -0.18, lx + 0.04, 0.42, 0.18, mat, { occlude: false });
 }
 export function armchair(k: Kit, f: Frame, mat: Mat = M.fabricBrown) {
-  pbox(k, f, -0.42, 0, -0.4, 0.42, 0.42, 0.4, mat, { collide: 'cover' });
-  pbox(k, f, -0.42, 0.42, 0.22, 0.42, 0.95, 0.4, mat);
-  pbox(k, f, -0.42, 0.42, -0.4, -0.3, 0.65, 0.22, mat); pbox(k, f, 0.3, 0.42, -0.4, 0.42, 0.65, 0.22, mat);
+  // club/lobby armchair: skirted base, seat cushion with piping, rolled arms, a slightly reclined back, short tapered legs
+  const W = (x: number, y: number, z: number): V3 => { const [wx, wz] = toWorld(f, x, z); return [wx, y, wz]; };
+  pbox(k, f, -0.4, 0.12, -0.38, 0.4, 0.36, 0.38, mat, { collide: 'cover' });
+  pbox(k, f, -0.41, 0.115, -0.385, 0.41, 0.125, 0.385, M.woodDark, { occlude: false });
+  pbox(k, f, -0.27, 0.36, -0.36, 0.27, 0.47, 0.2, mat, { occlude: false });
+  k.tube(W(-0.27, 0.47, -0.36), W(0.27, 0.47, -0.36), 0.012, tint(mat, mat.c.map((c) => c * 0.7) as [number, number, number]), 6);
+  pbox(k, f, -0.26, 0.47, 0.18, 0.26, 0.88, 0.3, mat, { occlude: false });                                   // back cushion
+  pbox(k, f, -0.4, 0.36, 0.3, 0.4, 0.95, 0.38, mat, { occlude: false });
+  for (const sx of [-1, 1]) { pbox(k, f, sx * 0.335 - 0.065, 0.36, -0.36, sx * 0.335 + 0.065, 0.58, 0.36, mat, { occlude: false }); k.tube(W(sx * 0.335, 0.6, -0.38), W(sx * 0.335, 0.6, 0.34), 0.075, mat, 10); }
+  for (const [lx, lz] of [[-0.33, -0.3], [0.33, -0.3], [-0.33, 0.3], [0.33, 0.3]]) { const [wx, wz] = toWorld(f, lx, lz); k.cyl(wx, 0, wz, 0.02, 0.12, M.woodDark, 6, { r1: 0.028 }); }
 }
 export function sofa(k: Kit, f: Frame, len = 2, mat: Mat = M.fabricPlaid) {
   // 1940s lobby sofa (Aberdeen reference): skirted base on tapered legs, separate seat and back cushions, rolled arms, piping
