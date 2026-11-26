@@ -153,7 +153,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
       if (tool) { tool.update(dt); hud.setVisible(false); return; }
       if (root.state !== 'play') touch?.setVisible(false);
       if (root.state === 'cutscene') { cinema.update(dt); choices.update(dt); hud.setVisible(false); return; }
-      if (root.state === 'title') { if (hub.open) hub.update(dt); else title?.update(dt); hud.setVisible(false); return; }
+      if (root.state === 'title') { document.body.classList.toggle('u-menu', hub.open); if (hub.open) hub.update(dt); else title?.update(dt); hud.setVisible(false); return; }
       if (hub.open) hub.update(dt);
       else if (root.state === 'paused') root.state = 'play';
       for (const m of modals) m.update(dt);
@@ -163,6 +163,8 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
         else if (input.pressed('weaponSelect')) root.show('weapons');
       }
       const blocking = Modal.current && Modal.current !== weapons && Modal.current !== choices;
+      // the world behind a menu: graded (theme.css body.u-menu), never hidden; in-play overlays (choices, weapons) leave it live
+      document.body.classList.toggle('u-menu', hub.open || !!blocking);
       if (touch) { touch.setVisible(root.state === 'play' && !hub.open && !blocking && input.activeDevice === 'touch'); touch.update(dt); }
       hud.setVisible(root.state === 'play' && !hub.open && !blocking && uiSettings.get('hud'));
       if (hud.visible) hud.update(dt);

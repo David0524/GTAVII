@@ -81,3 +81,27 @@ Written sources:
 7. Focus is **one thin outline or an inverted row**: no glow, no stamp, no scale-up.
 8. **One decorative gesture per screen, at most.**
 9. Motion is subtle and functional.
+
+## Current games (2023–2026): what sits behind the menu (user: "consider translucent backgrounds; reference current video game menus")
+Twenty screenshots were checked, mostly from interfaceingame.com. They are linked here and never committed. The darkness figures are measured on the background half of each frame.
+
+| Game, screen | Behind the menu | Panel and selection |
+|---|---|---|
+| Indiana Jones and the Great Circle, pause | Frozen frame, heavy blur, ~90% dark, cold | No panel; a serif list bottom-left; a bullet marks the selection |
+| Indiana Jones, shop and books | Live world, an object held in hand, a left vignette (~50%→0) | 1px cream rules; boxes at ~40% fill |
+| Assassin's Creed Shadows, pause | Frozen frame, ~30px blur, ~75% dark, low-saturation warm | No panel; the selection bar fades right with a solid left edge |
+| Assassin's Creed Shadows, inventory | Staged 3D scene | Detail panel at ~60%, no outline; dotted leaders to the values |
+| Alan Wake 2, pause | Frozen frame, no blur, ~55–60% dark, ~7% saturation | No panel; condensed caps |
+| Star Wars Outlaws, pause and merchant | Frozen frame, bokeh blur, ~60% dark, or the live vendor | Merchant panel at ~75% with a cut edge; outlined pill selection; a 70s film-title face |
+| Mafia: The Old Country, map, journal, options | The map is opaque; options sit over a still life ~80% dark | Solid bars top and bottom; gold underline; 1px rules |
+| Kingdom Come: Deliverance II, trader | Opaque period furniture (ledger, altarpiece) | A painted highlight band |
+| GTA VI, pause and map (unverified fan captures) | Key art, or an opaque vector map | Panels at ~80–85%; a selection bar fading right |
+
+**What we adopted**
+- **The world behind the menu:** the held game frame stays visible, darkened ~50%, desaturated, with a slight warm Kodachrome cast and a ~9px blur. That's the Indiana Jones, Assassin's Creed Shadows and Alan Wake 2 pattern. The canvas is held while a menu is open, so the CSS filter works on a static layer and costs little.
+- **Lists:** they sit straight on that frame with 1px rules, under a left-weighted scrim.
+- **Tab and footer bands:** ~70% dark. This is the NYCTA black sign band.
+- **Panels:** flat dark at ~70–85%, with no outline boxes.
+- **Selection:** a transit-yellow bar fading right, with a solid left edge.
+- **Maps:** stay opaque and own the screen, which every current game does. Ours is a printed street guide.
+- **Period:** it comes from typography and real artefacts (newspaper, street plates, the map), not from texture.

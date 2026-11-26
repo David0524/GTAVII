@@ -45,7 +45,7 @@ export async function capture(shots: Shot[]) {
         page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
         const q = s.q + (size === 'phone' ? '&touch=1' : '');
         const t0 = Date.now();
-        await page.goto(`${base}/uilab.html?${q}`, { waitUntil: 'load' });
+        await page.goto(`${base}/uilab.html?${q}${/city=1/.test(q) ? '' : '&bg=frame'}`, { waitUntil: 'load' }); // menus judged over a real game frame
         await page.waitForFunction(() => (window as unknown as { __UI?: unknown }).__UI, null, { timeout: 120_000 });
         await page.evaluate(() => (window as unknown as { __UI: { ready: Promise<void> } }).__UI.ready);
         await page.evaluate(() => document.fonts.ready);

@@ -148,3 +148,55 @@ body.touch .t74-legend { display: none; }
 /* screen edge margin setting (safeZone 0.9..1): pull the HUD in from the edges */
 .u-hud { inset: calc((1 - var(--safe-zone, 1)) * 50vh) calc((1 - var(--safe-zone, 1)) * 50vw); }
 .u-window { display: inline-block; margin-top: 6px; padding: 3px 8px; background: #111; color: #fff; font: 700 12px var(--f-cond); text-transform: uppercase; }
+
+/* --------------------------------------------------------------- the world behind menus (user: "consider translucent
+   backgrounds; reference current video game menus"). Pattern from Indiana Jones and the Great Circle, AC Shadows, Alan Wake 2,
+   Star Wars Outlaws (docs/research/UI_REFERENCES.md): the frozen frame stays visible, graded (darkened ~65%, desaturated, a
+   warm Kodachrome cast, softened); lists sit straight on it with 1px rules; panels are flat dark at ~70%, never boxed in
+   outlines. The 3D canvas is held (not re-rendered) while a menu is open, so the filter is applied to a static layer. */
+.t74-view, #backdrop { transition: filter .28s ease, transform .28s ease; transform-origin: 50% 50%; }
+body.u-menu .t74-view, body.u-menu #backdrop { filter: saturate(.45) sepia(.18) brightness(.5) blur(9px); transform: scale(1.04); }
+:root[data-motion="reduce"] .t74-view, :root[data-motion="reduce"] #backdrop { transition: none; }
+
+/* the pause hub: a left-weighted scrim, translucent sign bands top and bottom (the NYCTA black band, at 70%) */
+.t74-pause { background: linear-gradient(90deg, rgba(8,8,8,.62), rgba(8,8,8,.34) 55%, rgba(8,8,8,.42)); }
+.t74-tabs { background: rgba(8,8,8,.72); border-bottom: 1px solid rgba(244,241,234,.2); }
+.t74-foot { background: rgba(8,8,8,.72); }
+
+/* selection: a transit-yellow bar fading right, solid left edge (AC Shadows / GTA VI pattern) */body .t74-row.is-focus,
+body .t74-menu button:hover,
+body .t74-menu button.is-focus,
+body .t74-menu button.t74-focusable.is-focus,
+body .t74-slot.is-focus,
+body .sh-card:hover,
+body .sh-card.is-focus,
+body .car-card:hover,
+body .car-card.t74-focusable.is-focus,
+body .hm-card:hover,
+body .hm-card.t74-focusable.is-focus,
+body .bz-item.is-focus,
+body .ts-opt:hover,
+body .ts-opt.is-focus,
+body .t74-focusable.is-focus {
+  background: linear-gradient(90deg, rgba(232,163,23,.30), rgba(232,163,23,.08) 70%, transparent); color: #fff; box-shadow: inset 3px 0 0 var(--taxi);
+}body .t74-row.is-focus .v,
+body .t74-row.is-focus .k small,
+body .t74-row.is-focus .k small.wait,
+body .t74-row.is-focus .v::before,
+body .t74-row.is-focus .v::after,
+body .t74-menu button.is-focus .sub,
+body .t74-menu button:hover .sub,
+body .sh-card:hover small,
+body .sh-card.is-focus small,
+body .sh-card:hover .meta,
+body .sh-card.is-focus .meta,
+body .car-card:hover .car-sub,
+body .car-card.is-focus .car-sub,
+body .car-card:hover .car-mi,
+body .car-card.is-focus .car-mi,
+body .hm-card:hover small,
+body .hm-card.is-focus small,
+body .bz-item.is-focus span,
+body .bz-item.is-focus em,
+body .ts-opt:hover span,
+body .ts-opt.is-focus span { color: rgba(255,255,255,.78); }body .t74-row.is-focus .v { color: #fff; }

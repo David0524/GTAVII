@@ -51,6 +51,8 @@ async function main() {
     backdrop = await cityBackdrop(app, (q.get('quality') as 'low' | 'high') ?? 'high');
     document.getElementById('backdrop')!.remove();
   }
+  // ?bg=frame: a clean captured game frame (tools/ui/frameCapture.ts) behind everything, to judge menus over the real world
+  if (q.get('bg') === 'frame') { const b = document.getElementById('backdrop'); if (b) b.style.background = `#111 url(/shots/ui/frame_${innerWidth < 1000 ? 'phone' : 'desktop'}.png) center / cover`; }
   const screen = q.get('screen') ?? 'hud';
   ui.show(screen, Object.fromEntries(q));
 
