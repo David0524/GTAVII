@@ -90,7 +90,12 @@ export class BodyModel {
   /** Triangle indices (split-vertex space) for a group at a LOD (0 = full). */
   indices(group: string, lod: number): Uint16Array {
     const g = this.groups.indexOf(group);
-    return this.blobs.get(`idx_${g}_${lod}`) as Uint16Array;
+    const exact = this.blobs.get(`idx_${g}_${lod}`) as Uint16Array | undefined;
+    if (exact) return exact;
+    // reduced downloads (body_low.bin) carry only some LODs: use the nearest available one (finer first)
+    const avail = (this.meta.availableLods?.[group] as number[] | undefined) ?? [];
+    const pick = avail.filter((l) => l >= lod).sort((a, b) => a - b)[0] ?? avail.sort((a, b) => b - a)[0];
+    return (pick !== undefined ? this.blobs.get(`idx_${g}_${pick}`) : undefined) as Uint16Array ?? new Uint16Array(0);
   }
 
   evaluate(desc: BodyDesc): BodyShape {
