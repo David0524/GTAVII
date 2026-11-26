@@ -54,31 +54,45 @@ traffic and pedestrians as generic agents.** No story, no named characters, no l
    writes the content; you implement the runtime that honours it. Ship 4–6 neutral built-in
    archetypes (commuter, worker with handcart, shopper, loiterer, beat cop, vendor) as
    defaults and test data.
-5. **External actors:** an API for the player (on foot or driving) and scripted vehicles to be
+5. **Escort and companion locomotion** (narrative request N4): an NPC follows a route on the
+   sidewalk graph with pace-matching. It matches the player's speed within limits, waits when
+   the player falls more than a radius behind, and leads when the player gets ahead. Expose it
+   as `escort(agentId, route, opts)` and report progress per segment.
+6. **Dark signals** (narrative request N2, area brownouts): when the engine marks a signal
+   group unpowered, traffic treats it as an all-way stop.
+7. **External actors:** an API for the player (on foot or driving) and scripted vehicles to be
    obstacles agents react to: brake, swerve, honk, flee.
 
 ## Integration contract (keep to it; the engine session wires it in)
 ```ts
 // src/sim/index.ts
-export interface AgentView { id: number; kind: 'car' | 'cab' | 'truck' | 'bus' | 'ped'; archetype: string;
-  x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number }
+import type { TrafficVehicleView } from '../shared/traffic';   // engine-owned shared contract (vclass, variant, lights incl. brake)
+export interface PedView { id: number; archetype: string; x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number }
 export class Simulation {
   constructor(opts: { seed: number; maxVehicles: number; maxPeds: number; baseUrl?: string });
   load(): Promise<void>;                        // lanes.bin + chunk POIs
   update(dt: number, focus: { x: number; z: number }): void;   // fixed internal timestep, deterministic for a given seed
-  readonly vehicles: readonly AgentView[]; readonly peds: readonly AgentView[];
+  readonly vehicles: readonly TrafficVehicleView[]; readonly peds: readonly PedView[];
   setExternalActors(actors: { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle' }[]): void;
   emit(event: { type: 'threat' | 'blockLane' | 'closeStreet'; x: number; z: number; radius?: number; until?: number }): void;
   on(type: 'honk' | 'collision' | 'nearMiss' | 'hail', cb: (e: any) => void): void;
   setClock(minutesSinceMidnight: number): void; setWeather(w: 'clear' | 'overcast' | 'rain'): void;
 }
 ```
+- **Vehicle classes and light bits come from `src/shared/traffic.ts`** (`VEHICLE_CLASSES`,
+  `VehicleLights`).
+  - The sim sets `lights` every tick: brake while decelerating, indicators before a turn or
+    lane change, hazards when double-parked, the roof light on a vacant taxi.
+  - The sim never picks models. `variant` is a stable per-agent seed.
+  - Spawn mix is the sim's job: mostly `sedan`, many `taxi`, and `box_truck` heavy in the
+    Garment District by day.
 - **Rendering stays out of the sim.** Provide `src/sim/debug/SimDebugView.ts` that draws
   agents as instanced placeholder boxes and capsules (generic bodies only), lane lines and
   signal states, behind `?sim=1`.
 - Your only edit to `src/main.ts` is one guarded line that calls an `attachSimDebug(scene,
   camera)` you export. Don't change any other shared file. If you need something from the
-  engine, write it in `docs/ENGINE_REQUESTS.md`.
+  engine, append it to the root `ENGINE_REQUESTS.md` under `## From sim: N. Title` (what, why,
+  fallback). Answers appear in `ENGINE_RESPONSES.md` on the engine branch: check it each session.
 - No Rapier dependency. Agents are kinematic, and the engine maps them to physics later.
 
 ## Budgets

@@ -6,8 +6,9 @@ Source of truth across sessions. Read this first; update it last.
 | Phase | State |
 |---|---|
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
-| 2. Walkable player, camera, collision | Next |
-| 3. Rendering pipeline + facade generation | — |
+| 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
+| UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/` |
+| 3. Rendering pipeline + facade generation | **Next** (after integrating stream milestones) |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
 | 6. Weather, day/night, polish, optimisation | — |
@@ -46,15 +47,74 @@ archetype/save APIs), `content/` (owned by the narrative team).
 - **OSM `building:part` replaces the NYC footprint for towers** when the parts cover at least
   30% of it, which gives real setbacks (e.g. Empire State, 11 tiers plus mast). A podium is
   kept up to the lowest part base.
-- **Flat terrain for now.** Real relief here is about 5–15 m. Adding it later means one height
-  per ground vertex from the footprint `ground_elevation` field. **Needs your call before
-  Phase 2** (collision depends on it).
+- **Real terrain** (user decision): a height field from footprint `ground_elevation`,
+  exposed only through `src/shared/terrain.ts` `heightAt()`, so all streams agree.
 - **Three.js 0.187.0 and Rapier 0.21.0, pinned exactly.** WebGPU is used when `navigator.gpu`
   exists; `?webgl=1` forces WebGL2.
 - **Mobile:** landscape only, with a floating left stick, a right-thumb look area and big buttons
   on the right edge. Portrait shows a rotate prompt. Fullscreen plus orientation lock where
   supported (not iOS). Phones default to the Low preset with DPR capped at 1.5. All gameplay
   reads `Input` actions, so later controllers get touch for free.
+
+## Phase 2 (player, camera, collision, saves): engineering calls
+- **Physics:** Rapier (WASM) with a fixed 60 Hz step and render interpolation.
+  - City collision is static trimeshes built from each chunk's LOD0 render geometry, so
+    collision always matches what you see. They're created and destroyed within 320 m of the
+    player.
+  - Trade-off: no convex decomposition, so the trimeshes are fine for kinematic characters
+    but dynamic props will need simplified colliders (Phase 4/5).
+- **Player:** a Rapier kinematic character controller on a 1.84 m capsule.
+  - Walk, run and sprint at 1.5, 3.4 and 6.0 m/s; partial stick walks; sprint is held.
+  - Autostep 0.4 m (curbs and stoops), snap to ground on the hills, jump apex about 1.1 m.
+  - Jumping at a ledge 0.45–1.9 m high climbs it instead (raycast detection plus a timed
+    vault).
+  - The player waits on the spot until colliders exist under it, so it never falls through
+    streaming ground.
+- **Body:** a `StandInBody` implementing the characters stream's `setLocomotion` contract
+  structurally. It gets swapped for their `Character` on merge.
+- **Party:** three narrative leads with per-lead position, money, inventory and wardrobe
+  (N5). The switch UI and presentation come in Phase 7.
+- **Cameras:**
+  - over-the-shoulder orbit with a collision spring arm (pulls in instantly, eases out) and
+    wheel zoom;
+  - photo/free camera on P, R3 or the CAM button;
+  - the screenshot rig uses `?cam=` (photo mode); `?at=x,z,deg` starts on foot elsewhere.
+- **Controls:** Standard (default), Classic and Left-handed presets.
+- **Verified headless** at a fixed 60 Hz:
+  - a 3 s walk covers 9.7 m; jump apex 1.0 m;
+  - walking into the Empire State Building stops at its wall;
+  - climbs 1.2 and 1.8 m ledges, refuses 2.6 m, auto-steps 0.3 m.
+- **Local saves** (user decision: local profiles now):
+  - versioned schema and migrations, with a fixture per version (`tests/save-fixtures/`,
+    `npm test`);
+  - IndexedDB, with the blob put and pointer flip in one atomic, durable transaction;
+  - `navigator.storage.persist()` requested;
+  - profiles per device, 6 manual slots, a 3-deep autosave ring every 90 s, plus an
+    autosave on visibility-hidden and pagehide;
+  - checksummed (SHA-256) export and import;
+  - an iOS "not installed" eviction note;
+  - settings stay per device.
+  - **Accounts and cloud sync are PENDING the user's go-ahead.** The `SaveStore` interface
+    is ready for a cloud backend.
+  - Verified in a real browser: save, reload, resume at the same spot; export and import;
+    tamper rejected; the autosave ring rotates.
+- **Known:**
+  - The bundle is 5.2 MB because rapier3d-compat inlines its WASM. Move to the non-compat
+    build with a separate `.wasm` file for caching (perf pass).
+  - Save labels need the street name, so they're blank when the minimap is off.
+
+## Pipeline v2 (expanded bounds and terrain data)
+- **City:** 182 chunks covering the new playable bounds (`src/shared/bounds.ts`) plus a 200 m
+  buffer.
+- **Terrain is ON:** real relief, −11 to +12 m around the spawn, from 5 m grid data.
+  - The user said "Real hills", relayed through the oversight session.
+  - Ground is tessellated by longest-edge bisection to 10 m or less; buildings sit on the
+    lowest ground beneath them; a coarse terrain base runs under everything.
+  - Triangle count is about 360k in the High-preset spawn view.
+  - Colliders follow the terrain in Phase 2.
+- **Period fix:** OSM parts can no longer re-attach to stand-ins (1,249 rejected).
+- **Rule 2c:** start-vs-completion year ambiguity is now resolved in favour of the city's
+  completion year.
 
 ## Period accuracy (done after Phase 1, on request)
 Every building is now dated from three sources (PLUTO, footprint, OSM), with ordered conflict
@@ -64,6 +124,40 @@ Am Building has been added). The method, results and the list of 46 flagged rows
 `docs/PERIOD_AUDIT.md`, and `docs/period_audit.csv` has one row per building.
 Remaining limits: rooftop additions on old buildings (only 1107 Broadway is corrected), and
 stand-ins that are period-typical rather than the exact lost building.
+
+## Phase 2 critique (screenshots: `shots/phase2/`, render set via WebGL2/SwiftShader; UI set in `shots/phase2/ui/`)
+**What works:**
+- **Movement.** You can walk the real streets on the real hills, and the collision tests pass:
+  - you stop at walls;
+  - curbs and stoops are auto-stepped;
+  - ledges of 1.2 and 1.8 m are climbed, and 2.6 m is refused.
+- **Camera.** The over-the-shoulder camera keeps buildings out of the line to the player.
+- **Saves.** They survive reloads, export and import with a checksum, and rotate through
+  the autosave ring.
+- **The UI reads as period and premium:**
+  - the poster title with its marquee;
+  - the amber clock radio;
+  - the Fraunces location reveal, using real 1974 district names, at the real intersection;
+  - the folding 1974 street map that ends at the paper's edge;
+  - full controller, keyboard and touch navigation, with a landscape phone layout.
+
+**What doesn't (honestly):**
+- **The player is a capsule.** That's correct per scope, but it makes every on-foot shot read
+  as a prototype. Fixing it means merging the characters stream.
+- **No turn-in-place or animation blending,** so heading snaps feel floaty at low speed.
+- **Camera control is basic.** There's no auto-recentre behind the player while moving and no
+  separate on-foot/vehicle sensitivity yet (both are on the settings roadmap).
+- **Some viewpoints are poor.** The on-foot Herald Square shot faced a wall because of the rig's
+  heading choice; the rig is fixed for next time.
+- **Ground geometry is heavy:** about 360k triangles in the High-preset spawn view. That's fine
+  on desktop, but it needs Phase 3 LOD for phones.
+- **The bundle is 5.2 MB** because the Rapier WASM is inlined.
+- **Parking lots z-fought with the sidewalk on slopes** (speckling in shot 11). Fixed after the
+  capture by raising lots to 4 cm.
+- **The west edge (Hudson) still reads as fog over a void,** and the rail cut isn't modelled.
+  This is boundary Layers 0 and 1, scheduled.
+- **No real-GPU numbers yet.** Every frame time here is software rendering, so the user's
+  phone or Vercel tests with COPY PERF REPORT are the first real data.
 
 ## Phase 1 critique (screenshots: `shots/phase1/`, WebGL2 via SwiftShader)
 What works:
@@ -99,8 +193,18 @@ What doesn't (expected for untextured, but noted honestly):
   report real numbers once someone runs `npm run shots` on a GPU machine. The rig records them
   in `shots/<phase>/report.json`.
 
+## Planned: playable boundary (user requirement: no invisible walls; design in docs/briefs/BOUNDARIES.md)
+| Layer | What | When |
+|---|---|---|
+| 0 | Expand the modelled city and set playable bounds mid-block: 10th–11th Aves west, 47th–48th Sts north. Use the real 1974 barriers: Penn Central rail cut, Lincoln Tunnel trench. The shared API `src/shared/bounds.ts` (`edgeDistance`, `inwardDirection`, `EDGE`) is published now. | Pipeline v2 (next, together with terrain if confirmed) |
+| 1 | Low-detail shells about 1.5 km beyond the edge, Hudson and East Rivers, New Jersey, Queens and Brooklyn silhouettes | Pipeline v2 plus Phase 3 |
+| 2 | Period blockers with real colliders: film shoot, utility trench with steam stack, water-main break, police barricade, block party | Phase 2 colliders, then Phase 5 dressing |
+| 3 | Gridlock and crowd ramp near the edge (sim stream, via `edgeDistance`) | Phase 5 |
+| 4 | "The reel runs out": grain, weave and light leak build up, then a leader countdown and a reel-change cut back to a safe pose facing inward. Shares its presentation with the character switch. | Phase 3 post stack, Phase 6 polish |
+| Map | The pause map is a 1974 folding street map that ends at the paper's edge | UI pass |
+
 ## Known issues / TODO
-- [ ] Decide on terrain (see Decisions).
+- [x] Terrain decided: real relief (shipped in pipeline v2).
 - [ ] Research the 46 flagged rows in docs/PERIOD_AUDIT.md (rooftop additions, 206 W 36th St undated towers).
 - [ ] Low-detail shells for the buffer ring; rivers and distant boroughs on the horizon.
 - [ ] Hero landmarks are still extrusions (hand models are Phase 3). Macy's is tagged; Penn
@@ -116,6 +220,30 @@ What doesn't (expected for untextured, but noted honestly):
 Rapier character controller (walk, run, jump, ledge climb) with colliders generated per chunk
 from the same footprint data. Orbit and chase camera. Touch buttons swap to JUMP/USE/SPRINT.
 Spawn on foot at the Flatiron.
+
+## Workstreams and integration cadence
+| Stream | Branch | Brief | Owns |
+|---|---|---|---|
+| Engine (this session, integration owner) | `claude/tenderloin-74-engine-qi54lt` | this file | rendering, city, player, UI, shared contracts in `src/shared/`, merges |
+| Narrative | `claude/sharp-maxwell-jnb6hr` | NARRATIVE_BRIEF.md | `narrative/`, `content/`, NARRATIVE_PROGRESS.md |
+| Sim (traffic and pedestrian AI) | its own branch | docs/briefs/SIM_BRIEF.md | `src/sim/`, `tools/pipeline/lanes.ts`, SIM_PROGRESS.md |
+| Vehicles | its own branch | docs/briefs/VEHICLES_BRIEF.md | `src/vehicles/`, VEHICLES_PROGRESS.md, VEHICLE_REGISTRY.md |
+
+**Merge rules (into the engine branch):**
+1. **When merges happen:** at each stream's "done means" milestone, and otherwise
+   **twice a week** (Monday and Thursday) for content-only streams such as narrative.
+   An early merge happens on request when another stream needs the code.
+2. **Gate before merging:**
+   - `npm run typecheck` and `npm run build` pass on the merged result;
+   - the stream's own headless tests pass;
+   - no edits to engine-owned files beyond the one allowed guarded line in `src/main.ts`;
+   - no real brands or trademarks (the oversight session's scan).
+3. **How:** a merge commit (no squash, no rebase of other streams' history). Conflicts in
+   shared files are resolved by the engine, and the stream is notified.
+4. **Shared contracts** (`src/shared/*`) change only through ENGINE_REQUESTS.md and
+   ENGINE_RESPONSES.md. After a change, every stream is told to merge the engine branch.
+5. **Downstream:** streams merge the engine branch into theirs at least weekly and whenever a
+   shared contract changes.
 
 ## Narrative team
 `NARRATIVE_BRIEF.md` is the prompt and brief for the story/characters/missions team, including

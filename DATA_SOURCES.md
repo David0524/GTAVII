@@ -30,8 +30,10 @@ also fetched for a much larger box (lower and midtown Manhattan) to build the di
 The local tangent-plane projection is centred on the Flatiron's north tip and rotated
 **29.11°** so that the world axes follow the Manhattan grid (−Z is uptown, +X is crosstown
 toward the East River). The build re-measures the rotation every run from OSM Fifth Avenue
-and logs the residual (currently 0.004°). Elevation is treated as flat (see PROGRESS.md
-decisions).
+and logs the residual (currently 0.004°). Terrain comes from the footprint dataset's per-building `ground_elevation` (feet, NAVD88).
+It's interpolated to a 5 m grid by inverse-distance weighting, outlier-filtered,
+Gaussian-smoothed (σ = 15 m) and re-based so the spawn is y = 0 (12.6 m NAVD88).
+See `tools/pipeline/terrain.ts`.
 
 ## 1974 corrections (`tools/pipeline/era1974.ts`)
 

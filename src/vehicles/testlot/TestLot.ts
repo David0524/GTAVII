@@ -367,7 +367,7 @@ export async function runTestLot() {
     clock.update(t);
     const dt = Math.min(clock.getDelta(), 0.1);
     frames.push(dt * 1000);
-    input.poll();
+    input.poll(dt);
     if (input.pressed('use')) { modelIdx = (modelIdx + 1) % MODELS.length; spawnAt(); }
     if (input.pressed('photo')) camMode = (camMode + 1) % 3;
     acc += dt;

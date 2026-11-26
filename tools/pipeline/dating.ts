@@ -10,6 +10,7 @@
  *   0. Not a finished building (under construction, skybridge, etc.)        -> remove
  *   1. Manual override by BIN (PERIOD_OVERRIDES, each with a reason)        -> as stated
  *   2. O present:  O <= 1974 -> keep (flag if P and F both say later)
+ *      2c: ...unless P and F both say > 1974 and OSM is < 15 years earlier (start vs completion) -> remove
  *                  O > 1974 -> remove, unless P and F BOTH say <= 1974 (two independent sources agree;
  *                              OSM start_date on a renovated or bundled complex) -> keep, flagged
  *   3. Any of P, F > 1974                                                   -> remove (flag if the other says earlier)
@@ -47,7 +48,14 @@ export function dateBuilding(d: DatingInput): Dating {
   const ov = d.bin ? PERIOD_OVERRIDES[d.bin] : undefined;
   if (ov) return { keep: ov.action === 'keep', year: ov.year ?? (P || F || 1920), rule: '1', reason: `override: ${ov.reason} (${src})`, flagged: false, heightOverride: ov.height, name: ov.name };
   if (O) {
-    if (O <= CUTOFF_YEAR) return { keep: true, year: O, rule: '2', reason: `OSM start_date ${O} (${src})`, flagged: P > CUTOFF_YEAR && F > CUTOFF_YEAR };
+    if (O <= CUTOFF_YEAR) {
+      // Both city sources agree on a later year: OSM only wins if it is decades earlier (an original
+      // landmark later rebuilt, e.g. a 1918 theatre renovated 1999). A gap of a few years is a
+      // construction-start vs completion ambiguity -> trust the city's completion year.
+      if (P > CUTOFF_YEAR && F > CUTOFF_YEAR && Math.min(P, F) - O < 15)
+        return { keep: false, year: Math.min(P, F), rule: '2c', reason: `PLUTO and footprint agree on ${P}/${F}; OSM ${O} read as construction start (${src})`, flagged: true };
+      return { keep: true, year: O, rule: '2', reason: `OSM start_date ${O} (${src})`, flagged: P > CUTOFF_YEAR && F > CUTOFF_YEAR };
+    }
     if (P && F && P <= CUTOFF_YEAR && F <= CUTOFF_YEAR) return { keep: true, year: P, rule: '2b', reason: `PLUTO and footprint agree on ${P}/${F}; OSM ${O} treated as renovation (${src})`, flagged: true };
     return { keep: false, year: O, rule: '2', reason: `OSM start_date ${O} (${src})`, flagged: (P && P <= CUTOFF_YEAR) || (F && F <= CUTOFF_YEAR) ? true : false };
   }

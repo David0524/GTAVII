@@ -14,7 +14,8 @@
     "data": "npm run data:fetch && npm run data:build && npm run data:audit",
     "shots": "tsx tools/shots/capture.ts",
     "data:audit": "python3 tools/pipeline/audit_report.py",
-    "shots:vehicles": "tsx tools/shots/vehicles.ts"
+    "shots:vehicles": "tsx tools/shots/vehicles.ts",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.21.0",

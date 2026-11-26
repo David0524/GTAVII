@@ -68,14 +68,20 @@ Each vehicle is parametric, so one generator yields many variants:
   with curbs at 0.15 m. The engine session will swap in the city's colliders.
 
 ## Integration contract
+The traffic types are shared and engine-owned in `src/shared/traffic.ts`: `VEHICLE_CLASSES`,
+`VehicleLights` (head, brake, indicators, hazard, reverse, taxi roof light, siren) and
+`TrafficInstance`. Cover every class in the roster. Render the light bits as emissives.
 ```ts
+import type { TrafficInstance, VehicleClass } from '../shared/traffic';
 // src/vehicles/index.ts
 export function createVehicleFactory(opts: { quality: 'low' | 'medium' | 'high' | 'ultra' }): VehicleFactory;
 interface VehicleFactory {
   models: readonly { id: string; class: string; displayName: string }[];
   spawn(world: RAPIER.World, scene: THREE.Object3D, modelId: string, pose: { x: number; y: number; z: number; yaw: number }, variant?: number): Vehicle;
   /** Visual-only instanced proxies for AI traffic far from the player (no physics body). */
-  createTrafficRenderer(maxInstances: number): { setInstances(list: { modelId: string; variant: number; x: number; y: number; z: number; yaw: number; brake: boolean }[]): void; object: THREE.Object3D };
+  createTrafficRenderer(maxInstances: number): { setInstances(list: readonly TrafficInstance[]): void; object: THREE.Object3D };
+  /** Registry: every VehicleClass must resolve to >= 1 model; variant seeds model choice, paint, dirt, dents. */
+  resolve(vclass: VehicleClass, variant: number): { modelId: string; paint: string };
 }
 interface Vehicle {
   setInput(i: { throttle: number; brake: number; steer: number; handbrake: boolean }): void; // -1..1 / 0..1
@@ -86,8 +92,10 @@ interface Vehicle {
 ```
 - **Input is device-agnostic.** The engine's `src/input/Input.ts` maps keyboard, gamepad and
   touch (landscape mobile) to actions, and you take `setInput` values only.
-- **Don't edit shared files** except one guarded line in `src/main.ts` for your test scene. Put
-  requests for the engine in `docs/ENGINE_REQUESTS.md`.
+- **Don't edit shared files** except one guarded line in `src/main.ts` for your test scene. Append
+  requests for the engine to the root `ENGINE_REQUESTS.md` under `## From vehicles: N. Title`
+  (what, why, fallback). Answers appear in `ENGINE_RESPONSES.md` on the engine branch: check it
+  each session.
 
 ## Budgets
 - **Player vehicle:** physics under 0.5 ms per frame.
