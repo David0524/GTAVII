@@ -181,6 +181,27 @@ export class Kit {
     if (o.collide) this.colliders.push({ c: [cx, cy, cz], h: [hx, hy, hz], yaw, cover: o.collide === 'cover', breakable: o.breakable });
     if (o.occlude) { const r = Math.abs(hx * c) + Math.abs(hz * s), q = Math.abs(hx * s) + Math.abs(hz * c); this.occluders.push([cx - r, y0, cz - q, cx + r, y1, cz + q]); }
   }
+  /** Cylinder between two points (rolled sofa arms, piping, rails, pipes), capped. */
+  tube(a: V3, b: V3, r: number, mat: Mat, seg = 10) {
+    if (this.low) seg = Math.max(5, Math.round(seg * 0.6));
+    const mb = this.m, d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = Math.hypot(d[0], d[1], d[2]); if (L < 1e-4) return;
+    const w = [d[0] / L, d[1] / L, d[2] / L], up = Math.abs(w[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+    let u = [up[1] * w[2] - up[2] * w[1], up[2] * w[0] - up[0] * w[2], up[0] * w[1] - up[1] * w[0]]; const ul = Math.hypot(u[0], u[1], u[2]); u = u.map((x) => x / ul);
+    const v = [w[1] * u[2] - w[2] * u[1], w[2] * u[0] - w[0] * u[2], w[0] * u[1] - w[1] * u[0]];
+    const v0 = mb.vcount;
+    for (let k = 0; k <= seg; k++) {
+      const t = (k / seg) * Math.PI * 2, c = Math.cos(t), s = Math.sin(t);
+      const n = [u[0] * c + v[0] * s, u[1] * c + v[1] * s, u[2] * c + v[2] * s];
+      mb.v(a[0] + n[0] * r, a[1] + n[1] * r, a[2] + n[2] * r, n[0], n[1], n[2], (k / seg) * 6.28 * r, 0, mat);
+      mb.v(b[0] + n[0] * r, b[1] + n[1] * r, b[2] + n[2] * r, n[0], n[1], n[2], (k / seg) * 6.28 * r, L, mat);
+    }
+    for (let k = 0; k < seg; k++) { const q = v0 + k * 2; mb.tri(q, q + 3, q + 1); mb.tri(q, q + 2, q + 3); }
+    for (const [p, sgn] of [[a, -1], [b, 1]] as [V3, number][]) {
+      const c0 = mb.vcount; mb.v(p[0], p[1], p[2], w[0] * sgn, w[1] * sgn, w[2] * sgn, 0, 0, mat);
+      for (let k = 0; k <= seg; k++) { const t = (k / seg) * Math.PI * 2, c = Math.cos(t), s = Math.sin(t); mb.v(p[0] + (u[0] * c + v[0] * s) * r, p[1] + (u[1] * c + v[1] * s) * r, p[2] + (u[2] * c + v[2] * s) * r, w[0] * sgn, w[1] * sgn, w[2] * sgn, c * r, s * r, mat); }
+      for (let k = 0; k < seg; k++) { if (sgn > 0) mb.tri(c0, c0 + 1 + k, c0 + 2 + k); else mb.tri(c0, c0 + 2 + k, c0 + 1 + k); }
+    }
+  }
   /** Vertical cylinder (stools, poles, columns, bottles). */
   cyl(cx: number, y0: number, cz: number, r: number, h: number, mat: Mat, seg = 10, o: BoxOpts & { top?: boolean; r1?: number } = {}) {
     if (this.low) seg = Math.max(4, Math.round(seg * 0.5));

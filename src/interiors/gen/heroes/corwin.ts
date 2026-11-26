@@ -74,7 +74,7 @@ export function genCorwin(c: GenCtx) {
   // sofas + lamp tables along the left wall, framed pictures above (art slots), one empty hook
   for (let q = 0; q < 2; q++) {
     const z = WALL_T + 2.4 + q * 2.6; if (z > zl - 1.4) break;
-    P.sofa(k, { x: x0 + 0.5, z, yaw: -Math.PI / 2 }, 1.8, r.pick([tint(M.vinylBrown, '#5a3a2a'), tint(M.vinylGreen, '#3a4a38')]));
+    P.sofa(k, { x: x0 + 0.5, z, yaw: -Math.PI / 2 }, 1.8, r.pick([tint(M.fabricOlive, '#4a5238'), tint(M.fabricBrown, '#6a4a36')]));
     k.box(x0 + 0.1, 0, z + 1.05, x0 + 0.6, 0.6, z + 1.5, M.woodDark, { collide: 'cover' });
     k.cyl(x0 + 0.35, 0.6, z + 1.27, 0.06, 0.4, M.woodDark, 8); k.cyl(x0 + 0.35, 1.0, z + 1.27, 0.2, 0.25, tint(M.paper, '#d8c8a0'), 12, { r1: 0.13 });
     k.light(x0 + 0.35, 1.15, z + 1.27, [1, 0.75, 0.45], q === 0 ? 0.9 : 0.25, 'bulb', q === 1 ? 1 : 0);
@@ -96,6 +96,22 @@ export function genCorwin(c: GenCtx) {
   const bowl = (x: number, z: number, I: number) => { k.cyl(x, H - 0.75, z, 0.008, 0.75, M.black, 4, { top: false }); k.cyl(x, H - 0.85, z, 0.12, 0.1, tint(M.chrome, '#b0a080'), 14, { r1: 0.48 }); if (I > 0) { k.cyl(x, H - 0.76, z, 0.44, 0.005, tint(M.bulb, '#ffe0b0', { e: 1.2 }), 14); k.light(x, H - 0.55, z, [1, 0.8, 0.55], I, 'neon'); k.light(x, H - 1.3, z, [1, 0.8, 0.55], I * 0.45, 'bulb'); } }; // uplighter: washes the ceiling, a little spills down
   bowl(colX - 0.4, WALL_T + 1.2, 4.2); bowl(colX - 0.4, WALL_T + 4.0, 0); bowl(colX - 0.4, WALL_T + 7.0, 3.6); if (zl - 1.4 > WALL_T + 8.5) bowl(colX - 0.4, zl - 1.4, 3.8);
   P.fluorescent(k, (cx + x1) / 2, (cz0 + cz1) / 2, H, 1.22, 2.0, Math.PI / 2, 1);
+  // worn-grade storytelling (SRO, 1974): a bare tube screwed up beside the dead bowl; taped notices; burns; a dead palm; payphone
+  P.fluorescent(k, colX + 0.5, WALL_T + 4.0, H, 1.22, 2.6, 0, 0);
+  const notice = (x: number, y: number, z: number, nx: number, nz: number, w: number, h: number, id: string) => {
+    k.box(x - (nz ? w / 2 : 0.002), y - h / 2, z - (nx ? w / 2 : 0.002), x + (nz ? w / 2 : 0.002), y + h / 2, z + (nx ? w / 2 : 0.002), tint(M.paper, '#e8dcc0'), { occlude: false });
+    for (const [ox, oy] of [[-1, 1], [1, 1]]) k.box(x + (nz ? ox * w / 2 * 0.9 : 0) - 0.02, y + oy * h / 2 * 0.95 - 0.012, z + (nx ? ox * w / 2 * 0.9 : 0) - 0.02, x + (nz ? ox * w / 2 * 0.9 : 0) + 0.02, y + oy * h / 2 * 0.95 + 0.012, z + (nx ? ox * w / 2 * 0.9 : 0) + 0.02, tint(M.paper, '#c8c0a0'), { occlude: false });
+    k.artSlot('notice', x + nx * 0.004, y, z + nz * 0.004, w, h, nx, nz); void id;
+  };
+  notice(cx - 0.155 - 0.004, 2.45, (cz0 + cz1) / 2, -1, 0, 0.3, 0.22, 'no_visitors');   // NO VISITORS AFTER 11 P.M. (text via narrative's prompt queue)
+  notice(cx - 0.155 - 0.004, 0.75, cz0 + 0.6, -1, 0, 0.22, 0.28, 'rent_due');            // RENT DUE MONDAYS IN ADVANCE
+  notice(ex + 0.95, 1.5, zl - 0.03, 0, -1, 0.25, 0.32, 'elevator');                     // ELEVATOR OUT OF ORDER USE STAIRS
+  for (let q = 0; q < 14; q++) { const bx = r.range(x0 + 0.8, cx - 0.8), bz = r.range(WALL_T + 0.8, zl - 0.8), br = r.range(0.015, 0.035); k.cyl(bx, 0.0136, bz, br, 0.001, M.black, 6); } // cigarette burns
+  // dead potted palm by the door: brown fronds drooping over a cracked pot
+  const px = x0 + 0.5, pz = WALL_T + 0.7;
+  k.cyl(px, 0, pz, 0.24, 0.45, tint(M.steel, '#6a5a44'), 10, { collide: true, r1: 0.28 });
+  for (let q = 0; q < 6; q++) { const a2 = q * 1.05 + r.range(-0.2, 0.2); k.tube([px, 0.45, pz], [px + Math.cos(a2) * 0.45, r.range(0.55, 0.9), pz + Math.sin(a2) * 0.45], 0.012, tint(M.paper, '#6a5030'), 4); }
+  P.payphone(k, { x: x0 + 0.02, z: zl - 1.9, yaw: -Math.PI / 2 }, 'lobby payphone');
   P.radiator(k, { x: cx - 0.17, z: zl - 0.9, yaw: Math.PI / 2 }, 0.9);
   k.marker('spawn', u.door.t, 0, WALL_T + 1.4, 'Corwin lobby');
   // --- the stair to every floor; floors 9 (index 8) and 11 (index 10) are open

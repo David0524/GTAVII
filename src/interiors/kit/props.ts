@@ -4,7 +4,7 @@
  * No modern fixtures (STYLE_GUIDE §10): incandescent and fluorescent light only, rotary
  * phones, mechanical registers, console TVs, chrome-and-vinyl seating.
  */
-import { type Kit, type BoxOpts, F } from './Kit';
+import { type Kit, type BoxOpts, type V3, F } from './Kit';
 import { M, type Mat, tint, hex } from './materials';
 
 export interface Frame { x: number; z: number; yaw: number }
@@ -83,10 +83,25 @@ export function armchair(k: Kit, f: Frame, mat: Mat = M.fabricBrown) {
   pbox(k, f, -0.42, 0.42, -0.4, -0.3, 0.65, 0.22, mat); pbox(k, f, 0.3, 0.42, -0.4, 0.42, 0.65, 0.22, mat);
 }
 export function sofa(k: Kit, f: Frame, len = 2, mat: Mat = M.fabricPlaid) {
-  pbox(k, f, -len / 2, 0.08, -0.42, len / 2, 0.44, 0.42, mat, { collide: 'cover' });
-  pbox(k, f, -len / 2, 0.44, 0.2, len / 2, 0.9, 0.42, mat);
-  pbox(k, f, -len / 2, 0.44, -0.42, -len / 2 + 0.16, 0.68, 0.2, mat); pbox(k, f, len / 2 - 0.16, 0.44, -0.42, len / 2, 0.68, 0.2, mat);
-  for (const lx of [-len / 2 + 0.06, len / 2 - 0.06]) pbox(k, f, lx - 0.03, 0, -0.38, lx + 0.03, 0.08, 0.38, M.woodDark, { occlude: false });
+  // 1940s lobby sofa (Aberdeen reference): skirted base on tapered legs, separate seat and back cushions, rolled arms, piping
+  const W = (x: number, y: number, z: number): V3 => { const [wx, wz] = toWorld(f, x, z); return [wx, y, wz]; };
+  const arm = 0.17, inner = len / 2 - arm;
+  pbox(k, f, -len / 2 + 0.02, 0.12, -0.4, len / 2 - 0.02, 0.36, 0.4, mat, { collide: 'cover' });             // base / skirt
+  pbox(k, f, -len / 2 + 0.03, 0.115, -0.405, len / 2 - 0.03, 0.125, 0.405, M.woodDark, { occlude: false });  // skirt hem
+  const n = len > 1.6 ? 3 : 2, cw = (2 * inner) / n;
+  for (let q = 0; q < n; q++) {
+    const x0 = -inner + q * cw + 0.01, x1 = x0 + cw - 0.02;
+    pbox(k, f, x0, 0.36, -0.38, x1, 0.47, 0.2, mat, { occlude: false });                                     // seat cushion
+    pbox(k, f, x0 + 0.02, 0.47, 0.18, x1 - 0.02, 0.86, 0.34, mat, { occlude: false });                       // back cushion
+    k.tube(W(x0, 0.47, -0.38), W(x1, 0.47, -0.38), 0.012, tint(mat, mat.c.map((c) => c * 0.7) as [number, number, number]), 6); // piping
+  }
+  pbox(k, f, -len / 2 + 0.02, 0.36, 0.32, len / 2 - 0.02, 0.9, 0.42, mat, { occlude: false });                 // frame back
+  for (const sx of [-1, 1]) {
+    const ax = sx * (len / 2 - arm / 2);
+    pbox(k, f, ax - arm / 2, 0.36, -0.38, ax + arm / 2, 0.58, 0.4, mat, { occlude: false });
+    k.tube(W(ax, 0.6, -0.4), W(ax, 0.6, 0.38), arm / 2 + 0.01, mat, 12);                                      // rolled arm
+  }
+  for (const [lx, lz] of [[-len / 2 + 0.08, -0.32], [len / 2 - 0.08, -0.32], [-len / 2 + 0.08, 0.32], [len / 2 - 0.08, 0.32]]) { const [wx, wz] = toWorld(f, lx, lz); k.cyl(wx, 0, wz, 0.022, 0.12, M.woodDark, 6, { r1: 0.03 }); }
 }
 
 // ---------------------------------------------------------------- tables & counters
