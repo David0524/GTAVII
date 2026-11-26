@@ -26,6 +26,8 @@ export const facadeUniforms = {
   night: uniform(0),
   /** Real seconds, for subtle flicker (TVs). */
   time: uniform(0),
+  /** Global scale on window emission (exposure tuning / debugging). */
+  litScale: uniform(0.5),
 };
 
 export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
@@ -61,7 +63,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   // Distance LOD: when a bay is only a few pixels wide the pattern aliases into speckle; fade to the
   // average window coverage instead (also used to average lit windows).
   const bayPx = fwidth(u).div(bay);
-  const lodFade = smoothstep(0.06, 0.22, bayPx);
+  const lodFade = smoothstep(0.03, 0.12, bayPx);
   const coverage = winFrac.mul(head.sub(sill)).mul(0.85);
   const winMask = mix(winMaskSharp, coverage, lodFade);
 
@@ -71,7 +73,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const rowOff = floor(v.div(0.077)).mul(0.5);
   const head2 = fract(u.div(0.205).add(rowOff));
   const mortar = max(step(course, 0.13), step(head2, 0.05));
-  const mortarFade = smoothstep(0.03, 0.008, fwidth(v)); // fade coursing where a course is < ~2 px
+  const mortarFade = smoothstep(0.012, 0.004, fwidth(v)); // fade coursing well before a course is < ~4 px (no speckle)
   const mortarK = select(brickStyle, mortar.mul(mortarFade).mul(0.22), float(0));
   const blotch = mx_noise_float(vec3(u.mul(0.11), v.mul(0.13), seed.mul(37))).mul(0.5).add(0.5);
   // banding: sill / cornice lines at each floor (stone in offices, brick soldier courses in tenements)
@@ -106,7 +108,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const office = style.equal(4).or(style.equal(5));
   const tv = rnd3.lessThan(0.12).and(resid);
   const flicker = sin(facadeUniforms.time.mul(7.0).add(rnd.mul(40))).mul(0.15).add(0.85);
-  const lampCol = select(office, vec3(0.85, 0.92, 1.0), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
+  const lampCol = select(office, vec3(0.9, 0.88, 0.72), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
   const storeLit = groundFloor.and(hasStore).and(facadeUniforms.night.greaterThan(0.15)).and(rnd.lessThan(0.7));
   // Emission is modest: the Phase 3 post stack (filmic tonemap + bloom/halation) supplies the glow.
   const emissiveSharp = select(isLit.or(storeLit), lampCol.mul(select(storeLit, float(0.55), float(0.38))), vec3(0));
@@ -120,7 +122,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   m.colorNode = color;
   m.roughnessNode = select(isRoof, float(0.95), mix(float(0.9), select(boarded.or(shadeHere), float(0.8), float(0.12)), winMask));
   m.metalnessNode = float(0);
-  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask));
+  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask).mul(facadeUniforms.litScale));
   void abs; void min; void vec2;
   return m;
 }

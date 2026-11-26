@@ -4,6 +4,7 @@ import type { ChunkMeshes, MeshArrays } from './meshBuilder';
 import type { QualitySettings } from '../engine/quality';
 import { heightAt, terrainLoaded } from '../shared/terrain';
 import { createFacadeMaterial } from '../render/FacadeMaterial';
+import { createGroundMaterial } from '../render/GroundMaterial';
 
 export interface WorldManifest {
   region: { minX: number; maxX: number; minZ: number; maxZ: number };
@@ -53,7 +54,7 @@ export class World {
   private queue: string[] = [];
   private pending = new Map<number, string>();
   readonly buildingMat = createFacadeMaterial();
-  readonly groundMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
+  readonly groundMat = createGroundMaterial();
   stats = { ready: 0, lod0: 0, lod1: 0, loading: 0, parseMsTotal: 0, failed: 0 };
 
   constructor(private quality: QualitySettings, private base = import.meta.env.BASE_URL + 'data/') {
