@@ -44,4 +44,4 @@ headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
 ## From sim: 8. Vehicle classes for tow trucks and street sweepers
 - **What:** add `tow_truck` and `street_sweeper` to `VEHICLE_CLASSES` in `src/shared/traffic.ts`.
 - **Why:** parking enforcement tows cars and sanitation sweepers run the alternate-side schedule.
-- **Fallback:** the sim uses `box_truck` (tow) and `garbage` (sweeper) with `state` 'onScene'/'drive'.
+- **Status:** shipped by the engine (84f71af); the sim now spawns `tow_truck` and `street_sweeper`.

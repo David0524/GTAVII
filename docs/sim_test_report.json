@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26T22:18:31.607Z",
+  "generated": "2026-11-26T22:21:03.884Z",
   "note": "Headless Node timings, CPU only (container, no GPU); single thread.",
   "seed": 1974,
   "high": {
@@ -12,9 +12,9 @@
       "peds": 400
     },
     "stepMs": {
-      "avg": 0.809,
-      "p95": 1.088,
-      "max": 19.474
+      "avg": 0.863,
+      "p95": 1.18,
+      "max": 19.874
     },
     "failures": {
       "vehOffRoad": 0,
@@ -181,7 +181,7 @@
       "vehicleStolen": 1,
       "policeArrived": 1
     },
-    "hash": "26676ab5:142/400",
+    "hash": "39704e3d:142/400",
     "archetypeWarnings": []
   },
   "low": {
@@ -194,9 +194,9 @@
       "peds": 120
     },
     "stepMs": {
-      "avg": 0.209,
-      "p95": 0.436,
-      "max": 7.199
+      "avg": 0.208,
+      "p95": 0.375,
+      "max": 5.578
     },
     "failures": {
       "vehOffRoad": 0,
@@ -332,30 +332,30 @@
     {
       "label": "off-peak, Herald Square",
       "clock": 660,
-      "firstUnitSec": 17.2,
+      "firstUnitSec": 23.3,
       "arrivals": [
-        {
-          "who": "police#454",
-          "t": 17.2
-        },
         {
           "who": "ambulance",
           "t": 23.3
+        },
+        {
+          "who": "ambulance",
+          "t": 107.1
         }
       ]
     },
     {
       "label": "off-peak, Flatiron",
       "clock": 660,
-      "firstUnitSec": 8.7,
+      "firstUnitSec": 23.3,
       "arrivals": [
         {
           "who": "ambulance",
-          "t": 8.7
+          "t": 23.3
         },
         {
-          "who": "police#338",
-          "t": 24.7
+          "who": "police#332",
+          "t": 31
         }
       ]
     }

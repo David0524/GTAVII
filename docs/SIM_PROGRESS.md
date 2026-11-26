@@ -229,7 +229,8 @@ A logical layer over the street entrances (underground geometry belongs to the e
   entrances inside the bounds. Each station carries `crossStreet` (number) for the join.
 - Timetable: a pure function of the clock. Headway 4 min at the rush hours, 6 midday, 8 evening,
   12-20 at night; run time between stations from distance at ~10 m/s plus 25 s dwell; both directions
-  staggered. `nextTrains(station)` answers instantly (cops can be sent to the next station ahead).
+  staggered. `trainTravel(from, to)` gives the exact ride time and direction (uptown = -z; `order` counts
+  from the downtown end). `nextTrains(station)` answers instantly (cops can be sent to the next station ahead).
 - Platforms: per station and direction, riders accumulate (people who go down the stairs plus an
   ambient rate by time of day) and board each train; alighting riders (more at rush hour) surface at
   the station's entrances near the focus (`subwayExit`). `boardSubway(pedId)` walks a ped to the

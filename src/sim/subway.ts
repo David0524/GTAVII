@@ -147,6 +147,18 @@ export class Subway {
     return out.sort((a, b) => a.inSec - b.inSec).slice(0, n);
   }
 
+  /**
+   * Exact train time between two stations on the same line: the direction you'd ride and the seconds from
+   * departing `from` (end of its dwell) to arriving at `to`. Null if they're on different lines.
+   * Uptown = towards -z; `order` counts up from the downtown end.
+   */
+  trainTravel(fromId: number, toId: number): { dir: 'uptown' | 'downtown'; sec: number } | null {
+    const a = this.stations[fromId], b = this.stations[toId];
+    if (!a || !b || a.line !== b.line || a === b) return null;
+    const dir: 0 | 1 = b.z < a.z ? 0 : 1;
+    return { dir: dir === 0 ? 'uptown' : 'downtown', sec: this.stopOffset(b, dir) - this.stopOffset(a, dir) - DWELL };
+  }
+
   platformCrowd(stationId: number) { const c = this.crowd[stationId]; return c ? { uptown: Math.round(c[0]), downtown: Math.round(c[1]) } : null; }
 
   /** Nearest station to a point, or -1. */

@@ -20,8 +20,9 @@ import { destConnector, rideBehaviour, rideStopStarted, rideTurnCallout, respond
 const DIMS: Record<VehicleClass, [number, number]> = {
   sedan: [5.4, 2.0], hardtop: [5.3, 2.0], compact: [4.6, 1.8], wagon: [5.6, 2.0], taxi: [5.3, 2.0], police: [5.4, 2.0],
   bus: [12.0, 2.6], box_truck: [8.0, 2.5], step_van: [6.5, 2.3], garbage: [9.0, 2.5],
-  // engine roster additions: the sim doesn't spawn these yet (emergency/service traffic is next); sizes for when it does
+  // engine roster additions
   ambulance: [5.8, 2.1], fire_engine: [10.0, 2.5], ladder_truck: [14.0, 2.5], mail_truck: [5.6, 2.2], ice_cream: [6.0, 2.2],
+  tow_truck: [6.8, 2.4], street_sweeper: [6.0, 2.4],
   motorcycle: [2.2, 0.8], police_motorcycle: [2.3, 0.9], bicycle: [1.8, 0.6],
 };
 /** Sim-side spawn mix inside each driver kind (models are the vehicles workstream's job). */

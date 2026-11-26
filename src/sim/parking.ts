@@ -147,7 +147,7 @@ export class Parking {
       if (near.lane < 0 || near.d > 20 || S.net.len[near.lane] < 20) continue;
       const s = Math.max(6, Math.min(S.net.len[near.lane] - 10, near.s));
       if (S.occ[near.lane].some((o) => Math.abs(o.s - s) < o.len / 2 + 7)) continue;
-      const v: Vehicle = makeVehicle(S, 'service', 'box_truck', arch, near.lane, s); // TODO: 'tow_truck' class (ENGINE_REQUESTS sim 8)
+      const v: Vehicle = makeVehicle(S, 'service', 'tow_truck', arch, near.lane, s);
       const cs: CopState = { id: v.id, kind: 'car', role: 'tow', precinct: '', mode: 'idle', x: c.x, z: c.z, cx: c.x, cz: c.z, radius: 0, yaw: 0, target: null,
         urgent: false, siren: false, maxSpeed: 12, route: [], arrived: false, stuckT: 0, blockIds: 0 };
       v.cop = cs;
@@ -172,7 +172,7 @@ export class Parking {
       if (!cl || !cl.days.includes(this.dow) || S.minute < cl.from || S.minute >= cl.to) continue;
       const s = 10;
       if (S.occ[l].some((o) => Math.abs(o.s - s) < o.len / 2 + 8)) continue;
-      const v = makeVehicle(S, 'service', 'garbage', arch, l, s); // TODO: 'street_sweeper' class (ENGINE_REQUESTS sim 8)
+      const v = makeVehicle(S, 'service', 'street_sweeper', arch, l, s);
       v.svcRole = 'sweeper'; v.v0f = 0.25; v.latTarget = 0.6;
       S.emit('sweeperOut', { id: v.id, street: net.roadName(L.owner) });
       return;

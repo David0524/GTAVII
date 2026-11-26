@@ -353,6 +353,8 @@ export class Simulation {
   subwayStations(): readonly Station[] { return this.subway.stations; }
   /** Next trains at a station, both directions, soonest first (deterministic timetable). */
   nextTrains(stationId: number, n = 4): TrainCall[] { return this.subway.nextTrains(stationId, n); }
+  /** Seconds a train takes from leaving one station to arriving at another on the same line (and which way). */
+  trainTravel(fromStation: number, toStation: number) { return this.subway.trainTravel(fromStation, toStation); }
   /** Riders waiting on the platforms. */
   platformCrowd(stationId: number) { return this.subway.platformCrowd(stationId); }
   stationNear(x: number, z: number, r = 150): number { return this.subway.stationNear(x, z, r); }
