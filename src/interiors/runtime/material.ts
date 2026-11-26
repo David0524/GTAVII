@@ -12,7 +12,7 @@
 import * as THREE from 'three/webgpu';
 import {
   Fn, attribute, uniform, vec2, vec3, vec4, float, floor, fract, sin, abs, mix, step, smoothstep, max, min, dot, If,
-  positionWorld, normalView, positionViewDirection, mod, time, clamp, length, select, fwidth,
+  positionWorld, normalWorld, normalView, positionViewDirection, mod, time, clamp, length, select, fwidth,
 } from 'three/tsl';
 
 /** Per-object uniforms read from object.userData.interior (set by the streamer). */
@@ -171,8 +171,15 @@ function albedoNode() {
     });
     // 22 carpet: patterned (medallions on a field)
     If(id.equal(22), () => {
-      const f = fract(uvv.div(0.6)).sub(0.5); const med = smoothstep(0.22, 0.18, length(f)).sub(smoothstep(0.12, 0.08, length(f)));
-      col.assign(c.mul(med.mul(0.35).add(0.85)).mul(noise2(uvv.mul(80)).mul(0.12).add(0.9)).mul(fbm(uvv.mul(0.6)).mul(0.3).add(0.75)));
+      // bold 1930s-40s lobby carpet (Aberdeen reference): medallion lattice with scroll lobes, gold and dark accents
+      const q = uvv.div(0.46); const f = fract(q).sub(0.5); const f2 = fract(q.add(0.5)).sub(0.5);
+      const ring = smoothstep(0.24, 0.21, length(f)).sub(smoothstep(0.15, 0.12, length(f)));
+      const lobe = smoothstep(0.1, 0.07, length(vec2(abs(f2.x).sub(0.16), f2.y))).add(smoothstep(0.1, 0.07, length(vec2(f2.x, abs(f2.y).sub(0.16)))));
+      const dot0 = smoothstep(0.06, 0.04, length(f));
+      const gold = vec3(0.62, 0.48, 0.22), dark = c.mul(0.35);
+      let cc: N = mix(c, gold, ring.clamp(0, 1).mul(0.85));
+      cc = mix(cc, dark, lobe.clamp(0, 1).mul(0.8)); cc = mix(cc, gold, dot0);
+      col.assign(cc.mul(noise2(uvv.mul(80)).mul(0.12).add(0.9)).mul(fbm(uvv.mul(0.6)).mul(0.2).add(0.85)));
     });
     // 23 concrete
     If(id.equal(23), () => { col.assign(c.mul(fbm(uvv.mul(0.8)).mul(0.35).add(0.7)).mul(noise2(uvv.mul(40)).mul(0.1).add(0.95))); });
@@ -199,7 +206,18 @@ function albedoNode() {
     const wp = positionWorld.xz.add(positionWorld.y.mul(0.37));
     const grime = fbm(wp.mul(0.9)).mul(0.6).add(fbm(wp.mul(4.3)).mul(0.4));
     const wear = pat.z.mul(smoothstep(0.35, 0.85, grime)).mul(0.35);
-    return col.mul(float(1).sub(wear));
+    // water stains on ceilings and upper walls: tide-marked rings (dark edge, paler centre) that grow with wear (grade)
+    const ceilingish = smoothstep(-0.4, -0.8, normalWorld.y);
+    const sp = positionWorld.xz.mul(0.55);
+    const blob = fbm(sp.add(vec2(13.1, 7.7)));
+    const amt = smoothstep(0.55, 0.95, pat.z);           // only worn and derelict surfaces carry stains
+    const ring = smoothstep(0.6, 0.64, blob).mul(float(1).sub(smoothstep(0.66, 0.72, blob)));
+    const inner = smoothstep(0.64, 0.7, blob);
+    const stain = ceilingish.mul(amt).mul(ring.mul(0.45).add(inner.mul(0.12)));
+    // fallen plaster (derelict): lath-brown patches with a pale broken edge
+    const lath = ceilingish.mul(step(0.97, pat.z)).mul(smoothstep(0.74, 0.76, fbm(sp.mul(1.7).add(3.3))));
+    const stained = mix(col.mul(float(1).sub(wear)), col.mul(vec3(0.72, 0.6, 0.42)), stain);
+    return mix(stained, vec3(0.22, 0.15, 0.1), lath.mul(0.85));
   })();
 }
 

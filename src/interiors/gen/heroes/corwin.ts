@@ -57,8 +57,17 @@ export function genCorwin(c: GenCtx) {
   k.marker('register', cx + 0.3, 1.1, cz1 - 0.6, 'cash drawer');
   k.marker('payphone', cx + 0.2, 1.1, cz0 + 0.6, 'desk phone');
   // floor: terrazzo border with a patterned carpet field, worn through on the traffic line
-  k.box(x0 + 0.5, 0.004, WALL_T + 0.6, cx - 0.6, 0.012, zl - 0.5, tint(M.carpetRed, '#5a3a2e'), { occlude: false });
-  k.box(u.door.t - 0.5, 0.013, WALL_T + 0.6, u.door.t + 0.5, 0.015, zl - 0.5, tint(M.carpetRed, '#7a6a58'), { occlude: false }); // threadbare path
+  k.box(x0 + 0.5, 0.004, WALL_T + 0.6, cx - 0.6, 0.012, zl - 0.5, tint(M.carpetRed, '#6a3a2c', { wear: 0.5 }), { occlude: false });
+  // threadbare path through the pattern: same carpet, faded toward the backing, worn hardest at the door and the desk
+  k.box(u.door.t - 0.55, 0.0125, WALL_T + 0.6, u.door.t + 0.55, 0.0135, zl - 0.5, tint(M.carpetRed, '#9a7a62', { wear: 1 }), { occlude: false });
+  k.box(u.door.t + 0.55, 0.0125, cz0 + 0.6, cx - 0.6, 0.0135, cz1 - 0.6, tint(M.carpetRed, '#8a6a54', { wear: 1 }), { occlude: false });
+  // skirting and a dado rail all round the lobby (period plasterwork; the reference's wall bands)
+  for (const [ax, az, bx, bz, nx, nz] of [[x0, WALL_T, x0, zl, 1, 0], [x0, zl, L.x0 - 0.15, zl, 0, -1], [cx - 0.15, zl, cx - 0.15, WALL_T, -1, 0]] as number[][]) {
+    k.baseboard(ax, az, bx, bz, nx, nz, M.woodDark, 0.2);
+    const Lw = Math.hypot(bx - ax, bz - az), dx = (bx - ax) / Lw, dz = (bz - az) / Lw;
+    k.quad([ax + nx * 0.025, 0.95, az + nz * 0.025], [dx * Lw, 0, dz * Lw], [0, 0.06, 0], [nx, 0, nz], M.woodDark);
+    k.quad([ax + nx * 0.025, 1.01, az + nz * 0.025], [dx * Lw, 0, dz * Lw], [-nx * 0.025, 0, -nz * 0.025], [0, 1, 0], M.woodDark);
+  }
   // square columns down the room (Aberdeen), painted, scuffed at the base
   const colX = (x0 + cx) / 2 + 0.6;
   for (const z of [WALL_T + 2.4, WALL_T + 5.6]) if (z < zl - 1) { k.box(colX - 0.28, 0, z - 0.28, colX + 0.28, H, z + 0.28, NICOTINE, { collide: 'cover' }); k.box(colX - 0.3, 0, z - 0.3, colX + 0.3, 0.2, z + 0.3, M.woodDark, { occlude: false }); }

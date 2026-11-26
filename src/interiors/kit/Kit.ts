@@ -142,7 +142,7 @@ export class Kit {
     (opts?.glass ? this.g : this.m).quad(p, a, b, n, mat, opts?.tess ?? this.tess, opts?.uv0, opts?.shade);
   }
   floor(x0: number, z0: number, x1: number, z1: number, y: number, mat: Mat) {
-    this.m.quad([x0, y, z0], [x1 - x0, 0, 0], [0, 0, z1 - z0], [0, 1, 0], mat, this.tess, [x0, z0]);
+    this.m.quad([x0, y, z0], [x1 - x0, 0, 0], [0, 0, z1 - z0], [0, 1, 0], mat, this.low ? this.tess : this.tess * 0.6, [x0, z0]);
   }
   ceiling(x0: number, z0: number, x1: number, z1: number, y: number, mat: Mat) {
     this.m.quad([x0, y, z0], [x1 - x0, 0, 0], [0, 0, z1 - z0], [0, -1, 0], mat, this.tess, [x0, z0]);
@@ -254,7 +254,7 @@ export class Kit {
     if (this.grade === 0) {
       const n = Math.round(((x1 - x0) * (z1 - z0)) / 6);
       for (let q = 0; q < n; q++) { const x = this.rng.range(x0 + 0.3, x1 - 0.3), z = this.rng.range(z0 + 0.3, z1 - 0.3), sz = this.rng.range(0.1, 0.45); this.box(x - sz, y0, z - sz * 0.7, x + sz, y0 + this.rng.range(0.03, 0.18), z + sz * 0.7, { c: [0.5, 0.46, 0.4], pat: 23, p: 0, wear: 1 } as Mat, { occlude: false }); }
-      for (let q = 0; q < Math.max(1, n / 2); q++) { const x = this.rng.range(x0 + 0.5, x1 - 0.5), z = this.rng.range(z0 + 0.5, z1 - 0.5), sz = this.rng.range(0.3, 0.8); this.m.quad([x - sz, y1 - 0.003, z - sz], [2 * sz, 0, 0], [0, 0, 2 * sz], [0, -1, 0], { c: [0.25, 0.2, 0.16], pat: 10, p: 0, wear: 1 } as Mat, 99); }
+      // fallen-plaster patches on the ceiling are procedural too (material.ts, ceilings at high wear)
     } else if (this.grade >= 3 && y1 - y0 > 2.6) {
       const mould = this.grade >= 4 ? ({ c: [0.86, 0.8, 0.66], pat: 0, p: 0, wear: 0.1 } as Mat) : ({ c: [0.78, 0.73, 0.62], pat: 0, p: 0, wear: 0.2 } as Mat);
       const t = this.grade >= 4 ? 0.14 : 0.08;
@@ -265,13 +265,7 @@ export class Kit {
         if (this.grade >= 4) this.m.quad([ax + nx * 0.015, y1 - 0.75, az + nz * 0.015], [dx * L, 0, dz * L], [0, 0.04, 0], [nx, 0, nz], { c: [0.7, 0.55, 0.3], pat: 13, p: 1, wear: 0.1 } as Mat, 99);
       }
     }
-    // water stains and soot blooms on ceilings and upper walls (worn and derelict grades)
-    const st = GRADE[this.grade].stains * ((x1 - x0) * (z1 - z0)) / 20;
-    for (let q = 0; q < Math.round(st); q++) {
-      const cx = this.rng.range(x0 + 0.3, x1 - 0.3), cz = this.rng.range(z0 + 0.3, z1 - 0.3), rr = this.rng.range(0.25, 0.9);
-      const stain = { c: [0.66, 0.56, 0.4] as [number, number, number], pat: 23, p: 0, wear: 0.6 } as Mat; // tea-brown water ring, soft
-      for (let b = 0; b < 3; b++) { const ox = this.rng.range(-rr, rr) * 0.5, oz = this.rng.range(-rr, rr) * 0.5, s = rr * this.rng.range(0.4, 0.8); this.m.quad([cx + ox - s, y1 - 0.004 - b * 0.001, cz + oz - s], [2 * s, 0, 0], [0, 0, 2 * s], [0, -1, 0], stain, 99); }
-    }
+    // water stains are procedural in the material (runtime/material.ts), scaled by grade wear: no decal quads
     const sk = o.skip ?? [], col = o.collide;
     // Walls run counter-clockwise in x/z (z0: +x, x1: +z, z1: -x, x0: -z), so side = 1 faces inward on every edge.
     // Openings are measured from each edge's start: z0 from x0, x1 from z0, z1 from x1, x0 from z1.

@@ -113,8 +113,8 @@ function bakeMesh(m: MeshArrays, c: CellOut, sources: { l: LightOut; via: Portal
       if (s.via && !throughPortal([px, py, pz], [l.x, l.y, l.z], s.via.pts)) continue;
       if (s.via2 && !throughPortal([px, py, pz], [l.x, l.y, l.z], s.via2.pts)) continue;
       // bulbs in shades throw more down than up
-      const down = l.kind === 'bulb' ? (ly > 0 ? 1 : 0.55) : 1;
-      let e = (l.intensity * cos * down) / (d2 + 0.8);
+      const down = l.kind === 'bulb' ? (ly > 0 ? 1 : 0.3) : 1; // shaded fixtures pool light below, ceilings stay darker
+      let e = (l.intensity * 1.25 * cos * down) / (d2 + 0.3); // near inverse-square: pools under fixtures, fall-off into corners
       if (occ && e > 0.004) e *= occ.traceCached(s.id, px, py, pz, l.x, l.y, l.z);
       r += e * l.color[0]; g += e * l.color[1]; bl += e * l.color[2];
     }
@@ -141,7 +141,7 @@ function bakeMesh(m: MeshArrays, c: CellOut, sources: { l: LightOut; via: Portal
     // corner AO from the cell box (distance to faces the vertex is not on)
     let ao = 1;
     const dists = [x - b[0], b[3] - x, y - b[1], b[4] - y, z - b[2], b[5] - z];
-    for (const dd of dists) if (dd > 0.03) ao *= 0.55 + 0.45 * Math.min(1, dd / 0.7);
+    for (const dd of dists) if (dd > 0.03) ao *= 0.45 + 0.55 * Math.min(1, dd / 0.8);
     if (occ && aoRays) {
       let hit = 0;
       for (let k = 0; k < aoRays; k++) {
@@ -154,13 +154,13 @@ function bakeMesh(m: MeshArrays, c: CellOut, sources: { l: LightOut; via: Portal
         const dl = Math.hypot(dx, dy, dz) || 1;
         if (occ.at(px + (dx / dl) * 0.35, py + (dy / dl) * 0.35, pz + (dz / dl) * 0.35) || occ.at(px + (dx / dl) * 0.7, py + (dy / dl) * 0.7, pz + (dz / dl) * 0.7)) hit++;
       }
-      ao *= 1 - 0.55 * (hit / aoRays);
+      ao *= 1 - 0.7 * (hit / aoRays); // contact shadows under furniture, at wall bases and around columns
     }
     L[4 * v] = r * ao; L[4 * v + 1] = g * ao; L[4 * v + 2] = bl * ao; L[4 * v + 3] = sky * ao;
     sumR += r; sumG += g; sumB += bl;
   }
   // one-bounce fill: a fraction of the mean direct light, everywhere in the cell (AO-weighted)
-  const k = nv ? 0.22 / nv : 0;
+  const k = nv ? 0.1 / nv : 0; // one-bounce fill kept low so dead fixtures leave real dark patches
   const fr = sumR * k, fg = sumG * k, fb = sumB * k;
   for (let v = 0; v < nv; v++) {
     const y = P[3 * v + 1], ao = 0.6 + 0.4 * Math.min(1, (y - b[1]) / 1.2);
