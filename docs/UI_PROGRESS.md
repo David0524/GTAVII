@@ -122,7 +122,7 @@ The user chose type direction **A, Transit Authority**, relayed by the oversight
   - no tilt, tape, stamps, price tags, aged paper, coffee rings or film-leader gimmicks;
   - the map is a white, Hagstrom-style street guide, and the parking ticket is a plain notification panel.
 - **Font payload (measured in game):** the phone loads 3 files, 47 KB; the desktop loads 5 files, 85 KB. Faces load only when used.
-- **Legibility:** at the smallest text setting (85%) the HUD's smallest text is 10 CSS px (concealment tag, minimap "N"). It's crisp at ×3 DPR, but a little under Apple's 11 pt guideline. That's open.
+- **Legibility:** at the smallest text setting (85%), the HUD's smallest text is now **11 CSS px**, measured in the lab (Apple's guideline). The OBJECTIVE eyebrow is a black plate with white type and a yellow edge, legible over a bright sky. Newspaper small print stays smaller on purpose: it's the artefact.
 - **Shots:** `shots/ui/game/` (in game, phone and desktop) and `shots/ui/` (lab).
 
 ## Touch controls (docs/briefs/TOUCH_CONTROLS.md; user: "our controls may be messy")
