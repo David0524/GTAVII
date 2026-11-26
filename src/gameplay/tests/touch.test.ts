@@ -128,3 +128,22 @@ test('touch: the context button announces changes with a "context" event', () =>
   r.pos[2] = 30; r.step(0.3);
   assert.equal(ev.at(-1)?.kind, null);
 });
+
+test('touch: context button opens doors (interiors list), knocks out of hours, and talks', () => {
+  const r = touchRig();
+  const opened: string[] = [];
+  const doors = [{ id: 'door.diner', x: 3, z: 0, yaw: 0, kind: 'shop', locked: false }, { id: 'door.bank', x: 403, z: 0, yaw: 0, kind: 'shop', locked: true, hours: ['09:00', '15:00'] as [string, string] }];
+  r.g.bindDoors({ doorsForChunk: (i, j) => doors.filter((d) => Math.floor(d.x / 200) === i && Math.floor(d.z / 200) === j), open: (id) => opened.push(id) });
+  r.pos[0] = 2; r.pos[2] = 0;
+  assert.equal(r.g.contextAction()?.kind, 'door');
+  r.g.doContextAction(); assert.deepEqual(opened, ['door.diner']);
+  r.pos[0] = 402; r.g.setClock({ minutes: 10 * 60 });
+  assert.equal(r.g.contextAction()?.label, 'Knock');
+  r.g.setClock({ minutes: 22 * 60 }); assert.equal(r.g.contextAction()?.label, 'Locked');
+  r.g.doContextAction(); assert.deepEqual(opened, ['door.diner'], 'a locked door stays shut');
+  // engine talkables outrank doors; with none bound, a ped within 2 m gets a bark
+  const talked: string[] = [];
+  r.g.bindTalk({ nearestTalkable: (x, z) => (Math.hypot(x - 402, z) < 2 ? { id: 'char.mrs_k', name: 'Mrs. K', x: 402, z: 1 } : null), talk: (id) => talked.push(id) });
+  assert.equal(r.g.contextAction()?.label, 'Talk to Mrs. K');
+  r.g.doContextAction(); assert.deepEqual(talked, ['char.mrs_k']);
+});

@@ -69,6 +69,11 @@ export const COMBAT_BUDGET: Record<Quality, { combatants: number; witnesses: num
 
 export interface PlayerBinding { id: string; lead: string; position(): [number, number, number]; aim(): { origin: [number, number, number]; dir: [number, number, number] } }
 export interface SimBinding { on(type: string, cb: (e: any) => void): void; emit(e: any): void; peds: readonly unknown[]; vehicles: readonly unknown[]; command?(id: string, c: AgentCommand): void }
+/** Interiors' door list (INTERIORS_BRIEF `doorsForChunk`); chunk (i,j) covers [i*S,(i+1)*S) × [j*S,(j+1)*S). */
+export interface DoorInfo { id: string; x: number; z: number; yaw: number; kind: string; locked: boolean; hours?: [string, string] }
+export interface DoorsBinding { doorsForChunk(i: number, j: number): readonly DoorInfo[]; chunkSize?: number; open?(id: string): void }
+/** Engine mission/trigger runtime (ENGINE_REQUESTS 15): named characters and givers the player can talk to. */
+export interface TalkBinding { nearestTalkable(x: number, z: number, radius: number): { id: string; name: string; x: number; z: number } | null; talk(id: string): void }
 export interface VehiclesBinding { on(type: 'impact' | 'destroyed', cb: (e: any) => void): void }
 
 interface Actor { id: string; kind: 'player' | 'npc' | 'ped' | 'cop'; team: 'player' | 'enemy' | 'civilian' | 'police'; pos: () => V3; yaw: () => number; stance: () => 'stand' | 'crouch' | 'down'; vehicleId?: string }
@@ -219,6 +224,30 @@ export class Gameplay {
       command: (id, cmd) => (sim.command ? sim.command(id, cmd) : sim.emit({ type: 'agentCommand', id, cmd })),
     };
     sim.on('collision', (e) => this.onSimCollision(e));
+  }
+  private doors: DoorsBinding | null = null;
+  private talkers: TalkBinding | null = null;
+  private doorOpenNow(d: DoorInfo) {
+    if (!d.hours) return false;
+    const m = this.clock.clock.minutes; const [a, b] = d.hours.map((h) => { const [H, M] = h.split(':').map(Number); return H * 60 + (M || 0); });
+    return a <= b ? m >= a && m < b : m >= a || m < b;
+  }
+  bindDoors(d: DoorsBinding) { this.doors = d; }
+  bindTalk(t: TalkBinding) { this.talkers = t; }
+  /** Nearest door within r metres (searches the player's chunk and its neighbours). */
+  nearestDoor(x: number, z: number, r = 1.8): DoorInfo | null {
+    if (!this.doors) return null;
+    const S = this.doors.chunkSize ?? 200, ci = Math.floor(x / S), cj = Math.floor(z / S);
+    let best: DoorInfo | null = null, bd = r;
+    for (let i = ci - 1; i <= ci + 1; i++) for (let j = cj - 1; j <= cj + 1; j++) for (const d of this.doors.doorsForChunk(i, j)) { const k = Math.hypot(d.x - x, d.z - z); if (k <= bd) { bd = k; best = d; } }
+    return best;
+  }
+  /** Who the context button would talk to: engine talkables first; fallback, any sim ped within 2 m (a bark). */
+  nearestTalkable(x: number, z: number, r = 2): { id: string; name: string; ped: boolean } | null {
+    const t = this.talkers?.nearestTalkable(x, z, r); if (t) return { id: t.id, name: t.name, ped: false };
+    let best: PedSnapshot | null = null, bd = r;
+    for (const p of this.port.peds()) { if (!p.alive) continue; const k = Math.hypot(p.x - x, p.z - z); if (k <= bd) { bd = k; best = p; } }
+    return best ? { id: best.id, name: 'passer-by', ped: true } : null;
   }
   bindVehicles(v: VehiclesBinding) {
     v.on('impact', (e) => this.onVehicleImpact(e));
@@ -591,7 +620,7 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk'; label: string; target?: string } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door'; label: string; target?: string } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
@@ -603,8 +632,13 @@ export class Gameplay {
     for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3) { const m = this.cars.methods(c.id, this.player.lead); if (m.length) return { kind: 'enterVehicle', label: m[0] === 'keys' || m[0] === 'unlocked' ? 'Get in' : m[0] === 'carjack' ? 'Pull him out' : 'Slim jim', target: c.id }; }
     const ph = this.phones.nearest(p[0], p[2], 2.5); if (ph) return { kind: 'usePhone', label: 'Payphone (10¢)', target: ph.id };
     if (this.reg.weapon(this.pc.weapon).family === 'blunt') for (const pr of this.props.list.values()) if (pr.type === 'hydrant' && !this.props.isBroken(pr.id) && Math.hypot(pr.x - p[0], pr.z - p[2]) < 1.6) return { kind: 'openHydrant', label: 'Open the hydrant', target: pr.id };
+    const t = this.nearestTalkable(p[0], p[2]);
+    if (t && !t.ped) return { kind: 'talk', label: `Talk to ${t.name}`, target: t.id };
+    const d = this.nearestDoor(p[0], p[2]);
+    if (d) return { kind: 'door', label: d.locked ? (this.doorOpenNow(d) ? 'Knock' : 'Locked') : 'Go in', target: d.id };
     if (this.pc.cover) return { kind: 'leaveCover', label: 'Leave cover' };
     if (this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
+    if (t) return { kind: 'talk', label: 'Say something', target: t.id };
     return null;
   }
   /** Do the context action (the bribe amount for payOff is the cop's expected price; the UI may offer more). */
@@ -621,6 +655,12 @@ export class Gameplay {
       case 'usePhone': this.phones.place(this.player.lead, a.target!, 'service'); break;
       case 'openHydrant': this.openHydrant(); break;
       case 'cover': case 'leaveCover': this.toggleCover(moveDir); break;
+      case 'door': { const d = this.nearestDoor(this.player.position()[0], this.player.position()[2]); if (d && !d.locked) this.doors?.open?.(d.id); this.emit('notice', { kind: 'door', id: a.target, locked: d?.locked ?? false }); break; }
+      case 'talk': {
+        if (this.talkers && this.talkers.nearestTalkable(this.player.position()[0], this.player.position()[2], 2)?.id === a.target) this.talkers.talk(a.target!);
+        else { this.port.command(a.target!, { type: 'face', x: this.player.position()[0], z: this.player.position()[2] }); this.emit('bark', { who: a.target, line: 'greet' }); }
+        break;
+      }
     }
     return a;
   }

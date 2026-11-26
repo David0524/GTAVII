@@ -192,3 +192,13 @@ Every one of these has a subtitle or visual equivalent in the HUD.
 | Sleep / wait | `canSleep()` → reason; `sleep(hour)`; `wait(hours)` |
 | Stats / completion | `stats.of(lead)`, `stats.totals()`, `stats.accuracy()`, `stats.checklist()` |
 | Fast travel | `cabTo(x, z)`, `enterSubway(jump?)`, `rideSubwayTo(x, z)` |
+
+## From gameplay: 15. `nearestTalkable` and door wiring for the one context button (TOUCH_CONTROLS.md)
+Gameplay's single context button (`contextAction()` / `doContextAction()`) resolves talk and door through two bindings. Please wire them when the scene boots:
+- `gameplay.bindTalk({ nearestTalkable(x, z, radius) → { id, name, x, z } | null, talk(id) })` comes from the **Phase 7 mission and trigger runtime**: named characters, mission givers and side givers. Narrative is content-only, so this belongs to the engine. Until it is bound, any sim ped within 2 m gets "Say something", which turns them to face the player and fires `bark {who, line: 'greet'}`.
+- `gameplay.bindDoors({ doorsForChunk, chunkSize?: 200, open?(id) })` passes Interiors' `doorsForChunk` straight through. Gameplay searches the 3×3 chunks around the player.
+  - An unlocked door gives "Go in" and calls `open(id)`.
+  - A locked door inside its `hours` gives "Knock"; outside them it gives "Locked". Neither calls `open`.
+  - Every press emits `notice {kind: 'door', id, locked}`.
+
+Priority order is in docs/GAMEPLAY_PROGRESS.md, "UI contract for TOUCH_CONTROLS.md".
