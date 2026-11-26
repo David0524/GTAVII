@@ -1,21 +1,21 @@
 {
   "note": "CPU-only, headless Node in the build container (no GPU, no rendering). Gameplay main-thread cost only; physics and rendering are the engine's.",
   "node": "v22.23.5",
-  "date": "2026-11-26T17:42:00.056Z",
+  "date": "2026-11-26T21:58:17.056Z",
   "high12": {
     "combatants": 11,
     "frames": 3479,
     "combat": {
-      "avg": 0.067,
-      "p95": 0.185,
-      "p99": 0.443,
-      "max": 2.957
+      "avg": 0.052,
+      "p95": 0.117,
+      "p99": 0.339,
+      "max": 2.993
     },
     "gameplayTotal": {
-      "avg": 0.079,
-      "p95": 0.237,
-      "p99": 0.504,
-      "max": 3.752
+      "avg": 0.061,
+      "p95": 0.136,
+      "p99": 0.374,
+      "max": 3.029
     },
     "shotsPerSecond": 2.8,
     "aiStates": [
@@ -32,15 +32,15 @@
     "frames": 3479,
     "combat": {
       "avg": 0.022,
-      "p95": 0.043,
-      "p99": 0.245,
-      "max": 1.573
+      "p95": 0.044,
+      "p99": 0.116,
+      "max": 1.524
     },
     "gameplayTotal": {
-      "avg": 0.026,
-      "p95": 0.051,
-      "p99": 0.28,
-      "max": 1.591
+      "avg": 0.025,
+      "p95": 0.052,
+      "p99": 0.136,
+      "max": 1.549
     },
     "shotsPerSecond": 1.7,
     "aiStates": [
@@ -52,10 +52,10 @@
     "peds": 400,
     "frames": 3569,
     "policeAndWitnesses": {
-      "avg": 0.067,
-      "p95": 0.179,
-      "p99": 0.491,
-      "max": 4.217
+      "avg": 0.02,
+      "p95": 0.078,
+      "p99": 0.231,
+      "max": 1.028
     },
     "peakWitnesses": 25,
     "units": 6,
@@ -65,10 +65,10 @@
     "peds": 120,
     "frames": 3569,
     "policeAndWitnesses": {
-      "avg": 0.025,
-      "p95": 0.066,
-      "p99": 0.206,
-      "max": 1.449
+      "avg": 0.01,
+      "p95": 0.038,
+      "p99": 0.094,
+      "max": 0.833
     },
     "peakWitnesses": 25,
     "units": 6,
@@ -76,6 +76,6 @@
   },
   "phoneEstimateX3": {
     "combatLow6_phoneEstimate_ms": 0.066,
-    "police120_phoneEstimate_ms": 0.075
+    "police120_phoneEstimate_ms": 0.03
   }
 }

@@ -138,20 +138,21 @@ Context labels are kept short enough for a button (≤ 14 chars): Pay off, Hands
 Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
 
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
-`shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, 3,480 frames):
+`shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
 | Case | Avg | p95 | p99 | Max | Budget |
 |---|---|---|---|---|---|
-| 12 combatants, High | 0.067 | 0.185 | 0.443 | 3.0 | ≤ 1.5 ms ✔ (rare single-frame spikes) |
-| 6 combatants, Low (×3 phone estimate) | 0.022 (≈0.07) | 0.043 | 0.245 | 1.6 | ✔ |
-| Police and witnesses, 400 peds | 0.067 | 0.179 | 0.491 | 4.2 | ≤ 0.3 ms avg ✔, p99 over |
-| Police and witnesses, 120 peds | 0.025 | 0.066 | 0.206 | 1.4 | ✔ |
+| 12 combatants, High (gameplay total) | 0.061 | 0.136 | 0.374 | 3.0 | ≤ 1.5 ms ✔ (rare single-frame spikes) |
+| 6 combatants, Low (×3 phone estimate) | 0.025 (≈0.07) | 0.052 | 0.136 | 1.5 | ✔ |
+| Police and witnesses, 400 peds | 0.020 | 0.078 | 0.231 | 1.0 | ≤ 0.3 ms avg ✔, p99 ✔ |
+| Police and witnesses, 120 peds | 0.010 | 0.038 | 0.094 | 0.8 | ✔ |
 
-This rerun is uncontended, after stealth, fire, stats, crowd cover and concealment were added
-(about +0.02–0.04 ms on average over the first run). Known waste:
-- `crowdAt` scans every pedestrian each frame;
-- `concealment()` is recomputed several times per frame.
-
-Both are cheap to cache.
+**The crowd cache.**
+- **Why:** `crowdAt` scanned every pedestrian on every `suspect()` call, about 24 µs with 400 peds. The player's crowd cover now refreshes at 4 Hz, which makes `suspect()` about 23 → 2.9 µs.
+- **Measured back-to-back on the same machine, police with 400 peds:**
+  - avg 0.048 → 0.020 ms;
+  - p95 0.123 → 0.078 ms;
+  - p99 0.305 → 0.231 ms.
+- **Concealment:** I measured it at 0.8 µs a call, so it's left uncached; that waste turned out not to matter.
 - **Caveats:**
   - These are desktop-container CPU timings.
   - The ×3 phone factor is an estimate, not a measurement.

@@ -1195,11 +1195,18 @@ export class Gameplay {
     const p = this.player; if (!p) return null;
     const h = this.healthSys.state(p.id);
     return {
-      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false, crowd: this.crowdAt(p.position()), indoorsPublic: this.pc.indoorsPublic, hiding: this.pc.hiding,
+      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false, crowd: this.playerCrowd(), indoorsPublic: this.pc.indoorsPublic, hiding: this.pc.hiding,
       bleeding: !!h && h.bleeds.length > 0, indoors: this.pc.indoors, subway: this.pc.subway, inVehicle: !!this.pc.vehicle, surrendered: this.pc.surrendered,
     };
   }
   /** Crowd cover at a point: pedestrians within 6 m (4+ = a crowd) × the lead's blend. */
+  /** The player's crowd cover, refreshed at 4 Hz (24 µs a scan with 400 peds; crowds don't change per frame). */
+  private crowdCache = { at: -1, v: 0 };
+  private playerCrowd() {
+    if (!this.player) return 0;
+    if (this.time - this.crowdCache.at >= 0.25 || this.crowdCache.at < 0) { this.crowdCache.v = this.crowdAt(this.player.position()); this.crowdCache.at = this.time; }
+    return this.crowdCache.v;
+  }
   crowdAt(pos: V3) {
     if (!this.player) return 0;
     let n = 0; for (const q of this.port.peds()) if (q.alive && Math.hypot(q.x - pos[0], q.z - pos[2]) < 6) n++;
