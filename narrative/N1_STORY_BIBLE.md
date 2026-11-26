@@ -1,6 +1,6 @@
 # Tenderloin '74: Story Bible (Phase N1)
 
-> Status: **draft for review**. Every name here is provisional. Character names get a
+> Status: **approved; revised 26 Nov for combat-central play** (user: "Full open world and missions like a GTA game"). Every name here is provisional. Character names get a
 > collision check in N2, and business names get a trademark search before they go into
 > `BUSINESS_NAMES.md` (N6). Each period claim marked **[S#]** is backed by an entry in the
 > SOURCES section of `NARRATIVE_PROGRESS.md`, and anything marked **(invented)** is ours.
@@ -83,8 +83,10 @@ The question is asked in three registers, and every act turns one of them:
 ## 1. Tone and themes
 
 **Tone.** A 35mm crime film from the street, not from the penthouse. It's procedural
-and patient, warm with the people and cold with the systems. Violence is sudden,
-ugly and consequential rather than choreographed. Humour comes from working people
+and patient, warm with the people and cold with the systems. Violence is frequent,
+because this is a full open-world action game (the user's decision, 26 Nov). It's still
+sudden, loud and consequential: it brings witnesses, call boxes and reports, never
+slow-motion glamour. Humour comes from working people
 talking to each other: it's dry, profane (implied), multilingual and tired. The
 palette matches the engine's: sodium orange, wet black asphalt, steam from manholes,
 the neon of 42nd Street smeared in fog, the green of a hotel lobby's fluorescent
@@ -135,7 +137,8 @@ Three leads, chosen to differ on every axis that matters in play:
 | Relation to the money | Asked to **collect** it | **Banks** it (for the women on the strip) | **Pays** it, and owns the buildings it's buying |
 | Home turf | The Corwin, Broadway in the 30s; the night desk | Eighth Ave 34th–42nd; the Deuce; hotel bars | His loft and vaults on W 30th St; the showroom; the Hotel Pennsylvania ballroom; Seventh Ave restaurants |
 | Hours | Night shift (23:00–07:00) | Late evening to dawn | Business hours, then late nights at the vault and in his car |
-| Gameplay identity | **Access:** keys, favours, talk, interiors, cab fares; avoids fights | **Reading people:** tails, blending in crowds, instant-camera evidence (photo mode), escaping on foot along routes she knows | **Money and leverage:** buying, hiring, bribing, lending, owning; night driving in a big sedan; social missions in rich interiors. He can't blend in and can't fight. |
+| Gameplay identity | **The ex-cop:** best with a revolver; non-lethal takedowns and disarms; master keys; "Old Beat" precinct favours | **The ghost:** fastest and best in melee (straight razor), vanishes into crowds; the instant camera turns a cop's bribe into leverage | **The payroll:** poor shot but hard to drop; best driver; bribes and buys off witnesses; hires muscle |
+| Combat stats (proposed, agreeing with the Gameplay chat) | Health 100 · handgun 8 · melee 6 · sprint 5 · driving 6 · blend 4 | Health 90 · handgun 5 · melee 8 · sprint 9 · driving 3 · blend 9 | Health 110 · handgun 3 · melee 4 · sprint 3 · driving 8 · blend 2 |
 | Inner wound | The night he waited in the car | The work she came north for went south without her | He swore he'd never be poor again, and kept the promise at a price |
 | What he or she wants by Labor Day | Save the Corwin | Get the women's money out of the tax's reach, and own something | Save his firm before the fall season without losing the buildings |
 
@@ -183,8 +186,11 @@ request for switching characters is ENGINE_REQUESTS #5, with a fallback.
 
 **Playable verbs, as the story uses them:** walk and talk, drive (hack, truck,
 borrowed car), tail, deliver, photograph (photo mode), listen (overheard dialogue),
-choose (dialogue), plus very occasional, avoidable fighting. Teddy is not a gunman.
-His weapons are a ring of keys, a phone book's worth of favours and the grid.
+choose (dialogue), and fight. **Revised 26 Nov for combat-central play:** Teddy was a
+patrol cop for eight years and is still the best shot of the three with a revolver. He
+prefers takedowns to killing, and the game lets him choose. He also has a ring of keys, a
+phone book's worth of favours and the grid. His arc now has a combat edge: how often he
+reaches for the gun he gave up.
 
 **The opening (earning the spawn shot).** It's dusk on Friday 21 June 1974, the
 solstice, and sunset is around 20:30. Teddy stands at the north prow of the Flatiron,
@@ -210,10 +216,11 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
 - **The pressure:** Lt. Wurtz's plainclothes unit has started a regular "tax" on the
   women. It looks like enforcement of the post-Knapp kind: arrests on paper, money off the
   paper. The tax is going up, and it's coming for the club.
-- **Gameplay identity:** reading people and slipping through the crowd. She tails people,
-  blends into Eighth Ave and 42nd St crowds, collects evidence with an instant camera
-  (photo mode) on the cops who are also her customers, and escapes on foot along the
-  alleys, arcades and hotel back stairs she knows. She almost never drives.
+- **Gameplay identity (revised for combat):** the fastest and most dangerous up close.
+  She fights with a straight razor and her elbows, carries a snub-nose in her bag, and
+  disappears into Eighth Ave and 42nd St crowds. Her instant camera is a weapon of
+  another kind: a photo of a cop taking money cancels his report on her. She escapes on
+  foot along the alleys, arcades and back stairs she knows, and almost never drives.
 - **Want:** to take over the lease on a closed beauty shop on W 37th St and get the club's
   money somewhere the tax can't reach. **Need:** to let someone help her without owing
   them for it.
@@ -251,8 +258,11 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
 - **Gameplay identity:** money and leverage. He solves problems by spending, and spending
   is a verb in his missions: pay off a super, buy out a lease, hire a cab to block a
   street, lend to the wrong man. He drives a big sedan fast on the avenues at night, and
-  plays social missions in rich interiors. He can't blend in on Eighth Avenue and he can't
-  fight. When money doesn't work he's helpless, and that's when he needs the other two.
+  plays social missions in rich interiors. **Revised for combat:** he's a poor shot but a
+  heavy man who's hard to put down, and he fights like the nailer he was (slow, ugly). He
+  hires muscle (Augie's drivers, off-duty cops from the Shamrock Rail) and buys off
+  witnesses before they reach a call box. He can't blend in on Eighth Avenue. When money
+  doesn't work, he needs the other two.
 - **Want:** to keep the house he built from going under before the fall season.
   **Need:** to see what his money does after it leaves his hands.
 - **How he meets the others:** on the first brownout night his vault compressors stop
