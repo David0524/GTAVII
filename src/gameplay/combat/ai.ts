@@ -46,8 +46,10 @@ export interface Agent {
   track: number; cover: CoverPoint | null; goal: [number, number] | null; token: boolean; suppressed: number; flinch: number;
   barkCd: Record<string, number>; stance: 'stand' | 'crouch' | 'down'; leader: boolean; aimDir: V3; firing: boolean; burst: number;
   alive: boolean; downedAt: number; looted: boolean;
+  /** unaware agents build suspicion before they notice someone (stealth) */
+  suspicion: number; knockedOut: boolean;
 }
-export interface CombatTarget { id: string; pos: V3; vel: [number, number]; team: 'player' | 'enemy'; alive: boolean; inCover: boolean; stance: 'stand' | 'crouch' | 'down' }
+export interface CombatTarget { id: string; pos: V3; vel: [number, number]; team: 'player' | 'enemy'; alive: boolean; inCover: boolean; stance: 'stand' | 'crouch' | 'down'; /** footstep noise radius (m) this frame */ noise?: number; /** 0..1 light at their position */ light?: number }
 
 export interface AiEvents extends Record<string, unknown> {
   bark: { id: string; bark: Bark; at: V3 };
@@ -69,10 +71,14 @@ export interface AiCtx {
 }
 
 const THINK_HZ = 4, EYE = 1.6, CROUCH_EYE = 1.05;
+/** An unaware agent's view: 120° and 28 m in daylight for someone standing. */
+export const IDLE_FOV = (120 * Math.PI) / 180, IDLE_SIGHT = 28;
 
 export class CombatAI extends Emitter<AiEvents> {
   readonly agents = new Map<string, Agent>();
   private squadSize = new Map<string, number>();
+  /** fighting members per squad, counted once per frame (not per agent per think) */
+  private squadAlive = new Map<string, number>();
   stats = { thinkMs: 0, moveMs: 0, agents: 0, losRays: 0 };
   /** fairness knob: how many agents may shoot at the player at once (per difficulty) */
   tokensBase = TOKENS_BASE;
@@ -86,7 +92,7 @@ export class CombatAI extends Emitter<AiEvents> {
       id: o.id, faction: o.faction, squad: o.squad, pos: [...o.pos] as V3, yaw: o.yaw ?? 0, vel: [0, 0],
       gun: o.gun ? new Gun(o.gun) : null, melee: o.melee, ammo: o.ammo ?? 30, state: 'idle', t: 0, think: this.rng.range(0, 1 / THINK_HZ),
       morale: bravery, bravery, target: null, lastKnown: null, seeT: 0, unseenT: 0, track: 0, cover: null, goal: null, token: false, suppressed: 0, flinch: 0,
-      barkCd: {}, stance: 'stand', leader: !!o.leader, aimDir: [0, 0, -1], firing: false, burst: 0, alive: true, downedAt: -1, looted: false,
+      barkCd: {}, stance: 'stand', leader: !!o.leader, aimDir: [0, 0, -1], firing: false, burst: 0, alive: true, downedAt: -1, looted: false, suspicion: 0, knockedOut: false,
     };
     this.agents.set(a.id, a);
     this.squadSize.set(o.squad, (this.squadSize.get(o.squad) ?? 0) + 1);
@@ -96,7 +102,7 @@ export class CombatAI extends Emitter<AiEvents> {
 
   /** External stimuli. */
   alert(id: string, at: [number, number], target: string) {
-    const a = this.agents.get(id); if (!a || !a.alive || a.state === 'surrender' || a.state === 'flee') return;
+    const a = this.agents.get(id); if (!a || !a.alive || a.knockedOut || a.state === 'surrender' || a.state === 'flee') return;
     a.target = target; a.lastKnown = at;
     if (a.state === 'idle') { this.setState(a, 'alert'); this.bark(a, a.faction === 'police' ? 'police' : 'spotted'); }
   }
@@ -115,6 +121,14 @@ export class CombatAI extends Emitter<AiEvents> {
     if (a.state === 'idle') this.setState(a, 'alert');
     this.bark(a, 'hit', 2);
   }
+  /** A takedown from behind: knocked out cold (not dead) for good in this encounter. */
+  knockOut(id: string) {
+    const a = this.agents.get(id); if (!a || !a.alive) return false;
+    a.knockedOut = true; a.firing = false; this.setState(a, 'down'); this.cover?.release(a.id);
+    return true;
+  }
+  /** Is this agent unaware of the player (a takedown is possible)? */
+  unaware(id: string) { const a = this.agents.get(id); return !!a && a.alive && !a.knockedOut && a.state === 'idle'; }
   onDied(id: string) {
     const a = this.agents.get(id); if (!a) return;
     a.alive = false; this.setState(a, 'dead'); this.cover?.release(a.id);
@@ -147,6 +161,8 @@ export class CombatAI extends Emitter<AiEvents> {
     const t0 = now();
     // token allocation (per hostile target): the closest/best-placed holders keep tokens; rotate slowly
     this.allocateTokens(ctx);
+    this.squadAlive.clear();
+    for (const b of this.agents.values()) if (b.alive && b.state !== 'surrender' && b.state !== 'flee') this.squadAlive.set(b.squad, (this.squadAlive.get(b.squad) ?? 0) + 1);
     let thinkMs = 0;
     let n = 0;
     for (const a of this.agents.values()) {
@@ -179,7 +195,7 @@ export class CombatAI extends Emitter<AiEvents> {
 
   private decide(a: Agent, ctx: AiCtx) {
     const st = a.state;
-    if (st === 'dead' || st === 'surrender' || st === 'flee') return;
+    if (st === 'dead' || st === 'surrender' || st === 'flee' || a.knockedOut) return;
     const hp = ctx.health.state(a.id);
     const hpFrac = hp ? hp.hp / hp.maxHp : 1;
     const legs = hp ? Math.max(hp.wear.leg_l, hp.wear.leg_r) : 0;
@@ -192,13 +208,25 @@ export class CombatAI extends Emitter<AiEvents> {
     const chest: V3 = [tgt.pos[0], tgt.pos[1] + (tgt.stance === 'crouch' ? 0.75 : tgt.stance === 'down' ? 0.25 : 1.2), tgt.pos[2]];
     const sees = this.los(ctx, a.pos, st === 'inCover' && a.cover?.height === 'low' ? EYE : eye, chest);
     const dist = Math.hypot(tgt.pos[0] - a.pos[0], tgt.pos[2] - a.pos[2]);
-    if (sees) { a.lastKnown = [tgt.pos[0], tgt.pos[2]]; a.seeT += 0.25; a.unseenT = 0; if (st === 'idle') { this.setState(a, 'alert'); this.bark(a, a.faction === 'police' ? 'police' : 'spotted'); } }
+    if (st === 'idle') {
+      // unaware: needs to look the right way, close enough, long enough. Sneaking and darkness help; noise gives you away.
+      const inFov = Math.abs(wrapAngle(Math.atan2(-(tgt.pos[0] - a.pos[0]), -(tgt.pos[2] - a.pos[2])) - a.yaw)) < IDLE_FOV / 2;
+      const range = IDLE_SIGHT * (tgt.stance === 'crouch' ? 0.55 : 1) * (0.5 + 0.5 * (tgt.light ?? 1));
+      if (sees && inFov && dist < range) a.suspicion += 0.25 * (1.6 - dist / range);
+      else a.suspicion = Math.max(0, a.suspicion - 0.25 * 0.3);
+      const heard = (tgt.noise ?? 0) > dist;
+      if (a.suspicion >= 1 || heard || dist < 1.2) {
+        a.lastKnown = [tgt.pos[0], tgt.pos[2]];
+        this.setState(a, 'alert'); this.bark(a, a.faction === 'police' ? 'police' : 'spotted');
+      }
+      return;
+    }
+    if (sees) { a.lastKnown = [tgt.pos[0], tgt.pos[2]]; a.seeT += 0.25; a.unseenT = 0; }
     else { a.unseenT += 0.25; a.seeT = 0; }
-    if (st === 'idle') return;
 
     // --- morale gates (surrender / flee / retreat)
     const size = this.squadSize.get(a.squad) ?? 1;
-    const alive = [...this.agents.values()].filter((b) => b.squad === a.squad && b.alive && b.state !== 'surrender' && b.state !== 'flee').length;
+    const alive = this.squadAlive.get(a.squad) ?? 1;
     const outnumbered = alive / size;
     const m = a.morale * (0.6 + 0.4 * outnumbered) * (0.5 + 0.5 * hpFrac);
     const F = FACTIONS[a.faction];

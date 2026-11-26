@@ -67,6 +67,8 @@ export interface PlayerCombatState {
   sprinting: boolean; tempF: number; raining: boolean; unlimitedSprint: boolean; jamClear: number;
   /** heading of the car the player sits in (drive-by arcs) */
   vehicleYaw: number;
+  /** crouched / sneaking (stealth) */
+  crouch: boolean;
   lockLimb: Limb; device: 'touch' | 'pad' | 'mouse'; assist: AssistLevel;
 }
 
@@ -114,7 +116,7 @@ export class Gameplay {
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
-    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0,
+    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false,
   };
   /** Last frame's shot results (debug overlay tracers). */
   lastShots: ShotResult[] = [];
@@ -324,7 +326,7 @@ export class Gameplay {
   }
   setBlindFire(on: boolean) { this.pc.blind = on; }
   surrender(on: boolean) { this.pc.surrendered = on; }
-  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw'>>) { Object.assign(this.pc, c); }
+  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch'>>) { Object.assign(this.pc, c); }
   /** Take the gun and rounds off a downed enemy within reach. Guns come in random condition and tier. */
   loot(): { weapon: string | null; rounds: number } | null {
     if (!this.player) return null;
@@ -783,7 +785,32 @@ export class Gameplay {
   }
   profileOf(lead: string, npc: boolean): FighterProfile { const m = this.reg.lead(lead).melee; return { damage: m.damage, speed: m.speed, parryWindow: m.parryWindow, dodgeIframes: m.dodgeIframes, npc }; }
   private syncPlayerFighter() { if (!this.player) return; const f = this.melee.fighters.get(this.player.id); if (f) { f.pos = this.player.position(); f.yaw = yawOf(this.player.aim().dir); } }
-  private playerStance(): 'stand' | 'crouch' | 'down' { const c = this.pc.cover; return c && !this.pc.peek && c.height === 'low' ? 'crouch' : 'stand'; }
+  private playerStance(): 'stand' | 'crouch' | 'down' { const c = this.pc.cover; return (c && !this.pc.peek && c.height === 'low') || (this.pc.crouch && !this.pc.aiming) ? 'crouch' : 'stand'; }
+  /** Footstep noise radius (m): sneaking 2, walking 6, running 12, sprinting 20, × stealth skill; gunfire is separate. */
+  footstepNoise() {
+    if (!this.player) return 0;
+    const sp = this.pc.speed, sk = skillFx(this.inv.ensure(this.player.lead).skills).sneakNoise;
+    const base = sp < 0.2 ? 0 : this.pc.crouch ? 2 : this.pc.sprinting ? 20 : sp > 2.5 ? 12 : 6;
+    return base * sk;
+  }
+  /** Takedown from behind on an unaware enemy within 1.4 m: a blade kills, anything else knocks out. */
+  takedown(): { id: string; lethal: boolean } | null {
+    if (!this.player) return null;
+    const p = this.player.position();
+    for (const a of this.ai.agents.values()) {
+      if (!this.ai.unaware(a.id) || Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) > 1.4) continue;
+      const behind = Math.abs(wrapAngle(Math.atan2(-(p[0] - a.pos[0]), -(p[2] - a.pos[2])) - a.yaw)) > Math.PI * 0.55;
+      if (!behind) continue;
+      const lethal = this.reg.weapon(this.pc.weapon).family === 'blade';
+      if (lethal) this.applyDamage(a.id, { amount: 999, region: 'torso', type: 'melee', source: this.player.id });
+      else this.ai.knockOut(a.id);
+      learn(this.inv.ensure(this.player.lead).skills, 'unseenTakedown');
+      this.crime(lethal ? 'homicide' : 'assault', { victim: a.id, noise: 4 });
+      this.emit('melee', { kind: 'takedown', id: a.id, lethal });
+      return { id: a.id, lethal };
+    }
+    return null;
+  }
   /** Movement multiplier for the engine's controller (limp, crouch in cover). */
   moveMul() { if (!this.player) return 1; const e = this.healthSys.effects(this.player.id); return e.speedMul * this.reg.lead(this.player.lead).sprint; }
   canSprint() { if (!this.player) return true; const st = this.inv.ensure(this.player.lead).stamina; return this.healthSys.effects(this.player.id).canSprint && (this.pc.unlimitedSprint || !st.exhausted); }
@@ -837,7 +864,7 @@ export class Gameplay {
   combatTargets(): CombatTarget[] {
     const out: CombatTarget[] = [];
     const p = this.player;
-    if (p && !this.healthSys.state(p.id)?.dead && !this.pc.surrendered) out.push({ id: p.id, pos: p.position(), vel: [0, 0], team: 'player', alive: true, inCover: !!this.pc.cover, stance: this.playerStance() });
+    if (p && !this.healthSys.state(p.id)?.dead && !this.pc.surrendered) { const pp = p.position(); out.push({ id: p.id, pos: pp, vel: [0, 0], team: 'player', alive: true, inCover: !!this.pc.cover, stance: this.playerStance(), noise: this.footstepNoise(), light: this.light(pp[0], pp[2]) }); }
     for (const a of this.ai.agents.values()) if (a.alive && a.faction !== 'muscle' && a.state !== 'surrender' && a.state !== 'flee') out.push({ id: a.id, pos: a.pos, vel: a.vel, team: 'enemy', alive: true, inCover: a.state === 'inCover', stance: a.stance });
     return out;
   }
