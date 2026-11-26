@@ -209,9 +209,12 @@ export function hairMaterial(): THREE.MeshPhysicalNodeMaterial {
   const straight = mx_noise_float(vec3(uvA.x.mul(f), uvA.y.mul(f).mul(0.07), h.mul(0.7)));
   const curly = mx_noise_float(vec3(uvA.x.mul(f), uvA.y.mul(f), h.mul(4)));
   const n = mix(straight, curly, smoothstep(0.35, 0.8, texture)).mul(0.5).add(0.5);
-  const cornrow = m1.w.greaterThan(0.5).select(smoothstep(0.25, 0.4, abs(fract(uvA.x.mul(45)).sub(0.5)).mul(-1).add(0.5)), float(1));
+  const cornrow = m1.w.greaterThan(0.5).and(m1.w.lessThan(1.5)).select(smoothstep(0.25, 0.4, abs(fract(uvA.x.mul(45)).sub(0.5)).mul(-1).add(0.5)), float(1));
+  // coily hair: clumps (Worley cells) that shrink outward, so the silhouette breaks into tufts
+  const clumpD = mx_worley_noise_float(vec3(uvA.mul(freq.mul(0.045)), h.mul(1.7)));
+  const clump = m1.w.greaterThan(1.5).select(smoothstep(1.1, 0.45, clumpD.add(h.mul(0.15))).mul(mix(0.85, 1.15, n)), float(1));
   const alpha = Fn(() => {
-    const a = n.mul(density).mul(cornrow).toVar();
+    const a = m1.w.greaterThan(1.5).select(clump.mul(density), n.mul(density).mul(cornrow)).toVar();
     // shells thin out towards the tips; the innermost layer is solid scalp coverage
     const keep = smoothstep(h.mul(0.75).sub(0.06), h.mul(0.75).add(0.06), a);
     return sub.equal(3).select(float(1), h.lessThan(0.02).select(density.mul(cornrow), keep));

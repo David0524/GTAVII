@@ -41,7 +41,7 @@ const STYLES: Record<HairStyle, StyleShape> = {
   shag: { length: -0.11, thick: (u, _f, s) => 0.014 + 0.016 * u + 0.008 * s, fringe: 0.012, density: 0.95, freq: 300, layers: 8 },
   earLength: { length: -0.07, thick: (u, _f, s) => 0.012 + 0.012 * u + 0.006 * s, fringe: 0.02, density: 1, freq: 320, layers: 7 },
   feathered: { length: -0.1, thick: (u, f, s) => 0.016 + 0.018 * u + 0.012 * s + 0.006 * f, fringe: 0.03, density: 0.95, freq: 300, layers: 8 },
-  curlyMid: { length: -0.06, thick: (u) => 0.02 + 0.015 * u, fringe: 0.03, density: 1, freq: 650, layers: 8 },
+  curlyMid: { length: -0.05, thick: (u) => 0.015 + 0.01 * u, fringe: 0.04, density: 1, freq: 650, layers: 8, sphere: 0.04 },
   afro: { length: -0.05, thick: () => 0.01, fringe: 0.04, density: 1, freq: 900, layers: 10, sphere: 0.075 },
   afroShort: { length: -0.035, thick: () => 0.008, fringe: 0.045, density: 1, freq: 900, layers: 6, sphere: 0.025 },
   longStraight: { length: -0.36, thick: (u, _f, s) => 0.008 + 0.006 * u + 0.006 * s, fringe: 0.05, density: 1, freq: 260, layers: 7 },
@@ -136,13 +136,24 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
         for (let i = 0; i < v.ids.length; i++) {
           const k = v.ids[i], w = v.w[i];
           let th = st.thick(up(k), front(k), side(k)) * vol;
+          if (app.hair.style === 'setCurls') {
+            // set-and-sprayed rows of roller curls: a bumpy, rounded surface
+            const uk = Math.atan2(P[k * 3] - hc[0], P[k * 3 + 2] - hc[2]) * ff.headRadius, vk = hc[1] + ff.headRadius - P[k * 3 + 1];
+            th *= 0.7 + 0.55 * Math.abs(Math.sin((uk / 0.034) * Math.PI) * Math.sin((vk / 0.03) * Math.PI + (Math.floor(vk / 0.03) % 2) * 1.5));
+          }
           let dir = [Nh[k * 3], Nh[k * 3 + 1], Nh[k * 3 + 2]];
           if (st.sphere) {
             // afro: grow towards a rounded volume around the head centre
-            const d = [P[k * 3] - hc[0], P[k * 3 + 1] - (hc[1] + 0.01), P[k * 3 + 2] - (hc[2] - 0.01)];
+            // grown from a raised centre: up and out, not forward over the brow; rounded at the ears
+            const d = [P[k * 3] - hc[0], P[k * 3 + 1] - (hc[1] + 0.035), P[k * 3 + 2] - (hc[2] - 0.02)];
             const l = Math.hypot(d[0], d[1], d[2]) || 1;
+            d[1] = Math.max(d[1], -0.15 * l); // never grows downward over the face or ears
             dir = [d[0] / l, d[1] / l, d[2] / l];
-            th = Math.max(0, ff.headRadius * 0.92 + st.sphere * vol * (0.6 + 0.4 * up(k)) - l * 0.92) + 0.006;
+            const fr = front(k) * (1 - up(k));
+            th = Math.max(0, ff.headRadius * 0.95 + st.sphere * vol * (0.55 + 0.45 * up(k)) * (1 - 0.55 * fr) - l * 0.95) + 0.006;
+            // rounded edge: the volume rises from zero at the hairline
+            th *= 0.12 + 0.88 * sm(0, 0.045, hairline(k));
+            const dl = Math.hypot(d[0], d[1], d[2]) || 1; dir = [d[0] / dl, d[1] / dl, d[2] / dl];
           }
           const o = th * (0.15 + 0.85 * h) * (cards ? 0.6 : 1);
           for (let c = 0; c < 3; c++) { pos[c] += (P[k * 3 + c] + dir[c] * o) * w; nrm[c] += Nh[k * 3 + c] * w; }
@@ -160,7 +171,8 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
           cA: col, cB: tip,
           // under cards the shells are the hair mass: dense, low-frequency, the cards carry the strands
           m0: [h, soft * st.density * (cardHL ? 3 : 1) * (app.hair.style === 'combOver' ? 0.6 : 1) * (1 - app.hair.thinning * 0.4), st.freq * (cardHL ? 0.35 : 1), app.hair.texture],
-          m1: [KIND.hair, 0, app.hair.grey, app.hair.style === 'cornrows' ? 1 : 0],
+          // m1.w: 1 cornrows, 2 coily clumps (afro, curls)
+          m1: [KIND.hair, 0, app.hair.grey, app.hair.style === 'cornrows' ? 1 : ['afro', 'afroShort', 'curlyMid', 'setCurls'].includes(app.hair.style) ? 2 : 0],
         }, [u, vv]);
       });
       for (let i = 0; i < res.tris.length; i += 3) mb.tri(map[res.tris[i]], map[res.tris[i + 1]], map[res.tris[i + 2]]);
