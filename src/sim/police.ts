@@ -85,6 +85,7 @@ export function responderStart(S: SimCore, x: number, z: number, targetSec = 24)
     const near = nearestLane(S, x + Math.cos(a) * r, z + Math.sin(a) * r);
     if (near.lane < 0 || near.d > 45) continue;
     const len = S.net.len[near.lane];
+    if (len < 20) continue; // too short to start on (stubs between close junctions)
     const s = Math.max(6, Math.min(len - 10, near.s));
     if (S.occ[near.lane].some((o) => Math.abs(o.s - s) < o.len / 2 + 9)) continue;
     sampleAt(S.net.g.links[near.lane].pts, S.net.cum[near.lane], s, tmp);
@@ -245,7 +246,7 @@ function startRoadblock(S: SimCore, v: Vehicle) {
   // centre the car on the middle lane of its direction
   const mid = grp[Math.floor((grp.length - 1) / 2)];
   v.latTarget = 0; v.lat = 0;
-  if (mid !== v.link) { const ratio = net.len[mid] / net.len[v.link]; const occ = S.occ[v.link]; const i = occ.indexOf(v); if (i >= 0) occ.splice(i, 1); v.s *= ratio; v.link = mid; S.occ[mid].push(v); S.occ[mid].sort((a, b) => a.s - b.s); }
+  if (mid !== v.link) { const ratio = net.len[mid] / net.len[v.link]; const occ = S.occ[v.link]; const i = occ.indexOf(v); if (i >= 0) occ.splice(i, 1); v.s *= ratio; v.link = mid; v.prevLink = -1; S.occ[mid].push(v); S.occ[mid].sort((a, b) => a.s - b.s); }
   for (const lane of grp) {
     const s = v.s * (net.len[lane] / net.len[v.link]) - 4;
     S.blocks.push({ link: lane, s: Math.max(1, s), until: Infinity, owner: v.id });

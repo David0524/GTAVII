@@ -18,6 +18,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Economy hook | `blockAt(x,z)` + `footTraffic(blockId)` rolling peds/min |
 | Police agents (Gameplay spec) | **First pass**: `spawnPolice`, `setPoliceGoal` (patrol / goto / search / pursue / boxIn / roadblock), `setSiren`, `despawnPolice`, `police: PoliceView[]`, events `policeArrived`, `policeBlocked`. Plus `setGoal({kind:'act'})`, `nerve` on PedView, `kill()`, `takeVehicle()` → `vehicleStolen` |
 | Emergency & service traffic, player cab rides | **First pass**: `dispatch('ambulance'|'fire', x, z)` (+ ambient ambulance runs), mail trucks, soft-serve truck; `callCab` / `boardCab` / `leaveCab` with `cabReady`, `cabTurnAhead`, `cabRideArrived`; left-kerb pickups on one-way streets |
+| Parking enforcement, tows, street cleaning | **Done (first pass)**: `parkingRule(x,z,minute?,dow?)`, `hydrantsNear`, `setDay`, `registerParkedCar`/`unregisterParkedCar`; traffic agents ticket (`ticketIssued`), tow trucks tow (`towDispatched`, `vehicleTowed`), street sweepers run alternate-side windows (`sweeperOut`) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
@@ -185,6 +186,26 @@ Gameplay keeps every decision (reports, recognition, bribes, arrests, stamina); 
 - **Hails**: cabs now also pick up from the left kerb on one-way streets (leftmost lane, pulls left).
 - **Crosswalk starvation fix**: a car that has waited at the line more than 6 s gets a gap; pedestrians
   hold back for it (the Flatiron crossing could otherwise block turning cars for minutes).
+
+### Parking, enforcement, tows, street cleaning (`src/sim/parking.ts`)
+Period-typical rules derived deterministically from the street graph (block-level 1974 signage isn't
+documented, so these are plausible rather than historical claims):
+- alternate-side cleaning on side streets: each kerb gets two days (Mon/Thu, Tue/Fri, Wed/Sat) and a
+  window (08-11 or 11-14) by hashing street and side; avenues have none (swept at night);
+- avenues: no standing 07-10 and 16-19 on weekdays (tow-away); bus stops: no standing within 15 m
+  (tow-away); hydrants every ~70 m of kerb, no parking within 4.6 m (tow-away), with
+  `hydrantsNear(x, z, r)` so the engine places the props where the rules are; corners: no standing within 6 m.
+- Fines are tiers ('minor' | 'major'); the Economy stream owns the money. Day of week via `setDay`
+  (default Friday, 21 June 1974).
+- A registered car in violation for 20 s gets a traffic agent walking down the same sidewalk to write a
+  ticket; tow-away violations left 5 minutes (or any violation 30 minutes after a ticket) bring a tow
+  truck that routes there, hooks up for 20-30 s and leaves (`vehicleTowed`). Street sweepers work kerbs
+  whose cleaning window is on. The tow truck and sweeper use the `box_truck` / `garbage` classes until
+  the vehicles stream adds `tow_truck` / `street_sweeper` (request below).
+- Kerb room: the build step now checks that each kerb-side lane's parking lane is on roadway ground
+  (577 of 590 are); siren gutter runs, pull-overs, cab pickups/drop-offs and service stops only use those.
+- Pedestrian `goto` now walks to the exact kerb spot along the target sidewalk (not just the nearest
+  corner), and crosswalk fairness compares how long the pedestrian and the waiting car have waited.
 
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,

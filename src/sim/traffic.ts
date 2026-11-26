@@ -64,7 +64,7 @@ export function gutterLat(S: SimCore, L: Link): number {
   if (L.kind !== LinkKind.Lane || R.flags & RoadFlag.Link || S.net.g.names[R.name] === '') return 0;
   const side = R.oneway !== 0 ? -1 : 1;
   const idx = side > 0 ? 0 : L.laneCount - 1;
-  if (L.laneIndex !== idx) return 0;
+  if (L.laneIndex !== idx || !(L.flags & (side > 0 ? LinkFlag.RightKerbRoom : LinkFlag.LeftKerbRoom))) return 0;
   return side * (L.width / 2 + 1.2);
 }
 export function gutterSideOf(S: SimCore, L: Link): number { return S.net.g.roads[L.owner].oneway !== 0 ? -1 : 1; }
@@ -240,10 +240,20 @@ function roomFrom(S: SimCore, out: number, t: number): number {
   return len + best;
 }
 
+/** A siren unit coming out of the gutter waits for the car beside it at the line to go first. */
+function gutterBlocked(S: SimCore, v: Vehicle): string {
+  if (Math.abs(v.lat) < 0.6 || v.next < 0) return '';
+  const net = S.net, L = net.g.links[v.link];
+  for (const lane of net.groups.get(L.group)!) for (const w of S.occ[lane]) if (w !== v && w.v > 0.3 && net.len[lane] - w.s < w.len / 2 + 8 && Math.abs(w.s * (net.len[v.link] / net.len[lane]) - v.s) < (w.len + v.len) / 2 + 2) return 'gutterWait';
+  for (const w of S.occ[v.next]) if (w.s - w.len / 2 < v.len + 2) return 'gutterWait';
+  return '';
+}
+
 /** For a police car running a red with its siren: anything physically in the way inside the junction? */
 function sirenBlocked(S: SimCore, v: Vehicle): string {
   const net = S.net, c = v.next;
   if (c < 0) return '';
+  const gw = gutterBlocked(S, v); if (gw) return gw;
   const C = net.g.links[c];
   for (const cf of C.conflicts) if (vehiclesBeforePoint(S, cf.link, cf.sOther, v.wid + 1.0)) return 'conflict';
   for (const cf of C.conflicts) { // vehicles about to enter on green: let them clear first
@@ -259,6 +269,7 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
   const net = S.net, c = v.next;
   if (c < 0) return '';
   const C = net.g.links[c], out = C.next[0];
+  if (v.cop?.siren) { const gw = gutterBlocked(S, v); if (gw) return gw; }
   // don't block the box: room on the exit lane (siren units go: traffic makes way for them)
   if (!v.force && !v.cop?.siren) {
     let room = roomFrom(S, out, t);
@@ -545,7 +556,7 @@ function periodBehaviour(S: SimCore, v: Vehicle, dt: number) {
     v.fareT -= dt;
     if (v.fareT < 0 && v.stopLink < 0 && L.kind === LinkKind.Lane && len - v.s > 45) {
       const lane0 = net.groups.get(L.group)![0];
-      v.stopLink = lane0; v.stopAt = Math.min(net.len[lane0] - 15, v.s * (net.len[lane0] / len) + 25); v.stopKind = 'dropoff';
+      if (net.g.links[lane0].flags & LinkFlag.RightKerbRoom) { v.stopLink = lane0; v.stopAt = Math.min(net.len[lane0] - 15, v.s * (net.len[lane0] / len) + 25); v.stopKind = 'dropoff'; }
     }
   }
   // cab: answer hails on this block, or on a block it can turn or continue into (cabbies cruise for fares)
@@ -555,6 +566,7 @@ function periodBehaviour(S: SimCore, v: Vehicle, dt: number) {
     const stopHere = (h: Hail): boolean => {
       // right kerb from the kerb lane; on one-way streets the left kerb from the leftmost lane
       const left = h.side !== L.dir, lane = left ? grp[grp.length - 1] : lane0;
+      if (!(net.g.links[lane].flags & (left ? LinkFlag.LeftKerbRoom : LinkFlag.RightKerbRoom))) return false;
       const p = projectS(S, lane, h.x, h.z);
       if (p - v.s * (net.len[lane] / len) < 5 || p > net.len[lane] - 6) return false;
       h.claimedBy = v.id; v.hail = h; v.stopLink = lane; v.stopAt = p; v.stopKind = 'pickup'; v.kerb = left ? -1 : 1;
@@ -750,10 +762,10 @@ export function stepVehicles(S: SimCore, dt: number) {
         // one-way street: pull right into the parking lane, unless something is parked there (then just stop)
         a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren';
         const kerbBusy = S.occ[v.link].some((w) => w !== v && (w.state !== 'drive' || w.passable) && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 4);
-        if (!kerbBusy && v.latTarget >= 0) v.latTarget = (L.width - v.wid) / 2 + 1.1;
+        if (!kerbBusy && v.latTarget >= 0 && L.flags & LinkFlag.RightKerbRoom) v.latTarget = (L.width - v.wid) / 2 + 1.1;
       }
       else if (v.v > 4) a = Math.min(a, -1.5); // slow down
-    } else if (v.pullT > -0.1 && v.latTarget !== 0 && v.state === 'drive' && !v.cop && !v.passable) v.latTarget = 0;
+    } else if (v.pullT > -0.1 && (v.latTarget > 0.35 || Math.abs(v.latTarget) <= 0.35) && v.latTarget !== 0 && v.state === 'drive' && !v.cop && !v.passable) v.latTarget = 0; // undo pull-over offsets only (not passing)
     a = Math.max(-B_MAX, Math.min(v.aMax, a));
     let nv = Math.max(0, v.v + a * dt);
     let ds = v.v * dt + 0.5 * a * dt * dt;

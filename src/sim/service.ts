@@ -12,7 +12,7 @@
  *    each turn ahead (`cabTurnAhead`, for "Call Your Turns"); `cabRideArrived` at the kerb; `leaveCab`.
  */
 import { projectOnPoly } from './geom';
-import { LinkKind, Turn, WalkKind } from './laneFormat';
+import { LinkFlag, LinkKind, Turn, WalkKind } from './laneFormat';
 import type { SimCore, Vehicle, Hail, CopState } from './state';
 import { makeVehicle } from './traffic';
 import { nearestLane, responderStart, routeConnectorTo, routeCost, setCopGoalCar } from './police';
@@ -28,6 +28,7 @@ export function serviceBehaviour(S: SimCore, v: Vehicle, dt: number) {
   if (v.vclass === 'ice_cream' && Math.floor(S.t / 15) !== Math.floor((S.t - dt) / 15)) S.emit('iceCreamChime', { id: v.id, x: v.x, z: v.z });
   if (v.svcT > 0 || v.stopLink >= 0 || len < 50 || len - v.s < 30) return;
   const lane0 = net.groups.get(L.group)![0];
+  if (!(net.g.links[lane0].flags & LinkFlag.RightKerbRoom)) return;
   if (v.vclass === 'mail_truck') {
     v.stopLink = lane0; v.stopAt = Math.min(net.len[lane0] - 15, v.s * (net.len[lane0] / len) + 20); v.stopKind = 'mail'; v.kerb = 1;
   } else if (v.vclass === 'ice_cream' && !net.isAvenue(L.owner)) {

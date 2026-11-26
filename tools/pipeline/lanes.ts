@@ -796,6 +796,24 @@ const wild: WildSpot[] = [];
   log(`wildlife places: pigeon park ${c(WildKind.PigeonPark)}, corner ${c(WildKind.PigeonCorner)}, ledge ${c(WildKind.PigeonLedge)}, coop ${c(WildKind.PigeonCoop)}; rat trash ${c(WildKind.RatTrash)}, subway ${c(WildKind.RatSubway)}`);
 }
 
+// ------------------------------------------------------------------ kerb room (parking lane actually on roadway ground)
+{
+  let ok = 0, total = 0;
+  for (const l of links) {
+    if (l.kind !== LinkKind.Lane) continue;
+    for (const [side, flag, cond] of [[1, LinkFlag.RightKerbRoom, l.laneIndex === 0], [-1, LinkFlag.LeftKerbRoom, l.laneIndex === l.laneCount - 1]] as const) {
+      if (!cond) continue;
+      total++;
+      const off = side * (l.width / 2 + 1.2);
+      const op = offsetPoly(l.pts, off), cum = cumLengths(op), L = cum[cum.length - 1], o = [0, 0, 0, 0];
+      let good = true;
+      for (let s2 = 0; s2 <= L && good; s2 += 2) { sampleAt(op, cum, s2, o); for (const d of [-1.1, 0, 1.1]) if (!onRoad.has(o[0] - o[3] * d, o[1] + o[2] * d)) { good = false; break; } }
+      if (good) { l.flags |= flag; ok++; }
+    }
+  }
+  log(`kerb room: ${ok}/${total} kerb-side lanes have a parking lane on roadway ground`);
+}
+
 // ------------------------------------------------------------------ write
 const graph: LaneGraph = { names, roads, junctions, links, walkNodes, walkEdges, spots, busStops, wild };
 const bytes = writeLaneGraph(graph);

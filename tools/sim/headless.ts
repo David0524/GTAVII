@@ -78,10 +78,11 @@ function hashState(sim: Simulation): string {
   return (h >>> 0).toString(16) + `:${vehicles.length}/${peds.length}`;
 }
 
-async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number; checks: boolean; label: string }) {
+async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number; checks: boolean; label: string; clock?: number; day?: number }) {
   const sim = new Simulation({ seed: SEED, maxVehicles: opts.maxVehicles, maxPeds: opts.maxPeds, fetchBinary });
   await sim.load();
-  sim.setClock(17 * 60 + 30);
+  sim.setClock(opts.clock ?? 17 * 60 + 30);
+  if (opts.day !== undefined) sim.setDay(opts.day);
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
   const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0, fire: 0, cab: -1, parkRule: '' };
@@ -180,7 +181,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (inside(v.x, v.z) && !onRoad.has(v.x, v.z)) note('vehOffRoad', `#${v.id} ${v.kind} at ${v.x.toFixed(1)},${v.z.toFixed(1)} link ${v.link}`);
       const pr = projectOnPoly(L.pts, v.x, v.z);
       const tol = L.width / 2 + Math.abs(v.lat) + (v.lcT < 1 ? L.width : 0) + 0.6;
-      if (pr.d > tol) note('vehOffLane', `#${v.id} ${pr.d.toFixed(2)} m from link ${v.link} (tol ${tol.toFixed(2)})`);
+      if (pr.d > tol) note('vehOffLane', `#${v.id} ${v.kind}/${v.vclass}/${v.state} lat${v.lat.toFixed(2)} lc${v.lcT.toFixed(2)}from${v.lcFrom} prev${v.prevLink} s${v.s.toFixed(1)}/${net.len[v.link].toFixed(1)} k${L.kind} cop:${v.cop?.mode ?? '-'} ${pr.d.toFixed(2)} m from link ${v.link} (tol ${tol.toFixed(2)})`);
       // wrong way: lane direction must follow the road's 1974 one-way, and heading must follow the lane
       if (L.kind === LinkKind.Lane) {
         const R = g.roads[L.owner];
@@ -284,7 +285,7 @@ async function main() {
   const report: any = { generated: new Date().toISOString(), note: 'Headless Node timings, CPU only (container, no GPU); single thread.', seed: SEED };
   const full = await run({ seconds: MINUTES * 60, maxVehicles: 150, maxPeds: 400, checks: true, label: 'High preset, 10 sim-minutes, all checks' });
   report.high = full;
-  const low = await run({ seconds: 120, maxVehicles: 40, maxPeds: 120, checks: false, label: 'Mobile Low preset, 2 sim-minutes, timing only' });
+  const low = await run({ seconds: 120, maxVehicles: 40, maxPeds: 120, checks: true, label: 'Mobile Low preset, 2 sim-minutes, Wednesday 09:00 (street cleaning, mail), all checks', clock: 9 * 60, day: 3 });
   report.low = low;
   const resp = [
     await responseRun(17 * 60 + 30, FOCI[1], 'rush hour, Herald Square'),
@@ -299,6 +300,7 @@ async function main() {
   const f = full.failures;
   const problems: string[] = [];
   for (const [k, n] of Object.entries(f)) if (n > 0) problems.push(`${k}: ${n}`);
+  for (const [k, n] of Object.entries(low.failures)) if (n > 0) problems.push(`low/morning ${k}: ${n}`);
   if (full.maxStationarySec > 180) problems.push(`deadlock: a vehicle stood still ${full.maxStationarySec} s (${full.maxStationaryWho})`);
   if (full.flow.minMovingFraction < 0.05) problems.push(`network-wide stall: moving fraction fell to ${full.flow.minMovingFraction}`);
   if (!report.determinism.equal) problems.push('non-deterministic');
@@ -306,11 +308,11 @@ async function main() {
     const limit = r.clock === 11 * 60 ? 40 : 60;
     if (r.firstUnitSec === null || r.firstUnitSec > limit) problems.push(`response ${r.label}: first unit ${r.firstUnitSec ?? 'never'} s (target <= ${limit} s)`);
   }
-  if (MINUTES >= 8 && !full.events.policeArrived) problems.push('police never arrived anywhere');
+  // police arrival is asserted by the dedicated response-time runs below
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;
   fs.writeFileSync(path.join(ROOT, 'docs/sim_test_report.json'), JSON.stringify(report, null, 2));
-  console.log(JSON.stringify({ high: { ...full, examples: undefined }, low: { stepMs: low.stepMs, final: low.final }, determinism: report.determinism, response: report.response }, null, 1));
+  console.log(JSON.stringify({ high: { ...full, examples: undefined }, low: { stepMs: low.stepMs, final: low.final, failures: low.failures, events: low.events }, determinism: report.determinism, response: report.response }, null, 1));
   for (const [k, ex] of Object.entries(full.examples)) console.log(k, ex);
   console.log(report.pass ? 'PASS' : `FAIL\n  ${problems.join('\n  ')}`);
   process.exit(report.pass ? 0 : 1);

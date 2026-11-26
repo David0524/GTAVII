@@ -27,7 +27,9 @@ export const enum RoadFlag { Avenue = 1, BusRoute = 2, Link = 4, Wide = 8 }
 export const enum JuncFlag { Signal = 1, Continuation = 2, Synthesized = 4, DeadEnd = 8 }
 export const enum LinkKind { Lane = 0, Connector = 1 }
 export const enum Turn { Straight = 0, Right = 1, Left = 2 }
-export const enum LinkFlag { CurbLane = 1, BusStop = 2 }
+/** RightKerbRoom/LeftKerbRoom: the parking lane beside this kerb-side lane is on roadway ground along its whole length
+ *  (sirens may gutter-run there, cars may pull into it). */
+export const enum LinkFlag { CurbLane = 1, BusStop = 2, RightKerbRoom = 4, LeftKerbRoom = 8 }
 export const enum WalkKind { Sidewalk = 0, Crosswalk = 1 }
 export const enum SpotKind { Storefront = 0, Stoop = 1, Subway = 2, Corner = 3, BusStop = 4 }
 /** Wildlife places. Ground spots are on sidewalk/park ground; ledges and coops are up on buildings (y = metres above the road surface). */

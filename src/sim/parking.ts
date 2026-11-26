@@ -103,8 +103,16 @@ export class Parking {
       // a traffic agent comes to write the ticket
       if (c.ticketedAt < 0 && c.agent < 0 && S.t - c.since > 20) {
         let agent = S.peds.find((p) => p.alive && p.arch.def.id === 'npc.traffic_agent' && !p.goal && Math.hypot(p.x - c.x, p.z - c.z) < 200);
-        if (!agent) { const a = S.reg.list.find((q) => q.def.id === 'npc.traffic_agent'); const p = a ? spawnPedNear(S, c.x + 60, c.z, a, 60) : null; if (p) agent = p; }
-        if (agent) { c.agent = agent.id; setPedGoal(S, agent, { kind: 'goto', x: c.x, z: c.z, speed: 1.3, until: S.t + 240 }); }
+        if (!agent) {
+          // the agent comes down this same sidewalk, from ~35 m along the kerb
+          const a = S.reg.list.find((q) => q.def.id === 'npc.traffic_agent'), k = this.kerb(c.x, c.z);
+          if (a && k) {
+            const L = S.net.walkLen[k.edge], s2 = k.s > L / 2 ? Math.max(1, k.s - 35) : Math.min(L - 1, k.s + 35);
+            sampleAt(S.net.g.walkEdges[k.edge].pts, S.net.walkCum[k.edge], s2, tmp);
+            const p = spawnPedNear(S, tmp[0], tmp[1], a, 10); if (p) agent = p;
+          }
+        }
+        if (agent) { c.agent = agent.id; setPedGoal(S, agent, { kind: 'goto', x: c.x, z: c.z, speed: 1.3, until: S.t + 400 }); }
       }
       if (c.agent >= 0 && c.ticketedAt < 0) {
         const p = S.pedById.get(c.agent);
@@ -136,7 +144,7 @@ export class Parking {
     for (let tries = 0; tries < 12; tries++) {
       const a = S.rng.next() * Math.PI * 2, r = S.rng.range(120, 220);
       const near = nearestLane(S, c.x + Math.cos(a) * r, c.z + Math.sin(a) * r);
-      if (near.lane < 0 || near.d > 20) continue;
+      if (near.lane < 0 || near.d > 20 || S.net.len[near.lane] < 20) continue;
       const s = Math.max(6, Math.min(S.net.len[near.lane] - 10, near.s));
       if (S.occ[near.lane].some((o) => Math.abs(o.s - s) < o.len / 2 + 7)) continue;
       const v: Vehicle = makeVehicle(S, 'service', 'box_truck', arch, near.lane, s); // TODO: 'tow_truck' class (ENGINE_REQUESTS sim 8)
