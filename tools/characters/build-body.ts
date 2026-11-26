@@ -283,7 +283,8 @@ for (let k = 0; k < NK; k++) {
   else if (n === 'neck_01') importance[k] = 2;
   else if (/hand|thumb|index|middle|ring|pinky/.test(n)) importance[k] = 3;
 }
-const LOD_TARGETS: Record<number, number[]> = { 0: [9000, 3000, 900], 1: [2600, 1100, 420], 2: [800, 380, 160], 3: [500, 220, 0] };
+// body has 5 levels (full, 15k hero, 7k near crowd, 2.6k mid, 900 far); helpers have 4
+const LOD_TARGETS: Record<number, number[]> = { 0: [15000, 7000, 2600, 900], 1: [2600, 1100, 420], 2: [800, 380, 160], 3: [500, 220, 0] };
 const lodIndex: Record<string, Uint16Array> = {};
 const lodMeta: Record<string, number[]> = {};
 for (let g = 0; g < GROUPS.length; g++) {
@@ -295,13 +296,13 @@ for (let g = 0; g < GROUPS.length; g++) {
   const wTris = Uint32Array.from(full.map((s) => splitSrc[s]));
   const locked = new Uint8Array(NK);
   for (let k = 0; k < NK; k++) if (splitsOfSrc[k].length > 1) locked[k] = 1;
-  for (let l = 1; l <= 3; l++) {
+  for (let l = 1; l <= targets.length; l++) {
     const target = targets[l - 1];
     let out: number[];
     if (target === 0) out = [];
     else if (target >= full.length / 3) out = full;
     else {
-      const res = simplify({ pos: basePos, tris: wTris, locked: l === 3 ? undefined : locked, importance, targetTris: target });
+      const res = simplify({ pos: basePos, tris: wTris, locked: l >= targets.length ? undefined : locked, importance, targetTris: target });
       // map welded corners back to split vertices (nearest UV to the original corner)
       out = [];
       const triUV = (s: number) => [splitUV[s * 2], splitUV[s * 2 + 1]];

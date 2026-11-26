@@ -28,7 +28,8 @@ export interface Assembled {
 
 const sm = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, outfit: Outfit, lod: number): Assembled {
+/** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
+export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false): Assembled {
   const t0 = performance.now();
   const F = computeFields(model, shape);
   const ff = faceFrame(shape, F);
@@ -50,7 +51,7 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
   // --- skin ---
   const skinBase = lin(app.skin.tone);
   const masks = [0, 0, 0, 0, 0, 0, 0];
-  const bodyIdx = model.indices('body', lod);
+  const bodyIdx = model.indices('body', Math.min(4, lod + (ultraSkin ? 0 : 1)));
   const used = new Int32Array(model.numSplit).fill(-1);
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const legsVisibleSock = outfit.bottom.kind !== 'skirt' && outfit.bottom.kind !== 'shorts' && outfit.socks;
@@ -89,6 +90,7 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
   }
   smoothSkinNormals(mb, model, used, F, skinStart, skinI0);
 
+  mb.slot = 0;
   // --- eyes and teeth ---
   if (lod <= 2) {
     eyes(model, shape, app, lod, mb);
@@ -100,6 +102,7 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
   if (lod <= 1) for (const tr of trims) tr(mb);
 
   // --- hats, glasses, props ---
+  mb.slot = 5;
   buildAccessories({ ...ctx, face: ff, app }, mb);
 
   const hair = lod <= 3 ? buildHair({ ...ctx, face: ff, app, covered }) : null;
@@ -137,7 +140,7 @@ function shoePiece(F: Fields, shape: BodyShape, outfit: Outfit): { piece: PieceS
   const fab = { color: s.color, color2: s.color2, pattern: 'solid' as const, scale: 0.02, rough: kind === KIND.leather ? 0.42 : 0.85, sheen: kind === KIND.leather ? 0.35 : 0, fade: s.wear * 0.4, dirt: s.wear };
   // heel point (back of the foot) for the heel block
   const piece: PieceSpec = {
-    surface: 'body', fabric: fab, kind, hem: 0.004, hides: true, hideMargin: 0.004,
+    surface: 'body', fabric: fab, kind, hem: 0.004, hides: true, hideMargin: 0.004, slot: 4,
     fields: [(k) => (isLeg(k) ? (F.legS[k] - top) * 0.45 : -1)],
     offset: (k) => 0.004 + (F.legS[k] > 2.75 ? 0.004 : 0) + (s.kind === 'workBoot' || s.kind === 'boot' ? 0.003 : 0),
     // the shoe "last": the foot smoothed into one rounded volume (no toes), pinned at the ankle

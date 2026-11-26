@@ -25,11 +25,9 @@ const KIND = { skin: 0, cloth: 1, leather: 2, eye: 3, teeth: 4, lens: 5, metal: 
 
 function luminance(c: any) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 
-let shared: THREE.MeshSSSNodeMaterial | null = null;
-export function characterMaterial(): THREE.MeshSSSNodeMaterial {
-  if (shared) return shared;
-  // double-sided: the inside of collars, cuffs and hems shows fabric, not a hole
-  const m = new THREE.MeshSSSNodeMaterial({ side: THREE.DoubleSide });
+/** Shared surface shading (colour, roughness, micro-relief) from the per-vertex material data.
+ *  `tint` (crowds) recolours garment slots per instance. */
+export function surfaceNodes(tint?: (col: any) => any) {
   const cA = attribute('cA', 'vec3'), cB = attribute('cB', 'vec3');
   const m0 = attribute('m0', 'vec4'), m1 = attribute('m1', 'vec4');
   const uvA = attribute('uv', 'vec2');
@@ -162,10 +160,20 @@ export function characterMaterial(): THREE.MeshSSSNodeMaterial {
     return h;
   });
 
-  m.colorNode = color();
-  m.roughnessNode = roughness();
+  const col = tint ? tint(color()) : color();
+  return { color: col, roughness: roughness(), height: height(), kind, m0, m1 };
+}
+
+let shared: THREE.MeshSSSNodeMaterial | null = null;
+export function characterMaterial(): THREE.MeshSSSNodeMaterial {
+  if (shared) return shared;
+  // double-sided: the inside of collars, cuffs and hems shows fabric, not a hole
+  const m = new THREE.MeshSSSNodeMaterial({ side: THREE.DoubleSide });
+  const { color: col, roughness: rough, height: h, kind, m0, m1 } = surfaceNodes();
+  m.colorNode = col;
+  m.roughnessNode = rough;
   m.metalnessNode = kind.equal(KIND.metal).select(float(0.9), float(0));
-  m.normalNode = bumpMap(height(), kind.equal(KIND.skin).select(float(0.0006), float(0.0004)));
+  m.normalNode = bumpMap(h, kind.equal(KIND.skin).select(float(0.0006), float(0.0004)));
   // polyester/satin sheen; skin peach fuzz
   m.sheenNode = kind.equal(KIND.cloth).select(vec3(m0.w.mul(0.35)), kind.equal(KIND.skin).select(vec3(0.04), vec3(0)));
   m.sheenRoughnessNode = float(0.45);

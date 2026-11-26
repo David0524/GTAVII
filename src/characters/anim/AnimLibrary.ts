@@ -12,6 +12,8 @@ export interface ClipInfo {
   speed: number; travel: number[];
   /** Normalised [start, end] foot-contact intervals, per foot. */
   contacts: { l: [number, number][]; r: [number, number][] };
+  /** Timed events (footstep, contact, hail …), seconds. */
+  events?: { t: number; type: string; data?: any }[];
 }
 
 export class Pose {
@@ -29,8 +31,8 @@ export interface Clip {
   pelvis: Float32Array;           // frames × 3
   /** Joints this clip animates (others keep the base pose when layered). null = all. */
   mask: Uint8Array | null;
-  /** Additive clips store deltas from the identity and are applied on top of a base. */
-  additive?: boolean;
+  /** Authored clips store the pelvis as an offset from the body's rest pelvis (else absolute). */
+  pelvisRelative?: boolean;
 }
 
 export class AnimLibrary {

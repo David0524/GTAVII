@@ -35,6 +35,8 @@ export interface PieceSpec {
   hideMargin?: number;
   /** Extra displacement in rest space. */
   disp?: (k: number, out: number[]) => void;
+  /** Crowd tint slot (see MeshBuilder.slot). */
+  slot?: number;
   /** Replacement base positions (e.g. a smoothed shoe last) for some compact vertices. */
   basePos?: Map<number, [number, number, number]>;
 }
@@ -119,13 +121,13 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   const neckBack = t.collar === 'mock' ? 0.05 : t.collar === 'spread' || t.collar === 'polo' ? 0.025 : 0.0;
   const topOff = 0.0035 + t.fit * 0.5;
   pieces.push({
-    surface: 'helper-tights', fabric: t.fabric, hem: 0.004, hides: true,
+    surface: 'helper-tights', fabric: t.fabric, hem: 0.004, hides: true, slot: 1,
     fields: [neckline(neckFront, neckBack), sleeve(t.sleeve), above(topHem), noLegs],
     offset: (k) => topOff + (isArm(k) ? t.fit * 0.6 + smooth(0, 1.0, F.armS[k]) * 0.004 : t.fit * (0.5 + 0.5 * smooth(y.waist, y.chest, Y(k)))),
     sweat: sweatMask,
   });
-  if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1), topOff + t.fit + 0.002, neckBack));
-  if (t.collar === 'mock') trims.push((mb) => neckBand(ctx, mb, t.fabric, topOff + 0.004, 0.05));
+  if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => (mb.slot = 1, shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1), topOff + t.fit + 0.002, neckBack)));
+  if (t.collar === 'mock') trims.push((mb) => (mb.slot = 1, neckBand(ctx, mb, t.fabric, topOff + 0.004, 0.05)));
 
   // ---- bottom ------------------------------------------------------------------------------------
   const b = outfit.bottom;
@@ -134,7 +136,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
     const hemY = y.knee - b.length;
     const top = outfit.dress ? y.waist + 0.02 : waistTop;
     pieces.push({
-      surface: 'helper-skirt', fabric: outfit.dress ? t.fabric : b.fabric, hem: 0.004, hides: false,
+      surface: 'helper-skirt', fabric: outfit.dress ? t.fabric : b.fabric, hem: 0.004, hides: false, slot: outfit.dress ? 1 : 2,
       fields: [below(top), above(hemY)],
       offset: (k) => 0.006 + b.fit + b.flare * Math.pow(Math.max(0, (y.hip - Y(k)) / Math.max(0.2, y.hip - hemY)), 1.3),
       dust: (k) => smooth(hemY + 0.15, hemY, Y(k)) * 0.4,
@@ -142,7 +144,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   } else {
     const hemS = b.kind === 'shorts' ? b.length : b.length;
     pieces.push({
-      surface: 'helper-tights', fabric: b.fabric, hem: 0.005, hides: true,
+      surface: 'helper-tights', fabric: b.fabric, hem: 0.005, hides: true, slot: 2,
       fields: [below(waistTop), noArms, legHem(hemS)],
       offset: (k) => {
         const base = 0.006 + b.fit;
@@ -156,7 +158,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   }
   if (b.belt && !outfit.dress) {
     const bt = waistTop - 0.004, bb = waistTop - 0.036;
-    pieces.push({ surface: 'helper-tights', fabric: b.belt, kind: KIND.leather, hem: 0.003, hides: false, fields: [below(bt), above(bb), noArms, noLegs], offset: () => 0.006 + b.fit + 0.004 });
+    pieces.push({ surface: 'helper-tights', fabric: b.belt, kind: KIND.leather, slot: 5, hem: 0.003, hides: false, fields: [below(bt), above(bb), noArms, noLegs], offset: () => 0.006 + b.fit + 0.004 });
   }
 
   // ---- outer layer -------------------------------------------------------------------------------
@@ -164,7 +166,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   if (o) addOuter(ctx, o, pieces, trims, { sleeve, noLegs, above, below, neckline, sweatMask, isArm, topOff: topOff + t.fit + 0.006 });
 
   // ---- tie ---------------------------------------------------------------------------------------
-  if (outfit.tie && !(o && o.open < 0.5 && o.lapel === 0)) trims.push((mb) => tie(ctx, mb, outfit.tie!, topOff + t.fit + 0.004));
+  if (outfit.tie && !(o && o.open < 0.5 && o.lapel === 0)) trims.push((mb) => (mb.slot = 5, tie(ctx, mb, outfit.tie!, topOff + t.fit + 0.004)));
   return { pieces, trims };
 }
 
@@ -195,7 +197,7 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   const thick = o.kind === 'overcoat' || o.kind === 'trench' ? 0.006 : 0.004;
   const sleeveS = Math.min(o.sleeve, 1.94);
   pieces.push({
-    surface: 'helper-tights', fabric: o.fabric, hem: thick, hides: true, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
+    surface: 'helper-tights', fabric: o.fabric, hem: thick, hides: true, slot: 3, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
     fields: [h.neckline(0.02, 0.035), h.sleeve(sleeveS), h.above(Math.max(y.crotch + 0.04, Math.min(hemY, y.waist - 0.04))), h.noLegs, front],
     offset: (k) => off + (h.isArm(k) ? 0.006 + 0.006 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
     sweat: (k) => h.sweatMask(k) * 0.5,
@@ -203,16 +205,16 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   if (hemY < y.waist - 0.04) {
     // tails / coat skirt from the skirt helper, overlapping the torso piece at the waist
     pieces.push({
-      surface: 'helper-skirt', fabric: o.fabric, hem: thick, hides: false, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
+      surface: 'helper-skirt', fabric: o.fabric, hem: thick, hides: false, slot: 3, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
       fields: [h.below(y.waist - 0.0), h.above(hemY), front],
       offset: (k) => off + 0.012 + Math.max(0, (y.hip - Y(k))) * (o.kind === 'trench' ? 0.1 : 0.06),
       dust: (k) => smooth(hemY + 0.2, hemY, Y(k)) * 0.5,
     });
   }
   if (o.belted) {
-    pieces.push({ surface: 'helper-tights', fabric: o.fabric, hem: 0.003, hides: false, fields: [h.below(y.waist + 0.02), h.above(y.waist - 0.02), h.noLegs, front, (k) => (h.isArm(k) ? -1 : 1)], offset: () => off + 0.012 });
+    pieces.push({ surface: 'helper-tights', fabric: o.fabric, hem: 0.003, hides: false, slot: 3, fields: [h.below(y.waist + 0.02), h.above(y.waist - 0.02), h.noLegs, front, (k) => (h.isArm(k) ? -1 : 1)], offset: () => off + 0.012 });
   }
-  if (o.lapel > 0) trims.push((mb) => lapels(ctx, mb, o, off + 0.004, buttonY, gorgeY, openAngle));
+  if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.004, buttonY, gorgeY, openAngle)));
 }
 
 // --- trims ---------------------------------------------------------------------------------------
@@ -359,12 +361,14 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   // use the low-poly tights helper. Normals always come from the smooth LOD0 surface.
   const useBody = p.surface === 'helper-tights' && ctx.lod <= 2;
   const surface = useBody ? 'body' : p.surface;
-  const tris = F.tris(surface, useBody ? ctx.lod + 1 : ctx.lod);
+  // body LODs: 0 full, 1 15k, 2 7k, 3 2.6k, 4 900 (character LOD n skins with body n+1)
+  const tris = F.tris(surface, useBody ? Math.min(4, ctx.lod + 2) : surface === 'body' ? Math.min(4, ctx.lod + 1) : ctx.lod);
   const N = F.normals.get(surface)!;
   const res = clipSurface(tris, p.fields);
   const P = shape.pos;
   const offCache = new Map<number, number>();
   const offOf = (k: number) => { let o = offCache.get(k); if (o === undefined) { o = p.offset(k); offCache.set(k, o); } return o; };
+  mb.slot = p.slot ?? 1;
   const base = mb.count, i0 = mb.indexCount;
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const js: number[] = [], ws: number[] = [];

@@ -16,6 +16,7 @@ export interface GeoArrays {
   skinIndex: Uint16Array; skinWeight: Float32Array;
   cA: Float32Array; cB: Float32Array; m0: Float32Array; m1: Float32Array;
   index: Uint32Array;
+  slot: Float32Array;
   vertexCount: number; triangleCount: number;
 }
 
@@ -24,6 +25,9 @@ export class MeshBuilder {
   private sj = new F32(); private sw = new F32();
   private ca = new F32(); private cb = new F32(); private m0 = new F32(); private m1 = new F32();
   private idx = new U32();
+  private sl = new F32();
+  /** Garment slot written with each vertex (0 skin/eyes, 1 top, 2 bottom, 3 outer, 4 shoes, 5 accessories, 6 hair); crowds tint per slot. */
+  slot = 0;
   /** Whether normals were supplied (else computed at finish). */
   private hasN = true;
   get count() { return this.pos.n / 3; }
@@ -35,6 +39,7 @@ export class MeshBuilder {
     this.uv.push(uv[0], uv[1]);
     this.sj.push(skinJ[0], skinJ[1], skinJ[2], skinJ[3]); this.sw.push(skinW[0], skinW[1], skinW[2], skinW[3]);
     this.ca.push(...m.cA); this.cb.push(...m.cB); this.m0.push(...m.m0); this.m1.push(...m.m1);
+    this.sl.push(this.slot);
     return i;
   }
   tri(a: number, b: number, c: number) { this.idx.push(a, b, c); }
@@ -62,7 +67,7 @@ export class MeshBuilder {
     const sj = new Uint16Array(n * 4); for (let i = 0; i < n * 4; i++) sj[i] = this.sj.a[i];
     return {
       position: this.pos.get(), normal: this.nrm.get(), uv: this.uv.get(), skinIndex: sj, skinWeight: this.sw.get(),
-      cA: this.ca.get(), cB: this.cb.get(), m0: this.m0.get(), m1: this.m1.get(), index: this.idx.get(),
+      cA: this.ca.get(), cB: this.cb.get(), m0: this.m0.get(), m1: this.m1.get(), index: this.idx.get(), slot: this.sl.get(),
       vertexCount: n, triangleCount: this.idx.n / 3,
     };
   }

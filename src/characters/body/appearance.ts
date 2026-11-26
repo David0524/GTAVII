@@ -83,7 +83,7 @@ export function generateAppearance(seed: number, opts: AppearanceOpts = {}): App
   const r = { body: rng.fork(1), face: rng.fork(2), skin: rng.fork(3), hair: rng.fork(4) };
   const sex = opts.sex ?? (rng.chance(0.6) ? 1 : 0); // weekday avenue mix (doc §5.1)
   const age = opts.age ?? Math.round(rng.weighted<[number, number]>([[[18, 35], 40], [[36, 59], 40], [[60, 86], 20]]).reduce((a, b) => a + rng.next() * (b - a)));
-  const clampAge = Math.min(opts.maxAge ?? 90, Math.max(opts.minAge ?? 12, age));
+  const clampAge = Math.min(opts.maxAge ?? 90, Math.max(opts.minAge ?? 18, age));
   const bg = rng.weighted(BACKGROUNDS.map((b) => [b, b.w] as const));
   const male = sex >= 0.5;
 

@@ -13,6 +13,7 @@ export function toGeometry(g: GeoArrays): THREE.BufferGeometry {
   geo.setAttribute('cB', new THREE.BufferAttribute(g.cB, 3));
   geo.setAttribute('m0', new THREE.BufferAttribute(g.m0, 4));
   geo.setAttribute('m1', new THREE.BufferAttribute(g.m1, 4));
+  geo.setAttribute('slot', new THREE.BufferAttribute(g.slot, 1));
   geo.setIndex(new THREE.BufferAttribute(g.vertexCount < 65536 ? Uint16Array.from(g.index) : g.index, 1));
   geo.computeBoundingSphere();
   return geo;

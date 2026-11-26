@@ -6,7 +6,7 @@
 export interface MacroParams {
   /** 0 = female, 1 = male (in-between values are allowed: the build space is continuous). */
   sex: number;
-  /** Age in years, 11..90. */
+  /** Age in years (the build space covers 11..90; the game spawns adults only: no child characters anywhere). */
   age: number;
   /** 0..1, 0.5 average. */
   muscle: number;
