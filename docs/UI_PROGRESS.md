@@ -152,7 +152,7 @@ are not cross-merged. Adapters for gameplay's `?gameplay=1` scene and vehicles' 
 - **The phone gives no feedback beyond the fill.** The pedals have no haptic detent and no speed readout under the thumb.
 - **Steering and walking share one stick.** It is cleared on every state change, so a held walk can't become a held turn. But re-placing the thumb after getting in is still a small hitch.
 - **Left-handed:** the HUD route strip moves to the right under the cash, out of the thumb cluster (fixed after the first shots).
-- **Gyro is a setting forwarded to gameplay;** the layer reads no gyro itself yet. Tilt steering uses `deviceorientation`, which iOS gates behind a permission prompt that isn't wired.
+- **Gyro is a setting forwarded to gameplay;** the layer reads no gyro itself yet. Tilt steering uses `deviceorientation`; on iOS the motion-permission prompt is requested when the player picks Tilt (or gyro aim) in Settings, inside that tap, and a refusal falls back to the stick with a toast.
 - **The editor's presets are crude** (scale the cluster in or out). There's no pinch-to-resize and no per-element opacity.
 
 ## Critique against the 2031 bar

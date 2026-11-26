@@ -210,7 +210,17 @@ export class SettingsTab implements Tab {
       const step = (d: number) => {
         const cur = settings.get(key) as unknown;
         if (r.kind === 'bool') settings.set(key, !cur as never);
-        else if (r.kind === 'choice') { const i = r.options.findIndex(([o]) => o === cur); settings.set(key, r.options[(i + d + r.options.length) % r.options.length][0] as never); }
+        else if (r.kind === 'choice') {
+          const i = r.options.findIndex(([o]) => o === cur), next = r.options[(i + d + r.options.length) % r.options.length][0];
+          settings.set(key, next as never);
+          // iOS asks before giving a page the motion sensors, and only from a tap: ask now, while the player is choosing it
+          if ((key === 'steerMode' && next === 'tilt') || (key === 'gyroAim' && next !== 'off')) {
+            const DOE = (globalThis as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } }).DeviceOrientationEvent;
+            if (DOE?.requestPermission) void DOE.requestPermission().then((r2) => {
+              if (r2 !== 'granted') { if (key === 'steerMode') settings.set('steerMode', 'stick'); else settings.set('gyroAim', 'off'); this.onToast?.('Motion access was refused: back to the stick. Allow it in Settings → Safari → Motion & Orientation.'); this.render(); }
+            }).catch(() => {});
+          }
+        }
         else { const n = Math.min(r.max, Math.max(r.min, Math.round(((cur as number) + d * r.step) / r.step) * r.step)); settings.set(key, +n.toFixed(3) as never); }
         paint();
       };
