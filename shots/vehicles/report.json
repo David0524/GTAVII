@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-26T15:55:26.604Z",
+  "date": "2026-11-26T16:44:09.287Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -244,82 +244,82 @@
   },
   "triangles": {
     "bancroft": {
-      "lod0": 7604,
+      "lod0": 7998,
       "lod1": 1362,
       "lod2": 72
     },
     "bancroft_patrol": {
-      "lod0": 7512,
+      "lod0": 7634,
       "lod1": 1482,
       "lod2": 72
     },
     "bancroft_cab": {
-      "lod0": 7276,
+      "lod0": 7398,
       "lod1": 1386,
       "lod2": 72
     },
     "tiverton": {
-      "lod0": 7054,
+      "lod0": 7478,
       "lod1": 1344,
       "lod2": 72
     },
     "ferris": {
-      "lod0": 6322,
+      "lod0": 6490,
       "lod1": 1170,
       "lod2": 72
     },
     "homestead": {
-      "lod0": 7206,
+      "lod0": 7774,
       "lod1": 1314,
       "lod2": 72
     },
     "fareway": {
-      "lod0": 6924,
+      "lod0": 7092,
       "lod1": 1380,
       "lod2": 72
     },
     "ct40": {
-      "lod0": 8972,
+      "lod0": 8684,
       "lod1": 2064,
       "lod2": 72
     },
     "b60": {
-      "lod0": 6300,
+      "lod0": 6012,
       "lod1": 1370,
       "lod2": 84
     },
     "walkin": {
-      "lod0": 5646,
+      "lod0": 5454,
       "lod1": 1148,
       "lod2": 72
     },
     "b80": {
-      "lod0": 6314,
+      "lod0": 6026,
       "lod1": 1376,
       "lod2": 84
     },
     "medic": {
-      "lod0": 6460,
+      "lod0": 6172,
       "lod1": 1664,
       "lod2": 84
     },
     "pumper": {
-      "lod0": 6620,
+      "lod0": 6332,
       "lod1": 1548,
       "lod2": 84
     },
     "ladder": {
-      "lod0": 6754,
+      "lod0": 6466,
       "lod1": 1616,
       "lod2": 84
     },
     "courier": {
-      "lod0": 5482,
+      "lod0": 5290,
       "lod1": 1058,
       "lod2": 72
     },
     "scoop": {
-      "lod0": 5644,
+      "lod0": 5436,
       "lod1": 1274,
       "lod2": 84
     }

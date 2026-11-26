@@ -100,17 +100,25 @@ async function main() {
       await open(page, 'mode=lineup&quality=high');
       await page.evaluate(() => window.__VEH.simulate(1.5));
       const shots: Buffer[] = [];
-      const cams: [number, number, number, number, number, number, number][] = [
-        [0.6, 1.45, -82, 3.6, 0.9, -55, 38], // down the curb lane, eye level, longish lens
-        [-1.2, 1.6, -38, 3.8, 0.9, -24, 40], // middle of the line (trucks and bus)
-        [-2.5, 7, -30, 3.4, 0.4, -60, 48], // from a second-floor window
+      // framed like the reference photos: camera relative to a specific parked car (local frame)
+      const framings: [string, number[]][] = [
+        ['tiverton', [-2.7, 1.1, -3.8, 0.4, 0.7, 1.4, 52]], // 549851: low rear three-quarter, driver side, close
+        ['bancroft_cab', [-1.6, 1.25, -5.2, 0.4, 0.7, 0.6, 48]], // 554331: cab front three-quarter from the lane
+        ['ct40', [-2.2, 1.55, -9.5, 0.2, 1.6, -3.5, 50]], // 549921: bus front three-quarter at the stop
       ];
-      for (const c of cams) { await page.evaluate((c: number[]) => window.__VEH.setCamera(...c), c); shots.push(await snap(page)); }
+      for (const [id, c] of framings) {
+        await page.evaluate(([id, c]: [string, number[]]) => {
+          const V = window.__VEH; const v = V.parked.find((p: any) => p.modelId === id); const o = v.object;
+          const a = o.localToWorld(new o.position.constructor(c[0], c[1], c[2])), t = o.localToWorld(new o.position.constructor(c[3], c[4], c[5]));
+          V.setCamera(a.x, a.y, a.z, t.x, t.y, t.z, c[6]);
+        }, [id, c] as [string, number[]]);
+        shots.push(await snap(page));
+      }
       await sheet(page, shots, 3, 640, 360, 'lineup_street.png');
       // side by side with reference photos (public domain, references/catalog.json)
       const refs = ['documerica_549851.jpg', 'documerica_554331.jpg', 'documerica_549921.jpg'].map((f) => fs.readFileSync(path.join(ROOT, 'references/img', f)));
       await sheet(page, [shots[0], refs[0], shots[1], refs[1], shots[2], refs[2]], 2, 640, 420, 'lineup_vs_references.png',
-        ['render: lineup (eye level)', 'ref: DOCUMERICA 549851 (public domain)', 'render: lineup', 'ref: DOCUMERICA 554331 (taxis, Lexington Ave)', 'render: from above', 'ref: DOCUMERICA 549921 (bus)']);
+        ['render: Delacorte Tiverton, framed like 549851', 'ref: DOCUMERICA 549851 (public domain)', 'render: Bancroft cab, framed like 554331', 'ref: DOCUMERICA 554331 (taxis, Lexington Ave)', 'render: CT-40 bus, framed like 549921', 'ref: DOCUMERICA 549921 (bus)']);
       console.log('lineup');
     }
 

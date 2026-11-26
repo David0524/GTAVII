@@ -4,6 +4,44 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 3b: look pass against the references (oversight review of the lineup)
+**Fresh comparison:** `shots/vehicles/lineup_vs_references.png`. Each render is now framed like
+its photo: the Tiverton as in 549851, the Bancroft cab as in 554331, the CT-40 as in 549921.
+
+**Checked before changing anything:**
+- **Dimensions were already period-correct.** The Bancroft is 5.75 m overall, 2.0 m wide, with
+  a 1.62 m track and 1.39 m height, against 1973–74 full-size cars at roughly 5.6–5.8 m, 2.0 m
+  and 1.37–1.40 m. The "short and upright" read came mostly from wide-angle framing and from
+  missing brightwork. So the only proportion change is the sedan roof, 3 cm lower with a
+  slightly longer roof line.
+- **The PMREM street environment was already on in the test lot.** It was too low-contrast to
+  read in chrome, so it has been retuned.
+
+**Changed:**
+- **Brightwork:** chrome window surrounds and belt mouldings (black trim on police cars),
+  chrome wheel-lip mouldings, door shut lines, and door handles on every passenger car.
+- **Arches:** clean vertical cut-outs with no inward tuck, which removes the dark smudge over
+  the wheels.
+- **Materials:** glossier clearcoat (0.75, roughness 0.12), finer vinyl grain, and an
+  environment with a bright sky band and a mid-tone street, so hubcaps and bumpers read as
+  chrome.
+- **Budget:** LOD0 stays within the brief at 6.5–8.0k triangles per car. The trim tubes were
+  coarsened to fit.
+
+**Still short of the photos (honest):**
+- **No film grade or grain yet.** That's the engine post stack, and it's the biggest remaining
+  difference in mood. The references are warm and low-contrast; our renders are clean and grey.
+- **Shoulder highlights are weak.** The photographed cars show a strong reflected highlight
+  along the fender crease. Our body sides are close to flat, so the highlight is weak. Next:
+  a sharper upper character line with a slight tumblehome.
+- **Taxi front:** the photographed cabs have a lower, wider grille with a thin wrapping bumper.
+  Ours has a taller face with the lamps higher.
+- **Missing details:** no interiors or people, and the glass is opaque, so nobody visible
+  behind the windscreen as in 549851. Hood creases and the long hood centre crease seen on the
+  cab in 554331 are also missing.
+- **The test-lot set is bare** next to dense period streets. That's the city's job, not the
+  vehicles'.
+
 ## Session 3: the user's "Yes all of it" (2026-11-26)
 The user confirmed the scope relayed by the oversight session: condition and breakdowns, the
 damage API, theft, ownership, and the new roster. Everything below is built and measured, and the
