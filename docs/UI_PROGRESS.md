@@ -113,6 +113,28 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
   the title was drawn under it).
 - [x] Honest critique: below.
 
+## Touch controls (docs/briefs/TOUCH_CONTROLS.md; user: "our controls may be messy")
+**Built:** `src/ui/touch/TouchLayout.ts` behind `UiHost.touch`. Movement, look, jump and pedals go through Input.
+- **On foot:** stick, look, context, jump, weapon, menu.
+- **Combat:** fire, aim with tap-to-lock (56 px) and a flick to switch target, cover/roll, reload (swipe it to swap), context.
+- **Driving:** a horizontal steering stick (or arrows, or tilt), analog gas and brake pedals read from thumb height, hand brake, exit (long-press for the horn), drive-by.
+- **Shared slots:** context, enter and exit share one spot; jump, fire and gas share another.
+- **Presentation:** 150 ms fades, safe areas, a left-handed mirror, and a per-state layout editor (drag, resize, reset, compact or large) opened from Settings.
+
+**Evidence:** `tools/ui/touchControls.ts` on a phone in landscape with real thumb drags (CDP touch events). 27/27 checks pass, stable over three runs. Screenshots are in `shots/ui/touchcontrols/`. The layer costs 0.03 ms a frame.
+
+**Done-means change (oversight, 18:10):** the combined touch-only run (on foot → fight → steal a car → drive → park) moves to the
+**engine's integration milestone**, after UI and gameplay merge. No scene has both combat and cars yet, and stream branches
+are not cross-merged. Adapters for gameplay's `?gameplay=1` scene and vehicles' TestLot are offered to their owners.
+
+**Critique:**
+- **Everything is proven against a scripted mock, not real systems.** Lock-on feel, auto-fire and pedal response belong to gameplay and vehicles; until integration, nobody has felt the whole loop.
+- **The phone gives no feedback beyond the fill.** The pedals have no haptic detent and no speed readout under the thumb.
+- **Steering and walking share one stick.** It is cleared on every state change, so a held walk can't become a held turn. But re-placing the thumb after getting in is still a small hitch.
+- **Left-handed overlap:** the context button sits over the HUD's route strip. The strip should move when the layout is mirrored.
+- **Gyro is a setting forwarded to gameplay;** the layer reads no gyro itself yet. Tilt steering uses `deviceorientation`, which iOS gates behind a permission prompt that isn't wired.
+- **The editor's presets are crude** (scale the cluster in or out). There's no pinch-to-resize and no per-element opacity.
+
 ## Critique against the 2031 bar
 **What holds up:**
 - **The map language is the strongest piece and it's ours:**
