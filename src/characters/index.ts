@@ -18,6 +18,8 @@ import { HEROES } from './heroes';
 import { CrowdRenderer, type AgentView } from './crowd/CrowdRenderer';
 import { charUniforms } from './render/materials';
 import { ArchetypeRegistry, type ArchetypeDef } from './archetypes';
+import { castBuild, type CastEntry } from './cast';
+export type { CastEntry } from './cast';
 export type { ArchetypeDef } from './archetypes';
 
 export type { CharacterDesc, GroundFn } from './Character';
@@ -30,6 +32,8 @@ export interface CharacterFactory {
   setGround(fn: GroundFn | null): void;
   /** Narrative archetypes (content/npc_archetypes/*.json): palette, wardrobe and props drive generation. */
   registerArchetypes(defs: ArchetypeDef[]): void;
+  /** Narrative cast sheets (content/cast/*.json); spawn them with { hero: 'char.x' }. */
+  registerCast(entries: CastEntry[]): void;
   /** Heat 0..1 (sweat, slumped idles) and wetness 0..1 (rain): set from time of day / weather. */
   setClimate(c: { heat?: number; wetness?: number }): void;
   readonly quality: Quality;
@@ -45,11 +49,12 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
   registerAuthored(anims);
   let ground: GroundFn | null = null;
   const archetypes = new ArchetypeRegistry();
+  const cast = new Map<string, CastEntry>();
   const heroLod = opts.quality === 'low' ? 2 : 0, pedLod = opts.quality === 'low' ? 2 : 1;
   return {
     quality: opts.quality, body, anims,
     spawn(scene, desc) {
-      const hero = desc.hero ? HEROES[desc.hero] : undefined;
+      const hero = desc.hero ? HEROES[desc.hero] ?? (cast.has(desc.hero) ? () => castBuild(cast.get(desc.hero!)!) : undefined) : undefined;
       if (desc.hero && !hero) console.warn(`characters: unknown hero ${desc.hero}`);
       const build = hero?.();
       const ch = new Character(body, anims, desc, { lod: hero ? heroLod : pedLod, build, heat: charUniforms.heat.value, outfitCtx: archetypes.outfitContext(desc.archetype) });
@@ -60,6 +65,7 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
     },
     createCrowdRenderer(max) { return new CrowdRenderer(body, anims, { max, quality: opts.quality, ground: () => ground, archetypes, bodyUrl: base + bodyFile, nearLod: pedLod }); },
     registerArchetypes(defs) { archetypes.register(defs); },
+    registerCast(entries) { for (const e of entries) cast.set(e.id, e); },
     setGround(fn) { ground = fn; },
     setClimate(c) { if (c.heat !== undefined) charUniforms.heat.value = c.heat; if (c.wetness !== undefined) charUniforms.wetness.value = c.wetness; },
   };
