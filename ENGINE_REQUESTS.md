@@ -102,11 +102,12 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
 - **Fallback:** none on my side (I use the chunk data as-is). Found by the canyon ray debug view
   in `?audio=1`.
 
-## From audio: 11. Build step for rendered speech (pending the user's choice of where renders live)
-- **What:** rendered speech (`public/audio/voice/`, ~34 MB for 1,428 lines) is a build artefact and
-  is no longer committed. If the user chooses build-time generation, the deploy build needs
-  `espeak-ng` and `ffmpeg` available and `npm run audio:voices` before `vite build` (narrative
-  `content/` must be present at `public/content`). Vercel's build image doesn't ship espeak-ng, so
-  this may mean a prebuilt artefact instead (Git LFS or a release asset) — the user decides.
-- **Why:** keeps 35 MB per narrative revision out of git history.
+## From audio: 11. Build step for rendered speech (user approved build-time rendering, 2026-11-26)
+- **What:** rendered speech is a build artefact, not committed. In the deploy build, run
+  `npm run audio:voices` before `vite build`, with the narrative `content/` present at
+  `public/content` (copy it in first). It needs no system packages: eSpeak NG is the npm WASM build
+  and ffmpeg is `ffmpeg-static`, both devDependencies, both GPL-3.0, build-time only, never bundled.
+  Output goes to `public/audio/voice/` (ignored by git). Cache that folder plus its `manifest.json`
+  between builds (Vercel build cache) so unchanged lines are skipped. Measured cost: see AUDIO_PROGRESS.
+- **Why:** keeps ~35 MB per narrative revision out of git, and keeps GPL code out of the shipped game.
 - **Fallback:** without renders, lines play the formant placeholder voice with correct subtitle timing.
