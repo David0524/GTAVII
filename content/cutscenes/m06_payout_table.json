@@ -1,0 +1,102 @@
+{
+  "id": "cut.m06_payout_table",
+  "mission": "mission.the_club",
+  "before": "o1",
+  "time": "18:20",
+  "date": "1974-06-30",
+  "skippable": true,
+  "logline": "Delphine's first scene. Sunday at the Arden's lobby bar: twenty women's savings on one table, and one bruise nobody will name.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "slow dolly along the bar",
+      "framing": "The Arden's lobby bar on a Sunday: ceiling fans, a jukebox unplugged, four women at the back table",
+      "blocking": "Rita wipes the bar; Delphine at the table with a cash box and a ledger",
+      "beats": [
+        "Introduce Delphine by her hands: counting, squaring bills, writing"
+      ],
+      "durationSec": 6,
+      "notes": "audio: fans; street noise through the open door; a Spanish-language ballgame on a kitchen radio | lighting: late sun through venetian blinds, hard stripes | film: grain; warm cast"
+    },
+    {
+      "id": "s2",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Rita leaning over the bar toward the table",
+      "blocking": "",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 3.6,
+      "dialogue": [
+        "dlg.m06_payout_table#l1"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Delphine, not looking up from the money",
+      "blocking": "",
+      "beats": [
+        "l2–l3: her rules, the club in one line"
+      ],
+      "durationSec": 9.7,
+      "dialogue": [
+        "dlg.m06_payout_table#l2",
+        "dlg.m06_payout_table#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "two-shot",
+      "lensMm": 50,
+      "move": "slow push in",
+      "framing": "Tina across the table; Delphine finally looks up",
+      "blocking": "Tina turns her cheek away from the window light",
+      "beats": [
+        "l4–l5: the powder is noticed, never shown up close"
+      ],
+      "durationSec": 9.4,
+      "dialogue": [
+        "dlg.m06_payout_table#l4",
+        "dlg.m06_payout_table#l5"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Tina, a joke held up like a hand",
+      "blocking": "",
+      "beats": [
+        "l6"
+      ],
+      "durationSec": 4.9,
+      "dialogue": [
+        "dlg.m06_payout_table#l6"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Delphine squares the stack and opens the ledger",
+      "blocking": "The other women lean in",
+      "beats": [
+        "l7; title card: DELPHINE MOORE"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m06_payout_table#l7"
+      ],
+      "notes": "film: name card in period type, lower left"
+    }
+  ]
+}
