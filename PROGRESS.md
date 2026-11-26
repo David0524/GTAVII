@@ -242,7 +242,8 @@ the same city, filmed on the same stock, with a 2031 open-world game's density o
 | C | `documerica_549867` (Garment District canyon) | A dark street floor under a bright sky slot, haze, handcarts, trucks double-parked, depth falling into warm grey |
 | D | `documerica_549869` (Herald Square traffic) | Saturation budget: only taxi yellow and truck red sing, everything else muted; chrome highlights; dense traffic |
 
-**Grade targets** (STYLE_GUIDE §1, measured from 87 photos). Phase 3 shots are measured with
+**Grade targets** (STYLE_GUIDE §1, measured from 87 photos, all daytime, so these bands apply to
+**noon and golden-hour** shots; dusk and night are judged by the night criteria below and by eye). Phase 3 shots are measured with
 the same script (`tools/refs/lookmetrics.py`, to be added in Phase 3). Each shot's numbers must
 land in these bands:
 - **Tones:** shadow average near `#2e171d` (warm maroon, within ±12 per channel); midtone
@@ -252,6 +253,13 @@ land in these bands:
   clipped to white).
 - **Saturation:** at least 70% of saturated pixels in red-orange-yellow (hue 0–60° plus
   330–360°). Saturated blue/green 10% or less (dusk sky excepted, in a sky-masked variant).
+
+**Night criteria** (no PD night references yet, so these are taken from STYLE_GUIDE §8):
+- Luma p50 between 12 and 40.
+- Lit sources hold colour: sodium stays orange and windows stay warm, never white-clipped.
+- At least two distinct light colours in frame: sodium and mercury, or warm windows and TV-blue.
+
+**Measurement:** `python3 tools/refs/lookmetrics.py shots/...png` prints each band with PASS or FAIL.
 
 **What "done" looks like:**
 - **Facades:**
