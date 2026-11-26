@@ -123,6 +123,14 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
 
 **Evidence:** `tools/ui/touchControls.ts` on a phone in landscape with real thumb drags (CDP touch events). 27/27 checks pass, stable over three runs. Screenshots are in `shots/ui/touchcontrols/`. The layer costs 0.03 ms a frame.
 
+**Adapters:** `src/ui/touch/adapters.ts` turns gameplay's and vehicles' published shapes into `UiHost.touch`.
+`combineTouch` sends configure to both, and gyro forces aim assist off. It's unit-tested with fakes, and the engine wires it at integration.
+
+**In-game touch-only menu run (real game, phone):** 23/26 steps pass with no page errors.
+- The 3 misses are taps made while the city renders live at about 2.2 s per frame on headless SwiftShader: the bare title screen, skip from a paused cutscene, and the touch Menu button.
+- The steps after each one pass, so those taps did land. Playwright's actionability wait times out on frames that slow.
+- What fixed the rest: menus now **hold the last 3D frame** instead of re-rendering the city behind them. With a hub open, frames dropped from 3.6 s to 17 ms. Flat scrims replaced the backdrop blur.
+
 **Done-means change (oversight, 18:10):** the combined touch-only run (on foot → fight → steal a car → drive → park) moves to the
 **engine's integration milestone**, after UI and gameplay merge. No scene has both combat and cars yet, and stream branches
 are not cross-merged. Adapters for gameplay's `?gameplay=1` scene and vehicles' TestLot are offered to their owners.
@@ -170,6 +178,9 @@ are not cross-merged. Adapters for gameplay's `?gameplay=1` scene and vehicles' 
   - gameplay data is still mock (no inventory, heat or objectives from the real game yet);
   - `uilab.html` isn't in the production build, because `vite.config` is engine-owned. To use it
     on a phone, run it in dev mode.
+
+## Cinematics: branches
+Narrative's `showIf {choice, option}` is accepted. Branch shots play only for the picked option; the timeline is rebuilt at the pick, so timing before the hold is unchanged. The tool lays out every branch, validation checks that each branch follows its hold, and m29 has a test for all four options.
 
 ## Requests and coordination
 - ENGINE_REQUESTS ui 1–5: accepted.
