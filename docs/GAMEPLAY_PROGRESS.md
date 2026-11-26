@@ -318,17 +318,27 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
   - **Rates:**
     - best legal job: cab, 0.44×;
     - best crime: the chop list, 0.71×;
-    - property, tiered ("small early, big late", the user's decision of 2026-11-26):
+    - property, tiered ("small early, big late", the user's decision; oversight's windows), retuned on 2026-11-26:
       - starters (newsstand $300, laundromat $800): 0.16–0.19×;
-      - mid (pool hall $1,000, diner $1,400): 0.30–0.31×;
-      - big (Deuce arcade $7,500, parking garage $9,500, rooming house $14,000, and Nick's supper club at $22,000, Nick only): 0.55–0.82×.
+      - mid (pool hall $750, diner $950): 0.30–0.31×;
+      - big (Deuce arcade $2,800, parking garage $3,800, rooming house $5,000, Nick's supper club $7,500, Nick only and the dearest): 0.55–0.82×.
     - Weekly trouble scales with the size of the business.
   - **Exploits are bounded:** robbing the same register again pays $87, then $23 over the next
     ten; fencing ten fur lots to one fence gets $536 against $1,440 at full price.
-  - **The 20-hour run (seed 1974):** cash goes from $365 to $2,040.
-    - Every mixed seed buys a starter between real hours 2.5 and 5.2. That run collects $438 from its till.
-    - Nobody reaches a mid business. Teddy peaks at about $860; Nick's loans or pooled money would be the way there.
-    - Nothing big is bought. The cheapest big property costs more than 4× the best single-lead cash at any checkpoint, so all of them are late-game goals (asserted).
+  - **The 20-hour run (seed 1974), before → after the retune:**
+    - Cash: $2,040 → $2,002, plus businesses worth $300 → $1,050.
+    - Property income: $438 → $814, so the tills now matter.
+    - **Where the money was going:**
+      - an arbitrary "hospital" bill every 5–10 real hours, now removed (hospital costs come from the injuries crimes cause);
+      - starter upgrades and a car bought while saving for the next tier (the policy now saves first);
+      - one lead could never cover a mid business alone (Nick's loan, up to $500 at 1.2% a day, now closes the gap).
+  - **Windows, asserted across 5 seeds:**
+    - starter by 2.5–5.8 h;
+    - mid-tier at 9.8 / 9.9 / 10.2 / 13.4 / 14.2 h (median 10.2, all by 15 h);
+    - no big property inside 20 h of mixed play;
+    - a best-case investor (saves for property, no gambling) gets the Deuce arcade at 26.7 h and 28.8 h, and seed 99 doesn't get there by 30 h.
+  - **Missions are still the best earner per hour of play:** cab 0.44×, chop 0.71×. Property is passive, at about 0.27× of the 20-hour run.
+  - **Blocking finding: narrative's 32 mission files pay $134 in total.** Most have `rewards.money: 0`. The whole economy, like ECONOMY.md, assumes missions pay about $150 a real hour and are the best earner. With today's content, free roam is the only income and every curve above is optimistic. This needs narrative to add mission pay, or a design decision.
   - **My reservation:** the targets are partly met through long attempt cycles. A chop delivery
     counts about 57 game hours, roughly 1.9 real hours. In play that would feel slow.
     - The rebalance: raise the mission reference once narrative's mission pay is settled

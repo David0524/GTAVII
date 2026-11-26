@@ -42,18 +42,18 @@ export const DEFAULT_BUSINESSES: BusinessDef[] = [
   { id: 'biz.laundromat', name: 'Wash-and-Dry laundromat', block: 'block.ninth', price: usd(800), weeklyBase: usd(275), wages: usd(60), pad: usd(15), tier: 'starter', sideline: 'launders cash',
     upgrades: [up('machines', 'Newer machines', usd(260), 0.12, 'a new sign', false), up('alarm', 'Door alarm', usd(120), 0.0, 'a bell on the door', true)] },
   // mid
-  { id: 'biz.diner', name: 'All-night diner', block: 'block.deuce', price: usd(1400), weeklyBase: usd(645), wages: usd(430), pad: usd(60), tier: 'mid', sideline: 'a back booth for meets',
+  { id: 'biz.diner', name: 'All-night diner', block: 'block.deuce', price: usd(950), weeklyBase: usd(645), wages: usd(430), pad: usd(60), tier: 'mid', sideline: 'a back booth for meets',
     upgrades: [up('neon', 'Neon sign', usd(500), 0.12, 'a neon sign'), up('grill', 'Second grill', usd(700), 0.15, 'a longer counter')] },
-  { id: 'biz.poolhall', name: 'Pool hall', block: 'block.penn', price: usd(1000), weeklyBase: usd(500), wages: usd(190), pad: usd(50), tier: 'mid', sideline: 'a card game upstairs',
+  { id: 'biz.poolhall', name: 'Pool hall', block: 'block.penn', price: usd(750), weeklyBase: usd(500), wages: usd(190), pad: usd(50), tier: 'mid', sideline: 'a card game upstairs',
     upgrades: [up('tables', 'Re-clothed tables', usd(500), 0.11, 'green felt'), up('bar', 'Beer licence', usd(900), 0.16, 'a lit beer sign')] },
   // big (late game)
-  { id: 'biz.arcade', name: 'Deuce arcade', block: 'block.deuce', price: usd(7500), weeklyBase: usd(745), wages: usd(300), pad: usd(90), tier: 'big', sideline: 'launders cash',
+  { id: 'biz.arcade', name: 'Deuce arcade', block: 'block.deuce', price: usd(2800), weeklyBase: usd(745), wages: usd(300), pad: usd(90), tier: 'big', sideline: 'launders cash',
     upgrades: [up('machines', 'New machines', usd(1600), 0.16, 'new cabinets'), up('neon', 'Neon marquee', usd(1100), 0.10, 'a neon marquee')] },
-  { id: 'biz.garage', name: 'Parking garage', block: 'block.garment', price: usd(9500), weeklyBase: usd(950), wages: usd(350), pad: usd(100), tier: 'big', sideline: 'stores cars',
+  { id: 'biz.garage', name: 'Parking garage', block: 'block.garment', price: usd(3800), weeklyBase: usd(950), wages: usd(350), pad: usd(100), tier: 'big', sideline: 'stores cars',
     upgrades: [up('lights', 'Lighting', usd(900), 0.10, 'bright bulbs'), up('alarm', 'Booth alarm', usd(450), 0.0, 'a booth alarm', true)] },
-  { id: 'biz.rooming_house', name: 'Rooming house on Thirtieth', block: 'block.penn', price: usd(14000), weeklyBase: usd(890), wages: usd(200), pad: usd(80), tier: 'big', sideline: 'rooms to lie low in',
+  { id: 'biz.rooming_house', name: 'Rooming house on Thirtieth', block: 'block.penn', price: usd(5000), weeklyBase: usd(890), wages: usd(200), pad: usd(80), tier: 'big', sideline: 'rooms to lie low in',
     upgrades: [up('boiler', 'New boiler', usd(1800), 0.12, 'heat in the halls'), up('lobby', 'Lobby and buzzer', usd(1200), 0.08, 'a lit lobby', true)] },
-  { id: 'biz.supper_club', name: 'Supper club off Broadway', block: 'block.midtown', price: usd(22000), weeklyBase: usd(1690), wages: usd(700), pad: usd(150), tier: 'big', lead: 'char.nick_varelas', sideline: "Nick's back room: the book and the precinct's table",
+  { id: 'biz.supper_club', name: 'Supper club off Broadway', block: 'block.midtown', price: usd(7500), weeklyBase: usd(1690), wages: usd(700), pad: usd(150), tier: 'big', lead: 'char.nick_varelas', sideline: "Nick's back room: the book and the precinct's table",
     upgrades: [up('band', 'House band', usd(2500), 0.14, 'a bandstand'), up('awning', 'Canopy to the kerb', usd(1500), 0.08, 'a canopy and doorman', true)] },
 ];
 /** Foot traffic by block, a 0.6..1.6 multiplier. Sim owns the real numbers per block (setTraffic). */

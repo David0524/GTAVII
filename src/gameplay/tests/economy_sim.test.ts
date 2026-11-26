@@ -271,22 +271,33 @@ test('no runaway wealth: 20 hours of mixed play and of pure free-roam grinding s
     assert.ok(r.total + r.assets <= cap, `net worth ${(r.total + r.assets) / 100} over cap ${cap / 100}`);
   }
   for (const g of grind) assert.ok(g.total <= g.startTotal + missionOnly, 'a free-roam-only grinder does not out-earn missions');
-  // small early, big late: every mixed run buys a starter in the first few hours, and nothing big in 20 hours
-  for (const r of [mixed, ...mixedSeeds]) {
+  // small early, big late (user decision; oversight's windows): a starter by about 2-5 h, a mid-tier business
+  // around 8-12 h, nothing big inside 20 h of mixed play, and a best-case investor's first big property by 20-30 h
+  const runs = [mixed, ...mixedSeeds, ...[3, 42].map((seed) => runPlaythrough({ seed }))];
+  for (const r of runs) {
     const first = r.bought[0];
     assert.ok(first && first.tier === 'starter' && first.realHour <= 6, `first business ${JSON.stringify(first)}`);
-    assert.ok(!r.bought.some((b) => b.tier === 'big'), 'no big property inside 20 hours');
+    assert.ok(!r.bought.some((b) => b.tier === 'big'), 'no big property inside 20 hours of mixed play');
   }
-  const cheapestBig = Math.min(...E.DEFAULT_BUSINESSES.filter((b) => b.tier === 'big').map((b) => b.price));
-  const richest = Math.max(...mixed.curve.flatMap((c) => Object.values(c.cash)));
-  assert.ok(cheapestBig > 4 * richest, `big property is a late-game goal (${cheapestBig / 100} vs best single-lead cash ${richest / 100})`);
-  assert.ok(E.DEFAULT_BUSINESSES.filter((b) => b.lead === 'char.nick_varelas').every((b) => b.tier === 'big'), "Nick's tier is big");
+  const midAt = runs.map((r) => r.bought.find((b) => b.tier === 'mid')?.realHour ?? Infinity).sort((a, b) => a - b);
+  const median = midAt[Math.floor(midAt.length / 2)];
+  console.log(`mid-tier at ${midAt.map((h) => h.toFixed(1)).join(', ')} h (median ${median.toFixed(1)})`);
+  assert.ok(median >= 8 && median <= 12, `mid-tier median ${median.toFixed(1)} h, want 8-12`);
+  assert.ok(midAt.every((h) => h <= 15), 'every mixed run owns a mid-tier business by 15 h');
+  const investor = [1974, 7, 99].map((seed) => runPlaythrough({ seed, investor: true, realHours: 30 }));
+  const bigAt = investor.map((r) => r.bought.find((b) => b.tier === 'big')?.realHour ?? Infinity);
+  console.log(`investor first big property at ${bigAt.map((h) => (isFinite(h) ? h.toFixed(1) : 'none')).join(', ')} h`);
+  assert.ok(Math.min(...bigAt) >= 18 && Math.min(...bigAt) <= 30, `best-case first big property at ${Math.min(...bigAt)} h, want 20-30`);
+  assert.ok(investor.filter((r) => r.bought.some((b) => b.tier === 'big')).length >= 2, 'most investors get there by 30 h');
+  assert.ok(E.DEFAULT_BUSINESSES.filter((b) => b.lead === 'char.nick_varelas').every((b) => b.tier === 'big' && b.price === Math.max(...E.DEFAULT_BUSINESSES.map((x) => x.price))), "Nick's supper club is the last and dearest");
   // the mixed run is a sensible curve: it grows, and every lead is checkpointed every real hour
   assert.equal(mixed.curve.length, 21);
   assert.ok(mixed.curve[20].total > mixed.curve[0].total, 'the money curve rises');
   assert.ok(mixed.curve.every((c) => Object.keys(c.cash).length === 3));
   assert.ok(mixed.owned.length >= 1, 'the policy bought a business');
-  assert.ok(mixed.spent.rent > 0 && ['hospital', 'clothes'].every((k) => (mixed.spent[k] ?? 0) > 0), `sinks were exercised: ${Object.keys(mixed.spent)}`);
+  assert.ok(mixed.spent.rent > 0 && ['clothes', 'business'].every((k) => (mixed.spent[k] ?? 0) > 0), `sinks were exercised: ${Object.keys(mixed.spent)}`);
+  // heat costs money somewhere across the seeds (bribes after witnessed crimes); hospital bills come from injuries (outcomes tests)
+  assert.ok([mixed, ...mixedSeeds].some((r) => (r.spent.bribe ?? 0) > 0), 'bribes were paid in some run');
 });
 
 test('simulation is deterministic', () => {

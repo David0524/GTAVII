@@ -7,6 +7,7 @@ import type { CrimeKind } from '../police/crime';
 import { Economy } from './index';
 import type { ActivityDef } from './activities';
 import { DELPHINE, GAME_HOURS_PER_REAL_HOUR, NICK, TEDDY, usd } from './types';
+import { MAX_OUTSTANDING } from './loans';
 
 /**
  * Deterministic headless economy simulation (ECONOMY.md "balance targets").
@@ -29,6 +30,8 @@ export interface SimOptions {
   missionShare?: number;
   /** game hours a lead plays before the player switches to the next */
   stintHours?: number;
+  /** an investor saves everything for property and goes for a big one as soon as mid-tier is owned or affordable */
+  investor?: boolean;
   /** free-roam-only stress policy: always take the best known earner instead of a mixed menu */
   greedy?: boolean;
 }
@@ -147,7 +150,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
   const plan = new Map(LEADS.map((l) => [l, { outfit: false, gun: false, licence: l === TEDDY, carPrice: usd(600 + 100 * rng.int(0, 9)) }]));
   const curve: Checkpoint[] = [];
   const stats = new Map<string, { cents: number; min: number }>();
-  let nextBill = 120, nextCp = 0, missions = 0, visibleCrimes = 0;
+  let nextCp = 0, missions = 0, visibleCrimes = 0;
   const checkpoint = () => {
     while (nextCp * GAME_HOURS_PER_REAL_HOUR <= eco.nowH() - startH && nextCp <= realHours) {
       curve.push({ realHour: nextCp, gameHour: nextCp * GAME_HOURS_PER_REAL_HOUR, cash: Object.fromEntries(LEADS.map((l) => [l, inv.ensure(l).money + inv.ensure(l).savings])), total: total() });
@@ -163,6 +166,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
 
   /** Shopping and chores, done between actions by whoever is playing. */
   const lastCollect = new Map<string, number>();
+  const CUSHION = { starter: usd(75), mid: usd(150), big: usd(o.investor ? 150 : 400) } as const;
   const chores = (lead: string) => {
     const p = plan.get(lead)!, c = cash(lead);
     // an owner drops by the business about once a game day to empty the till (a real player passes it on the way)
@@ -171,22 +175,29 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     }
     // Nick's loans: borrow only when stuck near zero; repay when flush
     if (lead !== NICK && c < usd(15) && eco.loans.outstanding(lead) === 0) eco.lend(NICK, lead, usd(60));
-    if (lead !== NICK && c > usd(250) && eco.loans.outstanding(lead) > 0) eco.repay(lead, Math.min(c - usd(100), eco.loans.outstanding(lead)));
+    if (lead !== NICK && c > usd(400) && eco.loans.outstanding(lead) > 0) eco.repay(lead, Math.min(c - usd(100), eco.loans.outstanding(lead)));
     if (!p.outfit && c >= usd(54) + usd(200) && buy(lead, usd(54), 'clothes')) p.outfit = true;
     if (!p.gun && !eco.armed(lead) && c >= usd(75) + usd(150) && buy(lead, usd(75), 'gun')) { inv.give(lead, 'item.snub'); p.gun = true; if (inv.reserve(lead, 'weapon.snub') < 20 && buy(lead, usd(6.5), 'ammo')) inv.give(lead, 'item.ammo_38', 50); }
     if (lead === DELPHINE && inv.count(lead, 'item.film_pack') < 2 && buy(lead, usd(5.49), 'film')) inv.give(lead, 'item.film_pack', 1);
     if (!p.licence && lead !== TEDDY && c >= usd(75) + usd(400) && buy(lead, usd(75), 'licence')) { rig.flags.add(`hack_licence.${lead}`); p.licence = true; }
-    // a business once there is real cash to spare; at most two across the three leads
-    // small early, big late: a starter as soon as it's affordable with a cushion, a mid business later, big ones only with a deep cushion
-    {
-      const cushion = { starter: usd(75), mid: usd(200), big: usd(1500) } as const;
-      const pick = [...eco.property.defs.values()]
-        .filter((b) => !eco.property.owned.has(b.id) && (!b.lead || b.lead === lead) && eco.property.owned.size < 3 && !eco.property.ownedBy(lead).some((o) => eco.property.defs.get(o.def)!.tier === b.tier) && b.price + cushion[b.tier] <= cash(lead))
-        .sort((a, b) => a.price - b.price)[0];
-      if (pick && eco.buyBusiness(lead, pick.id)) bought.push({ id: pick.id, tier: pick.tier, realHour: (eco.nowH() - startH) / GAME_HOURS_PER_REAL_HOUR, lead });
+    // property, small early and big late. The player saves toward the next tier before anything else
+    // (no car or upgrades while saving); when within reach, Nick's loan (up to $500 at 1.2% a day) closes
+    // the gap. Starter first, then mid, then (an investor, or late) big.
+    const tierOrder = ['starter', 'mid', 'big'] as const;
+    const ownedTiers = new Set(eco.property.ownedBy(lead).map((o) => eco.property.defs.get(o.def)!.tier));
+    const anyTier = new Set([...eco.property.owned.values()].map((o) => eco.property.defs.get(o.def)!.tier));
+    const nextTier = tierOrder.find((t) => !anyTier.has(t) && (t !== 'big' || o.investor || anyTier.has('mid')));
+    const target = nextTier ? [...eco.property.defs.values()].filter((b) => b.tier === nextTier && !eco.property.owned.has(b.id) && (!b.lead || b.lead === lead)).sort((a, b) => a.price - b.price)[0] : undefined;
+    if (target && !ownedTiers.has(target.tier)) {
+      const cushion = CUSHION[target.tier];
+      const short = target.price + cushion - cash(lead);
+      const loanRoom = lead === NICK ? 0 : Math.min(MAX_OUTSTANDING - eco.loans.outstanding(lead), Math.max(0, cash(NICK) - usd(150)));
+      if (short > 0 && short <= loanRoom && target.tier !== 'starter') eco.lend(NICK, lead, short);
+      if (target.price + cushion <= cash(lead) && eco.buyBusiness(lead, target.id)) bought.push({ id: target.id, tier: target.tier, realHour: (eco.nowH() - startH) / GAME_HOURS_PER_REAL_HOUR, lead });
     }
-    if (eco.property.owned.size > 0 && !rig.flags.has(`car.${lead}`) && cash(lead) >= p.carPrice + usd(100) && buy(lead, p.carPrice, 'car')) rig.flags.add(`car.${lead}`);
-    for (const b of eco.property.ownedBy(lead)) for (const u of eco.property.defs.get(b.def)!.upgrades) if (cash(lead) >= u.price + usd(600)) eco.buyUpgrade(lead, b.def, u.id);
+    const saving = !!target && !ownedTiers.has(target.tier) && target.price + CUSHION[target.tier] > cash(lead);
+    if (!saving && eco.property.owned.size > 0 && !rig.flags.has(`car.${lead}`) && cash(lead) >= p.carPrice + usd(100) && buy(lead, p.carPrice, 'car')) rig.flags.add(`car.${lead}`);
+    if (!saving) for (const b of eco.property.ownedBy(lead)) for (const u of eco.property.defs.get(b.def)!.upgrades) if (cash(lead) >= u.price + usd(600)) eco.buyUpgrade(lead, b.def, u.id);
   };
 
   const after = (lead: string, r: ReturnType<Economy['attempt']>, cat: keyof Earnings) => {
@@ -206,7 +217,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
   while (eco.nowH() - startH < endH) {
     const h = eco.nowH() - startH, lead = SCHEDULE[Math.floor(h / stint) % SCHEDULE.length];
     chores(lead);
-    if (h >= nextBill) { inv.payUpTo(lead, usd(rng.int(50, 150)), 'hospital'); nextBill = h + rng.range(150, 300); }
+    // (no arbitrary 'life happens' bills: hospital costs come from the injuries crimes cause, in `after`)
     // time budget: keep to the mission share of elapsed time
     if (hoursBy.mission < share * h || h < 1) {
       const len = 15, pay = Math.round(mRate * len * rng.range(0.85, 1.15));
@@ -231,7 +242,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     } else if (roll < 0.75) {
       const id = tryList(lead, CRIMES);
       if (id) { attempts[id] = (attempts[id] ?? 0) + 1; after(lead, eco.attempt(lead, id), 'crime'); continue; }
-    } else if (roll < 0.90) {
+    } else if (roll < 0.90 && !o.investor) { // an investor stays out of the card games and the OTB
       const id = rng.pick(['gamble.number', 'gamble.otb', 'gamble.cards', 'gamble.pool', 'gamble.fight']);
       const stake = Math.min(eco.defs.get(id)!.stake!.default, Math.floor(cash(lead) * 0.03));
       if (stake >= eco.defs.get(id)!.stake!.min) { attempts[id] = (attempts[id] ?? 0) + 1; after(lead, eco.attempt(lead, id, { stake }), 'gamble'); continue; }
