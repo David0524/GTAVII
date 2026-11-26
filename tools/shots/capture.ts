@@ -38,6 +38,17 @@ const on = (name: string, x: number, z: number, y = 1.8): [number, number, numbe
 };
 const esb = hero('Empire State Building'), macys = hero("Macy's"), msg = hero('Madison Square Garden'), chelsea = hero('Hotel Chelsea'), flat = hero('Flatiron Building');
 
+/** Phase 3 judged set (PROGRESS.md look target): matched to reference frames A-D, each at four times of day. */
+const P3_TIMES = ['12:30', '19:30', '20:14', '23:00'];
+const P3_VIEWS: { name: string; cam: string; ref?: string }[] = [
+  { name: 'A_42nd_west_of_7th', cam: (() => { const c = on('West 42nd Street', -700, -1550, 1.7); return `${c[0]},${c[1]},${c[2]},90,3`; })(), ref: 'documerica_554297' },
+  { name: 'B_6th_and_32nd_uptown', cam: (() => { const c = on('6th Avenue', -300, -790, 1.7); return `${c[0] + 6},${c[1]},${c[2]},0,4`; })(), ref: 'documerica_554293' },
+  { name: 'C_garment_canyon_37th', cam: (() => { const c = on('West 37th Street', -760, -1200, 1.7); return `${c[0]},${c[1]},${c[2]},90,6`; })(), ref: 'documerica_549867' },
+  { name: 'D_herald_square', cam: (() => { const c = on('Broadway', macys.x + 40, macys.z + 170, 1.7); return `${c[0]},${c[1]},${c[2]},12,5`; })(), ref: 'documerica_549869' },
+  { name: 'E_flatiron_from_madison_sq', cam: '25,1.7,-150,173.5,10' },
+  { name: 'F_spawn_up_broadway', cam: '-8,1.7,-30,14,6' },
+];
+
 /** Fixed viewpoints. 'spawn' uses the game's own spawn logic (no cam param). */
 const VIEWS: { name: string; cam?: string; at?: string }[] = [
   { name: '01_spawn_flatiron_up_broadway' }, // on foot, third person, at the game's own spawn
@@ -56,6 +67,7 @@ const VIEWS: { name: string; cam?: string; at?: string }[] = [
 
 async function main() {
   const port = 4173;
+  const p3 = phase === 'phase3';
   const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'pipe' });
   await new Promise((r) => setTimeout(r, 2500));
   const browser = await chromium.launch({
@@ -66,8 +78,10 @@ async function main() {
   page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
   const report: any[] = [];
-  for (const v of VIEWS) {
-    const q = new URLSearchParams({ quality, fresh: '1', title: '0', hud: '1', ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}) });
+  const list = p3 ? P3_VIEWS.flatMap((v) => P3_TIMES.map((t) => ({ name: `${v.name}_${t.replace(':', '')}`, cam: v.cam, at: undefined as string | undefined, time: t }))) : VIEWS.map((v) => ({ ...v, time: undefined as string | undefined }));
+  page.setDefaultTimeout(600000);
+  for (const v of list) {
+    const q = new URLSearchParams({ quality, fresh: '1', title: '0', hud: p3 ? '0' : '1', ...(p3 ? { minimap: '0', camrel: '1', timescale: '0' } : {}), ...(v.time ? { time: v.time } : {}), ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}) });
     await page.goto(`http://localhost:${port}/?${q}`);
     await page.waitForFunction(() => (window as any).__T74, null, { timeout: 120_000 });
     await page.evaluate(() => (window as any).__T74.whenIdle());

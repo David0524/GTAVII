@@ -101,7 +101,8 @@ async function main() {
   let mode: Mode = 'onfoot';
   const camParam = params.get('cam');
   if (camParam) {
-    const [x, y, z, yaw, pitch] = camParam.split(',').map(Number);
+    const [x, y0, z, yaw, pitch] = camParam.split(',').map(Number);
+    const y = params.has('camrel') ? y0 + heightAt(x, z) + SIDEWALK_H : y0; // ?camrel=1: y is height above the ground
     fly.set(x, y, z, THREE.MathUtils.degToRad(yaw), THREE.MathUtils.degToRad(pitch || 0));
     mode = 'photo';
   }
