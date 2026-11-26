@@ -21,13 +21,15 @@ export interface RocketboxHead {
   bytes: number;
 }
 
+const qp = (k: string) => (typeof location !== 'undefined' ? new URLSearchParams(location.search).get(k) : null);
+
 export async function loadRocketboxHead(base: string, name: string): Promise<RocketboxHead> {
   const res = await fetch(`${base}eval/rb_${name}.bin`);
   const buf = await res.arrayBuffer();
   const c = readContainer(buf);
   const B = (k: string) => c.blobs.get(k) as any;
   const tl = new THREE.TextureLoader();
-  const load = async (f: string, srgb: boolean) => { const t = await tl.loadAsync(`${base}eval/${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.flipY = false; t.anisotropy = 4; return t; };
+  const load = async (f: string, srgb: boolean) => { const t = await tl.loadAsync(`${base}eval/${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.flipY = qp('rbflip') !== '0'; t.anisotropy = 4; return t; };
   const color = await load(`rb_${name}_color.webp`, true), normal = await load(`rb_${name}_normal.webp`, false);
   const hasOp = (c.meta.counts.opacityTris ?? 0) > 0;
   const opacity = hasOp ? await load(`rb_${name}_opacity.webp`, true) : null;
@@ -65,12 +67,17 @@ export function rocketboxHeadMesh(h: RocketboxHead, fit: ReturnType<typeof fitHe
   if (h.idxOpacity.length) geo.addGroup(h.idxSkin.length, h.idxOpacity.length, 1);
   geo.computeBoundingSphere();
   const skin = new THREE.MeshSSSNodeMaterial({ map: h.color, normalMap: h.normal, roughness: 0.52 });
-  skin.normalScale = new THREE.Vector2(1, -1);
+  skin.normalScale = new THREE.Vector2(1, qp('rbn') === '-1' ? -1 : 1);
   // warm transmission like our own skin shader
   skin.thicknessColorNode = vec3(0.4, 0.1, 0.05); skin.thicknessScaleNode = float(1.0); skin.thicknessPowerNode = float(3); skin.thicknessDistortionNode = float(0.15);
-  void texture; void uv; void attribute; void mix;
+  void attribute; void mix;
   const mats: THREE.Material[] = [skin];
-  if (h.opacity) { const op = new THREE.MeshStandardNodeMaterial({ map: h.opacity, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.6 }); op.alphaToCoverage = true; mats.push(op); }
+  if (h.opacity) {
+    const op = new THREE.MeshStandardNodeMaterial({ side: THREE.DoubleSide, roughness: 0.7 });
+    const t = texture(h.opacity, uv());
+    op.colorNode = t.rgb; op.opacityNode = t.a; op.alphaTest = 0.4; op.alphaToCoverage = true;
+    mats.push(op);
+  }
   const m = new THREE.SkinnedMesh(geo, mats.length > 1 ? mats : mats[0]);
   m.bind(skeleton, bindMatrix);
   m.frustumCulled = false; m.castShadow = true;

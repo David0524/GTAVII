@@ -67,12 +67,13 @@ export class Character {
     this.appearance = (opts.build?.appearance ?? (opts as { appearance?: Appearance }).appearance) ?? generateAppearance(desc.seed);
     this.outfit = (opts.build?.outfit ?? (opts as { outfit?: Outfit }).outfit) ?? generateOutfit(desc.seed ^ 0x5bd1e995, { sex: this.appearance.sex, age: this.appearance.age, archetype: desc.archetype, ...opts.outfitCtx });
     // evaluation: a substituted Rocketbox head sets the body's skin tone to match its texture
-    if (desc.overrides?.rbHead) { const t = (desc.overrides.rbHead as RocketboxHead).meta.tone; const l = ['1', '3', '5'].map((i) => parseInt(t.slice(+i, +i + 2), 16) / 255); const lum = 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2]; this.appearance = { ...this.appearance, skin: { ...this.appearance.skin, tone: t, melanin: Math.min(1, Math.max(0, 1 - lum * 1.6)) } }; }
+    const toneOv = (desc.overrides?.rbHead as RocketboxHead | undefined)?.meta.tone ?? (desc.overrides?.skinTone as string | undefined);
+    if (toneOv) { const t = toneOv; const l = ['1', '3', '5'].map((i) => parseInt(t.slice(+i, +i + 2), 16) / 255); const lum = 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2]; this.appearance = { ...this.appearance, skin: { ...this.appearance.skin, tone: t, melanin: Math.min(1, Math.max(0, 1 - lum * 1.6)) } }; }
     // desc.overrides.hair / facialHair: appearance overrides (tests, cast tweaks)
     if (desc.overrides?.hair) this.appearance = { ...this.appearance, hair: { ...this.appearance.hair, ...(desc.overrides.hair as object) } };
     if (desc.overrides?.facialHair) this.appearance = { ...this.appearance, facialHair: desc.overrides.facialHair as Appearance['facialHair'] };
     // desc.overrides: shallow per-slot outfit overrides, e.g. { shoes: { kind: 'pump' } } (tests, cutscenes)
-    if (desc.overrides) for (const [k, v] of Object.entries(desc.overrides)) if (k in this.outfit && k !== 'hair' && k !== 'rbHead') {
+    if (desc.overrides) for (const [k, v] of Object.entries(desc.overrides)) if (k in this.outfit && k !== 'hair' && k !== 'rbHead' && k !== 'skinTone') {
       const cur = (this.outfit as unknown as Record<string, unknown>)[k];
       (this.outfit as unknown as Record<string, unknown>)[k] = v && typeof v === 'object' && cur && typeof cur === 'object' ? { ...cur, ...v } : v;
     }

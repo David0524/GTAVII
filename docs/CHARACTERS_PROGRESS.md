@@ -72,45 +72,44 @@ src/characters/    rig.ts (56 joints, UAL names), format.ts (T74X container), in
 ## Measurements
 CPU numbers come from this container's CPU: Node/V8 for the offline harnesses, headless Chromium for
 the scenes. Rendering here is SwiftShader **software**, so GPU frame times can't be measured.
-Real-device numbers are still needed (the user tests on an iPhone).
+Real-device numbers are still needed (the user tests on an iPhone). Every shot and its JSON report
+is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
 
-**Heroes (LOD0)**
-- Triangles: about 16.8k main + 2.3k hair on average (max 19.3k + 3.9k); Teddy is 17.3k. 2 draws.
-- Per-frame update: **0.044 ms avg, 0.057 ms p95** (walking, foot IK on a 0.15 m curb, look-at;
-  `tools/characters/scratch/cpu.ts` harness). Budget 0.3 ms.
-- Build at spawn: about 80–110 ms (assemble) + 9 ms (evaluate), main thread.
+**Heroes (LOD0)**, after Block A (shoes, hair cards, buttons):
+- Triangles: main about 17.8k (shoes about 3.3–4.5k of it) + hair 2.2k (afro) to 7.6k (long
+  straight, bob) = **20–25.4k**, within the 20–30k budget. 2 draws.
+- Per-frame update: **0.05–0.09 ms avg, 0.06 ms p95** (`tools/characters/scratch/cpu.ts`). Budget 0.3 ms.
+- Build at spawn: about 45–170 ms (assemble; card hair and the shoe loft added about 30 ms), main thread.
 
-**Crowd LODs (triangles):** LOD1 (near ring) about 7.2k + 1.4k hair; LOD2 about 4.1k; LOD3 about 1.8k.
+**Pedestrians (LOD1, lineup):** 9.0–10.5k triangles including hair, 2 draws.
+**Crowd LODs:** LOD2 about 3.4–4.5k (shoes about 0.3–0.7k); LOD3 about 1.5–2.3k (shoes about 150–380).
 
-**Crowd: 400 agents, High (`19_crowd_400_high`, 145 measured frames)**
-- `setAgents` CPU: **0.40 ms avg, 1.2 ms p95** (budget 1.5 ms), including 10 near-ring
-  characters.
-- 74 draws, about 544k triangles in view (10 near, 46 mid, 158 far, 186 culled); atlas 33
-  templates, half-float.
+**Crowd: 400 agents, High (`19_crowd_400_high`, 145 frames, measured with nothing else running)**
+- `setAgents` CPU: **0.39 ms avg, 1.1 ms p95** (budget 1.5 ms), including 10 near-ring characters.
+- 74 draws, about 554k triangles in view (10 near, 46 mid, 158 far, 186 culled); 33 templates.
+- (A run during other CPU load measured 0.63/1.4 ms; the clean number is the one above.)
 
 **Crowd: 120 agents, Low (`20_crowd_120_low`)**
-- `setAgents` CPU: **0.18 ms avg, 0.5 ms p95**.
-- 18 draws, about 94k triangles; 12 templates; near ring of 2 at LOD2.
+- `setAgents` CPU: **0.20 ms avg, 0.5 ms p95**. 18 draws, about 96k triangles; near ring of 2 at LOD2.
+
+**Crowd on a real street (engine city, West 22nd Street at 13:30, `24`–`26`)**
+- 140 agents, eye level, High: **0.46 ms avg, 1.4 ms p95**, 65 draws, 368k tris.
+- 400 agents from 6 m, High: **0.43 ms avg, 0.9 ms p95**, 65 draws, 760k tris (158 mid-LOD in view).
+- 120 agents, Low: **0.24 ms avg, 0.9 ms p95**, 25 draws, 224k tris.
 
 **Foot sliding** (`npx tsx tools/characters/measure-sliding.ts`; ankle drift while planted, 3 bodies
-× 3 crowd speeds):
+× 3 crowd speeds; re-measured after heeled shoes pitch the foot):
 
 | Speed | Raw stride match (no IK lock: instanced crowds) | Near characters (IK lock) |
 |---|---|---|
 | 0.8 m/s | 30–110 mm/s | 1–7 mm/s |
-| 1.3 m/s | 110–165 mm/s | 9–14 mm/s |
-| 1.75 m/s | 160–210 mm/s | 17–23 mm/s |
-
-- Most of the raw figure is heel and toe roll inside the source clip's broad contact windows; the
-  signed (net) drift averages near zero after calibration (`STRIDE_CAL` in Animator).
-- Instanced crowds have no IK, so they show the raw figure. It reads at mid and far distance;
-  a tighter contact-window measure is next.
+| 1.3 m/s | 110–165 mm/s | 8–17 mm/s |
+| 1.75 m/s | 160–210 mm/s | 17–28 mm/s |
 
 **Downloads**
-- High: body.bin 6.9 MiB + anims.bin 1.0 MiB = **7.9 MiB** (budget 15).
-- **Mobile Low: body_low.bin 0.95 MiB + anims.bin 1.0 MiB = 1.95 MiB** (budget 6). It keeps only
-  the far-LOD vertices, 32 shape components and no expressions; Low uses LOD2 for heroes and the
-  near ring.
+- High: body.bin 6.9 MiB + anims.bin 0.97 MiB + fabric maps 0.26 MiB = **8.13 MiB** (budget 15).
+- **Mobile Low: body_low.bin 0.95 MiB + anims.bin 0.97 MiB + fabric maps 0.07 MiB = 1.99 MiB**
+  (budget 6; oversight's target was about 1.95 MiB, so the fabric set adds 0.04 MiB).
 
 ## Critique of the lineup and leads (honest)
 Shots: `shots/characters/01_lineup_a_vs_refs.png` and `02_lineup_b_vs_refs.png` show 20 seeded
@@ -181,6 +180,54 @@ including close-ups. Locomotion frames are `10`–`17`; crowds are `19` and `20`
 - The lighting in the lineup and lead shots is a neutral test rig; `24`–`26` use the engine's own
   atmosphere on a real street (West 22nd Street at 13:30).
 
+## Rocketbox evaluation (user-approved, via oversight; nothing switched)
+**Question:** would Microsoft Rocketbox avatars close the realism gap? (`27_rocketbox_ab`,
+`28_rocketbox_faces_ab`; scene `?characters=1&scene=rocketbox`.)
+- **Licence:** MIT (repo `LICENSE.md`; README "November 2020 License Update"). Redistributable in
+  a web game with the notice shipped. Full text in `docs/CHARACTER_SOURCES.md` §6. Adults only; the
+  library's `Children` folder was never fetched.
+- **What was built:** the head (skin, eyes, teeth, lashes and hair cards) of three adults
+  (Male_Adult_12, Male_Adult_03, Female_Adult_11), fitted onto our parametric body by eye
+  midpoint and interocular distance, skinned to our Head/jaw/eyes/neck, the body's skin tone set
+  from the face texture, dressed in our 1974 wardrobe. Each stands beside the same seed, outfit and
+  tone with our own head.
+- **Result: the faces are far better.** Real eyes with wet highlights, visible ageing (Male_03),
+  photographic skin, believable hairlines. Our heads read as mannequins next to them. The gap is
+  almost entirely the face's *texture* (2K photographic albedo and normal maps); the geometry is
+  low (about 3k triangles per head versus our full-resolution head).
+
+| | Rocketbox head (hybrid) | Our head |
+|---|---|---|
+| Triangles (LOD1 pedestrian, whole person) | 8.2k–9.6k | 9.4k–10.3k |
+| Draws | 2 (no cards) or 3 (hair/lash cards) | 2 |
+| Download per head | 0.72 / 1.20 / 1.61 MB (0.3–0.5 MB possible: 512² opacity, quantised mesh) | 0 (generated) |
+| Build | 50–185 ms (same assembly; our hair skipped) | 105–170 ms |
+| Blinks, jaw, lips | facial bones exist (unused yet) | jaw + expression targets |
+
+**Recommendation: hybrid for the near ring, not a switch; the leads stay ours. This is the
+user's decision (base-mesh choices are theirs).**
+- **Don't switch.** Rocketbox is about 40 fixed adult bodies wearing baked modern clothes, with
+  no body morphs. A switch would lose the parametric variety (build, age, height) and the garment
+  system, which is cut from MakeHuman's topology and helpers.
+- **Hybrid (Rocketbox heads on our bodies) for the near ring and close pedestrians:**
+  - a large visual gain;
+  - CPU unchanged;
+  - about 0.5–1 MB per head on High (a pool of 12–16 heads is about 6–12 MB, inside the 15 MB High
+    budget);
+  - Low keeps our heads (Low stays at 1.99 MiB).
+  - **Costs to fix first:**
+    - a texture array or atlas to get back to 2 draws;
+    - matching body skin to the face (the tone is sampled, but the albedo detail doesn't
+      continue onto the neck and hands; the seam hides under collars, not under crew necks);
+    - only about 40 faces, so repeats in a long session;
+    - hats were sized for our heads.
+- **The leads stay ours** (or need bespoke textures): their faces come from narrative appearance
+  sheets, and Rocketbox faces are fixed. *Risk to flag:* Rocketbox faces are artist-made, and we
+  can't verify that none resembles a real person, which the brief forbids for anything we ship.
+- **Cheaper parallel route** (suggested next, not done): MakeHuman's own CC0 skin textures (and
+  our own baked albedo/normal detail) map onto our existing UVs. That would close part of the gap
+  for everyone, including Low and the leads, without a second asset family.
+
 ## Known issues (honest)
 - **Faces** read as "game" faces: dark eye rims, no wet-line geometry, no blinks, little visible
   ageing (next block).
@@ -198,9 +245,10 @@ including close-ups. Locomotion frames are `10`–`17`; crowds are `19` and `20`
   the worker before gameplay spawns heroes mid-scene.
 
 ## Next
-1. Write the lineup critique against the reference photos (after captures). Then: a reduced
-   Low download, impostors, a ledge-aligned climb, ankle pitch for heels, and lip-sync from
-   text timing.
+1. **Decision needed from the user:** the Rocketbox hybrid (above). Meanwhile, the next block
+   is faces: albedo/normal detail and age, eye rims, blinks (Rocketbox's facial-bone layout is a
+   good reference), lip-sync. Then posture (pockets, contrapposto, folded arms), impostors, and
+   a ledge-aligned climb.
 2. Consume `content/npc_archetypes/*.json` (53 archetypes). `npc.strip_worker` must vary in
    background and is never costumed or framed sexually.
 3. **Scope added by oversight (backlog, in priority order):**

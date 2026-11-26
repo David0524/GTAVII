@@ -4,7 +4,7 @@
   "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
   "crowd": {
     "agents": 400,
-    "cpuMs": 1.099999999627471,
+    "cpuMs": 1.2000000000043656,
     "near": 10,
     "mid": 46,
     "far": 158,
@@ -13,13 +13,13 @@
     "tris": 553503,
     "templatesReady": 33,
     "nearBuilds": 10,
-    "cpuAvgMs": 0.634,
-    "cpuP95Ms": 1.4,
+    "cpuAvgMs": 0.389,
+    "cpuP95Ms": 1.1,
     "framesMeasured": 145
   },
   "renderMsSoftware": [
-    7,
-    4.2999999998137355,
-    4.2999999998137355
+    7.099999999998545,
+    4.30000000000291,
+    3.8000000000029104
   ]
 }

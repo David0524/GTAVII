@@ -86,9 +86,9 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       const female = name.startsWith('Female'), old = name === 'Male_Adult_03';
       let seed = 700 + i * 31;
       for (let k = 0; k < 400; k++) { const a = generateAppearance(hash2(seed, k)); if ((a.sex < 0.5) === female && (old ? a.age > 55 : a.age > 25 && a.age < 45)) { seed = hash2(seed, k); break; } }
-      const ov = { hat: null };
+      const ov = { hat: null, glasses: null };
       chars.push(factory.spawn(world, { seed, overrides: { ...ov, rbHead: head } }));
-      chars.push(factory.spawn(world, { seed, overrides: ov }));
+      chars.push(factory.spawn(world, { seed, overrides: { ...ov, skinTone: head.meta.tone } })); // same tone: a fair A/B
       report.rocketbox = [...(report.rocketbox ?? []), { name, bytes: head.bytes, headTris: head.meta.counts.skinTris + head.meta.counts.opacityTris, tone: head.meta.tone }];
     }
   } else if (scene === 'hair') {
