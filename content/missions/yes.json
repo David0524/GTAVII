@@ -6,7 +6,7 @@
   "chapter": 3,
   "playAs": "char.teddy_arce",
   "date": "1974-07-01",
-  "durationMin": 11,
+  "durationMin": 14,
   "pillars": [
     "P4",
     "P5"
@@ -78,13 +78,42 @@
       "type": "dialogue",
       "script": "dlg.m07_yes",
       "text": "Tell Mayhew yes"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "script": "dlg.m07_revolver",
+      "text": "Mayhew's gift: your old revolver"
+    },
+    {
+      "id": "o9",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.stickup_man",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Stick-up at the Rail's back door",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "tutorial": "shooting: soft lock, cover, reload; non-lethal disarm still possible"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+    }
+  ],
   "checkpoints": [
     "o2",
     "o4",
-    "o6"
+    "o6",
+    "o9"
   ],
   "rewards": {
     "money": 200,
@@ -96,7 +125,9 @@
       "mission.back_stairs"
     ],
     "items": [
-      "item.collection_list_week1"
+      "item.ammo_38",
+      "item.collection_list_week1",
+      "item.revolver_service"
     ],
     "relationships": {
       "char.teddy_arce/char.carmen_arce": 1,
@@ -123,5 +154,5 @@
     "loc.cop_bar"
   ],
   "mobile": "Three walking legs of under two blocks each, with a checkpoint at each. The decisive choice is untimed. If the player has the M5 photo, it adds a fourth option ('Show him the photograph').",
-  "design": "Teddy says yes to buy the Corwin time, and Mayhew promises it stays open through Labor Day (a lie). Showing the photo sets flag.mayhew_saw_photo (applied in the dialogue). The $200 advance is the first week's pay, and P1 makes it feel heavy."
+  "design": "Teddy says yes to buy the Corwin time, and Mayhew promises it stays open through Labor Day (a lie). Showing the photo sets flag.mayhew_saw_photo (applied in the dialogue). The $200 advance is the first week's pay, and P1 makes it feel heavy. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }

@@ -114,7 +114,7 @@ S("dlg.m04_baek_envelope", "M4 o5. W 29th St. A Carriers' truck idles outside Se
   (VIL, "radio", "Unit four. Collect at twenty-nine and Broadway. Don't take no for an answer."),
   (BAE, "calm", "You want twenty dollars for protection. From what? Please, show me."),
   (BAE, "calm", "I pay for delivery. I pay rent. I pay tax. What is this, the weather?"),
-  C(ch("Step in.", "l_in", setRelationships={f"{T}/{BAE}": 1, f"{T}/{AUG}": -1}),
+  C(ch("Step in.", "l_in", setFlags=["flag.teddy_stepped_in_baek"], setRelationships={f"{T}/{BAE}": 1, f"{T}/{AUG}": -1}),
     ch("Walk on.", "l_on", setRelationships=rel(T, BAE, -1))),
   {"id": "l_in", "speaker": T, "emotion": "firm", "text": "He's asking a fair question, pal. What's the twenty for?"},
   {"id": "l_in2", "speaker": BAE, "emotion": "dry", "text": "Thank you. Now two of us are confused. Better.", "goto": "l_end"},
@@ -252,6 +252,38 @@ S("dlg.m09_concourse", "M9 o10. Penn Station concourse, under the Garden. Firewo
   {"id": "l_keep2", "speaker": D, "emotion": "cool", "text": "Honest. In a way that doesn't help anybody. Okay.", "goto": "l_end"},
   {"id": "l_end", "speaker": D, "emotion": "warm", "text": "Delphine. Since we've been shot at together. Well, almost."},
   {"id": "l_end2", "speaker": T, "emotion": "warm", "text": "Teddy. Happy Fourth, Delphine."})
+
+# ---------------- COMBAT REWORK additions (26 Nov 2026)
+S("dlg.m01_stickup_after", "M1 o8. After the stick-up at the desk. A resident ran for the police call box on Broadway.",
+  (ODE, "shaken", "Mr. Arce. Mr. Lefkowitz ran for the call box. In his slippers."),
+  (T, "inner", "Call box on the corner. Somebody gives a description. A report gets written. Mine."),
+  (T, "flat", "He was a trucker out of work, Mrs. Pruitt. He'll sleep it off at Midtown Central."),
+  (ODE, "dry", "And you'll sleep it off behind the glass. Here. The master keys. Manny forgot them."))
+S("dlg.m02_movers_after", "M2 o4c. The 11th-floor corridor after Prentiss's two 'movers' have been thrown down the stairs.",
+  (HOL, "cheerful", "Shipmate! Two of 'em! Like the old days in Marseille!"),
+  (T, "breathless", "They said they were moving your furniture, Mr. Hollis."),
+  (HOL, "cheerful", "My furniture is a chair and a radio. I'm keeping both."))
+S("dlg.m03_runner_caught", "M3 o6c. The fare who ran with Delroy's cash box, caught on W 41st St.",
+  ("npc.fare_runner", "panicked", "Okay! Okay! It's all there! I got laid off Tuesday, man!"),
+  (T, "tired", "So did half the city. Give me the box. Go home."),
+  (T, "inner", "Somebody on the corner saw that. A report with my shirt in it. Note to self: new shirt."))
+S("dlg.m04_brawl_after", "M4 o5c. The Carriers' men are gone. Baek sits on a crate of wigs, his glasses cracked.",
+  (BAE, "dry", "Thank you. Now two of us are bruised. Better than one."),
+  (DWA, "cocky", "Used-to-be! You hit like a cop! I mean that nice!"),
+  (T, "flat", "They'll be back with friends, Mr. Baek."),
+  (BAE, "calm", "Then I'll need more wigs to sit on."))
+S("dlg.m06_after_fight", "M6 o5c. W 38th St. Lonnie's boys are on the pavement. Delphine counts the envelope.",
+  (D, "breathless", "Rule three: when they see you, you're already gone. Three and a half: unless they grab."),
+  (TIN, "awed", "Del. You cut his sleeve off. His whole sleeve."),
+  (D, "brisk", "Ninety-five dollars. All there. Walk with me to the Pennsylvania, Tina."))
+S("dlg.m07_revolver", "M7 o8. The Shamrock Rail, after the yes. Mayhew slides a paper bag along the bar.",
+  (MAY, "low", "Your old service piece. I kept it when they took your shield. Kept it oiled."),
+  (T, "cold", "I gave that up, Carl."),
+  (MAY, "serious", "You gave up the badge. The streets didn't give up anything. Take it."),
+  ("npc.off_duty_cop", "alarmed", "Back door! Somebody's at the back door with a gun!"))
+S("dlg.m08_stairwell", "M8 o3b (barks during the stairwell fight).",
+  (LON, "smooth", "Del, baby. Give me the film and we're square."),
+  (D, "cold", "Rule eleven: nobody's square with you, Lonnie."))
 
 for s in SCRIPTS:
     (OUT / f"{s['id'].split('.', 1)[1]}.json").write_text(json.dumps(s, ensure_ascii=False, indent=2) + "\n")

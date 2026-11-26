@@ -245,6 +245,74 @@ M.append({
  "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10."
 })
 
+
+# ---------------------------------------------------------------- COMBAT REWORK (26 Nov 2026)
+# User: "Full open world and missions like a GTA game". Every Act 1 mission gets an action
+# beat; non-lethal options are always available to Teddy (his arc). Inserted after the named
+# objective. Objective types 'combat' and 'chase' and fail 'player_down' are proposed in
+# ENGINE_REQUESTS (From narrative: 12). Soft-lock aim on touch; no precision free-aim.
+def CB(i, mode, text, targets, **k):
+    o = {"id": i, "type": "combat", "mode": mode, "targets": targets, "nonLethalAllowed": True, "text": text}
+    o.update(k); return o
+COMBAT = {
+ "mission.dusk_on_broadway": {"after": {"o6": [
+    CB("o7", "takedown", "Stop the stick-up at the desk", [{"archetype": "npc.stickup_man", "count": 1}],
+       tutorial="melee + disarm; a witness runs for the Broadway call box (police intro)"),
+    {"id": "o8", "type": "dialogue", "script": "dlg.m01_stickup_after", "text": "Deal with the witness and the call box"}]},
+   "duration": 15, "checkpoints": ["o2", "o4", "o7"], "items": ["item.corwin_master_keys"]},
+ "mission.night_desk": {"after": {"o4": [
+    CB("o4b", "melee", "Throw Prentiss's 'movers' off eleven", [{"archetype": "npc.prentiss_mover", "count": 2}], tutorial="melee combos, using a corridor"),
+    {"id": "o4c", "type": "dialogue", "script": "dlg.m02_movers_after", "text": "Check Mr. Hollis is all right"}]},
+   "duration": 13, "checkpoints": ["o3", "o4b", "o5"]},
+ "mission.hack": {"after": {"o6": [
+    {"id": "o6b", "type": "chase", "target": "npc.fare_runner", "catchDistanceM": 4, "vehicleAllowed": True,
+     "text": "Catch the fare who took the cash box", "note": "He runs down the 1974 one-ways; the route-knowledge shortcut is 41st St westbound."},
+    {"id": "o6c", "type": "dialogue", "script": "dlg.m03_runner_caught", "text": "Get Delroy's cash box back"}]},
+   "duration": 16, "checkpoints": ["o3", "o5", "o6b", "o7"]},
+ "mission.surcharge": {"after": {"o5": [
+    CB("o5b", "melee", "Fight off the Carriers' men", [{"archetype": "npc.carrier_muscle", "count": 2}], weapons=["item.tire_iron"],
+       note="Only if Teddy chose 'Step in'; otherwise they leave and Baek pays (choice-gated, `if`).", **{"if": "flag.teddy_stepped_in_baek"}),
+    {"id": "o5c", "type": "dialogue", "script": "dlg.m04_brawl_after", "text": "Help Mr. Baek up", "if": "flag.teddy_stepped_in_baek"}]},
+   "duration": 17, "checkpoints": ["o2", "o3", "o5", "o5b", "o6"]},
+ "mission.contact_sheet": {"after": {"o7": [
+    {"id": "o8", "type": "evade", "from": ["npc.lisle_driver"], "breakDistanceM": 80, "safeZones": ["loc.hotel_pennsylvania", "loc.herald_sq_store"],
+     "text": "Lisle's driver saw the camera. Lose him.", "fallback": "goto with timeLimitSec 120"}]},
+   "duration": 15, "checkpoints": ["o3", "o5", "o6", "o8"]},
+ "mission.the_club": {"after": {"o5": [
+    CB("o5b", "melee", "Lonnie's boys want the payout", [{"archetype": "npc.lonnie_crew", "count": 2}], weapons=["item.straight_razor"],
+       tutorial="Delphine: fast strikes, dodges, the razor; break away into the crowd"),
+    {"id": "o5c", "type": "dialogue", "script": "dlg.m06_after_fight", "text": "Count the money. Still all there."}]},
+   "duration": 15, "checkpoints": ["o2", "o5", "o5b"]},
+ "mission.yes": {"after": {"o7": [
+    {"id": "o8", "type": "dialogue", "script": "dlg.m07_revolver", "text": "Mayhew's gift: your old revolver"},
+    CB("o9", "firefight", "Stick-up at the Rail's back door", [{"archetype": "npc.stickup_man", "count": 2}], weapons=["item.revolver_service"],
+       tutorial="shooting: soft lock, cover, reload; non-lethal disarm still possible")]},
+   "duration": 14, "checkpoints": ["o2", "o4", "o6", "o9"], "items": ["item.revolver_service", "item.ammo_38"]},
+ "mission.back_stairs": {"after": {"o3": [
+    CB("o3b", "melee", "Lonnie blocks the stairwell", [{"character": "char.lonnie_gage"}], weapons=["item.straight_razor"],
+       note="Lonnie is beaten, not killed (he has an Act 3 arc): `lethal: false` for this target.", lethal=False)]},
+   "duration": 13, "checkpoints": ["o2", "o3b", "o4"]},
+ "mission.independence_day": {"after": {"o8": [
+    CB("o8b", "survive", "Lonnie's crew opens fire on Eighth Ave", [{"archetype": "npc.lonnie_crew", "count": 4}], weapons=["item.revolver_service"],
+       cover=["parked cars", "the post office steps"], durationSec=90, note="Delphine fights as a companion NPC with her razor and snub-nose.")]},
+   "duration": 20, "checkpoints": ["o3", "o5", "o8", "o8b", "o10"]},
+}
+for m in M:
+    c = COMBAT.get(m["id"])
+    if not c: continue
+    objs = []
+    for o in m["objectives"]:
+        objs.append(o)
+        objs.extend(c["after"].get(o["id"], []))
+    m["objectives"] = objs
+    m["durationMin"] = c["duration"]
+    m["checkpoints"] = c["checkpoints"]
+    if c.get("items"): m["rewards"]["items"] = sorted(set(m["rewards"].get("items", []) + c["items"]))
+    if not any(f["type"] == "player_down" for f in m["fail"]):
+        m["fail"] = m["fail"] + [{"type": "player_down", "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."}]
+    m["pillars"] = sorted(set(m["pillars"]))
+    m["design"] = m["design"] + " COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+
 for m in M:
     (OUT / f"{m['id'].split('.',1)[1]}.json").write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n")
 print(len(M), "missions written")

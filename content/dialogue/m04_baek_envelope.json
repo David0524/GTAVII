@@ -26,6 +26,9 @@
         {
           "text": "Step in.",
           "goto": "l_in",
+          "setFlags": [
+            "flag.teddy_stepped_in_baek"
+          ],
           "setRelationships": {
             "char.teddy_arce/char.jung_ho_baek": 1,
             "char.teddy_arce/char.augie_lomax": -1

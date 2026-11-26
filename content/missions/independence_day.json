@@ -10,7 +10,7 @@
     "o8"
   ],
   "date": "1974-07-04",
-  "durationMin": 18,
+  "durationMin": 20,
   "pillars": [
     "P1",
     "P4"
@@ -95,6 +95,28 @@
       "text": "(Teddy)"
     },
     {
+      "id": "o8b",
+      "type": "combat",
+      "mode": "survive",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's crew opens fire on Eighth Ave",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "cover": [
+        "parked cars",
+        "the post office steps"
+      ],
+      "durationSec": 90,
+      "note": "Delphine fights as a companion NPC with her razor and snub-nose."
+    },
+    {
       "id": "o9",
       "type": "evade",
       "from": [
@@ -122,12 +144,17 @@
     {
       "type": "target_lost",
       "objective": "o6"
+    },
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
     }
   ],
   "checkpoints": [
     "o3",
     "o5",
     "o8",
+    "o8b",
     "o10"
   ],
   "rewards": {
@@ -166,5 +193,5 @@
     "loc.penn_station_lockers"
   ],
   "mobile": "Four checkpoints. Switches only at the safe beats (o5 after the handover, o8 at the ambush). The tail is generous; 'spotted' is warned twice before it fails. The escape is solved by Penn Station's two entrances (Eighth Ave and Seventh Ave), so it's route knowledge, not speed. No fighting.",
-  "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10."
+  "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }

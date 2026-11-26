@@ -468,6 +468,17 @@
       ],
       "world": "None.",
       "notes": "Choice in M25: let Mayhew go or bring him to Calloway."
+    },
+    {
+      "id": "flag.teddy_stepped_in_baek",
+      "setBy": [
+        "mission.surcharge"
+      ],
+      "readBy": [
+        "mission.surcharge"
+      ],
+      "world": "None. Gates the Carriers' brawl in M4.",
+      "notes": "Set by the 'Step in' choice in dlg.m04_baek_envelope."
     }
   ]
 }

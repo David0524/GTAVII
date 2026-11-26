@@ -6,7 +6,7 @@
   "chapter": 1,
   "playAs": "char.teddy_arce",
   "date": "1974-06-21",
-  "durationMin": 12,
+  "durationMin": 15,
   "pillars": [
     "P2",
     "P4"
@@ -87,21 +87,50 @@
       "until": "23:00",
       "at": "interior.corwin_lobby",
       "text": "Take the night desk at 11 p.m."
+    },
+    {
+      "id": "o7",
+      "type": "combat",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.stickup_man",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Stop the stick-up at the desk",
+      "tutorial": "melee + disarm; a witness runs for the Broadway call box (police intro)"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "script": "dlg.m01_stickup_after",
+      "text": "Deal with the witness and the call box"
     }
   ],
   "triggers": [
     "trigger.m01_gates_overheard"
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+    }
+  ],
   "checkpoints": [
     "o2",
-    "o4"
+    "o4",
+    "o7"
   ],
   "rewards": {
     "money": 0,
     "setFlags": [],
     "unlock": [
       "mission.night_desk"
+    ],
+    "items": [
+      "item.corwin_master_keys"
     ]
   },
   "npcs": [
@@ -122,5 +151,5 @@
     "loc.corwin_hotel"
   ],
   "mobile": "No fail states. The escort matches the player's pace and waits, so there's no exact pacing on touch. Dialogue segments are gated by route leg. Objective text names real corners. One untimed choice (3 options). Long dusk light keeps the walk readable on small screens.",
-  "design": "Earns the spawn shot. The streetlights come on as the pair walk north (the engine dusk cycle at 20:31 sunset). Mayhew's 'Not anymore' about W 35th St seeds the 1971 secret."
+  "design": "Earns the spawn shot. The streetlights come on as the pair walk north (the engine dusk cycle at 20:31 sunset). Mayhew's 'Not anymore' about W 35th St seeds the 1971 secret. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }

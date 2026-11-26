@@ -6,7 +6,7 @@
   "chapter": 1,
   "playAs": "char.teddy_arce",
   "date": "1974-06-24",
-  "durationMin": 14,
+  "durationMin": 16,
   "pillars": [
     "P2",
     "P3"
@@ -77,6 +77,21 @@
       "hint": "Eighth runs uptown. Don't try Seventh."
     },
     {
+      "id": "o6b",
+      "type": "chase",
+      "target": "npc.fare_runner",
+      "catchDistanceM": 4,
+      "vehicleAllowed": true,
+      "text": "Catch the fare who took the cash box",
+      "note": "He runs down the 1974 one-ways; the route-knowledge shortcut is 41st St westbound."
+    },
+    {
+      "id": "o6c",
+      "type": "dialogue",
+      "script": "dlg.m03_runner_caught",
+      "text": "Get Delroy's cash box back"
+    },
+    {
       "id": "o7",
       "type": "goto",
       "to": "loc.penn_hack_stand",
@@ -93,11 +108,16 @@
   "fail": [
     {
       "type": "vehicle_destroyed"
+    },
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
     }
   ],
   "checkpoints": [
     "o3",
     "o5",
+    "o6b",
     "o7"
   ],
   "rewards": {
@@ -131,5 +151,5 @@
     "W 42nd St & 8th Ave"
   ],
   "mobile": "No timers on fares (the meter is flavour). Wrong-way driving is allowed but honked at, and the fare complains, which teaches the one-ways without punishing. Hints are written as a 1974 New Yorker would give directions. The fare to 42nd St shows the Deuce's marquees for the first time.",
-  "design": "P2 tutorial. Each fare follows one avenue's 1974 direction. On the last fare, Teddy passes a woman in an oxblood dress at 8th & W 40th (Delphine, unnamed). It's foreshadowing only, with no interaction."
+  "design": "P2 tutorial. Each fare follows one avenue's 1974 direction. On the last fare, Teddy passes a woman in an oxblood dress at 8th & W 40th (Delphine, unnamed). It's foreshadowing only, with no interaction. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }

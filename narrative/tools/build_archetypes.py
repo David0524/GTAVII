@@ -121,6 +121,14 @@ for pid, desc, area, pal in [("npc.club_maid", "Hotel chambermaid's grey uniform
                              ("npc.parish_priest", "Clerical black, a straw hat, a roof-fund envelope.", "The church on W 31st St", ["#000000", "#FFFFFF"])]:
     a(pid, "loiterer", pal, desc, [], s(("09:00", "20:00", area, "socialize")), 0.0, 0.0, None, scripted=True, note="Side-activity speaker (N5).")
 
+for pid, desc, beh, props, note in [
+    ("npc.stickup_man", "An out-of-work man in a cheap jacket with a cheap gun (adult). Desperate, not a monster.", "walker", ["street-tier handgun"], "M1 and M7 stick-ups. Can be disarmed and let go."),
+    ("npc.prentiss_mover", "A 'mover' in a work shirt who doesn't move furniture.", "worker", ["dolly", "crowbar"], "M2 brawl."),
+    ("npc.fare_runner", "A laid-off man in a short-sleeve shirt who bolts from the cab.", "walker", ["cash box"], "M3 chase."),
+    ("npc.carrier_muscle", "Truck-driver muscle: work shirt, tyre iron.", "worker", ["tire iron"], "M4 brawl."),
+    ("npc.lisle_driver", "Lisle's driver: dark suit, chauffeur's cap in his pocket, a weightlifter's neck.", "driver", ["sedan keys"], "M5 escape.")]:
+    a(pid, beh, ["#2F2F2F", "#8B4513"], desc, props, s(("00:00", "24:00", "Scripted scenes only", "loiter")), 0.0, 0.0, "barks.street_tough", scripted=True, note=note)
+
 for x in A:
     (OUT / f"{x['id'].split('.', 1)[1]}.json").write_text(json.dumps(x, ensure_ascii=False, indent=2) + "\n")
 print(len(A), "archetypes")

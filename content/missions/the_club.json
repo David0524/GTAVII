@@ -6,7 +6,7 @@
   "chapter": 2,
   "playAs": "char.delphine_moore",
   "date": "1974-06-30",
-  "durationMin": 12,
+  "durationMin": 15,
   "pillars": [
     "P1",
     "P3",
@@ -73,6 +73,29 @@
       "text": "Brannock's waiting at 38th St"
     },
     {
+      "id": "o5b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's boys want the payout",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "tutorial": "Delphine: fast strikes, dodges, the razor; break away into the crowd"
+    },
+    {
+      "id": "o5c",
+      "type": "dialogue",
+      "script": "dlg.m06_after_fight",
+      "text": "Count the money. Still all there."
+    },
+    {
       "id": "o6",
       "type": "enter_interior",
       "marker": "interior.arden_lobby",
@@ -85,10 +108,16 @@
       "text": "Marcus has something to show you"
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+    }
+  ],
   "checkpoints": [
     "o2",
-    "o5"
+    "o5",
+    "o5b"
   ],
   "rewards": {
     "money": 0,
@@ -124,5 +153,5 @@
     "8th Ave & W 38th St"
   ],
   "mobile": "Walking only, with no timers. The Brannock scene's choice ('Pay the fifty' or 'Pay, and read his badge') is untimed and both options pay. It teaches that Delphine's power is noticing. Large USE prompt for the handover.",
-  "design": "Shows the women's club as an institution: a table, a book in her head, a Sunday ritual. Sex work is present as context (where the money comes from; the corner) with nothing sexual on screen. Tina's bruise is visible and unexplained. Marcus shows the back stairs, which teaches M8's escape route."
+  "design": "Shows the women's club as an institution: a table, a book in her head, a Sunday ritual. Sex work is present as context (where the money comes from; the corner) with nothing sexual on screen. Tina's bruise is visible and unexplained. Marcus shows the back stairs, which teaches M8's escape route. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }

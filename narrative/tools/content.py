@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 C = ROOT / "content"
 OBJ_TEXT_MAX, LINE_MAX, CHOICE_MAX, CHOICES_MAX = 40, 90, 40, 4
 OBJ_TYPES = {"goto", "enter_vehicle", "deliver", "follow", "enter_interior", "photo", "wait", "dialogue",
-             "escort", "switch_to", "evade"}  # brief contract + accepted engine responses (N4, N5) + request 8
-FAIL_TYPES = {"target_lost", "vehicle_destroyed", "timer", "spotted", "caught"}
+             "escort", "switch_to", "evade", "combat", "chase"}  # brief contract + accepted engine responses (N4, N5) + request 8
+FAIL_TYPES = {"target_lost", "vehicle_destroyed", "timer", "spotted", "caught", "player_down"}
 LEADS = {"char.teddy_arce", "char.delphine_moore", "char.nick_varelas"}
 TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 WEATHER = {"any", "clear", "overcast", "rain"}
@@ -119,6 +119,10 @@ def main():
                 if v and v.startswith("char.") and v not in cast: E(f"{ow}: {k} {v} unknown")
             if o.get("marker") and o["marker"] not in interiors: E(f"{ow}: interior {o['marker']} unknown")
             for z in o.get("safeZones", []): loc_ok(ow, z)
+            if o["type"] == "combat":
+                if o.get("mode") not in ("takedown", "melee", "firefight", "survive", "defend", "eliminate"): E(f"{ow}: bad combat mode")
+                for tg in o.get("targets", []):
+                    if tg.get("character") and tg["character"] not in cast: E(f"{ow}: target {tg['character']} unknown")
             scripts = ([o["script"]] if o.get("script") else []) + o.get("dialogue", [])
             for s in scripts:
                 if s not in dialogue: W(f"{ow}: dialogue {s} not written yet (N5)")

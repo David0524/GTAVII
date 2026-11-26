@@ -45,3 +45,4 @@
 | `flag.epilogue_started` | mission.labor_day | ambient, boundaries | Epilogue world set (date 1974-10-01). |  |
 | `flag.arson_stopped` | mission.fire_watch | ambient, mission.the_march | Corwin tenants sit outside on folding chairs at night; a bedsheet banner reads 'WE STAYED UP'. | Always set: M26 can't end in a fire. |
 | `flag.teddy_spared_mayhew` | mission.the_car | mission.labor_day, epilogue | None. | Choice in M25: let Mayhew go or bring him to Calloway. |
+| `flag.teddy_stepped_in_baek` | mission.surcharge | mission.surcharge | None. Gates the Carriers' brawl in M4. | Set by the 'Step in' choice in dlg.m04_baek_envelope. |

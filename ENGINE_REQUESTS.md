@@ -200,3 +200,25 @@ with a fallback. Validation is in `narrative/tools/content.py`.
 - **Found by:** the N7 static pre-pass (`narrative/N7_PREPASS.md`).
 - **Fallback:** Narrative widens every `dateRange` to its act's range, and missions set
   date-specific ambience through flags.
+
+## From narrative: 11. Lead combat stats (PROPOSED, being agreed with the Gameplay chat)
+User decision, verbatim: "Full open world and missions like a GTA game". Proposal sent to the
+Gameplay chat (session_01H4ZSJ7ih6pW16fwcDhuHtD). Final numbers will replace this table once
+agreed. Scale 1–10 except health.
+| Lead | Health | Handgun | Shotgun | Melee | Sprint | Stamina | Driving | Blend | Memorability | Specials |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Teddy | 100 | 8 | 6 | 6 (takedowns, disarms) | 5 | 5 | 6 | 4 | 6 | **Old Beat:** once a day, gets one report downgraded at Midtown Central if his relationship with Kearney is +2 or more. **Keys:** opens locks faster. |
+| Delphine | 90 | 5 (snub-nose) | 2 | 8 (straight razor) | 9 | 8 | 3 | 9 | 3 | **Evidence:** a photo of a cop taking money cancels his report on her. **Disappear:** breaking pursuit in crowds or two-door buildings is faster. |
+| Nick | 110 | 3 | 4 | 4 | 3 | 3 | 8 | 2 | 9 | **Payroll:** cheaper bribes, and he can buy off a witness before the call box. **Muscle:** hires 1–2 companions for a day. |
+
+## From narrative: 12. Combat objectives in the mission contract
+- `combat`: `{ mode: 'takedown'|'melee'|'firefight'|'survive'|'defend'|'eliminate', targets: [{ archetype, count } | { character, lethal?: false }], nonLethalAllowed: true, weapons?: [item ids], cover?: [...], durationSec? (survive), tutorial? }`.
+  Non-lethal is always allowed for Teddy (his arc). Story-critical characters carry
+  `lethal: false`.
+- `chase`: `{ target, catchDistanceM, vehicleAllowed }`. Catching the target is the goal; route
+  shortcuts on 1974 one-ways are authored in `note`.
+- Fail `player_down`: retry from the last checkpoint. The hospital and arrest flow belongs to
+  Gameplay (CORE_SYSTEMS).
+- **Mobile:** every combat objective is clearable with soft-lock aim on touch.
+- **Fallback:** combat beats become `survive`-style timed objectives with scripted enemies.
+- **Used by:** Act 1 (M1–M9) as of commit 40d2413+. Acts 2–3 are next.

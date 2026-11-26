@@ -11,12 +11,12 @@
 
 ## Notes
 - 26 of 32 story missions have single-day date windows (1, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32). Policy needed so the story never soft-locks (ENGINE_REQUESTS From narrative: 10).
-- Act 1: 9 missions, 115 min of critical path (1.9 h); longest 18 min.
+- Act 1: 9 missions, 138 min of critical path (2.3 h); longest 20 min.
 - Act 2: 12 missions, 168 min of critical path (2.8 h); longest 20 min.
 - Act 3: 11 missions, 164 min of critical path (2.7 h); longest 20 min.
 - Branch B1 is open if flag.branch_a_wire (M12) or flag.nick_flipped (M24 choice). B3 and B4 are always open, so every playthrough reaches an ending.
 - Branch B2 corroborations guaranteed by critical-path rewards: 3 of 4 (flag.have_kearney_list, flag.have_wurtz_locker, flag.photo_file_3). B2 still needs flag.editor_neutralised (optional photo, M27).
-- Critical-path minutes by playAs lead: delphine_moore 101, nick_varelas 107, teddy_arce 239
+- Critical-path minutes by playAs lead: delphine_moore 107, nick_varelas 107, teddy_arce 256
 
 ## Unlock order (breadth-first from M1)
 

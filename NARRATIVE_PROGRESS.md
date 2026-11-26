@@ -657,3 +657,22 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
 - **Next, once the engine ships Phase 7 hooks:** run the engine schema checker over
   `content/`, play every mission headless, and report broken references, unreachable
   triggers and pacing problems. This is the brief's full N7.
+
+### Step 2: combat rework (in progress)
+- **N1:** the leads' gameplay identities are revised. Teddy is the ex-cop with the revolver and
+  non-lethal options. Delphine is the fastest, best in melee, and uses her camera as
+  leverage. Nick is a poor shot who's hard to drop, the best driver, and buys and hires his
+  way. The stats are proposed to the Gameplay chat (ENGINE_REQUESTS 11).
+- **Act 1 (M1–M9):** every mission now has an action beat, starting in M1 with the stick-up at
+  the night desk.
+  - M2: a brawl with the movers.
+  - M3: a chase after the fare runner.
+  - M4: a brawl with the Carriers' men (only if Teddy stepped in).
+  - M5: escaping Lisle's driver.
+  - M6: Delphine's razor tutorial.
+  - M7: Mayhew returns the revolver, then a firefight at the bar's back door.
+  - M8: Lonnie in the stairwell.
+  - M9: a street firefight on Eighth Ave.
+  - Durations rose by 2–3 minutes and checkpoints were re-spaced.
+  - New: 5 archetypes, 7 dialogue scripts, and 1 flag.
+- **Next:** Acts 2–3, including the subway story mission, then step 3.

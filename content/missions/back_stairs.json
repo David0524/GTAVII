@@ -6,7 +6,7 @@
   "chapter": 3,
   "playAs": "char.delphine_moore",
   "date": "1974-07-02",
-  "durationMin": 10,
+  "durationMin": 13,
   "pillars": [
     "P1",
     "P2"
@@ -58,6 +58,23 @@
       "text": "Brannock saw the flash"
     },
     {
+      "id": "o3b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "character": "char.lonnie_gage"
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie blocks the stairwell",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "note": "Lonnie is beaten, not killed (he has an Act 3 arc): `lethal: false` for this target.",
+      "lethal": false
+    },
+    {
       "id": "o4",
       "type": "evade",
       "from": [
@@ -88,10 +105,15 @@
     {
       "type": "caught",
       "note": "Proposed (ENGINE_REQUESTS 8). Fallback: timer."
+    },
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
     }
   ],
   "checkpoints": [
     "o2",
+    "o3b",
     "o4"
   ],
   "rewards": {
@@ -132,5 +154,5 @@
     "loc.bauer_arcade"
   ],
   "mobile": "The chase is on foot and solved by route knowledge (M6 taught the back stairs). Brannock is slower than Delphine and loses her at any door with two exits. There's no aiming; the photo auto-frames. Generous break distance.",
-  "design": "Delphine's power is witnessing. Bauer's arcade is a second safe zone, which seeds his double life. Wurtz is glimpsed in the car, not confronted."
+  "design": "Delphine's power is witnessing. Bauer's arcade is a second safe zone, which seeds his double life. Wurtz is glimpsed in the car, not confronted. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }

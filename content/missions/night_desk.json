@@ -6,7 +6,7 @@
   "chapter": 1,
   "playAs": "char.teddy_arce",
   "date": "1974-06-22",
-  "durationMin": 10,
+  "durationMin": 13,
   "pillars": [
     "P3",
     "P5"
@@ -59,6 +59,26 @@
       "text": "Talk to Mr. Hollis, room 1112"
     },
     {
+      "id": "o4b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.prentiss_mover",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Throw Prentiss's 'movers' off eleven",
+      "tutorial": "melee combos, using a corridor"
+    },
+    {
+      "id": "o4c",
+      "type": "dialogue",
+      "script": "dlg.m02_movers_after",
+      "text": "Check Mr. Hollis is all right"
+    },
+    {
       "id": "o5",
       "type": "enter_interior",
       "marker": "interior.corwin_lobby",
@@ -78,9 +98,15 @@
       "text": "Take the night desk at 11 p.m."
     }
   ],
-  "fail": [],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+    }
+  ],
   "checkpoints": [
     "o3",
+    "o4b",
     "o5"
   ],
   "rewards": {
@@ -113,5 +139,5 @@
     "loc.corwin_hotel"
   ],
   "mobile": "Interior-only hub tutorial: big USE prompts on the desk, the mailboxes, the elevator and room 1112. The elevator ride is a 3-second cut, not a control. No timers.",
-  "design": "Teaches the hub: desk ledger (save), room-key board (fast travel to floors), phone (calls from cast). Prentiss's first friendly offer establishes P5. Bernard reads the notice aloud and names 'Corwin Residential Associates, H. Lisle, counsel'."
+  "design": "Teaches the hub: desk ledger (save), room-key board (fast travel to floors), phone (calls from cast). Prentiss's first friendly offer establishes P5. Bernard reads the notice aloud and names 'Corwin Residential Associates, H. Lisle, counsel'. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 }
