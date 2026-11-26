@@ -123,8 +123,8 @@ Reads as a modern kit or is wrong:
 - **Gaps:** SRO rooms, tenement halls, diners and lunch counters, walk-up stairwells, garment lofts and worn or derelict
   grades are missing. Those are exactly what the Corwin and most of Tier B need. Next searches: DOCUMERICA housing and
   "welfare hotel" sets, HABS tenement documentation (97 Orchard St), and NYPL public-domain items.
-- **Caveat:** HABS rights say "images copied from other sources may be restricted". All 18 HABS items kept are HABS's
-  own 1976 photographs.
+- **Caveat:** HABS rights say "images copied from other sources may be restricted". The 8 HABS items kept are HABS
+  survey photographs dated 1962–1977, not copies from other sources.
 
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
