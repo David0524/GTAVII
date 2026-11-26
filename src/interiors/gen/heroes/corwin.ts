@@ -90,13 +90,20 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
   const cell = k.cell(`floor${floorLabel}_corridor`, [cx0, y0, cz0, L.x1, y0 + H, cz1], f);
   k.portalRect(stairCell, cell, dx0, cz1, dx0 + 0.9, cz1, y0, y0 + 2.1);
   // rooms in front (z < cz0) and behind (z > cz1, left of the stair tower), 3.0 m wide
+  // the view window: back wall (local +z) when the tower lies more inward than sideways, else the corridor end wall
+  const esbLx0 = (ESB.x - u.ox) * u.ux + (ESB.z - u.oz) * u.uz, esbLz0 = (ESB.x - u.ox) * u.nx + (ESB.z - u.oz) * u.nz;
+  const viewBack = bathAndView && esbLz0 > Math.abs(esbLx0) * 0.6;
+  // measured (docs/interiors/corwin_sightline.txt): the tower's upper shaft clears the neighbours only from the north face's
+  // west half; the Broadway (east) end is blocked by taller neighbours. So the bay sits at the corridor end away from Broadway.
+  const bayAtLeft = esbLx0 > 0;
   type Room = { label: string; rc: [number, number, number, number]; front: boolean; door: number };
   const rooms: Room[] = [];
   let n = 1;
   const front = fitRect(c.ring, [cx0, cz0 - 3, L.x1, cz0], [cx0, WALL_T, L.x1, cz0], [], 0.25);
   for (let x = front[2]; x - 2.9 >= front[0]; x -= 3.0) rooms.push({ label: `${floorLabel}${String(n++).padStart(2, '0')}`, rc: [x - 3.0 + 0.06, Math.max(WALL_T, front[1]), x - 0.06, cz0], front: true, door: x - 1.0 });
   const back = fitRect(c.ring, [cx0, cz1, L.x0 - 0.3, cz1 + 2.5], [cx0, cz1, L.x0 - 0.3, cz1 + 4.0], [], 0.25);
-  if (back[3] - back[1] > 2.4) for (let x = back[0]; x + 2.9 <= back[2]; x += 3.0) rooms.push({ label: `${floorLabel}${String(n++).padStart(2, '0')}`, rc: [x + 0.06, cz1, x + 3.0 - 0.06, back[3]], front: false, door: x + 1.0 });
+  const bx0 = back[0] + (viewBack && bayAtLeft ? 1.8 : 0), bx1 = back[2] - (viewBack && !bayAtLeft ? 1.8 : 0);
+  if (back[3] - back[1] > 2.4) for (let x = bx0; x + 2.9 <= bx1; x += 3.0) rooms.push({ label: `${floorLabel}${String(n++).padStart(2, '0')}`, rc: [x + 0.06, cz1, x + 3.0 - 0.06, back[3]], front: false, door: x + 1.0 });
   // assign the story labels: requested labels replace the generic ones (9F is a letter on the 9th floor)
   for (let q = 0; q < open.length && q < rooms.length; q++) {
     const want = open[q].label; const at = /\d{2}$/.test(want) ? Math.min(rooms.length - 1, Math.max(0, parseInt(want.slice(-2), 10) - 1)) : Math.min(rooms.length - 1, 5);
@@ -114,7 +121,10 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
   // the corridor-end window: on the end wall that faces the Empire State (local x direction)
   const esbLx = (ESB.x - u.ox) * u.ux + (ESB.z - u.oz) * u.uz;
   const viewAtLeft = esbLx < 0;
-  if (bathAndView) viewOps.push({ s0: 0.35, s1: 1.25, y0: y0 + 0.8, y1: y0 + 2.4 });
+  if (bathAndView && !viewBack) viewOps.push({ s0: 0.2, s1: 1.4, y0: y0 + 0.75, y1: y0 + 2.45 });
+  // back-wall bay: a 1.5 m window in the corridor's back wall at the end nearest the tower
+  const bayX0 = bayAtLeft ? cx0 + 0.15 : L.x0 - 1.75, bayX1 = bayX0 + 1.5;
+  if (viewBack) opsBack.push({ s0: L.x1 - bayX1, s1: L.x1 - bayX0, y0, y1: y0 + 2.45, depth: 0.12 });
   k.floor(cx0, cz0, L.x1, cz1, y0, tint(M.lino, '#6a5a44'));
   k.box(cx0, y0 - 0.25, cz0, L.x1, y0, cz1, M.concrete, { collide: true, faces: 0b000100 });
   k.ceiling(cx0, cz0, L.x1, cz1, y0 + H, M.ceilingPlaster);
@@ -122,10 +132,26 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
   k.wall(L.x1, cz1, cx0, cz1, y0, y0 + H, HALL_WALL, 1, opsBack);
   k.wall(cx0, cz1, cx0, cz0, y0, y0 + H, HALL_WALL, 1, viewAtLeft ? viewOps : []);
   k.wall(L.x1, cz0, L.x1, cz1, y0, y0 + H, HALL_WALL, 1, viewAtLeft ? [] : viewOps);
-  if (bathAndView) {
+  if (viewBack) {
+    // a short passage north from the corridor to the exterior wall, window at its end
+    const pr = fitRect(c.ring, [bayX0, cz1, bayX1, cz1 + 0.5], [bayX0, cz1, bayX1, cz1 + 24], [], 0.15);
+    const pz1 = Math.max(cz1 + 0.6, pr[3]);
+    const pc = k.cell(`floor${floorLabel}_view`, [bayX0, y0, cz1, bayX1, y0 + H, pz1], f);
+    k.portalRect(cell, pc, bayX1, cz1, bayX0, cz1, y0, y0 + 2.45);
+    k.room(bayX0, cz1, bayX1, pz1, y0, y0 + H, { floor: tint(M.lino, '#6a5a44'), wall: HALL_WALL, ceiling: M.ceilingPlaster }, { z0: [{ s0: 0, s1: 1.5, y0, y1: y0 + 2.45 }], z1: [{ s0: 0.15, s1: 1.35, y0: y0 + 0.75, y1: y0 + 2.45, depth: 0.25 }] });
+    k.portalRect(pc, -1, bayX1 - 0.15, pz1, bayX0 + 0.15, pz1, y0 + 0.75, y0 + 2.45);
+    k.box(bayX0 + 0.15, y0 + 0.75, pz1 + 0.12, bayX1 - 0.15, y0 + 2.45, pz1 + 0.13, M.glass, { glass: true, occlude: false });
+    k.box(bayX0 + 0.1, y0 + 0.72, pz1 - 0.2, bayX1 - 0.1, y0 + 0.76, pz1 + 0.1, M.woodDark, { occlude: false });
+    k.box((bayX0 + bayX1) / 2 - 0.02, y0 + 0.75, pz1 + 0.1, (bayX0 + bayX1) / 2 + 0.02, y0 + 2.45, pz1 + 0.14, M.enamelCream, { occlude: false });
+    P.radiator(k, { x: bayX0 + 0.3, z: pz1 - 0.2, yaw: 0 }, 0.9);
+    P.bareBulb(k, (bayX0 + bayX1) / 2, (cz1 + pz1) / 2, y0 + H, 0.8);
+    k.marker('prop', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'window to the Empire State');
+    k.marker('wait', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'the window at the end of the hall');
+    k.use(cell);
+  } else if (bathAndView) {
     const wx = viewAtLeft ? cx0 : L.x1, sgn = viewAtLeft ? 1 : -1;
-    k.portalRect(cell, -1, wx, cz0 + 0.35, wx, cz0 + 1.25, y0 + 0.8, y0 + 2.4);
-    k.box(wx - 0.01, y0 + 0.8, cz0 + 0.35, wx + 0.01, y0 + 2.4, cz0 + 1.25, M.glass, { glass: true, occlude: false });
+    k.portalRect(cell, -1, wx, cz0 + 0.2, wx, cz0 + 1.4, y0 + 0.75, y0 + 2.45);
+    k.box(wx - 0.01, y0 + 0.75, cz0 + 0.2, wx + 0.01, y0 + 2.45, cz0 + 1.4, M.glass, { glass: true, occlude: false });
     k.box(wx + sgn * 0.02, y0 + 0.78, cz0 + 0.3, wx + sgn * 0.25, y0 + 0.82, cz0 + 1.3, M.woodDark, { occlude: false });
     k.marker('prop', wx + sgn * 0.6, y0, cz0 + 0.8, 'window to the Empire State');
     k.marker('wait', wx + sgn * 0.6, y0, cz0 + 0.8, 'the window at the end of the hall');
