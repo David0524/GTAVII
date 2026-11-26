@@ -1,0 +1,39 @@
+{
+  "id": "dlg.m21_marjorie",
+  "context": "M21 o3 (wire branch). Lisle's building lobby. Marjorie Kell, coat on, keys in hand.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.marjorie_kell",
+      "emotion": "low",
+      "text": "Mr. Arce. Miss Calloway said you'd come. Nobody asks the typist. She asked."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.marjorie_kell",
+      "emotion": "low",
+      "text": "Office key. Cabinet key. Put everything back exactly. He measures the gaps."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.marjorie_kell",
+      "emotion": "low",
+      "text": "And take these. My carbons. Fifteen years. In a laundry bag. Don't ask why laundry.",
+      "setFlags": [
+        "flag.have_marjorie_carbons"
+      ]
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "grateful",
+      "text": "Why help, Miss Kell?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.marjorie_kell",
+      "emotion": "flat",
+      "text": "He never set up my pension. People forget the people who type."
+    }
+  ]
+}

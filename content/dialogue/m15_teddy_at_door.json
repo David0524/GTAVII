@@ -1,0 +1,54 @@
+{
+  "id": "dlg.m15_teddy_at_door",
+  "context": "M15 o8. Vault loading dock, W 30th St, after midnight. Ice steaming. A man in a tan sport coat at the door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Mr. Varelas? I'm here for the monthly. Mayhew sent me."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "incredulous",
+      "text": "Tonight? Look around you. I'm wet to the elbow, I'm buying ice by the ton."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Everybody's got a bad night, sir. The envelope doesn't."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "weary",
+      "text": "…Yiannis, pay the man. What's your name, collector?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Arce. I work nights at the Corwin. On Thirty-First."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.nick_varelas",
+      "emotion": "startled",
+      "text": "The Corwin. I… I own the Corwin. On paper."
+    },
+    {
+      "id": "l7",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Then you own two hundred people in a hot building. Good night, Mr. Varelas."
+    },
+    {
+      "id": "l8",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "I bought a building. Nobody told me there were people in it."
+    }
+  ]
+}

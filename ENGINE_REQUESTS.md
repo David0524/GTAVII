@@ -180,3 +180,4 @@ with a fallback. Validation is in `narrative/tools/content.py`.
   - Brownout Relief starts only when `world.power(area)` is dim or off.
 - **Fallback:** Each activity is expanded into short generated missions (one per pool row)
   with `requires.timeWindow`, unlocked by `unlockedBy`.
+| Line-level relationship conditions and effects | dialogue line `ifRelationship: { "char.<lead>/char.<npc>": ">=3" }`; line `setRelationships`; choice `confirm: "text"` (a confirm step for branch choices) | Gated lines (M18 Yiannis's true count); confirm steps on Branch A and B | Duplicate scripts selected by flags that missions set from relationship thresholds |

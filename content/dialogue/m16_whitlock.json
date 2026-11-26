@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m16_whitlock",
+  "context": "M16 o2. Fifth Avenue Trust, corner office. Whitlock taps a pen on a file.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.gordon_whitlock",
+      "emotion": "smooth",
+      "text": "Nick, the bank loves you. The bank simply loves you less in July."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Gordon. Love is seasonal. Fur is seasonal. October, you'll love me again."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.gordon_whitlock",
+      "emotion": "smooth",
+      "text": "We're not calling the loan. We're inviting it home. By September."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.gordon_whitlock",
+      "emotion": "cool",
+      "text": "And Nick? Someone suggested your vault is… popular collateral. Rumours."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "cold",
+      "text": "Rumours from a man in a white suit, I'd guess."
+    }
+  ]
+}

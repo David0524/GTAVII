@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m15_ballroom",
+  "context": "M15 o1. Hotel Pennsylvania ballroom, a furriers' trade dinner. Chandeliers flicker. Nick at the head table.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "expansive",
+      "text": "Gentlemen. In Kastoria we say the beaver doesn't ask who wears the coat."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "expansive",
+      "text": "I am a beaver. You are all beavers. We work. Somebody else gets warm."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.stavros_kallis",
+      "emotion": "cutting",
+      "text": "Niko, the lights. Even the hotel is losing faith in you."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "joking",
+      "text": "The lights are applauding, Stavros. In Morse code."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "alarmed",
+      "text": "…The lights are applauding all over Thirtieth Street. Excuse me."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m19_wake",
+  "context": "M19 o7. Lobby, evening. Folding chairs. Hollis's radio on the desk. Carmen arrives with food. Prentiss arrives with flowers.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "grieving",
+      "text": "Forty years at sea, and he died in a hotel. He said he wouldn't. He was a liar."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.carmen_arce",
+      "emotion": "gentle",
+      "text": "Mijo. I brought rice. And… Feld left. Last night. The machines are gone."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.mei_lin_chow",
+      "emotion": "flat",
+      "text": "Cutting table sold. He owes us severance. He sends a postcard. From Ponce."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Folks. Terrible thing. Terrible. The owners send their condolences. And flowers."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "cold",
+      "text": "Take your flowers outside, Mr. Prentiss. This room is full."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Hollis's radio stays on the desk. Nobody turns it off."
+    }
+  ]
+}

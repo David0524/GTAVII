@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m14_yiannis",
+  "context": "M14 o4. Varelas & Co. vaults, the cold room. Breath shows. Racks of stored coats in garment bags.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "Mr. Varelas is at the bank. Again. I pay you. Like every month."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "Four hundred coats from uptown sleep here till October. Mink, fox, persian."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "curious",
+      "text": "Lot of money behind one door."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "And one compressor. When the power goes, the coats go. Nobody thinks of that."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "low",
+      "text": "A skin tells you where it was cut. So does a man. You were police, yes?"
+    }
+  ]
+}
