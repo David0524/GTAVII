@@ -149,7 +149,7 @@ export async function runInteriorsTest() {
     const wg = new THREE.BufferGeometry();
     wg.setAttribute('position', new THREE.Float32BufferAttribute(winAll.position, 3)); wg.setAttribute('normal', new THREE.Float32BufferAttribute(winAll.normal, 3));
     wg.setAttribute('wuv', new THREE.Float32BufferAttribute(winAll.wuv, 2)); wg.setAttribute('wtan', new THREE.Float32BufferAttribute(winAll.wtan, 3)); wg.setAttribute('wdat', new THREE.Float32BufferAttribute(winAll.wdat, 4));
-    wg.setIndex(winAll.index); const wm = new THREE.Mesh(wg, wroom.material); wm.name = 'tierC_windows'; scene.add(wm); windowCount = winAll.index.length / 6;
+    wg.setIndex(winAll.index); const wm = new THREE.Mesh(wg, wroom.material); wm.name = 'tierC_windows'; wm.visible = params.get('tierC') !== '0'; scene.add(wm); debug.tierCMesh = wm; windowCount = winAll.index.length / 6;
   }
 
   const input = new Input(renderer.domElement);

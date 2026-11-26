@@ -9,7 +9,9 @@
  */
 export const worldClock = {
   date: '1974-06-21',
-  minutes: 20 * 60 + 14, // 8:14 PM EDT
+  // Free-roam / demo default: 12:30 PM, full summer sun on the facades (user, 2026-11-26: "while we're demoing
+  // still, set it to daytime"). Missions set their own start (M1 keeps 8:14 PM); ?time=HH:MM overrides.
+  minutes: 12 * 60 + 30,
   weather: 'clear' as 'clear' | 'overcast' | 'rain',
   /** Game minutes per real second. 1440 / (48 * 60) = 0.5 by default; 0 freezes the clock. */
   scale: 1440 / (48 * 60),

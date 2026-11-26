@@ -13,7 +13,8 @@ export interface WorldManifest {
   gridRotationDeg: number;
   chunks: { i: number; j: number; key: string; bytes: number; buildings: number; maxHeight: number }[];
   spawn: { x: number; z: number; heading: number };
-  heroes: { name: string; ids: number[]; x: number; z: number; height: number }[];
+  /** name/short are display names from content/landmarks.json (never raw OSM names); id is the stable key. */
+  heroes: { id: string; name: string; short: string; ids: number[]; x: number; z: number; height: number }[];
   attribution: string;
   stats: Record<string, number>;
 }
@@ -21,7 +22,7 @@ export interface WorldManifest {
 type ChunkState = {
   key: string; cx: number; cz: number; info: WorldManifest['chunks'][number];
   status: 'idle' | 'loading' | 'ready';
-  group?: THREE.Group; lod0?: THREE.Group; lod1?: THREE.Mesh;
+  group?: THREE.Group; lod0?: THREE.Group; lod1?: THREE.Mesh; props?: THREE.Mesh;
   lod: -1 | 0 | 1;
 };
 
@@ -120,6 +121,7 @@ export class World {
       if (c.status === 'ready') {
         if (target === -1 && d > lod1Radius * 1.25) { this.unload(c); continue; }
         this.setLod(c, target);
+        if (c.props) c.props.visible = d <= this.quality.propsRadius;
         if (c.lod === 0) lod0++; else if (c.lod === 1) lod1++;
       }
     }
@@ -180,7 +182,7 @@ export class World {
     const lod1 = new THREE.Mesh(toGeometry(m.buildingsLod1), this.buildingMat); lod1.name = 'lod1';
     group.add(lod0, lod1);
     lod0.visible = false; lod1.visible = false;
-    Object.assign(c, { group, lod0, lod1, status: 'ready', lod: -1 });
+    Object.assign(c, { group, lod0, lod1, props: pr, status: 'ready', lod: -1 });
     group.userData = { chunk: m.key, stats: m.stats };
     this.root.add(group);
     this.stats.ready++;
@@ -198,7 +200,7 @@ export class World {
     if (!c.group) return;
     c.group.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose(); });
     this.root.remove(c.group);
-    Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, status: 'idle', lod: -1 });
+    Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, props: undefined, status: 'idle', lod: -1 });
     this.stats.ready--;
     for (const cb of this.onChunkUnload) cb(c.key);
   }

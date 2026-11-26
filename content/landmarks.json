@@ -1,0 +1,90 @@
+{
+  "note": "Display names for real landmarks carrying real/trademarked names. User decision 2026-11-26 (via oversight): sound-alike renames, 'kinda similar to the actual name'. `real` is dev-only matching (equals world.json hero names) and must never be displayed. Plain place names (Herald Square, Penn Station, Madison Square park, Flatiron, Times Square) stay real. USPTO clearance pending before ship.",
+  "landmarks": [
+    {
+      "id": "lm.macys",
+      "real": "Macy's",
+      "aliases": [
+        "Macys",
+        "Macy's Herald Square"
+      ],
+      "name": "Lacy's",
+      "short": "Lacy's",
+      "sign": "LACY'S · HERALD SQUARE"
+    },
+    {
+      "id": "lm.met_life",
+      "real": "Metropolitan Life Insurance Company Tower",
+      "aliases": [
+        "Met Life Tower",
+        "MetLife Tower",
+        "Metropolitan Life Tower"
+      ],
+      "name": "Metropolitan Lifeline Tower",
+      "short": "Lifeline Tower"
+    },
+    {
+      "id": "lm.ny_life",
+      "real": "New York Life Building",
+      "aliases": [
+        "New York Life"
+      ],
+      "name": "New York Lifelong Building",
+      "short": "NY Lifelong Bldg"
+    },
+    {
+      "id": "lm.msg",
+      "real": "Madison Square Garden",
+      "aliases": [
+        "MSG",
+        "The Garden"
+      ],
+      "name": "Penn Square Garden",
+      "short": "Penn Sq. Garden",
+      "sign": "PENN SQUARE GARDEN"
+    },
+    {
+      "id": "lm.hotel_penn",
+      "real": "Hotel Pennsylvania",
+      "aliases": [
+        "Hotel Penn",
+        "The Pennsylvania"
+      ],
+      "name": "Hotel Pennsylvanian",
+      "short": "Hotel Pennsylvanian",
+      "sign": "HOTEL PENNSYLVANIAN"
+    },
+    {
+      "id": "lm.empire_state",
+      "real": "Empire State Building",
+      "aliases": [
+        "Empire State",
+        "ESB"
+      ],
+      "name": "Empire Estate Building",
+      "short": "Empire Estate",
+      "sign": "EMPIRE ESTATE BUILDING"
+    },
+    {
+      "id": "lm.wtc",
+      "real": "World Trade Center",
+      "aliases": [
+        "Twin Towers",
+        "WTC"
+      ],
+      "name": "World Trading Towers",
+      "short": "Trading Towers"
+    },
+    {
+      "id": "lm.hotel_chelsea",
+      "real": "Hotel Chelsea",
+      "aliases": [
+        "Chelsea Hotel",
+        "The Chelsea"
+      ],
+      "name": "Hotel Kelsey",
+      "short": "Hotel Kelsey",
+      "sign": "HOTEL KELSEY"
+    }
+  ]
+}

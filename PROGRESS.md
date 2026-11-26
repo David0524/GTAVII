@@ -322,6 +322,25 @@ improve, with no frame-time regression on the Low preset.
 10. [ ] Street furniture and call-box POIs with colliders, manholes and steam.
 Not a fit: Gaussian splats, and SSGI or volumetrics on phones.
 
+## Real-device findings and the integration checklist (2026-11-26)
+- **First iPhone report:** iOS 27, Chrome for iOS (WebKit). WebGPU works. Preset Low, DPR 1.13 on
+  a DPR-3 screen, 392k triangles, pinned at 30 Hz.
+  - Shipped responses: a richer perf report (interval, JS and GPU per frame, lock diagnosis, load
+    phases), adaptive DPR on touch, and a props draw distance (Low 180 m).
+  - Waiting on the user's next report from 3f61d34.
+- **Fixed real-device bugs:**
+  - half-canvas after rotation (b83317d, then fd1f496);
+  - slow load (adb6373; title-ready 137 s → 9.6 s headless);
+  - window lights changing while turning (3f61d34; measured by `tools/tests/windows.ts`).
+- **Headless limits (honest):** SwiftShader WebGPU loses its device on larger frames, so WebGPU
+  coverage, look and timing need a real GPU. Headless frames cost about 1.5 s, so the load and
+  frame budgets are proxies.
+- **Integration checklist** (each merge, on the merged result): every stream's tests,
+  `test:viewport`, `test:load`, the windows sweep, the brands check, integrated shots, frame time,
+  and a regression note here. **After the UI and gameplay merges:** the touch-only combined run on
+  a phone-emulated viewport, with screenshots (on foot → fight with lock-on and auto-fire → steal
+  a car → drive with the analog pedals → park).
+
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
 |---|---|---|---|

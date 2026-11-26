@@ -5,3 +5,4 @@ data/raw*/
 .DS_Store
 shots/tmp/
 dist-test/
+dist-*/
