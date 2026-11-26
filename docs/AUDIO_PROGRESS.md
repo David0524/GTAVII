@@ -114,20 +114,20 @@ What will sound like a tech demo (worst first):
    Distant traffic is mostly that in reality too; mid-distance pass-bys are thin because only the
    nearest 6 (High) / 2 (Low) cars are full engines.
 
-## Measurements (`npm run audio:test`, 60 s per run, merged engine data: 132-chunk story-core map with terrain and world clock; all assertions passed)
-Generated 2026-11-26T17:03:08.771Z. Headless Chromium OfflineAudioContext in a CPU-only container: timings are CPU-only, not device numbers.
+## Measurements (`npm run audio:test`, 60 s per run, 132-chunk story-core map, radio stations off; all assertions passed)
+Generated 2026-11-26T17:41:43.855Z. Headless Chromium OfflineAudioContext in a CPU-only container: timings are CPU-only, not device numbers.
 
 Meter self-test: 1 kHz at −23 dBFS reads -22.99 LUFS; fs/4 sine true peak -0.17 dBTP. Limiter torture (impulses ×4, +12 dB bursts, fs/4 sines, 20 kHz sweep): -1.46 dBTP out, 0 safety clamps.
 
 | Scene | Preset / profile | Integrated LUFS (ffmpeg) | True peak dBTP | Short-term max | LRA LU | Limiter >1 dB / max GR | Real voices max / cap | update ms p50 / p95 / p99 / max | Leaked nodes | NaN / denormals |
 |---|---|---|---|---|---|---|---|---|---|---|
-| herald_rush | high / mobile | -15.47 (-15.5) | -1.50 | -11.1 | 7.0 | 1.2 % / -4.3 dB | 36 / 64 | 0.30 / 1.00 / 2.00 / 10.6 | 0 (of 411 wired) | 0 / 0 |
-| side_3am | high / mobile | -26.75 (-26.8) | -11.36 | -22.6 | 6.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.40 / 0.70 / 13.7 | 0 (of 132 wired) | 0 / 0 |
-| eighth_rain | high / mobile | -15.61 (-15.6) | -1.50 | -12.2 | 6.4 | 0.0 % / -1.0 dB | 30 / 64 | 0.30 / 0.80 / 1.70 / 6.5 | 0 (of 323 wired) | 0 / 0 |
-| herald_rush | high / homeTheatre | -22.52 (-22.5) | -1.50 | -16.5 | 10.9 | 0.9 % / -2.7 dB | 36 / 64 | 0.30 / 0.90 / 1.90 / 6.7 | 0 (of 411 wired) | 0 / 0 |
-| side_3am | high / homeTheatre | -36.23 (-36.2) | -20.79 | -32.1 | 6.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.40 / 0.80 / 4.3 | 0 (of 132 wired) | 0 / 0 |
-| eighth_rain | high / homeTheatre | -23.36 (-23.4) | -5.17 | -17.7 | 9.6 | 0.0 % / 0.0 dB | 30 / 64 | 0.30 / 0.80 / 1.80 / 13.6 | 0 (of 323 wired) | 0 / 0 |
-| herald_rush | low / mobile | -16.44 (-16.4) | -1.87 | -13.8 | 4.5 | 0.0 % / 0.0 dB | 24 / 24 | 0.20 / 0.70 / 1.50 / 4.6 | 0 (of 323 wired) | 0 / 0 |
+| herald_rush | high / mobile | -15.47 (-15.5) | -1.50 | -11.1 | 7.0 | 1.2 % / -4.3 dB | 35 / 64 | 0.30 / 0.80 / 1.90 / 10.1 | 0 (of 411 wired) | 0 / 0 |
+| side_3am | high / mobile | -26.75 (-26.8) | -11.36 | -22.6 | 6.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.30 / 0.60 / 7.4 | 0 (of 132 wired) | 0 / 0 |
+| eighth_rain | high / mobile | -15.61 (-15.6) | -1.50 | -12.2 | 6.4 | 0.0 % / -1.0 dB | 30 / 64 | 0.20 / 0.70 / 1.60 / 5.4 | 0 (of 323 wired) | 0 / 0 |
+| herald_rush | high / homeTheatre | -22.52 (-22.5) | -1.50 | -16.5 | 10.9 | 0.9 % / -2.7 dB | 35 / 64 | 0.30 / 0.80 / 1.60 / 6.5 | 0 (of 411 wired) | 0 / 0 |
+| side_3am | high / homeTheatre | -36.23 (-36.2) | -20.79 | -32.1 | 6.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.30 / 0.60 / 6.1 | 0 (of 132 wired) | 0 / 0 |
+| eighth_rain | high / homeTheatre | -23.36 (-23.4) | -5.17 | -17.7 | 9.6 | 0.0 % / 0.0 dB | 30 / 64 | 0.20 / 0.70 / 1.40 / 10.5 | 0 (of 323 wired) | 0 / 0 |
+| herald_rush | low / mobile | -16.44 (-16.4) | -1.87 | -13.8 | 4.5 | 0.0 % / 0.0 dB | 24 / 24 | 0.20 / 0.60 / 1.40 / 4.6 | 0 (of 323 wired) | 0 / 0 |
 
 | Session (scenes back to back) | Integrated LUFS | Target | True peak dBTP | LRA LU |
 |---|---|---|---|---|
@@ -136,10 +136,10 @@ Meter self-test: 1 kHz at −23 dBFS reads -22.99 LUFS; fs/4 sine true peak -0.1
 
 | Scene | Octave bands 63..8k (dB) | L/R correlation | Bank MB (budget) | Mean update parts (ms) |
 |---|---|---|---|---|
-| herald_rush (high) | -23.9 / -22.9 / -23.4 / -25.2 / -28.4 / -32.6 / -37.6 / -43.6 | 0.604 | 38.1 (58), evicted 0, streamed 4 | canyon 0.019, radio 0.006, ambience 0.105, vehicles 0.083, footsteps 0.028, voices 0.204 |
-| side_3am (high) | -34.4 / -33.8 / -34.8 / -37.2 / -40.8 / -45.4 / -51.1 / -58.1 | 0.4 | 38.1 (58), evicted 0, streamed 4 | canyon 0.014, radio 0.003, ambience 0.040, vehicles 0.032, footsteps 0.005, voices 0.057 |
-| eighth_rain (high) | -24.5 / -23.5 / -24.1 / -26 / -28.4 / -31 / -34.2 / -38.6 | 0.756 | 38.1 (58), evicted 0, streamed 4 | canyon 0.018, radio 0.004, ambience 0.095, vehicles 0.058, footsteps 0.017, voices 0.165 |
-| herald_rush (low) | -24 / -24.1 / -24.7 / -26.1 / -28.8 / -33 / -38.1 / -44.4 | 0.647 | 22.6 (23), evicted 4, streamed 4 | canyon 0.013, radio 0.004, ambience 0.086, vehicles 0.046, footsteps 0.013, voices 0.134 |
+| herald_rush (high) | -23.9 / -22.9 / -23.4 / -25.2 / -28.4 / -32.6 / -37.6 / -43.6 | 0.604 | 38.1 (58), evicted 0, streamed 4 | canyon 0.019, radio 0.004, ambience 0.089, vehicles 0.071, footsteps 0.025, voices 0.171 |
+| side_3am (high) | -34.4 / -33.8 / -34.8 / -37.2 / -40.8 / -45.4 / -51.1 / -58.1 | 0.4 | 38.1 (58), evicted 0, streamed 4 | canyon 0.013, radio 0.003, ambience 0.039, vehicles 0.029, footsteps 0.004, voices 0.055 |
+| eighth_rain (high) | -24.5 / -23.5 / -24.1 / -26 / -28.4 / -31 / -34.2 / -38.6 | 0.756 | 38.1 (58), evicted 0, streamed 4 | canyon 0.015, radio 0.003, ambience 0.086, vehicles 0.053, footsteps 0.017, voices 0.152 |
+| herald_rush (low) | -24 / -24.1 / -24.7 / -26.1 / -28.8 / -33 / -38.1 / -44.4 | 0.647 | 22.6 (23), evicted 4, streamed 4 | canyon 0.013, radio 0.003, ambience 0.081, vehicles 0.044, footsteps 0.009, voices 0.118 |
 
 Failures: none
 
