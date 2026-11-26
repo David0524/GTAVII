@@ -339,16 +339,18 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
     - Deuce arcade $50k (17.7 h), garage $65k (19.4 h), rooming house $90k (21.9 h), and Nick's supper club $150k (25.5 h), the last and dearest.
     - Weekly trouble scales with the business.
   - **Sinks:** a showroom with new cars ($7.8k coupe, $9.5k luxury sedan, $16.5k limousine), the tailor and a gold watch. Rent, clothes, guns and tokens stay at period prices.
-  - **The 25 h run (seed 1974; asserted across 5 seeds, typical and best-choice play):**
-    - the starter at 2.2–6.1 h (Act 1's pay sets this: Teddy crosses $1k after mission 7);
-    - mid tier at 8.5 / 11.1 / 11.1 / 11.2 / 12.7 h (median 11.1);
-    - with the best-paying choices, the Deuce arcade at 21.6–23.3 h; typical play buys nothing big before 18 h;
-    - the story ends at about 24 h;
-    - story-end net worth $97–113k in typical play: about $20k Teddy, $18k Delphine, $47k Nick, plus businesses, after a premium car, suits and a watch each. With the best choices it's about $175–180k.
+  - **The 25 h run (narrative 0912179; seed 1974; asserted across 5 seeds, typical and best-choice play):**
+    - Inputs:
+      - story pay of $112,300 gross, with Act 1 front-loaded;
+      - Brownout's $6k is a debt, repaid automatically from Nick's next income (Cold Storage);
+      - 52 one-off side pieces ($42.9k in all; the $5k+ jobs open from Act 2, and their heat sometimes costs a bribe). A side-content player takes about half their free-roam turns on them, about 20–30 pieces in 25 h.
+    - Results:
+      - the starter at 1.3–3.3 h;
+      - mid tier at 8.6 / 8.6 / 8.7 / 8.9 / 11.4 h;
+      - with the best-paying choices, the Deuce arcade at 20.2–21.4 h; typical play buys nothing big before 18 h;
+      - the story ends at about 22 h;
+      - story-end net worth $114–125k in typical play, about $31–47k Teddy, $18–25k Delphine and $45–56k Nick, after a premium car, suits and a watch.
   - **No runaway:** a free-roam-only grinder makes under 25% of what the story pays in the same 25 h.
-  - **Two narrative follow-ups:**
-    - Brownout charges Nick $6k at mission 15, but he has about $300 then; Cold Storage's $25k comes three missions later. Today the charge takes what he has.
-    - Side-content pay isn't in yet; narrative proposes $50–$1,500 with a few $5k+ jobs.
   - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
     witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
 - **Content: placeholders by default; narrative's content on request.** `?gameplay=1&content=narrative` runs the scene on narrative's items, guns, shops and precincts through the adapter. It reads the real `/content` files once narrative's branch is merged, and gameplay's test snapshot until then; both load lazily. The snapshot matched narrative's latest files on 2026-11-26. Frames 18–19 show their shops, names and 1974 prices in the browser. Gameplay's archetype guns stay registered so NPC loadouts resolve. It isn't the default yet, because the recorded scenarios and the director script still use placeholder IDs.

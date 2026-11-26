@@ -8,7 +8,7 @@ import { Economy } from './index';
 import type { ActivityDef } from './activities';
 import { DELPHINE, GAME_HOURS_PER_REAL_HOUR, NICK, TEDDY, usd } from './types';
 import { MAX_OUTSTANDING } from './loans';
-import { storyRatePerRealHour, type StoryMission } from './story';
+import { storyRatePerRealHour, type SidePiece, type StoryMission } from './story';
 
 /**
  * Deterministic headless economy simulation (ECONOMY.md "balance targets").
@@ -36,13 +36,15 @@ export interface SimOptions {
   /** Story missions (narrative's pay table). With a story, missions are finite and pay per lead in story order;
    *  without one, missions pay a flat `missionCentsPerRealHour` (the old reference model). */
   story?: readonly StoryMission[];
+  /** one-off side content (completion payouts), played among free roam */
+  side?: readonly SidePiece[];
   /** which choice outcomes the player takes: none, or the best-paying one in each mission */
   branches?: 'none' | 'best';
   /** free-roam-only stress policy: always take the best known earner instead of a mixed menu */
   greedy?: boolean;
 }
 /** With narrative's story: an 8.7 h critical path played among side content finishes around 22-25 h. */
-export const STORY_DEFAULTS = { realHours: 25, missionShare: 0.36 } as const;
+export const STORY_DEFAULTS = { realHours: 25, missionShare: 0.4 } as const;
 export const DEFAULTS = { seed: 1974, realHours: 20, missionCentsPerRealHour: usd(150), missionShare: 0.6, stintHours: 50 } as const;
 /** cents per game hour of mission play */
 export const missionRate = (o: SimOptions = {}) => (o.story ? storyRatePerRealHour(o.story) : o.missionCentsPerRealHour ?? DEFAULTS.missionCentsPerRealHour) / GAME_HOURS_PER_REAL_HOUR;
@@ -110,7 +112,7 @@ export function measureRates(o: SimOptions = {}): Rates {
 // ---------------------------------------------------------------------------------------------
 // 2. The 20-hour playthrough
 export interface Checkpoint { realHour: number; gameHour: number; cash: Record<string, number>; total: number }
-export interface Earnings { mission: number; legal: number; crime: number; gamble: number; property: number }
+export interface Earnings { mission: number; legal: number; crime: number; gamble: number; property: number; side: number }
 export interface SimResult {
   seed: number; gameHours: number; realHours: number;
   curve: Checkpoint[];
@@ -146,9 +148,9 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
   const total = () => LEADS.reduce((a, l) => a + inv.ensure(l).money + inv.ensure(l).savings, 0);
   const startTotal = total();
 
-  const earned: Earnings = { mission: 0, legal: 0, crime: 0, gamble: 0, property: 0 };
+  const earned: Earnings = { mission: 0, legal: 0, crime: 0, gamble: 0, property: 0, side: 0 };
   const bought: SimResult['bought'] = [];
-  const hoursBy: Earnings = { mission: 0, legal: 0, crime: 0, gamble: 0, property: 0 };
+  const hoursBy: Earnings = { mission: 0, legal: 0, crime: 0, gamble: 0, property: 0, side: 0 };
   const spent: Record<string, number> = {};
   const attempts: Record<string, number> = {};
   const bucket = (reason: string): keyof Earnings | null => reason.startsWith('job.') ? 'legal' : reason === 'till' ? 'property' : reason.startsWith('gamble') || reason === 'number' ? null : ['robbery', 'safe', 'fence', 'chop'].includes(reason) || reason.startsWith('crime.') ? 'crime' : null;
@@ -228,6 +230,22 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
 
   // story missions: in order, each paying its leads' wallets (narrative's moneyByLead), choices per `branches`
   let storyIdx = 0; let storyEndH: number | null = null;
+  const debts = new Map<string, number>();
+  // side content: each piece once; the $5k+ jobs open from Act 2, the rest any time
+  const sideLeft = [...(o.side ?? [])];
+  const playSide = (lead: string): boolean => {
+    const act2 = (o.story?.[storyIdx - 1]?.act ?? 1) >= 2;
+    const i = sideLeft.findIndex((x) => (x.leads.includes('any') || x.leads.includes(lead)) && (x.cents < usd(5000) || act2));
+    if (i < 0) return false;
+    const x = sideLeft.splice(i, 1)[0];
+    const len = (x.durationMin / 60) * GAME_HOURS_PER_REAL_HOUR;
+    advance(len); hoursBy.side += len; attempts['side'] = (attempts['side'] ?? 0) + 1;
+    if (x.cents > 0) { inv.addMoney(lead, x.cents, 'side'); earned.side += x.cents; }
+    else if (x.cents < 0) inv.payUpTo(lead, -x.cents, 'side cost');
+    // heat 0-3: the hotter jobs sometimes need a bribe (about 10% of the take)
+    if (x.heat >= 2 && rng.chance(0.15 * x.heat)) inv.payUpTo(lead, Math.round(Math.max(x.cents, usd(500)) * 0.1), 'bribe');
+    return true;
+  };
   const playMission = (lead: string): boolean => {
     if (!o.story) {
       const len = 15, pay = Math.round(mRate * len * rng.range(0.85, 1.15));
@@ -238,7 +256,14 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     storyIdx++; missions++;
     const len = (m.durationMin / 60) * GAME_HOURS_PER_REAL_HOUR;
     advance(len, 'mission'); hoursBy.mission += len;
-    const payOut = (who: string, c: number) => { if (c >= 0) { inv.addMoney(who, c, 'mission'); earned.mission += c; } else { inv.payUpTo(who, -c, 'mission cost'); earned.mission += c; } };
+    const payOut = (who: string, c: number) => {
+      if (c < 0) { inv.payUpTo(who, -c, 'mission cost'); earned.mission += c; return; }
+      earned.mission += c;
+      // a story debt (Brownout) comes out of the lead's next income first
+      const d = Math.min(debts.get(who) ?? 0, c); if (d > 0) { debts.set(who, (debts.get(who) ?? 0) - d); spent['debt'] = (spent['debt'] ?? 0) + d; c -= d; }
+      if (c > 0) inv.addMoney(who, c, 'mission');
+    };
+    if (m.debt) debts.set(m.debt.lead, (debts.get(m.debt.lead) ?? 0) + m.debt.cents);
     for (const [who, c] of Object.entries(m.pay)) payOut(who, c);
     if (o.branches === 'best' && m.branches.length) { const b = [...m.branches].sort((x, y) => y.cents - x.cents)[0]; if (b.cents > 0) payOut(b.lead, b.cents); }
     if (storyIdx === o.story.length) storyEndH = (eco.nowH() - startH) / GAME_HOURS_PER_REAL_HOUR;
@@ -266,6 +291,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
       }
       advance(1); continue;
     }
+    if (sideLeft.length && rng.chance(0.5) && playSide(lead)) continue; // a side-content player takes about half their free-roam turns on it
     const roll = rng.next();
     if (roll < 0.40) {
       const id = tryList(lead, LEGAL) ?? (cash(lead) < usd(30) ? 'job.garment' : null);

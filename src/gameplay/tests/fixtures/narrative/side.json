@@ -1,0 +1,529 @@
+{
+ "_source": "narrative claude/sharp-maxwell-jnb6hr 0912179 content/side/*.json (completion payouts)",
+ "side": [
+  {
+   "id": "mission.side_baby_cab",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 8,
+   "heat": 1,
+   "money": 0
+  },
+  {
+   "id": "mission.side_brownout_relief",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 150
+  },
+  {
+   "id": "mission.side_bryant_brawl",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 6,
+   "heat": 1,
+   "money": 60
+  },
+  {
+   "id": "mission.side_bulldog_scoop",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 18,
+   "heat": 1,
+   "money": 400
+  },
+  {
+   "id": "mission.side_buyers_banquet",
+   "leads": [
+    "char.nick_varelas"
+   ],
+   "act": null,
+   "durationMin": 25,
+   "heat": 0,
+   "money": 3500
+  },
+  {
+   "id": "mission.side_chop_list",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 35,
+   "heat": 3,
+   "money": 6000
+  },
+  {
+   "id": "mission.side_club_crisis",
+   "leads": [
+    "char.delphine_moore"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 1,
+   "money": 0
+  },
+  {
+   "id": "mission.side_club_ious",
+   "leads": [
+    "char.delphine_moore"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_collections_marked",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 2,
+   "money": 1500
+  },
+  {
+   "id": "mission.side_corner_pocket",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 800
+  },
+  {
+   "id": "mission.side_desk_requests",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 120
+  },
+  {
+   "id": "mission.side_fence_wants",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 30,
+   "heat": 3,
+   "money": 5500
+  },
+  {
+   "id": "mission.side_fight_door",
+   "leads": [
+    "char.teddy_arce",
+    "char.nick_varelas"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 1,
+   "money": 900
+  },
+  {
+   "id": "mission.side_fire_escape_gardens",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_four_pianos",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 25,
+   "heat": 0,
+   "money": 400
+  },
+  {
+   "id": "mission.side_garden_runaway",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 1,
+   "money": 40
+  },
+  {
+   "id": "mission.side_garment_rush",
+   "leads": [
+    "char.teddy_arce",
+    "char.delphine_moore"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 300
+  },
+  {
+   "id": "mission.side_hack_license",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 10,
+   "heat": 0,
+   "money": -25
+  },
+  {
+   "id": "mission.side_hack_turns",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 200
+  },
+  {
+   "id": "mission.side_hill_races",
+   "leads": [
+    "char.nick_varelas",
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 25,
+   "heat": 3,
+   "money": 5000
+  },
+  {
+   "id": "mission.side_hollis_postcards",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_hydrant_war",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 10,
+   "heat": 1,
+   "money": 0
+  },
+  {
+   "id": "mission.side_insomnia_drives",
+   "leads": [
+    "char.nick_varelas"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_last_train",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 12,
+   "heat": 1,
+   "money": 250
+  },
+  {
+   "id": "mission.side_locksmith",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 300
+  },
+  {
+   "id": "mission.side_lost_tourists",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 5,
+   "heat": 0,
+   "money": 20
+  },
+  {
+   "id": "mission.side_marquee_letters",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 100
+  },
+  {
+   "id": "mission.side_monte",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 10,
+   "heat": 2,
+   "money": 700
+  },
+  {
+   "id": "mission.side_night_rate_stunts",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 1,
+   "money": 1200
+  },
+  {
+   "id": "mission.side_numbers_runner",
+   "leads": [
+    "char.delphine_moore",
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 2,
+   "money": 500
+  },
+  {
+   "id": "mission.side_old_beat",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_otb_tips",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 2500
+  },
+  {
+   "id": "mission.side_own_business",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 10,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_passage_shops",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 1,
+   "money": 1500
+  },
+  {
+   "id": "mission.side_photo_night_desk",
+   "leads": [
+    "char.delphine_moore"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 1,
+   "money": 600
+  },
+  {
+   "id": "mission.side_pigeon_bands",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 25,
+   "heat": 0,
+   "money": 300
+  },
+  {
+   "id": "mission.side_pigeon_commodore",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 200
+  },
+  {
+   "id": "mission.side_practice_chair",
+   "leads": [
+    "char.delphine_moore"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_projectionist",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_purse_snatch",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 5,
+   "heat": 1,
+   "money": 50
+  },
+  {
+   "id": "mission.side_rent_day",
+   "leads": [
+    "char.nick_varelas"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 2000
+  },
+  {
+   "id": "mission.side_rizo_147",
+   "leads": [
+    "char.delphine_moore"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 1,
+   "money": 0
+  },
+  {
+   "id": "mission.side_runaway_rack",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 8,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_skip_board",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 35,
+   "heat": 3,
+   "money": 7500
+  },
+  {
+   "id": "mission.side_stuck_elevator",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 12,
+   "heat": 0,
+   "money": 150
+  },
+  {
+   "id": "mission.side_tar_beach",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 8,
+   "heat": 0,
+   "money": 10
+  },
+  {
+   "id": "mission.side_telegrams",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 20,
+   "heat": 0,
+   "money": 150
+  },
+  {
+   "id": "mission.side_the_lost_husband",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 30,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_three_am_phone",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 25,
+   "heat": 1,
+   "money": 0
+  },
+  {
+   "id": "mission.side_wanted_1971",
+   "leads": [
+    "char.teddy_arce"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_water_tank_radio",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 0
+  },
+  {
+   "id": "mission.side_weather_prophet",
+   "leads": [
+    "any"
+   ],
+   "act": null,
+   "durationMin": 15,
+   "heat": 0,
+   "money": 50
+  }
+ ]
+}

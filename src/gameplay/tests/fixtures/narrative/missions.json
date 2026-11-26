@@ -1,5 +1,5 @@
 {
- "_source": "narrative claude/sharp-maxwell-jnb6hr f0a96c9 content/missions/*.json (order, duration, play-as and rewards only)",
+ "_source": "narrative claude/sharp-maxwell-jnb6hr 0912179 content/missions/*.json (order, duration, play-as, rewards incl. debt)",
  "missions": [
   {
    "id": "mission.dusk_on_broadway",
@@ -9,7 +9,8 @@
    "durationMin": 15,
    "money": 0,
    "moneyByLead": {},
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.night_desk",
@@ -21,7 +22,8 @@
    "moneyByLead": {
     "char.teddy_arce": 120
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.hack",
@@ -29,11 +31,12 @@
    "act": 1,
    "playAs": "char.teddy_arce",
    "durationMin": 16,
-   "money": 180,
+   "money": 380,
    "moneyByLead": {
-    "char.teddy_arce": 180
+    "char.teddy_arce": 380
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.surcharge",
@@ -41,11 +44,12 @@
    "act": 1,
    "playAs": "char.teddy_arce",
    "durationMin": 17,
-   "money": 250,
+   "money": 450,
    "moneyByLead": {
-    "char.teddy_arce": 250
+    "char.teddy_arce": 450
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.contact_sheet",
@@ -53,11 +57,12 @@
    "act": 1,
    "playAs": "char.teddy_arce",
    "durationMin": 15,
-   "money": 400,
+   "money": 500,
    "moneyByLead": {
-    "char.teddy_arce": 400
+    "char.teddy_arce": 500
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.the_club",
@@ -69,7 +74,8 @@
    "moneyByLead": {
     "char.delphine_moore": 450
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.yes",
@@ -77,9 +83,9 @@
    "act": 1,
    "playAs": "char.teddy_arce",
    "durationMin": 14,
-   "money": 1000,
+   "money": 500,
    "moneyByLead": {
-    "char.teddy_arce": 1000
+    "char.teddy_arce": 500
    },
    "moneyIf": [
     {
@@ -88,7 +94,8 @@
      "money": 500,
      "why": "Mayhew pays more to make the photograph go away"
     }
-   ]
+   ],
+   "debt": null
   },
   {
    "id": "mission.back_stairs",
@@ -100,7 +107,8 @@
    "moneyByLead": {
     "char.delphine_moore": 600
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.independence_day",
@@ -113,7 +121,8 @@
     "char.teddy_arce": 2000,
     "char.delphine_moore": 600
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.five_am",
@@ -125,7 +134,8 @@
    "moneyByLead": {
     "char.teddy_arce": 1500
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.tax_day",
@@ -137,7 +147,8 @@
    "moneyByLead": {
     "char.delphine_moore": 1000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.lunch_counter",
@@ -154,7 +165,8 @@
      "money": 1000,
      "why": "Calloway's witness expenses"
     }
-   ]
+   ],
+   "debt": null
   },
   {
    "id": "mission.contact_prints",
@@ -166,7 +178,8 @@
    "moneyByLead": {
     "char.delphine_moore": 1200
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.cold_room",
@@ -178,7 +191,8 @@
    "moneyByLead": {
     "char.teddy_arce": 2000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.brownout",
@@ -186,11 +200,15 @@
    "act": 2,
    "playAs": "char.nick_varelas",
    "durationMin": 18,
-   "money": -6000,
-   "moneyByLead": {
-    "char.nick_varelas": -6000
-   },
-   "moneyIf": []
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": [],
+   "debt": {
+    "lead": "char.nick_varelas",
+    "amount": 6000,
+    "owedTo": "the ice-house men and Wurtz's unit",
+    "repay": "automatic from the lead's next income; loan model per Gameplay"
+   }
   },
   {
    "id": "mission.margin_call",
@@ -202,7 +220,8 @@
    "moneyByLead": {
     "char.nick_varelas": 4000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.the_lease",
@@ -214,7 +233,8 @@
    "moneyByLead": {
     "char.delphine_moore": 1500
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.cold_storage",
@@ -228,7 +248,8 @@
     "char.teddy_arce": 5000,
     "char.delphine_moore": 3500
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.rewiring",
@@ -238,7 +259,8 @@
    "durationMin": 15,
    "money": 0,
    "moneyByLead": {},
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.partners_meeting",
@@ -250,7 +272,8 @@
    "moneyByLead": {
     "char.nick_varelas": 6000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.carbon_copy",
@@ -270,7 +293,8 @@
      "money": 2500,
      "why": "the stolen ledger's cash drawer"
     }
-   ]
+   ],
+   "debt": null
   },
   {
    "id": "mission.the_address",
@@ -284,7 +308,8 @@
     "char.delphine_moore": 1500,
     "char.nick_varelas": 3000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.shoebox",
@@ -296,7 +321,8 @@
    "moneyByLead": {
     "char.delphine_moore": 3000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.flip",
@@ -308,7 +334,8 @@
    "moneyByLead": {
     "char.nick_varelas": 8000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.the_car",
@@ -318,7 +345,8 @@
    "durationMin": 17,
    "money": 0,
    "moneyByLead": {},
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.fire_watch",
@@ -331,7 +359,8 @@
     "char.teddy_arce": 2000,
     "char.delphine_moore": 1500
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.exposure",
@@ -344,7 +373,8 @@
     "char.delphine_moore": 4000,
     "char.nick_varelas": 5000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.the_march",
@@ -354,7 +384,8 @@
    "durationMin": 18,
    "money": 0,
    "moneyByLead": {},
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   },
   {
    "id": "mission.the_ledger",
@@ -389,7 +420,8 @@
      "money": 0,
      "why": "nothing: that's the point"
     }
-   ]
+   ],
+   "debt": null
   },
   {
    "id": "mission.closing",
@@ -418,7 +450,8 @@
      "money": -1,
      "why": "a dollar the wrong way, on purpose"
     }
-   ]
+   ],
+   "debt": null
   },
   {
    "id": "mission.lease",
@@ -437,7 +470,8 @@
      "money": -3000,
      "why": "the shop's first quarter's rent"
     }
-   ]
+   ],
+   "debt": null
   },
   {
    "id": "mission.labor_day",
@@ -451,7 +485,8 @@
     "char.delphine_moore": 6000,
     "char.nick_varelas": 6000
    },
-   "moneyIf": []
+   "moneyIf": [],
+   "debt": null
   }
  ]
 }

@@ -10,7 +10,7 @@ import { Registers } from '../economy/registers';
 import * as G from '../economy/gambling';
 import { Loans } from '../economy/loans';
 import { bareLead, makeRig, measureRates, missionRate, runPlaythrough, type Rate } from '../economy/sim';
-import { storyFromNarrative, storyHours, storyTotal } from '../economy/story';
+import { sideFromNarrative, storyFromNarrative, storyHours, storyTotal } from '../economy/story';
 import { DELPHINE, NICK, TEDDY, usd, type Lot } from '../economy/types';
 import type { CrimeKind } from '../police/crime';
 
@@ -239,8 +239,9 @@ test('economy: serialize / restore round-trips state', () => {
 // Narrative's story pay (claude/sharp-maxwell-jnb6hr f0a96c9; snapshot of content/missions/*.json rewards).
 // User decision (2026-11-26, verbatim): "Yes, but in GTA VI you can really rack up money. Like 10s of thousands".
 const STORY = storyFromNarrative(JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/narrative/missions.json'), 'utf8')).missions);
+const SIDE = sideFromNarrative(JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/narrative/side.json'), 'utf8')).side);
 const rates = measureRates({ story: STORY });
-const mixed = runPlaythrough({ story: STORY });
+const mixed = runPlaythrough({ story: STORY, side: SIDE });
 const perRealHour = (r: Rate) => r.centsPerGameHour * 30;
 
 test('balance: missions are by far the best earner; street work stays modest; risky crime scales; property pays back in hours of play', () => {
@@ -276,8 +277,8 @@ test('balance: missions are by far the best earner; street work stays modest; ri
 
 test('the curve: a starter early, mid tier mid-game, big property late through the big scores; tens of thousands per lead at story end', () => {
   const seeds = [1974, 7, 99, 3, 42];
-  const typical = [mixed, ...seeds.slice(1).map((seed) => runPlaythrough({ seed, story: STORY }))];
-  const best = seeds.map((seed) => runPlaythrough({ seed, story: STORY, branches: 'best' }));
+  const typical = [mixed, ...seeds.slice(1).map((seed) => runPlaythrough({ seed, story: STORY, side: SIDE }))];
+  const best = seeds.map((seed) => runPlaythrough({ seed, story: STORY, side: SIDE, branches: 'best' }));
   for (const r of [...typical, ...best]) {
     assert.ok(r.storyEndH !== null && r.storyEndH >= 20 && r.storyEndH <= 27, `story ends at ${r.storyEndH} h`);
     const first = r.bought[0];
@@ -293,7 +294,12 @@ test('the curve: a starter early, mid tier mid-game, big property late through t
   assert.ok(bigAt.every((h) => h >= 18 && h <= 30), 'big property late, through the big scores');
   for (const r of typical) assert.ok(!r.bought.some((b) => b.tier === 'big' && b.realHour < 18), 'nothing big early');
   // story end: tens of thousands in every wallet
-  for (const r of [...typical, ...best]) for (const [lead, c] of Object.entries(r.final)) assert.ok(c >= usd(10000), `${lead} ends with $${c / 100}`);
+  // (cash plus the businesses each lead bought: a lead who just bought the arcade is rich, not broke)
+  const priceOf = (id: string) => E.DEFAULT_BUSINESSES.find((b) => b.id === id)!.price;
+  for (const r of [...typical, ...best]) for (const [lead, c] of Object.entries(r.final)) {
+    const worth = c + r.bought.filter((b) => b.lead === lead).reduce((a, b) => a + priceOf(b.id), 0);
+    assert.ok(worth >= usd(10000), `${lead} ends worth $${worth / 100}`);
+  }
   const nw = typical.map((r) => r.netWorth / 100).sort((a, b) => a - b);
   console.log(`story-end net worth, typical: $${nw.map((x) => x.toFixed(0)).join(', $')}`);
   assert.ok(nw[0] >= 50000 && nw[nw.length - 1] <= 300000);
@@ -301,6 +307,9 @@ test('the curve: a starter early, mid tier mid-game, big property late through t
   assert.ok(typical.some((r) => (r.spent['premium car'] ?? 0) > 0) && typical.some((r) => (r.spent['tailored suits'] ?? 0) > 0));
   // heat costs money somewhere across the seeds; rent and clothes always
   assert.ok(typical.some((r) => (r.spent.bribe ?? 0) > 0) && typical.every((r) => r.spent.rent > 0 && r.spent.clothes > 0));
+  // Brownout's $6k debt comes out of Nick's next income (M18); side content pays
+  for (const r of typical) assert.equal(r.spent.debt, usd(6000), 'the Brownout debt is repaid from the next income');
+  assert.ok(typical.every((r) => r.earned.side > usd(10000)), 'side content pays thousands');
   // the curve rises and every lead is checkpointed every real hour
   assert.equal(mixed.curve.length, mixed.realHours + 1);
   assert.ok(mixed.curve.at(-1)!.total > mixed.curve[0].total && mixed.curve.every((c) => Object.keys(c.cash).length === 3));
@@ -308,11 +317,12 @@ test('the curve: a starter early, mid tier mid-game, big property late through t
 
 test('no runaway wealth: a free-roam-only grinder earns a fraction of what the story pays', () => {
   const grind = [1974, 7, 99].map((seed) => runPlaythrough({ seed, story: STORY, greedy: true, missionShare: 0 }));
+  // (side content is one-off and excluded here: the grinder farms only the repeatable activities)
   for (const g of grind) assert.ok(g.total - g.startTotal <= 0.25 * storyTotal(STORY), `grinder made $${(g.total - g.startTotal) / 100} in ${g.realHours} h`);
 });
 
 test('simulation is deterministic', () => {
-  const again = runPlaythrough({ story: STORY });
+  const again = runPlaythrough({ story: STORY, side: SIDE });
   assert.deepEqual(JSON.parse(JSON.stringify(again)), JSON.parse(JSON.stringify(mixed)));
 });
 

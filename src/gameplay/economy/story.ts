@@ -18,6 +18,13 @@ export interface StoryMission {
   pay: Record<string, number>;
   /** alternative outcomes, cents */
   branches: { flag: string; lead: string; cents: number; why?: string }[];
+  /** a debt run up in the mission (Brownout), repaid automatically from the lead's next income */
+  debt?: { lead: string; cents: number; owedTo?: string };
+}
+/** One-off side content (content/side/*.json): a completion payout to whoever plays it. */
+export interface SidePiece { id: string; leads: string[]; durationMin: number; heat: number; cents: number }
+export function sideFromNarrative(side: readonly Json[]): SidePiece[] {
+  return side.map((x) => ({ id: x.id, leads: x.leads ?? ['any'], durationMin: Number(x.durationMin ?? 15), heat: Number(x.heat ?? 0), cents: usd(Number(x.money ?? x.rewards?.money ?? 0)) }));
 }
 
 type Json = Record<string, any>;
@@ -34,6 +41,7 @@ export function storyFromNarrative(missions: readonly Json[]): StoryMission[] {
       return {
         id: m.id, number: Number(m.number ?? 0), act: Number(m.act ?? 1), playAs: m.playAs ?? '', durationMin: Number(m.durationMin ?? 15), pay,
         branches: (r.moneyIf ?? []).map((b: Json) => ({ flag: b.flag, lead: b.lead, cents: usd(Number(b.money)), why: b.why })),
+        ...(r.debt ? { debt: { lead: r.debt.lead, cents: usd(Number(r.debt.amount)), owedTo: r.debt.owedTo } } : {}),
       };
     })
     .sort((a, b) => a.number - b.number);
