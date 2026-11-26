@@ -77,7 +77,13 @@ export interface ModelSpec {
   taillamps: { kind: 'band' | 'corner' | 'block' | 'vertical' | 'truck'; y0: number; y1: number };
   bumper: { kind: 'chrome' | '5mph' | 'painted' | 'rubber'; y: number; h: number; depth: number; wrap: number };
   rearBumper?: { kind: 'chrome' | '5mph' | 'painted' | 'rubber'; y: number; h: number; depth: number; wrap: number };
-  trim: { side?: { y: number; kind: 'chrome' | 'rubber' }; rocker?: boolean; belt?: boolean; wheelLip?: boolean };
+  trim: {
+    side?: { y: number; kind: 'chrome' | 'rubber' }; rocker?: boolean; belt?: boolean; wheelLip?: boolean;
+    /** Brightwork around the side glass: chrome on civilian cars, black on police and fleet cars. */
+    windowFrame?: 'chrome' | 'trim';
+    /** Door shut lines and handles (passenger cars). */
+    doors?: boolean;
+  };
   /** Lower-body region in the second colour (two-tone / livery): (s, y, side) -> true. */
   twoTone?: (s: number, y: number) => boolean;
   /** Stripe band in paint2 (bus belt stripe). */

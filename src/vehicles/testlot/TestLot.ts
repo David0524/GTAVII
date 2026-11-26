@@ -45,8 +45,8 @@ function streetEnvironment(renderer: THREE.WebGPURenderer) {
   const c = document.createElement('canvas'); c.width = 1024; c.height = 512;
   const g = c.getContext('2d')!;
   const sky = g.createLinearGradient(0, 0, 0, 512);
-  sky.addColorStop(0, '#8c93a3'); sky.addColorStop(0.35, '#d8c7a8'); sky.addColorStop(0.5, '#a08a74');
-  sky.addColorStop(0.52, '#3a332e'); sky.addColorStop(1, '#1a1715');
+  sky.addColorStop(0, '#9aa2b4'); sky.addColorStop(0.3, '#f2e6cc'); sky.addColorStop(0.48, '#c8b090');
+  sky.addColorStop(0.5, '#6a5e52'); sky.addColorStop(0.7, '#3a322c'); sky.addColorStop(1, '#1e1a17');
   g.fillStyle = sky; g.fillRect(0, 0, 1024, 512);
   // building silhouettes along the horizon with lit windows
   for (let x = 0; x < 1024; x += 30 + Math.random() * 50) {

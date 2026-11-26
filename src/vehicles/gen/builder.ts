@@ -114,6 +114,18 @@ export class GeoBuilder {
     return ids;
   }
 
+  /** Thin round trim along a 3D polyline (window surrounds, wheel lips, shut lines). */
+  tubePath(slot: Slot, pts: V3[], r: number, segs = 5) {
+    for (let i = 1; i < pts.length; i++) {
+      const a = new THREE.Vector3(...pts[i - 1]), c = new THREE.Vector3(...pts[i]);
+      const len = a.distanceTo(c);
+      if (len < 1e-4) continue;
+      const g = new THREE.CylinderGeometry(r, r, len + r * 1.5, segs, 1, true);
+      const m = new THREE.Matrix4().compose(a.clone().add(c).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), c.clone().sub(a).normalize()), new THREE.Vector3(1, 1, 1));
+      this.add(slot, g, m);
+    }
+  }
+
   /** Lathe around the local X axis (wheels): profile [radius, x]. */
   latheX(slot: Slot, profile: [number, number][], segs: number, center: V3, mirror = false) {
     const rows: V3[][] = profile.map(([r, x]) => {

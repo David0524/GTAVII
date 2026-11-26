@@ -91,7 +91,9 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   const sideX = (s: number, y: number) => {
     const hw = halfW(s), y0 = bottomY(s), yb = beltAt(s);
     const creaseY = lerp(m.sillY, m.beltY, m.crease);
-    return hw * pw([[y0, 0.92], [y0 + 0.05, 0.985], [Math.max(y0 + 0.06, creaseY), 1], [yb - 0.05, 0.995], [yb, 0.975]], y);
+    // over the wheel arches the skin stays vertical (a clean cut-out), only the sill tucks under
+    const arch = y0 > m.sillY + 0.01;
+    return hw * pw([[y0, arch ? 0.992 : 0.92], [y0 + 0.05, arch ? 0.998 : 0.985], [Math.max(y0 + 0.06, creaseY), 1], [yb - 0.05, 0.995], [yb, 0.975]], y);
   };
 
   const section = (s: number): Section => {
@@ -298,6 +300,38 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     };
     if (m.trim.side) sideRun(m.trim.side.y, m.trim.side.kind === 'chrome' ? 'chrome' : 'rubber', [[0, -0.016], [0.012, -0.012], [0.014, 0.012], [0, 0.016]]);
     if (m.trim.rocker) sideRun(m.sillY + 0.045, 'chrome', [[0, -0.03], [0.008, -0.025], [0.008, 0.025], [0, 0.03]]);
+    // wheel-lip mouldings follow the arch edge
+    if (m.trim.wheelLip) for (const a of axles) for (const sx of [1, -1]) {
+      const pts: V3[] = [];
+      for (let k = 0; k <= 9; k++) {
+        const s0 = a.s - archR + (2 * archR * k) / 9;
+        const y = bottomY(s0);
+        if (y <= m.sillY + 0.005 && k > 0 && k < 9) continue;
+        pts.push([sx * (sideX(s0, y + 0.01) + 0.004), y + 0.008, Z(s0)]);
+      }
+      if (pts.length > 2) b.tubePath('chrome', pts, 0.011, 4);
+    }
+    // door shut lines + handles: front edge at the A-pillar foot, a seam at the B-pillar, the rear edge ahead of the rear arch
+    if (m.trim.doors) {
+      const g2 = m.gh;
+      const beltS = (u: number) => lerp(g2.sA0, g2.sC0, u);
+      const bandCentres = g2.bands.map((b2, i) => ({ ...b2, c: (b2.u + (g2.bands[i + 1]?.u ?? 1)) / 2 }));
+      const bPillar = bandCentres.find((b2, i) => i > 0 && b2.k === 'pillar' && b2.c < 0.8);
+      const lastGlass = [...g2.bands].reverse().find((b2) => b2.k === 'glass' || b2.k === 'opera');
+      const seams = [g2.sA0 + 0.03];
+      if (bPillar) seams.push(beltS(bPillar.c));
+      const rearEdge = bPillar ? Math.min(rearS - archR - 0.05, beltS(g2.bands[g2.bands.length - 1].u) + 0.05) : beltS(lastGlass && lastGlass.k === 'opera' ? lastGlass.u : 0.6);
+      seams.push(rearEdge);
+      for (const sx of [1, -1]) {
+        for (const sSeam of seams) {
+          const pts: V3[] = [];
+          for (let k = 0; k <= 2; k++) { const y = lerp(Math.max(bottomY(sSeam), m.sillY) + 0.04, m.beltY - 0.012, k / 2); pts.push([sx * (sideX(sSeam, y) + 0.0015), y, Z(sSeam)]); }
+          b.tubePath('grille', pts, 0.0035, 3);
+        }
+        // handles just ahead of each door's rear edge, below the belt
+        for (let i = 1; i < seams.length; i++) b.box('chrome', sx * (sideX(seams[i] - 0.16, m.beltY - 0.07) + 0.01), m.beltY - 0.07, Z(seams[i] - 0.16), 0.02, 0.028, 0.17);
+      }
+    }
   }
 
   // ---------------------------------------------------------------- extras
@@ -517,6 +551,28 @@ function greenhouse(b: GeoBuilder, m: ModelSpec, o: GenOptions, Z: (s: number) =
     }));
   }
   b.grid(roofRows, (i) => (vinyl === 'full' || (vinyl === 'landau' && i >= nu / 2) ? 'vinyl' : 'roof'), { inside });
+  // window surrounds and belt moulding
+  const frame = m.trim.windowFrame;
+  if (frame && lod === 0) for (const sx of [1, -1]) {
+    const P = (u: number, v: number): V3 => [sx * (hwAt(v) + 0.007), yAt(v), Z(lerp(lerp(g.sA0, g.sC0, u), lerp(g.sA1, g.sC1, u), v))];
+    for (let i = 0; i < g.bands.length; i++) {
+      const band = g.bands[i];
+      if (band.k !== 'glass' && band.k !== 'opera') continue;
+      let u0 = band.u, u1 = g.bands[i + 1]?.u ?? 1, v0 = g.winV[0], v1 = g.winV[1];
+      if (band.k === 'opera') { const w = u1 - u0; u0 += w * 0.28; u1 -= w * 0.28; v0 = 0.4; v1 = 0.72; }
+      const ring: V3[] = [];
+      const n = 3;
+      for (let k = 0; k <= n; k++) ring.push(P(lerp(u0, u1, k / n), v0));
+      ring.push(P(u1, v1));
+      for (let k = 1; k <= n; k++) ring.push(P(lerp(u1, u0, k / n), v1));
+      ring.push(P(u0, v0));
+      b.tubePath(frame, ring, 0.009, 3);
+    }
+    // belt moulding along the base of the glass
+    const belt: V3[] = [];
+    for (let k = 0; k <= 4; k++) belt.push([sx * (hwAt(0) + 0.012), yAt(0) + 0.006, Z(lerp(g.sA0, g.sC0, k / 4))]);
+    b.tubePath(frame, belt, 0.011, 4);
+  }
   if (g.drip && lod === 0) for (const sx of [1, -1]) {
     const path: V3[] = [];
     for (let k = 0; k <= 8; k++) { const u = k / 8; path.push([sx * (g.roofHalfW + 0.006), g.roofY - 0.004, Z(lerp(g.sA1, g.sC1, u))]); }
@@ -620,7 +676,7 @@ function bumper(b: GeoBuilder, bp: NonNullable<ModelSpec['rearBumper']>, end: 'f
 function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry {
   const b = new GeoBuilder();
   const R = m.wheelR, w = m.tireW;
-  const segs = o.lod === 0 ? 16 : 7;
+  const segs = o.lod === 0 ? 14 : 7;
   const rim = R * (m.cls === 'bus' || m.cls === 'boxtruck' || m.cls === 'garbage' ? 0.56 : 0.62);
   const mir = side < 0;
   const tire: [number, number][] = o.lod === 0

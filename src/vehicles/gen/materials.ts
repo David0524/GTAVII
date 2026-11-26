@@ -72,7 +72,7 @@ function vinylMat(hex: number) {
   if (!m) {
     const v = new THREE.MeshStandardNodeMaterial({ roughness: 0.78, metalness: 0 });
     // fine grain texture in the colour
-    const n: N = (mx_noise_float(positionLocal.mul(220)) as N).mul(0.04);
+    const n: N = (mx_noise_float(positionLocal.mul(140)) as N).mul(0.012);
     v.colorNode = (color(hex) as N).add(n);
     VINYL_CACHE.set(hex, (m = v));
   }
@@ -87,7 +87,7 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
 
   const makePaint = (hex: number, metallic: boolean) => {
     const p = physical
-      ? new THREE.MeshPhysicalNodeMaterial({ metalness: metallic ? 0.55 : 0.0, roughness: metallic ? 0.34 : 0.42, clearcoat: metallic ? 0.8 : 0.45, clearcoatRoughness: 0.22 })
+      ? new THREE.MeshPhysicalNodeMaterial({ metalness: metallic ? 0.55 : 0.0, roughness: metallic ? 0.34 : 0.42, clearcoat: metallic ? 0.9 : 0.75, clearcoatRoughness: 0.12 })
       : new THREE.MeshStandardNodeMaterial({ metalness: metallic ? 0.45 : 0.0, roughness: 0.42 });
     const base = uniform(new THREE.Color(hex));
     const g = grime(base, u);
