@@ -26,6 +26,10 @@ export const facadeUniforms = {
   night: uniform(0),
   /** Real seconds, for subtle flicker (TVs). */
   time: uniform(0),
+  /** Global scale on window emission (exposure tuning / debugging). */
+  litScale: uniform(0.5),
+  /** Canyon occlusion strength (0 = off). */
+  aoStrength: uniform(0.8),
 };
 
 export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
@@ -38,8 +42,10 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
 
   // ---------------------------------------------------------------- window grid
   const isTenement = style.equal(1), isCast = style.equal(2), isLoft = style.equal(3), isPostwar = style.equal(6), isLow = style.equal(7);
-  const bay = select(isTenement, float(2.6), select(isCast.or(isLoft), float(3.3), select(isPostwar, float(1.9), float(2.45))));
-  const winFrac = select(isCast.or(isLoft), float(0.78), select(isPostwar, float(0.82), float(0.5)));
+  const isDeco = style.equal(9), isBeaux = style.equal(10), isChelsea = style.equal(11);
+  const bay = select(isDeco, float(1.55), select(isBeaux, float(1.8), select(isChelsea, float(2.4),
+    select(isTenement, float(2.6), select(isCast.or(isLoft), float(3.3), select(isPostwar, float(1.9), float(2.45)))))));
+  const winFrac = select(isDeco, float(0.42), select(isBeaux, float(0.58), select(isCast.or(isLoft), float(0.78), select(isPostwar, float(0.82), float(0.5)))));
   const sill = select(isCast.or(isLoft), float(0.2), float(0.3));
   const head = select(isCast.or(isLoft), float(0.86), float(0.84));
   const fu = fract(u.div(bay)), fv = fract(v.div(floorH));
@@ -61,17 +67,17 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   // Distance LOD: when a bay is only a few pixels wide the pattern aliases into speckle; fade to the
   // average window coverage instead (also used to average lit windows).
   const bayPx = fwidth(u).div(bay);
-  const lodFade = smoothstep(0.06, 0.22, bayPx);
+  const lodFade = smoothstep(0.03, 0.12, bayPx);
   const coverage = winFrac.mul(head.sub(sill)).mul(0.85);
   const winMask = mix(winMaskSharp, coverage, lodFade);
 
   // ---------------------------------------------------------------- wall material
-  const brickStyle = isTenement.or(isLoft).or(isLow).or(style.equal(0));
+  const brickStyle = isTenement.or(isLoft).or(isLow).or(style.equal(0)).or(isChelsea);
   const course = fract(v.div(0.077));
   const rowOff = floor(v.div(0.077)).mul(0.5);
   const head2 = fract(u.div(0.205).add(rowOff));
   const mortar = max(step(course, 0.13), step(head2, 0.05));
-  const mortarFade = smoothstep(0.03, 0.008, fwidth(v)); // fade coursing where a course is < ~2 px
+  const mortarFade = smoothstep(0.012, 0.004, fwidth(v)); // fade coursing well before a course is < ~4 px (no speckle)
   const mortarK = select(brickStyle, mortar.mul(mortarFade).mul(0.22), float(0));
   const blotch = mx_noise_float(vec3(u.mul(0.11), v.mul(0.13), seed.mul(37))).mul(0.5).add(0.5);
   // banding: sill / cornice lines at each floor (stone in offices, brick soldier courses in tenements)
@@ -82,7 +88,10 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const underSill = smoothstep(0.55, 0.0, fv).mul(streak);
   const soot = clamp(dirt.mul(0.55).mul(underSill.mul(0.7).add(0.3)).add(select(groundFloor, float(0.18), float(0))).add(dirt.mul(0.15)), 0, 0.8);
   const wallBase = vertexColor().rgb.mul(blotch.mul(0.22).add(0.88));
-  const wall = wallBase.mul(float(1).sub(mortarK)).mul(float(1).sub(band)).mul(float(1).sub(soot));
+  // hero treatments: Beaux-Arts rusticated base (horizontal grooves on the lower floors) and strong cornice bands
+  const rustic = select(isBeaux.and(v.lessThan(floorH.mul(3))), step(fract(v.div(0.42)), 0.08).mul(0.3).mul(mortarFade.max(0.4)), float(0));
+  const heroBand = select(isBeaux, smoothstep(0.1, 0.0, fv).mul(0.18), float(0));
+  const wall = wallBase.mul(float(1).sub(mortarK)).mul(float(1).sub(band)).mul(float(1).sub(soot)).mul(float(1).sub(rustic)).mul(float(1).sub(heroBand));
 
   // ---------------------------------------------------------------- glass, shades, boarded, lit
   const winId = floorIdx.mul(97.13).add(bayIdx.mul(13.7)).add(seed.mul(1000));
@@ -106,7 +115,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const office = style.equal(4).or(style.equal(5));
   const tv = rnd3.lessThan(0.12).and(resid);
   const flicker = sin(facadeUniforms.time.mul(7.0).add(rnd.mul(40))).mul(0.15).add(0.85);
-  const lampCol = select(office, vec3(0.85, 0.92, 1.0), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
+  const lampCol = select(office, vec3(0.9, 0.88, 0.72), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
   const storeLit = groundFloor.and(hasStore).and(facadeUniforms.night.greaterThan(0.15)).and(rnd.lessThan(0.7));
   // Emission is modest: the Phase 3 post stack (filmic tonemap + bloom/halation) supplies the glow.
   const emissiveSharp = select(isLit.or(storeLit), lampCol.mul(select(storeLit, float(0.55), float(0.38))), vec3(0));
@@ -116,11 +125,22 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   // ---------------------------------------------------------------- roofs
   const tar = vec3(0.13, 0.12, 0.115).mul(mx_noise_float(vec3(u.mul(0.4), v.mul(0.4), seed.mul(5))).mul(0.25).add(0.85));
 
-  const color = select(isRoof, tar, mix(wall, glassCol, winMask));
+  const spandrel = select(isDeco, inU.mul(float(1).sub(inV)).mul(float(1).sub(lodFade.mul(0.5))), float(0));
+  const aluminium = vec3(0.42, 0.42, 0.4);
+  const wallDeco = mix(wall, aluminium, spandrel);
+  const color = select(isRoof, tar, mix(wallDeco, glassCol, winMask));
   m.colorNode = color;
   m.roughnessNode = select(isRoof, float(0.95), mix(float(0.9), select(boarded.or(shadeHere), float(0.8), float(0.12)), winMask));
-  m.metalnessNode = float(0);
-  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask));
+  m.metalnessNode = spandrel.mul(0.6);
+  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask).mul(facadeUniforms.litScale));
+  // ---------------------------------------------------------------- baked canyon occlusion (indirect light only)
+  // wallAO = (distance to the facing wall, its height). The facing skyline's elevation angle seen from this
+  // point blocks that share of the sky: deep side-street canyons go dim at the bottom, avenues stay open.
+  const wao = attribute('wallAO', 'vec2');
+  const rise = wao.y.sub(v).max(0).div(wao.x.max(1)); // tan(elevation)
+  const blocked = rise.div(rise.mul(rise).add(1).sqrt()); // sin(elevation)
+  const contact = mix(float(0.55), float(1), smoothstep(-0.3, 3.0, v)); // sidewalk contact darkening
+  m.aoNode = select(isRoof, float(1), float(1).sub(blocked.mul(facadeUniforms.aoStrength)).mul(contact));
   void abs; void min; void vec2;
   return m;
 }

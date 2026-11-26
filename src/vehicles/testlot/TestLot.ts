@@ -264,7 +264,7 @@ export async function runTestLot() {
   const tcars: { vclass: VehicleClass; variant: number; x: number; y: number; z: number; yaw: number; lights: number; lane: number; axis: 0 | 1; dir: number; v: number }[] = [];
   if (traffic) {
     scene.add(traffic.object);
-    const weights: VehicleClass[] = ['taxi', 'taxi', 'taxi', 'sedan', 'sedan', 'hardtop', 'compact', 'wagon', 'box_truck', 'step_van', 'police', 'bus', 'garbage'];
+    const weights: VehicleClass[] = ['taxi', 'taxi', 'taxi', 'sedan', 'sedan', 'hardtop', 'compact', 'wagon', 'box_truck', 'step_van', 'police', 'bus', 'garbage', 'bicycle', 'motorcycle', 'ambulance', 'mail_truck', 'police_motorcycle', 'fire_engine', 'ice_cream', 'ladder_truck', 'bicycle'];
     for (let i = 0; i < nTraffic; i++) {
       const axis = (i % 2) as 0 | 1, dir = i % 4 < 2 ? 1 : -1;
       const lane = Math.floor(i / 4) % 5 - 2;

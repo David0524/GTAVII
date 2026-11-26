@@ -7,8 +7,8 @@ import path from 'node:path';
 import { union, intersect, difference, bufferLines } from './clip.ts';
 import { CHUNK_SIZE, GRID_ROTATION_DEG, REGION, project, chunkKey } from '../../src/shared/geo.ts';
 import {
-  BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter,
-  type WBuilding, type WGround, type WPoi,
+  BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter, PaintKind,
+  type WBuilding, type WGround, type WPoi, type WPaint,
 } from '../../src/shared/chunkFormat.ts';
 import { RAW, OUT, ROOT, ensureDir, log } from './common.ts';
 import { dateBuilding, osmYear, type Dating } from './dating.ts';
@@ -301,6 +301,32 @@ for (const r of RESTORED_BUILDINGS) {
   log(`osm parts: ${replaced.size} footprints replaced by ${added.length} parts`);
 }
 
+// Global no-floating pass: every raised part (minHeight > 0) must be supported across its whole footprint,
+// not just at its centroid. Sample the centroid and points near each vertex against ALL buildings; lower the
+// base onto the weakest support (or the ground) so nothing hangs in the air (found: 1912 parts at 6th & 34th).
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } });
+  const supportAt = (p: P, self: number, below: number) => {
+    let best = 0;
+    for (const k of index.get(`${Math.floor(p[0] / GRID)},${Math.floor(p[1] / GRID)}`) ?? []) {
+      if (k === self) continue; const o = buildings[k];
+      if (o.height <= below + 1.5 && o.height > best && pointInPoly(p, o.poly)) best = o.height;
+    }
+    return best;
+  };
+  let lowered = 0;
+  buildings.forEach((b, k) => {
+    if (b.minHeight <= 0) return;
+    const c = centroid(b.poly[0]);
+    const samples: P[] = [c, ...b.poly[0].map(([x, z]) => [x + (c[0] - x) * 0.15, z + (c[1] - z) * 0.15] as P)];
+    const weakest = Math.min(...samples.map((pt) => supportAt(pt, k, b.minHeight)));
+    if (weakest < b.minHeight - 1.5) { b.minHeight = weakest; lowered++; }
+  });
+  stats.groundedParts += lowered;
+  log(`no-floating pass: ${lowered} raised parts lowered onto their real support`);
+}
+
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
 const DRIVABLE = new Set(['motorway', 'motorway_link', 'trunk', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'residential', 'unclassified', 'living_street']);
 interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean }
@@ -332,6 +358,63 @@ log(`streets: ${streets.length}; 1974 direction overrides applied to`, dirStats)
 
 // ------------------------------------------------------------------ ground polygons (per chunk)
 const roadLines = streets.map((s) => ({ pts: s.pts, half: s.width / 2, bb: bbox([s.pts]) }));
+
+// ------------------------------------------------------------------ road paint (1974 NYC markings)
+// White dashed lane lines (10 ft dash / 30 ft gap) between lanes, double yellow on two-way streets,
+// crosswalks as two parallel white lines (period style, not today's ladder bars). Dashes stop short of
+// intersections. Strokes are split into <= 20 m pieces and assigned to chunks by midpoint.
+const paintStrokes: WPaint[] = [];
+{
+  const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
+  const nodeUse = new Map<string, { p: P; legs: { dir: P; width: number }[] }>();
+  for (const s of streets) s.pts.forEach((p, k) => {
+    const e = nodeUse.get(key(p)) ?? nodeUse.set(key(p), { p, legs: [] }).get(key(p))!;
+    for (const nb of [s.pts[k - 1], s.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: s.width }); }
+  });
+  const junctions = [...nodeUse.values()].filter((n) => n.legs.length >= 3);
+  const jIndex = new Map<string, P[]>();
+  for (const j of junctions) { const k = `${Math.floor(j.p[0] / 40)},${Math.floor(j.p[1] / 40)}`; (jIndex.get(k) ?? jIndex.set(k, []).get(k)!).push(j.p); }
+  const nearJunction = (x: number, z: number, r: number) => { for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const q of jIndex.get(`${Math.floor(x / 40) + a},${Math.floor(z / 40) + b}`) ?? []) if (Math.hypot(q[0] - x, q[1] - z) < r) return true; return false; };
+  const DASH = 3.05, GAP = 9.15;
+  for (const s of streets) {
+    if (s.cls === 'motorway' || s.cls === 'motorway_link') continue;
+    const lanes = Math.max(1, Math.round(s.width / 3.4)), laneW = s.width / lanes;
+    const offsets: [number, number][] = []; // [offset, kind]
+    if (s.oneway === 0) {
+      offsets.push([-0.15, PaintKind.Yellow], [0.15, PaintKind.Yellow]);
+      for (let k = 1; k < lanes / 2; k++) { offsets.push([k * laneW, PaintKind.LaneDash], [-k * laneW, PaintKind.LaneDash]); }
+    } else for (let k = 1; k < lanes; k++) offsets.push([-s.width / 2 + k * laneW, PaintKind.LaneDash]);
+    for (const [off, kind] of offsets) {
+      let along = 0;
+      for (let k = 1; k < s.pts.length; k++) {
+        const a = s.pts[k - 1], b = s.pts[k]; const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz); if (L < 0.5) continue;
+        const ux = dx / L, uz = dz / L, nx = -uz * off, nz = ux * off;
+        const step = kind === PaintKind.Yellow ? 20 : DASH + GAP;
+        for (let t = kind === PaintKind.Yellow ? 0 : (DASH + GAP) - (along % (DASH + GAP)); t < L; t += step) {
+          const t1 = Math.min(L, t + (kind === PaintKind.Yellow ? 20 : DASH));
+          const p0: P = [a[0] + ux * t + nx, a[1] + uz * t + nz], p1: P = [a[0] + ux * t1 + nx, a[1] + uz * t1 + nz];
+          const mid: P = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];
+          if (!inRegion(mid) || nearJunction(mid[0], mid[1], s.width / 2 + 9)) continue;
+          paintStrokes.push({ kind, width: 0.11, pts: [p0, p1] });
+        }
+        along += L;
+      }
+    }
+  }
+  // crosswalks: two parallel lines across each leg, set back past the cross street's curb
+  for (const j of junctions) {
+    if (!inRegion(j.p)) continue;
+    const maxW = Math.max(...j.legs.map((l) => l.width));
+    for (const leg of j.legs) {
+      const half = leg.width / 2, nx = -leg.dir[1], nz = leg.dir[0];
+      for (const d of [maxW / 2 + 1.2, maxW / 2 + 4.2]) {
+        const cx = j.p[0] + leg.dir[0] * d, cz = j.p[1] + leg.dir[1] * d;
+        paintStrokes.push({ kind: PaintKind.CrosswalkLine, width: 0.3, pts: [[cx - nx * half, cz - nz * half], [cx + nx * half, cz + nz * half]] });
+      }
+    }
+  }
+  log(`road paint: ${paintStrokes.length} strokes, ${junctions.length} junctions`);
+}
 const parks: Poly[] = [];
 const PARK_TAGS = (t: any) => t.leisure === 'park' || t.leisure === 'garden' || t.landuse === 'grass' || t.leisure === 'playground';
 for (const w of ways) {
@@ -350,6 +433,57 @@ for (const b of buildings) {
   const c = centroid(b.poly[0]);
   const key = chunkKey(Math.floor(c[0] / CHUNK_SIZE), Math.floor(c[1] / CHUNK_SIZE));
   (chunkBuildings.get(key) ?? chunkBuildings.set(key, []).get(key)!).push(b);
+}
+
+// ------------------------------------------------------------------ wall occlusion bake (sky openness per wall)
+// For every wall edge: cast three horizontal rays (-30, 0, +30 deg) from its midpoint along the outward
+// normal; record the mean distance to the facing wall and the facing building's height. The facade shader
+// turns (distance, height, own y) into the elevation angle of the facing skyline = canyon occlusion.
+const AO_CELL = 25, AO_MAX = 127;
+const aoGrid = new Map<string, { x0: number; z0: number; x1: number; z1: number; h: number }[]>();
+for (const b of buildings) for (const r of b.poly) for (let k = 0; k < r.length; k++) {
+  const a = r[k], c = r[(k + 1) % r.length];
+  const e = { x0: a[0], z0: a[1], x1: c[0], z1: c[1], h: b.height };
+  const ia0 = Math.floor(Math.min(a[0], c[0]) / AO_CELL), ia1 = Math.floor(Math.max(a[0], c[0]) / AO_CELL);
+  const ja0 = Math.floor(Math.min(a[1], c[1]) / AO_CELL), ja1 = Math.floor(Math.max(a[1], c[1]) / AO_CELL);
+  for (let ii = ia0; ii <= ia1; ii++) for (let jj = ja0; jj <= ja1; jj++) { const key = `${ii},${jj}`; (aoGrid.get(key) ?? aoGrid.set(key, []).get(key)!).push(e); }
+}
+function aoRay(px: number, pz: number, dx: number, dz: number): [number, number] {
+  let best = AO_MAX, h = 0; const seen = new Set<object>();
+  for (let t = 0; t <= AO_MAX + AO_CELL; t += AO_CELL / 2) {
+    const key = `${Math.floor((px + dx * t) / AO_CELL)},${Math.floor((pz + dz * t) / AO_CELL)}`;
+    for (const e of aoGrid.get(key) ?? []) {
+      if (seen.has(e)) continue; seen.add(e);
+      const ex = e.x1 - e.x0, ez = e.z1 - e.z0, den = dx * ez - dz * ex; if (Math.abs(den) < 1e-9) continue;
+      const wx = e.x0 - px, wz = e.z0 - pz;
+      const tt = (wx * ez - wz * ex) / den, s = (wx * dz - wz * dx) / den;
+      if (tt > 0.05 && tt < best && s >= 0 && s <= 1) { best = tt; h = e.h; }
+    }
+    if (best < t) break;
+  }
+  return [best, h];
+}
+function wallAO(b: Bldg): [number, number][][] {
+  return b.poly.map((r) => {
+    let area = 0; for (let k = 0; k < r.length; k++) { const a = r[k], c = r[(k + 1) % r.length]; area += a[0] * c[1] - c[0] * a[1]; }
+    return r.map((a, k) => {
+      const c = r[(k + 1) % r.length]; const dx = c[0] - a[0], dz = c[1] - a[1], L = Math.hypot(dx, dz); if (L < 1e-3) return [AO_MAX, 0] as [number, number];
+      let nx = dz / L, nz = -dx / L; if (!(area > 0)) { nx = -nx; nz = -nz; } // same convention as meshBuilder.extrude
+      const mx = (a[0] + c[0]) / 2 + nx * 0.3, mz = (a[1] + c[1]) / 2 + nz * 0.3;
+      let dSum = 0, hMax = 0;
+      for (const ang of [-0.52, 0, 0.52]) {
+        const ca = Math.cos(ang), sa = Math.sin(ang);
+        const [d, h] = aoRay(mx, mz, nx * ca - nz * sa, nz * ca + nx * sa);
+        dSum += d * Math.cos(ang); if (d < AO_MAX) hMax = Math.max(hMax, h);
+      }
+      return [dSum / 3, hMax] as [number, number];
+    });
+  });
+}
+{
+  const t = Date.now(); let n = 0;
+  for (const b of buildings) { (b as any).ao = wallAO(b); n++; }
+  log(`wall occlusion baked for ${n} buildings in ${((Date.now() - t) / 1000).toFixed(1)} s`);
 }
 
 const toLocal = (poly: Poly, ox: number, oz: number): [number, number][][] => poly.map((r) => r.map(([x, z]) => [x - ox, z - oz] as [number, number]));
@@ -377,14 +511,16 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
   pushG(GroundKind.Road, roads); pushG(GroundKind.Sidewalk, sidewalks); pushG(GroundKind.Park, parkHere); pushG(GroundKind.Lot, lotsHere);
 
   const bl = (chunkBuildings.get(chunkKey(i, j)) ?? []).map<WBuilding>((b) => ({
-    id: b.id, year: b.year, use: b.use, style: b.style, floors: b.floors, flags: b.flags, height: b.height, minHeight: b.minHeight, rings: toLocal(b.poly, ox, oz),
+    id: b.id, year: b.year, use: b.use, style: b.style, floors: b.floors, flags: b.flags, height: b.height, minHeight: b.minHeight, rings: toLocal(b.poly, ox, oz), ao: (b as any).ao,
   }));
   const inChunk = (p: P) => p[0] >= minX && p[0] < maxX && p[1] >= minZ && p[1] < maxZ;
   const pois: WPoi[] = [
     ...signals.filter(inChunk).map((p) => ({ kind: PoiKind.Signal, x: p[0] - ox, z: p[1] - oz, heading: 0 })),
     ...entrances.filter(inChunk).map((p) => ({ kind: PoiKind.SubwayEntrance, x: p[0] - ox, z: p[1] - oz, heading: 0 })),
   ];
-  const bytes = writeChunk(i, j, bl, ground, pois);
+  const paintHere = paintStrokes.filter((st) => { const m: P = [(st.pts[0][0] + st.pts[st.pts.length - 1][0]) / 2, (st.pts[0][1] + st.pts[st.pts.length - 1][1]) / 2]; return m[0] >= minX && m[0] < maxX && m[1] >= minZ && m[1] < maxZ; })
+    .map((st) => ({ ...st, pts: st.pts.map(([x, z]) => [x - ox, z - oz] as [number, number]) }));
+  const bytes = writeChunk(i, j, bl, ground, pois, paintHere);
   fs.writeFileSync(path.join(OUT, 'chunks', `${chunkKey(i, j)}.bin`), bytes);
   totalBytes += bytes.length;
   const maxH = bl.reduce((m, b) => Math.max(m, b.height), 0);
@@ -457,6 +593,12 @@ if (flat) {
   for (const v of terr.h) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
   log(`terrain: ${terr.nx}x${terr.nz} @ ${terr.cell} m, spawn NAVD88 ${terr.base.toFixed(1)} m, relief ${lo.toFixed(1)}..${hi.toFixed(1)} m, ${terrainRejected} outlier samples dropped (${((Date.now() - t0t) / 1000).toFixed(1)} s)`);
 }
+// Hero facade styles (hand-tuned treatments in FacadeMaterial / props)
+const HERO_STYLE: Record<string, number> = {
+  'Empire State Building': Style.HeroDeco, 'Flatiron Building': Style.HeroBeaux, 'Metropolitan Life Insurance Company Tower': Style.HeroBeaux,
+  'New York Life Building': Style.HeroBeaux, 'Hotel Chelsea': Style.HeroChelsea,
+};
+for (const b of buildings) if (b.name && HERO_STYLE[b.name] !== undefined) b.style = HERO_STYLE[b.name];
 const heroMap = new Map<string, { name: string; ids: number[]; x: number; z: number; height: number; area: number }>();
 for (const b of buildings) if (b.flags & BuildingFlag.Hero && b.name) {
   const c = centroid(b.poly[0]); const a = polyArea(b.poly);

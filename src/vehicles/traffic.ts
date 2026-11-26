@@ -4,6 +4,7 @@ import { trafficSlotColor, type Quality } from './gen/materials';
 import { getAsset } from './assets';
 import type { ModelSpec } from './gen/spec';
 import { MODEL_BY_ID } from './models';
+import { BIKE_BY_ID, buildBike, type BikeSpec } from './twowheel/bikes';
 import { resolve } from './registry';
 import { VehicleLights, type TrafficInstance } from '../shared/traffic';
 
@@ -13,7 +14,8 @@ import { VehicleLights, type TrafficInstance } from '../shared/traffic';
  *  - fixed (vertex-coloured: chrome, glass, tyres, second colour, ...)
  *  - tail (lamps; instanceColor carries the brake state)
  */
-function splitForInstancing(spec: ModelSpec, g: THREE.BufferGeometry) {
+interface SplitOpts { paint2?: number; roofColor?: ModelSpec['roofColor']; signWhite: boolean }
+function splitForInstancing(spec: SplitOpts, g: THREE.BufferGeometry) {
   const pos = g.getAttribute('position'), nrm = g.getAttribute('normal');
   const idx = g.index!;
   const out = { paint: [] as number[], fixed: [] as number[], fixedCol: [] as number[], tail: [] as number[], head: [] as number[], sign: [] as number[] };
@@ -27,7 +29,7 @@ function splitForInstancing(spec: ModelSpec, g: THREE.BufferGeometry) {
     if (slot === 'paint' || (slot === 'roof' && roofFixed === null)) target = 'paint';
     else if (slot === 'taillamp') target = 'tail';
     else if (slot === 'headlamp') target = 'head';
-    else if (slot === 'white' && spec.cls !== 'icecream' && (spec.cls === 'taxi' || !!getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle }).lod1.beacon)) target = 'sign'; // roof light box / beacons
+    else if (slot === 'white' && spec.signWhite) target = 'sign'; // taxi roof light box / beacons
     else {
       target = 'fixed';
       col = slot === 'paint2' ? spec.paint2 ?? 0xdddddd : slot === 'roof' ? roofFixed! : trafficSlotColor(slot) ?? 0x888888;
@@ -49,6 +51,19 @@ function splitForInstancing(spec: ModelSpec, g: THREE.BufferGeometry) {
     return geo;
   };
   return { paint: mk(out.paint), fixed: mk(out.fixed, out.fixedCol), tail: mk(out.tail), head: mk(out.head), sign: mk(out.sign) };
+}
+
+/** A two-wheeler's LOD1 parts merged (frame, steering assembly, wheels) for instancing. */
+function bikeGeometry(b: BikeSpec): THREE.BufferGeometry {
+  const g = buildBike(b, 1);
+  const parts: THREE.BufferGeometry[] = [g.body.clone(), g.steer.clone()];
+  for (const w of g.wheels) { const wg = g.wheel.clone(); wg.translate(w.x, w.y, w.z); parts.push(wg); }
+  if (g.beacon) {
+    const bc = g.beacon.clone();
+    for (const grp of bc.groups) if (SLOTS[grp.materialIndex!] === 'taillamp') grp.materialIndex = SLOTS.indexOf('white');
+    parts.push(bc);
+  }
+  return mergeGrouped(parts);
 }
 
 /** Body + wheels merged into one geometry so a whole car is three instanced draws. */
@@ -130,9 +145,12 @@ export class TrafficRenderer {
     let b = this.batches.get(modelId);
     if (!b) {
       const spec = MODEL_BY_ID.get(modelId);
-      if (!spec) throw new Error(`unknown vehicle model ${modelId}`);
+      const bike = BIKE_BY_ID.get(modelId);
+      if (!spec && !bike) throw new Error(`unknown vehicle model ${modelId}`);
       const mk = (lodLevel: 1 | 2): ModelBatch => {
-        const parts = splitForInstancing(spec, withWheels(spec, lodLevel));
+        const parts = spec
+          ? splitForInstancing({ paint2: spec.paint2, roofColor: spec.roofColor, signWhite: spec.cls !== 'icecream' && (spec.cls === 'taxi' || !!getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle }).lod1.beacon) }, withWheels(spec, lodLevel))
+          : splitForInstancing({ paint2: bike!.paint2, signWhite: !!bike!.police }, bikeGeometry(bike!));
         const im = (geo: THREE.BufferGeometry, mat: THREE.Material, colored: boolean) => {
           const m = new THREE.InstancedMesh(geo, mat, this.maxInstances);
           m.count = 0; m.frustumCulled = false;
@@ -182,7 +200,7 @@ export class TrafficRenderer {
       b.tail.setColorAt(i, flash ? L.amber : lt & VehicleLights.Brake ? L.brake : lt & VehicleLights.Reverse ? L.reverse : lt & VehicleLights.Head ? L.tailRun : L.tailOff);
       b.head.setColorAt(i, lt & VehicleLights.Head ? L.headOn : L.headOff);
       if (b.sign) {
-        const police = MODEL_BY_ID.get(r.modelId)!.cls !== 'taxi'; // emergency beacons follow the Siren bit
+        const police = MODEL_BY_ID.get(r.modelId)?.cls !== 'taxi'; // emergency beacons (cars and police bikes) follow the Siren bit
         b.sign.setColorAt(i, police ? (lt & VehicleLights.Siren && blink ? L.beacon : L.beaconOff) : lt & VehicleLights.RoofLight ? L.signOn : L.signOff);
       }
     }

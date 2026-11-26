@@ -8,6 +8,7 @@ import { rng } from '../src/vehicles/gen/rng.ts';
 import { MODEL_BY_ID, MODELS } from '../src/vehicles/models.ts';
 import { resolve, CLASS_MODELS } from '../src/vehicles/registry.ts';
 import { VEHICLE_CLASSES } from '../src/shared/traffic.ts';
+import { BIKE_BY_ID } from '../src/vehicles/twowheel/bikes.ts';
 
 const spec = (id: string) => MODEL_BY_ID.get(id)!;
 const healthy: Condition = { mileage: 1000, shocks: 0, tyres: 0, alignment: 0, brakes: 0, engine: 0, radiator: 0, battery: 0, tyreType: 'bias' };
@@ -20,7 +21,7 @@ test('initial state is deterministic per (model, variant)', () => {
 test('every traffic class resolves to a model', () => {
   for (const c of VEHICLE_CLASSES) {
     assert.ok(CLASS_MODELS[c]?.length, c);
-    for (let v = 0; v < 20; v++) assert.ok(MODEL_BY_ID.has(resolve(c, v).modelId));
+    for (let v = 0; v < 20; v++) { const id = resolve(c, v).modelId; assert.ok(MODEL_BY_ID.has(id) || BIKE_BY_ID.has(id), id); }
   }
 });
 

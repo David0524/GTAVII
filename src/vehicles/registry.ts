@@ -6,6 +6,7 @@ import type { VehicleClass } from '../shared/traffic';
 import { MODEL_BY_ID } from './models';
 import { variantOf } from './assets';
 import { rng } from './gen/builder';
+import { BIKE_BY_ID } from './twowheel/bikes';
 
 /** Weighted model choices per class. Taxis: mostly full-size sedans in yellow (STYLE_GUIDE §6). */
 export const CLASS_MODELS: Record<VehicleClass, [string, number][]> = {
@@ -19,19 +20,18 @@ export const CLASS_MODELS: Record<VehicleClass, [string, number][]> = {
   box_truck: [['b60', 1]],
   step_van: [['walkin', 1]],
   garbage: [['b80', 1]],
-};
-
-/**
- * Classes proposed to the engine for src/shared/traffic.ts (ENGINE_REQUESTS "From vehicles: 7").
- * resolve() accepts them now so the sim can start using them as soon as the contract lands.
- */
-export const PROPOSED_CLASS_MODELS: Record<string, [string, number][]> = {
   ambulance: [['medic', 1]],
   fire_engine: [['pumper', 1]],
   ladder_truck: [['ladder', 1]],
   mail_truck: [['courier', 1]],
   ice_cream: [['scoop', 1]],
+  motorcycle: [['calder650', 1]],
+  police_motorcycle: [['calder_patrol', 1]],
+  bicycle: [['wexford_roadster', 0.8], ['wexford_carrier', 0.2]],
 };
+
+/** Kept for compatibility: the request-7 classes are now in the shared contract (CLASS_MODELS). */
+export const PROPOSED_CLASS_MODELS: Record<string, [string, number][]> = {};
 
 export function resolve(vclass: VehicleClass | keyof typeof PROPOSED_CLASS_MODELS, variant: number): { modelId: string; paint: string } {
   const opts = (CLASS_MODELS as Record<string, [string, number][]>)[vclass] ?? PROPOSED_CLASS_MODELS[vclass];
@@ -42,6 +42,9 @@ export function resolve(vclass: VehicleClass | keyof typeof PROPOSED_CLASS_MODEL
     let x = rng((variant * 2654435761) >>> 0)() * total;
     for (const [id, w] of opts) { if ((x -= w) <= 0) { pick = id; break; } }
   }
+  const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
+  const bike = BIKE_BY_ID.get(pick);
+  if (bike) return { modelId: pick, paint: hex(bike.palette[Math.floor(rng((variant + 11) * 7919)() * bike.palette.length)]) }; // same draw as TwoWheeler
   const spec = MODEL_BY_ID.get(pick)!;
-  return { modelId: pick, paint: '#' + variantOf(spec, variant).paint.toString(16).padStart(6, '0') };
+  return { modelId: pick, paint: hex(variantOf(spec, variant).paint) };
 }
