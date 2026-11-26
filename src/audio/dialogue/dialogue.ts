@@ -34,7 +34,9 @@ export class DialogueSystem {
   private handlers: { subtitle: ((e: SubtitleEvent) => void)[]; subtitleEnd: ((e: SubtitleEndEvent) => void)[] } = { subtitle: [], subtitleEnd: [] };
   private overheard: { at: Vec3; radius: number; cancel: () => void; voice: Voice | null }[] = [];
   speakers: Record<string, Partial<SpeakerVoice>> = {};
-  stats = { lines: 0, cut: 0, placeholder: 0 };
+  stats = { lines: 0, cut: 0, placeholder: 0, barks: 0 };
+  /** false = never fetch content/ (hermetic tests); registered scripts still work. */
+  contentEnabled = true;
 
   constructor(private env: Env, private baseUrl: string) {}
 
@@ -44,7 +46,11 @@ export class DialogueSystem {
 
   private async script(id: string): Promise<Script | null> {
     if (this.scripts.has(id)) return this.scripts.get(id)!;
-    try { const r = await fetch(`${this.baseUrl}content/dialogue/${id}.json`); if (r.ok) { const s = await r.json(); this.scripts.set(id, s); return s; } } catch { /* offline */ }
+    if (!this.contentEnabled) return null;
+    // Narrative files are named without the 'dlg.' namespace (dlg.m01_lobby -> m01_lobby.json).
+    for (const name of [id.replace(/^dlg\./, ''), id]) {
+      try { const r = await fetch(`${this.baseUrl}content/dialogue/${name}.json`); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const s = await r.json(); this.scripts.set(id, s); return s; } } catch { /* offline */ }
+    }
     return null;
   }
 
@@ -127,9 +133,27 @@ export class DialogueSystem {
     return { stop: () => { cancelled = true; current?.stop(0.25); if (currentId) this.fire('subtitleEnd', { id: currentId, cut: true }); this.overheard = this.overheard.filter((e) => e !== entry); } };
   }
 
+  /** Bark pools from content/barks/<pool>.json ({ id, lines: [{ context, emotion, text }] }). */
+  private pools = new Map<string, Promise<{ lines: { context?: string; emotion?: string; text: string }[] } | null>>();
+  private poolFetch(pool: string) {
+    const name = pool.replace(/^barks\./, '');
+    let p = this.pools.get(name);
+    if (!p && !this.contentEnabled) p = Promise.resolve(null);
+    if (!p) { p = fetch(`${this.baseUrl}content/barks/${name}.json`).then((r) => (r.ok && (r.headers.get('content-type') ?? '').includes('json') ? r.json() : null)).catch(() => null); this.pools.set(name, p); }
+    return p;
+  }
+  /** A random line of `context` from a bark pool, spoken at `at` (no-op if the pool or context is missing). */
+  async barkFrom(pool: string, context: string, at: Vec3 | (() => Vec3), speaker = pool, subtitle = true): Promise<boolean> {
+    const p = await this.poolFetch(pool); const lines = p?.lines.filter((l) => l.context === context) ?? [];
+    if (!lines.length) return false;
+    const l = lines[(this.env.rng.next() * lines.length) | 0];
+    this.bark(l.text, at, speaker, subtitle, l.emotion); this.stats.barks++;
+    return true;
+  }
+
   /** NPC bark: short positional line (archetype barks come from the narrative's barks files). */
-  bark(text: string, at: Vec3 | (() => Vec3), speaker = 'npc', subtitle = false) {
-    const line: Line = { id: `bark${++lineSerial}`, speaker, text, emotion: 'neutral' };
+  bark(text: string, at: Vec3 | (() => Vec3), speaker = 'npc', subtitle = false, emotion = 'neutral') {
+    const line: Line = { id: `bark${++lineSerial}`, speaker, text, emotion };
     const { duration } = this.speak(line, { at, unkeyed: true, gain: 0.9, onDone: () => {} });
     if (subtitle) this.fire('subtitle', { id: line.id, speaker, text, duration: Math.max(duration, readingTime(text)), channel: 'ambient', overheard: true, at: typeof at === 'function' ? at() : at });
   }

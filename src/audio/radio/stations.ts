@@ -8,7 +8,8 @@
  * 't74-music' worklet; a track with `file` set will stream that file instead.
  */
 export interface TrackDef { id: string; title: string; artist: string; durationSec: number; style: number; bpm: number; file?: string }
-export interface SpeechDef { id: string; speaker: string; text: string }
+/** `context` (e.g. 'brownout') and `date` (YYYY-MM-DD) restrict when a line can air. */
+export interface SpeechDef { id: string; speaker: string; text: string; context?: string; date?: string }
 export interface StationDef {
   id: string; name: string; band: 'AM' | 'FM'; freq: string; format: string; placeholder?: boolean;
   tracks: TrackDef[];

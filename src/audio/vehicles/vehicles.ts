@@ -93,14 +93,24 @@ export class VehicleAudio {
     this.sim = sim;
     const pos = (e: any): Vec3 => [num(e?.x, 0), num(e?.y, 1), num(e?.z, 0)];
     const vclassOf = (e: any) => { const id = e?.vehicleId ?? e?.id ?? e?.a; const v = (sim.vehicles as TrafficVehicleView[]).find((q) => q.id === id); return v?.vclass ?? e?.vclass ?? 'sedan'; };
-    sim.on('honk', (e) => { this.stats.honks++; this.horn(vclassOf(e), pos(e), num(e?.duration, this.rng.range(0.25, 1.1))); });
-    sim.on('collision', (e) => { this.stats.collisions++; this.impact(pos(e), num(e?.impulse, num(e?.speed, 6) * 1400)); });
+    const pool = (vc: string) => (vc === 'taxi' ? 'cab_driver' : vc === 'box_truck' || vc === 'garbage' || vc === 'step_van' ? 'truck_driver' : vc === 'police' ? 'beat_cop' : 'commuter');
+    const near = (p: Vec3, r: number) => { const l = this.env.vm.listener.position; return Math.hypot(p[0] - l[0], p[2] - l[2]) < r; };
+    sim.on('honk', (e) => {
+      this.stats.honks++; const vc = vclassOf(e), p = pos(e);
+      this.horn(vc, p, num(e?.duration, this.rng.range(0.25, 1.1)));
+      // 1974: the horn is often followed by an opinion through the open window.
+      if (near(p, 30) && this.rng.next() < 0.3) this.env.emit('bark', { pool: pool(vc), context: 'horn', at: [p[0], 1.3, p[2]], delay: 0.6 });
+    });
+    sim.on('collision', (e) => {
+      this.stats.collisions++; const p = pos(e); this.impact(p, num(e?.impulse, num(e?.speed, 6) * 1400));
+      if (near(p, 50)) this.env.emit('bark', { pool: pool(vclassOf(e)), context: 'collision', at: [p[0], 1.5, p[2]], delay: 1.2 });
+    });
     sim.on('nearMiss', (e) => {
       this.stats.nearMiss++; const p = pos(e);
       this.tyreChirp(p, 0.7);
       if (this.rng.next() < 0.6) this.horn(vclassOf(e), p, this.rng.range(0.4, 1.4));
     });
-    sim.on('hail', (e) => { this.stats.hails++; const p = pos(e); p[1] = 1.7; this.env.oneShot('whistle.hail', { category: 'voice', gain: 0.8, at: p, priority: 5 }); this.env.emit('bark', { kind: 'hail', at: p }); });
+    sim.on('hail', (e) => { this.stats.hails++; const p = pos(e); p[1] = 1.7; this.env.oneShot('whistle.hail', { category: 'voice', gain: 0.8, at: p, priority: 5 }); this.env.emit('bark', { pool: 'commuter', context: 'hail', at: p, delay: 0.3 }); });
   }
 
   horn(vclass: string, at: Vec3, dur: number) {

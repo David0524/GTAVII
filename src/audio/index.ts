@@ -23,6 +23,7 @@ import { VehicleAudio, type AttachedVehicle, type SimLike } from './vehicles/veh
 import { Footsteps } from './world/footsteps';
 import { RadioSystem } from './radio/radio';
 import type { StationDef } from './radio/stations';
+import { stationsFromNarrative } from './radio/narrative';
 import { DialogueSystem, runAudioSleepers, type Script } from './dialogue/dialogue';
 import { Rng } from './worklets/dsp';
 import { readChunk, type ChunkData } from '../shared/chunkFormat';
@@ -53,15 +54,19 @@ export class AudioSystem {
   private listeners: Record<string, ((e: any) => void)[]> = {};
   private baseUrl: string;
   private loaded = false;
+  private customStations = false;
+  private useContent = true;
   private ready: Promise<void>;
   radio!: { setStation(id: string | null): void; readonly stations: readonly { id: string; name: string }[]; readonly system: RadioSystem };
   dialogue!: { play(scriptId: string, lineId: string, at?: Vec3, opts?: { filter?: 'phone' | 'radio' }): Promise<void>; on(type: 'subtitle' | 'subtitleEnd', cb: (e: any) => void): void; overhear: DialogueSystem['overhear']; registerScript(s: Script): void; bark: DialogueSystem['bark']; readonly system: DialogueSystem };
   readonly timing = { updateMs: 0, updateMaxMs: 0, frames: 0, sumMs: 0, samples: [] as number[], parts: {} as Record<string, number>, partsMax: {} as Record<string, number> };
 
-  constructor(opts: { quality: QualityName; baseUrl?: string; context?: BaseAudioContext; stations?: StationDef[] }) {
+  constructor(opts: { quality: QualityName; baseUrl?: string; context?: BaseAudioContext; stations?: StationDef[]; content?: boolean }) {
     this.quality = AUDIO_PRESETS[opts.quality] ?? AUDIO_PRESETS.high;
     this.baseUrl = opts.baseUrl ?? (import.meta.env?.BASE_URL ?? '/');
     this.runtime = new AudioRuntime({ context: opts.context as AudioContext | OfflineAudioContext | undefined, latencyHint: this.quality.latencyHint });
+    this.customStations = !!opts.stations?.length || opts.content === false;
+    this.useContent = opts.content !== false;
     this.ready = this.runtime.ready.then(() => this.build(opts.stations));
   }
 
@@ -87,8 +92,13 @@ export class AudioSystem {
     this.env = env;
     this.vehicles = new VehicleAudio(env);
     const radio = new RadioSystem(env, stations);
-    const dlg = new DialogueSystem(env, this.baseUrl);
+    const dlg = new DialogueSystem(env, this.baseUrl); dlg.contentEnabled = this.useContent;
     radio.onSubtitle = (e) => env.emit('radioSubtitle', e);
+    // Reaction barks from the narrative's bark pools (content/barks/*.json), positional, subtitled as overheard.
+    (this.listeners.bark ??= []).push((e: { pool?: string; context?: string; at?: Vec3; delay?: number }) => {
+      if (!e.pool || !e.context || !e.at) return; const at = e.at;
+      setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true); });
+    });
     this.radio = { setStation: (id) => radio.setStation(id), get stations() { return radio.stations.map((s) => ({ id: s.id, name: s.name })); }, system: radio };
     this.dialogue = { play: (s, l, at, o) => dlg.play(s, l, at, o), on: (t, cb) => dlg.on(t, cb), overhear: (o) => dlg.overhear(o), registerScript: (s) => dlg.registerScript(s), bark: (t, at, sp, sub) => dlg.bark(t, at, sp, sub), system: dlg };
   }
@@ -113,6 +123,10 @@ export class AudioSystem {
     if (this.quality.hrtf > 0) { const pn = this.runtime.ctx.createPanner(); pn.panningModel = 'HRTF'; pn.disconnect(); }
     this.geo.build(chunks, streets!);
     this.env.map = new CityMap(streets!);
+    // Narrative radio content if the engine serves content/ (else the PLACEHOLDER stations stay).
+    if (!this.customStations) {
+      try { const r = await fetch(this.baseUrl + 'content/radio.json'); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const defs = stationsFromNarrative(await r.json()); if (defs.length) this.radio.system.setStations(defs); } } catch { /* no content */ }
+    }
     await this.bank.init();
     await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic')]);
     this.ambience = new Ambience(this.env, REGION, this.radio.system);

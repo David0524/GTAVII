@@ -32,12 +32,31 @@ export class RadioSystem {
   onSubtitle: ((e: { speaker: string; text: string; duration: number; channel: 'radio'; id: string }) => void) | null = null;
 
   constructor(private env: Env, defs?: StationDef[]) {
-    this.stations = defs && defs.length ? defs : PLACEHOLDER_STATIONS;
+    this.stations = [];
+    this.setStations(defs && defs.length ? defs : PLACEHOLDER_STATIONS);
+  }
+
+  /** Replace the station list (e.g. once content/radio.json has loaded). Keeps the car tuned if the id survives. */
+  setStations(defs: StationDef[]) {
+    const car = this.carStation; if (car) this.setStation(null);
+    for (const f of this.feeds.values()) { for (const n of f.nodes) try { n.disconnect(); } catch { /* */ } f.voice.port.postMessage({ cmd: 'dispose' }); }
+    this.feeds.clear(); this.cursors.clear();
+    this.stations = defs;
     for (const s of this.stations) {
       const rng = new Rng(hashStr(s.id));
       const c: Cursor = { idx: 0, seg: null as unknown as Segment, t: rng.next() * 120, rng, newsPending: false, lastHour: -1, sinceAd: 0 };
       c.seg = this.nextSegment(s, c); this.cursors.set(s.id, c);
     }
+    if (car && defs.some((d) => d.id === car)) this.setStation(car);
+  }
+
+  /** Lines tagged with a date air only on that date; tagged with a context only while it holds. */
+  private eligible(list: SpeechDef[]) {
+    const [x, , z] = this.env.vm.listener.position; const date = this.env.clock.date;
+    const ctx = new Set<string>(); if (this.env.power(x, z) !== 'on') ctx.add('brownout'); if (this.env.weather.kind === 'rain') ctx.add('rain'); if (this.env.clock.hour < 5 || this.env.clock.hour >= 22) ctx.add('night');
+    const ok = list.filter((l) => (!l.date || l.date === date) && (!l.context || ctx.has(l.context)));
+    const special = ok.filter((l) => l.date || l.context);
+    return special.length && this.env.rng.next() < 0.6 ? special : ok.length ? ok : list.filter((l) => !l.date && !l.context);
   }
 
   get currentStation() { return this.carStation; }
@@ -46,14 +65,14 @@ export class RadioSystem {
     const r = c.rng; c.idx++;
     if (c.newsPending && s.news) {
       c.newsPending = false;
-      const list = s.news.byDate?.[this.env.clock.date] ?? s.news.generic; const sp = list[(r.next() * list.length) | 0];
+      const list = s.news.byDate?.[this.env.clock.date] ?? this.eligible(s.news.generic); const sp = list[(r.next() * list.length) | 0];
       return { kind: 'news', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp };
     }
     if (!s.tracks.length || (c.sinceAd > 3 && s.ads.length && r.next() < 0.5)) {
-      const pool = s.tracks.length ? s.ads : [...s.links, ...s.ads]; const sp = pool[(r.next() * pool.length) | 0];
+      const pool = s.tracks.length ? s.ads : [...this.eligible(s.links), ...s.ads]; const sp = pool[(r.next() * pool.length) | 0];
       c.sinceAd = 0; return { kind: s.ads.includes(sp) ? 'ad' : 'link', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp };
     }
-    if (s.links.length && r.next() < 0.3) { const sp = s.links[(r.next() * s.links.length) | 0]; return { kind: 'link', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp }; }
+    if (s.links.length && r.next() < 0.3) { const el = this.eligible(s.links); const sp = el[(r.next() * el.length) | 0]; return { kind: 'link', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp }; }
     const tr = s.tracks[(r.next() * s.tracks.length) | 0]; c.sinceAd++;
     return { kind: 'track', dur: tr.durationSec, seed: hashStr(tr.id), style: tr.style, bpm: tr.bpm, trackId: tr.id, file: tr.file };
   }

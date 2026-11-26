@@ -35,7 +35,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   const sc = SCENARIOS.find((s) => s.id === id)!; const seconds = o.seconds ?? 60, sr = o.sr ?? 48000, quality = o.quality ?? 'high';
   live.clear(); created.n = 0;
   const ctx = new OfflineAudioContext({ numberOfChannels: 2, length: Math.round(seconds * sr), sampleRate: sr });
-  const sys = new AudioSystem({ quality, context: ctx });
+  const sys = new AudioSystem({ quality, context: ctx, content: false }); // hermetic: no narrative content fetched
   await sys.whenReady();
   const streets: StreetRec[] = await fetch('/data/streets.json').then((r) => r.json());
   await sys.load({ streets });
