@@ -273,14 +273,17 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
     const u = ax.map((v) => v / al);
     const loc = (k: number) => { const d = [P[k * 3] - A[0], P[k * 3 + 1] - A[1], P[k * 3 + 2] - A[2]]; const t = d[0] * u[0] + d[1] * u[1] + d[2] * u[2]; const r = [d[0] - u[0] * t, d[1] - u[1] * t, d[2] - u[2] * t]; return { t, r }; };
     // shin radius just above where the tube starts (the tube never gets narrower than the ankle bones)
-    let R0 = 0, n0 = 0, Ra = 0;
+    // (the ankle term uses a percentile just above the ankle bones: the heel would make every leg a bell)
+    let R0 = 0, n0 = 0; const ra: number[] = [];
     for (let k = 0; k < F.n; k++) {
       if (F.part[k] !== part) continue;
       const s = F.legS[k];
       if (s > 1.62 && s < 1.7) { R0 += Math.hypot(...loc(k).r); n0++; }
-      if (s > 1.9 && s < 2.0) Ra = Math.max(Ra, Math.hypot(...loc(k).r));
+      if (s > 1.84 && s < 1.93) ra.push(Math.hypot(...loc(k).r));
     }
-    R0 = Math.max(n0 ? R0 / n0 : 0.05, Ra + 0.004);
+    ra.sort((a, b) => a - b);
+    const Ra = ra.length ? ra[Math.floor(ra.length * 0.85)] : 0;
+    R0 = Math.max(n0 ? R0 / n0 : 0.05, Ra + 0.003);
     for (let k = 0; k < F.n; k++) {
       if (F.part[k] !== part || F.legS[k] < 1.66) continue;
       const { t, r } = loc(k);
