@@ -269,7 +269,7 @@ export class Kit {
     const st = GRADE[this.grade].stains * ((x1 - x0) * (z1 - z0)) / 20;
     for (let q = 0; q < Math.round(st); q++) {
       const cx = this.rng.range(x0 + 0.3, x1 - 0.3), cz = this.rng.range(z0 + 0.3, z1 - 0.3), rr = this.rng.range(0.25, 0.9);
-      const stain = { c: [0.42, 0.33, 0.2] as [number, number, number], pat: 23, p: 0, wear: 0.9 } as Mat;
+      const stain = { c: [0.66, 0.56, 0.4] as [number, number, number], pat: 23, p: 0, wear: 0.6 } as Mat; // tea-brown water ring, soft
       for (let b = 0; b < 3; b++) { const ox = this.rng.range(-rr, rr) * 0.5, oz = this.rng.range(-rr, rr) * 0.5, s = rr * this.rng.range(0.4, 0.8); this.m.quad([cx + ox - s, y1 - 0.004 - b * 0.001, cz + oz - s], [2 * s, 0, 0], [0, 0, 2 * s], [0, -1, 0], stain, 99); }
     }
     const sk = o.skip ?? [], col = o.collide;

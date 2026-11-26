@@ -4,7 +4,7 @@
  * building on W 31st St: grade WORN. Hand-directed on top of the kit.
  *
  * contains (lobby): desk behind glass, mailboxes, room-key board, lobby chairs, elevator, desk phone
- * contains (floor 11): corridor, room 1104 (Odessa), room 1112 (Hollis), shared bathroom, window to the Empire State
+ * contains (floor 11): corridor, room 1104 (Odessa), room 1112 (Hollis), shared bathroom, window to the Empire Estate Building
  * 9F portrait: footlocker table, face-down academy photo, expired hack licence in the mirror,
  *              Saint Christopher on a nail, broken window AC with a towel, Carmen's tupperware, hot plate and one pan
  */
@@ -15,7 +15,7 @@ import { type GenCtx, WALL_T, PARTY, fitRect } from '../common';
 import { coreFacade, stairTower } from '../vertical';
 import { towerLayout } from '../../layout';
 
-/** Empire State Building (world.json hero) for the 11th-floor window. */
+/** The Empire Estate Building (content/landmarks.json name; world.json hero position) for the 11th-floor window. */
 const ESB = { x: -131.4, z: -861.1 };
 const NICOTINE = tint(M.plasterCream, '#c8b07a');
 const HALL_WALL = tint(M.dadoHall, '#bfae84');
@@ -30,44 +30,64 @@ export function genCorwin(c: GenCtx) {
   k.room(x0, WALL_T, x1, zl, 0, H, { floor: tint(M.hexWhite, '#c9bfa6'), wall: NICOTINE, ceiling: M.tin, wallZ1: HALL_WALL }, {}, { skip: ['z0', 'z1'] });
   // back wall left of the stair tower (the tower draws its own front)
   k.wall(L.x0 - 0.15, zl, x0, zl, 0, H, HALL_WALL, 1);
-  // --- desk behind glass: counter along the right wall, glass to 2.4 m with a pass-through, key board behind
-  const cx = Math.min(L.x0 - 0.4, x1 - 2.3), cz0 = WALL_T + 1.6, cz1 = Math.min(zl - 1.0, cz0 + 3.6);
-  k.box(cx - 0.6, 0, cz0, cx, 1.05, cz1, M.paneling, { collide: 'cover' });
-  k.box(cx - 0.75, 1.05, cz0 - 0.05, cx + 0.05, 1.09, cz1 + 0.05, M.woodDark);
-  k.box(cx - 0.62, 1.09, cz0, cx - 0.6, 2.45, cz1, M.glass, { glass: true, occlude: false });
-  k.box(cx - 0.64, 2.45, cz0, cx - 0.58, 2.6, cz1, M.woodDark, { occlude: false });
-  k.collider({ c: [cx - 0.61, 1.75, (cz0 + cz1) / 2], h: [0.03, 0.7, (cz1 - cz0) / 2], yaw: 0 });
-  k.box(cx - 0.6, 1.09, cz0 - 0.02, x1, 2.6, cz0, M.paneling, { collide: true }); // cage end wall
-  k.box(cx - 0.68, 1.09, (cz0 + cz1) / 2 - 0.25, cx - 0.56, 1.11, (cz0 + cz1) / 2 + 0.25, M.steel, { occlude: false }); // pass-through tray
-  // room-key board: 11 rows of hooks + tags
+  // Reference: Aberdeen Hotel lobby, 17 W 32nd St (Gottscho-Schleisner 1941, loc_gs_2018738643/-644), one block north.
+  // Period grammar kept: desk as a recessed window in the side wall with pigeonholes behind, square columns down the room,
+  // shallow bowl pendants, patterned carpet on a terrazzo border, sofas and lamp tables along the wall, framed pictures,
+  // a mailbox bank with a clock on the back wall. 1974 (worn grade): carpet threadbare, one bowl dead, a wire grille added
+  // to the desk window, vinyl patched, pictures gone from one hook.
+  const cx = Math.min(L.x0 - 0.5, x1 - 2.4), cz0 = WALL_T + 1.4, cz1 = Math.min(zl - 1.2, cz0 + 3.2);
+  // the clerk's room behind a full-height partition; the desk window opens in it (counter 1.05, opening to 2.25)
+  const deskOps = [{ s0: cz0 + 0.4 - WALL_T, s1: cz1 - 0.4 - WALL_T, y0: 1.05, y1: 2.25, depth: 0.15 }];
+  k.wall(cx, WALL_T, cx, zl, 0, H, NICOTINE, -1, deskOps);               // clerk-room face (+x)
+  k.wall(cx - 0.15, zl, cx - 0.15, WALL_T, 0, H, NICOTINE, -1, [{ s0: zl - (cz1 - 0.4), s1: zl - (cz0 + 0.4), y0: 1.05, y1: 2.25 }]);
+  k.box(cx - 0.4, 1.0, cz0 + 0.35, cx + 0.15, 1.05, cz1 - 0.35, M.woodDark, { collide: true });           // counter shelf
+  k.box(cx - 0.15, 0, cz0 + 0.4, cx, 1.0, cz1 - 0.4, M.paneling, { collide: true });
+  for (let z = cz0 + 0.5; z < cz1 - 0.45; z += 0.09) k.box(cx - 0.17, 1.05, z - 0.006, cx - 0.155, 2.25, z + 0.006, tint(M.steel, '#5a5a50'), { occlude: false }); // 1970s wire grille
+  k.collider({ c: [cx - 0.16, 1.65, (cz0 + cz1) / 2], h: [0.02, 0.6, (cz1 - cz0) / 2 - 0.4], yaw: 0 });
+  k.box(cx - 0.18, 1.05, (cz0 + cz1) / 2 - 0.2, cx - 0.14, 1.2, (cz0 + cz1) / 2 + 0.2, M.steel, { occlude: false }); // pass-through slot
+  // pigeonholes + key board on the clerk room's back wall, seen through the window
   const kb = { x: x1 - 0.02, z: (cz0 + cz1) / 2, yaw: Math.PI / 2 };
-  P.pbox(k, kb, -1.3, 1.2, -0.02, 1.3, 2.4, 0.02, M.woodDark, { occlude: false });
-  for (let row = 0; row < 11; row++) for (let col = 0; col < 12; col++) if (r.chance(0.7)) P.pbox(k, kb, -1.2 + col * 0.2, 1.27 + row * 0.1, -0.035, -1.15 + col * 0.2, 1.34 + row * 0.1, -0.02, r.chance(0.6) ? tint(M.chrome, '#b08a4a') : M.paper, { occlude: false });
-  // desk phone, register book, a bell, a small fan, the clerk
-  k.box(cx - 0.5, 1.09, cz0 + 0.4, cx - 0.28, 1.19, cz0 + 0.62, M.black);
-  k.box(cx - 0.55, 1.09, cz0 + 1.0, cx - 0.2, 1.12, cz0 + 1.4, tint(M.paper, '#7a2a24'));
-  k.cyl(cx - 0.7, 1.09, cz1 - 0.4, 0.05, 0.05, tint(M.chrome, '#b08a4a'), 8);
+  P.pbox(k, kb, -1.3, 1.0, -0.02, 1.3, 2.6, 0.02, M.woodDark, { occlude: false });
+  for (let row = 0; row < 11; row++) for (let col = 0; col < 12; col++) { P.pbox(k, kb, -1.25 + col * 0.21, 1.05 + row * 0.14, -0.06, -1.06 + col * 0.21, 1.17 + row * 0.14, -0.02, M.black, { occlude: false }); if (r.chance(0.55)) P.pbox(k, kb, -1.2 + col * 0.21, 1.07 + row * 0.14, -0.065, -1.12 + col * 0.21, 1.13 + row * 0.14, -0.06, r.chance(0.6) ? tint(M.chrome, '#b08a4a') : M.paper, { occlude: false }); }
+  k.box(cx + 0.1, 1.05, cz0 + 0.5, cx + 0.32, 1.15, cz0 + 0.72, M.black); // desk phone
+  k.box(cx - 0.35, 1.05, cz0 + 0.9, cx - 0.05, 1.08, cz0 + 1.3, tint(M.paper, '#7a2a24')); // register book
+  k.cyl(cx - 0.25, 1.05, cz1 - 0.6, 0.05, 0.05, tint(M.chrome, '#b08a4a'), 8); // bell
   k.slot('desk_clerk', (cx + x1) / 2, 0, (cz0 + cz1) / 2, Math.PI / 2);
   k.marker('shop', cx - 1.2, 0, (cz0 + cz1) / 2, 'front desk (rooms by the week)');
-  k.marker('register', cx - 0.3, 1.1, cz1 - 0.6, 'cash drawer');
-  k.marker('payphone', cx - 0.4, 1.1, cz0 + 0.5, 'desk phone');
-  // --- mailboxes on the left wall, lobby chairs, a standing ashtray, a sagging palm
-  P.mailboxes(k, { x: x0 + 0.02, z: WALL_T + 1.2, yaw: -Math.PI / 2 }, 12, 6);
-  for (let q = 0; q < 3; q++) { P.armchair(k, { x: x0 + 0.55, z: WALL_T + 3.6 + q * 1.05, yaw: -Math.PI / 2 }, r.pick([M.vinylBrown, M.vinylGreen, tint(M.vinylRed, '#6a2a24')])); }
-  k.slot('resident_lobby', x0 + 0.55, 0.42, WALL_T + 4.65, -Math.PI / 2);
-  k.marker('wait', x0 + 0.55, 0.42, WALL_T + 3.6, 'lobby chair');
-  k.cyl(x0 + 0.6, 0, WALL_T + 6.9, 0.16, 0.7, M.steel, 10, { collide: true });
-  // --- elevator: brass cage gate look, floor dial, an OUT OF ORDER card (stairs carry the story until request 5 ships)
-  const ex = Math.max(x0 + 1.2, L.x0 - 1.6);
+  k.marker('register', cx + 0.3, 1.1, cz1 - 0.6, 'cash drawer');
+  k.marker('payphone', cx + 0.2, 1.1, cz0 + 0.6, 'desk phone');
+  // floor: terrazzo border with a patterned carpet field, worn through on the traffic line
+  k.box(x0 + 0.5, 0.004, WALL_T + 0.6, cx - 0.6, 0.012, zl - 0.5, tint(M.carpetRed, '#5a3a2e'), { occlude: false });
+  k.box(u.door.t - 0.5, 0.013, WALL_T + 0.6, u.door.t + 0.5, 0.015, zl - 0.5, tint(M.carpetRed, '#7a6a58'), { occlude: false }); // threadbare path
+  // square columns down the room (Aberdeen), painted, scuffed at the base
+  const colX = (x0 + cx) / 2 + 0.6;
+  for (const z of [WALL_T + 2.4, WALL_T + 5.6]) if (z < zl - 1) { k.box(colX - 0.28, 0, z - 0.28, colX + 0.28, H, z + 0.28, NICOTINE, { collide: 'cover' }); k.box(colX - 0.3, 0, z - 0.3, colX + 0.3, 0.2, z + 0.3, M.woodDark, { occlude: false }); }
+  // sofas + lamp tables along the left wall, framed pictures above (art slots), one empty hook
+  for (let q = 0; q < 2; q++) {
+    const z = WALL_T + 2.4 + q * 2.6; if (z > zl - 1.4) break;
+    P.sofa(k, { x: x0 + 0.5, z, yaw: -Math.PI / 2 }, 1.8, r.pick([tint(M.vinylBrown, '#5a3a2a'), tint(M.vinylGreen, '#3a4a38')]));
+    k.box(x0 + 0.1, 0, z + 1.05, x0 + 0.6, 0.6, z + 1.5, M.woodDark, { collide: 'cover' });
+    k.cyl(x0 + 0.35, 0.6, z + 1.27, 0.06, 0.4, M.woodDark, 8); k.cyl(x0 + 0.35, 1.0, z + 1.27, 0.2, 0.25, tint(M.paper, '#d8c8a0'), 12, { r1: 0.13 });
+    k.light(x0 + 0.35, 1.15, z + 1.27, [1, 0.75, 0.45], q === 0 ? 0.9 : 0.25, 'bulb', q === 1 ? 1 : 0);
+    if (q === 0) { k.box(x0 + 0.01, 1.5, z - 0.4, x0 + 0.04, 2.2, z + 0.4, tint(M.wood, '#8a6a3a'), { occlude: false }); k.box(x0 + 0.04, 1.56, z - 0.34, x0 + 0.045, 2.14, z + 0.34, tint(M.fabricOlive, '#7a8a6a'), { occlude: false }); k.artSlot('photo', x0 + 0.046, 1.85, z, 0.68, 0.58, 1, 0); }
+    else k.box(x0 + 0.01, 1.55, z - 0.3, x0 + 0.015, 2.1, z + 0.3, tint(NICOTINE, '#d8c8a0'), { occlude: false }); // paler patch where a picture hung
+  }
+  k.slot('resident_lobby', x0 + 0.5, 0.42, WALL_T + 2.4, -Math.PI / 2);
+  k.marker('wait', x0 + 0.5, 0.42, WALL_T + 2.8, 'lobby sofa');
+  k.cyl(colX, 0, WALL_T + 4.0, 0.16, 0.7, M.steel, 10, { collide: true }); // sand-urn ashtray
+  // mailbox bank on the back wall with a wall clock above (Aberdeen), left of the elevator
+  const ex = Math.max(x0 + 2.4, L.x0 - 1.6);
+  P.mailboxes(k, { x: x0 + 0.3, z: zl - 0.02, yaw: 0 }, Math.max(4, Math.min(12, Math.floor((ex - x0 - 1.2) / 0.14))), 6);
+  P.wallClock(k, x0 + 0.3 + Math.min(1.0, (ex - x0 - 1.2) / 2), 2.75, zl - 0.02, 0, -1);
+  // elevator: brass gate look, floor dial, an OUT OF ORDER card (stairs carry the story until request 5 ships)
   P.elevatorDoors(k, { x: ex, z: zl - 0.02, yaw: 0 }, 1.1, 2.25, tint(M.chrome, '#7a6a42'));
   for (let q = 0; q < 9; q++) k.box(ex - 0.5 + q * 0.125, 0.05, zl - 0.09, ex - 0.49 + q * 0.125, 2.2, zl - 0.07, tint(M.chrome, '#7a6a42'), { occlude: false });
   k.box(ex - 0.15, 1.3, zl - 0.1, ex + 0.15, 1.5, zl - 0.095, M.sign, { occlude: false });
-  // light: two flickering tubes and a dim globe, tired grade
-  P.fluorescent(k, (x0 + x1) / 2, WALL_T + 2.2, H, 1.22, 3.2, Math.PI / 2, 0);
-  P.fluorescent(k, cx - 0.3, (cz0 + cz1) / 2, H, 1.22, 2.4, 0, 1); // the clerk's tube flickers
-  P.globeLight(k, (x0 + x1) / 2, zl - 2.2, H, 2.6);
-  P.globeLight(k, x0 + 1.2, WALL_T + 5, H, 2.0);
-  P.radiator(k, { x: x0 + 0.02, z: zl - 1.6, yaw: -Math.PI / 2 }, 0.9);
+  // light: shallow bowl pendants (one dead), a bare tube in the clerk's room that flickers
+  const bowl = (x: number, z: number, I: number) => { k.cyl(x, H - 0.75, z, 0.008, 0.75, M.black, 4, { top: false }); k.cyl(x, H - 0.85, z, 0.12, 0.1, tint(M.chrome, '#b0a080'), 14, { r1: 0.48 }); if (I > 0) { k.cyl(x, H - 0.76, z, 0.44, 0.005, tint(M.bulb, '#ffe0b0', { e: 1.2 }), 14); k.light(x, H - 0.55, z, [1, 0.8, 0.55], I, 'neon'); k.light(x, H - 1.3, z, [1, 0.8, 0.55], I * 0.45, 'bulb'); } }; // uplighter: washes the ceiling, a little spills down
+  bowl(colX - 0.4, WALL_T + 1.2, 4.2); bowl(colX - 0.4, WALL_T + 4.0, 0); bowl(colX - 0.4, WALL_T + 7.0, 3.6); if (zl - 1.4 > WALL_T + 8.5) bowl(colX - 0.4, zl - 1.4, 3.8);
+  P.fluorescent(k, (cx + x1) / 2, (cz0 + cz1) / 2, H, 1.22, 2.0, Math.PI / 2, 1);
+  P.radiator(k, { x: cx - 0.17, z: zl - 0.9, yaw: Math.PI / 2 }, 0.9);
   k.marker('spawn', u.door.t, 0, WALL_T + 1.4, 'Corwin lobby');
   // --- the stair to every floor; floors 9 (index 8) and 11 (index 10) are open
   const top = L.floors - 1, nine = Math.min(8, top - 1);
@@ -145,7 +165,7 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
     k.box((bayX0 + bayX1) / 2 - 0.02, y0 + 0.75, pz1 + 0.1, (bayX0 + bayX1) / 2 + 0.02, y0 + 2.45, pz1 + 0.14, M.enamelCream, { occlude: false });
     P.radiator(k, { x: bayX0 + 0.3, z: pz1 - 0.2, yaw: 0 }, 0.9);
     P.bareBulb(k, (bayX0 + bayX1) / 2, (cz1 + pz1) / 2, y0 + H, 0.8);
-    k.marker('prop', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'window to the Empire State');
+    k.marker('prop', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'window to the Empire Estate Building');
     k.marker('wait', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'the window at the end of the hall');
     k.use(cell);
   } else if (bathAndView) {
@@ -153,7 +173,7 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
     k.portalRect(cell, -1, wx, cz0 + 0.2, wx, cz0 + 1.4, y0 + 0.75, y0 + 2.45);
     k.box(wx - 0.01, y0 + 0.75, cz0 + 0.2, wx + 0.01, y0 + 2.45, cz0 + 1.4, M.glass, { glass: true, occlude: false });
     k.box(wx + sgn * 0.02, y0 + 0.78, cz0 + 0.3, wx + sgn * 0.25, y0 + 0.82, cz0 + 1.3, M.woodDark, { occlude: false });
-    k.marker('prop', wx + sgn * 0.6, y0, cz0 + 0.8, 'window to the Empire State');
+    k.marker('prop', wx + sgn * 0.6, y0, cz0 + 0.8, 'window to the Empire Estate Building');
     k.marker('wait', wx + sgn * 0.6, y0, cz0 + 0.8, 'the window at the end of the hall');
   }
   for (let x = cx0 + 1.5; x < L.x1; x += 4) P.bareBulb(k, x, (cz0 + cz1) / 2, y0 + H, r.chance(0.2) ? 0.3 : 1.0);

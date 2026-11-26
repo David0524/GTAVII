@@ -126,6 +126,22 @@ Reads as a modern kit or is wrong:
 - **Caveat:** HABS rights say "images copied from other sources may be restricted". The 8 HABS items kept are HABS
   survey photographs dated 1962–1977, not copies from other sources.
 
+## Grade and Corwin boards v1–v2 (against references)
+- `docs/interiors/grades_vs_refs_v1.png`: the same diner at grades 0–4 above reference exemplars (1, 3 and 4; there are no 0 or 2
+  exemplars yet).
+  - **Verdict:** the steps read, but too subtly. In the references, grade 3 is chandeliers, columns, patterned carpet and
+    linen, and grade 4 is carved panelling and coffered ceilings. Our recipe changes colour, stains and mouldings but
+    not the furniture, fixtures or ceiling. Next: grade-driven fixture and furniture sets (chandeliers and pendants vs
+    bare bulbs, linen vs formica, carpet vs linoleum, panelling vs paint) and a derelict set (boarded windows, stripped
+    fixtures).
+- `docs/interiors/corwin_vs_ref_lobby_v2.png`: the Corwin lobby rebuilt against the Aberdeen Hotel lobby (17 W 32nd St,
+  1941, a block away). It now has the recessed desk window with pigeonholes and a 1970s wire grille, square columns,
+  uplight bowl pendants (one dead), a patterned carpet with a threadbare path, sofas and lamp tables, a picture and a pale
+  patch where one hung, and the mailbox bank and clock on the back wall.
+  - **Verdict:** the plan and fixtures now match the period. Still flat: no carpet pattern detail at distance, vinyl aliasing,
+    no pattern on the bowl undersides. The ceiling cove and cornice are missing. Exposure is darker than the reference by
+    design (1974 worn vs 1941 new), but it may be too dark on a real display.
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.
