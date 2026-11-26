@@ -185,11 +185,11 @@ function headMaterial(h: HeadAsset, tint: [number, number, number], bodyLin: [nu
   const tc = texture(h.color, uv()), tn = texture(h.normal, uv());
   const to = texture(h.opacity ?? h.color, uv());
   const tintU = uniform(new THREE.Color(tint[0], tint[1], tint[2]));
-  const neckU = uniform(bodyLin ? new THREE.Color(bodyLin[0], bodyLin[1], bodyLin[2]) : new THREE.Color(0, 0, 0));
+  const neckU = uniform(bodyLin ? new THREE.Vector3(bodyLin[0], bodyLin[1], bodyLin[2]) : new THREE.Vector3());
   const fadeW = attribute('hfade', 'float').mul(bodyLin ? 0.9 : 0);
   // keep the texture's fine detail (luminance ratio) while the colour moves to the body tone
   const skinC = tc.rgb.mul(tintU);
-  const neckV = vec3(neckU);
+  const neckV = neckU;
   const neckC = neckV.mul(dot(skinC, vec3(0.3, 0.6, 0.1)).div(dot(neckV, vec3(0.3, 0.6, 0.1)).add(1e-4)).clamp(0.6, 1.4));
   m.colorNode = isCard.select(to.rgb, mix(skinC, neckC, fadeW));
   m.opacityNode = isCard.select(h.opacity ? to.a : float(1), float(1));
