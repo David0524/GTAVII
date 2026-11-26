@@ -11,8 +11,10 @@ Only the derived binaries in `public/characters/` are shipped; raw downloads liv
 |---|---|---|---|---|
 | `public/characters/body.bin` | 6.9 MiB | `tools/characters/build-body.ts` | MakeHuman base mesh, morph targets, default skeleton joint groups, default skin weights | CC0 1.0 (MakeHuman assets) |
 | `public/characters/anims.bin` | 0.97 MiB | `tools/characters/build-anims.ts` | Quaternius Universal Animation Library 1 and 2, Standard tier (39 clips) | CC0 1.0 |
+| `public/characters/body_low.bin` | 0.95 MiB | `tools/characters/build-low.ts` | subset of `body.bin` (Low quality) | CC0 1.0 (MakeHuman assets) |
+| `public/characters/fabric_{a,b}_{hi,lo}.webp` | 275 KiB (hi, 512²) / 74 KiB (lo, 256²) | see §5 | Poly Haven displacement maps, high-passed and channel-packed | CC0 1.0 |
 
-Everything else is generated at runtime by our own code: garments, shoes, hats, glasses,
+Everything else is generated at runtime by our own code (fabric *relief* uses the §5 maps): garments, shoes, hats, glasses,
 props, hair, eyeballs, skin and cloth shading, the authored animation clips, the crowd bake.
 
 ## 1. MakeHuman assets (CC0)
@@ -90,6 +92,26 @@ props, hair, eyeballs, skin and cloth shading, the authored animation clips, the
   public-domain reference photos in `references/` (US National Archives, DOCUMERICA; credits in
   `references/catalog.json`). Those photos are references only and are not shipped by this
   workstream.
+
+## 5. Poly Haven fabric scans (CC0)
+- **Licence:** CC0 1.0 (https://polyhaven.com/license): no attribution required; credited here anyway.
+- **Assets** (1k `Displacement` PNGs from the Poly Haven API, fetched 2026-11-26; scans by colormass, processed by Rico Cilliers):
+
+| Channel | Asset | URL | Used for |
+|---|---|---|---|
+| a.R | Poly Wool Herringbone | https://polyhaven.com/a/poly_wool_herringbone | suitings, tweeds, checks, plaids |
+| a.G | Denim Fabric | https://polyhaven.com/a/denim_fabric | jeans and denim jackets |
+| a.B | Cotton Jersey | https://polyhaven.com/a/cotton_jersey | knits and rib |
+| b.R | Stretch Poplin | https://polyhaven.com/a/stretch_poplin | shirting, blouses, plain cloth |
+| b.G | Ribbed Corduroy | https://polyhaven.com/a/ribbed_corduroy | reserved (corduroy) |
+| b.B | Brown Leather | https://polyhaven.com/a/brown_leather | leather grain (shoes, belts, jackets) |
+
+- **Edits:** resampled to 512² / 256², high-passed (periodic Gaussian, σ = 1/64 of the tile, so
+  the tiles stay seamless) to remove the swatches' own undulation, contrast-normalised, packed
+  into RGB and saved as WebP (q85). Sampled triplanar in bind space at the scans' real size
+  (0.27 m tile) as bump height; colour still comes from our procedural patterns.
+- **Shared log:** `docs/briefs/ART_ASSETS.md` asks for `docs/ART_SOURCES.md`; that is a shared
+  file, so the entry is requested in `ENGINE_REQUESTS.md` (characters 4) instead of edited here.
 
 ## 4. Tooling (not shipped)
 - three 0.187.0 (MIT) is used inside the build scripts for maths.

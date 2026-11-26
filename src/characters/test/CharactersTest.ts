@@ -12,7 +12,7 @@ import * as THREE from 'three/webgpu';
 import { normalGeometry } from 'three/tsl';
 import { createRenderer } from '../../engine/renderer';
 import { createCharacterFactory, type CharacterFactory, type Character } from '../index';
-import { characterMaterial } from '../render/materials';
+import { characterMaterial, surfaceNodes } from '../render/materials';
 import type { AgentView } from '../crowd/CrowdRenderer';
 import { hash2 } from '../util/rng';
 import { generateAppearance } from '../body/appearance';
@@ -31,10 +31,11 @@ export async function runCharactersTest() {
   world.add(new THREE.HemisphereLight(0xc8d2e6, 0x4a3c30, 1.25));
   const sun = new THREE.DirectionalLight(0xffe8cc, 2.6); sun.position.set(4, 7, 6); world.add(sun);
   const rim = new THREE.DirectionalLight(0xc0d0ff, 1.0); rim.position.set(-5, 3, -6); world.add(rim);
-  if (qp.get('dbg') === 'n') { const mm = characterMaterial(); mm.colorNode = normalGeometry.mul(0.5).add(0.5); mm.normalNode = null; }
-  if (qp.get('dbg') === 'nobump') characterMaterial().normalNode = null;
   const quality = (qp.get('quality') ?? 'high') as 'low' | 'high';
   const factory = await createCharacterFactory({ quality });
+  if (qp.get('dbg') === 'n') { const mm = characterMaterial(); mm.colorNode = normalGeometry.mul(0.5).add(0.5); mm.normalNode = null; }
+  if (qp.get('dbg') === 'fabric') { const mm = characterMaterial(); mm.colorNode = surfaceNodes().detail; mm.normalNode = null; }
+  if (qp.get('dbg') === 'nobump') characterMaterial().normalNode = null;
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};

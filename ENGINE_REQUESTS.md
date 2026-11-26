@@ -36,3 +36,10 @@ Workstreams append requests here on their own branch under `## From <team>: N. T
   - call `factory.setClimate({ heat, wetness })` from time of day and weather.
 - **Why:** the brief says the engine chat wires it in. The test scene is `?characters=1`.
 - **Fallback:** none needed; the test scenes exercise the API stand-alone.
+
+## From characters: 4. Mirror the character fabric scans into ART_SOURCES.md
+- **What:** add the six Poly Haven CC0 fabric scans listed in `docs/CHARACTER_SOURCES.md` §5
+  (files `public/characters/fabric_{a,b}_{hi,lo}.webp`) to `docs/ART_SOURCES.md`.
+- **Why:** `docs/briefs/ART_ASSETS.md` asks for one shared source log; this workstream may not
+  edit shared files.
+- **Fallback:** the full record (URLs, licence, edits) is already in `docs/CHARACTER_SOURCES.md`.

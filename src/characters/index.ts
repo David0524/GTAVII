@@ -16,7 +16,7 @@ import { registerAuthored } from './anim/authored';
 import { Character, type CharacterDesc, type GroundFn } from './Character';
 import { HEROES } from './heroes';
 import { CrowdRenderer, type AgentView } from './crowd/CrowdRenderer';
-import { charUniforms } from './render/materials';
+import { charUniforms, setFabricMaps } from './render/materials';
 import { ArchetypeRegistry, type ArchetypeDef } from './archetypes';
 import { castBuild, type CastEntry } from './cast';
 export type { CastEntry } from './cast';
@@ -47,6 +47,9 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
   const bodyFile = opts.quality === 'low' ? 'body_low.bin' : 'body.bin';
   const [body, anims] = await Promise.all([BodyModel.load(base + bodyFile), AnimLibrary.load(base + 'anims.bin')]);
   registerAuthored(anims);
+  // fabric detail maps (≈70 KB Low / 270 KB High; relief stays flat if they fail)
+  const tag = opts.quality === 'low' ? 'lo' : 'hi', tl = new THREE.TextureLoader();
+  await Promise.all([tl.loadAsync(`${base}fabric_a_${tag}.webp`), tl.loadAsync(`${base}fabric_b_${tag}.webp`)]).then(([a, b]) => setFabricMaps(a, b)).catch((e) => console.warn('characters: fabric maps', e));
   let ground: GroundFn | null = null;
   const archetypes = new ArchetypeRegistry();
   const cast = new Map<string, CastEntry>();

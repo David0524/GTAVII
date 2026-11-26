@@ -10,7 +10,7 @@
  */
 import * as THREE from 'three/webgpu';
 import {
-  attribute, positionGeometry, float, vec2, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
+  attribute, positionGeometry, normalGeometry, texture, float, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
   mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize,
 } from 'three/tsl';
 
@@ -24,6 +24,21 @@ export const charUniforms = {
 const KIND = { skin: 0, cloth: 1, leather: 2, eye: 3, teeth: 4, lens: 5, metal: 6, hosiery: 8, paper: 9, rubber: 10 };
 
 function luminance(c: any) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+
+/**
+ * Fabric detail height maps (CC0, Poly Haven; docs/CHARACTER_SOURCES.md), packed RGB:
+ *   a: wool herringbone, denim twill, cotton jersey;  b: poplin, corduroy, leather grain.
+ * Installed by the factory before materials are built (index.ts); without them the relief is flat.
+ */
+export const fabricMaps = { a: new THREE.Texture(), b: new THREE.Texture() };
+for (const t of [fabricMaps.a, fabricMaps.b]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.NoColorSpace; }
+/** Install the loaded maps (the factory awaits them before any material is built). */
+export function setFabricMaps(a: THREE.Texture, b: THREE.Texture) {
+  for (const t of [a, b]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.NoColorSpace; t.anisotropy = 4; t.needsUpdate = true; }
+  fabricMaps.a = a; fabricMaps.b = b;
+}
+/** Real-world tile size of the scanned swatches (m). */
+const FABRIC_TILE = 0.27;
 
 /** Shared surface shading (colour, roughness, micro-relief) from the per-vertex material data.
  *  `tint` (crowds) recolours garment slots per instance. */
@@ -68,9 +83,12 @@ export function surfaceNodes(tint?: (col: any) => any) {
       const n = mx_noise_float(p.mul(vec3(30, 4, 30)));
       col.assign(mix(cA.mul(0.85), cA.mul(1.15).add(0.03), tw).mul(mix(0.92, 1.12, n)));
     });
-    If(id.equal(12), () => { // geometric 70s print: rings
-      const g = fract(length(vec2(fract(around.div(sc)).sub(0.5), fract(v.div(sc)).sub(0.5))).mul(3));
-      col.assign(mix(cA, cB, step(0.5, g)));
+    If(id.equal(12), () => { // geometric 70s print: staggered diamond lattice with outlined centres (no rings/targets)
+      const gy = v.div(sc), row = floor(gy);
+      const gx = around.div(sc).add(row.mul(0.5));
+      const d = abs(fract(gx).sub(0.5)).add(abs(fract(gy).sub(0.5)));
+      const fill = smoothstep(0.3, 0.27, d), line = smoothstep(0.37, 0.39, d).mul(smoothstep(0.45, 0.43, d));
+      col.assign(mix(mix(cA, cB, fill), cB.mul(0.55), line.mul(0.8)));
     });
     return col;
   });
@@ -148,6 +166,15 @@ export function surfaceNodes(tint?: (col: any) => any) {
   });
 
   // --- micro relief: pores and wrinkles (skin), weave (cloth), grain (leather) ----------------
+  // triplanar in bind space (no UVs on cut garments); sampled unconditionally (uniform control flow)
+  const tq = p.div(FABRIC_TILE);
+  const tw0 = pow(abs(normalGeometry), vec3(4)), tw = tw0.div(tw0.x.add(tw0.y).add(tw0.z).add(1e-5));
+  const tri = (t: THREE.Texture) => texture(t, tq.yz).mul(tw.x).add(texture(t, tq.xz).mul(tw.y)).add(texture(t, tq.xy).mul(tw.z));
+  const fa = tri(fabricMaps.a), fb = tri(fabricMaps.b);
+  const pid = floor(m0.x.add(0.5));
+  // which swatch a cloth uses: denim twill, wool (suitings, tweeds, checks), jersey (knits), else shirting poplin
+  const wool = pid.equal(3).or(pid.equal(4)).or(pid.equal(5)).or(pid.equal(6)).or(pid.equal(10)).or(m0.z.greaterThan(0.6).and(m0.w.lessThan(0.2)).and(pid.equal(0)));
+  const clothDetail = pid.equal(11).select(fa.y, wool.select(fa.x, pid.equal(9).select(fa.z, fb.x)));
   const height = Fn(() => {
     const h = float(0).toVar();
     If(kind.equal(KIND.skin), () => {
@@ -157,13 +184,13 @@ export function surfaceNodes(tint?: (col: any) => any) {
       const crows = uvA.y.mul(smoothstep(0.3, 0.75, age)).mul(sin(atan(p.y.mul(100), abs(p.x).mul(100)).mul(40)).mul(0.5).add(0.5));
       h.assign(pores.add(forehead.mul(0.9)).add(crows.mul(0.7)).add(nMid.mul(0.15).mul(age)));
     });
-    If(kind.equal(KIND.cloth), () => { h.assign(mx_noise_float(p.mul(1100)).mul(0.5).add(sin(p.y.mul(2600)).mul(0.25))); });
-    If(kind.equal(KIND.leather), () => { h.assign(mx_noise_float(p.mul(700)).mul(0.4)); });
+    If(kind.equal(KIND.cloth), () => { h.assign(clothDetail.mul(0.85).add(mx_noise_float(p.mul(300)).mul(0.12))); });
+    If(kind.equal(KIND.leather), () => { h.assign(fb.z.mul(0.6).add(mx_noise_float(p.mul(700)).mul(0.1))); });
     return h;
   });
 
   const col = tint ? tint(color()) : color();
-  return { color: col, roughness: roughness(), height: height(), kind, m0, m1 };
+  return { color: col, roughness: roughness(), height: height(), kind, m0, m1, detail: vec3(fa.x, fa.y, fb.z) };
 }
 
 let shared: THREE.MeshSSSNodeMaterial | null = null;
@@ -175,7 +202,7 @@ export function characterMaterial(): THREE.MeshSSSNodeMaterial {
   m.colorNode = col;
   m.roughnessNode = rough;
   m.metalnessNode = kind.equal(KIND.metal).select(float(0.9), float(0));
-  m.normalNode = bumpMap(h, kind.equal(KIND.skin).select(float(0.0006), float(0.0004)));
+  m.normalNode = bumpMap(h, kind.equal(KIND.skin).select(float(0.0006), float(0.0007)));
   // polyester/satin sheen; skin peach fuzz
   m.sheenNode = kind.equal(KIND.cloth).select(vec3(m0.w.mul(0.35)), kind.equal(KIND.skin).select(vec3(0.04), vec3(0)));
   m.sheenRoughnessNode = float(0.45);
