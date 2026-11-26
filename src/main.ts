@@ -19,6 +19,7 @@ import { promptStrip, PROMPT_CSS } from './ui/Prompts';
  *   cam=x,y,z,yawDeg,pitchDeg        (override the spawn camera; used by the screenshot rig)
  */
 async function main() {
+  if (new URLSearchParams(location.search).has('characters')) { await (await import('./characters/test/CharactersTest')).runCharactersTest(); return; } // characters workstream test scene
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
