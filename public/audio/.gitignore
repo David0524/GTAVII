@@ -1,0 +1,2 @@
+# Rendered speech is a build artefact (npm run audio:voices); not committed. Provenance: docs/AUDIO_SOURCES_VOICES.md
+voice/

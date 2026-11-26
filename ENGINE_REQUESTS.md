@@ -101,3 +101,12 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
   walls, so Eighth Ave at 41st gets far too much reflection energy.
 - **Fallback:** none on my side (I use the chunk data as-is). Found by the canyon ray debug view
   in `?audio=1`.
+
+## From audio: 11. Build step for rendered speech (pending the user's choice of where renders live)
+- **What:** rendered speech (`public/audio/voice/`, ~34 MB for 1,428 lines) is a build artefact and
+  is no longer committed. If the user chooses build-time generation, the deploy build needs
+  `espeak-ng` and `ffmpeg` available and `npm run audio:voices` before `vite build` (narrative
+  `content/` must be present at `public/content`). Vercel's build image doesn't ship espeak-ng, so
+  this may mean a prebuilt artefact instead (Git LFS or a release asset) — the user decides.
+- **Why:** keeps 35 MB per narrative revision out of git history.
+- **Fallback:** without renders, lines play the formant placeholder voice with correct subtitle timing.

@@ -39,7 +39,7 @@ export class RoomTone {
     const build = (ctx: BaseAudioContext): SourceGraph => {
       switch (kind) {
         case 'diner': return mix(ctx, [acUnitSource(ctx, noise, 11), textured(ctx, noise.white, 5200, 0.8, 9, 0.6, 0.05)]);
-        case 'bar': { const w = workletSource(ctx, 't74-walla', 2, { seed: 77, talkers: 4 }); w.node.parameters.get('density')!.value = 0.5; w.node.parameters.get('gain')!.value = 0.5; return mix(ctx, [this.radio.worldSpeaker(ctx, this.radio.stations[0].id, 'bar'), w.graph]); }
+        case 'bar': { const w = workletSource(ctx, 't74-walla', 2, { seed: 77, talkers: 4 }); w.node.parameters.get('density')!.value = 0.5; w.node.parameters.get('gain')!.value = 0.5; return this.radio.enabled ? mix(ctx, [this.radio.worldSpeaker(ctx, this.radio.stations[0].id, 'bar'), w.graph]) : w.graph; }
         case 'precinct': return mix(ctx, [humSource(ctx, noise), acUnitSource(ctx, noise, 12)]);
         case 'sro': return mix(ctx, [acUnitSource(ctx, noise, 13), humSource(ctx, noise)]);
         case 'loft': return mix(ctx, [textured(ctx, noise.white2, 2400, 2.5, 21, 0.85, 0.12), textured(ctx, noise.pink, 700, 1, 21, 0.7, 0.1)]);

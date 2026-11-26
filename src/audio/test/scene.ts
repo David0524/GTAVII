@@ -52,7 +52,7 @@ export async function startScene(params: URLSearchParams) {
   const gate = document.createElement('div'); gate.id = 'ats-gate'; gate.textContent = 'LOADING AUDIO…'; document.body.appendChild(gate);
   const quality = (params.get('quality') as QualityName) || (matchMedia('(pointer: coarse)').matches ? 'low' : 'high');
 
-  const audio = new AudioSystem({ quality });
+  const audio = new AudioSystem({ quality, radio: params.get('radio') === '1' }); // radio stations paused by the user; ?radio=1 to test
   const streets: StreetRec[] = await fetch(import.meta.env.BASE_URL + 'data/streets.json').then((r) => r.json());
   await audio.load({ streets });
   const map = new CityMap(streets);

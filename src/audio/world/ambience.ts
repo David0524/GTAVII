@@ -175,6 +175,7 @@ export class Ambience {
     const p = this.env.power(e.x, e.z), h = this.env.clock.hour;
     if (e.kind === 'ac') return p !== 'off' && (h > 10 || h < 2 || (e.seed % 3 === 0)); // hot June: most units run afternoon to late night
     if (e.kind === 'neon') return p === 'on' && curve(CURVE.dark, h) > 0.3;
+    if (e.kind === 'radio' && !this.radio?.enabled) return false;
     if (e.kind === 'radio' && e.bar) return !!this.radio && p !== 'off' && curve(CURVE.night, h) > 0.3;
     if (e.kind === 'radio') return !!this.radio && (h > 17 || h < 1.5) && (p !== 'off' || e.seed % 4 === 0); // some are battery transistors
     return true;

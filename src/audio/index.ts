@@ -65,13 +65,13 @@ export class AudioSystem {
   dialogue!: { play(scriptId: string, lineId: string, at?: Vec3, opts?: { filter?: 'phone' | 'radio' }): Promise<void>; on(type: 'subtitle' | 'subtitleEnd', cb: (e: any) => void): void; overhear: DialogueSystem['overhear']; registerScript(s: Script): void; bark: DialogueSystem['bark']; readonly system: DialogueSystem };
   readonly timing = { updateMs: 0, updateMaxMs: 0, frames: 0, sumMs: 0, samples: [] as number[], parts: {} as Record<string, number>, partsMax: {} as Record<string, number> };
 
-  constructor(opts: { quality: QualityName; baseUrl?: string; context?: BaseAudioContext; stations?: StationDef[]; content?: boolean }) {
+  constructor(opts: { quality: QualityName; baseUrl?: string; context?: BaseAudioContext; stations?: StationDef[]; content?: boolean; /** Radio stations (paused by the user): default false. */ radio?: boolean }) {
     this.quality = AUDIO_PRESETS[opts.quality] ?? AUDIO_PRESETS.high;
     this.baseUrl = opts.baseUrl ?? (import.meta.env?.BASE_URL ?? '/');
     this.runtime = new AudioRuntime({ context: opts.context as AudioContext | OfflineAudioContext | undefined, latencyHint: this.quality.latencyHint });
     this.customStations = !!opts.stations?.length || opts.content === false;
     this.useContent = opts.content !== false;
-    this.ready = this.runtime.ready.then(() => this.build(opts.stations));
+    this.ready = this.runtime.ready.then(() => { this.build(opts.stations); this.radio.system.enabled = opts.radio === true; });
   }
 
   private build(stations?: StationDef[]) {

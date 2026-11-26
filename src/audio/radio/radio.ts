@@ -83,7 +83,14 @@ export class RadioSystem {
   private speechDur(sp: SpeechDef) { return (this.voices?.duration(sp.speaker, 'radio', sp.text) ?? syllableScript(sp.text, 'neutral', speakerVoice(sp.speaker)).duration) + 0.6; }
 
   /** In-car station (null = off). */
+  /**
+   * Station playback is OFF by default: radio stations are paused by the user (relayed 2026-11-26 ~16:31).
+   * The engine or ?radio=1 turns it on; with it off, setStation() and world/bar radios are silent.
+   */
+  enabled = false;
+
   setStation(id: string | null) {
+    if (!this.enabled && id !== null) return;
     if (id === this.carStation) return;
     const env = this.env; const prev = this.carStation; this.carStation = id;
     const st = id ? this.stations.find((s) => s.id === id) : null;

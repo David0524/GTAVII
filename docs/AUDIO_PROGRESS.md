@@ -71,12 +71,14 @@ tools/audio/          render.ts (the test), loudness.ts (BS.1770-4 + TP), wav.ts
 - **Lightning is audio-led** (emits `lightning` with the delay before thunder) so the visual comes
   first, per the never-audio-only rule (requested from the engine).
 - **Settings, wiring, world state and the never-audio-only UI** are engine-owned; requested.
-- **Free music and voice (user decision 2026-11-26).** Music is generated live per song seed in the
+- **Free music and voice (user decision 2026-11-26, about 16:00 UTC, in this audio session).** After I
+  asked for the music and voice sources with options and costs, the user's exact words were:
+  *"Use free methods for now. Means you may have to generate speech locally."* Music is generated live per song seed in the
   worklet (deterministic, so stations can be joined mid-song). Speech is rendered offline with eSpeak
   NG: formant synthesis means no real person's voice is imitated and no model licence is involved,
   and keeping it a build step keeps GPL code out of the shipped game. Files are keyed by
   hash(speaker|emotion|text) so edits fall back to the placeholder voice instead of breaking. Cost:
-  34 MB of encoded speech in the repo (Opus + AAC). Casting reads the pronouns in the narrative's own
+  about 34 MB of encoded speech, so the renders are **not committed** (see below). Casting reads the pronouns in the narrative's own
   cast descriptions, never names; 6 named characters with no cast entry get a neutral voice until
   narrative adds them; overrides in `tools/audio/casting.json`.
 
@@ -99,8 +101,9 @@ What should already read as 1974 Midtown:
   Hudson, a siren wandering the grid with the canyons bouncing it.
 
 What will sound like a tech demo (worst first):
-1. **Placeholder voice and crowd walla.** Formant "mumble" is plainly synthetic up close; it's fine
-   as distant crowd texture but not as speech. It waits on your voice decision.
+1. **Speech is a placeholder tier, not final.** eSpeak NG lines are intelligible but robotic (formant
+   synthesis); nobody should mistake them for shipped voice quality. The crowd walla's formant
+   "mumble" is fine as distant texture only.
 2. **Placeholder radio music** is deliberately plain. It waits on your music decision.
 3. **Horns** are oscillator-based. A real 1970s disc horn has a rougher, beating, nonlinear
    buzz; ours is cleaner and more "electronic", especially solo and up close.
@@ -161,9 +164,18 @@ Reading the numbers honestly:
   exercise that code.
 
 ## Paused: radio stations (user instruction relayed by oversight, 2026-11-26 16:31)
-"Don't do radio stations right now." What exists stays in place and working (station framework,
-procedural music, DJ/news playback with rendered speech, in-car radio, window/bar radios); no further
-radio work until resumed. Everything else continues.
+"Don't do radio stations right now." The code stays, but **station playback is off by default**
+(`new AudioSystem({ radio: true })` or `?radio=1` turns it on): `setStation()` is ignored and window,
+bar and jukebox radios are silent. My commit wiring the narrative's 4 stations to procedural music
+(16:41) was finished just before the pause reached me; nothing further will be added until it lifts.
+
+## Voice renders are a build artefact, not committed (2026-11-26 ~17:45)
+The first render added ~35 MB (2,856 files) to git history in commit 6f7fb36. They are now removed from
+the tree and ignored (`public/audio/.gitignore`); `npm run audio:voices` regenerates them (needs the
+`espeak-ng` package). Provenance stays per file in `docs/AUDIO_SOURCES_VOICES.md`. Without renders the
+game plays the formant placeholder voice through the same API. Where the renders live for deployment
+(build step, Git LFS, or a release asset) is the user's decision; the files remain in history unless
+the user approves rewriting this branch's history before it merges.
 
 ## Backlog relayed from the oversight session (2026-11-26; not in the original brief)
 Recorded as scope additions to plan for; the brief's "done means" came first.
