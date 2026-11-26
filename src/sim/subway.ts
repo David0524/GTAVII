@@ -22,10 +22,28 @@ export const LINES: { key: string; name: string; avenue: RegExp; speed: number }
   { key: 'sixth', name: 'Sixth Avenue line', avenue: /^(6th Avenue|Avenue of the Americas)$/, speed: 10 },
   { key: 'broadway', name: 'Broadway line', avenue: /^Broadway$/, speed: 10 },
   { key: 'lexington', name: 'Lexington Avenue line', avenue: /^(Lexington Avenue|Park Avenue South|Park Avenue)$/, speed: 11 },
+  // PATH (Hudson tubes) runs under 6th Avenue too; its entrances are split off the IND by CANON below
+  { key: 'path', name: 'PATH', avenue: /^$/, speed: 12 },
 ];
+
+/**
+ * Canonical 1974 stops (narrative content/subway.json, joined on line + cross street). Entrance clusters
+ * snap to the stop on their line within 2 streets and take its name; clusters of one stop merge (long
+ * platforms). `complex` marks free-transfer groups shown as one place on the map.
+ */
+export const CANON: Record<string, { st: number; name: string; complex?: string }[]> = {
+  eighth: [{ st: 23, name: '23rd St' }, { st: 34, name: '34th St–Penn Station' }, { st: 42, name: '42nd St–Port Authority Bus Terminal' }],
+  seventh: [{ st: 23, name: '23rd St' }, { st: 28, name: '28th St' }, { st: 34, name: '34th St–Penn Station' }, { st: 42, name: 'Times Square–42nd St', complex: 'times_sq' }],
+  sixth: [{ st: 23, name: '23rd St' }, { st: 34, name: '34th St–Herald Square', complex: 'herald_sq' }, { st: 42, name: '42nd St' }],
+  broadway: [{ st: 23, name: '23rd St' }, { st: 28, name: '28th St' }, { st: 34, name: '34th St–Herald Square', complex: 'herald_sq' }, { st: 42, name: 'Times Square–42nd St', complex: 'times_sq' }],
+  lexington: [{ st: 23, name: '23rd St' }, { st: 28, name: '28th St' }, { st: 33, name: '33rd St' }],
+  path: [{ st: 33, name: '33rd St' }],
+};
+/** 6th Avenue entrances between these cross streets are the PATH's, not the IND's. */
+const PATH_RANGE: [number, number] = [29, 33];
 const DWELL = 25; // s at each station
 
-export interface Station { id: number; name: string; line: string; lineName: string; x: number; z: number; entrances: { x: number; z: number }[]; order: number }
+export interface Station { id: number; name: string; line: string; lineName: string; x: number; z: number; entrances: { x: number; z: number }[]; order: number; crossStreet: number; complex?: string }
 export interface TrainCall { line: string; dir: 'uptown' | 'downtown'; inSec: number }
 
 export function headway(minute: number): number {
@@ -62,28 +80,40 @@ export class Subway {
     for (const e of tagged.sort((a, b) => a.line - b.line || a.z - b.z || a.x - b.x)) {
       const st = this.stations.find((s) => s.line === LINES[e.line].key && Math.abs(s.z - e.z) < 140 && Math.abs(s.x - e.x) < 90);
       if (st) { st.entrances.push({ x: e.x, z: e.z }); const n = st.entrances.length; st.x += (e.x - st.x) / n; st.z += (e.z - st.z) / n; }
-      else this.stations.push({ id: this.stations.length, name: '', line: LINES[e.line].key, lineName: LINES[e.line].name, x: e.x, z: e.z, entrances: [{ x: e.x, z: e.z }], order: 0 });
+      else this.stations.push({ id: this.stations.length, name: '', line: LINES[e.line].key, lineName: LINES[e.line].name, x: e.x, z: e.z, entrances: [{ x: e.x, z: e.z }], order: 0, crossStreet: 0 });
     }
-    // order along each line (downtown = larger z) and name by the nearest numbered cross street
-    for (const L of LINES) {
-      const sts = this.stations.filter((s) => s.line === L.key).sort((a, b) => b.z - a.z);
-      sts.forEach((s, i) => { s.order = i; s.name = this.crossStreet(s.x, s.z); });
+    // snap clusters to the canonical stops; merge fragments of one stop; drop clusters with no stop
+    const merged: Station[] = [];
+    for (const c of this.stations) {
+      let line = c.line;
+      const n = this.crossStreet(c.x, c.z);
+      if (line === 'sixth' && n >= PATH_RANGE[0] && n <= PATH_RANGE[1]) line = 'path';
+      const canon = (CANON[line] ?? []).reduce<{ st: number; name: string; complex?: string } | null>((b, q) => (Math.abs(q.st - n) <= 2 && (!b || Math.abs(q.st - n) < Math.abs(b.st - n)) ? q : b), null);
+      if (!canon) continue;
+      const L = LINES.find((q) => q.key === line)!;
+      const into = merged.find((m) => m.line === line && m.crossStreet === canon.st);
+      if (into) { into.entrances.push(...c.entrances); const k = into.entrances.length; into.x = into.entrances.reduce((a, e) => a + e.x, 0) / k; into.z = into.entrances.reduce((a, e) => a + e.z, 0) / k; }
+      else merged.push({ ...c, id: merged.length, line, lineName: L.name, name: canon.name, crossStreet: canon.st, complex: canon.complex, entrances: [...c.entrances] });
     }
+    this.stations.length = 0; this.stations.push(...merged);
+    // order along each line (downtown = larger z)
+    for (const L of LINES) this.stations.filter((s) => s.line === L.key).sort((a, b) => b.z - a.z).forEach((s, i) => { s.order = i; });
     this.crowd = this.stations.map(() => [S.rng.range(5, 25), S.rng.range(5, 25)]);
     this.lastPhase = this.stations.map(() => [-1, -1]);
   }
 
-  private crossStreet(x: number, z: number): string {
+  /** Number of the nearest numbered cross street (0 if none within 120 m). */
+  private crossStreet(x: number, z: number): number {
     const net = this.S.net;
-    let best = '', bd = 120;
+    let best = 0, bd = 120;
     for (const l of net.lanesNear(x, z, 120, new Set())) {
       const name = net.roadName(net.g.links[l].owner);
-      const m = /^(?:East|West) (\d+(?:st|nd|rd|th)) Street$/.exec(name); if (!m) continue;
+      const m = /^(?:East|West) (\d+)(?:st|nd|rd|th) Street$/.exec(name); if (!m) continue;
       const p = net.g.links[l].pts; let d = Infinity;
       for (let k = 0; k < p.length; k += 2) d = Math.min(d, Math.hypot(p[k] - x, p[k + 1] - z));
-      if (d < bd) { bd = d; best = `${m[1]} Street`; }
+      if (d < bd) { bd = d; best = +m[1]; }
     }
-    return best || 'Midtown';
+    return best;
   }
 
   private offsets: [number, number][] = [];

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26T22:11:56.488Z",
+  "generated": "2026-11-26T22:18:31.607Z",
   "note": "Headless Node timings, CPU only (container, no GPU); single thread.",
   "seed": 1974,
   "high": {
@@ -8,13 +8,13 @@
     "maxVehicles": 150,
     "maxPeds": 400,
     "final": {
-      "vehicles": 140,
-      "peds": 399
+      "vehicles": 142,
+      "peds": 400
     },
     "stepMs": {
-      "avg": 0.947,
-      "p95": 1.337,
-      "max": 21.06
+      "avg": 0.809,
+      "p95": 1.088,
+      "max": 19.474
     },
     "failures": {
       "vehOffRoad": 0,
@@ -31,43 +31,44 @@
       "animalOnRoad": 0
     },
     "examples": {},
-    "maxStationarySec": 130.6,
-    "maxStationaryWho": "#302 emergency  link 615",
+    "maxStationarySec": 147.7,
+    "maxStationaryWho": "#29 bus red link 441",
     "flow": {
-      "minMovingFraction": 0.13,
-      "avgMovingFraction": 0.47
+      "minMovingFraction": 0.09,
+      "avgMovingFraction": 0.46
     },
     "hooks": {
       "escorts": 3,
       "gotos": 3,
-      "witnesses": 228,
+      "witnesses": 248,
       "police": 5,
       "acts": 1,
       "kills": 1,
       "stolen": 1,
       "fire": 2,
-      "cab": 53,
+      "cab": 211,
       "parkRule": "hydrant"
     },
     "subway": {
-      "stations": 20,
-      "arrivals": 76,
-      "boarded": 5395,
-      "alighted": 2738
+      "stations": 15,
+      "arrivals": 59,
+      "boarded": 4041,
+      "alighted": 2083
     },
     "doors": {
       "doors": 40,
       "entered": 112,
-      "exited": 212
+      "exited": 306
     },
     "wildlife": {
-      "peakVisible": 177,
-      "startles": 148,
-      "scatters": 11,
+      "peakVisible": 180,
+      "startles": 159,
+      "scatters": 17,
       "feeders": 2,
       "species": {
         "pigeon": 23,
-        "rat": 3
+        "rat": 3,
+        "dog": 2
       }
     },
     "stats": {
@@ -75,92 +76,112 @@
       "wrongWay": 0,
       "vehCollisions": 0,
       "pedHits": 0,
-      "spawnedV": 2295,
-      "despawnedV": 1012,
-      "spawnedP": 1874,
-      "despawnedP": 667,
-      "stuckDespawn": 31,
-      "honks": 4638,
-      "hails": 73,
-      "boardings": 8,
-      "dropoffs": 19,
-      "busStops": 4,
-      "doubleParks": 13,
-      "jaywalks": 75,
-      "crossings": 1450,
-      "laneChanges": 1821
+      "spawnedV": 2357,
+      "despawnedV": 1041,
+      "spawnedP": 1861,
+      "despawnedP": 653,
+      "stuckDespawn": 53,
+      "honks": 4645,
+      "hails": 46,
+      "boardings": 9,
+      "dropoffs": 26,
+      "busStops": 2,
+      "doubleParks": 11,
+      "jaywalks": 90,
+      "crossings": 1489,
+      "laneChanges": 1840
     },
     "stuckWhy": {
-      "box": 9,
-      "queue": 10,
-      "peds": 7,
-      "stopSign": 1,
+      "queue": 37,
+      "peds": 5,
+      "stopSign": 3,
       "conflict": 1,
-      "siren": 3
+      "box": 7
     },
     "stuckLog": [
-      "#30@-45,-150 head #30 car drive/box/box next 1794 link 458(Broadway) s35/40 @-45,-150 stop60",
-      "#21@-43,-143 head #21 cab drive/box/box next 1793 link 457(Broadway) s43/47 @-43,-143 stop60",
-      "#37@-48,-142 head #37 car drive/box/queue next 1792 link 456(Broadway) s42/54 @-48,-142 stop60",
-      "#60@137,-37 head #562 bus drive// next 855 link 26(Madison Avenue) s212/217 @140,-258 stop0",
-      "#24@-41,-138 head #24 car drive/peds/peds next 1792 link 456(Broadway) s49/54 @-41,-138 stop87",
-      "#228@-45,-150 head #228 service drive/box/box next 1794 link 458(Broadway) s35/40 @-45,-150 stop60",
-      "#4@-43,-143 head #4 cab drive/box/box next 1793 link 457(Broadway) s43/47 @-43,-143 stop60",
-      "#6@90,-27 head #733 cab drive// next -1 link 855(conn) s8/19 @140,-271 stop0",
-      "#12@114,-27 head #733 cab drive// next -1 link 855(conn) s8/19 @140,-271 stop0",
-      "#17@121,-27 head #733 cab drive// next -1 link 855(conn) s8/19 @140,-271 stop0",
-      "#18@107,-27 head #733 cab drive// next -1 link 855(conn) s8/19 @140,-271 stop0",
-      "#23@100,-27 head #733 cab drive// next -1 link 855(conn) s8/19 @140,-271 stop0",
-      "#300@120,-30 head #737 truck drive// next -1 link 857(conn) s8/19 @133,-271 stop0",
-      "#471@-74,-211 head #211 car drive/red/red next 1793 link 457(Broadway) s42/47 @-44,-143 stop26",
-      "#557@-70,-211 head #323 car drive/red/red next 1794 link 458(Broadway) s35/40 @-45,-150 stop29",
-      "#561@-77,-218 head #211 car drive/red/red next 1793 link 457(Broadway) s42/47 @-44,-143 stop26",
-      "#615@-79,-224 head #211 car drive/red/red next 1793 link 457(Broadway) s42/47 @-44,-143 stop26",
-      "#671@-82,-230 head #211 car drive/red/red next 1793 link 457(Broadway) s42/47 @-44,-143 stop26",
-      "#676@-73,-218 head #323 car drive/red/red next 1794 link 458(Broadway) s35/40 @-45,-150 stop29",
-      "#901@-388,-1005 head #1612 cab drive/red/red next 1129 link 751(West 35th Street) s192/197 @-586,-992 stop29",
-      "#906@-391,-1011 head #1612 cab drive/red/red next 1129 link 751(West 35th Street) s192/197 @-586,-992 stop30",
-      "#1014@-316,-992 head #1612 cab drive/red/red next 1129 link 751(West 35th Street) s192/197 @-586,-992 stop41",
-      "#1020@-386,-1010 head #1612 cab drive/red/red next 1131 link 45(West 35th Street) s32/245 @-652,-992 stop0",
-      "#1760@-334,-809 head #1306 service drive// next -1 link 1478(conn) s8/19 @-599,-745 stop0",
-      "#1680@-433,-1072 head #1939 car drive/red/red next 1129 link 751(West 35th Street) s192/197 @-586,-992 stop48",
-      "#2398@-560,-1634 head #2130 car drive/peds/peds next 1830 link 732(West 43rd Street) s0/3 @-592,-1634 stop58",
-      "#2074@-534,-1551 head #2115 bus drive/red/red next 1363 link 496(West 42nd Street) s236/245 @-859,-1550 stop9",
-      "#2130@-592,-1634 head #2130 car drive/peds/peds next 1830 link 732(West 43rd Street) s0/3 @-592,-1634 stop60",
-      "#2912@-824,-1635 head #2912 service drive/siren/doubleParked next 1374 link 534(West 43rd Street) s201/245 @-824,-1635 stop60",
-      "#2919@-817,-1633 head #2919 cab drive/siren/ next 1374 link 534(West 43rd Street) s194/245 @-817,-1633 stop60",
-      "#2936@-810,-1635 head #2936 cab drive/siren/queue next 1374 link 534(West 43rd Street) s187/245 @-810,-1635 stop60"
+      "#4@-47,-154 head #4 cab drive//queue next 1794 link 458(Broadway) s31/40 @-47,-154 stop87",
+      "#21@-42,-142 head #21 cab drive// next 1793 link 457(Broadway) s44/47 @-42,-142 stop87",
+      "#24@-39,-137 head #24 car drive// next 1792 link 456(Broadway) s51/54 @-39,-137 stop88",
+      "#30@-44,-148 head #30 car drive// next 1794 link 458(Broadway) s37/40 @-44,-148 stop88",
+      "#37@-46,-140 head #37 car drive//queue next 1792 link 456(Broadway) s44/54 @-46,-140 stop86",
+      "#43@-53,-160 head #43 car drive//queue next 1793 link 457(Broadway) s23/47 @-53,-160 stop84",
+      "#51@-50,-153 head #51 cab drive//queue next 1793 link 457(Broadway) s30/47 @-50,-153 stop85",
+      "#220@-52,-149 head #220 bus drive//queue next 1792 link 456(Broadway) s33/54 @-52,-149 stop84",
+      "#239@-47,-147 head #239 car drive//queue next 1793 link 457(Broadway) s37/47 @-47,-147 stop86",
+      "#240@-56,-166 head #240 car drive//queue next 1793 link 457(Broadway) s16/47 @-56,-166 stop82",
+      "#251@-50,-160 head #251 cab drive//queue next 1794 link 458(Broadway) s24/40 @-50,-160 stop86",
+      "#344@-52,-166 head #344 cab drive//queue next 1794 link 458(Broadway) s17/40 @-52,-166 stop84",
+      "#425@-55,-173 head #425 car drive//queue next 1794 link 458(Broadway) s10/40 @-55,-173 stop72",
+      "#535@-72,-116 head #785 cab drive/red/red next 1516 link 442(West 23rd Street) s155/281 @-187,-36 stop0",
+      "#588@-78,-116 head #785 cab drive// next 1516 link 442(West 23rd Street) s163/281 @-195,-36 stop0",
+      "#589@-77,-30 head #589 cab drive//queue next 1021 link 441(West 23rd Street) s236/281 @-77,-30 stop60",
+      "#326@119,-30 head #786 car drive// next 857 link 28(Madison Avenue) s211/218 @133,-257 stop0",
+      "#660@-74,-26 head #660 cab drive//queue next 1020 link 440(West 23rd Street) s239/281 @-74,-26 stop60",
+      "#428@-74,-211 head #302 cab drive/red/red next 1793 link 457(Broadway) s43/47 @-43,-143 stop31",
+      "#446@-71,-212 head #305 car drive/red/red next 1794 link 458(Broadway) s36/40 @-45,-149 stop33",
+      "#456@-77,-219 head #302 cab drive/red/red next 1793 link 457(Broadway) s43/47 @-43,-143 stop31",
+      "#571@-73,-218 head #305 car drive/red/red next 1794 link 458(Broadway) s36/40 @-45,-149 stop33",
+      "#629@-80,-225 head #302 cab drive/red/red next 1793 link 457(Broadway) s43/47 @-43,-143 stop31",
+      "#656@-76,-225 head #305 car drive/red/red next 1794 link 458(Broadway) s36/40 @-45,-149 stop33",
+      "#682@-77,-210 head #345 car drive/red/red next 1792 link 456(Broadway) s49/54 @-42,-138 stop30",
+      "#687@-82,-232 head #302 cab drive/red/red next 1793 link 457(Broadway) s43/47 @-43,-143 stop31",
+      "#979@-394,-1018 head #1030 cab drive/red/red next 1129 link 751(West 35th Street) s192/197 @-586,-992 stop44",
+      "#1265@-385,-1014 head #1030 cab drive/red/red next 1129 link 751(West 35th Street) s192/197 @-586,-992 stop45",
+      "#1395@-386,-1007 head #984 cab drive/conflict/conflict next 1128 link 751(West 35th Street) s190/197 @-584,-992 stop0",
+      "#1358@-328,-813 head #1617 cab drive/stopSign/stopSign next 898 link 376(6th Avenue) s56/62 @-328,-889 stop0",
+      "#939@-389,-1005 head #1825 cab drive/red/red next 929 link 756(7th Avenue) s38/60 @-599,-945 stop0",
+      "#929@-361,-992 head #1030 cab drive/red/red next 1130 link 45(West 35th Street) s15/245 @-636,-992 stop0",
+      "#949@-382,-1008 head #1030 cab drive/red/red next 1130 link 45(West 35th Street) s27/245 @-647,-992 stop0",
+      "#932@-369,-992 head #1030 cab drive/red/red next 1130 link 45(West 35th Street) s34/245 @-654,-992 stop0",
+      "#1587@-389,-1007 head #994 service curb//stopping next 1129 link 751(West 35th Street) s14/197 @-408,-995 stop0",
+      "#1363@-385,-1015 head #994 service curb//stopping next 1129 link 751(West 35th Street) s14/197 @-408,-995 stop0",
+      "#1242@-388,-1013 head #994 service drive/red/red next 1129 link 751(West 35th Street) s14/197 @-408,-995 stop0",
+      "#1447@-385,-1006 head #994 service drive/red/red next 1129 link 751(West 35th Street) s15/197 @-409,-994 stop0",
+      "#1312@-382,-1008 head #994 service drive/red/red next 1129 link 751(West 35th Street) s15/197 @-409,-994 stop0",
+      "#2133@-560,-1634 head #2717 cab drive/red/red next 1374 link 534(West 43rd Street) s240/245 @-863,-1635 stop4",
+      "#2123@-592,-1634 head #2717 cab drive/red/red next 1374 link 534(West 43rd Street) s240/245 @-863,-1635 stop6",
+      "#2449@-531,-1551 head #2449 cab drive//queue next 1142 link 138(West 42nd Street) s181/193 @-531,-1551 stop60",
+      "#2083@-515,-1465 head #2083 car drive/peds/peds next 1117 link 43(West 41st Street) s166/171 @-515,-1465 stop76",
+      "#2147@-508,-1465 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop29",
+      "#2159@-501,-1465 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop29",
+      "#2404@-494,-1465 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop29",
+      "#2522@-488,-1465 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop29",
+      "#2734@-473,-1465 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop29",
+      "#2735@-481,-1465 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop29",
+      "#2138@-589,-1464 head #2784 cab drive/red/red next 1493 link 178(West 41st Street) s239/244 @-863,-1464 stop34",
+      "#2172@-628,-1385 head #2653 police drive/red/red next 1546 link 526(West 40th Street) s141/146 @-353,-1386 stop17",
+      "#2643@-551,-1309 head #2504 truck doubleParked//queue next 1346 link 524(West 39th Street) s90/245 @-712,-1309 stop0",
+      "#2792@-544,-1307 head #2504 truck doubleParked//queue next 1346 link 524(West 39th Street) s90/245 @-712,-1309 stop0"
     ],
     "events": {
-      "subwayExit": 136,
-      "honk": 4638,
-      "jaywalk": 75,
-      "iceCreamChime": 132,
-      "nearMiss": 19,
-      "goalReached": 119,
+      "subwayExit": 89,
+      "honk": 4645,
+      "jaywalk": 90,
+      "iceCreamChime": 183,
       "dispatched": 5,
       "cabCalled": 1,
-      "hail": 73,
-      "trainDeparted": 26,
-      "trainArriving": 23,
-      "ticketIssued": 1,
+      "trainArriving": 16,
+      "goalReached": 123,
       "responderArrived": 3,
-      "dropoff": 19,
-      "policeBlocked": 21,
-      "cabReady": 1,
-      "cabDeparted": 1,
+      "trainDeparted": 16,
+      "hail": 46,
+      "policeBlocked": 27,
+      "dropoff": 28,
       "pickup": 9,
-      "escortProgress": 2,
-      "responderLeft": 2,
-      "doubleParked": 13,
-      "iceCreamStop": 6,
-      "busStop": 4,
+      "doubleParked": 11,
+      "iceCreamStop": 9,
+      "responderLeft": 1,
+      "nearMiss": 21,
+      "busStop": 2,
+      "subwayEnter": 2,
       "towDispatched": 2,
+      "dodge": 20,
+      "collision": 4,
+      "ticketIssued": 1,
       "vehicleStolen": 1,
-      "subwayEnter": 1,
       "policeArrived": 1
     },
-    "hash": "3e882112:140/399",
+    "hash": "26676ab5:142/400",
     "archetypeWarnings": []
   },
   "low": {
@@ -173,9 +194,9 @@
       "peds": 120
     },
     "stepMs": {
-      "avg": 0.217,
-      "p95": 0.397,
-      "max": 9.81
+      "avg": 0.209,
+      "p95": 0.436,
+      "max": 7.199
     },
     "failures": {
       "vehOffRoad": 0,
@@ -195,8 +216,8 @@
     "maxStationarySec": 38.9,
     "maxStationaryWho": "#2 bus red link 32",
     "flow": {
-      "minMovingFraction": 0.17,
-      "avgMovingFraction": 0.52
+      "minMovingFraction": 0.15,
+      "avgMovingFraction": 0.53
     },
     "hooks": {
       "escorts": 1,
@@ -211,23 +232,24 @@
       "parkRule": "street cleaning Wed/Sat 08:00-11:00; hydrant"
     },
     "subway": {
-      "stations": 20,
-      "arrivals": 9,
-      "boarded": 230,
-      "alighted": 366
+      "stations": 15,
+      "arrivals": 6,
+      "boarded": 137,
+      "alighted": 218
     },
     "doors": {
       "doors": 40,
-      "entered": 11,
-      "exited": 17
+      "entered": 2,
+      "exited": 19
     },
     "wildlife": {
       "peakVisible": 63,
-      "startles": 8,
+      "startles": 7,
       "scatters": 4,
       "feeders": 0,
       "species": {
-        "pigeon": 18
+        "pigeon": 18,
+        "dog": 1
       }
     },
     "stats": {
@@ -235,111 +257,112 @@
       "wrongWay": 0,
       "vehCollisions": 0,
       "pedHits": 0,
-      "spawnedV": 388,
-      "despawnedV": 157,
-      "spawnedP": 376,
-      "despawnedP": 24,
+      "spawnedV": 380,
+      "despawnedV": 153,
+      "spawnedP": 379,
+      "despawnedP": 25,
       "stuckDespawn": 0,
-      "honks": 178,
-      "hails": 3,
+      "honks": 196,
+      "hails": 0,
       "boardings": 0,
       "dropoffs": 0,
       "busStops": 0,
       "doubleParks": 1,
-      "jaywalks": 12,
-      "crossings": 72,
-      "laneChanges": 197
+      "jaywalks": 14,
+      "crossings": 65,
+      "laneChanges": 175
     },
     "stuckWhy": {},
     "stuckLog": [],
     "events": {
-      "subwayExit": 4,
-      "honk": 178,
+      "subwayExit": 12,
+      "honk": 196,
+      "jaywalk": 14,
       "sweeperOut": 4,
-      "jaywalk": 12,
+      "goalReached": 2,
       "iceCreamChime": 2,
-      "goalReached": 12,
       "dispatched": 2,
       "cabCalled": 1,
-      "hail": 3,
-      "trainDeparted": 5,
-      "doubleParked": 1,
-      "nearMiss": 4,
+      "trainArriving": 1,
+      "trainDeparted": 3,
+      "nearMiss": 3,
+      "collision": 1,
       "subwayEnter": 1,
+      "doubleParked": 1,
       "ticketIssued": 1
     },
-    "hash": "e7e7a94:40/120",
+    "hash": "8205ad3b:40/120",
     "archetypeWarnings": []
   },
   "response": [
     {
       "label": "rush hour, Herald Square",
       "clock": 1050,
-      "firstUnitSec": 21.1,
+      "firstUnitSec": 23.1,
       "arrivals": [
         {
-          "who": "ambulance",
-          "t": 21.1
+          "who": "police#495",
+          "t": 23.1
         },
         {
-          "who": "police#494",
-          "t": 27.7
+          "who": "ambulance",
+          "t": 25.5
+        },
+        {
+          "who": "ambulance",
+          "t": 114.2
         }
       ]
     },
     {
       "label": "rush hour, 42nd St & 7th Ave",
       "clock": 1050,
-      "firstUnitSec": 8.7,
+      "firstUnitSec": 10.2,
       "arrivals": [
         {
-          "who": "police#492",
-          "t": 8.7
+          "who": "police#476",
+          "t": 10.2
         },
         {
           "who": "ambulance",
-          "t": 22.2
+          "t": 11.7
         }
       ]
     },
     {
       "label": "off-peak, Herald Square",
       "clock": 660,
-      "firstUnitSec": 15.9,
+      "firstUnitSec": 17.2,
       "arrivals": [
         {
-          "who": "ambulance",
-          "t": 15.9
-        },
-        {
-          "who": "police#460",
-          "t": 26.6
+          "who": "police#454",
+          "t": 17.2
         },
         {
           "who": "ambulance",
-          "t": 109.2
+          "t": 23.3
         }
       ]
     },
     {
       "label": "off-peak, Flatiron",
       "clock": 660,
-      "firstUnitSec": 22.5,
+      "firstUnitSec": 8.7,
       "arrivals": [
         {
-          "who": "police#346",
-          "t": 22.5
+          "who": "ambulance",
+          "t": 8.7
         },
         {
-          "who": "ambulance",
-          "t": 37.2
+          "who": "police#338",
+          "t": 24.7
         }
       ]
     }
   ],
   "determinism": {
-    "a": "a1f53c58:100/254",
-    "b": "a1f53c58:100/254",
+    "a": "19303e4a:102/247",
+    "b": "19303e4a:102/247",
     "equal": true
   },
   "pass": true,

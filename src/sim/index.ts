@@ -8,6 +8,7 @@ import { ArchetypeRegistry, AreaResolver, BUILTIN_ARCHETYPES, type ArchetypeDef 
 import { Rng, sampleAt, projectOnPoly } from './geom';
 import type { TrafficVehicleView } from '../shared/traffic';
 import { heightAt, CURB_HEIGHT, loadTerrain, terrainLoaded } from '../shared/terrain';
+import { edgeDistance } from '../shared/bounds';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
 import { despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
@@ -17,8 +18,9 @@ import { Wildlife, type WildlifeView } from './wildlife';
 import { boardCab, callCab, dispatchResponders, leaveCab } from './service';
 import { Parking, type ParkingRule } from './parking';
 import { Subway, type Station, type TrainCall } from './subway';
-import { Doors, type DoorRec } from './doors';
-export type { DoorRec } from './doors';
+import { Doors, type DoorRec, type DoorRate } from './doors';
+export type { DoorRec, DoorRate } from './doors';
+export { DOOR_RATES } from './doors';
 export type { Station, TrainCall } from './subway';
 export type { ParkingRule } from './parking';
 import { policePedTick, removePolice, setCopGoal, spawnPolice as spawnCop, type PoliceGoal, type PoliceView } from './police';
@@ -328,6 +330,23 @@ export class Simulation {
   registerParkedCar(id: string, x: number, z: number) { this.parking.register(id, x, z); }
   unregisterParkedCar(id: string) { this.parking.unregister(id); }
 
+  // ---------------------------------------------------------------- street graph queries
+  /**
+   * Real intersections (lane-graph junctions where 2+ named streets meet) within `radius` of a point,
+   * nearest first. For chokepoints and roadblocks; `armYaw` are the yaws of the approach roads
+   * (direction pointing away from the junction) so a car can be placed across one.
+   */
+  nearestIntersections(x: number, z: number, radius: number, max = 16) {
+    const net = this.core.net, out: { id: number; x: number; z: number; dist: number; signal: boolean; streets: string[]; armYaw: number[] }[] = [];
+    net.g.junctions.forEach((J, id) => {
+      const d = Math.hypot(J.x - x, J.z - z); if (d > radius || edgeDistance(J.x, J.z) < 0) return;
+      const streets = [...new Set(J.arms.map((a) => net.roadName(a.road)).filter((n) => n))];
+      if (streets.length < 2) return; // bends and mid-block merges aren't chokepoints
+      out.push({ id, x: J.x, z: J.z, dist: d, signal: net.isSignal(id), streets, armYaw: J.arms.map((a) => Math.atan2(-a.dirX, -a.dirZ)) });
+    });
+    return out.sort((a, b) => a.dist - b.dist).slice(0, max);
+  }
+
   // ---------------------------------------------------------------- subway (logical layer over the street entrances)
   private subway!: Subway;
   /** Stations (clusters of street entrances) with their line, name and entrances. */
@@ -351,6 +370,8 @@ export class Simulation {
   private doors!: Doors;
   /** Doors near the player (from interiors `doorsForChunk`): pedestrians use them. Re-sending an id updates it. */
   setDoors(doors: DoorRec[]) { this.doors.set(doors); }
+  /** Override per-kind door rates (interiors tuning); unspecified fields keep the built-in table (DOOR_RATES). */
+  setDoorRates(t: Record<string, Partial<DoorRate>>) { this.doors.setRates(t); }
   clearDoors(ids?: string[]) { this.doors.clear(ids); }
   /** An interior occupant walks out onto the street. Returns the ped id or -1. Event `pedExitedDoor`. */
   exitFromDoor(doorId: string, archetypeId?: string): number { return this.doors.exitFromDoor(doorId, archetypeId); }

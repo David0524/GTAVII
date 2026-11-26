@@ -19,8 +19,9 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Police agents (Gameplay spec) | **First pass**: `spawnPolice`, `setPoliceGoal` (patrol / goto / search / pursue / boxIn / roadblock), `setSiren`, `despawnPolice`, `police: PoliceView[]`, events `policeArrived`, `policeBlocked`. Plus `setGoal({kind:'act'})`, `nerve` on PedView, `kill()`, `takeVehicle()` → `vehicleStolen` |
 | Emergency & service traffic, player cab rides | **First pass**: `dispatch('ambulance'|'fire', x, z)` (+ ambient ambulance runs), mail trucks, soft-serve truck; `callCab` / `boardCab` / `leaveCab` with `cabReady`, `cabTurnAhead`, `cabRideArrived`; left-kerb pickups on one-way streets |
 | Parking enforcement, tows, street cleaning | **Done (first pass)**: `parkingRule(x,z,minute?,dow?)`, `hydrantsNear`, `setDay`, `registerParkedCar`/`unregisterParkedCar`; traffic agents ticket (`ticketIssued`), tow trucks tow (`towDispatched`, `vehicleTowed`), street sweepers run alternate-side windows (`sweeperOut`) |
-| Subway schedule and platform crowds | **Done (first pass)**: 20 stations from entrance clusters on 5 trunk lines; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
-| Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured |
+| Subway schedule and platform crowds | **Done (first pass)**: 15 stations (narrative's canonical 1974 list + PATH 33rd St), `complex` for Herald Sq / Times Sq; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
+| Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured; per-kind rates (`DOOR_RATES`, `setDoorRates`) |
+| Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
@@ -105,6 +106,9 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
   hails on their block, cut to the kerb lane and into the parking lane to load, and drop fares off
   later, **buses** pull into stops and board waiting pedestrians/alight new ones, **horns** for
   queues, slow starters at green, cut-offs, pedestrians/player in the road (events only).
+- Long vehicles (buses, trucks over 7 m) swing wide on tight turns: they treat neighbouring turn paths
+  through the same junction (within 4.8 m) as conflicts and don't start a turn with someone at the line
+  in the next lane; nobody changes lanes into the last 14 m beside a vehicle still turning out.
 - Spawning in a ring around the focus (High: 0.6–2.6 × 10² m; Low: 0.6–1.6 × 10² m), density by
   time of day × weather × optional `setDensityHook`; despawn beyond the ring; gridlock fallback:
   a vehicle stationary > 60 s while not at a red (and > 70 m from the focus, or > 150 s anywhere)
@@ -218,8 +222,11 @@ documented, so these are plausible rather than historical claims):
 A logical layer over the street entrances (underground geometry belongs to the engine/interiors).
 - Stations: the 108 mapped entrances in bounds clustered by the avenue they sit on (within 140 m along
   it): 20 stations on the Eighth Avenue, Seventh Avenue, Sixth Avenue, Broadway and Lexington lines,
-  named by the nearest numbered cross street. `LINES` is a plain table; the narrative team verifies
-  1974 service and can rename or correct it (no route letters are claimed).
+  then snapped to narrative's canonical 1974 stops (`CANON`, joined on line + cross street, within 2
+  streets): fragments of long platforms merge (Penn, Times Square, 42nd St), 6th Avenue entrances at
+  29th–33rd become PATH 33rd St (its own line, separate fare). 15 stations; `complex` marks the free
+  transfers (`herald_sq`: Sixth + Broadway, `times_sq`: Seventh + Broadway). Lexington stops have no
+  entrances inside the bounds. Each station carries `crossStreet` (number) for the join.
 - Timetable: a pure function of the clock. Headway 4 min at the rush hours, 6 midday, 8 evening,
   12-20 at night; run time between stations from distance at ~10 m/s plus 25 s dwell; both directions
   staggered. `nextTrains(station)` answers instantly (cops can be sent to the next station ahead).
@@ -232,11 +239,13 @@ A logical layer over the street entrances (underground geometry belongs to the e
 - Door records come from the engine (interiors' `doorsForChunk`); the sim doesn't import the
   interiors stream. Each door attaches to the nearest sidewalk band (within 10 m); peds walk to the
   kerb spot in front of it and step to a threshold 0.4 m in front of the door.
-- By day, passers-by (walkers, commuters, loiterers, workers) step into open doors within 50 m, and open
-  doors near the focus let people out every 25-90 s (faster on busy hours). Locked doors and doors
+- Rates by interior kind (`DOOR_RATES`, from the interiors session; `setDoorRates` overrides): mean
+  seconds between occupants coming out (rush-hour and evening variants), chance a passer-by within 5 m
+  steps in, bursts (cinema screenings, church services, union meetings) and archetype hints for who
+  comes out. Residential kinds (tenement, apartment lobby, SRO) never take strangers in. Locked doors and doors
   outside their hours are skipped.
 - Interiors/characters can hand occupants over in both directions (`exitFromDoor`, `enterDoor`) to fill
-  their slots. Test (40 stand-in shop doors from storefront spots): 114 went in, 210 came out in 10 min.
+  their slots. Test (40 stand-in doors of mixed kinds from storefront spots): 112 went in, 306 came out in 10 min.
 
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,

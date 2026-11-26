@@ -136,7 +136,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     if (k === 0 || seg !== doorSeg) {
       doorSeg = seg;
       const doors = g.spots.filter((sp) => sp.kind === 0 && Math.hypot(sp.x - f.x, sp.z - f.z) < 140).slice(0, 40)
-        .map((sp, i) => ({ id: `door_${seg}_${i}`, x: sp.x + Math.sin(sp.heading) * 0.4, z: sp.z + Math.cos(sp.heading) * 0.4, kind: 'shop', hours: ['07:00', '22:00'] as [string, string] }));
+        .map((sp, i) => ({ id: `door_${seg}_${i}`, x: sp.x + Math.sin(sp.heading) * 0.4, z: sp.z + Math.cos(sp.heading) * 0.4, kind: ['diner', 'bodega', 'bar', 'clothing', 'office_lobby', 'tenement', 'deli', 'cinema_lobby'][i % 8], locked: i % 8 === 5 && i % 16 === 5, hours: ['07:00', '22:00'] as [string, string] }));
       sim.clearDoors(); sim.setDoors(doors);
     }
     // a (player's) car left at a hydrant: ticket, then tow
@@ -316,6 +316,13 @@ async function main() {
     if (r.firstUnitSec === null || r.firstUnitSec > limit) problems.push(`response ${r.label}: first unit ${r.firstUnitSec ?? 'never'} s (target <= ${limit} s)`);
   }
   // police arrival is asserted by the dedicated response-time runs below
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 10, maxPeds: 10, fetchBinary }); await sim.load();
+    const ix = sim.nearestIntersections(-380, -915, 150);
+    if (ix.length < 3 || !ix.every((q) => q.streets.length >= 2)) problems.push(`nearestIntersections: ${JSON.stringify(ix.slice(0, 3))}`);
+    const st = sim.subwayStations();
+    if (st.filter((q) => q.complex === 'herald_sq').length !== 2 || st.filter((q) => q.complex === 'times_sq').length !== 2 || !st.some((q) => q.line === 'path')) problems.push(`subway canon: ${st.map((q) => `${q.line}/${q.name}`).join(', ')}`);
+  }
   if (!full.doors.entered || !full.doors.exited) problems.push(`door traffic inactive: ${JSON.stringify(full.doors)}`);
   if (!full.subway.stations || !full.events.trainArriving) problems.push(`subway inactive: ${JSON.stringify(full.subway)}`);
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);

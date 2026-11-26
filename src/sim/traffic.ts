@@ -256,6 +256,16 @@ function sirenBlocked(S: SimCore, v: Vehicle): string {
   const gw = gutterBlocked(S, v); if (gw) return gw;
   const C = net.g.links[c];
   for (const cf of C.conflicts) if (vehiclesBeforePoint(S, cf.link, cf.sOther, v.wid + 1.0)) return 'conflict';
+  // long vehicles swing wide: keep the neighbouring turn paths clear (either one long), and don't start a
+  // turn with someone at the line in the next lane (the rear swings over them; lower id goes first)
+  const long = v.len > LONG;
+  for (const o of wideOf(S, c)) for (const w of S.occ[o]) if (long || w.len > LONG) return 'conflict';
+  if (long && C.turn !== 0) {
+    const L = net.g.links[v.link];
+    for (const side of [L.left, L.right]) if (side >= 0) for (const w of S.occ[side]) {
+      if (w !== v && w.state === 'drive' && net.len[side] - w.s < 8 && (w.len <= LONG || w.id < v.id)) return 'conflict';
+    }
+  }
   for (const cf of C.conflicts) { // vehicles about to enter on green: let them clear first
     const src = S.srcLane[cf.link];
     for (const w of S.occ[src]) if (w.next === cf.link && net.len[src] - w.s < 12 && w.v > 2) return 'yield';
@@ -263,6 +273,31 @@ function sirenBlocked(S: SimCore, v: Vehicle): string {
   for (const cr of C.crossings) { const peds = S.onWalk.get(cr.walkEdge); if (peds?.length) { sampleAt(C.pts, net.cum[c], cr.s, tmp); for (const p of peds) if (Math.hypot(p.x - tmp[0], p.z - tmp[1]) < 4.5) return 'peds'; } }
   return '';
 }
+
+/**
+ * Wide-swing neighbours of connector c: other movements through the same junction whose paths pass within
+ * 4.8 m but aren't conflicts. A bus or truck on a tight turn cuts across the chord (axles at ±0.35 len)
+ * and its ends swing out, so long vehicles treat these as conflicts (cars side by side don't).
+ */
+const wideCache = new WeakMap<object, number[][]>();
+function wideOf(S: SimCore, c: number): number[] {
+  const net = S.net, g = net.g;
+  let tab = wideCache.get(net);
+  if (!tab) {
+    tab = g.links.map(() => [] as number[]);
+    const byJ = new Map<number, number[]>();
+    g.links.forEach((L, i) => { if (L.kind !== LinkKind.Lane) { const a = byJ.get(L.startJ) ?? []; a.push(i); byJ.set(L.startJ, a); } });
+    for (const list of byJ.values()) for (const a of list) for (const b of list) {
+      if (a >= b || g.links[a].conflicts.some((q) => q.link === b)) continue;
+      const pa = g.links[a].pts, pb = g.links[b].pts; let near = false;
+      for (let i = 0; i < pa.length && !near; i += 2) for (let k = 0; k < pb.length; k += 2) if (Math.hypot(pa[i] - pb[k], pa[i + 1] - pb[k + 1]) < 4.8) { near = true; break; }
+      if (near) { tab[a].push(b); tab[b].push(a); }
+    }
+    wideCache.set(net, tab);
+  }
+  return tab[c];
+}
+const LONG = 7;
 
 /** May vehicle v (on a lane, approaching its stop line) enter its chosen connector now? */
 function canEnter(S: SimCore, v: Vehicle, t: number): string {
@@ -472,6 +507,8 @@ function tryLaneChange(S: SimCore, v: Vehicle, toLane: number, aggressive: boole
   // vehicles in the lane we leave that are alongside or just ahead would overlap during the blend
   for (const w of S.occ[v.link]) if (w !== v && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1) return false;
   for (const w of S.lcList) if (w !== v && w.lcFrom === toLane && Math.abs(w.s - s2) < (w.len + v.len) / 2 + 2) return false;
+  // near the line: someone just turning out of either lane still has their rear over it (long ones swing)
+  if (s2 > net.len[toLane] - 14) for (const ln of [v.link, toLane]) for (const c of net.g.links[ln].next) for (const w of S.occ[c]) if (w.s < w.len / 2 + 3) return false;
   occRemove(S, v);
   v.lcFrom = v.link; v.lcT = 0; v.link = toLane; v.s = s2; v.prevLink = -1;
   occInsert(S, v);
