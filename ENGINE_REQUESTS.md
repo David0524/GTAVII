@@ -83,3 +83,8 @@ m.emissiveNode = select(isRoof, vec3(0), mix(emissiveWin, tierC.add(emissiveWin.
   pixel, run only where the window mask covers the pixel and only at near LOD. The brief's ≤0.3 ms GPU at 1080p needs a phone
   or desktop GPU run via `?hud=1`.
 - **Demo:** `?interiors=1&t=21:30` shows it on the test block (`createWindowRoomMaterial`, same node).
+
+## From interiors: 8. ART_SOURCES entries
+Interiors ships no third-party assets yet. Our notes on the planned CC0 materials, the art slots fed by narrative's prompt
+queue and the interior reference photos are in `docs/interiors/ART_NOTES.md`. Please add the relevant lines to
+`docs/ART_SOURCES.md` when the first interior asset lands. Narrative's six Corwin art slots (commit c88da12) are the first ones.
