@@ -66,19 +66,26 @@ traffic and pedestrians as generic agents.** No story, no named characters, no l
 ## Integration contract (keep to it; the engine session wires it in)
 ```ts
 // src/sim/index.ts
-export interface AgentView { id: number; kind: 'car' | 'cab' | 'truck' | 'bus' | 'ped'; archetype: string;
-  x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number }
+import type { TrafficVehicleView } from '../shared/traffic';   // engine-owned shared contract (vclass, variant, lights incl. brake)
+export interface PedView { id: number; archetype: string; x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number }
 export class Simulation {
   constructor(opts: { seed: number; maxVehicles: number; maxPeds: number; baseUrl?: string });
   load(): Promise<void>;                        // lanes.bin + chunk POIs
   update(dt: number, focus: { x: number; z: number }): void;   // fixed internal timestep, deterministic for a given seed
-  readonly vehicles: readonly AgentView[]; readonly peds: readonly AgentView[];
+  readonly vehicles: readonly TrafficVehicleView[]; readonly peds: readonly PedView[];
   setExternalActors(actors: { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle' }[]): void;
   emit(event: { type: 'threat' | 'blockLane' | 'closeStreet'; x: number; z: number; radius?: number; until?: number }): void;
   on(type: 'honk' | 'collision' | 'nearMiss' | 'hail', cb: (e: any) => void): void;
   setClock(minutesSinceMidnight: number): void; setWeather(w: 'clear' | 'overcast' | 'rain'): void;
 }
 ```
+- **Vehicle classes and light bits come from `src/shared/traffic.ts`** (`VEHICLE_CLASSES`,
+  `VehicleLights`).
+  - The sim sets `lights` every tick: brake while decelerating, indicators before a turn or
+    lane change, hazards when double-parked, the roof light on a vacant taxi.
+  - The sim never picks models. `variant` is a stable per-agent seed.
+  - Spawn mix is the sim's job: mostly `sedan`, many `taxi`, and `box_truck` heavy in the
+    Garment District by day.
 - **Rendering stays out of the sim.** Provide `src/sim/debug/SimDebugView.ts` that draws
   agents as instanced placeholder boxes and capsules (generic bodies only), lane lines and
   signal states, behind `?sim=1`.

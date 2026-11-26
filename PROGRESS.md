@@ -117,6 +117,30 @@ Rapier character controller (walk, run, jump, ledge climb) with colliders genera
 from the same footprint data. Orbit and chase camera. Touch buttons swap to JUMP/USE/SPRINT.
 Spawn on foot at the Flatiron.
 
+## Workstreams and integration cadence
+| Stream | Branch | Brief | Owns |
+|---|---|---|---|
+| Engine (this session, integration owner) | `claude/tenderloin-74-engine-qi54lt` | this file | rendering, city, player, UI, shared contracts in `src/shared/`, merges |
+| Narrative | `claude/sharp-maxwell-jnb6hr` | NARRATIVE_BRIEF.md | `narrative/`, `content/`, NARRATIVE_PROGRESS.md |
+| Sim (traffic and pedestrian AI) | its own branch | docs/briefs/SIM_BRIEF.md | `src/sim/`, `tools/pipeline/lanes.ts`, SIM_PROGRESS.md |
+| Vehicles | its own branch | docs/briefs/VEHICLES_BRIEF.md | `src/vehicles/`, VEHICLES_PROGRESS.md, VEHICLE_REGISTRY.md |
+
+**Merge rules (into the engine branch):**
+1. **When merges happen:** at each stream's "done means" milestone, and otherwise
+   **twice a week** (Monday and Thursday) for content-only streams such as narrative.
+   An early merge happens on request when another stream needs the code.
+2. **Gate before merging:**
+   - `npm run typecheck` and `npm run build` pass on the merged result;
+   - the stream's own headless tests pass;
+   - no edits to engine-owned files beyond the one allowed guarded line in `src/main.ts`;
+   - no real brands or trademarks (the oversight session's scan).
+3. **How:** a merge commit (no squash, no rebase of other streams' history). Conflicts in
+   shared files are resolved by the engine, and the stream is notified.
+4. **Shared contracts** (`src/shared/*`) change only through ENGINE_REQUESTS.md and
+   ENGINE_RESPONSES.md. After a change, every stream is told to merge the engine branch.
+5. **Downstream:** streams merge the engine branch into theirs at least weekly and whenever a
+   shared contract changes.
+
 ## Narrative team
 `NARRATIVE_BRIEF.md` is the prompt and brief for the story/characters/missions team, including
 the draft hook contract the engine will implement in Phase 7.
