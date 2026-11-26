@@ -8,6 +8,7 @@ import { Economy } from './index';
 import type { ActivityDef } from './activities';
 import { DELPHINE, GAME_HOURS_PER_REAL_HOUR, NICK, TEDDY, usd } from './types';
 import { MAX_OUTSTANDING } from './loans';
+import { storyRatePerRealHour, type StoryMission } from './story';
 
 /**
  * Deterministic headless economy simulation (ECONOMY.md "balance targets").
@@ -32,12 +33,19 @@ export interface SimOptions {
   stintHours?: number;
   /** an investor saves everything for property and goes for a big one as soon as mid-tier is owned or affordable */
   investor?: boolean;
+  /** Story missions (narrative's pay table). With a story, missions are finite and pay per lead in story order;
+   *  without one, missions pay a flat `missionCentsPerRealHour` (the old reference model). */
+  story?: readonly StoryMission[];
+  /** which choice outcomes the player takes: none, or the best-paying one in each mission */
+  branches?: 'none' | 'best';
   /** free-roam-only stress policy: always take the best known earner instead of a mixed menu */
   greedy?: boolean;
 }
+/** With narrative's story: an 8.7 h critical path played among side content finishes around 22-25 h. */
+export const STORY_DEFAULTS = { realHours: 25, missionShare: 0.36 } as const;
 export const DEFAULTS = { seed: 1974, realHours: 20, missionCentsPerRealHour: usd(150), missionShare: 0.6, stintHours: 50 } as const;
 /** cents per game hour of mission play */
-export const missionRate = (o: SimOptions = {}) => (o.missionCentsPerRealHour ?? DEFAULTS.missionCentsPerRealHour) / GAME_HOURS_PER_REAL_HOUR;
+export const missionRate = (o: SimOptions = {}) => (o.story ? storyRatePerRealHour(o.story) : o.missionCentsPerRealHour ?? DEFAULTS.missionCentsPerRealHour) / GAME_HOURS_PER_REAL_HOUR;
 
 export interface Rig { eco: Economy; inv: Inventory; time: TimeKeeper; rng: Rng; flags: Set<string>; crimes: { kind: CrimeKind; visible: boolean }[] }
 export function makeRig(seed: number, activities?: ActivityDef[]): Rig {
@@ -114,6 +122,10 @@ export interface SimResult {
   owned: string[]; cars: string[];
   /** each business bought, with when (real hours into the run) and its tier */
   bought: { id: string; tier: string; realHour: number; lead: string }[];
+  /** real hour the last story mission finished (null if the story wasn't finished) */
+  storyEndH: number | null;
+  /** cash plus businesses at purchase price */
+  netWorth: number;
   attempts: Record<string, number>; visibleCrimes: number;
   /** realised cents per game hour per category in this playthrough */
   rates: Record<keyof Earnings, number>;
@@ -127,7 +139,7 @@ const LEGAL = ['job.cab', 'job.locksmith', 'job.photos', 'job.bail', 'job.tow'];
 const CRIMES = ['crime.chop', 'crime.register', 'crime.safe', 'crime.burglary', 'crime.hijack', 'crime.collections', 'crime.pickpocket'];
 
 export function runPlaythrough(o: SimOptions = {}): SimResult {
-  const seed = o.seed ?? DEFAULTS.seed, realHours = o.realHours ?? DEFAULTS.realHours, share = o.missionShare ?? DEFAULTS.missionShare, stint = o.stintHours ?? DEFAULTS.stintHours;
+  const seed = o.seed ?? DEFAULTS.seed, realHours = o.realHours ?? (o.story ? STORY_DEFAULTS.realHours : DEFAULTS.realHours), share = o.missionShare ?? (o.story ? STORY_DEFAULTS.missionShare : DEFAULTS.missionShare), stint = o.stintHours ?? DEFAULTS.stintHours;
   const endH = realHours * GAME_HOURS_PER_REAL_HOUR, mRate = missionRate(o);
   const rig = makeRig(seed), { eco, inv, time, rng } = rig;
   rig.flags.add(`hack_licence.${TEDDY}`);
@@ -166,7 +178,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
 
   /** Shopping and chores, done between actions by whoever is playing. */
   const lastCollect = new Map<string, number>();
-  const CUSHION = { starter: usd(75), mid: usd(150), big: usd(o.investor ? 150 : 400) } as const;
+  const CUSHION = { starter: usd(150), mid: usd(1500), big: usd(o.investor ? 3000 : 8000) } as const;
   const chores = (lead: string) => {
     const p = plan.get(lead)!, c = cash(lead);
     // an owner drops by the business about once a game day to empty the till (a real player passes it on the way)
@@ -197,6 +209,11 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     }
     const saving = !!target && !ownedTiers.has(target.tier) && target.price + CUSHION[target.tier] > cash(lead);
     if (!saving && eco.property.owned.size > 0 && !rig.flags.has(`car.${lead}`) && cash(lead) >= p.carPrice + usd(100) && buy(lead, p.carPrice, 'car')) rig.flags.add(`car.${lead}`);
+    // money worth chasing: a premium car and the tailor once a lead is flush (not an investor's priority)
+    // a typical player treats themselves once flush (an investor keeps saving)
+    if (!o.investor && !rig.flags.has(`premium.${lead}`) && cash(lead) >= usd(20000) && buy(lead, usd(9500), 'premium car')) rig.flags.add(`premium.${lead}`);
+    if (!o.investor && !rig.flags.has(`tailor.${lead}`) && cash(lead) >= usd(6000) && buy(lead, usd(850), 'tailored suits')) rig.flags.add(`tailor.${lead}`);
+    if (!o.investor && !rig.flags.has(`watch.${lead}`) && cash(lead) >= usd(12000) && buy(lead, usd(1200), 'gold watch')) rig.flags.add(`watch.${lead}`);
     if (!saving) for (const b of eco.property.ownedBy(lead)) for (const u of eco.property.defs.get(b.def)!.upgrades) if (cash(lead) >= u.price + usd(600)) eco.buyUpgrade(lead, b.def, u.id);
   };
 
@@ -209,6 +226,24 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     rig.crimes.length = 0;
   };
 
+  // story missions: in order, each paying its leads' wallets (narrative's moneyByLead), choices per `branches`
+  let storyIdx = 0; let storyEndH: number | null = null;
+  const playMission = (lead: string): boolean => {
+    if (!o.story) {
+      const len = 15, pay = Math.round(mRate * len * rng.range(0.85, 1.15));
+      inv.addMoney(lead, pay, 'mission'); earned.mission += pay; hoursBy.mission += len; missions++;
+      advance(len, 'mission'); return true;
+    }
+    const m = o.story[storyIdx]; if (!m) return false;
+    storyIdx++; missions++;
+    const len = (m.durationMin / 60) * GAME_HOURS_PER_REAL_HOUR;
+    advance(len, 'mission'); hoursBy.mission += len;
+    const payOut = (who: string, c: number) => { if (c >= 0) { inv.addMoney(who, c, 'mission'); earned.mission += c; } else { inv.payUpTo(who, -c, 'mission cost'); earned.mission += c; } };
+    for (const [who, c] of Object.entries(m.pay)) payOut(who, c);
+    if (o.branches === 'best' && m.branches.length) { const b = [...m.branches].sort((x, y) => y.cents - x.cents)[0]; if (b.cents > 0) payOut(b.lead, b.cents); }
+    if (storyIdx === o.story.length) storyEndH = (eco.nowH() - startH) / GAME_HOURS_PER_REAL_HOUR;
+    return true;
+  };
   const tryList = (lead: string, ids: string[], thr = 0.6) => {
     const ok = ids.filter((id) => eco.availability(lead, id) >= thr);
     return ok.length ? rng.pick(ok) : null;
@@ -219,11 +254,7 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     chores(lead);
     // (no arbitrary 'life happens' bills: hospital costs come from the injuries crimes cause, in `after`)
     // time budget: keep to the mission share of elapsed time
-    if (hoursBy.mission < share * h || h < 1) {
-      const len = 15, pay = Math.round(mRate * len * rng.range(0.85, 1.15));
-      inv.addMoney(lead, pay, 'mission'); earned.mission += pay; hoursBy.mission += len; missions++;
-      advance(len, 'mission'); continue;
-    }
+    if ((hoursBy.mission < share * h || h < 1) && playMission(lead)) continue;
     if (o.greedy) {
       const ids = [...LEGAL, ...CRIMES, 'job.garment'].filter((id) => eco.availability(lead, id) >= 0.6);
       const score = (id: string) => (stats.get(id)?.cents ?? 1e9) / Math.max(1, stats.get(id)?.min ?? 1);
@@ -249,10 +280,8 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     } else if (eco.availability(lead, 'property.collect') > 0) {
       attempts['property.collect'] = (attempts['property.collect'] ?? 0) + 1; after(lead, eco.attempt(lead, 'property.collect'), 'property'); continue;
     }
-    // nothing worth doing this turn: another mission
-    const len = 15, pay = Math.round(mRate * len * rng.range(0.85, 1.15));
-    inv.addMoney(lead, pay, 'mission'); earned.mission += pay; hoursBy.mission += len; missions++;
-    advance(len, 'mission');
+    // nothing worth doing this turn: the next mission if there is one, else an hour on the street
+    if (!playMission(lead)) advance(1);
   }
   attempts['mission'] = missions;
   const final = Object.fromEntries(LEADS.map((l) => [l, inv.ensure(l).money + inv.ensure(l).savings]));
@@ -261,6 +290,6 @@ export function runPlaythrough(o: SimOptions = {}): SimResult {
     seed, gameHours: endH, realHours, curve, final, total: total(),
     assets: [...eco.property.owned.keys()].reduce((a, id) => a + eco.property.defs.get(id)!.price, 0) + LEADS.filter((l) => rig.flags.has(`car.${l}`)).reduce((a, l) => a + plan.get(l)!.carPrice, 0), earned, earnedBy, hoursBy, spent,
     owned: [...eco.property.owned.keys()], cars: LEADS.filter((l) => rig.flags.has(`car.${l}`)),
-    attempts, visibleCrimes, rates, startTotal, bought,
+    attempts, visibleCrimes, rates, startTotal, bought, storyEndH, netWorth: total() + [...eco.property.owned.keys()].reduce((a, id) => a + eco.property.defs.get(id)!.price, 0),
   };
 }

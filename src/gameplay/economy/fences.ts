@@ -27,12 +27,12 @@ export const SAT_TAU_H = 72;
 const SPECIALTY_BONUS = 0.06;
 
 export const DEFAULT_FENCES: FenceDef[] = [
-  { id: 'fence.lund', name: 'Lund (back of a watch repair)', kind: 'fence', cut: 0.44, specialty: ['jewelry', 'silver'], accepts: ['jewelry', 'silver', 'furs'], satCap: usd(450) },
-  { id: 'fence.kessel', name: 'Kessel (appliance warehouse)', kind: 'fence', cut: 0.40, specialty: ['electronics', 'appliances'], accepts: ['electronics', 'appliances', 'liquor'], satCap: usd(600) },
-  { id: 'fence.drago', name: 'Drago (garment loft)', kind: 'fence', cut: 0.42, specialty: ['furs', 'liquor'], accepts: ['furs', 'liquor', 'silver', 'jewelry'], satCap: usd(500) },
-  { id: 'fence.mercer', name: 'Mercer (anything, for less)', kind: 'fence', cut: 0.32, specialty: [], accepts: LOOT_CATEGORIES, satCap: usd(700) },
-  { id: 'pawn.golden', name: 'Golden Ball Loans', kind: 'pawn', cut: 0.22, specialty: [], accepts: LOOT_CATEGORIES, satCap: usd(900) },
-  { id: 'pawn.eighth', name: 'Eighth Ave Pawn', kind: 'pawn', cut: 0.18, specialty: [], accepts: LOOT_CATEGORIES, satCap: usd(900) },
+  { id: 'fence.lund', name: 'Lund (back of a watch repair)', kind: 'fence', cut: 0.44, specialty: ['jewelry', 'silver'], accepts: ['jewelry', 'silver', 'furs'], satCap: usd(4500) },
+  { id: 'fence.kessel', name: 'Kessel (appliance warehouse)', kind: 'fence', cut: 0.40, specialty: ['electronics', 'appliances'], accepts: ['electronics', 'appliances', 'liquor'], satCap: usd(6000) },
+  { id: 'fence.drago', name: 'Drago (garment loft)', kind: 'fence', cut: 0.42, specialty: ['furs', 'liquor'], accepts: ['furs', 'liquor', 'silver', 'jewelry'], satCap: usd(5000) },
+  { id: 'fence.mercer', name: 'Mercer (anything, for less)', kind: 'fence', cut: 0.32, specialty: [], accepts: LOOT_CATEGORIES, satCap: usd(7000) },
+  { id: 'pawn.golden', name: 'Golden Ball Loans', kind: 'pawn', cut: 0.22, specialty: [], accepts: LOOT_CATEGORIES, satCap: usd(9000) },
+  { id: 'pawn.eighth', name: 'Eighth Ave Pawn', kind: 'pawn', cut: 0.18, specialty: [], accepts: LOOT_CATEGORIES, satCap: usd(9000) },
 ];
 
 export interface WantEntry { id: string; fence: string; category: LootCategory; premium: number; remaining: number }
@@ -63,7 +63,7 @@ export class Fences {
       const pool = [...d.accepts];
       for (let k = 0; k < 2 && pool.length; k++) {
         const cat = pool.splice(r.int(0, pool.length - 1), 1)[0];
-        this.wants.push({ id: `want.w${week}.${d.id}.${k}`, fence: d.id, category: cat, premium: Math.round(r.range(0.12, 0.25) * 100) / 100, remaining: usd(r.int(200, 500)) });
+        this.wants.push({ id: `want.w${week}.${d.id}.${k}`, fence: d.id, category: cat, premium: Math.round(r.range(0.12, 0.25) * 100) / 100, remaining: usd(r.int(2000, 5000)) });
       }
     }
   }

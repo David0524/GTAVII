@@ -54,7 +54,7 @@ test('live clock: the engine feed runs tills, the calendar and restocks while yo
   const r = rig();
   const lead = 'char.teddy_arce';
   r.g.setClock({ day: 0, minutes: 22 * 60 });
-  r.g.inv.ensure(lead).money = 100000;
+  r.g.inv.ensure(lead).money = 500000;
   assert.ok(r.g.economy.buyBusiness(lead, 'biz.newsstand'));
   const till = () => r.g.economy.property.owned.get('biz.newsstand')!.till;
   const ticks: string[] = []; r.g.clock.on('timeAdvanced', (e) => ticks.push(e.how));

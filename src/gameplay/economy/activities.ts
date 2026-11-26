@@ -95,7 +95,7 @@ export const DEFAULT_ACTIVITIES: ActivityDef[] = [
   { id: 'crime.pickpocket', name: 'Pickpocketing', kind: 'crime', resolver: 'pickpocket', leads: 'any', skill: 'stealth', minutes: 440,
     payout: { min: usd(8), max: usd(60), skew: 1.8, skillBonus: 0.006 }, crime: { kind: 'theft', noise: 4, witnessChance: 0.15 }, failChance: 0.3, supply: { capacity: 4, perHour: 0.2 } },
   { id: 'crime.collections', name: 'Collections (loan shark)', kind: 'crime', resolver: 'collections', leads: 'any', skill: 'strength', minutes: 670,
-    payout: { min: usd(20), max: usd(60) }, crime: { kind: 'menacing', extra: ['assault'], noise: 10, witnessChance: 0.5 }, failChance: 0.25, supply: { capacity: 3, perHour: 0.15 } },
+    payout: { min: usd(150), max: usd(600) }, crime: { kind: 'menacing', extra: ['assault'], noise: 10, witnessChance: 0.5 }, failChance: 0.25, supply: { capacity: 3, perHour: 0.15 } },
   { id: 'crime.chop', name: 'Car theft for the chop shop', kind: 'crime', resolver: 'chop', leads: 'any', skill: 'driving', minutes: 3400,
     crime: { kind: 'theft', noise: 12, witnessChance: 0.6 }, failChance: 0.2 },
 

@@ -15,7 +15,13 @@ import type { Cars } from './theft';
  *    Three unpaid → the boot; booted a day → towed to the pound ($40 + $5/day storage).
  *  - A monthly garage space keeps a car off the street (no tickets).
  */
-export const PRICE: Record<string, number> = { sedan: 120000, compact: 90000, wagon: 110000, hardtop: 160000, taxi: 70000, box_truck: 180000, step_van: 150000 };
+export const PRICE: Record<string, number> = { sedan: 120000, compact: 90000, wagon: 110000, hardtop: 160000, taxi: 70000, box_truck: 180000, step_van: 150000, coupe: 780000, luxury: 950000, limousine: 1650000 };
+/** The showroom (new, fixed price, no haggling): money worth chasing once the big scores land (user decision 2026-11-26). */
+export const SHOWROOM: { model: string; name: string; vclass: string; price: number }[] = [
+  { model: 'showroom.coupe', name: 'two-door personal coupe, new', vclass: 'coupe', price: 780000 },
+  { model: 'showroom.luxury', name: 'full-size luxury sedan, new', vclass: 'luxury', price: 950000 },
+  { model: 'showroom.limousine', name: 'stretch limousine with a partition', vclass: 'limousine', price: 1650000 },
+];
 export const TICKET = 1500, BOOT_AT = 3, TOW_AFTER_H = 24, POUND_FEE = 4000, POUND_DAY = 500, GARAGE_MONTH = 6000;
 /** Alternate-side cleaning: Mon/Thu 8–11 a.m. on our side streets (day 0 = Friday 21 June 1974). */
 export function cleaningWindow(day: number, minutes: number) { const dow = (day + 5) % 7; return (dow === 1 || dow === 4) && minutes >= 8 * 60 && minutes < 11 * 60; }
@@ -39,6 +45,15 @@ export class Ownership extends Emitter<OwnEvents> {
   private seq = 1;
   constructor(private inv: Inventory, private cars: Cars) { super(); }
 
+  /** Buy new at the showroom: fixed price, keys in hand, condition 1. */
+  buyNew(lead: string, model: string, colour = 'black') {
+    const m = SHOWROOM.find((x) => x.model === model); if (!m || !this.inv.spend(lead, m.price, `car:showroom`)) return null;
+    const car = `car_new_${this.seq++}`;
+    this.cars.add({ id: car, vclass: m.vclass, colour, condition: 1, owner: lead, locked: true, keysIn: false });
+    this.owned.set(car, { car, owner: lead, parked: 'street', tickets: 0, booted: false, bootedAt: -1, impoundedDay: -1, garageUntilDay: -1 });
+    this.emit('bought', { lead, car, cents: m.price, from: 'lot' });
+    return car;
+  }
   /** Value of a car by class and condition (cents). */
   value(vclass: string, condition: number) { return Math.round((PRICE[vclass] ?? 100000) * (0.35 + 0.65 * condition)); }
 
@@ -47,7 +62,7 @@ export class Ownership extends Emitter<OwnEvents> {
     if (week === this.week) return;
     this.week = week;
     const rng = new Rng(0x7400 + week);
-    const classes = Object.keys(PRICE), colours = ['tan', 'green', 'maroon', 'cream', 'brown', 'white', 'harvest gold', 'avocado', 'powder blue', 'black'];
+    const classes = Object.keys(PRICE).filter((c) => !SHOWROOM.some((m) => m.vclass === c)), colours = ['tan', 'green', 'maroon', 'cream', 'brown', 'white', 'harvest gold', 'avocado', 'powder blue', 'black'];
     const mk = (seller: 'lot' | 'private'): Listing => {
       const vclass = rng.pick(classes.filter((c) => c !== 'taxi' || seller === 'private'));
       const condition = +rng.range(seller === 'lot' ? 0.45 : 0.2, seller === 'lot' ? 0.9 : 0.95).toFixed(2);

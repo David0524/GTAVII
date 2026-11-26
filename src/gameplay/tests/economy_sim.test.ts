@@ -9,14 +9,15 @@ import { Fences } from '../economy/fences';
 import { Registers } from '../economy/registers';
 import * as G from '../economy/gambling';
 import { Loans } from '../economy/loans';
-import { bareLead, DEFAULTS, makeRig, measureRates, missionRate, runPlaythrough, type Rate } from '../economy/sim';
+import { bareLead, makeRig, measureRates, missionRate, runPlaythrough, type Rate } from '../economy/sim';
+import { storyFromNarrative, storyHours, storyTotal } from '../economy/story';
 import { DELPHINE, NICK, TEDDY, usd, type Lot } from '../economy/types';
 import type { CrimeKind } from '../police/crime';
 
 const lot = (category: Lot['category'], cents: number): Lot => ({ category, cents, label: 'test lot' });
 
 // ------------------------------------------------------------------------------------------ modules
-test('chop: the weekly list is deterministic from the week, each entry fills once, pay is $100-$600 by condition', () => {
+test('chop: the weekly list is deterministic from the week, each entry fills once, pay is $250-$1,500 by condition (scaled with risk, user decision 2026-11-26)', () => {
   assert.deepEqual(chopList(12), chopList(12));
   assert.notDeepEqual(chopList(12), chopList(13));
   const shop = new ChopShop();
@@ -25,13 +26,13 @@ test('chop: the weekly list is deterministic from the week, each entry fills onc
   const first = shop.deliver(5, car);
   assert.ok(first.ok);
   assert.equal(first.cents, chopPay(e.cls, 0.9));
-  assert.ok(first.cents >= usd(100) && first.cents <= usd(600));
+  assert.ok(first.cents >= usd(250) && first.cents <= usd(1500));
   const again = shop.deliver(5, car);
   assert.ok(!again.ok && again.reason === 'filled', 'an entry fills once');
   assert.ok(again.cents < first.cents / 5, 'a second copy only fetches scrap');
   assert.ok(!shop.deliver(5, { ...car, condition: 0.2 }).ok);
-  // pay scales with condition; the whole table spans the brief's $100-$600
-  assert.ok(chopPay('luxury', 1) <= usd(600) && chopPay('compact', 0.5) >= usd(100));
+  // pay scales with condition; the whole table spans $250-$1,500
+  assert.ok(chopPay('luxury', 1) <= usd(1500) && chopPay('compact', 0.5) >= usd(200));
   assert.ok(chopPay('sedan', 0.9) > chopPay('sedan', 0.6));
   const off = shop.deliver(5, { cls: e.cls, colour: e.colour === 'white' ? 'black' : 'white', condition: 1 });
   assert.ok(!off.ok && off.cents <= CLASS_BASE[e.cls] * 0.2, 'a car that is not on the list is scrap');
@@ -56,10 +57,10 @@ test('fences: 30-50% of value, pawnshops lower, demand saturates and recovers ov
   const g = new Fences(); g.rollWeek(0);
   const id = 'fence.mercer';
   const paid: number[] = [];
-  for (let i = 0; i < 8; i++) paid.push(g.sell(id, lot('liquor', usd(200)), 0)!.cents);
+  for (let i = 0; i < 8; i++) paid.push(g.sell(id, lot('liquor', usd(2000)), 0)!.cents);
   for (let i = 1; i < paid.length; i++) assert.ok(paid[i] < paid[i - 1], 'each sale pays less');
   assert.ok(paid[7] < paid[0] * 0.5, `dumping 8 lots halves the price (${paid[0]} -> ${paid[7]})`);
-  const rec = g.quote(id, lot('liquor', usd(200)), 24 * 7)!.cents;
+  const rec = g.quote(id, lot('liquor', usd(2000)), 24 * 7)!.cents;
   assert.ok(rec > paid[7] * 1.5 && rec > paid[0] * 0.75, 'a week later the market has largely recovered');
   // a different category on the same fence is unaffected
   assert.equal(g.quote(id, lot('furs', usd(200)), 0)!.cents, f.quote(id, lot('furs', usd(200)), 0)!.cents);
@@ -235,73 +236,83 @@ test('economy: serialize / restore round-trips state', () => {
 });
 
 // -------------------------------------------------------------------------------------- the simulation
-const rates = measureRates();
-const mixed = runPlaythrough();
+// Narrative's story pay (claude/sharp-maxwell-jnb6hr f0a96c9; snapshot of content/missions/*.json rewards).
+// User decision (2026-11-26, verbatim): "Yes, but in GTA VI you can really rack up money. Like 10s of thousands".
+const STORY = storyFromNarrative(JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/narrative/missions.json'), 'utf8')).missions);
+const rates = measureRates({ story: STORY });
+const mixed = runPlaythrough({ story: STORY });
+const perRealHour = (r: Rate) => r.centsPerGameHour * 30;
 
-test('balance: hourly earnings against missions match the ECONOMY.md targets', () => {
-  const ref = missionRate();
-  assert.equal(ref, usd(150) / 30, '$150 per real hour is $5 per game hour at 30 game hours per real hour');
-  const line = (r: Rate) => `${r.id.padEnd(18)} ${(r.centsPerGameHour / 100).toFixed(2).padStart(6)} $/game-h  sustained ${r.ratio.toFixed(2)}x  active ${r.activeRatio.toFixed(2)}x`;
-  console.log('\n== hourly earnings vs missions ($' + (ref / 100).toFixed(2) + ' per game hour = 1.00x) ==');
-  for (const r of [...rates.jobs, ...rates.crimes, ...rates.property]) console.log(line(r));
-  console.log(`best legal ${rates.legalBest.id} ${rates.legalBest.ratio.toFixed(3)}x | best crime ${rates.crimeBest.id} ${rates.crimeBest.ratio.toFixed(3)}x | property mean ${rates.propertyMean.toFixed(3)}x`);
-  assert.ok(rates.legalBest.ratio >= 0.4 && rates.legalBest.ratio <= 0.5, `best legal job ${rates.legalBest.ratio}`);
-  assert.ok(rates.crimeBest.ratio >= 0.6 && rates.crimeBest.ratio <= 0.8, `best crime ${rates.crimeBest.ratio}`);
-  // small early, big late (user decision 2026-11-26): starters below the brief's band, mid inside it, big above it
-  const BAND = { starter: [0.1, 0.22], mid: [0.2, 0.4], big: [0.45, 0.9] } as const;
-  for (const p of rates.property) { const t = E.DEFAULT_BUSINESSES.find((b) => b.id === p.id)!.tier; assert.ok(p.ratio >= BAND[t][0] && p.ratio <= BAND[t][1], `${p.id} (${t}) passive ${p.ratio}`); }
-  // nothing in free roam beats the best of its class, and crime beats legal, but nothing beats missions
-  for (const r of rates.jobs) assert.ok(r.ratio <= 0.5 && r.activeRatio <= 0.5, `${r.id} legal job above 0.5x`);
-  for (const r of rates.crimes) assert.ok(r.ratio <= 0.8 && r.activeRatio <= 0.8, `${r.id} crime above 0.8x`);
-  assert.ok(rates.crimeBest.ratio > rates.legalBest.ratio);
-  // each business, with every upgrade, stays below the best legal job
-  for (const id of E.DEFAULT_BUSINESSES.map((b) => b.id)) assert.ok(E.DEFAULT_BUSINESSES.find((b) => b.id === id)!.upgrades.length > 0);
+test('balance: missions are by far the best earner; street work stays modest; risky crime scales; property pays back in hours of play', () => {
+  const ref = missionRate({ story: STORY }) * 30;
+  console.log(`\n== story: $${storyTotal(STORY) / 100} over ${storyHours(STORY).toFixed(1)} h of missions = $${(ref / 100).toFixed(0)} per real hour (1.00x) ==`);
+  const line = (r: Rate) => `${r.id.padEnd(18)} $${(perRealHour(r) / 100).toFixed(0).padStart(6)} per real hour  ${r.ratio.toFixed(3)}x`;
+  for (const r of [...rates.jobs, ...rates.crimes]) console.log(line(r));
+  assert.ok(storyTotal(STORY) >= usd(80000), 'the story pays tens of thousands per lead');
+  // missions are the best earner per hour of play, by a wide margin
+  for (const r of [...rates.jobs, ...rates.crimes]) assert.ok(r.ratio < 0.25 && r.activeRatio < 0.35, `${r.id} ${r.ratio}x of missions`);
+  // street-level work stays at 1974 wages: a few dollars a fare, $15 a garment run
+  for (const id of ['job.cab', 'job.garment', 'job.locksmith', 'job.tow', 'crime.register', 'crime.pickpocket']) {
+    const r = [...rates.jobs, ...rates.crimes].find((x) => x.id === id)!;
+    assert.ok(perRealHour(r) <= usd(150), `${id} stays modest ($${perRealHour(r) / 100}/h)`);
+  }
+  // risky crime scales with the risk: a hijack beats a register; the best crime beats the best legal job many times over
+  const get = (id: string) => rates.crimes.find((x) => x.id === id)!;
+  assert.ok(perRealHour(get('crime.hijack')) > 5 * perRealHour(get('crime.register')));
+  assert.ok(rates.crimeBest.ratio > 5 * rates.legalBest.ratio);
+  // property: payback in real hours of play, by tier
+  const BAND = { starter: [2, 8], mid: [8, 14], big: [15, 30] } as const;
+  for (const p of rates.property) {
+    const d = E.DEFAULT_BUSINESSES.find((b) => b.id === p.id)!; const payback = d.price / perRealHour(p);
+    console.log(`${p.id.padEnd(20)} ${d.tier.padEnd(7)} $${(d.price / 100).toFixed(0).padStart(6)}  nets $${(perRealHour(p) / 100).toFixed(0)}/real h  pays back in ${payback.toFixed(1)} h`);
+    assert.ok(payback >= BAND[d.tier][0] && payback <= BAND[d.tier][1], `${p.id} pays back in ${payback.toFixed(1)} h`);
+  }
+  const price = (t: string) => E.DEFAULT_BUSINESSES.filter((b) => b.tier === t).map((b) => b.price);
+  assert.ok(price('starter').every((c) => c >= usd(1000) && c <= usd(5000)), 'starters in the low thousands');
+  assert.ok(price('mid').every((c) => c >= usd(10000) && c <= usd(25000)), 'mid tier $10-25k');
+  assert.ok(price('big').every((c) => c >= usd(50000) && c <= usd(150000)), 'big $50-150k');
+  assert.ok(E.DEFAULT_BUSINESSES.filter((b) => b.lead === 'char.nick_varelas').every((b) => b.price === Math.max(...E.DEFAULT_BUSINESSES.map((x) => x.price))), "Nick's supper club is the last and dearest");
 });
 
-test('no runaway wealth: 20 hours of mixed play and of pure free-roam grinding stay under the cap', () => {
-  // Cap = starting cash + 1.5x what the same hours would earn on missions alone. Every free-roam activity is
-  // held at or below 0.8x of missions per active hour (asserted above), so even a free-roam-only grinder earns less
-  // than the mission-only player; property passive income (starters only in 20 hours, and only
-  // after the purchase price) is what the extra 0.5x of headroom covers.
-  const missionOnly = DEFAULTS.realHours * DEFAULTS.missionCentsPerRealHour;
-  const grind = [1974, 7, 99].map((seed) => runPlaythrough({ seed, greedy: true, missionShare: 0 }));
-  const mixedSeeds = [7, 99].map((seed) => runPlaythrough({ seed }));
-  for (const r of [mixed, ...mixedSeeds, ...grind]) {
-    const cap = r.startTotal + 1.5 * missionOnly;
-    assert.ok(r.total + r.assets <= cap, `net worth ${(r.total + r.assets) / 100} over cap ${cap / 100}`);
-  }
-  for (const g of grind) assert.ok(g.total <= g.startTotal + missionOnly, 'a free-roam-only grinder does not out-earn missions');
-  // small early, big late (user decision; oversight's windows): a starter by about 2-5 h, a mid-tier business
-  // around 8-12 h, nothing big inside 20 h of mixed play, and a best-case investor's first big property by 20-30 h
-  const runs = [mixed, ...mixedSeeds, ...[3, 42].map((seed) => runPlaythrough({ seed }))];
-  for (const r of runs) {
+test('the curve: a starter early, mid tier mid-game, big property late through the big scores; tens of thousands per lead at story end', () => {
+  const seeds = [1974, 7, 99, 3, 42];
+  const typical = [mixed, ...seeds.slice(1).map((seed) => runPlaythrough({ seed, story: STORY }))];
+  const best = seeds.map((seed) => runPlaythrough({ seed, story: STORY, branches: 'best' }));
+  for (const r of [...typical, ...best]) {
+    assert.ok(r.storyEndH !== null && r.storyEndH >= 20 && r.storyEndH <= 27, `story ends at ${r.storyEndH} h`);
     const first = r.bought[0];
-    assert.ok(first && first.tier === 'starter' && first.realHour <= 6, `first business ${JSON.stringify(first)}`);
-    assert.ok(!r.bought.some((b) => b.tier === 'big'), 'no big property inside 20 hours of mixed play');
+    // timing is set by Act 1's pay: Teddy crosses ~$1k after mission 7
+    assert.ok(first && first.tier === 'starter' && first.realHour <= 6.5, `first business ${JSON.stringify(first)}`);
   }
-  const midAt = runs.map((r) => r.bought.find((b) => b.tier === 'mid')?.realHour ?? Infinity).sort((a, b) => a - b);
+  const midAt = typical.map((r) => r.bought.find((b) => b.tier === 'mid')?.realHour ?? Infinity).sort((a, b) => a - b);
   const median = midAt[Math.floor(midAt.length / 2)];
   console.log(`mid-tier at ${midAt.map((h) => h.toFixed(1)).join(', ')} h (median ${median.toFixed(1)})`);
-  assert.ok(median >= 8 && median <= 12, `mid-tier median ${median.toFixed(1)} h, want 8-12`);
-  assert.ok(midAt.every((h) => h <= 15), 'every mixed run owns a mid-tier business by 15 h');
-  const investor = [1974, 7, 99].map((seed) => runPlaythrough({ seed, investor: true, realHours: 30 }));
-  const bigAt = investor.map((r) => r.bought.find((b) => b.tier === 'big')?.realHour ?? Infinity);
-  console.log(`investor first big property at ${bigAt.map((h) => (isFinite(h) ? h.toFixed(1) : 'none')).join(', ')} h`);
-  assert.ok(Math.min(...bigAt) >= 18 && Math.min(...bigAt) <= 30, `best-case first big property at ${Math.min(...bigAt)} h, want 20-30`);
-  assert.ok(investor.filter((r) => r.bought.some((b) => b.tier === 'big')).length >= 2, 'most investors get there by 30 h');
-  assert.ok(E.DEFAULT_BUSINESSES.filter((b) => b.lead === 'char.nick_varelas').every((b) => b.tier === 'big' && b.price === Math.max(...E.DEFAULT_BUSINESSES.map((x) => x.price))), "Nick's supper club is the last and dearest");
-  // the mixed run is a sensible curve: it grows, and every lead is checkpointed every real hour
-  assert.equal(mixed.curve.length, 21);
-  assert.ok(mixed.curve[20].total > mixed.curve[0].total, 'the money curve rises');
-  assert.ok(mixed.curve.every((c) => Object.keys(c.cash).length === 3));
-  assert.ok(mixed.owned.length >= 1, 'the policy bought a business');
-  assert.ok(mixed.spent.rent > 0 && ['clothes', 'business'].every((k) => (mixed.spent[k] ?? 0) > 0), `sinks were exercised: ${Object.keys(mixed.spent)}`);
-  // heat costs money somewhere across the seeds (bribes after witnessed crimes); hospital bills come from injuries (outcomes tests)
-  assert.ok([mixed, ...mixedSeeds].some((r) => (r.spent.bribe ?? 0) > 0), 'bribes were paid in some run');
+  assert.ok(median >= 8 && median <= 12 && midAt.every((h) => h <= 14), 'mid tier mid-game');
+  const bigAt = best.map((r) => r.bought.find((b) => b.tier === 'big')?.realHour ?? Infinity);
+  console.log(`taking the best-paying choices, the first big property comes at ${bigAt.map((h) => h.toFixed(1)).join(', ')} h`);
+  assert.ok(bigAt.every((h) => h >= 18 && h <= 30), 'big property late, through the big scores');
+  for (const r of typical) assert.ok(!r.bought.some((b) => b.tier === 'big' && b.realHour < 18), 'nothing big early');
+  // story end: tens of thousands in every wallet
+  for (const r of [...typical, ...best]) for (const [lead, c] of Object.entries(r.final)) assert.ok(c >= usd(10000), `${lead} ends with $${c / 100}`);
+  const nw = typical.map((r) => r.netWorth / 100).sort((a, b) => a - b);
+  console.log(`story-end net worth, typical: $${nw.map((x) => x.toFixed(0)).join(', $')}`);
+  assert.ok(nw[0] >= 50000 && nw[nw.length - 1] <= 300000);
+  // money worth chasing gets spent: a premium car, the tailor
+  assert.ok(typical.some((r) => (r.spent['premium car'] ?? 0) > 0) && typical.some((r) => (r.spent['tailored suits'] ?? 0) > 0));
+  // heat costs money somewhere across the seeds; rent and clothes always
+  assert.ok(typical.some((r) => (r.spent.bribe ?? 0) > 0) && typical.every((r) => r.spent.rent > 0 && r.spent.clothes > 0));
+  // the curve rises and every lead is checkpointed every real hour
+  assert.equal(mixed.curve.length, mixed.realHours + 1);
+  assert.ok(mixed.curve.at(-1)!.total > mixed.curve[0].total && mixed.curve.every((c) => Object.keys(c.cash).length === 3));
+});
+
+test('no runaway wealth: a free-roam-only grinder earns a fraction of what the story pays', () => {
+  const grind = [1974, 7, 99].map((seed) => runPlaythrough({ seed, story: STORY, greedy: true, missionShare: 0 }));
+  for (const g of grind) assert.ok(g.total - g.startTotal <= 0.25 * storyTotal(STORY), `grinder made $${(g.total - g.startTotal) / 100} in ${g.realHours} h`);
 });
 
 test('simulation is deterministic', () => {
-  const again = runPlaythrough();
+  const again = runPlaythrough({ story: STORY });
   assert.deepEqual(JSON.parse(JSON.stringify(again)), JSON.parse(JSON.stringify(mixed)));
 });
 
@@ -330,9 +341,9 @@ test('no unbounded exploit: the same register, the same fence category, the same
   assert.ok(last < first * 0.25);
   // fencing: same category, same fence
   const f = new Fences(); f.rollWeek(2);
-  const payAt = (n: number) => { const c: number[] = []; for (let i = 0; i < n; i++) c.push(f.sell('fence.drago', lot('furs', usd(300)), 0)!.cents); return c; };
+  const payAt = (n: number) => { const c: number[] = []; for (let i = 0; i < n; i++) c.push(f.sell('fence.drago', lot('furs', usd(3000)), 0)!.cents); return c; };
   const p = payAt(10);
-  console.log(`fence.drago furs x10 at $300 street: first ${(p[0] / 100).toFixed(0)}$ ... tenth ${(p[9] / 100).toFixed(0)}$, total ${(p.reduce((a, b) => a + b, 0) / 100).toFixed(0)}$ vs ${(p[0] * 10 / 100).toFixed(0)}$ undiminished`);
+  console.log(`fence.drago furs x10 at $3,000 street: first ${(p[0] / 100).toFixed(0)}$ ... tenth ${(p[9] / 100).toFixed(0)}$, total ${(p.reduce((a, b) => a + b, 0) / 100).toFixed(0)}$ vs ${(p[0] * 10 / 100).toFixed(0)}$ undiminished`);
   assert.ok(p[9] < p[0] * 0.35, 'the tenth lot pays a third of the first');
   assert.ok(p.reduce((a, b) => a + b, 0) < p[0] * 10 * 0.5, 'the batch pays under half of linear');
   // the weekly chop list cannot be farmed: only one delivery per entry, scrap otherwise
@@ -349,19 +360,19 @@ test('no unbounded exploit: the same register, the same fence category, the same
 
 test('economy curve: print the money curve and write shots/gameplay/economy_curve.json', () => {
   const names: Record<string, string> = { [TEDDY]: 'Teddy', [DELPHINE]: 'Delphine', [NICK]: 'Nick' };
-  console.log('\n== 20-hour mixed playthrough: cash + savings per lead at each real-hour checkpoint ($) ==');
+  console.log(`\n== ${mixed.realHours}-hour playthrough with narrative's story pay: cash + savings per lead at each real-hour checkpoint ($) ==`);
   console.log('hour   Teddy  Delphine    Nick   total');
   for (const c of mixed.curve) console.log(`${String(c.realHour).padStart(4)} ${[TEDDY, DELPHINE, NICK].map((l) => (c.cash[l] / 100).toFixed(0).padStart(7)).join(' ')} ${(c.total / 100).toFixed(0).padStart(7)}`);
   const f = (o: Record<string, number>) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, Math.round(v / 100)]));
   console.log('earned $', JSON.stringify(f(mixed.earned as unknown as Record<string, number>)), '| spent $', JSON.stringify(f(mixed.spent)), '| owned', mixed.owned.join(','), '| visible crimes', mixed.visibleCrimes);
   console.log('hours by category', JSON.stringify(Object.fromEntries(Object.entries(mixed.hoursBy).map(([k, v]) => [k, Math.round(v)]))), '| attempts', JSON.stringify(mixed.attempts));
-  console.log(`final cash $${(mixed.total / 100).toFixed(0)} + assets $${(mixed.assets / 100).toFixed(0)}; start $${(mixed.startTotal / 100).toFixed(0)}; mission-only would be $${(DEFAULTS.realHours * DEFAULTS.missionCentsPerRealHour / 100).toFixed(0)}`);
+  console.log(`final cash $${(mixed.total / 100).toFixed(0)} + assets $${(mixed.assets / 100).toFixed(0)}; start $${(mixed.startTotal / 100).toFixed(0)}; the story pays $${storyTotal(STORY) / 100}; story ended at ${mixed.storyEndH?.toFixed(1)} h`);
   const out = path.join(import.meta.dirname, '..', '..', '..', 'shots', 'gameplay', 'economy_curve.json');
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const dollars = (c: number) => Math.round(c) / 100;
   fs.writeFileSync(out, JSON.stringify({
-    description: '20-hour mixed playthrough, deterministic (seed ' + mixed.seed + '). 1 game minute = 2 real seconds, so 20 real hours = 600 game hours. Money in dollars.',
-    missionReferencePerRealHour: dollars(DEFAULTS.missionCentsPerRealHour),
+    description: mixed.realHours + "-hour playthrough on narrative's story pay (snapshot f0a96c9), deterministic (seed " + mixed.seed + '). 1 game minute = 2 real seconds. Money in dollars. User decision: "Yes, but in GTA VI you can really rack up money. Like 10s of thousands".',
+    storyPay: dollars(storyTotal(STORY)), storyHours: +storyHours(STORY).toFixed(2), storyEndRealHour: mixed.storyEndH, netWorth: dollars(mixed.netWorth),
     realHours: mixed.realHours, gameHours: mixed.gameHours,
     curve: mixed.curve.map((c) => ({ realHour: c.realHour, gameHour: c.gameHour, total: dollars(c.total), leads: Object.fromEntries(Object.entries(c.cash).map(([k, v]) => [names[k], dollars(v)])) })),
     final: Object.fromEntries(Object.entries(mixed.final).map(([k, v]) => [names[k], dollars(v)])),
@@ -369,8 +380,9 @@ test('economy curve: print the money curve and write shots/gameplay/economy_curv
     earned: Object.fromEntries(Object.entries(mixed.earned).map(([k, v]) => [k, dollars(v)])), spent: Object.fromEntries(Object.entries(mixed.spent).map(([k, v]) => [k, dollars(v)])),
     hoursByCategory: mixed.hoursBy, attempts: mixed.attempts, owned: mixed.owned, bought: mixed.bought.map((b) => ({ ...b, realHour: +b.realHour.toFixed(2) })), businesses: E.DEFAULT_BUSINESSES.map((b) => ({ id: b.id, tier: b.tier, price: b.price / 100, lead: b.lead })),
     hourlyVsMissions: {
-      bestLegal: { id: rates.legalBest.id, ratio: +rates.legalBest.ratio.toFixed(3) }, bestCrime: { id: rates.crimeBest.id, ratio: +rates.crimeBest.ratio.toFixed(3) }, propertyMean: +rates.propertyMean.toFixed(3),
-      all: Object.fromEntries([...rates.jobs, ...rates.crimes, ...rates.property].map((r) => [r.id, { sustained: +r.ratio.toFixed(3), active: +r.activeRatio.toFixed(3), centsPerGameHour: Math.round(r.centsPerGameHour) }])),
+      missionsPerRealHour: dollars(missionRate({ story: STORY }) * 30),
+      bestLegal: { id: rates.legalBest.id, ratio: +rates.legalBest.ratio.toFixed(3) }, bestCrime: { id: rates.crimeBest.id, ratio: +rates.crimeBest.ratio.toFixed(3) },
+      all: Object.fromEntries([...rates.jobs, ...rates.crimes, ...rates.property].map((r) => [r.id, { vsMissions: +r.ratio.toFixed(3), dollarsPerRealHour: Math.round(r.centsPerGameHour * 30) / 100 }])),
     },
   }, null, 1) + '\n');
   assert.ok(fs.existsSync(out));

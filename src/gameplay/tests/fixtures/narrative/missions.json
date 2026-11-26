@@ -1,0 +1,457 @@
+{
+ "_source": "narrative claude/sharp-maxwell-jnb6hr f0a96c9 content/missions/*.json (order, duration, play-as and rewards only)",
+ "missions": [
+  {
+   "id": "mission.dusk_on_broadway",
+   "number": 1,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 15,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": []
+  },
+  {
+   "id": "mission.night_desk",
+   "number": 2,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 13,
+   "money": 120,
+   "moneyByLead": {
+    "char.teddy_arce": 120
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.hack",
+   "number": 3,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 16,
+   "money": 180,
+   "moneyByLead": {
+    "char.teddy_arce": 180
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.surcharge",
+   "number": 4,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 17,
+   "money": 250,
+   "moneyByLead": {
+    "char.teddy_arce": 250
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.contact_sheet",
+   "number": 5,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 15,
+   "money": 400,
+   "moneyByLead": {
+    "char.teddy_arce": 400
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.the_club",
+   "number": 6,
+   "act": 1,
+   "playAs": "char.delphine_moore",
+   "durationMin": 15,
+   "money": 450,
+   "moneyByLead": {
+    "char.delphine_moore": 450
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.yes",
+   "number": 7,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 14,
+   "money": 1000,
+   "moneyByLead": {
+    "char.teddy_arce": 1000
+   },
+   "moneyIf": [
+    {
+     "flag": "flag.mayhew_saw_photo",
+     "lead": "char.teddy_arce",
+     "money": 500,
+     "why": "Mayhew pays more to make the photograph go away"
+    }
+   ]
+  },
+  {
+   "id": "mission.back_stairs",
+   "number": 8,
+   "act": 1,
+   "playAs": "char.delphine_moore",
+   "durationMin": 13,
+   "money": 600,
+   "moneyByLead": {
+    "char.delphine_moore": 600
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.independence_day",
+   "number": 9,
+   "act": 1,
+   "playAs": "char.teddy_arce",
+   "durationMin": 20,
+   "money": 2600,
+   "moneyByLead": {
+    "char.teddy_arce": 2000,
+    "char.delphine_moore": 600
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.five_am",
+   "number": 10,
+   "act": 2,
+   "playAs": "char.teddy_arce",
+   "durationMin": 15,
+   "money": 1500,
+   "moneyByLead": {
+    "char.teddy_arce": 1500
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.tax_day",
+   "number": 11,
+   "act": 2,
+   "playAs": "char.delphine_moore",
+   "durationMin": 14,
+   "money": 1000,
+   "moneyByLead": {
+    "char.delphine_moore": 1000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.lunch_counter",
+   "number": 12,
+   "act": 2,
+   "playAs": "char.teddy_arce",
+   "durationMin": 16,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": [
+    {
+     "flag": "flag.branch_a_wire",
+     "lead": "char.teddy_arce",
+     "money": 1000,
+     "why": "Calloway's witness expenses"
+    }
+   ]
+  },
+  {
+   "id": "mission.contact_prints",
+   "number": 13,
+   "act": 2,
+   "playAs": "char.delphine_moore",
+   "durationMin": 15,
+   "money": 1200,
+   "moneyByLead": {
+    "char.delphine_moore": 1200
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.cold_room",
+   "number": 14,
+   "act": 2,
+   "playAs": "char.teddy_arce",
+   "durationMin": 15,
+   "money": 2000,
+   "moneyByLead": {
+    "char.teddy_arce": 2000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.brownout",
+   "number": 15,
+   "act": 2,
+   "playAs": "char.nick_varelas",
+   "durationMin": 18,
+   "money": -6000,
+   "moneyByLead": {
+    "char.nick_varelas": -6000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.margin_call",
+   "number": 16,
+   "act": 2,
+   "playAs": "char.nick_varelas",
+   "durationMin": 17,
+   "money": 4000,
+   "moneyByLead": {
+    "char.nick_varelas": 4000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.the_lease",
+   "number": 17,
+   "act": 2,
+   "playAs": "char.delphine_moore",
+   "durationMin": 16,
+   "money": 1500,
+   "moneyByLead": {
+    "char.delphine_moore": 1500
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.cold_storage",
+   "number": 18,
+   "act": 2,
+   "playAs": "char.nick_varelas",
+   "durationMin": 20,
+   "money": 33500,
+   "moneyByLead": {
+    "char.nick_varelas": 25000,
+    "char.teddy_arce": 5000,
+    "char.delphine_moore": 3500
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.rewiring",
+   "number": 19,
+   "act": 2,
+   "playAs": "char.teddy_arce",
+   "durationMin": 15,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": []
+  },
+  {
+   "id": "mission.partners_meeting",
+   "number": 20,
+   "act": 2,
+   "playAs": "char.nick_varelas",
+   "durationMin": 15,
+   "money": 6000,
+   "moneyByLead": {
+    "char.nick_varelas": 6000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.carbon_copy",
+   "number": 21,
+   "act": 2,
+   "playAs": "char.teddy_arce",
+   "durationMin": 18,
+   "money": 4000,
+   "moneyByLead": {
+    "char.teddy_arce": 2500,
+    "char.nick_varelas": 1500
+   },
+   "moneyIf": [
+    {
+     "flag": "flag.branch_a_burned",
+     "lead": "char.teddy_arce",
+     "money": 2500,
+     "why": "the stolen ledger's cash drawer"
+    }
+   ]
+  },
+  {
+   "id": "mission.the_address",
+   "number": 22,
+   "act": 3,
+   "playAs": "char.teddy_arce",
+   "durationMin": 18,
+   "money": 6500,
+   "moneyByLead": {
+    "char.teddy_arce": 2000,
+    "char.delphine_moore": 1500,
+    "char.nick_varelas": 3000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.shoebox",
+   "number": 23,
+   "act": 3,
+   "playAs": "char.delphine_moore",
+   "durationMin": 18,
+   "money": 3000,
+   "moneyByLead": {
+    "char.delphine_moore": 3000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.flip",
+   "number": 24,
+   "act": 3,
+   "playAs": "char.nick_varelas",
+   "durationMin": 16,
+   "money": 8000,
+   "moneyByLead": {
+    "char.nick_varelas": 8000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.the_car",
+   "number": 25,
+   "act": 3,
+   "playAs": "char.teddy_arce",
+   "durationMin": 17,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": []
+  },
+  {
+   "id": "mission.fire_watch",
+   "number": 26,
+   "act": 3,
+   "playAs": "char.teddy_arce",
+   "durationMin": 20,
+   "money": 3500,
+   "moneyByLead": {
+    "char.teddy_arce": 2000,
+    "char.delphine_moore": 1500
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.exposure",
+   "number": 27,
+   "act": 3,
+   "playAs": "char.delphine_moore",
+   "durationMin": 18,
+   "money": 9000,
+   "moneyByLead": {
+    "char.delphine_moore": 4000,
+    "char.nick_varelas": 5000
+   },
+   "moneyIf": []
+  },
+  {
+   "id": "mission.the_march",
+   "number": 28,
+   "act": 3,
+   "playAs": "char.teddy_arce",
+   "durationMin": 18,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": []
+  },
+  {
+   "id": "mission.the_ledger",
+   "number": 29,
+   "act": 3,
+   "playAs": "char.teddy_arce",
+   "durationMin": 17,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": [
+    {
+     "flag": "flag.ledger_to_prosecutor",
+     "lead": "char.teddy_arce",
+     "money": 7500,
+     "why": "witness relocation stipend"
+    },
+    {
+     "flag": "flag.ledger_to_press",
+     "lead": "char.teddy_arce",
+     "money": 10000,
+     "why": "the Dispatch buys the story"
+    },
+    {
+     "flag": "flag.ledger_kept",
+     "lead": "char.teddy_arce",
+     "money": 35000,
+     "why": "the pad's first month, run by Teddy"
+    },
+    {
+     "flag": "flag.ledger_burned",
+     "lead": "char.teddy_arce",
+     "money": 0,
+     "why": "nothing: that's the point"
+    }
+   ]
+  },
+  {
+   "id": "mission.closing",
+   "number": 30,
+   "act": 3,
+   "playAs": "char.nick_varelas",
+   "durationMin": 15,
+   "money": 0,
+   "moneyByLead": {},
+   "moneyIf": [
+    {
+     "flag": "flag.corwin_sold_on",
+     "lead": "char.nick_varelas",
+     "money": 40000,
+     "why": "Lisle's people pay over the odds"
+    },
+    {
+     "flag": "flag.corwin_kept",
+     "lead": "char.nick_varelas",
+     "money": -10000,
+     "why": "real wiring and fans on eleven"
+    },
+    {
+     "flag": "flag.corwin_to_council",
+     "lead": "char.nick_varelas",
+     "money": -1,
+     "why": "a dollar the wrong way, on purpose"
+    }
+   ]
+  },
+  {
+   "id": "mission.lease",
+   "number": 31,
+   "act": 3,
+   "playAs": "char.delphine_moore",
+   "durationMin": 14,
+   "money": 4000,
+   "moneyByLead": {
+    "char.delphine_moore": 4000
+   },
+   "moneyIf": [
+    {
+     "flag": "flag.delphine_shop",
+     "lead": "char.delphine_moore",
+     "money": -3000,
+     "why": "the shop's first quarter's rent"
+    }
+   ]
+  },
+  {
+   "id": "mission.labor_day",
+   "number": 32,
+   "act": 3,
+   "playAs": "char.nick_varelas",
+   "durationMin": 20,
+   "money": 18000,
+   "moneyByLead": {
+    "char.teddy_arce": 6000,
+    "char.delphine_moore": 6000,
+    "char.nick_varelas": 6000
+   },
+   "moneyIf": []
+  }
+ ]
+}

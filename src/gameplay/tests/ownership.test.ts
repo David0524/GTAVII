@@ -54,3 +54,13 @@ test('alternate-side parking: tickets on cleaning days, the boot at three, the p
   assert.ok(o.release(T, car, r.g.clock.clock.day));
   assert.ok(m0 - r.g.inv.ensure(T).money >= owed);
 });
+
+test('showroom: premium new cars at fixed prices, a sink worth chasing; the used lot stays period', () => {
+  const r = rig(); const o = r.g.ownership; o.restockWeek(0);
+  assert.ok(o.lot.every((l) => !['coupe', 'luxury', 'limousine'].includes(l.vclass)), 'the used lot is 1974 used cars');
+  assert.equal(o.buyNew(T, 'showroom.luxury'), null, 'not on $40');
+  r.g.inv.addMoney(T, 1000000);
+  const car = o.buyNew(T, 'showroom.luxury')!;
+  assert.ok(car && r.g.cars.cars.get(car)!.condition === 1 && o.owned.get(car)!.owner === T);
+  assert.equal(r.g.inv.ensure(T).money, 4000 + 1000000 - 950000);
+});

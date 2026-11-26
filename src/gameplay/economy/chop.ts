@@ -9,7 +9,7 @@ import { clamp, hash32, usd } from './types';
  */
 export type CarClass = 'compact' | 'wagon' | 'sedan' | 'truck' | 'coupe' | 'luxury';
 export const CLASS_BASE: Record<CarClass, number> = {
-  compact: usd(220), wagon: usd(260), sedan: usd(320), truck: usd(360), coupe: usd(450), luxury: usd(600),
+  compact: usd(450), wagon: usd(520), sedan: usd(650), truck: usd(750), coupe: usd(950), luxury: usd(1500),
 };
 export const ERA_COLOURS = ['avocado', 'harvest gold', 'burnt orange', 'brown', 'tan', 'cream', 'black', 'white'] as const;
 export type EraColour = typeof ERA_COLOURS[number];

@@ -171,6 +171,15 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
     cover.
 
 ## Decisions (and why)
+
+- **Money scale, user decision of 2026-11-26, relayed by oversight, verbatim: "Yes, but in GTA VI you can really rack up money. Like 10s of thousands".** Oversight added these terms:
+  - everyday 1974 prices stay real;
+  - missions pay hundreds to low thousands, and the big jobs $10k–$50k+;
+  - street work stays modest, while risky crime scales with its risk;
+  - property is re-priced: starters in the low thousands, mid $10–25k, big $50–150k+;
+  - premium cars and luxuries are sinks worth chasing.
+
+  Narrative set mission pay (f0a96c9; `rewards.moneyByLead`, with `moneyIf` for choice outcomes). Gameplay reads it through `economy/story.ts` and runs the simulation on it.
 - **The headless core has no three.js:** tests run in Node and the engine can wire it into its
   own loop.
 - **Money in integer cents:** 10¢ calls and 25¢ coffees; floats drift.
@@ -315,40 +324,31 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
   - the encounter panel covers the cop it's about.
 - **The diegetic police UI is half there:** the radio line and the witness marker work. The
   minimap cones live in a debug radar until the engine's minimap layer exists (ENGINE_REQUESTS 4).
-- **The economy is in, but the balance is provisional.** Measured against a reference of $150
-  per real hour of missions:
-  - **Rates:**
-    - best legal job: cab, 0.44×;
-    - best crime: the chop list, 0.71×;
-    - property, tiered ("small early, big late", the user's decision; oversight's windows), retuned on 2026-11-26:
-      - starters (newsstand $300, laundromat $800): 0.16–0.19×;
-      - mid (pool hall $750, diner $950): 0.30–0.31×;
-      - big (Deuce arcade $2,800, parking garage $3,800, rooming house $5,000, Nick's supper club $7,500, Nick only and the dearest): 0.55–0.82×.
-    - Weekly trouble scales with the size of the business.
-  - **Exploits are bounded:** robbing the same register again pays $87, then $23 over the next
-    ten; fencing ten fur lots to one fence gets $536 against $1,440 at full price.
-  - **The 20-hour run (seed 1974), before → after the retune:**
-    - Cash: $2,040 → $2,002, plus businesses worth $300 → $1,050.
-    - Property income: $438 → $814, so the tills now matter.
-    - **Where the money was going:**
-      - an arbitrary "hospital" bill every 5–10 real hours, now removed (hospital costs come from the injuries crimes cause);
-      - starter upgrades and a car bought while saving for the next tier (the policy now saves first);
-      - one lead could never cover a mid business alone (Nick's loan, up to $500 at 1.2% a day, now closes the gap).
-  - **Windows, asserted across 5 seeds:**
-    - starter by 2.5–5.8 h;
-    - mid-tier at 9.8 / 9.9 / 10.2 / 13.4 / 14.2 h (median 10.2, all by 15 h);
-    - no big property inside 20 h of mixed play;
-    - a best-case investor (saves for property, no gambling) gets the Deuce arcade at 26.7 h and 28.8 h, and seed 99 doesn't get there by 30 h.
-  - **Missions are still the best earner per hour of play:** cab 0.44×, chop 0.71×. Property is passive, at about 0.27× of the 20-hour run.
-  - **Blocking finding: narrative's 32 mission files pay $134 in total.** Most have `rewards.money: 0`. The whole economy, like ECONOMY.md, assumes missions pay about $150 a real hour and are the best earner. With today's content, free roam is the only income and every curve above is optimistic. This needs narrative to add mission pay, or a design decision.
-  - **My reservation:** the targets are partly met through long attempt cycles. A chop delivery
-    counts about 57 game hours, roughly 1.9 real hours. In play that would feel slow.
-    - The rebalance: raise the mission reference once narrative's mission pay is settled
-      (missions currently pay almost nothing), shorten the cycles to the real time an attempt
-      takes, and let supply caps (pools, the weekly list, fence saturation) do the bounding.
-    - Property payback is decided (small early, big late). A starter pays back in about 2 game weeks, about 11 real hours. A big one takes 15–25 game weeks, so it's an endgame income and a prestige goal, not a money printer.
-    - Honest gap: mid-tier is out of reach for one lead in 20 hours. If playtests want a mid business around hour 12–15, cut mid prices again or let one lead's business till feed another lead.
-  - **Runs in live play, not only on sleep/wait** (fixed 2026-11-26). The engine's per-frame `setClock` used to move the clock silently, so tills, loan interest, the daily number, weekly trouble and shop restocks only ever happened on a skip. Now forward movement is reported as `timeAdvanced {how: 'live'}` in 5-game-minute batches, and midnight wraps when only minutes are sent. A single jump of more than 2 game hours (a load, a debug set) is treated as a set, with no effects. Test: `time.test.ts`.
+- **The economy runs at the "tens of thousands" scale (user decision, above).** All figures come from the simulation on narrative's story pay (`economy_sim.test.ts` writes `shots/gameplay/economy_curve.json`).
+  - **Missions:** $106,300 over an 8.7 h critical path, about $12.2k per real hour of mission play, in lumps:
+    - the Cold Storage heist pays Nick $25k;
+    - the finale pays each lead $6k;
+    - the choice outcomes add up to +$40k.
+  - **Free roam, per real hour (sustained, supply-limited):**
+    - street work stays 1974-real: cab $65, garment $56, register $56, pickpocket $78;
+    - risky crime scales: hijack $1,101, collections $837, burglary $597, safes $495, chop $230;
+    - so missions are 11× the best crime (asserted below 0.25×).
+  - **Property is priced by payback in real hours of play:**
+    - newsstand $1,200 (3.6 h), laundromat $3,500 (6.3 h);
+    - pool hall $10k (9.8 h), diner $16k (10.7 h);
+    - Deuce arcade $50k (17.7 h), garage $65k (19.4 h), rooming house $90k (21.9 h), and Nick's supper club $150k (25.5 h), the last and dearest.
+    - Weekly trouble scales with the business.
+  - **Sinks:** a showroom with new cars ($7.8k coupe, $9.5k luxury sedan, $16.5k limousine), the tailor and a gold watch. Rent, clothes, guns and tokens stay at period prices.
+  - **The 25 h run (seed 1974; asserted across 5 seeds, typical and best-choice play):**
+    - the starter at 2.2–6.1 h (Act 1's pay sets this: Teddy crosses $1k after mission 7);
+    - mid tier at 8.5 / 11.1 / 11.1 / 11.2 / 12.7 h (median 11.1);
+    - with the best-paying choices, the Deuce arcade at 21.6–23.3 h; typical play buys nothing big before 18 h;
+    - the story ends at about 24 h;
+    - story-end net worth $97–113k in typical play: about $20k Teddy, $18k Delphine, $47k Nick, plus businesses, after a premium car, suits and a watch each. With the best choices it's about $175–180k.
+  - **No runaway:** a free-roam-only grinder makes under 25% of what the story pays in the same 25 h.
+  - **Two narrative follow-ups:**
+    - Brownout charges Nick $6k at mission 15, but he has about $300 then; Cold Storage's $25k comes three missions later. Today the charge takes what he has.
+    - Side-content pay isn't in yet; narrative proposes $50–$1,500 with a few $5k+ jobs.
   - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
     witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
 - **Content: placeholders by default; narrative's content on request.** `?gameplay=1&content=narrative` runs the scene on narrative's items, guns, shops and precincts through the adapter. It reads the real `/content` files once narrative's branch is merged, and gameplay's test snapshot until then; both load lazily. The snapshot matched narrative's latest files on 2026-11-26. Frames 18–19 show their shops, names and 1974 prices in the browser. Gameplay's archetype guns stay registered so NPC loadouts resolve. It isn't the default yet, because the recorded scenarios and the director script still use placeholder IDs.

@@ -22,12 +22,12 @@ const UNARMED_MULT = 0.6;
 
 export const DEFAULT_SHOPS: ShopDef[] = [
   { id: 'shop.newsstand_8th', name: 'Eighth Ave newsstand', base: usd(28) },
-  { id: 'shop.deli_9th', name: 'Ninth Ave deli', base: usd(45), safe: usd(60) },
-  { id: 'shop.liquor_w34', name: 'West 34th liquor', base: usd(70), safe: usd(110) },
+  { id: 'shop.deli_9th', name: 'Ninth Ave deli', base: usd(45), safe: usd(600) },
+  { id: 'shop.liquor_w34', name: 'West 34th liquor', base: usd(70), safe: usd(1100) },
   { id: 'shop.diner_deuce', name: 'Deuce all-night diner', base: usd(52) },
-  { id: 'shop.bar_corner', name: 'Corner tap room', base: usd(63), safe: usd(100) },
-  { id: 'shop.drug_7th', name: 'Seventh Ave drugstore', base: usd(60), safe: usd(85) },
-  { id: 'shop.theatre_box', name: 'Deuce movie-house box office', base: usd(90), safe: usd(160) },
+  { id: 'shop.bar_corner', name: 'Corner tap room', base: usd(63), safe: usd(1000) },
+  { id: 'shop.drug_7th', name: 'Seventh Ave drugstore', base: usd(60), safe: usd(850) },
+  { id: 'shop.theatre_box', name: 'Deuce movie-house box office', base: usd(90), safe: usd(1600) },
   { id: 'shop.market_10th', name: 'Tenth Ave market', base: usd(45) },
 ];
 

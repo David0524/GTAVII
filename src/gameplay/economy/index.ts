@@ -232,7 +232,8 @@ export class Economy extends Emitter<EconomyEvents> {
         if (failed()) return bust();
         if (d.resolver === 'hijack') { report('carjack', { noise: 24, visible: true }); report('assault_weapon', { noise: 18, visible: true }); }
         else report('theft', { noise: d.crime!.noise, visible: visible() });
-        const lots = d.resolver === 'hijack' ? this.lots(this.rng.int(3, 5), ['furs', 'liquor', 'electronics'], 40, 120) : this.lots(this.rng.int(1, 3), LOOT_CATEGORIES, 10, 100);
+        // a truckload is a big score (high heat); an apartment is a few hundred on the street
+        const lots = d.resolver === 'hijack' ? this.lots(this.rng.int(3, 5), ['furs', 'liquor', 'electronics'], 1500, 5000) : this.lots(this.rng.int(1, 3), LOOT_CATEGORIES, 60, 600);
         for (const l of lots) l.cents = Math.round(l.cents * f);
         if (o.keepLoot) { this.loot.set(lead, [...(this.loot.get(lead) ?? []), ...lots]); return res(true, 0); }
         return res(true, lots.reduce((a, l) => a + this.sellLot(lead, l), 0));

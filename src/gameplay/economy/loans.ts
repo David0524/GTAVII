@@ -9,7 +9,7 @@ import { NICK, usd } from './types';
  */
 export const DAILY_RATE = 0.012;
 export const LOAN_TERM_DAYS = 7;
-export const MAX_OUTSTANDING = usd(500);
+export const MAX_OUTSTANDING = usd(5000);
 
 export interface Loan { id: number; lender: string; borrower: string; principal: number; balance: number; madeDay: number; dueDay: number; misses: number }
 export interface LoanDue { loan: Loan; paid: number; remaining: number; relationship: number }
