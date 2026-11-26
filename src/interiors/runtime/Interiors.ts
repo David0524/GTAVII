@@ -5,7 +5,7 @@
  */
 import * as THREE from 'three/webgpu';
 import RAPIER from '@dimforge/rapier3d-compat';
-import { decodeIndex, unitDoor, isCoreKind, type BuildingIdx, type DoorRec, type IndexFile, type UnitRec, type WireIndex } from '../indexFormat';
+import { decodeIndex, unitDoor, facadeDoorRec, isCoreKind, type BuildingIdx, type DoorRec, type IndexFile, type UnitRec, type WireIndex } from '../indexFormat';
 import { KINDS, isOpen } from '../catalog';
 import type { BuiltInterior, MeshArrays, DoorOut } from '../spec';
 import type { WorkerReq, WorkerRes } from '../worker';
@@ -35,6 +35,7 @@ export class Interiors {
   private units = new Map<string, { b: BuildingIdx; u: UnitRec }>();
   private byChunk = new Map<string, { b: BuildingIdx; u: UnitRec }[]>();
   private doorCache = new Map<string, DoorRec[]>();
+  private facadeByChunk = new Map<string, BuildingIdx[]>();
   private live = new Map<string, Live>();
   private pending = new Map<string, { seq: number; at: number }>();
   private workers: Worker[] = []; private busy: number[] = []; private queue: string[] = []; private seq = 0;
@@ -60,6 +61,7 @@ export class Interiors {
   private async load() {
     const w = (await (await fetch(this.base + 'interiors/index.json')).json()) as WireIndex;
     this.index = decodeIndex(w, (k) => (KINDS as Record<string, { hours?: [string, string] }>)[k]?.hours);
+    for (const b of this.index.buildings) if (b.facadeDoors.length) { const fd = b.facadeDoors[0]; const key = `${Math.floor(fd.x / 200)}_${Math.floor(fd.z / 200)}`; (this.facadeByChunk.get(key) ?? this.facadeByChunk.set(key, []).get(key)!).push(b); }
     for (const b of this.index.buildings) for (const u of b.units) {
       this.units.set(u.id, { b, u });
       const ci = Math.floor((u.ox + u.ux * u.door.t) / 200), cj = Math.floor((u.oz + u.uz * u.door.t) / 200);
@@ -76,7 +78,11 @@ export class Interiors {
   // ------------------------------------------------------------------ contract
   doorsForChunk(i: number, j: number): readonly DoorRec[] {
     const key = `${i}_${j}`; let d = this.doorCache.get(key);
-    if (!d) { d = (this.byChunk.get(key) ?? []).map(({ b, u }) => unitDoor(u, b.id)); this.doorCache.set(key, d); }
+    if (!d) {
+      d = (this.byChunk.get(key) ?? []).map(({ b, u }) => unitDoor(u, b));
+      for (const b of this.facadeByChunk.get(key) ?? []) b.facadeDoors.forEach((fd, k) => d!.push(facadeDoorRec(fd, b, k)));
+      this.doorCache.set(key, d);
+    }
     return d;
   }
   unit(id: string) { return this.units.get(id); }

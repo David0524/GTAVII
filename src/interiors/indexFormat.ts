@@ -40,10 +40,16 @@ export interface BuildingIdx {
   cond: number;
   roof: boolean;
   units: UnitRec[];
+  /** Locked / decorative street entrances for buildings (or extra service doors) that have no enterable unit there. */
+  facadeDoors: FacadeDoor[];
   /** Street frontage edges [ax, az, bx, bz, streetIdx]. */
   frontage: [number, number, number, number, number][];
   address?: string;
 }
+/** Period door treatments the engine renders (frames, handles, stoops, gates). */
+export type DoorStyle = 'shop' | 'shop_recessed' | 'stoop' | 'vestibule' | 'brass_double' | 'revolving' | 'freight' | 'service' | 'boarded' | 'garage' | 'church' | 'rear' | 'internal';
+/** style 'internal': a hemmed-in footprint (no wall on open ground) reached through the adjoining building `via`; nothing is drawn. */
+export interface FacadeDoor { x: number; z: number; y: number; yaw: number; w: number; h: number; style: DoorStyle; street: number; rise: number; via?: number }
 export interface IndexFile {
   version: 1;
   streets: string[];
@@ -69,12 +75,12 @@ export function encodeIndex(f: IndexFile, kindHours: (k: string) => [string, str
     x.units.map((u) => {
       const left = Math.abs(u.nx - -u.uz) < 0.01 && Math.abs(u.nz - u.ux) < 0.01; // n = (-uz, ux) is +90deg
       return [ki(u.kind), r2(u.ox), r2(u.oz), r2(Math.atan2(u.uz, u.ux), 10000), r2(u.w), r2(u.d), r2(u.door.t), r2(u.door.w), r2(u.door.recess), r2(u.y), u.street, (u.avenue ? 1 : 0) | (u.locked ? 2 : 0) | (left ? 4 : 0) | (u.roofAccess ? 8 : 0), u.seed, ...(u.hero ? [u.hero] : [])];
-    }), x.cond]);
+    }), x.cond, x.facadeDoors.map((d) => [r2(d.x), r2(d.z), r2(d.y), r2(d.yaw, 1000), r2(d.w), r2(d.h), d.style, d.street, r2(d.rise), d.via ?? 0])]);
   return { v: 2, streets: f.streets, kinds, districts, coverage: f.coverage, b };
 }
 export function decodeIndex(w: WireIndex, kindHours: (k: string) => [string, string] | undefined): IndexFile {
   const buildings: BuildingIdx[] = w.b.map((a) => {
-    const [id, i, j, use, style, year, floors, fh, top, gAvg, d, roof, address, fr, us, cond] = a as [number, number, number, number, number, number, number, number, number, number, number, number, string, number[], number[][], number];
+    const [id, i, j, use, style, year, floors, fh, top, gAvg, d, roof, address, fr, us, cond, fd] = a as [number, number, number, number, number, number, number, number, number, number, number, number, string, number[], number[][], number, unknown[][]];
     const frontage: BuildingIdx['frontage'] = [];
     for (let k = 0; k < fr.length; k += 5) frontage.push([fr[k], fr[k + 1], fr[k + 2], fr[k + 3], fr[k + 4]]);
     const units: UnitRec[] = us.map((u, k) => {
@@ -83,7 +89,8 @@ export function decodeIndex(w: WireIndex, kindHours: (k: string) => [string, str
       return { id: u[13] ? (u[13] as unknown as string) : k === 0 && isCoreKind(kind) ? `b${id}` : `b${id}u${k}`, kind, ox: u[1], oz: u[2], ux, uz, nx: left ? -uz : uz, nz: left ? ux : -ux, w: u[4], d: u[5],
         door: { t: u[6], w: u[7], recess: u[8] }, y: u[9], street: u[10], avenue: (u[11] & 1) !== 0, locked: (u[11] & 2) !== 0, roofAccess: (u[11] & 8) !== 0, seed: u[12], ...(u[13] ? { hero: u[13] as unknown as string } : {}), hours: kindHours(kind) };
     });
-    return { id, i, j, use, style, year, floors, fh, top, gAvg, cond: cond ?? 2, district: w.districts[d], roof: roof === 1, units, frontage, ...(address ? { address } : {}) };
+    const facadeDoors: FacadeDoor[] = (fd ?? []).map((q) => ({ x: q[0] as number, z: q[1] as number, y: q[2] as number, yaw: q[3] as number, w: q[4] as number, h: q[5] as number, style: q[6] as DoorStyle, street: q[7] as number, rise: q[8] as number, ...(q[9] ? { via: q[9] as number } : {}) }));
+    return { id, i, j, use, style, year, floors, fh, top, gAvg, cond: cond ?? 2, facadeDoors, district: w.districts[d], roof: roof === 1, units, frontage, ...(address ? { address } : {}) };
   });
   return { version: 1, streets: w.streets, buildings, coverage: w.coverage };
 }
@@ -97,17 +104,42 @@ export interface DoorRec {
   kind: string; locked: boolean; hours?: [string, string];
   /** Clear opening width/height (m) so the engine can cut and frame the facade. */
   width: number; height: number;
+  /** Period treatment the engine renders (frame, handle, stoop, gate, revolving drum). */
+  style?: DoorStyle;
+  /** shop: show a roll-down gate outside opening hours */
+  nightGate?: boolean;
+  /** false for facade_only and boarded doors (no interior behind) */
+  enterable?: boolean;
+  /** stoop / steps height above the sidewalk (m) */
+  rise?: number;
   /** Display-window openings either side of the door (storefronts), along the facade: [t0, t1] offsets from the door centre. */
   windows?: [number, number][];
 }
 
 export const DOOR_H = 2.25;
-export function unitDoor(u: UnitRec, bId: number): DoorRec {
+/** Period door treatment for an enterable unit, from kind, building style, floors and condition grade. */
+export function unitDoorStyle(u: UnitRec, b: Pick<BuildingIdx, 'style' | 'floors' | 'cond' | 'year'>): DoorStyle {
+  if (u.kind === 'garage') return 'garage';
+  if (u.kind === 'church') return 'church';
+  if (b.cond === 0 && !isCoreKind(u.kind)) return 'boarded';
+  if (u.kind === 'tenement' || u.kind === 'sro') return b.style === 1 ? 'stoop' : 'vestibule';
+  if (u.kind === 'apartment_lobby' || u.kind === 'hero' || u.kind === 'loft') return 'vestibule';
+  if (u.kind === 'office_lobby' || u.kind === 'hotel_lobby') return b.floors >= 15 && b.year >= 1920 && b.year < 1960 && b.cond >= 3 ? 'revolving' : 'brass_double';
+  return u.door.recess > 0 ? 'shop_recessed' : 'shop';
+}
+export function unitDoor(u: UnitRec, b: number | Pick<BuildingIdx, 'id' | 'style' | 'floors' | 'cond' | 'year'>): DoorRec {
+  const bId = typeof b === 'number' ? b : b.id;
   const x = u.ox + u.ux * u.door.t, z = u.oz + u.uz * u.door.t;
   const yaw = Math.atan2(u.nx, u.nz); // outward = -n; heading convention atan2(-dx,-dz) with d = -n
   const shop = !isCoreKind(u.kind) && u.kind !== 'hero';
   const windows: [number, number][] | undefined = shop && u.w > u.door.w + 1.4
     ? [[-u.door.t + 0.35, -u.door.w / 2 - 0.15], [u.door.w / 2 + 0.15, u.w - u.door.t - 0.35]].filter(([a, b]) => b - a > 0.6) as [number, number][]
     : undefined;
-  return { id: u.id, buildingId: bId, x, y: u.y, z, yaw, kind: u.kind, locked: u.locked, hours: u.hours, width: u.door.w, height: u.kind === 'garage' ? 3.6 : DOOR_H, windows };
+  const style: DoorStyle = typeof b === 'number' ? (shop ? 'shop' : 'vestibule') : unitDoorStyle(u, b);
+  // shops pull a steel roll-down gate when closed (engine renders it outside hours)
+  return { id: u.id, buildingId: bId, x, y: u.y, z, yaw, kind: u.kind, locked: u.locked || style === 'boarded', hours: u.hours, width: u.door.w, height: u.kind === 'garage' ? 3.6 : DOOR_H, windows, style, nightGate: shop && style !== 'boarded', enterable: style !== 'boarded' };
+}
+/** Decorative / locked entrance as a DoorRec (kind 'facade_only'). */
+export function facadeDoorRec(d: FacadeDoor, b: Pick<BuildingIdx, 'id'>, k: number): DoorRec {
+  return { id: `b${b.id}f${k}`, buildingId: b.id, x: d.x, y: d.y, z: d.z, yaw: d.yaw, kind: 'facade_only', locked: true, width: d.w, height: d.h, style: d.style, rise: d.rise, enterable: false };
 }

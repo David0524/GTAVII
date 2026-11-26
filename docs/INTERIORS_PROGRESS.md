@@ -166,6 +166,20 @@ Reads as a modern kit or is wrong:
 - Interiors' side, still to wire: on `pedEnteredDoor`, fill a slot by role in resident interiors; offer `exitFromDoor`
   candidates from slots. Residential doors never take passers-by.
 
+## Every building has a door (user feedback via oversight)
+- **Assertion:** `buildIndex.ts` throws unless 100% of ground buildings in bounds have at least one door. Result: **3,072 / 3,072**.
+  The enterable share is unchanged: 75.9% of buildings, 73.6% of commercial frontage, 53.9% with roofs.
+- **Locked or decorative entrances** (`kind: 'facade_only'`, `locked: true`, `enterable: false`) for the 742 buildings with no enterable
+  unit, plus freight or service doors on long frontage the units leave bare. Each sits on its real frontage at sidewalk height
+  from `heightAt`.
+- **Period styles** (`DoorRec.style`): stoop (with rise) on walk-up tenements; vestibule on apartment, SRO, loft and hero entrances;
+  brass double doors on office and hotel towers, revolving on 1920s–50s towers of 15+ floors at grade 3+; freight on lofts;
+  church; garage; boarded at grade 0. Shops get `nightGate` for a roll-down gate outside hours.
+- **Honest caveat:** 576 buildings in bounds have no street frontage. 158 get a rear door onto a yard or lot. The other 418
+  are hemmed in on every side by other footprints (back buildings, split lots). They get `style: 'internal'` with
+  `via: <adjoining building id>`, so nothing is drawn into a wall. **Visible street or yard entrances: 2,654 of 3,072 (86.4%);
+  the remaining 13.6% are reached through a neighbour.**
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.

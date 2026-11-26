@@ -225,9 +225,47 @@ function shopChance(b: B, avenue: boolean): number {
   return 0;
 }
 
+
+// ---------------------------------------------------------------- every building gets a street entrance (enterable or not)
+import type { FacadeDoor, DoorStyle } from '../../src/interiors/indexFormat';
+function facadeStyle(b: B, cond: number): DoorStyle {
+  if (cond === 0) return 'boarded';
+  if (b.use === 7 || b.use === 10) return 'garage';
+  if (b.use === 8 || b.style === Style.Civic) return 'church';
+  if (b.style === Style.Tenement || b.use <= 3) return b.floors <= 6 ? 'stoop' : 'vestibule';
+  if ((b.style === Style.PrewarOffice || b.style === Style.SetbackTower) && b.floors >= 10) return b.floors >= 15 && b.year >= 1920 && b.year < 1960 && cond >= 3 ? 'revolving' : 'brass_double';
+  if (b.style === Style.CastIronLoft || b.style === Style.MasonryLoft || b.use === 6) return 'freight';
+  return 'service';
+}
+const DOOR_DIMS: Record<DoorStyle, [number, number, number]> = { // width, height, rise
+  internal: [0.9, 2.1, 0],
+  shop: [0.95, 2.25, 0], shop_recessed: [0.95, 2.25, 0], stoop: [1.1, 2.3, 0.75], vestibule: [1.2, 2.4, 0.2], brass_double: [1.8, 2.6, 0.15], revolving: [2.2, 2.6, 0.1],
+  freight: [3.0, 3.2, 0], service: [1.0, 2.2, 0], boarded: [1.0, 2.2, 0], garage: [4.5, 3.6, 0], church: [2.2, 3.4, 0.45], rear: [0.95, 2.1, 0],
+};
+function placeFacadeDoor(b: B, e: { ax: number; az: number; ux: number; uz: number; nx: number; nz: number; street: number; L: number }, t: number, style: DoorStyle): FacadeDoor {
+  const [w0, h, rise] = DOOR_DIMS[style]; void b;
+  const w = Math.min(w0, Math.max(0.8, e.L - 0.4));
+  const x = e.ax + e.ux * t, z = e.az + e.uz * t;
+  return { x: +x.toFixed(2), z: +z.toFixed(2), y: +(heightAt(x - e.nx, z - e.nz) + SIDEWALK_H).toFixed(3), yaw: +Math.atan2(e.nx, e.nz).toFixed(4), w, h, style, street: e.street, rise };
+}
+/** Building with no frontage edge (block-interior or hemmed in): door on the outer edge facing the nearest street, style 'rear'. */
+function rearDoor(b: B): FacadeDoor {
+  const r = b.ring, n = r.length / 2, ccw = signedArea(r) > 0;
+  let best: { score: number; d: FacadeDoor } | null = null;
+  for (let k = 0; k < n; k++) {
+    const j = (k + 1) % n, ax = r[2 * k], az = r[2 * k + 1], bx = r[2 * j], bz = r[2 * j + 1], L = Math.hypot(bx - ax, bz - az); if (L < 0.3) continue;
+    const ux = (bx - ax) / L, uz = (bz - az) / L; let ox = uz, oz = -ux; if (!ccw) { ox = -ox; oz = -oz; }
+    const px = (ax + bx) / 2 + ox * 1.2, pz = (az + bz) / 2 + oz * 1.2;
+    const blocked = buildingAt(px, pz) >= 0 ? 50 : 0;
+    const st = nearestStreet(px, pz); const score = (st?.d ?? 999) + blocked + (L < 1.4 ? 20 : 0);
+    if (!best || score < best.score) best = { score, d: placeFacadeDoor(b, { ax, az, ux, uz, nx: -ox, nz: -oz, street: st?.s ?? 0, L }, L / 2, 'rear') };
+  }
+  return best!.d;
+}
+
 // ---------------------------------------------------------------- main pass
 const out: BuildingIdx[] = [];
-const cov = { buildingsPlayable: 0, groundBuildings: 0, enterableBuildings: 0, roofBuildings: 0, commercialFrontageM: 0, enterableCommercialFrontageM: 0, allFrontageM: 0, enterableFrontageM: 0, units: 0, shopUnits: 0, cores: 0 } as Record<string, number>;
+const cov = { rearBlocked: 0, withDoor: 0, facadeOnlyBuildings: 0, rearOnly: 0, buildingsPlayable: 0, groundBuildings: 0, enterableBuildings: 0, roofBuildings: 0, commercialFrontageM: 0, enterableCommercialFrontageM: 0, allFrontageM: 0, enterableFrontageM: 0, units: 0, shopUnits: 0, cores: 0 } as Record<string, number>;
 const kindCount: Record<string, number> = {};
 const lost: Record<string, number> = {};
 for (const b of blds) {
@@ -242,7 +280,17 @@ for (const b of blds) {
   const commercial = [4, 5, 6, 7, 10].includes(b.use);
   const frontLen = edges.reduce((a, e) => a + e.L, 0);
   if (inPlay) { cov.allFrontageM += frontLen; if (commercial) cov.commercialFrontageM += frontLen; }
-  if (!edges.length || b.area < 30) continue;
+  const condB = buildingCondition({ id: b.id, year: b.year, style: b.style, use: b.use, floors: b.floors, flags: b.flags, avenueDistance: edges.some((e) => e.avenue) ? 10 : 60, x: cx });
+  const pushFacadeOnly = () => {
+    let gsum = 0; for (let k = 0; k < b.ring.length; k += 2) gsum += heightAt(b.ring[k], b.ring[k + 1]);
+    const ga = gsum / (b.ring.length / 2);
+    const e = [...edges].sort((p, q) => q.L - p.L)[0];
+    const fd = e ? placeFacadeDoor(b, e, e.L / 2, facadeStyle(b, condB)) : rearDoor(b);
+    if (!e && inPlay) { cov.rearOnly++; const px = fd.x - Math.sin(fd.yaw) * 1.2, pz = fd.z - Math.cos(fd.yaw) * 1.2; const nb = buildingAt(px, pz); if (nb >= 0) { cov.rearBlocked++; fd.style = 'internal'; fd.via = blds[nb].id; } }
+    out.push({ id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: Math.max(2.8, Math.min(5.2, b.floors > 0 ? b.height / b.floors : 3.2)), top: ga + Math.max(b.height, b.minHeight + 0.5), gAvg: ga, district, cond: condB, roof: false, units: [], facadeDoors: [fd], frontage: edges.map((q) => [+q.ax.toFixed(2), +q.az.toFixed(2), +q.bx.toFixed(2), +q.bz.toFixed(2), q.street]) });
+    if (inPlay) { cov.withDoor++; cov.facadeOnlyBuildings++; }
+  };
+  if (!edges.length || b.area < 30) { pushFacadeOnly(); continue; }
 
   // engine roof rule: mean ground over outer ring + height
   let gs = 0; const nv = b.ring.length / 2; for (let k = 0; k < b.ring.length; k += 2) gs += heightAt(b.ring[k], b.ring[k + 1]);
@@ -332,20 +380,31 @@ for (const b of blds) {
     const nd = fitDepth(b, { ox: q.ox, oz: q.oz, ux: q.ux, uz: q.uz, nx: q.nx, nz: q.nz, w: q.w }, md, others);
     if (nd > q.d) { q.d = nd; const u = units.find((x) => Math.abs(x.ox - q.ox) < 0.01 && Math.abs(x.oz - q.oz) < 0.01 && Math.abs(x.w - q.w) < 0.02); if (u) u.d = +nd.toFixed(2); }
   }
-  if (!units.length) continue;
+  if (!units.length) { pushFacadeOnly(); continue; }
   units.forEach((u, k) => { u.id = k === 0 && isCoreKind(u.kind) ? `b${b.id}` : `b${b.id}u${k}`; });
   const roofCore = units[0]?.kind;
   let roof = (roofCore === 'tenement' || roofCore === 'loft' || roofCore === 'sro' || roofCore === 'apartment_lobby') && b.floors <= 16;
   if ((roofCore === 'office_lobby' || roofCore === 'hotel_lobby') && b.floors <= 14 && units[0].d >= 9) roof = true;
   // low taxpayers: a ship's ladder in a deep shop's back room up to a roof hatch
   if (!roof && b.floors <= 3) { const ru = units.find((u) => !isCoreKind(u.kind) && !(KINDS as any)[u.kind]?.upstairs && u.d > 11 && u.w > 3.6); if (ru) { ru.roofAccess = true; roof = true; } }
+  // a freight or service door on long frontage that the units leave bare (lofts, warehouses, wide lots)
+  const serviceDoors = (): FacadeDoor[] => {
+    const outD: FacadeDoor[] = [];
+    for (const e of edges) {
+      if (e.L < 18) continue;
+      const covered = (t: number) => units.some((u) => { const dx = e.ax + e.ux * t - u.ox, dz = e.az + e.uz * t - u.oz; const s0 = dx * u.ux + dz * u.uz, off = Math.abs(dx * u.nx + dz * u.nz); return off < 0.3 && s0 > -1.6 && s0 < u.w + 1.6; });
+      for (const t of [e.L - 2.5, 2.5, e.L / 2]) if (!covered(t)) { outD.push(placeFacadeDoor(b, e, t, b.style === Style.CastIronLoft || b.style === Style.MasonryLoft || b.use === 6 ? 'freight' : 'service')); break; }
+      if (outD.length) break;
+    }
+    return outD;
+  };
   const addr = audit.find((a) => a.x >= b.minX && a.x <= b.maxX && a.z >= b.minZ && a.z <= b.maxZ && inRing(b.ring, a.x, a.z))?.address;
   out.push({
-    id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: +fh.toFixed(3), top: +top.toFixed(3), gAvg: +gAvg.toFixed(3), district, cond: buildingCondition({ id: b.id, year: b.year, style: b.style, use: b.use, floors: b.floors, flags: b.flags, avenueDistance: edges.some((e) => e.avenue) ? 10 : 60, x: cx }), roof, units,
+    id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: +fh.toFixed(3), top: +top.toFixed(3), gAvg: +gAvg.toFixed(3), district, cond: condB, roof, units, facadeDoors: serviceDoors(),
     frontage: edges.map((e) => [+e.ax.toFixed(2), +e.az.toFixed(2), +e.bx.toFixed(2), +e.bz.toFixed(2), e.street]), ...(addr ? { address: addr } : {}),
   });
   if (inPlay) {
-    cov.enterableBuildings++; if (roof) cov.roofBuildings++;
+    cov.enterableBuildings++; cov.withDoor++; if (roof) cov.roofBuildings++;
     for (const u of units) {
       cov.units++; kindCount[u.kind] = (kindCount[u.kind] ?? 0) + 1;
       if (u.kind === roofCore && u === units[0] && !(KINDS as any)[u.kind]?.upstairs && ['tenement', 'apartment_lobby', 'sro', 'office_lobby', 'hotel_lobby', 'loft', 'garage', 'church', 'union_hall'].includes(u.kind)) cov.cores++; else cov.shopUnits++;
@@ -390,8 +449,11 @@ for (const h of heroContent) {
 }
 console.log('heroes:', heroLog);
 
+const doorShare = cov.withDoor / cov.groundBuildings;
+if (doorShare < 0.9999) throw new Error(`door coverage assertion failed: ${cov.withDoor}/${cov.groundBuildings} ground buildings have a door`);
 const coverage = {
   ...cov,
+  doorShareOfGroundBuildings: +doorShare.toFixed(4),
   enterableShareOfGroundBuildings: +(cov.enterableBuildings / cov.groundBuildings).toFixed(4),
   roofShareOfGroundBuildings: +(cov.roofBuildings / cov.groundBuildings).toFixed(4),
   enterableShareOfCommercialFrontage: +(cov.enterableCommercialFrontageM / cov.commercialFrontageM).toFixed(4),
