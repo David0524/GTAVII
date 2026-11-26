@@ -69,7 +69,7 @@ function floor(world: THREE.Scene, size = 60, color = 0x4c4642) {
 function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: CharacterFactory, scene: string, report: any) {
   floor(world);
   const chars: Character[] = [];
-  const zoom = qp.has('zoom');
+  const zoom = qp.get('zoom');
   if (scene === 'leads') {
     const act = num('act', 1);
     for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) chars.push(factory.spawn(world, { seed: 1, hero, act }));
@@ -82,7 +82,9 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
   chars.forEach((c, i) => { c.object.position.set(zoom ? 0 : (i - (n - 1) / 2) * gap, 0, 0); c.object.visible = !zoom || i === num('focus', 0); });
   const yaw = THREE.MathUtils.degToRad(num('yaw', 0));
   const spin = qp.has('spin');
-  if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
+  if (zoom === 'hand') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.6, 0.95, 1.1); camera.lookAt(0.2, 0.8, 0); }
+  else if (zoom === 'feet') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.5, 0.35, 1.3); camera.lookAt(0, 0.08, 0); }
+  else if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
   else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.2, Math.max(5.5, w * 1.12 + 1.5)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }
   report.people = chars.map((c) => ({ seed: c.desc.seed, hero: c.desc.hero, sex: c.appearance.sex, age: c.appearance.age, hair: c.appearance.hair.style, facialHair: c.appearance.facialHair, top: c.outfit.top.kind, bottom: c.outfit.bottom.kind, outer: c.outfit.outer?.kind ?? null, shoes: c.outfit.shoes.kind, hat: c.outfit.hat?.kind ?? null, props: c.outfit.props, tris: c.stats.tris, draws: c.stats.draws, buildMs: +c.stats.buildMs.toFixed(1) }));
   let t = 0;

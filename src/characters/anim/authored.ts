@@ -32,10 +32,10 @@ function quatFromEuler(x: number, y: number, z: number, out: Float32Array, o: nu
 /** Relaxed standing posture from the A-pose: arms down at the sides, soft elbows, curled fingers. */
 export const RELAXED: Record<string, Euler> = {
   clavicle_l: [0, 0, -4], clavicle_r: [0, 0, 4],
-  upperarm_l: [-4, 0, -35], upperarm_r: [-4, 0, 35],
-  lowerarm_l: [-12, 0, 0], lowerarm_r: [-12, 0, 0],
-  hand_l: [0, 0, -4], hand_r: [0, 0, 4],
-  ...fingers('l', 14), ...fingers('r', 14),
+  upperarm_l: [2, -32, -40], upperarm_r: [2, 32, 40], // solved by FK: wrist beside the thigh, palm to the leg (tools/characters/scratch/palm.ts)
+  lowerarm_l: [6, 50, 0], lowerarm_r: [6, -50, 0],
+  hand_l: [10, 0, -10], hand_r: [10, 0, 10],
+  ...handShape('l', 'relaxed'), ...handShape('r', 'relaxed'),
   spine_01: [1, 0, 0], neck_01: [-2, 0, 0],
   thigh_l: [0, 0, -1.5], thigh_r: [0, 0, 1.5],
 };
@@ -46,6 +46,23 @@ function fingers(side: 'l' | 'r', curl: number): Record<string, Euler> {
     o[`${f}_01_${side}`] = [0, 0, sgn * curl * 0.8]; o[`${f}_02_${side}`] = [0, 0, sgn * curl * 1.1]; o[`${f}_03_${side}`] = [0, 0, sgn * curl * 0.7];
   }
   o[`thumb_01_${side}`] = [0, sgn * 10, 0]; o[`thumb_02_${side}`] = [0, 0, sgn * curl * 0.4];
+  return o;
+}
+/**
+ * Hand shapes. relaxed: the natural cascade (index straightest, pinky most curled, thumb resting
+ * beside the index); grip: wrapped round a handle; pinch: a cigarette between index and middle.
+ */
+export function handShape(side: 'l' | 'r', shape: 'relaxed' | 'grip' | 'pinch'): Record<string, Euler> {
+  const sgn = side === 'l' ? -1 : 1;
+  const o: Record<string, Euler> = {};
+  const curls: Record<string, [number, number, number]> = shape === 'grip'
+    ? { index: [62, 78, 40], middle: [66, 82, 42], ring: [70, 84, 44], pinky: [74, 86, 46] }
+    : shape === 'pinch'
+      ? { index: [14, 12, 6], middle: [18, 14, 8], ring: [55, 70, 35], pinky: [60, 72, 38] }
+      : { index: [10, 14, 6], middle: [14, 18, 8], ring: [18, 22, 10], pinky: [22, 26, 12] };
+  for (const [f, c] of Object.entries(curls)) { o[`${f}_01_${side}`] = [0, 0, sgn * c[0]]; o[`${f}_02_${side}`] = [0, 0, sgn * c[1]]; o[`${f}_03_${side}`] = [0, 0, sgn * c[2]]; }
+  const thumb = shape === 'grip' ? [30, 35] : [12, 10];
+  o[`thumb_01_${side}`] = [0, sgn * thumb[0], 0]; o[`thumb_02_${side}`] = [0, 0, sgn * thumb[1]]; o[`thumb_03_${side}`] = [0, 0, sgn * 8];
   return o;
 }
 const merge = (...m: Record<string, Euler>[]) => {

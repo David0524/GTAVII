@@ -50,6 +50,7 @@ export function bakeTemplate(lib: AnimLibrary, restJoints: Float32Array, p: Pers
   const restPelvis: [number, number, number] = [restOff[3], restOff[4], restOff[5]];
   for (const def of CROWD_SET) {
     const an = new Animator(lib, restPelvis, p);
+    an.setRestJoints(restJoints);
     const dt = 1 / 60;
     let seconds = def.seconds ?? 2, fps = def.fps ?? 15, speed = 0;
     if (def.kind === 'move') {

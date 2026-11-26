@@ -6,12 +6,12 @@
  */
 import { JOINTS, JOINT_INDEX as JI, NUM_JOINTS } from '../rig';
 import { AnimLibrary, Pose, clearAcc, normalizePose, type Clip } from './AnimLibrary';
-import { MASKS } from './authored';
+import { MASKS, handShape } from './authored';
 
 export type LocoMode = 'walk' | 'run' | 'sprint' | 'crouch';
 export interface LocoInput { velocity: [number, number, number]; grounded: boolean; heading: number; mode: LocoMode }
 export interface AnimEvent { type: 'footstep' | 'contact' | 'hail'; foot?: 'l' | 'r'; data?: any; speed?: number }
-export interface Personality { stride: number; swing: number; bounce: number; slump: number; age: number; heat: number; formal: boolean }
+export interface Personality { stride: number; swing: number; bounce: number; slump: number; age: number; heat: number; formal: boolean; /** extra arm abduction (radians) so arms clear wide hips and heavy bodies */ girth?: number }
 
 interface Action { clip: number; t: number; w: number; target: number; loop: boolean; layer: 'full' | 'upper'; resolve?: () => void; done?: boolean; speed: number; name: string }
 
@@ -36,6 +36,7 @@ export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; lo
 export let STRIDE_CAL = 0.87;
 export function setStrideCal(v: number) { STRIDE_CAL = v; }
 const MIRROR = JOINTS.map((j) => { const n = j.name; const m = n.endsWith('_l') ? n.slice(0, -2) + '_r' : n.endsWith('_r') ? n.slice(0, -2) + '_l' : n; return JI[m]; });
+const FINGER_MASK = (() => { const m = new Uint8Array(NUM_JOINTS); JOINTS.forEach((j, i) => { if (/^(thumb|index|middle|ring|pinky)_/.test(j.name)) m[i] = 255; }); return m; })();
 const sm = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 export class Animator {
@@ -56,6 +57,44 @@ export class Animator {
   private events: AnimEvent[] = [];
   private lastPhase = 0;
   private cadenceBoost = 1;
+  /** Hand shapes held over every clip (props gripped, otherwise relaxed); see setHands(). */
+  private hands: Record<'l' | 'r', 'relaxed' | 'grip' | 'pinch'> = { l: 'relaxed', r: 'relaxed' };
+  private handPose = new Pose();
+  setHands(l: 'relaxed' | 'grip' | 'pinch', r: 'relaxed' | 'grip' | 'pinch') { this.hands = { l, r }; this.buildHandPose(); }
+  /** Rest joint positions (character space) for anatomically correct finger curl axes. */
+  restJoints: Float32Array | null = null;
+  private buildHandPose() {
+    const p = this.handPose; p.identity();
+    const RJ = this.restJoints;
+    const D = Math.PI / 180;
+    const put = (j: number, ax: number[], deg: number) => {
+      const a = (deg * D) / 2, s2 = Math.sin(a);
+      p.q.set([ax[0] * s2, ax[1] * s2, ax[2] * s2, Math.cos(a)], j * 4);
+    };
+    for (const side of ['l', 'r'] as const) {
+      const shape = handShape(side, this.hands[side]);
+      if (!RJ) continue;
+      const jp = (n: string) => { const j = JI[n]; return [RJ[j * 3], RJ[j * 3 + 1], RJ[j * 3 + 2]]; };
+      const sub = (a: number[], b: number[]) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+      const nrm = (a: number[]) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+      const cross = (a: number[], b: number[]) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+      const knuckles = nrm(sub(jp(`index_01_${side}`), jp(`pinky_01_${side}`)));
+      const along = nrm(sub(jp(`middle_01_${side}`), jp(`hand_${side}`)));
+      // palm faces the thigh at rest (medial): pick the knuckle-axis sign that curls the tips that way
+      let palm = nrm(cross(along, knuckles));
+      const medial = side === 'l' ? -1 : 1;
+      if (palm[0] * medial < 0) palm = palm.map((x) => -x);
+      // rotating `along` about +knuckles by +θ moves it along cross(knuckles, along)
+      const dirOfPositive = cross(knuckles, along);
+      const sign = dirOfPositive[0] * palm[0] + dirOfPositive[1] * palm[1] + dirOfPositive[2] * palm[2] > 0 ? 1 : -1;
+      for (const f of ['index', 'middle', 'ring', 'pinky']) for (const k of [1, 2, 3]) {
+        const n = `${f}_0${k}_${side}`; const e = shape[n]; if (!e) continue;
+        put(JI[n], knuckles, sign * Math.abs(e[2]));
+      }
+      // thumb: curls across the palm about the finger direction axis
+      for (const k of [1, 2, 3]) { const n = `thumb_0${k}_${side}`; const e = shape[n]; if (!e) continue; put(JI[n], along, (side === 'l' ? 1 : -1) * (Math.abs(e[1]) + Math.abs(e[2]))); }
+    }
+  }
   /** Lean (radians) applied by the procedural layer, exposed for IK/debug. */
   lean = { pitch: 0, roll: 0 };
   /** Contact state per foot (true = planted) for foot locking. */
@@ -70,7 +109,9 @@ export class Animator {
     this.idleClip = p.heat > 0.7 && p.age > 30 ? this.c.idle_heat : this.c.idle_relaxed;
     clearAcc(this.neutral); this.lib.accumulate(this.c.idle_relaxed, 0, 1, this.neutral); normalizePose(this.neutral);
     this.time = Math.random() * 10;
+    this.buildHandPose();
   }
+  setRestJoints(j: Float32Array) { this.restJoints = j; this.buildHandPose(); }
 
   setIdle(name: string) { const i = this.lib.byName.get(name); if (i !== undefined) this.idleClip = i; }
 
@@ -202,6 +243,12 @@ export class Animator {
     }
     this.actions = this.actions.filter((a) => !(a.done && a.w < 0.01));
 
+    // --- hands: the stock clips clench fists; hold relaxed or gripping hands instead, except
+    // where an action shapes the hand itself (hailing, waving off, arguing, talking)
+    const handFree = this.actions.some((a) => a.w > 0.05 && /hail|wave|argue|talk|throw|punch/i.test(a.name));
+    const hw = handFree ? 0 : 0.9;
+    if (hw > 0) blendInto(out, this.handPose, hw, FINGER_MASK);
+
     // --- posture additives ----------------------------------------------------------------------
     const breathe = Math.sin(this.time * 1.7) * 0.012;
     const slump = this.p.slump * 0.12 + this.p.heat * 0.05;
@@ -215,6 +262,8 @@ export class Animator {
     rotLocal(out, JI.spine_03, breathe + slump * 0.3, 0, 0);
     rotLocal(out, JI.neck_01, slump * 0.4 - this.lean.pitch * 0.4, 0, -this.lean.roll * 0.3);
     rotLocal(out, JI.clavicle_l, breathe * 0.5, 0, -slump * 0.1); rotLocal(out, JI.clavicle_r, breathe * 0.5, 0, slump * 0.1);
+    const g = this.p.girth ?? 0;
+    if (g) { rotLocal(out, JI.upperarm_l, 0, 0, g); rotLocal(out, JI.upperarm_r, 0, 0, -g); }
   }
 
   /** UAL clips: pelvis absolute (scaled to this body); authored: relative to rest. */

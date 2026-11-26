@@ -209,9 +209,11 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
   const paper: MatData = { cA: lin('#cfc8b4'), cB: lin('#3a3632'), m0: [0, 0.01, 0.9, 0], m1: [KIND.paper, 0.2, 0.2, 0] };
   const leather = (hex: string): MatData => ({ cA: lin(hex), cB: lin(hex), m0: [0, 0, 0.45, 0.3], m1: [KIND.leather, 0.1, 0.2, 0] });
   switch (id) {
-    case 'newspaper': { // folded, held in the left hand
-      const f = handFrame('l');
-      box(mb, [f.c[0] + f.palm[0] * 0.02, f.c[1] + f.palm[1] * 0.02, f.c[2] + f.palm[2] * 0.02], f.along, f.across, f.palm, 0.15, 0.06, 0.008, paper, f.joint);
+    case 'newspaper': { // folded and tucked under the left arm, pressed to the ribs
+      const sh = jp('upperarm_l'), el = jp('lowerarm_l');
+      const down = nrm(sub(el, sh));
+      const c: V3 = [sh[0] + down[0] * 0.13 - 0.035, sh[1] + down[1] * 0.13, sh[2] + down[2] * 0.13 + 0.01];
+      box(mb, c, [0, 0, 1], down, [1, 0, 0], 0.15, 0.05, 0.007, paper, JI.upperarm_l);
       break;
     }
     case 'briefcase': {
@@ -220,11 +222,17 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
       box(mb, [f.c[0], f.c[1] - 0.17, f.c[2]], [0, 0, 1], down, [1, 0, 0], 0.21, 0.15, 0.05, leather('#3a2418'), f.joint);
       break;
     }
-    case 'handbag': case 'shoulderBag': case 'tote': {
+    case 'shoulderBag': { // strap across the body, bag at the left hip
+      const h = jp('thigh_l');
+      box(mb, [h[0] + 0.07, h[1] + 0.06, h[2] + 0.02], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.12, 0.09, 0.04, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), JI.pelvis);
+      break;
+    }
+    case 'handbag': case 'tote': { // held by its handle in the left hand
       const f = handFrame('l');
       const big = id === 'tote';
-      const y = id === 'shoulderBag' ? -0.05 : -0.12;
-      box(mb, [f.c[0] + 0.02, f.c[1] + y, f.c[2]], [0, 0, 1], [0, 1, 0], [1, 0, 0], big ? 0.16 : 0.12, big ? 0.14 : 0.09, 0.045, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), f.joint);
+      const hh = big ? 0.14 : 0.09;
+      box(mb, [f.c[0] + f.palm[0] * 0.03, f.c[1] - hh - 0.05, f.c[2] + f.palm[2] * 0.03], [0, 0, 1], [0, 1, 0], [1, 0, 0], big ? 0.16 : 0.12, hh, 0.045, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), f.joint);
+      box(mb, [f.c[0] + f.palm[0] * 0.03, f.c[1] - 0.025, f.c[2] + f.palm[2] * 0.03], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.05, 0.03, 0.006, leather('#2a1e16'), f.joint);
       break;
     }
     case 'shoppingBag': case 'paperBag': {

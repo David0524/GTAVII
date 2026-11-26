@@ -21,7 +21,7 @@ import type { GeoArrays } from '../build/MeshBuilder';
 import { crowdJoint } from '../rig';
 import { bakeTemplate, CROWD_INDEX, NB, CROWD_SET, type BakeClip } from './bake';
 import { crowdMaterial, ATLAS_ROWS } from './crowdMaterial';
-import { Character, type GroundFn } from '../Character';
+import { Character, armGirth, type GroundFn } from '../Character';
 import { hash2 } from '../util/rng';
 import type { ArchetypeRegistry } from '../archetypes';
 
@@ -134,7 +134,7 @@ export class CrowdRenderer {
     const shape = this.body.evaluate({ ...appearance.body, stature: appearance.stature });
     const lod2 = assemble(this.body, shape, appearance, outfit, 2);
     const lod3 = assemble(this.body, shape, appearance, outfit, 3);
-    const baked = bakeTemplate(this.lib, lod2.joints, { stride: appearance.gait.stride, swing: appearance.gait.swing, bounce: appearance.gait.bounce, slump: appearance.slump, age: appearance.age, heat: 0.6, formal: !!outfit.tie });
+    const baked = bakeTemplate(this.lib, lod2.joints, { stride: appearance.gait.stride, swing: appearance.gait.swing, bounce: appearance.gait.bounce, slump: appearance.slump, age: appearance.age, heat: 0.6, formal: !!outfit.tie, girth: armGirth(appearance) });
     const frameBase = this.atlasFrames;
     this.writeAtlas(baked.data, frameBase, baked.frames);
     this.atlasFrames += baked.frames;

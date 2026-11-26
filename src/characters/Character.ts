@@ -69,8 +69,10 @@ export class Character {
     this.object.name = `character:${desc.hero ?? desc.archetype ?? 'ped'}:${desc.seed}`;
     this.build(opts.prebuilt);
     const formal = !!this.outfit.outer && (this.outfit.outer.kind === 'suitJacket' || this.outfit.outer.kind === 'sportCoat') || !!this.outfit.tie;
-    this.animator = new Animator(lib, this.restPelvis, { stride: this.appearance.gait.stride, swing: this.appearance.gait.swing, bounce: this.appearance.gait.bounce, slump: this.appearance.slump, age: this.appearance.age, heat: opts.heat ?? 0.6, formal });
+    this.animator = new Animator(lib, this.restPelvis, { stride: this.appearance.gait.stride, swing: this.appearance.gait.swing, bounce: this.appearance.gait.bounce, slump: this.appearance.slump, age: this.appearance.age, heat: opts.heat ?? 0.6, formal, girth: armGirth(this.appearance) });
     // idle_pockets / idle_hands_behind need a hand-placement pass before they're used by default
+    this.animator.setRestJoints(this.asm.joints);
+    this.applyHands();
   }
 
   private build(prebuilt?: Assembled) {
@@ -94,6 +96,14 @@ export class Character {
     this.stats.buildMs = performance.now() - t0;
   }
 
+  /** Hands follow the props: handles are gripped, a cigarette is pinched, otherwise relaxed. */
+  private applyHands() {
+    const p = this.outfit.props;
+    const l = p.some((x) => x === 'handbag' || x === 'tote') ? 'grip' : 'relaxed';
+    const r = p.includes('cigarette') ? 'pinch' : p.some((x) => ['briefcase', 'shoppingBag', 'paperBag', 'umbrella'].includes(x)) ? 'grip' : 'relaxed';
+    this.animator?.setHands(l, r);
+  }
+
   /** Engine controller input. heading: yaw about +Y (radians); the rest pose faces +Z. */
   setLocomotion(s: LocoInput) { this.loco = s; }
   play(action: string, opts?: { loop?: boolean; blendIn?: number }): Promise<void> { return this.animator.play(action, opts); }
@@ -110,6 +120,7 @@ export class Character {
     const gen = this.wardrobeSets?.[set];
     this.outfit = gen ? gen(this.desc.seed) : generateOutfit(this.desc.seed ^ (set.length * 0x9e3779b9), { sex: this.appearance.sex, age: this.appearance.age, archetype: this.desc.archetype, ...this.outfitCtx });
     this.build();
+    this.applyHands();
   }
   on(type: 'footstep' | 'contact' | 'hail', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
   private emit(type: string, e: any) { for (const cb of this.listeners[type] ?? []) cb(e); }
@@ -224,4 +235,10 @@ export class Character {
     this.listeners = {};
     void _m4;
   }
+}
+
+/** Arm abduction for wide hips / heavy bodies (radians, +Z lifts the left arm away from the body). */
+export function armGirth(a: Appearance): number {
+  const m = a.body.macro;
+  return Math.max(0, (m.weight - 0.45) * 0.35 + (1 - m.sex) * 0.05 + (m.muscle - 0.5) * 0.12);
 }
