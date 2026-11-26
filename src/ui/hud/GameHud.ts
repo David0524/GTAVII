@@ -43,6 +43,12 @@ export class GameHud {
   private idleT = 0;
   private lastPos = { x: NaN, z: NaN };
   private t = 0;
+  private lastCash = NaN;
+  private pollT = 0; private dirtyPoll = true;
+  private inv: ReturnType<UiHost['inventory']> | null = null;
+  private hp: ReturnType<UiHost['health']> | null = null;
+  private locT = 0;
+  private loc = { district: '', crossing: '' };
   visible = true;
   readonly cost = { frame: 0 };
 
@@ -67,11 +73,12 @@ export class GameHud {
     this.notes = this.q('.u-notes'); this.sub = this.q('.u-sub');
     document.body.appendChild(this.el);
 
-    host.on('money', (e) => { if (e.lead === host.player().lead) this.cashDelta(e.delta); });
+    host.on('money', (e) => { this.dirtyPoll = true; if (e.lead === host.player().lead) this.cashDelta(e.delta); });
+    host.on('lead', () => { this.dirtyPoll = true; });
     host.on('subtitle', (e) => this.subtitle(e.speaker, e.text, e.channel, e.seconds));
     host.on('notify', (e) => this.note(e.kind === 'help' ? 'NOTE' : '', esc(e.text)));
-    host.on('inventory', () => this.ping('weapon', 6));
-    host.on('damage', () => this.ping('injuries', 8));
+    host.on('inventory', () => { this.dirtyPoll = true; this.ping('weapon', 6); });
+    host.on('damage', () => { this.dirtyPoll = true; this.ping('injuries', 8); });
     host.on('heat', (e) => { if (e.radio) this.radio(e.radio); });
     host.on('achievement', (e) => { const a = host.achievements().find((x) => x.id === e.id); if (a) this.note('ACHIEVEMENT', `<i>${esc(a.name)}</i> · ${esc(a.text)}`, 6); });
     host.on('discover', (e) => { model.discovery.reveal(e.placeId, e.via); });
@@ -118,61 +125,10 @@ export class GameHud {
     if (heat.phase !== 'none') this.ping('minimap', 3);
     if (this.radioT > 0 && (this.radioT -= dt) <= 0) this.show('.u-radio', false);
 
-    // objective
-    this.objective(obj, p.x, p.z);
-    // clock (dynamic: when standing still, when the hour turns, or when the objective is time-gated)
-    const c = h.clock(), hr = Math.floor(c.minutes / 60), mn = c.minutes % 60;
-    const timeStr = uiSettings.get('clock24') ? `${String(hr).padStart(2, '0')}:${String(mn).padStart(2, '0')}` : `${((hr + 11) % 12) + 1}:${String(mn).padStart(2, '0')} <span style="font-size:.55em">${hr < 12 ? 'AM' : 'PM'}</span>`;
-    if (this.last.hour !== String(hr)) { this.last.hour = String(hr); this.ping('clock', 6); }
-    const d = new Date(`${c.date}T12:00:00Z`);
-    this.set('.u-clockel .time', timeStr);
-    this.set('.u-clockel .date', `${DAYS[d.getUTCDay()]} · ${MON[d.getUTCMonth()]} ${d.getUTCDate()}${c.tempF ? ` · ${c.tempF}°` : ''}`);
-    this.show('.u-clockel', this.vis('clock', 'hudClock', this.idleT > 4 || /\d{1,2}(:\d\d)? ?(a\.?m|p\.?m)/i.test(obj?.text ?? '')));
-
-    // cash
-    const inv = h.inventory();
-    this.set('.u-cash .amt', `${money(inv.cash).replace(/\.(\d\d)$/, '<i>$1</i>')}`);
-    this.show('.u-cash', this.vis('cash', 'hudCash', this.idleT > 4));
-
-    // weapon + concealment
-    const w = inv.items.find((i) => i.equipped && i.kind === 'weapon');
-    if (w) {
-      const loaded = w.ammo?.loaded ?? 0, cap = Math.max(loaded, /derringer/i.test(w.name) ? 2 : /double|sawn/i.test(w.name) ? 2 : /auto/i.test(w.name) ? 7 : /snub/i.test(w.name) ? 5 : 6);
-      this.set('.u-weapon .nm', esc(w.name.replace(/\s*".*?"/, '')));
-      this.set('.u-weapon .rounds', Array.from({ length: cap }, (_, i) => `<b class="${i < loaded ? '' : 'spent'}"></b>`).join(''));
-      this.set('.u-weapon .spare', w.ammo ? `${w.ammo.spare} spare` : '');
-      const cs = this.q('.u-conceal'); const lbl = { hidden: 'Hidden', printing: 'Printing', visible: 'In plain sight' }[w.state];
-      if (cs.textContent !== lbl) { cs.textContent = lbl; cs.className = `u-conceal ${w.state}`; }
-    }
-    this.show('.u-weapon', !!w && (this.vis('weapon', 'hudWeapon', heat.phase !== 'none') || (this.mode('hudWeapon') !== 'off' && w.state !== 'hidden')));
-
-    // health: vignette + injuries; heat exhaustion glow
-    const hp = h.health();
-    const hurt = Math.max(0, 1 - hp.hp / (hp.max * 0.6));
-    const breathe = hurt > 0 && !uiSettings.get('reduceFlashing') ? 0.85 + 0.15 * Math.sin(this.t * (2 + hurt * 4)) : 1;
-    this.css('.u-hurt', 'opacity', (hurt * breathe).toFixed(2));
-    this.css('.u-heat', 'opacity', Math.max(0, hp.heatExhaustion - 0.2).toFixed(2));
-    this.set('.u-injuries', hp.injuries.map((i) => `<span class="${i.bandaged ? '' : 'raw'}">${esc(i.region)} · ${i.bandaged ? 'bandaged' : i.kind}</span>`).join(''));
-    this.show('.u-injuries', hp.injuries.length > 0 && this.vis('injuries', 'hudInjuries', hp.hp < 60));
-    // stamina
-    const st = hp.stamina / hp.staminaMax;
-    this.css('.u-stamina i', 'width', `${(st * 100).toFixed(0)}%`);
-    if (this.q('.u-stamina').classList.contains('low') !== st < 0.25) this.q('.u-stamina').classList.toggle('low', st < 0.25);
-    this.show('.u-stamina', this.mode('hudStamina') === 'on' || (this.mode('hudStamina') === 'dynamic' && st < 0.98));
-
-    // location reveal on district change
-    if (this.mode('hudLocation') !== 'off') {
-      const loc = h.location();
-      if (loc.district && loc.district !== this.last.district) {
-        this.last.district = loc.district;
-        this.q('.u-loc .name').textContent = loc.district; this.q('.u-loc .street').textContent = loc.crossing;
-        this.q('.u-loc').classList.add('show'); this.shown.set('loc', 5);
-      }
-      if ((this.shown.get('loc') ?? 0) <= 0) this.q('.u-loc').classList.remove('show');
-    }
-
-    // pencilled route: next turn
-    this.turnCallout(p.x, p.z, p.inVehicle);
+    // DOM elements (clock, cash, weapon, health, location, route call-outs) update at 30 Hz; the
+    // minimap below stays at full rate so the map never judders against the camera.
+    this.slowDt += dt;
+    if ((++this.frameN & 1) === 0) { this.slowUpdate(this.slowDt, h, p, heat, obj, moved); this.slowDt = 0; }
 
     // minimap
     const mmOn = this.vis('minimap', 'hudMinimap', !!this.model.waypoint);
@@ -189,6 +145,69 @@ export class GameHud {
     this.css('.u-prompts', 'opacity', pm === 'on' || (pm === 'dynamic' && this.idleT > 3) ? '1' : '0');
     const ms = performance.now() - t0;
     this.cost.frame = this.cost.frame ? this.cost.frame * 0.95 + ms * 0.05 : ms;
+  }
+
+  private frameN = 0; private slowDt = 0;
+  private slowUpdate(dt: number, h: UiHost, p: ReturnType<UiHost['player']>, heat: HeatView, obj: ObjectiveView | null, moved: boolean) {
+    void moved; void heat;
+    // objective
+    this.objective(obj, p.x, p.z);
+    // clock (dynamic: when standing still, when the hour turns, or when the objective is time-gated)
+    const c = h.clock(), hr = Math.floor(c.minutes / 60), mn = c.minutes % 60;
+    const timeStr = uiSettings.get('clock24') ? `${String(hr).padStart(2, '0')}:${String(mn).padStart(2, '0')}` : `${((hr + 11) % 12) + 1}:${String(mn).padStart(2, '0')} <span style="font-size:.55em">${hr < 12 ? 'AM' : 'PM'}</span>`;
+    if (this.last.hour !== String(hr)) { this.last.hour = String(hr); this.ping('clock', 6); }
+    const d = new Date(`${c.date}T12:00:00Z`);
+    this.set('.u-clockel .time', timeStr);
+    this.set('.u-clockel .date', `${DAYS[d.getUTCDay()]} · ${MON[d.getUTCMonth()]} ${d.getUTCDate()}${c.tempF ? ` · ${c.tempF}°` : ''}`);
+    this.show('.u-clockel', this.vis('clock', 'hudClock', this.idleT > 4 || /\d{1,2}(:\d\d)? ?(a\.?m|p\.?m)/i.test(obj?.text ?? '')));
+
+    // cash
+    if ((this.pollT -= dt) <= 0 || this.dirtyPoll) { this.pollT = 0.25; this.dirtyPoll = false; this.inv = h.inventory(); this.hp = h.health(); }
+    const inv = this.inv!;
+    if (inv.cash !== this.lastCash) { this.lastCash = inv.cash; this.set('.u-cash .amt', `${money(inv.cash).replace(/\.(\d\d)$/, '<i>$1</i>')}`); }
+    this.show('.u-cash', this.vis('cash', 'hudCash', this.idleT > 4));
+
+    // weapon + concealment
+    const w = inv.items.find((i) => i.equipped && i.kind === 'weapon');
+    if (w) {
+      const loaded = w.ammo?.loaded ?? 0, cap = Math.max(loaded, /derringer/i.test(w.name) ? 2 : /double|sawn/i.test(w.name) ? 2 : /auto/i.test(w.name) ? 7 : /snub/i.test(w.name) ? 5 : 6);
+      this.set('.u-weapon .nm', esc(w.name.replace(/\s*".*?"/, '')));
+      this.set('.u-weapon .rounds', Array.from({ length: cap }, (_, i) => `<b class="${i < loaded ? '' : 'spent'}"></b>`).join(''));
+      this.set('.u-weapon .spare', w.ammo ? `${w.ammo.spare} spare` : '');
+      const cs = this.q('.u-conceal'); const lbl = { hidden: 'Hidden', printing: 'Printing', visible: 'In plain sight' }[w.state];
+      if (cs.textContent !== lbl) { cs.textContent = lbl; cs.className = `u-conceal ${w.state}`; }
+    }
+    this.show('.u-weapon', !!w && (this.vis('weapon', 'hudWeapon', heat.phase !== 'none') || (this.mode('hudWeapon') !== 'off' && w.state !== 'hidden')));
+
+    // health: vignette + injuries; heat exhaustion glow
+    const hp = this.hp!;
+    const hurt = Math.max(0, 1 - hp.hp / (hp.max * 0.6));
+    const breathe = hurt > 0 && !uiSettings.get('reduceFlashing') ? 0.85 + 0.15 * Math.sin(this.t * (2 + hurt * 4)) : 1;
+    this.css('.u-hurt', 'opacity', (hurt * breathe).toFixed(2));
+    this.css('.u-heat', 'opacity', Math.max(0, hp.heatExhaustion - 0.2).toFixed(2));
+    this.set('.u-injuries', hp.injuries.map((i) => `<span class="${i.bandaged ? '' : 'raw'}">${esc(i.region)} · ${i.bandaged ? 'bandaged' : i.kind}</span>`).join(''));
+    this.show('.u-injuries', hp.injuries.length > 0 && this.vis('injuries', 'hudInjuries', hp.hp < 60));
+    // stamina
+    const st = hp.stamina / hp.staminaMax;
+    this.css('.u-stamina i', 'width', `${(st * 100).toFixed(0)}%`);
+    if (this.q('.u-stamina').classList.contains('low') !== st < 0.25) this.q('.u-stamina').classList.toggle('low', st < 0.25);
+    this.show('.u-stamina', this.mode('hudStamina') === 'on' || (this.mode('hudStamina') === 'dynamic' && st < 0.98));
+
+    // location reveal on district change
+    if (this.mode('hudLocation') !== 'off') {
+      if ((this.locT -= dt) <= 0) { this.locT = 0.5; this.loc = h.location(); }
+      const loc = this.loc;
+      if (loc.district && loc.district !== this.last.district) {
+        this.last.district = loc.district;
+        this.q('.u-loc .name').textContent = loc.district; this.q('.u-loc .street').textContent = loc.crossing;
+        this.q('.u-loc').classList.add('show'); this.shown.set('loc', 5);
+      }
+      if ((this.shown.get('loc') ?? 0) <= 0) this.q('.u-loc').classList.remove('show');
+    }
+
+    // pencilled route: next turn
+    this.turnCallout(p.x, p.z, p.inVehicle);
+
   }
 
   private objective(o: ObjectiveView | null, x: number, z: number) {

@@ -3,18 +3,20 @@
  *  - Base: paper, inked streets and 1974 one-way ticks, rendered lazily into 256 m tiles at the
  *    card's device resolution (LRU), so it is crisp on phones and costs a few drawImage calls a frame.
  *    The paper ends in a deckled edge at the playable boundary; beyond it is the table top.
- *  - Overlays each frame: pencilled route, police search cones and the search area (heat shown only
- *    here and through the radio: no stars), discovered places as period pictograms (kept upright,
- *    "new" ones circled in pencil), the waypoint cross, the objective marker (pinned to the rim when
- *    off-card), and the player arrow.
- * Budget: HUD + minimap <= 0.5 ms CPU per frame on mobile Low (measured in the lab, see UI_PROGRESS).
+ *  - World layer (same transform as the base): pencilled route, waypoint cross, police search cones
+ *    and the search area (heat shown only here and through the radio: no stars). Redrawn only when
+ *    its content changes (at most 10 Hz during a pursuit).
+ *  - Screen layer as DOM: discovered places as upright period pictograms ("new" ones ringed in red
+ *    pencil), the objective star pinned to the rim when off-card, the N tick and the player arrow.
+ * Per frame the main thread writes a few CSS transforms and rasterises nothing; the compositor rotates
+ * the layers. Budget: HUD + minimap <= 0.5 ms CPU per frame on mobile Low (UI_PROGRESS has the numbers).
  */
 import { PLAYABLE } from '../../shared/bounds';
 import type { StreetRec } from './grid';
 import type { MapModel } from './MapModel';
 import type { HeatView, ObjectiveView } from '../host/types';
 import { pictogram } from './pictograms';
-import { PAPER, INK, TABLE, deckledRect, paperGrain, pencilLine, pencilRing, pencilCross, hash } from './ink';
+import { PAPER, INK, TABLE, deckledRect, paperGrain, pencilLine, pencilCross } from './ink';
 
 const TILE_M = 256;
 const MARGIN = 60; // printed margin beyond the playable edge
@@ -23,8 +25,16 @@ export interface MiniMapFrame { x: number; z: number; yaw: number; speed: number
 
 export class MiniMap {
   readonly el = document.createElement('div');
+  /** World overlay layer (route, waypoint, cones), aligned with the base window. */
   readonly canvas = document.createElement('canvas');
   private g: CanvasRenderingContext2D;
+  private screen = document.createElement('div');
+  private icons = new Map<string, HTMLElement>();
+  private player = document.createElement('div');
+  private north = document.createElement('div');
+  private star = document.createElement('div');
+  private overlayKey = '';
+  private overlayT = 0;
   private w = 0; private h = 0; private dpr = 1;
   private tiles = new Map<string, HTMLCanvasElement>();
   private tileOrder: string[] = [];
@@ -39,16 +49,20 @@ export class MiniMap {
   /** 3x3-tile composite around the player; rebuilt only when the centre tile or scale changes. */
   private win = document.createElement('canvas');
   private winKey = '';
-  private lastKey = '';
-  private sinceDraw = 1;
   private ro: ResizeObserver;
 
   constructor(private model: MapModel, private streets: StreetRec[]) {
     this.el.className = 't74-minimap';
-    this.el.appendChild(this.canvas);
+    this.win.className = 't74-mm-base'; this.canvas.className = 't74-mm-base';
+    this.screen.className = 't74-mm-screen';
+    this.player.className = 't74-mm-player'; this.player.innerHTML = '<svg viewBox="-9 -10 18 20"><path d="M0-8L6 7 0 3.5-6 7z" fill="#b2302a" stroke="#fff6e0" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    this.north.className = 't74-mm-n'; this.north.textContent = 'N';
+    this.star.className = 't74-mm-star'; this.star.innerHTML = '<b></b><i></i>';
+    this.screen.append(this.star, this.player, this.north);
+    this.el.append(this.win, this.canvas, this.screen);
     this.g = this.canvas.getContext('2d')!;
     this.ro = new ResizeObserver((e) => { const r = e[0].contentRect; this.measured = { w: r.width, h: r.height }; });
-    this.ro.observe(this.canvas);
+    this.ro.observe(this.el);
     this.bboxes = new Float32Array(streets.length * 4);
     streets.forEach((s, i) => {
       let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
@@ -64,7 +78,6 @@ export class MiniMap {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     if (r.width === this.w && r.height === this.h && dpr === this.dpr) return;
     this.w = r.width; this.h = r.height; this.dpr = dpr;
-    this.canvas.width = Math.round(r.width * dpr); this.canvas.height = Math.round(r.height * dpr);
     this.pxPerM = 0; // invalidate tiles
   }
 
@@ -119,116 +132,126 @@ export class MiniMap {
     g.fillStyle = g.createPattern(paperGrain(), 'repeat')!; g.fillRect(0, 0, c.width, c.height);
     g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
     this.tiles.set(key, c); this.tileOrder.push(key);
-    if (this.tileOrder.length > 24) this.tiles.delete(this.tileOrder.shift()!);
+    if (this.tileOrder.length > 40) this.tiles.delete(this.tileOrder.shift()!);
     this.cost.tiles = performance.now() - t0;
     return c;
   }
 
-  /** Draw a frame. Returns ids of "new" places currently on the card (the HUD marks them seen after a while). */
+  /** Draw a frame: positions layers; rasterises only when content changed. */
   draw(f: MiniMapFrame, dt: number) {
     const t0 = performance.now();
     this.fit();
     if (!this.w) return;
-    // Redraw only when something visible changed, and at most ~30 Hz while it changes slowly.
-    this.sinceDraw += dt;
-    const m0 = this.model, animating = f.heat.phase !== 'none' || m0.discovery.counts.fresh > 0;
-    const key = `${f.x.toFixed(1)}|${f.z.toFixed(1)}|${f.yaw.toFixed(3)}|${this.rangeM.toFixed(1)}|${m0.version}|${f.objective?.target?.x ?? ''}`;
-    if ((key === this.lastKey && !animating) || this.sinceDraw < 1 / 32) { this.cost.skipped++; return; }
-    this.lastKey = key; this.sinceDraw = 0; this.cost.drawn++;
-    // zoom out with speed (driving) and when a pursuit is on
     this.zoomTarget = f.inVehicle ? 230 + Math.min(120, f.speed * 4) : f.heat.phase === 'pursuit' ? 190 : 140;
     this.rangeM += (this.zoomTarget - this.rangeM) * Math.min(1, dt * 1.5);
     this.ensureScale();
-    const g = this.g, W = this.w * this.dpr, H = this.h * this.dpr, s = this.pxPerM, cx = W / 2, cy = H * 0.58;
-    const scale = (H / 2 / this.rangeM) / s; // tile px -> canvas px
-    const cos = Math.cos(f.yaw), sin = Math.sin(f.yaw), k = (H / 2) / this.rangeM; // world m -> canvas px
+    const W = this.w, H = this.h, dpr = this.dpr, s = this.pxPerM, cx = W / 2, cy = H * 0.58;
+    const k = (H / 2) / this.rangeM; // world m -> CSS px
+    const cos = Math.cos(f.yaw), sin = Math.sin(f.yaw);
     const toScreen = (x: number, z: number): [number, number] => { const dx = (x - f.x) * k, dz = (z - f.z) * k; return [cx + dx * cos - dz * sin, cy + dx * sin + dz * cos]; };
 
-    g.setTransform(1, 0, 0, 1, 0, 0);
-    g.fillStyle = TABLE; g.fillRect(0, 0, W, H);
-    // base: one rotated blit of the 3x3-tile window around the player
-    const ci = Math.floor(f.x / TILE_M), cj = Math.floor(f.z / TILE_M), wk = `${ci},${cj},${this.tilePx}`;
+    // ---- base window (3x3 tiles) and the world overlay share one transform
+    const ci = Math.floor(f.x / TILE_M), cj = Math.floor(f.z / TILE_M), tp = this.tilePx, wk = `${ci},${cj},${tp}`;
     if (wk !== this.winKey) {
-      this.winKey = wk; const tp = this.tilePx;
-      if (this.win.width !== tp * 3) { this.win.width = this.win.height = tp * 3; }
+      this.winKey = wk; this.overlayKey = '';
+      if (this.win.width !== tp * 3) { this.win.width = this.win.height = tp * 3; this.canvas.width = this.canvas.height = tp * 3; }
       const wg = this.win.getContext('2d')!;
       for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) wg.drawImage(this.tile(ci + i, cj + j), (i + 1) * tp, (j + 1) * tp);
     }
-    g.save(); g.translate(cx, cy); g.rotate(f.yaw); g.scale(scale, scale);
-    g.drawImage(this.win, ((ci - 1) * TILE_M - f.x) * s, ((cj - 1) * TILE_M - f.z) * s);
-    g.restore();
+    this.prefetch(ci, cj);
+    const ox0 = (ci - 1) * TILE_M, oz0 = (cj - 1) * TILE_M, scale = k / s;
+    const tf = `translate(${cx.toFixed(2)}px,${cy.toFixed(2)}px) rotate(${f.yaw.toFixed(4)}rad) scale(${scale.toFixed(5)}) translate(${((ox0 - f.x) * s).toFixed(2)}px,${((oz0 - f.z) * s).toFixed(2)}px)`;
+    this.win.style.transform = tf; this.canvas.style.transform = tf;
 
-    // police: search area and cones (pencil hatching in red)
-    const heat = f.heat;
-    if (heat.searchArea) {
-      const [sx, sy] = toScreen(heat.searchArea.x, heat.searchArea.z), r = heat.searchArea.r * k;
-      g.save(); g.setLineDash([5 * this.dpr, 5 * this.dpr]); g.strokeStyle = 'rgba(158,42,36,.7)'; g.lineWidth = 1.6 * this.dpr;
-      g.beginPath(); g.arc(sx, sy, r, 0, Math.PI * 2); g.stroke(); g.fillStyle = 'rgba(158,42,36,.07)'; g.fill(); g.restore();
-    }
-    for (const c of heat.cones) {
-      const [sx, sy] = toScreen(c.x, c.z), r = c.r * k, a = c.dir + f.yaw;
-      const pulse = c.seeing ? 0.28 + 0.1 * Math.sin(f.t * 8) : 0.14;
-      const grd = g.createRadialGradient(sx, sy, 0, sx, sy, r); grd.addColorStop(0, `rgba(178,48,42,${pulse + 0.15})`); grd.addColorStop(1, 'rgba(178,48,42,0)');
-      g.fillStyle = grd; g.beginPath(); g.moveTo(sx, sy); g.arc(sx, sy, r, a - c.spread, a + c.spread); g.closePath(); g.fill();
-    }
-    for (const u of heat.units) {
-      const [sx, sy] = toScreen(u.x, u.z);
-      g.fillStyle = u.seeing ? '#b2302a' : '#5a2330'; g.strokeStyle = '#efe3c4'; g.lineWidth = 1.2 * this.dpr;
-      g.beginPath(); if (u.kind === 'car') g.rect(sx - 3.5 * this.dpr, sy - 2.2 * this.dpr, 7 * this.dpr, 4.4 * this.dpr); else g.arc(sx, sy, 2.8 * this.dpr, 0, Math.PI * 2); g.fill(); g.stroke();
+    // ---- world overlay: redraw on change (route, waypoint, heat), heat at most 10 Hz
+    const m = this.model, heat = f.heat;
+    const heatKey = heat.phase === 'none' ? '' : `${heat.phase}|${heat.cones.map((c) => `${c.x | 0},${c.z | 0},${c.dir.toFixed(1)},${+c.seeing}`).join(';')}|${heat.units.map((u) => `${u.x | 0},${u.z | 0}`).join(';')}|${heat.searchArea?.r ?? ''}`;
+    const okey = `${wk}|${m.version}|${heatKey}|${(s / k).toFixed(1)}`;
+    this.overlayT -= dt;
+    if (okey !== this.overlayKey && (this.overlayT <= 0 || !heatKey)) {
+      this.overlayKey = okey; this.overlayT = 0.1; this.drawWorldOverlay(ox0, oz0, heat, s / k);
     }
 
-    // pencilled route
-    const m = this.model;
-    if (m.route) {
-      const pts: number[] = [];
-      const rr2 = this.rangeM * 2;
-      for (let q = 0; q < m.route.pts.length; q += 2) {
-        const rx = m.route.pts[q], rz = m.route.pts[q + 1];
-        if (Math.abs(rx - f.x) > rr2 || Math.abs(rz - f.z) > rr2) { if (pts.length >= 4) break; continue; }
-        const p = toScreen(rx, rz); pts.push(p[0], p[1]);
-      }
-      pencilLine(this.g, pts, 2.4 * this.dpr, 3, 0.62);
-    }
-    if (m.waypoint) { const [wx, wy] = this.clampToCard(toScreen(m.waypoint.x, m.waypoint.z), W, H, 10 * this.dpr); pencilCross(g, wx, wy, 5 * this.dpr); }
-
-    // places (upright pictograms)
-    const ic = Math.round(15), seenNow: string[] = [];
-    const rr = this.rangeM * 1.5;
-    for (const p of m.discovery.known()) {
-      if (Math.abs(p.x - f.x) > rr || Math.abs(p.z - f.z) > rr || !m.visible(p)) continue;
+    // ---- screen layer (DOM): pictograms upright, "new" rings, star, N, player
+    const seenNow: string[] = [], rr = this.rangeM * 1.5, live = new Set<string>();
+    for (const p of m.knownNear(f.x, f.z, rr)) {
       const [sx, sy] = toScreen(p.x, p.z);
-      if (sx < -12 || sy < -12 || sx > W + 12 || sy > H + 12) continue;
-      const spr = pictogram(p.cat, ic, this.dpr);
-      g.drawImage(spr, sx - spr.width / 2, sy - spr.height / 2);
-      if (m.discovery.isNew(p.id)) {
-        pencilRing(g, sx, sy, (ic / 2 + 4 + Math.sin(f.t * 4) * 1.2) * this.dpr, hash(p.x) * 100, 'rgba(158,42,36,.9)', 1.6 * this.dpr);
-        const tt = (this.newSeenTimer.get(p.id) ?? 0) + dt; this.newSeenTimer.set(p.id, tt);
-        if (tt > 6) seenNow.push(p.id);
+      if (sx < -10 || sy < -10 || sx > W + 10 || sy > H + 10) continue;
+      live.add(p.id);
+      let e = this.icons.get(p.id);
+      if (!e) {
+        e = document.createElement('div'); e.className = 't74-mm-icon';
+        const spr = pictogram(p.cat, 15, dpr); const c = document.createElement('canvas'); c.width = spr.width; c.height = spr.height; c.getContext('2d')!.drawImage(spr, 0, 0);
+        c.style.width = `${spr.width / dpr}px`; e.appendChild(c); this.screen.insertBefore(e, this.star); this.icons.set(p.id, e);
       }
+      const isNew = m.discovery.isNew(p.id);
+      if (e.classList.contains('new') !== isNew) e.classList.toggle('new', isNew);
+      e.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px)`;
+      if (e.style.display) e.style.display = '';
+      if (isNew) { const tt = (this.newSeenTimer.get(p.id) ?? 0) + dt; this.newSeenTimer.set(p.id, tt); if (tt > 6) seenNow.push(p.id); }
     }
+    for (const [id, e] of this.icons) if (!live.has(id) && e.style.display !== 'none') e.style.display = 'none';
     if (seenNow.length) m.discovery.markSeen(seenNow);
 
-    // objective marker (story star), pinned to the rim when off-card
     if (f.objective?.target) {
-      const raw = toScreen(f.objective.target.x, f.objective.target.z);
-      const [ox, oy] = this.clampToCard(raw, W, H, 11 * this.dpr);
-      const spr = pictogram('mission', 17, this.dpr, 'disc', '#b2302a');
-      g.drawImage(spr, ox - spr.width / 2, oy - spr.height / 2);
-      if (raw[0] !== ox || raw[1] !== oy) { g.save(); g.translate(ox, oy); g.rotate(Math.atan2(raw[1] - oy, raw[0] - ox)); g.fillStyle = '#b2302a'; g.beginPath(); g.moveTo(13 * this.dpr, 0); g.lineTo(8 * this.dpr, -4 * this.dpr); g.lineTo(8 * this.dpr, 4 * this.dpr); g.fill(); g.restore(); }
+      const raw = toScreen(f.objective.target.x, f.objective.target.z), [sx, sy] = this.clampToCard(raw, W, H, 11);
+      const off = raw[0] !== sx || raw[1] !== sy;
+      this.star.style.display = '';
+      this.star.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px)`;
+      const arw = this.star.firstElementChild as HTMLElement; arw.style.display = off ? '' : 'none'; if (off) arw.style.transform = `rotate(${Math.atan2(raw[1] - sy, raw[0] - sx).toFixed(3)}rad)`;
+    } else if (this.star.style.display !== 'none') this.star.style.display = 'none';
+    const [nx, ny] = this.clampToCard(toScreen(f.x, f.z - 10000), W, H, 9);
+    this.north.style.transform = `translate(${nx.toFixed(1)}px,${ny.toFixed(1)}px)`;
+    this.player.style.transform = `translate(${cx}px,${cy}px)`;
+
+    const ms = performance.now() - t0;
+    this.cost.draw = this.cost.draw ? this.cost.draw * 0.95 + ms * 0.05 : ms; this.cost.drawn++;
+  }
+
+  private prefetching = false;
+  /** Render the 5x5 ring of tiles around the player in idle time, one tile per idle slice, so crossing
+   *  a tile boundary never renders vector streets inside a frame. */
+  private prefetch(ci: number, cj: number) {
+    if (this.prefetching) return;
+    const missing: [number, number][] = [];
+    for (let r = 1; r <= 2; r++) for (let i = -r; i <= r; i++) for (let j = -r; j <= r; j++) if (Math.max(Math.abs(i), Math.abs(j)) === r && !this.tiles.has(`${ci + i},${cj + j}`)) missing.push([ci + i, cj + j]);
+    if (!missing.length) return;
+    this.prefetching = true;
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 30));
+    const step = () => { const t = missing.shift(); if (t) this.tile(t[0], t[1]); if (missing.length) ric(step, { timeout: 500 }); else this.prefetching = false; };
+    ric(step, { timeout: 500 });
+  }
+
+  /** Route, waypoint and police marks in window pixel space (tile px), aligned with the base layer. */
+  private drawWorldOverlay(ox0: number, oz0: number, heat: HeatView, px: number) {
+    // px: tile pixels per CSS pixel on screen, so strokes keep their on-screen width at any zoom
+    const g = this.g, s = this.pxPerM, d = px;
+    const X = (x: number) => (x - ox0) * s, Z = (z: number) => (z - oz0) * s;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const m = this.model, lim = TILE_M * 3;
+    if (heat.searchArea) {
+      g.save(); g.setLineDash([5 * d, 5 * d]); g.strokeStyle = 'rgba(158,42,36,.75)'; g.lineWidth = 2.2 * d;
+      g.beginPath(); g.arc(X(heat.searchArea.x), Z(heat.searchArea.z), heat.searchArea.r * s, 0, Math.PI * 2); g.stroke(); g.fillStyle = 'rgba(158,42,36,.08)'; g.fill(); g.restore();
     }
-
-    // player
-    g.save(); g.translate(cx, cy); g.scale(this.dpr, this.dpr);
-    g.fillStyle = '#b2302a'; g.strokeStyle = '#fff6e0'; g.lineWidth = 1.6;
-    g.beginPath(); g.moveTo(0, -8); g.lineTo(6, 7); g.lineTo(0, 3.5); g.lineTo(-6, 7); g.closePath(); g.fill(); g.stroke();
-    g.restore();
-    // north tick on the bezel
-    const [px, py] = this.clampToCard(toScreen(f.x, f.z - 10000), W, H, 9 * this.dpr);
-    g.font = `700 ${10 * this.dpr}px Archivo, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = '#efe3c4'; g.strokeStyle = '#1c1311'; g.lineWidth = 3 * this.dpr; g.strokeText('N', px, py); g.fillText('N', px, py);
-
-    const dtMs = performance.now() - t0;
-    this.cost.draw = this.cost.draw ? this.cost.draw * 0.95 + dtMs * 0.05 : dtMs;
+    for (const c of heat.cones) {
+      const x = X(c.x), z = Z(c.z), r = c.r * s, a = c.dir;
+      const grd = g.createRadialGradient(x, z, 0, x, z, r); grd.addColorStop(0, `rgba(178,48,42,${c.seeing ? 0.55 : 0.3})`); grd.addColorStop(1, 'rgba(178,48,42,0)');
+      g.fillStyle = grd; g.beginPath(); g.moveTo(x, z); g.arc(x, z, r, a - c.spread, a + c.spread); g.closePath(); g.fill();
+    }
+    for (const u of heat.units) {
+      g.fillStyle = u.seeing ? '#b2302a' : '#5a2330'; g.strokeStyle = '#efe3c4'; g.lineWidth = 1.4 * d;
+      g.beginPath(); if (u.kind === 'car') g.rect(X(u.x) - 4 * d, Z(u.z) - 2.5 * d, 8 * d, 5 * d); else g.arc(X(u.x), Z(u.z), 3 * d, 0, Math.PI * 2); g.fill(); g.stroke();
+    }
+    if (m.route) {
+      const pts: number[] = [];
+      for (let q = 0; q < m.route.pts.length; q += 2) {
+        const x = m.route.pts[q] - ox0, z = m.route.pts[q + 1] - oz0;
+        if (x < -200 || z < -200 || x > lim + 200 || z > lim + 200) { if (pts.length >= 4) break; continue; }
+        pts.push(X(m.route.pts[q]), Z(m.route.pts[q + 1]));
+      }
+      pencilLine(g, pts, 2.8 * d, 3, 0.65);
+    }
+    if (m.waypoint) pencilCross(g, X(m.waypoint.x), Z(m.waypoint.z), 6 * d);
   }
 
   private clampToCard(p: [number, number], W: number, H: number, inset: number): [number, number] {

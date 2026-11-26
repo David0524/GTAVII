@@ -38,6 +38,23 @@ export class MapModel {
     return new MapModel(f.places, streets);
   }
 
+  private nearKey = -1;
+  private nearGrid = new Map<string, Place[]>();
+  /** Known, filter-visible places within r metres (cached 100 m grid, rebuilt when version changes). */
+  knownNear(x: number, z: number, r: number): Place[] {
+    const nk = this.version * 100000 + this.discovery.revision;
+    if (this.nearKey !== nk) {
+      this.nearKey = nk; this.nearGrid.clear();
+      for (const p of this.discovery.known()) {
+        if (!this.visible(p)) continue;
+        const k = `${Math.floor(p.x / 100)},${Math.floor(p.z / 100)}`; const a = this.nearGrid.get(k) ?? []; a.push(p); this.nearGrid.set(k, a);
+      }
+    }
+    const out: Place[] = [], n = Math.ceil(r / 100), cx = Math.floor(x / 100), cz = Math.floor(z / 100);
+    for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) for (const p of this.nearGrid.get(`${cx + i},${cz + j}`) ?? []) if (Math.abs(p.x - x) <= r && Math.abs(p.z - z) <= r) out.push(p);
+    return out;
+  }
+
   visible(p: Place) { return this.discovery.isKnown(p.id) && this.filters.has(CATEGORIES[p.cat].group); }
   toggleFilter(g: FilterGroup) {
     if (this.filters.has(g)) this.filters.delete(g); else this.filters.add(g);

@@ -27,6 +27,8 @@ export class Discovery {
   now = 0;
   /** Sight checks are skipped when the player moved less than this since the last check. */
   private last = { x: NaN, z: NaN };
+  /** Bumped on every membership change (reveal, quiet or not; load). */
+  revision = 0;
 
   constructor(places: Place[]) { for (const p of places) this.add(p); }
 
@@ -61,7 +63,7 @@ export class Discovery {
     if (!p || id in this.state) return false;
     if (via !== 'mission' && !p.reveal.includes(via)) return false;
     if (via === 'sight' && p.shady) return false;
-    this.state[id] = { at: this.now, via, seen: quiet };
+    this.state[id] = { at: this.now, via, seen: quiet }; this.revision++;
     if (!quiet) for (const l of this.listeners) l({ place: p, via });
     return true;
   }
@@ -91,6 +93,6 @@ export class Discovery {
     this.state = {};
     if (!s) return;
     for (const [id, e] of Object.entries(s)) if (e && typeof e.at === 'number') this.state[id] = { at: e.at, via: e.via, seen: !!e.seen };
-    this.last = { x: NaN, z: NaN };
+    this.last = { x: NaN, z: NaN }; this.revision++;
   }
 }
