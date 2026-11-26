@@ -179,6 +179,7 @@ Both are cheap to cache.
   See `docs/WEAPON_REGISTRY.md`.
 
 ## Next (milestone plan, including the oversight docs)
+- **Rapier import point (ENGINE_RESPONSES E13).** Once `src/shared/rapier.ts` lands on the engine branch, switch the only two gameplay Rapier imports to it: `scene/GameplayScene.ts` and `scene/RapierWorldQuery.ts`. Two wasm instances can't share a physics world. The headless core imports no Rapier.
 - **Swap the `?gameplay=1` touch buttons for the UI's `TouchLayout`.** Wait until the engine branch has merged `claude/ui-cinematics` (touch layer at 8ba6729 or later); merge order is engine → UI → gameplay, so gameplay must not merge the UI branch itself. The adapter is the UI chat's, with two corrections: `lockables: () => g.lockables().map((l) => ({ id: l.id, x: l.chest[0], y: l.chest[1], z: l.chest[2] }))`, because `chest` is a V3 tuple; and `locked: () => g.aimer.locked`, because it is already an id. `configure` maps to `g.setContext({ fireMode, gyro: c.gyro !== 'off' }); g.setAssist(c.aimAssist)`.
 1. **Integration with the engine** (ENGINE_REQUESTS 1–3, 7, 12) and merging narrative's
    systems content. That means adapters for `content/items`, `shops.json`,
