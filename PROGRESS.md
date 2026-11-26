@@ -1,5 +1,12 @@
 # PROGRESS: Tenderloin '74 engine & city
 
+## Design pillar: "small map, very interactive" (user)
+Density per block beats area. Most shopfronts are enterable, most roofs reachable, and every
+block has something to do. The playable area is the dense story core: mid-block 21st/22nd to
+43rd/44th Sts, and 9th/10th to Madison/Park Aves, about 2.3 km². A full-detail 200 m buffer
+and low-detail shells keep Times Square, the rail yards and the skyline visible beyond the
+edge.
+
 Source of truth across sessions. Read this first; update it last.
 
 ## Status
@@ -7,7 +14,7 @@ Source of truth across sessions. Read this first; update it last.
 |---|---|
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
 | 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
-| UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/` |
+| UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/`; **handed to the UI and cinematics stream** at the freeze commit |
 | 3. Rendering pipeline + facade generation | **Next** (after integrating stream milestones) |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
@@ -224,10 +231,21 @@ Spawn on foot at the Flatiron.
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
 |---|---|---|---|
-| Engine (this session, integration owner) | `claude/tenderloin-74-engine-qi54lt` | this file | rendering, city, player, UI, shared contracts in `src/shared/`, merges |
-| Narrative | `claude/sharp-maxwell-jnb6hr` | NARRATIVE_BRIEF.md | `narrative/`, `content/`, NARRATIVE_PROGRESS.md |
-| Sim (traffic and pedestrian AI) | its own branch | docs/briefs/SIM_BRIEF.md | `src/sim/`, `tools/pipeline/lanes.ts`, SIM_PROGRESS.md |
-| Vehicles | its own branch | docs/briefs/VEHICLES_BRIEF.md | `src/vehicles/`, VEHICLES_PROGRESS.md, VEHICLE_REGISTRY.md |
+| Engine (this session, integration owner) | `claude/tenderloin-74-engine-qi54lt` | this file | rendering, city and pipeline, player and cameras (incl. the camera director), physics, saves (core plus the section registry), mission runtime (Phase 7), integration, shared contracts in `src/shared/` |
+| Narrative | `claude/sharp-maxwell-jnb6hr` | NARRATIVE_BRIEF.md | `narrative/`, `content/`, side quests |
+| Sim (traffic and pedestrian AI) | `claude/nice-sagan-2jh4m2` | docs/briefs/SIM_BRIEF.md | `src/sim/`, the lane pipeline |
+| Vehicles | `claude/youthful-newton-py223e` | docs/briefs/VEHICLES_BRIEF.md | `src/vehicles/` |
+| Characters | `claude/characters-74` | docs/briefs/CHARACTERS_BRIEF.md | `src/characters/` |
+| Audio | (oversight branch brief) | docs/briefs/AUDIO_BRIEF.md | `src/audio/` |
+| Interiors | `claude/interiors-tenderloin` | docs/briefs/INTERIORS_BRIEF.md | `src/interiors/` (tiers A/B; tier C window shader inside the engine's Phase 3 facade material) |
+| Gameplay systems | (new) | docs/briefs/GAMEPLAY_BRIEF.md, ECONOMY.md, CORE_SYSTEMS.md | combat, police, items, money, economy, its own save sections |
+| UI, map and cinematics | `claude/ui-cinematics` | docs/briefs/UI_CINEMATICS_BRIEF.md | **all of `src/ui/` and `src/settings/` after the freeze commit**, plus the cutscene system (`src/cinematics/`) |
+| Oversight | `claude/awesome-keller-i9tmmu` | — | cross-stream checks, briefs, the user's decisions |
+
+**Master feature checklist:** [docs/briefs/FEATURE_AUDIT.md](docs/briefs/FEATURE_AUDIT.md), with an owner for every line.
+
+**`package.json`:** scripts are kept alphabetical. Streams add only their own `<stream>:*`
+scripts, never reorder existing lines, and the engine resolves conflicts at merge.
 
 **Merge rules (into the engine branch):**
 1. **When merges happen:** at each stream's "done means" milestone, and otherwise

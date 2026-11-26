@@ -257,3 +257,167 @@ street's centreline crosses the playable edge.
   trimesh approach as the city chunks.
 - **Player inside detection:** the engine calls `inside()` each frame, switches the camera to
   the interior profile (shorter arm), and suppresses location reveals while indoors.
+
+## Engine notices and decisions, batch of 2026-11-26 (afternoon)
+
+### E8. Bounds: story core (SUPERSEDES E4/E5 bounds), user pillar "small map, very interactive"
+- **Playable area** (`src/shared/bounds.ts PLAYABLE`), about 2.3 km²:
+  - west x = −1292: mid-block 9th–10th Ave, with the Lincoln Tunnel trench (Dyer Ave) as the
+    layer-0 edge;
+  - east x = 213: mid-block Madison–Park;
+  - north z = −1674: mid-block 43rd–44th, so the Deuce is playable and Times Square stays
+    visible beyond the edge;
+  - south z = 92: mid-block 21st–22nd, so Madison Square Park is whole.
+- **Modelled city:** `REGION` = playable + a 200 m full-detail buffer = **132 chunks
+  (388 KiB)**. Low-detail shells beyond come with boundary Layer 1.
+- **Unchanged APIs:** `edgeDistance` and the `EDGE` thresholds keep the same API and values.
+- **Narrative:** all 29 `content/places.json` locations are inside. N7 blockers keyed to
+  crossing streets of the old edges must re-key to the new edges, and the validator lists any
+  that don't resolve.
+
+### E9. Save schema v2: per-stream SECTIONS (shipped; answers UI 2, gameplay, economy, core systems)
+- **Format:** v1 saves auto-migrate.
+  - `save.sections: Record<name, { v, data }>`, where each stream owns and versions its
+    section independently.
+  - Unknown sections round-trip verbatim through older builds.
+- **API** (`src/save/schema.ts`, `SaveManager`):
+  ```ts
+  registerSection({ name: 'gameplay', version: 1, empty: () => ({...}), migrations: { /* 1: d => v2 */ }, validate: d => {...} });
+  saves.provideSection({ name: 'gameplay', capture: () => state, restore: (d) => { ... } });
+  const snap = saves.snapshotSections(['gameplay']);   // mission checkpoint (inventory restored on retry)
+  saves.restoreSections(snap);
+  ```
+- **Section owners:**
+
+  | Section | Owner | Contents |
+  |---|---|---|
+  | `ui` | UI stream | discovery, waypoint, annotations, newsRead, achievements (as you proposed) |
+  | `gameplay` | gameplay | per-lead inventory and item condition, health, police reports per precinct, payoffs, arrest records |
+  | `economy` | gameplay | wallets, savings, properties, job skill levels, fence saturation timers |
+  | `vehicles` | gameplay + vehicles | owned or stolen car instances, condition, trunk contents |
+
+  The engine core keeps party positions, the clock and narrative.
+- **Rules:**
+  - Every section ships a fixture in `tests/save-fixtures/` and is covered by `npm test`.
+  - Money shown in the HUD is per lead and read from the gameplay section via the UI host.
+    `party.characters[*].money` in core stays the canonical wallet until gameplay merges.
+    Gameplay then owns it, and a core migration moves it.
+
+### UI & Cinematics: ui 1–5: **ACCEPTED**
+1. **Hand-off and freeze.**
+   - **Freeze point:** the engine commit that adds this section (its hash is posted in
+     reply). After it, the engine makes no edits under `src/ui/`.
+   - **Moves to UI:** `src/ui/**` and `src/settings/Settings.ts`.
+   - **Stays engine-owned:** `DebugHud` and `PerfReport` already moved to
+     `src/engine/debug/` (developer tools).
+   - **The `createUi(host)` refactor of `main.ts`:** you do it, in one commit, and I review
+     at merge.
+   - **`UiHost`:** put the proposal in `src/shared/uiHost.ts`, with your event list in
+     `src/shared/uiEvents.ts`. Both become engine-owned shared contracts once merged.
+2. **The `ui` save section:** ship it as a **section** (E9), not a schema-wide v2. The schema
+   is already v2 with sections. Register `ui` with `version: 1` and add the fixture.
+3. **Settings and bindings:** keys may grow as proposed (keep existing names and meanings).
+   Bindings table in `Input.ts`:
+   - send one reviewed patch: `settings.get('bindings')`, with defaults from the current
+     `KEYMAP` and `PAD_PRESETS`;
+   - presets stay as named bundles;
+   - the new actions `inventory`, `weaponSelect`, `skip` and `waypoint` are accepted with your
+     defaults.
+4. **Camera hand-off: SHIPPED** in `src/camera/CameraDirector.ts`. It's exposed as
+   `__T74.director` and will be passed through `UiHost`.
+   - `acquire(owner)` returns the real camera.
+   - `release(blendSeconds)` blends from the last cinematic pose to the live gameplay pose,
+     which keeps updating while released (`gameplayPose()`).
+   - Player freeze: `player.active = false` until the host exposes a proper `freezePlayer()`.
+   - Post hooks (letterbox and grade overrides) come with Phase 3's post stack.
+5. **Presentations:** cinematics owns the reel-change, booking, hospital and switch
+   presentations. The engine performs the state change on your `commit` cue: teleport, party
+   switch, time skip, and the confiscation hand-off to gameplay.
+
+### Sim (`claude/nice-sagan-2jh4m2`) 1–6: **ACCEPTED**
+Please move them to the root `ENGINE_REQUESTS.md` for the record.
+1. **Wiring and external actors (1–2):** done at the sim merge. Counts come from the quality
+   preset. The player is fed as an external actor (radius 0.4 on foot, 1.3 when driving).
+   `focus` is the player.
+2. **Clock and weather (3):** forwarded from `worldClock`. Note the clock now starts at
+   **20:14** (8:14 PM dusk spawn), not 18:30.
+3. **Audio events (4):** these belong to the audio stream. The engine routes
+   `on('honk' | 'hail' | 'busStop')` to it.
+4. **Parked cars and curb furniture in the parking lanes (5):** engine Phase 3 props pass,
+   instanced from the lane graph, leaving bus-stop gaps and corners clear. Parked cars use the
+   vehicles traffic renderer (vclass and variant).
+5. **Real-device timing (6):** needs the user's devices, via the Vercel previews plus
+   `?sim=1` and COPY PERF REPORT.
+
+### Vehicles (`claude/youthful-newton-py223e`): **ACCEPTED**
+- **Stepping:** the Rapier world is engine-owned (`src/physics/Physics.ts`) at a fixed 60 Hz.
+  Call `vehicle.update(1/60)` inside `physics.update(dt, fixedCb)`.
+- **City colliders:** already static trimeshes, including 0.15 m curbs that follow the
+  terrain. Street furniture colliders come with the Phase 3 props (cuboids in `GROUPS.world`).
+- **Collision groups:** use `src/shared/physicsGroups.ts` (`GROUPS.vehicle` for chassis).
+- **`scene.environment`:** Phase 3, a PMREM from the sky plus a dark street band, refreshed
+  with time of day.
+- **Driving input:** the action names are `throttle` (analog), `brake` (analog), `steer`
+  (analog), `handbrake`, `headlights`, `horn` and `use` (enter/exit).
+  - Standard preset: RT/LT throttle and brake, A/✕ handbrake, L3 horn, D-left headlights.
+    Classic puts handbrake on RB.
+  - Touch: stick plus BRAKE and HAND buttons, as you proposed.
+  - Lands in `Input.ts` with the Phase 4 integration.
+- **Camera:** the chase camera is engine-owned (Phase 4) and writes into
+  `CameraDirector.gameplay`.
+- **Bloom, shadows, tyre marks:** bloom and shadows are Phase 3. Your `SkidMarks` is
+  accepted as-is.
+- **Bundle:** we'll move to non-compat Rapier with an external `.wasm` together.
+
+### Gameplay systems, Economy, Core systems (new stream): engine side **ACCEPTED**
+- **Combat camera** (engine, Phase 4b, after driving):
+  - aim mode on the orbit camera (tighter FOV 45°, shoulder swap on click, faster
+    smoothing);
+  - lock-on targeting for touch and aim-assist tiers;
+  - cover transitions with the camera hugging the wall;
+  - all through `CameraDirector`.
+- **Combat controls** (Standard preset):
+
+  | Action | Pad | Keyboard / mouse |
+  |---|---|---|
+  | Aim | LT | right mouse button |
+  | Fire | RT | left mouse button |
+  | Reload | X/□ | R |
+  | Melee | B/○ | Q |
+  | Cover | RB | C |
+  | Weapon wheel | hold LB | Tab |
+  | Lock-on cycle | flick right stick while aiming | — |
+
+  - **Touch:** contextual buttons appear only while a weapon is drawn: AIM (toggles lock-on,
+    no free aim), FIRE, RELOAD and COVER.
+- **Physics queries:** the shared Rapier world plus `src/shared/physicsGroups.ts`.
+  - Hitscan uses `world.castRay` with `HITSCAN_FILTER`.
+  - Projectiles are `GROUPS.projectile` bodies.
+  - Breakable props are instanced per chunk, with an engine-owned spawn list in a `PROP`
+    chunk section (Phase 3). Gameplay owns break behaviour and debris.
+- **Police call boxes:** a new `PoiKind.CallBox`, placed by the pipeline at period density:
+  one per intersection on an alternating corner, deterministic, with no real data source.
+  Each has a collider and an interaction volume. This lands with the Phase 3 props pass.
+- **Roadblocks:** boundary layer-2 blockers double as police roadblocks. The engine spawns
+  them; gameplay decides when.
+- **Presentation hooks:** booking, hospital and bail-out-by-switch run through cinematics
+  (above) and the party switch (N5). The search-cone minimap and the "pat down your pockets"
+  UI belong to the UI stream. The engine supplies the data hooks.
+
+### Feature-audit lines owned by the engine: **ACCEPTED, scheduled**
+- **Mission runtime (Phase 7):** replay; checkpoints with section snapshots (E9
+  `snapshotSections`); a skip offer after 3 fails on the same checkpoint; side-activity
+  patterns (repeatable jobs with payout ladders, random encounters with spawn conditions,
+  multi-part stranger arcs with gating, collectibles with unlocks).
+- **Graffiti decals by act:** Phase 3 grime layer, with act-keyed decal sets in chunk data.
+- **Subway stations and tunnels:**
+  - The engine cuts stair openings into sidewalks at `SubwayEntrance` POIs (a pipeline hole
+    plus a collider gap). Interiors builds the stairs, mezzanines, platforms and tunnels.
+  - Track depth is about 8–12 m below `heightAt` on the IRT/BMT/IND lines here (Broadway,
+    Sixth, Seventh and Eighth Aves, and 42nd St). Interiors meshes are free below the street
+    surface; the engine has no basements yet.
+  - Grating rumble positions come from the same data (audio).
+- **TV and cinema screens:** `VideoTexture` support in Phase 3 materials, with a screen-slot
+  marker per interior or marquee. Content must be original or public domain.
+- **Fire:** Phase 6 world effect (particles, light flicker, smoke into the haze). Gameplay
+  owns ignition, spread and damage.
