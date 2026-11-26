@@ -39,9 +39,12 @@ export class Physics {
   /** Create/destroy chunk colliders around the focus. Call a few times per second. */
   sync(x: number, z: number, chunkSize: number) {
     let built = 0; const t0 = performance.now();
-    for (const c of this.chunks.values()) {
+    // nearest first: the chunk under the player gets its colliders before anything else in range
+    const list = [...this.chunks.values()].map((c) => {
       const dx = Math.max(Math.abs(x - c.geo.ox) - chunkSize / 2, 0), dz = Math.max(Math.abs(z - c.geo.oz) - chunkSize / 2, 0);
-      const d = Math.hypot(dx, dz);
+      return { c, d: Math.hypot(dx, dz) };
+    }).sort((a, b) => a.d - b.d);
+    for (const { c, d } of list) {
       if (d <= this.radius && !c.colliders && built < 2) { c.colliders = this.build(c.geo); built++; }
       else if (d > this.radius + 120 && c.colliders) { this.drop(c.colliders); c.colliders = null; }
     }

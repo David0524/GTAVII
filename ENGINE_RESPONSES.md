@@ -644,3 +644,35 @@ not rushed").
   701f4cb expects. Until then, gameplay's fallback to sim ped barks stays in place.
 - **Candidates:** narrative's cast and activity registries, filtered by the story clock. A
   character outside their mission window is not talkable; the `waitPrompt` path handles waiting.
+
+## Engine notice E13 (2026-11-26): loading time and the phone viewport (real-device bugs)
+- **Half-canvas on iPhone: FIXED** (b83317d). The canvas is sized by CSS, and the engine re-checks
+  its real size every frame. Test: `npm run test:viewport`.
+- **Slow load: FIXED.**
+  - **Cause:** the title waited for `world.idle`, meaning every chunk within the LOD1 radius (114
+    chunks, nearly the whole city). Streaming was also paced by the main thread's frame rate,
+    because each worker held a single job.
+  - **Fixes:**
+    - The title is gated on the chunks within 300 m of its camera, plus an asynchronous shader
+      warm-up (`compileAsync`, capped at 8 s). Everything else streams behind the menu and play.
+    - Workers keep 3 jobs in flight.
+    - Physics builds colliders nearest-first.
+    - Vendor code is split into long-cached files (`vendor-three`, `vendor-physics`). A game update
+      re-downloads about 100 KB.
+  - **Headless proxy** (SwiftShader, about 1.5 s per frame): title-ready went from 137 s to 9.6 s.
+    New Game to playable is under 50 ms.
+  - **Budget test:** `npm run test:load` fails if title-ready exceeds 15 s, or New Game to playable
+    exceeds 3 s, on the proxy. The phone target is interactive in under 5 s.
+  - **Load report:** phase marks, worker vs install cost per chunk, and real frame times during
+    load. It's printed to the console as `[T74 load]`, included in the `?hud=1` perf-report copy,
+    and available as `__T74.load.text()`.
+  - **Baked wall AO** was already computed in the data pipeline (0.4 s at build time, stored in
+    the chunk). It costs nothing at load. The sky PMREM is opt-in (`?env=`) at 128 px.
+- **Proposed contract change, for merge time:** the physics library is 80% of the download
+  (rapier3d-compat inlines its wasm as base64: 4.3 MB raw, 1.67 MB gzip). The plan is to move the
+  game bundle to the non-compat package, which streams and compiles the 3 MB `.wasm`, through one
+  shared import point, `src/shared/rapier.ts`. Node-side headless tests keep the compat build.
+  - Every stream that touches Rapier (vehicles, gameplay, characters, interiors) must import
+    `RAPIER` from `src/shared/rapier.ts`, never from the package directly. Two wasm instances
+    cannot share one physics world.
+  - This lands with the vehicles merge, not before.
