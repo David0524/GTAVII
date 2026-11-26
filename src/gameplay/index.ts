@@ -287,8 +287,21 @@ export class Gameplay {
   setFiring(on: boolean) { this.pc.firing = on; }
   reload() { const g = this.currentGun(); if (g && this.player) g.startReload(this.inv.reserve(this.player.lead, g.def.id), this.mods()); }
   /** Touch lock-on. */
-  lockOn() { if (!this.player) return null; const a = this.player.aim(); return this.aimer.lock(a.origin, a.dir, this.aimTargets()); }
-  cycleLock(dir: 1 | -1) { if (!this.player) return null; const a = this.player.aim(); return this.aimer.cycle(a.origin, a.dir, this.aimTargets(), dir); }
+  /** Touch lock-on: needs no precise aim. Searches a wide cone around where the camera faces (pitch
+   *  ignored), then falls back to the best visible threat anywhere in range. */
+  lockOn() {
+    if (!this.player) return null;
+    const a = this.player.aim(), ts = this.aimTargets();
+    const L = Math.hypot(a.dir[0], a.dir[2]);
+    const flat: V3 = L > 0.05 ? [a.dir[0] / L, 0, a.dir[2] / L] : [-Math.sin(this.melee.fighters.get(this.player.id)?.yaw ?? 0), 0, -Math.cos(this.melee.fighters.get(this.player.id)?.yaw ?? 0)];
+    const cur = this.aimer.locked && ts.find((t) => t.id === this.aimer.locked && t.alive && t.visible);
+    if (cur) return cur;
+    const c = this.aimer.candidates(a.origin, flat, ts, 160);
+    const best = c[0] ?? this.aimer.candidates(a.origin, flat, ts, 360)[0];
+    this.aimer.locked = best?.t.id ?? null;
+    return best?.t ?? null;
+  }
+  cycleLock(dir: 1 | -1) { if (!this.player) return null; const a = this.player.aim(); const L = Math.hypot(a.dir[0], a.dir[2]) || 1; return this.aimer.cycle(a.origin, [a.dir[0] / L, 0, a.dir[2] / L], this.aimTargets(), dir); }
   setLimb(l: Limb) { this.aimer.limb = l; this.pc.lockLimb = l; }
   meleeAttack(kind: AttackKind) { if (!this.player) return false; this.syncPlayerFighter(); return this.melee.attack(this.player.id, kind); }
   block(held: boolean) { if (this.player) { this.syncPlayerFighter(); this.melee.block(this.player.id, held); } }
