@@ -172,7 +172,7 @@ week(11, "1974-08-30", "1974-09-02", DS, "HOTELS SOLD FOR 'CONVERSION'", "Invest
      ["Tenants given thirty days", "Boiler fire at W 31st St hotel, no injuries", "Labor Day traffic"], requires={"all": ["flag.ledger_burned"]})
 week(12, "1974-10-01", "1974-10-01", TK, "CITY FACES $1.5 BILLION GAP", "Mayor's plan: cuts, freezes, and 'shared sacrifice'",
      ["Furs back in season on 30th St", "Corwin Hotel: see page 3", "Subway fare 'safe through winter'"], real=["the budget gap reported from Oct 1974 [S3]"])
-# ---- 26 Nov rework: combat-era stories and the economy page (daily number, results, classifieds)
+# ---- 26 Nov rework: combat-era stories and the economy page (street number from the track handle, results, classifieds)
 COMBAT_NEWS = {1: "Night clerk foils stick-up at W 31st St hotel (M1)", 2: "Shots on Eighth Ave on the Fourth; two men flee into Penn Station (M9)",
                3: "Dawn brawl among the palms on 28th St (M10)", 4: "Robbers routed at a fur vault on 30th St (M14)",
                5: "Looters rush ice truck in brownout (M15)", 6: "Gunfire as furrier's truck is hijacked (M18)",
@@ -189,7 +189,10 @@ for pg in W:
             pg["items"] = [text] + pg["items"]
         pg["missionRefs"] = [ref.rstrip(")")]
     a, b = rng.sample(FIGHTERS, 2)
-    pg["economy"] = {"dailyNumber": f"{rng.randint(0, 999):03d}",
+    _num = f"{rng.randint(0, 999):03d}"
+    pg["economy"] = {"trackHandle": f"Belmar Downs handle: ${rng.randint(1100, 1499):,},{_num}",
+                     "streetNumber": _num,
+                     "streetNumberNote": "No legal daily number existed in 1974 (New York's began in 1980). The numbers game used the last three digits of the track handle printed in the paper; the State Lottery existed separately.",
                      "raceResults": f"Belmar Downs (invented): {rng.choice(['Sodium Light', 'Night Desk', 'Brass Token', 'Tar Beach', 'Hydrant Mambo'])} wins the {rng.choice(['third', 'fifth', 'seventh'])} at {rng.randint(3, 12)}-1",
                      "fightCard": f"Garden: {a} vs {b}",
                      "prices": {"subway": "35\u00a2", "paper": "15\u00a2", "coffee": "20\u00a2", "rye_bottle": "$4.50"},

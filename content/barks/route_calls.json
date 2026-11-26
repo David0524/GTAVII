@@ -1,7 +1,7 @@
 {
   "id": "barks.route_calls",
   "core": false,
-  "note": "No-GPS route call-outs (goto.routeCalledBy). {street}/{avenue} are filled by the UI's turn list; the HUD repeats each call with the speaker's name. 'voice' tags pick the pool by caller.",
+  "note": "No-GPS route call-outs (goto.routeCalledBy). Every voice covers left/right x {street}/{avenue} (UI test tests/ui-route.test.ts). The HUD prints the computed turn; a voiced line plays only if its direction and slot match.",
   "lines": [
     {
       "context": "fare",
@@ -11,17 +11,17 @@
     {
       "context": "fare",
       "emotion": "brisk",
-      "text": "Right on {avenue}. Then keep going."
-    },
-    {
-      "context": "fare",
-      "emotion": "impatient",
-      "text": "Not this one, the next one. {street}."
+      "text": "Right on {street}, then straight."
     },
     {
       "context": "fare",
       "emotion": "brisk",
-      "text": "Straight through the light. Straight."
+      "text": "Hang a left on {avenue}."
+    },
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Right on {avenue}. Keep going."
     },
     {
       "context": "fare",
@@ -40,18 +40,43 @@
     },
     {
       "context": "fare_tourist",
+      "emotion": "nervous",
+      "text": "Right on {street}, I think. Is that a street or an avenue?"
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "unsure",
+      "text": "Left onto {avenue}? The book says it's very long."
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "excited",
+      "text": "Right on {avenue}! Look, honey, the big one!"
+    },
+    {
+      "context": "fare_tourist",
       "emotion": "happy",
       "text": "Oh! That's it! That's the building!"
     },
     {
       "context": "cabbie",
       "emotion": "easy",
-      "text": "Take {avenue} up, it's faster than it looks."
+      "text": "Hang a left on {street}, kid."
     },
     {
       "context": "cabbie",
       "emotion": "easy",
-      "text": "{street} runs the other way. Next block, kid."
+      "text": "Right on {street}. Easy. Mind the hydrant."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Left on {avenue}. Faster than it looks."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Swing right on {avenue}. Ride the lights."
     },
     {
       "context": "cabbie",
@@ -71,7 +96,17 @@
     {
       "context": "labour",
       "emotion": "strained",
-      "text": "Pennington's on Ninth. Down {avenue}. Go!"
+      "text": "Right on {street}! Right! Don't brake so hard!"
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Left on {avenue}. Breathe. Breathe and drive."
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Right on {avenue}. Pennington's on Ninth. Go!"
     },
     {
       "context": "odessa",
@@ -79,14 +114,59 @@
       "text": "Slowly, Mr. Arce. Left at {street}. I'm in no hurry. You are."
     },
     {
+      "context": "odessa",
+      "emotion": "steady",
+      "text": "Right on {street}. Mind the old man on the corner. That's me in ten years."
+    },
+    {
+      "context": "odessa",
+      "emotion": "steady",
+      "text": "Left onto {avenue}, if you please."
+    },
+    {
+      "context": "odessa",
+      "emotion": "dry",
+      "text": "Right on {avenue}. Gently. I'm not a sack of laundry."
+    },
+    {
       "context": "delphine",
       "emotion": "brisk",
-      "text": "Rule nine: never take {avenue} after midnight. Take {street}."
+      "text": "Left on {street}. Rule nine: never the obvious way."
+    },
+    {
+      "context": "delphine",
+      "emotion": "brisk",
+      "text": "Right on {street}. Quick, before the light."
+    },
+    {
+      "context": "delphine",
+      "emotion": "cool",
+      "text": "Left on {avenue}. Nobody watches the left."
+    },
+    {
+      "context": "delphine",
+      "emotion": "brisk",
+      "text": "Rule nine: never take {avenue} after midnight. Right on it anyway."
     },
     {
       "context": "nick",
       "emotion": "expansive",
-      "text": "Turn here! No, here! I own a building on this block, I should know."
+      "text": "Left on {street}! I own a building on this block, I should know."
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Right on {street}. My first shop was here. Smaller than this car."
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Left on {avenue}! No, here! Yes, here!"
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Right on {avenue}. Everybody gets paid on {avenue}."
     }
   ],
   "voiceByPassenger": {

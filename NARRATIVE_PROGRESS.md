@@ -825,3 +825,19 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - register the invented `item.*` ids used by the side specs;
   - the Interiors wish-list (sent);
   - image-prompt packs (backlog).
+
+### Cutscene file ownership (agreed with UI & cinematics, 26 Nov)
+- **Mine:** `content/cutscenes/<id>.json`, the script layer (shots, framing, beats, dialogue
+  refs, notes).
+- **UI chat's:** `content/cutscenes/layout/<id>.layout.json` (camera keys, blocking, timing
+  overrides).
+- **Rule:** once a scene has a layout, its shot ids (s1, s2, ...) are frozen. Adding shots is
+  fine; renaming or removing one orphans its layout and fails their test.
+- M1's opening s5 and s6 durations now match the layout (5.6 s and 13.4 s).
+
+### Period fix (from the UI chat's research)
+- There was no legal daily number in 1974; New York's started in 1980. The numbers game used
+  the last three digits of the racetrack handle printed in the papers.
+- `newspapers.json` now carries `trackHandle` and `streetNumber` instead of `dailyNumber`.
+  The economy and side text were corrected to match.
+- The State Lottery did exist in 1974, so Earl's line "State's got a lottery" stands.
