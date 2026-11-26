@@ -15,16 +15,20 @@ import type { MapModel } from './MapModel';
 import type { Place } from './places';
 import { CATEGORIES } from './places';
 import { pictogram } from './pictograms';
+import { LabelPlacer } from './labels';
 import { PAPER, INK, TABLE, deckledRect, paperGrain, pencilLine, pencilRing, pencilCross, stamp, coffeeRing, pencilText, hash } from './ink';
 import type { Input } from '../../input/Input';
+import { settings } from '../../settings/Settings';
 
-const MARGIN = 60;
+/** The printed sheet runs this far past the playable edge; beyond the edge it's greyed and hatched. */
+const MARGIN = 240;
 const DISTRICTS: [string, number, number][] = [
   ['TIMES SQUARE', -520, -1640], ['GARMENT DISTRICT', -620, -1180], ['HERALD SQ.', -440, -930], ['HELL\'S KITCHEN', -1180, -1350],
-  ['CHELSEA', -820, -250], ['THE TENDERLOIN', -330, -460], ['MURRAY HILL', 210, -1080], ['MADISON SQ.', 40, -70], ['KIPS BAY', 400, -420],
+  ['CHELSEA', -820, -250], ['THE TENDERLOIN', -330, -460], ['MURRAY HILL', 110, -1080], ['MADISON SQ.', 40, -70], ['KIPS BAY', 400, -420],
   ['GRAMERCY', 260, 210], ['FUR DISTRICT', -620, -640], ['FLOWER MARKET', -380, -330], ['PENN STATION', -720, -830],
 ];
 const AVES = ['11th Avenue', '10th Avenue', '9th Avenue', '8th Avenue', '7th Avenue', '6th Avenue', '5th Avenue', 'Madison Avenue', 'Park Avenue South', 'Lexington Avenue', '3rd Avenue', 'Broadway'];
+function settingsIconScale() { return settings.get('mapIconSize') === 'large' ? 1.3 : 1; }
 const SHORT: Record<string, string> = { 'Metropolitan Life Insurance Company Tower': 'Met Life Tower', 'Empire State Building': 'Empire State Bldg.', 'Madison Square Garden': 'Madison Sq. Garden', 'New York Life Building': 'N.Y. Life Bldg.', 'Flatiron Building': 'Flatiron Bldg.', "Macy's": 'Herald Sq. store' };
 
 export interface FoldingMapSelection { place?: Place; at?: { x: number; z: number } }
@@ -66,7 +70,7 @@ export class FoldingMap {
   private clamp() {
     const W = this.canvas.clientWidth || 800, H = this.canvas.clientHeight || 600;
     const sw = PLAYABLE.maxX - PLAYABLE.minX + 2 * MARGIN, sh = PLAYABLE.maxZ - PLAYABLE.minZ + 2 * MARGIN;
-    this.zoom = Math.min(2.4, Math.max(Math.min(W / sw, H / sh) * 0.92, this.zoom));
+    this.zoom = Math.min(2.4, Math.max(Math.max(W / sw, H / sh), this.zoom)); // full-bleed: never show bare table
     const ax = (lo: number, hi: number, half: number) => (hi - lo > 2 * half ? [lo + half, hi - half] : [(lo + hi) / 2, (lo + hi) / 2]);
     const [x0, x1] = ax(PLAYABLE.minX - MARGIN, PLAYABLE.maxX + MARGIN, W / 2 / this.zoom), [z0, z1] = ax(PLAYABLE.minZ - MARGIN, PLAYABLE.maxZ + MARGIN, H / 2 / this.zoom);
     this.cx = Math.min(x1, Math.max(x0, this.cx));
@@ -151,20 +155,21 @@ export class FoldingMap {
     g.fillStyle = tg; g.fillRect(0, 0, W, H);
 
     const x0 = tx(PLAYABLE.minX - MARGIN), z0 = tz(PLAYABLE.minZ - MARGIN), x1 = tx(PLAYABLE.maxX + MARGIN), z1 = tz(PLAYABLE.maxZ + MARGIN);
+    const px0 = tx(PLAYABLE.minX), pz0 = tz(PLAYABLE.minZ), px1 = tx(PLAYABLE.maxX), pz1 = tz(PLAYABLE.maxZ);
     // sheet shadow + paper
     g.save(); g.shadowColor = 'rgba(0,0,0,.65)'; g.shadowBlur = 26; g.shadowOffsetY = 8;
     deckledRect(g, x0, z0, x1, z1, Math.max(1.5, 2.6 * Z), Math.max(4, 7 * Z), 11); g.fillStyle = PAPER; g.fill(); g.restore();
     g.save(); deckledRect(g, x0, z0, x1, z1, Math.max(1.5, 2.6 * Z), Math.max(4, 7 * Z), 11); g.clip();
     // folds: 4 x 3 panels, alternating light so the creases read as mountain/valley folds
     for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) {
-      const px0 = x0 + (x1 - x0) * i / 4, px1 = x0 + (x1 - x0) * (i + 1) / 4, pz0 = z0 + (z1 - z0) * j / 3, pz1 = z0 + (z1 - z0) * (j + 1) / 3;
-      const gr = g.createLinearGradient(px0, 0, px1, 0);
+      const fx0 = x0 + (x1 - x0) * i / 4, fx1 = x0 + (x1 - x0) * (i + 1) / 4, fz0 = z0 + (z1 - z0) * j / 3, fz1 = z0 + (z1 - z0) * (j + 1) / 3;
+      const gr = g.createLinearGradient(fx0, 0, fx1, 0);
       const a = i % 2 ? [0.0, 0.07] : [0.07, 0.0];
       gr.addColorStop(0, `rgba(90,60,30,${a[0]})`); gr.addColorStop(1, `rgba(90,60,30,${a[1]})`);
-      g.fillStyle = gr; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0);
-      if (j % 2) { g.fillStyle = 'rgba(255,250,235,.05)'; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0); }
+      g.fillStyle = gr; g.fillRect(fx0, fz0, fx1 - fx0, fz1 - fz0);
+      if (j % 2) { g.fillStyle = 'rgba(255,250,235,.05)'; g.fillRect(fx0, fz0, fx1 - fx0, fz1 - fz0); }
     }
-    g.fillStyle = 'rgba(160,120,70,.10)'; g.fillRect(tx(PLAYABLE.minX), tz(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * Z, (PLAYABLE.maxZ - PLAYABLE.minZ) * Z);
+    g.fillStyle = 'rgba(160,120,70,.10)'; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0);
 
     // streets (culled), white roads with ink casing
     g.lineCap = 'round'; g.lineJoin = 'round';
@@ -188,39 +193,92 @@ export class FoldingMap {
     }
     // paper grain
     g.save(); g.globalCompositeOperation = 'multiply'; g.globalAlpha = 0.55; g.fillStyle = g.createPattern(paperGrain(), 'repeat')!; g.fillRect(x0, z0, x1 - x0, z1 - z0); g.restore();
-    // printed labels: avenues, districts, landmarks
-    g.fillStyle = '#3d2a20'; g.font = `italic 600 ${Math.max(9, Math.min(13, Z * 30))}px Fraunces, Georgia, serif`;
-    for (const name of AVES) {
-      const s = this.streets.find((r) => r.n === name && r.p.length >= 4); if (!s) continue;
-      const k = Math.floor(s.p.length / 4) * 2, ax = s.p[k], az = s.p[k + 1], bx = s.p[k + 2] ?? ax, bz = s.p[k + 3] ?? az;
-      g.save(); g.translate(tx(ax), tz(az)); g.rotate(Math.atan2(tz(bz) - tz(az), tx(bx) - tx(ax)) + (tz(bz) < tz(az) ? Math.PI : 0));
-      g.fillText(name.replace('Avenue', 'Ave.').toUpperCase(), 6, -3); g.restore();
+    // beyond the playable edge: still printed, but greyed and hatched (the city goes on; this sheet's coverage doesn't)
+    g.save(); g.beginPath(); g.rect(x0, z0, x1 - x0, z1 - z0); g.rect(px0, pz0, px1 - px0, pz1 - pz0); g.clip('evenodd');
+    g.fillStyle = 'rgba(120,110,98,.42)'; g.fillRect(x0, z0, x1 - x0, z1 - z0);
+    g.strokeStyle = 'rgba(70,58,48,.22)'; g.lineWidth = 1;
+    for (let d = -(z1 - z0); d < x1 - x0; d += 7) { g.beginPath(); g.moveTo(x0 + d, z0); g.lineTo(x0 + d + (z1 - z0), z1); g.stroke(); }
+    g.restore();
+    g.save(); g.strokeStyle = 'rgba(46,23,29,.8)'; g.lineWidth = 1.6; g.setLineDash([9, 4, 2, 4]); g.strokeRect(px0, pz0, px1 - px0, pz1 - pz0); g.restore();
+    if (Z < 0.7) {
+      g.save(); g.font = "400 11px 'League Gothic', sans-serif"; g.fillStyle = 'rgba(46,23,29,.75)'; g.textAlign = 'center';
+      const note = 'C O V E R A G E   O F   T H I S   S H E E T   E N D S   ·   A D J O I N I N G   S H E E T S   S O L D   S E P A R A T E L Y';
+      g.fillText(note, (px0 + px1) / 2, pz0 - 8); g.fillText(note, (px0 + px1) / 2, pz1 + 16); g.restore();
     }
-    if (Z > 0.5) { // cross streets at street zoom
-      g.font = `500 ${Math.min(11, Z * 14)}px Archivo, sans-serif`; g.fillStyle = 'rgba(61,42,32,.8)'; g.textAlign = 'center';
-      const done = new Set<string>();
-      for (const s of this.streets) {
-        const m = s.n.match(/^(West|East) (\d+)(st|nd|rd|th) Street$/); if (!m || done.has(s.n + Math.round(s.p[0] / 400))) continue;
-        const k = Math.floor(s.p.length / 4) * 2, x = tx(s.p[k]), z = tz(s.p[k + 1]);
-        if (x < 0 || z < 0 || x > W || z > H) continue;
-        done.add(s.n + Math.round(s.p[0] / 400)); g.fillText(`${m[1][0]}. ${m[2]} ST.`, x, z - s.w * Z / 2 - 3);
-      }
-      g.textAlign = 'left';
-    }
-    g.textAlign = 'center'; g.fillStyle = 'rgba(120,40,30,.5)'; g.font = `400 ${Math.max(11, Math.min(24, Z * 54))}px 'League Gothic', sans-serif`;
-    for (const [n, x, z] of DISTRICTS) g.fillText(n.split('').join(' '), tx(x), tz(z));
-    g.font = `600 ${Math.max(9, Math.min(12, Z * 26))}px 'Courier Prime', monospace`; g.fillStyle = '#2e171d';
-    for (const h of this.heroes) { g.beginPath(); g.rect(tx(h.x) - 3, tz(h.z) - 3, 6, 6); g.fill(); if (Z > 0.28) g.fillText(SHORT[h.name] ?? h.name, tx(h.x), tz(h.z) - 8); }
-    g.textAlign = 'left';
     // crease lines
     g.strokeStyle = 'rgba(70,45,25,.22)'; g.lineWidth = 1;
     for (let i = 1; i < 4; i++) { const x = x0 + (x1 - x0) * i / 4; g.beginPath(); g.moveTo(x, z0); g.lineTo(x, z1); g.stroke(); }
     for (let i = 1; i < 3; i++) { const z = z0 + (z1 - z0) * i / 3; g.beginPath(); g.moveTo(x0, z); g.lineTo(x1, z); g.stroke(); }
     // coffee ring on the lower-right panel (it has lived on a diner counter)
     coffeeRing(g, tx(PLAYABLE.maxX - 260), tz(PLAYABLE.maxZ - 330), 95 * Z, 4);
+
+    // ---------------------------------------------------------------- symbols first (they reserve space), then type
+    const L = new LabelPlacer(W, H);
+    const m = this.model;
+    const icon = Math.round((Z > 0.6 ? 18 : Z > 0.3 ? 15 : 12) * (settingsIconScale()));
+    const placed: [number, number][] = [], drawnPlaces: { p: Place; x: number; y: number }[] = [];
+    for (const p of m.discovery.known()) {
+      if (!m.visible(p)) continue;
+      const x = tx(p.x), y = tz(p.z);
+      if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
+      // de-clutter at low zoom: payphones, call boxes and subway entrances that would overlap
+      if (Z < 0.45 && (p.cat === 'payphone' || p.cat === 'callbox' || p.cat === 'subway') && placed.some(([a, b]) => Math.hypot(a - x, b - y) < icon * 0.9)) continue;
+      placed.push([x, y]); drawnPlaces.push({ p, x, y });
+      L.reserve([x - icon / 2, y - icon / 2, x + icon / 2, y + icon / 2]);
+    }
+    for (const h of this.heroes) L.reserve([tx(h.x) - 3, tz(h.z) - 3, tx(h.x) + 3, tz(h.z) + 3]);
+    L.reserve([tx(this.player.x) - 9, tz(this.player.z) - 11, tx(this.player.x) + 9, tz(this.player.z) + 10]);
+    // printed furniture reserves its space so no type runs through it
+    const cart = Z < 0.6 ? { bx: x0 + 18, bz: z1 - 96 } : null;
+    if (cart) L.reserve([cart.bx, cart.bz, cart.bx + 236, cart.bz + 78]);
+    if (Z < 0.7) { const hw = 330; L.reserve([(px0 + px1) / 2 - hw, pz0 - 20, (px0 + px1) / 2 + hw, pz0 - 4]); L.reserve([(px0 + px1) / 2 - hw, pz1 + 4, (px0 + px1) / 2 + hw, pz1 + 20]); }
+    // 1. printed landmarks (famous public buildings only; the player's own knowledge is pencil)
+    g.fillStyle = '#2e171d';
+    for (const h of this.heroes) {
+      g.fillStyle = '#2e171d'; g.beginPath(); g.rect(tx(h.x) - 3, tz(h.z) - 3, 6, 6); g.fill();
+      if (Z > 0.22) L.point(g, SHORT[h.name] ?? h.name, tx(h.x), tz(h.z), { font: `600 ${Math.max(10, Math.min(12.5, Z * 26))}px 'Courier Prime', monospace`, colour: '#2e171d', symbol: 6, leader: true });
+    }
+    // 2. pencil notes on lead homes
+    for (const d of drawnPlaces) if (d.p.cat === 'home' && Z > 0.2) {
+      const t = this.ownerNotes[d.p.id] ?? d.p.name; g.font = 'italic 500 13px Fraunces, Georgia, serif';
+      const w = g.measureText(t).width;
+      for (const [dx, dy] of [[icon / 2 + 4, 4], [-icon / 2 - 4 - w, 4], [-w / 2, -icon / 2 - 6], [-w / 2, icon / 2 + 14]]) {
+        const b: [number, number, number, number] = [d.x + dx, d.y + dy - 12, d.x + dx + w, d.y + dy + 3];
+        if (L.free(b)) { L.reserve(b); pencilText(g, t, d.x + dx, d.y + dy, 13, -0.06, d.p.x); break; }
+      }
+    }
+    // 4. avenue names along their lines
+    for (const name of AVES) {
+      const s = this.streets.filter((r) => r.n === name && r.p.length >= 4).sort((a, b) => b.p.length - a.p.length)[0]; if (!s) continue;
+      const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
+      L.line(g, name.replace('Avenue', 'Ave.').replace('South', 'So.').toUpperCase(), pts, { font: `italic 600 ${Math.max(9.5, Math.min(13, Z * 30))}px Fraunces, Georgia, serif`, colour: '#3d2a20', offset: s.w * Z / 2 + 2 });
+    }
+    // 3. district names (period names; inside the coverage only), spaced capitals
+    g.textAlign = 'center';
+    const dSize = Math.max(11, Math.min(24, Z * 54));
+    for (const [n, x, z] of DISTRICTS) {
+      if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue;
+      L.point(g, n.split('').join(' '), tx(x), tz(z), { font: `400 ${dSize}px 'League Gothic', sans-serif`, colour: 'rgba(120,40,30,.5)', symbol: 0 });
+    }
+    // 5. cross streets at street zoom
+    if (Z > 0.5) {
+      const done = new Set<string>();
+      for (const s of this.streets) {
+        const mm = s.n.match(/^(West|East) (\d+)(st|nd|rd|th) Street$/); if (!mm || done.has(s.n)) continue;
+        const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
+        if (!pts.some((v, i) => (i % 2 ? v > 0 && v < H : v > 0 && v < W))) continue;
+        if (L.line(g, `${mm[1][0]}. ${mm[2]} ST.`, pts, { font: `600 ${Math.min(11, Z * 14)}px Archivo, sans-serif`, colour: 'rgba(61,42,32,.85)', offset: s.w * Z / 2 + 1 })) done.add(s.n);
+      }
+    }
+    // 6. place names at close zoom
+    if (Z > 0.75) for (const d of drawnPlaces) {
+      if (d.p.cat === 'payphone' || d.p.cat === 'callbox' || d.p.cat === 'subway' || d.p.cat === 'home') continue;
+      L.point(g, d.p.name, d.x, d.y, { font: "500 10px 'Courier Prime', monospace", colour: 'rgba(46,23,29,.85)', symbol: icon });
+    }
+    g.textAlign = 'left';
     // cartouche
-    const bx = x0 + 18 * Math.min(1, Z * 3), bz = z1 - 96;
-    if (Z < 0.6) {
+    if (cart) {
+      const { bx, bz } = cart;
       g.fillStyle = PAPER; g.strokeStyle = '#3d2a20'; g.lineWidth = 1.5; g.fillRect(bx, bz, 236, 78); g.strokeRect(bx + 3, bz + 3, 230, 72);
       g.fillStyle = '#2e171d'; g.font = 'italic 800 17px Fraunces, serif'; g.fillText('Midtown Manhattan', bx + 12, bz + 26);
       g.font = "400 12px 'League Gothic', sans-serif"; g.fillText('S T R E E T   G U I D E   ·   1 9 7 4   E D I T I O N', bx + 12, bz + 44);
@@ -228,7 +286,6 @@ export class FoldingMap {
     }
 
     // ---------------------------------------------------------------- the player's pencil
-    const m = this.model;
     for (const a of m.annotations) {
       const [x, y] = [tx(a.x), tz(a.z)];
       if (a.mark === 'circle') pencilRing(g, x, y, 14, a.x); else if (a.mark === 'cross') pencilCross(g, x, y, 7, a.z);
@@ -236,24 +293,11 @@ export class FoldingMap {
     }
     if (m.route) { const pts: number[] = []; for (let k = 0; k < m.route.pts.length; k += 2) pts.push(tx(m.route.pts[k]), tz(m.route.pts[k + 1])); pencilLine(g, pts, 2.6, 5, 0.6); }
     if (m.waypoint) { const x = tx(m.waypoint.x), y = tz(m.waypoint.z); pencilCross(g, x, y, 9, 2); if (m.route) pencilText(g, `${(m.route.length / 1609).toFixed(1)} mi`, x + 12, y + 16, 12); }
-
-    const icon = Z > 0.6 ? 18 : Z > 0.3 ? 15 : 12;
-    const placed: [number, number][] = [];
-    for (const p of m.discovery.known()) {
-      if (!m.visible(p)) continue;
-      const x = tx(p.x), y = tz(p.z);
-      if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
-      // de-clutter at low zoom: skip payphones/call boxes/subway entrances that would overlap
-      if (Z < 0.3 && (p.cat === 'payphone' || p.cat === 'callbox' || p.cat === 'subway') && placed.some(([a, b]) => Math.hypot(a - x, b - y) < 10)) continue;
-      placed.push([x, y]);
+    for (const { p, x, y } of drawnPlaces) {
       const spr = pictogram(p.cat, icon, dpr, 'print');
       g.drawImage(spr, x - spr.width / dpr / 2, y - spr.height / dpr / 2, spr.width / dpr, spr.height / dpr);
       if (m.discovery.isNew(p.id)) pencilRing(g, x, y, icon / 2 + 5, hash(p.x * 3) * 99, 'rgba(158,42,36,.9)', 1.8);
-      if (p.cat === 'home' && Z > 0.2) pencilText(g, this.ownerNotes[p.id] ?? p.name, x + icon / 2 + 4, y + 4, 13, -0.06, p.x);
       if (this.owned.has(p.id) && Z > 0.25) stamp(g, 'Ours', x, y - icon - 6, -0.12, '#9e2a24', 11, p.z | 0);
-      if (Z > 0.75 && p.cat !== 'payphone' && p.cat !== 'callbox' && p.cat !== 'subway' && p.cat !== 'home') {
-        g.font = `500 10px 'Courier Prime', monospace`; g.fillStyle = 'rgba(46,23,29,.85)'; g.fillText(p.name, x + icon / 2 + 3, y + 3);
-      }
     }
     // objective marker (story)
     g.restore();
