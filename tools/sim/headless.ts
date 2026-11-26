@@ -243,6 +243,28 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   };
 }
 
+/** Response time: siren units dispatched to a scene; seconds until the first one is on scene. */
+async function responseRun(clock: number, where: { x: number; z: number }, label: string) {
+  const sim = new Simulation({ seed: SEED, maxVehicles: 150, maxPeds: 400, fetchBinary });
+  await sim.load(); sim.setClock(clock);
+  const arrivals: { who: string; t: number }[] = [];
+  let t0 = -1;
+  sim.on('responderArrived', (e) => arrivals.push({ who: e.role, t: sim.time - t0 }));
+  sim.on('policeArrived', (e) => arrivals.push({ who: `police#${e.id}`, t: sim.time - t0 }));
+  const scene = { x: where.x + 20, z: where.z - 70 };
+  for (let k = 0; k < 150 / SIM_DT; k++) {
+    if (k === Math.round(30 / SIM_DT)) {
+      t0 = sim.time;
+      sim.dispatch('ambulance', scene.x, scene.z);
+      const id = sim.spawnPolice({ kind: 'car', x: 0, z: 0, siren: true, respondTo: scene });
+      if (id >= 0) sim.setPoliceGoal(id, { kind: 'goto', x: scene.x, z: scene.z, urgent: true });
+    }
+    sim.update(SIM_DT, where);
+  }
+  arrivals.sort((a, b) => a.t - b.t);
+  return { label, clock, firstUnitSec: arrivals.length ? +arrivals[0].t.toFixed(1) : null, arrivals: arrivals.map((a) => ({ ...a, t: +a.t.toFixed(1) })) };
+}
+
 function obbOverlap(A: { x: number; z: number; yaw: number; len: number; wid: number }, B: typeof A, shrink: number) {
   const axes = [A, B].flatMap((V) => { const fx = -Math.sin(V.yaw), fz = -Math.cos(V.yaw); return [[fx, fz], [fz, -fx]]; });
   for (const [ax, az] of axes) {
@@ -264,6 +286,13 @@ async function main() {
   report.high = full;
   const low = await run({ seconds: 120, maxVehicles: 40, maxPeds: 120, checks: false, label: 'Mobile Low preset, 2 sim-minutes, timing only' });
   report.low = low;
+  const resp = [
+    await responseRun(17 * 60 + 30, FOCI[1], 'rush hour, Herald Square'),
+    await responseRun(17 * 60 + 30, FOCI[2], 'rush hour, 42nd St & 7th Ave'),
+    await responseRun(11 * 60, FOCI[1], 'off-peak, Herald Square'),
+    await responseRun(11 * 60, FOCI[0], 'off-peak, Flatiron'),
+  ];
+  report.response = resp;
   const h1 = (await run({ seconds: 60, maxVehicles: 150, maxPeds: 400, checks: false, label: 'determinism A' })).hash;
   const h2 = (await run({ seconds: 60, maxVehicles: 150, maxPeds: 400, checks: false, label: 'determinism B' })).hash;
   report.determinism = { a: h1, b: h2, equal: h1 === h2 };
@@ -273,11 +302,15 @@ async function main() {
   if (full.maxStationarySec > 180) problems.push(`deadlock: a vehicle stood still ${full.maxStationarySec} s (${full.maxStationaryWho})`);
   if (full.flow.minMovingFraction < 0.05) problems.push(`network-wide stall: moving fraction fell to ${full.flow.minMovingFraction}`);
   if (!report.determinism.equal) problems.push('non-deterministic');
+  for (const r of report.response) {
+    const limit = r.clock === 11 * 60 ? 40 : 60;
+    if (r.firstUnitSec === null || r.firstUnitSec > limit) problems.push(`response ${r.label}: first unit ${r.firstUnitSec ?? 'never'} s (target <= ${limit} s)`);
+  }
   if (MINUTES >= 8 && !full.events.policeArrived) problems.push('police never arrived anywhere');
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;
   fs.writeFileSync(path.join(ROOT, 'docs/sim_test_report.json'), JSON.stringify(report, null, 2));
-  console.log(JSON.stringify({ high: { ...full, examples: undefined }, low: { stepMs: low.stepMs, final: low.final }, determinism: report.determinism }, null, 1));
+  console.log(JSON.stringify({ high: { ...full, examples: undefined }, low: { stepMs: low.stepMs, final: low.final }, determinism: report.determinism, response: report.response }, null, 1));
   for (const [k, ex] of Object.entries(full.examples)) console.log(k, ex);
   console.log(report.pass ? 'PASS' : `FAIL\n  ${problems.join('\n  ')}`);
   process.exit(report.pass ? 0 : 1);

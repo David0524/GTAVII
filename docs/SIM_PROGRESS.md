@@ -133,6 +133,22 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
 - Rats dash around trash and subway entrances, mostly at night, and vanish from footsteps and
   headlights, re-emerging later. Event `ratScatter`. Startle, never damage.
 
+### Siren priority and response times
+Units with sirens (police, ambulance, fire) now get real priority, the way 1970s radio cars drove:
+- **Gutter run:** past any queue they drive the empty parking lane, on the left kerb on one-way streets
+  (traffic pulls to the right) and the right kerb on two-way streets; lane traffic stops and leans away.
+- **Reds:** they slow to ~4 m/s and cross whenever nothing is physically in the way (crossing traffic,
+  pedestrians on the crosswalk); no don't-block-the-box or yield rules; pedestrians don't step off the
+  kerb with a siren within 40 m. They turn straight out of the gutter across stopped traffic.
+- **Routing by expected time** (length at speed, queued cars, signals), not distance.
+- **Starts** from "a unit already on patrol nearby": dispatch (and `spawnPolice({respondTo})`) picks a
+  free lane spot ~24 s of siren driving away (32 s for the ladder truck).
+- **On scene** within 45 m of the scene (scenes inside parks/blocks count from the nearest kerb).
+- **Test assertion** (`docs/sim_test_report.json` `response`): first unit on scene after dispatch,
+  rush hour (17:30) Herald Square 17.6 s and 42nd St & 7th Ave 10.5 s (target <= 60 s); off-peak
+  (11:00) Herald Square 27.9 s and Flatiron 16.5 s (target <= 40 s).
+- Gameplay owns pacing; numbers sent to them for confirmation.
+
 ### Police (`src/sim/police.ts`)
 Gameplay keeps every decision (reports, recognition, bribes, arrests, stamina); the sim moves the agents.
 - **Cars** route over lane groups (Dijkstra) and never drive against a one-way (the lane graph has no
@@ -147,10 +163,7 @@ Gameplay keeps every decision (reports, recognition, bribes, arrests, stamina); 
   direction 4 m behind it.
 - **Foot cops** walk the sidewalk graph; urgent goals cross against the light when traffic allows;
   pursue = follow the target at `maxSpeed` (Gameplay's stamina cap).
-- **Weakness (honest):** in the 17:30 jam a police car with siren can need minutes to reach a point a
-  few blocks away, because the one-way detours are long and it queues behind cars stopped at reds.
-  Next: let siren cars use the left lanes freed by pull-over, and let civilians stopped at a red
-  creep through to clear the way.
+- Response times: see "Siren priority" above (fixed; was minutes at rush hour).
 
 ### Emergency, service traffic and cab rides (`src/sim/service.ts`)
 - **Responders** (`dispatch`): ambulance, or fire engine + ladder truck, spawn 150-250 m out on a free

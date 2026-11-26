@@ -274,7 +274,8 @@ export class Simulation {
 
   // ---------------------------------------------------------------- police (Gameplay keeps the decisions; the sim moves them)
   /** Spawn a police car on the nearest lane or a foot cop on the nearest sidewalk. Returns the police id (== agent id), or -1. */
-  spawnPolice(opts: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean }): number {
+  /** `respondTo`: start a car about 25 s of siren driving from that point (a unit already on patrol nearby); x/z are then ignored. */
+  spawnPolice(opts: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean; respondTo?: { x: number; z: number } }): number {
     const r = spawnCop(this.core, opts); return r ? r.cop.id : -1;
   }
   setPoliceGoal(id: number, goal: PoliceGoal): boolean {

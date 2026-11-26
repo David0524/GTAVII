@@ -55,6 +55,20 @@ export function rebuildOcc(S: SimCore) {
   for (const l of S.occDirty) S.occ[l].sort((a, b) => a.s - b.s || a.id - b.id);
 }
 
+// ------------------------------------------------------------------ siren gutter run
+/** Siren units run past queues in the empty parking lane: left kerb on one-way streets (traffic pulls to
+ *  the right), right kerb on two-way streets. Returns lateral offset of the gutter from lane L's centre
+ *  (signed, + = right), or 0 if this road has no parking lane or L is not the kerb-side lane. */
+export function gutterLat(S: SimCore, L: Link): number {
+  const R = S.net.g.roads[L.owner];
+  if (L.kind !== LinkKind.Lane || R.flags & RoadFlag.Link || S.net.g.names[R.name] === '') return 0;
+  const side = R.oneway !== 0 ? -1 : 1;
+  const idx = side > 0 ? 0 : L.laneCount - 1;
+  if (L.laneIndex !== idx) return 0;
+  return side * (L.width / 2 + 1.2);
+}
+export function gutterSideOf(S: SimCore, L: Link): number { return S.net.g.roads[L.owner].oneway !== 0 ? -1 : 1; }
+
 /** Point at arc distance d ahead (d<0: behind) of the vehicle's position along its path. */
 function pathPoint(S: SimCore, v: Vehicle, d: number, out: number[]) {
   const net = S.net;
@@ -245,8 +259,8 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
   const net = S.net, c = v.next;
   if (c < 0) return '';
   const C = net.g.links[c], out = C.next[0];
-  // don't block the box: room on the exit lane
-  if (!v.force) {
+  // don't block the box: room on the exit lane (siren units go: traffic makes way for them)
+  if (!v.force && !v.cop?.siren) {
     let room = roomFrom(S, out, t);
     for (const w of S.occ[c]) if (w !== v) room = Math.min(room, -1); // someone still on my connector: car-following handles, but keep a queue
     if (room < v.len + 1.5 && ((S.occ[out][0]?.v ?? 0) < 3)) return 'box';
@@ -261,7 +275,7 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
     for (const p of peds) if (Math.hypot(p.x - tmp[0], p.z - tmp[1]) < 4.5) return 'peds';
   }
   // yield to approaching higher-priority movements (permissive left turns, unsignalized junctions)
-  if (!v.force) for (const cf of C.conflicts) {
+  if (!v.force && !v.cop?.siren) for (const cf of C.conflicts) {
     const O = net.g.links[cf.link];
     const allWay = net.dark.has(C.owner); // brownout: every approach is equal, first stopped goes first
     if (!allWay && O.prio < C.prio) continue;
@@ -314,7 +328,9 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
   const list = S.occ[v.link];
   let passSlow = Infinity, passing = 0;
   if (v.wid <= 2.1) for (const w of list) if (w.passable && w !== v && w.s - v.s > -(w.len + v.len) / 2 - 1.5 && w.s - v.s < 30) passing = -Math.max(0, L.width / 2 - v.wid / 2 - 0.5);
+  const gutter = !!v.cop?.siren && L.kind === LinkKind.Lane && Math.abs(v.lat) > L.width / 2;
   for (const w of list) if (w !== v && w.s > v.s) {
+    if (gutter && Math.abs(w.lat - v.lat) > (w.wid + v.wid) / 2 + 0.3) continue; // in the gutter: lane traffic isn't in the way
     if (w.passable && v.wid <= 2.1) {
       const tgt = -Math.max(0, L.width / 2 - v.wid / 2 - 0.5);
       if (w.s - v.s < 30) { passing = tgt; if (v.lat <= tgt + 0.1) { if (w.s - v.s < 16) passSlow = 3; continue; } }
@@ -323,7 +339,15 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     out.hard = Math.min(out.hard, w.s - (w.len + v.len) / 2 - 0.3);
     break;
   }
-  if (passing < 0) v.latTarget = passing;
+  if (v.cop?.siren && v.state === 'drive') {
+    // siren: take the gutter when anything slow is ahead in this lane (stay there to the end of the lane)
+    const gl = gutterLat(S, L);
+    if (gl !== 0 && L.kind === LinkKind.Lane) {
+      let slowAhead = gutter;
+      for (const w of list) if (w !== v && w.s > v.s && w.s - v.s < 70 && w.v < 6 && Math.abs(w.lat - v.lat) < 1.5) slowAhead = true;
+      if (slowAhead) v.latTarget = gl;
+    } else if (L.kind !== LinkKind.Lane) v.latTarget = 0;
+  } else if (passing < 0) v.latTarget = passing;
   else if (v.state === 'drive' && v.latTarget < 0) v.latTarget = 0;
   if (passSlow < Infinity && v.v > passSlow) consider(Math.max(4, v.v * 2), passSlow, 'passing');
   // while blending out of a lane, its vehicles ahead still matter
@@ -348,11 +372,12 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     const siren = !!v.cop?.siren;
     if (siren && (sig === Sig.Red || sig === Sig.Yellow)) {
       // emergency: crawl up to the line and go only when no crossing traffic or pedestrians are in the way
-      if (dEnd < 25) { const c = sirenBlocked(S, v); if (c) must = c; else consider(Math.max(0.5, dEnd - v.len / 2), 3.0, 'siren'); }
+      // (a virtual leader a little ahead moving at crawl speed: slows to ~4 m/s through the junction, never stops it)
+      if (dEnd < 25) { const c = sirenBlocked(S, v); if (c) must = c; else consider(Math.max(4, v.v * 1.5 + 2), 4.0, 'siren'); }
     } else if (sig === Sig.Red) must = 'red';
     else if (sig === Sig.Yellow && dEnd - v.len / 2 > (v.v * v.v) / (2 * 3.5) + 1) must = 'red';
     // routed vehicles hold at the line until they've merged into the lane for their turn (25 s at most)
-    if (!must && (v.dest || v.cop) && v.want >= 0 && S.srcLane[v.want] !== v.link && dEnd < 15 && v.laneWaitT < 25
+    if (!must && (v.dest || (v.cop && !v.cop.siren)) && v.want >= 0 && S.srcLane[v.want] !== v.link && dEnd < 15 && v.laneWaitT < 25
       && net.g.links[S.srcLane[v.want]].group === L.group) { must = 'laneWait'; if (v.v < 0.3) v.laneWaitT += 1 / 30; }
     if (net.dark.has(L.endJ)) { // dead signal = all-way stop: come to a full stop at the line first
       if (dEnd - v.len / 2 < 3 && v.v < 0.3) v.atLine = true;
@@ -464,9 +489,13 @@ function laneChangeLogic(S: SimCore, v: Vehicle, obs: Obs) {
   const aggressive = v.kind === 'cab' || v.arch.aggression > 0.7 || (v.kind === 'bus' && v.stopLink >= 0);
   // mandatory: curb lane for stops, desired turn lane
   let target = -1;
-  if (v.pullT > 0 && L.right >= 0) { if (tryLaneChange(S, v, L.right, true)) return; }
+  if (v.pullT > 0 && L.right >= 0 && gutterSideOf(S, L) < 0) { if (tryLaneChange(S, v, L.right, true)) return; } // one-way: civilians pull right
+  if (v.cop?.siren && v.lcT >= 1) { // sirens move across to the gutter-side lane
+    const step = gutterSideOf(S, L) < 0 ? L.left : L.right;
+    if (step >= 0 && tryLaneChange(S, v, step, true)) return;
+  }
   if (v.stopLink >= 0 && v.stopLink !== v.link && net.g.links[v.stopLink].group === L.group) target = v.stopLink;
-  else if (v.want >= 0 && S.srcLane[v.want] !== v.link && net.g.links[S.srcLane[v.want]].group === L.group) target = S.srcLane[v.want];
+  else if (v.want >= 0 && !v.cop?.siren && S.srcLane[v.want] !== v.link && net.g.links[S.srcLane[v.want]].group === L.group) target = S.srcLane[v.want];
   if (target >= 0) {
     const step = net.g.links[target].laneIndex > L.laneIndex ? L.left : L.right;
     if (step >= 0 && tryLaneChange(S, v, step, aggressive || dEnd < 40)) return;
@@ -675,8 +704,9 @@ export function stepVehicles(S: SimCore, dt: number) {
     v.px = v.x; v.pz = v.z; v.pyaw = v.yaw;
     v.honkCd -= dt; v.lcCd -= dt;
     if (v.lcT < 1) v.lcT = Math.min(1, v.lcT + dt / 2.2);
-    v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * 1.4);
     const L = net.g.links[v.link];
+    // siren units snap back from the gutter quickly once in the junction
+    v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * (v.cop?.siren && L.kind !== LinkKind.Lane ? 3.5 : 1.4));
 
     if (v.cop) policeVehicleTick(S, v, dt);
     if (v.state === 'onScene' && Number.isFinite(v.dwell) && (v.dwell -= dt) <= 0) responderLeave(S, v);
@@ -712,14 +742,18 @@ export function stepVehicles(S: SimCore, dt: number) {
       if ((ahead < 8 && avf > 1) || (ahead > 0 && avf < -1 && d < 60)) v.pullT = 2.5;
     }
     if (v.pullT > 0) {
-      if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive') {
+      const gside = gutterSideOf(S, L);
+      if (L.kind === LinkKind.Lane && v.state === 'drive' && gutterLat(S, L) !== 0) {
+        // kerb-side lane next to the siren's gutter: stop and lean away from it
+        a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren'; v.latTarget = -gside * 0.3;
+      } else if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive' && gside < 0) {
+        // one-way street: pull right into the parking lane, unless something is parked there (then just stop)
         a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren';
-        // into the parking lane, unless something is parked or double-parked right there (then just stop)
         const kerbBusy = S.occ[v.link].some((w) => w !== v && (w.state !== 'drive' || w.passable) && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 4);
         if (!kerbBusy && v.latTarget >= 0) v.latTarget = (L.width - v.wid) / 2 + 1.1;
       }
-      else if (v.v > 4) a = Math.min(a, -1.5); // slow down; laneChangeLogic moves right
-    } else if (v.pullT > -0.1 && v.latTarget > 0 && v.state === 'drive') v.latTarget = 0;
+      else if (v.v > 4) a = Math.min(a, -1.5); // slow down
+    } else if (v.pullT > -0.1 && v.latTarget !== 0 && v.state === 'drive' && !v.cop && !v.passable) v.latTarget = 0;
     a = Math.max(-B_MAX, Math.min(v.aMax, a));
     let nv = Math.max(0, v.v + a * dt);
     let ds = v.v * dt + 0.5 * a * dt * dt;

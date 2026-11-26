@@ -152,6 +152,8 @@ export function despawnPed(S: SimCore, p: Ped) {
 // ------------------------------------------------------------------ traffic gap checks
 function trafficClearForCrosswalk(S: SimCore, walkEdge: number, pedWait = 0): boolean {
   const net = S.net, e = net.g.walkEdges[walkEdge];
+  // a siren coming: nobody steps off the kerb (those already crossing finish)
+  if (S.sirens.length) { const mx = (e.pts[0] + e.pts[e.pts.length - 2]) / 2, mz = (e.pts[1] + e.pts[e.pts.length - 1]) / 2; for (const sv of S.sirens) if (Math.hypot(sv.x - mx, sv.z - mz) < 40) return false; }
   for (const c of S.crossConns.get(walkEdge) ?? []) if (S.occ[c].length) return false;
   const lanes = net.approachLanes.get(e.owner * 16 + e.arm) ?? [];
   for (const l of lanes) for (const v of S.occ[l]) if (net.len[l] - v.s < 35 && v.v > 1) return false;

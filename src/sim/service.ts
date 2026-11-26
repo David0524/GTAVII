@@ -15,7 +15,7 @@ import { projectOnPoly } from './geom';
 import { LinkKind, Turn, WalkKind } from './laneFormat';
 import type { SimCore, Vehicle, Hail, CopState } from './state';
 import { makeVehicle } from './traffic';
-import { nearestLane, routeConnectorTo, routeCost, setCopGoalCar } from './police';
+import { nearestLane, responderStart, routeConnectorTo, routeCost, setCopGoalCar } from './police';
 import { setPedGoal } from './peds';
 import type { VehicleClass } from '../shared/traffic';
 
@@ -65,13 +65,10 @@ export function dispatchResponders(S: SimCore, role: 'ambulance' | 'fire', x: nu
   const arch = S.reg.list.find((a) => a.def.id === archId);
   if (!arch) return ids;
   for (const vclass of ROLE_CLASS[role]) {
-    for (let tries = 0; tries < 12; tries++) {
-      const a = S.rng.next() * Math.PI * 2, r = S.rng.range(150, 250);
-      const near = nearestLane(S, x + Math.cos(a) * r, z + Math.sin(a) * r);
-      if (near.lane < 0 || near.d > 20) continue;
-      const len = S.net.len[near.lane];
-      const s = Math.max(6, Math.min(len - 10, near.s));
-      if (S.occ[near.lane].some((o) => Math.abs(o.s - s) < o.len / 2 + 9)) continue;
+    {
+      const st = responderStart(S, x, z, vclass === 'ladder_truck' ? 32 : 24);
+      if (!st) continue;
+      const near = { lane: st.lane }, s = st.s;
       const v = makeVehicle(S, 'emergency', vclass, arch, near.lane, s);
       const c: CopState = { id: v.id, kind: 'car', role, precinct: '', mode: 'idle', x, z, cx: x, cz: z, radius: 0, yaw: 0, target: null, urgent: true, siren: true,
         maxSpeed: 18, route: [], arrived: false, stuckT: 0, blockIds: 0 };
@@ -79,7 +76,6 @@ export function dispatchResponders(S: SimCore, role: 'ambulance' | 'fire', x: nu
       setCopGoalCar(S, c, v, { kind: 'goto', x: x + S.rng.range(-6, 6), z: z + S.rng.range(-6, 6), urgent: true });
       ids.push(v.id);
       S.emit('dispatched', { id: v.id, role, vclass, x, z });
-      break;
     }
   }
   return ids;

@@ -41,6 +41,7 @@ function groupGraph(S: SimCore): GroupGraph {
     const l0 = lanes[0];
     const set = new Map<number, number>();
     for (const l of lanes) for (const c of net.g.links[l].next) { const t = net.g.links[net.g.links[c].next[0]].group; set.set(t, net.len[l0] + net.len[c]); }
+    G.lanes.push(lanes);
     G.succ.set(g, [...set].map(([to, len]) => ({ to, len })));
     sampleAt(net.g.links[l0].pts, net.cum[l0], net.len[l0] / 2, tmp);
     G.mid.set(g, [tmp[0], tmp[1]]);
@@ -65,6 +66,36 @@ export function nearestLane(S: SimCore, x: number, z: number): { lane: number; s
   }
   return { lane: best, s: bs, d: bd };
 }
+/** Expected siren travel time (s) from a lane group to the lane group nearest (gx,gz). */
+export function sirenTimeTo(S: SimCore, fromGroup: number, gx: number, gz: number): number {
+  const goal = nearestLane(S, gx, gz);
+  if (goal.lane < 0) return Infinity;
+  const to = S.net.g.links[goal.lane].group;
+  const path = routeGroups(S, fromGroup, to, true);
+  if (!path.length) return Infinity;
+  let t = 0;
+  for (let i = 1; i < path.length; i++) t += sirenCost(S, path[i], S.net.len[S.net.groups.get(path[i])![0]]);
+  return t;
+}
+/** A free lane spot whose siren travel time to (x,z) is close to `targetSec` (a unit already on patrol nearby). */
+export function responderStart(S: SimCore, x: number, z: number, targetSec = 24): { lane: number; s: number } | null {
+  let best: { lane: number; s: number } | null = null, bd = Infinity;
+  for (let tries = 0; tries < 40; tries++) {
+    const a = S.rng.next() * Math.PI * 2, r = S.rng.range(80, 260);
+    const near = nearestLane(S, x + Math.cos(a) * r, z + Math.sin(a) * r);
+    if (near.lane < 0 || near.d > 45) continue;
+    const len = S.net.len[near.lane];
+    const s = Math.max(6, Math.min(len - 10, near.s));
+    if (S.occ[near.lane].some((o) => Math.abs(o.s - s) < o.len / 2 + 9)) continue;
+    sampleAt(S.net.g.links[near.lane].pts, S.net.cum[near.lane], s, tmp);
+    if (S.vehicles.some((o) => Math.hypot(o.x - tmp[0], o.z - tmp[1]) < o.len / 2 + 7)) continue;
+    const t = sirenTimeTo(S, S.net.g.links[near.lane].group, x, z) + (len - s) / 15;
+    const dev = Math.abs(t - targetSec);
+    if (dev < bd) { bd = dev; best = { lane: near.lane, s }; }
+    if (dev < 4) break;
+  }
+  return best;
+}
 /** Driving distance (m) along the legal shortest route between two lane groups (Infinity if unreachable). */
 export function routeCost(S: SimCore, from: number, to: number): number {
   const path = routeGroups(S, from, to);
@@ -72,8 +103,17 @@ export function routeCost(S: SimCore, from: number, to: number): number {
   let d = 0; for (const g of path) d += S.net.len[S.net.groups.get(g)![0]];
   return d;
 }
-/** Group path from `from` to `to` (inclusive), or [] if unreachable. */
-function routeGroups(S: SimCore, from: number, to: number): number[] {
+/** Expected traversal time (s) of a lane group for a siren unit: length at speed, plus queues it must
+ *  gutter-run past and a few seconds per signalised junction it must check before crossing. */
+function sirenCost(S: SimCore, g: number, len: number): number {
+  const net = S.net, lanes = net.groups.get(g)!, L = net.g.links[lanes[0]];
+  let queued = 0;
+  for (const l of lanes) for (const w of S.occ[l]) if (w.v < 2) queued++;
+  const gutter = (net.g.roads[L.owner].flags & 4) === 0; // links have no parking lane to run in
+  return len / (L.speed * 1.2) + queued * (gutter ? 0.4 : 2.5) + (net.isSignal(L.endJ) ? 4 : 1);
+}
+/** Group path from `from` to `to` (inclusive), or [] if unreachable. `siren`: weigh by expected time. */
+function routeGroups(S: SimCore, from: number, to: number, siren = false): number[] {
   if (from === to) return [from];
   const G = groupGraph(S);
   const dist = new Map<number, number>([[from, 0]]), via = new Map<number, number>(), done = new Set<number>();
@@ -84,7 +124,7 @@ function routeGroups(S: SimCore, from: number, to: number): number[] {
     if (u === to) break;
     if (done.has(u)) continue; done.add(u);
     for (const { to: w, len } of G.succ.get(u) ?? []) {
-      const nd = dist.get(u)! + len;
+      const nd = dist.get(u)! + (siren ? sirenCost(S, w, len) : len);
       if (nd < (dist.get(w) ?? Infinity)) { dist.set(w, nd); via.set(w, u); open.push(w); }
     }
   }
@@ -121,10 +161,11 @@ export function policeConnector(S: SimCore, v: Vehicle): number {
 
 /** Connector at the end of v's current lane on the shortest legal route to (gx,gz); -1 when already on the goal block. */
 export function routeConnectorTo(S: SimCore, v: Vehicle, gx: number, gz: number, goalGroup = -1): { conn: number; path: number[] } {
+  const siren = !!v.cop?.siren;
   const net = S.net, L = net.g.links[v.link];
   if (L.kind !== LinkKind.Lane) return { conn: -1, path: [] };
   if (goalGroup < 0) { const goal = nearestLane(S, gx, gz); if (goal.lane < 0) return { conn: -1, path: [] }; goalGroup = net.g.links[goal.lane].group; }
-  const path = routeGroups(S, L.group, goalGroup);
+  const path = routeGroups(S, L.group, goalGroup, siren);
   if (path.length < 2) return { conn: -1, path };
   const nextG = path[1];
   // prefer a connector from the current lane, else any lane of the group (forces a lane change)
@@ -154,6 +195,19 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
     if (c.mode === 'boxIn' && d < 9 && v.v < 3) { v.state = 'boxIn'; v.dwell = Infinity; arrive(S, c); }
     return false;
   }
+  // close enough (goto): pull in right here
+  if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && d < 45 && v.stopLink !== v.link) {
+    const at = v.s + Math.max(4, v.v * v.v / 5);
+    if (at < net.len[v.link] - 4) { v.stopLink = v.link; v.stopAt = at; v.stopKind = 'police'; }
+    else if (v.v < 2 && L.kind === LinkKind.Lane) { v.stopLink = v.link; v.stopAt = v.s; v.stopKind = 'police'; } // no room ahead: this is the spot
+  }
+  if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && v.stopLink === v.link && v.s >= v.stopAt - 3 && v.v < 1) {
+    v.stopLink = -1; v.stopAt = -1; v.v = 0;
+    if (c.mode === 'roadblock') startRoadblock(S, v);
+    else { v.state = 'onScene'; v.dwell = c.role === 'ambulance' ? S.rng.range(40, 80) : c.role === 'fire' ? S.rng.range(120, 240) : c.role === 'tow' ? S.rng.range(20, 30) : Infinity; v.latTarget = v.lat; } // stay put: the kerb may already be taken
+    arrive(S, c);
+    return false;
+  }
   // arrival on the goal's lane group: stop at the nearest point of the lane (goto/roadblock), or pick a new point (patrol/search)
   const goal = nearestLane(S, gx, gz);
   if (goal.lane >= 0 && net.g.links[goal.lane].group === L.group && !c.arrived) {
@@ -163,13 +217,14 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
       return false;
     }
     // stop at the goal point; if we entered the block already past it (but close), pull in just ahead
-    const target = sHere > v.s + 2 ? sHere : d < 45 ? v.s + 8 : -1;
+    // (the scene may be inside a park or a block: the nearest kerb of the goal block counts as on scene)
+    const target = sHere > v.s + 2 ? sHere : d < 140 ? v.s + 8 : -1;
     if (target > 0 && target < net.len[v.link] - 4 && v.stopLink !== v.link) { v.stopLink = v.link; v.stopAt = target; v.stopKind = 'police'; }
     const sGoal = v.stopLink === v.link ? v.stopAt : sHere;
     if (v.stopLink === v.link && v.s >= sGoal - 3 && v.v < 1) {
       v.stopLink = -1; v.stopAt = -1; v.v = 0;
       if (c.mode === 'roadblock') startRoadblock(S, v);
-      else { v.state = 'onScene'; v.dwell = c.role === 'ambulance' ? S.rng.range(40, 80) : c.role === 'fire' ? S.rng.range(120, 240) : c.role === 'tow' ? S.rng.range(20, 30) : Infinity; v.latTarget = L.laneIndex === 0 ? (L.width - v.wid) / 2 + 1.1 : 0; }
+      else { v.state = 'onScene'; v.dwell = c.role === 'ambulance' ? S.rng.range(40, 80) : c.role === 'fire' ? S.rng.range(120, 240) : c.role === 'tow' ? S.rng.range(20, 30) : Infinity; v.latTarget = v.lat; } // stay put: the kerb may already be taken
       arrive(S, c);
     }
   }
@@ -250,13 +305,13 @@ function freeLaneSpot(S: SimCore, x: number, z: number): { lane: number; s: numb
 }
 
 // ------------------------------------------------------------------ API helpers (used by Simulation)
-export function spawnPolice(S: SimCore, opts: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean }): { cop: CopState; agentId: number } | null {
+export function spawnPolice(S: SimCore, opts: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean; respondTo?: { x: number; z: number } }): { cop: CopState; agentId: number } | null {
   const c: CopState = { id: 0, kind: opts.kind, precinct: opts.precinct ?? '', mode: 'idle', x: opts.x, z: opts.z, cx: opts.x, cz: opts.z, radius: 0, yaw: 0, target: null,
     urgent: false, siren: !!opts.siren, maxSpeed: opts.kind === 'car' ? 20 : 4, route: [], arrived: false, stuckT: 0, blockIds: 0 };
   if (opts.kind === 'car') {
     const arch = S.reg.list.find((a) => a.def.id === 'npc.police_driver');
     if (!arch) return null;
-    const spot = freeLaneSpot(S, opts.x, opts.z);
+    const spot = opts.respondTo ? responderStart(S, opts.respondTo.x, opts.respondTo.z) : freeLaneSpot(S, opts.x, opts.z);
     if (!spot) return null;
     const v = makeVehicle(S, 'police', 'police', arch, spot.lane, spot.s);
     v.cop = c; c.id = v.id;
