@@ -16,7 +16,7 @@ import type { StreetRec } from './grid';
 import type { MapModel } from './MapModel';
 import type { HeatView, ObjectiveView } from '../host/types';
 import { pictogram } from './pictograms';
-import { PAPER, INK, TABLE, deckledRect, paperGrain, pencilLine, pencilCross } from './ink';
+import { PAPER, PAPER_SHADE, INK, TABLE, pencilLine, pencilCross } from './ink';
 
 const TILE_M = 256;
 const MARGIN = 60; // printed margin beyond the playable edge
@@ -55,7 +55,7 @@ export class MiniMap {
     this.el.className = 't74-minimap';
     this.win.className = 't74-mm-base'; this.canvas.className = 't74-mm-base';
     this.screen.className = 't74-mm-screen';
-    this.player.className = 't74-mm-player'; this.player.innerHTML = '<svg viewBox="-9 -10 18 20"><path d="M0-8L6 7 0 3.5-6 7z" fill="#b2302a" stroke="#fff6e0" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    this.player.className = 't74-mm-player'; this.player.innerHTML = '<svg viewBox="-9 -10 18 20"><path d="M0-8L6 7 0 3.5-6 7z" fill="#b2302a" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
     this.north.className = 't74-mm-n'; this.north.textContent = 'N';
     this.star.className = 't74-mm-star'; this.star.innerHTML = '<b></b><i></i>';
     this.screen.append(this.star, this.player, this.north);
@@ -98,22 +98,22 @@ export class MiniMap {
     const X = (x: number) => (x - ox) * s, Z = (z: number) => (z - oz) * s;
     g.fillStyle = TABLE; g.fillRect(0, 0, c.width, c.height);
     g.save();
-    deckledRect(g, X(PLAYABLE.minX - MARGIN), Z(PLAYABLE.minZ - MARGIN), X(PLAYABLE.maxX + MARGIN), Z(PLAYABLE.maxZ + MARGIN), 2.5 * s, 5 * s, 11);
+    g.beginPath(); g.rect(X(PLAYABLE.minX - MARGIN), Z(PLAYABLE.minZ - MARGIN), (PLAYABLE.maxX - PLAYABLE.minX + 2 * MARGIN) * s, (PLAYABLE.maxZ - PLAYABLE.minZ + 2 * MARGIN) * s);
     g.fillStyle = PAPER; g.fill(); g.clip();
     // the printed area (playable) a touch darker than the margin, like a street-guide plate
-    g.fillStyle = 'rgba(160,120,70,.10)'; g.fillRect(X(PLAYABLE.minX), Z(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * s, (PLAYABLE.maxZ - PLAYABLE.minZ) * s);
+    g.fillStyle = PAPER_SHADE; g.fillRect(X(PLAYABLE.minX), Z(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * s, (PLAYABLE.maxZ - PLAYABLE.minZ) * s);
     g.lineCap = 'round'; g.lineJoin = 'round';
     const x0 = ox - 40, z0 = oz - 40, x1 = ox + TILE_M + 40, z1 = oz + TILE_M + 40;
     for (const pass of [0, 1]) for (let k = 0; k < this.streets.length; k++) {
       const b = this.bboxes; if (b[k * 4] > x1 || b[k * 4 + 2] < x0 || b[k * 4 + 1] > z1 || b[k * 4 + 3] < z0) continue;
       const st = this.streets[k];
       const major = st.w >= 15;
-      g.strokeStyle = pass === 0 ? INK : major ? '#fbf4de' : '#f4ead0';
+      g.strokeStyle = pass === 0 ? INK : '#ffffff';
       g.lineWidth = Math.max(1, st.w * s * (major ? 1.1 : 1)) + (pass === 0 ? 1.4 * this.dpr : 0);
       g.beginPath(); for (let q = 0; q < st.p.length; q += 2) (q ? g.lineTo : g.moveTo).call(g, X(st.p[q]), Z(st.p[q + 1])); g.stroke();
     }
     // one-way ticks (1974 table)
-    g.fillStyle = 'rgba(80,55,35,.55)';
+    g.fillStyle = 'rgba(60,60,60,.6)';
     for (let k = 0; k < this.streets.length; k++) {
       const st = this.streets[k]; if (!st.o) continue;
       const b = this.bboxes; if (b[k * 4] > x1 || b[k * 4 + 2] < x0 || b[k * 4 + 1] > z1 || b[k * 4 + 3] < z0) continue;
@@ -127,10 +127,6 @@ export class MiniMap {
       }
     }
     g.restore();
-    // paper grain over everything printed
-    g.globalCompositeOperation = 'multiply'; g.globalAlpha = 0.6;
-    g.fillStyle = g.createPattern(paperGrain(), 'repeat')!; g.fillRect(0, 0, c.width, c.height);
-    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
     this.tiles.set(key, c); this.tileOrder.push(key);
     if (this.tileOrder.length > 40) this.tiles.delete(this.tileOrder.shift()!);
     this.cost.tiles = performance.now() - t0;
@@ -239,7 +235,7 @@ export class MiniMap {
       g.fillStyle = grd; g.beginPath(); g.moveTo(x, z); g.arc(x, z, r, a - c.spread, a + c.spread); g.closePath(); g.fill();
     }
     for (const u of heat.units) {
-      g.fillStyle = u.seeing ? '#b2302a' : '#5a2330'; g.strokeStyle = '#efe3c4'; g.lineWidth = 1.4 * d;
+      g.fillStyle = u.seeing ? '#b2302a' : '#6b6b6b'; g.strokeStyle = '#ffffff'; g.lineWidth = 1.4 * d;
       g.beginPath(); if (u.kind === 'car') g.rect(X(u.x) - 4 * d, Z(u.z) - 2.5 * d, 8 * d, 5 * d); else g.arc(X(u.x), Z(u.z), 3 * d, 0, Math.PI * 2); g.fill(); g.stroke();
     }
     if (m.route) {

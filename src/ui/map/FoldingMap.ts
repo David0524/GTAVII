@@ -18,7 +18,7 @@ import type { Place } from './places';
 import { CATEGORIES } from './places';
 import { pictogram } from './pictograms';
 import { LabelPlacer } from './labels';
-import { PAPER, INK, TABLE, deckledRect, paperGrain, pencilLine, pencilRing, pencilCross, stamp, coffeeRing, pencilText, hash } from './ink';
+import { PAPER, PAPER_SHADE, INK, TABLE, pencilLine, pencilRing, pencilCross, pencilText, hash } from './ink';
 import type { Input } from '../../input/Input';
 import { settings } from '../../settings/Settings';
 
@@ -162,26 +162,24 @@ export class FoldingMap {
     const g = this.g; g.setTransform(dpr, 0, 0, dpr, 0, 0);
     const Z = this.zoom, tx = (x: number) => W / 2 + (x - this.cx) * Z, tz = (z: number) => H / 2 + (z - this.cz) * Z;
 
-    // diner table: dark formica with a faint boomerang-free grain
-    const tg = g.createLinearGradient(0, 0, W, H); tg.addColorStop(0, '#2a1b17'); tg.addColorStop(1, TABLE);
-    g.fillStyle = tg; g.fillRect(0, 0, W, H);
+    // behind the sheet: flat dark
+    g.fillStyle = TABLE; g.fillRect(0, 0, W, H);
 
     const x0 = tx(PLAYABLE.minX - MARGIN), z0 = tz(PLAYABLE.minZ - MARGIN), x1 = tx(PLAYABLE.maxX + MARGIN), z1 = tz(PLAYABLE.maxZ + MARGIN);
     const px0 = tx(PLAYABLE.minX), pz0 = tz(PLAYABLE.minZ), px1 = tx(PLAYABLE.maxX), pz1 = tz(PLAYABLE.maxZ);
     // sheet shadow + paper
-    g.save(); g.shadowColor = 'rgba(0,0,0,.65)'; g.shadowBlur = 26; g.shadowOffsetY = 8;
-    deckledRect(g, x0, z0, x1, z1, Math.max(1.5, 2.6 * Z), Math.max(4, 7 * Z), 11); g.fillStyle = PAPER; g.fill(); g.restore();
-    g.save(); deckledRect(g, x0, z0, x1, z1, Math.max(1.5, 2.6 * Z), Math.max(4, 7 * Z), 11); g.clip();
+    g.save(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 16; g.shadowOffsetY = 4;
+    g.beginPath(); g.rect(x0, z0, x1 - x0, z1 - z0); g.fillStyle = PAPER; g.fill(); g.restore();
+    g.save(); g.beginPath(); g.rect(x0, z0, x1 - x0, z1 - z0); g.clip();
     // folds: 4 x 3 panels, alternating light so the creases read as mountain/valley folds
     for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) {
       const fx0 = x0 + (x1 - x0) * i / 4, fx1 = x0 + (x1 - x0) * (i + 1) / 4, fz0 = z0 + (z1 - z0) * j / 3, fz1 = z0 + (z1 - z0) * (j + 1) / 3;
       const gr = g.createLinearGradient(fx0, 0, fx1, 0);
-      const a = i % 2 ? [0.0, 0.07] : [0.07, 0.0];
-      gr.addColorStop(0, `rgba(90,60,30,${a[0]})`); gr.addColorStop(1, `rgba(90,60,30,${a[1]})`);
+      const a = i % 2 ? [0.0, 0.035] : [0.035, 0.0];
+      gr.addColorStop(0, `rgba(0,0,0,${a[0]})`); gr.addColorStop(1, `rgba(0,0,0,${a[1]})`);
       g.fillStyle = gr; g.fillRect(fx0, fz0, fx1 - fx0, fz1 - fz0);
-      if (j % 2) { g.fillStyle = 'rgba(255,250,235,.05)'; g.fillRect(fx0, fz0, fx1 - fx0, fz1 - fz0); }
     }
-    g.fillStyle = 'rgba(160,120,70,.10)'; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0);
+    g.fillStyle = PAPER_SHADE; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0); // blocks: pale; streets print white over them
 
     // streets (culled), white roads with ink casing
     g.lineCap = 'round'; g.lineJoin = 'round';
@@ -190,12 +188,12 @@ export class FoldingMap {
       let inView = false; for (let k = 0; k < s.p.length; k += 2) if (s.p[k] > vx0 && s.p[k] < vx1 && s.p[k + 1] > vz0 && s.p[k + 1] < vz1) { inView = true; break; }
       if (!inView && s.p.length < 8) continue;
       const w = Math.max(0.9, s.w * Z * (s.w >= 15 ? 1.15 : 1));
-      g.strokeStyle = pass === 0 ? INK : s.w >= 15 ? '#fcf5e0' : '#f5ebd2';
+      g.strokeStyle = pass === 0 ? INK : '#ffffff';
       g.lineWidth = pass === 0 ? w + 1.5 : w;
       g.beginPath(); for (let k = 0; k < s.p.length; k += 2) (k ? g.lineTo : g.moveTo).call(g, tx(s.p[k]), tz(s.p[k + 1])); g.stroke();
     }
     if (Z > 0.55) {
-      g.fillStyle = 'rgba(110,80,55,.75)';
+      g.fillStyle = 'rgba(60,60,60,.7)';
       for (const s of this.streets) if (s.o) for (let k = 2; k < s.p.length; k += 2) {
         const ax = s.p[k - 2], az = s.p[k - 1], dx = s.p[k] - ax, dz = s.p[k + 1] - az, L = Math.hypot(dx, dz); if (L < 40) continue;
         const ux = dx / L * s.o, uz = dz / L * s.o, cx = tx(ax + dx / 2), cz = tz(az + dz / 2), a = 3.6;
@@ -203,26 +201,23 @@ export class FoldingMap {
         g.beginPath(); g.moveTo(cx + ux * a * 1.5, cz + uz * a * 1.5); g.lineTo(cx - ux * a - uz * a, cz - uz * a + ux * a); g.lineTo(cx - ux * a + uz * a, cz - uz * a - ux * a); g.fill();
       }
     }
-    // paper grain
-    g.save(); g.globalCompositeOperation = 'multiply'; g.globalAlpha = 0.55; g.fillStyle = g.createPattern(paperGrain(), 'repeat')!; g.fillRect(x0, z0, x1 - x0, z1 - z0); g.restore();
     // beyond the playable edge: still printed, but greyed and hatched (the city goes on; this sheet's coverage doesn't)
     g.save(); g.beginPath(); g.rect(x0, z0, x1 - x0, z1 - z0); g.rect(px0, pz0, px1 - px0, pz1 - pz0); g.clip('evenodd');
-    g.fillStyle = 'rgba(120,110,98,.42)'; g.fillRect(x0, z0, x1 - x0, z1 - z0);
-    g.strokeStyle = 'rgba(70,58,48,.22)'; g.lineWidth = 1;
+    g.fillStyle = 'rgba(110,110,110,.32)'; g.fillRect(x0, z0, x1 - x0, z1 - z0);
+    g.strokeStyle = 'rgba(40,40,40,.16)'; g.lineWidth = 1;
     for (let d = -(z1 - z0); d < x1 - x0; d += 7) { g.beginPath(); g.moveTo(x0 + d, z0); g.lineTo(x0 + d + (z1 - z0), z1); g.stroke(); }
     g.restore();
-    g.save(); g.strokeStyle = 'rgba(46,23,29,.8)'; g.lineWidth = 1.6; g.setLineDash([9, 4, 2, 4]); g.strokeRect(px0, pz0, px1 - px0, pz1 - pz0); g.restore();
+    g.save(); g.strokeStyle = 'rgba(17,17,17,.75)'; g.lineWidth = 1.4; g.setLineDash([9, 4, 2, 4]); g.strokeRect(px0, pz0, px1 - px0, pz1 - pz0); g.restore();
     if (Z < 0.7) {
-      g.save(); g.font = `700 11px ${F_COND}`; g.fillStyle = 'rgba(46,23,29,.75)'; g.textAlign = 'center';
+      g.save(); g.font = `700 11px ${F_COND}`; g.fillStyle = 'rgba(17,17,17,.7)'; g.textAlign = 'center';
       const note = 'C O V E R A G E   O F   T H I S   S H E E T   E N D S   ·   A D J O I N I N G   S H E E T S   S O L D   S E P A R A T E L Y';
       g.fillText(note, (px0 + px1) / 2, pz0 - 8); g.fillText(note, (px0 + px1) / 2, pz1 + 16); g.restore();
     }
     // crease lines
-    g.strokeStyle = 'rgba(70,45,25,.22)'; g.lineWidth = 1;
+    g.strokeStyle = 'rgba(40,40,40,.16)'; g.lineWidth = 1;
     for (let i = 1; i < 4; i++) { const x = x0 + (x1 - x0) * i / 4; g.beginPath(); g.moveTo(x, z0); g.lineTo(x, z1); g.stroke(); }
     for (let i = 1; i < 3; i++) { const z = z0 + (z1 - z0) * i / 3; g.beginPath(); g.moveTo(x0, z); g.lineTo(x1, z); g.stroke(); }
     // coffee ring on the lower-right panel (it has lived on a diner counter)
-    coffeeRing(g, tx(PLAYABLE.maxX - 260), tz(PLAYABLE.maxZ - 330), 95 * Z, 4);
 
     // ---------------------------------------------------------------- symbols first (they reserve space), then type
     const L = new LabelPlacer(W, H);
@@ -248,16 +243,22 @@ export class FoldingMap {
     // sheet corner that isn't under the screen's UI
     let cart: { bx: number; bz: number } | null = null;
     if (Z < 0.6) {
-      const corners = [{ bx: x0 + 18, bz: z1 - 96 }, { bx: x1 - 254, bz: z1 - 96 }, { bx: x0 + 18, bz: z0 + 18 }, { bx: x1 - 254, bz: z0 + 18 }];
-      cart = corners.find((c) => L.free([c.bx, c.bz, c.bx + 236, c.bz + 78])) ?? corners[0];
+      // sheet corners first, then the visible screen's corners (clamped onto the sheet); it must sit fully on
+      // screen, on the sheet and clear of the UI, or it isn't printed at all (it's decoration, never clipped)
+      const cl = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+      const sx0 = cl(18, x0 + 18, x1 - 254), sx1 = cl(W - 254, x0 + 18, x1 - 254), sz0 = cl(18, z0 + 18, z1 - 96), sz1 = cl(H - 96, z0 + 18, z1 - 96);
+      const corners = [{ bx: x0 + 18, bz: z1 - 96 }, { bx: x1 - 254, bz: z1 - 96 }, { bx: x0 + 18, bz: z0 + 18 }, { bx: x1 - 254, bz: z0 + 18 },
+        { bx: sx1, bz: sz1 }, { bx: sx1, bz: sz0 }, { bx: sx0, bz: sz1 }, { bx: sx0, bz: sz0 }];
+      const onScreen = (c: { bx: number; bz: number }) => c.bx >= 4 && c.bz >= 4 && c.bx + 236 <= W - 4 && c.bz + 78 <= H - 4;
+      cart = corners.find((c) => onScreen(c) && L.free([c.bx, c.bz, c.bx + 236, c.bz + 78])) ?? null;
     }
     if (cart) L.reserve([cart.bx, cart.bz, cart.bx + 236, cart.bz + 78]);
     if (Z < 0.7) { const hw = 330; L.reserve([(px0 + px1) / 2 - hw, pz0 - 20, (px0 + px1) / 2 + hw, pz0 - 4]); L.reserve([(px0 + px1) / 2 - hw, pz1 + 4, (px0 + px1) / 2 + hw, pz1 + 20]); }
     // 1. printed landmarks (famous public buildings only; the player's own knowledge is pencil)
-    g.fillStyle = '#2e171d';
+    g.fillStyle = '#111';
     for (const h of this.heroes) {
-      g.fillStyle = '#2e171d'; g.beginPath(); g.rect(tx(h.x) - 3, tz(h.z) - 3, 6, 6); g.fill();
-      if (Z > 0.22) L.point(g, landmarks.short(h.name), tx(h.x), tz(h.z), { font: `700 ${Math.max(10, Math.min(12.5, Z * 26))}px ${F_UI}`, colour: '#2e171d', symbol: 6, leader: true });
+      g.fillStyle = '#111'; g.beginPath(); g.rect(tx(h.x) - 3, tz(h.z) - 3, 6, 6); g.fill();
+      if (Z > 0.22) L.point(g, landmarks.short(h.name), tx(h.x), tz(h.z), { font: `700 ${Math.max(10, Math.min(12.5, Z * 26))}px ${F_UI}`, colour: '#111', symbol: 6, leader: true });
     }
     // 2. pencil notes on lead homes
     for (const d of drawnPlaces) if (d.p.cat === 'home' && Z > 0.2) {
@@ -272,14 +273,14 @@ export class FoldingMap {
     for (const name of AVES) {
       const s = this.streets.filter((r) => r.n === name && r.p.length >= 4).sort((a, b) => b.p.length - a.p.length)[0]; if (!s) continue;
       const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
-      L.line(g, name.replace('Avenue', 'Ave.').replace('South', 'So.').toUpperCase(), pts, { font: `700 ${Math.max(9.5, Math.min(13, Z * 30))}px ${F_COND}`, colour: '#3d2a20', offset: s.w * Z / 2 + 2 });
+      L.line(g, name.replace('Avenue', 'Ave.').replace('South', 'So.').toUpperCase(), pts, { font: `700 ${Math.max(9.5, Math.min(13, Z * 30))}px ${F_COND}`, colour: '#222', offset: s.w * Z / 2 + 2 });
     }
     // 3. district names (period names; inside the coverage only), spaced capitals
     g.textAlign = 'center';
     const dSize = Math.max(11, Math.min(24, Z * 54));
     for (const [n, x, z] of DISTRICTS) {
       if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue;
-      L.point(g, n.split('').join(' '), tx(x), tz(z), { font: `700 ${dSize}px ${F_UI}`, colour: 'rgba(120,40,30,.5)', symbol: 0 });
+      L.point(g, n.split('').join(' '), tx(x), tz(z), { font: `700 ${dSize}px ${F_UI}`, colour: 'rgba(17,17,17,.38)', symbol: 0 });
     }
     // 5. cross streets at street zoom
     if (Z > 0.5) {
@@ -288,21 +289,21 @@ export class FoldingMap {
         const mm = s.n.match(/^(West|East) (\d+)(st|nd|rd|th) Street$/); if (!mm || done.has(s.n)) continue;
         const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
         if (!pts.some((v, i) => (i % 2 ? v > 0 && v < H : v > 0 && v < W))) continue;
-        if (L.line(g, `${mm[1][0]}. ${mm[2]} ST.`, pts, { font: `400 ${Math.min(11, Z * 14)}px ${F_COND}`, colour: 'rgba(61,42,32,.85)', offset: s.w * Z / 2 + 1 })) done.add(s.n);
+        if (L.line(g, `${mm[1][0]}. ${mm[2]} ST.`, pts, { font: `400 ${Math.min(11, Z * 14)}px ${F_COND}`, colour: 'rgba(17,17,17,.85)', offset: s.w * Z / 2 + 1 })) done.add(s.n);
       }
     }
     // 6. place names at close zoom
     if (Z > 0.75) for (const d of drawnPlaces) {
       if (d.p.cat === 'payphone' || d.p.cat === 'callbox' || d.p.cat === 'subway' || d.p.cat === 'home') continue;
-      L.point(g, d.p.name, d.x, d.y, { font: `400 10px ${F_UI}`, colour: 'rgba(46,23,29,.85)', symbol: icon });
+      L.point(g, d.p.name, d.x, d.y, { font: `400 10px ${F_UI}`, colour: 'rgba(17,17,17,.88)', symbol: icon });
     }
     g.textAlign = 'left';
     // cartouche
     if (cart) {
       const { bx, bz } = cart;
-      g.fillStyle = PAPER; g.strokeStyle = '#3d2a20'; g.lineWidth = 1.5; g.fillRect(bx, bz, 236, 78); g.strokeRect(bx + 3, bz + 3, 230, 72);
-      g.fillStyle = '#2e171d'; g.font = `700 16px ${F_UI}`; g.fillText('Midtown Manhattan', bx + 12, bz + 26);
-      g.font = `400 11px ${F_UI}`; g.fillText('S T R E E T   G U I D E   ·   1 9 7 4   E D I T I O N', bx + 12, bz + 44);
+      g.fillStyle = '#fff'; g.strokeStyle = '#111'; g.lineWidth = 1.2; g.fillRect(bx, bz, 236, 78); g.strokeRect(bx + 3, bz + 3, 230, 72);
+      g.fillStyle = '#111'; g.font = `700 16px ${F_UI}`; g.fillText('Midtown Manhattan', bx + 12, bz + 26);
+      g.font = `400 11px ${F_UI}`; g.fillText('Street guide · 1974 edition', bx + 12, bz + 44);
       g.font = `400 10px ${F_UI}`; g.fillText('Hollis & Crane Map Co. · 50¢ · one-way arrows current', bx + 12, bz + 62);
     }
 
@@ -318,7 +319,9 @@ export class FoldingMap {
       const spr = pictogram(p.cat, icon, dpr, 'print');
       g.drawImage(spr, x - spr.width / dpr / 2, y - spr.height / dpr / 2, spr.width / dpr, spr.height / dpr);
       if (m.discovery.isNew(p.id)) pencilRing(g, x, y, icon / 2 + 5, hash(p.x * 3) * 99, 'rgba(158,42,36,.9)', 1.8);
-      if (this.owned.has(p.id) && Z > 0.25) stamp(g, 'Ours', x, y - icon - 6, -0.12, '#9e2a24', 11, p.z | 0);
+      if (this.owned.has(p.id) && Z > 0.25) { // a business you own: a small black flag label, set straight
+        g.save(); g.font = `700 10px ${F_UI}`; const tw = g.measureText('YOURS').width; g.fillStyle = '#111'; g.fillRect(x - tw / 2 - 4, y - icon - 16, tw + 8, 13);
+        g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('YOURS', x, y - icon - 9.5); g.restore(); }
     }
     for (const ms of this.missions) {
       const spr = pictogram('mission', 21, dpr, 'disc', '#b2302a'), x = tx(ms.x), y = tz(ms.z);

@@ -88,7 +88,7 @@ export class GameHud {
     model.discovery.on((e) => {
       if (uiSettings.get('hudDiscovery') === 'off') return;
       const how = VIA_SHORT[e.via];
-      this.note('PENCILLED IN', `<img alt="" src="${pictogramURL(e.place.cat, 16, 'print')}">${esc(e.place.name)}${how ? ` <span style="opacity:.7">· ${how}</span>` : ''}`, 4.5);
+      this.note('PENCILLED IN', `<img alt="" src="${pictogramURL(e.place.cat, 16, 'disc')}">${esc(e.place.name)}${how ? ` <span style="opacity:.7">· ${how}</span>` : ''}`, 4.5);
       this.ping('minimap', 8);
     });
     uiSettings.subscribe((_s, k) => this.applySetting(k));

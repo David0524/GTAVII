@@ -66,7 +66,7 @@ export class LeadPicker extends Modal {
 
   private render(reason: 'switch' | 'bail') {
     const party = this.host.party(), cur = this.host.player().lead, items: NavItem[] = [];
-    this.root.innerHTML = `<div class="u-head"><h2>${reason === 'bail' ? 'Who comes for you?' : 'Switch to…'}</h2><span class="sub">${reason === 'bail' ? 'They pay the bail. They\'ll remember it.' : 'The reel changes. The city keeps going.'}</span><span class="close"></span></div>
+    this.root.innerHTML = `<div class="u-head"><h2>${reason === 'bail' ? 'Who comes for you?' : 'Switch to…'}</h2><span class="sub">${reason === 'bail' ? 'They pay the bail. They\'ll remember it.' : 'The others carry on where you left them.'}</span><span class="close"></span></div>
       <div class="ld-row"></div><div class="ld-go"></div><div class="u-foot">${this.footer()}</div>`;
     const row = this.root.querySelector('.ld-row')!;
     for (const l of party) {

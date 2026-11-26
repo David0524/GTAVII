@@ -1,5 +1,6 @@
 /**
- * Title screen over the live city at dusk: '70s poster wordmark with a marquee "'74", tagline,
+ * Title screen over the live city: the constructed wordmark (public/ui/wordmark.svg, not a font), a one-line
+ * tagline,
  * film-leader loading bar while the city streams, then CONTINUE / NEW GAME / SETTINGS / CREDITS.
  * The camera behind it drifts slowly past the Flatiron.
  */
@@ -22,11 +23,11 @@ export class TitleScreen {
     this.nav = new MenuNav(input);
     this.root.className = 't74-screen t74-letterbox t74-grain';
     this.root.innerHTML = `<div class="t74-vignette"></div>
-      <div class="t74-logo"><div class="word">Tenderloin</div><div class="t74-marquee">'74</div>
-      <div class="t74-tagline">Manhattan · Summer · Nineteen seventy-four</div></div>`;
+      <div class="t74-logo"><img class="wordmark" src="${import.meta.env.BASE_URL}ui/wordmark.svg" alt="Tenderloin ’74">
+      <div class="t74-tagline">Manhattan · Summer 1974</div></div>`;
     this.menu.className = 't74-menu'; this.menu.style.visibility = 'hidden';
     this.leader.className = 't74-leader';
-    this.leader.innerHTML = '<span>THREADING THE PROJECTOR</span><div class="bar"><i></i></div>';
+    this.leader.innerHTML = '<span>Loading the city</span><div class="bar"><i></i></div>';
     const legal = document.createElement('div'); legal.className = 't74-legal';
     legal.innerHTML = 'Map data © OpenStreetMap contributors · NYC Open Data · All businesses and brands are fictional';
     this.root.append(this.menu, this.leader, legal);
@@ -36,8 +37,7 @@ export class TitleScreen {
   /** 0..1 city streaming progress. */
   progress(p: number) {
     (this.leader.querySelector('i') as HTMLElement).style.width = `${Math.round(p * 100)}%`;
-    const steps = ['THREADING THE PROJECTOR', 'LEADER · 8', 'LEADER · 5', 'LEADER · 3', 'ROLLING'];
-    (this.leader.querySelector('span') as HTMLElement).textContent = steps[Math.min(steps.length - 1, Math.floor(p * steps.length))];
+    (this.leader.querySelector('span') as HTMLElement).textContent = `Loading the city · ${Math.round(p * 100)}%`;
   }
 
   setReady(continueLabel: string | null) {
@@ -58,7 +58,7 @@ export class TitleScreen {
     this.menu.style.visibility = '';
     this.nav.set(items);
     const press = document.createElement('div'); press.className = 't74-press';
-    press.innerHTML = `${glyph('confirm', st)} SELECT`;
+    press.innerHTML = `${glyph('confirm', st)} Select`;
     this.root.appendChild(press);
   }
 

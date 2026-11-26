@@ -174,13 +174,13 @@ export class NoticeCard {
     const car = this.host.cars?.().find((c) => c.id === e.car || c.name === e.car);
     const clk = this.host.clock(), h = Math.floor(clk.minutes / 60), m = clk.minutes % 60;
     const time = `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
-    const title = e.kind === 'ticket' ? 'Parking Summons' : e.kind === 'tow' ? 'Vehicle Removed' : 'Vehicle Immobilized';
+    const title = e.kind === 'ticket' ? 'Parking ticket' : e.kind === 'tow' ? 'Car towed' : 'Car booted';
     const serial = `${String(4000 + ((car?.plate ?? e.car).length * 211 + (e.amount ?? 0) * 7) % 5000)}-${String(100 + clk.minutes % 899)}-${e.kind[0].toUpperCase()}`;
     const row = (k: string, v: string) => `<dt>${k}</dt><dd>${esc(v)}</dd>`;
     const d = new Date(Date.parse(`${clk.date}T00:00:00Z`));
     const card = document.createElement('div');
     card.className = `car-notice ${e.kind}`;
-    card.innerHTML = `<div class="nt-band"><span>City Traffic Bureau</span><b>${title}</b></div>
+    card.innerHTML = `<div class="nt-band"><b>${title}</b></div>
       <div class="nt-serial"><span>No.</span>${esc(serial)}</div>
       <dl>${row('Vehicle', car ? car.name : e.car)}${row('Plate', car?.plate ?? '—')}${row('Date', `${d.getUTCMonth() + 1}/${d.getUTCDate()}/74  ${time}`)}${row(e.kind === 'ticket' ? 'Violation' : e.kind === 'tow' ? 'Removed' : 'Notice', e.text)}</dl>
       ${e.amount != null ? `<div class="nt-fine"><span>${e.kind === 'tow' ? 'Pound fee' : 'Fine'}</span><b>${money(e.amount, false)}</b></div>` : ''}

@@ -8,11 +8,11 @@
 import { F_BODY, F_COND } from '../fonts';
 type G = CanvasRenderingContext2D;
 
-export const PAPER = '#ebdfc3';
-export const PAPER_SHADE = '#d9c8a4';
-export const INK = '#3b2a20';
+export const PAPER = '#f7f6f2'; // the sheet: clean white, as 1974 Hagstrom street maps were printed
+export const PAPER_SHADE = '#e6e3da';
+export const INK = '#8f8a80'; // street casing
 export const GRAPHITE = 'rgba(52,50,48,';
-export const TABLE = '#1c1311';
+export const TABLE = '#141414';
 
 export function hash(n: number) { n = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b); n ^= n >>> 13; n = Math.imul(n, 0xc2b2ae35); return ((n ^ (n >>> 16)) >>> 0) / 4294967296; }
 
