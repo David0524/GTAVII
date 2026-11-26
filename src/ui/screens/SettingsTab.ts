@@ -25,7 +25,7 @@ const WIRED = new Set<keyof SettingsData>([
   'mouseSensitivity', 'mouseInvertY', 'touchLookSensitivity', 'fov', 'hud', 'subtitles', 'subtitleScale', 'bindings',
   'hudMinimap', 'hudObjective', 'hudCash', 'hudWeapon', 'hudClock', 'hudRadio', 'hudStamina', 'hudInjuries', 'hudLocation', 'hudDiscovery', 'hudTurns', 'hudPrompts',
   'minimapOrientation', 'minimapSize', 'subtitleMode', 'subtitleBackground', 'subtitleSpeakerNames', 'subtitleSpeakerColours',
-  'textScale', 'colourMode', 'highContrast', 'reduceFlashing', 'reduceMotion', 'cutsceneLetterbox', 'filmGrain', 'units', 'clock24', 'safeZone', 'touchButtonSize', 'touchOpacity', 'touchLeftHanded', 'skipTimers',
+  'textScale', 'colourMode', 'highContrast', 'reduceFlashing', 'reduceMotion', 'cutsceneLetterbox', 'filmGrain', 'units', 'clock24', 'safeZone', 'mapIconSize', 'touchButtonSize', 'touchOpacity', 'touchLeftHanded', 'skipTimers',
 ]);
 const WAITS: Record<string, string> = { audio: 'audio lands', gameplay: 'gameplay lands', engine: 'the engine wires it', post: 'the Phase 3 film grade lands', input: 'the input layer supports it', ui: 'the UI wires it' };
 

@@ -10,6 +10,7 @@ import type { UiHost, ShopView, ItemView, DialogueChoice } from '../host/types';
 import type { Input } from '../../input/Input';
 import type { NavItem } from '../MenuNav';
 import { Modal } from './Modal';
+import { settings } from '../../settings/Settings';
 import { esc, money } from '../util';
 
 export class ShopCounter extends Modal {
@@ -122,7 +123,7 @@ export class Choices extends Modal {
   ask(choices: DialogueChoice[], resolve: (id: string) => void, opts: { prompt?: string; seconds?: number; defaultId?: string } = {}) {
     if (choices.length > 4) console.warn('More than four choices (narrative rule): truncating');
     const cs = choices.slice(0, 4);
-    this.resolve = resolve; this.total = this.timer = opts.seconds ? Math.max(6, opts.seconds) : 0; this.defaultId = opts.defaultId ?? cs[cs.length - 1].id;
+    this.resolve = resolve; this.total = this.timer = opts.seconds && !settings.get('skipTimers') ? Math.max(6, opts.seconds) : 0; this.defaultId = opts.defaultId ?? cs[cs.length - 1].id;
     this.show();
     this.root.innerHTML = `${opts.prompt ? `<div class="ch-prompt">${esc(opts.prompt)}</div>` : ''}<div class="ch-list"></div>${this.total ? '<div class="ch-fuse"><i></i></div>' : ''}`;
     const list = this.root.querySelector('.ch-list')!, items: NavItem[] = [];

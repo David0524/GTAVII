@@ -150,3 +150,6 @@ body.touch .t74-legend { display: none; }
 .u-clockel { padding: 6px 10px 6px 14px; margin: -6px -10px 0 0; background: radial-gradient(ellipse at 70% 50%, rgba(10,5,5,.5), rgba(10,5,5,0) 75%); }
 .u-clockel .date { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0,0,0,.8); }
 .u-hub { z-index: 55; } /* above the title screen when Settings/Saves/Credits open from it */
+
+/* screen edge margin setting (safeZone 0.9..1): pull the HUD in from the edges */
+.u-hud { inset: calc((1 - var(--safe-zone, 1)) * 50vh) calc((1 - var(--safe-zone, 1)) * 50vw); }
