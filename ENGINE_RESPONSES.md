@@ -168,3 +168,47 @@ below** so nothing has to change when it lands.
   - Audio: nothing to do.
 - **Cost:** about 360k triangles in the High-preset spawn view (was about 120k flat), almost
   all of it near ground detail. LOD trimming is a Phase 3 job.
+
+## Narrative N6–N7 and the answers to engine asks: reviewed 2026-11-26
+
+### N6. Region bounds contain every story street: **RESOLVED by E4 + E5 (shipped)**
+- Every listed location is now well inside the playable area: the carriers' garage at
+  9th & 38th, Augie's corner, Delphine's Eighth Ave and 42nd St turf, and Penn South.
+- The west edge is mid-block between 10th and 11th, and the north edge is mid-block between
+  47th and 48th.
+
+### N7. Schema for `content/boundaries.json`: **ACCEPTED with three additions** (blockers built in Phase 2, dressed in Phase 5)
+The shape stands as written: `id`, `kind`, `segment`, `acts`, `when`, `removedWhen`,
+`replacedBy`, `barks`, `sign`, `note`, plus `defaultRotation`, `brownoutVariant`,
+`actChanges` and bark pools.
+
+**Engine additions** (all optional; the engine fills defaults):
+- `offsetM` (default 30, range 8–60): how far inside the edge the blocker stands. Missions
+  stay beyond `EDGE.BLOCKERS` = 60 m.
+- `span` (`"curb_to_curb"` by default, or `"roadway"`): `roadway` leaves the sidewalks open
+  to pedestrians, so the edge treatment takes over there.
+- `kind: "geography"`: **placement is engine-owned** (the rail cut, the Lincoln Tunnel
+  trench, the closed elevated highway deck). Narrative supplies only signs and barks, and
+  `segment` is informational.
+
+**How `segment` is resolved:** `"<street> @ <edge> edge"` resolves to the point where that
+street's centreline crosses the playable edge.
+- Accepted spellings: `W 44th St`, `West 44th Street`, `8th Ave` and `8th Avenue` all
+  normalise to the OSM names in `public/data/streets.json`.
+- The build-time validator (Phase 2) fails on any segment that doesn't resolve, and lists
+  crossing streets that have neither a blocker nor `defaultRotation` coverage.
+
+**Clock vocabulary:** `when.time` may wrap midnight (`["16:00","05:00"]` is fine).
+`dateRange` and `weekday` follow N1.
+
+### Answers to engine asks (lead homes, clock range): **ACCEPTED**
+- **Lead homes:** each door goes on a **pre-1975, non-landmark facade** on the stated block
+  face, chosen deterministically from the period audit, never a hero building. Doors become
+  interior-entry markers in Phase 7.
+- **Varelas's 23:00–07:30 off-map rule:** switching to him then spawns him in his sedan at
+  7th Ave & W 30th St, as specified.
+- **Clock range confirmed:** 1974-06-21 to 1974-09-02, then `set_date` 1974-10-01 for the
+  epilogue. World-event dates are noted for Phase 6: 07-04, the brownouts on 07-19 and
+  07-26, the radio address on 08-08 and 08-09 noon, and Labor Day.
+- **Places:** the Phase 7 resolver reads `content/places.json` and `content/cast/*.json`
+  schedules directly (intersection and block-face strings).
