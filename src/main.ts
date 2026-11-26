@@ -280,6 +280,7 @@ async function main() {
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.id === 'lm.flatiron') ?? { x: 0, z: 0 };
   let titleT = 0;
+  let lastRenderT = -1e9, pausedFrameDrawn = false, heldW = 0, heldH = 0;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const attributionEl = document.getElementById('attribution');
@@ -380,7 +381,16 @@ async function main() {
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
-    if (postfx) postfx.render(); else renderer.render(scene, camera);
+    // Battery and heat on phones (oversight relay): the title drift renders at 24 fps on touch devices, and
+    // an open pause menu holds the last frame instead of re-rendering the city behind it. Hidden tabs
+    // already stop: the loop runs on requestAnimationFrame, which browsers suspend in the background.
+    const capTitle = screen === 'title' && input.isTouch && frameCount > 3 && t - lastRenderT < 1000 / 24;
+    // (a resize clears the canvas, so a held frame is only kept while the drawing buffer size is unchanged)
+    const holdPaused = (screen === 'paused' || pause.open) && screen !== 'title' && pausedFrameDrawn && view.width === heldW && view.height === heldH;
+    if (!capTitle && !holdPaused) {
+      if (postfx) postfx.render(); else renderer.render(scene, camera);
+      lastRenderT = t; pausedFrameDrawn = screen === 'paused' || pause.open; heldW = view.width; heldH = view.height;
+    }
     if (frameCount === 0) loadReport.mark('first-frame');
     loadReport.frameCpu(performance.now() - cpu0); perfSamples.cpu.push(performance.now() - cpu0);
     if (trackGpu && frameCount % 6 === 0) {
