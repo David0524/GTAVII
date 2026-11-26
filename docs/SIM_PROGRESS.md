@@ -226,7 +226,7 @@ A logical layer over the street entrances (underground geometry belongs to the e
   streets): fragments of long platforms merge (Penn, Times Square, 42nd St), 6th Avenue entrances at
   29th–33rd become PATH 33rd St (its own line, separate fare). 15 stations; `complex` marks the free
   transfers (`herald_sq`: Sixth + Broadway, `times_sq`: Seventh + Broadway). Lexington stops have no
-  entrances inside the bounds. Each station carries `crossStreet` (number) for the join.
+  entrances inside the bounds. Each station carries `crossStreet` (number) and narrative's `contentId` (e.g. `station.herald_sq`, shared by a complex's lines).
 - Timetable: a pure function of the clock. Headway 4 min at the rush hours, 6 midday, 8 evening,
   12-20 at night; run time between stations from distance at ~10 m/s plus 25 s dwell; both directions
   staggered. `trainTravel(from, to)` gives the exact ride time and direction (uptown = -z; `order` counts

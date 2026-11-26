@@ -321,7 +321,7 @@ async function main() {
     const ix = sim.nearestIntersections(-380, -915, 150);
     if (ix.length < 3 || !ix.every((q) => q.streets.length >= 2)) problems.push(`nearestIntersections: ${JSON.stringify(ix.slice(0, 3))}`);
     const st = sim.subwayStations();
-    if (st.filter((q) => q.complex === 'herald_sq').length !== 2 || st.filter((q) => q.complex === 'times_sq').length !== 2 || !st.some((q) => q.line === 'path')) problems.push(`subway canon: ${st.map((q) => `${q.line}/${q.name}`).join(', ')}`);
+    if (st.filter((q) => q.complex === 'herald_sq').length !== 2 || st.filter((q) => q.complex === 'times_sq').length !== 2 || !st.some((q) => q.line === 'path') || st.some((q) => !q.contentId)) problems.push(`subway canon: ${st.map((q) => `${q.line}/${q.name}`).join(', ')}`);
   }
   if (!full.doors.entered || !full.doors.exited) problems.push(`door traffic inactive: ${JSON.stringify(full.doors)}`);
   if (!full.subway.stations || !full.events.trainArriving) problems.push(`subway inactive: ${JSON.stringify(full.subway)}`);

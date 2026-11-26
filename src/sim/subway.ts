@@ -31,19 +31,19 @@ export const LINES: { key: string; name: string; avenue: RegExp; speed: number }
  * snap to the stop on their line within 2 streets and take its name; clusters of one stop merge (long
  * platforms). `complex` marks free-transfer groups shown as one place on the map.
  */
-export const CANON: Record<string, { st: number; name: string; complex?: string }[]> = {
-  eighth: [{ st: 23, name: '23rd St' }, { st: 34, name: '34th St–Penn Station' }, { st: 42, name: '42nd St–Port Authority Bus Terminal' }],
-  seventh: [{ st: 23, name: '23rd St' }, { st: 28, name: '28th St' }, { st: 34, name: '34th St–Penn Station' }, { st: 42, name: 'Times Square–42nd St', complex: 'times_sq' }],
-  sixth: [{ st: 23, name: '23rd St' }, { st: 34, name: '34th St–Herald Square', complex: 'herald_sq' }, { st: 42, name: '42nd St' }],
-  broadway: [{ st: 23, name: '23rd St' }, { st: 28, name: '28th St' }, { st: 34, name: '34th St–Herald Square', complex: 'herald_sq' }, { st: 42, name: 'Times Square–42nd St', complex: 'times_sq' }],
+export const CANON: Record<string, { st: number; name: string; contentId?: string; complex?: string }[]> = {
+  eighth: [{ st: 23, name: '23rd St', contentId: 'station.23rd_ind8' }, { st: 34, name: '34th St–Penn Station', contentId: 'station.penn_ind' }, { st: 42, name: '42nd St–Port Authority Bus Terminal', contentId: 'station.42nd_ind8' }],
+  seventh: [{ st: 23, name: '23rd St', contentId: 'station.23rd_irt' }, { st: 28, name: '28th St', contentId: 'station.28th_irt' }, { st: 34, name: '34th St–Penn Station', contentId: 'station.penn_irt' }, { st: 42, name: 'Times Square–42nd St', contentId: 'station.times_sq', complex: 'times_sq' }],
+  sixth: [{ st: 23, name: '23rd St', contentId: 'station.23rd_ind6' }, { st: 34, name: '34th St–Herald Square', contentId: 'station.herald_sq', complex: 'herald_sq' }, { st: 42, name: '42nd St', contentId: 'station.42nd_ind6' }],
+  broadway: [{ st: 23, name: '23rd St', contentId: 'station.23rd_bmt' }, { st: 28, name: '28th St', contentId: 'station.28th_bmt' }, { st: 34, name: '34th St–Herald Square', contentId: 'station.herald_sq', complex: 'herald_sq' }, { st: 42, name: 'Times Square–42nd St', contentId: 'station.times_sq', complex: 'times_sq' }],
   lexington: [{ st: 23, name: '23rd St' }, { st: 28, name: '28th St' }, { st: 33, name: '33rd St' }],
-  path: [{ st: 33, name: '33rd St' }],
+  path: [{ st: 33, name: '33rd St', contentId: 'station.path_33' }],
 };
 /** 6th Avenue entrances between these cross streets are the PATH's, not the IND's. */
 const PATH_RANGE: [number, number] = [29, 33];
 const DWELL = 25; // s at each station
 
-export interface Station { id: number; name: string; line: string; lineName: string; x: number; z: number; entrances: { x: number; z: number }[]; order: number; crossStreet: number; complex?: string }
+export interface Station { id: number; name: string; line: string; lineName: string; x: number; z: number; entrances: { x: number; z: number }[]; order: number; crossStreet: number; complex?: string; /** narrative content id (content/subway.json); shared by a complex's lines */ contentId?: string }
 export interface TrainCall { line: string; dir: 'uptown' | 'downtown'; inSec: number }
 
 export function headway(minute: number): number {
@@ -88,12 +88,12 @@ export class Subway {
       let line = c.line;
       const n = this.crossStreet(c.x, c.z);
       if (line === 'sixth' && n >= PATH_RANGE[0] && n <= PATH_RANGE[1]) line = 'path';
-      const canon = (CANON[line] ?? []).reduce<{ st: number; name: string; complex?: string } | null>((b, q) => (Math.abs(q.st - n) <= 2 && (!b || Math.abs(q.st - n) < Math.abs(b.st - n)) ? q : b), null);
+      const canon = (CANON[line] ?? []).reduce<{ st: number; name: string; contentId?: string; complex?: string } | null>((b, q) => (Math.abs(q.st - n) <= 2 && (!b || Math.abs(q.st - n) < Math.abs(b.st - n)) ? q : b), null);
       if (!canon) continue;
       const L = LINES.find((q) => q.key === line)!;
       const into = merged.find((m) => m.line === line && m.crossStreet === canon.st);
       if (into) { into.entrances.push(...c.entrances); const k = into.entrances.length; into.x = into.entrances.reduce((a, e) => a + e.x, 0) / k; into.z = into.entrances.reduce((a, e) => a + e.z, 0) / k; }
-      else merged.push({ ...c, id: merged.length, line, lineName: L.name, name: canon.name, crossStreet: canon.st, complex: canon.complex, entrances: [...c.entrances] });
+      else merged.push({ ...c, id: merged.length, line, lineName: L.name, name: canon.name, crossStreet: canon.st, complex: canon.complex, contentId: canon.contentId, entrances: [...c.entrances] });
     }
     this.stations.length = 0; this.stations.push(...merged);
     // order along each line (downtown = larger z)
