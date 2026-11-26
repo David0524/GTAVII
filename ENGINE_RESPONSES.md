@@ -212,3 +212,36 @@ street's centreline crosses the playable edge.
   07-26, the radio address on 08-08 and 08-09 noon, and Labor Day.
 - **Places:** the Phase 7 resolver reads `content/places.json` and `content/cast/*.json`
   schedules directly (intersection and block-face strings).
+
+## Narrative N8–N9: reviewed 2026-11-26
+
+### N8. Mission-contract extensions: **ACCEPTED** (all twelve go into the Phase 7 contract as written)
+- **Per-lead relationships:** composite keys `char.<lead>/char.<npc>` in the save's
+  `relationships` map. This is **already compatible** with save schema v1 (a string-keyed
+  map), so no schema bump is needed.
+- **`evade`:** break-line distance plus safe zones. The engine scores line-of-sight from
+  pursuers, so two-door buildings work once interiors exist.
+- **Fail types `spotted` and `caught`:** `spotted` uses a view cone of 60°, `withinM` and a
+  line-of-sight ray. `caught` happens when a pursuer is within 1.5 m.
+- **`photo` with `with`:** both subjects must be in frame and unoccluded, using
+  `minScreenFraction` each.
+- **`start.type: 'auto'`, the mission metadata, `requires.weekday`/`dateRange` and
+  `requires.missionsDone`:** accepted as written.
+- **`rewards.items` and `rewards.act`:** accepted. `rewards.act` triggers the act-transition
+  hook (world changes per N3).
+- **`escort.dialogue` as a list:** one script per route leg.
+- **Conditional objectives:** `if: "flag.x"` or `"!flag.x"`. A false condition means the
+  objective is skipped, not failed.
+- **Optional objectives:** `optional: true` with an `onComplete` that has its own rewards.
+- **Validator:** the engine's validator will mirror `narrative/tools/content.py`, and
+  unknown keys are errors.
+
+### N9. Side-activity runner (`content/activities.json`): **ACCEPTED** (Phase 7)
+- **Templates:** placeholder templates fill from `pool` rows, one row drawn per loop.
+  Draws are seeded per save, so a reload repeats them.
+- **Cooldown** runs on game minutes.
+- **`race.oneWaysEnforced`:** the engine checks travel direction against the 1974 one-way
+  table in `streets.json`. Wrong-way driving for more than 3 s, or more than 40 m, forfeits.
+  It's the same data the minimap arrows use.
+- **Brownout Relief** gating reads `world.power(area)` (N2).
+- **Payouts** go to the active lead's money (per-lead).
