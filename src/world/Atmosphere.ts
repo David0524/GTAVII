@@ -39,7 +39,7 @@ export class Atmosphere {
   readonly lightDir = new THREE.Vector3();
 
   constructor(private scene: THREE.Scene) {
-    this.sky.scale.setScalar(40000);
+    this.sky.scale.setScalar(24000); // box corners (sqrt(3) x 12 km = 20.8 km) must stay inside the 30 km camera far plane, or the sky clips to an ellipse
     this.sky.turbidity.value = 8;
     this.sky.rayleigh.value = 2.2;
     this.sky.mieCoefficient.value = 0.012;
@@ -93,7 +93,7 @@ export class Atmosphere {
     lerpC(C(0.62, 0.68, 0.82), C(0.42, 0.4, 0.52), golden, this.tmp.a);
     lerpC(this.tmp.a, C(0.09, 0.1, 0.17), night, this.hemi.color);
     lerpC(C(0.32, 0.27, 0.22), C(0.3, 0.18, 0.09), night, this.hemi.groundColor);
-    this.hemi.intensity = 1.5 * day + 0.55 * night + 0.2;
+    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.55 * night + 0.2;
     // sky dome
     this.sky.turbidity.value = 6 + 4 * golden;
     this.sky.rayleigh.value = 1.6 + 1.2 * golden;
@@ -105,6 +105,32 @@ export class Atmosphere {
     this.state.sunElevation = el; this.state.night = night * late; this.state.lightsOn = smooth(6, -1, el);
     this.state.exposure = 0.5 + 0.38 * golden + 0.35 * night; // ~0.5 noon, ~0.88 golden, ~1.2 night
     return this.state;
+  }
+
+  // ---- reflection / image-based environment (vehicles request 2): a PMREM of the live sky only ----
+  private envScene = new THREE.Scene();
+  private pmrem?: THREE.PMREMGenerator;
+  private envRT?: THREE.RenderTarget;
+  private envSun = new THREE.Vector3(0, -1, 0);
+  /** Strength of sky IBL (diffuse + specular) relative to the hemisphere fill it partly replaces. */
+  envIntensity = 0.55;
+  envEnabled = true;
+  /**
+   * Re-capture the sky into scene.environment when the sun has moved > 2 deg (about every 16 s of
+   * game time at the default day length). Only the sky is captured: buildings are not in the probe,
+   * so reflections read as open sky/haze, correct for paint, chrome and glass at street level.
+   */
+  updateEnvironment(renderer: THREE.WebGPURenderer, force = false) {
+    if (!this.envEnabled) return;
+    if (!force && this.envRT && this.sunDir.angleTo(this.envSun) < THREE.MathUtils.degToRad(2)) return;
+    this.envSun.copy(this.sunDir);
+    this.pmrem ??= new THREE.PMREMGenerator(renderer);
+    const parent = this.sky.parent;
+    this.envScene.add(this.sky);
+    this.envRT = this.pmrem.fromScene(this.envScene, 0.02, 1, 100000, { size: 128, renderTarget: (this.envRT ?? null) as any }) as unknown as THREE.RenderTarget; // eslint-disable-line @typescript-eslint/no-explicit-any
+    parent?.add(this.sky);
+    this.scene.environment = this.envRT.texture;
+    this.scene.environmentIntensity = this.envIntensity;
   }
 
   setSun(azimuthDeg: number, elevationDeg: number) {

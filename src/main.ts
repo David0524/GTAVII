@@ -50,6 +50,10 @@ async function main() {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
   const atmosphere = new Atmosphere(scene);
+  if (params.has('ao')) facadeUniforms.aoStrength.value = Number(params.get('ao'));
+  // sky IBL: opt-in until verified against the look target; ?env=<intensity> (the raw sky is ~20x brighter than the fill)
+  atmosphere.envEnabled = params.has('env') && params.get('env') !== '0';
+  if (atmosphere.envEnabled) atmosphere.envIntensity = Number(params.get('env')) || 0.05;
   if (quality.shadows && params.get('shadows') !== '0') atmosphere.enableShadows(renderer, quality.name === 'high' || quality.name === 'ultra' ? 2048 : 1024);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
@@ -98,7 +102,8 @@ async function main() {
   let mode: Mode = 'onfoot';
   const camParam = params.get('cam');
   if (camParam) {
-    const [x, y, z, yaw, pitch] = camParam.split(',').map(Number);
+    const [x, y0, z, yaw, pitch] = camParam.split(',').map(Number);
+    const y = params.has('camrel') ? y0 + heightAt(x, z) + SIDEWALK_H : y0; // ?camrel=1: y is height above the ground
     fly.set(x, y, z, THREE.MathUtils.degToRad(yaw), THREE.MathUtils.degToRad(pitch || 0));
     mode = 'photo';
   }
@@ -144,15 +149,30 @@ async function main() {
   // Debug HUD is a developer overlay: off unless ?hud=1 (F3 / D-pad up toggles it in play).
   if (params.get('hud') !== '1') hud.toggle(false);
 
-  const onResize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  // Viewport sync. The canvas fills #app via CSS; every frame we compare its real client size (and the
+  // device pixel ratio) with what the renderer was last sized to, and resize on any change. Resize events
+  // alone are not enough on iOS Safari: on rotation it can fire 'resize' with the pre-rotation
+  // innerWidth and no follow-up event, leaving a portrait-width frame on a landscape screen (bug report
+  // 2026-11-26, iPhone landscape: 3D covered the left ~45% only).
+  const view = renderer.domElement; view.classList.add('t74-view');
+  let lastW = 0, lastH = 0, lastDpr = 0, lastFov = -1;
+  const onResize = (force = false) => {
+    const w = view.clientWidth || window.innerWidth, h = view.clientHeight || window.innerHeight;
+    const dpr = window.devicePixelRatio || 1, fov = settings.get('fov');
+    if (!force && w === lastW && h === lastH && dpr === lastDpr && fov === lastFov) return;
+    if (dpr !== lastDpr && lastDpr) renderer.setPixelRatio(Math.min(dpr, matchMedia('(pointer: coarse)').matches ? 1.5 : 2) * quality.pixelRatio);
+    lastW = w; lastH = h; lastDpr = dpr; lastFov = fov;
+    camera.aspect = w / h;
     // Keep the horizontal field of view sane on very wide phone screens (19.5:9 landscape).
-    camera.fov = settings.get('fov') - (camera.aspect > 2 ? 8 : 0);
+    camera.fov = fov - (camera.aspect > 2 ? 8 : 0);
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h, false); // CSS owns the element size; this sets the drawing buffer + viewport
   };
-  window.addEventListener('resize', onResize); onResize();
-  settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
+  window.addEventListener('resize', () => onResize());
+  window.addEventListener('orientationchange', () => onResize());
+  window.visualViewport?.addEventListener('resize', () => onResize());
+  onResize(true);
+  settings.subscribe((_s, k) => { if (k === 'fov') onResize(true); });
 
   // ?time=HH:MM sets the clock (screenshot rig), ?timescale=0 freezes it; ?night= overrides window lighting.
   if (params.has('time')) setTime(params.get('time')!);
@@ -166,7 +186,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -264,6 +284,7 @@ async function main() {
     if (frozen) jumpLatch = false;
     if (playing) tickClock(dt); // the clock pauses in menus, the title and cutscenes
     const light = atmosphere.update();
+    atmosphere.updateEnvironment(renderer);
     facadeUniforms.night.value = nightOverride ?? light.night;
     streetLightUniforms.lightsOn.value = light.lightsOn;
     renderer.toneMappingExposure = light.exposure;
@@ -292,6 +313,7 @@ async function main() {
     input.endFrame();
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
+    onResize(); // cheap: two clientWidth reads; catches every size change the events miss
     if (postfx) postfx.render(); else renderer.render(scene, camera);
     frameCount++;
 

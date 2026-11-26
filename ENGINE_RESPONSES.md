@@ -512,3 +512,135 @@ monotonic along the main chain.
   real metres, plus a per-building record (style, condition, floor height, seed). There's a
   TSL material in `src/render/FacadeMaterial.ts`. The interiors tier-C hook is the lit-window
   colour path.
+
+## Batch of 2026-11-26 (night): sim 5–7, vehicles 7–11, interiors 1–7, characters 1–3, UI contracts
+Sequencing: the Phase 3 look comes first and is judged against the target before anything else is
+called done. Then come the integration merges, in this order: sim, then vehicles, then characters,
+UI, gameplay, interiors and audio. Each merge is verified on the merged result: every stream's
+tests, integrated shots, frame time, and a regression note in PROGRESS.md (user: "do this right,
+not rushed").
+
+### Shipped now
+- **Sim 6, `setTerrainData(buf)`: SHIPPED** in `src/shared/terrain.ts`. Node tests can drop the
+  `data:` URL.
+- **Vehicles 7, new classes: SHIPPED** in `src/shared/traffic.ts`:
+  - `ambulance`, `fire_engine`, `ladder_truck`, `mail_truck`, `ice_cream`;
+  - `motorcycle`, `police_motorcycle`, `bicycle`.
+
+  Vehicles: please move `PROPOSED_CLASS_MODELS` into `CLASS_MODELS`. A two-wheeler class may
+  resolve to `null` in the traffic renderer until it instances bikes.
+- **Road paint: SHIPPED (47c3715).** Chunk format v2 adds a `PNT` section, so streams that parse
+  chunks themselves must take the new `chunkFormat.ts`. The markings:
+  - white 10 ft dashes on 30 ft gaps;
+  - a double yellow line on two-way streets;
+  - two-line crosswalks.
+
+### Sim
+- **5. Parked cars:** **ACCEPTED** for Phase 5. Sim owns placement, since it already reserves
+  the parking lane and knows the bus stops. Vehicles draws them through the traffic renderer
+  as `state: 'parked'`. The engine only reserves the draw budget.
+- **7. Real-device timing:** **ACCEPTED (needs the user).** It's tracked in PROGRESS.md as a
+  user check once `?sim=1` is on the integrated build. Moving the sim to a worker stays the
+  fallback; nothing is decided until the numbers are in.
+
+### Vehicles
+- **2. `scene.environment`:** **ACCEPTED, Phase 3 (now, next step).**
+  - First, a PMREM of the live sky, refreshed when the sun moves more than 2°.
+  - Later, CC0 HDRIs and local probes (`docs/briefs/ART_ASSETS.md`).
+- **8. Owned-vehicle saves:** **ACCEPTED.** Vehicles registers its own section,
+  `registerSection('vehicles', v1, …)` (E9), holding `VehicleSave[]` and `TwoWheelerSave[]`.
+  Ownership (which lead, garage or street, tickets) stays with gameplay (HOMES_AND_CARS). Link
+  the two by the vehicle `id`.
+- **9. Moving platforms:** **ACCEPTED, Phase 4** (also covers interiors 5, elevators).
+  - `PlayerController.setPlatform(body | null)`: the controller adds the body's
+    per-fixed-step delta (translation and yaw) before solving the move.
+  - Ground contact picks the platform up automatically when the support collider belongs to a
+    kinematic body.
+  - The rider crash hand-off is relayed to characters (ragdoll spawn from `riderPosition` and
+    `riderVelocity`).
+- **10. Subway track data:** **ACCEPTED, Phase 5, pipeline-side.**
+  - The pipeline emits `public/data/subway.json` from OSM `railway=subway` (1974 IND, IRT and
+    BMT lines only, period-gated like buildings): centrelines at rail-top height, plus
+    stations with platform extents.
+  - Sim drives `train.setState`. Interiors owns stations, and the stair cutouts are already on
+    the engine list.
+- **11. `applyHit()`:** noted, and relayed to gameplay in the next oversight sweep.
+- **5 and 6:** bloom and post are already applied (the vehicles' emissives pick them up after
+  merge). **SkidMarks: ADOPTED as-is**, owned by vehicles; the engine adds the mesh at
+  integration.
+
+### Interiors
+- **1 and 2. Facade openings and roof hatches:** **ACCEPTED, at the interiors merge**, which is
+  the first thing after the sim and vehicles merges.
+  - The worker loads `interiors/index.json` next to `terrain.bin`.
+  - `extrude()` splits outer-ring walls around `shellOpenings()` spans and holes roofs at
+    `roofHatchesWorld()`.
+  - Render and collider come from the same geometry, so both are cut.
+  - LOD1 stays uncut.
+- **3. Contract additions:** **ACCEPTED.** `await interiors.ready` before the first chunk
+  build. When `exteriorHidden` is set, the engine hides LOD1 and chunks beyond 60 m and skips
+  the sky.
+- **4. Indoor character light:** **ACCEPTED-PARTIAL.**
+  - When `inside()` is non-null and `exteriorHidden`, sun and hemi scale to 0.15 and the
+    shadow casters skip.
+  - A per-object `lightAt()` tint for characters is Phase 5, with characters.
+- **5. Elevators:** see vehicles 9 (`setPlatform`).
+- **6. Tier-C window data:** **ACCEPTED, with a change.**
+  - No per-window attributes. The facade shader already knows building id, style, condition,
+    floor height and a seed per building, and computes floor and column per window. The
+    window id is `hash(buildingSeed, floor, column)`.
+  - **Engine adds `use` (residential, office, loft, hotel, retail) to the per-building record**
+    and `areaPower` and clock-minute uniforms.
+  - Interiors ships the room function as a TSL `Fn(windowId, use, floor, uvInPane)` that returns
+    the colour. The engine calls it where it now draws the lit-window colour.
+- **7. Water tanks:** **ACCEPTED.** After merge, the engine's far water tanks come from
+  `roofFeatures(buildingId)`, replacing today's heuristic placement, so the near and far tanks
+  always match. Interiors hides the engine instance within its 30 m swap radius by id.
+
+### Characters
+- **1. Appearance sheets:** **REDIRECTED to narrative.** Narrative owns wardrobe and props; the
+  question of personal props is relayed.
+- **2. `groundAt(x, z)`:** **ACCEPTED, at the characters merge.** It goes in
+  `src/shared/ground.ts`:
+  - y comes from a short downward Rapier ray when physics is resident (curbs, stoops, stairs),
+    else `heightAt()`;
+  - `surface` comes from the chunk ground kind (road → asphalt, sidewalk and plaza →
+    concrete, curb → stone, park → dirt), with grates and puddles in Phase 6.
+- **3. Factory wiring:** **ACCEPTED, at the characters merge.**
+
+### UI contracts (question from the oversight session)
+**Reviewed; within the hand-off. ACCEPTED.**
+- `Settings.ts` became UI-owned at c3db008.
+- The `Input.ts` bindings patch is what ui 3 asked for: defaults identical, a context-gated
+  extra action per key, and a pad override per action. Two notes:
+  - The D-pad and LB double meanings (hud/inventory/weaponSelect vs. menu nav and tabs) must
+    stay context-gated in gameplay. Menus read `nav*` and `tab*` only.
+  - Gameplay must not read `jump` during a cutscene, because A also maps to `skip`.
+- `src/shared/uiHost.ts` and `uiEvents.ts`: **ACCEPTED as shared contracts, engine-owned after
+  merge.** Changes go through ENGINE_REQUESTS like `traffic.ts`.
+- `uilab.html` goes into the Vite inputs at the UI merge (the file has to exist first).
+
+### Art assets (the user, relayed by the oversight session: "graphics should really be true to life")
+**ACCEPTED** as written in `docs/briefs/ART_ASSETS.md` (copied to this branch).
+- CC0 scanned PBR detail goes under the procedural facades and ground, blended by condition.
+- CC0 HDRIs supply reflections.
+- Budgets: KTX2 textures, ≤ 256 MB High, ≤ 64 MB mobile Low. Sources go in
+  `docs/ART_SOURCES.md`.
+- This is Phase 3 work after the sky environment.
+- Sign slots and prompt packs come later, with the text policy as written.
+
+### Touch controls (TOUCH_CONTROLS.md, UI-owned): engine asks **SHIPPED**
+- **Analog pedals:** `input.touchPedals.gas` and `input.touchPedals.brake` (0..1) are written by
+  the touch UI. `input.gas` and `input.brake` (0..1) merge pad RT/LT, touch and W/S each frame,
+  and the Phase 4 driving context reads them. They reset on window blur.
+- **Safe areas:** `viewport-fit=cover` is set in `index.html`, and `env(safe-area-inset-*)` is
+  available, including the `--safe-*` variables in `theme.css`. No engine change is needed.
+
+### Gameplay 15, `nearestTalkable(x, z, radius)` and `talk(id)`: **ACCEPTED (Phase 7, mission and trigger runtime)**
+- **Shape:** `nearestTalkable` returns `{ id, name, kind: 'mission' | 'side' | 'named', x, z, prompt } | null`.
+  `talk(id)` starts the conversation or mission intro, or returns `false` if the character is
+  busy or out of their time window.
+- **Wiring:** the runtime calls `gameplay.bindTalk({ nearestTalkable, talk })` at integration, as
+  701f4cb expects. Until then, gameplay's fallback to sim ped barks stays in place.
+- **Candidates:** narrative's cast and activity registries, filtered by the story clock. A
+  character outside their mission window is not talkable; the `waitPrompt` path handles waiting.

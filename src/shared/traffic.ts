@@ -18,6 +18,16 @@ export const VEHICLE_CLASSES = [
   'box_truck', // garment-district box trucks
   'step_van',
   'garbage',
+  // Roster additions (vehicles request 7, FEATURE_AUDIT, user-confirmed). Two-wheelers are spawned via
+  // factory.spawnBike() until the traffic renderer instances them.
+  'ambulance',
+  'fire_engine',
+  'ladder_truck',
+  'mail_truck',
+  'ice_cream', // summer soft-serve route
+  'motorcycle',
+  'police_motorcycle',
+  'bicycle', // messengers
 ] as const;
 export type VehicleClass = (typeof VEHICLE_CLASSES)[number];
 

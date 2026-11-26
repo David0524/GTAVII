@@ -24,6 +24,8 @@ export interface MeshArrays {
   uv?: Float32Array;
   /** Per-building facade record: style, condition (0..4), floor height (m), seed (0..1). */
   facade?: Float32Array;
+  /** Wall occlusion: x = distance to the facing wall (m, 127 = open), y = its height (m). */
+  wallAO?: Float32Array;
 }
 export interface ChunkMeshes {
   key: string;
@@ -43,7 +45,8 @@ export interface ChunkMeshes {
 
 class Builder {
   p: number[] = []; n: number[] = []; c: number[] = []; idx: number[] = [];
-  uv: number[] = []; fac: number[] = [];
+  uv: number[] = []; fac: number[] = []; ao: number[] = [];
+  curAO: [number, number] = [127, 0];
   /** When set, every vert() also records facade uv + attributes (building meshes). */
   facadeMode = false;
   curUV: [number, number] = [0, 0];
@@ -51,12 +54,12 @@ class Builder {
   get vcount() { return this.p.length / 3; }
   vert(x: number, y: number, z: number, nx: number, ny: number, nz: number, col: [number, number, number]) {
     this.p.push(x, y, z); this.n.push(nx, ny, nz); this.c.push(col[0], col[1], col[2]);
-    if (this.facadeMode) { this.uv.push(this.curUV[0], this.curUV[1]); this.fac.push(...this.curFac); }
+    if (this.facadeMode) { this.uv.push(this.curUV[0], this.curUV[1]); this.fac.push(...this.curFac); this.ao.push(this.curAO[0], this.curAO[1]); }
   }
   quad(a: number, b: number, c: number, d: number) { this.idx.push(a, b, c, a, c, d); }
   finish(): MeshArrays {
     const m: MeshArrays = { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx) };
-    if (this.facadeMode) { m.uv = new Float32Array(this.uv); m.facade = new Float32Array(this.fac); }
+    if (this.facadeMode) { m.uv = new Float32Array(this.uv); m.facade = new Float32Array(this.fac); m.wallAO = new Float32Array(this.ao); }
     return m;
   }
 }
@@ -73,6 +76,9 @@ const STYLE_COLORS: Record<number, RGB> = {
   [Style.Postwar]: [0.6, 0.6, 0.58], // white brick / curtain wall
   [Style.LowCommercial]: [0.38, 0.34, 0.3],
   [Style.Civic]: [0.5, 0.5, 0.52],
+  [Style.HeroDeco]: [0.66, 0.62, 0.54],
+  [Style.HeroBeaux]: [0.7, 0.6, 0.47],
+  [Style.HeroChelsea]: [0.42, 0.19, 0.14],
 };
 const GROUND_COLORS: Record<number, RGB> = {
   [GroundKind.Road]: [0.11, 0.105, 0.1],
@@ -124,6 +130,7 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
       if (!ccw) { nx = -nx; nz = -nz; }
       const v = b.vcount;
       const vb = bottom - gAvg, vt = top - gAvg;
+      const ao = rec.ao?.[r]; b.curAO = ao ? [ao[2 * k] / 2, ao[2 * k + 1] * 2] : [127, 0];
       b.curUV = [along, vb]; b.vert(x0, bottom, z0, nx, 0, nz, col);
       b.curUV = [along + L, vb]; b.vert(x1, bottom, z1, nx, 0, nz, col);
       b.curUV = [along + L, vt]; b.vert(x1, top, z1, nx, 0, nz, col);
@@ -132,6 +139,7 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
       along += L;
     }
   }
+  b.curAO = [127, 0];
   // Roof
   const flat: number[] = []; const holes: number[] = [];
   for (let r = 0; r < rec.rings.length; r++) {
@@ -224,6 +232,25 @@ export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = ()
     if (gr.kind === GroundKind.Road) groundPoly(g, gr.rings, 0, col, false, half, hf);
     else if (gr.kind === GroundKind.Lot) groundPoly(g, gr.rings, SIDEWALK_H + 0.04, col, false, half, hf); // 4 cm: different tessellation from the sidewalk below must not z-fight on slopes
     else groundPoly(g, gr.rings, SIDEWALK_H, col, true, half, hf);
+  }
+  // road paint: thin quads on the road surface (terrain-following), kind 20 white / 21 yellow
+  for (const st of data.paint) {
+    g.curFac = [st.kind === 2 ? 21 : 20, 0, 0, 0];
+    for (let q = 2; q < st.pts.length; q += 2) {
+      const x0 = st.pts[q - 2], z0 = st.pts[q - 1], x1 = st.pts[q], z1 = st.pts[q + 1];
+      const L = Math.hypot(x1 - x0, z1 - z0); if (L < 0.05) continue;
+      const nx = -(z1 - z0) / L * st.width / 2, nz = (x1 - x0) / L * st.width / 2;
+      const segs = Math.max(1, Math.ceil(L / 6));
+      for (let k = 0; k < segs; k++) {
+        const ta = k / segs, tb = (k + 1) / segs;
+        const ax = x0 + (x1 - x0) * ta, az = z0 + (z1 - z0) * ta, bx = x0 + (x1 - x0) * tb, bz = z0 + (z1 - z0) * tb;
+        const v = g.vcount, white: RGB = [1, 1, 1];
+        g.vert(ax - nx, hf(ax, az) + 0.015, az - nz, 0, 1, 0, white); g.vert(ax + nx, hf(ax, az) + 0.015, az + nz, 0, 1, 0, white);
+        g.vert(bx + nx, hf(bx, bz) + 0.015, bz + nz, 0, 1, 0, white); g.vert(bx - nx, hf(bx, bz) + 0.015, bz - nz, 0, 1, 0, white);
+        const cross = (nx) * (bz - az) - (nz) * (bx - ax); // keep the quad facing up
+        if (cross > 0) g.idx.push(v, v + 2, v + 1, v, v + 3, v + 2); else g.idx.push(v, v + 1, v + 2, v, v + 2, v + 3);
+      }
+    }
   }
   const buildings = bAll.finish(), ground = g.finish(), buildingsLod1 = bLod.finish();
   const props = buildProps(data, hf);
