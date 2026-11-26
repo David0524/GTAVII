@@ -30,6 +30,7 @@ import { PauseMenu } from './ui/PauseMenu';
 import { TitleScreen } from './ui/TitleScreen';
 import { Locator } from './world/Districts';
 import { settings } from './settings/Settings';
+import { facadeUniforms } from './render/FacadeMaterial';
 
 /**
  * URL parameters (all optional):
@@ -153,6 +154,7 @@ async function main() {
   window.addEventListener('resize', onResize); onResize();
   settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
 
+  if (params.has('night')) facadeUniforms.night.value = Number(params.get('night'));
   const frames = new FrameStats();
   const clock = new THREE.Timer();
   let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
@@ -250,6 +252,7 @@ async function main() {
     clock.update(t);
     const dt = Math.min(clock.getDelta(), 0.1);
     frames.push(dt * 1000);
+    facadeUniforms.time.value += dt;
     input.poll(dt);
     if (screen === 'title') {
       titleT += dt;
