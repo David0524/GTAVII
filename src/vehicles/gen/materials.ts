@@ -79,7 +79,7 @@ function vinylMat(hex: number) {
   return m;
 }
 
-export function createMaterialSet(q: Quality, o: { paint: number; paint2?: number; roof: 'paint' | 'paint2' | number; metallic: boolean; vinyl: number; dirt: number }): MaterialSet {
+export function createMaterialSet(q: Quality, o: { paint: number; paint2?: number; roof: 'paint' | 'paint2' | number; metallic: boolean; vinyl: number; dirt: number; seat?: number; seeThroughGlass?: boolean }): MaterialSet {
   const s = sharedMats(q);
   const u: MatUniforms = { dirt: uniform(o.dirt), wet: uniform(0), burnt: uniform(0), cracked: uniform(0) };
   const physical = q !== 'low';
@@ -103,7 +103,7 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
 
   // Glass: dark, glossy; rain streaks when wet; crazed when cracked; per pane so a bullet or a
   // smashed window affects only that pane. 'broken' = shattered out: you see the dark cabin.
-  const makeGlass = (cracked: FloatUniform, broken: FloatUniform) => {
+  const makeGlass = (cracked: FloatUniform, broken: FloatUniform, seeThrough = false) => {
     const glass = new THREE.MeshPhysicalNodeMaterial({ color: 0x0b0e10, metalness: 0.1, roughness: 0.05, clearcoat: physical ? 1 : 0, clearcoatRoughness: 0.02 });
     const p: N = positionLocal;
     const nz = (x: N): N => mx_noise_float(x);
@@ -118,6 +118,11 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
     glass.roughnessNode = mix(mix(float(0.05), float(0.5), crazed.add(burnt)), float(1), br);
     glass.clearcoatNode = float(1).sub(br).mul(physical ? 1 : 0);
     glass.metalnessNode = mix(float(0.1), float(0), br);
+    if (seeThrough) {
+      // tinted, partly transparent so the cabin reads; cracked glass goes milky, shattered is open
+      glass.transparent = true; glass.depthWrite = false;
+      glass.opacityNode = mix(mix(float(0.58), float(0.88), (cracked as N)), float(0.0), br);
+    }
     owned.push(glass);
     return glass;
   };
@@ -126,9 +131,12 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
     left: { cracked: fu(0), broken: fu(0) }, right: { cracked: fu(0), broken: fu(0) },
   };
   const glass = makeGlass(u.cracked, fu(0));
-  const glassF = makeGlass(panes.front.cracked, panes.front.broken), glassB = makeGlass(panes.rear.cracked, panes.rear.broken);
-  const glassL = makeGlass(panes.left.cracked, panes.left.broken), glassR = makeGlass(panes.right.cracked, panes.right.broken);
+  const see = o.seeThroughGlass ?? false;
+  const glassF = makeGlass(panes.front.cracked, panes.front.broken, see), glassB = makeGlass(panes.rear.cracked, panes.rear.broken, see);
+  const glassL = makeGlass(panes.left.cracked, panes.left.broken, see), glassR = makeGlass(panes.right.cracked, panes.right.broken, see);
   const lamp = (c: number, e: number) => { const m = new THREE.MeshStandardNodeMaterial({ color: c, roughness: 0.15, metalness: 0, emissive: e, emissiveIntensity: 0 }); owned.push(m); return m; };
+  const seat = new THREE.MeshStandardNodeMaterial({ color: o.seat ?? 0x5a4632, roughness: 0.55, metalness: 0 }); // vinyl upholstery
+  owned.push(seat);
   const headlamp = lamp(0xe8e4d8, 0xfff0cc);
   headlamp.metalness = 0.6; headlamp.roughness = 0.06; // glassy lens over a silvered reflector
   const taillamp = lamp(0x5a0806, 0xff1a0a);
@@ -137,7 +145,7 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
 
   const bySlot: Record<Slot, THREE.Material> = {
     paint, paint2, roof, vinyl: vinylMat(o.vinyl), chrome: s.chrome!, trim: s.trim!, rubber: s.rubber!, glass, glassF, glassB, glassL, glassR, under: s.under!, wood: s.wood!,
-    white: s.white!, headlamp, taillamp, indicator, reverse, grille: s.grille!, interior: s.interior!,
+    white: s.white!, headlamp, taillamp, indicator, reverse, grille: s.grille!, interior: s.interior!, seat,
   };
   return {
     array: SLOTS.map((sl) => bySlot[sl]), bySlot, u, panes,
@@ -161,6 +169,7 @@ export function trafficSlotColor(slot: Slot): number | null {
     case 'reverse': return 0xd8d6d0;
     case 'grille': return 0x0a0a0a;
     case 'interior': return 0x171310;
+    case 'seat': return 0x4a3828;
     case 'vinyl': return 0x2a2420;
     default: return null; // paint-like (instance colour) or taillamp (instance brake)
   }

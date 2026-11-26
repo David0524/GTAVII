@@ -6,6 +6,7 @@ import { buildDecals, drawPlate } from './gen/decals';
 import { VehiclePhysics, type DriveInput } from './physics';
 import { Emitter } from './effects';
 import { ZONES, type Zone } from './gen/morphs';
+import { SLOTS } from './gen/builder';
 import { CLASS_MODELS, PROPOSED_CLASS_MODELS } from './registry';
 import {
   type TrimTier, type Condition, type Upgrade, type Components, type Security, type Trunk, type TrunkItem, type GlassPane,
@@ -143,9 +144,14 @@ export class Vehicle {
     this.engine = new EngineSystems(this.condition, { tankL: tankLitres(spec), fuel: st.fuel, cooling: TRIM[this.trim].cooling * (this.upgrades.includes('policeEngine') ? 1.2 : 1), seed: variant.seed * 31 + 7 });
     this.engine.on((type, info) => this.emit('engine', { vehicleId: this.id, type, temp: info?.temp ?? this.engine.temp } satisfies EngineEvent));
 
+    const passenger = ['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(spec.cls);
+    const SEATS = [0x5a4632, 0x6a1e1e, 0x1f2a44, 0x2a2a2a, 0x8a7350, 0x3a4a2a];
     this.mats = createMaterialSet(quality, {
       paint: save?.paint ?? variant.paint, paint2: spec.paint2, roof: spec.roofColor ?? 'paint', metallic: variant.metallic, vinyl: variant.vinylColor, dirt: save?.dirt ?? variant.dirt,
+      seat: SEATS[variant.seed % SEATS.length], seeThroughGlass: passenger,
     });
+    // distant LODs have no cabin: they keep opaque glass
+    const opaque = this.mats.array.map((mt, i) => (SLOTS[i].startsWith('glass') ? this.mats.bySlot.glass : mt));
     if (save?.paint != null) this.paint = save.paint;
     const g0 = asset.lod0, g1 = asset.lod1;
     // ---- LOD0
@@ -189,10 +195,10 @@ export class Vehicle {
     this.holes.count = 0; this.holes.frustumCulled = false;
     lod0.add(this.holes);
     // ---- LOD1 / LOD2
-    const lod1 = new THREE.Mesh(g1.body, this.mats.array);
+    const lod1 = new THREE.Mesh(g1.body, opaque);
     lod1.castShadow = true;
     if (g1.beacon) lod1.add(new THREE.Mesh(g1.beacon, this.mats.array));
-    const lod2 = new THREE.Mesh(asset.lod2, this.mats.array);
+    const lod2 = new THREE.Mesh(asset.lod2, opaque);
     const [d1, d2] = LOD_DIST[quality];
     this.lod = new THREE.LOD();
     this.lod.addLevel(lod0, 0); this.lod.addLevel(lod1, d1); this.lod.addLevel(lod2, d2);

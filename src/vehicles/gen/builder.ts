@@ -6,7 +6,7 @@ import * as THREE from 'three/webgpu';
  */
 export const SLOTS = [
   'paint', 'paint2', 'roof', 'vinyl', 'chrome', 'trim', 'rubber', 'glass', 'glassF', 'glassB', 'glassL', 'glassR', 'under',
-  'wood', 'white', 'headlamp', 'taillamp', 'indicator', 'reverse', 'grille', 'interior',
+  'wood', 'white', 'headlamp', 'taillamp', 'indicator', 'reverse', 'grille', 'interior', 'seat',
 ] as const;
 export type Slot = (typeof SLOTS)[number];
 
@@ -127,7 +127,7 @@ export class GeoBuilder {
   }
 
   /** Lathe around the local X axis (wheels): profile [radius, x]. */
-  latheX(slot: Slot, profile: [number, number][], segs: number, center: V3, mirror = false) {
+  latheX(slot: Slot, profile: [number, number][], segs: number, center: V3, mirror = false, insideX?: number) {
     const rows: V3[][] = profile.map(([r, x]) => {
       const row: V3[] = [];
       for (let k = 0; k < segs; k++) {
@@ -138,7 +138,7 @@ export class GeoBuilder {
     });
     // Winding: faces point away from a point just inboard of the profile's mid-plane on the axis.
     const xs = profile.map((p) => p[1]);
-    const xin = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const xin = insideX ?? (Math.min(...xs) + Math.max(...xs)) / 2;
     this.grid(rows, slot, { closeJ: true, inside: [center[0] + (mirror ? -xin : xin), center[1], center[2]] });
   }
 

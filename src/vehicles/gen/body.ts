@@ -114,7 +114,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
 
   // ---------------------------------------------------------------- stations
   const st = new Set<number>();
-  const n = Math.max(lod === 0 ? 16 : 7, Math.round(L / (lod === 0 ? 0.36 : 0.85)));
+  const n = Math.max(lod === 0 ? 14 : 7, Math.round(L / (lod === 0 ? 0.42 : 0.85)));
   for (let i = 0; i <= n; i++) st.add(L * i / n);
   for (const a of axles) {
     const k = lod === 0 ? 8 : 1;
@@ -175,6 +175,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
 
   // ---------------------------------------------------------------- greenhouse
   greenhouse(b, m, o, Z, halfW, lod);
+  if (lod === 0 && PASSENGER.has(m.cls)) cabin(b, m, Z, halfW);
 
   // ---------------------------------------------------------------- cargo modules
   for (const c of m.cargo ?? []) cargo(b, c, Z, lod);
@@ -473,6 +474,40 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   };
 }
 
+// ======================================================================= cabin (visible through the glass)
+const PASSENGER = new Set<ModelSpec['cls']>(['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi']);
+function cabin(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s: number) => number) {
+  const g = m.gh, belt = m.beltY;
+  const hw = halfW((g.sA0 + g.sC0) / 2) - g.beltInset - 0.06;
+  const d = m.seats.driver;
+  const front = Z(g.sA0), rearLimit = Z(g.sC0) - 0.2;
+  // dash and its padded top
+  b.box('interior', 0, belt - 0.03, front + 0.25, hw * 2, 0.2, 0.4);
+  b.box('trim', 0, belt + 0.075, front + 0.3, hw * 2, 0.03, 0.32);
+  // steering wheel on its column, tilted toward the driver
+  const wz = front + 0.62, wy = belt + 0.1;
+  b.add('trim', new THREE.TorusGeometry(0.19, 0.016, 4, 12), new THREE.Matrix4().makeTranslation(d[0], wy, wz).multiply(new THREE.Matrix4().makeRotationX(-0.45)));
+  b.add('trim', new THREE.CylinderGeometry(0.025, 0.03, 0.45, 6), new THREE.Matrix4().makeTranslation(d[0], wy - 0.08, wz - 0.2).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2 - 0.45)));
+  // bench seats with headrests (mandatory on new cars from 1969)
+  const bench = (z: number, headrests: boolean) => {
+    b.box('seat', 0, belt - 0.22, z - 0.25, hw * 2, 0.16, 0.5); // cushion (mostly below the belt)
+    b.add('seat', new THREE.BoxGeometry(hw * 2, 0.56, 0.14), new THREE.Matrix4().makeTranslation(0, belt + 0.05, z).multiply(new THREE.Matrix4().makeRotationX(-0.17)));
+    if (headrests) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt + 0.4, z + 0.06, 0.26, 0.2, 0.1, 0, -0.17);
+  };
+  const frontZ = d[2] + 0.32;
+  bench(frontZ, true);
+  const rearZ = Math.min(d[2] + 1.3, rearLimit);
+  if (rearZ - frontZ > 0.6) bench(rearZ, false);
+  // parcel shelf behind the rear seat and the headliner
+  if (m.cls !== 'wagon' && rearLimit - rearZ > 0.1) b.box('interior', 0, belt + 0.03, (rearZ + rearLimit) / 2 + 0.08, hw * 2, 0.03, rearLimit - rearZ + 0.1);
+  const rows: V3[][] = [];
+  for (const u of [0, 0.5, 1]) {
+    const s = lerp(g.sA1 + 0.05, g.sC1 - 0.05, u);
+    rows.push([-1, -0.5, 0, 0.5, 1].map((xf) => [xf * (g.roofHalfW - 0.04), g.roofY - 0.025 + g.crown * (1 - xf * xf) * 0.8, Z(s)] as V3));
+  }
+  b.grid(rows, 'white', { facing: [0, -1, 0] });
+}
+
 // ======================================================================= greenhouse
 function greenhouse(b: GeoBuilder, m: ModelSpec, o: GenOptions, Z: (s: number) => number, halfW: (s: number) => number, lod: 0 | 1) {
   const g = m.gh;
@@ -684,21 +719,25 @@ function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry 
     ? [[rim * 0.98, -w / 2], [R - 0.035, -w / 2 - 0.005], [R - 0.008, -w / 2 + 0.02], [R, -w / 4], [R, w / 4], [R - 0.008, w / 2 - 0.02], [R - 0.035, w / 2 + 0.005], [rim * 0.98, w / 2]]
     : [[rim, -w / 2], [R - 0.03, -w / 2], [R, 0], [R - 0.03, w / 2], [rim, w / 2]];
   b.latheX('rubber', tire, segs, [0, 0, 0], mir);
+  // inboard back of the wheel, so far-side wheels seen under the body never look hollow
+  if (m.sillY > 0.4) b.latheX('under', [[rim * 0.99, -w / 2 + 0.004], [0.001, -w / 2 + 0.004]], segs, [0, 0, 0], mir, w);
   const style = o.wheelStyle;
   if (o.lod === 1) { // flat disc in the trim colour
     b.latheX(style === 'fullcover' || style === 'wire' ? 'chrome' : 'trim', [[rim, w / 2], [0.001, w / 2 + 0.02]], segs, [0, 0, 0], mir);
     return b.build();
   }
   const face = w / 2;
-  if (o.whitewall) b.latheX('white', [[rim + 0.03, face + 0.006], [R - 0.06, face + 0.006]], segs, [0, 0, 0], mir);
+  // period wide whitewall band, slightly proud of the black sidewall
+  if (o.whitewall) b.latheX('white', [[rim + 0.018, face + 0.006], [R - 0.045, face + 0.008], [R - 0.04, face + 0.004]], segs, [0, 0, 0], mir, -w);
   if (style === 'fullcover' || style === 'wire') {
-    b.latheX('chrome', [[rim, face - 0.005], [rim * 0.92, face + 0.012], [rim * 0.7, face + 0.02], [rim * 0.45, face + 0.035], [rim * 0.2, face + 0.04], [0.001, face + 0.045]], segs, [0, 0, 0], mir);
+    // full wheel cover: rolled outer lip, a recessed concentric groove, a domed centre cap
+    b.latheX('chrome', [[rim, face - 0.005], [rim * 0.9, face + 0.018], [rim * 0.72, face + 0.01], [rim * 0.6, face + 0.028], [rim * 0.3, face + 0.03], [rim * 0.22, face + 0.05], [0.001, face + 0.056]], segs, [0, 0, 0], mir, -w);
   } else if (style === 'hubcap' || style === 'dogdish') {
-    b.latheX('trim', [[rim, face - 0.005], [rim * 0.9, face + 0.004], [rim * 0.55, face + 0.012], [0.001, face + 0.012]], segs, [0, 0, 0], mir);
+    b.latheX('trim', [[rim, face - 0.005], [rim * 0.9, face + 0.004], [rim * 0.55, face + 0.012], [0.001, face + 0.012]], segs, [0, 0, 0], mir, -w);
     const cr = style === 'dogdish' ? rim * 0.5 : rim * 0.72;
-    b.latheX('chrome', [[cr, face + 0.012], [cr * 0.8, face + 0.03], [cr * 0.3, face + 0.04], [0.001, face + 0.041]], segs, [0, 0, 0], mir);
+    b.latheX('chrome', [[cr, face + 0.012], [cr * 0.8, face + 0.03], [cr * 0.3, face + 0.04], [0.001, face + 0.041]], segs, [0, 0, 0], mir, -w);
   } else { // truck steel: deep dish with a hub
-    b.latheX('trim', [[rim, face - 0.01], [rim * 0.85, face - 0.04], [rim * 0.5, face - 0.05], [rim * 0.35, face - 0.02], [rim * 0.2, face + 0.03], [0.001, face + 0.04]], segs, [0, 0, 0], mir);
+    b.latheX('trim', [[rim, face - 0.01], [rim * 0.85, face - 0.04], [rim * 0.5, face - 0.05], [rim * 0.35, face - 0.02], [rim * 0.2, face + 0.03], [0.001, face + 0.04]], segs, [0, 0, 0], mir, -w);
   }
   return b.build();
 }
