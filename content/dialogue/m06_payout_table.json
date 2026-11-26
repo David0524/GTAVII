@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m06_payout_table",
+  "context": "M6 o1. Sunday, the Arden's lobby bar. Rita behind the bar. Four women at the back table.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "warm",
+      "text": "Sit down, sugar. Nobody makes a good decision standing up."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Rule one: I don't hold money I can't count. Rule two: I count everything."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Twenty women, five dollars a week, one woman a month takes the pot. Claudette's month."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.tina_mercado",
+      "emotion": "funny",
+      "text": "Del, that cop's so cheap he tips in subway tokens. I'm short this week."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "noticing",
+      "text": "You're short and you're wearing powder on your cheek in July. Who did that?"
+    },
+    {
+      "id": "l6",
+      "speaker": "char.tina_mercado",
+      "emotion": "deflecting",
+      "text": "The door. The door did it. Big mean door. Can we do the money?"
+    },
+    {
+      "id": "l7",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "We do the money. Then we talk about the door."
+    }
+  ]
+}

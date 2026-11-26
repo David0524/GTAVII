@@ -1,0 +1,78 @@
+{
+  "id": "dlg.m02_prentiss",
+  "context": "M2 o2. A man in a plaid sport coat comes through the door with a box of doughnuts.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Folks! Vic Prentiss. New management. I brought crullers. Who's the desk man?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I am. Desk opens at eleven."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Teddy, right? Can I call you Teddy? Manny told me all about you."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Big changes coming. Good changes. Anybody wants to move, we help. Cash help."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "cold",
+      "text": "Nobody here wants to move, Mr. Prentiss."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Odessa! Can I call you Odessa? Everybody wants something. Here's my card."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Take his card.",
+          "goto": "l_take"
+        },
+        {
+          "text": "Tell him where to put it.",
+          "goto": "l_tell",
+          "setRelationships": {
+            "char.teddy_arce/char.vic_prentiss": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_take",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I'll keep it by the phone. In case of fire.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_tell",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Put it with the crullers, Mr. Prentiss. Somewhere you can find it.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Ha! I like him. I like you, Teddy. We're gonna be friends."
+    }
+  ]
+}

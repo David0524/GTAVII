@@ -143,6 +143,7 @@ def main():
             if "choices" in l:
                 if len(l["choices"]) > CHOICES_MAX: E(f"{lw}: more than {CHOICES_MAX} choices")
                 for c in l["choices"]:
+                    if c.get("if"): flag_ok(lw + " choice if", c["if"].lstrip("!"))
                     if len(c["text"]) > CHOICE_MAX: E(f"{lw}: choice over {CHOICE_MAX} chars: {c['text']}")
                     if c.get("goto") and c["goto"] not in lids: E(f"{lw}: choice goto {c['goto']} missing")
                     for f in c.get("setFlags", []): flag_ok(lw, f)

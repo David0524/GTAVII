@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m07_notices",
+  "context": "M7 o1. Corwin, 4th-floor corridor. Prentiss's man slides yellow paper under doors. Hollis watches.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.walter_hollis",
+      "emotion": "angry",
+      "text": "Shipmate! He's mailing us out! Thirty days, it says. Thirty days!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Teddy! Just paperwork. Standard. Nobody's evicting anybody."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "Thirty days is a conversation, not a deadline. Five hundred if you go early."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Take your paper off Mr. Hollis's floor."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.vic_prentiss",
+      "emotion": "friendly",
+      "text": "I'm in the moving business, Teddy. Moving's healthy. Ask Inez. She's thinking."
+    }
+  ]
+}
