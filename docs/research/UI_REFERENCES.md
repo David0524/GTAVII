@@ -48,6 +48,36 @@ copyright, for internal reference only. Collected by a research helper and spot-
   used the last three digits of the racetrack handle printed in the papers. The New York State Lottery itself did exist in 1974.
 - The 1979 Hertz subway map is too late for the setting.
 
-## Game references
-A separate pass on shipped AAA period games (Mafia I–III DE, L.A. Noire, RDR2, GTA) is still running; its findings will be added here.
-Screenshots are linked, never committed.
+## Game references: shipped AAA period games (all ©; linked, never committed)
+These are the 23 screenshots checked, mainly from interfaceingame.com (RDR2, Mafia: The Old Country), gamepressure.com
+(Mafia DE, Mafia III), gamesradar.com (L.A. Noire) and gtabase.com (GTA V). Not found: Mafia II DE, GTA IV, and a
+verifiable GTA VI menu.
+
+| Game, screen | What it actually does |
+|---|---|
+| RDR2 pause | Eight display words on a single torn red band over a desaturated live frame; small prompts bottom-right. No cards, no tilt |
+| RDR2 catalogue and camp ledger | A book held in two hands, straight on. Period woodtype stays **inside the printed page**; controls, cash ("$91⁰⁵") and the purchase box are clean small-caps sans on dark translucent panels |
+| RDR2 stable, satchel, stats, settings | Flat dark panels, ruled rows of label + right-aligned value, one thin red focus outline, "You cannot afford this item" in grey. Not paper |
+| Mafia DE garage | The real 3D garage full screen; "GARAGE 21/36" in condensed caps; the car name is the one script element; a spec table with thin cream bars; one outlined "Drive" button |
+| Mafia DE map | A flat printed-style map; one torn edge is the only decoration |
+| Mafia III options and map | 1968 expressed by graphic design: one heavy display word ("GAME", "MAP"), a pipe-separated tab bar, yellow for money |
+| Mafia: The Old Country, Carcyclopedia | Black field, one gold heading, a thin-line spec list, segmented bars |
+| L.A. Noire notebook | Printed small-caps field labels filled in **by hand**; used entries struck through. Hints in plain sans outside the book |
+| GTA V pause and interaction menu | One sans face throughout; dense two-column label/value list; the focused row inverted to white; script only as one header |
+
+Written sources:
+- Taylor Wright, Rockstar San Diego, on RDR2 (redlamp.org/work/rdr2/): menu motion is a subtle "shuffle", "easy to miss";
+  the radar was kept minimal "to let players stay immersed"; meters fade in quiet moments.
+- Jason Schreier, via TechRadar, on GTA VI: Rockstar tried "a million different things" for the weapon wheel and kept the familiar convention.
+
+### The rules we take from both sets of references
+1. Paper is an in-world **object, shown straight on**, never a floating, tilted card. There is no tape, no stamps and no scattered notes.
+2. **Keep the artefact and the UI layer separate.** Period typography lives inside a reproduced object; the controls,
+   cash and prompts around it are one clean sans on dark translucent panels.
+3. Most screens aren't paper at all: a **dark flat panel or a narrow left column over the live world**.
+4. **Two type roles per screen**: a display heading and one text face.
+5. **One accent colour, used for meaning only** (selection, the player, wanted).
+6. Prices and stats are **label + right-aligned value rows**, never price-tag graphics.
+7. Focus is **one thin outline or an inverted row**: no glow, no stamp, no scale-up.
+8. **One decorative gesture per screen, at most.**
+9. Motion is subtle and functional.
