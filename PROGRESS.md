@@ -304,6 +304,24 @@ land in these bands:
 go side by side with frames A–D at matching angles: 42nd St & 7th, Sixth Ave & 32nd, a Garment
 District side street, and Herald Square.
 
+### Phase 3 remaining plan (realism levers, measured one at a time on the look target)
+Source: `docs/research/GRAPHICS_REFERENCES.md` (user-approved). Its finding is that real scanned
+assets plus code beat code alone. Each lever ships only if lookmetrics and the A–D comparison
+improve, with no frame-time regression on the Low preset.
+1. [x] Road paint (1974 markings).
+2. [~] Sky PMREM environment (`?env=1`, opt-in until measured).
+3. [ ] Per-building AO baked at generation: vertex AO for street-level darkening, under-cornice
+   and canyon occlusion. Nearly free at runtime.
+4. [ ] CC0 photoscans (Poly Haven, ambientCG) layered under the procedural facades and ground,
+   with KTX2 and budgets per `docs/briefs/ART_ASSETS.md`.
+5. [ ] A `LightProbeGrid` per chunk for warm canyon bounce. Check the WebGL2 fallback.
+6. [ ] Instanced grime and poster decals; these double as the future sign slots.
+7. [ ] Aerial-perspective fog and faked light shafts at golden hour.
+8. [ ] Impostors and dithered LOD for distant blocks, with meshopt.
+9. [ ] Desktop-only tier: GTAO, SSR on wet roads, TRAA.
+10. [ ] Street furniture and call-box POIs with colliders, manholes and steam.
+Not a fit: Gaussian splats, and SSGI or volumetrics on phones.
+
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
 |---|---|---|---|

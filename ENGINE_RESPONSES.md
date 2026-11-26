@@ -628,3 +628,10 @@ not rushed").
   `docs/ART_SOURCES.md`.
 - This is Phase 3 work after the sky environment.
 - Sign slots and prompt packs come later, with the text policy as written.
+
+### Touch controls (TOUCH_CONTROLS.md, UI-owned): engine asks **SHIPPED**
+- **Analog pedals:** `input.touchPedals.gas` and `input.touchPedals.brake` (0..1) are written by
+  the touch UI. `input.gas` and `input.brake` (0..1) merge pad RT/LT, touch and W/S each frame,
+  and the Phase 4 driving context reads them. They reset on window blur.
+- **Safe areas:** `viewport-fit=cover` is set in `index.html`, and `env(safe-area-inset-*)` is
+  available, including the `--safe-*` variables in `theme.css`. No engine change is needed.
