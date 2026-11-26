@@ -57,7 +57,7 @@ varied so it never looks like a pattern:
   - A trench with steel plates and sawhorses stencilled with an invented city agency.
   - The orange-and-white steam chimney venting.
   - A broke city's "work suspended" sign, a nod to the fiscal crisis.
-- **A water-main break:** a flooded block, a geyser and kids at an opened hydrant.
+- **A water-main break:** a flooded block, a geyser from an opened hydrant.
 - **A police barricade:** a cordoned street with a beat cop waving people off. In a chase it
   becomes a roadblock.
 - **A street fair or block party, at weekends:** tables and a bandstand across the street. It's

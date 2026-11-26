@@ -59,7 +59,7 @@ nights, heat, steam and subway rumble under the gratings.
    - **iOS/Safari unlock** on the first user gesture, plus suspend and resume on app
      background, phone calls and the silent switch, with no stuck or doubled audio afterwards.
 2. **Ambience from the world data:**
-   - Layered beds by area and time: the avenue roar, side-street quiet, park birds and kids,
+   - Layered beds by area and time: the avenue roar, side-street quiet, park birds and pigeons,
      Garment District daytime clatter (handcarts, loading docks), Eighth Ave nights.
    - Point emitters placed from chunk POIs: subway gratings with rumble and air push when a
      train passes, signals clicking, steam vents, window AC units dripping and rattling, distant
