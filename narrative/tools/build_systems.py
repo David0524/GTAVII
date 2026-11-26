@@ -193,7 +193,7 @@ W("economy.json", {"_note": "Free-roam money (user: 'Make sure there's a way for
   {"id": "econ.numbers", "who": "char.earl_poole", "where": "loc.poole_shine", "pays": "runner pay $10 a day; the street number is the last three digits of the track handle printed in the paper (no legal daily number until 1980)", "links": "activity.numbers_slips"},
   {"id": "econ.otb", "name": "OTB parlour (invented branch: 'Eighth Avenue Teletrack')", "where": "8th Ave & W 37th St", "pays": "bets on invented race cards", "races": ["Aqueduct-style card at 'Belmar Downs' (invented track)"], "note": "Off-track betting existed in NYC from 1971 as a public corporation; the parlour and races here are invented."},
   {"id": "econ.card_games", "where": ["Kafeneio Kastoria (tavli and cards)", "the Shamrock Rail back room (poker, cops)", "a pool hall over a W 41st St storefront (invented: Corner Pocket Billiards)"], "pays": "stake-based"},
-  {"id": "econ.fight_cards", "where": "Madison Square Garden (invented fighters)", "pays": "bets; Teddy can work the door", "fighters": ["'Iron' Eddie Mallory", "Benny 'The Bell' Okoro", "Ray 'Sailor' Dempster", "Luis 'Cha-Cha' Ortiz"]},
+  {"id": "econ.fight_cards", "where": "Penn Square Garden (invented fighters)", "pays": "bets; Teddy can work the door", "fighters": ["'Iron' Eddie Mallory", "Benny 'The Bell' Okoro", "Ray 'Sailor' Dempster", "Luis 'Cha-Cha' Ortiz"]},
   {"id": "econ.businesses_for_sale", "items": [
      {"name": "Hanyang House (half share)", "price": 4000, "income": "$60/week", "trouble": "Kallis's men want a cut; a health inspector wants a 'tip'"},
      {"name": "Royal Cafeteria", "price": 9000, "income": "$120/week", "trouble": "Lonnie's crew uses it; the night manager skims"},
@@ -221,7 +221,7 @@ W("homes.json", {"_note": "Each lead's own home (user: 'The characters should al
    "byAct": {"2": "bank letters on the hall table; the AC rattling", "3": "a small suitcase by the door (Eleni)", "epilogue": "piano sold (sold-on) / paid bills framed as a joke (kept) / a Housing Council thank-you letter on the piano (council)"},
    "storyObjects": ["item.delacroix_9_continental"]},
   {"lead": "principal", "who": "char.carmen_arce", "interior": "interior.carmen_apartment", "where": "Penn South, W 26th St & 8th Ave", "portrait": ["sewing machine by the window", "saint candles", "Teddy's academy photo, face-up", "a pot always on the stove"]},
-  {"lead": "principal", "who": "char.odessa_pruitt", "interior": "interior.corwin_floor11", "where": "Corwin room 1104", "portrait": ["a window on the Empire State", "church hats in boxes", "the court notice in her Bible", "a folding chair"]}]})
+  {"lead": "principal", "who": "char.odessa_pruitt", "interior": "interior.corwin_floor11", "where": "Corwin room 1104", "portrait": ["a window on the Empire Estate", "church hats in boxes", "the court notice in her Bible", "a folding chair"]}]})
 
 # ------------------------------------------------------------------ cars (HOMES_AND_CARS.md); makes come from the vehicles registry
 W("cars.json", {"_note": "Buying and owning cars (user: 'Should be able to buy/own cars too.'). Makes and models come from the vehicles chat's invented registry; narrative supplies sellers, prices, the insurer and the garage.", "sellers": [

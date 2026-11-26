@@ -142,7 +142,7 @@ S("dlg.m06_payout_table", "M6 o1. Sunday, the Arden's lobby bar. Rita behind the
   (D, "noticing", "You're short and you're wearing powder on your cheek in July. Who did that?"),
   (TIN, "deflecting", "The door. The door did it. Big mean door. Can we do the money?"),
   (D, "brisk", "We do the money. Then we talk about the door."))
-S("dlg.m06_claudette", "M6 o3. Hotel Pennsylvania staff entrance, W 33rd St. Claudette in her uniform.",
+S("dlg.m06_claudette", "M6 o3. Hotel Pennsylvanian staff entrance, W 33rd St. Claudette in her uniform.",
   (CLA, "formal", "Delphine. You walked all this way with my month in your bag?"),
   (D, "warm", "Ninety-five dollars. Count it. I'd be insulted if you didn't."),
   (CLA, "formal", "I send forty dollars home each week. The club is how I keep the other ten."),

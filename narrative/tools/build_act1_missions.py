@@ -129,7 +129,7 @@ M.append({
   {"id": "o3", "type": "follow", "target": "char.howard_lisle", "keepWithinM": 60, "text": "Tail Lisle to lunch"},
   {"id": "o4", "type": "photo", "subject": "char.howard_lisle", "minScreenFraction": 0.08, "text": "Photograph Lisle at the counter"},
   {"id": "o5", "type": "dialogue", "script": "dlg.m05_recognition", "text": "Remember where you've seen him"},
-  {"id": "o6", "type": "follow", "target": "char.howard_lisle", "keepWithinM": 70, "text": "Tail Lisle to the Hotel Pennsylvania"},
+  {"id": "o6", "type": "follow", "target": "char.howard_lisle", "keepWithinM": 70, "text": "Tail Lisle to the Hotel Pennsylvanian"},
   {"id": "o7", "type": "photo", "subject": "char.carl_mayhew", "with": "char.howard_lisle", "minScreenFraction": 0.06, "text": "Photograph who he's meeting"}
  ],
  "fail": [{"type": "target_lost"}, {"type": "spotted", "by": "char.howard_lisle", "withinM": 6, "note": "Proposed fail type (ENGINE_REQUESTS 8). Fallback: target_lost only."}],
@@ -150,7 +150,7 @@ M.append({
            "note": "Delphine's introduction: the first reel-change cut (ENGINE N5). Title card: DELPHINE MOORE · EIGHTH AVENUE."},
  "objectives": [
   {"id": "o1", "type": "dialogue", "script": "dlg.m06_payout_table", "text": "Run the club meeting, Rita's bar"},
-  {"id": "o2", "type": "deliver", "item": "item.club_payout_claudette", "to": "loc.hotel_pennsylvania", "text": "Pay Claudette, Hotel Pennsylvania",
+  {"id": "o2", "type": "deliver", "item": "item.club_payout_claudette", "to": "loc.hotel_pennsylvania", "text": "Pay Claudette, Hotel Pennsylvanian",
    "note": "Staff entrance on W 33rd St. On foot down Eighth Ave."},
   {"id": "o3", "type": "dialogue", "script": "dlg.m06_claudette", "text": "Hand Claudette her month"},
   {"id": "o4", "type": "goto", "to": "8th Ave & W 38th St", "radius": 20, "text": "Back up Eighth to 38th St"},

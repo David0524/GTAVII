@@ -135,7 +135,7 @@ Three leads, chosen to differ on every axis that matters in play:
 | Class | Broke; lives in an SRO room | Poor, with cash she can't bank | Rich on paper, short on cash |
 | Relation to the law | Ex-cop, disgraced | Outside it; arrested regularly | Respectable; pays the law to leave him alone |
 | Relation to the money | Asked to **collect** it | **Banks** it (for the women on the strip) | **Pays** it, and owns the buildings it's buying |
-| Home turf | The Corwin, Broadway in the 30s; the night desk | Eighth Ave 34th–42nd; the Deuce; hotel bars | His loft and vaults on W 30th St; the showroom; the Hotel Pennsylvania ballroom; Seventh Ave restaurants |
+| Home turf | The Corwin, Broadway in the 30s; the night desk | Eighth Ave 34th–42nd; the Deuce; hotel bars | His loft and vaults on W 30th St; the showroom; the Hotel Pennsylvanian ballroom; Seventh Ave restaurants |
 | Hours | Night shift (23:00–07:00) | Late evening to dawn | Business hours, then late nights at the vault and in his car |
 | Gameplay identity | **The ex-cop:** best with a revolver; non-lethal takedowns and disarms; master keys; "Old Beat" precinct favours | **The ghost:** fastest and best in melee (straight razor), vanishes into crowds; the instant camera turns a cop's bribe into leverage | **The payroll:** poor shot but hard to drop; best driver; bribes and buys off witnesses; hires muscle |
 | Combat stats (proposed, agreeing with the Gameplay chat) | Health 100 · handgun 8 · melee 6 · sprint 5 · driving 6 · blend 4 | Health 90 · handgun 5 · melee 8 · sprint 9 · driving 3 · blend 9 | Health 110 · handgun 3 · melee 4 · sprint 3 · driving 8 · blend 2 |
@@ -197,7 +197,7 @@ solstice, and sunset is around 20:30. Teddy stands at the north prow of the Flat
 facing up Broadway. He's been asked to meet someone there "where you used to stand
 your post". The first mission is a **walk-and-talk north up Broadway from 23rd to
 Herald Square** as the streetlights come on. It establishes the wholesale strip, the
-flower and fur blocks to the west, the Empire State lit ahead, the welfare hotels,
+flower and fur blocks to the west, the Empire Estate lit ahead, the welfare hotels,
 and finally the Corwin. The person who asked him there is Mayhew. He has an offer.
 
 ---
@@ -249,7 +249,7 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
   buildings cheaply, from owners leaving the city.
 - He lives on the Upper East Side, which is off the map and never shown. His world in the
   game is the penthouse office above the W 30th loft, his table at a steakhouse on W 36th
-  (invented), trade dinners in the Hotel Pennsylvania ballroom, the fur salon at the
+  (invented), trade dinners in the Hotel Pennsylvanian ballroom, the fur salon at the
   Herald Square department store, and the driver's seat of a long black sedan (an invented
   make). He likes to drive it himself at night.
 - **The money:** he's rich on paper and short on cash. It was a bad season, the banks are
@@ -301,7 +301,7 @@ Ave South. Real blocks, invented occupants. **Day** is roughly 07:00–19:00 and
 | **Herald Square** (34th St, Broadway & Sixth) | The department store, shoppers, commuters from PATH and the subway; hustlers working the crowds | Theatre-sized crowds after store hours thin out; the welfare hotels nearby light up **[S7]** | Store security; uniformed foot posts. The squares are always "covered". | Pickpocket side activity; crowd tails; Act 3 rally |
 | **The welfare-hotel belt** (Broadway & Fifth, 28th–32nd) | Residents with nowhere to go during the day; caseworkers; the Corwin's day clerk | The Corwin's night desk, Teddy's world | **The Lisle syndicate** owns three hotels by July and wants six | Home base. The Corwin is our hub interior. |
 | **Koreatown-to-be** (W 32nd St, Fifth to Broadway) | Wholesalers; one Korean restaurant (invented, following the real pattern of a 1972 opening nearby **[S10]**); a travel agent; an import office | Quiet; one lit sign | Nobody yet | Secondary cast; ambient; a family that came in 1971 |
-| **Penn Station / MSG** (Seventh to Eighth, 31st–33rd) and **Hotel Pennsylvania** (Seventh Ave at 33rd) | Commuters, porters, redcaps, cab lines; the hotel's convention trade | Event nights at the Garden (invented fight cards and concerts); cab queues on Seventh; ticket scalpers | **Cab-line starters and the scalpers' ring** | Cab-fare side activity; Act 2 meet in the hotel ballroom |
+| **Penn Station / MSG** (Seventh to Eighth, 31st–33rd) and **Hotel Pennsylvanian** (Seventh Ave at 33rd) | Commuters, porters, redcaps, cab lines; the hotel's convention trade | Event nights at the Garden (invented fight cards and concerts); cab queues on Seventh; ticket scalpers | **Cab-line starters and the scalpers' ring** | Cab-fare side activity; Act 2 meet in the hotel ballroom |
 | **The Post Office block** (Eighth Ave, 31st–33rd) | Postal workers on three shifts | The night shift: mail trucks on 31st and 33rd all night | The postal workers themselves | Night ambient; a secondary character's shift |
 | **Penn South / Chelsea edge** (Eighth to Ninth, 23rd–29th) and **Hotel Chelsea** (W 23rd, Seventh to Eighth) | Union co-op families; retirees; the 23rd St shops | Stoops, radios, domino tables; artists and drifters drifting toward the old hotel | Nobody. It's home. | Carmen's apartment; the "safe" pocket of the map |
 | **Eighth Avenue strip** (Eighth Ave, 34th–44th) | Lunch counters, bus-station foot traffic, cheap hotels | Bars, peep arcades, massage parlours, street sex work, hustlers, police sweeps **[S8]** | **Ray Bauer's arcades** (invented), with the surviving plainclothes unit "taxing" them | Delphine's turf (playable from mission 6); see §7 |

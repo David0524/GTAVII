@@ -4,14 +4,14 @@
   "before": "o3",
   "time": "20:50",
   "skippable": true,
-  "logline": "Under a wholesaler's dark awning at 31st & Broadway, the offer. The Empire State lit up over Mayhew's shoulder.",
+  "logline": "Under a wholesaler's dark awning at 31st & Broadway, the offer. The Empire Estate lit up over Mayhew's shoulder.",
   "shots": [
     {
       "id": "s1",
       "type": "wide",
       "lensMm": 32,
       "move": "static",
-      "framing": "Broadway & W 31st, roll gates down, one awning; the Empire State lit up above the rooftops",
+      "framing": "Broadway & W 31st, roll gates down, one awning; the Empire Estate lit up above the rooftops",
       "blocking": "The two men stop under the awning; a wholesaler pulls his gate",
       "beats": [
         "Gate rattle"
@@ -24,7 +24,7 @@
       "type": "medium",
       "lensMm": 50,
       "move": "slow push in on Mayhew",
-      "framing": "Mayhew framed by the Empire State's lights",
+      "framing": "Mayhew framed by the Empire Estate's lights",
       "blocking": "He lowers his voice",
       "beats": [
         "l1–l2"

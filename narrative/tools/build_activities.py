@@ -144,18 +144,18 @@ act("activity.buyers_tour", "The Buyers' Tour", N, "mission.margin_call", ["P2",
  {"type": "talk", "at": "loc.hotel_pennsylvania", "note": "Out-of-town buyers in the lobby want to see the district."},
  [O("o1", "enter_vehicle", "Your sedan on Seventh", "vehicle_role.nick_sedan"), O("o2", "goto", "Show them {sightName}", "{sight}", radius=25),
   O("o3", "dialogue", "Sell them the city", "dlg.act_buyers_{sightKey}")],
- {"sight": [["5th Ave & W 34th St", "the Empire State", "empire"], ["W 37th St & 7th Ave", "the Garment District", "garment"], ["W 42nd St & 7th Ave", "Times Square", "times"], ["loc.flatiron_prow", "the Flatiron", "flatiron"]]},
+ {"sight": [["5th Ave & W 34th St", "the Empire Estate", "empire"], ["W 37th St & 7th Ave", "the Garment District", "garment"], ["W 42nd St & 7th Ave", "Times Square", "times"], ["loc.flatiron_prow", "the Flatiron", "flatiron"]]},
  {"perTour": 30}, 1440, "Short drives with a talkative back seat. No timers.",
  "A guided tour that teaches landmarks (P2) while Nick sells a city that's going broke. The buyers' barks (N5) carry period small talk.", acts=(2, 3), veh=["vehicle_role.nick_sedan"])
 # --- any lead
 act("activity.postcards", "Postcards", [T, D, N], "mission.contact_sheet", ["P2", "P3"], ("06:00", "21:00"), ["clear", "overcast"],
  {"type": "talk", "at": "W 34th St & Broadway", "note": "A postcard printer on Broadway buys photographs of landmarks taken in good light."},
  [O("o1", "photo", "Photograph {landmarkName}", subject="{landmark}", minScreenFraction=0.25)],
- {"landmark": [["loc.flatiron_prow", "the Flatiron"], ["5th Ave & W 34th St", "the Empire State"], ["8th Ave & W 33rd St", "the Garden"], ["loc.hotel_pennsylvania", "the Pennsylvania"],
+ {"landmark": [["loc.flatiron_prow", "the Flatiron"], ["5th Ave & W 34th St", "the Empire Estate"], ["8th Ave & W 33rd St", "the Garden"], ["loc.hotel_pennsylvania", "the Pennsylvania"],
                ["W 34th St & Broadway", "Herald Square"], ["loc.bryant_park", "Bryant Park"], ["W 42nd St & 7th Ave", "Times Square"], ["W 23rd St & 8th Ave", "the Chelsea"],
                ["W 23rd St & 7th Ave", "the towers from 23rd St"]]},
  {"perPhoto": 5, "bonus": "Golden hour pays double."}, 0, "Photo mode with auto-framing. Landmarks are big. No timers.",
- "Photo mode as map teaching. The 'towers from 23rd St' card uses the skyline layer (the World Trade Center).")
+ "Photo mode as map teaching. The 'towers from 23rd St' card uses the skyline layer (the World Trading Towers).")
 act("activity.brownout_relief", "Brownout Relief", [T, D, N], "mission.brownout", ["P5", "P4"], ("20:00", "03:00"), ["any"],
  {"type": "auto", "note": "Only on dim or off power nights (ENGINE N2). Someone on the street needs help."},
  [O("o1", "goto", "{needText}", "{needAt}", radius=20), O("o2", "deliver", "Bring the {itemName}", "{needAt}", item="{item}")],

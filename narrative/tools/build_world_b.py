@@ -95,7 +95,7 @@ street = {"_note": "Graffiti tags (invented writers; real 1970s writers' tags av
    {"title": "OPEN CALL! KETTLE & CRANE PICTURES SEEKS 'NEW YORK FACES' FOR NIGHT RATE", "acts": [1, 2], "where": "Hell's Kitchen, 8th Ave"},
    {"title": "VELVET MOON: 'FIST OF THE PAPER TIGER' · 'HOUSE OF THE WAX SAINT' · 'THUNDER OF THE SILVER FIST'", "acts": [1, 2, 3], "where": "W 42nd St marquee and one-sheets",
     "note": "Invented grindhouse titles. The engine rotates triple bills weekly."},
-   {"title": "MADISON SQUARE GARDEN — FRIDAY: 'IRON' EDDIE MALLORY vs. BENNY 'THE BELL' OKORO — 10 ROUNDS", "acts": [1, 2], "where": "Penn Station, 8th Ave", "note": "Invented boxers."},
+   {"title": "PENN SQUARE GARDEN — FRIDAY: 'IRON' EDDIE MALLORY vs. BENNY 'THE BELL' OKORO — 10 ROUNDS", "acts": [1, 2], "where": "Penn Station, 8th Ave", "note": "Invented boxers."},
    {"title": "BLOCK PARTY — W 46TH ST — SAT & SUN — BAND, RAFFLE, FAN PRIZE", "acts": [1, 2, 3], "where": "Hell's Kitchen (matches the boundaries blocker)"},
    {"title": "CONSERVE! TURN IT OFF — HUDSON UNION", "acts": [1, 2], "where": "Subway cars, bus shelters"},
    {"title": "LOST: ORANGE CAT 'COMMISSIONER'. ANSWERS TO NOTHING. REWARD.", "acts": [1, 2, 3], "where": "Penn South lampposts"},
@@ -175,7 +175,7 @@ dress = {"_note": "Dressing and ambient text for enterable interiors, per act. '
     "text": ["LISLE & ASSOCIATES", "(If B1) SEALED — BY ORDER OF THE SPECIAL PROSECUTOR"], "people": ["char.howard_lisle", "char.marjorie_kell"],
     "sound": "A ticking clock, the typewriter, then silence"},
    {"interior": "interior.herald_lunch_counter", "props": ["U-shaped counter", "chrome stools", "pie stands", "the fur salon sign upstairs"],
-    "text": ["BAXTER & LOWE — LUNCH COUNTER", "TODAY: TUNA MELT 95¢"], "people": ["char.ruth_calloway", "npc.lunch_counter_regular", "npc.shopper"],
+    "text": ["LACY'S — LUNCH COUNTER", "TODAY: TUNA MELT 95¢"], "people": ["char.ruth_calloway", "npc.lunch_counter_regular", "npc.shopper"],
     "sound": "Store announcements, cash registers, a milkshake mixer"}]}}
 (C / "radio.json").write_text(json.dumps(radio, ensure_ascii=False, indent=2) + "\n")
 (C / "street_text.json").write_text(json.dumps(street, ensure_ascii=False, indent=2) + "\n")

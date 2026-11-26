@@ -203,7 +203,7 @@
     },
     {
       "id": "loc.hotel_pennsylvania",
-      "name": "Hotel Pennsylvania (ballroom, lobby)",
+      "name": "Hotel Pennsylvanian (ballroom, lobby)",
       "at": "7th Ave & W 33rd St",
       "side": "east",
       "invented": false,
@@ -219,7 +219,7 @@
     },
     {
       "id": "loc.herald_sq_store",
-      "name": "Baxter & Lowe, Herald Square (department store: lunch counter, fur salon)",
+      "name": "Lacy's, Herald Square (department store: lunch counter, fur salon)",
       "at": "W 34th St & Broadway",
       "invented": true,
       "kind": "landmark",

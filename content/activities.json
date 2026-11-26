@@ -1278,7 +1278,7 @@
         "sight": [
           {
             "sight": "5th Ave & W 34th St",
-            "sightName": "the Empire State",
+            "sightName": "the Empire Estate",
             "sightKey": "empire"
           },
           {
@@ -1358,7 +1358,7 @@
           },
           {
             "landmark": "5th Ave & W 34th St",
-            "landmarkName": "the Empire State"
+            "landmarkName": "the Empire Estate"
           },
           {
             "landmark": "8th Ave & W 33rd St",
@@ -1397,7 +1397,7 @@
       "cooldownMin": 0,
       "vehicles": [],
       "mobile": "Photo mode with auto-framing. Landmarks are big. No timers.",
-      "design": "Photo mode as map teaching. The 'towers from 23rd St' card uses the skyline layer (the World Trade Center)."
+      "design": "Photo mode as map teaching. The 'towers from 23rd St' card uses the skyline layer (the World Trading Towers)."
     },
     {
       "id": "activity.brownout_relief",

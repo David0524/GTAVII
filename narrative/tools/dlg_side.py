@@ -110,7 +110,7 @@ s("dlg.side_last_train_1", "A tipsy office worker on the platform at 1 a.m.", ("
 s("dlg.side_last_train_2", "Her stop.", ("npc.subway_rider", "grateful", "Twenty-Third! Thank you. Here's my card. I'm a secretary. I know everybody's secrets."))
 s("dlg.side_locksmith_1", "Krause Hardware (Teddy).", (OTT, "gentle", "Lady on Thirty-Fourth locked out. Dead husband's place. Be gentle."), (T, "quiet", "I'm always gentle with doors."))
 s("dlg.side_locksmith_2", "Inside the flat (Teddy).", (T, "inner", "Three locks inside the bedroom door. Not to keep people out. To keep something in."), (T, "inner", "A box of letters. Not mine to read. Hers."))
-s("dlg.side_lost_tourists_1", "A family from Ohio with a folded map, Herald Square.", ("npc.cab_fare_tourist", "lost", "Excuse me! The Empire State Building? The map says it's here. Here is very big."),
+s("dlg.side_lost_tourists_1", "A family from Ohio with a folded map, Herald Square.", ("npc.cab_fare_tourist", "lost", "Excuse me! The Empire Estate Building? The map says it's here. Here is very big."),
   ch(("Two blocks up, east side of Fifth.", "l_r"), ("Look up.", "l_u"), ("Take the subway. Any one.", "l_w")),
   {"id": "l_r", "speaker": "npc.cab_fare_tourist", "emotion": "happy", "text": "Two blocks up, east side of Fifth. Thank you! New Yorkers are nice!", "goto": "l_e"},
   {"id": "l_u", "speaker": "npc.cab_fare_tourist", "emotion": "startled", "text": "Oh! Oh, there it is. It's right there. I feel foolish. Thank you.", "goto": "l_e"},

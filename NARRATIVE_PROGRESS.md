@@ -596,6 +596,14 @@ dependency).
 
 ## Direction changes (26 Nov 2026, relayed by the oversight session with the user's words verbatim)
 These messages arrived while N5 and N6 were being written (they crossed). Recorded verbatim:
+- **Landmark names (26 Nov 2026):** the user's words, verbatim: "Rename but that's a silly rename.
+  They should be kinda similar to the actual name. Look how GTA does it". The user picked the
+  oversight session's set: Macy's → Lacy's; MetLife Tower → Metropolitan Lifeline Tower; New York
+  Life Building → New York Lifelong Building; Madison Square Garden → Penn Square Garden; Hotel
+  Pennsylvania → Hotel Pennsylvanian; Empire State Building → Empire Estate Building; World
+  Trade Center → World Trading Towers. The registry is `content/landmarks.json`, in the UI's shape;
+  `real` is for dev matching only. All content was replaced and the validators are clean. Options and
+  the reasoning are in `narrative/LANDMARK_NAMES.md`. **Before ship: USPTO clearance of these 7 names.**
 - **N2 review:** "All good". N2 approved.
 - **Combat:** "Full open world and missions like a GTA game". Police: "Witnesses + call boxes +
   bribes (Recommended)". The Gameplay chat owns the systems

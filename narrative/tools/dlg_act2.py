@@ -163,7 +163,7 @@ S("dlg.m14_mayhew", "M14 o6. Kafeneio Kastoria, W 29th & 8th. Backgammon clacks.
   (T, "inner", "He dropped his toothpick. Carl hasn't dropped a toothpick since nineteen sixty-four."),
   (MAY, "forced", "Drink your coffee. Greeks make it like mud. Good mud."))
 # ---------------- M15 Brownout (Nick's introduction)
-S("dlg.m15_ballroom", "M15 o1. Hotel Pennsylvania ballroom, a furriers' trade dinner. Chandeliers flicker. Nick at the head table.",
+S("dlg.m15_ballroom", "M15 o1. Hotel Pennsylvanian ballroom, a furriers' trade dinner. Chandeliers flicker. Nick at the head table.",
   (N, "expansive", "Gentlemen. In Kastoria we say the beaver doesn't ask who wears the coat."),
   (N, "expansive", "I am a beaver. You are all beavers. We work. Somebody else gets warm."),
   (KAL, "cutting", "Niko, the lights. Even the hotel is losing faith in you."),
