@@ -69,3 +69,62 @@ test('touch: melee by buttons: GUARD tap dodges, GUARD hold blocks/parries, FIRE
   if (f.state === 'grappling') r.g.grappleAction('shove', [0, -1]);
   for (const k of ['hit', 'dodge']) assert.ok(ev.includes(k), `${k} (${[...new Set(ev)]})`);
 });
+
+// ---- TOUCH_CONTROLS.md: tap-to-lock, assist/gyro, auto-fire, one context button
+test('touch: tapping an enemy locks exactly that one; lockables lists only visible hostiles', () => {
+  const r = touchRig();
+  for (let i = 0; i < 3; i++) r.g.spawnCombatant({ id: `e${i}`, faction: 'hood', squad: 's', pos: [-6 + i * 6, 0, -15], weapon: null });
+  for (let i = 0; i < 3; i++) r.g.ai.alert(`e${i}`, [0, 0], 'player');
+  r.step(0.3);
+  const ids = r.g.lockables().map((t) => t.id).sort();
+  assert.deepEqual(ids, ['e0', 'e1', 'e2']);
+  assert.ok(r.g.lockTarget('e2')); assert.equal(r.g.aimer.locked, 'e2');
+  assert.ok(!r.g.lockTarget('nobody')); assert.equal(r.g.aimer.locked, null);
+});
+
+test('touch: gyro aim turns the soft assist off, and keeps it off', () => {
+  const r = touchRig();
+  r.g.setAssist('strong'); assert.equal(r.g.pc.assist, 'strong');
+  r.g.setContext({ gyro: true }); assert.equal(r.g.pc.assist, 'off');
+  r.g.setAssist('standard'); assert.equal(r.g.pc.assist, 'off');
+  r.g.setContext({ gyro: false }); r.g.setAssist('low'); assert.equal(r.g.pc.assist, 'low');
+});
+
+test('touch: auto-fire shoots a locked target by itself; tap/button modes wait for input', () => {
+  for (const mode of ['auto', 'button'] as const) {
+    const r = touchRig();
+    r.g.setContext({ fireMode: mode });
+    r.g.spawnCombatant({ id: 'e', faction: 'gang', squad: 's', pos: [0, 0, -12], weapon: null, hp: 60 });
+    r.g.ai.alert('e', [0, 0], 'player');
+    r.g.equip('weapon.service'); r.g.inv.give('char.teddy_arce', 'item.ammo_38', 30);
+    r.step(0.2); r.g.setAiming(true); assert.ok(r.g.lockTarget('e'));
+    r.step(1.5);
+    const shots = r.events.filter((e) => e.type === 'shot' && e.e.shooter === 'player').length;
+    if (mode === 'auto') assert.ok(shots >= 1, `auto fired ${shots}`); else assert.equal(shots, 0, 'button mode never fires on its own');
+  }
+});
+
+test('touch: one context button: cover, leave cover, then pick up a dropped gun', () => {
+  const r = touchRig();
+  r.g.addCar('car', 0, 0, -2.5, Math.PI / 2);
+  r.pos[2] = -0.6;
+  assert.equal(r.g.contextAction()?.kind, 'cover');
+  r.g.doContextAction([0, -1]); assert.ok(r.g.pc.cover);
+  assert.equal(r.g.contextAction()?.kind, 'leaveCover');
+  r.g.doContextAction(); assert.ok(!r.g.pc.cover);
+  // a dead gunman beside the player: picking up outranks cover
+  r.g.spawnCombatant({ id: 'd', faction: 'gang', squad: 's', pos: [1, 0, -0.6], weapon: 'weapon.snub', hp: 1 });
+  r.g.ai.agents.get('d')!.alive = false;
+  assert.equal(r.g.contextAction()?.kind, 'pickUp');
+});
+
+test('touch: the context button announces changes with a "context" event', () => {
+  const r = touchRig();
+  r.g.addCar('car', 0, 0, -2.5, Math.PI / 2);
+  const ev: any[] = []; r.g.on('context', (e) => ev.push(e));
+  r.pos[2] = -0.6; r.step(0.3);
+  assert.equal(ev.at(-1)?.kind, 'cover');
+  const n = ev.length; r.step(1); assert.equal(ev.length, n, 'no repeats while nothing changes');
+  r.pos[2] = 30; r.step(0.3);
+  assert.equal(ev.at(-1)?.kind, null);
+});

@@ -101,6 +101,18 @@ The headless proof (`touch.test.ts`):
 
 The camera direction is set straight up for all of it.
 
+### UI contract for TOUCH_CONTROLS.md (the UI chat owns the layout; gameplay owns these)
+| Need | Query / command | Event |
+|---|---|---|
+| Tap an enemy to lock | `lockables()` → `{id, chest, head, legs, threat}[]` (world points; UI projects and hit-tests), then `lockTarget(id)` | — |
+| Swipe to switch target | `swipeLock(+1 \| -1)` (= `cycleLock`) | — |
+| Soft aim assist strength | `setAssist('off'\|'low'\|'standard'\|'strong')` | — |
+| Gyro aim | `setContext({ gyro: true })` forces assist off; `setAssist` can't turn it back on while gyro is on | — |
+| Fire mode | `setContext({ fireMode: 'auto' \| 'tap' \| 'button' })`. With `auto` (the touch default), a gun out and a visible locked target, it fires by itself. With `tap` or `button`, the UI calls `setFiring` | `shot` |
+| One context button | `contextAction()` → `{kind, label, target?}` or null; `doContextAction(moveDir?)` performs it. Priority: surrender/payOff (cop encounter) > exit vehicle > pick up gun > takedown > answer phone > enter vehicle (keys/carjack/slim jim) > payphone > open hydrant > leave/take cover | `context` (fires only when it changes, checked 4×/s; `{kind:null}` when nothing applies) |
+
+Not covered yet: **talk** and **door**. Dialogue belongs to narrative and doors belong to interiors, so neither has a gameplay-side target to resolve. When those systems expose a `nearestTalkable` or `nearestDoor` query, the resolver will slot them in after cover. Tests: `touch.test.ts` (9 cases; the camera aims at the sky in all of them).
+
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, 3,480 frames):
 | Case | Avg | p95 | p99 | Max | Budget |

@@ -28,7 +28,7 @@ import { CombatAI, type Faction, type CombatTarget } from './combat/ai';
 import { Gun, NEUTRAL_MODS, type ShooterMods, type ShotRay } from './combat/weapons';
 import { humanoidHitbox, resolveShots, type ActorHitbox, type ShotResult, type TyreShape } from './combat/ballistics';
 import { Witnesses, type ReportPoint } from './police/witnesses';
-import { Police, type SuspectCtx, type UnitKind } from './police/police';
+import { Police, expectedBribe as expectedBribeOf, type SuspectCtx, type UnitKind } from './police/police';
 import { radiusOf as radiusOfCrime, type Crime, type CrimeKind } from './police/crime';
 import type { Appearance } from './police/description';
 import type { AgentCommand, AgentPort, PedSnapshot } from './police/ports';
@@ -50,7 +50,7 @@ import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
   | 'impact' | 'bark' | 'radio' | 'witness' | 'police' | 'melee' | 'money' | 'pickup' | 'ring' | 'call' | 'wear' | 'geyser' | 'tyreShot' | 'notice'
-  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire';
+  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire' | 'context';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
 /** How much a drink goes to your head (0..1 scale; effects stay modest and wear off in a few minutes). */
@@ -81,6 +81,8 @@ export interface PlayerCombatState {
   vehicleYaw: number;
   /** crouched / sneaking (stealth) */
   crouch: boolean;
+  /** touch fire mode (TOUCH_CONTROLS.md): 'auto' fires when the reticle is on a locked target; 'tap' and 'button' wait for input */
+  fireMode: 'auto' | 'tap' | 'button'; gyro: boolean;
   /** Interiors: inside a public place (diner, shop, lobby) / in a hiding spot marker */
   indoorsPublic: boolean; hiding: boolean;
   lockLimb: Limb; device: 'touch' | 'pad' | 'mouse'; assist: AssistLevel;
@@ -140,7 +142,7 @@ export class Gameplay {
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
-    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false, indoorsPublic: false, hiding: false,
+    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false, indoorsPublic: false, hiding: false, fireMode: 'auto', gyro: false,
   };
   /** Last frame's shot results (debug overlay tracers). */
   lastShots: ShotResult[] = [];
@@ -342,6 +344,12 @@ export class Gameplay {
     return best?.t ?? null;
   }
   cycleLock(dir: 1 | -1) { if (!this.player) return null; const a = this.player.aim(); const L = Math.hypot(a.dir[0], a.dir[2]) || 1; return this.aimer.cycle(a.origin, [a.dir[0] / L, 0, a.dir[2] / L], this.aimTargets(), dir); }
+  /** Tap an enemy on screen: lock exactly that one (the UI picks the id from its screen hit test). */
+  lockTarget(id: string) { const t = this.aimTargets().find((x) => x.id === id && x.alive && x.hostile); this.aimer.locked = t ? t.id : null; if (t) this.pc.aiming = true; return !!t; }
+  /** For the UI's tap hit test: hostile targets with world points (the UI projects them). */
+  lockables() { return this.aimTargets().filter((t) => t.hostile && t.visible).map((t) => ({ id: t.id, chest: t.chest, head: t.head, legs: t.legs, threat: t.threat })); }
+  /** Assist strength setting (off | low | standard | strong); gyro aim forces it off. */
+  setAssist(level: AssistLevel) { this.pc.assist = this.pc.gyro ? 'off' : level; }
   setLimb(l: Limb) { this.aimer.limb = l; this.pc.lockLimb = l; }
   meleeAttack(kind: AttackKind) { if (!this.player) return false; this.syncPlayerFighter(); return this.melee.attack(this.player.id, kind); }
   block(held: boolean) { if (this.player) { this.syncPlayerFighter(); this.melee.block(this.player.id, held); } }
@@ -364,7 +372,7 @@ export class Gameplay {
   }
   setBlindFire(on: boolean) { this.pc.blind = on; }
   surrender(on: boolean) { this.pc.surrendered = on; }
-  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch' | 'indoorsPublic' | 'hiding'>>) { Object.assign(this.pc, c); }
+  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch' | 'indoorsPublic' | 'hiding' | 'fireMode' | 'gyro'>>) { Object.assign(this.pc, c); if (c.gyro) this.pc.assist = 'off'; }
   /** Take the gun and rounds off a downed enemy within reach. Guns come in random condition and tier. */
   loot(): { weapon: string | null; rounds: number } | null {
     if (!this.player) return null;
@@ -581,6 +589,42 @@ export class Gameplay {
     return { minutes };
   }
 
+  // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
+  /** What the single context button would do right now, highest priority first. The UI shows `label`. */
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk'; label: string; target?: string } | null {
+    if (!this.player) return null;
+    const p = this.player.position();
+    const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
+    if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay him off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
+    if (this.pc.vehicle) return { kind: 'exitVehicle', label: 'Get out' };
+    for (const a of this.ai.agents.values()) if (!a.alive && a.gun && !a.looted && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2.5) return { kind: 'pickUp', label: `Take the ${this.reg.weapon(a.gun.def.id).name}`, target: a.id };
+    for (const a of this.ai.agents.values()) if (this.ai.unaware(a.id) && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 1.4) return { kind: 'takedown', label: 'Take him down', target: a.id };
+    const ring = this.phones.pending.find((c) => c.ringing); if (ring) { const ph = this.phones.phones.get(ring.ringing!); if (ph && Math.hypot(ph.x - p[0], ph.z - p[2]) < 3) return { kind: 'answerPhone', label: 'Answer the phone', target: ph.id }; }
+    for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3) { const m = this.cars.methods(c.id, this.player.lead); if (m.length) return { kind: 'enterVehicle', label: m[0] === 'keys' || m[0] === 'unlocked' ? 'Get in' : m[0] === 'carjack' ? 'Pull him out' : 'Slim jim', target: c.id }; }
+    const ph = this.phones.nearest(p[0], p[2], 2.5); if (ph) return { kind: 'usePhone', label: 'Payphone (10¢)', target: ph.id };
+    if (this.reg.weapon(this.pc.weapon).family === 'blunt') for (const pr of this.props.list.values()) if (pr.type === 'hydrant' && !this.props.isBroken(pr.id) && Math.hypot(pr.x - p[0], pr.z - p[2]) < 1.6) return { kind: 'openHydrant', label: 'Open the hydrant', target: pr.id };
+    if (this.pc.cover) return { kind: 'leaveCover', label: 'Leave cover' };
+    if (this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
+    return null;
+  }
+  /** Do the context action (the bribe amount for payOff is the cop's expected price; the UI may offer more). */
+  doContextAction(moveDir: [number, number] | null = null) {
+    const a = this.contextAction(); if (!a || !this.player) return null;
+    switch (a.kind) {
+      case 'surrender': this.surrender(true); break;
+      case 'payOff': { const r = this.policeSys.reportFor(this.player.id); this.bribe(a.target!, expectedBribeOf(r?.heat ?? 1)); break; }
+      case 'pickUp': this.loot(); break;
+      case 'takedown': this.takedown(); break;
+      case 'answerPhone': this.phones.answer(this.player.lead, a.target!); break;
+      case 'enterVehicle': { const m = this.cars.methods(a.target!, this.player.lead)[0]; this.enterCar(a.target!, m); break; }
+      case 'exitVehicle': this.exitCar(); break;
+      case 'usePhone': this.phones.place(this.player.lead, a.target!, 'service'); break;
+      case 'openHydrant': this.openHydrant(); break;
+      case 'cover': case 'leaveCover': this.toggleCover(moveDir); break;
+    }
+    return a;
+  }
+
   /** Mission "lose the police" gate: no open report on the player and no unit with eyes on / closing on them. */
   heatClear(): boolean {
     const id = this.player?.id; if (!id) return true;
@@ -591,6 +635,9 @@ export class Gameplay {
   setEssential(id: string, on = true) { if (on) this.essential.add(id); else this.essential.delete(id); }
 
   // ------------------------------------------------------------------ frame
+  private ctxTimer = 0; private ctxKey = '';
+  /** Swipe on the lock reticle: +1 right / −1 left (same as cycleLock). */
+  swipeLock(dir: 1 | -1) { return this.cycleLock(dir); }
   update(dt: number) {
     const T0 = now();
     this.time += dt;
@@ -638,11 +685,18 @@ export class Gameplay {
     const clear = this.heatClear();
     if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
     this.wasClear = clear;
+    // the context button's label changes at most 4×/s; UI listens for 'context' instead of polling
+    if ((this.ctxTimer -= dt) <= 0) { this.ctxTimer = 0.25; const c = this.contextAction(); const k = c ? c.kind + ':' + (c.target ?? '') : ''; if (k !== this.ctxKey) { this.ctxKey = k; this.emit('context', c ?? { kind: null }); } }
     this.timings.totalMs = now() - T0;
   }
 
   private updatePlayer(dt: number, p: PlayerBinding) {
     const lead = p.lead;
+    // touch auto-fire: on a locked, visible target with a gun out, it fires by itself (TOUCH_CONTROLS.md)
+    if (this.pc.device === 'touch' && this.pc.fireMode === 'auto' && this.aimer.locked && this.currentGun() && !this.pc.surrendered) {
+      const t = this.aimTargets().find((x) => x.id === this.aimer.locked);
+      this.pc.firing = !!t && t.visible && t.alive;
+    }
     // stamina and fitness
     const li = this.inv.ensure(lead);
     const mode = this.pc.sprinting ? 'sprint' : this.pc.speed > 2.5 ? 'run' : this.pc.speed > 0.3 ? 'walk' : 'idle';
