@@ -11,7 +11,7 @@ import type { UnitRec } from '../indexFormat';
 import { KINDS, type InteriorKind } from '../catalog';
 import { facadeOpenings, groundCeiling, unitEra } from '../facade';
 import { shipLadder } from './vertical';
-import { bayWidth, sillFrac } from '../../shared/facade';
+import { bayWidth, sillFrac, windowFrac } from '../../shared/facade';
 
 export interface BuildingInfo { id: number; use: number; style: number; year: number; floors: number; fh: number; top: number; gAvg: number; district: string; roof: boolean; address?: string; cond?: number }
 export interface GenCtx {
@@ -246,14 +246,12 @@ export function backRoom(c: GenCtx, s: ShopShell, style: 'storage' | 'kitchen' |
 export { KINDS };
 
 // ---------------------------------------------------------------- engine facade grid alignment (src/shared/facade.ts)
-/** FacadeMaterial window width fraction per style (must match its `winFrac`). */
-const winFrac = (style: number) => (style === 9 ? 0.42 : style === 10 ? 0.58 : style === 2 || style === 3 ? 0.78 : style === 6 ? 0.82 : 0.5);
 /**
  * Upper-floor window openings on the unit's facade, seated on the engine's bay grid: centres where the ring coordinate
  * (unit.ringU + ringDir * x) sits mid-bay. Returns local [s0, s1] spans within [x0, x1].
  */
 export function bayWindowSpans(c: GenCtx, x0: number, x1: number): [number, number][] {
-  const bay = bayWidth(c.b.style), w = bay * winFrac(c.b.style), ru = c.unit.ringU ?? 0, dir = c.unit.ringDir ?? 1;
+  const bay = bayWidth(c.b.style), w = bay * windowFrac(c.b.style), ru = c.unit.ringU ?? 0, dir = c.unit.ringDir ?? 1;
   const out: [number, number][] = [];
   const uA = ru + dir * x0, uB = ru + dir * x1;
   for (let k = Math.floor(Math.min(uA, uB) / bay) - 1; k <= Math.ceil(Math.max(uA, uB) / bay) + 1; k++) {

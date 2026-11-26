@@ -387,7 +387,7 @@ for (const b of blds) {
   for (const u of units) {
     let acc = 0, best = Infinity; const r = b.ring, n = r.length / 2;
     for (let k = 0; k < n; k++) {
-      const j = (k + 1) % n, ax = r[2 * k], az = r[2 * k + 1], bx = r[2 * j], bz = r[2 * j + 1], L = Math.hypot(bx - ax, bz - az); if (L < 1e-6) continue;
+      const j = (k + 1) % n, ax = r[2 * k], az = r[2 * k + 1], bx = r[2 * j], bz = r[2 * j + 1], L = Math.hypot(bx - ax, bz - az); if (L < 0.001) continue; // same rule as the facade shader: sub-mm edges add nothing
       const ex = (bx - ax) / L, ez = (bz - az) / L, dx = u.ox - ax, dz = u.oz - az, t = dx * ex + dz * ez, off = Math.abs(dx * ez - dz * ex);
       if (t > -0.05 && t < L + 0.05 && off < best) { best = off; u.ringU = +(acc + Math.max(0, Math.min(L, t))).toFixed(2); u.ringDir = ex * u.ux + ez * u.uz >= 0 ? 1 : -1; }
       acc += L;
