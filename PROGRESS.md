@@ -56,6 +56,15 @@ archetype/save APIs), `content/` (owned by the narrative team).
   supported (not iOS). Phones default to the Low preset with DPR capped at 1.5. All gameplay
   reads `Input` actions, so later controllers get touch for free.
 
+## Period accuracy (done after Phase 1, on request)
+Every building is now dated from three sources (PLUTO, footprint, OSM), with ordered conflict
+rules, height-for-era sanity checks and reviewed manual rulings. Lots with no footprint get
+1974 treatments, modern OSM parts are dropped, and the skyline is dated the same way (the Pan
+Am Building has been added). The method, results and the list of 46 flagged rows are in
+`docs/PERIOD_AUDIT.md`, and `docs/period_audit.csv` has one row per building.
+Remaining limits: rooftop additions on old buildings (only 1107 Broadway is corrected), and
+stand-ins that are period-typical rather than the exact lost building.
+
 ## Phase 1 critique (screenshots: `shots/phase1/`, WebGL2 via SwiftShader)
 What works:
 - The streets follow the real grid. The Flatiron's wedge reads correctly from Madison Square,
@@ -92,6 +101,7 @@ What doesn't (expected for untextured, but noted honestly):
 
 ## Known issues / TODO
 - [ ] Decide on terrain (see Decisions).
+- [ ] Research the 46 flagged rows in docs/PERIOD_AUDIT.md (rooftop additions, 206 W 36th St undated towers).
 - [ ] Low-detail shells for the buffer ring; rivers and distant boroughs on the horizon.
 - [ ] Hero landmarks are still extrusions (hand models are Phase 3). Macy's is tagged; Penn
       Station has no building outline because it's underground.

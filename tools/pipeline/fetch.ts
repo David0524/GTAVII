@@ -58,7 +58,7 @@ async function fetchFootprints(name: string, bb: { w: number; s: number; e: numb
 async function fetchPluto(bb: { w: number; s: number; e: number; n: number }) {
   const name = 'pluto.json';
   if (have(name)) return log(`skip ${name}`);
-  const fields = 'bbl,address,yearbuilt,yearalter1,yearalter2,numfloors,numbldgs,landuse,bldgclass,lotarea,bldgarea,latitude,longitude';
+  const fields = 'bbl,address,yearbuilt,yearalter1,yearalter2,numfloors,numbldgs,landuse,bldgclass,lotarea,bldgarea,lotfront,lotdepth,latitude,longitude';
   const q = new URLSearchParams({
     $select: fields,
     $where: `borough='MN' AND latitude between ${bb.s} and ${bb.n} AND longitude between ${bb.w} and ${bb.e}`,
@@ -68,6 +68,16 @@ async function fetchPluto(bb: { w: number; s: number; e: number; n: number }) {
   if (!r.ok) throw new Error(`pluto ${r.status}: ${await r.text()}`);
   const body = await r.text();
   save(name, body, { source: 'NYC Open Data 64uk-42ks (PLUTO)', bbox: bb });
+}
+
+/** PLUTO years for every Manhattan lot with 10+ floors: dates the distant skyline layer. */
+async function fetchPlutoTall() {
+  const name = 'pluto_tall.json';
+  if (have(name)) return log(`skip ${name}`);
+  const q = new URLSearchParams({ $select: 'bbl,address,yearbuilt,yearalter1,numfloors', $where: "borough='MN' AND numfloors >= 10", $limit: '50000' });
+  const r = await get(`https://data.cityofnewyork.us/resource/64uk-42ks.json?${q}`);
+  if (!r.ok) throw new Error(`pluto_tall ${r.status}: ${await r.text()}`);
+  save(name, await r.text(), { source: 'NYC Open Data 64uk-42ks (PLUTO), Manhattan lots >= 10 floors' });
 }
 
 /** OpenStreetMap: everything needed for streets, parks, rail, and building parts. */
@@ -137,6 +147,7 @@ async function main() {
   // Distant skyline: tall buildings (>60 m roof) across lower/midtown Manhattan for the horizon layer.
   await fetchFootprints('skyline.geojson', { w: -74.03, s: 40.69, e: -73.94, n: 40.80 }, ' AND height_roof > 197');
   await fetchPluto(bb);
+  await fetchPlutoTall();
   await fetchOSM(bb);
   fs.writeFileSync(mf, JSON.stringify(manifest, null, 2));
   log('done');

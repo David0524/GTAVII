@@ -3,6 +3,21 @@
  * Every entry is a deliberate, sourced decision; see DATA_SOURCES.md.
  */
 
+export const CUTOFF_YEAR = 1974;
+
+/**
+ * Per-building period decisions where the open data is wrong or ambiguous, keyed by NYC BIN.
+ * Every entry needs a reason. 'height' replaces today's roof height with the 1974 one
+ * (removes later rooftop additions); 'year' is the original construction year.
+ * See docs/PERIOD_AUDIT.md for the review that produced these.
+ */
+export const PERIOD_OVERRIDES: Record<string, { action: 'keep' | 'remove'; reason: string; year?: number; height?: number; name?: string }> = {
+  '1083026': { action: 'keep', year: 1968, name: 'Two Penn Plaza', reason: 'Two Penn Plaza (1968), Penn Station/MSG complex; undated in all three sources' },
+  '1082908': { action: 'keep', year: 1968, name: 'Madison Square Garden', reason: 'Madison Square Garden (1968) arena structure; undated in all three sources' },
+  '1015190': { action: 'keep', year: 1910, name: 'Gimbels', reason: 'Gimbels department store (1910) on Herald Square; PLUTO 2001 reflects the 1989 Manhattan Mall re-cladding' },
+  '1015602': { action: 'keep', year: 1915, height: 52, reason: '1107 Broadway (c.1915, toy-trade loft); today\'s 91 m includes a 2010s glass addition. 1974 height ~12 floors: estimated, verify' },
+};
+
 /** Traffic direction of each avenue in summer 1974, relative to the grid.
  *  'north' = uptown only, 'south' = downtown only, 'two' = two-way. */
 export const AVENUE_DIRECTION_1974: Record<string, { dir: 'north' | 'south' | 'two'; since: string; source: string }> = {
@@ -56,6 +71,8 @@ export const RESTORED_BUILDINGS = [
 
 /** Twin towers for the downtown skyline layer (completed 1972/1973). */
 export const SKYLINE_ADDITIONS = [
+  // Pan Am Building (1963): absent from the footprint dataset as a usable record. Slab spans Park Ave crosstown.
+  { name: 'Pan Am Building', lat: 40.75336, lon: -73.97640, size: 0, sizeX: 92, sizeZ: 46, height: 246, heading: 29.11 },
   { name: 'World Trade Center North Tower', lat: 40.71175, lon: -74.01315, size: 63.4, height: 417, heading: 29 },
   { name: 'World Trade Center South Tower', lat: 40.71065, lon: -74.01345, size: 63.4, height: 415, heading: 29 },
 ];

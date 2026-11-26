@@ -10,14 +10,14 @@ import {
   BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter,
   type WBuilding, type WGround, type WPoi,
 } from '../../src/shared/chunkFormat.ts';
-import { RAW, OUT, ensureDir, log } from './common.ts';
+import { RAW, OUT, ROOT, ensureDir, log } from './common.ts';
+import { dateBuilding, osmYear, type Dating } from './dating.ts';
 import {
-  AVENUE_DIRECTION_1974, HERO_NAMES, HERO_POINTS, RESTORED_BUILDINGS, SKYLINE_ADDITIONS, TWO_WAY_STREETS, roadwayWidth,
+  AVENUE_DIRECTION_1974, HERO_NAMES, HERO_POINTS, CUTOFF_YEAR, RESTORED_BUILDINGS, SKYLINE_ADDITIONS, TWO_WAY_STREETS, roadwayWidth,
 } from './era1974.ts';
 
 type P = [number, number];
 type Poly = P[][]; // outer + holes
-const CUTOFF_YEAR = 1974;
 const FT = 0.3048;
 
 // ------------------------------------------------------------------ helpers
@@ -77,6 +77,14 @@ for (const e of osm) if (e.type === 'node') nodes.set(e.id, snap(project(e.lon, 
 const ways = osm.filter((e) => e.type === 'way' && e.nodes && e.tags);
 const wayPts = (w: any): P[] => w.nodes.map((id: number) => nodes.get(id)).filter(Boolean);
 
+// OSM outlines carrying a NYC BIN: their start_date is a third, hand-curated dating source.
+const osmByBin = new Map<string, any>();
+for (const w of ways) { const b = w.tags['nycdoitt:bin']; if (b && (w.tags.building || w.tags['building:part'])) { const prev = osmByBin.get(b); if (!prev || (!prev.start_date && w.tags.start_date)) osmByBin.set(b, w.tags); } }
+for (const e of osm) if (e.type === 'relation' && e.tags?.['nycdoitt:bin'] && !osmByBin.has(e.tags['nycdoitt:bin'])) osmByBin.set(e.tags['nycdoitt:bin'], e.tags);
+
+interface AuditRow { bin: string; address: string; name: string; pluto: number; footprint: number; osm: number; heightM: number; x: number; z: number; d: Dating }
+const audit: AuditRow[] = [];
+
 // ------------------------------------------------------------------ measure grid rotation (sanity check)
 {
   let sx = 0, sz = 0;
@@ -95,7 +103,7 @@ interface Bldg {
 const buildings: Bldg[] = [];
 const lots: Poly[] = []; // stand-in parking lots
 let nextId = 1;
-const stats = { footprints: 0, removedPost1974: 0, standIns: 0, parkingLots: 0, osmParts: 0, restored: 0, heroes: 0, noYear: 0, groundedParts: 0 };
+const stats = { footprints: 0, removedPost1974: 0, standIns: 0, parkingLots: 0, osmParts: 0, restored: 0, heroes: 0, noYear: 0, groundedParts: 0, notBuildings: 0, droppedModernParts: 0, orphanBuildings: 0, orphanStandIns: 0 };
 
 function classify(year: number, use: number, floors: number, height: number, bldgclass: string): number {
   const cls = bldgclass?.[0] ?? '';
@@ -154,19 +162,61 @@ for (const f of footprints) {
     if (!inRegion(centroid(poly[0]))) continue;
     stats.footprints++;
     const lot = pluto.get(pr.mappluto_bbl ?? '') ?? pluto.get(pr.base_bbl ?? '');
-    let year = parseInt(lot?.yearbuilt ?? '0') || 0;
-    const fpYear = parseInt(pr.construction_year ?? '0') || 0;
-    if (!year) year = fpYear;
-    if (!year) { year = 1920; stats.noYear++; }
     const use = parseInt(lot?.landuse ?? '0') || 0;
-    const height = Number.isFinite(heightFt) && heightFt > 0 ? heightFt * FT : 10;
-    const floors = Math.max(1, Math.round(parseFloat(lot?.numfloors ?? '0') || height / 3.6));
-    if (year > CUTOFF_YEAR) { stats.removedPost1974++; standIns(poly, parseInt(pr.doitt_id ?? pr.objectid) || nextId, use); continue; }
+    let height = Number.isFinite(heightFt) && heightFt > 0 ? heightFt * FT : 10;
+    const o = osmByBin.get(pr.bin ?? '');
+    const d = dateBuilding({
+      bin: pr.bin, featureCode: pr.feature_code, status: pr.last_status_type, heightM: height,
+      pluto: parseInt(lot?.yearbuilt ?? '0') || 0, footprint: parseInt(pr.construction_year ?? '0') || 0, osm: osmYear(o?.start_date), osmName: o?.name,
+    });
+    const c0 = centroid(poly[0]);
+    audit.push({ bin: pr.bin ?? '', address: lot?.address ?? '', name: d.name ?? o?.name ?? '', pluto: parseInt(lot?.yearbuilt ?? '0') || 0, footprint: parseInt(pr.construction_year ?? '0') || 0, osm: osmYear(o?.start_date), heightM: +height.toFixed(1), x: +c0[0].toFixed(0), z: +c0[1].toFixed(0), d });
+    if (d.rule === '0') { stats.notBuildings++; continue; }
+    if (d.rule === '5' && d.keep) stats.noYear++;
+    if (!d.keep) { stats.removedPost1974++; standIns(poly, parseInt(pr.doitt_id ?? pr.objectid) || nextId, use); continue; }
+    const year = d.year;
+    if (d.heightOverride) height = d.heightOverride;
+    const floors = d.heightOverride ? Math.round(d.heightOverride / 3.8) : Math.max(1, Math.round(parseFloat(lot?.numfloors ?? '0') || height / 3.6));
     if (polyArea(poly) < 4 && height < 3) continue; // sheds, kiosks
     buildings.push({
       id: nextId++, poly, height, minHeight: 0, year, use, floors, flags: 0,
       style: classify(year, use, floors, height, lot?.bldgclass ?? ''), bin: pr.bin,
     });
+  }
+}
+
+// PLUTO lots with no footprint at all: buildings the footprint dataset is missing, towers too new to be
+// in it yet, and today's vacant/parking lots. Each gets its 1974 treatment inside a lot rectangle built
+// from PLUTO frontage x depth, oriented to its address street, minus any building already there.
+{
+  const usedBbl = new Set<string>();
+  for (const f of footprints) { usedBbl.add(f.properties.mappluto_bbl); usedBbl.add(f.properties.base_bbl); }
+  const near = (minX: number, minZ: number, maxX: number, maxZ: number) => buildings.filter((b) => { const bb = bbox(b.poly); return bb.maxX > minX && bb.minX < maxX && bb.maxZ > minZ && bb.minZ < maxZ; }).map((b) => b.poly);
+  for (const r of plutoRows) {
+    const bbl = String(Math.round(parseFloat(r.bbl)));
+    if (usedBbl.has(bbl) || !r.latitude) continue;
+    const [cx, cz] = project(parseFloat(r.longitude), parseFloat(r.latitude));
+    if (!inRegion([cx, cz])) continue;
+    const yr = parseInt(r.yearbuilt ?? '0') || 0, lu = parseInt(r.landuse ?? '0') || 0, fl = Math.round(parseFloat(r.numfloors ?? '0') || 0);
+    const front = (parseFloat(r.lotfront) || 0) * FT, depth = (parseFloat(r.lotdepth) || 0) * FT;
+    const row = (decision: string, keep: boolean, rule: string) => audit.push({ bin: `lot:${bbl}`, address: r.address ?? '', name: '', pluto: yr, footprint: 0, osm: 0, heightM: fl * 3.8, x: Math.round(cx), z: Math.round(cz), d: { keep, year: yr, rule, reason: decision, flagged: false } });
+    if (lu === 9 || front < 4 || depth < 4 || front * depth < 40) { row('no-footprint lot skipped (open space or no lot dimensions)', false, 'L0'); continue; }
+    const alongZ = !/STREET/.test(r.address ?? '') || /AVENUE|BROADWAY|PLAZA|SQUARE/.test(r.address ?? '');
+    const hx = (alongZ ? depth : front) / 2, hz = (alongZ ? front : depth) / 2;
+    const rect = rectPoly(cx - hx, cz - hz, cx + hx, cz + hz);
+    const free = difference([rect], near(cx - hx, cz - hz, cx + hx, cz + hz)).map(cleanPoly).filter((p): p is Poly => !!p && polyArea(p) > 40);
+    const freeArea = free.reduce((a, p) => a + polyArea(p), 0);
+    if (freeArea < 0.3 * front * depth) { row('no-footprint lot already covered by neighbours', false, 'L0'); continue; }
+    const seed = parseInt(bbl.slice(-6));
+    if (yr > 0 && yr <= CUTOFF_YEAR && fl > 0) {
+      for (const p of free) buildings.push({ id: nextId++, poly: p, height: fl * 3.8 + 1, minHeight: 0, year: yr, use: lu, floors: fl, style: classify(yr, lu, fl, fl * 3.8, r.bldgclass ?? ''), flags: 0 });
+      stats.orphanBuildings++; row(`built ${yr}, ${fl} floors per PLUTO but missing from footprints: modelled from lot`, true, 'L1');
+    } else if (yr > CUTOFF_YEAR || lu === 11) {
+      for (const p of free) standIns(p, seed, lu); stats.orphanStandIns++;
+      row(yr > CUTOFF_YEAR ? `built ${yr} (too new for footprints): period stand-in` : 'vacant today: period stand-in', false, 'L2');
+    } else if (lu === 10) {
+      lots.push(...free); stats.parkingLots++; row('parking lot today: kept as 1974 parking lot', false, 'L3');
+    } else row('no-footprint lot, no 1974 evidence: left open', false, 'L0');
   }
 }
 
@@ -203,6 +253,7 @@ for (const r of RESTORED_BUILDINGS) {
       for (const k of findContaining(centroid(pts))) if (!buildings[k].name) { buildings[k].flags |= BuildingFlag.Hero; buildings[k].name = t.name; stats.heroes++; }
     }
     if (!t['building:part'] || t['building:part'] === 'no') continue;
+    if (osmYear(t.start_date) > CUTOFF_YEAR) { stats.droppedModernParts++; continue; } // e.g. a later rooftop addition
     const h = parseFloat(t.height) || (parseFloat(t['building:levels']) ? parseFloat(t['building:levels']) * 3.6 : NaN);
     if (!Number.isFinite(h)) continue;
     const minH = parseFloat(t.min_height) || (parseFloat(t['building:min_level']) ? parseFloat(t['building:min_level']) * 3.6 : 0);
@@ -338,6 +389,7 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
 log(`wrote ${chunkIndex.length} chunks, ${(totalBytes / 1024).toFixed(0)} KiB total in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
 
 // ------------------------------------------------------------------ skyline layer (outside region)
+const skylineAudit = { kept: 0, removed: 0, keptTall: [] as string[], removedTall: [] as string[] };
 {
   const w = new ByteWriter();
   let count = 0;
@@ -345,10 +397,16 @@ log(`wrote ${chunkIndex.length} chunks, ${(totalBytes / 1024).toFixed(0)} KiB to
   const emitBox = (cx: number, cz: number, sx: number, sz: number, rot: number, h: number) => {
     w.i16(Math.round(cx / 2)); w.i16(Math.round(cz / 2)); w.u16(Math.round(sx * 10)); w.u16(Math.round(sz * 10)); w.i16(Math.round(rot * 1000)); w.u16(Math.round(h * 10)); count++;
   };
+  const plutoTall = new Map<string, any>();
+  for (const r of JSON.parse(fs.readFileSync(path.join(RAW, 'pluto_tall.json'), 'utf8'))) plutoTall.set(String(Math.round(parseFloat(r.bbl))), r);
   for (const f of skylineRaw) {
     const pr = f.properties;
-    const y = parseInt(pr.construction_year ?? '0') || 0;
-    if (y > CUTOFF_YEAR || !f.geometry) continue;
+    if (!f.geometry) continue;
+    const lot = plutoTall.get(pr.mappluto_bbl ?? '') ?? plutoTall.get(pr.base_bbl ?? '');
+    const d = dateBuilding({ bin: pr.bin, featureCode: pr.feature_code, status: pr.last_status_type, heightM: parseFloat(pr.height_roof) * FT, pluto: parseInt(lot?.yearbuilt ?? '0') || 0, footprint: parseInt(pr.construction_year ?? '0') || 0 });
+    skylineAudit[d.keep ? 'kept' : 'removed']++;
+    if (!d.keep) { if (parseFloat(pr.height_roof) * FT > 150) skylineAudit.removedTall.push(`${lot?.address ?? pr.bin} ${(parseFloat(pr.height_roof) * FT).toFixed(0)} m: ${d.reason}`); continue; }
+    if (parseFloat(pr.height_roof) * FT > 200) skylineAudit.keptTall.push(`${lot?.address ?? pr.bin} ${(parseFloat(pr.height_roof) * FT).toFixed(0)} m, ${d.year}`);
     const coords = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0] : f.geometry.coordinates[0];
     const ring: P[] = coords.map(([lon, lat]: number[]) => project(lon, lat));
     const c = centroid(ring);
@@ -358,7 +416,8 @@ log(`wrote ${chunkIndex.length} chunks, ${(totalBytes / 1024).toFixed(0)} KiB to
   }
   for (const s of SKYLINE_ADDITIONS) {
     const [x, z] = project(s.lon, s.lat);
-    emitBox(x, z, s.size, s.size, ((s.heading - GRID_ROTATION_DEG) * Math.PI) / 180, s.height);
+    const sx = (s as { sizeX?: number }).sizeX ?? s.size, sz = (s as { sizeZ?: number }).sizeZ ?? s.size;
+    emitBox(x, z, sx, sz, ((s.heading - GRID_ROTATION_DEG) * Math.PI) / 180, s.height);
   }
   w.setU32(countAt, count);
   fs.writeFileSync(path.join(OUT, 'skyline.bin'), w.bytes());
@@ -403,3 +462,23 @@ const r1 = (v: number) => Math.round(v * 10) / 10;
 fs.writeFileSync(path.join(OUT, 'streets.json'), JSON.stringify(streets.map((s) => ({ n: s.name, c: s.cls, w: s.width, o: s.oneway, p: s.pts.flatMap(([x, z]) => [r1(x), r1(z)]) }))));
 log('stats', world.stats);
 log('spawn', spawn, 'heroes', heroes.map((h) => `${h.name} (${h.ids.length} parts, ${h.height} m)`));
+
+// ------------------------------------------------------------------ period audit (committed: docs/period_audit.csv)
+{
+  const inReg = audit.filter((r) => inRegion([r.x, r.z]));
+  const esc = (v: unknown) => { const t = String(v ?? ''); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const head = 'bin,address,name,pluto_year,footprint_year,osm_year,height_m,x,z,decision,rule,flagged,reason';
+  const lines = inReg.sort((a, b) => b.heightM - a.heightM).map((r) => [r.bin, r.address, r.name, r.pluto || '', r.footprint || '', r.osm || '', r.heightM, r.x, r.z, r.d.keep ? 'keep' : 'remove', r.d.rule, r.d.flagged ? 'yes' : '', r.d.reason].map(esc).join(','));
+  ensureDir(path.join(ROOT, 'docs'));
+  fs.writeFileSync(path.join(ROOT, 'docs/period_audit.csv'), [head, ...lines].join('\n') + '\n');
+  const by = (f: (r: AuditRow) => boolean) => inReg.filter(f).length;
+  const summary = {
+    footprintsInRegion: inReg.length,
+    kept: by((r) => r.d.keep), removed: by((r) => !r.d.keep && r.d.rule !== '0'), notBuildings: by((r) => r.d.rule === '0'),
+    flaggedForReview: by((r) => r.d.flagged), overrides: by((r) => r.d.rule === '1'),
+    byRule: Object.fromEntries(['0', '1', '2', '2b', '3', '3b', '4', '5', 'L0', 'L1', 'L2', 'L3'].map((k) => [k, by((r) => r.d.rule === k)])),
+    skyline: { kept: skylineAudit.kept, removed: skylineAudit.removed },
+  };
+  fs.writeFileSync(path.join(ROOT, 'docs/period_audit_summary.json'), JSON.stringify({ summary, skylineKeptOver200m: skylineAudit.keptTall.sort(), skylineRemovedOver150m: skylineAudit.removedTall.sort() }, null, 2));
+  log('period audit', summary);
+}

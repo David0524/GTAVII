@@ -35,24 +35,33 @@ decisions).
 
 ## 1974 corrections (`tools/pipeline/era1974.ts`)
 
-### Buildings built after 1974 are removed
-- Year source: PLUTO `yearbuilt`, joined on the footprint's `mappluto_bbl`/`base_bbl`. If
-  PLUTO has no year, the footprint's `construction_year` is used. If neither has one, the
-  building is assumed to date from 1920 (27 buildings).
-- Current build: 284 post-1974 footprints removed.
-- Each removed footprint is replaced by a **stand-in**. Large footprints are sliced into
-  25/50/75/100 ft lot strips along their long grid axis. Each strip becomes a brick tenement
-  (4–6 floors), a cast-iron or masonry loft (7–14 floors), a one- or two-storey "taxpayer",
-  or a parking lot (~18%). The choice is seeded and deterministic. Current build: 423
-  stand-in buildings and 69 parking lots.
-- Known limitation: PLUTO year-built is sometimes an estimate, and some pre-1974 buildings
-  were heavily re-clad later. Overrides by BIN can be added in `era1974.ts`.
+### Period dating: every building checked against three sources
+Full method, rulings and per-building results: **[docs/PERIOD_AUDIT.md](docs/PERIOD_AUDIT.md)**
+(with `docs/period_audit.csv`).
+
+- **Dating.** Each footprint is dated from PLUTO `yearbuilt`, the footprint's
+  `construction_year`, and OSM `start_date` matched by BIN. Ordered rules resolve
+  disagreements (`tools/pipeline/dating.ts`). A second source is needed to overrule one, and
+  heights are checked against the era. Hand rulings with reasons live in `PERIOD_OVERRIDES`.
+- **Records that aren't finished buildings** (under construction, skybridges, marked for
+  demolition) are dropped.
+- **OSM `building:part`s with a post-1974 `start_date`** (rooftop additions) are dropped.
+- **Stand-ins.** Removed buildings are replaced by stand-ins. Large footprints are sliced into
+  25/50/75/100 ft lot strips along their long grid axis, and each strip becomes a brick
+  tenement (4–6 floors), a cast-iron or masonry loft (7–14 floors), a one- or two-storey
+  "taxpayer", or a parking lot (~18%). The choice is seeded and deterministic.
+- **Tax lots with no footprint** (buildings the dataset misses, towers too new for it, vacant
+  and parking lots) are modelled from PLUTO frontage × depth and given their 1974 treatment.
+- **The distant skyline layer** uses the same dating rules, with PLUTO fetched for every
+  Manhattan lot of 10 or more floors (`pluto_tall.json`).
 
 ### Buildings that stood in 1974 but are gone today
 | Building | Treatment |
 |---|---|
 | Hotel Pennsylvania (401 Seventh Ave, 1919; demolished 2022–23) | Restored as a 120 × 58 m, 86 m, 22-floor block centred on the PLUTO lot centroid (lot 1008087501). PLUTO still lists the hotel, but the footprint dataset doesn't. |
-| World Trade Center towers (1972/73) | Added to the skyline layer: 63.4 m square, 417 m and 415 m. One WTC (2014) and other post-1974 skyline towers are dropped by the year filter. |
+| World Trade Center towers (1972/73) | Added to the skyline layer: 63.4 m square, 417 m and 415 m. One WTC (2014) and other post-1974 skyline towers are dropped by the dating rules. |
+| Pan Am Building (1963) | Added to the skyline layer (92 × 46 m slab, 246 m). It has no usable record in the footprint dataset. |
+| Gimbels (1910), Two Penn Plaza (1968), Madison Square Garden (1968) | Kept by manual ruling where the open data misdates or omits the year (see PERIOD_AUDIT.md). |
 
 ### Street directions in 1974
 Avenue directions are set from the era table, not from today's OSM tags:
