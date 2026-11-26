@@ -97,7 +97,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const times: number[] = [];
   const steps = Math.round(opts.seconds / SIM_DT);
   const o = [0, 0, 0, 0];
-  let wildPeak = 0, powerChangedAt = -1;
+  let wildPeak = 0, powerChangedAt = -1, doorSeg = -1;
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
   for (let k = 0; k < steps; k++) {
     const t = k * SIM_DT;
@@ -131,6 +131,13 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (ps[1]) hooks.kills += sim.kill(ps[1].id, 30) ? 1 : 0;
       const car = sim.debugAgents().vehicles.find((v) => v.kind === 'car' && v.state === 'drive' && Math.hypot(v.x - f.x, v.z - f.z) < 80);
       if (car && sim.takeVehicle(car.id)) hooks.stolen++;
+    }
+    // doors (as the engine would feed them from interiors): storefront spots near the focus stand in for shop doors
+    if (k === 0 || seg !== doorSeg) {
+      doorSeg = seg;
+      const doors = g.spots.filter((sp) => sp.kind === 0 && Math.hypot(sp.x - f.x, sp.z - f.z) < 140).slice(0, 40)
+        .map((sp, i) => ({ id: `door_${seg}_${i}`, x: sp.x + Math.sin(sp.heading) * 0.4, z: sp.z + Math.cos(sp.heading) * 0.4, kind: 'shop', hours: ['07:00', '22:00'] as [string, string] }));
+      sim.clearDoors(); sim.setDoors(doors);
     }
     // a (player's) car left at a hydrant: ticket, then tow
     if (k === Math.round(5 / SIM_DT)) {
@@ -240,7 +247,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    hooks, subway: sim.debugSubway(), wildlife: (() => { const W = sim.debugWildlife(); return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
+    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
   };
 }
 
@@ -309,6 +316,7 @@ async function main() {
     if (r.firstUnitSec === null || r.firstUnitSec > limit) problems.push(`response ${r.label}: first unit ${r.firstUnitSec ?? 'never'} s (target <= ${limit} s)`);
   }
   // police arrival is asserted by the dedicated response-time runs below
+  if (!full.doors.entered || !full.doors.exited) problems.push(`door traffic inactive: ${JSON.stringify(full.doors)}`);
   if (!full.subway.stations || !full.events.trainArriving) problems.push(`subway inactive: ${JSON.stringify(full.subway)}`);
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;

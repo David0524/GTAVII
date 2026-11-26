@@ -17,6 +17,8 @@ import { Wildlife, type WildlifeView } from './wildlife';
 import { boardCab, callCab, dispatchResponders, leaveCab } from './service';
 import { Parking, type ParkingRule } from './parking';
 import { Subway, type Station, type TrainCall } from './subway';
+import { Doors, type DoorRec } from './doors';
+export type { DoorRec } from './doors';
 export type { Station, TrainCall } from './subway';
 export type { ParkingRule } from './parking';
 import { policePedTick, removePolice, setCopGoal, spawnPolice as spawnCop, type PoliceGoal, type PoliceView } from './police';
@@ -136,6 +138,9 @@ export class Simulation {
     this.core = core;
     this.parking = new Parking(core);
     this.subway = new Subway(core);
+    this.doors = new Doors(core);
+    core.doorArrived = (p, id) => this.doors.arrived(p, id);
+    core.doorStepIn = (p) => this.doors.stepIn(p);
     this.wild = new Wildlife(core, g.wild, Math.round(this.opts.maxPeds * 0.5), Math.round(this.opts.maxPeds * 0.15));
     g.links.forEach((l, i) => {
       if (l.kind !== LinkKind.Lane || !net.isSignal(l.endJ)) return;
@@ -189,6 +194,7 @@ export class Simulation {
     this.wild.step(h);
     this.parking.step(h);
     this.subway.step(h);
+    this.doors.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -340,6 +346,17 @@ export class Simulation {
   }
   /** Subway counters (tests/debug). */
   debugSubway() { return { stations: this.subway.stations.length, arrivals: this.subway.arrivals, boarded: Math.round(this.subway.boarded), alighted: this.subway.alighted }; }
+
+  // ---------------------------------------------------------------- doors (interiors hand-off)
+  private doors!: Doors;
+  /** Doors near the player (from interiors `doorsForChunk`): pedestrians use them. Re-sending an id updates it. */
+  setDoors(doors: DoorRec[]) { this.doors.set(doors); }
+  clearDoors(ids?: string[]) { this.doors.clear(ids); }
+  /** An interior occupant walks out onto the street. Returns the ped id or -1. Event `pedExitedDoor`. */
+  exitFromDoor(doorId: string, archetypeId?: string): number { return this.doors.exitFromDoor(doorId, archetypeId); }
+  /** A street ped goes in through a door. Event `pedEnteredDoor {doorId, pedId, archetype}` at the threshold. */
+  enterDoor(pedId: number, doorId: string): boolean { const p = this.core.pedById.get(pedId); return !!p && p.alive && this.doors.enterDoor(p, doorId); }
+  debugDoors() { return { doors: this.doors.count, entered: this.doors.entered, exited: this.doors.exited }; }
 
   // ---------------------------------------------------------------- violence and theft (gameplay)
   /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */

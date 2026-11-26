@@ -51,7 +51,7 @@ export interface Ped {
   then: string; fleeSpeed: number; cop: boolean;
   goal: PedGoal | null; path: number[];
   /** 0..1 courage (gameplay: who runs to a call box, who freezes) */
-  nerve: number; actName: string; actPrev: string;
+  nerve: number; actName: string; actPrev: string; doorId: string;
   /** police officer state (src/sim/police.ts) */
   cop2: CopState | null;
 }
@@ -77,7 +77,7 @@ export interface PedGoal {
   /** urgent: cross against the light when traffic allows (police, panicked owners) */
   urgent?: boolean;
   /** goto: what to do on arrival ('subway' = go down the stairs and leave the street) */
-  then?: 'subway';
+  then?: 'subway' | 'door'; doorId?: string;
   x?: number; z?: number; speed?: number;
   /** follow/escort: external actor id (default 'player') or numeric agent id to pace against */
   target?: string | number;
@@ -126,6 +126,8 @@ export interface SimCore {
   /** peds entering each road's sidewalks since the last foot-traffic sample, and the rolling per-minute average */
   footCount: Float32Array; footAvg: Float32Array;
   spawnPedAt(x: number, z: number, reason: string): void;
+  /** door hand-off hooks (src/sim/doors.ts) */
+  doorArrived?(p: Ped, doorId: string): void; doorStepIn?(p: Ped): void;
   onBusStop(spot: number, v: Vehicle): void;
 }
 

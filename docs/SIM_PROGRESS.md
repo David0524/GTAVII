@@ -20,6 +20,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Emergency & service traffic, player cab rides | **First pass**: `dispatch('ambulance'|'fire', x, z)` (+ ambient ambulance runs), mail trucks, soft-serve truck; `callCab` / `boardCab` / `leaveCab` with `cabReady`, `cabTurnAhead`, `cabRideArrived`; left-kerb pickups on one-way streets |
 | Parking enforcement, tows, street cleaning | **Done (first pass)**: `parkingRule(x,z,minute?,dow?)`, `hydrantsNear`, `setDay`, `registerParkedCar`/`unregisterParkedCar`; traffic agents ticket (`ticketIssued`), tow trucks tow (`towDispatched`, `vehicleTowed`), street sweepers run alternate-side windows (`sweeperOut`) |
 | Subway schedule and platform crowds | **Done (first pass)**: 20 stations from entrance clusters on 5 trunk lines; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
+| Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
@@ -221,6 +222,16 @@ A logical layer over the street entrances (underground geometry belongs to the e
   ambient rate by time of day) and board each train; alighting riders (more at rush hour) surface at
   the station's entrances near the focus (`subwayExit`). `boardSubway(pedId)` walks a ped to the
   nearest entrance and down. In the 10-min test: 76 train calls, 117 riders up the stairs.
+
+### Doors (`src/sim/doors.ts`)
+- Door records come from the engine (interiors' `doorsForChunk`); the sim doesn't import the
+  interiors stream. Each door attaches to the nearest sidewalk band (within 10 m); peds walk to the
+  kerb spot in front of it and step to a threshold 0.4 m in front of the door.
+- By day, passers-by (walkers, commuters, loiterers, workers) step into open doors within 50 m, and open
+  doors near the focus let people out every 25-90 s (faster on busy hours). Locked doors and doors
+  outside their hours are skipped.
+- Interiors/characters can hand occupants over in both directions (`exitFromDoor`, `enterDoor`) to fill
+  their slots. Test (40 stand-in shop doors from storefront spots): 114 went in, 210 came out in 10 min.
 
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,

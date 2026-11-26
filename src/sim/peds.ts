@@ -41,7 +41,7 @@ function newPed(S: SimCore, arch: ArchetypeRt, edge: number, s: number): Ped {
     lat: S.rng.range(-half, half) * 0.8, latGoal: 0, speed: arch.walkSpeed * S.rng.range(0.85, 1.15) * (S.weather === 'rain' ? 1.15 : 1), v: 0,
     state: 'walk', timer: 0, node: -1, prevEdge: -1, x: 0, z: 0, y: SIDEWALK_Y, yaw: 0, px: 0, pz: 0, pyaw: 0,
     tx: 0, tz: 0, toEdge: -1, toS: 0, spot: -1, goalSpot: -1, jayCd: S.rng.range(1, 10), hailCd: S.rng.range(5, 60), hail: null,
-    fleeX: 0, fleeZ: 0, onRoad: false, jaywalking: false, then: '', fleeSpeed: 0, cop: arch.behaviour === 'beat_cop', goal: null, path: [], nerve: Math.max(0, Math.min(1, arch.nerve + S.rng.range(-0.15, 0.15))), cop2: null, actName: '', actPrev: '',
+    fleeX: 0, fleeZ: 0, onRoad: false, jaywalking: false, then: '', fleeSpeed: 0, cop: arch.behaviour === 'beat_cop', goal: null, path: [], nerve: Math.max(0, Math.min(1, arch.nerve + S.rng.range(-0.15, 0.15))), cop2: null, actName: '', actPrev: '', doorId: '',
   };
   p.latGoal = S.rng.range(0.1, 0.6) * half;
   return p;
@@ -354,7 +354,8 @@ export function stepPeds(S: SimCore, dt: number) {
             p.edge = p.toEdge; p.s = Math.max(0, Math.min(net.walkLen[p.edge], p.toS)); p.lat = 0; p.state = then === 'flee' ? 'flee' : 'walk';
             if (p.jaywalking) { p.jaywalking = false; p.dir = S.rng.chance(0.5) ? 1 : -1; }
             placeOnEdge(S, p);
-          } else if (then === 'vanish') { despawnPed(S, p); S.stats.despawnedP++; S.emit('subwayEnter', { id: p.id, x: p.x, z: p.z }); }
+          } else if (then === 'enterDoor') { S.doorStepIn?.(p); despawnPed(S, p); S.stats.despawnedP++; }
+          else if (then === 'vanish') { despawnPed(S, p); S.stats.despawnedP++; S.emit('subwayEnter', { id: p.id, x: p.x, z: p.z }); }
           else if (then === 'loiter') { p.state = 'loiter'; p.timer = S.rng.range(20, 120) * (S.minute > 20 * 60 || S.minute < 5 * 60 ? 2 : 1); p.yaw = g.spots[p.spot].heading; }
           else if (then === 'feed') { p.state = 'feed'; p.timer = S.rng.range(240, 600); }
           else if (then === 'waitBus') { p.state = 'waitBus'; p.timer = S.rng.range(60, 240); p.yaw = g.spots[p.spot].heading; }
@@ -422,6 +423,7 @@ function walk(S: SimCore, p: Ped, dt: number) {
   if (p.goal?.kind === 'goto' && p.goal.edge === p.edge && !p.path.length && Math.abs(p.s - (p.goal.s ?? -9)) < 0.8) {
     placeOnEdge(S, p); p.state = 'hold'; p.v = 0; S.emit('goalReached', { id: p.id, x: p.x, z: p.z });
     if (p.goal.then === 'subway') { const tx = p.goal.x!, tz = p.goal.z!; p.goal = null; goFree(p, tx, tz, 'vanish'); }
+    else if (p.goal.then === 'door' && p.goal.doorId) { const id = p.goal.doorId; p.goal = null; S.doorArrived?.(p, id); }
     return;
   }
   if (p.s >= len || p.s <= 0) { p.s = Math.max(0, Math.min(len, p.s)); placeOnEdge(S, p); arriveNode(S, p); placeOnEdge(S, p); return; }
