@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import type { ChunkRequest, ChunkResponse } from './chunkWorker';
 import type { ChunkMeshes, MeshArrays } from './meshBuilder';
 import type { QualitySettings } from '../engine/quality';
+import { heightAt, terrainLoaded } from '../shared/terrain';
 
 export interface WorldManifest {
   region: { minX: number; maxX: number; minZ: number; maxZ: number };
@@ -66,10 +67,31 @@ export class World {
       w.onmessage = (ev: MessageEvent<ChunkResponse>) => this.onWorker(k, ev.data);
       this.workers.push(w); this.busy.push(false);
     }
-    // Distant ground: everything beyond the modelled region reads as dark asphalt/roofs in haze.
-    const far = new THREE.Mesh(new THREE.PlaneGeometry(20000, 20000).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x1a1816, roughness: 1 }));
-    far.position.y = -0.6; far.name = 'farGround';
-    this.root.add(far);
+    this.root.add(this.buildTerrainBase());
+  }
+
+  /**
+   * Terrain base: a coarse heightfield under the whole city and 3 km beyond (heights clamp at the
+   * data edge), a little below road level. Hides any gap at the modelled-region edge and reads as
+   * distant ground; a huge flat plane catches the rest of the horizon.
+   */
+  private buildTerrainBase(): THREE.Object3D {
+    const g = new THREE.Group(); g.name = 'terrainBase';
+    const R = this.manifest.region, pad = 3000, step = terrainLoaded() ? 40 : 1000;
+    const x0 = R.minX - pad, z0 = R.minZ - pad, nx = Math.ceil((R.maxX - R.minX + 2 * pad) / step), nz = Math.ceil((R.maxZ - R.minZ + 2 * pad) / step);
+    const geo = new THREE.PlaneGeometry(nx * step, nz * step, nx, nz).rotateX(-Math.PI / 2);
+    const pos = geo.attributes.position as THREE.BufferAttribute;
+    for (let k = 0; k < pos.count; k++) {
+      const x = pos.getX(k) + x0 + (nx * step) / 2, z = pos.getZ(k) + z0 + (nz * step) / 2;
+      pos.setXYZ(k, x, heightAt(x, z) - 0.35, z);
+    }
+    geo.computeVertexNormals(); geo.computeBoundingSphere();
+    const mat = new THREE.MeshStandardMaterial({ color: 0x1a1816, roughness: 1 });
+    g.add(new THREE.Mesh(geo, mat));
+    const far = new THREE.Mesh(new THREE.PlaneGeometry(40000, 40000).rotateX(-Math.PI / 2), mat);
+    far.position.y = -12; far.name = 'farGround';
+    g.add(far);
+    return g;
   }
 
   /** Called every frame (cheap): decide desired LOD per chunk, enqueue loads, swap visibility. */
@@ -105,7 +127,8 @@ export class World {
       if (this.busy[k]) continue;
       const key = this.queue.shift()!;
       this.busy[k] = true; this.pending.set(k, key);
-      const req: ChunkRequest = { key, url: `${this.base}chunks/${key}.bin`, chunkSize: this.manifest.chunkSize };
+      const c = this.chunks.get(key)!;
+      const req: ChunkRequest = { key, url: new URL(`${this.base}chunks/${key}.bin`, location.href).href, terrainUrl: new URL(`${this.base}terrain.bin`, location.href).href, chunkSize: this.manifest.chunkSize, i: c.info.i, j: c.info.j };
       this.workers[k].postMessage(req);
     }
   }

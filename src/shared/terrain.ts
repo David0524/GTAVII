@@ -4,14 +4,15 @@
  * change, not a code change. While TERRAIN_ENABLED is false the world is flat (y = 0 road surface).
  * Sidewalks/park surfaces sit CURB_HEIGHT above the road surface at the curb.
  */
-export const TERRAIN_ENABLED = false; // flips to true once the user confirms real relief
+export const TERRAIN_ENABLED = true; // real relief (user confirmed "Real hills"); false = flat city
 export const CURB_HEIGHT = 0.15;
 
 let grid: { cell: number; nx: number; nz: number; minX: number; minZ: number; h: Int16Array } | null = null;
 
-export async function loadTerrain(baseUrl = import.meta.env?.BASE_URL ?? '/'): Promise<void> {
+/** url defaults to `${BASE_URL}data/terrain.bin`; workers pass an absolute URL. */
+export async function loadTerrain(url?: string): Promise<void> {
   if (!TERRAIN_ENABLED || grid) return;
-  const r = await fetch(`${baseUrl}data/terrain.bin`);
+  const r = await fetch(url ?? `${import.meta.env?.BASE_URL ?? '/'}data/terrain.bin`);
   if (!r.ok) return;
   grid = decodeTerrain(await r.arrayBuffer());
 }
@@ -22,6 +23,8 @@ export function decodeTerrain(buf: ArrayBuffer) {
   const cell = dv.getUint16(6, true) / 100, nx = dv.getUint16(8, true), nz = dv.getUint16(10, true);
   return { cell, nx, nz, minX: dv.getFloat32(12, true), minZ: dv.getFloat32(16, true), h: new Int16Array(buf, 28, nx * nz) };
 }
+
+export function terrainLoaded() { return grid !== null; }
 
 /** Road-surface height (m) at world x,z; bilinear; 0 when terrain is disabled or not loaded. */
 export function heightAt(x: number, z: number): number {

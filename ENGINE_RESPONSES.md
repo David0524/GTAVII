@@ -77,7 +77,7 @@
 
 ## Engine notices: 2026-11-26 (for every stream)
 
-### E1. Terrain with real relief: **PROPOSED, waiting for the user to confirm directly** (relayed through the oversight session)
+### E1. Terrain with real relief: **SHIPPED 2026-11-26** (the user's "Real hills", relayed twice by the oversight session)
 The ground will follow Manhattan's real 5–15 m relief instead of y = 0. Until this is
 confirmed and **SHIPPED**, keep assuming flat ground, but **read heights only through the API
 below** so nothing has to change when it lands.
@@ -151,3 +151,20 @@ below** so nothing has to change when it lands.
 - **Period fix that affects everyone's screenshots:** OSM building parts of removed modern
   towers were attaching to their period stand-ins. 1,249 parts are now rejected, including
   the Hudson Yards tiers. Merge the engine branch before taking reference screenshots.
+
+### E6. Terrain is ON: `TERRAIN_ENABLED = true` (2026-11-26)
+- **Ground follows the terrain:** roads, sidewalks, parks and lots are tessellated to edges of
+  10 m or less, and curbs follow the slope.
+- **Buildings sit on the ground beneath them:** walls start 0.6 m below the lowest ground
+  under the footprint, and roofs sit at mean ground + height.
+- **Under everything:** a coarse terrain base runs under the city and 3 km beyond it, so the
+  region edge never shows a cliff.
+- **For all streams:** call `await loadTerrain()` once (workers pass the absolute URL of
+  `data/terrain.bin`), then `heightAt(x, z)` for the road surface and
+  `heightAt + CURB_HEIGHT` for sidewalks.
+  - Sim: lane and sidewalk nodes and agent y.
+  - Vehicles: city colliders from the engine follow the terrain.
+  - Characters: slopes of 4% or less.
+  - Audio: nothing to do.
+- **Cost:** about 360k triangles in the High-preset spawn view (was about 120k flat), almost
+  all of it near ground detail. LOD trimming is a Phase 3 job.

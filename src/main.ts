@@ -9,6 +9,7 @@ import { DebugHud, FrameStats } from './ui/DebugHud';
 import { Minimap, type StreetRec } from './ui/Minimap';
 import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
+import { loadTerrain, heightAt } from './shared/terrain';
 import { Input } from './input/Input';
 import { TouchControls } from './ui/TouchControls';
 import { promptStrip, PROMPT_CSS } from './ui/Prompts';
@@ -29,6 +30,7 @@ async function main() {
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.3, 30000);
   new Atmosphere(scene);
 
+  await loadTerrain();
   const world = new World(quality);
   await world.load();
   scene.add(world.root);
@@ -57,7 +59,7 @@ async function main() {
     const [x, y, z, yaw, pitch] = camParam.split(',').map(Number);
     fly.set(x, y, z, THREE.MathUtils.degToRad(yaw), THREE.MathUtils.degToRad(pitch || 0));
   } else {
-    fly.set(spawn.x, SIDEWALK_H + 1.65, spawn.z, spawn.heading, THREE.MathUtils.degToRad(4));
+    fly.set(spawn.x, heightAt(spawn.x, spawn.z) + SIDEWALK_H + 1.65, spawn.z, spawn.heading, THREE.MathUtils.degToRad(4));
   }
 
   const hud = new DebugHud(document.body);

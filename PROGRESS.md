@@ -46,9 +46,8 @@ archetype/save APIs), `content/` (owned by the narrative team).
 - **OSM `building:part` replaces the NYC footprint for towers** when the parts cover at least
   30% of it, which gives real setbacks (e.g. Empire State, 11 tiers plus mast). A podium is
   kept up to the lowest part base.
-- **Flat terrain for now.** Real relief here is about 5–15 m. Adding it later means one height
-  per ground vertex from the footprint `ground_elevation` field. **Needs your call before
-  Phase 2** (collision depends on it).
+- **Real terrain** (user decision): a height field from footprint `ground_elevation`,
+  exposed only through `src/shared/terrain.ts` `heightAt()`, so all streams agree.
 - **Three.js 0.187.0 and Rapier 0.21.0, pinned exactly.** WebGPU is used when `navigator.gpu`
   exists; `?webgl=1` forces WebGL2.
 - **Mobile:** landscape only, with a floating left stick, a right-thumb look area and big buttons
@@ -59,9 +58,12 @@ archetype/save APIs), `content/` (owned by the narrative team).
 ## Pipeline v2 (expanded bounds and terrain data)
 - **City:** 182 chunks covering the new playable bounds (`src/shared/bounds.ts`) plus a 200 m
   buffer.
-- **Terrain:** `terrain.bin` is generated with real relief (−11 to +12 m around the spawn),
-  but `TERRAIN_ENABLED` stays false pending the user's direct confirmation. Enabling it
-  needs ground-mesh tessellation and following in the worker, plus terrain-aware colliders.
+- **Terrain is ON:** real relief, −11 to +12 m around the spawn, from 5 m grid data.
+  - The user said "Real hills", relayed through the oversight session.
+  - Ground is tessellated by longest-edge bisection to 10 m or less; buildings sit on the
+    lowest ground beneath them; a coarse terrain base runs under everything.
+  - Triangle count is about 360k in the High-preset spawn view.
+  - Colliders follow the terrain in Phase 2.
 - **Period fix:** OSM parts can no longer re-attach to stand-ins (1,249 rejected).
 - **Rule 2c:** start-vs-completion year ambiguity is now resolved in favour of the city's
   completion year.
@@ -120,7 +122,7 @@ What doesn't (expected for untextured, but noted honestly):
 | Map | The pause map is a 1974 folding street map that ends at the paper's edge | UI pass |
 
 ## Known issues / TODO
-- [ ] Decide on terrain (see Decisions).
+- [x] Terrain decided: real relief (shipped in pipeline v2).
 - [ ] Research the 46 flagged rows in docs/PERIOD_AUDIT.md (rooftop additions, 206 W 36th St undated towers).
 - [ ] Low-detail shells for the buffer ring; rivers and distant boroughs on the horizon.
 - [ ] Hero landmarks are still extrusions (hand models are Phase 3). Macy's is tagged; Penn
