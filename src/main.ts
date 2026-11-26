@@ -30,6 +30,7 @@ import { Party } from './player/Party';
 type Mode = 'onfoot' | 'photo';
 
 async function main() {
+  if (new URLSearchParams(location.search).has('gameplay')) return void (await import('./gameplay/scene/GameplayScene')).runGameplayScene(); // gameplay test scene (?gameplay=1)
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;

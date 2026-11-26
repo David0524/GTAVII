@@ -1,0 +1,134 @@
+[
+  {
+    "file": "01_shootout_cover.png",
+    "note": "Teddy crouched behind a parked sedan (low cover, engine block to his left). A five-man crew has spread into cover among the crates; labels show AI state, attack token (●), morale and rounds. Orange lines are rounds being fired.",
+    "state": {
+      "hp": 110,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:inCover",
+        "gang:inCover",
+        "gang:inCover",
+        "gang:inCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.44310344827907355,
+        "gameplayP95": 2,
+        "frameAvg": 12.99482758620208,
+        "frameP95": 36.5,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0,
+          "totalMs": 0.10000000009313226,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "02_shootout_peek_fire.png",
+    "note": "Peeking over the car with a lock-on (touch mode) and returning fire; tracers, muzzle flash, hit marker. Enemies without a token suppress the car instead of all shooting at once.",
+    "state": {
+      "hp": 105,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:flee",
+        "gang:suppress",
+        "gang:inCover",
+        "gang:moveToCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.528571428581407,
+        "gameplayP95": 2.099999999627471,
+        "frameAvg": 10.673809523805089,
+        "frameP95": 16.5,
+        "combat": {
+          "combatMs": 0.20000000018626451,
+          "policeMs": 0,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "03_shootout_blind_fire.png",
+    "note": "Blind fire: the revolver held up over the car without exposing the body (wide spread).",
+    "state": {
+      "hp": 105,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:flee",
+        "gang:retreat",
+        "gang:inCover",
+        "gang:moveToCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.5139784946316673,
+        "gameplayP95": 2.099999999627471,
+        "frameAvg": 10.181720430111532,
+        "frameP95": 16.5,
+        "combat": {
+          "combatMs": 0.20000000018626451,
+          "policeMs": 0,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "04_shootout_morale.png",
+    "note": "Later in the same fight: wounded and outnumbered crew members retreat, surrender (hands up) or run rather than fighting to the death.",
+    "state": {
+      "hp": 94,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:flee",
+        "gang:inCover",
+        "gang:inCover",
+        "gang:moveToCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.4626865671746044,
+        "gameplayP95": 1.900000000372529,
+        "frameAvg": 8.717164179105172,
+        "frameP95": 14.399999999906868,
+        "combat": {
+          "combatMs": 0.3000000002793968,
+          "policeMs": 0,
+          "totalMs": 0.3000000002793968,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  }
+]

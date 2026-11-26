@@ -91,6 +91,8 @@ export class Police extends Emitter<PoliceEvents> {
   };
   /** Chokepoints for roadblocks around a point (intersections ~250 m out). */
   chokepoints: (near: [number, number]) => { x: number; z: number; yaw: number }[] = (n) => [{ x: n[0] + 250, z: n[1], yaw: Math.PI / 2 }, { x: n[0] - 250, z: n[1], yaw: -Math.PI / 2 }, { x: n[0], z: n[1] + 250, yaw: 0 }, { x: n[0], z: n[1] - 250, yaw: Math.PI }];
+  /** Snap a point the police want to walk/drive to onto somewhere they can go (street/sidewalk). Scene/engine overrides. */
+  project: (x: number, z: number) => [number, number] = (x, z) => [x, z];
   placeName: (x: number, z: number) => string = (x, z) => `${x.toFixed(0)}, ${z.toFixed(0)}`;
   /** Lead-specific: how good they are at buying people. */
   bribeSkill: (suspect: string) => number = () => 0;
@@ -190,7 +192,7 @@ export class Police extends Emitter<PoliceEvents> {
       this.emit('dispatched', { unit: u, report: r });
       return;
     }
-    const [x, z] = this.spawnAt(kind, r.lastKnown, pct);
+    const [x, z] = this.project(...this.spawnAt(kind, r.lastKnown, pct));
     const u = this.addUnit(kind, pct.id, x, z, { state: 'enroute' });
     this.assign(u, r, r.lastKnown);
     this.emit('dispatched', { unit: u, report: r });
@@ -337,7 +339,7 @@ export class Police extends Emitter<PoliceEvents> {
           const r = this.report(u); const c = r?.lastKnown ?? [u.x, u.z];
           const rad = Math.min(150, 25 + (r?.sinceSighting ?? 30) * 1.2);
           const a = this.rng.next() * Math.PI * 2, d = this.rng.range(0.3, 1) * rad;
-          u.searchPts.push([c[0] + Math.cos(a) * d, c[1] + Math.sin(a) * d]);
+          u.searchPts.push(this.project(c[0] + Math.cos(a) * d, c[1] + Math.sin(a) * d));
         }
         target = u.searchPts[0];
         if (Math.hypot(target[0] - u.x, target[1] - u.z) < 3) u.searchPts.shift();
