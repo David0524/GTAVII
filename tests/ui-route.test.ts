@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { RouteGraph, turns, callout } from '../src/ui/map/Route';
+import { RouteGraph, turns, callout, routeVoice, voicedCallout } from '../src/ui/map/Route';
 import { StreetIndex } from '../src/ui/map/grid';
 
 const streets = JSON.parse(fs.readFileSync('public/data/streets.json', 'utf8'));
@@ -57,4 +57,19 @@ test('voiced call-outs never contradict the printed one', async () => {
   const right = { atM: 0, dir: 'right' as const, onto: '8th Avenue', x: 0, z: 0 };
   const r = voicedCallout(right, 'fare', pool, 1);
   assert.ok(r === null || (/\bright\b/i.test(r) && /Eighth Avenue/.test(r)), String(r));
+});
+
+test("route-call voice follows narrative's passenger table (voice-line coverage gaps are reported, not failed: the HUD always prints the turn)", () => {
+  const rc = JSON.parse(fs.readFileSync('content/barks/route_calls.json', 'utf8'));
+  const t = rc.voiceByPassenger as Record<string, string>;
+  assert.equal(routeVoice(t), null, 'alone: silent');
+  assert.equal(routeVoice(t, 'char.delphine_moore'), 'delphine');
+  assert.equal(routeVoice(t, 'npc.cab_driver'), 'cabbie');
+  assert.equal(routeVoice(t, 'npc.somebody_new'), 'fare');
+  assert.equal(routeVoice(t, 'char.nick_varelas', 'side.baby_cab'), 'labour');
+  const gaps: string[] = [];
+  for (const v of new Set(Object.values(t))) for (const dir of ['left', 'right'] as const) for (const onto of ['West 34th Street', '7th Avenue']) {
+    if (!voicedCallout({ atM: 100, dir, onto, x: 0, z: 0 }, v, rc.lines, 3)) gaps.push(`${v}: ${dir} onto ${/Avenue/.test(onto) ? 'an avenue' : 'a street'}`);
+  }
+  if (gaps.length) console.log(`route-call voice gaps (silent turns): ${gaps.join('; ')}`);
 });

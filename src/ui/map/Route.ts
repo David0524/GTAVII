@@ -152,3 +152,11 @@ export function voicedCallout(t: Turn, voice: string, pool: CallLine[], seed = 0
   if (!ok.length) return null;
   return ok[Math.abs(seed) % ok.length].text.replace('{street}', name).replace('{avenue}', name);
 }
+
+/** Who speaks the call-outs (narrative's route_calls.json voiceByPassenger): the quest wins (side.baby_cab), then the
+ *  companion, then the default fare voice. Driving alone, nobody speaks; the HUD line still shows the turn. */
+export function routeVoice(table: Record<string, string>, companion?: string, quest?: string): string | null {
+  if (quest && table[quest]) return table[quest];
+  if (!companion) return null;
+  return table[companion] ?? table.default ?? 'fare';
+}

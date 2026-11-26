@@ -15,7 +15,13 @@ export interface StreetRec { n: string; c: string; w: number; o: number; p: numb
 
 export type LeadId = string; // char.*
 
-export interface PlayerView { x: number; z: number; yaw: number; speed: number; inVehicle: boolean; lead: LeadId; interior?: string }
+export interface PlayerView {
+  x: number; z: number; yaw: number; speed: number; inVehicle: boolean; lead: LeadId; interior?: string;
+  /** Who rides with the player (cast id), or the driver when the player is the passenger: picks the route-call voice. */
+  companion?: string;
+  /** Active side quest id, for quest-specific voices (route_calls.json voiceByPassenger, e.g. side.baby_cab). */
+  quest?: string;
+}
 export interface ClockView { date: string; minutes: number; weather: 'clear' | 'overcast' | 'rain'; tempF?: number }
 
 export interface LeadView {
