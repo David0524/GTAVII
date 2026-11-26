@@ -81,7 +81,7 @@
       "beats": [
         "Mayhew's grin before he's close enough to talk"
       ],
-      "durationSec": 4,
+      "durationSec": 5.6,
       "dialogue": [
         "dlg.m01_prow#l1"
       ]
@@ -96,7 +96,7 @@
       "beats": [
         "Exchange l2–l4"
       ],
-      "durationSec": 10,
+      "durationSec": 13.4,
       "dialogue": [
         "dlg.m01_prow#l2",
         "dlg.m01_prow#l3",
