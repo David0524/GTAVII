@@ -1,0 +1,67 @@
+{
+  "footprints.geojson": {
+    "sha256": "1029e7b603dc39e1d742c57f4cbb8f3ae019682194af0b449ad35635ccbe2833",
+    "bytes": 9662073,
+    "fetchedAt": "2026-11-26T14:44:22.661Z",
+    "source": "NYC Open Data 5zhs-2jue",
+    "bbox": {
+      "w": -74.01231207464173,
+      "s": 40.73302076396779,
+      "e": -73.96820368374034,
+      "n": 40.76717058222888
+    },
+    "where": "",
+    "endpoint": null
+  },
+  "osm.json": {
+    "sha256": "6edfd25d8bd9ada6f829d4e936225825f9db42245587305892c19df4abc0fad8",
+    "bytes": 27635358,
+    "fetchedAt": "2026-11-26T14:44:44.262Z",
+    "source": "OpenStreetMap via Overpass",
+    "bbox": {
+      "w": -74.01231207464173,
+      "s": 40.73302076396779,
+      "e": -73.96820368374034,
+      "n": 40.76717058222888
+    },
+    "where": null,
+    "endpoint": "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  },
+  "pluto.json": {
+    "sha256": "45540671d47fe6f5e155017881e8b104997c4523b7ca435c29d8bd70fb379fa7",
+    "bytes": 3257382,
+    "fetchedAt": "2026-11-26T14:44:30.029Z",
+    "source": "NYC Open Data 64uk-42ks (PLUTO)",
+    "bbox": {
+      "w": -74.01231207464173,
+      "s": 40.73302076396779,
+      "e": -73.96820368374034,
+      "n": 40.76717058222888
+    },
+    "where": null,
+    "endpoint": null
+  },
+  "pluto_tall.json": {
+    "sha256": "a1eac4df565afa2f04685fdf6fecd0bbe083486471a85a1185d5a7e0525d2e5c",
+    "bytes": 651433,
+    "fetchedAt": "2026-11-26T14:44:30.458Z",
+    "source": "NYC Open Data 64uk-42ks (PLUTO), Manhattan lots >= 10 floors",
+    "bbox": null,
+    "where": null,
+    "endpoint": null
+  },
+  "skyline.geojson": {
+    "sha256": "b1426d27de32d8555b2b89e5bbf7ed66d29f1fdeabc25da2aa2c3b284ab738f3",
+    "bytes": 2544409,
+    "fetchedAt": "2026-11-26T14:44:24.247Z",
+    "source": "NYC Open Data 5zhs-2jue",
+    "bbox": {
+      "w": -74.03,
+      "s": 40.69,
+      "e": -73.94,
+      "n": 40.8
+    },
+    "where": " AND height_roof > 197",
+    "endpoint": null
+  }
+}
