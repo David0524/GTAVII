@@ -99,19 +99,21 @@
       ],
       "nonLethalAllowed": true,
       "text": "Brannock's partner grabs your camera",
-      "lethal": false
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o7",
       "type": "enter_interior",
       "text": "Back to Rita's bar, the Arden",
-      "marker": "interior.arden_lobby"
+      "marker": "interior.arden_lobby",
+      "requireNoHeat": true
     },
     {
       "id": "o8",
       "type": "dialogue",
       "text": "Lay the prints out for Rita",
-      "script": "dlg.m13_rita_prints"
+      "script": "dlg.m13_rita_prints",
+      "requireNoHeat": true
     }
   ],
   "fail": [
@@ -123,7 +125,15 @@
     },
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -162,5 +172,12 @@
   ],
   "mobile": "Rain and darkness: photo targets get a subtle rim light (engine photo mode), and the size threshold is generous. Bryant Park's trees and benches give cover. Being spotted is warned twice.",
   "design": "Delphine's file reaches three prints (Brannock from M8, Wurtz and Ricky now, and Brannock at Earl's stand if taken), which sets flag.photo_file_3, one corroboration for B2. Ricky is drawn with dignity: scared, and counting days. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.rita_haines",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

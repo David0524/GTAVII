@@ -100,13 +100,22 @@
       "weapons": [
         "item.revolver_service"
       ],
-      "tutorial": "shooting: soft lock, cover, reload; non-lethal disarm still possible"
+      "tutorial": "shooting: soft lock, cover, reload; non-lethal disarm still possible",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     }
   ],
   "fail": [
     {
       "type": "player_down",
-      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -155,5 +164,7 @@
   ],
   "mobile": "Three walking legs of under two blocks each, with a checkpoint at each. The decisive choice is untimed. If the player has the M5 photo, it adds a fourth option ('Show him the photograph').",
   "design": "Teddy says yes to buy the Corwin time, and Mayhew promises it stays open through Labor Day (a lie). Showing the photo sets flag.mayhew_saw_photo (applied in the dialogue). The $200 advance is the first week's pay, and P1 makes it feel heavy. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

@@ -80,7 +80,7 @@
         "truck bays",
         "fuel drums"
       ],
-      "note": "Nick hires muscle beforehand or fights badly; Augie survives (lethal: false)."
+      "note": "Nick hires muscle beforehand or fights badly; Augie survives (lethal: false). Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o6",
@@ -93,7 +93,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -129,5 +137,12 @@
   ],
   "mobile": "Calm dialogue plus one cross-town drive (west on 37th, then up Ninth to the garage; back east on 38th, then down Seventh). No timers.",
   "design": "Calloway's deal: testify against Lisle for immunity on the insurance fraud. Accepting sets flag.nick_flipped (in dialogue), which opens B1 even if Teddy burned the wire. Augie, sick, admits the sale. If Nick's relationship with Villalba is −3, Villalba tips Lisle about Nick's visit. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.augie_lomax",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

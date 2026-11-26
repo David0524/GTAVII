@@ -85,7 +85,8 @@
       "id": "o7",
       "type": "enter_interior",
       "text": "Lisle's office, Fifth & 36th",
-      "marker": "interior.lisle_office"
+      "marker": "interior.lisle_office",
+      "requireNoHeat": true
     },
     {
       "id": "o8",
@@ -97,7 +98,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -142,5 +151,24 @@
   ],
   "mobile": "Four short stops, any order after o2 (the engine can present o3–o8 as a list). Driving is optional because the stops are close. Choices are untimed.",
   "design": "Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.howard_lisle",
+      "reason": "died"
+    },
+    {
+      "character": "char.jung_ho_baek",
+      "reason": "died"
+    },
+    {
+      "character": "char.marjorie_kell",
+      "reason": "died"
+    },
+    {
+      "character": "char.mi_sook_baek",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

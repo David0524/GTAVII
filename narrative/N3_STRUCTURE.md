@@ -85,10 +85,14 @@ User: *"Full open world and missions like a GTA game."*
 - **Missions at the 20-minute cap** (M18, M32) convert existing steps instead of adding time.
 - **Non-lethal is always available to Teddy** (his arc: how often he reaches for the gun he
   gave up).
-- **Plainclothes and beat cops are non-lethal targets.** Killing police is a story-breaking
-  crime, handled by Gameplay.
-- **Story characters can't be killed** (`lethal: false`): Lonnie, Brannock, Augie and
-  Mayhew.
+- **Police are fully lethal everywhere.** The user, verbatim: *"Fully lethal everywhere"* and
+  *"No you can kill cops during missions. That's normal. Consider how GTA handles these
+  things."* Killing a cop feeds the heat system and is never a fail state or a story branch.
+- **"Lose the police":** objectives marked `requireNoHeat` (drop-offs, safe interiors, scenes
+  after a fight) make the player lose the police first.
+- **Characters the plot needs are `essential` per mission.** The mission fails with "<Name>
+  died" only while their arc needs them; they're never made invulnerable. See
+  `narrative/tools/conventions.py`.
 - **Mission durations in the table above are the originals.** The current values are in
   `content/missions/*.json`, and `narrative/N7_PREPASS.md` gives the totals.
 - **M23 is now the subway mission** (user: *"Maybe a mission in the subways"*).

@@ -53,21 +53,22 @@
       "mode": "melee",
       "targets": [
         {
-          "character": "char.lonnie_gage",
-          "lethal": false
+          "character": "char.lonnie_gage"
         }
       ],
       "nonLethalAllowed": true,
       "text": "Lonnie's last try, at the shop door",
       "weapons": [
         "item.straight_razor"
-      ]
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o3",
       "type": "dialogue",
       "text": "Keys, or no keys",
-      "script": "dlg.m31_lease"
+      "script": "dlg.m31_lease",
+      "requireNoHeat": true
     },
     {
       "id": "o4",
@@ -80,7 +81,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -114,5 +123,16 @@
   ],
   "mobile": "Walking and talking only. The count is a dialogue, not arithmetic. Untimed choices.",
   "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.lonnie_gage",
+      "reason": "died"
+    },
+    {
+      "character": "char.mi_sook_baek",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

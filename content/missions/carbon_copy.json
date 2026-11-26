@@ -85,7 +85,8 @@
       "id": "o7",
       "type": "enter_interior",
       "text": "Into Lisle's office, 11th floor",
-      "marker": "interior.lisle_office"
+      "marker": "interior.lisle_office",
+      "requireNoHeat": true
     },
     {
       "id": "o8",
@@ -120,13 +121,14 @@
       "weapons": [
         "item.revolver_service"
       ],
-      "note": "The watchman is non-lethal; the driver's men are hired guns. Converted from the exit goto."
+      "note": "The watchman is non-lethal; the driver's men are hired guns. Converted from the exit goto. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o10",
       "type": "dialogue",
       "text": "Bernard reads it on the lobby table",
-      "script": "dlg.m21_bernard"
+      "script": "dlg.m21_bernard",
+      "requireNoHeat": true
     }
   ],
   "fail": [
@@ -138,7 +140,15 @@
     },
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -176,5 +186,16 @@
   ],
   "mobile": "The infiltration is about timing and doors (the watchman has a fixed loop shown on a radio clock), not stealth reflexes. Being spotted resets to the o7 checkpoint. Nick's dinner is a calm dialogue that the player can stretch with menu choices. Branch variants via `if` (ENGINE_REQUESTS 8).",
   "design": "**End of Act 2.** Branch A pays off. With the wire, Marjorie lets Teddy in, he copies the ledger and returns it, and she hands over her carbons (flag.have_marjorie_carbons, set in dialogue). Burned, he steals it, and Lisle knows by morning. Either way the oldest page is Mayhew's. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "dusk"
+  "timeOfDay": "dusk",
+  "essential": [
+    {
+      "character": "char.bernard_ostrow",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

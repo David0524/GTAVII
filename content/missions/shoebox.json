@@ -37,7 +37,8 @@
       "id": "o1",
       "type": "enter_interior",
       "text": "The Arden boiler room. Get the box.",
-      "marker": "interior.arden_back_stairs"
+      "marker": "interior.arden_back_stairs",
+      "requireNoHeat": true
     },
     {
       "id": "o2",
@@ -88,8 +89,7 @@
       "mode": "melee",
       "targets": [
         {
-          "character": "char.jimmy_brannock",
-          "lethal": false
+          "character": "char.jimmy_brannock"
         }
       ],
       "nonLethalAllowed": true,
@@ -101,7 +101,7 @@
         "platform edge",
         "an arriving train (timed, telegraphed)"
       ],
-      "note": "Content rule: no instructional detail about the third rail; it's a visible 'do not' hazard only."
+      "note": "Content rule: no instructional detail about the third rail; it's a visible 'do not' hazard only. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o8",
@@ -116,19 +116,22 @@
       "type": "deliver",
       "text": "Box to Hanyang House, W 32nd St",
       "item": "item.club_shoebox",
-      "to": "interior.hanyang_house"
+      "to": "interior.hanyang_house",
+      "requireNoHeat": true
     },
     {
       "id": "o10",
       "type": "dialogue",
       "text": "Mi-sook opens the back room",
-      "script": "dlg.m23_mi_sook"
+      "script": "dlg.m23_mi_sook",
+      "requireNoHeat": true
     },
     {
       "id": "o11",
       "type": "enter_interior",
       "text": "Back to the Arden. Tina's waiting.",
-      "marker": "interior.arden_lobby"
+      "marker": "interior.arden_lobby",
+      "requireNoHeat": true
     },
     {
       "id": "o12",
@@ -139,8 +142,16 @@
   ],
   "fail": [
     {
-      "type": "caught",
-      "note": "Proposed; fallback timer."
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -185,5 +196,20 @@
   ],
   "mobile": "The underground is navigated by lit signs and the passage's single track of bulbs; route knowledge (the passage links Herald Square to Penn Station) is the solution. Rats are a startle, not damage. The train arrival is telegraphed 6+ seconds ahead. Melee on soft lock.",
   "design": "**The subway story mission** (user: 'Maybe a mission in the subways'). Uses what only the subway has: a token booth and turnstiles, a half-abandoned pedestrian passage from Herald Square toward Penn Station (real; sources differ on when it closed, 1970s or c.1990), rats, a platform fight with a train coming, and a one-stop ride on a graffiti-covered local. Content rule: the third rail is a visible hazard with no instructional detail. Then the kye hand-off and Tina's confession, as before.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.jimmy_brannock",
+      "reason": "died"
+    },
+    {
+      "character": "char.mi_sook_baek",
+      "reason": "died"
+    },
+    {
+      "character": "char.tina_mercado",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

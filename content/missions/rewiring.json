@@ -43,7 +43,8 @@
       "id": "o2",
       "type": "enter_interior",
       "text": "Find Gus: the Corwin basement",
-      "marker": "interior.corwin_basement"
+      "marker": "interior.corwin_basement",
+      "requireNoHeat": true
     },
     {
       "id": "o2b",
@@ -57,19 +58,21 @@
       ],
       "nonLethalAllowed": true,
       "text": "Prentiss's men guard the panel",
-      "note": "Teddy forces his way to the switch. Power returns, but too late for Mr. Hollis."
+      "note": "Teddy forces his way to the switch. Power returns, but too late for Mr. Hollis. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o3",
       "type": "dialogue",
       "text": "Who told Gus to throw the switch?",
-      "script": "dlg.m19_gus"
+      "script": "dlg.m19_gus",
+      "requireNoHeat": true
     },
     {
       "id": "o4",
       "type": "enter_interior",
       "text": "Up to eleven. Mr. Hollis.",
-      "marker": "interior.corwin_floor11"
+      "marker": "interior.corwin_floor11",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
@@ -81,7 +84,8 @@
       "id": "o6",
       "type": "enter_interior",
       "text": "Back down to the lobby",
-      "marker": "interior.corwin_lobby"
+      "marker": "interior.corwin_lobby",
+      "requireNoHeat": true
     },
     {
       "id": "o7",
@@ -93,7 +97,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -136,5 +148,28 @@
   ],
   "mobile": "Interior only. The stairs (the elevator is dead) are a short climb with fading audio, not a stamina test. No timers.",
   "design": "Content rule: **the death is off screen.** Teddy opens the door, the camera stays on his face and on Odessa behind him, and Hollis's radio is still playing. Nothing is shown. Afterwards Carmen arrives with the news that Feld has gone south (flag.feld_left), and grief turns into organising. Prentiss appears with condolence flowers, and the room goes silent. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.carmen_arce",
+      "reason": "died"
+    },
+    {
+      "character": "char.gus_wilkie",
+      "reason": "died"
+    },
+    {
+      "character": "char.mei_lin_chow",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    },
+    {
+      "character": "char.vic_prentiss",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

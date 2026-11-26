@@ -251,3 +251,25 @@ Written by `narrative/tools/build_systems.py`. The owning chats confirm or amend
   - `race.oneWaysEnforced` (already accepted in N9).
 - **Ask:** Is the side-quest runner the mission runner with `kind: "side"`, or the activities
   runner (N9)? The narrative side works with either.
+
+## From narrative: 12b. UPDATE to 12: mission conventions (supersedes its non-lethal wording)
+The user, verbatim: "Fully lethal everywhere" and "No you can kill cops during missions. That's
+normal. Consider how GTA handles these things". Applied to all 32 missions by
+`narrative/tools/conventions.py`.
+- **Cops are ordinary killable police in missions.** A kill feeds heat only. There's no
+  `cop_killed` fail or branch.
+- **Objective flag `requireNoHeat: true`:** if the player has heat, the engine inserts a
+  **`lose_police`** objective ("Lose the police": break contact, then wait out the search)
+  before this objective unlocks. It's set on drop-offs, safe interiors and the first scene
+  after a fight.
+- **Mission field `essential`:** `[{ character, reason: "died" }]`. Any of them dying fails the
+  mission with "<Name> died". These are characters the mission's later steps need. They're
+  never invulnerable.
+- **Standard fails on every mission:** `player_down` (wasted), `busted` (arrested) and
+  `essential_died`, plus mission-specific `vehicle_destroyed`, `target_lost` and `timer`.
+  Retry from the checkpoint, and offer a skip after repeated failures.
+- **Consequence content:**
+  - `content/barks/cop_killed.json`: officer-down radio, Teddy's reactions and his
+    non-lethal contrast, Delphine, Nick and the street;
+  - `content/police/precincts.json` `copKilled`: precinct memory, relationship nudges and
+    headline templates.

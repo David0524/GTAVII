@@ -87,7 +87,8 @@
       "text": "Lonnie's crew moves on Tina in the crowd",
       "weapons": [
         "item.straight_razor"
-      ]
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o7",
@@ -100,7 +101,8 @@
       "id": "o8",
       "type": "dialogue",
       "text": "Lisle on the phone, very calm",
-      "script": "dlg.m22_lisle_call"
+      "script": "dlg.m22_lisle_call",
+      "requireNoHeat": true
     },
     {
       "id": "o9",
@@ -119,7 +121,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -164,5 +174,28 @@
   ],
   "mobile": "Three short scenes, one per lead, with a checkpoint at each switch. The Times Square crowd stays 60 m or more inside the north edge (45th St, not 47th). No timers.",
   "design": "The Act 3 opener. A real event as weather: in the syndicate, everyone suddenly wonders who'll go down with whom. Mayhew has learned about the wire or the theft (branch-dependent lines). Delphine overhears Tina on a payphone with Lonnie (a seed for M23). Nick watches Lisle work the hotel lobby like a man selling lifeboats. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.augie_lomax",
+      "reason": "died"
+    },
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    },
+    {
+      "character": "char.howard_lisle",
+      "reason": "died"
+    },
+    {
+      "character": "char.nora_finch",
+      "reason": "died"
+    },
+    {
+      "character": "char.ray_bauer",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

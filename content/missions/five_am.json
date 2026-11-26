@@ -60,7 +60,7 @@
       ],
       "nonLethalAllowed": true,
       "text": "Catch the tyre-slashers in the palms",
-      "note": "Dawn, among Moretti's potted palms (soft collisions)"
+      "note": "Dawn, among Moretti's potted palms (soft collisions) Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o3",
@@ -73,7 +73,8 @@
       "id": "o4",
       "type": "dialogue",
       "text": "Collect from Mr. Baek. Again.",
-      "script": "dlg.m10_baek"
+      "script": "dlg.m10_baek",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
@@ -91,7 +92,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -129,5 +138,20 @@
   ],
   "mobile": "Walking at dawn, two blocks between stops, no timers. Moretti's sidewalk jungle of potted palms is a soft-collision crowd, so take it slowly. Both collection choices are untimed.",
   "design": "P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "dawn"
+  "timeOfDay": "dawn",
+  "essential": [
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    },
+    {
+      "character": "char.jung_ho_baek",
+      "reason": "died"
+    },
+    {
+      "character": "char.mi_sook_baek",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

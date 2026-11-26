@@ -63,19 +63,22 @@
       "text": "Lonnie's boys are smashing the shop",
       "weapons": [
         "item.straight_razor"
-      ]
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o3",
       "type": "enter_interior",
       "text": "Go over his head: Varelas, W 30th St",
-      "marker": "interior.varelas_office"
+      "marker": "interior.varelas_office",
+      "requireNoHeat": true
     },
     {
       "id": "o4",
       "type": "dialogue",
       "text": "Two bankers, one table",
-      "script": "dlg.m17_two_bankers"
+      "script": "dlg.m17_two_bankers",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
@@ -107,7 +110,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -144,5 +155,12 @@
   ],
   "mobile": "Walk, talk and a short drive (three blocks). The midpoint mission is deliberately calm. No timers.",
   "design": "**Midpoint: all three leads are playable.** Two people who bank for others meet. Eleni respects the club's books, while Nick is charmed and wary. The lease is promised 'after the season', which ties Delphine's resolution to Nick's survival (M31 gate). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.eleni_varelas",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

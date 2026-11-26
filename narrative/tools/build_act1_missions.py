@@ -290,7 +290,7 @@ COMBAT = {
    "duration": 14, "checkpoints": ["o2", "o4", "o6", "o9"], "items": ["item.revolver_service", "item.ammo_38"]},
  "mission.back_stairs": {"after": {"o3": [
     CB("o3b", "melee", "Lonnie blocks the stairwell", [{"character": "char.lonnie_gage"}], weapons=["item.straight_razor"],
-       note="Lonnie is beaten, not killed (he has an Act 3 arc): `lethal: false` for this target.", lethal=False)]},
+       note="Lonnie is essential here (he has an Act 3 arc); the mission fails if he dies.", lethal=False)]},
    "duration": 13, "checkpoints": ["o2", "o3b", "o4"]},
  "mission.independence_day": {"after": {"o8": [
     CB("o8b", "survive", "Lonnie's crew opens fire on Eighth Ave", [{"archetype": "npc.lonnie_crew", "count": 4}], weapons=["item.revolver_service"],
@@ -324,6 +324,8 @@ def tod_label(w):
     return "night"
 for m in M:
     m["timeOfDay"] = tod_label(m["requires"].get("timeWindow"))
+import sys as _sys; _sys.path.insert(0, str(Path(__file__).parent)); import conventions
+conventions.apply(M)
 for m in M:
     (OUT / f"{m['id'].split('.',1)[1]}.json").write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n")
 print(len(M), "missions written")

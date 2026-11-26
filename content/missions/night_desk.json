@@ -50,7 +50,8 @@
       "id": "o3",
       "type": "enter_interior",
       "marker": "interior.corwin_floor11",
-      "text": "Check on Mr. Hollis, 11th floor"
+      "text": "Check on Mr. Hollis, 11th floor",
+      "requireNoHeat": true
     },
     {
       "id": "o4",
@@ -70,19 +71,22 @@
       ],
       "nonLethalAllowed": true,
       "text": "Throw Prentiss's 'movers' off eleven",
-      "tutorial": "melee combos, using a corridor"
+      "tutorial": "melee combos, using a corridor",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o4c",
       "type": "dialogue",
       "script": "dlg.m02_movers_after",
-      "text": "Check Mr. Hollis is all right"
+      "text": "Check Mr. Hollis is all right",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
       "type": "enter_interior",
       "marker": "interior.corwin_lobby",
-      "text": "Back to the desk, lobby"
+      "text": "Back to the desk, lobby",
+      "requireNoHeat": true
     },
     {
       "id": "o6",
@@ -101,7 +105,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -140,5 +152,16 @@
   ],
   "mobile": "Interior-only hub tutorial: big USE prompts on the desk, the mailboxes, the elevator and room 1112. The elevator ride is a 3-second cut, not a control. No timers.",
   "design": "Teaches the hub: desk ledger (save), room-key board (fast travel to floors), phone (calls from cast). Prentiss's first friendly offer establishes P5. Bernard reads the notice aloud and names 'Corwin Residential Associates, H. Lisle, counsel'. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.carmen_arce",
+      "reason": "died"
+    },
+    {
+      "character": "char.walter_hollis",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

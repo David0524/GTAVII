@@ -51,7 +51,8 @@
       "item": "item.club_payout_claudette",
       "to": "loc.hotel_pennsylvania",
       "text": "Pay Claudette, Hotel Pennsylvania",
-      "note": "Staff entrance on W 33rd St. On foot down Eighth Ave."
+      "note": "Staff entrance on W 33rd St. On foot down Eighth Ave.",
+      "requireNoHeat": true
     },
     {
       "id": "o3",
@@ -87,19 +88,22 @@
       "weapons": [
         "item.straight_razor"
       ],
-      "tutorial": "Delphine: fast strikes, dodges, the razor; break away into the crowd"
+      "tutorial": "Delphine: fast strikes, dodges, the razor; break away into the crowd",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o5c",
       "type": "dialogue",
       "script": "dlg.m06_after_fight",
-      "text": "Count the money. Still all there."
+      "text": "Count the money. Still all there.",
+      "requireNoHeat": true
     },
     {
       "id": "o6",
       "type": "enter_interior",
       "marker": "interior.arden_lobby",
-      "text": "Get back to the Arden, W 39th St"
+      "text": "Get back to the Arden, W 39th St",
+      "requireNoHeat": true
     },
     {
       "id": "o7",
@@ -111,7 +115,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -154,5 +166,16 @@
   ],
   "mobile": "Walking only, with no timers. The Brannock scene's choice ('Pay the fifty' or 'Pay, and read his badge') is untimed and both options pay. It teaches that Delphine's power is noticing. Large USE prompt for the handover.",
   "design": "Shows the women's club as an institution: a table, a book in her head, a Sunday ritual. Sex work is present as context (where the money comes from; the corner) with nothing sexual on screen. Tina's bruise is visible and unexplained. Marcus shows the back stairs, which teaches M8's escape route. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
-  "timeOfDay": "dusk"
+  "timeOfDay": "dusk",
+  "essential": [
+    {
+      "character": "char.marcus_teague",
+      "reason": "died"
+    },
+    {
+      "character": "char.tina_mercado",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

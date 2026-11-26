@@ -84,14 +84,14 @@
       "nonLethalAllowed": true,
       "text": "Two of Wurtz's men jump Calloway",
       "protect": "char.ruth_calloway",
-      "note": "Plainclothes cops: non-lethal only (killing police is a story-breaking crime)",
-      "lethal": false
+      "note": "Plainclothes cops: ordinary killable police (heat only). Calloway is essential. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o6",
       "type": "dialogue",
       "text": "Ask her what she wants with him",
-      "script": "dlg.m12_delphine_calloway"
+      "script": "dlg.m12_delphine_calloway",
+      "requireNoHeat": true
     }
   ],
   "fail": [
@@ -100,7 +100,15 @@
     },
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -131,5 +139,12 @@
   ],
   "mobile": "**Branch A** is an untimed two-option choice with a confirm step ('Are you sure?'), because it persists. Delphine's tail goes down Broadway and Sixth through lunch crowds, so it's generous.",
   "design": "**Branch A.** Calloway offers the wire. Choices in dlg.m12_calloway set flag.branch_a_wire or flag.branch_a_burned and the N3 §3 relationship changes. Delphine, two stools down because she followed her fifty dollars, learns who Calloway is, which gives her leverage in P4. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.ruth_calloway",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

@@ -73,5 +73,19 @@
   "reports": {
     "note": "Per the CORE_SYSTEMS design: witnesses run to red police call boxes; each precinct keeps reports with descriptions (lead, clothing colours, vehicle). Narrative supplies the text below.",
     "callBoxColour": "red (period police call boxes on lampposts)"
+  },
+  "copKilled": {
+    "note": "User: 'Fully lethal everywhere'; missions follow the genre (heat only, never a fail or branch).",
+    "memory": "The precinct where an officer is killed keeps it: for the rest of the act, its corruptibility drops to 0 for the killer's description (bribes refused), patrol density doubles in its blocks, and the desk sergeant's lines turn cold.",
+    "relationships": {
+      "char.teddy_arce/char.pat_kearney": -2,
+      "char.teddy_arce/char.luis_navarro": -2
+    },
+    "newspaper": [
+      "COP SLAIN ON {street}",
+      "MANHUNT FOR {description}",
+      "'ONE OF OURS': PRECINCT MOURNS"
+    ],
+    "teddyNote": "Teddy's always-available non-lethal option stays a meaningful choice: barks.cop_killed (teddy vs teddy_nonlethal), and Kearney and Navarro remember."
   }
 }

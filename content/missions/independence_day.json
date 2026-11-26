@@ -114,7 +114,7 @@
         "the post office steps"
       ],
       "durationSec": 90,
-      "note": "Delphine fights as a companion NPC with her razor and snub-nose."
+      "note": "Delphine fights as a companion NPC with her razor and snub-nose. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o9",
@@ -133,21 +133,26 @@
       "id": "o10",
       "type": "dialogue",
       "script": "dlg.m09_concourse",
-      "text": "Catch your breath with Delphine"
+      "text": "Catch your breath with Delphine",
+      "requireNoHeat": true
     }
   ],
   "fail": [
-    {
-      "type": "caught",
-      "note": "Proposed. Fallback: timer."
-    },
     {
       "type": "target_lost",
       "objective": "o6"
     },
     {
       "type": "player_down",
-      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -194,5 +199,7 @@
   ],
   "mobile": "Four checkpoints. Switches only at the safe beats (o5 after the handover, o8 at the ambush). The tail is generous; 'spotted' is warned twice before it fails. The escape is solved by Penn Station's two entrances (Eighth Ave and Seventh Ave), so it's route knowledge, not speed. No fighting.",
   "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

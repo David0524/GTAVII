@@ -65,7 +65,7 @@
       "weapons": [
         "item.revolver_service"
       ],
-      "note": "Whatever Teddy chose, someone tries to take it on W 31st St. Plainclothes are non-lethal."
+      "note": "Whatever Teddy chose, someone tries to take it on W 31st St. Plainclothes are ordinary killable police (heat only). Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o3a",
@@ -94,19 +94,29 @@
       "type": "enter_interior",
       "text": "The Corwin boiler. Open the door.",
       "marker": "interior.corwin_basement",
-      "if": "flag.ledger_burned"
+      "if": "flag.ledger_burned",
+      "requireNoHeat": true
     },
     {
       "id": "o4",
       "type": "dialogue",
       "text": "Hand it over. Or don't.",
-      "script": "dlg.m29_handover"
+      "script": "dlg.m29_handover",
+      "requireNoHeat": true
     }
   ],
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -143,5 +153,28 @@
   ],
   "mobile": "**Branch B** is an untimed choice with a confirm step. Unavailable options are shown greyed out, with the reason ('Needs a witness who'll testify'), so the player sees the cost of earlier choices. One short trip afterwards.",
   "design": "**Branch B** (N3 §3). dlg.m29_choice gates options with `if`: B1 needs flag.branch_a_wire or flag.nick_flipped; B2 needs two corroborations plus flag.editor_neutralised; B3 and B4 are always available. o3c meets Lisle at the Iron Gate because it's dinnertime. In the New Pad epilogue Teddy takes Lisle's luncheonette stool. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "dusk"
+  "timeOfDay": "dusk",
+  "essential": [
+    {
+      "character": "char.gus_wilkie",
+      "reason": "died"
+    },
+    {
+      "character": "char.howard_lisle",
+      "reason": "died"
+    },
+    {
+      "character": "char.nora_finch",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    },
+    {
+      "character": "char.ruth_calloway",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

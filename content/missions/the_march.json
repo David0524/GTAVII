@@ -71,8 +71,7 @@
       "nonLethalAllowed": true,
       "text": "Prentiss's men try to break the march",
       "protect": "char.odessa_pruitt",
-      "lethal": false,
-      "note": "Non-lethal crowd fight on Broadway; marchers help."
+      "note": "Crowd fight on Broadway; marchers help. Odessa is essential. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o3",
@@ -85,7 +84,8 @@
       "id": "o4",
       "type": "dialogue",
       "text": "The operators join at 34th & Seventh",
-      "script": "dlg.m28_operators"
+      "script": "dlg.m28_operators",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
@@ -111,7 +111,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -157,5 +165,20 @@
   ],
   "mobile": "Walking pace with the escort matching the player (Odessa uses a cane, so it's slow on purpose). The crowd is dense but passable. No timers. One untimed choice for Nick at the end.",
   "design": "P5 turned around: the city's working people show up. Every community's sympathetic figure marches: Carmen and Mei-lin, Moretti with flowers, the Baeks, Dwayne. Nick's walk to Odessa builds the non-transactional bond (N3 §3) that gates the council resolution. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.carmen_arce",
+      "reason": "died"
+    },
+    {
+      "character": "char.mei_lin_chow",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

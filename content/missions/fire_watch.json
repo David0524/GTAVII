@@ -111,13 +111,14 @@
       "weapons": [
         "item.revolver_service"
       ],
-      "note": "In the alley off W 31st; no fire is ever lit (content rule)."
+      "note": "In the alley off W 31st; no fire is ever lit (content rule). Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o9",
       "type": "dialogue",
       "text": "Prentiss, in his car, with the money",
-      "script": "dlg.m26_prentiss"
+      "script": "dlg.m26_prentiss",
+      "requireNoHeat": true
     }
   ],
   "fail": [
@@ -127,7 +128,15 @@
     },
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -173,5 +182,12 @@
   ],
   "mobile": "Content rule: **there's no fire.** Failing resets to the checkpoint. The false alarm brings real fire engines (ambience), and the tenants are walked out safely by Inez and Odessa. Inez's children are at her sister's (dialogue says so). Gus helps or hinders based on his relationship with Teddy (−3 means he leaves the service door open). The wait is a skippable time-advance.",
   "design": "Prentiss's plan, stopped. Delphine's photo plus the tail give Teddy leverage over Prentiss. The relationship gates from N3 §5 pay off visibly: Manny unlocks the service door at +3, and Gus at −3 is the risk. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.vic_prentiss",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

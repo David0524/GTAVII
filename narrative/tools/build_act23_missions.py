@@ -444,7 +444,7 @@ M.append(mission(32, "mission.labor_day", "Labor Day", 3, 10, N, "1974-09-02", (
 # ---------------------------------------------------------------- COMBAT REWORK, Acts 2-3 (26 Nov 2026)
 # User: "Full open world and missions like a GTA game". Each mission gets an action beat inserted
 # after the named objective, or an objective converted ('replace'). Missions at the 20-min cap
-# convert rather than add. Cops and story characters are non-lethal targets (lethal: false).
+# convert rather than add. Cops are ordinary killable police (heat only); characters the plot needs are essential (conventions.py).
 def CB(i, mode, text, targets, **k):
     o = {"id": i, "type": "combat", "mode": mode, "targets": targets, "nonLethalAllowed": True, "text": text}
     o.update(k); return o
@@ -452,8 +452,8 @@ A_ = lambda n, c=1: {"archetype": n, "count": c}
 COMBAT = {
  "mission.five_am": ({"o2": [CB("o2b", "melee", "Catch the tyre-slashers in the palms", [A_("npc.carrier_muscle", 2)], note="Dawn, among Moretti's potted palms (soft collisions)")]}, 15, ["o2", "o2b", "o4", "o5"]),
  "mission.tax_day": ({"o4": [CB("o4b", "melee", "Lonnie's boys corner you in the arcade", [A_("npc.lonnie_crew", 2)], weapons=["item.straight_razor"])]}, 14, ["o2", "o4", "o4b", "o5"]),
- "mission.lunch_counter": ({"o5": [CB("o5b", "defend", "Two of Wurtz's men jump Calloway", [A_("npc.plainclothes", 2)], protect="char.ruth_calloway", note="Plainclothes cops: non-lethal only (killing police is a story-breaking crime)", lethal=False)]}, 16, ["o2", "o3", "o5", "o5b"]),
- "mission.contact_prints": ({"o6": [CB("o6b", "takedown", "Brannock's partner grabs your camera", [A_("npc.plainclothes", 1)], lethal=False)]}, 15, ["o2", "o5", "o6b", "o7"]),
+ "mission.lunch_counter": ({"o5": [CB("o5b", "defend", "Two of Wurtz's men jump Calloway", [A_("npc.plainclothes", 2)], protect="char.ruth_calloway", note="Plainclothes cops: ordinary killable police (heat only). Calloway is essential.")]}, 16, ["o2", "o3", "o5", "o5b"]),
+ "mission.contact_prints": ({"o6": [CB("o6b", "takedown", "Brannock's partner grabs your camera", [A_("npc.plainclothes", 1)])]}, 15, ["o2", "o5", "o6b", "o7"]),
  "mission.cold_room": ({"o4": [CB("o4b", "firefight", "Stick-up crew hits the fur vault", [A_("npc.stickup_man", 3)], weapons=["item.revolver_service"], cover=["garment racks", "vault door"], note="Midday fur-vault robbery. Yiannis's crew hides; Teddy holds the door.")]}, 15, ["o2", "o4", "o4b", "o5"]),
  "mission.brownout": ({"o6": [CB("o6b", "defend", "Looters rush the ice truck in the dark", [A_("npc.brownout_looter", 4)], protect="vehicle_role.ice_truck", note="Nick: poor shot. Hire the ice men as muscle (Payroll) or pay the looters off (bribe).")]}, 18, ["o3", "o5", "o6b", "o7"]),
  "mission.margin_call": ({"o4": [{"id": "o4b", "type": "chase", "target": "npc.kallis_driver", "catchDistanceM": 6, "vehicleAllowed": True, "invert": True,
@@ -468,9 +468,9 @@ COMBAT = {
  "mission.flip": ({"o5": [CB("o5b", "firefight", "Villalba's drivers ambush the booth", [A_("npc.carrier_muscle", 4)], cover=["truck bays", "fuel drums"], note="Nick hires muscle beforehand or fights badly; Augie survives (lethal: false).")]}, 16, ["o2", "o3", "o5b", "o6"]),
  "mission.the_car": ({"o4": [CB("o4b", "firefight", "Lisle sent men to clean up Mayhew", [A_("npc.lisle_driver", 3)], protect="char.carl_mayhew", weapons=["item.revolver_service"], cover=["parked cars", "the stoop"], note="Rain, W 35th St. Teddy protects the man he came to confront.")]}, 17, ["o2", "o3", "o4", "o4b"]),
  "mission.fire_watch": ({"o8": [CB("o8b", "firefight", "The firebug's crew turns on you", [A_("npc.hired_firebug", 1), A_("npc.stickup_man", 2)], weapons=["item.revolver_service"], note="In the alley off W 31st; no fire is ever lit (content rule).")]}, 20, ["o2", "o3", "o6", "o8b"]),
- "mission.exposure": ({"o7": [CB("o7b", "survive", "Wurtz's unit corners you at the lockers", [A_("npc.plainclothes", 3)], durationSec=60, lethal=False, note="Survive until Nick's hired muscle arrives (Payroll); then the Disappear exit through the concourse.")]}, 18, ["o3", "o5", "o7b", "o9"]),
- "mission.the_march": ({"o2": [CB("o2b", "defend", "Prentiss's men try to break the march", [A_("npc.prentiss_mover", 4)], protect="char.odessa_pruitt", lethal=False, note="Non-lethal crowd fight on Broadway; marchers help.")]}, 18, ["o2", "o2b", "o3", "o5", "o7"]),
- "mission.the_ledger": ({"o2": [CB("o2b", "firefight", "Wurtz's men want the ledger first", [A_("npc.plainclothes", 2), A_("npc.lisle_driver", 2)], weapons=["item.revolver_service"], note="Whatever Teddy chose, someone tries to take it on W 31st St. Plainclothes are non-lethal.")]}, 17, ["o1", "o2", "o2b", "o4"]),
+ "mission.exposure": ({"o7": [CB("o7b", "survive", "Wurtz's unit corners you at the lockers", [A_("npc.plainclothes", 3)], durationSec=60, note="Survive until Nick's hired muscle arrives (Payroll); then the Disappear exit through the concourse.")]}, 18, ["o3", "o5", "o7b", "o9"]),
+ "mission.the_march": ({"o2": [CB("o2b", "defend", "Prentiss's men try to break the march", [A_("npc.prentiss_mover", 4)], protect="char.odessa_pruitt", note="Crowd fight on Broadway; marchers help. Odessa is essential.")]}, 18, ["o2", "o2b", "o3", "o5", "o7"]),
+ "mission.the_ledger": ({"o2": [CB("o2b", "firefight", "Wurtz's men want the ledger first", [A_("npc.plainclothes", 2), A_("npc.lisle_driver", 2)], weapons=["item.revolver_service"], note="Whatever Teddy chose, someone tries to take it on W 31st St. Plainclothes are ordinary killable police (heat only).")]}, 17, ["o1", "o2", "o2b", "o4"]),
  "mission.closing": ({"o3": [CB("o3b", "defend", "Kallis's men want the deed unsigned", [A_("npc.carrier_muscle", 2)], protect="char.jung_ho_baek", note="Nick: hire muscle, pay them off, or fight badly.")]}, 15, ["o2", "o3b", "o4", "o5"]),
  "mission.lease": ({"o2": [CB("o2b", "melee", "Lonnie's last try, at the shop door", [{"character": "char.lonnie_gage", "lethal": False}], weapons=["item.straight_razor"])]}, 14, ["o1", "o2", "o2b", "o3"]),
  "mission.labor_day": ({"replace": {"o4": CB("o4", "survive", "Brannock's men in the Penn concourse", [A_("npc.plainclothes", 3), A_("npc.lisle_driver", 2)], durationSec=75, note="Converted from the evade (20-min cap): fight through, then out on Seventh.")}}, 20, ["o2", "o3", "o4", "o5", "o6", "o7"]),
@@ -536,6 +536,8 @@ def tod_label(w):
     return "night"
 for m in M:
     m["timeOfDay"] = tod_label(m["requires"].get("timeWindow"))
+import sys as _sys; _sys.path.insert(0, str(Path(__file__).parent)); import conventions
+conventions.apply(M)
 for m in M:
     (OUT / f"{m['id'].split('.', 1)[1]}.json").write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n")
 print(len(M), "missions written")

@@ -55,14 +55,16 @@
       "item": "item.feld_sample_racks",
       "to": "W 35th St & 7th Ave",
       "text": "Racks to the store dock, W 35th St",
-      "note": "Loading dock of the Herald Square department store (generic until N6 names it)."
+      "note": "Loading dock of the Herald Square department store (generic until N6 names it).",
+      "requireNoHeat": true
     },
     {
       "id": "o4",
       "type": "deliver",
       "item": "item.feld_sample_bags",
       "to": "loc.baek_wholesale",
-      "text": "Sample bags to W 29th St"
+      "text": "Sample bags to W 29th St",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
@@ -86,7 +88,7 @@
       "weapons": [
         "item.tire_iron"
       ],
-      "note": "Only if Teddy chose 'Step in'; otherwise they leave and Baek pays (choice-gated, `if`).",
+      "note": "Only if Teddy chose 'Step in'; otherwise they leave and Baek pays (choice-gated, `if`). Cops among the targets are ordinary killable police (heat only).",
       "if": "flag.teddy_stepped_in_baek"
     },
     {
@@ -94,7 +96,8 @@
       "type": "dialogue",
       "script": "dlg.m04_brawl_after",
       "text": "Help Mr. Baek up",
-      "if": "flag.teddy_stepped_in_baek"
+      "if": "flag.teddy_stepped_in_baek",
+      "requireNoHeat": true
     },
     {
       "id": "o6",
@@ -116,7 +119,15 @@
     },
     {
       "type": "player_down",
-      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -163,5 +174,20 @@
   ],
   "mobile": "Following is generous (40 m) through rush-hour crowds, and losing Dwayne only fails after 30 s out of range with a 'Dwayne's at 36th & Seventh' hint. Pushing a rack is one held button. The step-in choice is untimed.",
   "design": "The surcharge is shown, not explained: envelopes on dashboards, the Baeks' refusal, Augie's 'I remember you from the Christmas list'. The choice sets relationships only (Baek +1 and Augie −1 if Teddy steps in; Baek −1 if he walks on). Those are applied in the dialogue's setRelationships. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.augie_lomax",
+      "reason": "died"
+    },
+    {
+      "character": "char.dwayne_little",
+      "reason": "died"
+    },
+    {
+      "character": "char.jung_ho_baek",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

@@ -73,7 +73,8 @@
       "id": "o4",
       "type": "enter_interior",
       "marker": "interior.corwin_lobby",
-      "text": "Get to the Corwin, W 31st St"
+      "text": "Get to the Corwin, W 31st St",
+      "requireNoHeat": true
     },
     {
       "id": "o5",
@@ -100,13 +101,15 @@
       ],
       "nonLethalAllowed": true,
       "text": "Stop the stick-up at the desk",
-      "tutorial": "melee + disarm; a witness runs for the Broadway call box (police intro)"
+      "tutorial": "melee + disarm; a witness runs for the Broadway call box (police intro)",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o8",
       "type": "dialogue",
       "script": "dlg.m01_stickup_after",
-      "text": "Deal with the witness and the call box"
+      "text": "Deal with the witness and the call box",
+      "requireNoHeat": true
     }
   ],
   "triggers": [
@@ -115,7 +118,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Down in a fight: mission fails to the last checkpoint (hospital flow handled by the Gameplay chat)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -152,5 +163,16 @@
   ],
   "mobile": "No fail states. The escort matches the player's pace and waits, so there's no exact pacing on touch. Dialogue segments are gated by route leg. Objective text names real corners. One untimed choice (3 options). Long dusk light keeps the walk readable on small screens.",
   "design": "Earns the spawn shot. The streetlights come on as the pair walk north (the engine dusk cycle at 20:31 sunset). Mayhew's 'Not anymore' about W 35th St seeds the 1971 secret. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

@@ -79,30 +79,37 @@
       "text": "Lonnie's boys corner you in the arcade",
       "weapons": [
         "item.straight_razor"
-      ]
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o5",
       "type": "dialogue",
       "text": "Bauer's nervous about something",
-      "script": "dlg.m11_bauer"
+      "script": "dlg.m11_bauer",
+      "requireNoHeat": true
     },
     {
       "id": "o6",
       "type": "deliver",
       "text": "Hide the money: the Arden boiler room",
       "item": "item.club_cash",
-      "to": "interior.arden_back_stairs"
+      "to": "interior.arden_back_stairs",
+      "requireNoHeat": true
     }
   ],
   "fail": [
     {
-      "type": "caught",
-      "note": "Proposed; fallback timer."
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
     },
     {
-      "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -143,5 +150,12 @@
   ],
   "mobile": "The evade is solved by the arcade's two doors (42nd St and 8th Ave). Lonnie is slower in the crowd. No combat. Day-into-dusk light helps readability.",
   "design": "Moving cash under surveillance (P1). Tina's lateness and Lonnie's tail are linked, which seeds her secret. Bauer hints that 'somebody downtown' asks about Wurtz. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "day"
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.ray_bauer",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

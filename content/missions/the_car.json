@@ -79,7 +79,7 @@
         "parked cars",
         "the stoop"
       ],
-      "note": "Rain, W 35th St. Teddy protects the man he came to confront."
+      "note": "Rain, W 35th St. Teddy protects the man he came to confront. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o5",
@@ -92,7 +92,15 @@
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -129,5 +137,12 @@
   ],
   "mobile": "The emotional peak is a dialogue in a parked car. The final walk home in the rain is optional pacing (it can be skipped by fast travel to the desk). No timers.",
   "design": "Kearney gives Teddy the 1969–71 Christmas list (always, so it's a critical-path corroboration). In the car, Mayhew tells the truth: the 1971 meet was Lisle buying a case, and Teddy was the alibi. The final choice is to let him go or take him to Calloway (flag.teddy_spared_mayhew, in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

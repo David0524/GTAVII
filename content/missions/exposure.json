@@ -92,8 +92,7 @@
       "nonLethalAllowed": true,
       "text": "Wurtz's unit corners you at the lockers",
       "durationSec": 60,
-      "lethal": false,
-      "note": "Survive until Nick's hired muscle arrives (Payroll); then the Disappear exit through the concourse."
+      "note": "Survive until Nick's hired muscle arrives (Payroll); then the Disappear exit through the concourse. Cops among the targets are ordinary killable police (heat only)."
     },
     {
       "id": "o8",
@@ -116,19 +115,29 @@
       "id": "o9",
       "type": "enter_interior",
       "text": "Back to Rita's. Tina's decided.",
-      "marker": "interior.arden_lobby"
+      "marker": "interior.arden_lobby",
+      "requireNoHeat": true
     },
     {
       "id": "o10",
       "type": "dialogue",
       "text": "Tina's choice",
-      "script": "dlg.m27_tina"
+      "script": "dlg.m27_tina",
+      "requireNoHeat": true
     }
   ],
   "fail": [
     {
       "type": "player_down",
-      "note": "Retry from the last checkpoint; hospital/arrest flow per Gameplay (CORE_SYSTEMS)."
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
     }
   ],
   "checkpoints": [
@@ -175,5 +184,12 @@
   ],
   "mobile": "Spending is the solution: Nick buys the key, so there's no lockpicking. The optional photo is signposted ('Claudette says the paper's man drinks at the Pennsylvania') so players know it opens a Branch B option. Two switches, both at calm beats.",
   "design": "The mirror pays off: Wurtz's photographs (his insurance) become the leads' evidence. The optional photo neutralises the editor's conflict for B2 and is signposted here, as N3 §9 requires. Tina's resolution (flag.tina_stays or flag.tina_gone) and Bauer's fate (flag.bauer_burned if Delphine trades him to save Tina) are set in dlg.m27_tina. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
-  "timeOfDay": "night"
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.tina_mercado",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
 }

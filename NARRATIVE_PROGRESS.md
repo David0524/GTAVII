@@ -758,3 +758,15 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
   - the lead stats agreement (Gameplay);
   - the cop-lethality decision (user);
   - the name re-checks before ship.
+
+### Decision: cop lethality (26 Nov, user verbatim via oversight)
+"Fully lethal everywhere", then "No you can kill cops during missions. That's normal. Consider
+how GTA handles these things".
+- **Applied:** `lethal: false` is removed everywhere. Every mission now has an `essential`
+  list (the characters its later steps need, with "<Name> died" as the fail reason), the
+  standard fails (wasted, busted, essential died), and `requireNoHeat` gates where the player
+  must lose the police first.
+- **Consequence content:** `barks.cop_killed` (radio, Teddy's guilt versus his non-lethal
+  pride, Delphine, Nick, the street) and the precinct's memory (bribes refused, patrols
+  doubled, Kearney and Navarro −2, headline templates).
+- **Docs updated:** ENGINE_REQUESTS 12b and N3 §2b.

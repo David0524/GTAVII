@@ -45,6 +45,11 @@ precincts = {"_note": "Invented precincts covering the playable area (E8). Real 
    "honest": ["char.sgt_greer", "char.det_fisk (Internal Affairs; hunts players who bribe too often citywide)"]}],
  "reports": {"note": "Per the CORE_SYSTEMS design: witnesses run to red police call boxes; each precinct keeps reports with descriptions (lead, clothing colours, vehicle). Narrative supplies the text below.",
              "callBoxColour": "red (period police call boxes on lampposts)"}}
+precincts["copKilled"] = {"note": "User: 'Fully lethal everywhere'; missions follow the genre (heat only, never a fail or branch).",
+ "memory": "The precinct where an officer is killed keeps it: for the rest of the act, its corruptibility drops to 0 for the killer's description (bribes refused), patrol density doubles in its blocks, and the desk sergeant's lines turn cold.",
+ "relationships": {"char.teddy_arce/char.pat_kearney": -2, "char.teddy_arce/char.luis_navarro": -2},
+ "newspaper": ["COP SLAIN ON {street}", "MANHUNT FOR {description}", "'ONE OF OURS': PRECINCT MOURNS"],
+ "teddyNote": "Teddy's always-available non-lethal option stays a meaningful choice: barks.cop_killed (teddy vs teddy_nonlethal), and Kearney and Navarro remember."}
 W("police/precincts.json", precincts)
 
 # ------------------------------------------------------------------ service characters (tier 'service': lighter sheets)
@@ -250,6 +255,21 @@ pool("barks.police_radio", "Dispatch ('Central') and car chatter: the main heat 
  ("idle", "flat", "Central, car six, out of service for coffee. Ten minutes."),
  ("idle", "wry", "Central, any word on overtime? …Never mind."),
  ("idle", "flat", "Central to Midtown Central: hydrant open again, Thirty-Seventh and Ninth.")])
+pool("barks.cop_killed", "Consequences of killing a police officer (user: 'Fully lethal everywhere'). Heat is Gameplay's; this is flavour. Teddy's lines are a meaningful contrast with his always-available non-lethal option.", [
+ ("radio", "urgent", "Central to all cars: officer down, {street} and {avenue}. All units. All units."),
+ ("radio", "grave", "Central, the officer is not breathing. Repeat: not breathing."),
+ ("radio", "cold", "All precincts: shooter of a police officer. Description follows. Use extreme caution."),
+ ("radio", "grave", "Central to all cars: a moment of silence on the air for car one-four. …Back to work."),
+ ("teddy", "shaken", "(Teddy) I wore that uniform. Eight years. God forgive me."),
+ ("teddy", "hollow", "(Teddy) Some kid from Bay Ridge. He had a mother. Everybody's got a mother."),
+ ("teddy", "cold", "(Teddy) Kearney will hear about this before I'm off the block."),
+ ("teddy_nonlethal", "relieved", "(Teddy) Down, not dead. Cuffs on his own wrist. He'll go home tonight."),
+ ("teddy_nonlethal", "dry", "(Teddy) Old habits. You don't shoot a man you'd have bought coffee for."),
+ ("delphine", "cold", "(Delphine) Rule twenty-one: they'll never stop looking now. Never."),
+ ("nick", "panicked", "(Nick) I'm a furrier! I'm a furrier! What have I done?"),
+ ("street", "shocked", "They shot a cop. On Eighth Avenue. They shot a cop."),
+ ("street", "low", "Get inside. Every cop in the city is coming here.")])
+
 pool("barks.combat", "Generic enemy and ally combat barks (crews, stick-up men, security). No slurs.", [
  ("spot", "alert", "There! That's him!"), ("spot", "angry", "That's the one from Eighth Avenue!"), ("spot", "cold", "Lonnie said you'd come this way."),
  ("cover", "urgent", "Get down! Behind the car!"), ("cover", "urgent", "He's got a piece! Cover!"), ("flank", "urgent", "Go around! Take the alley!"),
