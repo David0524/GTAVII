@@ -1,0 +1,28 @@
+{
+  "id": "npc.park_sleeper",
+  "behaviour": "loiterer",
+  "palette": [
+    "#696969",
+    "#8B7D6B"
+  ],
+  "wardrobe": "Layers despite the heat, worn shoes, a coat as a pillow.",
+  "props": [
+    "paper bag",
+    "coat"
+  ],
+  "schedule": [
+    {
+      "from": "19:00",
+      "to": "08:00",
+      "area": "Madison Square Park, Bryant Park",
+      "activity": "sleep"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.2
+  },
+  "barks": "barks.park",
+  "scripted": false,
+  "note": ""
+}

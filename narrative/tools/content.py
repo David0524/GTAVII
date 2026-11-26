@@ -199,13 +199,31 @@ def main():
                 v = o.get(k)
                 if isinstance(v, str) and not PH.search(v): loc_ok(f"{aw}.{o['id']}", v)
 
+    # archetypes and barks
+    archs = {x["id"]: x for x in (jl(f) for f in sorted((C / "npc_archetypes").glob("*.json")))}
+    pools = {x["id"]: x for x in (jl(f) for f in sorted((C / "barks").glob("*.json")))}
+    bnd = jl(C / "boundaries.json") if (C / "boundaries.json").exists() else {"barks": {}}
+    pool_ids = set(pools) | set(bnd.get("barks", {}))
+    for aid, x in archs.items():
+        if x.get("barks") and x["barks"] not in pool_ids: E(f"{aid}: bark pool {x['barks']} missing")
+        if sum(1 for r in x["schedule"] for k in ("from", "to") if not TIME_RE.match(r[k]) and r[k] != "24:00"): E(f"{aid}: bad schedule time")
+    for pid, x in pools.items():
+        if x.get("core") and len(x["lines"]) < 30: E(f"{pid}: core pool has {len(x['lines'])} lines (<30)")
+        for l in x["lines"]:
+            if len(l["text"]) > LINE_MAX: E(f"{pid}: bark over {LINE_MAX}: {l['text']}")
+    blob = json.dumps([list(missions.values()), acts_doc, list(dialogue.values()), bnd])
+    for ref in sorted(set(re.findall(r'"(npc\.[a-z_]+)"', blob))):
+        if ref not in archs: E(f"archetype {ref} referenced but not defined")
+    for b in bnd.get("blockers", []):
+        if b.get("barks") and b["barks"] not in pool_ids: E(f"{b['id']}: bark pool {b['barks']} missing")
+
     # flags: documented but never set by written content -> info only
     set_somewhere = {f for m in missions.values() for f in m["rewards"].get("setFlags", [])}
     set_somewhere |= {f for d in dialogue.values() for l in d["lines"] for c in l.get("choices", []) for f in c.get("setFlags", [])}
 
     for x in warns: print("WARN ", x)
     for x in errs: print("ERROR", x)
-    print(f"{len(acts_doc)} activities, {len(missions)}/{len(planned)} missions, {len(dialogue)} dialogue scripts, {len(triggers)} triggers, "
+    print(f"{len(archs)} archetypes, {len(pools)} bark pools ({sum(len(x['lines']) for x in pools.values())} lines), {len(acts_doc)} activities, {len(missions)}/{len(planned)} missions, {len(dialogue)} dialogue scripts, {len(triggers)} triggers, "
           f"{len(spawns)} spawns, {len(interiors)} interiors, {len(flags)} flags ({len(set_somewhere)} set by written content); "
           f"{len(errs)} errors, {len(warns)} warnings")
     if errs:

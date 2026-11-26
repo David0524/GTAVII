@@ -1,0 +1,47 @@
+{
+  "id": "barks.emergency",
+  "core": false,
+  "note": "Firefighters and ambulance crews (scripted scenes, e.g. M26's false alarm).",
+  "lines": [
+    {
+      "context": "idle",
+      "emotion": "brisk",
+      "text": "Everybody out! Nice and calm! Nice and calm!"
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "False alarm. Third this week on this block."
+    },
+    {
+      "context": "idle",
+      "emotion": "annoyed",
+      "text": "Who pulled the box? Somebody pulled the box."
+    },
+    {
+      "context": "idle",
+      "emotion": "brisk",
+      "text": "Clear the stairs! Let the old folks down first!"
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Budget cut two companies. We're doing double runs."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alert",
+      "text": "Hey! Not inside! Stay back!"
+    },
+    {
+      "context": "collision",
+      "emotion": "brisk",
+      "text": "Move, move, hose coming through!"
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Building's fine. Go back up. Nobody's hurt."
+    }
+  ]
+}

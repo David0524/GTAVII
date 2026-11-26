@@ -1,0 +1,27 @@
+{
+  "id": "npc.bank_teller",
+  "behaviour": "worker",
+  "palette": [
+    "#000080",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Neat blouse or shirt and tie, name plate.",
+  "props": [
+    "rubber stamp"
+  ],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "15:00",
+      "area": "Fifth Avenue Trust",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.0
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": ""
+}

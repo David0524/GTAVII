@@ -1,0 +1,27 @@
+{
+  "id": "npc.cab_fare_night_worker",
+  "behaviour": "commuter",
+  "palette": [
+    "#FFFFFF",
+    "#4682B4"
+  ],
+  "wardrobe": "Nurse's whites under a cardigan, or a waiter's jacket.",
+  "props": [
+    "handbag"
+  ],
+  "schedule": [
+    {
+      "from": "18:00",
+      "to": "04:00",
+      "area": "Cab pickups",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.cab_fare",
+  "scripted": true,
+  "note": ""
+}

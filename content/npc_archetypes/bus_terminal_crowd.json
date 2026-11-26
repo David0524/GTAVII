@@ -1,0 +1,29 @@
+{
+  "id": "npc.bus_terminal_crowd",
+  "behaviour": "commuter",
+  "palette": [
+    "#696969",
+    "#F5DEB3",
+    "#1E90FF"
+  ],
+  "wardrobe": "Travellers with suitcases, soldiers, families from out of town.",
+  "props": [
+    "suitcase",
+    "duffel"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "8th Ave & W 40th–42nd St",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.5,
+    "night": 0.3
+  },
+  "barks": "barks.commuter",
+  "scripted": false,
+  "note": ""
+}

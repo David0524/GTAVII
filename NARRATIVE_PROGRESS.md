@@ -10,7 +10,7 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 | N2. Cast | **Done** (with appearance sheets; no review objections) → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
 | N3. Story structure | **Done** → `narrative/N3_STRUCTURE.md` (32-mission chain, branches, endings, relationships, act-by-act world) |
 | N4. Mission specs and side activities | **Done.** All 32 missions in `content/missions/`; 20 side activities in `content/activities.json`; M1 fully playable. Validator: 0 errors (104 warnings = dialogue scripts due in N5). |
-| N5. Dialogue and barks | **Next.** Mission dialogue in mission order (M1 done), then barks per archetype (≥30 each). |
+| N5. Dialogue and barks | **In progress.** Done: Act 1 dialogue (M1–M9, 32 scripts), 53 NPC archetypes, 21 bark pools (477 lines; 12 core pools with 31+ each). Next: Act 2 dialogue (M10–M21), then Act 3 (M22–M32), then activity dialogue. |
 | N6. Ambient world and business registry | — |
 | N7. Integration | — (waits on engine Phase 7 hooks) |
 
@@ -28,6 +28,9 @@ narrative/tools/build_act1_missions.py  authoring source for Act 1 mission JSON 
 content/missions/, content/dialogue/, content/triggers/, content/spawns.json, content/interiors.json, content/flags.json (+ FLAGS.md)
 content/activities.json    20 side activities (pool rows keyed by placeholder), built by narrative/tools/build_activities.py
 narrative/tools/build_act23_missions.py  authoring source for M10–M32 mission JSON
+content/npc_archetypes/    53 archetypes (contract shape), built by narrative/tools/build_archetypes.py
+content/barks/             21 bark pools, built by narrative/tools/build_barks.py
+narrative/tools/dlg_act1.py  authoring source for Act 1 dialogue (M2–M9)
 content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.

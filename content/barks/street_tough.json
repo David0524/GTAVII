@@ -1,0 +1,47 @@
+{
+  "id": "barks.street_tough",
+  "core": false,
+  "note": "Lonnie's crew and similar street toughs. Threat without slurs; scripted encounters mostly.",
+  "lines": [
+    {
+      "context": "idle",
+      "emotion": "cocky",
+      "text": "Nice night. Shame to waste it."
+    },
+    {
+      "context": "idle",
+      "emotion": "cold",
+      "text": "Lonnie says hello. Lonnie says a lot of things."
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "You bumped me. Now we got a problem."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alert",
+      "text": "There he goes! Get him!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "angry",
+      "text": "He's heading for Penn Station! Cut him off!"
+    },
+    {
+      "context": "idle",
+      "emotion": "cocky",
+      "text": "Envelope looks heavy, collector. Want help carrying it?"
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Lost him. Lonnie's gonna be sore."
+    },
+    {
+      "context": "night",
+      "emotion": "cold",
+      "text": "Walk away, friend. Just walk."
+    }
+  ]
+}

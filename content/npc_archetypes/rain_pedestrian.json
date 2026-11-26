@@ -1,0 +1,29 @@
+{
+  "id": "npc.rain_pedestrian",
+  "behaviour": "walker",
+  "palette": [
+    "#2F4F4F",
+    "#F0E68C",
+    "#000000"
+  ],
+  "wardrobe": "Raincoats, plastic rain bonnets, newspapers over heads, umbrellas that turn inside out.",
+  "props": [
+    "umbrella",
+    "newspaper"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Anywhere (rain weather only)",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.4,
+    "night": 0.2
+  },
+  "barks": "barks.commuter",
+  "scripted": false,
+  "note": ""
+}

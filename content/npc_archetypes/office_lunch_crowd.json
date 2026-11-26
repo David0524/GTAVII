@@ -1,0 +1,37 @@
+{
+  "id": "npc.office_lunch_crowd",
+  "behaviour": "commuter",
+  "palette": [
+    "#2F4F4F",
+    "#FFFFFF",
+    "#8B4513",
+    "#B0C4DE"
+  ],
+  "wardrobe": "Men in short-sleeve dress shirts and wide ties, jackets over arms; women in A-line dresses, shirtwaists, pantsuits.",
+  "props": [
+    "briefcase",
+    "newspaper",
+    "paper lunch bag"
+  ],
+  "schedule": [
+    {
+      "from": "08:00",
+      "to": "18:00",
+      "area": "Fifth Ave, Madison Sq, Herald Sq, Park Ave S",
+      "activity": "work"
+    },
+    {
+      "from": "12:00",
+      "to": "13:30",
+      "area": "lunch counters",
+      "activity": "eat"
+    }
+  ],
+  "density": {
+    "day": 0.7,
+    "night": 0.05
+  },
+  "barks": "barks.office",
+  "scripted": false,
+  "note": ""
+}

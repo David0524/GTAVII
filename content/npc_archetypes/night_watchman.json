@@ -1,0 +1,28 @@
+{
+  "id": "npc.night_watchman",
+  "behaviour": "worker",
+  "palette": [
+    "#2F4F4F",
+    "#C0C0C0"
+  ],
+  "wardrobe": "Guard uniform, cap, flashlight, time clock on a strap.",
+  "props": [
+    "flashlight",
+    "watchman's clock"
+  ],
+  "schedule": [
+    {
+      "from": "19:00",
+      "to": "07:00",
+      "area": "Lisle's building and similar",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.05
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": "M21: fixed loop shown on a radio clock."
+}

@@ -1,0 +1,28 @@
+{
+  "id": "npc.truck_driver",
+  "behaviour": "driver",
+  "palette": [
+    "#556B2F",
+    "#A0522D",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Work shirt with name patch, cap, cigarette behind ear.",
+  "props": [
+    "box truck"
+  ],
+  "schedule": [
+    {
+      "from": "05:00",
+      "to": "15:00",
+      "area": "Garment District (W 35th–40th, 6th–9th Aves) and avenues",
+      "activity": "drive"
+    }
+  ],
+  "density": {
+    "day": 0.4,
+    "night": 0.05
+  },
+  "barks": "barks.truck_driver",
+  "scripted": false,
+  "note": ""
+}

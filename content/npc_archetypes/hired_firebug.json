@@ -1,0 +1,27 @@
+{
+  "id": "npc.hired_firebug",
+  "behaviour": "walker",
+  "palette": [
+    "#2F2F2F",
+    "#696969"
+  ],
+  "wardrobe": "Work clothes, cap pulled low.",
+  "props": [
+    "two cans (unlabelled)"
+  ],
+  "schedule": [
+    {
+      "from": "01:00",
+      "to": "04:00",
+      "area": "W 31st St (M26 only)",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": true,
+  "note": "M26 only. No method shown (content rule 6)."
+}
