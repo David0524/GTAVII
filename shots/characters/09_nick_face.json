@@ -18,7 +18,7 @@
       "props": [],
       "tris": 20088,
       "draws": 2,
-      "buildMs": 101.6
+      "buildMs": 127.1
     },
     {
       "seed": 1,
@@ -37,7 +37,7 @@
       ],
       "tris": 20651,
       "draws": 2,
-      "buildMs": 66.8
+      "buildMs": 76.6
     },
     {
       "seed": 1,
@@ -54,17 +54,17 @@
       "props": [],
       "tris": 19746,
       "draws": 2,
-      "buildMs": 64.6
+      "buildMs": 84
     }
   ],
   "updateMs": [
-    0.2,
+    0,
     0,
     0
   ],
   "renderMsSoftware": [
-    2.1000000000931323,
-    3,
-    0.8000000000465661
+    2,
+    1,
+    0.6999999999534339
   ]
 }
