@@ -101,11 +101,18 @@ for id, name, trade, where, sign in [
 for id, name, trade, where, sign in [
     ("botanica", "Botánica San Lázaro", "Botanica (religious goods)", "8th Ave & W 25th St", "BOTÁNICA SAN LÁZARO · HIERBAS · VELAS"),
     ("bodega_25", "Bodega La Esquina", "Bodega", "8th Ave & W 25th St", "BODEGA LA ESQUINA · CAFÉ · CERVEZA FRÍA"),
-    ("pawn_8th", "Eighth Avenue Loan Office", "Pawnshop", "8th Ave & W 37th St", "LOANS · 8TH AVE LOAN OFFICE · WE BUY GOLD")]:
+    ("pawn_8th", "Eighth Avenue Loan Office", "Pawnshop", "8th Ave & W 37th St", "LOANS · 8TH AVE LOAN OFFICE · WE BUY GOLD"),
+    ("cormorant", "The Cormorant", "Grindhouse cinema (ex-legit house)", "W 42nd St, 7th–8th Aves (north side)", "CORMORANT · KUNG FU · HORROR · CONTINUOUS"),
+    ("gilded_lyre", "The Gilded Lyre", "Grindhouse cinema (gilt 1910s house, peeling)", "W 42nd St, 7th–8th Aves (south side)", "GILDED LYRE · 2 HITS · AIR COOLED"),
+    ("pharaoh", "The Pharaoh", "Grindhouse cinema (Egyptian-revival facade)", "W 42nd St, 7th–8th Aves (south side)", "PHARAOH · ACTION · 24 HRS · 99¢"),
+    ("comet", "The Comet", "Grindhouse cinema (narrow 1930s front)", "W 42nd St, west of 8th Ave", "COMET · LATE SHOW · 3 FEATURES")]:
     biz(f"biz.{id}", name, trade, where, "Ambient shopfront.", [sign], GENERIC, story=False)
 for b in B:
     if b["where"].startswith("loc."):
         pass
+for b in B:
+    if b["id"] in ("biz.cormorant", "biz.gilded_lyre", "biz.pharaoh", "biz.comet"):
+        b["check"] = "cleared: exact-name search (Nov 2026), no NYC cinema/theatre of that name; avoided real Deuce houses (Lyric, Victory, Selwyn, Apollo, Times Square, Liberty, Empire, Harris, Anco, Cine 42, Times, Bryant)"
 
 (C / "businesses.json").write_text(json.dumps({"_note": "Invented business registry (N6). 'sign' gives the signage text for the engine. 'check' records the trademark/collision search.", "businesses": B}, ensure_ascii=False, indent=2) + "\n")
 L = ["# BUSINESS_NAMES: invented business registry", "",
