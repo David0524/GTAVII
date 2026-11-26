@@ -1,0 +1,371 @@
+{
+ "description": "20-hour mixed playthrough, deterministic (seed 1974). 1 game minute = 2 real seconds, so 20 real hours = 600 game hours. Money in dollars.",
+ "missionReferencePerRealHour": 150,
+ "realHours": 20,
+ "gameHours": 600,
+ "curve": [
+  {
+   "realHour": 0,
+   "gameHour": 0,
+   "total": 365,
+   "leads": {
+    "Teddy": 40,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 1,
+   "gameHour": 30,
+   "total": 523.41,
+   "leads": {
+    "Teddy": 198.41,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 2,
+   "gameHour": 60,
+   "total": 626.07,
+   "leads": {
+    "Teddy": 301.07,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 3,
+   "gameHour": 90,
+   "total": 717.77,
+   "leads": {
+    "Teddy": 392.77,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 4,
+   "gameHour": 120,
+   "total": 689.06,
+   "leads": {
+    "Teddy": 424.06,
+    "Delphine": 0,
+    "Nick": 265
+   }
+  },
+  {
+   "realHour": 5,
+   "gameHour": 150,
+   "total": 689.06,
+   "leads": {
+    "Teddy": 424.06,
+    "Delphine": 0,
+    "Nick": 265
+   }
+  },
+  {
+   "realHour": 6,
+   "gameHour": 180,
+   "total": 780.48,
+   "leads": {
+    "Teddy": 515.48,
+    "Delphine": 0,
+    "Nick": 265
+   }
+  },
+  {
+   "realHour": 7,
+   "gameHour": 210,
+   "total": 874.07,
+   "leads": {
+    "Teddy": 597.87,
+    "Delphine": 0,
+    "Nick": 276.2
+   }
+  },
+  {
+   "realHour": 8,
+   "gameHour": 240,
+   "total": 1030.44,
+   "leads": {
+    "Teddy": 597.87,
+    "Delphine": 0,
+    "Nick": 432.57
+   }
+  },
+  {
+   "realHour": 9,
+   "gameHour": 270,
+   "total": 1143.53,
+   "leads": {
+    "Teddy": 671.12,
+    "Delphine": 0,
+    "Nick": 472.41
+   }
+  },
+  {
+   "realHour": 10,
+   "gameHour": 300,
+   "total": 1307.13,
+   "leads": {
+    "Teddy": 834.72,
+    "Delphine": 0,
+    "Nick": 472.41
+   }
+  },
+  {
+   "realHour": 11,
+   "gameHour": 330,
+   "total": 1442.52,
+   "leads": {
+    "Teddy": 1005.11,
+    "Delphine": 0,
+    "Nick": 437.41
+   }
+  },
+  {
+   "realHour": 12,
+   "gameHour": 360,
+   "total": 1523.79,
+   "leads": {
+    "Teddy": 1086.38,
+    "Delphine": 0,
+    "Nick": 437.41
+   }
+  },
+  {
+   "realHour": 13,
+   "gameHour": 390,
+   "total": 1599.93,
+   "leads": {
+    "Teddy": 1086.38,
+    "Delphine": 136.14,
+    "Nick": 377.41
+   }
+  },
+  {
+   "realHour": 14,
+   "gameHour": 420,
+   "total": 1781.63,
+   "leads": {
+    "Teddy": 1243.77,
+    "Delphine": 160.45,
+    "Nick": 377.41
+   }
+  },
+  {
+   "realHour": 15,
+   "gameHour": 450,
+   "total": 813.27,
+   "leads": {
+    "Teddy": 275.41,
+    "Delphine": 160.45,
+    "Nick": 377.41
+   }
+  },
+  {
+   "realHour": 16,
+   "gameHour": 480,
+   "total": 840.47,
+   "leads": {
+    "Teddy": 240.41,
+    "Delphine": 125.45,
+    "Nick": 474.61
+   }
+  },
+  {
+   "realHour": 17,
+   "gameHour": 510,
+   "total": 934.66,
+   "leads": {
+    "Teddy": 319.62,
+    "Delphine": 125.45,
+    "Nick": 489.59
+   }
+  },
+  {
+   "realHour": 18,
+   "gameHour": 540,
+   "total": 1115.98,
+   "leads": {
+    "Teddy": 500.94,
+    "Delphine": 60.22,
+    "Nick": 554.82
+   }
+  },
+  {
+   "realHour": 19,
+   "gameHour": 570,
+   "total": 1115.98,
+   "leads": {
+    "Teddy": 500.94,
+    "Delphine": 60.22,
+    "Nick": 554.82
+   }
+  },
+  {
+   "realHour": 20,
+   "gameHour": 600,
+   "total": 1274.59,
+   "leads": {
+    "Teddy": 500.94,
+    "Delphine": 218.83,
+    "Nick": 554.82
+   }
+  }
+ ],
+ "final": {
+  "Teddy": 500.94,
+  "Delphine": 218.83,
+  "Nick": 554.82
+ },
+ "totalCash": 1274.59,
+ "assetsAtPurchasePrice": 1100,
+ "startCash": 365,
+ "earned": {
+  "mission": 1725.44,
+  "legal": 143.07,
+  "crime": 605.57,
+  "gamble": 33.51,
+  "property": 0
+ },
+ "spent": {
+  "clothes": 108,
+  "rent": 270,
+  "hospital": 114.51,
+  "film": 5.49,
+  "business": 1100
+ },
+ "hoursByCategory": {
+  "mission": 345,
+  "legal": 62.166666666666664,
+  "crime": 193.98333333333332,
+  "gamble": 4,
+  "property": 0
+ },
+ "attempts": {
+  "job.bail": 5,
+  "gamble.pool": 2,
+  "crime.collections": 1,
+  "job.cab": 2,
+  "gamble.fight": 1,
+  "crime.chop": 2,
+  "crime.burglary": 1,
+  "crime.safe": 1,
+  "crime.pickpocket": 1,
+  "crime.register": 1,
+  "mission": 23
+ },
+ "owned": [
+  "biz.newsstand"
+ ],
+ "hourlyVsMissions": {
+  "bestLegal": {
+   "id": "job.cab",
+   "ratio": 0.437
+  },
+  "bestCrime": {
+   "id": "crime.chop",
+   "ratio": 0.706
+  },
+  "propertyMean": 0.304,
+  "all": {
+   "job.cab": {
+    "sustained": 0.437,
+    "active": 0.437,
+    "centsPerGameHour": 218
+   },
+   "job.garment": {
+    "sustained": 0.375,
+    "active": 0.375,
+    "centsPerGameHour": 188
+   },
+   "job.locksmith": {
+    "sustained": 0.406,
+    "active": 0.404,
+    "centsPerGameHour": 203
+   },
+   "job.photos": {
+    "sustained": 0.429,
+    "active": 0.434,
+    "centsPerGameHour": 215
+   },
+   "job.bail": {
+    "sustained": 0.321,
+    "active": 0.317,
+    "centsPerGameHour": 160
+   },
+   "job.tow": {
+    "sustained": 0.353,
+    "active": 0.356,
+    "centsPerGameHour": 177
+   },
+   "crime.register": {
+    "sustained": 0.371,
+    "active": 0.393,
+    "centsPerGameHour": 185
+   },
+   "crime.safe": {
+    "sustained": 0.33,
+    "active": 0.455,
+    "centsPerGameHour": 165
+   },
+   "crime.burglary": {
+    "sustained": 0.656,
+    "active": 0.668,
+    "centsPerGameHour": 328
+   },
+   "crime.hijack": {
+    "sustained": 0.199,
+    "active": 0.335,
+    "centsPerGameHour": 100
+   },
+   "crime.pickpocket": {
+    "sustained": 0.519,
+    "active": 0.517,
+    "centsPerGameHour": 259
+   },
+   "crime.collections": {
+    "sustained": 0.593,
+    "active": 0.595,
+    "centsPerGameHour": 297
+   },
+   "crime.chop": {
+    "sustained": 0.706,
+    "active": 0.698,
+    "centsPerGameHour": 353
+   },
+   "biz.newsstand": {
+    "sustained": 0.28,
+    "active": 0.28,
+    "centsPerGameHour": 140
+   },
+   "biz.laundromat": {
+    "sustained": 0.3,
+    "active": 0.3,
+    "centsPerGameHour": 150
+   },
+   "biz.diner": {
+    "sustained": 0.31,
+    "active": 0.31,
+    "centsPerGameHour": 155
+   },
+   "biz.garage": {
+    "sustained": 0.313,
+    "active": 0.313,
+    "centsPerGameHour": 156
+   },
+   "biz.arcade": {
+    "sustained": 0.311,
+    "active": 0.311,
+    "centsPerGameHour": 155
+   },
+   "biz.poolhall": {
+    "sustained": 0.308,
+    "active": 0.308,
+    "centsPerGameHour": 154
+   }
+  }
+ }
+}
