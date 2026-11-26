@@ -52,6 +52,9 @@ const P3_VIEWS: { name: string; cam: string; ref?: string }[] = [
   { name: 'D_herald_square', cam: (() => { const c = on('Broadway', macys.x + 40, macys.z + 170, 1.7); return `${c[0]},${c[1]},${c[2]},12,5`; })(), ref: 'documerica_549869' },
   { name: 'E_flatiron_from_madison_sq', cam: '25,1.7,-150,173.5,10' },
   { name: 'F_spawn_up_broadway', cam: '-8,1.7,-30,14,6' },
+  { name: 'G_user_report_looking_up', cam: '-8,1.7,-30,14,30' }, // iPhone report 2026-11-26 ('the building is weird')
+  { name: 'H_madison_sq_park_inside', cam: '40,1.7,-160,30,6' },
+  { name: 'I_flatiron_looking_north_to_park', cam: '-5,1.7,-45,10,6' },
 ];
 
 /** Fixed viewpoints. 'spawn' uses the game's own spawn logic (no cam param). */
