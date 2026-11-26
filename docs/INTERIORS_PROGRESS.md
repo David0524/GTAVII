@@ -160,6 +160,12 @@ Reads as a modern kit or is wrong:
   the near-LOD band, so the brief's ≤0.3 ms at 1080p still needs a real GPU: the Vercel build with `?hud=1` on the user's
   phone, or any desktop GPU.
 
+## Sim door hand-off
+- Street ↔ interior traffic per kind lives in the sim (`src/sim/doors.ts` on claude/nice-sagan-2jh4m2, from our table). It's tunable at
+  runtime through `sim.setDoorRates()`.
+- Interiors' side, still to wire: on `pedEnteredDoor`, fill a slot by role in resident interiors; offer `exitFromDoor`
+  candidates from slots. Residential doors never take passers-by.
+
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire
    State), Teddy's room 9F.
