@@ -26,6 +26,8 @@ export const facadeUniforms = {
   night: uniform(0),
   /** Real seconds, for subtle flicker (TVs). */
   time: uniform(0),
+  /** Global scale on window emission (exposure tuning / debugging). */
+  litScale: uniform(0.5),
 };
 
 export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
@@ -106,7 +108,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const office = style.equal(4).or(style.equal(5));
   const tv = rnd3.lessThan(0.12).and(resid);
   const flicker = sin(facadeUniforms.time.mul(7.0).add(rnd.mul(40))).mul(0.15).add(0.85);
-  const lampCol = select(office, vec3(0.85, 0.92, 1.0), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
+  const lampCol = select(office, vec3(0.9, 0.88, 0.72), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
   const storeLit = groundFloor.and(hasStore).and(facadeUniforms.night.greaterThan(0.15)).and(rnd.lessThan(0.7));
   // Emission is modest: the Phase 3 post stack (filmic tonemap + bloom/halation) supplies the glow.
   const emissiveSharp = select(isLit.or(storeLit), lampCol.mul(select(storeLit, float(0.55), float(0.38))), vec3(0));
@@ -120,7 +122,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   m.colorNode = color;
   m.roughnessNode = select(isRoof, float(0.95), mix(float(0.9), select(boarded.or(shadeHere), float(0.8), float(0.12)), winMask));
   m.metalnessNode = float(0);
-  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask));
+  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask).mul(facadeUniforms.litScale));
   void abs; void min; void vec2;
   return m;
 }

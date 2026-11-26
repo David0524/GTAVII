@@ -155,6 +155,7 @@ async function main() {
   settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
 
   if (params.has('night')) facadeUniforms.night.value = Number(params.get('night'));
+  if (params.has('lit')) facadeUniforms.litScale.value = Number(params.get('lit'));
   const frames = new FrameStats();
   const clock = new THREE.Timer();
   let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
