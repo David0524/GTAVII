@@ -195,7 +195,7 @@
       "id": "interior.bank_branch",
       "address": "5th Ave & W 34th St, east side",
       "facade": "avenue",
-      "name": "Fifth Avenue Trust, 34th St branch",
+      "name": "Ashgrove Trust, 34th St branch",
       "kind": "shop",
       "hours": [
         "00:00",
@@ -225,7 +225,7 @@
       "id": "interior.herald_lunch_counter",
       "address": "W 34th St & Broadway",
       "facade": "avenue",
-      "name": "Herald Square department store, lunch counter",
+      "name": "Baxter & Lowe, lunch counter",
       "kind": "diner",
       "hours": [
         "00:00",

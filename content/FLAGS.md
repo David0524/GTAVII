@@ -28,7 +28,7 @@
 | `flag.editor_neutralised` | mission.exposure | mission.the_ledger | None. | Required for B2. |
 | `flag.tina_stays` | mission.exposure | epilogue | Tina at the beauty shop chair or the club table in the epilogue. | Resolution. |
 | `flag.tina_gone` | mission.exposure | epilogue | A postcard from Tina pinned behind Rita's bar. | Resolution. |
-| `flag.bauer_burned` | mission.exposure | ambient | Fun-O-Rama boarded up. |  |
+| `flag.bauer_burned` | mission.exposure | ambient | Lucky Quarter Amusements boarded up. |  |
 | `flag.feld_left` | mission.rewiring | ambient, mission.the_march | Feld Frocks dark; an operators' picket in the morning. |  |
 | `flag.ledger_to_prosecutor` | mission.the_ledger | mission.labor_day, epilogue | Testimony ending. | Branch B1. |
 | `flag.ledger_to_press` | mission.the_ledger | mission.labor_day, epilogue | Ledger Goes Public ending. | Branch B2. |

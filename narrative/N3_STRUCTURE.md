@@ -191,7 +191,7 @@ appear in free roam in every ending, as set by their resolutions.
 | Edge blockers | `content/boundaries.json` Act 1 set | Water main at the east edge; second film unit at the south edge; first "work suspended" signs | The film wraps and the west trench is abandoned; "work suspended" signs everywhere | Trenches still open |
 | New ambient NPCs | Tourists at Herald Square; buyers in the Garment District | More plainclothes on Eighth Ave (+50% `npc.plainclothes`); ice trucks; insurance adjusters on W 30th | Tenant picketers outside the Corwin and two other hotels; radio crowds on 8–9 Aug; process servers | Fewer Garment District pushboys (runaway shops); fur buyers back for the season |
 | Graffiti and posters (text in N6) | Faded political posters; "subway art" tags | Tenant posters "WE LIVE HERE"; vacate notices on doors | "WHO OWNS THE TENDERLOIN?" stencils; Corwin bedsheet banners. | By ending: "CORWIN STAYS" (saved) or "FOR CONVERSION" hoardings (Ashes) |
-| Shuttered businesses | — | Moretti's truck idle (sabotage) until M10 or N4 | Feld Frocks dark if Feld left (`flag.feld_left`); Fun-O-Rama boarded if Bauer was burned (`flag.bauer_burned`) | Varelas & Co. or Kallis (whoever lost); the Baeks' new sign if they bought |
+| Shuttered businesses | — | Moretti's truck idle (sabotage) until M10 or N4 | Feld Frocks dark if Feld left (`flag.feld_left`); Lucky Quarter Amusements boarded if Bauer was burned (`flag.bauer_burned`) | Varelas & Co. or Kallis (whoever lost); the Baeks' new sign if they bought |
 | Newspapers (N6) | Weekly, quiet | Heat, brownouts, the city's cash | The resignation; "HOTEL KING'S LAWYER" (if B2) | The budget gap (real, [S3]) and the ending's headline |
 
 ## 8. Mobile and pacing notes for every mission

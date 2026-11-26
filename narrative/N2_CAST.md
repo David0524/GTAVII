@@ -64,7 +64,7 @@
 | `char.mi_sook_baek` | Baek Mi-sook | 38 | Co-owner of Seoul Star Imports | off map | 16, 30 |
 | `char.earl_poole` | Earl Poole | 61 | Shoeshine stand at 42nd & Seventh | off map | 13, 27 |
 | `char.ricky_vail` | Ricky Vail | 24 | Small-time heroin dealer in Bryant Park | off map | 13, 23 |
-| `char.gordon_whitlock` | Gordon Whitlock | 55 | Loan officer, Fifth Avenue Trust (invented bank), 34th St branch | off map | 16, 30 |
+| `char.gordon_whitlock` | Gordon Whitlock | 55 | Loan officer, Ashgrove Trust Company (invented bank), 34th St branch | off map | 16, 30 |
 
 ## Relationship edges
 
@@ -315,7 +315,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Everybody gets paid. That's not corruption, my friend. That's payroll.”
   - “I bought a building. Nobody told me there were people in it.”
 - **Home:** Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave)
-- **Haunts:** The Iron Gate Chop House, W 36th St & 7th Ave (His corner table at lunch; the waiters know his order); Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Trade dinners in the ballroom; deals in the lobby); The Herald Square department store (lunch counter, fur salon), W 34th St & Broadway (The fur salon, his most important customer); Lisle & Associates, 11th floor, 5th Ave & W 36th St (Where he signs things he doesn't read); Kafeneio Kastoria (coffeehouse), W 29th St & 8th Ave (Backgammon with men who knew him as a nailer)
+- **Haunts:** The Iron Gate Chop House, W 36th St & 7th Ave (His corner table at lunch; the waiters know his order); Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Trade dinners in the ballroom; deals in the lobby); Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (The fur salon, his most important customer); Lisle & Associates, 11th floor, 5th Ave & W 36th St (Where he signs things he doesn't read); Kafeneio Kastoria (coffeehouse), W 29th St & 8th Ave (Backgammon with men who knew him as a nailer)
 - **Daily schedule (weekday):**
   - 23:00–07:30 · home · off map — Upper East Side, never shown
   - 07:30–08:30 · commute · Park Ave S & E 23rd St — Drives in himself
@@ -456,11 +456,11 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Everybody in your building is a witness. Most just don't know it yet.”
   - “I have a budget for coffee and a budget for you. Guess which is bigger.”
 - **Home:** off map
-- **Haunts:** The Herald Square department store (lunch counter, fur salon), W 34th St & Broadway (Lunch-counter meets; crowds hide conversations); 5th Ave & W 36th St (Parked surveillance across from Lisle's office); Public Library, Fifth Ave main branch, 5th Ave & W 41st St (Reads property records in the reading room)
+- **Haunts:** Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (Lunch-counter meets; crowds hide conversations); 5th Ave & W 36th St (Parked surveillance across from Lisle's office); Public Library, Fifth Ave main branch, 5th Ave & W 41st St (Reads property records in the reading room)
 - **Daily schedule (weekday):**
   - 20:00–08:00 · home · off map
   - 08:00–12:30 · work · off map — Office downtown
-  - 12:30–13:30 · eat · The Herald Square department store (lunch counter, fur salon), W 34th St & Broadway
+  - 12:30–13:30 · eat · Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway
   - 13:30–17:00 · work · Public Library, Fifth Ave main branch, 5th Ave & W 41st St
   - 17:00–20:00 · work · 5th Ave & W 36th St — Watching Lisle's door
 - **Relationships:** Teodoro “Teddy” Arce (recruits, +1); Howard Lisle (hunts, -3); Ray Bauer (runs informant, +0); Ptl. Luis Navarro (ally, +1); Nikos “Nick” Varelas (offers deal, +0); Nora Finch (rival, -1)
@@ -592,10 +592,10 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “I pay Wurtz, I pay the landlord, I pay the fire inspector. Who pays me?”
   - “Legit. That's the word. I'm gonna be so legit you'll be bored.”
 - **Home:** off map
-- **Haunts:** Bauer's Fun-O-Rama arcade and office, W 42nd St & 8th Ave (Office above the change booth); Hotel Arden (and its lobby bar), W 39th St & 8th Ave (Checks the bar's register; Rita watches him do it); Royal Cafeteria, 8th Ave & W 40th St (2 a.m. eggs)
+- **Haunts:** Lucky Quarter Amusements (Bauer's arcade and office), W 42nd St & 8th Ave (Office above the change booth); Hotel Arden (and its lobby bar), W 39th St & 8th Ave (Checks the bar's register; Rita watches him do it); Royal Cafeteria, 8th Ave & W 40th St (2 a.m. eggs)
 - **Daily schedule (weekday):**
   - 02:00–14:00 · home · off map
-  - 14:00–18:00 · work · Bauer's Fun-O-Rama arcade and office, W 42nd St & 8th Ave
+  - 14:00–18:00 · work · Lucky Quarter Amusements (Bauer's arcade and office), W 42nd St & 8th Ave
   - 18:00–20:00 · eat · Royal Cafeteria, 8th Ave & W 40th St
   - 20:00–02:00 · work · 8th Ave & W 39th St — Rounds of his concessions
 - **Relationships:** Ruth Calloway (informs for, +0); Lt. Dennis Wurtz (taxed by, -2); Rita Haines (employs, +0); Lonnie Gage (creditor of, -1); Howard Lisle (wants deal, +1)
@@ -625,11 +625,11 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “In this family I'm the one who reads. You're the one who signs.”
   - “Summer is when furriers go broke politely.”
 - **Home:** off map
-- **Haunts:** Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave) (Glass office overlooking the cutting floor); Fifth Avenue Trust, 34th St branch, 5th Ave & W 34th St (Her own account, under her maiden name)
+- **Haunts:** Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave) (Glass office overlooking the cutting floor); Ashgrove Trust, 34th St branch, 5th Ave & W 34th St (Her own account, under her maiden name)
 - **Daily schedule (weekday):**
   - 18:30–08:30 · home · off map
   - 08:30–17:30 · work · Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave)
-  - 17:30–18:30 · errand · Fifth Avenue Trust, 34th St branch, 5th Ave & W 34th St
+  - 17:30–18:30 · errand · Ashgrove Trust, 34th St branch, 5th Ave & W 34th St
 - **Relationships:** Nikos “Nick” Varelas (spouse, +1); Yiannis Doukas (ally, +2); Gordon Whitlock (distrusts, -2); Stavros Kallis (despises, -2)
 - **Arc:**
   - *Act 1:* Offstage.
@@ -1336,7 +1336,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
 ### Gordon Whitlock  `char.gordon_whitlock`
 
 - **Age:** 55 (born 1919) · **Origin:** Darien, Connecticut
-- **Occupation:** Loan officer, Fifth Avenue Trust (invented bank), 34th St branch
+- **Occupation:** Loan officer, Ashgrove Trust Company (invented bank), 34th St branch
 - **Want:** Get Nick's loan off his books before the auditors arrive.
 - **Need:** None.
 - **Secret:** The bank is quietly cutting its exposure to everything in New York.
@@ -1345,12 +1345,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “We're not calling the loan. We're inviting it home.”
   - “A coat in a vault is collateral. The same coat twice is a crime.”
 - **Home:** off map
-- **Haunts:** Fifth Avenue Trust, 34th St branch, 5th Ave & W 34th St (Corner office); The Iron Gate Chop House, W 36th St & 7th Ave (Lunch on Nick's tab)
+- **Haunts:** Ashgrove Trust, 34th St branch, 5th Ave & W 34th St (Corner office); The Iron Gate Chop House, W 36th St & 7th Ave (Lunch on Nick's tab)
 - **Daily schedule (weekday):**
   - 17:00–09:00 · home · off map
-  - 09:00–12:30 · work · Fifth Avenue Trust, 34th St branch, 5th Ave & W 34th St
+  - 09:00–12:30 · work · Ashgrove Trust, 34th St branch, 5th Ave & W 34th St
   - 12:30–14:00 · eat · The Iron Gate Chop House, W 36th St & 7th Ave
-  - 14:00–17:00 · work · Fifth Avenue Trust, 34th St branch, 5th Ave & W 34th St
+  - 14:00–17:00 · work · Ashgrove Trust, 34th St branch, 5th Ave & W 34th St
 - **Relationships:** Nikos “Nick” Varelas (creditor of, +0); Stavros Kallis (listens to, +1)
 - **Arc:** The margin call (M16). The squeeze that drives the vault job.
 - **Visual:** palette `#87CEEB` `#FFFFFF` `#000080`. *Silhouette:* Tall and soft; perfectly barbered.

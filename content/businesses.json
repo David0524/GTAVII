@@ -1,0 +1,590 @@
+{
+  "_note": "Invented business registry (N6). 'sign' gives the signage text for the engine. 'check' records the trademark/collision search.",
+  "businesses": [
+    {
+      "id": "biz.hotel_corwin",
+      "name": "Hotel Corwin",
+      "trade": "SRO hotel, 14 storeys",
+      "where": "loc.corwin_hotel",
+      "era": "A 1900s commercial hotel turned single-room-occupancy, typical of Broadway in the 30s by the 1970s [S6][S7].",
+      "sign": [
+        "HOTEL CORWIN (vertical neon, three letters dead: 'HOT  CO WIN')",
+        "ROOMS · DAY · WEEK · MONTH",
+        "NO VISITORS AFTER 11 P.M. — MGMT"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.hotel_arden",
+      "name": "Hotel Arden",
+      "trade": "SRO hotel with a lobby bar",
+      "where": "loc.arden_hotel",
+      "era": "One of the cheap Eighth Avenue hotels near the bus terminal [S8].",
+      "sign": [
+        "HOTEL ARDEN",
+        "ARDEN BAR · COCKTAILS · OPEN 4 P.M.",
+        "TRANSIENT · PERMANENT"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.shamrock_rail",
+      "name": "The Shamrock Rail",
+      "trade": "Bar and grill (the cops' bar)",
+      "where": "loc.cop_bar",
+      "era": "A neighbourhood Irish bar near a station house; a period staple.",
+      "sign": [
+        "SHAMROCK RAIL (green neon shamrock)",
+        "BAR · GRILL · COLD BEER · SANDWICHES",
+        "TV (hand-lettered)"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.lisle_associates",
+      "name": "Lisle & Associates",
+      "trade": "Law office",
+      "where": "loc.lisle_office",
+      "era": "Gold leaf on the 11th-floor door; a lobby directory board.",
+      "sign": [
+        "LISLE & ASSOCIATES · COUNSELORS AT LAW · 1104"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.fifth_ave_luncheonette",
+      "name": "The Fifth Avenue Luncheonette",
+      "trade": "Lunch counter",
+      "where": "loc.lisle_luncheonette",
+      "era": "A soda-fountain lunch counter with a fixed menu board.",
+      "sign": [
+        "LUNCHEONETTE · FOUNTAIN",
+        "TUNA ON RYE 85¢ · EGG CREAM 35¢ · COFFEE 20¢"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.saca",
+      "name": "Seventh Avenue Carriers' Association",
+      "trade": "Garment trucking combine",
+      "where": "loc.carriers_garage",
+      "era": "Garment-district trucking as a gatekeeping business [S4].",
+      "sign": [
+        "S.A.C.A. · GARMENT TRUCKING · LICENSED & BONDED (on truck doors)",
+        "NO PARKING — TRUCKS IN AND OUT 24 HRS"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.varelas",
+      "name": "Varelas & Co.",
+      "trade": "Fur manufacturer and cold storage",
+      "where": "loc.varelas_loft",
+      "era": "Kastorian-run fur houses in the Fur District [S12]. Summer cold storage of customers' coats.",
+      "sign": [
+        "VARELAS & CO. · FURS",
+        "COLD STORAGE · INSURED · BONDED",
+        "MANUFACTURING FURRIERS · SINCE 1955"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": "The owner's name was checked in N1 (no notable real namesake). Avoid 143 and 210 W 29th St (real fur houses)."
+    },
+    {
+      "id": "biz.iron_gate",
+      "name": "The Iron Gate Chop House",
+      "trade": "Steakhouse",
+      "where": "loc.steakhouse",
+      "era": "A Garment District steakhouse where buyers are entertained.",
+      "sign": [
+        "THE IRON GATE · CHOP HOUSE · EST. 1938"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.kafeneio_kastoria",
+      "name": "Kafeneio Kastoria",
+      "trade": "Greek coffeehouse",
+      "where": "loc.kafeneio",
+      "era": "Greek men's coffeehouses near the Fur District.",
+      "sign": [
+        "ΚΑΦΕΝΕΙΟ ΚΑΣΤΟΡΙΑ · KAFENEIO KASTORIA · COFFEE · TAVLI"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.royal_cafeteria",
+      "name": "Royal Cafeteria",
+      "trade": "24-hour cafeteria",
+      "where": "loc.eighth_ave_cafeteria",
+      "era": "An all-night Eighth Avenue cafeteria: trays, steam table, pie case.",
+      "sign": [
+        "ROYAL CAFETERIA · OPEN ALL NIGHT",
+        "PIE 30¢ · COFFEE 20¢"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.lucky_quarter",
+      "name": "Lucky Quarter Amusements",
+      "trade": "Arcade (pinball, peep booths implied)",
+      "where": "loc.bauer_arcade",
+      "era": "42nd St arcades [S8]. Replaces 'Fun-O-Rama', which is a real operating arcade in Maine.",
+      "sign": [
+        "LUCKY QUARTER (chasing bulbs)",
+        "AMUSEMENTS · PINBALL · SKILL GAMES · OPEN 24 HRS"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.earls_shine",
+      "name": "Earl's Shine",
+      "trade": "Shoeshine stand",
+      "where": "loc.poole_shine",
+      "era": "Sidewalk shine stands on the Deuce.",
+      "sign": [
+        "EARL'S SHINE · FINEST ON THE DEUCE · 50¢"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.feld_frocks",
+      "name": "Feld Frocks",
+      "trade": "Dress manufacturer (9th-floor loft)",
+      "where": "loc.feld_loft",
+      "era": "A family dress house of the kind that ran south in the 1960s–70s [S4][S20].",
+      "sign": [
+        "FELD FROCKS INC. · 9TH FL. · SHOWROOM BY APPT."
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.moretti",
+      "name": "Moretti & Sons Wholesale Florists",
+      "trade": "Wholesale florist",
+      "where": "loc.moretti_flowers",
+      "era": "W 28th St wholesale florists [S11].",
+      "sign": [
+        "MORETTI & SONS · WHOLESALE FLORISTS · SINCE 1912"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.kallis_furs",
+      "name": "Kallis Fur Salon",
+      "trade": "Fur salon",
+      "where": "loc.kallis_furs",
+      "era": "A rival fur house.",
+      "sign": [
+        "KALLIS · FURS OF DISTINCTION"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.seoul_star",
+      "name": "Seoul Star Imports",
+      "trade": "Wig and handbag wholesaler",
+      "where": "loc.baek_wholesale",
+      "era": "Early Korean wholesalers between 24th and 34th Sts, Fifth to Sixth [S10].",
+      "sign": [
+        "SEOUL STAR IMPORTS · WIGS · HANDBAGS · WHOLESALE ONLY"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.hanyang_house",
+      "name": "Hanyang House",
+      "trade": "Korean restaurant",
+      "where": "loc.korean_restaurant",
+      "era": "Modelled on the pattern of an early-1970s midtown Korean restaurant [S10].",
+      "sign": [
+        "한양집 HANYANG HOUSE · KOREAN FOOD"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.ashgrove_trust",
+      "name": "Ashgrove Trust Company",
+      "trade": "Bank (34th St branch)",
+      "where": "loc.bank_branch",
+      "era": "Replaces 'Fifth Avenue Trust', which was a real NYC trust company (1907 bank run).",
+      "sign": [
+        "ASHGROVE TRUST COMPANY · MEMBER F.D.I.C."
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": "F.D.I.C. is a real public institution; 'member' wording is period-plausible."
+    },
+    {
+      "id": "biz.baxter_lowe",
+      "name": "Baxter & Lowe",
+      "trade": "Department store at Herald Square",
+      "where": "loc.herald_sq_store",
+      "era": "Invented in place of the real store on Herald Square (a trademark).",
+      "sign": [
+        "BAXTER & LOWE (huge rooftop letters)",
+        "BAXTER & LOWE · HERALD SQUARE · LUNCH COUNTER · FUR SALON 5"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.kettle_crane",
+      "name": "Kettle & Crane Pictures",
+      "trade": "Film production (NIGHT RATE)",
+      "where": "content/boundaries.json",
+      "era": "Location crime-picture shoots were common on 1970s NYC streets.",
+      "sign": [
+        "KETTLE & CRANE GRIP & ELECTRIC (truck sides)"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": "Chosen after 'Lamplight' and 'Halyard' turned out to be real production companies."
+    },
+    {
+      "id": "biz.hudson_union",
+      "name": "Hudson Union Steam & Power",
+      "trade": "Utility (steam and electric)",
+      "where": "all districts",
+      "era": "Stands in for the real utility in all period beats (the skipped dividend, the August shortfall) [S15].",
+      "sign": [
+        "HUDSON UNION — STEAM — KEEP BACK"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.evening_dispatch",
+      "name": "Manhattan Evening Dispatch",
+      "trade": "Evening newspaper (Nora Finch's paper)",
+      "where": "newsstands",
+      "era": "The afternoon-paper tradition.",
+      "sign": [
+        "MANHATTAN EVENING DISPATCH · FINAL · 15¢"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": "A 'New York Dispatch' existed until 1899. That's no live trademark, and the full title differs."
+    },
+    {
+      "id": "biz.daily_ticker",
+      "name": "The Daily Ticker",
+      "trade": "Morning tabloid",
+      "where": "newsstands",
+      "era": "The morning tabloid tradition.",
+      "sign": [
+        "THE DAILY TICKER · NEW YORK'S PICTURE PAPER · 15¢"
+      ],
+      "check": "cleared: exact-name search, no real business found",
+      "story": true,
+      "note": "'Clarion' was rejected: it's a fictional New York paper in an existing film franchise."
+    },
+    {
+      "id": "biz.wmhc",
+      "name": "West Midtown Housing Council",
+      "trade": "Non-profit housing group",
+      "where": "loc.corwin_hotel (epilogue)",
+      "era": "A community housing non-profit.",
+      "sign": [
+        "WEST MIDTOWN HOUSING COUNCIL · THIS BUILDING IS HOUSING"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.corwin_residential",
+      "name": "Corwin Residential Associates",
+      "trade": "Shell company (Lisle's)",
+      "where": "loc.corwin_hotel",
+      "era": "A paper owner.",
+      "sign": [
+        "NOTICE — CORWIN RESIDENTIAL ASSOCIATES — H. LISLE, COUNSEL"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": true,
+      "note": ""
+    },
+    {
+      "id": "biz.pinsky",
+      "name": "Pinsky Bros. Notions",
+      "trade": "Notions wholesaler",
+      "where": "Broadway & W 27th St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "PINSKY BROS. · NOTIONS · ZIPPERS · THREAD · WHOLESALE"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.silverglass",
+      "name": "Silverglass Luggage",
+      "trade": "Luggage wholesaler",
+      "where": "Broadway & W 26th St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "SILVERGLASS LUGGAGE · TRUNKS · CASES"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.ardito",
+      "name": "Ardito Novelty Co.",
+      "trade": "Novelties",
+      "where": "Broadway & W 28th St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "ARDITO NOVELTY CO. · PARTY GOODS · PLASTIC FLOWERS"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.marlowe",
+      "name": "Marlowe Import House",
+      "trade": "Importer",
+      "where": "Broadway & W 30th St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "MARLOWE IMPORT HOUSE · BRASS · GLASS · GIFTS"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.halpern",
+      "name": "Halpern Pleating & Stitching",
+      "trade": "Garment contractor",
+      "where": "W 36th St & 8th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "HALPERN PLEATING & STITCHING · 4TH FL."
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.rivkin",
+      "name": "Rivkin Buttons & Trims",
+      "trade": "Trimmings",
+      "where": "W 38th St & 7th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "RIVKIN BUTTONS & TRIMS · TO THE TRADE"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.dorfman",
+      "name": "Dorfman Dye Works",
+      "trade": "Dye house",
+      "where": "W 38th St & 9th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "DORFMAN DYE WORKS · PIECE DYEING"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.kaplowitz",
+      "name": "Kaplowitz Hangers",
+      "trade": "Hanger supply",
+      "where": "W 35th St & 8th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "KAPLOWITZ HANGERS · WIRE · WOOD · PLASTIC"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.papadakis",
+      "name": "Papadakis Pelts",
+      "trade": "Fur skins dealer",
+      "where": "W 29th St & 7th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "PAPADAKIS PELTS · MINK · FOX · PERSIAN"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.zissis",
+      "name": "Zissis Cold Storage",
+      "trade": "Fur storage",
+      "where": "W 28th St & 8th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "ZISSIS · FUR COLD STORAGE · BONDED"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.velvet_moon",
+      "name": "The Velvet Moon",
+      "trade": "Grindhouse cinema",
+      "where": "W 42nd St, 7th–8th Aves",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "VELVET MOON · 3 FEATURES · CONTINUOUS · $1"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.orbit",
+      "name": "The Orbit Lounge",
+      "trade": "Bar",
+      "where": "8th Ave & W 44th St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "ORBIT LOUNGE · COCKTAILS (neon Saturn)"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.mr_lucky",
+      "name": "Mr. Lucky's Lunch",
+      "trade": "Lunch counter",
+      "where": "8th Ave & W 41st St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "MR. LUCKY'S LUNCH · HOT DOGS · PAPAYA DRINK"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.ostrander",
+      "name": "Ostrander Opticians",
+      "trade": "Optician",
+      "where": "Madison Ave & E 25th St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "OSTRANDER OPTICIANS · EYES EXAMINED"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.penny_lantern",
+      "name": "The Penny Lantern Diner",
+      "trade": "Diner",
+      "where": "W 23rd St & 9th Ave",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "PENNY LANTERN DINER · BREAKFAST ALL DAY"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.krause",
+      "name": "Krause Hardware",
+      "trade": "Hardware store (Gus's)",
+      "where": "6th Ave & W 31st St",
+      "era": "Ambient shopfront for signage variety.",
+      "sign": [
+        "KRAUSE HARDWARE · KEYS MADE · FANS IN STOCK"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.botanica",
+      "name": "Botánica San Lázaro",
+      "trade": "Botanica (religious goods)",
+      "where": "8th Ave & W 25th St",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "BOTÁNICA SAN LÁZARO · HIERBAS · VELAS"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.bodega_25",
+      "name": "Bodega La Esquina",
+      "trade": "Bodega",
+      "where": "8th Ave & W 25th St",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "BODEGA LA ESQUINA · CAFÉ · CERVEZA FRÍA"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.pawn_8th",
+      "name": "Eighth Avenue Loan Office",
+      "trade": "Pawnshop",
+      "where": "8th Ave & W 37th St",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "LOANS · 8TH AVE LOAN OFFICE · WE BUY GOLD"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    }
+  ]
+}

@@ -88,7 +88,7 @@ a("npc.office_cleaner", "worker", ["#708090", "#FFFFFF"], "Grey work dress or co
 a("npc.night_watchman", "worker", ["#2F4F4F", "#C0C0C0"], "Guard uniform, cap, flashlight, time clock on a strap.", ["flashlight", "watchman's clock"],
   s(("19:00", "07:00", "Lisle's building and similar", "work")), 0.0, 0.05, "barks.service", note="M21: fixed loop shown on a radio clock.")
 a("npc.bank_teller", "worker", ["#000080", "#FFFFFF"], "Neat blouse or shirt and tie, name plate.", ["rubber stamp"],
-  s(("09:00", "15:00", "Fifth Avenue Trust", "work")), 0.1, 0.0, "barks.service")
+  s(("09:00", "15:00", "Ashgrove Trust", "work")), 0.1, 0.0, "barks.service")
 a("npc.rental_agent", "worker", ["#556B2F", "#F5F5DC"], "Cheap suit, clip-on tie, a ring of keys.", ["ring of keys", "clipboard"],
   s(("10:00", "17:00", "W 37th St storefronts", "work")), 0.0, 0.0, "barks.office", scripted=True)
 a("npc.marcher", "walker", ["#FFFFFF", "#4B0082", "#B22222"], "Sunday clothes, union T-shirts, church hats, aprons straight from work.", ["placard", "bedsheet banner", "flowers"],

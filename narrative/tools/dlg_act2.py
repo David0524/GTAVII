@@ -190,7 +190,7 @@ S("dlg.m15_teddy_at_door", "M15 o8. Vault loading dock, W 30th St, after midnigh
   (T, "cold", "Then you own two hundred people in a hot building. Good night, Mr. Varelas."),
   (N, "inner", "I bought a building. Nobody told me there were people in it."))
 # ---------------- M16 Margin Call
-S("dlg.m16_whitlock", "M16 o2. Fifth Avenue Trust, corner office. Whitlock taps a pen on a file.",
+S("dlg.m16_whitlock", "M16 o2. Ashgrove Trust, corner office. Whitlock taps a pen on a file.",
   (WHI, "smooth", "Nick, the bank loves you. The bank simply loves you less in July."),
   (N, "charming", "Gordon. Love is seasonal. Fur is seasonal. October, you'll love me again."),
   (WHI, "smooth", "We're not calling the loan. We're inviting it home. By September."),

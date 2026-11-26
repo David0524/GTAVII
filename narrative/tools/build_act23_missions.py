@@ -145,7 +145,7 @@ M.append(mission(15, "mission.brownout", "Brownout", 2, 5, N, "1974-07-19", ("21
   design="Introduces Nick through crisis and money (spending is a verb: the ice costs $300). It ends with the first meeting: Teddy at the vault door in his collector's coat, and Nick in a dinner jacket, sleeves rolled, wet to the elbows. Neither knows the other is tied to the Corwin until the last line."))
 M.append(mission(16, "mission.margin_call", "Margin Call", 2, 6, N, "1974-07-22", ("09:00", "14:30"), ["any"], 14, ["P1", "P5"],
   "char.eleni_varelas", [
-   O("o1", "enter_interior", "Fifth Avenue Trust, 34th St branch", marker="interior.bank_branch"),
+   O("o1", "enter_interior", "Ashgrove Trust, 34th St branch", marker="interior.bank_branch"),
    O("o2", "dialogue", "Whitlock loves you less in July", script="dlg.m16_whitlock"),
    O("o3", "enter_interior", "Kallis wants a word, 29th & Seventh", marker="interior.kallis_salon"),
    O("o4", "dialogue", "Hear Kallis's 'fair' price", script="dlg.m16_kallis"),
