@@ -604,6 +604,8 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
   Trade Center → World Trading Towers. The registry is `content/landmarks.json`, in the UI's shape;
   `real` is for dev matching only. All content was replaced and the validators are clean. Options and
   the reasoning are in `narrative/LANDMARK_NAMES.md`. **Before ship: USPTO clearance of these 7 names.**
+- **Hotel Chelsea (26 Nov 2026):** the user chose "Hotel Kelsey (Recommended)" over Hotel Chelmsford
+  (via oversight). Added to `content/landmarks.json` as `lm.hotel_chelsea`. **Before ship: USPTO clearance (now 8 names).**
 - **N2 review:** "All good". N2 approved.
 - **Combat:** "Full open world and missions like a GTA game". Police: "Witnesses + call boxes +
   bribes (Recommended)". The Gameplay chat owns the systems

@@ -89,7 +89,7 @@ This name appears in one shopper bark, the activity note, and a code comment in 
 
 ---
 
-## 8. Hotel Chelsea (222 W 23rd St): proposal, the user picks
+## 8. Hotel Chelsea (222 W 23rd St): DECIDED as Hotel Kelsey (26 Nov 2026)
 Added after the UI chat found it among the world.json heroes. In 1974 it was the artists' and writers' hotel. It isn't named anywhere in narrative content yet, only as a world.json hero.
 
 | Option | Why | Search |
