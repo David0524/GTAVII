@@ -49,7 +49,8 @@ const STYLES: Record<HairStyle, StyleShape> = {
   ponytail: { length: -0.05, thick: (u) => 0.006 + 0.006 * u, fringe: 0.055, density: 1, freq: 360, layers: 5 },
   braid: { length: -0.05, thick: (u) => 0.006 + 0.005 * u, fringe: 0.055, density: 1, freq: 500, layers: 5 },
   updo: { length: -0.03, thick: (u, f) => 0.012 + 0.03 * u * (1 - f * 0.6), fringe: 0.05, density: 1, freq: 400, layers: 7 },
-  setCurls: { length: -0.06, thick: (u, _f, s) => 0.022 + 0.018 * u + 0.008 * s, fringe: 0.035, density: 1, freq: 800, layers: 8 },
+  // set and sprayed: soft, dense volume (low-frequency noise; the roller bumps are geometry)
+  setCurls: { length: -0.06, thick: (u, _f, s) => 0.022 + 0.018 * u + 0.008 * s, fringe: 0.035, density: 1.6, freq: 220, layers: 6 },
   cornrows: { length: -0.04, thick: () => 0.004, fringe: 0.05, density: 1, freq: 120, layers: 3 },
   flip: { length: -0.13, thick: (u, _f, s) => 0.014 + 0.014 * u + 0.012 * s, fringe: 0.03, density: 1, freq: 300, layers: 7 },
 };
@@ -172,7 +173,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
           // under cards the shells are the hair mass: dense, low-frequency, the cards carry the strands
           m0: [h, soft * st.density * (cardHL ? 3 : 1) * (app.hair.style === 'combOver' ? 0.6 : 1) * (1 - app.hair.thinning * 0.4), st.freq * (cardHL ? 0.35 : 1), app.hair.texture],
           // m1.w: 1 cornrows, 2 coily clumps (afro, curls)
-          m1: [KIND.hair, 0, app.hair.grey, app.hair.style === 'cornrows' ? 1 : ['afro', 'afroShort', 'curlyMid', 'setCurls'].includes(app.hair.style) ? 2 : 0],
+          m1: [KIND.hair, 0, app.hair.grey, app.hair.style === 'cornrows' ? 1 : ['afro', 'afroShort', 'curlyMid'].includes(app.hair.style) ? 2 : 0],
         }, [u, vv]);
       });
       for (let i = 0; i < res.tris.length; i += 3) mb.tri(map[res.tris[i]], map[res.tris[i + 1]], map[res.tris[i + 2]]);

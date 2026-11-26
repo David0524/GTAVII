@@ -19,6 +19,7 @@ import { CrowdRenderer, type AgentView } from './crowd/CrowdRenderer';
 import { charUniforms, setFabricMaps } from './render/materials';
 import { ArchetypeRegistry, type ArchetypeDef } from './archetypes';
 import { castBuild, type CastEntry } from './cast';
+import { HeadLibrary, type HeadAsset } from './heads/rocketbox';
 export type { CastEntry } from './cast';
 export type { ArchetypeDef } from './archetypes';
 
@@ -39,6 +40,8 @@ export interface CharacterFactory {
   readonly quality: Quality;
   readonly body: BodyModel;
   readonly anims: AnimLibrary;
+  /** Rocketbox head library (null on Low). */
+  readonly heads: HeadLibrary | null;
 }
 
 export async function createCharacterFactory(opts: { quality: Quality; baseUrl?: string }): Promise<CharacterFactory> {
@@ -50,16 +53,27 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
   // fabric detail maps (≈70 KB Low / 270 KB High; relief stays flat if they fail)
   const tag = opts.quality === 'low' ? 'lo' : 'hi', tl = new THREE.TextureLoader();
   await Promise.all([tl.loadAsync(`${base}fabric_a_${tag}.webp`), tl.loadAsync(`${base}fabric_b_${tag}.webp`)]).then(([a, b]) => setFabricMaps(a, b)).catch((e) => console.warn('characters: fabric maps', e));
+  // Rocketbox heads (Medium and above): the leads' altered heads are preloaded; the near-ring pool
+  // loads on demand. Low keeps our generated heads everywhere.
+  const heads = opts.quality === 'low' ? null : await new HeadLibrary(base + 'rb/').init();
+  const leadHeads = new Map<string, HeadAsset>();
+  if (heads) await Promise.all(['teddy', 'delphine', 'nick'].map(async (n) => { const e = heads.lead(`lead_${n}`); if (e) leadHeads.set(n, await heads.load(e.id)); })).catch((e) => console.warn('characters: lead heads', e));
+  const leadOf = (hero: string) => (/teddy/.test(hero) ? 'teddy' : /delphine/.test(hero) ? 'delphine' : /nick/.test(hero) ? 'nick' : '');
   let ground: GroundFn | null = null;
   const archetypes = new ArchetypeRegistry();
   const cast = new Map<string, CastEntry>();
   const heroLod = opts.quality === 'low' ? 2 : 0, pedLod = opts.quality === 'low' ? 2 : 1;
   return {
-    quality: opts.quality, body, anims,
+    quality: opts.quality, body, anims, heads,
     spawn(scene, desc) {
       const hero = desc.hero ? HEROES[desc.hero] ?? (cast.has(desc.hero) ? () => castBuild(cast.get(desc.hero!)!) : undefined) : undefined;
       if (desc.hero && !hero) console.warn(`characters: unknown hero ${desc.hero}`);
       const build = hero?.();
+      // leads wear their Rocketbox-based heads unless a scene opts out (overrides.rbHead === false)
+      const lh = desc.hero ? leadHeads.get(leadOf(desc.hero)) : undefined;
+      // the leads keep our strand-card hair (it follows their sheets) over the head
+      if (lh && desc.overrides?.rbHead === undefined) desc = { ...desc, overrides: { ourHair: true, ...desc.overrides, rbHead: lh } };
+      if (desc.overrides?.rbHead === false) { const { rbHead: _x, ...rest } = desc.overrides; void _x; desc = { ...desc, overrides: rest }; }
       const ch = new Character(body, anims, desc, { lod: hero ? heroLod : pedLod, build, heat: charUniforms.heat.value, outfitCtx: archetypes.outfitContext(desc.archetype) });
       if (build && desc.act) ch.setWardrobe(`act${desc.act}`);
       ch.setGround(ground);

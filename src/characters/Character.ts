@@ -9,7 +9,7 @@ import type { BodyModel } from './body/BodyModel';
 import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
-import { fitHead, rocketboxHeadMesh, type RocketboxHead } from './eval/rocketbox';
+import { fitHead, headMesh, neckProfile, type HeadAsset } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
 import { Animator, type LocoInput } from './anim/Animator';
@@ -59,6 +59,7 @@ export class Character {
   /** CPU time of the last update (ms), for budgets. */
   lastUpdateMs = 0;
   private rbFit: ReturnType<typeof fitHead> | null = null;
+  private rbNeck: ReturnType<typeof neckProfile> | null = null;
   readonly stats = { tris: 0, hairTris: 0, draws: 0, buildMs: 0 };
 
   constructor(model: BodyModel, lib: AnimLibrary, desc: CharacterDesc, opts: { lod: number; build?: CharacterBuild; outfitCtx?: Partial<OutfitContext>; heat?: number; prebuilt?: Assembled; appearance?: Appearance; outfit?: Outfit }) {
@@ -67,13 +68,13 @@ export class Character {
     this.appearance = (opts.build?.appearance ?? (opts as { appearance?: Appearance }).appearance) ?? generateAppearance(desc.seed);
     this.outfit = (opts.build?.outfit ?? (opts as { outfit?: Outfit }).outfit) ?? generateOutfit(desc.seed ^ 0x5bd1e995, { sex: this.appearance.sex, age: this.appearance.age, archetype: desc.archetype, ...opts.outfitCtx });
     // evaluation: a substituted Rocketbox head sets the body's skin tone to match its texture
-    const toneOv = (desc.overrides?.rbHead as RocketboxHead | undefined)?.meta.tone ?? (desc.overrides?.skinTone as string | undefined);
+    const toneOv = desc.overrides?.skinTone as string | undefined;
     if (toneOv) { const t = toneOv; const l = ['1', '3', '5'].map((i) => parseInt(t.slice(+i, +i + 2), 16) / 255); const lum = 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2]; this.appearance = { ...this.appearance, skin: { ...this.appearance.skin, tone: t, melanin: Math.min(1, Math.max(0, 1 - lum * 1.6)) } }; }
     // desc.overrides.hair / facialHair: appearance overrides (tests, cast tweaks)
     if (desc.overrides?.hair) this.appearance = { ...this.appearance, hair: { ...this.appearance.hair, ...(desc.overrides.hair as object) } };
     if (desc.overrides?.facialHair) this.appearance = { ...this.appearance, facialHair: desc.overrides.facialHair as Appearance['facialHair'] };
     // desc.overrides: shallow per-slot outfit overrides, e.g. { shoes: { kind: 'pump' } } (tests, cutscenes)
-    if (desc.overrides) for (const [k, v] of Object.entries(desc.overrides)) if (k in this.outfit && k !== 'hair' && k !== 'rbHead' && k !== 'skinTone') {
+    if (desc.overrides) for (const [k, v] of Object.entries(desc.overrides)) if (k in this.outfit && k !== 'hair' && k !== 'rbHead' && k !== 'skinTone' && k !== 'headTint' && k !== 'ourHair') {
       const cur = (this.outfit as unknown as Record<string, unknown>)[k];
       (this.outfit as unknown as Record<string, unknown>)[k] = v && typeof v === 'object' && cur && typeof cur === 'object' ? { ...cur, ...v } : v;
     }
@@ -93,24 +94,25 @@ export class Character {
     if (prebuilt) this.asm = prebuilt;
     else {
       const shape = this.model.evaluate({ ...this.appearance.body, stature: this.appearance.stature });
-      const rb = this.desc.overrides?.rbHead as RocketboxHead | undefined;
+      const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
       this.rbFit = rb ? fitHead(rb, shape.joints) : null;
-      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY } : {});
+      this.rbNeck = this.rbFit ? neckProfile(shape.pos, shape.joints, this.rbFit.neckBottom - 0.012, this.rbFit.neckBottom + 0.03) : null;
+      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, keepHair: !!this.desc.overrides?.ourHair } : {});
     }
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     const { bones, skeleton, root } = buildSkeleton(this.asm.joints);
     this.bones = bones; this.skeleton = skeleton;
     const { main, hair } = createSkinnedMeshes(this.asm.main, this.asm.hair, skeleton, root);
     this.meshes = hair ? [main, hair] : [main];
-    const rb = this.desc.overrides?.rbHead as RocketboxHead | undefined;
-    if (rb && this.rbFit) this.meshes.push(rocketboxHeadMesh(rb, this.rbFit, this.asm.lift, skeleton, main.bindMatrix));
+    const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
+    if (rb && this.rbFit) this.meshes.push(headMesh(rb, this.rbFit, skeleton, main.bindMatrix, { lift: this.asm.lift, tint: this.desc.overrides?.headTint as [number, number, number] | undefined, neck: this.rbNeck ?? undefined, bodyTone: this.appearance.skin.tone, noCards: !!this.desc.overrides?.ourHair }));
     for (const m of this.meshes) this.object.add(m);
     const p = bones[JI.pelvis].position;
     this.restPelvis = [p.x, p.y, p.z];
     this.stats.tris = this.asm.stats.tris + this.asm.stats.hairTris;
     this.stats.hairTris = this.asm.stats.hairTris;
     this.stats.draws = this.meshes.reduce((n, m) => n + (Array.isArray(m.material) ? m.material.length : 1), 0);
-    if (rb) this.stats.tris += rb.idxSkin.length / 3 + rb.idxOpacity.length / 3;
+    if (rb) this.stats.tris += rb.idx.length / 3;
     this.stats.buildMs = performance.now() - t0;
   }
 

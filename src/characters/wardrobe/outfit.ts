@@ -214,9 +214,13 @@ function glasses(rng: Rng, age: number, male: boolean, warm: boolean): GlassesDe
   return null;
 }
 const trouserBase = (rng: Rng, age: number): Pick<BottomDesc, 'rise' | 'flare' | 'length' | 'fit'> => {
-  // under 35: high rise, flare from the knee, hem flat 26–32 cm (≈ +3–5 cm radius over the ankle)
+  // 1973 photos (docs/WARDROBE_1974.md): most men wear straight or mild boot-cut legs; big bell
+  // flares are the fashionable young minority (about 1 in 4 under 35), near-straight over 35.
   const young = age < 35;
-  return { rise: young ? rng.range(0.01, 0.05) : rng.range(-0.01, 0.02), flare: young ? rng.range(0.035, 0.06) : rng.range(0.012, 0.03), length: rng.range(2.02, 2.1), fit: young ? 0.008 : rng.range(0.012, 0.022) };
+  const rise = young ? rng.range(0.01, 0.05) : rng.range(-0.01, 0.02);
+  const r = rng.range(0, 1); // one draw, as before, so other seeded choices don't shift
+  const flare = young ? (r < 0.25 ? 0.035 + 0.02 * (r / 0.25) : 0.01 + 0.014 * ((r - 0.25) / 0.75)) : 0.003 + 0.01 * r;
+  return { rise, flare, length: rng.range(2.02, 2.1), fit: young ? 0.008 : rng.range(0.012, 0.022) };
 };
 
 function menOutfit(rng: Rng, age: number, warm: boolean): Outfit {

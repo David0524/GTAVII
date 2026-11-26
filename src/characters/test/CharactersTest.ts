@@ -16,6 +16,7 @@ import { characterMaterial, surfaceNodes } from '../render/materials';
 import type { AgentView } from '../crowd/CrowdRenderer';
 import { hash2 } from '../util/rng';
 import { generateAppearance } from '../body/appearance';
+import { tintFor } from '../heads/rocketbox';
 
 const qp = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (qp.has(k) ? +qp.get(k)! : d);
@@ -76,21 +77,27 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   const chars: Character[] = [];
   const zoom = qp.get('zoom');
   if (scene === 'rocketbox') {
-    // EVALUATION: Rocketbox heads (MIT) on our bodies in our 1974 wardrobe, each beside the same
-    // seed with our own generated head (A/B). Assets: tools/characters/build-rocketbox.ts.
-    const names = (qp.get('rb') ?? 'Male_Adult_12,Male_Adult_03,Female_Adult_11').split(',');
-    const { loadRocketboxHead } = await import('../eval/rocketbox');
-    const base = import.meta.env.BASE_URL + 'characters/';
-    for (const [i, name] of names.entries()) {
-      const head = await loadRocketboxHead(base, name);
-      const female = name.startsWith('Female'), old = name === 'Male_Adult_03';
-      let seed = 700 + i * 31;
-      for (let k = 0; k < 400; k++) { const a = generateAppearance(hash2(seed, k)); if ((a.sex < 0.5) === female && (old ? a.age > 55 : a.age > 25 && a.age < 45)) { seed = hash2(seed, k); break; } }
-      const ov = { hat: null, glasses: null };
-      chars.push(factory.spawn(world, { seed, overrides: { ...ov, rbHead: head } }));
-      chars.push(factory.spawn(world, { seed, overrides: { ...ov, skinTone: head.meta.tone } })); // same tone: a fair A/B
-      report.rocketbox = [...(report.rocketbox ?? []), { name, bytes: head.bytes, headTris: head.meta.counts.skinTris + head.meta.counts.opacityTris, tone: head.meta.tone }];
+    // Faces A/B: each lead with its altered Rocketbox-based head beside the same lead with our
+    // generated head; then (pool=1) generated pedestrians with their matched pool heads.
+    const act = num('act', 1);
+    for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
+      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null } }));
+      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }
+    if (qp.has('pool')) {
+      chars.length = 0;
+      const heads = factory.heads!;
+      const used = new Set<string>();
+      for (let i = 0, s = 0; chars.length < num('n', 8) && s < 400; s++) {
+        const seed = hash2(4100, s), a = generateAppearance(seed);
+        const id = heads.pick(a, used); if (!id) continue;
+        used.add(id);
+        const asset = await heads.load(id);
+        chars.push(factory.spawn(world, { seed, overrides: { hat: null, rbHead: asset, headTint: tintFor(asset, a.skin.tone) } }));
+        i++;
+      }
+    }
+    report.heads = chars.map((c) => ({ hero: c.desc.hero, head: (c.desc.overrides?.rbHead as any)?.id ?? null, tris: c.stats.tris, draws: c.stats.draws }));
   } else if (scene === 'hair') {
     // every hair style on a head; women's and men's styles on matching seeds; hats off
     const styles = (qp.get('styles') ?? 'short,sidePart,slick,combOver,pompadour,feathered,shag,earLength,bob,flip,longStraight,ponytail,braid,updo,setCurls,afro,afroShort,curlyMid,cornrows,buzz').split(',');

@@ -1,13 +1,16 @@
 /**
- * EVALUATION ONLY (oversight request, user-approved): extracts the head of a Microsoft Rocketbox
- * avatar (MIT; docs/CHARACTER_SOURCES.md §6) so it can be fitted onto our parametric body:
- * head skin, eyes, teeth, eyelashes and hair cards, skinned to our rig (Head, jaw, eyes, neck).
- * Shirt collars painted in the head atlas (Spine2-dominated triangles) are left out.
+ * Microsoft Rocketbox heads (MIT; docs/CHARACTER_SOURCES.md §6) for the near ring and the leads.
+ * Adults only: the library's Children folder is never read.
  *
- *   git clone (blobless, sparse) https://github.com/microsoft/microsoft-rocketbox → --repo
- *   npx tsx tools/characters/build-rocketbox.ts --repo /home/user/microsoft/microsoft-rocketbox Male_Adult_12 …
+ *   npx tsx tools/characters/build-rocketbox.ts --repo /home/user/microsoft/microsoft-rocketbox [--pool] [--leads] [--only id,id]
  *
- * Writes public/characters/eval/rb_<name>.bin (T74X) and rb_<name>_{color,normal,opacity}.webp (1024²).
+ * Per head: the head piece (skin, eyes, teeth, lashes, hair cards) extracted by bone dominance,
+ * welded and quantised, skinned to our Head / jaw / eyes / neck; facial landmarks (bone positions)
+ * for fitting and for the leads' feature edits; tags for matching (sex, age, ancestry, hair).
+ * Leads (rb_leads.json) get landmark-driven feature deformations and Lab colour transfer so each
+ * is its own character, not the stock face.
+ * Output: public/characters/rb/<id>.bin, <id>_c.webp (colour), <id>_n.webp (normal), <id>_o.webp
+ * (hair/lash cards, RGBA), and public/characters/rb/index.json.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,12 +25,57 @@ const { FBXLoader } = await import('three/examples/jsm/loaders/FBXLoader.js');
 THREE.TextureLoader.prototype.load = function () { return new THREE.Texture(); } as any;
 
 const args = process.argv.slice(2);
-const repo = args[args.indexOf('--repo') + 1];
-const names = args.filter((a, i) => a !== '--repo' && args[i - 1] !== '--repo');
-const OUT = path.resolve(import.meta.dirname, '../../public/characters/eval');
-fs.mkdirSync(OUT, { recursive: true });
+const opt = (k: string) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : undefined; };
+const repo = opt('--repo')!;
+const only = opt('--only')?.split(',');
+const OUT = path.resolve(import.meta.dirname, '../../public/characters/rb');
+const TMP = path.resolve(import.meta.dirname, 'scratch/rb');
+fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(TMP, { recursive: true });
 
-/** Rocketbox Biped → our joints (head piece only). Facial bones collapse onto the head except jaw/eyes. */
+/**
+ * The near-ring pool, tagged by eye from the library's previews (sex, apparent age band, broad
+ * ancestry weights african/asian/caucasian for matching our generated bodies, hair category).
+ * Excluded: heads whose mesh includes headwear implausible on 1974 Midtown streets (hijab,
+ * burqa, keffiyeh, hood up), and the three heads used as the leads' bases (no lookalikes).
+ */
+interface Tag { sex: 0 | 1; age: [number, number]; anc: [number, number, number]; hair: 'short' | 'long' | 'curly' | 'bald' | 'tied' }
+const POOL: Record<string, Tag> = {
+  Female_Adult_01: { sex: 0, age: [22, 40], anc: [0, 0, 1], hair: 'tied' },
+  Female_Adult_02: { sex: 0, age: [35, 55], anc: [0, 0, 1], hair: 'tied' },
+  Female_Adult_03: { sex: 0, age: [20, 40], anc: [0, 0.8, 0.2], hair: 'long' },
+  Female_Adult_04: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'short' },
+  Female_Adult_05: { sex: 0, age: [22, 40], anc: [0, 0.1, 0.9], hair: 'long' },
+  Female_Adult_07: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'tied' },
+  Female_Adult_08: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
+  Female_Adult_09: { sex: 0, age: [35, 55], anc: [0, 0, 1], hair: 'tied' },
+  Female_Adult_11: { sex: 0, age: [25, 45], anc: [0.15, 0.05, 0.8], hair: 'tied' },
+  Female_Adult_12: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
+  Female_Adult_13: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'short' },
+  Female_Adult_14: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'long' },
+  Female_Adult_15: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
+  Female_Adult_17: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'tied' },
+  Female_Party_01: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'curly' },
+  Male_Adult_01: { sex: 1, age: [20, 35], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_02: { sex: 1, age: [25, 40], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_03: { sex: 1, age: [58, 75], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_04: { sex: 1, age: [22, 40], anc: [0.7, 0, 0.3], hair: 'curly' },
+  Male_Adult_05: { sex: 1, age: [50, 70], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_06: { sex: 1, age: [22, 40], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_08: { sex: 1, age: [22, 40], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_09: { sex: 1, age: [22, 40], anc: [0, 1, 0], hair: 'short' },
+  Male_Adult_10: { sex: 1, age: [20, 35], anc: [0, 0.6, 0.4], hair: 'short' },
+  Male_Adult_11: { sex: 1, age: [20, 35], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_12: { sex: 1, age: [25, 45], anc: [1, 0, 0], hair: 'short' },
+  Male_Adult_13: { sex: 1, age: [45, 65], anc: [0, 0, 1], hair: 'bald' },
+  Male_Adult_15: { sex: 1, age: [25, 45], anc: [0.1, 0.5, 0.4], hair: 'short' },
+  Male_Adult_16: { sex: 1, age: [20, 35], anc: [0, 0, 1], hair: 'short' },
+  Male_Adult_17: { sex: 1, age: [22, 40], anc: [0.1, 0.5, 0.4], hair: 'short' },
+  Male_Adult_20: { sex: 1, age: [25, 45], anc: [0, 0, 1], hair: 'short' },
+};
+
+interface DeformOp { at: string; radius: number; scale?: [number, number, number]; offset?: [number, number, number]; mirror?: boolean }
+interface LeadSpec { id: string; base: string; skinTarget: string; hairTarget?: string; deform: DeformOp[]; hairScale?: number; texSize?: number }
+
 const mapBone = (n: string): number => {
   const b = n.replace('Bip01_', '');
   if (b === 'MJaw' || b === 'MBottomLip' || b === 'MTongue' || b === 'LMouthBottom' || b === 'RMouthBottom') return JI.jaw;
@@ -37,102 +85,151 @@ const mapBone = (n: string): number => {
   if (b === 'Spine2' || b === 'Spine1' || b === 'Spine' || b.includes('Clavicle')) return JI.spine_03;
   return JI.Head;
 };
+const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 
-for (const name of names) {
+function build(name: string, id: string, texC: number, texN: number, lead?: LeadSpec) {
   const dir = path.join(repo, 'Assets/Avatars/Adults', name);
+  if (dir.includes('/Children/')) throw new Error('adults only');
   const buf = fs.readFileSync(path.join(dir, 'Export', `${name}.fbx`));
   const g = new FBXLoader().parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length), '');
   g.updateMatrixWorld(true);
   let mesh: any = null; g.traverse((o: any) => { if (o.isSkinnedMesh) mesh = o; });
   const geo = mesh.geometry, mats = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map((m: any) => m.name as string);
   const P = geo.attributes.position, N = geo.attributes.normal, UV = geo.attributes.uv, SI = geo.attributes.skinIndex, SW = geo.attributes.skinWeight;
-  const bm = mesh.bindMatrix as InstanceType<typeof THREE.Matrix4>;
-  const nm = new THREE.Matrix3().getNormalMatrix(bm);
+  const bm = mesh.bindMatrix, nm = new THREE.Matrix3().getNormalMatrix(bm);
   const bones = mesh.skeleton.bones as any[];
-  const S = 0.01; // cm → m
-  const wpos = (b: string) => { const o = bones.find((x) => x.name === b); const v = new THREE.Vector3(); o.getWorldPosition(v); return v.multiplyScalar(S); };
-  const eyeL = wpos('Bip01_LEye'), eyeR = wpos('Bip01_REye'), head = wpos('Bip01_Head'), neck = wpos('Bip01_Neck');
-  // which triangles belong to the head piece: head/opacity materials, vertices dominated by head-side bones
+  const S = 0.01;
+  const lm: Record<string, number[]> = {};
+  for (const b of bones) { const v = new THREE.Vector3(); b.getWorldPosition(v); lm[b.name.replace('Bip01_', '')] = v.multiplyScalar(S).toArray(); }
   const headish = (v: number) => { let w = 0; for (let c = 0; c < 4; c++) { const b = bones[SI.getComponent(v, c)].name.replace('Bip01_', ''); if (!/^(Spine|Spine1|Spine2|Pelvis)$/.test(b) && !b.includes('Clavicle')) w += SW.getComponent(v, c); } return w; };
-  const verts = new Map<number, number>();
+  // weld identical corners (FBX splits every corner)
+  const key = new Map<string, number>();
   const pos: number[] = [], nrm: number[] = [], uv: number[] = [], sj: number[] = [], sw: number[] = [], kind: number[] = [];
-  const idx: Record<string, number[]> = { skin: [], opacity: [] };
-  let neckMinY = Infinity;
-  for (const gr of geo.groups) {
+  const idx: number[] = [];
+  let nSkin = 0;
+  for (const pass of [0, 1]) for (const gr of geo.groups) {
     const mname = mats[gr.materialIndex];
-    const isOpacity = mname.endsWith('_opacity'), isHead = mname.endsWith('_head');
-    if (!isHead && !isOpacity) continue;
+    const isOp = mname.endsWith('_opacity'), isHead = mname.endsWith('_head');
+    if (pass === 0 ? !isHead : !isOp) continue;
     for (let i = gr.start; i < gr.start + gr.count; i += 3) {
       const tri = [0, 1, 2].map((k) => (geo.index ? geo.index.getX(i + k) : i + k));
       if (tri.some((v) => headish(v) < 0.5)) continue;
-      const out = tri.map((v) => {
-        let o = verts.get(v);
+      for (const v of tri) {
+        const p = new THREE.Vector3(P.getX(v), P.getY(v), P.getZ(v)).applyMatrix4(bm).multiplyScalar(S);
+        const n = new THREE.Vector3(N.getX(v), N.getY(v), N.getZ(v)).applyMatrix3(nm).normalize();
+        const k = `${pass}|${Math.round(p.x * 1e4)},${Math.round(p.y * 1e4)},${Math.round(p.z * 1e4)}|${Math.round(UV.getX(v) * 4096)},${Math.round(UV.getY(v) * 4096)}|${Math.round(n.x * 20)},${Math.round(n.y * 20)},${Math.round(n.z * 20)}`;
+        let o = key.get(k);
         if (o === undefined) {
-          o = pos.length / 3;
-          const p = new THREE.Vector3(P.getX(v), P.getY(v), P.getZ(v)).applyMatrix4(bm).multiplyScalar(S);
-          const n = new THREE.Vector3(N.getX(v), N.getY(v), N.getZ(v)).applyMatrix3(nm).normalize();
-          pos.push(p.x, p.y, p.z); nrm.push(n.x, n.y, n.z); uv.push(UV.getX(v), UV.getY(v));
+          o = pos.length / 3; key.set(k, o);
+          pos.push(p.x, p.y, p.z); nrm.push(n.x, n.y, n.z); uv.push(UV.getX(v), UV.getY(v)); kind.push(pass);
           const js: number[] = [], ws: number[] = [];
           for (let c = 0; c < 4; c++) { const w = SW.getComponent(v, c); if (w <= 0) continue; const j = mapBone(bones[SI.getComponent(v, c)].name); const at = js.indexOf(j); if (at >= 0) ws[at] += w; else { js.push(j); ws.push(w); } }
           const tw = ws.reduce((a, b) => a + b, 0) || 1;
           for (let c = 0; c < 4; c++) { sj.push(js[c] ?? 0); sw.push((ws[c] ?? 0) / tw); }
-          kind.push(isOpacity ? 1 : 0);
-          verts.set(v, o);
-          if (!isOpacity) neckMinY = Math.min(neckMinY, p.y);
         }
-        return o;
-      });
-      idx[isOpacity ? 'opacity' : 'skin'].push(...out);
+        idx.push(o);
+      }
+      if (pass === 0) nSkin += 3;
     }
   }
-  // textures: head colour, normal, opacity (cards) → 1024² WebP; and a reference skin tone
-  const tex = (suffix: string) => fs.readdirSync(path.join(dir, 'Textures')).find((f) => f.endsWith(suffix));
-  const conv = (src: string | undefined, dst: string, alpha = false) => {
-    if (!src) return 0;
-    const out = path.join(OUT, dst);
-    execFileSync('python3', ['-I', '-c', `
-import sys
-from PIL import Image
-im=Image.open(sys.argv[1]); im=im.convert('RGBA' if ${alpha ? 'True' : 'False'} else 'RGB').resize((1024,1024), Image.LANCZOS)
-im.save(sys.argv[2],'WEBP',quality=88)`, path.join(dir, 'Textures', src), out]);
-    return fs.statSync(out).size;
-  };
-  const sizes = {
-    color: conv(tex('_head_color.tga'), `rb_${name}_color.webp`),
-    normal: conv(tex('_head_normal.tga'), `rb_${name}_normal.webp`),
-    opacity: conv(tex('_opacity_color.tga'), `rb_${name}_opacity.webp`, true),
-  };
-  // skin tone: median colour of the head texture under front-facing cheek/forehead vertices
-  const samples: number[][] = [];
-  const cy = (eyeL.y + eyeR.y) / 2;
-  const pts: [number, number][] = [];
-  for (let v = 0; v < pos.length / 3; v++) {
+  const nv = pos.length / 3;
+  // --- leads: feature deformations (smooth falloff around landmarks) and cropped hair ---------
+  if (lead) {
+    for (const op of lead.deform) {
+      const sides = op.mirror ? [op.at.replace(/^R/, 'L'), op.at.replace(/^L/, 'R')] : [op.at];
+      for (const at of sides) {
+        const c = lm[at]; if (!c) throw new Error(`no landmark ${at}`);
+        const sx = at.startsWith('R') && op.mirror ? -1 : 1;
+        for (let v = 0; v < nv; v++) {
+          const d = Math.hypot(pos[v * 3] - c[0], pos[v * 3 + 1] - c[1], pos[v * 3 + 2] - c[2]);
+          if (d >= op.radius) continue;
+          const t = 1 - d / op.radius, w = t * t * (3 - 2 * t);
+          for (let a = 0; a < 3; a++) {
+            const rel = pos[v * 3 + a] - c[a];
+            let dv = 0;
+            if (op.scale) dv += rel * (op.scale[a] - 1);
+            if (op.offset) dv += op.offset[a] * (a === 0 ? sx : 1);
+            pos[v * 3 + a] += dv * w;
+          }
+        }
+      }
+    }
+    if (lead.hairScale) {
+      const hc = lm.Head;
+      for (let v = 0; v < nv; v++) if (kind[v] === 1) for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * lead.hairScale;
+    }
+  }
+  // --- quantise ---
+  const mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
+  for (let v = 0; v < nv; v++) for (let a = 0; a < 3; a++) { mn[a] = Math.min(mn[a], pos[v * 3 + a]); mx[a] = Math.max(mx[a], pos[v * 3 + a]); }
+  const qp = new Uint16Array(nv * 3);
+  for (let v = 0; v < nv; v++) for (let a = 0; a < 3; a++) qp[v * 3 + a] = Math.round(((pos[v * 3 + a] - mn[a]) / (mx[a] - mn[a] || 1)) * 65535);
+  const qn = Int8Array.from(nrm.map((x) => Math.round(x * 127)));
+  const quv = Uint16Array.from(uv.map((x) => Math.round(Math.min(1, Math.max(0, x)) * 65535)));
+  const qsw = Uint8Array.from(sw.map((x) => Math.round(x * 255)));
+  const qsj = Uint8Array.from(sj);
+  // --- skin colour (cheeks/forehead) and neck colour (bottom ring) from the colour texture ---
+  const eyeY = (lm.LEye[1] + lm.REye[1]) / 2;
+  const cheek: [number, number][] = [], neckUV: [number, number][] = [];
+  let neckMinY = Infinity;
+  for (let v = 0; v < nv; v++) if (!kind[v]) neckMinY = Math.min(neckMinY, pos[v * 3 + 1]);
+  for (let v = 0; v < nv; v++) {
     if (kind[v]) continue;
     const y = pos[v * 3 + 1], z = nrm[v * 3 + 2];
-    if (z > 0.75 && y > cy - 0.06 && y < cy + 0.05 && Math.abs(pos[v * 3] - head.x) > 0.02) pts.push([uv[v * 2], uv[v * 2 + 1]]);
+    if (z > 0.75 && y > eyeY - 0.06 && y < eyeY + 0.05 && Math.abs(pos[v * 3] - lm.Head[0]) > 0.02) cheek.push([uv[v * 2], uv[v * 2 + 1]]);
+    if (y < neckMinY + 0.02) neckUV.push([uv[v * 2], uv[v * 2 + 1]]);
   }
-  const ptsFile = path.join(OUT, `.rb_pts.json`); fs.writeFileSync(ptsFile, JSON.stringify(pts));
-  const tone = execFileSync('python3', ['-I', '-c', `
+  const tex = (suffix: string) => fs.readdirSync(path.join(dir, 'Textures')).find((f) => f.endsWith(suffix));
+  const sample = (pts: [number, number][]) => {
+    const f = path.join(TMP, 'pts.json'); fs.writeFileSync(f, JSON.stringify(pts));
+    return JSON.parse(execFileSync('python3', ['-I', '-c', `
 import sys,json
 from PIL import Image
 im=Image.open(sys.argv[1]).convert('RGB'); W,H=im.size
-pts=json.load(open(sys.argv[2])); cs=[]
-for u,v in pts:
-  x=min(W-1,max(0,int(u*W))); y=min(H-1,max(0,int((1-v)*H))); cs.append(im.getpixel((x,y)))
-cs.sort(key=lambda c:sum(c)); c=cs[len(cs)//2] if cs else (180,140,110)
-print('#%02x%02x%02x'%c)`, path.join(dir, 'Textures', tex('_head_color.tga')!), ptsFile]).toString().trim();
-  fs.unlinkSync(ptsFile);
-  void samples;
-  const meta = {
-    name, licence: 'MIT (Microsoft Rocketbox, Copyright (c) 2020 Microsoft)', tone,
-    eyeL: eyeL.toArray(), eyeR: eyeR.toArray(), head: head.toArray(), neck: neck.toArray(), neckMinY,
-    counts: { verts: pos.length / 3, skinTris: idx.skin.length / 3, opacityTris: idx.opacity.length / 3 },
+cs=sorted((im.getpixel((min(W-1,max(0,int(u*W))),min(H-1,max(0,int((1-v)*H))))) for u,v in json.load(open(sys.argv[2]))), key=sum)
+print(json.dumps(list(cs[len(cs)//2]) if cs else [180,140,110]))`, path.join(dir, 'Textures', tex('_head_color.tga')!), f]).toString());
   };
-  const blob = writeContainer(meta, {
-    pos: Float32Array.from(pos), nrm: Float32Array.from(nrm), uv: Float32Array.from(uv),
-    sj: Uint16Array.from(sj), sw: Float32Array.from(sw), kind: Uint8Array.from(kind),
-    idxSkin: Uint32Array.from(idx.skin), idxOpacity: Uint32Array.from(idx.opacity),
-  });
-  fs.writeFileSync(path.join(OUT, `rb_${name}.bin`), blob);
-  console.log(name, meta.counts, 'tone', tone, 'bin', blob.length, 'textures', sizes, 'iod', eyeL.distanceTo(eyeR).toFixed(4));
+  const skinRGB = sample(cheek), neckRGB = sample(neckUV);
+  // --- textures ---
+  const job = (src: string | undefined, dst: string, size: number, alpha: boolean, recolor: boolean) => {
+    if (!src) return 0;
+    const j = path.join(TMP, 'job.json');
+    fs.writeFileSync(j, JSON.stringify({ src: path.join(dir, 'Textures', src), dst: path.join(OUT, dst), size, alpha, quality: alpha ? 84 : 86,
+      skin: recolor ? skinRGB : null, skinTarget: recolor && lead ? hex(lead.skinTarget) : null, hairTarget: recolor && lead?.hairTarget ? hex(lead.hairTarget) : null }));
+    execFileSync('python3', ['-I', path.resolve(import.meta.dirname, 'rb_tex.py'), j]);
+    return fs.statSync(path.join(OUT, dst)).size;
+  };
+  const sizes = {
+    c: job(tex('_head_color.tga'), `${id}_c.webp`, texC, false, true),
+    n: job(tex('_head_normal.tga'), `${id}_n.webp`, texN, false, false),
+    o: kind.includes(1) ? job(tex('_opacity_color.tga'), `${id}_o.webp`, texC, true, !!lead?.hairTarget) : 0,
+  };
+  const outRGB = lead ? hex(lead.skinTarget) : skinRGB;
+  const meta = {
+    id, source: name, licence: 'MIT (Microsoft Rocketbox, Copyright (c) 2020 Microsoft)', lead: lead?.id ?? null,
+    bbox: { min: mn, max: mx }, skinIdx: nSkin, cardIdx: idx.length - nSkin,
+    skinRGB: outRGB, neckRGB: lead ? outRGB : neckRGB, neckMinY,
+    landmarks: Object.fromEntries(['Head', 'Neck', 'LEye', 'REye', 'MNose', 'MJaw', 'LCheek', 'RCheek', 'MUpperLip', 'MBottomLip', 'LMouthCorner', 'RMouthCorner'].map((k) => [k, lm[k]])),
+    tag: POOL[name] ?? null,
+  };
+  const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj: qsj, sw: qsw, kind: Uint8Array.from(kind), idx: nv < 65536 ? Uint16Array.from(idx) : Uint32Array.from(idx) });
+  fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);
+  const total = blob.length + sizes.c + sizes.n + sizes.o;
+  console.log(id.padEnd(18), 'verts', nv, 'tris', idx.length / 3, `(cards ${(idx.length - nSkin) / 3})`, 'bin', blob.length, 'tex', sizes, 'total KB', (total / 1024).toFixed(0), 'skin', outRGB);
+  return { id, source: name, bytes: total, tag: POOL[name] ?? null, skinRGB: outRGB, lead: lead?.id ?? null };
 }
+
+const index: any[] = [];
+const prev = fs.existsSync(path.join(OUT, 'index.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'index.json'), 'utf8')) : { heads: [] };
+if (args.includes('--pool')) for (const name of Object.keys(POOL)) {
+  if (only && !only.includes(name)) continue;
+  if (!fs.existsSync(path.join(repo, 'Assets/Avatars/Adults', name, 'Export', `${name}.fbx`))) { console.warn('missing', name); continue; }
+  index.push(build(name, name, 512, 256));
+}
+if (args.includes('--leads')) {
+  const leads = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, 'rb_leads.json'), 'utf8')) as LeadSpec[];
+  for (const l of leads) { if (only && !only.includes(l.id)) continue; index.push(build(l.base, l.id, l.texSize ?? 1024, 512, l)); }
+}
+const merged = [...prev.heads.filter((h: any) => !index.some((x) => x.id === h.id)), ...index];
+fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify({ licence: 'MIT (Microsoft Rocketbox); see LICENSE-Rocketbox.md', heads: merged }, null, 1));
+console.log('heads', merged.length, 'pool bytes', merged.filter((h: any) => !h.lead).reduce((a: number, h: any) => a + h.bytes, 0), 'lead bytes', merged.filter((h: any) => h.lead).reduce((a: number, h: any) => a + h.bytes, 0));
