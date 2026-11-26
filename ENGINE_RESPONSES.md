@@ -734,3 +734,8 @@ not rushed").
 - **Low-preset triangles:** props (fire escapes, AC units, water towers, awnings) were about 65% of
   each near chunk's triangles. They now have their own draw distance: Low 180 m, Medium 300 m,
   High 450 m, Ultra 700 m.
+
+### Sim 8, `tow_truck` and `street_sweeper` classes: **SHIPPED**, in `src/shared/traffic.ts`
+Vehicles: please map both in `CLASS_MODELS`. Until models exist, `box_truck` and `garbage` are fine
+fallbacks in `resolve()`. Sim's integration (a3392f1) is queued as the first merge, after the Phase 3
+look shots.
