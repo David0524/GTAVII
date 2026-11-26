@@ -22,6 +22,8 @@ export interface LightState {
   night: number;
   /** 0..1 street/neon lighting level (comes on in a wave just before sunset). */
   lightsOn: number;
+  /** Tone-mapping exposure: stopped down at noon, opened up at night (cinematographer's iris). */
+  exposure: number;
 }
 
 /**
@@ -49,7 +51,7 @@ export class Atmosphere {
   }
 
   private tmp = { a: new THREE.Color(), b: new THREE.Color() };
-  readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0 };
+  readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0, exposure: 1 };
 
   /** Recompute sun, sky, lights and haze from the world clock. Cheap; call every frame. */
   update(): LightState {
@@ -81,6 +83,7 @@ export class Atmosphere {
     // late-night windows thin out between 1:00 and 5:30
     const m = worldClock.minutes, late = m > 60 && m < 330 ? 0.45 : 1;
     this.state.sunElevation = el; this.state.night = night * late; this.state.lightsOn = smooth(6, -1, el);
+    this.state.exposure = 0.5 + 0.38 * golden + 0.35 * night; // ~0.5 noon, ~0.88 golden, ~1.2 night
     return this.state;
   }
 
