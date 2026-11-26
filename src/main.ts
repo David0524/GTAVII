@@ -20,6 +20,7 @@ import { promptStrip, PROMPT_CSS } from './ui/Prompts';
  */
 async function main() {
   const params = new URLSearchParams(location.search);
+  if (params.has('audio')) return void import('./audio/test/entry').then((m) => m.startAudioTest(params)); // audio workstream test scene / offline harness
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
