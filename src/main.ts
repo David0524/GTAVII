@@ -330,7 +330,7 @@ async function main() {
     // A menu over the game (pause hub, shop, any modal) holds the last frame instead of re-rendering the
     // city behind it: same picture, a fraction of the GPU and battery (and the canvas keeps its last
     // presented frame). Render again on any resize, which clears the drawing buffer.
-    const hold = ui.hub.open || (ui.state === 'play' && ui.paused);
+    const hold = ui.hub.open || (ui.state === 'play' && ui.paused) || (ui.state === 'cutscene' && ui.cinema.paused);
     const vw = view.width, vh = view.height;
     if (!hold || heldFrames < 2 || vw !== heldW || vh !== heldH) { if (postfx) postfx.render(); else renderer.render(scene, camera); }
     heldFrames = hold ? heldFrames + 1 : 0; heldW = vw; heldH = vh;
