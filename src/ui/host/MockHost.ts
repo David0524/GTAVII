@@ -12,6 +12,7 @@ import {
 import type { Input } from '../../input/Input';
 import type { SaveManager } from '../../save/SaveManager';
 import type { StreetRec } from '../map/grid';
+import { Locator } from '../../world/Districts';
 
 export function concealState(size: Conceal, hides: Conceal): ConcealState {
   if (size === 'visible') return 'visible';
@@ -100,6 +101,8 @@ export class MockHost implements UiHost {
     };
   }
   objective() { return this.obj; }
+  private loc?: Locator;
+  location() { this.loc ??= new Locator(this.streets); return { district: this.loc.district(this.pos.x, this.pos.z), crossing: this.loc.intersection(this.pos.x, this.pos.z) }; }
 
   shop(id: string): ShopView | null {
     const S: Record<string, ShopView> = {

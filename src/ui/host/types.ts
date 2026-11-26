@@ -127,6 +127,8 @@ export interface UiHost {
   inventory(lead?: LeadId): InventoryView;
   heat(): HeatView;
   objective(): ObjectiveView | null;
+  /** Period district and nearest corner ("The Tenderloin", "Broadway & W 26 St"). */
+  location(): { district: string; crossing: string };
   shop(id: string): ShopView | null;
   newspaper(): NewsIssue | null;
   businesses(): BusinessView[];
