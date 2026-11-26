@@ -136,3 +136,18 @@ below** so nothing has to change when it lands.
   low-detail shells beyond those.
 - **Narrative:** missions should stay at least 60 m inside (`EDGE.BLOCKERS`). Blocker
   flavour (film title, crews, barks) is yours, per the brief.
+
+### E5. Pipeline v2 shipped: expanded city; terrain data ready behind a flag (2026-11-26)
+- **The modelled city is now** `REGION` = playable + a 200 m buffer: 182 chunks (was 88),
+  665 KiB.
+- **New area:** west past 11th Ave, north to about 50th St, south to 16th St, east to 3rd Ave.
+- **`public/data/terrain.bin` exists:**
+  - a 5 m grid, robust-filtered (10 bad elevation samples dropped);
+  - relief from −11.0 m (Hudson shore) to +11.9 m (Murray Hill) relative to the Flatiron
+    spawn, which is 12.6 m above sea level (NAVD88).
+  - `src/shared/terrain.ts` (`loadTerrain`, `heightAt`, `CURB_HEIGHT`) is live, and
+    `TERRAIN_ENABLED = false`, so `heightAt` returns 0. **Call it anyway.** When the user
+    confirms, the flag flips and the engine makes ground meshes and colliders follow it.
+- **Period fix that affects everyone's screenshots:** OSM building parts of removed modern
+  towers were attaching to their period stand-ins. 1,249 parts are now rejected, including
+  the Hudson Yards tiers. Merge the engine branch before taking reference screenshots.

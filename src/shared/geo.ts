@@ -44,12 +44,13 @@ export function unproject(x: number, z: number): [number, number] {
 /** Direction of true north in world XZ (unit vector), for sun/sky placement. */
 export const TRUE_NORTH: [number, number] = [-S, -C];
 
-/** Playable + buffer region in world metres (grid-aligned rectangle). */
+/** Modelled region in world metres (grid-aligned rectangle): the playable area (bounds.ts PLAYABLE)
+ *  plus a 200 m full-detail buffer so the city continues past the edge (pipeline v2). */
 export const REGION = {
-  minX: -980, // between 8th and 9th Ave
-  maxX: 520, // past Park Ave South / Lexington
-  minZ: -1760, // ~44th St
-  maxZ: 300, // ~19th St
+  minX: -1780, // beyond 11th Ave (playable edge: mid-block 10th-11th)
+  maxX: 720, // ~3rd Ave (playable edge: mid-block Lexington-3rd)
+  minZ: -2190, // ~50th St (playable edge: mid-block 47th-48th)
+  maxZ: 520, // ~16th St (playable edge: mid-block 18th-19th)
 };
 
 export const CHUNK_SIZE = 200; // metres; chunk (i,j) covers [i*S,(i+1)*S) x [j*S,(j+1)*S)

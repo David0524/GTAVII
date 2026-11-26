@@ -56,6 +56,16 @@ archetype/save APIs), `content/` (owned by the narrative team).
   supported (not iOS). Phones default to the Low preset with DPR capped at 1.5. All gameplay
   reads `Input` actions, so later controllers get touch for free.
 
+## Pipeline v2 (expanded bounds and terrain data)
+- **City:** 182 chunks covering the new playable bounds (`src/shared/bounds.ts`) plus a 200 m
+  buffer.
+- **Terrain:** `terrain.bin` is generated with real relief (−11 to +12 m around the spawn),
+  but `TERRAIN_ENABLED` stays false pending the user's direct confirmation. Enabling it
+  needs ground-mesh tessellation and following in the worker, plus terrain-aware colliders.
+- **Period fix:** OSM parts can no longer re-attach to stand-ins (1,249 rejected).
+- **Rule 2c:** start-vs-completion year ambiguity is now resolved in favour of the city's
+  completion year.
+
 ## Period accuracy (done after Phase 1, on request)
 Every building is now dated from three sources (PLUTO, footprint, OSM), with ordered conflict
 rules, height-for-era sanity checks and reviewed manual rulings. Lots with no footprint get
