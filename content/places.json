@@ -6,7 +6,12 @@
       "name": "Flatiron Building, north prow",
       "at": "Broadway & 5th Ave & E 23rd St",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.corwin_hotel",
@@ -18,7 +23,12 @@
       ],
       "side": "north",
       "invented": true,
-      "kind": "sro"
+      "kind": "sro",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.dusk_on_broadway",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.station_house",
@@ -30,7 +40,12 @@
       ],
       "side": "south",
       "invented": true,
-      "kind": "precinct"
+      "kind": "precinct",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.yes",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.cop_bar",
@@ -38,7 +53,12 @@
       "at": "W 31st St & 8th Ave",
       "side": "se_corner",
       "invented": true,
-      "kind": "bar"
+      "kind": "bar",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.yes",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.penn_south",
@@ -46,7 +66,12 @@
       "at": "W 26th St & 8th Ave",
       "side": "west",
       "invented": false,
-      "kind": "residence"
+      "kind": "residence",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.night_desk",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.lisle_office",
@@ -54,7 +79,12 @@
       "at": "5th Ave & W 36th St",
       "side": "west",
       "invented": true,
-      "kind": "office"
+      "kind": "office",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.contact_sheet",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.lisle_luncheonette",
@@ -66,7 +96,12 @@
       ],
       "side": "south",
       "invented": true,
-      "kind": "diner"
+      "kind": "diner",
+      "discovery": {
+        "method": "npc_tip",
+        "source": "Bernard: 'Men like that always eat at twelve-forty' (M5)",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.carriers_garage",
@@ -74,7 +109,12 @@
       "at": "W 38th St & 9th Ave",
       "side": "nw_corner",
       "invented": true,
-      "kind": "garage"
+      "kind": "garage",
+      "discovery": {
+        "method": "overheard",
+        "source": "Carriers' radio chatter on W 37th St (M4)",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.varelas_loft",
@@ -86,7 +126,12 @@
       ],
       "side": "north",
       "invented": true,
-      "kind": "loft"
+      "kind": "loft",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Sign: VARELAS & CO. FURS",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.steakhouse",
@@ -94,7 +139,12 @@
       "at": "W 36th St & 7th Ave",
       "side": "ne_corner",
       "invented": true,
-      "kind": "restaurant"
+      "kind": "restaurant",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Sign",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.kafeneio",
@@ -102,7 +152,12 @@
       "at": "W 29th St & 8th Ave",
       "side": "nw_corner",
       "invented": true,
-      "kind": "cafe"
+      "kind": "cafe",
+      "discovery": {
+        "method": "npc_tip",
+        "source": "Yiannis or Mayhew (M14)",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.hotel_pennsylvania",
@@ -110,7 +165,12 @@
       "at": "7th Ave & W 33rd St",
       "side": "east",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.herald_sq_store",
@@ -118,7 +178,12 @@
       "at": "W 34th St & Broadway",
       "invented": true,
       "kind": "landmark",
-      "_brand": "Invented name replacing the real store at this location (N6 registry)."
+      "_brand": "Invented name replacing the real store at this location (N6 registry).",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.arden_hotel",
@@ -126,7 +191,12 @@
       "at": "W 39th St & 8th Ave",
       "side": "ne_corner",
       "invented": true,
-      "kind": "sro"
+      "kind": "sro",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.the_club",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.eighth_ave_cafeteria",
@@ -134,7 +204,12 @@
       "at": "8th Ave & W 40th St",
       "side": "west",
       "invented": true,
-      "kind": "diner"
+      "kind": "diner",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Sign: ROYAL CAFETERIA, OPEN ALL NIGHT",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.beauty_shop",
@@ -146,7 +221,12 @@
       ],
       "side": "north",
       "invented": true,
-      "kind": "shop"
+      "kind": "shop",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.the_club",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.bauer_arcade",
@@ -154,7 +234,12 @@
       "at": "W 42nd St & 8th Ave",
       "side": "se_corner",
       "invented": true,
-      "kind": "shop"
+      "kind": "shop",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Chasing bulbs on 42nd St",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.poole_shine",
@@ -162,14 +247,24 @@
       "at": "W 42nd St & 7th Ave",
       "side": "sw_corner",
       "invented": true,
-      "kind": "stand"
+      "kind": "stand",
+      "discovery": {
+        "method": "npc_tip",
+        "source": "Dwayne: 'Earl's the best on the street' (M4)",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.bryant_park",
       "name": "Bryant Park",
       "at": "6th Ave & W 41st St",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.feld_loft",
@@ -181,7 +276,12 @@
       ],
       "side": "south",
       "invented": true,
-      "kind": "loft"
+      "kind": "loft",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.surcharge",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.moretti_flowers",
@@ -193,7 +293,12 @@
       ],
       "side": "south",
       "invented": true,
-      "kind": "shop"
+      "kind": "shop",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Palms on the W 28th St sidewalk at dawn",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.kallis_furs",
@@ -201,7 +306,12 @@
       "at": "W 29th St & 7th Ave",
       "side": "ne_corner",
       "invented": true,
-      "kind": "shop"
+      "kind": "shop",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Sign",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.baek_wholesale",
@@ -213,7 +323,12 @@
       ],
       "side": "south",
       "invented": true,
-      "kind": "shop"
+      "kind": "shop",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.surcharge",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.korean_restaurant",
@@ -225,7 +340,12 @@
       ],
       "side": "north",
       "invented": true,
-      "kind": "restaurant"
+      "kind": "restaurant",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Hangul sign on W 32nd St",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.penn_hack_stand",
@@ -233,7 +353,12 @@
       "at": "7th Ave & W 32nd St",
       "side": "west",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.bank_branch",
@@ -241,28 +366,48 @@
       "at": "5th Ave & W 34th St",
       "side": "east",
       "invented": true,
-      "kind": "office"
+      "kind": "office",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Sign",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.madison_sq_park",
       "name": "Madison Square Park",
       "at": "Madison Ave & E 24th St",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.nypl_main",
       "name": "Public Library, Fifth Ave main branch",
       "at": "5th Ave & W 41st St",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "always",
+        "source": null,
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.penn_station_lockers",
       "name": "Penn Station coin lockers (concourse)",
       "at": "8th Ave & W 33rd St",
       "invented": false,
-      "kind": "landmark"
+      "kind": "landmark",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.exposure",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.penn_south_delphine",
@@ -274,7 +419,12 @@
       ],
       "side": "south",
       "invented": false,
-      "kind": "residence"
+      "kind": "residence",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.the_club",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.varelas_apartment",
@@ -282,7 +432,12 @@
       "at": "Madison Ave & E 37th St",
       "side": "west",
       "invented": true,
-      "kind": "residence"
+      "kind": "residence",
+      "discovery": {
+        "method": "mission",
+        "source": "mission.brownout",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.hospital",
@@ -290,7 +445,12 @@
       "at": "W 26th St & 9th Ave",
       "side": "ne_corner",
       "invented": true,
-      "kind": "hospital"
+      "kind": "hospital",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Sign: PENNINGTON GENERAL, EMERGENCY",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.lawyer_office",
@@ -298,7 +458,12 @@
       "at": "W 33rd St & 7th Ave",
       "side": "se_corner",
       "invented": true,
-      "kind": "office"
+      "kind": "office",
+      "discovery": {
+        "method": "business_card",
+        "source": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest",
+        "hiddenUntilIntroduced": true
+      }
     },
     {
       "id": "loc.bail_bonds",
@@ -306,7 +471,12 @@
       "at": "W 31st St & 8th Ave",
       "side": "nw_corner",
       "invented": true,
-      "kind": "shop"
+      "kind": "shop",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.galloway_lot",
@@ -314,7 +484,12 @@
       "at": "W 25th St & 9th Ave",
       "side": "se_corner",
       "invented": true,
-      "kind": "lot"
+      "kind": "lot",
+      "discovery": {
+        "method": "newspaper_ad",
+        "source": "Sunday classifieds in The Daily Ticker",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.precinct_madison_sq",
@@ -326,7 +501,12 @@
       ],
       "side": "north",
       "invented": true,
-      "kind": "precinct"
+      "kind": "precinct",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Green lamps outside",
+        "hiddenUntilIntroduced": false
+      }
     },
     {
       "id": "loc.precinct_bryant_park",
@@ -338,7 +518,13 @@
       ],
       "side": "south",
       "invented": true,
-      "kind": "precinct"
+      "kind": "precinct",
+      "discovery": {
+        "method": "walk_past",
+        "source": "Green lamps outside",
+        "hiddenUntilIntroduced": false
+      }
     }
-  ]
+  ],
+  "_discovery_note": "Map discovery (user: 'populate with new icons/tags throughout as you discover more stuff. Not all at once.'). Methods: always (landmarks), walk_past (sign seen within ~30 m), npc_tip, overheard, newspaper_ad, business_card, mission. Shady or story places stay hidden until introduced. Side-content places (economy.json, side_content.json) are discovered via npc_tip and overheard by default; the Ticker, fences, the chop shop, OTB and the pool hall via overheard or newspaper_ad."
 }
