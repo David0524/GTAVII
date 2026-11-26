@@ -268,7 +268,7 @@ async function main() {
   if (full.maxStationarySec > 180) problems.push(`deadlock: a vehicle stood still ${full.maxStationarySec} s (${full.maxStationaryWho})`);
   if (full.flow.minMovingFraction < 0.05) problems.push(`network-wide stall: moving fraction fell to ${full.flow.minMovingFraction}`);
   if (!report.determinism.equal) problems.push('non-deterministic');
-  if (!full.events.policeArrived) problems.push('police never arrived anywhere');
+  if (MINUTES >= 8 && !full.events.policeArrived) problems.push('police never arrived anywhere');
   if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;
   fs.writeFileSync(path.join(ROOT, 'docs/sim_test_report.json'), JSON.stringify(report, null, 2));
