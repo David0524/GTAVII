@@ -180,6 +180,24 @@ export class FoldingMap {
       g.fillStyle = gr; g.fillRect(fx0, fz0, fx1 - fx0, fz1 - fz0);
     }
     g.fillStyle = PAPER_SHADE; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0); // blocks: pale; streets print white over them
+    // district names are printed UNDER the street network, as on a printed street guide: the white streets break the
+    // letters where they cross, so a name never sits on top of an avenue. They stay on the sheet, on screen, and clear of
+    // the pencilled route.
+    {
+      const dSize = Math.max(11, Math.min(24, Z * 54));
+      g.save(); g.font = `700 ${dSize}px ${F_UI}`; g.fillStyle = 'rgba(17,17,17,.22)'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      const route = this.model.route?.pts ?? [];
+      for (const [n, x, z] of DISTRICTS) {
+        if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue;
+        const text = n.split('').join('\u2009'), w = g.measureText(text).width, cx = tx(x), cy = tz(z);
+        const b = [cx - w / 2, cy - dSize * 0.6, cx + w / 2, cy + dSize * 0.6];
+        if (b[0] < px0 + 6 || b[2] > px1 - 6 || b[1] < pz0 + 6 || b[3] > pz1 - 6 || b[0] < 2 || b[1] < 2 || b[2] > W - 2 || b[3] > H - 2) continue;
+        let hit = this.occluders.some((o) => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+        for (let k = 0; k < route.length && !hit; k += 2) { const rx = tx(route[k]), ry = tz(route[k + 1]); hit = rx > b[0] - 6 && rx < b[2] + 6 && ry > b[1] - 6 && ry < b[3] + 6; }
+        if (!hit) g.fillText(text, cx, cy);
+      }
+      g.restore();
+    }
 
     // streets (culled), white roads with ink casing
     g.lineCap = 'round'; g.lineJoin = 'round';
@@ -274,13 +292,6 @@ export class FoldingMap {
       const s = this.streets.filter((r) => r.n === name && r.p.length >= 4).sort((a, b) => b.p.length - a.p.length)[0]; if (!s) continue;
       const pts: number[] = []; for (let k = 0; k < s.p.length; k += 2) pts.push(tx(s.p[k]), tz(s.p[k + 1]));
       L.line(g, name.replace('Avenue', 'Ave.').replace('South', 'So.').toUpperCase(), pts, { font: `700 ${Math.max(9.5, Math.min(13, Z * 30))}px ${F_COND}`, colour: '#222', offset: s.w * Z / 2 + 2 });
-    }
-    // 3. district names (period names; inside the coverage only), spaced capitals
-    g.textAlign = 'center';
-    const dSize = Math.max(11, Math.min(24, Z * 54));
-    for (const [n, x, z] of DISTRICTS) {
-      if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue;
-      L.point(g, n.split('').join(' '), tx(x), tz(z), { font: `700 ${dSize}px ${F_UI}`, colour: 'rgba(17,17,17,.38)', symbol: 0 });
     }
     // 5. cross streets at street zoom
     if (Z > 0.5) {
