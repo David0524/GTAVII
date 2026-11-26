@@ -316,6 +316,7 @@ Both are cheap to cache.
       takes, and let supply caps (pools, the weekly list, fence saturation) do the bounding.
     - Property payback is decided (small early, big late). A starter pays back in about 2 game weeks, about 11 real hours. A big one takes 15–25 game weeks, so it's an endgame income and a prestige goal, not a money printer.
     - Honest gap: mid-tier is out of reach for one lead in 20 hours. If playtests want a mid business around hour 12–15, cut mid prices again or let one lead's business till feed another lead.
+  - **Runs in live play, not only on sleep/wait** (fixed 2026-11-26). The engine's per-frame `setClock` used to move the clock silently, so tills, loan interest, the daily number, weekly trouble and shop restocks only ever happened on a skip. Now forward movement is reported as `timeAdvanced {how: 'live'}` in 5-game-minute batches, and midnight wraps when only minutes are sent. A single jump of more than 2 game hours (a load, a debug set) is treated as a set, with no effects. Test: `time.test.ts`.
   - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
     witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
 - **Content is placeholder:** gameplay's own invented weapons, shops and prices run unless

@@ -49,3 +49,22 @@ test('home upgrade: an air conditioner makes a heatwave night a full rest', () =
   assert.ok(!r.g.buyHomeUpgrade('ac'), 'once');
   assert.equal(r.g.sleep(7).quality, 1);
 });
+
+test('live clock: the engine feed runs tills, the calendar and restocks while you play; jumps and loads do not', () => {
+  const r = rig();
+  const lead = 'char.teddy_arce';
+  r.g.setClock({ day: 0, minutes: 22 * 60 });
+  r.g.inv.ensure(lead).money = 100000;
+  assert.ok(r.g.economy.buyBusiness(lead, 'biz.newsstand'));
+  const till = () => r.g.economy.property.owned.get('biz.newsstand')!.till;
+  const ticks: string[] = []; r.g.clock.on('timeAdvanced', (e) => ticks.push(e.how));
+  // 3 game hours of play at 1 game minute per 2 real seconds, fed every frame at 30 fps (minutes only, like the engine)
+  let m = 22 * 60;
+  for (let f = 0; f < 3 * 60 * 2 * 30; f++) { m += 1 / 60; r.g.setClock({ minutes: m >= 1440 ? m - 1440 : m }); }
+  assert.ok(till() > 0, `the till filled in live play (${till()})`);
+  assert.equal(r.g.clock.clock.day, 1, 'midnight rolled the day');
+  assert.ok(ticks.length >= 30 && ticks.every((h) => h === 'live'), `batched live ticks (${ticks.length})`);
+  // a big jump (a load, a debug set) moves the clock with no effects
+  const t0 = till(); r.g.setClock({ day: 5, minutes: 600 });
+  assert.equal(till(), t0); assert.equal(ticks.length >= 30, true);
+});

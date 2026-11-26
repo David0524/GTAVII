@@ -1046,7 +1046,7 @@ export class Gameplay {
     this.bus.on('money', (e) => this.stats.add(e.lead, e.delta > 0 ? 'moneyEarned' : 'moneySpent', Math.abs(e.delta)));
     this.bus.on('call', (e) => { if (e.kind === 'placed') this.stats.add(e.lead, 'phoneCalls'); });
     this.shops.on('outfitBought', (e) => this.stats.add(e.lead, 'outfitsBought'));
-    this.clock.on('timeAdvanced', (e) => { if (e.how === 'sleep' && this.player) this.stats.add(this.player.lead, 'nightsSlept'); });
+    this.clock.on('timeAdvanced', (e) => { if (e.how === 'sleep' && this.player) this.stats.add(this.player.lead, 'nightsSlept'); if (e.how === 'live' && e.toDay > e.fromDay) this.shops.restock(); });
   }
 
   /** Cop units become physical: health, melee body and hit capsules. */
