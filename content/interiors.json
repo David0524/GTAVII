@@ -494,6 +494,254 @@
         "tar beach"
       ],
       "tier": "A"
+    },
+    {
+      "id": "interior.velvet_moon_auditorium",
+      "address": "W 42nd St, 7th–8th Aves, north side",
+      "facade": "street",
+      "name": "The Velvet Moon, auditorium and projection booth",
+      "kind": "cinema",
+      "hours": [
+        "10:00",
+        "04:00"
+      ],
+      "contains": [
+        "800 worn seats",
+        "screen",
+        "projection booth with two projectors and reel cans",
+        "balcony (closed, rats)"
+      ],
+      "usedBy": "side.the_lost_husband, side.projectionist"
+    },
+    {
+      "id": "interior.corner_pocket",
+      "address": "W 41st St, 8th–9th Aves, south side (2nd floor)",
+      "facade": "street",
+      "name": "Corner Pocket Billiards",
+      "kind": "bar",
+      "hours": [
+        "12:00",
+        "03:00"
+      ],
+      "contains": [
+        "eight tables",
+        "rack of cues",
+        "chalkboard of debts",
+        "stairs from a storefront"
+      ],
+      "usedBy": "side.corner_pocket, side.skip_board"
+    },
+    {
+      "id": "interior.teletrack",
+      "address": "8th Ave & W 37th St, west side",
+      "facade": "street",
+      "name": "Eighth Avenue Teletrack (OTB parlour, invented)",
+      "kind": "shop",
+      "hours": [
+        "11:00",
+        "22:00"
+      ],
+      "contains": [
+        "betting windows",
+        "race-results board",
+        "pencils on chains",
+        "discarded tickets on the floor"
+      ],
+      "usedBy": "side.otb_tips"
+    },
+    {
+      "id": "interior.moss_barbers",
+      "address": "W 38th St & 8th Ave, SW corner",
+      "facade": "street",
+      "name": "Moss Barbers",
+      "kind": "shop",
+      "hours": [
+        "08:00",
+        "20:00"
+      ],
+      "contains": [
+        "three chairs",
+        "pole",
+        "radio",
+        "Zeke's scissors"
+      ],
+      "usedBy": "side.practice_chair (after hours)"
+    },
+    {
+      "id": "interior.garden_lobby",
+      "address": "8th Ave & W 33rd St (Madison Square Garden entrance)",
+      "facade": "street",
+      "name": "Madison Square Garden: doors, lobby, back corridor",
+      "kind": "shop",
+      "hours": [
+        "17:00",
+        "01:00"
+      ],
+      "contains": [
+        "ticket doors",
+        "concourse",
+        "the promoter's back corridor",
+        "ringside section (view only)"
+      ],
+      "usedBy": "side.fight_door, side.garden_runaway; real building, invented events"
+    },
+    {
+      "id": "interior.fifth_ave_tower",
+      "address": "5th Ave & W 35th St, west side",
+      "facade": "street",
+      "name": "Office tower: lobby and elevator machine room",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "marble lobby",
+        "elevator bank",
+        "stairs",
+        "roof machine room with a hand crank"
+      ],
+      "usedBy": "side.stuck_elevator"
+    },
+    {
+      "id": "interior.pennsylvania_ballroom",
+      "address": "7th Ave & W 33rd St (Hotel Pennsylvania)",
+      "facade": "street",
+      "name": "Hotel Pennsylvania ballroom",
+      "kind": "bar",
+      "hours": [
+        "18:00",
+        "01:00"
+      ],
+      "contains": [
+        "round tables",
+        "bandstand",
+        "service doors",
+        "champagne station"
+      ],
+      "usedBy": "M15 opener, side.buyers_banquet; real building"
+    },
+    {
+      "id": "interior.taxi_bureau",
+      "address": "W 33rd St, 6th–7th Aves, south side (3rd floor)",
+      "facade": "street",
+      "name": "Hack Licence Bureau (invented city office)",
+      "kind": "office",
+      "hours": [
+        "09:00",
+        "16:00"
+      ],
+      "contains": [
+        "counters with thick glass",
+        "forms rack",
+        "a numbered-ticket machine that's always broken"
+      ],
+      "usedBy": "side.hack_license"
+    },
+    {
+      "id": "interior.abend_bail",
+      "address": "W 31st St & 8th Ave, NW corner",
+      "facade": "street",
+      "name": "Abend Bail Bonds",
+      "kind": "shop",
+      "hours": [
+        "10:00",
+        "02:00"
+      ],
+      "contains": [
+        "desk",
+        "the board of skips (mugshots)",
+        "a safe"
+      ],
+      "usedBy": "side.skip_board"
+    },
+    {
+      "id": "interior.marty_back_room",
+      "address": "W 39th St & 9th Ave, NE corner (behind a radio-repair shop)",
+      "facade": "street",
+      "name": "Marty Glass's back room",
+      "kind": "shop",
+      "hours": [
+        "11:00",
+        "23:00"
+      ],
+      "contains": [
+        "radio-repair counter",
+        "back room shelves of 'goods'",
+        "a scale"
+      ],
+      "usedBy": "side.fence_wants"
+    },
+    {
+      "id": "interior.krause_hardware",
+      "address": "6th Ave & W 31st St, west side",
+      "facade": "street",
+      "name": "Krause Hardware",
+      "kind": "shop",
+      "hours": [
+        "08:00",
+        "19:00"
+      ],
+      "contains": [
+        "key-cutting machine",
+        "fans",
+        "crowbars",
+        "bins of nails"
+      ],
+      "usedBy": "side.locksmith; shop.krause_hardware"
+    },
+    {
+      "id": "interior.ticker_bureau",
+      "address": "W 26th St & 7th Ave, NE corner (2nd floor)",
+      "facade": "street",
+      "name": "The Daily Ticker midtown bureau",
+      "kind": "office",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "night photo desk",
+        "darkroom",
+        "police-radio scanner",
+        "a pneumatic tube"
+      ],
+      "usedBy": "side.photo_night_desk"
+    },
+    {
+      "id": "interior.dukes_garage",
+      "address": "W 36th St & 9th Ave, SW corner",
+      "facade": "street",
+      "name": "The Dukes' garage (chop shop)",
+      "kind": "garage",
+      "hours": [
+        "18:00",
+        "06:00"
+      ],
+      "contains": [
+        "three bays",
+        "the weekly chalk list",
+        "parts on shelves"
+      ],
+      "usedBy": "side.chop_list"
+    },
+    {
+      "id": "interior.telegraph_office",
+      "address": "W 34th St, 7th–8th Aves, north side",
+      "facade": "street",
+      "name": "Telegraph office (invented)",
+      "kind": "office",
+      "hours": [
+        "07:00",
+        "23:00"
+      ],
+      "contains": [
+        "counter",
+        "message pads",
+        "messenger bench",
+        "bicycles"
+      ],
+      "usedBy": "side.telegrams"
     }
   ]
 }
