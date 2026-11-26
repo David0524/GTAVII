@@ -177,6 +177,7 @@ function groundPoly(b: Builder, rings: Float32Array[], yOff: number, col: RGB, s
   // Curb faces: every edge of a raised polygon that is not on the chunk boundary drops to road level,
   // split into <= MAX_EDGE segments so the curb follows the slope.
   const curb: RGB = [0.5, 0.48, 0.45];
+  const prevFac = b.curFac; b.curFac = [10, 0, 0, 0];
   const onEdge = (x: number, z: number) => Math.abs(Math.abs(x) - half) < 0.02 || Math.abs(Math.abs(z) - half) < 0.02;
   for (const ring of rings) {
     const n = ring.length / 2; const ccw = ringSignedArea(ring) > 0;
@@ -197,12 +198,13 @@ function groundPoly(b: Builder, rings: Float32Array[], yOff: number, col: RGB, s
       }
     }
   }
+  b.curFac = prevFac;
 }
 
 export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = () => 0, ox = 0): ChunkMeshes {
   const bAll = new Builder(); bAll.facadeMode = true;
   const bLod = new Builder(); bLod.facadeMode = true;
-  const g = new Builder();
+  const g = new Builder(); g.facadeMode = true; // ground: facade.x = surface kind (GroundKind; 10 = curb face)
   let maxHeight = 0;
   for (const rec of data.buildings) {
     let col = jitter(rec.id, STYLE_COLORS[rec.style] ?? STYLE_COLORS[0]);
@@ -215,6 +217,7 @@ export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = ()
   const half = chunkSize / 2;
   for (const gr of data.ground) {
     const col = GROUND_COLORS[gr.kind] ?? GROUND_COLORS[GroundKind.Sidewalk];
+    g.curFac = [gr.kind, 0, 0, 0];
     if (gr.kind === GroundKind.Road) groundPoly(g, gr.rings, 0, col, false, half, hf);
     else if (gr.kind === GroundKind.Lot) groundPoly(g, gr.rings, SIDEWALK_H + 0.04, col, false, half, hf); // 4 cm: different tessellation from the sidewalk below must not z-fight on slopes
     else groundPoly(g, gr.rings, SIDEWALK_H, col, true, half, hf);

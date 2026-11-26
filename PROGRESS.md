@@ -15,7 +15,7 @@ Source of truth across sessions. Read this first; update it last.
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
 | 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
 | UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/`; **handed to the UI and cinematics stream** at the freeze commit |
-| 3. Rendering pipeline + facade generation **+ full day/night lighting cycle** (moved from Phase 6, per TIME.md) | **Next** |
+| 3. Rendering pipeline + facade generation **+ full day/night lighting cycle** (moved from Phase 6, per TIME.md) | **In progress.** Done: procedural facades (3a), clock + solar sun + streetlights (3b), post stack + grade + exposure + shadows (3c), ground materials. Next: props (water towers, fire escapes, awnings, AC units, call boxes), lane paint, manholes and steam, hero landmarks, AO, environment map, TAA, full four-times-of-day shot set vs refs A–D |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
 | 6. Weather variety, polish, optimisation (day/night moved to Phase 3) | — |
