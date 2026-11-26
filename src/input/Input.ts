@@ -4,6 +4,8 @@
  *
  *   move      : x = strafe right (+), y = forward (+), magnitude 0..1 (analog on stick/touch)
  *   vertical  : -1..1 analog up/down (fly cam: RT/LT, E/Q)
+ *   gas/brake : 0..1 analog pedals (pad RT/LT, touch pedals by thumb position, keys W/S as 1); the
+ *               driving context (Phase 4) reads these. Touch UI writes touchPedals (TOUCH_CONTROLS.md).
  *   look      : yaw/pitch deltas in radians since last consume(); stick look is rate-based with a response curve
  *   isHeld / pressed : buttons by action name
  *   activeDevice     : last device the player touched; drives button-prompt glyphs and touch-UI visibility
@@ -55,6 +57,10 @@ export class Input {
   /** Analog move written by the touch stick; combined with keys/pad each frame. */
   readonly touchMove = { x: 0, y: 0 };
   readonly touchHeld = new Set<ButtonAction>();
+  /** Analog pedal values written by the touch driving UI (0..1 from thumb position on each pedal). */
+  readonly touchPedals = { gas: 0, brake: 0 };
+  gas = 0;
+  brake = 0;
   isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   wheel = 0;
 
@@ -67,7 +73,7 @@ export class Input {
       this.setDevice('kbm');
     });
     window.addEventListener('keyup', (e) => this.keys.delete(e.code));
-    window.addEventListener('blur', () => { this.keys.clear(); this.touchHeld.clear(); this.touchMove.x = this.touchMove.y = 0; });
+    window.addEventListener('blur', () => { this.keys.clear(); this.touchHeld.clear(); this.touchMove.x = this.touchMove.y = 0; this.touchPedals.gas = this.touchPedals.brake = 0; });
     dom.addEventListener('click', () => { if (this.activeDevice === 'kbm' && document.pointerLockElement !== dom) dom.requestPointerLock?.(); });
     document.addEventListener('mousemove', (e) => {
       if (document.pointerLockElement !== this.dom) return;
@@ -129,6 +135,9 @@ export class Input {
 
     const kv = (this.held.has('rise') || this.held.has('jump') ? 1 : 0) - (this.held.has('sink') ? 1 : 0);
     this.vertical = Math.max(-1, Math.min(1, kv + this.pad.rt - this.pad.lt));
+    const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+    this.gas = clamp01(Math.max(this.pad.rt, this.touchPedals.gas, k.has('KeyW') || k.has('ArrowUp') ? 1 : 0));
+    this.brake = clamp01(Math.max(this.pad.lt, this.touchPedals.brake, k.has('KeyS') || k.has('ArrowDown') ? 1 : 0));
   }
   isHeld(a: ButtonAction) { return this.held.has(a); }
   pressed(a: ButtonAction) { const p = this.edges.has(a); this.edges.delete(a); return p; }

@@ -1,0 +1,144 @@
+/**
+ * Period props generated per chunk in the worker (one merged mesh, vertex colours, one draw call):
+ *   water towers (wood stave tanks on steel legs) on mid-rise roofs, stair/elevator bulkheads,
+ *   black iron fire escapes on tenement & loft street walls, window AC units (~1 in 6 windows, on the
+ *   same window grid as the facade shader), striped canvas awnings over storefront bays.
+ * Deterministic per building id. Props only go on walls that face open space (street side), never on
+ * party walls, tested by probing a point 5 m outside each wall against the chunk's footprints.
+ */
+import type { BuildingRec, ChunkData } from '../shared/chunkFormat';
+import type { HeightFn, MeshArrays } from './meshBuilder';
+
+type RGB = [number, number, number];
+class Geo {
+  p: number[] = []; n: number[] = []; c: number[] = []; idx: number[] = [];
+  quad(a: number[], b: number[], c: number[], d: number[], n: number[], col: RGB) {
+    const v = this.p.length / 3;
+    for (const q of [a, b, c, d]) { this.p.push(q[0], q[1], q[2]); this.n.push(n[0], n[1], n[2]); this.c.push(col[0], col[1], col[2]); }
+    this.idx.push(v, v + 1, v + 2, v, v + 2, v + 3);
+  }
+  /** Oriented box: centre, half sizes along (along-wall u, up, out-of-wall w) with basis ux,uz / wx,wz. */
+  box(cx: number, cy: number, cz: number, hu: number, hy: number, hw: number, ux: number, uz: number, col: RGB) {
+    const wx = -uz, wz = ux; // perpendicular (out of wall when u runs along it)
+    const P = (su: number, sy: number, sw: number) => [cx + ux * hu * su + wx * hw * sw, cy + hy * sy, cz + uz * hu * su + wz * hw * sw];
+    const f: [number[], number[], number[], number[], number[]][] = [
+      [P(-1, -1, 1), P(1, -1, 1), P(1, 1, 1), P(-1, 1, 1), [wx, 0, wz]],
+      [P(1, -1, -1), P(-1, -1, -1), P(-1, 1, -1), P(1, 1, -1), [-wx, 0, -wz]],
+      [P(1, -1, 1), P(1, -1, -1), P(1, 1, -1), P(1, 1, 1), [ux, 0, uz]],
+      [P(-1, -1, -1), P(-1, -1, 1), P(-1, 1, 1), P(-1, 1, -1), [-ux, 0, -uz]],
+      [P(-1, 1, 1), P(1, 1, 1), P(1, 1, -1), P(-1, 1, -1), [0, 1, 0]],
+      [P(-1, -1, -1), P(1, -1, -1), P(1, -1, 1), P(-1, -1, 1), [0, -1, 0]],
+    ];
+    for (const [a, b, c, d, n] of f) this.quad(a, b, c, d, n, col);
+  }
+  cylinder(cx: number, y0: number, cz: number, r: number, h: number, col: RGB, seg = 10, coneH = 0) {
+    for (let i = 0; i < seg; i++) {
+      const a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2;
+      const x0 = Math.cos(a0) * r, z0 = Math.sin(a0) * r, x1 = Math.cos(a1) * r, z1 = Math.sin(a1) * r;
+      const nm = [Math.cos((a0 + a1) / 2), 0, Math.sin((a0 + a1) / 2)];
+      this.quad([cx + x1, y0, cz + z1], [cx + x0, y0, cz + z0], [cx + x0, y0 + h, cz + z0], [cx + x1, y0 + h, cz + z1], nm, col);
+      if (coneH > 0) { // conical cap (as a degenerate quad)
+        const v = this.p.length / 3, top = [cx, y0 + h + coneH, cz];
+        const dark: RGB = [col[0] * 0.7, col[1] * 0.7, col[2] * 0.7];
+        for (const q of [[cx + x0 * 1.08, y0 + h, cz + z0 * 1.08], [cx + x1 * 1.08, y0 + h, cz + z1 * 1.08], top]) { this.p.push(q[0], q[1], q[2]); this.n.push(nm[0] * 0.6, 0.8, nm[2] * 0.6); this.c.push(...dark); }
+        this.idx.push(v, v + 2, v + 1);
+      }
+    }
+  }
+  finish(): MeshArrays { return { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx) }; }
+}
+
+const rand = (id: number, k: number) => { let h = Math.imul(id ^ (k * 0x9e3779b1), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+function inRing(x: number, z: number, r: Float32Array) {
+  let inside = false;
+  for (let i = 0, j = r.length / 2 - 1; i < r.length / 2; j = i++) {
+    const xi = r[2 * i], zi = r[2 * i + 1], xj = r[2 * j], zj = r[2 * j + 1];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+const IRON: RGB = [0.035, 0.033, 0.03];
+const STEEL: RGB = [0.08, 0.075, 0.07];
+const AWNINGS: RGB[] = [[0.12, 0.22, 0.12], [0.32, 0.07, 0.06], [0.08, 0.1, 0.22], [0.36, 0.26, 0.1], [0.2, 0.06, 0.12]];
+
+export function buildProps(data: ChunkData, hf: HeightFn): MeshArrays {
+  const g = new Geo();
+  const rings = data.buildings.map((b) => b.rings[0]);
+  const openAt = (x: number, z: number) => !rings.some((r) => inRing(x, z, r));
+  for (const b of data.buildings) {
+    if (b.minHeight > 0 || b.flags & 1) continue; // parts above podiums and hand-dressed heroes skip
+    const outer = b.rings[0]; const n = outer.length / 2;
+    let gs = 0; for (let k = 0; k < n; k++) gs += hf(outer[2 * k], outer[2 * k + 1]);
+    const gAvg = gs / n, top = gAvg + b.height;
+    const floorH = b.floors > 0 ? Math.min(5.6, Math.max(2.9, b.height / b.floors)) : 3.5;
+    let cx = 0, cz = 0; for (let k = 0; k < n; k++) { cx += outer[2 * k]; cz += outer[2 * k + 1]; } cx /= n; cz /= n;
+    const area = Math.abs(outer.reduce((a, _v, i) => (i % 2 ? a : a + outer[i] * outer[(i + 3) % outer.length] - outer[(i + 2) % outer.length] * outer[i + 1]), 0)) / 2;
+
+    // ---- roof: bulkhead and water tower (6+ floors, under ~120 m, period residential/loft/office stock)
+    if (b.floors >= 4 && area > 60 && rand(b.id, 1) < 0.6) g.box(cx + (rand(b.id, 2) - 0.5) * 4, top + 1.4, cz + (rand(b.id, 3) - 0.5) * 4, 1.6, 1.4, 1.6, 1, 0, [0.16, 0.12, 0.1]);
+    if (b.floors >= 6 && b.height < 120 && area > 150 && rand(b.id, 4) < 0.55) {
+      const tx = cx + (rand(b.id, 5) - 0.5) * 6, tz = cz + (rand(b.id, 6) - 0.5) * 6;
+      if (inRing(tx, tz, outer)) {
+        const r = 2.2 + rand(b.id, 7) * 1.1, legH = 3.2 + rand(b.id, 8) * 2.5, tankH = 4 + rand(b.id, 9) * 1.5;
+        const wood: RGB = rand(b.id, 10) < 0.7 ? [0.2, 0.14, 0.09] : [0.24, 0.22, 0.2]; // weathered cedar / grey
+        for (const [lx, lz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) g.box(tx + lx * r * 0.62, top + legH / 2, tz + lz * r * 0.62, 0.1, legH / 2, 0.1, 1, 0, STEEL);
+        g.box(tx, top + legH, tz, r * 0.8, 0.08, r * 0.8, 1, 0, STEEL); // platform
+        g.cylinder(tx, top + legH + 0.08, tz, r, tankH, wood, 12, 1.2);
+      }
+    }
+
+    // ---- street walls: fire escapes, AC units, awnings
+    for (let k = 0; k < n; k++) {
+      const j = (k + 1) % n;
+      const x0 = outer[2 * k], z0 = outer[2 * k + 1], x1 = outer[2 * j], z1 = outer[2 * j + 1];
+      const L = Math.hypot(x1 - x0, z1 - z0); if (L < 5) continue;
+      const ux = (x1 - x0) / L, uz = (z1 - z0) / L;
+      // outward normal = the side whose probe point is open space
+      let wx = -uz, wz = ux;
+      const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+      if (inRing(mx + wx * 0.5, mz + wz * 0.5, outer)) { wx = -wx; wz = -wz; }
+      if (!openAt(mx + wx * 5, mz + wz * 5)) continue; // party wall
+      const uxs = -wz, uzs = wx; // u axis such that box() 'w' = outward
+      const style = b.style;
+      // fire escape: tenements and lofts, middle of the wall, floors 2..top-1
+      if ((style === 1 || style === 2 || style === 3) && b.floors >= 4 && L > 8 && rand(b.id, 20 + k) < 0.75) {
+        const ex = mx + wx * 0.65, ez = mz + wz * 0.65, half = Math.min(3.2, L * 0.25);
+        for (let f = 1; f < Math.min(b.floors, 12); f++) {
+          const y = gAvg + f * floorH + 0.05;
+          g.box(ex, y, ez, half, 0.04, 0.6, uxs, uzs, IRON); // platform
+          g.box(ex + wx * 0.55, y + 0.5, ez + wz * 0.55, half, 0.025, 0.025, uxs, uzs, IRON); // rail
+          // ladder/stair diagonal to the next floor
+          if (f < Math.min(b.floors, 12) - 1) g.box(ex + uxs * half * 0.4, y + floorH / 2, ez + uzs * half * 0.4, 0.35, floorH / 2, 0.03, uxs, uzs, IRON);
+        }
+      }
+      // Hotel Chelsea: cast-iron balconies across the street facade on every upper floor
+      if (style === 11) {
+        for (let f = 1; f < b.floors; f++) {
+          const y = gAvg + f * floorH + 0.05;
+          g.box(mx + wx * 0.55, y, mz + wz * 0.55, L / 2 - 0.4, 0.05, 0.55, uxs, uzs, IRON);
+          g.box(mx + wx * 1.05, y + 0.5, mz + wz * 1.05, L / 2 - 0.4, 0.45, 0.02, uxs, uzs, [0.05, 0.045, 0.04]); // railing panel
+        }
+      }
+      // AC units on the facade window grid (same bays as FacadeMaterial)
+      const bay = style === 1 ? 2.6 : style === 2 || style === 3 ? 3.3 : style === 6 ? 1.9 : 2.45;
+      if (style !== 5 && b.year < 1974) {
+        for (let f = 1; f < Math.min(b.floors, 14); f++) for (let i = 0; (i + 0.5) * bay < L; i++) {
+          if (rand(b.id * 31 + k, f * 97 + i) > 0.16) continue;
+          const s = (i + 0.5) * bay, sx = x0 + ux * s + wx * 0.3, sz = z0 + uz * s + wz * 0.3;
+          g.box(sx, gAvg + f * floorH + floorH * 0.33, sz, 0.32, 0.22, 0.3, uxs, uzs, [0.42, 0.4, 0.36]);
+        }
+      }
+      // awning over storefront bays (commercial ground floors)
+      if (style !== 1 && style !== 5 && rand(b.id, 40 + k) < 0.6) {
+        const col = AWNINGS[Math.floor(rand(b.id, 50 + k) * AWNINGS.length)];
+        const len = Math.min(L - 1, 4 + rand(b.id, 60 + k) * 6), s = L / 2 + (rand(b.id, 70 + k) - 0.5) * (L - len) * 0.8;
+        const ax = x0 + ux * s + wx * 0.7, az = z0 + uz * s + wz * 0.7;
+        g.box(ax, gAvg + 2.95, az, len / 2, 0.05, 0.7, uxs, uzs, col);
+        g.box(ax + wx * 0.68, gAvg + 2.75, az + wz * 0.68, len / 2, 0.2, 0.02, uxs, uzs, col); // valance
+      }
+    }
+  }
+  return g.finish();
+}
+export type { BuildingRec };

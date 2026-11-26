@@ -15,7 +15,7 @@ Source of truth across sessions. Read this first; update it last.
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
 | 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
 | UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/`; **handed to the UI and cinematics stream** at the freeze commit |
-| 3. Rendering pipeline + facade generation **+ full day/night lighting cycle** (moved from Phase 6, per TIME.md) | **Next** |
+| 3. Rendering pipeline + facade generation **+ full day/night lighting cycle** (moved from Phase 6, per TIME.md) | **In progress.** Done: procedural facades (3a), clock + solar sun + streetlights (3b), post stack + grade + exposure + shadows (3c), ground materials. Next: props (water towers, fire escapes, awnings, AC units, call boxes), lane paint, manholes and steam, hero landmarks, AO, environment map, TAA, full four-times-of-day shot set vs refs A–D |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
 | 6. Weather variety, polish, optimisation (day/night moved to Phase 3) | — |
@@ -242,7 +242,8 @@ the same city, filmed on the same stock, with a 2031 open-world game's density o
 | C | `documerica_549867` (Garment District canyon) | A dark street floor under a bright sky slot, haze, handcarts, trucks double-parked, depth falling into warm grey |
 | D | `documerica_549869` (Herald Square traffic) | Saturation budget: only taxi yellow and truck red sing, everything else muted; chrome highlights; dense traffic |
 
-**Grade targets** (STYLE_GUIDE §1, measured from 87 photos). Phase 3 shots are measured with
+**Grade targets** (STYLE_GUIDE §1, measured from 87 photos, all daytime, so these bands apply to
+**noon and golden-hour** shots; dusk and night are judged by the night criteria below and by eye). Phase 3 shots are measured with
 the same script (`tools/refs/lookmetrics.py`, to be added in Phase 3). Each shot's numbers must
 land in these bands:
 - **Tones:** shadow average near `#2e171d` (warm maroon, within ±12 per channel); midtone
@@ -252,6 +253,13 @@ land in these bands:
   clipped to white).
 - **Saturation:** at least 70% of saturated pixels in red-orange-yellow (hue 0–60° plus
   330–360°). Saturated blue/green 10% or less (dusk sky excepted, in a sky-masked variant).
+
+**Night criteria** (no PD night references yet, so these are taken from STYLE_GUIDE §8):
+- Luma p50 between 12 and 40.
+- Lit sources hold colour: sodium stays orange and windows stay warm, never white-clipped.
+- At least two distinct light colours in frame: sodium and mercury, or warm windows and TV-blue.
+
+**Measurement:** `python3 tools/refs/lookmetrics.py shots/...png` prints each band with PASS or FAIL.
 
 **What "done" looks like:**
 - **Facades:**
@@ -295,6 +303,24 @@ land in these bands:
 **Shot list for judging:** the Phase 2 rig viewpoints, re-shot at all four times. Four of them
 go side by side with frames A–D at matching angles: 42nd St & 7th, Sixth Ave & 32nd, a Garment
 District side street, and Herald Square.
+
+### Phase 3 remaining plan (realism levers, measured one at a time on the look target)
+Source: `docs/research/GRAPHICS_REFERENCES.md` (user-approved). Its finding is that real scanned
+assets plus code beat code alone. Each lever ships only if lookmetrics and the A–D comparison
+improve, with no frame-time regression on the Low preset.
+1. [x] Road paint (1974 markings).
+2. [~] Sky PMREM environment (`?env=1`, opt-in until measured).
+3. [ ] Per-building AO baked at generation: vertex AO for street-level darkening, under-cornice
+   and canyon occlusion. Nearly free at runtime.
+4. [ ] CC0 photoscans (Poly Haven, ambientCG) layered under the procedural facades and ground,
+   with KTX2 and budgets per `docs/briefs/ART_ASSETS.md`.
+5. [ ] A `LightProbeGrid` per chunk for warm canyon bounce. Check the WebGL2 fallback.
+6. [ ] Instanced grime and poster decals; these double as the future sign slots.
+7. [ ] Aerial-perspective fog and faked light shafts at golden hour.
+8. [ ] Impostors and dithered LOD for distant blocks, with meshopt.
+9. [ ] Desktop-only tier: GTAO, SSR on wet roads, TRAA.
+10. [ ] Street furniture and call-box POIs with colliders, manholes and steam.
+Not a fit: Gaussian splats, and SSGI or volumetrics on phones.
 
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
