@@ -740,3 +740,21 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
 - **Remaining:** 47 pieces need full specs and dialogue (N4b part 2).
 - **Next:** step 5 (the M1 cutscene script, with the UI & cinematics chat), then step 6
   (revise N6).
+
+### Steps 5–6: cutscenes, discovery and the N6 revision (first pass done)
+- **Cutscenes:** `content/cutscenes/m01_opening.json` and `m01_offer.json` are timelines with
+  shot lists (lens, move, framing, blocking, beats, dialogue refs, audio, light and film
+  cues). The format is proposed to the UI & cinematics chat.
+- **Map discovery:** `content/places.json` now has a `discovery` field on every place
+  (always, walk past, NPC tip, overheard, newspaper ad, business card, or mission). 17 of 37
+  places stay hidden until introduced.
+- **N6 revised for combat:** every weekly front page carries the action story of its week, plus
+  an economy block: the daily number, invented race and fight results, 1974 prices and
+  classifieds pointers. Mission refs are kept out of the printed text.
+- **Remaining across the pivot:**
+  - full specs and dialogue for N4b part 2 (47 pieces);
+  - cutscene scripts for M2–M32;
+  - combat-era barks for radio DJs and signage, if needed;
+  - the lead stats agreement (Gameplay);
+  - the cop-lethality decision (user);
+  - the name re-checks before ship.
