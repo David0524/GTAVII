@@ -11,11 +11,11 @@ first and update it last.
 | Tier B generators (30 kinds) | **Done** (v1). Every kind builds; 0 failures over all ~11,000 units |
 | Streaming (30 m), portal culling, doors, colliders, power, slots, markers | **Done** (v1). Shown in the test scene |
 | `?interiors=1` test scene (street block with facade cuts, gallery, overlays) | **Done** (v1) |
-| Tier A heroes | **Next.** Corwin lobby and 11th floor first |
-| Tier C window shader | Not started |
+| Tier A heroes | **Hotel Corwin v1 done** (lobby, fire stair to roof, Teddy's 9F with the act 1 portrait, 11th-floor rooms 1104/1112, shared bath, a window to the Empire State checked by sightline). Other heroes next |
+| Tier C window shader | **v1 done** (`src/interiors/windowRooms.ts`), shown on test-block facades. Engine integration pending (request 6). GPU cost not measured (no GPU here) |
 | Reference library (interiors) + 5-grade condition boards | Not started (shared `condition.ts` merged) |
 | Subway stations and tunnels, homes, hospital, booking room | Not started (new requirements) |
-| Walk-in frame sequences, phone numbers | Not started |
+| Walk-in frame sequences | **v1 done:** diner, bar, loft, tenement to roof, Corwin lobby, Corwin 11th-floor window (`docs/interiors/*.png`). Phone numbers are pending the user's device |
 
 ## Coverage (measured, `docs/interiors/coverage.json`; playable bounds from `src/shared/bounds.ts` after the shrink)
 | Metric | Value | Target |
@@ -24,7 +24,7 @@ first and update it last.
 | Ground buildings with a reachable roof | **54.0%** (1,656 of 3,067) | ≥ 50% (superseding 25%) |
 | Ground buildings with any enterable door | 75.8% | — |
 | Units in bounds | 6,637 (4,623 shops, 2,014 cores) | — |
-| Tier C windows | 0% (shader not built) | 100% |
+| Tier C windows | shader built; 100% of street-facing upper windows on test shells. City-wide needs the engine facade pipeline | 100% |
 Not yet verified: "unlocked apartments on every residential block" and "a gameplay hook on
 every block". Both need a per-block report.
 
@@ -86,6 +86,31 @@ tools/interiors/capture.ts     gallery and screenshot rig; stress.ts builds ever
 - Office and hotel elevators are decorative (except the planned Corwin elevator, request 5).
 - No interior reference library yet, so the period critique is from knowledge, not from boards.
 - Coverage counts unit width against frontage length; corner overlap is not double counted.
+
+## Evidence (headless SwiftShader; layout and visuals only, no performance claims)
+- `docs/interiors/gallery_v1_allkinds.png`: one seeded interior of each of the 30 kinds, viewed from the door.
+- `docs/interiors/walkin_diner_bar_loft_v1.png`: 8 m → 1.5 m → threshold → 3 m inside. Interiors are resident and visible
+  through display windows at 8 m (streaming starts at 30 m), so nothing pops.
+- `docs/interiors/walkin_corwin_v1.png`, `docs/interiors/corwin_11th_window_esb_v1.png`: the Empire State's setback shaft is
+  framed in the 11th-floor window. Sightline data: `docs/interiors/corwin_sightline.txt` (clear above 150 m from the north face's
+  west half only).
+- `docs/interiors/climb_tenement_to_roof_v1.png`: street → lobby → floors 1–4 → roof (`inside()` reports the right cell at every stop).
+- `docs/interiors/tierC_night_vs_brownout_v1.png`: 21:30 normal power vs `setPower('all','off')`.
+
+## Gallery critique v1 (honest)
+Reads as 1974:
+- the storefront grammar: recessed glazed entries, display beds, transoms, mullions;
+- diner counters with chrome stools, booths and menu boards; tenement halls with two-tone dado, bare bulbs and dog-leg stairs;
+- tin ceilings in older units, fluorescent remodels in newer ones;
+- through the window, AC units, blinds at random drops and dark offices at night.
+
+Reads as a modern kit or is wrong:
+- Surfaces are too clean and flat: the wear is noise, not decals (no water stains, peeling paint or nicotine gradients).
+- Props are boxy (stools, booths and chairs are boxes and cylinders), and there's no signage text.
+- Rails at the showroom door read as walls. Cinemas are too dark.
+- The lighting is plausible, but there's no bounce colour and no specular on linoleum or chrome beyond a fake environment term.
+- Nothing has been compared to period interior photos yet: there are no interior references in `references/`. Building
+  the HABS and DOCUMERICA interior library is the next step before any "looks right" claim.
 
 ## Next
 1. Hero: Corwin lobby + 11th floor (room 1104, room 1112, shared bath, window to the Empire

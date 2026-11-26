@@ -89,6 +89,11 @@ export function bake(cells: CellOut[], lights: LightOut[], portals: PortalOut[],
       for (const nb2 of neigh.get(nb.cell) ?? []) if (nb2.cell !== c.id) for (const l of pl) if (l.cell === nb2.cell) sources.push({ l, via: nb.portal, via2: nb2.portal, id: pl.indexOf(l) });
     }
     const myWindows = windows.filter((w) => w.a === c.id);
+    if (c.outdoor) {
+      // roof dressing: lit by the sky, not by lamps (window-light channel = 1, scaled at runtime by daylight/street light)
+      for (const mesh of [c.opaque, c.glass]) if (mesh) for (let v = 0; v < mesh.light.length / 4; v++) { const ny = mesh.normal[3 * v + 1]; mesh.light[4 * v + 3] = 0.55 + 0.45 * Math.max(0, ny); }
+      continue;
+    }
     for (const mesh of [c.opaque, c.glass]) if (mesh) bakeMesh(mesh, c, sources, myWindows, occ, aoRays, hemi);
   }
 }

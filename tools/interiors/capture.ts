@@ -78,6 +78,25 @@ async function main() {
       }
       fs.writeFileSync(path.join(dir, 'log.json'), JSON.stringify(log, null, 1));
     });
+  } else if (mode === 'climb') {
+    // climb <unitId> <startX,startZ>: street -> lobby -> each floor's landing (markers) -> roof
+    const [sx, sz] = (b ?? '').split(',').map(Number);
+    await withPage(async (page) => {
+      await page.goto(url(`at=${sx},${sz},0`));
+      await page.waitForFunction(() => (window as any).__INT?.ready, null, { timeout: 180_000 });
+      await page.evaluate(() => (window as any).__INT.whenIdle());
+      const dir = path.join(ROOT, `shots/interiors/climb/${a}`); fs.mkdirSync(dir, { recursive: true });
+      await page.evaluate((id) => (window as any).__INT.walkTo(id, 6), a); await page.waitForTimeout(800); await page.screenshot({ path: path.join(dir, '0_street.png') });
+      await page.evaluate((id) => (window as any).__INT.walkTo(id, -2.5), a); await page.waitForTimeout(800); await page.screenshot({ path: path.join(dir, '1_lobby.png') });
+      const marks = await page.evaluate((id) => (window as any).__INT.interiors.markers(id).filter((m: any) => (m.type === 'hide' && /under stair/.test(m.name)) || (m.type === 'spawn' && m.name === 'roof')), a) as { x: number; y: number; z: number; name: string }[];
+      let n = 2;
+      for (const m of marks) {
+        await page.evaluate(([x, y, z]) => { const t = (window as any).__INT; t.player.teleport(x, y + 0.05, z, t.orbit.yaw); t.orbit.snap({ x, y, z }, t.orbit.yaw); }, [m.x, m.y, m.z]);
+        await page.waitForTimeout(700);
+        const st = await page.evaluate(() => { const t = (window as any).__INT; const p = t.player.pos; return { y: +p.y.toFixed(1), inside: t.interiors.inside(p.x, p.y, p.z)?.cell ?? 'outside', vis: t.interiors.stats.visibleCells }; });
+        await page.screenshot({ path: path.join(dir, `${n++}_${m.name.replace(/\W+/g, '_')}.png`) }); console.log(m.name, JSON.stringify(st));
+      }
+    });
   } else if (mode === 'url') {
     await withPage(async (page) => { const r = await shot(page, a, path.resolve(ROOT, b)); console.log(r); });
   }

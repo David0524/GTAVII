@@ -357,7 +357,7 @@ export class Interiors {
         }
       }
       for (const c of L.cells) {
-        const id = L.cells.indexOf(c), on = visible.has(id);
+        const id = L.cells.indexOf(c), on = visible.has(id) || !!L.built.cells[id].outdoor;
         c.opaque.visible = on; if (c.glass) c.glass.visible = on; c.visible = on;
         if (on) { vis++; draws += 1 + (c.glass ? 1 : 0); }
       }
