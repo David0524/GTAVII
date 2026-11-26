@@ -88,7 +88,9 @@ export function surfaceNodes(tint?: (col: any) => any) {
       base.assign(mix(base, base.mul(vec3(1.06, 0.9, 0.9)), cB.x.mul(0.35).mul(smoothstep(0.3, 0.8, nLow))));
       const lips = m0.x;
       base.assign(mix(base, base.mul(vec3(0.78, 0.52, 0.52)).mul(mix(1.1, 0.85, melanin)), lips.mul(0.85)));
-      base.assign(mix(base, base.mul(0.82), m0.y.mul(0.5))); // under-brow
+      // brows painted as short strokes (fine shells alias without TAA)
+      const strokes = smoothstep(0.35, 0.7, mx_noise_float(vec3(p.x.mul(900), p.y.mul(260), p.z.mul(900))).mul(0.5).add(0.5));
+      base.assign(mix(base, mix(base.mul(0.35), vec3(0.03, 0.025, 0.022), 0.6), m0.y.mul(mix(0.55, 0.95, strokes))));
       const stubble = m0.z.mul(smoothstep(0.45, 0.75, nHi));
       base.assign(mix(base, vec3(0.06, 0.055, 0.06), stubble.mul(0.55)));
       const freck = cB.y.mul(smoothstep(0.62, 0.72, mx_noise_float(p.mul(260))));

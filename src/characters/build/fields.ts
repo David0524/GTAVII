@@ -39,19 +39,38 @@ export function computeFields(model: BodyModel, shape: BodyShape): Fields {
     for (let i = 1; i < spine.length; i++) if (y <= spine[i][1]) { const t = (y - spine[i - 1][1]) / (spine[i][1] - spine[i - 1][1]); return [spine[i - 1][0] + (spine[i][0] - spine[i - 1][0]) * t, spine[i - 1][2] + (spine[i][2] - spine[i - 1][2]) * t]; }
     return [spine[5][0], spine[5][2]];
   };
+  // Limb chain polylines from the evaluated joints: a continuous coordinate along each limb
+  // (projection onto the nearest segment), so hems and cuffs are clean iso-lines at any length.
+  const jp = (name: string) => [J[JI[name] * 3], J[JI[name] * 3 + 1], J[JI[name] * 3 + 2]];
+  const L = shape.landmarks;
+  const armL = [jp('upperarm_l'), jp('lowerarm_l'), jp('hand_l'), L.hand_tip_l], armR = [jp('upperarm_r'), jp('lowerarm_r'), jp('hand_r'), L.hand_tip_r];
+  const legL = [jp('thigh_l'), jp('calf_l'), jp('foot_l'), L.toe_tip_l], legR = [jp('thigh_r'), jp('calf_r'), jp('foot_r'), L.toe_tip_r];
+  const chainCoord = (k: number, chain: number[][]) => {
+    let best = Infinity, coord = 0;
+    for (let i = 0; i < 3; i++) {
+      const a = chain[i], b = chain[i + 1];
+      const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], ap = [P[k * 3] - a[0], P[k * 3 + 1] - a[1], P[k * 3 + 2] - a[2]];
+      const l2 = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2 || 1;
+      let t = (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / l2;
+      const tc = Math.min(1, Math.max(0, t));
+      const d = Math.hypot(ap[0] - ab[0] * tc, ap[1] - ab[1] * tc, ap[2] - ab[2] * tc);
+      if (i === 0) t = Math.max(-0.3, t); if (i === 2) t = Math.min(1.2, t);
+      if (d < best - 1e-4) { best = d; coord = i + (i === 0 || i === 2 ? t : tc); }
+    }
+    return coord;
+  };
   for (let k = 0; k < n; k++) {
     const seg = segName[model.limbSeg[k]];
-    const t = (model.limbT[k] / 255) * 2 - 0.5;
     const side = seg.endsWith('_l') ? 0 : 1;
     if (/^(pelvis|spine_0\d|clavicle_)/.test(seg)) part[k] = PART.torso;
     else if (seg === 'neck_01') part[k] = PART.neck;
     else if (seg === 'Head') part[k] = PART.head;
     else if (/^(upperarm|lowerarm|hand)_/.test(seg)) {
       part[k] = side ? PART.armR : PART.armL;
-      armS[k] = (seg.startsWith('upperarm') ? 0 : seg.startsWith('lowerarm') ? 1 : 2) + Math.min(1.2, Math.max(-0.2, t));
+      armS[k] = chainCoord(k, side ? armR : armL);
     } else if (/^(thigh|calf|foot|ball)_/.test(seg)) {
       part[k] = side ? PART.legR : PART.legL;
-      legS[k] = seg.startsWith('thigh') ? Math.max(-0.2, t) : seg.startsWith('calf') ? 1 + t : seg.startsWith('foot') ? 2 + Math.min(0.7, Math.max(0, t) * 0.7) : 2.7 + Math.min(0.3, Math.max(0, t) * 0.3);
+      legS[k] = chainCoord(k, side ? legR : legL);
     }
     const [cx, cz] = axisAt(P[k * 3 + 1]);
     az[k] = Math.atan2(P[k * 3] - cx, P[k * 3 + 2] - cz);

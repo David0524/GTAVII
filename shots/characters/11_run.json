@@ -1,0 +1,65 @@
+{
+  "backend": "webgl2",
+  "scene": "course",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "footsteps": [
+    {
+      "foot": "l",
+      "surface": "asphalt",
+      "x": -13.68,
+      "y": 0
+    },
+    {
+      "foot": "r",
+      "surface": "asphalt",
+      "x": -12.87,
+      "y": 0
+    },
+    {
+      "foot": "l",
+      "surface": "asphalt",
+      "x": -12.18,
+      "y": 0
+    },
+    {
+      "foot": "r",
+      "surface": "asphalt",
+      "x": -11.39,
+      "y": 0
+    },
+    {
+      "foot": "l",
+      "surface": "asphalt",
+      "x": -11.1,
+      "y": 0
+    },
+    {
+      "foot": "r",
+      "surface": "asphalt",
+      "x": -9.93,
+      "y": 0
+    },
+    {
+      "foot": "l",
+      "surface": "asphalt",
+      "x": -8.53,
+      "y": 0
+    },
+    {
+      "foot": "r",
+      "surface": "asphalt",
+      "x": -6.86,
+      "y": 0
+    }
+  ],
+  "updateMs": 0.1,
+  "pos": [
+    -5.3,
+    0
+  ],
+  "renderMsSoftware": [
+    10.099999999976717,
+    8.599999999976717,
+    0.8000000000465661
+  ]
+}

@@ -177,7 +177,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
     const Nb = F.normals.get('body')!;
     const groups: { field: Field; th: number; layers: number; density: number; freq: number; color: [number, number, number]; sub: number }[] = [];
     if (fh !== 'none' && fh !== 'stubble') groups.push({ field: (k) => mOf(k).beard - 0.25, th: fh === 'beard' ? 0.012 : 0.006, layers: lod === 0 ? 4 : 2, density: 1, freq: 900, color: lin(app.facialHairColor), sub: 1 });
-    groups.push({ field: (k) => mOf(k).brow - 0.45, th: 0.0018, layers: lod === 0 ? 3 : 2, density: 0.9, freq: 1400, color: lin(app.facialHairColor).map((c) => c * 0.85) as [number, number, number], sub: 2 });
+    if (false) groups.push({ field: (k) => mOf(k).brow - 0.45, th: 0.0018, layers: lod === 0 ? 3 : 2, density: 0.9, freq: 1400, color: lin(app.facialHairColor).map((c) => c * 0.85) as [number, number, number], sub: 2 });
     const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
     const js: number[] = [], ws: number[] = [];
     for (const g of groups) {

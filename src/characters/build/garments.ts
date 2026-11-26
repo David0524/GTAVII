@@ -199,7 +199,7 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   pieces.push({
     surface: 'helper-tights', fabric: o.fabric, hem: thick, hides: true, slot: 3, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
     fields: [h.neckline(0.02, 0.035), h.sleeve(sleeveS), h.above(Math.max(y.crotch + 0.04, Math.min(hemY, y.waist - 0.04))), h.noLegs, front],
-    offset: (k) => off + (h.isArm(k) ? 0.006 + 0.006 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
+    offset: (k) => off + (h.isArm(k) ? 0.002 + 0.003 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
     sweat: (k) => h.sweatMask(k) * 0.5,
   });
   if (hemY < y.waist - 0.04) {

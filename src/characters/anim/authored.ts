@@ -175,10 +175,10 @@ export function authoredClips(): ClipDef[] {
     events: [{ t: 0.6, type: 'hail' }],
     keys: [
       { t: 0, j: {} },
-      { t: 0.5, j: { clavicle_r: [0, 0, 10], upperarm_r: [-20, -10, -45], lowerarm_r: [0, 30, 0], hand_r: [0, 0, -10], ...fingers('r', -15), neck_01: [-4, -15, 0], spine_02: [0, -8, 3] } },
-      { t: 0.9, j: { clavicle_r: [0, 0, 12], upperarm_r: [-25, -10, -55], lowerarm_r: [0, 20, 0], hand_r: [0, 15, -10], ...fingers('r', -15), neck_01: [-4, -18, 0], spine_02: [0, -8, 3] } },
-      { t: 1.3, j: { clavicle_r: [0, 0, 10], upperarm_r: [-20, -10, -45], lowerarm_r: [0, 30, 0], hand_r: [0, -15, -10], ...fingers('r', -15), neck_01: [-4, -18, 0], spine_02: [0, -8, 3] } },
-      { t: 1.9, j: { clavicle_r: [0, 0, 12], upperarm_r: [-25, -10, -55], lowerarm_r: [0, 20, 0], hand_r: [0, 15, -10], ...fingers('r', -15), neck_01: [-4, -18, 0], spine_02: [0, -8, 3] } },
+      { t: 0.5, j: { clavicle_r: [0, 0, 10], upperarm_r: [-30, -10, -118], lowerarm_r: [-25, 0, 0], hand_r: [0, 0, -10], ...fingers('r', -15), neck_01: [-4, -15, 0], spine_02: [0, -8, 3] } },
+      { t: 0.9, j: { clavicle_r: [0, 0, 12], upperarm_r: [-30, -10, -132], lowerarm_r: [-15, 0, 0], hand_r: [0, 15, -10], ...fingers('r', -15), neck_01: [-4, -18, 0], spine_02: [0, -8, 3] } },
+      { t: 1.3, j: { clavicle_r: [0, 0, 10], upperarm_r: [-30, -10, -118], lowerarm_r: [-25, 0, 0], hand_r: [0, -15, -10], ...fingers('r', -15), neck_01: [-4, -18, 0], spine_02: [0, -8, 3] } },
+      { t: 1.9, j: { clavicle_r: [0, 0, 12], upperarm_r: [-30, -10, -132], lowerarm_r: [-15, 0, 0], hand_r: [0, 15, -10], ...fingers('r', -15), neck_01: [-4, -18, 0], spine_02: [0, -8, 3] } },
       { t: 2.6, j: {} },
     ],
   });

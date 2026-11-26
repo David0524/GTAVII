@@ -200,7 +200,7 @@ export class Animator {
     const breathe = Math.sin(this.time * 1.7) * 0.012;
     const slump = this.p.slump * 0.12 + this.p.heat * 0.05;
     // lean: forward into acceleration and speed, sideways into turns
-    const targetPitch = Math.max(-0.15, Math.min(0.2, this.accel * 0.035 + Math.min(fwdAbs, 7) * 0.012 * dir));
+    const targetPitch = Math.max(-0.15, Math.min(0.2, this.accel * 0.035 + Math.min(fwdAbs, 7) * 0.006 * dir));
     const targetRoll = Math.max(-0.25, Math.min(0.25, -this.lateralAcc * 0.03));
     this.lean.pitch += (targetPitch - this.lean.pitch) * Math.min(1, dt * 6);
     this.lean.roll += (targetRoll - this.lean.roll) * Math.min(1, dt * 6);
