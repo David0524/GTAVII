@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_rizo_147_2",
+  "context": "Showing RIZO the print (Delphine).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rizo_147",
+      "emotion": "moved",
+      "text": "That's it. That's the whole thing. It's not vandalism. It's a gallery that moves."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Rule twenty-three: if nobody photographs it, it didn't happen."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_projectionist_1",
+  "context": "The Velvet Moon booth.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.lou_ferraro",
+      "emotion": "wistful",
+      "text": "Twelve reels. Nineteen forty-seven. Shot on these streets. I lost them."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.lou_ferraro",
+      "emotion": "wistful",
+      "text": "Bring me a reel, I'll show you a city that's gone."
+    }
+  ]
+}

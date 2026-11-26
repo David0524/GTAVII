@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_hack_license_2",
+  "context": "Kehoe's office (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.maureen_kehoe",
+      "emotion": "brisk",
+      "text": "Seven forms, stamped, in order. You did it straight. I'm almost proud. Sign here."
+    }
+  ]
+}

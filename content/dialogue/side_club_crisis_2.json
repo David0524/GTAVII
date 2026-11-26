@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_club_crisis_2",
+  "context": "Settled (Delphine).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.club_waitress",
+      "emotion": "relieved",
+      "text": "You got it open. How did you— Never mind. Thank you. Sunday I pay double."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Sunday you pay five. Like everybody. That's the point."
+    }
+  ]
+}

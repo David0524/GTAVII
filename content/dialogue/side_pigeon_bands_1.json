@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_pigeon_bands_1",
+  "context": "Banded pigeons around the core; the Commodore's lost birds.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ignatz_halloran",
+      "emotion": "wistful",
+      "text": "Fifteen of my lost birds still wear my bands. Photograph them. I want to know they're fed."
+    }
+  ]
+}

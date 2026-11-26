@@ -1,0 +1,24 @@
+{
+  "id": "dlg.side_hack_license_1",
+  "context": "Taxi-licence bureau, a clerk behind three inches of glass (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.bank_teller",
+      "emotion": "flat",
+      "text": "Seven forms. Form A needs Form C. Form C needs a doctor. The doctor needs Form A."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "So nobody gets a license."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.bank_teller",
+      "emotion": "flat",
+      "text": "Somebody does. Usually on Thursdays."
+    }
+  ]
+}

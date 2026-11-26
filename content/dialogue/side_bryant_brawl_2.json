@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_bryant_brawl_2",
+  "context": "The crowd decides.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.night_reader",
+      "emotion": "dry",
+      "text": "Split the bench. Half each. Solomon would be proud. Solomon would be tired."
+    }
+  ]
+}

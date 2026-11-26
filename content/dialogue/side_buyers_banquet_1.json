@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_buyers_banquet_1",
+  "context": "Nick's briefing before the buyers' banquet (Nick).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "expansive",
+      "text": "Ohio at table four, Chicago at table two. Never seat Chicago near Ohio."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.eleni_varelas",
+      "emotion": "dry",
+      "text": "And Kallis's man is a waiter tonight. I saw his shoes."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_desk_requests_1",
+  "context": "The Corwin desk bell (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.sro_resident",
+      "emotion": "apologetic",
+      "text": "Mr. Arce, I'm sorry, it's late. It's my pills. The drugstore on Thirty-Fourth."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Write it down. I'll be back before you're asleep."
+    }
+  ]
+}

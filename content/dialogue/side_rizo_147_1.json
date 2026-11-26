@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_rizo_147_1",
+  "context": "RIZO on a platform bench (Delphine).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rizo_147",
+      "emotion": "intense",
+      "text": "My piece runs on the downtown local till they buff it. Two days, maybe."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.rizo_147",
+      "emotion": "intense",
+      "text": "Shoot it from the platform. Whole car. Nobody does whole cars."
+    }
+  ]
+}

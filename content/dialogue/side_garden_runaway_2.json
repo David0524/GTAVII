@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_garden_runaway_2",
+  "context": "Back at the stable door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.ice_house_worker",
+      "emotion": "relieved",
+      "text": "Duchess. You walked down Seventh Avenue against traffic. You're a New Yorker now."
+    }
+  ]
+}

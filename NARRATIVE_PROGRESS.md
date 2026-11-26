@@ -803,3 +803,25 @@ how GTA handles these things".
   buyable).
 - **Precincts** now carry structured `bounds` for Gameplay.
 - **Cutscenes** for M9, M15, M18, M22, M25 and M32 are written (by me).
+
+### Backlog: image-prompt packs (later, not now)
+The user said, verbatim: "graphics should really be true to life. I can handle a ton of
+ChatGPT image prompts if necessary for signs, branding, etc".
+- **When:** once the engine defines sign slots.
+- **What:** prompt packs in `assets/prompts/<pack>.md`, about 20 per batch, in the table
+  format of `docs/briefs/ART_ASSETS.md`, built from the registries (businesses, street text,
+  newspapers, posters, invented films).
+- **Rules:** each prompt must be 1974-true, contain no real brands, logos or people, use the
+  exact registry text (or "no text"), state the size and aspect, and be flat and frontal.
+- **First pack:** the vertical-slice storefronts plus the Deuce marquees.
+
+### N4b part 2: side dialogue done
+- **89 side-quest scripts** (149 lines) in `narrative/tools/dlg_side.py`, written by me.
+- **10 recurring side givers** in `content/cast_side.json`: Mrs. Cho, the weather prophet,
+  RIZO 147 (adult, 20), Marty the fence, the projectionist, the Tibor brothers, the Velvet
+  Moon's owner, the fight promoter, the barber, and Krause of the hardware store.
+- **Validators:** 0 errors, 0 warnings.
+- **Still open:**
+  - register the invented `item.*` ids used by the side specs;
+  - the Interiors wish-list (sent);
+  - image-prompt packs (backlog).

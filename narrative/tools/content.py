@@ -28,8 +28,9 @@ def jl(p):
 
 def load():
     cast = {c["id"]: c for f in (C / "cast").glob("*.json") for c in jl(f)}
-    if (C / "cast_service.json").exists():
-        cast.update({c["id"]: c for c in jl(C / "cast_service.json")["characters"]})
+    for extra in ("cast_service.json", "cast_side.json"):
+        if (C / extra).exists():
+            cast.update({c["id"]: c for c in jl(C / extra)["characters"]})
     places = {p["id"]: p for p in jl(C / "places.json")["places"]}
     flags = {f["id"]: f for f in jl(C / "flags.json")["flags"]}
     missions = {m["id"]: m for m in (jl(f) for f in sorted((C / "missions").glob("*.json")))}

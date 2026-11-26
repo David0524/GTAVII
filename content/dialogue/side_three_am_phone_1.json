@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_three_am_phone_1",
+  "context": "The payphone at W 33rd & 8th rings at 3 a.m.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.office_cleaner",
+      "emotion": "whisper",
+      "text": "(Payphone) Thirty-Sixth and Ninth. A grey truck. Look at the dashboard. Don't call back."
+    }
+  ]
+}

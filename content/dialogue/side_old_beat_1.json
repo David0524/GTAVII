@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_old_beat_1",
+  "context": "Kearney at the station-house desk (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.pat_kearney",
+      "emotion": "low",
+      "text": "Son. Old Mrs. Duffy's boy got picked up. He's simple. Wrong place, wrong week."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.pat_kearney",
+      "emotion": "low",
+      "text": "I can't walk him out in uniform. You can walk him home."
+    }
+  ]
+}

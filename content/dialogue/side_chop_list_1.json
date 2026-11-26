@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_chop_list_1",
+  "context": "The Dukes' garage on W 36th. A chalkboard of wanted cars.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.stickup_man",
+      "emotion": "flat",
+      "text": "List's on the board. Colour, make, condition. No cabs. Cabbies are family."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.stickup_man",
+      "emotion": "wry",
+      "text": "And no doctors' cars. Bad luck. We tried once."
+    }
+  ]
+}

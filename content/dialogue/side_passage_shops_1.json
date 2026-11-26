@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_passage_shops_1",
+  "context": "The shuttered gate in the old passage (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Corwin master key. Doesn't fit. The old station key from the footlocker. …It fits."
+    }
+  ]
+}
