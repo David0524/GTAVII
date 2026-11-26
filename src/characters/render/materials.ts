@@ -216,11 +216,28 @@ export function hairMaterial(): THREE.MeshPhysicalNodeMaterial {
     const keep = smoothstep(h.mul(0.75).sub(0.06), h.mul(0.75).add(0.06), a);
     return sub.equal(3).select(float(1), h.lessThan(0.02).select(density.mul(cornrow), keep));
   });
-  m.opacityNode = alpha();
-  m.alphaTest = 0.32;
-  const grey = m1.z.mul(step(0.5, mx_noise_float(vec3(uvA.mul(freq.mul(0.7)), 3)).add(0.5)));
+  // strand cards (sub 4): uv.x = card id + across (0..1), uv.y = root → tip
+  const cu = fract(uvA.x), seed = floor(uvA.x), cv = uvA.y;
+  const strand = mx_noise_float(vec3(cu.mul(11).add(seed.mul(3.7)), cv.mul(1.2).add(seed.mul(0.37)), seed.mul(0.11))).mul(0.5).add(0.5);
+  const strandEnd = mx_noise_float(vec3(cu.mul(40).add(seed), seed.mul(1.3), 2.0)).mul(0.5).add(0.5).mul(0.35).add(0.65);
+  const cardAlpha = smoothstep(0.22, 0.6, strand)
+    .mul(smoothstep(0.0, 0.22, cu).mul(smoothstep(1.0, 0.78, cu)))
+    .mul(smoothstep(strandEnd, strandEnd.sub(0.12), cv))
+    .mul(smoothstep(0.0, 0.06, cv).mul(0.6).add(0.4))
+    .mul(1.35);
+  // grey strands: per strand on cards, fine salt-and-pepper on shells (independent of the shell's clump size)
+  const greyShell = step(0.5, mx_noise_float(vec3(uvA.mul(900), 3)).add(0.5));
+  const greyCard = step(0.5, mx_noise_float(vec3(cu.mul(11).add(seed.mul(5.3)), seed, 7)).add(0.5));
+  const grey = m1.z.mul(sub.equal(4).select(greyCard, greyShell));
+  m.opacityNode = sub.equal(4).select(cardAlpha, alpha());
+  m.alphaTest = 0.3;
+  m.alphaToCoverage = true;
+
   // inner layers darker (self-shadowing), tips lighter; grey strands mixed in by age
-  m.colorNode = mix(mix(cA.mul(0.55), cB, h.mul(0.8).add(0.1)).mul(mix(0.8, 1.15, n)), vec3(0.72, 0.7, 0.67), grey);
+  const shellCol = mix(cA.mul(0.55), cB, h.mul(0.8).add(0.1)).mul(mix(0.8, 1.15, n));
+  // cards: darker near the root and on inner layers, strand-to-strand variation, lighter tips
+  const cardCol = mix(cA.mul(0.62), cB, cv.mul(0.55).add(h.mul(0.25))).mul(mix(0.72, 1.18, strand));
+  m.colorNode = mix(sub.equal(4).select(cardCol, shellCol), vec3(0.72, 0.7, 0.67), grey);
   m.roughnessNode = float(0.62);
   m.sheenNode = cA.mul(0.6).add(0.03);
   m.sheenRoughnessNode = float(0.35);

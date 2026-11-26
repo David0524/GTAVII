@@ -12,6 +12,7 @@ import { faceMasks } from './face';
 import type { GarmentCtx } from './garments';
 import { lin } from './garments';
 import { KIND, MeshBuilder, mergeSkin, type GeoArrays } from './MeshBuilder';
+import { buildCards, CARD_STYLES, cardHairline, headMap } from './hairCards';
 
 const sm = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -83,7 +84,11 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
   const P = shape.pos;
   const st = STYLES[app.hair.style];
   const hat = ctx.outfit.hat;
-  const layerCount = Math.max(1, Math.round(st.layers * [1, 0.6, 0.35, 0.2][lod]));
+  // hero/near LODs draw strand cards over a single scalp shell; crowds keep the shell stack
+  const cards = lod <= 1 && CARD_STYLES.has(app.hair.style);
+  // under cards: a solid scalp, a mid and an outer volume shell (the cards carry the strands)
+  const layerCount = cards ? (lod === 0 ? 3 : 2) : Math.max(1, Math.round(st.layers * [1, 0.6, 0.35, 0.2][lod]));
+  const cardHL = cards ? cardHairline(ctx) : null;
   const col = lin(app.hair.color);
   const tip = col.map((c) => Math.min(1, c * 1.25 + 0.02)) as [number, number, number];
   const hc = ff.headCenter;
@@ -100,7 +105,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
     const rec = app.hair.recession;
     const hatLine = hat ? ff.browY + 0.03 * s : Infinity;
     // hairline: forehead (front), temples (recession), around the ears, the nape/length cut
-    const hairline: Field = (k) => {
+    const hairline: Field = cardHL ? (k) => P[k * 3 + 1] - cardHL(Math.atan2(P[k * 3] - hc[0], P[k * 3 + 2] - hc[2])) : (k) => {
       const yy = P[k * 3 + 1], fr = front(k), sd = side(k);
       const fringeY = ff.browY + st.fringe * s + rec * 0.05 * s * (0.4 + sd);
       const frontCut = fr > 0.35 ? yy - fringeY + (1 - fr) * 0.02 : 1;
@@ -139,7 +144,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
             dir = [d[0] / l, d[1] / l, d[2] / l];
             th = Math.max(0, ff.headRadius * 0.92 + st.sphere * vol * (0.6 + 0.4 * up(k)) - l * 0.92) + 0.006;
           }
-          const o = th * (0.15 + 0.85 * h);
+          const o = th * (0.15 + 0.85 * h) * (cards ? 0.6 : 1);
           for (let c = 0; c < 3; c++) { pos[c] += (P[k * 3 + c] + dir[c] * o) * w; nrm[c] += Nh[k * 3 + c] * w; }
           for (let c = 0; c < 4; c++) { const ww = model.skinW[k * 4 + c]; if (ww) { js.push(model.skinJ[k * 4 + c]); ws.push((ww / 255) * w); } }
           // strand coordinates: around the head (u) and down from the crown (v), in metres
@@ -148,9 +153,13 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
         }
         mergeSkin(js, ws, sj, sw);
         const nl = Math.hypot(nrm[0], nrm[1], nrm[2]) || 1;
+        // under cards the scalp shell fades in over the first 12 mm inside the hairline (no hard edge)
+        let soft = 1;
+        if (cardHL) { let fy = 0; for (let i = 0; i < v.ids.length; i++) fy += hairline(v.ids[i]) * v.w[i]; soft = 0.35 + 0.65 * sm(0, 0.012, fy); }
         return mb.vertex(pos, [nrm[0] / nl, nrm[1] / nl, nrm[2] / nl], sj, sw, {
           cA: col, cB: tip,
-          m0: [h, st.density * (app.hair.style === 'combOver' ? 0.6 : 1) * (1 - app.hair.thinning * 0.4), st.freq, app.hair.texture],
+          // under cards the shells are the hair mass: dense, low-frequency, the cards carry the strands
+          m0: [h, soft * st.density * (cardHL ? 3 : 1) * (app.hair.style === 'combOver' ? 0.6 : 1) * (1 - app.hair.thinning * 0.4), st.freq * (cardHL ? 0.35 : 1), app.hair.texture],
           m1: [KIND.hair, 0, app.hair.grey, app.hair.style === 'cornrows' ? 1 : 0],
         }, [u, vv]);
       });
@@ -158,6 +167,8 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
       void base; void i0;
     }
   }
+
+  if (cards) buildCards({ ...ctx, face: ff, app }, mb, headMap({ ...ctx, face: ff }));
 
   // ---- facial hair, brows (shells on the face) ---------------------------------------------------
   if (lod <= 2) {

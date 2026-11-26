@@ -38,7 +38,7 @@ export async function runCharactersTest() {
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};
-  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes') tick = lineup(world, camera, factory, scene, report);
+  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair') tick = lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   const simT = qp.has('t') ? num('t', 0) : -1;
@@ -71,7 +71,21 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
   floor(world);
   const chars: Character[] = [];
   const zoom = qp.get('zoom');
-  if (scene === 'shoes') {
+  if (scene === 'hair') {
+    // every hair style on a head; women's and men's styles on matching seeds; hats off
+    const styles = (qp.get('styles') ?? 'short,sidePart,slick,combOver,pompadour,feathered,shag,earLength,bob,flip,longStraight,ponytail,braid,updo,setCurls,afro,afroShort,curlyMid,cornrows,buzz').split(',');
+    const W = ['bob', 'flip', 'longStraight', 'ponytail', 'braid', 'updo', 'setCurls'];
+    styles.forEach((style, i) => {
+      const female = W.includes(style) || (style === 'shag' || style === 'feathered' || style === 'afro') && i % 2 === 1;
+      const old = style === 'combOver' || style === 'setCurls';
+      let seed = 900 + i * 53;
+      for (let s = 0; s < 400; s++) { const a = generateAppearance(hash2(seed, s)); if ((a.sex < 0.5) === female && (old ? a.age > 50 : a.age < 45) && (style.startsWith('afro') || style === 'cornrows' || style === 'curlyMid' ? a.hair.texture > 0.7 : a.hair.texture < 0.5)) { seed = hash2(seed, s); break; } }
+      const hair: Record<string, unknown> = { style };
+      if (style === 'combOver') Object.assign(hair, { thinning: 0.8, recession: 0.7 });
+      if (style !== 'combOver') Object.assign(hair, { thinning: 0, recession: female ? 0 : 0.2 });
+      chars.push(factory.spawn(world, { seed, overrides: { hair, hat: null, glasses: null, facialHair: 'none' } }));
+    });
+  } else if (scene === 'shoes') {
     // every shoe type, on a seeded man/woman pair per type, bare legs for women so the heel pitch reads
     const kinds = (qp.get('kinds') ?? 'oxford,wingtip,loafer,sneaker,workBoot,boot,platform,pump,slipOn,sandal,clog').split(',');
     const W = ['pump', 'slipOn', 'sandal', 'clog'];
@@ -102,13 +116,19 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
   }
   const n = chars.length;
   const gap = scene === 'leads' ? 1.1 : scene === 'shoes' ? 0.5 : 0.85;
-  chars.forEach((c, i) => { c.object.position.set(zoom ? 0 : (i - (n - 1) / 2) * gap, 0, 0); c.object.visible = !zoom || i === num('focus', 0); });
+  if (scene === 'hair') {
+    const per = num('cols', n), rowsN = Math.ceil(n / per);
+    chars.forEach((c, i) => { const col = i % per, row = Math.floor(i / per); c.object.position.set((col - (per - 1) / 2) * 0.42, -row * 0.42 + (rowsN - 1) * 0.21, -row * 0.001); });
+    if (zoom === 'head') chars.forEach((c, i) => { c.object.position.set(0, 0, 0); c.object.visible = i === num('focus', 0); });
+  } else chars.forEach((c, i) => { c.object.position.set(zoom ? 0 : (i - (n - 1) / 2) * gap, 0, 0); c.object.visible = !zoom || i === num('focus', 0); });
   const yaw = THREE.MathUtils.degToRad(num('yaw', 0));
   const spin = qp.has('spin');
   if (zoom === 'hand') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.6, 0.95, 1.1); camera.lookAt(0.2, 0.8, 0); }
   else if (zoom === 'shoe') { camera.fov = 24; camera.updateProjectionMatrix(); camera.position.set(0.75, 0.22, 0.7); camera.lookAt(0.03, 0.06, 0.04); }
   else if (zoom === 'feet') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.5, 0.35, 1.3); camera.lookAt(0, 0.08, 0); }
   else if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
+  else if (scene === 'hair' && zoom === 'head') { camera.fov = 24; camera.position.set(0, 1.62, 0.85); camera.lookAt(0, 1.6, 0); camera.updateProjectionMatrix(); }
+  else if (scene === 'hair') { camera.fov = 22; camera.position.set(0, 1.56, 0.5 + n * 0.42); camera.lookAt(0, 1.52, 0); camera.updateProjectionMatrix(); }
   else if (scene === 'shoes') { const d = 0.6 + n * 0.32; camera.fov = 22; camera.position.set(0, 0.45, d); camera.lookAt(0, 0.1, 0); camera.updateProjectionMatrix(); }
   else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.2, Math.max(5.5, w * 1.12 + 1.5)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }
   report.people = chars.map((c) => ({ seed: c.desc.seed, hero: c.desc.hero, sex: c.appearance.sex, age: c.appearance.age, hair: c.appearance.hair.style, facialHair: c.appearance.facialHair, top: c.outfit.top.kind, bottom: c.outfit.bottom.kind, outer: c.outfit.outer?.kind ?? null, shoes: c.outfit.shoes.kind, hat: c.outfit.hat?.kind ?? null, props: c.outfit.props, tris: c.stats.tris, draws: c.stats.draws, buildMs: +c.stats.buildMs.toFixed(1) }));
