@@ -206,6 +206,14 @@ def main():
             if o["type"] not in OBJ_TYPES: E(f"{aw}.{o['id']}: unknown objective type {o['type']}")
             for ph in PH.findall(o["text"]):
                 if ph[1:-1] not in keys: E(f"{aw}.{o['id']}: placeholder {ph} has no pool field")
+            tmpl = o.get("script")
+            if tmpl and PH.search(tmpl):
+                for r in rows:
+                    if isinstance(r, dict):
+                        sid = PH.sub(lambda m: str(r.get(m.group(0)[1:-1], m.group(0))), tmpl)
+                        if sid not in dialogue: W(f"{aw}.{o['id']}: activity dialogue {sid} not written yet")
+            elif tmpl and tmpl not in dialogue:
+                W(f"{aw}.{o['id']}: activity dialogue {tmpl} not written yet")
             for r in rows:
                 if not isinstance(r, dict): continue
                 worst = PH.sub(lambda m: str(r.get(m.group(0)[1:-1], m.group(0))), o["text"])

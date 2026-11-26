@@ -1,0 +1,52 @@
+{
+  "id": "dlg.act_collection_kallis",
+  "context": "Collections activity, kallis. Untimed choice: press or let it slide.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.stavros_kallis",
+      "emotion": "courtly",
+      "text": "Kallis pays early, collector. Tell your sergeant who's a gentleman."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Collect.",
+          "goto": "l_press",
+          "setRelationships": {
+            "char.teddy_arce/char.stavros_kallis": -1,
+            "char.teddy_arce/char.carl_mayhew": 1
+          }
+        },
+        {
+          "text": "Let it slide this week.",
+          "goto": "l_slide",
+          "setRelationships": {
+            "char.teddy_arce/char.stavros_kallis": 1,
+            "char.teddy_arce/char.carl_mayhew": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_press",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Thanks. See you next week.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_slide",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Keep it this week. Buy Mr. Varelas some ice."
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Every envelope's a person. I keep forgetting that on purpose."
+    }
+  ]
+}

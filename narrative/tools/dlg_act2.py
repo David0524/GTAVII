@@ -296,7 +296,7 @@ S("dlg.m20_meeting", "M20 o3. Lisle's conference room. Augie, Villalba, Wurtz in
   (AUG, "gruff", "Surcharge comes in, your cut goes out. Same as always. What's new?"),
   (LIS, "soft", "What's new is that it's legal. Nicholas's name is on every hotel. Very clean."),
   (N, "startled", "Every hotel?"),
-  (WUR, "amused", "Knapp was weather. Weather passes. Paperwork's climate. Right, counselor?"),
+  (WUR, "amused", "The Commission was weather. Weather passes. Paperwork's climate. Right, counselor?"),
   (LIS, "soft", "Notwithstanding the lieutenant's metaphors. Yes. Every hotel."))
 S("dlg.m20_marjorie", "M20 o4. After the meeting. Marjorie leaves the ledger open on her desk and goes to get coffee. She looks back once.",
   (N, "inner", "My name. Corwin. The Broadway hotels. The surcharge 'consultancy'. All me."),

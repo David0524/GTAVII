@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_walkhome_tina",
+  "context": "Walk Her Home: to the bus terminal.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.tina_mercado",
+      "emotion": "funny",
+      "text": "You walk like a cop, Del. Shoulders back, eyes everywhere."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "A cop walks like he owns the street. I walk like I'm watching who does."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Goodnight. Lock the door. Count your money in the morning."
+    }
+  ]
+}

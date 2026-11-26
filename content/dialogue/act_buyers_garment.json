@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_buyers_garment",
+  "context": "Buyers' Tour: the Garment District.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.trade_dinner_guest",
+      "emotion": "alarmed",
+      "text": "Why is everyone pushing racks in the street?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "proud",
+      "text": "That's the factory floor. Three miles long, one block wide."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Sell them the city. The city's going broke. Sell it anyway. It's beautiful."
+    }
+  ]
+}

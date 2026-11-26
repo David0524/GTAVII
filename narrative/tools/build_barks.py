@@ -169,7 +169,7 @@ pool("barks.plainclothes", True, "The plainclothes 'conditions' unit and off-dut
  ("idle", "smug", "Fifty's a tax. Seventy-five is a tax with a smile."),
  ("greet", "flat", "Shine your shoes, Earl? No? Shame. They need it."),
  ("idle", "flat", "Ricky says the park's quiet. Ricky says a lot of things."),
- ("complain", "smug", "Knapp was weather. Weather passes."),
+ ("complain", "smug", "The Commission was weather. Weather passes."),
  ("idle", "cold", "Camera? Who's got a camera on this avenue? Find it."),
  ("greet", "smug", "Delphine. Always a pleasure. Always."),
  ("idle", "flat", "Write it up as a disorderly. Disorderly's always true."),

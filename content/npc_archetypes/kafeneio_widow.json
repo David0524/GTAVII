@@ -1,0 +1,25 @@
+{
+  "id": "npc.kafeneio_widow",
+  "behaviour": "loiterer",
+  "palette": [
+    "#000000",
+    "#696969"
+  ],
+  "wardrobe": "Black dress and cardigan, worry beads, a handbag held in both hands.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "20:00",
+      "area": "Kafeneio Kastoria",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": true,
+  "note": "Side-activity speaker (N5)."
+}

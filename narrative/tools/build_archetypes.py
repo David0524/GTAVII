@@ -115,6 +115,12 @@ a("npc.cab_fare_night_worker", "commuter", ["#FFFFFF", "#4682B4"], "Nurse's whit
 a("npc.wholesaler_gate", "vendor", ["#8B4513", "#F5DEB3"], "Shirt sleeves and vest.", ["roll-gate hook"], s(("18:00", "20:00", "Broadway wholesale strip", "work")), 0.2, 0.0, "barks.wholesaler",
   note="Variant used by the M1 overheard trigger (closing gates).")
 
+for pid, desc, area, pal in [("npc.club_maid", "Hotel chambermaid's grey uniform and apron; a cardigan after work.", "Hotel Pennsylvania", ["#808080", "#FFFFFF"]),
+                             ("npc.club_hatcheck", "Black dress, white collar, a hat-check stub book.", "W 46th St supper clubs", ["#000000", "#FFFFFF"]),
+                             ("npc.kafeneio_widow", "Black dress and cardigan, worry beads, a handbag held in both hands.", "Kafeneio Kastoria", ["#000000", "#696969"]),
+                             ("npc.parish_priest", "Clerical black, a straw hat, a roof-fund envelope.", "The church on W 31st St", ["#000000", "#FFFFFF"])]:
+    a(pid, "loiterer", pal, desc, [], s(("09:00", "20:00", area, "socialize")), 0.0, 0.0, None, scripted=True, note="Side-activity speaker (N5).")
+
 for x in A:
     (OUT / f"{x['id'].split('.', 1)[1]}.json").write_text(json.dumps(x, ensure_ascii=False, indent=2) + "\n")
 print(len(A), "archetypes")

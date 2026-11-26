@@ -1,0 +1,47 @@
+{
+  "id": "dlg.act_patronage_widow",
+  "context": "Patronage: a union widow at the kafeneio.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.kafeneio_widow",
+      "emotion": "proud",
+      "text": "Kyrie Varelas. My husband cut for you twelve years. The pension is small."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Pay her rent this month.",
+          "goto": "l_pay",
+          "setRelationships": {
+            "char.nick_varelas/char.yiannis_doukas": 1
+          }
+        },
+        {
+          "text": "Promise to look into it.",
+          "goto": "l_promise"
+        }
+      ]
+    },
+    {
+      "id": "l_pay",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "This month and next. Tell nobody. Especially Kallis.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_promise",
+      "speaker": "char.nick_varelas",
+      "emotion": "evasive",
+      "text": "I'll talk to the union. And the bank. And God."
+    },
+    {
+      "id": "l_end",
+      "speaker": "npc.kafeneio_widow",
+      "emotion": "dry",
+      "text": "In Kastoria we say: a promise is a coat with no lining."
+    }
+  ]
+}

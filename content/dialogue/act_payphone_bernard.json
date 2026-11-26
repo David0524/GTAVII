@@ -1,0 +1,12 @@
+{
+  "id": "dlg.act_payphone_bernard",
+  "context": "Payphone: Bernard.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "My library book is due. Comma. I am seventy. Period. Would you, kindly?"
+    }
+  ]
+}

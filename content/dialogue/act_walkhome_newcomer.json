@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_walkhome_newcomer",
+  "context": "Walk Her Home: to the women's residence.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.club_newcomer",
+      "emotion": "nervous",
+      "text": "I just got off the bus Tuesday. Everybody's so fast here."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Here's a token and a number. Rita's bar. Ask for me. Don't ask for anybody else."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Goodnight. Lock the door. Count your money in the morning."
+    }
+  ]
+}

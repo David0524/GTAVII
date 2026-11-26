@@ -1,0 +1,25 @@
+{
+  "id": "npc.club_hatcheck",
+  "behaviour": "loiterer",
+  "palette": [
+    "#000000",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Black dress, white collar, a hat-check stub book.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "20:00",
+      "area": "W 46th St supper clubs",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": true,
+  "note": "Side-activity speaker (N5)."
+}

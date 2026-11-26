@@ -1,0 +1,62 @@
+{
+  "id": "dlg.act_club_maid",
+  "context": "Club rounds, maid. Untimed choice.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.club_maid",
+      "emotion": "friendly",
+      "text": "Five dollars, Delphine. Convention of shoe salesmen. They tip in shoelaces."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Collect.",
+          "goto": "l_col"
+        },
+        {
+          "text": "Advance her next week's.",
+          "goto": "l_adv",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 1
+          }
+        },
+        {
+          "text": "Forgive it this week.",
+          "goto": "l_fgv",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_col",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Five dollars. Counted. Rule one.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_adv",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Pay me next week. I'll carry it. I always carry it.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_fgv",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Not this week. The club's for weeks like this.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Twenty women, twenty weeks a year that go wrong. The club's for those."
+    }
+  ]
+}

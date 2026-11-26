@@ -420,7 +420,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
 - **Speech:** A jovial bully. Talks about his diet and his boat, threatens through compliments and uses sports metaphors.
   - “Lovely evening. Shame if the precinct had to notice how lovely.”
   - “Fifty a week is a tax. Seventy-five is a tax with a smile. Smile.”
-  - “Knapp was weather. Weather passes. I'm climate.”
+  - “The Commission was weather. Weather passes. I'm climate.”
 - **Home:** off map
 - **Haunts:** Midtown Central station house, W 31st St (7th Ave–8th Ave) (Back door, after dark); 8th Ave & W 40th St (Sweeps that end in envelopes); Bryant Park, 6th Ave & W 41st St (Informants under the trees); Penn Station coin lockers (concourse), 8th Ave & W 33rd St (Locker 4-something; he checks it every Friday)
 - **Daily schedule (weekday):**

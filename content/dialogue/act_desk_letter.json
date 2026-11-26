@@ -1,0 +1,50 @@
+{
+  "id": "dlg.act_desk_letter",
+  "context": "Desk request: reading a letter (changes after Hollis's death).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.walter_hollis",
+      "emotion": "cheerful",
+      "text": "Shipmate! Letter from my old bosun. Eyes are bad. Read it to me?",
+      "requires": {
+        "none": [
+          "flag.hollis_dead"
+        ]
+      }
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Come down to the desk, Mr. Hollis. I'll read it slow.",
+      "requires": {
+        "none": [
+          "flag.hollis_dead"
+        ]
+      }
+    },
+    {
+      "id": "l3",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "quiet",
+      "text": "A letter came for Walter. From his ship. Will you read it to me, Mr. Arce?",
+      "requires": {
+        "all": [
+          "flag.hollis_dead"
+        ]
+      }
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Sit, Mrs. Pruitt. 'Dear Walt. The reunion's in October…'",
+      "requires": {
+        "all": [
+          "flag.hollis_dead"
+        ]
+      }
+    }
+  ]
+}

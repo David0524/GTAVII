@@ -10,8 +10,8 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 | N2. Cast | **Done** (with appearance sheets; no review objections) → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
 | N3. Story structure | **Done** → `narrative/N3_STRUCTURE.md` (32-mission chain, branches, endings, relationships, act-by-act world) |
 | N4. Mission specs and side activities | **Done.** All 32 missions in `content/missions/`; 20 side activities in `content/activities.json`; M1 fully playable. Validator: 0 errors (104 warnings = dialogue scripts due in N5). |
-| N5. Dialogue and barks | **In progress.** Done: Act 1 dialogue (M1–M9, 32 scripts), 53 NPC archetypes, 21 bark pools (477 lines; 12 core pools with 31+ each). Next: Act 2 dialogue (M10–M21), then Act 3 (M22–M32), then activity dialogue. |
-| N6. Ambient world and business registry | — |
+| N5. Dialogue and barks | **Done.** 155 dialogue scripts (about 790 lines: all 32 missions + 44 side-activity scenes), 57 NPC archetypes, 21 bark pools (477 lines; 12 core pools with 31+ each), plus 78 edge barks. Validator: 0 errors, 0 warnings. |
+| N6. Ambient world and business registry | **Next.** Trademark-search and register every invented name; signage, weekly front pages, radio, graffiti, posters, overheard talk, interiors per act. |
 | N7. Integration | — (waits on engine Phase 7 hooks) |
 
 ## Files
@@ -30,7 +30,7 @@ content/activities.json    20 side activities (pool rows keyed by placeholder), 
 narrative/tools/build_act23_missions.py  authoring source for M10–M32 mission JSON
 content/npc_archetypes/    53 archetypes (contract shape), built by narrative/tools/build_archetypes.py
 content/barks/             21 bark pools, built by narrative/tools/build_barks.py
-narrative/tools/dlg_act1.py  authoring source for Act 1 dialogue (M2–M9)
+narrative/tools/dlg_act1.py, dlg_act2.py, dlg_act3.py, dlg_activities.py  authoring sources for all dialogue (edit there, re-run, validate)
 content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.
@@ -479,3 +479,64 @@ calls":
 - The 104 dialogue scripts referenced (about 900–1,200 lines) are the bulk of N5.
 - Ambient NPC archetypes (`npc.*`) are referenced but not yet defined. They're due in N5,
   with the barks.
+
+---
+
+## Phase N5 self-critique
+**What was delivered:**
+- **155 dialogue scripts, about 790 subtitle lines.** That covers every script referenced by
+  the 32 missions and the 20 activities.
+- **Branch A** (M12) and **Branch B** (M29) have confirm steps. Branch B shows locked options
+  greyed out, with a stated reason ("Needs a witness who'll testify").
+- **The four endings** are keyed by flags in M29 and M32. The lead resolutions are in M23,
+  M27, M30 and M31.
+- **57 archetypes in the contract shape**, and **477 barks**: 12 core pools, each with 31+
+  lines across greet, idle, complain, rain, heat, horn, collision, player_running,
+  player_vehicle, brownout and night.
+
+**Against the pillars**
+- P1: the envelopes speak: Baek's receipt for "nothing", Earl's "a tax with legs", Nick's
+  "that's payroll".
+- P2: directions are given the way New Yorkers give them (Delroy's "Sixth goes up, Seventh
+  comes down"), and objective and bark text names real corners.
+- P3: people are introduced by their shifts (Feld's loft, the 5 a.m. florist, Odessa's 30
+  years in the hotel laundry).
+- P4: relationship changes sit in about 60 choices.
+- P5: the scarcity lines (heat, power, rooms, money) recur in barks in every pool.
+
+**Against the content rules**
+- **Real names:** in-game text no longer says "Knapp". The Commission is named after a real
+  person, so lines now say "the Commission". The research docs keep the historical name.
+  The President, the mayor and union leaders are never named. The resignation is invented
+  radio narration.
+- **Real brands:** a scan of all dialogue and barks found none. The only real proper nouns
+  are public institutions and places (Bellevue as a hospital, Penn Station, the Hotel
+  Pennsylvania, the White House in the radio line).
+- **No slurs.** Period prejudice is implied (Kallis's condescension, the rental agent's
+  "established tenants", Wurtz's "To Koreans. Clever."), and the writing doesn't endorse it.
+  The characters it targets get the last word.
+- **Sex work:** context and solidarity only. The strip pool's barks are about feet, rent,
+  cops and friends.
+- **Minors:** they appear only as ambient children (camp, hydrant, ice-cream customers), and
+  the content rules are written into the archetypes.
+- **Death:** Hollis's death is off screen, and the camera rule is in the dialogue context.
+- **Arson:** prevented, with no fire.
+
+**Against the mobile rules**
+- Every line is 90 characters or fewer. Choices are at most 4, each 40 characters or fewer,
+  and none is timed (enforced).
+- Inner monologue uses `emotion: "inner"` and should render in italics.
+- No information is carried only by audio: radio and payphone lines are subtitled and
+  marked "(Radio)" or "(Payphone)".
+
+**Risks and gaps**
+- **Accent and dialect:** I avoided phonetic spelling. Some characters use simplified syntax
+  (Mr. Baek's short sentences, Yiannis's bluntness), which reads as character but could slide
+  toward caricature. **Recommendation:** a sensitivity read by Korean-American,
+  Greek-American, Puerto Rican and Black American readers before voice casting. This is
+  flagged for the user, not decided by me.
+- **Dialogue extensions** (line-level `requires`, `ifRelationship` and `setRelationships`;
+  choice `confirm` and `disabledText`) are filed in ENGINE_REQUESTS 8. The fallbacks are
+  documented.
+- **Thin spots:** the Read the Room puzzles rely on the engine showing per-NPC "tell" lines,
+  which aren't written yet. N6 will add them as interior ambient text.

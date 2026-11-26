@@ -144,7 +144,7 @@ S("dlg.m25_the_car", "M25 o4. W 35th St off Eighth, rain on the windshield. Mayh
   (T, "flat", "I remember a man in a good suit in the back seat. With a briefcase."),
   (MAY, "hollow", "Lisle. A.D.A. then. Case seventy-one forty-four-oh-two. A trucker's assault charge."),
   (MAY, "hollow", "Lisle made it go away. For money. I carried. You drove. You were my alibi, kid."),
-  (MAY, "breaking", "Then Knapp came. I gave them six guys so I'd never have to give them you. Or him."),
+  (MAY, "breaking", "Then the Commission came. I gave them six guys so I'd never have to give them you. Or him."),
   (T, "quiet", "You gave them six so they'd never ask about one."),
   C(ch("Get out of the city, Carl.", "l_go", setFlags=["flag.teddy_spared_mayhew"], setRelationships=r((T, MAY, 2))),
     ch("We're driving to Calloway.", "l_cal", setRelationships=r((T, MAY, -2), (T, CAL, 1)))),

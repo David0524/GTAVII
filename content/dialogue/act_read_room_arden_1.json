@@ -1,0 +1,56 @@
+{
+  "id": "dlg.act_read_room_arden_1",
+  "context": "Read the Room at the Arden bar. Tap patrons for their tell lines first (engine), then choose.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Somebody in here is a cop. Which one, sugar?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "The sailor with the tattoo",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The man in white sneakers",
+          "goto": "l_right",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 1
+          }
+        },
+        {
+          "text": "The salesman with the samples",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The old man with the racing form",
+          "goto": "l_wrong"
+        }
+      ]
+    },
+    {
+      "id": "l_right",
+      "speaker": "char.rita_haines",
+      "emotion": "pleased",
+      "text": "White sneakers in a bar. Good for standing all night. Nobody does that for fun.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_wrong",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "No, sugar. White sneakers in a bar. Good for standing all night. Nobody does that for fun.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule nineteen: the cop is the one who isn't enjoying himself."
+    }
+  ]
+}
