@@ -6,9 +6,9 @@
 import type { Input } from '../input/Input';
 import { MenuNav } from './MenuNav';
 import { glyph } from './Prompts';
-import { escapeHtml } from './Hud';
+import { esc as escapeHtml } from './util';
 
-export interface TitleChoice { kind: 'continue' | 'new' | 'settings' | 'credits' }
+export interface TitleChoice { kind: 'continue' | 'new' | 'load' | 'settings' | 'credits' }
 
 export class TitleScreen {
   readonly root = document.createElement('div');
@@ -46,7 +46,7 @@ export class TitleScreen {
     this.leader.style.display = 'none';
     const st = this.input.promptStyle === 'touch' ? 'keyboard' : this.input.promptStyle;
     const opts: [TitleChoice['kind'], string, string | null][] = [
-      ['continue', 'Continue', continueLabel], ['new', 'New game', null], ['settings', 'Settings', null], ['credits', 'Credits', null],
+      ['continue', 'Continue', continueLabel], ['new', 'New game', null], ['load', 'Profiles & saves', null], ['settings', 'Settings', null], ['credits', 'Credits', null],
     ];
     this.menu.innerHTML = '';
     const items = opts.filter(([k]) => k !== 'continue' || continueLabel).map(([k, label, sub]) => {

@@ -34,13 +34,21 @@ export class MiniMap {
   private zoomTarget = 150;
   private bboxes: Float32Array;
   private newSeenTimer = new Map<string, number>();
-  /** Timings for the perf budget (ms, exponential moving average). */
-  readonly cost = { draw: 0, tiles: 0 };
+  /** Timings for the perf budget (ms, exponential moving average) and how many frames were skipped. */
+  readonly cost = { draw: 0, tiles: 0, skipped: 0, drawn: 0 };
+  /** 3x3-tile composite around the player; rebuilt only when the centre tile or scale changes. */
+  private win = document.createElement('canvas');
+  private winKey = '';
+  private lastKey = '';
+  private sinceDraw = 1;
+  private ro: ResizeObserver;
 
   constructor(private model: MapModel, private streets: StreetRec[]) {
     this.el.className = 't74-minimap';
     this.el.appendChild(this.canvas);
     this.g = this.canvas.getContext('2d')!;
+    this.ro = new ResizeObserver((e) => { const r = e[0].contentRect; this.measured = { w: r.width, h: r.height }; });
+    this.ro.observe(this.canvas);
     this.bboxes = new Float32Array(streets.length * 4);
     streets.forEach((s, i) => {
       let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
@@ -49,8 +57,10 @@ export class MiniMap {
     });
   }
 
+  private measured = { w: 0, h: 0 };
+  /** Size comes from a ResizeObserver: no forced layout in the frame loop. */
   private fit() {
-    const r = this.canvas.getBoundingClientRect();
+    const r = { width: this.measured.w, height: this.measured.h };
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     if (r.width === this.w && r.height === this.h && dpr === this.dpr) return;
     this.w = r.width; this.h = r.height; this.dpr = dpr;
@@ -62,7 +72,7 @@ export class MiniMap {
   private ensureScale() {
     const want = (this.h / 2 / this.rangeM) * this.dpr; // device px per metre
     const q = Math.pow(2, Math.round(Math.log2(want) * 2) / 2);
-    if (q !== this.pxPerM) { this.pxPerM = q; this.tilePx = Math.ceil(TILE_M * q); this.tiles.clear(); this.tileOrder = []; }
+    if (q !== this.pxPerM) { this.pxPerM = q; this.tilePx = Math.ceil(TILE_M * q); this.tiles.clear(); this.tileOrder = []; this.winKey = ''; }
   }
 
   private tile(i: number, j: number): HTMLCanvasElement {
@@ -119,6 +129,12 @@ export class MiniMap {
     const t0 = performance.now();
     this.fit();
     if (!this.w) return;
+    // Redraw only when something visible changed, and at most ~30 Hz while it changes slowly.
+    this.sinceDraw += dt;
+    const m0 = this.model, animating = f.heat.phase !== 'none' || m0.discovery.counts.fresh > 0;
+    const key = `${f.x.toFixed(1)}|${f.z.toFixed(1)}|${f.yaw.toFixed(3)}|${this.rangeM.toFixed(1)}|${m0.version}|${f.objective?.target?.x ?? ''}`;
+    if ((key === this.lastKey && !animating) || this.sinceDraw < 1 / 32) { this.cost.skipped++; return; }
+    this.lastKey = key; this.sinceDraw = 0; this.cost.drawn++;
     // zoom out with speed (driving) and when a pursuit is on
     this.zoomTarget = f.inVehicle ? 230 + Math.min(120, f.speed * 4) : f.heat.phase === 'pursuit' ? 190 : 140;
     this.rangeM += (this.zoomTarget - this.rangeM) * Math.min(1, dt * 1.5);
@@ -130,11 +146,16 @@ export class MiniMap {
 
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.fillStyle = TABLE; g.fillRect(0, 0, W, H);
-    // base tiles
+    // base: one rotated blit of the 3x3-tile window around the player
+    const ci = Math.floor(f.x / TILE_M), cj = Math.floor(f.z / TILE_M), wk = `${ci},${cj},${this.tilePx}`;
+    if (wk !== this.winKey) {
+      this.winKey = wk; const tp = this.tilePx;
+      if (this.win.width !== tp * 3) { this.win.width = this.win.height = tp * 3; }
+      const wg = this.win.getContext('2d')!;
+      for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) wg.drawImage(this.tile(ci + i, cj + j), (i + 1) * tp, (j + 1) * tp);
+    }
     g.save(); g.translate(cx, cy); g.rotate(f.yaw); g.scale(scale, scale);
-    const reach = this.rangeM * 1.6;
-    const i0 = Math.floor((f.x - reach) / TILE_M), i1 = Math.floor((f.x + reach) / TILE_M), j0 = Math.floor((f.z - reach) / TILE_M), j1 = Math.floor((f.z + reach) / TILE_M);
-    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) g.drawImage(this.tile(i, j), (i * TILE_M - f.x) * s, (j * TILE_M - f.z) * s);
+    g.drawImage(this.win, ((ci - 1) * TILE_M - f.x) * s, ((cj - 1) * TILE_M - f.z) * s);
     g.restore();
 
     // police: search area and cones (pencil hatching in red)
@@ -160,7 +181,12 @@ export class MiniMap {
     const m = this.model;
     if (m.route) {
       const pts: number[] = [];
-      for (let q = 0; q < m.route.pts.length; q += 2) { const p = toScreen(m.route.pts[q], m.route.pts[q + 1]); pts.push(p[0], p[1]); }
+      const rr2 = this.rangeM * 2;
+      for (let q = 0; q < m.route.pts.length; q += 2) {
+        const rx = m.route.pts[q], rz = m.route.pts[q + 1];
+        if (Math.abs(rx - f.x) > rr2 || Math.abs(rz - f.z) > rr2) { if (pts.length >= 4) break; continue; }
+        const p = toScreen(rx, rz); pts.push(p[0], p[1]);
+      }
       pencilLine(this.g, pts, 2.4 * this.dpr, 3, 0.62);
     }
     if (m.waypoint) { const [wx, wy] = this.clampToCard(toScreen(m.waypoint.x, m.waypoint.z), W, H, 10 * this.dpr); pencilCross(g, wx, wy, 5 * this.dpr); }

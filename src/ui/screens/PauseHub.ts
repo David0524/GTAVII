@@ -44,7 +44,10 @@ export class PauseHub {
 
   add(t: Tab) { this.tabs.push(t); t.el.style.display = 'none'; this.body.appendChild(t.el); }
 
-  show(tab = this.active || this.tabs[0]?.id) {
+  private only: string[] | null = null;
+  /** Open on a tab. `only` limits the visible tabs (the title screen shows saves/settings/credits only). */
+  show(tab = this.active || this.tabs[0]?.id, only: string[] | null = null) {
+    this.only = only;
     this.open = true; this.root.style.display = '';
     if (document.pointerLockElement) document.exitPointerLock?.();
     this.select(tab);
@@ -57,8 +60,8 @@ export class PauseHub {
     const t = this.tabs.find((x) => x.id === id) ?? this.tabs[0];
     this.active = t.id; t.el.style.display = '';
     const st = this.input.promptStyle;
-    this.tabsEl.innerHTML = `<span class="brand">Tenderloin '74</span>` + this.tabs.map((x) => `<button data-t="${x.id}" class="${x.id === t.id ? 'active' : ''}">${esc(x.label)}</button>`).join('') +
-      (st === 'touch' ? '' : `<span class="hint">${glyph('tabPrev', st)} ${glyph('tabNext', st)}</span>`) + `<button class="resume">RESUME ✕</button>`;
+    this.tabsEl.innerHTML = `<span class="brand">Tenderloin '74</span>` + this.visible.map((x) => `<button data-t="${x.id}" class="${x.id === t.id ? 'active' : ''}">${esc(x.label)}</button>`).join('') +
+      (st === 'touch' ? '' : `<span class="hint">${glyph('tabPrev', st)} ${glyph('tabNext', st)}</span>`) + `<button class="resume">${this.only ? 'BACK' : 'RESUME'} ✕</button>`;
     this.tabsEl.querySelectorAll<HTMLElement>('button[data-t]').forEach((b) => b.addEventListener('click', () => this.select(b.dataset.t!)));
     this.tabsEl.querySelector('.resume')!.addEventListener('click', () => this.hide());
     this.tabsEl.querySelector('button.active')?.scrollIntoView?.({ inline: 'nearest', block: 'nearest' });
@@ -77,5 +80,6 @@ export class PauseHub {
     t?.update?.(dt);
     if (this.nav.update(dt) === 'back' && !t?.back?.()) this.hide();
   }
-  private cycle(d: number) { const i = this.tabs.findIndex((t) => t.id === this.active); this.select(this.tabs[(i + d + this.tabs.length) % this.tabs.length].id); }
+  private get visible() { return this.only ? this.tabs.filter((t) => this.only!.includes(t.id)) : this.tabs; }
+  private cycle(d: number) { const v = this.visible, i = v.findIndex((t) => t.id === this.active); this.select(v[(i + d + v.length) % v.length].id); }
 }

@@ -54,17 +54,21 @@ async function main() {
   ui.show(screen, Object.fromEntries(q));
 
   let last = performance.now(), walk = q.get('walk') === '1';
+  const samples: number[] = []; const spin = q.get('spin') === '1';
   const loop = (now: number) => {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     input.poll(dt);
     if (walk) { host.pos.z -= dt * 1.4 * Math.cos(host.pos.yaw); host.pos.x -= dt * 1.4 * Math.sin(host.pos.yaw); }
     host.minutes += dt / 2;
+    if (spin) host.pos.yaw += dt * 0.6;
     backdrop?.frame(host.pos);
+    const u0 = performance.now();
     ui.update(dt);
+    samples.push(performance.now() - u0); if (samples.length > 4000) samples.shift();
     input.endFrame();
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
-  (window as unknown as Record<string, unknown>).__UI = { ui, host, model, input, backdrop, ready: backdrop ? backdrop.whenIdle() : Promise.resolve() };
+  (window as unknown as Record<string, unknown>).__UI = { ui, host, model, input, backdrop, ready: backdrop ? backdrop.whenIdle() : Promise.resolve(), samples };
 }
 main().catch((e) => { console.error(e); document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f88;position:fixed;top:0">${String(e?.stack ?? e)}</pre>`); });

@@ -27,7 +27,7 @@ const WIRED = new Set<keyof SettingsData>([
   'minimapOrientation', 'minimapSize', 'subtitleMode', 'subtitleBackground', 'subtitleSpeakerNames', 'subtitleSpeakerColours',
   'textScale', 'colourMode', 'highContrast', 'reduceFlashing', 'reduceMotion', 'cutsceneLetterbox', 'filmGrain', 'units', 'clock24', 'safeZone', 'touchButtonSize', 'touchOpacity', 'touchLeftHanded', 'skipTimers',
 ]);
-const WAITS: Record<string, string> = { audio: 'audio lands', gameplay: 'gameplay lands', engine: 'the engine wires it', post: 'the Phase 3 film grade lands', input: 'the input pass', ui: 'the UI pass' };
+const WAITS: Record<string, string> = { audio: 'audio lands', gameplay: 'gameplay lands', engine: 'the engine wires it', post: 'the Phase 3 film grade lands', input: 'the input layer supports it', ui: 'the UI wires it' };
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 const M3: [string, string][] = [['on', 'On'], ['dynamic', 'Dynamic'], ['off', 'Off']];

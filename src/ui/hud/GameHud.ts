@@ -19,6 +19,7 @@ import { uiSettings, type Mode3, type UiSettingsData } from '../settings/uiSetti
 import { radioLine } from './radio';
 import { callout } from '../map/Route';
 import { esc, money, blocks, distance } from '../util';
+import { promptStrip } from '../Prompts';
 
 const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -27,7 +28,11 @@ const VIA_SHORT: Partial<Record<RevealVia, string>> = { sight: '', enter: 'been 
 export class GameHud {
   readonly el = document.createElement('div');
   readonly minimap: MiniMap;
-  private q = <T extends HTMLElement = HTMLElement>(s: string) => this.el.querySelector(s) as T;
+  private cache = new Map<string, HTMLElement>();
+  /** Cached element lookup (no querySelector in the frame loop). */
+  private q = <T extends HTMLElement = HTMLElement>(s: string) => { let e = this.cache.get(s); if (!e) { e = this.el.querySelector(s) as HTMLElement; this.cache.set(s, e); } return e as T; };
+  private styleCache = new Map<string, string>();
+  private css(sel: string, prop: 'opacity' | 'width', v: string) { const k = `${sel}|${prop}`; if (this.styleCache.get(k) !== v) { this.styleCache.set(k, v); this.q(sel).style[prop] = v; } }
   private shown = new Map<string, number>(); // element -> seconds left for dynamic visibility
   private last: Record<string, string> = {};
   private notes: HTMLElement;
@@ -55,7 +60,8 @@ export class GameHud {
       <div class="u-stamina fade off"><i></i></div>
       <div class="u-turn fade off"></div>
       <div class="u-notes"></div>
-      <div class="t74-sub u-sub" style="opacity:0"></div>`;
+      <div class="t74-sub u-sub" style="opacity:0"></div>
+      <div class="t74-prompts u-prompts"></div>`;
     this.minimap = new MiniMap(model, host.streets);
     this.el.appendChild(this.minimap.el);
     this.notes = this.q('.u-notes'); this.sub = this.q('.u-sub');
@@ -144,14 +150,14 @@ export class GameHud {
     const hp = h.health();
     const hurt = Math.max(0, 1 - hp.hp / (hp.max * 0.6));
     const breathe = hurt > 0 && !uiSettings.get('reduceFlashing') ? 0.85 + 0.15 * Math.sin(this.t * (2 + hurt * 4)) : 1;
-    (this.q('.u-hurt').style.opacity = (hurt * breathe).toFixed(3));
-    (this.q('.u-heat').style.opacity = Math.max(0, hp.heatExhaustion - 0.2).toFixed(2));
+    this.css('.u-hurt', 'opacity', (hurt * breathe).toFixed(2));
+    this.css('.u-heat', 'opacity', Math.max(0, hp.heatExhaustion - 0.2).toFixed(2));
     this.set('.u-injuries', hp.injuries.map((i) => `<span class="${i.bandaged ? '' : 'raw'}">${esc(i.region)} · ${i.bandaged ? 'bandaged' : i.kind}</span>`).join(''));
     this.show('.u-injuries', hp.injuries.length > 0 && this.vis('injuries', 'hudInjuries', hp.hp < 60));
     // stamina
     const st = hp.stamina / hp.staminaMax;
-    this.q('.u-stamina i').style.width = `${(st * 100).toFixed(1)}%`;
-    this.q('.u-stamina').classList.toggle('low', st < 0.25);
+    this.css('.u-stamina i', 'width', `${(st * 100).toFixed(0)}%`);
+    if (this.q('.u-stamina').classList.contains('low') !== st < 0.25) this.q('.u-stamina').classList.toggle('low', st < 0.25);
     this.show('.u-stamina', this.mode('hudStamina') === 'on' || (this.mode('hudStamina') === 'dynamic' && st < 0.98));
 
     // location reveal on district change
@@ -170,12 +176,17 @@ export class GameHud {
 
     // minimap
     const mmOn = this.vis('minimap', 'hudMinimap', !!this.model.waypoint);
-    this.minimap.el.classList.toggle('dim', !mmOn);
+    if (this.minimap.el.classList.contains('dim') === mmOn) this.minimap.el.classList.toggle('dim', !mmOn);
     if (mmOn) this.minimap.draw({ x: p.x, z: p.z, yaw: uiSettings.get('minimapOrientation') === 'north' ? 0 : p.yaw, speed: p.speed, inVehicle: p.inVehicle, heat, objective: obj, t: this.t }, dt);
     this.model.discovery.tick(p.x, p.z);
     this.model.update(dt, p.x, p.z, p.inVehicle);
 
     if (this.subT > 0 && (this.subT -= dt) <= 0) this.sub.style.opacity = '0';
+    // context button prompts (never on touch: the buttons are on screen)
+    const pm = this.mode('hudPrompts'), items = h.prompts?.() ?? [];
+    const pk = `${h.input.promptStyle}|${items.map((i) => i.join(':')).join(',')}`;
+    if (pk !== this.last.prompts) { this.last.prompts = pk; this.q('.u-prompts').innerHTML = h.input.promptStyle === 'touch' ? '' : promptStrip(h.input, items); }
+    this.css('.u-prompts', 'opacity', pm === 'on' || (pm === 'dynamic' && this.idleT > 3) ? '1' : '0');
     const ms = performance.now() - t0;
     this.cost.frame = this.cost.frame ? this.cost.frame * 0.95 + ms * 0.05 : ms;
   }
@@ -230,7 +241,7 @@ export class GameHud {
   /** Subtitle (N3 channels). Respects mode (off / scene only / all), names, colours, background, size. */
   subtitle(speaker: string, text: string, channel: 'scene' | 'ambient' = 'scene', seconds = Math.max(2.2, text.length / 14)) {
     const mode = uiSettings.get('subtitleMode');
-    if (mode === 'off' || (mode === 'scene' && channel === 'ambient')) return;
+    if (!uiSettings.get('subtitles') || mode === 'off' || (mode === 'scene' && channel === 'ambient')) return;
     const lead = this.host.party().find((l) => l.short === speaker || l.name === speaker || l.id === speaker);
     const col = uiSettings.get('subtitleSpeakerColours') && lead ? ` style="color:${lead.colour}"` : '';
     const who = uiSettings.get('subtitleSpeakerNames') && speaker ? `<span class="who"${col}>${esc(lead?.short ?? speaker)}</span>` : '';

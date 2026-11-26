@@ -139,6 +139,8 @@ export interface UiHost {
   /** Front-end hooks the engine implements: start a new game / continue the latest save. */
   newGame?(): void | Promise<void>;
   continueGame?(): Promise<boolean>;
+  /** Context button prompts for the HUD strip: [action, label]. */
+  prompts?(): [import('../input/Input').ButtonAction, string][];
   /** Static map data. */
   readonly heroes: { name: string; x: number; z: number }[];
 }
