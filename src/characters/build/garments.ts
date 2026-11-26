@@ -111,17 +111,20 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
     if (isArm(k) && F.armS[k] < 0.25) s += (1 - F.armS[k] / 0.25) * smooth(1.2, 2.2, Math.abs(F.az[k])) * 0.6;
     return Math.min(1, s) * outfit.sweat;
   };
-  const N = F.normals.get('helper-tights')!;
-  void N;
+  // Drape: shirts and jackets hang off the shoulders and chest instead of printing every muscle.
+  // Their base surface is a Taubin-smoothed copy of the torso (close LODs only; arms stay exact so cuffs cut cleanly).
+  const drape = ctx.lod <= 2
+    ? taubin(P, F.tris('body', Math.min(4, ctx.lod + 2)), (k) => F.part[k] === PART.torso || F.part[k] === PART.neck, 12, (k) => F.part[k] === PART.neck)
+    : undefined;
 
   // ---- top ---------------------------------------------------------------------------------------
   const t = outfit.top;
   const topHem = outfit.dress ? y.waist - 0.02 : t.tucked ? y.waist - 0.07 : Math.max(y.crotch + 0.05, y.hip - 0.07);
   const neckFront = t.collar === 'v' ? 0.16 : t.collar === 'scoop' ? 0.09 : t.collar === 'crew' || t.collar === 'mock' ? 0.035 : t.collar === 'polo' ? 0.05 + t.open * 0.03 : 0.04 + t.open * 0.035;
   const neckBack = t.collar === 'mock' ? 0.05 : t.collar === 'spread' || t.collar === 'polo' ? 0.025 : 0.0;
-  const topOff = 0.0035 + t.fit * 0.5;
+  const topOff = 0.005 + t.fit * 0.7;
   pieces.push({
-    surface: 'helper-tights', fabric: t.fabric, hem: 0.004, hides: true, slot: 1,
+    surface: 'helper-tights', fabric: t.fabric, hem: 0.004, hides: true, slot: 1, basePos: drape,
     fields: [neckline(neckFront, neckBack), sleeve(t.sleeve), above(topHem), noLegs],
     offset: (k) => topOff + (isArm(k) ? t.fit * 0.6 + smooth(0, 1.0, F.armS[k]) * 0.004 : t.fit * (0.5 + 0.5 * smooth(y.waist, y.chest, Y(k)))),
     sweat: sweatMask,
@@ -163,7 +166,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
 
   // ---- outer layer -------------------------------------------------------------------------------
   const o = outfit.outer;
-  if (o) addOuter(ctx, o, pieces, trims, { sleeve, noLegs, above, below, neckline, sweatMask, isArm, topOff: topOff + t.fit + 0.006 });
+  if (o) addOuter(ctx, o, pieces, trims, { sleeve, noLegs, above, below, neckline, sweatMask, isArm, topOff: topOff + t.fit + 0.006, drape });
 
   // ---- tie ---------------------------------------------------------------------------------------
   if (outfit.tie && !(o && o.open < 0.5 && o.lapel === 0)) trims.push((mb) => (mb.slot = 5, tie(ctx, mb, outfit.tie!, topOff + t.fit + 0.004)));
@@ -171,7 +174,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
 }
 
 function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((mb: MeshBuilder) => void)[], h: {
-  sleeve: (s: number) => Field; noLegs: Field; above: (y: number) => Field; below: (y: number) => Field; neckline: (f: number, b?: number, w?: number) => Field; sweatMask: (k: number) => number; isArm: (k: number) => boolean; topOff: number;
+  sleeve: (s: number) => Field; noLegs: Field; above: (y: number) => Field; below: (y: number) => Field; neckline: (f: number, b?: number, w?: number) => Field; sweatMask: (k: number) => number; isArm: (k: number) => boolean; topOff: number; drape?: Map<number, [number, number, number]>;
 }) {
   const { F, shape } = ctx;
   const P = shape.pos, y = F.y;
@@ -197,7 +200,7 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   const thick = o.kind === 'overcoat' || o.kind === 'trench' ? 0.006 : 0.004;
   const sleeveS = Math.min(o.sleeve, 1.94);
   pieces.push({
-    surface: 'helper-tights', fabric: o.fabric, hem: thick, hides: true, slot: 3, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
+    surface: 'helper-tights', fabric: o.fabric, hem: thick, hides: true, slot: 3, basePos: h.drape, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
     fields: [h.neckline(0.02, 0.035), h.sleeve(sleeveS), h.above(Math.max(y.crotch + 0.04, Math.min(hemY, y.waist - 0.04))), h.noLegs, front],
     offset: (k) => off + (h.isArm(k) ? 0.002 + 0.003 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
     sweat: (k) => h.sweatMask(k) * 0.5,

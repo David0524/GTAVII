@@ -29,9 +29,9 @@ for shot, refs in SETS.items():
     for rid, p in zip(refs, photos):
         out.paste(p, (x, lineup.height + 10))
         c = cat[rid]
-        d.text((x + 4, lineup.height + row_h + 16), f"{rid.split('_')[1]} · {c['date']} · public domain, US National Archives (DOCUMERICA)", fill=(220, 210, 190))
+        d.text((x + 4, lineup.height + row_h + 16), f"NARA {rid.split('_')[1]}, {c['date']}", fill=(220, 210, 190))
         x += p.width + 10
-    d.text((10, lineup.height + row_h + 44), 'Top: generated pedestrians (seeded, ?characters=1&scene=lineup). Bottom: period reference photos the wardrobe tables came from (docs/WARDROBE_1974.md).', fill=(200, 190, 170))
+    d.text((10, lineup.height + row_h + 44), 'Top: generated pedestrians (seeded, ?characters=1&scene=lineup). Bottom: public-domain DOCUMERICA photos (US National Archives) the wardrobe tables came from (docs/WARDROBE_1974.md).', fill=(200, 190, 170))
     name = os.path.join(ROOT, 'shots/characters', shot.replace('.png', '_vs_refs.png'))
     out.save(name)
     print('wrote', name, out.size)

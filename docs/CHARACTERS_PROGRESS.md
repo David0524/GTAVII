@@ -98,6 +98,60 @@ Real-device numbers are still needed (the user tests on an iPhone).
   the far-LOD vertices, 32 shape components and no expressions; Low uses LOD2 for heroes and the
   near ring.
 
+## Critique of the lineup and leads (honest)
+Shots: `shots/characters/01_lineup_a_vs_refs.png` and `02_lineup_b_vs_refs.png` show 20 seeded
+pedestrians above the DOCUMERICA photos the wardrobe tables came from. `04`–`09` are the leads,
+including close-ups. Locomotion frames are `10`–`17`; crowds are `19` and `20`.
+
+**What reads as 1974**
+- **Silhouettes and cuts:**
+  - high-rise flared trousers with real hem flare, and A-line knee skirts;
+  - wide flat shirt collars, wide ties (10–12 cm), short-sleeve dress shirts on men;
+  - striped knit tops, a pink pantsuit, pinstripe suits;
+  - straw and felt hats on older men, set curls on older women, afros.
+  These match the photos (551651, 548399, 551646, 551658).
+- **Palette:** camel, rust, navy, cream, mustard, brown and charcoal with occasional red and pink,
+  no modern neons. Prints are mostly tonal, matching the photos' mostly sober colour with a few
+  loud accents.
+- **The street mix:**
+  - a full range of skin tones, builds and ages (18–90, adults only), with no single default face;
+  - variety comes from continuous parameters, never caricature.
+- **The leads** follow the narrative sheets:
+  - Teddy: pale khaki short-sleeve shirt, brown slacks, black oxfords, 1.75 m, soft middle;
+  - Delphine: oxblood dress, 1.78 m, cropped natural hair;
+  - Nick: midnight-blue suit, wide silk tie, cordovan loafers, iron-grey hair, 1.68 m, heavy.
+- **Motion:**
+  - walk, run and hail-a-cab read clearly, and the relaxed idle has hanging arms;
+  - curb and stair foot IK keeps both feet on their surfaces (12, 13);
+  - planted feet don't slide on near characters (1–23 mm/s).
+
+**What reads as a modern game, not a 35 mm photo of 1974**
+1. **Cloth has no folds.** Garments are offset shells of the body, so nothing creases, bags or
+   hangs. The photos are full of drag lines, baggy trouser seats, rolled sleeves and jacket
+   drape. Torso smoothing ("drape") removes printed anatomy but adds no folds. *Next:* wrinkle
+   normal maps driven by joint angles (elbow, knee, waist), and a hanging-hem offset for
+   jackets and coats.
+2. **Faces are smooth and same-y up close.**
+   - There's no texture detail beyond procedural pores and wrinkles, the eye area is dark, and
+     lashes are a solid line.
+   - The lineup reads as a cast of mannequins in good clothes.
+   - *Next:* per-face albedo variation (blotchiness, shadow under the eyes, lip edges), an
+     eyelid/wet-line strip, blinks, and stronger asymmetry and age sculpting.
+3. **Hair aliases.** Shells speckle without TAA, and straight hair is helmet-like. Afros and set
+   curls are best. *Next:* card strands for long and straight styles, and alpha-to-coverage.
+4. **Everyone stands the same way.** It's one relaxed idle. The photos show hands in pockets,
+   arms folded, weight on one hip, newspapers under arms and leaning. The pocket and
+   behind-the-back idles exist, but their hand placement isn't right yet, so they're off.
+5. **Shoes are chunky.** The rounded-last approach reads as a shoe at street distance but is
+   bulbous up close. Heels don't tilt the foot, and sandals render as closed shoes.
+6. **Small geometry defects:**
+   - collars are flat triangles;
+   - lapels are ribbon panels;
+   - skin can show at the trouser waistband under a tucked shirt;
+   - skirts and dress panels split at the hips in a long stride.
+7. **The lighting is a neutral test rig.** The real look depends on the engine's 1970s grade,
+   grain and halation; nothing here is graded.
+
 ## Known issues (honest)
 - **Faces read as "game" faces:**
   - eyes are procedural spheres with no wet-line geometry (the wet look comes from specular only);
