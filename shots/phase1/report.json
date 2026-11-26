@@ -1,7 +1,7 @@
 {
   "quality": "high",
   "forceWebGL": true,
-  "date": "2026-11-26T14:08:29.313Z",
+  "date": "2026-11-26T14:12:56.932Z",
   "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
   "views": [
     {
@@ -19,7 +19,7 @@
         "lod0": 38,
         "lod1": 50,
         "loading": 0,
-        "parseMsTotal": 997.0999999998603,
+        "parseMsTotal": 970.899999999674,
         "failed": 0
       }
     },
@@ -38,83 +38,83 @@
         "lod0": 44,
         "lod1": 44,
         "loading": 0,
-        "parseMsTotal": 865.9000000020023,
+        "parseMsTotal": 1191.6999999983236,
         "failed": 0
       }
     },
     {
       "view": "03_empire_state_from_fifth",
-      "cam": "10,1.8,-520,22.52,17.75",
+      "cam": "-18.8,1.8,-481.5,16.52,21.78",
       "backend": "webgl2",
       "avg": 100,
       "p95": 100,
       "max": 100,
       "fps": 10,
-      "drawCalls": 71,
-      "triangles": 78221,
+      "drawCalls": 69,
+      "triangles": 79282,
       "chunks": {
         "ready": 88,
         "lod0": 49,
         "lod1": 39,
         "loading": 0,
-        "parseMsTotal": 837.3999999989755,
+        "parseMsTotal": 1045.5000000006985,
         "failed": 0
       }
     },
     {
       "view": "04_herald_square",
-      "cam": "-357.8,1.8,-791.7,36.87,5.20",
+      "cam": "-303.3,1.8,-812.9,51.50,5.94",
       "backend": "webgl2",
       "avg": 100,
       "p95": 100,
       "max": 100,
       "fps": 10,
       "drawCalls": 48,
-      "triangles": 45604,
+      "triangles": 43847,
       "chunks": {
         "ready": 88,
-        "lod0": 51,
-        "lod1": 37,
+        "lod0": 52,
+        "lod1": 36,
         "loading": 0,
-        "parseMsTotal": 883.4000000017695,
+        "parseMsTotal": 863.4999999988358,
         "failed": 0
       }
     },
     {
       "view": "05_penn_msg_seventh_ave",
-      "cam": "-618.6,1.8,-702.1,76.76,4.32",
+      "cam": "-604.4,1.8,-582.1,49.02,4.27",
       "backend": "webgl2",
       "avg": 100,
       "p95": 100,
       "max": 100,
       "fps": 10,
-      "drawCalls": 25,
-      "triangles": 24320,
+      "drawCalls": 37,
+      "triangles": 34205,
       "chunks": {
         "ready": 88,
         "lod0": 42,
         "lod1": 46,
         "loading": 0,
-        "parseMsTotal": 869.8999999980442,
+        "parseMsTotal": 882.4999999995343,
         "failed": 0
       }
     },
     {
       "view": "06_hotel_chelsea_23rd",
-      "cam": "-680.9,1.8,-49.1,146.31,18.60",
+      "cam": "-620.9,1.8,-31.7,107.05,12.11",
       "backend": "webgl2",
       "avg": 100,
       "p95": 100,
       "max": 100,
       "fps": 10,
-      "drawCalls": 16,
-      "triangles": 23263,
+      "drawCalls": 20,
+      "triangles": 26080,
       "chunks": {
         "ready": 88,
-        "lod0": 32,
-        "lod1": 56,
+        "lod0": 33,
+        "lod1": 55,
         "loading": 0,
-        "parseMsTotal": 978.8000000005122,
+        "parseMsTotal": 834.8999999980442,
         "failed": 0
       }
     },
@@ -133,7 +133,7 @@
         "lod0": 12,
         "lod1": 76,
         "loading": 0,
-        "parseMsTotal": 799.0999999986961,
+        "parseMsTotal": 825.6000000007916,
         "failed": 0
       }
     },
@@ -152,15 +152,15 @@
         "lod0": 30,
         "lod1": 58,
         "loading": 0,
-        "parseMsTotal": 833.3000000000466,
+        "parseMsTotal": 852.3999999994412,
         "failed": 0
       }
     }
   ],
   "logs": [
-    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x1fa4003bd400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
   ]
 }
