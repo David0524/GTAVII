@@ -59,7 +59,13 @@ export interface OuterDesc {
   fabric: Fabric;
 }
 export type ShoeKind = 'oxford' | 'wingtip' | 'loafer' | 'boot' | 'sneaker' | 'platform' | 'pump' | 'sandal' | 'clog' | 'slipOn' | 'workBoot';
-export interface ShoesDesc { kind: ShoeKind; color: string; color2: string; sole: number; heel: number; wear: number }
+export interface ShoesDesc {
+  kind: ShoeKind; color: string; color2: string; sole: number; heel: number; wear: number;
+  /** Boot shaft top on the leg chain (legS: 1 knee, 2 ankle). */
+  shaft?: number;
+  /** Ankle strap (platforms). */
+  strap?: boolean;
+}
 export type HatKind = 'fedora' | 'straw' | 'flatCap' | 'newsboy' | 'knit' | 'beret' | 'sunHat' | 'headscarf' | 'policeCap' | 'peakedCap' | 'hardHat';
 export interface HatDesc { kind: HatKind; fabric: Fabric }
 export interface GlassesDesc { kind: 'clear' | 'sun' | 'catEye' | 'aviator' | 'horn'; frame: string; tint: number; scale: number }
@@ -185,14 +191,18 @@ export function generateOutfit(seed: number, ctx: OutfitContext): Outfit {
 function shoesMen(rng: Rng, age: number, formal: boolean): ShoesDesc {
   const k = rng.weighted<ShoeKind>([['oxford', formal ? 4 : 2], ['wingtip', age > 40 ? 2 : 0.6], ['loafer', 2.5], ['workBoot', formal ? 0.2 : 1.5], ['sneaker', age < 35 ? 2.5 : 0.8], ['platform', age < 32 ? 0.8 : 0.05], ['boot', 0.6]]);
   const col = k === 'sneaker' ? rng.pick([LEATHER.white, '#c8c0b0', CLOTH.navy, CLOTH.red70]) : rng.weighted([[LEATHER.black, 4], [LEATHER.brown, 3], [LEATHER.oxblood, 1.5], [LEATHER.tan, 1]]);
-  return { kind: k, color: col, color2: k === 'sneaker' ? '#d8d2c4' : '#2a2018', sole: k === 'platform' ? rng.range(0.03, 0.05) : k === 'workBoot' ? 0.02 : 0.012, heel: k === 'platform' ? rng.range(0.06, 0.08) : k === 'boot' ? 0.035 : 0.02, wear: rng.range(0.1, 0.5) };
+  return { kind: k, color: col, color2: k === 'sneaker' ? '#d8d2c4' : '#2a2018', sole: k === 'platform' ? rng.range(0.03, 0.05) : k === 'workBoot' ? 0.02 : 0.012, heel: k === 'platform' ? rng.range(0.06, 0.08) : k === 'boot' ? 0.035 : 0.02, wear: rng.range(0.1, 0.5), shaft: k === 'boot' ? 1.68 : k === 'workBoot' ? 1.72 : undefined };
 }
 function shoesWomen(rng: Rng, age: number): ShoesDesc {
   const old = age >= 60;
   const k = rng.weighted<ShoeKind>([['platform', old ? 0.1 : 3], ['pump', 2.5], ['sandal', 2], ['slipOn', old ? 3 : 0.8], ['clog', age < 40 ? 0.6 : 0.1], ['sneaker', age < 30 ? 0.6 : 0.2], ['boot', 0.3]]);
   const col = rng.weighted([[LEATHER.black, 2], [LEATHER.brown, 2], [LEATHER.tan, 2], [LEATHER.white, 1.5], [CLOTH.red70, 0.6], [LEATHER.oxblood, 0.6], [CLOTH.cream, 1]]);
   const heel = k === 'platform' ? rng.range(0.08, 0.11) : k === 'pump' ? rng.range(0.04, 0.065) : k === 'clog' ? 0.05 : k === 'boot' ? 0.05 : 0.015;
-  return { kind: k, color: col, color2: k === 'platform' ? rng.pick(['#3a2a1e', '#c8b090', '#2a2a2a']) : '#2a2018', sole: k === 'platform' ? rng.range(0.03, 0.06) : 0.01, heel, wear: rng.range(0.05, 0.4) };
+  return {
+    kind: k, color: col, color2: k === 'platform' ? rng.pick(['#3a2a1e', '#c8b090', '#2a2a2a']) : '#2a2018', sole: k === 'platform' ? rng.range(0.03, 0.06) : 0.01, heel, wear: rng.range(0.05, 0.4),
+    // derived without extra draws so existing seeds keep their outfits
+    shaft: k === 'boot' ? (col === LEATHER.white || col === CLOTH.cream ? 1.6 : 1.18) : undefined, strap: k === 'platform' && heel > 0.095,
+  };
 }
 function glasses(rng: Rng, age: number, male: boolean, warm: boolean): GlassesDesc | null {
   const p = age >= 40 ? 0.45 : 0.2;

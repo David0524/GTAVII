@@ -11,10 +11,11 @@ import type { Outfit } from '../wardrobe/outfit';
 import { JOINT_INDEX as JI } from '../rig';
 import { computeFields, PART, type Fields } from './fields';
 import { faceFrame, faceMasks, type FaceFrame } from './face';
-import { garmentPieces, emitPiece, fabricMat, lin, type GarmentCtx, type PieceSpec } from './garments';
+import { garmentPieces, emitPiece, fabricMat, lin, type GarmentCtx } from './garments';
 import { KIND, MeshBuilder, type GeoArrays, type MatData } from './MeshBuilder';
 import { buildHair, scalpField } from './hair';
 import { buildAccessories } from './accessories';
+import { heelRise, pitchFeet, planShoes } from './shoes';
 
 export interface Assembled {
   main: GeoArrays;
@@ -26,22 +27,24 @@ export interface Assembled {
   stats: { tris: number; verts: number; hairTris: number; ms: number };
 }
 
-const sm = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 /** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
-export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false): Assembled {
+export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false): Assembled {
   const t0 = performance.now();
+  // heeled shoes stand the body on its heels (foot pitched in the bind pose)
+  const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
   const F = computeFields(model, shape);
   const ff = faceFrame(shape, F);
   const ctx: GarmentCtx = { model, shape, F, outfit, lod };
   const mb = new MeshBuilder();
   const P = shape.pos;
   const { pieces, trims } = garmentPieces(ctx);
-  const shoe = shoePiece(F, shape, outfit);
-  const all = [...pieces, shoe.piece];
+  const shoes = planShoes(model, shape, F, outfit, lod);
+  const all = shoes.shaft ? [...pieces, shoes.shaft] : pieces;
 
   // --- which skin is hidden under opaque garments ---
   const covered = new Uint8Array(F.n);
+  for (let k = 0; k < F.n; k++) if (shoes.covers(k)) covered[k] = 1;
   for (const p of all) {
     if (!p.hides) continue;
     const margin = p.hideMargin ?? 0.012;
@@ -55,7 +58,6 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
   const used = new Int32Array(model.numSplit).fill(-1);
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const legsVisibleSock = outfit.bottom.kind !== 'skirt' && outfit.bottom.kind !== 'shorts' && outfit.socks;
-  const shoeTop = shoe.top;
   const age01 = app.age / 90;
   const stubble = app.sex >= 0.5 ? (app.facialHair === 'none' ? 0.35 : 0.6) : 0;
   const scalp = scalpField({ ...ctx, face: ff, app });
@@ -68,7 +70,7 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
     faceMasks(k, P, F, ff, masks);
     const leg = F.part[k] === PART.legL || F.part[k] === PART.legR;
     let m: MatData;
-    if (leg && legsVisibleSock && F.legS[k] > shoeTop - 0.35 && F.legS[k] <= shoeTop + 0.05) {
+    if (leg && legsVisibleSock && F.legS[k] > shoes.sockFrom) {
       m = { cA: lin(outfit.socks!), cB: lin(outfit.socks!), m0: [9, 0.004, 0.85, 0], m1: [KIND.cloth, 0.1, 0.1, 0] };
     } else if (leg && outfit.hosiery > 0) {
       m = { cA: skinBase, cB: lin('#6a4a38'), m0: [0, 0, 0, 0], m1: [KIND.hosiery, outfit.hosiery, app.skin.melanin, 0] };
@@ -99,6 +101,7 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
 
   // --- garments, trims, shoes ---
   for (const p of all) emitPiece(ctx, mb, p);
+  shoes.emit(mb);
   if (lod <= 1) for (const tr of trims) tr(mb);
 
   // --- hats, glasses, props ---
@@ -108,7 +111,7 @@ export function assemble(model: BodyModel, shape: BodyShape, app: Appearance, ou
   const hair = lod <= 3 ? buildHair({ ...ctx, face: ff, app, covered }) : null;
 
   // --- shoe sole lift ---
-  const lift = shoe.lift;
+  const lift = shoes.lift;
   mb.translate(lift);
   const joints = Float32Array.from(shape.joints);
   for (let j = 0; j < joints.length; j += 3) if (j > 0) joints[j + 1] += lift;
@@ -128,87 +131,6 @@ function smoothSkinNormals(mb: MeshBuilder, model: BodyModel, used: Int32Array, 
     const k = model.splitSrc[s];
     arr[v * 3] = N[k * 3]; arr[v * 3 + 1] = N[k * 3 + 1]; arr[v * 3 + 2] = N[k * 3 + 2];
   }
-}
-
-function shoePiece(F: Fields, shape: BodyShape, outfit: Outfit): { piece: PieceSpec; lift: number; top: number } {
-  const s = outfit.shoes;
-  const P = shape.pos;
-  const top = s.kind === 'boot' || s.kind === 'workBoot' ? 1.82 : s.kind === 'pump' || s.kind === 'slipOn' ? 2.1 : s.kind === 'sneaker' ? 2.0 : 2.04;
-  const isLeg = (k: number) => F.part[k] === PART.legL || F.part[k] === PART.legR;
-  const sole = s.sole;
-  const kind = s.kind === 'sneaker' || s.kind === 'sandal' ? KIND.cloth : KIND.leather;
-  const fab = { color: s.color, color2: s.color2, pattern: 'solid' as const, scale: 0.02, rough: kind === KIND.leather ? 0.42 : 0.85, sheen: kind === KIND.leather ? 0.35 : 0, fade: s.wear * 0.4, dirt: s.wear };
-  // heel point (back of the foot) for the heel block
-  const piece: PieceSpec = {
-    surface: 'body', fabric: fab, kind, hem: 0.004, hides: true, hideMargin: 0.004, slot: 4,
-    fields: [(k) => (isLeg(k) ? (F.legS[k] - top) * 0.45 : -1)],
-    offset: (k) => 0.004 + (F.legS[k] > 2.75 ? 0.004 : 0) + (s.kind === 'workBoot' || s.kind === 'boot' ? 0.003 : 0),
-    // the shoe "last": the foot smoothed into one rounded volume (no toes), pinned at the ankle
-    basePos: shoeLast(F, shape, top, s.kind),
-    disp: (k, out) => {
-      const yy = P[k * 3 + 1];
-      out[0] = 0; out[2] = 0;
-      // sole: push the underside down; the whole figure is lifted by `sole` afterwards
-      out[1] = -sole * sm(0.035, 0.0, yy);
-      // toes: slightly longer, squarer box
-      if (F.legS[k] > 2.85) out[2] = 0.006;
-    },
-    dust: () => 0.6,
-  };
-  return { piece, lift: sole, top };
-}
-
-/**
- * The shoe "last": every foot vertex is projected onto a rounded box cross-section per slice
- * along the foot (heel → toe), so toes disappear into one smooth toe box.
- */
-function shoeLast(F: Fields, shape: BodyShape, top: number, kind: string): Map<number, [number, number, number]> {
-  const P = shape.pos, L = shape.landmarks;
-  const out = new Map<number, [number, number, number]>();
-  for (const side of ['l', 'r'] as const) {
-    const part = side === 'l' ? PART.legL : PART.legR;
-    const heel = L[`heel_${side}`], toe = L[`toe_tip_${side}`];
-    const ax = [toe[0] - heel[0], 0, toe[2] - heel[2]];
-    const len = Math.hypot(ax[0], ax[2]) || 0.25;
-    ax[0] /= len; ax[2] /= len;
-    const lat = [ax[2], 0, -ax[0]];
-    const NB = 24, t0 = -0.3, t1 = 1.1;
-    const lo = new Float32Array(NB).fill(1e9), hi = new Float32Array(NB).fill(-1e9), up = new Float32Array(NB).fill(0);
-    const ids: number[] = [];
-    for (let k = 0; k < F.n; k++) {
-      if (F.part[k] !== part || F.legS[k] < top - 0.2) continue;
-      const d = [P[k * 3] - heel[0], P[k * 3 + 1], P[k * 3 + 2] - heel[2]];
-      const t = (d[0] * ax[0] + d[2] * ax[2]) / len, l = d[0] * lat[0] + d[2] * lat[2];
-      const b = Math.min(NB - 1, Math.max(0, Math.floor(((t - t0) / (t1 - t0)) * NB)));
-      lo[b] = Math.min(lo[b], l); hi[b] = Math.max(hi[b], l); up[b] = Math.max(up[b], d[1]);
-      ids.push(k);
-    }
-    // fill + smooth the slice profiles
-    for (let b = 0; b < NB; b++) if (lo[b] > hi[b]) { const p = b > 0 ? b - 1 : b + 1; lo[b] = lo[p]; hi[b] = hi[p]; up[b] = up[p]; }
-    const sm3 = (a: Float32Array) => a.map((v, i) => (a[Math.max(0, i - 1)] + v * 2 + a[Math.min(NB - 1, i + 1)]) / 4);
-    const LO = sm3(sm3(lo)), HI = sm3(sm3(hi)), UP = sm3(sm3(up));
-    const n = kind === 'sneaker' || kind === 'workBoot' ? 2.4 : 3.0; // superellipse exponent (boxier for dress shoes)
-    for (const k of ids) {
-      const d = [P[k * 3] - heel[0], P[k * 3 + 1], P[k * 3 + 2] - heel[2]];
-      const t = (d[0] * ax[0] + d[2] * ax[2]) / len, l = d[0] * lat[0] + d[2] * lat[2];
-      const fb = Math.min(NB - 1.001, Math.max(0, ((t - t0) / (t1 - t0)) * NB - 0.5));
-      const b0 = Math.floor(fb), u = fb - b0;
-      const lw = LO[b0] + (LO[b0 + 1] - LO[b0]) * u, hw2 = HI[b0] + (HI[b0 + 1] - HI[b0]) * u, hh2 = UP[b0] + (UP[b0 + 1] - UP[b0]) * u;
-      const cx = (lw + hw2) / 2, hw = (hw2 - lw) / 2 + 0.003;
-      const hh = Math.max(0.02, hh2) / 2, cy = hh;
-      // rounded toe
-      const toeR = t > 0.88 ? Math.sqrt(Math.max(0.05, 1 - ((t - 0.88) / 0.2) ** 2)) : 1;
-      const th = Math.atan2((d[1] - cy) / hh, (l - cx) / hw);
-      const c = Math.cos(th), s2 = Math.sin(th);
-      const nl = cx + hw * toeR * Math.sign(c) * Math.pow(Math.abs(c), 2 / n);
-      const ny = cy + hh * (s2 > 0 ? toeR : 1) * Math.sign(s2) * Math.pow(Math.abs(s2), 2 / n);
-      const w = sm(top - 0.15, top + 0.1, F.legS[k]) * sm(0.15, 0.45, t);
-      const along = t * len;
-      const np = [heel[0] + ax[0] * along + lat[0] * nl, ny, heel[2] + ax[2] * along + lat[2] * nl];
-      out.set(k, [P[k * 3] + (np[0] - P[k * 3]) * w, P[k * 3 + 1] + (np[1] - P[k * 3 + 1]) * w, P[k * 3 + 2] + (np[2] - P[k * 3 + 2]) * w]);
-    }
-  }
-  return out;
 }
 
 function eyes(model: BodyModel, shape: BodyShape, app: Appearance, lod: number, mb: MeshBuilder) {

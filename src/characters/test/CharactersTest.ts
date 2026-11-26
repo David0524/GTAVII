@@ -15,6 +15,7 @@ import { createCharacterFactory, type CharacterFactory, type Character } from '.
 import { characterMaterial } from '../render/materials';
 import type { AgentView } from '../crowd/CrowdRenderer';
 import { hash2 } from '../util/rng';
+import { generateAppearance } from '../body/appearance';
 
 const qp = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (qp.has(k) ? +qp.get(k)! : d);
@@ -37,7 +38,7 @@ export async function runCharactersTest() {
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};
-  if (scene === 'lineup' || scene === 'leads') tick = lineup(world, camera, factory, scene, report);
+  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes') tick = lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   const simT = qp.has('t') ? num('t', 0) : -1;
@@ -70,7 +71,29 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
   floor(world);
   const chars: Character[] = [];
   const zoom = qp.get('zoom');
-  if (scene === 'leads') {
+  if (scene === 'shoes') {
+    // every shoe type, on a seeded man/woman pair per type, bare legs for women so the heel pitch reads
+    const kinds = (qp.get('kinds') ?? 'oxford,wingtip,loafer,sneaker,workBoot,boot,platform,pump,slipOn,sandal,clog').split(',');
+    const W = ['pump', 'slipOn', 'sandal', 'clog'];
+    kinds.forEach((kind, i) => {
+      const shoes: Record<string, unknown> = { kind };
+      if (kind === 'pump') Object.assign(shoes, { heel: 0.06, sole: 0.01 });
+      if (kind === 'platform') Object.assign(shoes, { heel: 0.1, sole: 0.045, color2: '#c8b090', strap: true });
+      if (kind === 'boot') Object.assign(shoes, { heel: 0.05, sole: 0.012, shaft: 1.18 });
+      if (kind === 'workBoot') Object.assign(shoes, { heel: 0.025, sole: 0.02, shaft: 1.72, color: '#6a4a2a' });
+      if (kind === 'sneaker') Object.assign(shoes, { color: '#2a3a6a', color2: '#d8d2c4', heel: 0.025, sole: 0.02 });
+      if (kind === 'clog') Object.assign(shoes, { heel: 0.05, sole: 0.03 });
+      if (kind === 'sandal') Object.assign(shoes, { heel: 0.03, sole: 0.012, color: '#8a5a34' });
+      const female = W.includes(kind) || kind === 'boot' || kind === 'platform' && i % 2 === 0;
+      // pick a seed of the right sex
+      let seed = 500 + i * 37;
+      for (let s = 0; s < 200; s++) { const a = generateAppearance(hash2(seed, s)); if ((a.sex < 0.5) === female && a.age < 55) { seed = hash2(seed, s); break; } }
+      const ov: Record<string, unknown> = { shoes };
+      if (female) Object.assign(ov, { bottom: { kind: 'skirt', length: 0, flare: 0.06 }, dress: false, outer: null, hosiery: 0 });
+      else Object.assign(ov, { bottom: { length: 1.93 }, outer: null });
+      chars.push(factory.spawn(world, { seed, overrides: ov }));
+    });
+  } else if (scene === 'leads') {
     const act = num('act', 1);
     for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) chars.push(factory.spawn(world, { seed: 1, hero, act }));
   } else {
@@ -78,13 +101,15 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
     for (let i = 0; i < per; i++) chars.push(factory.spawn(world, { seed: hash2(seed0, page * per + i) }));
   }
   const n = chars.length;
-  const gap = scene === 'leads' ? 1.1 : 0.85;
+  const gap = scene === 'leads' ? 1.1 : scene === 'shoes' ? 0.5 : 0.85;
   chars.forEach((c, i) => { c.object.position.set(zoom ? 0 : (i - (n - 1) / 2) * gap, 0, 0); c.object.visible = !zoom || i === num('focus', 0); });
   const yaw = THREE.MathUtils.degToRad(num('yaw', 0));
   const spin = qp.has('spin');
   if (zoom === 'hand') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.6, 0.95, 1.1); camera.lookAt(0.2, 0.8, 0); }
+  else if (zoom === 'shoe') { camera.fov = 24; camera.updateProjectionMatrix(); camera.position.set(0.75, 0.22, 0.7); camera.lookAt(0.03, 0.06, 0.04); }
   else if (zoom === 'feet') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.5, 0.35, 1.3); camera.lookAt(0, 0.08, 0); }
   else if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
+  else if (scene === 'shoes') { const d = 0.6 + n * 0.32; camera.fov = 22; camera.position.set(0, 0.45, d); camera.lookAt(0, 0.1, 0); camera.updateProjectionMatrix(); }
   else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.2, Math.max(5.5, w * 1.12 + 1.5)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }
   report.people = chars.map((c) => ({ seed: c.desc.seed, hero: c.desc.hero, sex: c.appearance.sex, age: c.appearance.age, hair: c.appearance.hair.style, facialHair: c.appearance.facialHair, top: c.outfit.top.kind, bottom: c.outfit.bottom.kind, outer: c.outfit.outer?.kind ?? null, shoes: c.outfit.shoes.kind, hat: c.outfit.hat?.kind ?? null, props: c.outfit.props, tris: c.stats.tris, draws: c.stats.draws, buildMs: +c.stats.buildMs.toFixed(1) }));
   let t = 0;

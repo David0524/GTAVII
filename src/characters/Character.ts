@@ -64,6 +64,11 @@ export class Character {
     void this.lib;
     this.appearance = (opts.build?.appearance ?? (opts as { appearance?: Appearance }).appearance) ?? generateAppearance(desc.seed);
     this.outfit = (opts.build?.outfit ?? (opts as { outfit?: Outfit }).outfit) ?? generateOutfit(desc.seed ^ 0x5bd1e995, { sex: this.appearance.sex, age: this.appearance.age, archetype: desc.archetype, ...opts.outfitCtx });
+    // desc.overrides: shallow per-slot outfit overrides, e.g. { shoes: { kind: 'pump' } } (tests, cutscenes)
+    if (desc.overrides) for (const [k, v] of Object.entries(desc.overrides)) if (k in this.outfit) {
+      const cur = (this.outfit as unknown as Record<string, unknown>)[k];
+      (this.outfit as unknown as Record<string, unknown>)[k] = v && typeof v === 'object' && cur && typeof cur === 'object' ? { ...cur, ...v } : v;
+    }
     this.outfitCtx = opts.outfitCtx;
     this.wardrobeSets = opts.build?.wardrobeSets;
     this.object.name = `character:${desc.hero ?? desc.archetype ?? 'ped'}:${desc.seed}`;
