@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import type RAPIER from '@dimforge/rapier3d-compat';
+import type RAPIER from './rapier';
 import type { ModelAsset, Variant } from './assets';
 import { createMaterialSet, type MaterialSet, type Quality } from './gen/materials';
 import { buildDecals, drawPlate } from './gen/decals';

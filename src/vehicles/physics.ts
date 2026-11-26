@@ -1,4 +1,4 @@
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from './rapier';
 import * as THREE from 'three/webgpu';
 import type { ModelSpec, PhysicsSpec } from './gen/spec';
 import type { GeneratedModel } from './gen/body';

@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '../rapier';
 import { mix, color, positionWorld, mx_noise_float, float, smoothstep, fract, step, max } from 'three/tsl';
 import { createRenderer } from '../../engine/renderer';
 import { qualityFromUrl } from '../../engine/quality';

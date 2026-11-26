@@ -12,7 +12,7 @@
  * Input ranges: throttle 0..1 (negative = reverse request), brake 0..1, steer -1 (left) .. 1 (right).
  * Holding brake at a standstill engages reverse automatically, as in most driving games.
  */
-import type RAPIER from '@dimforge/rapier3d-compat';
+import type RAPIER from './rapier';
 import type * as THREE from 'three/webgpu';
 import { MODELS, MODEL_BY_ID } from './models';
 import { getAsset, variantOf } from './assets';

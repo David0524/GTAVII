@@ -6,7 +6,7 @@
  * calls setState({ s, doorsOpen }) each frame; cars are kinematic bodies so characters can ride.
  */
 import * as THREE from 'three/webgpu';
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '../rapier';
 import { GeoBuilder, type Slot } from '../gen/builder';
 import { createMaterialSet, type MaterialSet, type Quality } from '../gen/materials';
 import { paintCarSide, paintInterior, paintCarCards } from './graffiti';
