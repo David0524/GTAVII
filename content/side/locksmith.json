@@ -50,7 +50,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$10–25 a call; one call-out each act feeds a main-story clue"
+    "text": "$10–25 a call; one call-out each act feeds a main-story clue",
+    "money": 300,
+    "payNote": "$10–25 a call; completion bonus."
   },
   "where": "Krause Hardware; doors everywhere",
   "systems": [
@@ -60,5 +62,7 @@
   ],
   "mobile": "Lockpicking is a held button with a rhythm, no precision.",
   "rank": 15,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }

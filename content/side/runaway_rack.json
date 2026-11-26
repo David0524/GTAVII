@@ -45,7 +45,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "A thank-you from the shop (a free suit)"
+    "text": "A thank-you from the shop (a free suit)",
+    "money": 0,
+    "payNote": "A free suit instead of cash."
   },
   "where": "W 37th St hill toward 9th Ave (terrain)",
   "systems": [
@@ -54,5 +56,7 @@
   ],
   "mobile": "One run; generous.",
   "rank": 31,
-  "slice": false
+  "slice": false,
+  "durationMin": 8,
+  "heat": 0
 }

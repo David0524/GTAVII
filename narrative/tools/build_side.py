@@ -248,3 +248,6 @@ for x in sorted(P, key=lambda x: x["rank"]):
     L.append(f"| {x['rank']} | **{x['title']}**{star}{up} | {x['kind']}{' ×' + str(x['parts']) if x['parts'] > 1 else ''} | {leads} | {', '.join(map(str, x['acts']))} | {x['where']} | {x['hook']} | {x['twist']} | {', '.join(x['systems'])} | {x['reward']} | {x['mobile']} |")
 (ROOT / "narrative" / "N4B_SIDE_CONTENT.md").write_text("\n".join(L) + "\n")
 print(len(P), "pieces", kinds)
+
+# keep payouts after regenerating slice specs
+import side_pay  # noqa: E402,F401  (applies content/side payouts in place)

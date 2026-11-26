@@ -49,7 +49,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$25 a piano; the brothers become muscle Nick can hire"
+    "text": "$25 a piano; the brothers become muscle Nick can hire",
+    "money": 400,
+    "payNote": "$25 a piano, and the brothers' bonus."
   },
   "where": "Walk-ups across the core; the Varelas apartment",
   "systems": [
@@ -65,5 +67,7 @@
     "Part 2: A heavier piano and a window landing; the rope is old.",
     "Part 3: Pianos across the core, timing the swing past a window.",
     "Part 4: The fourth piano is Nick's, sold in his Act 3 decline (if he sells)."
-  ]
+  ],
+  "durationMin": 25,
+  "heat": 0
 }

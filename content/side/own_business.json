@@ -43,7 +43,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$40–150 a week"
+    "text": "$40–150 a week",
+    "money": 0,
+    "payNote": "The business pays weekly ($40–150) through Gameplay's property system."
   },
   "where": "Businesses for sale (economy.json)",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Trouble events are short and skippable (income dips).",
   "rank": 22,
-  "slice": false
+  "slice": false,
+  "durationMin": 10,
+  "heat": 0
 }

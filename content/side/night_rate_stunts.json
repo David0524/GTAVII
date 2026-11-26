@@ -42,7 +42,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "$50 a take; a crew jacket (outfit) and the director's thanks in the Act 3 wrap party"
+    "text": "$50 a take; a crew jacket (outfit) and the director's thanks in the Act 3 wrap party",
+    "money": 1200,
+    "payNote": "$50 a take; the wrap bonus."
   },
   "where": "The NIGHT RATE shoot at W 41st St & the west edge (boundaries.json)",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Takes are 60–90 s with generous marks. Retakes are free. No precision steering at walking-speed sections.",
   "rank": 2,
-  "slice": true
+  "slice": true,
+  "durationMin": 20,
+  "heat": 1
 }

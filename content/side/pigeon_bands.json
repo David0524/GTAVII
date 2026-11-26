@@ -51,7 +51,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "The Commodore's final race"
+    "text": "The Commodore's final race",
+    "money": 300,
+    "payNote": "The final race's purse."
   },
   "where": "Pigeons across the core",
   "systems": [
@@ -60,5 +62,7 @@
   ],
   "mobile": "Bands are highlighted when the camera is up.",
   "rank": 45,
-  "slice": false
+  "slice": false,
+  "durationMin": 25,
+  "heat": 0
 }

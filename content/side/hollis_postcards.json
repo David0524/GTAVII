@@ -31,7 +31,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "A memorial in the Corwin lobby; Odessa +1 per five cards; the last card unlocks Hollis's radio station preset"
+    "text": "A memorial in the Corwin lobby; Odessa +1 per five cards; the last card unlocks Hollis's radio station preset",
+    "money": 0,
+    "payNote": "Memorial: no pay."
   },
   "where": "Pawnshops, fences, the Corwin, Earl's stand, the Royal (20 hidden across the core)",
   "systems": [
@@ -41,5 +43,7 @@
   ],
   "mobile": "Cards glint at close range; an 'ask around' prompt points to the right block.",
   "rank": 5,
-  "slice": true
+  "slice": true,
+  "durationMin": 20,
+  "heat": 0
 }

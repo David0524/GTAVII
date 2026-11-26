@@ -48,7 +48,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Bets"
+    "text": "Bets",
+    "money": 2500,
+    "payNote": "The tip's payout if you bet it (stake required)."
   },
   "where": "Eighth Avenue Teletrack (invented OTB parlour)",
   "systems": [
@@ -58,5 +60,7 @@
   ],
   "mobile": "Menus only.",
   "rank": 20,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

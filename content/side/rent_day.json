@@ -50,7 +50,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Rent income; Odessa trust"
+    "text": "Rent income; Odessa trust",
+    "money": 2000,
+    "payNote": "A month's rent roll (Nick)."
   },
   "where": "Nick's properties (the W 29th building, W 37th storefront, the Corwin)",
   "systems": [
@@ -60,5 +62,7 @@
   ],
   "mobile": "Choice menus with short actions.",
   "rank": 37,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }

@@ -12,11 +12,11 @@ T, D, N = "char.teddy_arce", "char.delphine_moore", "char.nick_varelas"
 PAY = {
  "mission.dusk_on_broadway": ({}, [], "Exception: Teddy refuses the offer. Nothing is paid."),
  "mission.night_desk": ({T: 120}, [], "A week's wages at the night desk, in an envelope from Prentiss."),
- "mission.hack": ({T: 180}, [], "Delroy's cab: fares and tips, after Delroy's cut."),
- "mission.surcharge": ({T: 250}, [], "Feld's day rate, plus what Augie slips him to keep quiet."),
- "mission.contact_sheet": ({T: 400}, [], "Navarro pays for the prints of Lisle."),
+ "mission.hack": ({T: 380}, [], "Delroy's cab: fares and tips, after Delroy's cut."),
+ "mission.surcharge": ({T: 450}, [], "Feld's day rate, plus what Augie slips him to keep quiet."),
+ "mission.contact_sheet": ({T: 500}, [], "Navarro pays for the prints of Lisle."),
  "mission.the_club": ({D: 450}, [], "Delphine's own week. The club's pot isn't hers and is never counted as income."),
- "mission.yes": ({T: 1000}, [{"flag": "flag.mayhew_saw_photo", "lead": T, "money": 500, "why": "Mayhew pays more to make the photograph go away"}],
+ "mission.yes": ({T: 500}, [{"flag": "flag.mayhew_saw_photo", "lead": T, "money": 500, "why": "Mayhew pays more to make the photograph go away"}],
                  "Mayhew's first week and the start-up cash for the round. The dialogue's '$200 a week' is the salary; the rest is float to keep."),
  "mission.back_stairs": ({D: 600}, [], "Delphine sells a print of Brannock collecting to a scandal sheet, with no name attached."),
  "mission.independence_day": ({T: 2000, D: 600}, [], "Teddy's cut of the holiday envelopes; Delphine keeps what Lonnie's crew dropped."),
@@ -26,7 +26,7 @@ PAY = {
                            "No pay unless Teddy wears the wire (Branch A)."),
  "mission.contact_prints": ({D: 1200}, [], "Ricky's leak is paid for; Earl's ledger copies are sold to the Dispatch's morgue."),
  "mission.cold_room": ({T: 2000}, [], "Fur District collections: the biggest week of the round."),
- "mission.brownout": ({N: -6000}, [], "Exception: Nick pays the ice trucks, the favours and Teddy's envelope out of his own pocket."),
+ "mission.brownout": ({}, [], "Exception: Nick runs up a $6,000 debt for the ice trucks, the favours and Teddy's envelope. He is asset-rich and cash-poor (that's M16's squeeze). The debt is repaid automatically from his next income (M18)."),
  "mission.margin_call": ({N: 4000}, [], "Kallis's bridge money, with strings that M24 pulls."),
  "mission.the_lease": ({D: 1500}, [], "Nick's agent's goodwill deposit for the W 37th St shop, if Delphine signs."),
  "mission.cold_storage": ({N: 25000, T: 5000, D: 3500}, [],
@@ -59,6 +59,9 @@ PAY = {
 }
 
 
+DEBT = {"mission.brownout": {"lead": N, "amount": 6000, "owedTo": "the ice-house men and Wurtz's unit", "repay": "automatic from the lead's next income; loan model per Gameplay"}}
+
+
 def apply_one(m):
     if m["id"] not in PAY:
         return
@@ -70,6 +73,8 @@ def apply_one(m):
     if cond: r["moneyIf"] = cond
     else: r.pop("moneyIf", None)
     r["payNote"] = note
+    if m["id"] in DEBT: r["debt"] = DEBT[m["id"]]
+    else: r.pop("debt", None)
 
 
 def totals():

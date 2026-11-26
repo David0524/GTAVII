@@ -48,7 +48,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Reward and a story contact"
+    "text": "Reward and a story contact",
+    "money": 150,
+    "payNote": "Reward and a contact."
   },
   "where": "Office buildings on Fifth Ave during brownouts",
   "systems": [
@@ -58,5 +60,7 @@
   ],
   "mobile": "Rhythm prompt; no fail state.",
   "rank": 25,
-  "slice": false
+  "slice": false,
+  "durationMin": 12,
+  "heat": 0
 }

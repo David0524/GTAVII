@@ -48,7 +48,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$10 and a cold soda"
+    "text": "$10 and a cold soda",
+    "money": 10,
+    "payNote": "$10 and a cold soda, as written."
   },
   "where": "Roofs of the W 30s walk-ups",
   "systems": [
@@ -58,5 +60,7 @@
   ],
   "mobile": "Jumps are auto-vaults.",
   "rank": 28,
-  "slice": false
+  "slice": false,
+  "durationMin": 8,
+  "heat": 0
 }

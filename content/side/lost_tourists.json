@@ -44,7 +44,9 @@
     "o1"
   ],
   "rewards": {
-    "text": "Small tip; map-knowledge stat"
+    "text": "Small tip; map-knowledge stat",
+    "money": 20,
+    "payNote": "A small tip, as written."
   },
   "where": "Herald Square, Penn Station exits",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Choice menu.",
   "rank": 29,
-  "slice": false
+  "slice": false,
+  "durationMin": 5,
+  "heat": 0
 }

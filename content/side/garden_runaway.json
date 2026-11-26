@@ -55,7 +55,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$40 from the stable; a Garden ticket stub (fight-card access)"
+    "text": "$40 from the stable; a Garden ticket stub (fight-card access)",
+    "money": 40,
+    "payNote": "$40 from the stable, as written."
   },
   "where": "Penn Square Garden / Penn Station / Seventh Ave",
   "systems": [
@@ -65,5 +67,7 @@
   ],
   "mobile": "Slow pursuit; the horse waits at corners.",
   "rank": 10,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 1
 }

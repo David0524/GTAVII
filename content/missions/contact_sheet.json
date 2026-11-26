@@ -131,7 +131,7 @@
     "o8"
   ],
   "rewards": {
-    "money": 400,
+    "money": 500,
     "setFlags": [
       "flag.saw_lisle_mayhew"
     ],
@@ -143,7 +143,7 @@
       "item.photo_lisle_mayhew"
     ],
     "moneyByLead": {
-      "char.teddy_arce": 400
+      "char.teddy_arce": 500
     },
     "payNote": "Navarro pays for the prints of Lisle."
   },

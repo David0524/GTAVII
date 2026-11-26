@@ -63,7 +63,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "10% of bail; regulars give tips"
+    "text": "10% of bail; regulars give tips",
+    "money": 7500,
+    "payNote": "BIG JOB: the board's top skip (a bonded fur thief, $75,000 bail, 10%). Smaller skips 10% of bail."
   },
   "where": "Abend Bail Bonds, W 31st St & 8th Ave",
   "systems": [
@@ -74,5 +76,7 @@
   ],
   "mobile": "Investigation by talking; takedowns on soft lock.",
   "rank": 13,
-  "slice": false
+  "slice": false,
+  "durationMin": 35,
+  "heat": 3
 }

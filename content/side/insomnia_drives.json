@@ -42,7 +42,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Hidden places unlocked on the minimap"
+    "text": "Hidden places unlocked on the minimap",
+    "money": 0,
+    "payNote": "Places, not money."
   },
   "where": "Night drives anywhere",
   "systems": [
@@ -52,5 +54,7 @@
   ],
   "mobile": "Just drive; nothing to fail.",
   "rank": 39,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }

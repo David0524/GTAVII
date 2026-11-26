@@ -46,7 +46,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "A screening cutscene; the film's poster for a lead's home"
+    "text": "A screening cutscene; the film's poster for a lead's home",
+    "money": 0,
+    "payNote": "A screening, not money."
   },
   "where": "Cinemas, pawnshops and alleys on the Deuce",
   "systems": [
@@ -56,5 +58,7 @@
   ],
   "mobile": "Reels glint; marquees hint.",
   "rank": 40,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }

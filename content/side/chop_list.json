@@ -51,7 +51,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$100–600 per car"
+    "text": "$100–600 per car",
+    "money": 6000,
+    "payNote": "BIG JOB: the full weekly list delivered in one night. Per car $100–600 on top."
   },
   "where": "The Dyer Avenue Dukes' garage, W 36th St & 9th Ave",
   "systems": [
@@ -61,5 +63,7 @@
   ],
   "mobile": "No precision driving; the garage door is a big target.",
   "rank": 14,
-  "slice": false
+  "slice": false,
+  "durationMin": 35,
+  "heat": 3
 }

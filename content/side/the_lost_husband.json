@@ -50,7 +50,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Her late husband's watch (sell or keep); the Velvet Moon midnight screening unlocked"
+    "text": "Her late husband's watch (sell or keep); the Velvet Moon midnight screening unlocked",
+    "money": 0,
+    "payNote": "The watch (sellable for about $300 at the pawnshop) instead of cash."
   },
   "where": "The Velvet Moon and the Deuce's 24-hour cinemas",
   "systems": [
@@ -65,5 +67,7 @@
   "laterParts": [
     "Part 2: Match marquees to reels across the Deuce cinemas and persuade the projectionist to run the scene.",
     "Part 3: Give Mrs. Cho one more evening watching him on screen; the Velvet Moon midnight screening opens."
-  ]
+  ],
+  "durationMin": 30,
+  "heat": 0
 }

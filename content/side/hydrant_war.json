@@ -42,7 +42,9 @@
     "o1"
   ],
   "rewards": {
-    "text": "Relationship and reputation on the block"
+    "text": "Relationship and reputation on the block",
+    "money": 0,
+    "payNote": "Reputation only."
   },
   "where": "Any hot afternoon, side streets near 9th Ave",
   "systems": [
@@ -52,5 +54,7 @@
   ],
   "mobile": "A one-choice scene.",
   "rank": 23,
-  "slice": false
+  "slice": false,
+  "durationMin": 10,
+  "heat": 1
 }

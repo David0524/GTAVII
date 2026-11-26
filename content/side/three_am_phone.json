@@ -50,7 +50,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Story intel; corroboration evidence route for Branch B"
+    "text": "Story intel; corroboration evidence route for Branch B",
+    "money": 0,
+    "payNote": "Story intel."
   },
   "where": "Payphone at W 33rd St & 8th Ave",
   "systems": [
@@ -66,5 +68,7 @@
     "Part 2: A second tip, a meeting to watch.",
     "Part 3: A third tip, a stash to find.",
     "Part 4: The caller is revealed as Marjorie Kell."
-  ]
+  ],
+  "durationMin": 25,
+  "heat": 1
 }

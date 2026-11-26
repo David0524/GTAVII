@@ -45,7 +45,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "$3–7 a fare + tips (route-knowledge bonus); regulars pay double"
+    "text": "$3–7 a fare + tips (route-knowledge bonus); regulars pay double",
+    "money": 200,
+    "payNote": "Regulars' bonus on top of fares."
   },
   "where": "Penn Station cab line; anywhere in the core",
   "systems": [
@@ -56,5 +58,7 @@
   ],
   "mobile": "Turns are called 6+ seconds early and repeated on the HUD as text. Wrong turns cost tips, never fail.",
   "rank": 4,
-  "slice": true
+  "slice": true,
+  "durationMin": 15,
+  "heat": 0
 }

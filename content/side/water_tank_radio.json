@@ -42,7 +42,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "A hidden rooftop place unlocked on the minimap"
+    "text": "A hidden rooftop place unlocked on the minimap",
+    "money": 0,
+    "payNote": "A place, not money."
   },
   "where": "A rooftop water tank near W 36th St",
   "systems": [
@@ -52,5 +54,7 @@
   ],
   "mobile": "Signal meter on the HUD.",
   "rank": 44,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

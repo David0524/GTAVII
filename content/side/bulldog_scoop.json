@@ -60,7 +60,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$12 a run; 'scoop' bonus"
+    "text": "$12 a run; 'scoop' bonus",
+    "money": 400,
+    "payNote": "Per-run $12; the scoop bonus on completion."
   },
   "where": "Newsstands across the core",
   "systems": [
@@ -70,5 +72,7 @@
   ],
   "mobile": "Soft timer; no fail.",
   "rank": 12,
-  "slice": false
+  "slice": false,
+  "durationMin": 18,
+  "heat": 1
 }

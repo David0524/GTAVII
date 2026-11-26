@@ -51,7 +51,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$20–100 stakes"
+    "text": "$20–100 stakes",
+    "money": 5000,
+    "payNote": "BIG JOB: the last race's pot against a Murray Hill heir. Earlier stakes $20–100."
   },
   "where": "Races within the core: Madison Ave hills, the 34th St two-way, Fifth's downhill",
   "systems": [
@@ -61,5 +63,7 @@
   ],
   "mobile": "Route choice wins, not reflexes; no rubber-banding.",
   "rank": 18,
-  "slice": false
+  "slice": false,
+  "durationMin": 25,
+  "heat": 3
 }

@@ -44,7 +44,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Club trust; epilogue postcards"
+    "text": "Club trust; epilogue postcards",
+    "money": 0,
+    "payNote": "Bittersweet: the money goes home, not to you."
   },
   "where": "Bus terminal lockers, a church, a train station",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Short walks.",
   "rank": 48,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }

@@ -50,7 +50,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Moretti flowers for the march; Carmen +1"
+    "text": "Moretti flowers for the march; Carmen +1",
+    "money": 0,
+    "payNote": "Kindness: flowers for the march."
   },
   "where": "Fire escapes across the core",
   "systems": [
@@ -59,5 +61,7 @@
   ],
   "mobile": "Auto-frame.",
   "rank": 49,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

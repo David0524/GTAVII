@@ -129,7 +129,7 @@
     "o7"
   ],
   "rewards": {
-    "money": 180,
+    "money": 380,
     "setFlags": [],
     "unlock": [
       "mission.surcharge",
@@ -140,7 +140,7 @@
       "char.teddy_arce/char.luis_navarro": 1
     },
     "moneyByLead": {
-      "char.teddy_arce": 180
+      "char.teddy_arce": 380
     },
     "payNote": "Delroy's cab: fares and tips, after Delroy's cut."
   },

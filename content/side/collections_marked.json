@@ -48,7 +48,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Weekly pay; Branch-B corroboration"
+    "text": "Weekly pay; Branch-B corroboration",
+    "money": 1500,
+    "payNote": "Marked bills skimmed and swapped."
   },
   "where": "Collection stops (activity.collections)",
   "systems": [
@@ -57,5 +59,7 @@
   ],
   "mobile": "Menus.",
   "rank": 50,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 2
 }

@@ -52,7 +52,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$10 a day; Friday bank bonus"
+    "text": "$10 a day; Friday bank bonus",
+    "money": 500,
+    "payNote": "$10 a day; the Friday bank bonus."
   },
   "where": "Earl's stand and slip spots",
   "systems": [
@@ -62,5 +64,7 @@
   ],
   "mobile": "Soft noon deadline.",
   "rank": 17,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 2
 }

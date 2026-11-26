@@ -48,7 +48,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "His piece on the Ticker's front page; a tag on a lead's home wall"
+    "text": "His piece on the Ticker's front page; a tag on a lead's home wall",
+    "money": 0,
+    "payNote": "The front page, not money."
   },
   "where": "Subway cars, the passage, a rooftop",
   "systems": [
@@ -63,5 +65,7 @@
   "laterParts": [
     "Part 2: Guard the sketchbook from the rival crew.",
     "Part 3: The print on the Ticker's front page."
-  ]
+  ],
+  "durationMin": 20,
+  "heat": 1
 }

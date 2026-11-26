@@ -138,7 +138,7 @@
     "o6"
   ],
   "rewards": {
-    "money": 250,
+    "money": 450,
     "setFlags": [
       "flag.saw_surcharge"
     ],
@@ -150,7 +150,7 @@
       "char.teddy_arce/char.augie_lomax": -1
     },
     "moneyByLead": {
-      "char.teddy_arce": 250
+      "char.teddy_arce": 450
     },
     "payNote": "Feld's day rate, plus what Augie slips him to keep quiet."
   },

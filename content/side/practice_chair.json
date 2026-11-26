@@ -42,7 +42,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Tina +1; the epilogue shop's first customers"
+    "text": "Tina +1; the epilogue shop's first customers",
+    "money": 0,
+    "payNote": "Tina +1: no pay."
   },
   "where": "A barbershop on W 38th St (invented)",
   "systems": [
@@ -51,5 +53,7 @@
   ],
   "mobile": "Tap rhythm; no fail.",
   "rank": 36,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

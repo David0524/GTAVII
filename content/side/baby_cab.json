@@ -43,7 +43,9 @@
     "o1"
   ],
   "rewards": {
-    "text": "A name you choose for the baby (it appears in the epilogue paper's birth notices)"
+    "text": "A name you choose for the baby (it appears in the epilogue paper's birth notices)",
+    "money": 0,
+    "payNote": "Kindness: no pay. The reward is the name in the epilogue paper."
   },
   "where": "Anywhere; ends at Pennington General",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Soft timer, never fails.",
   "rank": 26,
-  "slice": false
+  "slice": false,
+  "durationMin": 8,
+  "heat": 1
 }

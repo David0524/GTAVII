@@ -43,7 +43,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Lore; a hidden line in M25"
+    "text": "Lore; a hidden line in M25",
+    "money": 0,
+    "payNote": "Lore."
   },
   "where": "Station-house corridors, post office walls",
   "systems": [
@@ -52,5 +54,7 @@
   ],
   "mobile": "Tap to read.",
   "rank": 46,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

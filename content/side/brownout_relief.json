@@ -57,7 +57,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Local reputation"
+    "text": "Local reputation",
+    "money": 150,
+    "payNote": "A block collection, pressed on you."
   },
   "where": "Brownout blocks",
   "systems": [
@@ -67,5 +69,7 @@
   ],
   "mobile": "Lit landmarks on the minimap.",
   "rank": 52,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

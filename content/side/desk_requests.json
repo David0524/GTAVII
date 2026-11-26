@@ -43,7 +43,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Relationship gates (M26)"
+    "text": "Relationship gates (M26)",
+    "money": 120,
+    "payNote": "Tips from the floors."
   },
   "where": "The Corwin",
   "systems": [
@@ -52,5 +54,7 @@
   ],
   "mobile": "Short.",
   "rank": 51,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

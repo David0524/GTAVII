@@ -43,7 +43,9 @@
     "o1"
   ],
   "rewards": {
-    "text": "Cash or information"
+    "text": "Cash or information",
+    "money": 700,
+    "payNote": "Cash, or information instead."
   },
   "where": "W 42nd St, the Deuce",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Tap-to-pick.",
   "rank": 27,
-  "slice": false
+  "slice": false,
+  "durationMin": 10,
+  "heat": 2
 }

@@ -44,7 +44,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Club trust (M31 gates)"
+    "text": "Club trust (M31 gates)",
+    "money": 0,
+    "payNote": "Club trust only."
   },
   "where": "Club members' homes and workplaces",
   "systems": [
@@ -55,5 +57,7 @@
   ],
   "mobile": "Varied, short.",
   "rank": 35,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 1
 }

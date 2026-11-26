@@ -54,7 +54,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Fall orders (Nick's finances)"
+    "text": "Fall orders (Nick's finances)",
+    "money": 3500,
+    "payNote": "Nick's fall orders: a deposit up front."
   },
   "where": "Hotel Pennsylvanian ballroom",
   "systems": [
@@ -64,5 +66,7 @@
   ],
   "mobile": "Tap-to-talk.",
   "rank": 38,
-  "slice": false
+  "slice": false,
+  "durationMin": 25,
+  "heat": 0
 }

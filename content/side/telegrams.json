@@ -54,7 +54,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$2–4 a telegram + tips; a 'messenger' outfit that makes you invisible to witnesses"
+    "text": "$2–4 a telegram + tips; a 'messenger' outfit that makes you invisible to witnesses",
+    "money": 150,
+    "payNote": "Tips on the last round."
   },
   "where": "A telegraph office on W 34th St (invented); deliveries across the core",
   "systems": [
@@ -65,5 +67,7 @@
   ],
   "mobile": "No timers except a soft 'before 6 p.m.'.",
   "rank": 9,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }

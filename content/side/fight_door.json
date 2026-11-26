@@ -57,7 +57,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "$30 a night; bets"
+    "text": "$30 a night; bets",
+    "money": 900,
+    "payNote": "$30 a night; the bets on the last card."
   },
   "where": "Penn Square Garden (invented fight cards)",
   "systems": [
@@ -67,5 +69,7 @@
   ],
   "mobile": "Ejections are soft-lock takedowns.",
   "rank": 16,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 1
 }

@@ -132,7 +132,7 @@
     "o7"
   ],
   "rewards": {
-    "money": -6000,
+    "money": 0,
     "setFlags": [],
     "unlock": [
       "mission.margin_call"
@@ -141,10 +141,13 @@
       "char.nick_varelas/char.yiannis_doukas": 1,
       "char.nick_varelas/char.teddy_arce": 0
     },
-    "moneyByLead": {
-      "char.nick_varelas": -6000
-    },
-    "payNote": "Exception: Nick pays the ice trucks, the favours and Teddy's envelope out of his own pocket."
+    "payNote": "Exception: Nick runs up a $6,000 debt for the ice trucks, the favours and Teddy's envelope. He is asset-rich and cash-poor (that's M16's squeeze). The debt is repaid automatically from his next income (M18).",
+    "debt": {
+      "lead": "char.nick_varelas",
+      "amount": 6000,
+      "owedTo": "the ice-house men and Wurtz's unit",
+      "repay": "automatic from the lead's next income; loan model per Gameplay"
+    }
   },
   "npcs": [
     "char.nick_varelas",

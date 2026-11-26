@@ -54,7 +54,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "$15 a run; a speed ladder unlocks Dwayne's sketches being seen"
+    "text": "$15 a run; a speed ladder unlocks Dwayne's sketches being seen",
+    "money": 300,
+    "payNote": "Speed-ladder bonus on top of $15 a run."
   },
   "where": "W 35th–39th St, 7th–9th Aves",
   "systems": [
@@ -64,5 +66,7 @@
   ],
   "mobile": "One held button; hills telegraphed.",
   "rank": 11,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

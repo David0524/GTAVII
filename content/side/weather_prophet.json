@@ -49,7 +49,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "Brownout warnings on the minimap; a barometer prop for a lead's home"
+    "text": "Brownout warnings on the minimap; a barometer prop for a lead's home",
+    "money": 50,
+    "payNote": "Pays for the barometer, and then some."
   },
   "where": "Herald Square, by the newsstand",
   "systems": [
@@ -64,5 +66,7 @@
   "laterParts": [
     "Part 2: Bring readings from the second and third rooftop gauges.",
     "Part 3: He names the blocks that go dark next brownout; the player prepares."
-  ]
+  ],
+  "durationMin": 15,
+  "heat": 0
 }

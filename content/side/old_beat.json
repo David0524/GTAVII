@@ -44,7 +44,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Relationship with Kearney (unlocks report downgrades)"
+    "text": "Relationship with Kearney (unlocks report downgrades)",
+    "money": 0,
+    "payNote": "Favours, not money."
   },
   "where": "Midtown Central; the old foot posts",
   "systems": [
@@ -54,5 +56,7 @@
   ],
   "mobile": "Short walks and talks.",
   "rank": 33,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

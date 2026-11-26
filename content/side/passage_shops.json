@@ -48,7 +48,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "$ and lore"
+    "text": "$ and lore",
+    "money": 1500,
+    "payNote": "What's behind the gate."
   },
   "where": "The old 33rd Street passage",
   "systems": [
@@ -58,5 +60,7 @@
   ],
   "mobile": "Flashlight auto-aims.",
   "rank": 41,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 1
 }

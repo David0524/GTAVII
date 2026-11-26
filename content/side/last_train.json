@@ -44,7 +44,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "Her thanks and a business card (a future job)"
+    "text": "Her thanks and a business card (a future job)",
+    "money": 250,
+    "payNote": "Her thanks, in cash and a business card."
   },
   "where": "Subway platforms (subway.json)",
   "systems": [
@@ -54,5 +56,7 @@
   ],
   "mobile": "Pace-matched escort.",
   "rank": 42,
-  "slice": false
+  "slice": false,
+  "durationMin": 12,
+  "heat": 1
 }

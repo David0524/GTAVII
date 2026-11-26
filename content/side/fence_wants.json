@@ -52,7 +52,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "30–50% of value"
+    "text": "30–50% of value",
+    "money": 5500,
+    "payNote": "BIG JOB: the top item on Marty's list (a fur coat from a bonded vault). 30–50% of value on smaller items."
   },
   "where": "Marty the fence, W 39th St & 9th Ave",
   "systems": [
@@ -62,5 +64,7 @@
   ],
   "mobile": "Inventory menu.",
   "rank": 21,
-  "slice": false
+  "slice": false,
+  "durationMin": 30,
+  "heat": 3
 }

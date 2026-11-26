@@ -44,7 +44,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "$10–75 a print; first-on-scene bonus; a press-pass outfit that lowers witness heat at scenes"
+    "text": "$10–75 a print; first-on-scene bonus; a press-pass outfit that lowers witness heat at scenes",
+    "money": 600,
+    "payNote": "$10–75 a print; the first-on-scene bonus."
   },
   "where": "The Daily Ticker midtown bureau, W 26th St & 7th Ave",
   "systems": [
@@ -55,5 +57,7 @@
   ],
   "mobile": "Auto-framing; the 'first' timer is generous and shown on the HUD. Missing it pays less, never fails.",
   "rank": 3,
-  "slice": true
+  "slice": true,
+  "durationMin": 20,
+  "heat": 1
 }

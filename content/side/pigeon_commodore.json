@@ -50,7 +50,9 @@
     "o2"
   ],
   "rewards": {
-    "text": "$20 a race; the final race unlocks a pigeon-post messenger that shows the next story marker"
+    "text": "$20 a race; the final race unlocks a pigeon-post messenger that shows the next story marker",
+    "money": 200,
+    "payNote": "$20 a race; completion purse."
   },
   "where": "Rooftop coop over W 29th St & 7th Ave; rooftops across the Fur District",
   "systems": [
@@ -61,5 +63,7 @@
   ],
   "mobile": "Following is by viewpoint, not aim. Birds pause on landmarks. Every roof route has a stairwell exit.",
   "rank": 1,
-  "slice": true
+  "slice": true,
+  "durationMin": 20,
+  "heat": 0
 }

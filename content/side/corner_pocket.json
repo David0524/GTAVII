@@ -43,7 +43,9 @@
     "o1"
   ],
   "rewards": {
-    "text": "Stakes"
+    "text": "Stakes",
+    "money": 800,
+    "payNote": "The big table's stake."
   },
   "where": "Corner Pocket Billiards, over a W 41st St storefront (invented)",
   "systems": [
@@ -53,5 +55,7 @@
   ],
   "mobile": "Aim assist on; one-touch shots.",
   "rank": 19,
-  "slice": false
+  "slice": false,
+  "durationMin": 15,
+  "heat": 0
 }

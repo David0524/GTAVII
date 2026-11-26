@@ -43,7 +43,9 @@
     "o3"
   ],
   "rewards": {
-    "text": "A marquee message of your choice"
+    "text": "A marquee message of your choice",
+    "money": 100,
+    "payNote": "The manager's thanks."
   },
   "where": "Around the Deuce",
   "systems": [
@@ -52,5 +54,7 @@
   ],
   "mobile": "Letters glint.",
   "rank": 47,
-  "slice": false
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
 }
