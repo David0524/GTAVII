@@ -95,3 +95,22 @@ test('script and layout stay separate: every layout matches a script, and extrac
     for (const s of script.shots) assert.equal(scene.shots.find((x) => x.id === s.id)!.framing, s.framing);
   }
 });
+
+test('branch shots (showIf) play only for the picked option, and timing before the hold is unchanged', () => {
+  const c = JSON.parse(fs.readFileSync('content/cutscenes/m29_the_choice.json', 'utf8')) as Cutscene;
+  assert.deepEqual(validateCutscene(c).filter((e) => !/not in cast/.test(e)), []);
+  const before = new Timeline(c);
+  assert.ok(!before.shots.some((s) => s.showIf), 'unresolved: no branch shots');
+  const hold = c.shots.find((s) => s.waitFor === 'choice')!;
+  for (let opt = 0; opt < 4; opt++) {
+    const tl = new Timeline(c, undefined, undefined, new Map([[hold.choices!, opt]]));
+    const branch = tl.shots.filter((s) => s.showIf);
+    assert.equal(branch.length, 1, `option ${opt}: exactly one branch shot`);
+    assert.equal(branch[0].showIf!.option, opt);
+    const hi = tl.shots.indexOf(hold);
+    assert.deepEqual(tl.shotStart.slice(0, hi + 1), before.shotStart.slice(0, hi + 1));
+  }
+  assert.equal(new Timeline(c, undefined, undefined, 'all').shots.length, c.shots.length);
+  const bad = structuredClone(c); bad.shots[0].showIf = { choice: hold.choices!, option: 0 };
+  assert.ok(validateCutscene(bad).some((e) => /not an earlier choice hold/.test(e)));
+});

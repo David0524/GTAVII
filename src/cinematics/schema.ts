@@ -65,16 +65,7 @@ export function validateCutscene(c: Cutscene): string[] {
   const errs: string[] = [];
   const isV3 = (v: unknown) => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
   if (!c || typeof c.id !== 'string') errs.push('id');
-  if (!Array.isArray(c?.shots) || !c.shots.length) { errs.push('shots: none');   // branch shots must follow the choice hold they depend on
-  const holds = new Set<string>();
-  c.shots.forEach((s, i) => {
-    if (s.showIf) {
-      if (!holds.has(s.showIf.choice)) errs.push(`shots[${i}] (${s.id}): showIf.choice ${s.showIf.choice} is not an earlier choice hold`);
-      if (!Number.isInteger(s.showIf.option) || s.showIf.option < 0) errs.push(`shots[${i}] (${s.id}): showIf.option must be a 0-based index`);
-    }
-    if (s.waitFor === 'choice' && s.choices) holds.add(s.choices);
-  });
-  return errs; }
+  if (!Array.isArray(c?.shots) || !c.shots.length) { errs.push('shots: none'); return errs; }
   const ids = new Set<string>();
   c.shots.forEach((s, i) => {
     const p = `shots[${i}]${s?.id ? ` (${s.id})` : ''}`;
@@ -96,6 +87,15 @@ export function validateCutscene(c: Cutscene): string[] {
       ks.forEach((k, j) => { if (![k.t, k.x, k.z, k.heading].every(Number.isFinite)) errs.push(`${p}.actors.${a}[${j}]`); });
     }
     for (const d of s.dialogue ?? []) { const ref = typeof d === 'string' ? d : d.ref; if (!/^dlg\.[\w.]+#\w+$/.test(ref)) errs.push(`${p}.dialogue "${ref}" (expected dlg.<script>#<line>)`); }
+  });
+  // branch shots must follow the choice hold they depend on
+  const holds = new Set<string>();
+  c.shots.forEach((s, i) => {
+    if (s.showIf) {
+      if (!holds.has(s.showIf.choice)) errs.push(`shots[${i}] (${s.id}): showIf.choice ${s.showIf.choice} is not an earlier choice hold`);
+      if (!Number.isInteger(s.showIf.option) || s.showIf.option < 0) errs.push(`shots[${i}] (${s.id}): showIf.option must be a 0-based index`);
+    }
+    if (s.waitFor === 'choice' && s.choices) holds.add(s.choices);
   });
   return errs;
 }
