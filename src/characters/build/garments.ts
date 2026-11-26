@@ -145,6 +145,13 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   // without a tie, a big 1970s collar is worn spread out over the jacket's lapels
   const overLapel = !outfit.tie && !!outfit.outer && outfit.outer.lapel > 0;
   if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => (mb.slot = 1, shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1) * (overLapel ? 1.15 : outfit.outer ? 0.5 : 0.85), topOff + t.fit + 0.002 + (overLapel ? 0.016 : 0), neckBack)));
+  if (ctx.lod <= 1 && ['dressShirt', 'printShirt', 'workShirt', 'uniformShirt', 'blouse'].includes(t.kind)) {
+    const yTop = y.neck - neckFront - 0.012, yBot = topHem + 0.03;
+    const ys: number[] = []; const closedJacket = !!outfit.outer && outfit.outer.open < 0.5 && outfit.outer.kind !== 'vest';
+    for (let yy = yTop; yy > yBot; yy -= 0.085) if (!closedJacket || yy > y.waist + 0.1) ys.push(yy);
+    const bcol = t.kind === 'workShirt' || t.kind === 'uniformShirt' ? '#2a2622' : '#e8e2d4';
+    trims.push((mb) => { mb.slot = 1; if (!closedJacket) frontLine(ctx, mb, t.fabric, 0.11, y.neck - neckFront, topHem + 0.01, topOff + t.fit + 0.0015); buttons(ctx, mb, ys, 0.0, topOff + t.fit + 0.002, bcol, 0.0055); });
+  }
   if (t.collar === 'mock') trims.push((mb) => (mb.slot = 1, neckBand(ctx, mb, t.fabric, topOff + 0.004, 0.05)));
 
   // ---- bottom ------------------------------------------------------------------------------------
@@ -244,6 +251,11 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
     pieces.push({ surface: 'helper-tights', fabric: o.fabric, hem: 0.003, hides: false, slot: 3, fields: [h.below(y.waist + 0.02), h.above(y.waist - 0.02), h.noLegs, front, (k) => (h.isArm(k) ? -1 : 1)], offset: () => off + 0.012 });
   }
   if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.004, buttonY, gorgeY, openAngle)));
+  if (ctx.lod <= 1 && o.open < 0.5 && ['suitJacket', 'sportCoat', 'leisureJacket', 'overcoat', 'trench', 'uniformJacket', 'raincoat'].includes(o.kind)) {
+    const n = o.kind === 'overcoat' || o.kind === 'trench' || o.kind === 'raincoat' ? 3 : o.kind === 'uniformJacket' ? 4 : 2;
+    const ys = Array.from({ length: n }, (_, i) => buttonY - i * 0.1 + (o.kind === 'uniformJacket' ? 0.2 : 0));
+    trims.push((mb) => { mb.slot = 3; buttons(ctx, mb, ys, -0.02, off + 0.008, shade(o.fabric.color, 0.5), o.kind === 'overcoat' ? 0.011 : 0.0085); });
+  }
 }
 
 /** Lower trouser legs as straight tubes continuing the shin (positions for leg vertices below mid-calf). */
@@ -382,6 +394,38 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
     ribbon(ctx, mb, rows, m, side < 0);
   }
 }
+
+/** Small domed buttons on the torso front (az ≈ 0), skinned to the spine. */
+function buttons(ctx: GarmentCtx, mb: MeshBuilder, ys: number[], az: number, off: number, color: string, r: number) {
+  const tr = torsoRadius(ctx);
+  const m = fabricMat({ color, color2: color, pattern: 'solid', scale: 0.02, rough: 0.3, sheen: 0, fade: 0, dirt: 0 } as Fabric, KIND.leather);
+  const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
+  const seg = ctx.lod === 0 ? 10 : 6;
+  for (const yy of ys) {
+    const c = tr.at(yy, az, off), n = [Math.sin(az), 0, Math.cos(az)], t = [Math.cos(az), 0, -Math.sin(az)];
+    torsoSkin(ctx, yy, sj, sw);
+    const base = mb.count;
+    mb.vertex([c[0] + n[0] * 0.0025, c[1], c[2] + n[2] * 0.0025], n, sj, sw, m);
+    for (let i = 0; i < seg; i++) {
+      const a = (i / seg) * Math.PI * 2, ca = Math.cos(a) * r, sa = Math.sin(a) * r;
+      const p = [c[0] + t[0] * ca, c[1] + sa, c[2] + t[2] * ca];
+      const nn = [n[0] * 0.6 + t[0] * Math.cos(a) * 0.8, Math.sin(a) * 0.8, n[2] * 0.6 + t[2] * Math.cos(a) * 0.8];
+      mb.vertex(p, nn, sj, sw, m);
+    }
+    for (let i = 0; i < seg; i++) mb.tri(base, base + 1 + i, base + 1 + ((i + 1) % seg));
+  }
+}
+
+/** A thin seam/placket line down the front at azimuth az, from y0 down to y1. */
+function frontLine(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, az: number, y0: number, y1: number, off: number) {
+  const tr = torsoRadius(ctx);
+  const m = fabricMat({ ...f, color: shade(f.color, 0.62), color2: shade(f.color2, 0.62) });
+  const rows: [number, number, number][][] = [];
+  const n = 10;
+  for (let i = 0; i <= n; i++) { const yy = y0 + (y1 - y0) * (i / n); rows.push([tr.at(yy, az - 0.008, off), tr.at(yy, az + 0.008, off)]); }
+  ribbon(ctx, mb, rows, m);
+}
+const shade = (hex: string, k: number) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
 
 function neckBand(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, off: number, h: number) {
   const tr = torsoRadius(ctx), y = ctx.F.y;

@@ -264,7 +264,7 @@ export function hairMaterial(): THREE.MeshPhysicalNodeMaterial {
   m.alphaToCoverage = true;
 
   // inner layers darker (self-shadowing), tips lighter; grey strands mixed in by age
-  const shellCol = mix(cA.mul(0.55), cB, h.mul(0.8).add(0.1)).mul(mix(0.8, 1.15, n));
+  const shellCol = mix(cA.mul(m1.w.greaterThan(1.5).select(float(0.82), float(0.55))), cB, h.mul(0.8).add(0.1)).mul(mix(0.8, 1.15, n));
   // cards: darker near the root and on inner layers, strand-to-strand variation, lighter tips
   const cardCol = mix(cA.mul(0.62), cB, cv.mul(0.55).add(h.mul(0.25))).mul(mix(0.72, 1.18, strand));
   m.colorNode = mix(sub.equal(4).select(cardCol, shellCol), vec3(0.72, 0.7, 0.67), grey);
