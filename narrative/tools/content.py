@@ -58,6 +58,18 @@ def main():
     def flag_ok(where, f):
         if f not in flags: E(f"{where}: flag {f} not documented in content/flags.json")
 
+    def req_ok(where, rq):
+        if not rq: return
+        for k in ("all", "any", "none"):
+            for f in rq.get(k, []): flag_ok(where + " requires." + k, f)
+        al = rq.get("atLeast")
+        if al:
+            for f in al["of"]: flag_ok(where + " requires.atLeast", f)
+            if not 1 <= al["n"] <= len(al["of"]): E(f"{where}: atLeast.n out of range")
+        for k in (rq.get("relationship") or {}):
+            a, _, b = k.partition("/")
+            if a not in LEADS or b not in cast: E(f"{where}: relationship key {k} invalid")
+
     def rel_ok(where, rels):
         for k, v in (rels or {}).items():
             a, _, b = k.partition("/")
@@ -144,6 +156,8 @@ def main():
                 if len(l["choices"]) > CHOICES_MAX: E(f"{lw}: more than {CHOICES_MAX} choices")
                 for c in l["choices"]:
                     if c.get("if"): flag_ok(lw + " choice if", c["if"].lstrip("!"))
+                    req_ok(lw + " choice", c.get("requires"))
+                    if c.get("requires") and not c.get("disabledText"): E(f"{lw}: gated choice needs disabledText (greyed reason)")
                     if len(c["text"]) > CHOICE_MAX: E(f"{lw}: choice over {CHOICE_MAX} chars: {c['text']}")
                     if c.get("goto") and c["goto"] not in lids: E(f"{lw}: choice goto {c['goto']} missing")
                     for f in c.get("setFlags", []): flag_ok(lw, f)
@@ -156,6 +170,7 @@ def main():
             elif not (sp.startswith("char.") or sp.startswith("npc.")): E(f"{lw}: speaker must be char.* or npc.*")
             if l.get("goto") and l["goto"] not in lids: E(f"{lw}: goto {l['goto']} missing")
             if l.get("if") and l["if"].lstrip("!") not in flags: E(f"{lw}: condition flag {l['if']} undocumented")
+            req_ok(lw, l.get("requires"))
             for f in l.get("setFlags", []): flag_ok(lw, f)
 
     # triggers
@@ -218,8 +233,17 @@ def main():
         if b.get("barks") and b["barks"] not in pool_ids: E(f"{b['id']}: bark pool {b['barks']} missing")
 
     # flags: documented but never set by written content -> info only
-    set_somewhere = {f for m in missions.values() for f in m["rewards"].get("setFlags", [])}
-    set_somewhere |= {f for d in dialogue.values() for l in d["lines"] for c in l.get("choices", []) for f in c.get("setFlags", [])}
+    set_somewhere = set()
+    def walk(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k == "setFlags": set_somewhere.update(v)
+                walk(v)
+        elif isinstance(x, list):
+            for v in x: walk(v)
+    walk([list(missions.values()), list(dialogue.values())])
+    for f in flags:
+        if f not in set_somewhere: W(f"{f}: documented but never set by any mission or dialogue")
 
     for x in warns: print("WARN ", x)
     for x in errs: print("ERROR", x)

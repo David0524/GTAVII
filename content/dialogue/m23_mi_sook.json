@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m23_mi_sook",
+  "context": "M23 o5. Hanyang House, the back room. Mi-sook unlocks a steel cabinet behind the kimchi crocks.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Kye is twelve families, one pot. Same as your friend's club, Miss Moore."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Your money sleeps next to ours. Nobody robs twelve Korean grandmothers."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Rule thirteen: trust a woman who counts faster than you."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "dry",
+      "text": "There's no thirteen. You made it up just now. I like it."
+    }
+  ]
+}

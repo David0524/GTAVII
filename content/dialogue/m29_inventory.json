@@ -1,0 +1,73 @@
+{
+  "id": "dlg.m29_inventory",
+  "context": "M29 o1. Corwin lobby table. Bernard lays out what the leads have gathered, item by item.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Exhibit one: the ledger, or its copy. Lisle's voice on every page."
+    },
+    {
+      "id": "l2a",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Exhibit: Miss Kell's carbons. Fifteen years, in a laundry bag.",
+      "requires": {
+        "all": [
+          "flag.have_marjorie_carbons"
+        ]
+      }
+    },
+    {
+      "id": "l2b",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Exhibit: Sergeant Kearney's Christmas list. Sixty-nine to seventy-one.",
+      "requires": {
+        "all": [
+          "flag.have_kearney_list"
+        ]
+      }
+    },
+    {
+      "id": "l2c",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Exhibit: the lieutenant's own locker. His insurance, now ours.",
+      "requires": {
+        "all": [
+          "flag.have_wurtz_locker"
+        ]
+      }
+    },
+    {
+      "id": "l2d",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Exhibit: Miss Moore's photographs. Brannock, Wurtz, the park boy.",
+      "requires": {
+        "all": [
+          "flag.photo_file_3"
+        ]
+      }
+    },
+    {
+      "id": "l2e",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "And a picture of a newspaper editor's brother-in-law drinking with Lisle.",
+      "requires": {
+        "all": [
+          "flag.editor_neutralised"
+        ]
+      }
+    },
+    {
+      "id": "l2",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "grave",
+      "text": "Now the question isn't what you have, Mr. Arce. It's who you give it to."
+    }
+  ]
+}

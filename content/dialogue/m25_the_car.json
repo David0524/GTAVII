@@ -1,0 +1,97 @@
+{
+  "id": "dlg.m25_the_car",
+  "context": "M25 o4. W 35th St off Eighth, rain on the windshield. Mayhew in the driver's seat. Teddy in the passenger seat. Same as 1971.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "hollow",
+      "text": "Same spot. Same rain, almost. You remember?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I remember a man in a good suit in the back seat. With a briefcase."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "hollow",
+      "text": "Lisle. A.D.A. then. Case seventy-one forty-four-oh-two. A trucker's assault charge."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carl_mayhew",
+      "emotion": "hollow",
+      "text": "Lisle made it go away. For money. I carried. You drove. You were my alibi, kid."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.carl_mayhew",
+      "emotion": "breaking",
+      "text": "Then Knapp came. I gave them six guys so I'd never have to give them you. Or him."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "You gave them six so they'd never ask about one."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Get out of the city, Carl.",
+          "goto": "l_go",
+          "setFlags": [
+            "flag.teddy_spared_mayhew"
+          ],
+          "setRelationships": {
+            "char.teddy_arce/char.carl_mayhew": 2
+          }
+        },
+        {
+          "text": "We're driving to Calloway.",
+          "goto": "l_cal",
+          "setRelationships": {
+            "char.teddy_arce/char.carl_mayhew": -2,
+            "char.teddy_arce/char.ruth_calloway": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_go",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Take your pension and go to Florida. Fish. Never come back to Thirty-Fifth Street."
+    },
+    {
+      "id": "l_go2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "weeping",
+      "text": "Kid. Teddy. I… Yeah. Florida.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_cal",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Start the car, Carl. Fifth and Thirty-Sixth. She's always parked there."
+    },
+    {
+      "id": "l_cal2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "hollow",
+      "text": "…Yeah. Okay. I always liked driving you.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "I waited in this car once and said nothing. Not twice."
+    }
+  ]
+}

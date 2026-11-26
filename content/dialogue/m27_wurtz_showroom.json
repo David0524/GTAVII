@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m27_wurtz_showroom",
+  "context": "M27 o3. (Nick.) Varelas showroom. Wurtz runs a finger down a mink. Brannock behind him.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.dennis_wurtz",
+      "emotion": "smug",
+      "text": "Mr. Varelas. Insurance man's been asking about July twenty-sixth. Our night."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.dennis_wurtz",
+      "emotion": "smug",
+      "text": "My memory's for sale. Five thousand. Seasonal price."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "calm",
+      "text": "Everybody gets paid, Lieutenant. You'll have it Friday."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "His man by the door has a skim, Delphine says. A man with a skim has a price."
+    }
+  ]
+}

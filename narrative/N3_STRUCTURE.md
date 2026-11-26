@@ -116,7 +116,8 @@ leads survive with what they personally saved.
 These don't change which missions exist. They set epilogue states, and they're shown as
 choices in M27, M30 and M31.
 - **Tina (M27, Delphine):** stays (`flag.tina_stays`) if Delphine forgave her in M23
-  (`flag.delphine_forgave_tina`) or Delphine's relationship with Tina is at least +2.
+  (`flag.delphine_forgave_tina`). (The relationship alternative was dropped in N5 to keep
+  the rule legible.)
   Otherwise she leaves the city (`flag.tina_gone`). She survives either way.
 - **The Corwin (M30, Nick):**
   - **Sold on** to Lisle's investors (`flag.corwin_sold_on`): always available.
