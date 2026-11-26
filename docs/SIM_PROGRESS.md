@@ -10,7 +10,12 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | 3. Pedestrians: walk graph, local avoidance, crosswalks, jaywalking, loiter spots, subway entrances, flee/cower | **Done** (first pass) |
 | 4. Archetype runtime for `content/npc_archetypes/*.json` + 10 neutral built-ins | **Done**; `npm run sim:validate` checks content |
 | 5. External actors (player on foot/driving, scripted vehicles) | **Done**: brake, honk, swerve-by-lane-change, dodge, flee, collision/nearMiss events |
-| Integration contract (`src/sim/index.ts`) | **Done**, exactly as briefed plus optional extras |
+| Integration contract (`src/sim/index.ts`) | **Done** on the engine's shared contracts: `vehicles: TrafficVehicleView[]` (vclass, variant, lights) from `src/shared/traffic.ts`, `peds: PedView[]`, y from `src/shared/terrain.ts` `heightAt` (+ `CURB_HEIGHT` on sidewalks), lanes and spawns only inside `src/shared/bounds.ts` |
+| Brief 5. Escort / companion locomotion (`escort(agentId, route, opts)`) | **Done** (pace-matching, `escortProgress`/`escortDone` events) |
+| Brief 6. Dark signals (brownout → all-way stop) | **Done** (`setSignalPower(area, powered)`) |
+| Boundaries layer 3 (city thickens at the edge) | **First pass**: spawn density ramps up over the last `EDGE.RAMP` m; traffic crawls bumper-to-bumper inside `EDGE.BLOCKERS`; no lanes/walk graph beyond the playable edge. Rubbernecking at blockers and chase roadblocks: not yet |
+| Gameplay hooks | **First pass**: `perceive()`, `setGoal()` (goto/follow/escort/flee/flagDownCar), `emit({type:'gunfire'})` with distance-scaled panic, civilians pull over for `siren` actors. Police pursuit/foot-cop AI: not yet |
+| Economy hook | `blockAt(x,z)` + `footTraffic(blockId)` rolling peds/min |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
 | Playwright screenshots (`npm run build && npm run shots:sim -- --webgl`) | **Done** (`shots/sim/`) |
@@ -70,8 +75,10 @@ SubwayEntrance POIs). Steps (all deterministic; per-place choices hash coordinat
 9. Traffic graph pruned to its largest strongly connected component at lane-group level; every
    surviving lane is guaranteed an exit (no dead ends anywhere).
 
-Result: 247 junctions (204 signalized), 1137 lanes, 1506 connectors, 2093 conflicts, 598 walk nodes,
-1034 walk edges (514 crosswalks), 2992 spots, 74 bus stops.
+Result (expanded city, engine pipeline v2, playable bounds from `src/shared/bounds.ts`): 402 junctions
+(305 signalized: 294 from OSM POIs, plus synthesized), 1685 lanes, 2247 connectors, 3140 conflicts,
+1078 walk nodes, 1822 walk edges (925 crosswalks), 5195 spots, 109 bus stops; lanes.bin 606 KiB.
+Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the chunks change.
 
 ### Traffic
 - Fixed 1/30 s step, `update(dt)` accumulates (≤ 6 steps per call) and writes interpolated views.
@@ -122,18 +129,24 @@ vehicle kind is otherwise taken from props (`cab`/`truck`/`bus`). `barks` ids ar
 events (`archetype` field) for the audio/dialogue side.
 
 ## Integration contract
-Exactly as in the brief. Optional extras (no breaking changes): `SimOptions.archetypes`,
+As in the updated brief (`vehicles: TrafficVehicleView[]`, `peds: PedView[]`; `AgentView` kept as a
+deprecated alias of `PedView`). Hooks: `perceive({x,z,loudness,visibility})`, `setGoal(pedId, goal)`,
+`escort(pedId, route, {waitRadius,maxSpeed,target})`, `setSignalPower(area, powered)`,
+`blockAt(x,z)`, `footTraffic(blockId)`, `emit({type:'gunfire', x, z, loudness})`, and actors with
+`siren: true`. Optional extras: `SimOptions.archetypes`,
 `SimOptions.fetchBinary` (Node), `time`, `stats`, `lastUpdateMs`, `graph`, `network`,
 `registerArchetypes()`, `setDensityHook()`, `signalStates()`, `debugAgents()`, `archetypeWarnings`.
 Events: `honk {id,x,z,kind,archetype,reason,intensity}`, `collision`, `nearMiss`, `hail`, plus
 `jaywalk`, `doubleParked`, `pickup`, `dropoff`, `cabAlight`, `busStop`, `busDepart`, `alight`,
-`subwayExit`, `subwayEnter`, `dodge`, `hailAnswered`. `emit({type:'blockLane'|'closeStreet', until})`
+`subwayExit`, `subwayEnter`, `dodge`, `hailAnswered`, `escortProgress`, `escortDone`, `goalReached`. `emit({type:'blockLane'|'closeStreet', until})`
 takes `until` in sim seconds (`sim.time`); default now + 60 s.
 
-## Test results (`docs/sim_test_report.json`, seed 1974; also passes with seed 7)
-10 simulated minutes, focus touring Flatiron → Herald Square → 42nd St & 7th Ave, with a threat, a
-blocked lane, a closed street, the player walking a sidewalk and a scripted car driving through
-everything. Checked every other step against geometry independent of the sim:
+## Test results (`docs/sim_test_report.json`, seed 1974; earlier build also passed seed 7)
+10 simulated minutes on the merged engine data (terrain on, expanded city), focus touring Flatiron →
+Herald Square → 42nd St & 7th Ave. Scripted: a threat, a blocked lane, a closed street, a brownout
+(dark signals for 130 s), gunfire, the player walking a sidewalk, a scripted car driving through
+everything with its **siren on** for the middle third, and escort + goto goals on nearby peds.
+Checked every other step against geometry independent of the sim:
 
 | Check | Result |
 |---|---|
@@ -143,25 +156,38 @@ everything. Checked every other step against geometry independent of the sim:
 | vehicle-vehicle overlap (oriented boxes) | 0 |
 | peds inside buildings / on roadway when not crossing | 0 / 0 |
 | peds inside a moving vehicle | 0 |
-| deadlock: longest non-dwelling stop | 144 s (spill-back queue at 6th Ave/42nd; limit 180 s) |
-| network-wide flow | moving fraction ≥ 0.15 always, 0.49 average |
+| any agent beyond the playable edge / non-finite or wild y | 0 / 0 |
+| deadlock: longest non-dwelling stop | 88 s (limit 180 s) |
+| network-wide flow | moving fraction ≥ 0.16 always, 0.52 average |
 | determinism (two runs, same seed) | identical hashes |
+| hooks | 3 escorts (3 waypoint progress events), 3 goto goals (2 reached in time), 142 witnesses returned by `perceive()` for the gunfire |
 
-Activity in 10 min: 2158 lane changes, 442 crosswalk crossings, 44 jaywalks, 19 double-parks,
-74 hails → 7 pickups, 19 drop-offs, 1 bus stop served, 5088 honks, 71 gridlock-fallback despawns
-(53 in spill-back queues far from the focus).
+Activity in 10 min: 2037 lane changes, 1407 crosswalk crossings, 135 jaywalks, 11 double-parks,
+43 hails → 5 pickups, 13 drop-offs, 1 bus stop served, 3770 honks, 59 gridlock-fallback despawns.
 
 ## Performance (honest)
 Headless Node 22, **CPU only, single thread, this container** (no GPU), per fixed step:
-- **High (150 vehicles + 400 peds): 0.88 ms avg, 1.22 ms p95**, 16.6 ms max (the max is the
+- **High (150 vehicles + 400 peds): 0.59 ms avg, 0.83 ms p95**, 19 ms max (the max is the
   full-ring refill when the focus teleports between tour stops).
-- **Mobile Low (40 + 120): 0.17 ms avg, 0.37 ms p95.**
+- **Mobile Low (40 + 120): 0.14 ms avg, 0.30 ms p95.**
 - In the headless browser (`shots/sim/report.json`) the HUD reads ~2.4–3.4 ms per `update()` call,
   but that is Chrome sharing the CPU with the SwiftShader software rasteriser, and up to three
   fixed steps per frame at ~100 ms frames. Needs a real-device measurement; if High exceeds 2 ms
   there, the sim is self-contained (no DOM, no three.js) and can move to a worker as-is.
 
 ## Decisions (and why)
+- **Merged the engine branch (merge commit) and moved to its shared contracts** as requested via the
+  control-panel chat: vehicle classes are picked sim-side (`sedan` most, `hardtop`/`wagon`/`compact`,
+  `taxi` for cabs, `box_truck`/`step_van`/early-morning `garbage` for deliveries, `bus`); `lights`
+  carries head (dusk/night/rain), brake (decelerating or stopped), indicators (turns, lane changes,
+  kerb pulls, pull-over), hazards (double-parked, cab loading) and the vacant-taxi roof light.
+- **Edge ramp is spawn-acceptance based**, so it redistributes the same budget toward the edge
+  rather than adding agents; the last block crawls (desired speed × edgeDistance/BLOCKERS, ≥ 12 %).
+- **Dark signals are an all-way stop**: full stop at the line, then first-stopped-goes-first.
+- **Peds step around standing people** instead of queueing behind them (fixed corner pile-ups that
+  also held turning cars); a stopped car only blocks a ped who would walk into it.
+- **Very short lanes between close junctions** (e.g. W 44th St at Seventh/Broadway) count as part of the
+  junction for don't-block-the-box: room is measured through them when the next light is green.
 - **Signals synthesized where OSM has none** at real named-street crossings (4). Midtown grid
   intersections were all signalized in 1974; unsignalized junctions use priority rules.
 - **Graph pruned to the strongly connected core** instead of edge sources/sinks: no dead ends,
@@ -198,6 +224,12 @@ What doesn't (yet):
 - Street-level shot shows a truck right at the camera: the camera rig stands in the roadway.
 
 ## Known issues / next
+- [ ] Police vehicle agents (pursuit, box-in, roadblocks), foot cops on the walk graph, car-owner
+      reactions, plate/description recognition: Gameplay will request these through ENGINE_REQUESTS.
+- [ ] Edge layer 3 extras: rubbernecking at edge blockers, chase roadblocks; retune when bounds shrink.
+- [ ] Interiors door hand-off: walk graph needs door nodes (`doorsForChunk`) + an `enter`/`exit` ped state.
+- [ ] Wildlife (pigeons/rats/strays/mounted unit), subway trains, emergency/service traffic, cab rides
+      as player fast travel: scoped by the control panel, not started.
 - [ ] Real-hardware timing (desktop + phone); move to a worker if High > 2 ms on device.
 - [ ] Cab dispatch over the next 2–3 blocks; bus route ids and denser stop service.
 - [ ] Parked-car props for the parking lanes (engine) and kerb gaps at hydrants/bus stops.

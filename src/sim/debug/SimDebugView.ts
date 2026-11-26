@@ -40,7 +40,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
   const w = params.get('simweather'); if (w === 'rain' || w === 'overcast' || w === 'clear') sim.setWeather(w);
   const root = new THREE.Group(); root.name = 'sim-debug'; scene.add(root);
   const hud = document.createElement('div');
-  hud.style.cssText = 'position:fixed;right:8px;top:8px;z-index:20;font:11px/1.35 ui-monospace,monospace;color:#e8e2d0;background:rgba(10,10,12,.72);padding:6px 8px;border-radius:4px;pointer-events:none;white-space:pre';
+  hud.style.cssText = 'position:fixed;right:8px;top:84px;z-index:20;font:11px/1.35 ui-monospace,monospace;color:#e8e2d0;background:rgba(10,10,12,.72);padding:6px 8px;border-radius:4px;pointer-events:none;white-space:pre';
   document.body.appendChild(hud);
   const state = { ready: false, sim, ms: [] as number[], events: {} as Record<string, number> };
   (window as unknown as { __T74SIM: typeof state }).__T74SIM = state;

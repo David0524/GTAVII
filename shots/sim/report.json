@@ -4,24 +4,24 @@
   "report": [
     {
       "view": "01_herald_square",
-      "cam": "-250,42,-909,75.43,-22.12",
-      "simTime": 5.6999999999999895,
-      "vehicles": 135,
-      "peds": 106,
-      "updateMsAvg": 2.7719298245940815,
-      "updateMsP95": 5.600000000093132,
-      "frameMs": 98.43859649122807,
+      "cam": "-250,44.32,-909,75.43,-22.34",
+      "simTime": 7.333333333333317,
+      "vehicles": 106,
+      "peds": 53,
+      "updateMsAvg": 2.632432432461379,
+      "updateMsP95": 7.699999999720603,
+      "frameMs": 98.79000000059605,
       "stats": {
         "redLight": 0,
         "wrongWay": 0,
         "vehCollisions": 0,
         "pedHits": 0,
-        "spawnedV": 136,
-        "despawnedV": 1,
-        "spawnedP": 106,
+        "spawnedV": 108,
+        "despawnedV": 2,
+        "spawnedP": 53,
         "despawnedP": 0,
         "stuckDespawn": 0,
-        "honks": 4,
+        "honks": 5,
         "hails": 0,
         "boardings": 0,
         "dropoffs": 0,
@@ -29,62 +29,94 @@
         "doubleParks": 0,
         "jaywalks": 0,
         "crossings": 1,
-        "laneChanges": 63
+        "laneChanges": 60
       },
       "events": {
-        "honk": 4
+        "honk": 5
       }
     },
     {
       "view": "02_flatiron_spawn",
-      "cam": "-19,30,95,-8.32,-12.86",
-      "simTime": 4.499999999999994,
-      "vehicles": 122,
-      "peds": 246,
-      "updateMsAvg": 3.1695652173872553,
+      "cam": "-19,29.87,95,-8.32,-12.85",
+      "simTime": 7.133333333333318,
+      "vehicles": 98,
+      "peds": 131,
+      "updateMsAvg": 2.9847222222791365,
       "updateMsP95": 8,
-      "frameMs": 98.10000000091699,
+      "frameMs": 98.72051282055102,
       "stats": {
         "redLight": 0,
         "wrongWay": 0,
         "vehCollisions": 0,
         "pedHits": 0,
-        "spawnedV": 122,
-        "despawnedV": 0,
-        "spawnedP": 247,
-        "despawnedP": 1,
+        "spawnedV": 100,
+        "despawnedV": 2,
+        "spawnedP": 131,
+        "despawnedP": 0,
         "stuckDespawn": 0,
-        "honks": 1,
+        "honks": 2,
+        "hails": 0,
+        "boardings": 0,
+        "dropoffs": 0,
+        "busStops": 0,
+        "doubleParks": 0,
+        "jaywalks": 1,
+        "crossings": 1,
+        "laneChanges": 46
+      },
+      "events": {
+        "honk": 2,
+        "jaywalk": 1
+      }
+    },
+    {
+      "view": "03_42nd_and_7th",
+      "cam": "-605,37.82,-1455,-3.01,-19.73",
+      "simTime": 8.099999999999982,
+      "vehicles": 94,
+      "peds": 109,
+      "updateMsAvg": 3.1382716049290735,
+      "updateMsP95": 7.600000000093132,
+      "frameMs": 98.94444444444444,
+      "stats": {
+        "redLight": 0,
+        "wrongWay": 0,
+        "vehCollisions": 0,
+        "pedHits": 0,
+        "spawnedV": 99,
+        "despawnedV": 5,
+        "spawnedP": 109,
+        "despawnedP": 0,
+        "stuckDespawn": 0,
+        "honks": 0,
         "hails": 0,
         "boardings": 0,
         "dropoffs": 0,
         "busStops": 0,
         "doubleParks": 0,
         "jaywalks": 0,
-        "crossings": 0,
-        "laneChanges": 32
+        "crossings": 2,
+        "laneChanges": 47
       },
-      "events": {
-        "honk": 1
-      }
+      "events": {}
     },
     {
-      "view": "03_42nd_and_7th",
-      "cam": "-605,34,-1455,-3.01,-19.67",
-      "simTime": 5.59999999999999,
-      "vehicles": 124,
-      "peds": 218,
-      "updateMsAvg": 3.384210526387681,
-      "updateMsP95": 7.600000000093132,
-      "frameMs": 98.47166666984558,
+      "view": "04_herald_square_street_level",
+      "cam": "-330,3,-850,7.77,0.49",
+      "simTime": 8.39999999999998,
+      "vehicles": 104,
+      "peds": 86,
+      "updateMsAvg": 2.2892857142613225,
+      "updateMsP95": 6.100000000093132,
+      "frameMs": 98.94047619047619,
       "stats": {
         "redLight": 0,
         "wrongWay": 0,
         "vehCollisions": 0,
         "pedHits": 0,
-        "spawnedV": 128,
-        "despawnedV": 4,
-        "spawnedP": 218,
+        "spawnedV": 107,
+        "despawnedV": 3,
+        "spawnedP": 86,
         "despawnedP": 0,
         "stuckDespawn": 0,
         "honks": 3,
@@ -94,51 +126,18 @@
         "busStops": 0,
         "doubleParks": 0,
         "jaywalks": 0,
-        "crossings": 1,
-        "laneChanges": 66
+        "crossings": 4,
+        "laneChanges": 50
       },
       "events": {
         "honk": 3
       }
-    },
-    {
-      "view": "04_herald_square_street_level",
-      "cam": "-330,1.7,-850,7.77,-0.10",
-      "simTime": 4.999999999999992,
-      "vehicles": 117,
-      "peds": 140,
-      "updateMsAvg": 2.923529411766532,
-      "updateMsP95": 9.5,
-      "frameMs": 98.14561403843395,
-      "stats": {
-        "redLight": 0,
-        "wrongWay": 0,
-        "vehCollisions": 0,
-        "pedHits": 0,
-        "spawnedV": 117,
-        "despawnedV": 0,
-        "spawnedP": 140,
-        "despawnedP": 0,
-        "stuckDespawn": 0,
-        "honks": 2,
-        "hails": 0,
-        "boardings": 0,
-        "dropoffs": 0,
-        "busStops": 0,
-        "doubleParks": 0,
-        "jaywalks": 0,
-        "crossings": 1,
-        "laneChanges": 50
-      },
-      "events": {
-        "honk": 2
-      }
     }
   ],
   "logs": [
-    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    "[warning] [.WebGL-0x107c003c5400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x107c003c5400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x107c003c5400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x107c003c5400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
   ]
 }

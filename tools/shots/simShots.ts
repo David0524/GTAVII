@@ -7,6 +7,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadTerrain, heightAt } from '../../src/shared/terrain.ts';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
@@ -23,17 +24,19 @@ const look = (from: [number, number, number], to: [number, number, number]) => {
 };
 // Street centrelines from public/data/streets.json (medians): 5th Ave x=-19, 6th Ave x=-330, 7th Ave x=-605,
 // 23rd St z=-32, 34th St z=-909, 42nd St z=-1548. Herald Square = Broadway x 6th Ave at 34th/35th.
+await loadTerrain('data:application/octet-stream;base64,' + fs.readFileSync(path.join(ROOT, 'public/data/terrain.bin')).toString('base64'));
+const g = (x: number, y: number, z: number): [number, number, number] => [x, +(y + heightAt(x, z)).toFixed(2), z];
 const VIEWS = [
   // cameras sit above street centrelines so they never start inside a building
-  { name: '01_herald_square', cam: look([-250, 42, -909], [-350, 0, -935]) },
-  { name: '02_flatiron_spawn', cam: look([-19, 30, 95], [0, 0, -35]) },
-  { name: '03_42nd_and_7th', cam: look([-605, 34, -1455], [-600, 0, -1550]) },
-  { name: '04_herald_square_street_level', cam: look([-330, 1.7, -850], [-345, 1.5, -960]) },
+  { name: '01_herald_square', cam: look(g(-250, 42, -909), g(-350, 0, -935)) },
+  { name: '02_flatiron_spawn', cam: look(g(-19, 30, 95), g(0, 0, -35)) },
+  { name: '03_42nd_and_7th', cam: look(g(-605, 34, -1455), g(-600, 0, -1550)) },
+  { name: '04_herald_square_street_level', cam: look(g(-330, 1.7, -850), g(-345, 1.5, -960)) },
 ];
 
 async function main() {
   const port = 4174;
-  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'pipe' });
+  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'pipe', detached: true });
   await new Promise((r) => setTimeout(r, 2500));
   const browser = await chromium.launch({ args: ['--enable-unsafe-webgpu', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1 });
@@ -58,7 +61,8 @@ async function main() {
     }
   } finally {
     fs.writeFileSync(path.join(outDir, 'report.json'), JSON.stringify({ note: 'Headless SwiftShader in a CPU-only container; frame times are the software rasteriser, sim update ms are real JS time on this CPU.', quality, report, logs: logs.slice(-40) }, null, 2));
-    await browser.close(); server.kill();
+    await browser.close().catch(() => undefined);
+    try { process.kill(-server.pid!, 'SIGTERM'); } catch { server.kill(); }
   }
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+main().then(() => process.exit(0), (e) => { console.error(e); process.exit(1); });
