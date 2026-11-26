@@ -166,3 +166,20 @@ test('wasted: capped bill from cash, the attendants\' cut, half the loose ammo, 
   assert.equal(s.hp, 60); assert.equal(r.g.healthSys.effMax(s), 80, '20% max-health penalty');
   r.step(301, 0.5); assert.equal(r.g.healthSys.effMax(s), 100);
 });
+
+test('economy is wired into Gameplay: a street job pays, a register robbery is a witnessed crime, and it saves', () => {
+  const r = rig();
+  r.sim.add('clerk', 2, 0, { yaw: Math.atan2(2, 0), nerve: 0.9 });
+  const ids = [...(r.g.economy as any).defs.keys()] as string[];
+  const legal = ids.find((i) => /garment/.test(i))!, rob = ids.find((i) => /register/.test(i))!;
+  const m0 = r.g.inv.ensure(T).money;
+  const job = r.g.economy.attempt(T, legal);
+  assert.ok(job.ok && job.cents > 0 && r.g.inv.ensure(T).money === m0 + job.cents, JSON.stringify(job));
+  r.g.equip('weapon.service');
+  const hit = r.g.economy.attempt(T, rob, { armed: true });
+  assert.ok(hit.crimes.length > 0, JSON.stringify(hit));
+  assert.ok(r.has('crimeWitnessed'), 'the clerk saw it');
+  const s = JSON.parse(JSON.stringify(r.g.serialize()));
+  const b = rig(); b.g.deserialize(s);
+  assert.deepEqual(b.g.economy.serialize(), r.g.economy.serialize());
+});

@@ -29,6 +29,7 @@ export interface SaveV3 {
   cars?: unknown;
   ownership?: unknown;
   stats?: unknown;
+  economy?: unknown;
   activeLead?: string;
 }
 

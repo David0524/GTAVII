@@ -44,6 +44,7 @@ import { FireSystem } from './props/fire';
 import { Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
 import { simAgentPort, type SimLike } from './integration/simAdapter';
+import { Economy } from './economy';
 import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
@@ -113,6 +114,8 @@ export class Gameplay {
   readonly ownership: Ownership;
   /** stats and completion feed for the UI chat */
   readonly stats = new Stats();
+  /** free-roam money: jobs, crime, fences, chop list, gambling, property, loans (ECONOMY.md) */
+  readonly economy: Economy;
   private lastPos: V3 | null = null;
   private fireTick = 0;
   /** a car waiting on a hot-wire before it will start */
@@ -169,6 +172,8 @@ export class Gameplay {
     this.cars = new Cars(this.rng);
     this.fire = new FireSystem(this.rng);
     this.ownership = new Ownership(this.inv, this.cars);
+    // crimes from economy activities go through the same witness system as everything else
+    this.economy = new Economy({ inv: this.inv, time: this.clock, crime: (kind, o) => { this.crime(kind, o); }, rng: this.rng, flags: (f) => this.flags.has(f) });
     this.clock.on('timeAdvanced', (e) => { this.ownership.advance(e.fromDay, e.fromMinutes, e.toDay, e.toMinutes); this.ownership.restockWeek(Math.floor(e.toDay / 7)); });
     this.port = this.nullPort();
     this.policeSys = new Police(this.reg.precincts, this.world, this.rng);
@@ -1070,7 +1075,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -1089,6 +1094,7 @@ export class Gameplay {
     this.cars.deserialize((s as any).cars ?? []);
     this.ownership.deserialize((s as any).ownership);
     this.stats.deserialize((s as any).stats);
+    if ((s as any).economy) this.economy.restore((s as any).economy);
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);
       this.pc.weapon = this.inv.ensure(this.player.lead).equipped; this.guns.clear();

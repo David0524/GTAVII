@@ -8,7 +8,7 @@ into `docs/briefs/`. Read this first each session and update it last.
 ## How to run
 | What | Command |
 |---|---|
-| Headless suite (101 tests, about 60 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
+| Headless suite (104 tests, about 60 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
 | CPU bench (writes `shots/gameplay/bench.json`) | `npx tsx tools/gameplay/bench.ts` |
 | Test scene | `npm run dev`, then `/?gameplay=1` (`&station=lot\|yard\|block\|shop`, `&lead=teddy\|delphine\|nick`, `&touch=1`, `&overlays=0`) |
 | Recorded frames | `npm run build && npx tsx tools/gameplay/record.ts [--only a,b] [--skip c]` → `shots/gameplay/*.png` plus `frames.json` (a note and the live game state per frame) |
@@ -272,8 +272,8 @@ Both are cheap to cache.
       takes, and let supply caps (pools, the weekly list, fence saturation) do the bounding.
     - Business payback, at 5–10 game weeks, is longer than a 20-hour playthrough. It needs a
       decision on whether property is late-game.
-  - **Not yet wired** into the facade or the scene (it runs against `Inventory` and `TimeKeeper`
-    directly).
+  - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
+    witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
 - **Content is placeholder:** gameplay's own invented weapons, shops and prices run unless
   narrative's adapter content is passed in. The adapter works on a snapshot, but the scene
   doesn't load narrative's files yet.
