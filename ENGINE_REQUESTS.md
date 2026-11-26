@@ -49,3 +49,24 @@ against until it ships. The engine team owns all decisions here.
 - **Fallback:** A chain of `goto` objectives (Flatiron → W 26th → W 28th → W 31st St &
   Broadway), each starting a short dialogue on arrival, with the NPC re-spawned ahead at
   each stop.
+
+## 5. Switching between playable characters
+- **What:** Three playable characters (`char.teddy_arce`, `char.delphine_moore`,
+  `char.ezra_lomax`), each with their own position, wardrobe, money and inventory. We
+  need:
+  - a switch action in free roam (between missions), with the camera cutting to the
+    other character wherever they are in their own daily schedule;
+  - a scripted `switch_to` objective or action inside missions;
+  - save state extended to per-character state, for example
+    `"characters": { "char.x": { "money": 0, "inventory": [], "at": "..." } }`,
+    plus `"activeCharacter"`.
+- **Why:** The reviewer approved three converging leads introduced across the first half.
+  There are 10 joint missions (M9, 12, 17, 18, 21, 22, 26, 27, 28, 32).
+- **Mobile:** The switch should be one large button that opens a three-portrait picker
+  (no hold or radial gestures). Mid-mission switches are only offered at safe points,
+  never under a timer.
+- **Fallback:** Switching happens only at mission boundaries. Each mission declares its
+  `playAs` lead, and the narrative sets a `flag.active_<lead>` that the engine reads to
+  pick the player spawn and wardrobe. In joint missions the other leads are
+  companion NPCs. Money stays a single shared pot, and per-lead balances are tracked
+  in flags for story purposes only.

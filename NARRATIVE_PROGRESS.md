@@ -6,7 +6,7 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 ## Status
 | Phase | State |
 |---|---|
-| N1. Story bible | **Draft done, awaiting review** → `narrative/N1_STORY_BIBLE.md` |
+| N1. Story bible | **Revised after review 1** (three leads); branch points pending → `narrative/N1_STORY_BIBLE.md` |
 | N2. Cast | — (blocked on N1 review) |
 | N3. Story structure | — |
 | N4. Mission specs and side activities | — |
@@ -29,32 +29,42 @@ content/                   (from N4 on) machine-readable missions, triggers, dia
 (`claude/sharp-maxwell-jnb6hr`) was fast-forwarded onto it so it carries the engine docs
 and `public/data/world.json`.
 
-## Proposal summary (for review)
-- **Premise:** Teddy Arce is an ex-patrolman purged in the Knapp aftermath for petty
-  "grass-eating" and now works the night desk at an SRO hotel. He's pulled into a
-  post-Knapp syndicate that is rebuilding the payoff "pad" as legal-looking paperwork
-  (legal fees, trucking surcharges, SRO conversions).
-- **Dramatic question:** Can you protect your block when every kind of protection is
-  for sale, without becoming the one who sells it?
+## Review log
+**26 Nov 2026, N1 review 1.** The reviewer said:
+- Teddy stays the lead.
+- **Three totally different playable leads**, in the spirit of rotating-lead open-world
+  games, converging for key missions and **introduced one at a time through the first
+  half**.
+- **Sensitive subjects are fine. Prostitution should be present in the world.**
+
+Applied in the bible:
+- Delphine Moore (§3b) and Ezra Lomax (§3c) added as leads.
+- A 32-mission rotation table (§6.0): Delphine arrives in M6, Ezra in M15, all three are
+  playable by M17, and there are 10 joint missions.
+- Sensitive-subject handling rules rewritten (§7).
+- ENGINE_REQUESTS #5 (switching leads).
+
+## Current proposal
+- **Leads:** Teddy Arce (ex-cop, night clerk: *access*), Delphine Moore (former presser,
+  works the Eighth Ave strip and banks the women's savings club: *reading people, photo
+  evidence, on foot*), Ezra Lomax (the trucking boss's gay son, who drives the surcharge
+  pad: *wheels*).
+- **Premise:** a post-Knapp syndicate rebuilds the payoff "pad" as legal-looking
+  paperwork. Each lead is one moving part of it: Teddy collects, Delphine's club gets
+  taxed, Ezra drives.
+- **Dramatic question:** Can you protect your block when every kind of protection is for
+  sale, without becoming the one who sells it?
 - **Pillars:** P1 Follow the money · P2 The grid is the game · P3 Everybody's on a shift
   · P4 Owed, not owned · P5 The city is running out.
-- **Acts:** 1 "Dusk" (21 Jun–4 Jul) · 2 "Heat" (5 Jul–7 Aug) · 3 "Resignation"
-  (8 Aug–2 Sep) · Epilogue "October" (1 Oct 1974).
-- **Alternatives considered:** "The Courier", "Wire", "Night Desk". All three are folded
-  in as mechanics, a branch and the hub.
+- **Acts:** 1 "Dusk" (M1–9, 21 Jun–4 Jul) · 2 "Heat" (M10–21, to 7 Aug) · 3 "Resignation"
+  (M22–32, to Labor Day) · Epilogue "October".
 
-## Decisions awaiting the reviewer
-1. **Approve the premise and protagonist**, or pick an alternative logline.
-2. **Branch points.** Two candidates are sketched: A, wear the wire or burn it; B, who
-   gets the ledger. The brief says to ask before adding branching points. I'm asking
-   now so N3 can build on them. A possible third: C, whether Teddy sides with the
-   Corwin tenants or the garment operators when the Act 3 march splits.
-3. **Sensitive beats** (bible §7): the heat death at the Corwin, the arson threat,
-   Marisol's Eighth Avenue storyline, the heroin market in Bryant Park, and the
-   presidential resignation as backdrop. Each has a proposed handling and a fallback.
-4. **Date-driven world.** The story assumes the game knows the calendar date (newspapers
-   per week, holidays, brownout nights). This is filed as ENGINE_REQUESTS #1, with a
-   flag-based fallback.
+## Still awaiting the reviewer
+1. **Branch points** (the brief says to ask before adding them). A: Teddy wears
+   Calloway's wire or burns it (M12). B: who gets the ledger (M29). Both are still
+   marked pending.
+2. ENGINE_REQUESTS #1 (calendar) and #5 (switching leads) are needed for the structure
+   as designed. Both have fallbacks.
 
 ## Decisions made (narrative-side)
 - **Calendar:** 21 Jun 1974 (Friday, solstice) to 2 Sep 1974 (Labor Day), plus an
@@ -72,6 +82,7 @@ and `public/data/world.json`.
   invention, not history.
 - **The 1975 crisis events are foreshadowing only.** Fear City, mass layoffs and the
   sanitation strike [S18] don't happen in 1974.
+- **Three-lead rules:** each lead gets a solo mission before any joint one; joint missions carry the act turns; no ending requires one lead to kill another.
 - **Crews are defined by trade, not ethnicity.** The trucking combine, the plainclothes
   unit, the SRO syndicate and the arcade operators are all mixed. Every community in the
   district has legitimate, sympathetic principal or secondary characters (enforced in N2).
@@ -186,6 +197,19 @@ Each period claim that drives a story beat is listed here. Secondary sources are
   halts under the new administration. Sources:
   [NYRB review of *Drop Dead City*](https://www.nybooks.com/articles/2025/06/26/the-vanishing-mr-beame-drop-dead-city/);
   [Macaulay CUNY seminar page](https://eportfolios.macaulay.cuny.edu/seminars/napoli09/index-54799.html).
+- **[S20] Runaway shops:** garment work fled New York for the South, and later the
+  Caribbean and beyond, in the postwar decades; relocation deepened racial segregation of
+  the jobs. Sources: [Battle, "On the Auction Block", ILWCH (2022)](https://doi.org/10.1017/s0147547922000059);
+  [Freeman, *Working-Class New York*, ch. 9](https://rodriguez21lpol301.commons.gc.cuny.edu/wp-content/blogs.dir/17962/files/2021/10/Working-Class-New-York-Joshua-Freeman-Chap-9.pdf).
+  *Drives:* Delphine's backstory.
+- **[S21] Policing of gay New Yorkers around 1974:** entrapment for cruising was curtailed
+  in the late 1960s; bar raids continued after Stonewall (for example the 1970 Snake Pit
+  raid); serious harassment had become less common by the early 1970s. Sources:
+  [NCJRS abstract, police harassment 1960–1980](https://ojp.gov/ncjrs/virtual-library/abstracts/police-harassment-homosexual-women-and-men-new-york-city-1960-1980);
+  [OutHistory, Gay Bars and Antigay Policing](https://outhistory.org/exhibits/show/docsw/docsw1);
+  [Gay City News, Corruption before and after Stonewall](https://gaycitynews.com/corruption-before-after-stonewall/).
+  *Drives:* Ezra's threat is private blackmail and exposure, not routine arrest. Raid
+  frequency for 1971–75 is still unverified, so no raid is set in 1974 without a source.
 - **[S19] Music in 1974:** disco emerging from New York and Philadelphia club culture in
   1974; salsa at a creative peak after the early-1970s club and stadium concerts.
   Sources: [Carnegie Hall, salsa's New York history](https://carnegiehall.org/Explore/Articles/2024/12/20/Salsas-New-York-History);
