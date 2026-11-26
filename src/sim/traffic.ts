@@ -11,8 +11,22 @@ import { Sig } from './network';
 import type { SimCore, Vehicle, Hail } from './state';
 import { vehDensity } from './state';
 import type { VehicleKind } from './archetypes';
+import type { VehicleClass } from '../shared/traffic';
+import { edgeDistance, EDGE } from '../shared/bounds';
 
-const DIMS: Record<VehicleKind, [number, number]> = { car: [5.2, 2.0], cab: [5.3, 2.0], truck: [8.0, 2.5], bus: [12.0, 2.6] };
+/** Body length/width by shared vehicle class (src/shared/traffic.ts). */
+const DIMS: Record<VehicleClass, [number, number]> = {
+  sedan: [5.4, 2.0], hardtop: [5.3, 2.0], compact: [4.6, 1.8], wagon: [5.6, 2.0], taxi: [5.3, 2.0], police: [5.4, 2.0],
+  bus: [12.0, 2.6], box_truck: [8.0, 2.5], step_van: [6.5, 2.3], garbage: [9.0, 2.5],
+};
+/** Sim-side spawn mix inside each driver kind (models are the vehicles workstream's job). */
+function pickClass(S: SimCore, kind: VehicleKind): VehicleClass {
+  const r = S.rng.next();
+  if (kind === 'cab') return 'taxi';
+  if (kind === 'bus') return 'bus';
+  if (kind === 'truck') return S.minute < 9 * 60 && r < 0.12 ? 'garbage' : r < 0.68 ? 'box_truck' : 'step_van';
+  return r < 0.55 ? 'sedan' : r < 0.75 ? 'hardtop' : r < 0.87 ? 'wagon' : 'compact';
+}
 const tmp = [0, 0, 0, 0], tmp2 = [0, 0, 0, 0];
 const B_MAX = 8; // emergency braking, m/s^2
 
@@ -126,7 +140,11 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     const arch = S.reg.pick((a) => a.behaviour === 'driver' && (a.vehicle !== 'bus' || (road.flags & RoadFlag.BusRoute) !== 0), tmp[0], tmp[1], S.minute, S.rng.next());
     if (!arch) continue;
     const kind = arch.vehicle!;
-    const [vl, vw] = DIMS[kind];
+    // the city thickens toward the playable edge (BOUNDARIES layer 3): spawn acceptance ramps up
+    const ramp = Math.max(0, Math.min(1, 1 - edgeDistance(tmp[0], tmp[1]) / EDGE.RAMP));
+    if (!full && S.rng.next() > 0.45 + 0.55 * ramp) continue;
+    const vclass = pickClass(S, kind);
+    const [vl, vw] = DIMS[vclass];
     if (kind === 'bus' && L.laneIndex !== 0 && L.laneCount > 2) continue;
     // free space on the lane
     let ok = true;
@@ -135,7 +153,7 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     if (!ok) continue;
     const ag = arch.aggression;
     const v: Vehicle = {
-      id: S.nextId++, kind, arch, variant: S.rng.int(8), alive: true,
+      id: S.nextId++, kind, vclass, lights: 0, arch, variant: S.rng.int(1 << 30), alive: true,
       link: lane, prevLink: -1, s, v: L.speed * 0.6, acc: 0, len: vl, wid: vw, next: -1, want: -1,
       v0f: (kind === 'bus' || kind === 'truck' ? 0.85 : 0.92 + 0.2 * ag) * S.rng.range(0.92, 1.08),
       T: kind === 'cab' ? 0.9 : kind === 'bus' ? 1.6 : 1.3 - 0.4 * ag, aMax: kind === 'bus' || kind === 'truck' ? 1.1 : 1.8 + ag * 0.6,
@@ -165,6 +183,25 @@ function vehiclesBeforePoint(S: SimCore, link: number, sPoint: number, margin: n
   return false;
 }
 
+/** Free road (m) from the start of lane `out` to the first vehicle, looking through short lanes into the
+ *  next junction when its light is green (a 3 m stub between two junctions must not hold a car in the box). */
+function roomFrom(S: SimCore, out: number, t: number): number {
+  const net = S.net;
+  const first = S.occ[out][0];
+  if (first) return first.s - first.len / 2;
+  const len = net.len[out];
+  if (len > 14) return len;
+  if (net.laneSignal(out, t) === Sig.Red || net.laneSignal(out, t) === Sig.Yellow) return len;
+  let best = 0;
+  for (const c of net.g.links[out].next) {
+    const fc = S.occ[c][0];
+    if (fc) { best = Math.max(best, fc.s - fc.len / 2); continue; }
+    const tl = net.g.links[c].next[0], ft = S.occ[tl][0];
+    best = Math.max(best, net.len[c] + (ft ? ft.s - ft.len / 2 : net.len[tl]));
+  }
+  return len + best;
+}
+
 /** May vehicle v (on a lane, approaching its stop line) enter its chosen connector now? */
 function canEnter(S: SimCore, v: Vehicle, t: number): string {
   const net = S.net, c = v.next;
@@ -172,10 +209,9 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
   const C = net.g.links[c], out = C.next[0];
   // don't block the box: room on the exit lane
   if (!v.force) {
-    let room = net.len[out];
-    for (const w of S.occ[out]) { room = w.s - w.len / 2; break; }
+    let room = roomFrom(S, out, t);
     for (const w of S.occ[c]) if (w !== v) room = Math.min(room, -1); // someone still on my connector: car-following handles, but keep a queue
-    if (room < v.len + 1.5 && (S.occ[out][0]?.v ?? 9) < 3) return 'box';
+    if (room < v.len + 1.5 && ((S.occ[out][0]?.v ?? 0) < 3)) return 'box';
   }
   // conflicting movements already in the junction
   for (const cf of C.conflicts) if (vehiclesBeforePoint(S, cf.link, cf.sOther, v.wid + 1.0)) return 'conflict';
@@ -489,6 +525,25 @@ function endDwell(S: SimCore, v: Vehicle) {
   v.stopLink = -1; v.stopAt = -1; v.stopKind = '';
 }
 
+// ------------------------------------------------------------------ lights (VehicleLights bits, src/shared/traffic.ts)
+const L_HEAD = 1, L_BRAKE = 2, L_IND_L = 4, L_IND_R = 8, L_HAZARD = 16, L_ROOF = 64;
+function updateLights(S: SimCore, v: Vehicle) {
+  const net = S.net, L = net.g.links[v.link];
+  let m = 0;
+  if (S.minute < 6.5 * 60 || S.minute > 19.5 * 60 || S.weather !== 'clear') m |= L_HEAD;
+  if (v.state === 'doubleParked') m |= L_HAZARD;
+  else if (v.state === 'curb' || v.state === 'busStop') m |= v.dwell <= 1 ? L_IND_L : v.kind === 'cab' ? L_HAZARD : L_IND_R;
+  else {
+    if (v.acc < -0.6 || v.v < 0.2) m |= L_BRAKE;
+    if (v.lcT < 1 && v.lcFrom >= 0) m |= net.g.links[v.lcFrom].laneIndex > L.laneIndex ? L_IND_R : L_IND_L;
+    else if (v.stopLink >= 0 && (v.stopLink !== v.link || v.stopAt - v.s < 40)) m |= L_IND_R;
+    else if (L.kind === LinkKind.Lane && v.next >= 0 && net.len[v.link] - v.s < 45) { const t = net.g.links[v.next].turn; if (t === Turn.Left) m |= L_IND_L; else if (t === Turn.Right) m |= L_IND_R; }
+    else if (L.kind === LinkKind.Connector && L.turn !== Turn.Straight) m |= L.turn === Turn.Left ? L_IND_L : L_IND_R;
+  }
+  if (v.vclass === 'taxi' && !v.fare) m |= L_ROOF;
+  v.lights = m;
+}
+
 // ------------------------------------------------------------------ main step
 const obs: Obs = { gap: Infinity, vl: 0, why: '', hard: Infinity };
 
@@ -512,12 +567,15 @@ export function stepVehicles(S: SimCore, dt: number) {
         for (const w of S.occ[v.link]) if (w !== v && w.s - v.s > -(w.len + v.len) / 2 - 10 && w.s - v.s < (w.len + v.len) / 2 + 1 && (w.passable === false)) { if (w.lat < -0.2 || w.s < v.s && w.v > 1) { clear = false; break; } }
         if (clear) endDwell(S, v); else v.dwell = 0.3;
       }
-      placeVehicle(S, v);
+      placeVehicle(S, v); updateLights(S, v);
       continue;
     }
     lookAhead(S, v, t, obs);
     v.why = obs.why;
-    const v0 = L.speed * v.v0f * rainF;
+    // last block before the edge: bumper-to-bumper crawl (TODO: retune when bounds.ts shrinks)
+    const ed = edgeDistance(v.x, v.z);
+    const edgeF = ed < EDGE.BLOCKERS ? Math.max(0.12, ed / EDGE.BLOCKERS) : 1;
+    const v0 = L.speed * v.v0f * rainF * edgeF;
     let a = idm(v, v0, obs.gap, obs.vl);
     a = Math.max(-B_MAX, Math.min(v.aMax, a));
     let nv = Math.max(0, v.v + a * dt);
@@ -561,7 +619,7 @@ export function stepVehicles(S: SimCore, dt: number) {
     // lane changes (staggered)
     if (v.lcCd <= 0) { v.lcCd = 0.5; laneChangeLogic(S, v, obs); }
     periodBehaviour(S, v, dt);
-    placeVehicle(S, v);
+    placeVehicle(S, v); updateLights(S, v);
   }
 }
 

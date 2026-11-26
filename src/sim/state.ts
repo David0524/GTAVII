@@ -3,9 +3,10 @@ import type { ArchetypeRegistry, ArchetypeRt, VehicleKind } from './archetypes';
 import type { Rng } from './geom';
 import type { AgentGrid, Network } from './network';
 import type { BusStop } from './laneFormat';
+import type { VehicleClass } from '../shared/traffic';
 
 export interface Vehicle {
-  id: number; kind: VehicleKind; arch: ArchetypeRt; variant: number; alive: boolean;
+  id: number; kind: VehicleKind; vclass: VehicleClass; lights: number; arch: ArchetypeRt; variant: number; alive: boolean;
   link: number; prevLink: number; s: number; v: number; acc: number; len: number; wid: number;
   /** Chosen connector at the end of the current lane (always one of links[link].next); -1 on a connector. */
   next: number;
@@ -74,6 +75,8 @@ export interface SimCore {
   preds: number[][];
   /** walk edge -> connectors that cross it */
   crossConns: Map<number, number[]>;
+  /** peds entering each road's sidewalks since the last foot-traffic sample, and the rolling per-minute average */
+  footCount: Float32Array; footAvg: Float32Array;
   spawnPedAt(x: number, z: number, reason: string): void;
   onBusStop(spot: number, v: Vehicle): void;
 }

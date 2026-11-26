@@ -17,8 +17,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Simulation, SIM_DT } from '../../src/sim/index.ts';
 import { readChunk, GroundKind } from '../../src/shared/chunkFormat.ts';
-import { CHUNK_SIZE, REGION } from '../../src/shared/geo.ts';
-const inside = (x: number, z: number) => x > REGION.minX + 1 && x < REGION.maxX - 1 && z > REGION.minZ + 1 && z < REGION.maxZ - 1;
+import { CHUNK_SIZE } from '../../src/shared/geo.ts';
+import { edgeDistance } from '../../src/shared/bounds.ts';
 import { pointInPolygon, projectOnPoly, sampleAt } from '../../src/sim/geom.ts';
 import { LinkKind } from '../../src/sim/laneFormat.ts';
 import { Sig } from '../../src/sim/network.ts';
@@ -30,11 +30,14 @@ const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return
 const MINUTES = +arg('minutes', '10');
 const SEED = +arg('seed', '1974');
 
+const terrainUrl = 'data:application/octet-stream;base64,' + fs.readFileSync(path.join(DATA, 'terrain.bin')).toString('base64');
 const fetchBinary = async (p: string) => { const b = fs.readFileSync(path.join(DATA, p)); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength); };
 
 // ------------------------------------------------------------------ ground polygons
 interface PolyW { rings: Float32Array[]; minX: number; minZ: number; maxX: number; maxZ: number }
 const world = JSON.parse(fs.readFileSync(path.join(DATA, 'world.json'), 'utf8'));
+const GR = world.region;
+const inside = (x: number, z: number) => x > GR.minX + 1 && x < GR.maxX - 1 && z > GR.minZ + 1 && z < GR.maxZ - 1;
 const bld: PolyW[] = [], road: PolyW[] = [];
 for (const c of world.chunks) {
   const b = fs.readFileSync(path.join(DATA, 'chunks', `${c.key}.bin`));
@@ -62,7 +65,7 @@ const inBuilding = new Idx(bld), onRoad = new Idx(road);
 const FOCI = [
   { name: 'Flatiron spawn', x: world.spawn.x, z: world.spawn.z },
   { name: 'Herald Square', x: -380, z: -915 },
-  { name: '42nd St & 7th Ave', x: -330, z: -1560 },
+  { name: '42nd St & 7th Ave', x: -605, z: -1548 },
 ];
 
 function hashState(sim: Simulation): string {
@@ -75,13 +78,13 @@ function hashState(sim: Simulation): string {
 }
 
 async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number; checks: boolean; label: string }) {
-  const sim = new Simulation({ seed: SEED, maxVehicles: opts.maxVehicles, maxPeds: opts.maxPeds, fetchBinary });
+  const sim = new Simulation({ seed: SEED, maxVehicles: opts.maxVehicles, maxPeds: opts.maxPeds, fetchBinary, terrainUrl });
   await sim.load();
   sim.setClock(17 * 60 + 30);
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
-  const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0 };
+  const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0 };
   const examples: Record<string, string[]> = {};
   const seen = new Set<string>();
   const note = (k: string, s: string) => { fail[k]++; const key = k + s.split(' at ')[0].split(' ')[0]; if (seen.has(key)) return; seen.add(key); (examples[k] ??= []).length < 8 && examples[k].push(s); };
@@ -122,6 +125,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     if (!opts.checks || k % 2) continue;
     const { vehicles, peds } = sim.debugAgents();
     let moving = 0;
+    for (const a of [...vehicles, ...peds]) if (edgeDistance(a.x, a.z) < -3) note('beyondEdge', `#${a.id} at ${a.x.toFixed(1)},${a.z.toFixed(1)}`);
+    for (const a of [...sim.vehicles, ...sim.peds]) if (!Number.isFinite(a.y) || Math.abs(a.y) > 40) note('badHeight', `#${a.id} y=${a.y}`);
     for (const v of vehicles) {
       const L = g.links[v.link];
       // roadway + lane band

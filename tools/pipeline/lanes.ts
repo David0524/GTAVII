@@ -22,7 +22,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readChunk, PoiKind, GroundKind } from '../../src/shared/chunkFormat.ts';
-import { CHUNK_SIZE, REGION } from '../../src/shared/geo.ts';
+import { CHUNK_SIZE } from '../../src/shared/geo.ts';
+import { edgeDistance } from '../../src/shared/bounds.ts';
 import { cumLengths, hash2, offsetPoly, polyIntersect, polyLength, pointInPolygon, projectOnPoly, reversePoly, sampleAt, subPoly } from '../../src/sim/geom.ts';
 import {
   writeLaneGraph, JuncFlag, LinkKind, RoadFlag, Turn, LinkFlag, WalkKind, SpotKind,
@@ -100,7 +101,11 @@ class PolyIndex {
   }
 }
 const inBuilding = new PolyIndex(buildingsW), onRoad = new PolyIndex(roadsW);
-const inRegion = (x: number, z: number, m = 0) => x >= REGION.minX - m && x <= REGION.maxX + m && z >= REGION.minZ - m && z <= REGION.maxZ + m;
+/** Inside the PLAYABLE bounds (src/shared/bounds.ts) with margin m: no lanes or walk graph beyond the edge. */
+const inRegion = (x: number, z: number, m = 0) => edgeDistance(x, z) >= -m;
+/** Inside the modelled ground (world.json region): ground polygons exist here. */
+const GR = world.region as { minX: number; maxX: number; minZ: number; maxZ: number };
+const onGround = (x: number, z: number) => x > GR.minX + 1 && x < GR.maxX - 1 && z > GR.minZ + 1 && z < GR.maxZ - 1;
 log(`input: ${streets.length} streets, ${buildingsW.length} building rings, ${roadsW.length} road polys, ${signals.length} signals, ${subways.length} subway entrances`);
 
 // ------------------------------------------------------------------ 1. nodes + raw edges
@@ -406,7 +411,7 @@ function connectorPts(a: Float32Array, b: Float32Array, straight: boolean): numb
     const p = connectorPtsK(a, b, straight, f);
     const cum = cumLengths(p), L = cum[cum.length - 1], o = [0, 0, 0, 0];
     let ok = true;
-    for (let s = 0; s <= L && ok; s += 0.75) { sampleAt(p, cum, s, o); if (inRegion(o[0], o[1], -1) && !onRoad.has(o[0], o[1])) ok = false; }
+    for (let s = 0; s <= L && ok; s += 0.75) { sampleAt(p, cum, s, o); if (onGround(o[0], o[1]) && !onRoad.has(o[0], o[1])) ok = false; }
     if (ok) return p;
   }
   badConnectors++;
@@ -525,7 +530,7 @@ for (const e of walkEdges) { for (let k = 0; k < e.pts.length; k++) e.pts[k] = q
 const okPoint1 = (x: number, z: number) => !inBuilding.has(x, z) && !onRoad.has(x, z);
 // also test the int16-decimetre quantized position that ends up in lanes.bin
 const okPoint = (x: number, z: number) => okPoint1(x, z) && okPoint1(Math.round(x * 10) / 10, Math.round(z * 10) / 10);
-const nodeOk = walkNodes.map((n) => okPoint(n.x, n.z) && inRegion(n.x, n.z, 60));
+const nodeOk = walkNodes.map((n) => okPoint(n.x, n.z) && inRegion(n.x, n.z, 2));
 const dbgCorners = walkNodes.map((n, i) => [Math.round(n.x * 10) / 10, Math.round(n.z * 10) / 10, nodeOk[i] ? 1 : inBuilding.has(n.x, n.z) ? 2 : onRoad.has(n.x, n.z) ? 3 : 4]);
 let badEdges = 0, badNodes = nodeOk.filter((v) => !v).length;
 walkEdges = walkEdges.map((e) => {
@@ -574,6 +579,8 @@ for (const [a, b] of sideEdge) if (a >= 0 && b >= 0) { walkEdges[a].opposite = b
   const G = groupLanes.length;
   const gAlive = new Array(G).fill(true);
   const tgtGroup = (c: number) => links[links[c].next[0]].group;
+  let added = 0;
+  for (let outer = 0; outer < 10; outer++) {
   for (let iter = 0; iter < 20; iter++) {
     const succ = (g: number) => [...new Set(groupLanes[g].flatMap((l) => links[l].next.map(tgtGroup)).filter((t) => gAlive[t]))];
     const index = new Int32Array(G).fill(-1), low = new Int32Array(G), onSt = new Uint8Array(G), comp = new Int32Array(G).fill(-1);
@@ -601,14 +608,20 @@ for (const [a, b] of sideEdge) if (a >= 0 && b >= 0) { walkEdges[a].opposite = b
     for (let g = 0; g < G; g++) if (gAlive[g] && comp[g] !== big) { gAlive[g] = false; changed = true; }
     if (!changed) break;
   }
-  // exits for every lane of a surviving group
-  let added = 0;
+  // exits for every lane of a surviving group; a group where some lane can't get one is dropped and we re-prune
+  let killed = 0;
   for (let g = 0; g < G; g++) if (gAlive[g]) for (const [i, l] of groupLanes[g].entries()) {
     if (links[l].next.some((c) => gAlive[tgtGroup(c)])) continue;
-    const sib = groupLanes[g].flatMap((s2) => links[s2].next).filter((c) => gAlive[tgtGroup(c)])
-      .sort((x, y) => links[x].turn - links[y].turn || Math.abs(links[x].laneIndex - i) - Math.abs(links[y].laneIndex - i) || x - y)[0];
-    const c = links[sib], tl = groupLanes[tgtGroup(sib)];
-    makeConnector(c.owner, c.startArm, c.endArm, l, tl[Math.min(i, tl.length - 1)], c.turn); added++;
+    const sibs = groupLanes[g].flatMap((s2) => links[s2].next).filter((c) => gAlive[tgtGroup(c)])
+      .sort((x, y) => links[x].turn - links[y].turn || Math.abs(links[x].laneIndex - i) - Math.abs(links[y].laneIndex - i) || x - y);
+    for (const sib of sibs) {
+      const c = links[sib], tl = groupLanes[tgtGroup(sib)];
+      makeConnector(c.owner, c.startArm, c.endArm, l, tl[Math.min(i, tl.length - 1)], c.turn);
+      if (links[l].next.some((x) => gAlive[tgtGroup(x)])) { added++; break; }
+    }
+    if (!links[l].next.some((x) => gAlive[tgtGroup(x)])) { gAlive[g] = false; killed++; break; }
+  }
+  if (!killed) break;
   }
   const alive = links.map((l, i) => (l.kind === LinkKind.Lane ? gAlive[l.group] : gAlive[links[srcOf.get(i)!].group] && gAlive[tgtGroup(i)]));
   if (process.env.LANES_DEBUG) fs.writeFileSync(process.env.LANES_DEBUG, JSON.stringify({

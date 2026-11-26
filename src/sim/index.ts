@@ -5,7 +5,9 @@
  * Integration contract (docs/briefs/SIM_BRIEF.md). Extensions are optional fields/methods only.
  */
 import { ArchetypeRegistry, AreaResolver, BUILTIN_ARCHETYPES, type ArchetypeDef } from './archetypes';
-import { Rng, sampleAt } from './geom';
+import { Rng, sampleAt, projectOnPoly } from './geom';
+import type { TrafficVehicleView } from '../shared/traffic';
+import { heightAt, CURB_HEIGHT, loadTerrain, terrainLoaded } from '../shared/terrain';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
 import { despawnPed, dodgeActors, spawnPedAt, spawnPeds, stepPeds, threaten } from './peds';
@@ -15,8 +17,11 @@ import { despawnVehicle, honk, rebuildOcc, spawnVehicles, stepVehicles, vehicleC
 export type { ArchetypeDef } from './archetypes';
 export { BUILTIN_ARCHETYPES, validateArchetype } from './archetypes';
 
-export interface AgentView {
-  id: number; kind: 'car' | 'cab' | 'truck' | 'bus' | 'ped'; archetype: string;
+/** @deprecated old name, kept for compatibility. */
+export type AgentView = PedView;
+/** Pedestrian view (contract). Vehicles use TrafficVehicleView from src/shared/traffic.ts. */
+export interface PedView {
+  id: number; archetype: string;
   x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number;
 }
 export type SimEventType = 'honk' | 'collision' | 'nearMiss' | 'hail';
@@ -26,14 +31,16 @@ export interface SimOptions {
   archetypes?: ArchetypeDef[];
   /** Custom loader (Node tests): path relative to baseUrl -> bytes. */
   fetchBinary?: (path: string) => Promise<ArrayBuffer>;
+  /** terrain.bin URL override (Node tests pass a data: URL). */
+  terrainUrl?: string;
 }
 
 /** Fixed internal timestep (s). */
 export const SIM_DT = 1 / 30;
 
 export class Simulation {
-  readonly vehicles: AgentView[] = [];
-  readonly peds: AgentView[] = [];
+  readonly vehicles: readonly TrafficVehicleView[] = [];
+  readonly peds: readonly PedView[] = [];
   /** Wall-clock ms spent in the last update() call. */
   lastUpdateMs = 0;
   private core!: SimCore;
@@ -73,6 +80,8 @@ export class Simulation {
   async load(): Promise<void> {
     const base = this.opts.baseUrl ?? '/data/';
     const buf = this.opts.fetchBinary ? await this.opts.fetchBinary('lanes.bin') : await fetch(base + 'lanes.bin').then((r) => { if (!r.ok) throw new Error(`lanes.bin: HTTP ${r.status}`); return r.arrayBuffer(); });
+    // ground heights for agent y (engine-owned terrain; the engine normally loads it first)
+    if (!terrainLoaded()) await loadTerrain(this.opts.terrainUrl ?? base + 'terrain.bin').catch(() => undefined);
     this.init(readLaneGraph(buf));
   }
 
@@ -97,6 +106,7 @@ export class Simulation {
       ringV: [rOutV * 0.6, rOutV], ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,
       emit: (type, e) => this.fire(type, e), stats: newStats(), nextId: 1, pedById: new Map(),
       busStopOf: new Map(g.busStops.map((b) => [b.link, b])), crossConns, lcList: [], preds: g.links.map(() => []),
+      footCount: new Float32Array(g.roads.length), footAvg: new Float32Array(g.roads.length),
       spawnPedAt: (x, z, reason) => spawnPedAt(core, x, z, reason),
       onBusStop: (spot, v) => {
         for (const p of core.peds) if (p.alive && p.state === 'waitBus' && p.spot === spot) { despawnPed(core, p); core.stats.boardings++; }
@@ -172,7 +182,17 @@ export class Simulation {
     if (this.contactCd.size > 500) for (const [k, t] of this.contactCd) if (t < S.t) this.contactCd.delete(k);
     spawnVehicles(S, 2, false);
     spawnPeds(S, 3, false);
+    // foot traffic: once a sim minute, fold counts into a rolling per-minute average (observed blocks only)
+    if (Math.floor(S.t / 60) !== Math.floor((S.t - h) / 60)) {
+      for (const e of this.net.sidewalksNear(S.focus.x, S.focus.z, S.ringP[0], new Set())) {
+        const r = this.net.g.walkEdges[e].owner;
+        if (this.footSeen.has(r)) continue; this.footSeen.add(r);
+        S.footAvg[r] = S.footAvg[r] * 0.7 + S.footCount[r] * 0.3;
+      }
+      this.footSeen.clear(); S.footCount.fill(0);
+    }
   }
+  private footSeen = new Set<number>();
 
   private clearFar() {
     const S = this.core;
@@ -186,22 +206,40 @@ export class Simulation {
   private writeViews(alpha: number) {
     const S = this.core;
     const lerpYaw = (a: number, b: number) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * alpha; };
-    const fill = (out: AgentView[], n: number) => { while (out.length < n) out.push({ id: 0, kind: 'car', archetype: '', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 }); out.length = n; };
-    fill(this.vehicles, S.vehicles.length);
+    const vs = this.vehicles as TrafficVehicleView[];
+    while (vs.length < S.vehicles.length) vs.push({ id: 0, vclass: 'sedan', variant: 0, x: 0, y: 0, z: 0, yaw: 0, speed: 0, lights: 0, state: '' });
+    vs.length = S.vehicles.length;
     S.vehicles.forEach((v, i) => {
-      const o = this.vehicles[i];
-      o.id = v.id; o.kind = v.kind; o.archetype = v.arch.def.id; o.x = v.px + (v.x - v.px) * alpha; o.z = v.pz + (v.z - v.pz) * alpha; o.y = 0;
-      o.yaw = lerpYaw(v.pyaw, v.yaw); o.speed = v.v; o.variant = v.variant;
-      o.state = v.state === 'drive' ? (v.blockedBy ? (v.blockedBy === 'red' ? 'stopped' : 'yielding') : v.v < 0.3 ? 'queued' : v.lcT < 1 ? 'laneChange' : 'driving') : v.state;
+      const o = vs[i];
+      o.id = v.id; o.vclass = v.vclass; o.variant = v.variant; o.lights = v.lights;
+      o.x = v.px + (v.x - v.px) * alpha; o.z = v.pz + (v.z - v.pz) * alpha; o.y = heightAt(o.x, o.z);
+      o.yaw = lerpYaw(v.pyaw, v.yaw); o.speed = v.v;
+      o.state = v.state === 'drive' ? (v.blockedBy ? (v.blockedBy === 'red' ? 'stopped' : 'yielding') : v.v < 0.3 ? 'queue' : v.lcT < 1 ? 'laneChange' : 'drive')
+        : v.state === 'doubleParked' ? 'doublePark' : v.state === 'curb' ? (v.stopKind || 'pickup') : v.state;
     });
-    fill(this.peds, S.peds.length);
+    const ps = this.peds as PedView[];
+    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
+    ps.length = S.peds.length;
     S.peds.forEach((p, i) => {
-      const o = this.peds[i];
-      o.id = p.id; o.kind = 'ped'; o.archetype = p.arch.def.id; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha; o.y = p.y;
+      const o = ps[i];
+      o.id = p.id; o.archetype = p.arch.def.id; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
+      // sidewalk top = road surface + kerb (src/shared/terrain.ts); in the roadway = road surface
+      o.y = heightAt(o.x, o.z) + (p.y > 0 ? CURB_HEIGHT : 0);
       o.yaw = lerpYaw(p.pyaw, p.yaw); o.speed = p.v; o.variant = p.variant;
       o.state = p.state === 'free' ? (p.jaywalking ? 'jaywalking' : p.then === 'flee' ? 'flee' : 'stepping') : p.onRoad ? (p.jaywalking ? 'jaywalking' : 'crossing') : p.state;
     });
   }
+
+  /** Road (block-face) id of the sidewalk nearest to (x,z), or -1. Use with footTraffic(). */
+  blockAt(x: number, z: number): number {
+    const g = this.net.g;
+    let best = -1, bd = 25;
+    for (const e of this.net.sidewalksNear(x, z, 25, new Set())) { const d = projectOnPoly(g.walkEdges[e].pts, x, z).d; if (d < bd) { bd = d; best = g.walkEdges[e].owner; } }
+    return best;
+  }
+  /** Rolling average of pedestrians entering this block's sidewalks per minute (both sides). Only blocks
+   *  near the sim focus are observed; elsewhere it holds its last value (Economy can blend with time of day). */
+  footTraffic(blockId: number): number { return this.core.footAvg[blockId] ?? 0; }
 
   setExternalActors(actors: Actor[]): void { if (this.core) this.core.actors = actors.slice(); }
 

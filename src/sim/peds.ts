@@ -9,6 +9,7 @@ import { JuncFlag, SpotKind, WalkKind } from './laneFormat';
 import type { SimCore, Ped } from './state';
 import { pedDensity } from './state';
 import type { ArchetypeRt } from './archetypes';
+import { edgeDistance, EDGE } from '../shared/bounds';
 
 const tmp = [0, 0, 0, 0];
 const SIDEWALK_Y = 0.15;
@@ -81,6 +82,9 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
     const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
     if (d > rOut || (!full && d < rIn)) continue;
     if (S.densityHook && S.rng.next() > S.densityHook(tmp[0], tmp[1], 'ped')) continue;
+    // crowds thicken toward the playable edge (BOUNDARIES layer 3)
+    const ramp = Math.max(0, Math.min(1, 1 - edgeDistance(tmp[0], tmp[1]) / EDGE.RAMP));
+    if (!full && S.rng.next() > 0.5 + 0.5 * ramp) continue;
     const arch = S.reg.pick((a) => a.behaviour !== 'driver', tmp[0], tmp[1], S.minute, S.rng.next());
     if (!arch) continue;
     const p = newPed(S, arch, edge, s);
@@ -220,6 +224,7 @@ function enterEdge(S: SimCore, p: Ped, e: number, fromNode: number) {
   p.dir = E.a === fromNode ? 1 : -1;
   p.s = p.dir > 0 ? 0 : S.net.walkLen[e];
   p.lat = Math.max(-E.half, Math.min(E.half, p.lat));
+  if (E.kind === WalkKind.Sidewalk) S.footCount[E.owner]++;
   if (E.kind === WalkKind.Crosswalk) { (S.onWalk.get(e) ?? S.onWalk.set(e, []).get(e)!).push(p); S.stats.crossings++; p.lat = 0; }
 }
 function leaveCrosswalk(S: SimCore, p: Ped) {

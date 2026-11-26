@@ -13,10 +13,13 @@ import * as THREE from 'three/webgpu';
 import { Simulation, type ArchetypeDef } from '../index';
 import { qualityFromUrl } from '../../engine/quality';
 import { LinkKind, WalkKind } from '../laneFormat';
+import { heightAt } from '../../shared/terrain';
 
-const KIND_COLOR: Record<string, number> = { car: 0x6f7c8a, cab: 0xe2b318, truck: 0x7a5a3a, bus: 0x3f7a55 };
-const KIND_H: Record<string, number> = { car: 1.4, cab: 1.5, truck: 3.0, bus: 3.1 };
+const CLASS_COLOR: Record<string, number> = { taxi: 0xe2b318, police: 0x22324f, bus: 0x3f7a55, box_truck: 0x7a5a3a, step_van: 0x9a8f7a, garbage: 0x4f5a3a };
+const CLASS_H: Record<string, number> = { sedan: 1.4, hardtop: 1.35, compact: 1.35, wagon: 1.45, taxi: 1.5, police: 1.5, bus: 3.1, box_truck: 3.0, step_van: 2.7, garbage: 3.2 };
+const DIMS: Record<string, [number, number]> = { sedan: [5.4, 2.0], hardtop: [5.3, 2.0], compact: [4.6, 1.8], wagon: [5.6, 2.0], taxi: [5.3, 2.0], police: [5.4, 2.0], bus: [12, 2.6], box_truck: [8, 2.5], step_van: [6.5, 2.3], garbage: [9, 2.5] };
 const CAR_TINTS = [0x5b6770, 0x7d3b2f, 0x2f4b6b, 0x8a8170, 0x3e5a3a, 0x9a9a92, 0x4a3b5c, 0x6b5a2e];
+const ORANGE = new THREE.Color(0xff7a1a), RED = new THREE.Color(0xff2a2a);
 const SIG_COLOR = { green: 0x2fe07a, yellow: 0xffc21a, red: 0xff3b30 };
 
 /** Narrative content archetypes, if the content/ folder exists (Vite glob; empty otherwise). */
@@ -49,7 +52,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
     if (params.get('simlanes') !== '0') {
       const pos: number[] = [], col: number[] = [];
       const add = (pts: Float32Array, y: number, c: THREE.Color) => {
-        for (let k = 2; k < pts.length; k += 2) { pos.push(pts[k - 2], y, pts[k - 1], pts[k], y, pts[k + 1]); col.push(c.r, c.g, c.b, c.r, c.g, c.b); }
+        for (let k = 2; k < pts.length; k += 2) { pos.push(pts[k - 2], heightAt(pts[k - 2], pts[k - 1]) + y, pts[k - 1], pts[k], heightAt(pts[k], pts[k + 1]) + y, pts[k + 1]); col.push(c.r, c.g, c.b, c.r, c.g, c.b); }
       };
       const cLane = new THREE.Color(0x7aa7d9), cConn = new THREE.Color(0x3a5f86), cWalk = new THREE.Color(0x8c8270), cX = new THREE.Color(0xf0f0f0);
       g.links.forEach((l) => add(l.pts, 0.04, l.kind === LinkKind.Lane ? cLane : cConn));
@@ -69,14 +72,13 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
     const sMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshBasicMaterial({ color: 0xffffff }), sigs.length);
     for (const m of [vMesh, pMesh, sMesh]) { m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); root.add(m); }
     const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), P = new THREE.Vector3(), S = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), C = new THREE.Color();
-    sigs.forEach((s, i) => { M.makeTranslation(s.x, 2.6, s.z); sMesh.setMatrixAt(i, M); sMesh.setColorAt(i, C.set(0xffffff)); });
+    sigs.forEach((s, i) => { M.makeTranslation(s.x, heightAt(s.x, s.z) + 2.6, s.z); sMesh.setMatrixAt(i, M); sMesh.setColorAt(i, C.set(0xffffff)); });
     // instance colours must exist before the first render so the material compiles with them
     for (let i = 0; i < maxV; i++) vMesh.setColorAt(i, C.set(0xffffff));
     for (let i = 0; i < maxP; i++) pMesh.setColorAt(i, C.set(0xffffff));
     vMesh.count = 0; pMesh.count = 0;
     const palettes = new Map<string, number[]>();
     for (const a of sim.archetypes) palettes.set(a.id, (a.palette ?? []).map((h) => new THREE.Color(h).getHex()));
-    const dims: Record<string, [number, number]> = { car: [5.2, 2.0], cab: [5.3, 2.0], truck: [8.0, 2.5], bus: [12.0, 2.6] };
     state.ready = true;
 
     let last = performance.now(), hudT = 0;
@@ -87,11 +89,12 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
       const vs = sim.vehicles;
       vMesh.count = Math.min(maxV, vs.length);
       for (let i = 0; i < vMesh.count; i++) {
-        const v = vs[i], [len, wid] = dims[v.kind], h = KIND_H[v.kind];
-        Q.setFromAxisAngle(up, v.yaw); P.set(v.x, h / 2 + 0.05, v.z); S.set(wid, h, len);
+        const v = vs[i], [len, wid] = DIMS[v.vclass], h = CLASS_H[v.vclass];
+        Q.setFromAxisAngle(up, v.yaw); P.set(v.x, v.y + h / 2 + 0.05, v.z); S.set(wid, h, len);
         M.compose(P, Q, S); vMesh.setMatrixAt(i, M);
-        C.set(v.kind === 'car' ? CAR_TINTS[v.variant % CAR_TINTS.length] : KIND_COLOR[v.kind]);
-        if (v.state === 'doubleParked' || v.state === 'curb' || v.state === 'busStop') C.lerp(new THREE.Color(0xff7a1a), 0.35);
+        C.set(CLASS_COLOR[v.vclass] ?? CAR_TINTS[v.variant % CAR_TINTS.length]);
+        if (v.lights & 16 && Math.floor(now / 400) % 2) C.lerp(ORANGE, 0.6); // hazards blink
+        else if (v.lights & 2) C.lerp(RED, 0.25); // brake
         vMesh.setColorAt(i, C);
       }
       const ps = sim.peds;
@@ -100,7 +103,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
       for (let i = 0; i < pMesh.count; i++) {
         const p = ps[i];
         const cower = p.state === 'cower';
-        Q.setFromAxisAngle(up, p.yaw); P.set(p.x, p.y + (cower ? 0.5 : 0.82), p.z); S.set(1, cower ? 0.55 : 1, 1);
+        Q.setFromAxisAngle(up, p.yaw); P.set(p.x, p.y + (cower ? 0.35 : 0.67), p.z); S.set(1, cower ? 0.55 : 1, 1);
         M.compose(P, Q, S); pMesh.setMatrixAt(i, M);
         const pal = palettes.get(p.archetype) ?? [];
         C.set(pal.length ? pal[p.variant % pal.length] : 0xb0a89a);
