@@ -290,6 +290,13 @@ pool("barks.route_calls", "No-GPS route call-outs (goto.routeCalledBy). {street}
  ("delphine", "brisk", "Rule nine: never take {avenue} after midnight. Take {street}."),
  ("nick", "expansive", "Turn here! No, here! I own a building on this block, I should know.")])
 
+_rc = json.loads((C / "barks" / "route_calls.json").read_text())
+_rc["voiceByPassenger"] = {"npc.cab_fare_businessman": "fare", "npc.cab_fare_night_worker": "fare", "npc.cab_fare_tourist": "fare_tourist",
+    "npc.cab_driver": "cabbie", "char.delroy_tate": "cabbie", "char.odessa_pruitt": "odessa", "char.delphine_moore": "delphine",
+    "char.nick_varelas": "nick", "side.baby_cab": "labour", "default": "fare"}
+_rc["voiceNote"] = "Keyed by the passenger's cast id. 'side.baby_cab' overrides to 'labour' for that quest only. Leads riding as passengers in another lead's car use their own voice."
+W("barks/route_calls.json", _rc)
+
 pool("barks.combat", "Generic enemy and ally combat barks (crews, stick-up men, security). No slurs.", [
  ("spot", "alert", "There! That's him!"), ("spot", "angry", "That's the one from Eighth Avenue!"), ("spot", "cold", "Lonnie said you'd come this way."),
  ("cover", "urgent", "Get down! Behind the car!"), ("cover", "urgent", "He's got a piece! Cover!"), ("flank", "urgent", "Go around! Take the alley!"),
