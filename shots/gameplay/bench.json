@@ -1,21 +1,21 @@
 {
   "note": "CPU-only, headless Node in the build container (no GPU, no rendering). Gameplay main-thread cost only; physics and rendering are the engine's.",
   "node": "v22.23.5",
-  "date": "2026-11-26T16:56:40.782Z",
+  "date": "2026-11-26T17:42:00.056Z",
   "high12": {
     "combatants": 11,
     "frames": 3479,
     "combat": {
-      "avg": 0.078,
-      "p95": 0.145,
-      "p99": 1.002,
-      "max": 9.43
+      "avg": 0.067,
+      "p95": 0.185,
+      "p99": 0.443,
+      "max": 2.957
     },
     "gameplayTotal": {
-      "avg": 0.093,
-      "p95": 0.174,
-      "p99": 1.38,
-      "max": 9.46
+      "avg": 0.079,
+      "p95": 0.237,
+      "p99": 0.504,
+      "max": 3.752
     },
     "shotsPerSecond": 2.8,
     "aiStates": [
@@ -31,16 +31,16 @@
     "combatants": 6,
     "frames": 3479,
     "combat": {
-      "avg": 0.025,
-      "p95": 0.042,
-      "p99": 0.117,
-      "max": 5.071
+      "avg": 0.022,
+      "p95": 0.043,
+      "p99": 0.245,
+      "max": 1.573
     },
     "gameplayTotal": {
-      "avg": 0.031,
-      "p95": 0.049,
-      "p99": 0.161,
-      "max": 8.143
+      "avg": 0.026,
+      "p95": 0.051,
+      "p99": 0.28,
+      "max": 1.591
     },
     "shotsPerSecond": 1.7,
     "aiStates": [
@@ -52,10 +52,10 @@
     "peds": 400,
     "frames": 3569,
     "policeAndWitnesses": {
-      "avg": 0.06,
-      "p95": 0.157,
-      "p99": 0.395,
-      "max": 5.481
+      "avg": 0.067,
+      "p95": 0.179,
+      "p99": 0.491,
+      "max": 4.217
     },
     "peakWitnesses": 25,
     "units": 6,
@@ -65,17 +65,17 @@
     "peds": 120,
     "frames": 3569,
     "policeAndWitnesses": {
-      "avg": 0.024,
-      "p95": 0.058,
-      "p99": 0.153,
-      "max": 4.274
+      "avg": 0.025,
+      "p95": 0.066,
+      "p99": 0.206,
+      "max": 1.449
     },
     "peakWitnesses": 25,
     "units": 6,
     "reports": 0
   },
   "phoneEstimateX3": {
-    "combatLow6_phoneEstimate_ms": 0.075,
-    "police120_phoneEstimate_ms": 0.072
+    "combatLow6_phoneEstimate_ms": 0.066,
+    "police120_phoneEstimate_ms": 0.075
   }
 }

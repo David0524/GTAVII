@@ -105,11 +105,17 @@ The camera direction is set straight up for all of it.
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, 3,480 frames):
 | Case | Avg | p95 | p99 | Max | Budget |
 |---|---|---|---|---|---|
-| 12 combatants, High | 0.049 | 0.123 | 0.349 | 3.0 | ≤ 1.5 ms ✔ (one spike >1.5 ms in ~3,500 frames: JIT/GC) |
-| 6 combatants, Low (×3 phone estimate) | 0.022 (≈0.07) | 0.057 | 0.218 | 0.62 | ✔ |
-| Police and witnesses, 400 peds | 0.027 | 0.172 | 0.40 | 3.4 | ≤ 0.3 ms avg ✔, p99 over |
-| Police and witnesses, 120 peds | 0.013 | 0.049 | 0.131 | 3.4 | ✔ |
+| 12 combatants, High | 0.067 | 0.185 | 0.443 | 3.0 | ≤ 1.5 ms ✔ (rare single-frame spikes) |
+| 6 combatants, Low (×3 phone estimate) | 0.022 (≈0.07) | 0.043 | 0.245 | 1.6 | ✔ |
+| Police and witnesses, 400 peds | 0.067 | 0.179 | 0.491 | 4.2 | ≤ 0.3 ms avg ✔, p99 over |
+| Police and witnesses, 120 peds | 0.025 | 0.066 | 0.206 | 1.4 | ✔ |
 
+This rerun is uncontended, after stealth, fire, stats, crowd cover and concealment were added
+(about +0.02–0.04 ms on average over the first run). Known waste:
+- `crowdAt` scans every pedestrian each frame;
+- `concealment()` is recomputed several times per frame.
+
+Both are cheap to cache.
 - **Caveats:**
   - These are desktop-container CPU timings.
   - The ×3 phone factor is an estimate, not a measurement.
