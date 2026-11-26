@@ -50,9 +50,9 @@
        -205
       ],
       "look": [
-       0,
-       36,
-       0
+       8.52,
+       42.54,
+       -15.59
       ],
       "lensMm": 40,
       "focusM": 230,
@@ -66,9 +66,9 @@
        -165
       ],
       "look": [
-       0,
-       24,
-       -8
+       2.96,
+       25.62,
+       -13.29
       ],
       "lensMm": 40,
       "focusM": 180,
@@ -82,14 +82,13 @@
        -118
       ],
       "look": [
-       -2,
-       10,
-       -22
+       0.35,
+       10.66,
+       -25.75
       ],
       "lensMm": 40,
       "focusM": 110,
-      "fStop": 5.6,
-      "ease": "out"
+      "fStop": 5.6
      }
     ]
    },
@@ -387,14 +386,14 @@
      {
       "t": 0,
       "pos": [
-       -0.2,
-       1.76,
-       -19.2
+       -0.8,
+       1.74,
+       -19.1
       ],
       "look": [
-       -22,
-       1.45,
-       -31.5
+       -18.06,
+       1.5,
+       -29.2
       ],
       "lensMm": 50,
       "focusM": 20,
@@ -403,14 +402,14 @@
      {
       "t": 5.6,
       "pos": [
-       -0.25,
-       1.76,
-       -19.25
+       -0.82,
+       1.74,
+       -19.12
       ],
       "look": [
-       -12,
-       1.5,
-       -26.5
+       -8.33,
+       1.58,
+       -24.08
       ],
       "lensMm": 50,
       "focusM": 9,
@@ -458,7 +457,7 @@
    "framing": "Both men, prow between them and the evening sky",
    "blocking": "Mayhew stops a little too close; Teddy doesn't step back",
    "beats": [
-    "Exchange l2\u2013l4"
+    "Exchange l2–l4"
    ],
    "durationSec": 13.4,
    "dialogue": [
@@ -543,7 +542,7 @@
    "framing": "Exactly the spawn shot",
    "blocking": "Mayhew starts walking uptown; Teddy follows",
    "beats": [
-    "Mayhew: l5 ('Walk with me\u2026')",
+    "Mayhew: l5 ('Walk with me…')",
     "HUD fades in with the objective 'Walk up Broadway with Mayhew'"
    ],
    "durationSec": 4,
@@ -575,14 +574,14 @@
      {
       "t": 1.6,
       "pos": [
-       3.0,
+       3,
        2.3,
-       -17.0
+       -17
       ],
       "look": [
-       -4.0,
+       -4,
        1.7,
-       -27.0
+       -27
       ],
       "lensMm": 36,
       "focusM": 8,
@@ -617,7 +616,7 @@
       "anim": "talk"
      },
      {
-      "t": 1.0,
+      "t": 1,
       "x": -3.6,
       "z": -23.4,
       "heading": 0.3,
@@ -626,7 +625,7 @@
      {
       "t": 4,
       "x": -5.2,
-      "z": -31.0,
+      "z": -31,
       "heading": 0.3,
       "anim": "walk"
      }
@@ -644,7 +643,7 @@
    ],
    "film": {
     "grain": 0.4,
-    "weave": 0.0,
+    "weave": 0,
     "halation": 0.4,
     "letterbox": 0
    },

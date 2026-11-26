@@ -126,6 +126,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
     titleProgress: (p) => title?.progress(p),
     titleReady: (l) => title?.setReady(l),
     update(dt) {
+      if (tool) { tool.update(dt); hud.setVisible(false); return; }
       if (root.state === 'cutscene') { cinema.update(dt); hud.setVisible(false); return; }
       if (root.state === 'title') { if (hub.open) hub.update(dt); else title?.update(dt); hud.setVisible(false); return; }
       if (hub.open) hub.update(dt);
@@ -171,6 +172,12 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   window.addEventListener('gamepadconnected', () => { toast(`Controller connected · ${input.pad.family === 'playstation' ? 'PlayStation' : input.pad.family === 'xbox' ? 'Xbox' : 'Gamepad'} layout`); input.rumble(0.4, 0.6, 180); });
   window.addEventListener('gamepaddisconnected', () => toast('Controller disconnected'));
   if (host.saves) iosSavesNote(host.saves);
+  // ?cine=1 (or ?cine=<scene id>): the in-browser cutscene tool, loaded only when asked for.
+  let tool: { update(dt: number): void } | null = null;
+  if (new URLSearchParams(location.search).has('cine') && host.camera) {
+    root.state = 'cutscene';
+    void import('../cinematics/tool/CineTool').then((m) => { tool = new m.CineTool(host); (window as unknown as { __CINE: unknown }).__CINE = tool; });
+  }
   const play = new URLSearchParams(location.search).get('play');
   if (play && !o.title) setTimeout(() => void root.playCutscene(play, { paused: new URLSearchParams(location.search).has('cinepause') }), 0);
   return root;
