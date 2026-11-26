@@ -45,8 +45,11 @@ export class PostFX {
     const scenePass = pass(scene, camera);
     const color = scenePass.getTextureNode('output');
     let hdr: any = vec4(color);
-    if (q.bloom) hdr = hdr.add(bloom(color, 1, 0.45, 1.2).mul(P.bloomStrength)); // threshold above sky: only lamps, neon, windows
-    if (q.halation) hdr = hdr.add(vec4(bloom(color, 1, 0.08, 1.0).rgb.mul(vec3(1.0, 0.3, 0.1)).mul(P.halation), 0));
+    // Clamp what feeds bloom/halation: the sun disc is enormous in HDR and would otherwise flood the whole
+    // frame when looking toward the sunset. Lamps, neon and windows (~1-4) still bloom fully.
+    const glowIn = min(vec4(color), vec4(3.0, 3.0, 3.0, 1.0));
+    if (q.bloom) hdr = hdr.add(bloom(glowIn, 1, 0.45, 1.2).mul(P.bloomStrength)); // threshold above sky: only lamps, neon, windows
+    if (q.halation) hdr = hdr.add(vec4(bloom(glowIn, 1, 0.08, 1.0).rgb.mul(vec3(1.0, 0.3, 0.1)).mul(P.halation), 0));
 
     const ldr = renderOutput(hdr); // renderer tone mapping (ACES filmic) + sRGB
 

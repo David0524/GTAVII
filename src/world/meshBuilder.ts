@@ -8,6 +8,7 @@
 import earcut from 'earcut';
 import { type ChunkData, type BuildingRec, GroundKind, Style, BuildingFlag } from '../shared/chunkFormat';
 import { buildingCondition } from '../shared/condition';
+import { buildProps } from './props';
 
 export const SIDEWALK_H = 0.15;
 /** Ground height in chunk-local coordinates (road surface). */
@@ -33,6 +34,8 @@ export interface ChunkMeshes {
   ground: MeshArrays;
   /** LOD1: tall-building shells only (no ground clutter, merged). */
   buildingsLod1: MeshArrays;
+  /** LOD0 props: water towers, fire escapes, AC units, awnings (vertex colours). */
+  props: MeshArrays;
   stats: { buildings: number; tris: number; trisLod1: number };
   /** Axis-aligned bounds (chunk-local). */
   maxHeight: number;
@@ -223,8 +226,9 @@ export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = ()
     else groundPoly(g, gr.rings, SIDEWALK_H, col, true, half, hf);
   }
   const buildings = bAll.finish(), ground = g.finish(), buildingsLod1 = bLod.finish();
+  const props = buildProps(data, hf);
   return {
-    key: `${data.i}_${data.j}`, i: data.i, j: data.j, buildings, ground, buildingsLod1, maxHeight,
+    key: `${data.i}_${data.j}`, i: data.i, j: data.j, buildings, ground, buildingsLod1, props, maxHeight,
     stats: { buildings: data.buildings.length, tris: (buildings.index.length + ground.index.length) / 3, trisLod1: buildingsLod1.index.length / 3 },
   };
 }
