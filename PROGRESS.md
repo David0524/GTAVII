@@ -6,7 +6,7 @@ Source of truth across sessions. Read this first; update it last.
 | Phase | State |
 |---|---|
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
-| 2. Walkable player, camera, collision | Next |
+| 2. Walkable player, camera, collision (+ local saves) | **Core done** (verification pass below); UI pass next |
 | 3. Rendering pipeline + facade generation | — |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
@@ -54,6 +54,53 @@ archetype/save APIs), `content/` (owned by the narrative team).
   on the right edge. Portrait shows a rotate prompt. Fullscreen plus orientation lock where
   supported (not iOS). Phones default to the Low preset with DPR capped at 1.5. All gameplay
   reads `Input` actions, so later controllers get touch for free.
+
+## Phase 2 (player, camera, collision, saves): engineering calls
+- **Physics:** Rapier (WASM) with a fixed 60 Hz step and render interpolation.
+  - City collision is static trimeshes built from each chunk's LOD0 render geometry, so
+    collision always matches what you see. They're created and destroyed within 320 m of the
+    player.
+  - Trade-off: no convex decomposition, so the trimeshes are fine for kinematic characters
+    but dynamic props will need simplified colliders (Phase 4/5).
+- **Player:** a Rapier kinematic character controller on a 1.84 m capsule.
+  - Walk, run and sprint at 1.5, 3.4 and 6.0 m/s; partial stick walks; sprint is held.
+  - Autostep 0.4 m (curbs and stoops), snap to ground on the hills, jump apex about 1.1 m.
+  - Jumping at a ledge 0.45–1.9 m high climbs it instead (raycast detection plus a timed
+    vault).
+  - The player waits on the spot until colliders exist under it, so it never falls through
+    streaming ground.
+- **Body:** a `StandInBody` implementing the characters stream's `setLocomotion` contract
+  structurally. It gets swapped for their `Character` on merge.
+- **Party:** three narrative leads with per-lead position, money, inventory and wardrobe
+  (N5). The switch UI and presentation come in Phase 7.
+- **Cameras:**
+  - over-the-shoulder orbit with a collision spring arm (pulls in instantly, eases out) and
+    wheel zoom;
+  - photo/free camera on P, R3 or the CAM button;
+  - the screenshot rig uses `?cam=` (photo mode); `?at=x,z,deg` starts on foot elsewhere.
+- **Controls:** Standard (default), Classic and Left-handed presets.
+- **Verified headless** at a fixed 60 Hz:
+  - a 3 s walk covers 9.7 m; jump apex 1.0 m;
+  - walking into the Empire State Building stops at its wall;
+  - climbs 1.2 and 1.8 m ledges, refuses 2.6 m, auto-steps 0.3 m.
+- **Local saves** (user decision: local profiles now):
+  - versioned schema and migrations, with a fixture per version (`tests/save-fixtures/`,
+    `npm test`);
+  - IndexedDB, with the blob put and pointer flip in one atomic, durable transaction;
+  - `navigator.storage.persist()` requested;
+  - profiles per device, 6 manual slots, a 3-deep autosave ring every 90 s, plus an
+    autosave on visibility-hidden and pagehide;
+  - checksummed (SHA-256) export and import;
+  - an iOS "not installed" eviction note;
+  - settings stay per device.
+  - **Accounts and cloud sync are PENDING the user's go-ahead.** The `SaveStore` interface
+    is ready for a cloud backend.
+  - Verified in a real browser: save, reload, resume at the same spot; export and import;
+    tamper rejected; the autosave ring rotates.
+- **Known:**
+  - The bundle is 5.2 MB because rapier3d-compat inlines its WASM. Move to the non-compat
+    build with a separate `.wasm` file for caching (perf pass).
+  - Save labels need the street name, so they're blank when the minimap is off.
 
 ## Pipeline v2 (expanded bounds and terrain data)
 - **City:** 182 chunks covering the new playable bounds (`src/shared/bounds.ts`) plus a 200 m

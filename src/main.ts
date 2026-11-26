@@ -20,6 +20,9 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { PlayerController } from './player/PlayerController';
 import { StandInBody, type PlayerBody } from './player/StandInBody';
 import { Party } from './player/Party';
+import { SaveManager, iosEvictionRisk } from './save/SaveManager';
+import type { SaveData } from './save/schema';
+import { worldClock, clockLabel } from './world/Clock';
 
 /**
  * URL parameters (all optional):
@@ -92,6 +95,37 @@ async function main() {
   };
   let jumpLatch = false;
 
+  // ---------------------------------------------------------------- saves (local profiles; cloud later)
+  let narrativeState: SaveData['narrative'] = { act: 1, flags: {}, missions: {}, relationships: {} };
+  let streetLabel = '';
+  const storeActiveLead = () => { const a = party.active; a.at = { x: player.pos.x, y: player.pos.y, z: player.pos.z, heading: player.heading }; };
+  const saves = await SaveManager.create({
+    snapshot: () => {
+      storeActiveLead();
+      const characters: SaveData['party']['characters'] = {};
+      for (const [id, l] of party.leads) characters[id] = { money: l.money, inventory: [...l.inventory], wardrobe: l.wardrobe, at: { ...l.at } };
+      return { world: { date: worldClock.date, minutes: worldClock.minutes, weather: worldClock.weather }, party: { activeCharacter: party.activeId, characters }, narrative: narrativeState };
+    },
+    label: () => `${streetLabel || 'Manhattan'} — ${clockLabel()}`,
+    apply: (s) => {
+      worldClock.date = s.world.date; worldClock.minutes = s.world.minutes; worldClock.weather = s.world.weather;
+      for (const [id, c] of Object.entries(s.party.characters)) {
+        const l = party.leads.get(id);
+        if (l) Object.assign(l, { money: c.money, inventory: [...c.inventory], wardrobe: c.wardrobe, at: { ...c.at } });
+        else party.leads.set(id, { id, displayName: id.replace(/^char\./, ''), ...c, inventory: [...c.inventory], at: { ...c.at } });
+      }
+      party.switchTo(s.party.activeCharacter);
+      narrativeState = s.narrative;
+      const a = party.active.at;
+      player.teleport(a.x, a.y, a.z, a.heading); player.active = false; // re-activates once colliders exist there
+      orbit.snap(a, a.heading);
+    },
+  });
+  if (!params.has('fresh') && !params.has('cam') && !params.has('at')) {
+    const last = await saves.latest().catch(() => null);
+    if (last) { try { await saves.load(last.slot); } catch (e) { console.warn('could not load save', last.slot, e); } }
+  }
+
   // ---------------------------------------------------------------- HUD, minimap, report
   const hud = new DebugHud(document.body);
   // ?hud=1 forces the debug HUD on (phone testing), ?hud=0 forces it off; default: on for desktop, off for touch.
@@ -111,7 +145,7 @@ async function main() {
   const clock = new THREE.Timer();
   let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0;
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER,
+    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, get saves() { return saves; },
     get mode() { return mode; }, setMode,
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active) ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -148,6 +182,26 @@ async function main() {
   window.addEventListener('gamepadconnected', () => { toast(`Controller connected · ${input.pad.family === 'playstation' ? 'PlayStation' : input.pad.family === 'xbox' ? 'Xbox' : 'Gamepad'} layout`); input.rumble(0.4, 0.6, 180); });
   window.addEventListener('gamepaddisconnected', () => toast('Controller disconnected'));
 
+  // Quick save / load until the pause menu lands (UI pass): F5 / F9.
+  window.addEventListener('keydown', async (e) => {
+    if (e.code === 'F5') { e.preventDefault(); const m = await saves.save('quick'); toast(`Saved · ${m.label}`); }
+    if (e.code === 'F9') { e.preventDefault(); const d = await saves.load('quick').catch((err) => { toast(String(err.message ?? err)); return null; }); if (d) toast(`Loaded · ${d.label}`); }
+  });
+  // iOS deletes site storage after ~7 days unvisited unless installed: gentle, dismissible, in-world note.
+  const ios = iosEvictionRisk();
+  if (ios.atRisk) {
+    let snoozed = false; try { snoozed = Date.now() - Date.parse(localStorage.getItem('t74.iosNoteSnooze') ?? '0') < 3 * 86400000; } catch { /* ignore */ }
+    const long = (ios.daysSinceLastVisit ?? 0) > 4;
+    if (!snoozed || long) saves.onSaved.add(function once() {
+      saves.onSaved.delete(once);
+      const n = document.createElement('div');
+      n.innerHTML = `<b style="font:600 13px 'League Gothic',sans-serif;letter-spacing:.12em">${long ? 'WELCOME BACK. KEEP YOUR SAVES SAFE' : 'A NOTE ABOUT SAVES'}</b><br>On iPhone and iPad, saves can be cleared after a week away.<br>Share → <i>Add to Home Screen</i> keeps them for good. <u style="cursor:pointer">Got it</u>`;
+      Object.assign(n.style, { position: 'fixed', left: '50%', bottom: 'calc(18px + env(safe-area-inset-bottom))', transform: 'translateX(-50%) rotate(-1.2deg)', maxWidth: '360px', padding: '12px 14px', background: '#efe3c4', color: '#2e171d', font: "12px/1.45 'Courier Prime', monospace", boxShadow: '0 6px 18px #000a', zIndex: '40' });
+      n.querySelector('u')!.addEventListener('click', () => { n.remove(); try { localStorage.setItem('t74.iosNoteSnooze', new Date().toISOString()); } catch { /* ignore */ } });
+      document.body.appendChild(n);
+    });
+  }
+
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
     clock.update(t);
@@ -157,6 +211,7 @@ async function main() {
     if (input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
     if (input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (input.pressed('jump')) jumpLatch = true;
+    if (mode === 'onfoot' && player.active) saves.tick(dt);
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }
@@ -180,7 +235,7 @@ async function main() {
 
     const p = mode === 'onfoot' ? body.object.position : camera.position;
     const yaw = mode === 'onfoot' ? orbit.yaw : fly.yaw;
-    if ((streetT -= dt) <= 0 && minimap) { streetName = minimap.nearestStreet(p.x, p.z); streetT = 0.5; }
+    if ((streetT -= dt) <= 0 && minimap) { streetName = minimap.nearestStreet(p.x, p.z); streetLabel = streetName; streetT = 0.5; }
     minimap?.draw(p.x, p.z, yaw);
     if ((hudT -= dt) <= 0) {
       hudT = 0.25;
