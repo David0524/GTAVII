@@ -53,6 +53,7 @@ async function main() {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
   const atmosphere = new Atmosphere(scene);
+  atmosphere.envEnabled = params.get('env') === '1'; // sky IBL: opt-in until verified against the look target
   if (quality.shadows && params.get('shadows') !== '0') atmosphere.enableShadows(renderer, quality.name === 'high' || quality.name === 'ultra' ? 2048 : 1024);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
@@ -293,6 +294,7 @@ async function main() {
     if (playing && mode === 'onfoot' && player.active) saves.tick(dt);
     if (playing) tickClock(dt); // the clock pauses in menus, the title and cutscenes
     const light = atmosphere.update();
+    atmosphere.updateEnvironment(renderer);
     facadeUniforms.night.value = nightOverride ?? light.night;
     streetLightUniforms.lightsOn.value = light.lightsOn;
     renderer.toneMappingExposure = light.exposure;
