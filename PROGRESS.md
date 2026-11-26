@@ -326,6 +326,34 @@ ENGINE_REQUESTS and ENGINE_RESPONSES, and the oversight session is copied on con
 | UI & cinematics | `session_01H4ZSJ9Htu5DPCDMJHKesiQ` |
 | Oversight | `session_01H4ZSJ99NBvPVUNdV2re88V` |
 
+**Helper models (user: use Sonnet/Haiku helpers only where it makes sense, to save usage):**
+- **When:** delegate only well-scoped, verifiable, low-judgement work to a helper subagent
+  (Agent tool, `model: 'haiku'` or `'sonnet'`).
+- **Haiku:**
+  - code and file searches;
+  - running tests, screenshot rigs and the period audit, then reporting numbers;
+  - fetching and summarising a web page;
+  - mechanical renames;
+  - validating content JSON against a schema.
+- **Sonnet:**
+  - bounded implementation from a precise spec with tests (a parser, converter, validator or
+    data script);
+  - research sweeps with sources;
+  - fixtures;
+  - first-draft docs you then edit.
+- **Keep on the main model:**
+  - architecture and shared contracts (`src/shared`, save sections, ENGINE_REQUESTS and
+    RESPONSES);
+  - shaders and look judgement;
+  - period-accuracy and licensing calls;
+  - anything touching another stream's contract;
+  - user-facing decisions;
+  - **reviewing every helper result before it's committed** (run the tests, spot-check).
+- **Don't:**
+  - delegate what takes a couple of tool calls;
+  - run helpers in parallel unless the work is truly independent;
+  - commit helper output to a contract unreviewed.
+
 **Master feature checklist:** [docs/briefs/FEATURE_AUDIT.md](docs/briefs/FEATURE_AUDIT.md), with an owner for every line.
 
 **`package.json`:** scripts are kept alphabetical. Streams add only their own `<stream>:*`
