@@ -33,6 +33,7 @@ import { worldClock, clockLabel } from './world/Clock';
 type Mode = 'onfoot' | 'photo';
 
 async function main() {
+  if (new URLSearchParams(location.search).has('interiors')) return void (await import('./interiors/test/testScene')).runInteriorsTest(); // interiors workstream test scene
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
