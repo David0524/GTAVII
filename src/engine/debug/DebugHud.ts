@@ -5,10 +5,10 @@ export class FrameStats {
   push(ms: number) { this.samples[this.n++ % this.samples.length] = ms; }
   summary() {
     const len = Math.min(this.n, this.samples.length);
-    if (!len) return { avg: 0, p95: 0, max: 0, fps: 0 };
+    if (!len) return { avg: 0, p50: 0, p95: 0, max: 0, fps: 0 };
     const a = Array.from(this.samples.subarray(0, len)).sort((x, y) => x - y);
     const avg = a.reduce((s, v) => s + v, 0) / len;
-    return { avg, p95: a[Math.floor(len * 0.95)], max: a[len - 1], fps: 1000 / avg };
+    return { avg, p50: a[len >> 1], p95: a[Math.floor(len * 0.95)], max: a[len - 1], fps: 1000 / avg };
   }
   reset() { this.n = 0; }
 }

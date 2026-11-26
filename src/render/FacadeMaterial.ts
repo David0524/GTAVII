@@ -18,7 +18,7 @@
 import * as THREE from 'three/webgpu';
 import {
   attribute, uv, vec2, vec3, float, fract, floor, step, smoothstep, mix, hash, mx_noise_float,
-  normalWorld, uniform, select, vertexColor, clamp, max, min, fwidth, abs, sin,
+  normalWorld, uniform, select, vertexColor, clamp, max, min, fwidth, abs, sin, positionWorld, cameraPosition, dot, normalize, length,
 } from 'three/tsl';
 
 export const facadeUniforms = {
@@ -26,8 +26,14 @@ export const facadeUniforms = {
   night: uniform(0),
   /** Real seconds, for subtle flicker (TVs). */
   time: uniform(0),
+  /** Game clock minutes since midnight (interiors Tier C: room by hour). */
+  minutes: uniform(0),
+  /** Area power 0 (blackout) / 0.45 (brownout) / 1 (normal); per-area masks come with N2. */
+  areaPower: uniform(1),
   /** Global scale on window emission (exposure tuning / debugging). */
   litScale: uniform(0.5),
+  /** Radians per drawing-buffer pixel (2 tan(fov/2) / height): rotation-invariant window LOD. Set on resize. */
+  pixelAngle: uniform(0.0015),
   /** Canyon occlusion strength (0 = off). */
   aoStrength: uniform(0.8),
 };
@@ -66,8 +72,16 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const winMaskSharp = clamp(storeMask.add(upperMask), 0, 1).mul(select(v.greaterThan(0.2), float(1), float(0)));
   // Distance LOD: when a bay is only a few pixels wide the pattern aliases into speckle; fade to the
   // average window coverage instead (also used to average lit windows).
-  const bayPx = fwidth(u).div(bay);
-  const lodFade = smoothstep(0.03, 0.12, bayPx);
+  // The footprint is computed from the distance to the window and the angle of view onto the wall, NOT
+  // from screen derivatives: fwidth() changes with where a facade sits on screen (perspective stretch at
+  // the edges), so turning the camera slid facades through the fade and the lit windows "bugged out"
+  // (user report 2026-11-26). This is invariant under camera rotation. The fade only starts once a bay
+  // is ~4 px wide, where individual windows are barely resolvable.
+  const toCam = cameraPosition.sub(positionWorld);
+  const grazing = abs(dot(normalize(toCam), normalWorld)).max(0.2);
+  const footprint = length(toCam).mul(facadeUniforms.pixelAngle).div(grazing); // metres per pixel along the wall
+  const bayPx = footprint.div(bay); // bays per pixel
+  const lodFade = smoothstep(0.25, 0.7, bayPx);
   const coverage = winFrac.mul(head.sub(sill)).mul(0.85);
   const winMask = mix(winMaskSharp, coverage, lodFade);
 
