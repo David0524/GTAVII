@@ -24,7 +24,8 @@ import { StandInBody, type PlayerBody } from './player/StandInBody';
 import { Party } from './player/Party';
 import { SaveManager, iosEvictionRisk } from './save/SaveManager';
 import type { SaveData } from './save/schema';
-import { worldClock, clockLabel } from './world/Clock';
+import { worldClock, clockLabel, tickClock, setTime } from './world/Clock';
+import { buildStreetLights, streetLightUniforms } from './world/StreetLights';
 import { Hud } from './ui/Hud';
 import { PauseMenu } from './ui/PauseMenu';
 import { TitleScreen } from './ui/TitleScreen';
@@ -50,7 +51,7 @@ async function main() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
-  new Atmosphere(scene);
+  const atmosphere = new Atmosphere(scene);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
   const world = new World(quality);
@@ -64,6 +65,8 @@ async function main() {
     fetch(base + 'streets.json').then((r) => r.json() as Promise<StreetRec[]>),
   ]);
   scene.add(skyline);
+  const streetLights = buildStreetLights(streets);
+  scene.add(streetLights);
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
@@ -154,7 +157,10 @@ async function main() {
   window.addEventListener('resize', onResize); onResize();
   settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
 
-  if (params.has('night')) facadeUniforms.night.value = Number(params.get('night'));
+  // ?time=HH:MM sets the clock (screenshot rig), ?timescale=0 freezes it; ?night= overrides window lighting.
+  if (params.has('time')) setTime(params.get('time')!);
+  if (params.has('timescale')) worldClock.scale = Number(params.get('timescale'));
+  const nightOverride = params.has('night') ? Number(params.get('night')) : null;
   if (params.has('lit')) facadeUniforms.litScale.value = Number(params.get('lit'));
   const frames = new FrameStats();
   const clock = new THREE.Timer();
@@ -280,6 +286,10 @@ async function main() {
     if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (playing && input.pressed('jump')) jumpLatch = true;
     if (playing && mode === 'onfoot' && player.active) saves.tick(dt);
+    if (playing) tickClock(dt); // the clock pauses in menus, the title and cutscenes
+    const light = atmosphere.update();
+    facadeUniforms.night.value = nightOverride ?? light.night;
+    streetLightUniforms.lightsOn.value = light.lightsOn;
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }

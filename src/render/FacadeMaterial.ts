@@ -63,7 +63,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   // Distance LOD: when a bay is only a few pixels wide the pattern aliases into speckle; fade to the
   // average window coverage instead (also used to average lit windows).
   const bayPx = fwidth(u).div(bay);
-  const lodFade = smoothstep(0.06, 0.22, bayPx);
+  const lodFade = smoothstep(0.03, 0.12, bayPx);
   const coverage = winFrac.mul(head.sub(sill)).mul(0.85);
   const winMask = mix(winMaskSharp, coverage, lodFade);
 
@@ -73,7 +73,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const rowOff = floor(v.div(0.077)).mul(0.5);
   const head2 = fract(u.div(0.205).add(rowOff));
   const mortar = max(step(course, 0.13), step(head2, 0.05));
-  const mortarFade = smoothstep(0.03, 0.008, fwidth(v)); // fade coursing where a course is < ~2 px
+  const mortarFade = smoothstep(0.012, 0.004, fwidth(v)); // fade coursing well before a course is < ~4 px (no speckle)
   const mortarK = select(brickStyle, mortar.mul(mortarFade).mul(0.22), float(0));
   const blotch = mx_noise_float(vec3(u.mul(0.11), v.mul(0.13), seed.mul(37))).mul(0.5).add(0.5);
   // banding: sill / cornice lines at each floor (stone in offices, brick soldier courses in tenements)
