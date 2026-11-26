@@ -12,7 +12,7 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 | N4. Mission specs and side activities | **Done.** All 32 missions in `content/missions/`; 20 side activities in `content/activities.json`; M1 fully playable. Validator: 0 errors (104 warnings = dialogue scripts due in N5). |
 | N5. Dialogue and barks | **Done.** 155 dialogue scripts (about 790 lines: all 32 missions + 44 side-activity scenes), 57 NPC archetypes, 21 bark pools (477 lines; 12 core pools with 31+ each), plus 78 edge barks. Validator: 0 errors, 0 warnings. |
 | N6. Ambient world and business registry | **Done.** 44-name registry (`content/BUSINESS_NAMES.md`, 4 names rejected after search); 15 weekly front pages (with ending variants); 4 radio stations (22 invented songs, 27 DJ lines); 8 tags, 13 slogans, 14 posters; 6 overheard grate scenes; 12 dressed interiors (4 per act). |
-| N7. Integration | **Static pre-pass next** (reachability, date order, pacing). Engine schema checker and headless play-through wait on engine Phase 7. |
+| N7. Integration | **Static pre-pass done** (`narrative/N7_PREPASS.md`, `narrative/tools/reach.py`): 32/32 reachable, 0 issues; the clock-policy need was filed as ENGINE_REQUESTS 10. **Blocked:** the engine schema checker and headless play-through wait on engine Phase 7 hooks. |
 
 ## Files
 ```
@@ -591,3 +591,20 @@ calls":
 **Gap:** the brief asks for neon and sign text per business. This exists for the registry,
 but the engine still has to map shopfronts to real facades (a Phase 3 facade-generation
 dependency).
+
+---
+
+## N7 pre-pass notes
+- **Reachability:** all 32 missions are reachable from M1 via unlocks, and every required flag
+  is set by an earlier mission.
+- **Dates:** every mission's dates fit inside its act. 25 of the dated missions use
+  single-day windows, which needs the clock policy in ENGINE_REQUESTS 10 so the story never
+  soft-locks.
+- **Endings:** all four are reachable. B3 and B4 are always open. B2 has 3 of 4
+  corroborations guaranteed and needs the optional M27 photo. B1 needs the wire or Nick's flip.
+- **Pacing:** Act 1 1.9 h, Act 2 2.8 h, Act 3 2.7 h. By lead: Teddy 4.0 h, Delphine 1.7 h,
+  Nick 1.8 h. That fits Teddy as the lead. Delphine and Nick get more time through their side
+  activities.
+- **Next, once the engine ships Phase 7 hooks:** run the engine schema checker over
+  `content/`, play every mission headless, and report broken references, unreachable
+  triggers and pacing problems. This is the brief's full N7.

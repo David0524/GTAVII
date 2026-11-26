@@ -182,3 +182,21 @@ with a fallback. Validation is in `narrative/tools/content.py`.
   with `requires.timeWindow`, unlocked by `unlockedBy`.
 | Line-level relationship conditions and effects | dialogue line `ifRelationship: { "char.<lead>/char.<npc>": ">=3" }`; line `setRelationships`; choice `confirm: "text"` (a confirm step for branch choices) | Gated lines (M18 Yiannis's true count); confirm steps on Branch A and B | Duplicate scripts selected by flags that missions set from relationship thresholds |
 | Compound conditions on choices and lines | `requires: { all: [flags], any: [flags], none: [flags], atLeast: { n, of: [flags] }, relationship: { "char.<lead>/char.<npc>": ">=2" } }`; gated choices carry `disabledText` and are shown greyed with that reason | Branch B (M29: B1 needs the wire OR Nick's flip; B2 needs 2 of 4 corroborations AND the editor neutralised); lead resolutions (M30, M31) | Missions set summary flags (for example `flag.b1_open`) before the choice |
+
+## From narrative: 10. Story-clock policy for dated missions (no soft-locks)
+- **What:** 25 of 32 story missions carry a `requires.dateRange` (many of them a single day:
+  4 July, 8 August, Labor Day and so on). Proposed policy:
+  1. A story mission becomes available when it's unlocked, whatever today's date is.
+  2. When the player starts it, if the world date is **before** `dateRange[0]`, the engine
+     runs `set_date(dateRange[0])` plus `advance_time` to the window's start (a "time passes"
+     card).
+  3. If the world date is **after** `dateRange[1]`, the mission still starts, and its
+     date-specific ambient world (fireworks, radio address) plays anyway. Story dates are
+     anchors, not deadlines.
+  4. Free roam between missions never pushes the clock past the next story date. The day
+     rolls over, but the date holds at the next story date until that mission starts.
+- **Why:** The weekly papers, act worlds and real-date beats (4 July, 8–9 August, Labor Day)
+  need the calendar, but a player who lingers must never miss the story.
+- **Found by:** the N7 static pre-pass (`narrative/N7_PREPASS.md`).
+- **Fallback:** Narrative widens every `dateRange` to its act's range, and missions set
+  date-specific ambience through flags.
