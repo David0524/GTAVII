@@ -70,6 +70,26 @@ export interface BusinessView {
   ledger: { week: string; gross: number; payroll: number; pad: number; net: number }[];
 }
 
+/** A car the lead owns (or has lost to the street, the garage or the pound). */
+export interface CarView {
+  id: string; name: string; year: number; colour: string; plate: string;
+  condition: number; // 0..1
+  mileage: number;
+  where: { kind: 'street' | 'garage' | 'pound'; x: number; z: number; label: string };
+  tickets: { id: string; amount: number; reason: string; date: string }[];
+  booted: boolean;
+  towed?: { pound: string; fee: number };
+  trunk?: string[];
+}
+/** A used-car lot or a showroom. */
+export interface LotView {
+  id: string; name: string; kind: 'lot' | 'showroom'; salesman: string; patter: string;
+  cars: { id: string; name: string; year: number; colour: string; cls: string; trim: string; condition: number; mileage: number; asking: number; notes?: string }[];
+}
+export interface ClassifiedAd { id: string; text: string; price: number; phone: string; kind: 'car' | 'room' | 'job' | 'misc'; placeId?: string }
+export interface HomeView { id: string; lead: LeadId; name: string; address: string; upgrades: { id: string; name: string; cost: number; owned: boolean; effect: string }[] }
+export interface SleepInfo { canSleep: boolean; reason?: string; bed: boolean; restQuality: 'good' | 'poor'; note?: string; nextPinnedDate?: string | null }
+
 export interface StatRow { group: string; label: string; value: string }
 export interface CompletionRow { group: string; label: string; done: number; total: number }
 export interface Achievement { id: string; name: string; text: string; unlocked?: string; hidden?: boolean }
@@ -102,8 +122,16 @@ export type UiAction =
   | { kind: 'upgrade'; business: string; upgrade: string }
   | { kind: 'payTrouble'; business: string; index: number }
   | { kind: 'waypoint'; at: { x: number; z: number } | null }
-  | { kind: 'betNumber'; digits: string; stake: number };
-export type ActionResult = { ok: true; text?: string } | { ok: false; text: string };
+  | { kind: 'betNumber'; digits: string; stake: number }
+  | { kind: 'wait'; until: string /* 'HH:MM' */ }
+  | { kind: 'sleep'; until: string /* 'HH:MM' */ }
+  | { kind: 'haggle'; lot: string; car: string; offer: number }
+  | { kind: 'buyCar'; lot: string; car: string; price: number }
+  | { kind: 'payTicket'; car: string; ticket: string }
+  | { kind: 'payPound'; car: string }
+  | { kind: 'homeUpgrade'; home: string; upgrade: string };
+/** `counter` and `accepted` are set by a haggle: the salesman's counter-offer, or that he took the offer. */
+export type ActionResult = { ok: true; text?: string; counter?: number; accepted?: boolean } | { ok: false; text: string };
 
 export interface UiHost {
   readonly input: Input;
@@ -126,6 +154,12 @@ export interface UiHost {
   completion(): CompletionRow[];
   achievements(): Achievement[];
   act(a: UiAction): ActionResult;
+  /** Optional (cars, lots, classifieds, homes, sleeping): screens degrade gracefully without them. */
+  cars?(): CarView[];
+  carLot?(id: string): LotView | null;
+  classifieds?(): ClassifiedAd[];
+  homes?(): HomeView[];
+  sleepInfo?(): SleepInfo;
   on<K extends keyof UiEvents>(k: K, cb: (e: UiEvents[K]) => void): () => void;
   camera?: CameraHost;
   actors?: ActorHost;

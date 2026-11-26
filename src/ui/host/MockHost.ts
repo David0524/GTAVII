@@ -7,7 +7,7 @@
 import {
   Emitter, CONCEAL_ORDER, type UiHost, type UiEvents, type PlayerView, type ClockView, type LeadView, type HealthView, type InventoryView,
   type HeatView, type ObjectiveView, type ShopView, type NewsIssue, type BusinessView, type StatRow, type CompletionRow, type Achievement,
-  type UiAction, type ActionResult, type ItemView, type Conceal, type ConcealState, type OutfitView, type LeadId,
+  type UiAction, type ActionResult, type CarView, type LotView, type ClassifiedAd, type HomeView, type SleepInfo, type ItemView, type Conceal, type ConcealState, type OutfitView, type LeadId,
 } from './types';
 import type { Input } from '../../input/Input';
 import type { SaveManager } from '../../save/SaveManager';
@@ -51,6 +51,45 @@ const ITEMS: Record<string, MItem[]> = {
   ],
 };
 
+
+const money$ = (v: number) => `$${v.toLocaleString('en-US')}`;
+const LOTS: Record<string, LotView> = {
+  sal: { id: 'sal', name: 'Sal\'s Square Deal Motors', kind: 'lot', salesman: 'Sal Brunetti',
+    patter: 'Kick a tire, friend, go ahead, she don\'t bite. Everything on this lot runs, and what don\'t run I tell you up front. Cash talks. Cash talks loud.',
+    cars: [
+      { id: 'l.monarch', name: 'Monarch Brougham 4-dr', year: 1970, colour: 'Maroon', cls: 'Full-size sedan', trim: 'Brougham, vinyl top', condition: 0.62, mileage: 71400, asking: 895, notes: 'One owner, a deacon. Rear shocks are tired.' },
+      { id: 'l.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1969, colour: 'Harvest gold', cls: 'Two-door hardtop', trim: 'Sprint V8', condition: 0.48, mileage: 88200, asking: 650, notes: 'Pulls left under braking. Fast anyway.' },
+      { id: 'l.dunmore', name: 'Dunmore Villager wagon', year: 1968, colour: 'Avocado', cls: 'Station wagon', trim: 'Woodgrain panels', condition: 0.4, mileage: 102300, asking: 425, notes: 'Smells like a dog. A good dog.' },
+      { id: 'l.corsair', name: 'Corsair Commuter 2-dr', year: 1972, colour: 'Sky blue', cls: 'Compact', trim: 'Four-cylinder', condition: 0.78, mileage: 38900, asking: 1150, notes: 'Gets twenty-two to the gallon. Honest.' },
+      { id: 'l.lancaster', name: 'Lancaster Hauler pickup', year: 1966, colour: 'Primer grey', cls: 'Pickup', trim: 'Stepside', condition: 0.33, mileage: 121000, asking: 380, notes: 'Starts when she feels like it.' },
+      { id: 'l.halvorsen', name: 'Halvorsen Royale 4-dr', year: 1973, colour: 'Midnight green', cls: 'Full-size sedan', trim: 'Royale, 455 V8', condition: 0.88, mileage: 21500, asking: 2150, notes: 'Retired lady, Fort Lee. Tires like new.' },
+    ] },
+  halvorsen: { id: 'halvorsen', name: 'Halvorsen Motors, Eighth Avenue', kind: 'showroom', salesman: 'Mr. Pruitt',
+    patter: 'Good evening. May I interest you in something with a warranty? Nineteen seventy-four, sir: the year of the radial tire and the five-mile-an-hour bumper.',
+    cars: [
+      { id: 's.royale', name: 'Halvorsen Royale 4-dr', year: 1974, colour: 'Candy apple red', cls: 'Full-size sedan', trim: 'Royale, 455 V8, AM/FM', condition: 1, mileage: 12, asking: 4895, notes: 'Factory air. 12 months or 12,000 miles.' },
+      { id: 's.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1974, colour: 'Bright yellow', cls: 'Two-door hardtop', trim: 'Sprint V8, four-on-the-floor', condition: 1, mileage: 9, asking: 3995 },
+      { id: 's.corsair', name: 'Corsair Commuter 2-dr', year: 1974, colour: 'Sky blue', cls: 'Compact', trim: 'Four-cylinder', condition: 1, mileage: 7, asking: 2495, notes: 'Gas is 55 cents. Think about it.' },
+    ] },
+};
+const mockClassifieds = (): ClassifiedAd[] => [
+  { id: 'cl.1', kind: 'car', text: '\'68 Kestrel Sprint, runs good, new tires, clean title. Deacon\'s car.', price: 650, phone: 'CH 3-8800' },
+  { id: 'cl.2', kind: 'car', text: 'STATION WAGON \'67 Dunmore, 3 seats, needs brake job. Must sell, moving.', price: 275, phone: 'WA 9-0417' },
+  { id: 'cl.3', kind: 'car', text: '\'73 Corsair Commuter, 22 mpg, low miles, AM radio.', price: 1190, phone: 'PE 6-2200' },
+  { id: 'cl.4', kind: 'room', text: 'SLEEPING ROOM W 40s, quiet gentleman, hot plate, linen, week in advance.', price: 22, phone: 'LO 4-1500', placeId: 'ui.forsale.0' },
+  { id: 'cl.5', kind: 'room', text: 'STUDIO furnished, 9th Av, private bath, utilities incl. No pets.', price: 85, phone: 'OR 5-1190' },
+  { id: 'cl.6', kind: 'job', text: 'NIGHT CLERK wanted, midtown hotel, 11 to 7, references, steady man.', price: 110, phone: 'CO 5-7733', placeId: 'ui.job.0' },
+  { id: 'cl.7', kind: 'job', text: 'DRIVERS: garment center, must know city, over 21, own license.', price: 95, phone: 'LA 4-6150' },
+  { id: 'cl.8', kind: 'misc', text: 'WINDOW air conditioner, 6,000 BTU, works fine. You haul.', price: 60, phone: 'MU 3-2040', placeId: 'ui.shop.0' },
+];
+const HOME_UPGRADES = (owned: string[]): HomeView['upgrades'] => [
+  { id: 'h.ac', name: 'Window air conditioner', cost: 189, owned: owned.includes('h.ac'), effect: 'Sleep well through the heat' },
+  { id: 'h.lock', name: 'Deadbolt and chain', cost: 24, owned: owned.includes('h.lock'), effect: 'Fewer break-ins while you sleep' },
+  { id: 'h.tv', name: 'Second-hand TV', cost: 60, owned: owned.includes('h.tv'), effect: 'Watch the news: hear about trouble early' },
+  { id: 'h.fan', name: 'Electric fan', cost: 14, owned: owned.includes('h.fan'), effect: 'Cooler nights (a little)' },
+  { id: 'h.phone', name: 'Telephone, wall model', cost: 35, owned: owned.includes('h.phone'), effect: 'Calls come to you at home' },
+];
+
 export class MockHost implements UiHost {
   readonly saves: SaveManager | null = null;
   private ev = new Emitter<UiEvents>();
@@ -65,6 +104,18 @@ export class MockHost implements UiHost {
   stamina = 0.64;
   obj: ObjectiveView | null = { text: 'Walk up Broadway with Mayhew', target: { x: 18, z: -240, label: 'Broadway & W 26 St' }, mission: 'Dusk on Broadway' };
   owned = new Set<string>(['biz.laundromat']);
+  garageCars: CarView[] = [
+    { id: 'car.monarch', name: 'Monarch Brougham 4-dr', year: 1971, colour: 'Harvest gold', plate: '612 KTR', condition: 0.58, mileage: 64210,
+      where: { kind: 'street', x: -205, z: -640, label: 'W 31 St near 8 Av, alternate-side Tue/Fri' },
+      tickets: [{ id: 'tk.1', amount: 15, reason: 'Alternate-side parking', date: 'Jun 18' }, { id: 'tk.2', amount: 25, reason: 'Hydrant, within 15 ft', date: 'Jun 20' }, { id: 'tk.3', amount: 15, reason: 'Expired meter', date: 'Jun 21' }], booted: true, trunk: ['Tire iron', 'Road flares', 'Spare coat'] },
+    { id: 'car.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1969, colour: 'Avocado', plate: '9R 4471', condition: 0.81, mileage: 52900,
+      where: { kind: 'garage', x: -640, z: -960, label: 'Midtown Park & Lock, level 2' }, tickets: [], booted: false, trunk: ['Crowbar', 'Gym bag'] },
+    { id: 'car.dunmore', name: 'Dunmore Villager wagon', year: 1967, colour: 'Maroon', plate: '38 BDN', condition: 0.35, mileage: 117800,
+      where: { kind: 'pound', x: -1180, z: -1010, label: 'Pier 74 city pound, W 38 St at 12 Av' }, tickets: [{ id: 'tk.4', amount: 15, reason: 'No standing, bus stop', date: 'Jun 19' }], booted: false, towed: { pound: 'Pier 74 pound', fee: 45 }, trunk: [] },
+  ];
+  homeOwned: Record<string, string[]> = {};
+  bed = true;
+  private sold = new Set<string>();
 
   constructor(readonly input: Input, readonly streets: StreetRec[], readonly baseUrl = '/', readonly heroes: { name: string; x: number; z: number }[] = []) {}
 
@@ -200,6 +251,25 @@ export class MockHost implements UiHost {
     ];
   }
 
+  cars(): CarView[] { return JSON.parse(JSON.stringify(this.garageCars)); }
+  carLot(id: string): LotView | null { const l = LOTS[id]; return l ? JSON.parse(JSON.stringify({ ...l, cars: l.cars.filter((c) => !this.sold.has(c.id)) })) : null; }
+  classifieds(): ClassifiedAd[] { return mockClassifieds(); }
+  homes(): HomeView[] {
+    const H: [string, string, string][] = [['char.teddy_arce', 'Room 614, Hotel Corwin', 'W 29 St near Broadway, sixth floor'], ['char.delphine_moore', 'Fourth-floor walk-up', 'W 44 St near 9 Av, rear'], ['char.nick_varelas', 'Two rooms over the bakery', 'Ditmars Blvd, Astoria']];
+    return H.map(([lead, name, address]) => ({ id: `home.${lead.split('.')[1]}`, lead, name, address, upgrades: HOME_UPGRADES(this.homeOwned[lead] ?? []) }));
+  }
+  sleepInfo(): SleepInfo {
+    const ac = (this.homeOwned[this.lead] ?? []).includes('h.ac');
+    const ok = this.bed;
+    return { canSleep: true, bed: ok, restQuality: ac && ok ? 'good' : 'poor',
+      note: ok ? (ac ? 'The air conditioner hums. You will sleep like a stone.' : 'Ninety at midnight and no air conditioner: you won\'t rest well.') : 'No bed here. All you can do is stand around and watch the clock.',
+      nextPinnedDate: 'Saturday, June 22' };
+  }
+  private advance(until: string) {
+    const [h, m] = until.split(':').map(Number); const target = h * 60 + m, now = Math.floor(this.minutes) % 1440;
+    this.minutes += (target - now + 1440) % 1440 || 1440;
+  }
+
   act(a: UiAction): ActionResult {
     const lead = this.lead;
     if (a.kind === 'buy') {
@@ -240,6 +310,53 @@ export class MockHost implements UiHost {
       if (this.cash[lead] < a.stake) return { ok: false, text: 'Not enough cash.' };
       this.cash[lead] -= a.stake; this.emit('money', { lead, delta: -a.stake, cash: this.cash[lead], reason: `number ${a.digits}` });
       return { ok: true, text: `$${a.stake} on ${a.digits}. Pays 600 to 1 (the runner keeps 10%).` };
+    }
+    if (a.kind === 'wait' || a.kind === 'sleep') {
+      this.advance(a.until); const c = this.clock(), h = Math.floor(c.minutes / 60), mm = c.minutes % 60;
+      if (a.kind === 'sleep') this.hp = Math.min(100, this.hp + (this.sleepInfo().restQuality === 'good' ? 30 : 12));
+      return { ok: true, text: `${a.kind === 'sleep' ? 'You slept. ' : ''}It is ${((h + 11) % 12) + 1}:${String(mm).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}.` };
+    }
+    if (a.kind === 'haggle') {
+      const c = LOTS[a.lot]?.cars.find((x) => x.id === a.car);
+      if (!c) return { ok: false, text: 'That one\'s gone.' };
+      if (a.offer < c.asking * 0.5) return { ok: false, text: 'Are you kidding me? Get outta here with that. (He turns away.)' };
+      if (a.offer >= c.asking * 0.85) return { ok: true, accepted: true, counter: a.offer, text: `You know what? ${money$(a.offer)}. Done. Don\'t tell nobody.` };
+      const counter = Math.min(c.asking - 5, Math.max(a.offer + 5, Math.round((a.offer + c.asking) / 2 / 5) * 5));
+      return { ok: true, accepted: false, counter, text: `${money$(a.offer)}? I got a family. Meet me halfway: ${money$(counter)}.` };
+    }
+    if (a.kind === 'buyCar') {
+      const c = LOTS[a.lot]?.cars.find((x) => x.id === a.car);
+      if (!c || this.sold.has(c.id)) return { ok: false, text: 'That one\'s gone.' };
+      if (this.cash[lead] + this.savings[lead] < a.price) return { ok: false, text: `You need ${money$(a.price)} between cash and savings.` };
+      const fromCash = Math.min(this.cash[lead], a.price); this.cash[lead] = +(this.cash[lead] - fromCash).toFixed(2); this.savings[lead] -= a.price - fromCash;
+      this.sold.add(c.id);
+      this.garageCars.push({ id: `car.${c.id}`, name: c.name, year: c.year, colour: c.colour, plate: '4A 0912', condition: c.condition, mileage: c.mileage, where: { kind: 'street', x: this.pos.x, z: this.pos.z, label: 'Right outside' }, tickets: [], booted: false, trunk: [] });
+      this.emit('money', { lead, delta: -a.price, cash: this.cash[lead], reason: c.name });
+      return { ok: true, text: `Yours: ${c.name}. Plates and keys in the glovebox.` };
+    }
+    if (a.kind === 'payTicket') {
+      const car = this.garageCars.find((x) => x.id === a.car), t = car?.tickets.find((x) => x.id === a.ticket);
+      if (!car || !t) return { ok: false, text: 'No such ticket.' };
+      if (this.cash[lead] < t.amount) return { ok: false, text: `Short ${money$(t.amount - this.cash[lead])}.` };
+      this.cash[lead] -= t.amount; car.tickets = car.tickets.filter((x) => x !== t); if (!car.tickets.length) car.booted = false;
+      this.emit('money', { lead, delta: -t.amount, cash: this.cash[lead], reason: 'parking summons' });
+      return { ok: true, text: car.booted ? 'Paid. Still booted.' : 'Paid.' };
+    }
+    if (a.kind === 'payPound') {
+      const car = this.garageCars.find((x) => x.id === a.car);
+      if (!car?.towed) return { ok: false, text: 'It\'s not at the pound.' };
+      if (this.cash[lead] < car.towed.fee) return { ok: false, text: `Short ${money$(car.towed.fee - this.cash[lead])}.` };
+      this.cash[lead] -= car.towed.fee; this.emit('money', { lead, delta: -car.towed.fee, cash: this.cash[lead], reason: 'pound' });
+      car.where = { kind: 'street', x: -1180, z: -1010, label: 'Outside the pound gate, 12 Av' }; delete car.towed;
+      return { ok: true, text: 'Released. Keys in the ignition.' };
+    }
+    if (a.kind === 'homeUpgrade') {
+      const h = this.homes().find((x) => x.id === a.home), u = h?.upgrades.find((x) => x.id === a.upgrade);
+      if (!h || !u || u.owned) return { ok: false, text: 'Already done.' };
+      if (this.cash[h.lead] < u.cost) return { ok: false, text: `Short ${money$(u.cost - this.cash[h.lead])}.` };
+      this.cash[h.lead] -= u.cost; (this.homeOwned[h.lead] ??= []).push(u.id);
+      this.emit('money', { lead: h.lead, delta: -u.cost, cash: this.cash[h.lead], reason: u.name });
+      return { ok: true, text: `Installed: ${u.name}.` };
     }
     return { ok: true };
   }

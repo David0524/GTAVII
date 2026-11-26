@@ -16,6 +16,10 @@ export interface UiEvents {
   inventory: { lead: LeadId };
   achievement: { id: string };
   lead: { id: LeadId };
+  /** A mission marker was reached outside its time window: offer to wait (HH:MM strings). */
+  waitPrompt: { mission: string; title: string; windowStart: string; windowEnd: string; resolve: (accept: boolean) => void };
+  /** A parking summons, a tow or a boot happened to one of the lead's cars. */
+  notice: { kind: 'ticket' | 'tow' | 'boot'; car: string; text: string; amount?: number };
   choices: { prompt?: string; choices: DialogueChoice[]; resolve: (id: string) => void };
 }
 
