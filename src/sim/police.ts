@@ -169,7 +169,7 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
     if (v.stopLink === v.link && v.s >= sGoal - 3 && v.v < 1) {
       v.stopLink = -1; v.stopAt = -1; v.v = 0;
       if (c.mode === 'roadblock') startRoadblock(S, v);
-      else { v.state = 'onScene'; v.dwell = c.role === 'ambulance' ? S.rng.range(40, 80) : c.role === 'fire' ? S.rng.range(120, 240) : Infinity; v.latTarget = L.laneIndex === 0 ? (L.width - v.wid) / 2 + 1.1 : 0; }
+      else { v.state = 'onScene'; v.dwell = c.role === 'ambulance' ? S.rng.range(40, 80) : c.role === 'fire' ? S.rng.range(120, 240) : c.role === 'tow' ? S.rng.range(20, 30) : Infinity; v.latTarget = L.laneIndex === 0 ? (L.width - v.wid) / 2 + 1.1 : 0; }
       arrive(S, c);
     }
   }

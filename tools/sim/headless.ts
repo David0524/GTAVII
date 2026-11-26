@@ -84,8 +84,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   sim.setClock(17 * 60 + 30);
   const net = sim.network, g = net.g;
   const events: Record<string, number> = {};
-  const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0, fire: 0, cab: -1 };
-  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen', 'dispatched', 'responderArrived', 'responderLeft', 'mailStop', 'iceCreamStop', 'iceCreamChime', 'cabCalled', 'cabReady', 'cabDeparted', 'cabTurnAhead', 'cabRideArrived', 'cabGaveUp']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
+  const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0, fire: 0, cab: -1, parkRule: '' };
+  for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen', 'dispatched', 'responderArrived', 'responderLeft', 'mailStop', 'iceCreamStop', 'iceCreamChime', 'cabCalled', 'cabReady', 'cabDeparted', 'cabTurnAhead', 'cabRideArrived', 'cabGaveUp', 'ticketIssued', 'towDispatched', 'vehicleTowed', 'sweeperOut']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
   const examples: Record<string, string[]> = {};
@@ -130,6 +130,11 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (ps[1]) hooks.kills += sim.kill(ps[1].id, 30) ? 1 : 0;
       const car = sim.debugAgents().vehicles.find((v) => v.kind === 'car' && v.state === 'drive' && Math.hypot(v.x - f.x, v.z - f.z) < 80);
       if (car && sim.takeVehicle(car.id)) hooks.stolen++;
+    }
+    // a (player's) car left at a hydrant: ticket, then tow
+    if (k === Math.round(5 / SIM_DT)) {
+      const h = sim.hydrantsNear(f.x, f.z, 120)[0];
+      if (h) { sim.registerParkedCar('player_car', h.x + 1, h.z); hooks.parkRule = sim.parkingRule(h.x + 1, h.z).reasons.join('; '); }
     }
     // emergency + player cab ride (seg 0 at the Flatiron, so the ride has time)
     if (k === Math.round(20 / SIM_DT)) {

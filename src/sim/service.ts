@@ -136,7 +136,7 @@ export function leaveCab(S: SimCore, cabId: number): boolean {
   const v = S.vehicles.find((w) => w.id === cabId && w.alive);
   if (!v?.ride) return false;
   v.ride = null; v.fare = false; v.dest = null; v.hail = null; v.stopLink = -1; v.stopAt = -1;
-  if (v.state === 'curb') v.dwell = 0;
+  if (v.state === 'curb') v.dwell = 4; // let the passenger get out before the cab pulls away
   return true;
 }
 

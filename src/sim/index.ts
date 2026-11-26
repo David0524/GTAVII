@@ -15,6 +15,8 @@ import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats,
 export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
 import { boardCab, callCab, dispatchResponders, leaveCab } from './service';
+import { Parking, type ParkingRule } from './parking';
+export type { ParkingRule } from './parking';
 import { policePedTick, removePolice, setCopGoal, spawnPolice as spawnCop, type PoliceGoal, type PoliceView } from './police';
 export type { PoliceGoal, PoliceView } from './police';
 export type { WildlifeView } from './wildlife';
@@ -130,6 +132,7 @@ export class Simulation {
     };
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Connector) core.preds[l.next[0]].push(i); });
     this.core = core;
+    this.parking = new Parking(core);
     this.wild = new Wildlife(core, g.wild, Math.round(this.opts.maxPeds * 0.5), Math.round(this.opts.maxPeds * 0.15));
     g.links.forEach((l, i) => {
       if (l.kind !== LinkKind.Lane || !net.isSignal(l.endJ)) return;
@@ -181,6 +184,7 @@ export class Simulation {
     stepPeds(S, h);
     vehicleContacts(S, this.contactCd);
     this.wild.step(h);
+    this.parking.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -300,6 +304,18 @@ export class Simulation {
   /** Player gets out (or cancels): the cab goes back to cruising. */
   leaveCab(cabId: number): boolean { return leaveCab(this.core, cabId); }
   private ambulanceT = 120;
+
+  // ---------------------------------------------------------------- kerbside rules, enforcement, tows, street cleaning
+  private parking!: Parking;
+  /** Day of week for kerb rules (0 Sun .. 6 Sat; default Friday, 21 June 1974). */
+  setDay(dow: number) { this.parking.dow = ((Math.floor(dow) % 7) + 7) % 7; }
+  /** Can a car park at this kerb now (or at `minute`/`dow`)? Reasons, tow-away and fine tier. */
+  parkingRule(x: number, z: number, minute?: number, dow?: number): ParkingRule { return this.parking.rule(x, z, minute, dow); }
+  /** Hydrant positions on the kerbs near a point (the same ones the rules use; place props here). */
+  hydrantsNear(x: number, z: number, r: number) { return this.parking.hydrantsNear(x, z, r); }
+  /** A parked car the sim should enforce against (the player's). Events: ticketIssued, towDispatched, vehicleTowed. */
+  registerParkedCar(id: string, x: number, z: number) { this.parking.register(id, x, z); }
+  unregisterParkedCar(id: string) { this.parking.unregister(id); }
 
   // ---------------------------------------------------------------- violence and theft (gameplay)
   /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */

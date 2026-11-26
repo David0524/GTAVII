@@ -150,7 +150,7 @@ export function despawnPed(S: SimCore, p: Ped) {
 }
 
 // ------------------------------------------------------------------ traffic gap checks
-function trafficClearForCrosswalk(S: SimCore, walkEdge: number): boolean {
+function trafficClearForCrosswalk(S: SimCore, walkEdge: number, pedWait = 0): boolean {
   const net = S.net, e = net.g.walkEdges[walkEdge];
   for (const c of S.crossConns.get(walkEdge) ?? []) if (S.occ[c].length) return false;
   const lanes = net.approachLanes.get(e.owner * 16 + e.arm) ?? [];
@@ -162,8 +162,8 @@ function trafficClearForCrosswalk(S: SimCore, walkEdge: number): boolean {
   for (let k = 0; k < J.arms.length; k++) for (const l of net.approachLanes.get(e.owner * 16 + k) ?? []) for (const v of S.occ[l]) {
     if (v.next < 0 || !xc.includes(v.next)) continue;
     const dEnd = net.len[l] - v.s;
-    if (dEnd < 25 && v.v > 0.5) return false;
-    if (dEnd < v.len / 2 + 4 && v.waitT > 6 && net.laneSignal(l, S.t) !== 2 /* not red */) return false;
+    if (dEnd < (pedWait > 20 ? 10 : 25) && v.v > 0.5) return false;
+    if (dEnd < v.len / 2 + 4 && v.waitT > 6 && v.waitT > pedWait && net.laneSignal(l, S.t) !== 2 /* not red */) return false;
   }
   return true;
 }
@@ -328,7 +328,7 @@ export function stepPeds(S: SimCore, dt: number) {
         const N = g.walkEdges[p.toEdge];
         const crossT = net.walkLen[p.toEdge] / Math.max(0.8, p.speed);
         const sig = (g.junctions[N.owner].flags & JuncFlag.Signal) !== 0;
-        const clear = trafficClearForCrosswalk(S, p.toEdge);
+        const clear = trafficClearForCrosswalk(S, p.toEdge, p.timer);
         let go = clear && (!sig || net.walkAllowed(N.owner, N.arm, S.t, crossT));
         if (!go && clear && sig && p.jayCd <= 0) {
           p.jayCd = 1;
@@ -417,6 +417,9 @@ function walk(S: SimCore, p: Ped, dt: number) {
   p.v += Math.sign(speed - p.v) * Math.min(Math.abs(speed - p.v), dt * (p.onRoad ? 4 : 2));
   p.s += p.dir * p.v * dt;
   const len = net.walkLen[p.edge];
+  if (p.goal?.kind === 'goto' && p.goal.edge === p.edge && !p.path.length && Math.abs(p.s - (p.goal.s ?? -9)) < 0.8) {
+    placeOnEdge(S, p); p.state = 'hold'; p.v = 0; S.emit('goalReached', { id: p.id, x: p.x, z: p.z }); return;
+  }
   if (p.s >= len || p.s <= 0) { p.s = Math.max(0, Math.min(len, p.s)); placeOnEdge(S, p); arriveNode(S, p); placeOnEdge(S, p); return; }
   placeOnEdge(S, p);
   if (flee || E.kind !== WalkKind.Sidewalk || p.goal) return;
@@ -553,6 +556,21 @@ function replan(S: SimCore, p: Ped, node: number) {
   let tx = G.x ?? p.x, tz = G.z ?? p.z;
   if (G.kind === 'escort' && G.waypoints) { const w = G.waypoints[G.segment ?? 0]; tx = w.x; tz = w.z; }
   if (G.kind === 'follow') { const t = goalTarget(S, p); if (t) { tx = t.x; tz = t.z; } }
+  if (G.kind === 'goto') {
+    if (G.edge === undefined) { // the sidewalk spot nearest the target
+      let be = -1, bd = 40, bs = 0;
+      for (const e of S.net.sidewalksNear(tx, tz, 40, new Set())) { const pr = projectOnPoly(S.net.g.walkEdges[e].pts, tx, tz); if (pr.d < bd) { bd = pr.d; be = e; bs = pr.s; } }
+      G.edge = be; G.s = bs;
+    }
+    if (G.edge >= 0) {
+      const E = S.net.g.walkEdges[G.edge];
+      if (node === E.a || node === E.b) { p.path = [G.edge]; return; }
+      const pa = walkPath(S, node, E.a), pb = walkPath(S, node, E.b);
+      const la = pa.reduce((a, e) => a + S.net.walkLen[e], 0) + G.s!, lb = pb.reduce((a, e) => a + S.net.walkLen[e], 0) + S.net.walkLen[G.edge] - G.s!;
+      p.path = [...(la <= lb ? pa : pb), G.edge];
+      return;
+    }
+  }
   p.path = walkPath(S, node, nearestNode(S, tx, tz));
 }
 function goalLegDone(S: SimCore, p: Ped, node: number) {

@@ -51,6 +51,10 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
   // Service and emergency traffic (generic; nothing narrative)
   { id: 'npc.mail_carrier', behaviour: 'driver', vehicle: 'service', vclass: 'mail_truck', schedule: [{ from: '08:00', to: '17:30', activity: 'deliver' }], density: { day: 0.1, night: 0 }, params: { patience: 8, aggression: 0.2 } },
   { id: 'npc.soft_serve', behaviour: 'driver', vehicle: 'service', vclass: 'ice_cream', schedule: [{ from: '12:00', to: '21:00', activity: 'sell' }], density: { day: 0.06, night: 0 }, params: { patience: 10, aggression: 0.1 } },
+  { id: 'npc.traffic_agent', behaviour: 'walker', palette: ['#6b4f2e', '#c8b48a'], wardrobe: 'Generic brown traffic-agent uniform, ticket book', props: ['ticket_book'],
+    schedule: [{ from: '08:00', to: '18:00', activity: 'enforce' }], density: { day: 0.03, night: 0 }, params: { walkSpeed: 1.1, jaywalk: 0, nerve: 0.5 } },
+  { id: 'npc.tow_driver', behaviour: 'driver', vehicle: 'service', vclass: 'box_truck', density: { day: 0, night: 0 }, params: { patience: 6, aggression: 0.4 } },
+  { id: 'npc.street_sweeper', behaviour: 'driver', vehicle: 'service', vclass: 'garbage', density: { day: 0, night: 0 }, params: { patience: 20, aggression: 0 } },
   { id: 'npc.emt_driver', behaviour: 'driver', vehicle: 'emergency', vclass: 'ambulance', density: { day: 0, night: 0 }, params: { patience: 3, aggression: 0.7 } },
   { id: 'npc.fire_driver', behaviour: 'driver', vehicle: 'emergency', vclass: 'fire_engine', density: { day: 0, night: 0 }, params: { patience: 3, aggression: 0.6 } },
   // Wildlife (behaviour 'critter': flocks and swarms run by src/sim/wildlife.ts, not as pedestrians)

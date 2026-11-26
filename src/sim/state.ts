@@ -28,8 +28,8 @@ export interface Vehicle {
   dest: { x: number; z: number } | null;
   /** player cab ride: pickup -> waiting -> riding -> arrived */
   ride: { phase: 'pickup' | 'waiting' | 'riding' | 'arrived'; t: number } | null;
-  /** service vehicles: next timed stop / chime */
-  svcT: number;
+  /** service vehicles: next timed stop / chime; special role (street sweeper) */
+  svcT: number; svcRole: string;
   x: number; z: number; yaw: number; px: number; pz: number; pyaw: number;
   fare: boolean; fareT: number; hail: Hail | null; stopAt: number; stopLink: number; stopKind: string;
   dpDone: boolean; busServed: number; blockedBy: string;
@@ -60,7 +60,7 @@ export interface Hail { ped: number; road: number; side: number; x: number; z: n
 export interface Actor { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle'; /** emergency siren on: civilians pull over */ siren?: boolean }
 /** Police locomotion state for a foot cop or a police car (decisions stay with Gameplay). */
 export interface CopState {
-  id: number; kind: 'foot' | 'car'; role?: 'police' | 'ambulance' | 'fire'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
+  id: number; kind: 'foot' | 'car'; role?: 'police' | 'ambulance' | 'fire' | 'tow'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
   x: number; z: number; cx: number; cz: number; radius: number; yaw: number; target: string | null; urgent: boolean; siren: boolean; maxSpeed: number;
   route: number[]; arrived: boolean; stuckT: number; blockIds: number;
 }
@@ -78,6 +78,8 @@ export interface PedGoal {
   /** follow/escort: external actor id (default 'player') or numeric agent id to pace against */
   target?: string | number;
   waypoints?: { x: number; z: number }[]; segment?: number;
+  /** goto: the sidewalk edge and arc position nearest the target (walk to the exact spot, not just the corner) */
+  edge?: number; s?: number;
   waitRadius?: number; maxSpeed?: number; replanT?: number;
 }
 export interface Block { link: number; s: number; until: number; owner?: number }
