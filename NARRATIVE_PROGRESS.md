@@ -9,8 +9,8 @@ update it last. The brief is `NARRATIVE_BRIEF.md`, and engine status is in `PROG
 | N1. Story bible | **Approved** (after reviews 1–3) → `narrative/N1_STORY_BIBLE.md` |
 | N2. Cast | **Done** (with appearance sheets; no review objections) → `narrative/N2_CAST.md` (generated from `content/cast/*.json`) |
 | N3. Story structure | **Done** → `narrative/N3_STRUCTURE.md` (32-mission chain, branches, endings, relationships, act-by-act world) |
-| N4. Mission specs and side activities | **In progress.** Act 1 (M1–M9) specced in `content/missions/`; M1 fully playable (dialogue, trigger, spawns, interiors). Next: Acts 2–3 and side activities. |
-| N5. Dialogue and barks | — |
+| N4. Mission specs and side activities | **Done.** All 32 missions in `content/missions/`; 20 side activities in `content/activities.json`; M1 fully playable. Validator: 0 errors (104 warnings = dialogue scripts due in N5). |
+| N5. Dialogue and barks | **Next.** Mission dialogue in mission order (M1 done), then barks per archetype (≥30 each). |
 | N6. Ambient world and business registry | — |
 | N7. Integration | — (waits on engine Phase 7 hooks) |
 
@@ -26,6 +26,8 @@ narrative/N3_STRUCTURE.md  acts, chapters, 32-mission chain, branches A/B, endin
 narrative/tools/content.py validates missions, dialogue, triggers, spawns, interiors and flags; renders content/FLAGS.md
 narrative/tools/build_act1_missions.py  authoring source for Act 1 mission JSON (edit here, re-run)
 content/missions/, content/dialogue/, content/triggers/, content/spawns.json, content/interiors.json, content/flags.json (+ FLAGS.md)
+content/activities.json    20 side activities (pool rows keyed by placeholder), built by narrative/tools/build_activities.py
+narrative/tools/build_act23_missions.py  authoring source for M10–M32 mission JSON
 content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.
@@ -423,3 +425,54 @@ calls":
 - **Validator results:** 0 errors. 25 warnings, all for dialogue scripts scheduled for N5.
   The validator caught one real mobile-rule break (M4 had too few checkpoints for its
   length), which is now fixed.
+
+---
+
+## Phase N4 self-critique
+**What was delivered:**
+- **32 story missions** to the contract (plus the extensions in ENGINE_REQUESTS 8): giver,
+  requirements (flags, act, time window, weather, date range), start trigger, objectives,
+  fail states, checkpoints, rewards, flags, relationship changes, dialogue references,
+  locations by intersection or place id, NPCs, archetypes, vehicles, and a mobile note.
+- **20 side activities** (ENGINE_REQUESTS 9).
+- **M1 is fully playable:** dialogue, trigger, spawns and interiors.
+- **Validator:** 0 errors. It checks every objective's text (40 characters or fewer, and
+  activities after substitution); checkpoint density (at least one per 5 minutes, and 3+ for
+  missions over 12 minutes); references (characters, places, interiors, flags, scripts,
+  triggers, unlocks); two pillars per mission; and the mobile notes.
+
+**Against the pillars**
+- P2 is weakest in the Act 3 dialogue missions (N3 §9). I added a movement leg to each: M22
+  has the Times Square radio crowd and the drive to the Pennsylvania; M24 has a cross-town
+  drive; M29 has the hand-over trip. They're still the least "grid" missions.
+- P1 is everywhere, and literal in M9 (Delphine follows her own money) and in the
+  Collections activity.
+- P4 has real mechanics now: relationship gates fire in M18 (Yiannis's count), M24
+  (Villalba), M26 (Manny, Gus), M30 (council) and M32 (Delroy's cab).
+
+**Against the content rules**
+- Hollis's death (M19) is off screen, and the camera rule is written into the spec.
+- M26 can't end in a fire (failing restarts it), and the children are explicitly elsewhere.
+- Sex work is context only (the club rounds, Walk Her Home). Photo Jobs subjects are petty
+  fraudsters, never intimate targets.
+- The numbers game and the drug trade are non-functional: no odds, recipes or instructions.
+- The real presidential resignation is radio background with an invented narration, and no
+  person is named.
+- The ice-cream activity caps truck speed near children.
+- All names stay provisional until the N6 search.
+
+**Against the mobile rules**
+- No objective needs precise aim (photos auto-frame).
+- Every chase is an `evade` solved by two-door buildings or one-ways.
+- Switch points sit only at calm beats.
+- Branch choices are untimed and have a confirm step.
+- Long missions (M18, M32) have five checkpoints.
+- Every objective text names a real place.
+
+**Risks and gaps**
+- Act 3 leans on several contract extensions (`if`, `optional`/`onComplete`,
+  `missionsDone`). Each has a fallback, but if the engine refuses them, M21, M29 and M27
+  become variant missions (more files, the same story).
+- The 104 dialogue scripts referenced (about 900–1,200 lines) are the bulk of N5.
+- Ambient NPC archetypes (`npc.*`) are referenced but not yet defined. They're due in N5,
+  with the barks.

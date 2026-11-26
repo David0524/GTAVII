@@ -162,3 +162,21 @@ with a fallback. Validation is in `narrative/tools/content.py`.
 | Conditional objectives | objective `if: "flag.x"` (or `"!flag.x"`); the engine skips objectives whose condition is false | Branch-dependent steps (M21 copy vs steal; M29's four outcomes) | Split into variant missions with `requires.flags` |
 | Optional objectives with their own rewards | objective `optional: true`, `onComplete: { setFlags, relationships, items }` | Optional photographs that become corroboration for Branch B2 (M13, M27) | Mandatory objectives |
 | `requires.missionsDone` | list of mission ids that must be `done` | M26 needs M23, M24 and M25 (open order in Act 3) | Flags set by each mission |
+
+## From narrative: 9. Side-activity schema (`content/activities.json`)
+- **What:** A repeatable-activity runner. Each activity has:
+  - `id`, `title`, `lead` (a lead id or a list), `unlockedBy`, `acts`, and `when { time, weather }`;
+  - a `start` (talk, enter_vehicle, enter_interior or auto);
+  - a `loop` of objective templates (the same objective types as missions) with
+    `{placeholders}`;
+  - a `pool` of rows keyed by placeholder name, one row drawn per loop;
+  - `payout`, `cooldownMin` and `vehicles`.
+- **Why:** The brief's 15–30 side activities (cab fares, garment deliveries, newspaper runs,
+  photo jobs, races on the 1974 one-ways). 20 are written: 7 for Teddy, 5 for Delphine,
+  4 for Nick and 4 for any lead.
+- **Extras:**
+  - Race objectives carry `race: { rival, oneWaysEnforced: true }`; wrong-way driving
+    forfeits the race.
+  - Brownout Relief starts only when `world.power(area)` is dim or off.
+- **Fallback:** Each activity is expanded into short generated missions (one per pool row)
+  with `requires.timeWindow`, unlocked by `unlockedBy`.

@@ -164,13 +164,47 @@ def main():
         for a in t["do"]:
             if a.get("script") and a["script"] not in dialogue: E(f"{tid}: script {a['script']} missing")
 
+    # activities
+    acts_doc = jl(C / "activities.json")["activities"] if (C / "activities.json").exists() else []
+    PH = re.compile(r"\{[A-Za-z]+\}")
+    IDP = ("loc.", "char.", "npc.", "item.", "interior.", "dlg.", "vehicle_role.")
+    for a in acts_doc:
+        aw = a["id"]
+        leads = a["lead"] if isinstance(a["lead"], list) else [a["lead"]]
+        for l in leads:
+            if l not in LEADS: E(f"{aw}: lead {l} is not a lead")
+        u = a["unlockedBy"]
+        if u.startswith("mission.") and u not in planned: E(f"{aw}: unlockedBy unknown {u}")
+        if len(a.get("pillars", [])) < 2: E(f"{aw}: must serve at least two pillars")
+        if not a.get("mobile"): E(f"{aw}: missing mobile note")
+        rows = [r for v in a["pool"].values() for r in v]
+        for r in rows:
+            if not isinstance(r, dict): E(f"{aw}: pool rows must be objects keyed by placeholder"); continue
+            for x in r.values():
+                if isinstance(x, str) and x.startswith("loc.") and x not in places: E(f"{aw}: pool place {x} unknown")
+                if isinstance(x, str) and x.startswith("interior.") and x not in interiors: E(f"{aw}: pool interior {x} unknown")
+                if isinstance(x, str) and x.startswith("char.") and x not in cast: E(f"{aw}: pool character {x} unknown")
+                if isinstance(x, str) and ("&" in x and not x.startswith(IDP)): loc_ok(aw, x)
+        keys = {k for r in rows if isinstance(r, dict) for k in r}
+        for o in a["loop"]:
+            if o["type"] not in OBJ_TYPES: E(f"{aw}.{o['id']}: unknown objective type {o['type']}")
+            for ph in PH.findall(o["text"]):
+                if ph[1:-1] not in keys: E(f"{aw}.{o['id']}: placeholder {ph} has no pool field")
+            for r in rows:
+                if not isinstance(r, dict): continue
+                worst = PH.sub(lambda m: str(r.get(m.group(0)[1:-1], m.group(0))), o["text"])
+                if len(worst) > OBJ_TEXT_MAX: E(f"{aw}.{o['id']}: text reaches {len(worst)} chars: {worst}")
+            for k in ("to", "marker"):
+                v = o.get(k)
+                if isinstance(v, str) and not PH.search(v): loc_ok(f"{aw}.{o['id']}", v)
+
     # flags: documented but never set by written content -> info only
     set_somewhere = {f for m in missions.values() for f in m["rewards"].get("setFlags", [])}
     set_somewhere |= {f for d in dialogue.values() for l in d["lines"] for c in l.get("choices", []) for f in c.get("setFlags", [])}
 
     for x in warns: print("WARN ", x)
     for x in errs: print("ERROR", x)
-    print(f"{len(missions)}/{len(planned)} missions, {len(dialogue)} dialogue scripts, {len(triggers)} triggers, "
+    print(f"{len(acts_doc)} activities, {len(missions)}/{len(planned)} missions, {len(dialogue)} dialogue scripts, {len(triggers)} triggers, "
           f"{len(spawns)} spawns, {len(interiors)} interiors, {len(flags)} flags ({len(set_somewhere)} set by written content); "
           f"{len(errs)} errors, {len(warns)} warnings")
     if errs:
