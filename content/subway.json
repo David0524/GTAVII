@@ -194,7 +194,9 @@
       "complex": "33rd_park",
       "status": "confirmed_general",
       "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
-      "edge": true
+      "edge": true,
+      "inSim": false,
+      "note": "No mapped entrances inside the bounds (sim ce9a788): kept for reference and dialogue only, not on the map."
     },
     {
       "id": "station.28th_lex",
@@ -208,7 +210,9 @@
       "complex": "28th_park",
       "status": "confirmed_general",
       "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
-      "edge": true
+      "edge": true,
+      "inSim": false,
+      "note": "No mapped entrances inside the bounds (sim ce9a788): kept for reference and dialogue only, not on the map."
     },
     {
       "id": "station.23rd_lex",
@@ -222,7 +226,9 @@
       "complex": "23rd_park",
       "status": "confirmed_general",
       "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
-      "edge": true
+      "edge": true,
+      "inSim": false,
+      "note": "No mapped entrances inside the bounds (sim ce9a788): kept for reference and dialogue only, not on the map."
     },
     {
       "id": "station.5th_flushing",
@@ -236,7 +242,8 @@
       "complex": "bryant",
       "status": "confirmed_general",
       "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
-      "note": "Linked to the IND 42nd St platforms (complex 'bryant')."
+      "note": "Linked to the IND 42nd St platforms (complex 'bryant'). Deferred by the sim (ce9a788).",
+      "inSim": false
     },
     {
       "id": "station.path_23",
