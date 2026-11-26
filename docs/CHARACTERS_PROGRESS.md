@@ -10,12 +10,14 @@ last.
 | Reference study | `docs/WARDROBE_1974.md`: 65 photos with usable people, about 230 readable figures |
 | Parametric body + face | Done (first pass): macro PCA space, 356 local targets, 5 body LODs, stature scaling, adults only |
 | 1974 wardrobe generator | Done (first pass): men's/women's tables from the doc, uniforms (generic), archetype hooks (palette/wardrobe/props), outfit description data for gameplay |
-| Garments / shoes / hats / glasses / props / hair | Done (first pass): cut from body/helper surfaces with clean hems, layer offsets, hidden skin removed |
-| Skin, cloth, hair materials | Done (first pass, TSL): SSS approximation, procedural patterns, wear/sweat, shell hair |
+| Garments | Cut from body/helper surfaces; collars rebuilt (stand/fold/fall, worn over lapels without a tie), plackets and buttons, jacket buttons; trouser legs are straight tubes with a tilted hem that breaks on the shoe; offsets layered relative to the shirt |
+| Shoes | Per-type generator (`build/shoes.ts`): oxford, wingtip, loafer, sneaker, work boot, boot, platform, pump, slip-on, sandal, clog; lofted around the wearer's measured foot; welts, shanks, heel blocks, wedges, laces, brogue lines, aprons, straps; heels pitch the foot in the bind pose |
+| Hair | Strand cards (alpha-to-coverage) for 14 straight/wavy styles, combed by per-style geodesic flow fields over a radial head map, on solid volume shells; clumped Worley shells for afros and curls; set-curl bumps; ponytail/braid/bun pieces; crowds keep the opaque outer shell |
+| Skin, cloth, hair materials | TSL: SSS approximation, procedural patterns, wear/sweat; CC0 Poly Haven fabric scans as triplanar bump detail (wool, denim, jersey, poplin, corduroy, leather) |
 | Animation | Animator (blend space with stride warp, layers, posture, lean), foot IK with locking, look-at, hand IK, seat pose, events |
 | Heroes | Teddy, Delphine and Nick from the narrative appearance sheets (7fffd4f), wardrobe sets per act |
 | Crowd | GPU-instanced templates (baked half-float bone atlas), LOD2/LOD3, a worker-built near ring of full characters, per-agent colour variation, hand carts |
-| Test scenes | `?characters=1&scene=lineup|leads|course|slide|crowd` (deterministic with `&t=`) |
+| Test scenes | `?characters=1&scene=lineup|leads|course|slide|crowd|shoes|hair|street` (deterministic with `&t=`); `street` runs the crowd on a real street of the engine's city. All shots: `bash tools/characters/shots.sh` |
 | Integration | API in `src/characters/index.ts`; engine wiring requested in ENGINE_REQUESTS ("From characters: 3") |
 
 ## Architecture
@@ -26,11 +28,12 @@ src/characters/    rig.ts (56 joints, UAL names), format.ts (T74X container), in
   body/            BodyModel (evaluate shape), macro.ts, appearance.ts (who someone is), skeleton.ts
   wardrobe/        outfit.ts (1974 generator), palette.ts, describe.ts (witness/shop data)
   build/           fields.ts (limb/height/azimuth fields), clip.ts (iso-line cutting), garments.ts,
-                   face.ts (landmarks + masks), hair.ts, accessories.ts, assemble.ts, MeshBuilder.ts
+                   face.ts (landmarks + masks), hair.ts (shells), hairCards.ts (strand cards, head map),
+                   shoes.ts (shoe generator, foot pitch), accessories.ts, assemble.ts, MeshBuilder.ts
   render/          materials.ts (character + hair TSL), meshes.ts
   anim/            AnimLibrary.ts (sampling/blending), authored.ts (hand-keyed clips), Animator.ts, IK.ts
   crowd/           CrowdRenderer.ts, bake.ts, crowdMaterial.ts, buildWorker.ts
-  Character.ts, heroes.ts, test/CharactersTest.ts
+  Character.ts, heroes.ts, test/CharactersTest.ts, test/StreetTest.ts (engine city, read-only)
 ```
 
 ## Decisions (and why)
@@ -52,6 +55,17 @@ src/characters/    rig.ts (56 joints, UAL names), format.ts (T74X container), in
   mid-scene).
 - **No child characters anywhere** (binding rule from oversight/narrative): generation clamps age
   to at least 18.
+- **Shoes are their own geometry, not a reshaped foot.** The foot is measured per slice and the
+  shoe lofted around it (so it always encloses the foot), skinned by copying the nearest foot
+  vertex's weights. A heel pitches the foot about the ankle in the bind pose with the body's own
+  skin weights (toes stay flat), so animation and foot IK work unchanged on the pitched rest pose.
+- **Hair flow uses geodesic attractors, not projected world directions.** Projecting "backward"
+  onto the forehead's tangent plane leaves only "down", which combed hair over faces. Attractor
+  targets are never near-antipodal to the roots they act on. Hair also never crosses the eyes
+  (cards stop at the brow in front of the ears).
+- **Full-length trousers stop following the foot below mid-calf:** the leg becomes a straight
+  tube continuing the shin, calf-skinned, cut by a hem plane that is higher in front (the break
+  on the vamp). This replaced hems cut along the leg chain, which wrapped onto the foot.
 - **Clear lenses aren't drawn** (an opaque material can't show the eye behind them); frames are
   drawn, and tinted lenses are opaque.
 
@@ -125,55 +139,63 @@ including close-ups. Locomotion frames are `10`–`17`; crowds are `19` and `20`
   - curb and stair foot IK keeps both feet on their surfaces (12, 13);
   - planted feet don't slide on near characters (1–23 mm/s).
 
-**What reads as a modern game, not a 35 mm photo of 1974**
-1. **Cloth has no folds.** Garments are offset shells of the body, so nothing creases, bags or
-   hangs. The photos are full of drag lines, baggy trouser seats, rolled sleeves and jacket
-   drape. Torso smoothing ("drape") removes printed anatomy but adds no folds. *Next:* wrinkle
-   normal maps driven by joint angles (elbow, knee, waist), and a hanging-hem offset for
-   jackets and coats.
-2. **Faces are smooth and same-y up close.**
-   - There's no texture detail beyond procedural pores and wrinkles, the eye area is dark, and
-     lashes are a solid line.
-   - The lineup reads as a cast of mannequins in good clothes.
-   - *Next:* per-face albedo variation (blotchiness, shadow under the eyes, lip edges), an
-     eyelid/wet-line strip, blinks, and stronger asymmetry and age sculpting.
-3. **Hair aliases.** Shells speckle without TAA, and straight hair is helmet-like. Afros and set
-   curls are best. *Next:* card strands for long and straight styles, and alpha-to-coverage.
-4. **Everyone stands the same way.** It's one relaxed idle. The photos show hands in pockets,
-   arms folded, weight on one hip, newspapers under arms and leaning. The pocket and
-   behind-the-back idles exist, but their hand placement isn't right yet, so they're off.
-5. **Shoes are chunky.** The rounded-last approach reads as a shoe at street distance but is
-   bulbous up close. Heels don't tilt the foot, and sandals render as closed shoes.
-6. **Small geometry defects:**
-   - collars are flat triangles;
-   - lapels are ribbon panels;
-   - skin can show at the trouser waistband under a tucked shirt;
-   - skirts and dress panels split at the hips in a long stride.
-7. **The lighting is a neutral test rig.** The real look depends on the engine's 1970s grade,
-   grain and halation; nothing here is graded.
+**Block A (oversight review of 2026-11-26), item by item: what changed, what still fails**
+1. **Hair.** *Changed:* strand cards (alpha-to-coverage) for 14 straight and wavy styles, each
+   combed by its own flow field (side part sweeping across the top, pompadour lift, feathered
+   wings, bob ends under, flip ends out, ponytail/braid/bun pieces), on solid volume shells, with
+   one hairline shared by cards, shells and the scalp tint (temples, sideburns, above the ears,
+   nape). Afros and curls are clumped shells rising from the hairline; set curls have roller
+   bumps. Hair never crosses the eyes. *Still fails:* at lineup distance the shells under the
+   cards still speckle (no TAA in these captures); grey and white coily hair shows dark gaps at
+   the silhouette; card strands are a procedural alpha, not authored strand textures, so close
+   up they read as wisps rather than hair. A one-shot cards-only captured texture atlas is next.
+2. **Garment construction.** *Changed:* collars are stand, fold and fall with the true leaf
+   length, and are worn over the lapels without a tie (21 and 06: the 1974 open-collar look);
+   shirt plackets and buttons; jacket and coat buttons; trouser legs are straight tubes below
+   mid-calf with a hem plane that breaks on the shoe's vamp; flare is graded per garment; CC0
+   fabric scans add weave relief. *Still fails:* still no cloth folds (drag lines, baggy seats,
+   jacket drape); lapels are still ribbons (better than before, but no roll line or notch
+   thickness); cuffs are a hem band, not a turned cuff; some light trousers pinch inward at the
+   hem band; with a tie under a jacket, the collar points can z-fight the lapels.
+3. **Shoes.** *Changed:* a per-type generator (21): oxford with toe cap, wingtip with brogue
+   lines, loafer with apron and saddle, canvas sneaker with toe cap and heel overlay, work boot,
+   boot (ankle or knee shaft), platform (with ankle strap), pump (U throat, block heel), slip-on,
+   sandal (vamp and ankle straps, bare toes), clog (wedge). Heels pitch the foot in the bind
+   pose. Foot sliding is unchanged (1–28 mm/s locked). *Still fails:* boot shafts are cut from
+   the leg surface (tight, a little stocking-like); shoe leather is smooth (no creasing at the
+   ball); laces are flat ribbons.
+4. **Hands.** *Changed (previous commit):* relaxed curl on anatomical axes, FK-solved arm hang,
+   props gripped (bag handles, briefcase, cigarette pinch), paper under the arm. *Still fails:*
+   thumbs are stiff; no per-prop grip poses beyond relaxed/grip/pinch.
+5. **Faces.** *Not started in this block:* the eye rims are still dark, skin is still plastic
+   with no visible ageing, and there are no blinks. This is the next block.
+6. **Posture.** *Not started in this block:* everyone still stands the same way (pockets,
+   contrapposto and folded arms are next, after faces).
+7. **Nick's suit.** *Changed:* the shirt fit and the jacket's stacked offsets are reduced (the
+   sleeve sat about 5 cm off the arm; now about 2 cm). *Still fails:* padded shoulders are still
+   rounded rather than square.
+
+**Other honest notes**
+- The `geometric` print had become concentric rings that read like a well-known retail logo; it
+  is now a staggered diamond lattice.
+- The lighting in the lineup and lead shots is a neutral test rig; `24`–`26` use the engine's own
+  atmosphere on a real street (West 22nd Street at 13:30).
 
 ## Known issues (honest)
-- **Faces read as "game" faces:**
-  - eyes are procedural spheres with no wet-line geometry (the wet look comes from specular only);
-  - no eyelid blinking yet;
-  - brows are short shells.
-- **Hair shells alias** without TAA; long hair has no strand cards yet. Afros and set curls read
-  best; straight long hair reads like a helmet.
-- **Collars and lapels** are ribbon trims: OK at street distance, crude in close-up.
-- **Sandals and heels:** sandals render as closed shoes; heels don't tilt the foot (no ankle pitch).
+- **Faces** read as "game" faces: dark eye rims, no wet-line geometry, no blinks, little visible
+  ageing (next block).
+- **Hair:** shell speckle without TAA; procedural strand alpha on cards (no authored strand
+  textures); grey coily hair shows dark gaps.
+- **Cloth:** no folds; lapels are ribbons; boot shafts hug the leg.
 - **Skirts and coat tails** follow MakeHuman's helper weights: the legs poke through at long
   strides.
 - **No impostors** past 170 m (High); agents beyond are culled.
-- **The crowd near ring** builds over a few frames when someone walks into range (the instanced
-  LOD shows meanwhile).
-- **Animation:**
-  - turn-in-place is a simple stepping layer;
-  - strafe is authored and basic;
-  - stairs rely on foot IK only (no step-up clip);
-  - ledge climb is UAL ClimbUp_1m retargeted, not aligned to the ledge yet;
-  - no ragdoll (a stretch goal; agree it with the engine).
-- **Lip-sync and talking:** talk gestures exist; lip-sync is not done (jaw joint and expression
-  targets are available).
+- **The crowd near ring** builds over a few frames when someone walks into range.
+- **Animation:** turn-in-place is a simple stepping layer; strafe is basic; stairs rely on foot
+  IK only; the ledge climb isn't aligned to the ledge; no ragdoll yet.
+- **Lip-sync** isn't done (jaw joint and expression targets are available).
+- **Hero builds** are synchronous at spawn (about 60–170 ms with cards and shoes); move them to
+  the worker before gameplay spawns heroes mid-scene.
 
 ## Next
 1. Write the lineup critique against the reference photos (after captures). Then: a reduced
