@@ -196,6 +196,25 @@
       "visual": "Coveralls, a ticket punch, a transistor radio on the races",
       "edges": [],
       "note": ""
+    },
+    {
+      "id": "char.ignatz_halloran",
+      "tier": "service",
+      "name": "Ignatz “The Commodore” Halloran",
+      "age": 71,
+      "role": "Rooftop pigeon racer (side arc)",
+      "at": "Roof coop over W 29th St & 7th Ave",
+      "schedule": "06:00–09:00 and 17:00–20:00 on the roof; otherwise in his walk-up below",
+      "speech": {
+        "samples": [
+          "Pigeons are the only New Yorkers who always come home.",
+          "That's Admiral Nelson. Blue bar, white band. He's smarter than the mayor.",
+          "Somebody's stealing my champions mid-race. Over these roofs. I need young legs."
+        ]
+      },
+      "visual": "Small, wiry, a captain's cap, binoculars, a feed bag, forearms freckled with old scratches",
+      "edges": [],
+      "note": "Pigeons (user: 'Definitely should be some pigeons'). Side arc rank 1."
     }
   ]
 }

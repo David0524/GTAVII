@@ -87,6 +87,10 @@ SV = [
  svc("char.sully_garage", "Sully McNamee", 57, "Parking-garage attendant (owned-car storage)", "W 33rd St, 7th–8th Aves (Penn Garage)",
      "16:00–04:00", ["Monthly's sixty. Hourly's robbery. I don't set the prices, I just park the robbery.", "Your car's on four. Somebody tried the door. I tried his head.", "Leave the keys. I don't drive 'em. Much."],
      "Coveralls, a ticket punch, a transistor radio on the races"),
+ svc("char.ignatz_halloran", "Ignatz “The Commodore” Halloran", 71, "Rooftop pigeon racer (side arc)", "Roof coop over W 29th St & 7th Ave",
+     "06:00–09:00 and 17:00–20:00 on the roof; otherwise in his walk-up below",
+     ["Pigeons are the only New Yorkers who always come home.", "That's Admiral Nelson. Blue bar, white band. He's smarter than the mayor.", "Somebody's stealing my champions mid-race. Over these roofs. I need young legs."],
+     "Small, wiry, a captain's cap, binoculars, a feed bag, forearms freckled with old scratches", note="Pigeons (user: 'Definitely should be some pigeons'). Side arc rank 1."),
 ]
 W("cast_service.json", {"_note": "Service-tier characters for systems (precincts, lawyer, bail, hospital, homes, cars). Lighter sheets than the main cast. Names checked for famous namesakes only.", "characters": SV})
 
@@ -136,7 +140,7 @@ W("items/evidence.json", {"items": [
   {"id": "item.marjorie_carbons", "name": "Marjorie Kell's carbons"}, {"id": "item.kearney_list", "name": "Kearney's Christmas list, 1969–71"},
   {"id": "item.collection_list_week1", "name": "Mayhew's collection list"}, {"id": "item.club_shoebox", "name": "The club's shoebox"}, {"id": "item.club_cash", "name": "Club dues (cash)"},
   {"id": "item.feld_sample_racks", "name": "Feld sample racks"}, {"id": "item.feld_sample_bags", "name": "Feld sample bags"}, {"id": "item.fur_bales", "name": "Bales of furs"},
-  {"id": "item.ice_order", "name": "Ice order"}, {"id": "item.club_payout_claudette", "name": "Claudette's payout"}]})
+  {"id": "item.ice_order", "name": "Ice order"}, {"id": "item.club_payout_claudette", "name": "Claudette's payout"}, {"id": "item.hollis_postcard", "name": "One of Walter Hollis's postcards (20 to find)"}]})
 
 # ------------------------------------------------------------------ shops (1974 prices)
 shops = {"_note": "Shops and 1974 prices (narrative content; Gameplay builds the shop flow). Prices are plausible for mid-1974 New York.", "shops": [

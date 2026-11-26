@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_night_rate_stunts",
+  "kind": "side",
+  "title": "Night Rate: Stunt Driver",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The first A.D. needs a driver",
+      "script": "dlg.side_stunt_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_vehicle",
+      "text": "Into the picture car",
+      "vehicle": "vehicle_role.picture_car"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Hit your mark on W 41st St",
+      "to": "W 41st St & 9th Ave",
+      "radius": 8
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "'Cut! Print it!'",
+      "script": "dlg.side_stunt_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "$50 a take; a crew jacket (outfit) and the director's thanks in the Act 3 wrap party"
+  },
+  "where": "The NIGHT RATE shoot at W 41st St & the west edge (boundaries.json)",
+  "systems": [
+    "driving",
+    "1974 one-ways",
+    "police witnesses",
+    "the map-edge film shoot"
+  ],
+  "mobile": "Takes are 60–90 s with generous marks. Retakes are free. No precision steering at walking-speed sections.",
+  "rank": 2,
+  "slice": true
+}

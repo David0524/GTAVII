@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_stunt_2",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.film_ad",
+      "emotion": "bullhorn",
+      "text": "Cut! Print it! Who are you? Never mind. Same time tomorrow!"
+    }
+  ]
+}

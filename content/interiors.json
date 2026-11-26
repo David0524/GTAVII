@@ -475,6 +475,25 @@
         "saint candles"
       ],
       "dressing": "content/homes.json"
+    },
+    {
+      "id": "interior.pigeon_roof",
+      "address": "W 29th St & 7th Ave (walk-up roof)",
+      "facade": "street",
+      "name": "The Commodore's roof and coop",
+      "kind": "rooftop",
+      "hours": [
+        "05:00",
+        "22:00"
+      ],
+      "contains": [
+        "stairwell to roof",
+        "pigeon coop",
+        "water tank",
+        "planks to neighbouring roofs",
+        "tar beach"
+      ],
+      "tier": "A"
     }
   ]
 }

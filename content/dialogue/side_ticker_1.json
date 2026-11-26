@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_ticker_1",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.ticker_editor",
+      "emotion": "rapid",
+      "text": "Ten bucks a print. Seventy-five if you beat the press car. Never the dead. I mean it."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.ticker_editor",
+      "emotion": "rapid",
+      "text": "Radio's on. Listen to the cops. They'll tell you where the news is."
+    }
+  ]
+}

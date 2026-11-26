@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_pigeon_2",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ignatz_halloran",
+      "emotion": "triumphant",
+      "text": "The roof with the green door! I knew it. That's Murphy's coop. He's been at it since '61."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ignatz_halloran",
+      "emotion": "warm",
+      "text": "Twenty dollars and a bird named after you. Don't argue."
+    }
+  ]
+}

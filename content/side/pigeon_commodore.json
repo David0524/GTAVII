@@ -1,0 +1,65 @@
+{
+  "id": "mission.side_pigeon_commodore",
+  "kind": "side",
+  "title": "The Pigeon Commodore",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Meet the Commodore on his roof",
+      "script": "dlg.side_pigeon_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Up the stairs to the W 29th St roof",
+      "marker": "interior.pigeon_roof"
+    },
+    {
+      "id": "o3",
+      "type": "follow",
+      "text": "Follow the bird across the roofs",
+      "target": "npc.pigeon_flock",
+      "keepWithinM": 60
+    },
+    {
+      "id": "o4",
+      "type": "photo",
+      "text": "Photograph the leg band",
+      "subject": "npc.pigeon_flock",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Tell the Commodore which roof",
+      "script": "dlg.side_pigeon_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "$20 a race; the final race unlocks a pigeon-post messenger that shows the next story marker"
+  },
+  "where": "Rooftop coop over W 29th St & 7th Ave; rooftops across the Fur District",
+  "systems": [
+    "rooftops and interiors",
+    "photo mode",
+    "pigeons (ambient)",
+    "brownout (birds roost early)"
+  ],
+  "mobile": "Following is by viewpoint, not aim. Birds pause on landmarks. Every roof route has a stairwell exit.",
+  "rank": 1,
+  "slice": true
+}

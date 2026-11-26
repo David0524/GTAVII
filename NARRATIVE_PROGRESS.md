@@ -722,3 +722,21 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
   individual and USPTO checks before ship.
 - **Validators:** 0 errors; 32/32 reachable.
 - **Next:** step 4, N4b side content (40–60 pieces).
+
+### Step 4: N4b side content (first pass done)
+- `narrative/N4B_SIDE_CONTENT.md` is a ranked catalogue of 52 pieces: 6 stranger arcs,
+  15 systemic jobs, 11 street encounters, 9 lead lines, 4 map ties and 7 collectibles with a
+  story payoff. The 20 original activities are upgraded, not duplicated.
+- **Top 5 slice candidates**, with full specs and dialogue:
+  1. The Pigeon Commodore (a rooftop arc)
+  2. Night Rate: Stunt Driver (the film shoot at the map edge)
+  3. The Night Desk at the Ticker (Delphine races the police radio)
+  4. Hack: Call Your Turns (no-GPS fares)
+  5. Hollis's Postcards (a collectible with a memorial payoff)
+- **Subway pieces:** Behind the Passage Gate, Last Train Home, RIZO 147.
+- **Pigeons:** the Commodore's arc and the Leg Bands collectible. Rats are in the passage
+  pieces.
+- **Not used:** the user's own example (driving with an NPC collecting cash).
+- **Remaining:** 47 pieces need full specs and dialogue (N4b part 2).
+- **Next:** step 5 (the M1 cutscene script, with the UI & cinematics chat), then step 6
+  (revise N6).

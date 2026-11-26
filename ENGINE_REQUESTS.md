@@ -239,3 +239,15 @@ Written by `narrative/tools/build_systems.py`. The owning chats confirm or amend
 | `content/dialogue/sys_bail_*` and `sys_lawyer_*` | Gameplay | Bail-out scenes for all six lead pairs (relationship +1 both ways) and a lawyer call for each lead |
 | `content/interiors.json` | Interiors | Added home interiors and subway interiors; Tier A marked |
 - **Lead homes changed:** Delphine is now at Penn South (W 27th St) and Nick at Madison Ave & E 37th St. Spawns are updated. The off-map night rule for Nick is no longer needed.
+
+## From narrative: 14. Side-content specs (`content/side/`)
+- `content/side/side_content.json`: 52 ranked pieces with hook, twist, systems, place, leads,
+  acts, reward and mobile note.
+- `content/side/<id>.json`: full specs for the 5 vertical-slice candidates, in mission format
+  with `kind: "side"`, `leads` (a list) and `acts`.
+- **New fields:**
+  - `goto.routeCalledBy: "passenger"`: the no-GPS route, where an NPC calls out turns
+    (UI chat: subtitle and HUD repeat).
+  - `race.oneWaysEnforced` (already accepted in N9).
+- **Ask:** Is the side-quest runner the mission runner with `kind: "side"`, or the activities
+  runner (N9)? The narrative side works with either.

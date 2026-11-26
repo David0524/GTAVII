@@ -136,6 +136,9 @@ a("npc.token_clerk", "worker", ["#1C2541", "#FFFFFF"], "Transit clerk in a booth
 a("npc.rat_swarm", "critter", ["#3B3B3B"], "Rats: a skittering swarm that scatters from light and footsteps. Startle, never damage.", [], s(("00:00", "24:00", "Subway passages, alleys, trash at night", "loiter")), 0.1, 0.4, None, note="User: 'Definitely should be some pigeons and rats.' Non-human ambient.")
 a("npc.pigeon_flock", "critter", ["#8C8C8C", "#4B0082"], "Pigeons: flocks that burst up when you run through them.", [], s(("05:00", "21:00", "Parks, squares, ledges, rooftops", "loiter")), 0.5, 0.0, None, note="User: 'Definitely should be some pigeons and rats.' Non-human ambient.")
 
+a("npc.film_ad", "worker", ["#000000", "#FFD700"], "Film crew first A.D.: headset, bullhorn, clipboard, sunburn.", ["bullhorn", "clipboard"], s(("16:00", "05:00", "NIGHT RATE shoot, W 41st St", "work")), 0.0, 0.1, "barks.film_pa", scripted=True)
+a("npc.ticker_editor", "worker", ["#FFFFFF", "#696969"], "Tabloid night photo editor: rolled sleeves, green eyeshade, a phone in each hand.", ["phone"], s(("20:00", "06:00", "The Daily Ticker bureau, W 26th St", "work")), 0.0, 0.0, None, scripted=True)
+
 for x in A:
     (OUT / f"{x['id'].split('.', 1)[1]}.json").write_text(json.dumps(x, ensure_ascii=False, indent=2) + "\n")
 print(len(A), "archetypes")

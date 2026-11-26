@@ -71,6 +71,10 @@
     {
       "id": "item.club_payout_claudette",
       "name": "Claudette's payout"
+    },
+    {
+      "id": "item.hollis_postcard",
+      "name": "One of Walter Hollis's postcards (20 to find)"
     }
   ]
 }
