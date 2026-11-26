@@ -325,7 +325,8 @@ export { coreFacade };
  * Fire-stair tower (office and hotel lobbies): a stair compartment at the back corner, entered from the
  * lobby through a door, rising through every floor (locked floor doors) to a roof bulkhead.
  */
-export function stairTower(c: GenCtx, L: CoreLayout, lobbyCell: number) {
+export function stairTower(c: GenCtx, L: CoreLayout, lobbyCell: number, open: number[] = []): number[] {
+  const cells: number[] = [];
   const { k, unit: u } = c;
   const fw = L.flightW, half = L.fh / 2, zBackL = L.zs + L.landing + L.run;
   const wall = M.plasterCream, tread = M.concrete;
@@ -343,7 +344,8 @@ export function stairTower(c: GenCtx, L: CoreLayout, lobbyCell: number) {
     k.wall(L.x1, L.ze, L.x0, L.ze, y0, y0 + L.fh, wall, 1);
     if (f === 0) { k.floor(L.x0, L.zs, L.x1, L.zs + L.landing, 0, tread); k.portalRect(lobbyCell, cell, dx0, L.zs - 0.15, dx1, L.zs - 0.15, 0, 2.1); }
     else k.box(L.x0, y0 - 0.2, L.zs, L.x1, y0, L.zs + L.landing, tread, { collide: true, faces: 0b001100 });
-    k.door(`${u.id}:fire${f}`, dx0, y0, L.zs - 0.07, 0.9, 2.1, 0, f === 0 ? -1 : 1, { cellA: cell, cellB: f === 0 ? lobbyCell : -1, locked: f > 0, mat: tint(M.steel, '#5a5a52') });
+    k.door(`${u.id}:fire${f}`, dx0, y0, L.zs - 0.07, 0.9, 2.1, 0, f === 0 ? -1 : 1, { cellA: cell, cellB: f === 0 ? lobbyCell : -1, locked: f > 0 && !open.includes(f), mat: tint(M.steel, '#5a5a52') });
+    cells.push(cell);
     k.box(dx0, y0 + 2.2, L.zs - 0.18, dx0 + 0.35, y0 + 2.35, L.zs - 0.16, M.exitSign, { occlude: false });
     k.stair(L.x0 + fw, L.zs + L.landing, 0, 1, fw, y0, y0 + half, tread, { run, stringer: M.paintGrey, rail: 'right', railMat: M.paintGrey });
     k.box(L.x0, y0 + half - 0.2, zBackL, L.x1, y0 + half, L.ze, tread, { collide: true });
@@ -355,6 +357,7 @@ export function stairTower(c: GenCtx, L: CoreLayout, lobbyCell: number) {
   }
   k.marker('hide', L.x1 - 0.4, 0, L.ze - 0.4, 'fire stair');
   k.use(lobbyCell);
+  return cells;
 }
 
 /** Low taxpayer roof access: a steep two-lane switchback ship's stair in the back room up to a hatch bulkhead. */

@@ -4,6 +4,7 @@ import { genDiner, genBar, genDeli } from './food';
 import * as R from './retail';
 import { genTenement, genLoft, genApartmentLobby } from './vertical';
 import * as Hl from './halls';
+import { HERO_GENERATORS } from './heroes';
 
 export type Generator = (c: GenCtx) => void;
 export const genGenericShop = R.genGenericShop;
@@ -38,4 +39,5 @@ export const GENERATORS: Record<string, Generator> = {
   cinema_lobby: Hl.genCinemaLobby,
   pool_hall: (c) => Hl.genUpstairs(c, 'pool_hall'),
   gym: (c) => Hl.genUpstairs(c, 'gym'),
+  hero: (c) => (HERO_GENERATORS[c.unit.hero ?? ''] ?? R.genGenericShop)(c),
 };

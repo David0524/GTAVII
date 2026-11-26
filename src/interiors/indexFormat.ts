@@ -25,6 +25,8 @@ export interface UnitRec {
   seed: number;
   /** this unit carries the building's roof access (ship's ladder in the back room of a low building) */
   roofAccess?: boolean;
+  /** hero interior id from content/interiors.json (kind === 'hero') */
+  hero?: string;
 }
 export interface BuildingIdx {
   id: number; i: number; j: number;
@@ -64,7 +66,7 @@ export function encodeIndex(f: IndexFile, kindHours: (k: string) => [string, str
     x.frontage.flatMap((e) => [r2(e[0], 10), r2(e[1], 10), r2(e[2], 10), r2(e[3], 10), e[4]]),
     x.units.map((u) => {
       const left = Math.abs(u.nx - -u.uz) < 0.01 && Math.abs(u.nz - u.ux) < 0.01; // n = (-uz, ux) is +90deg
-      return [ki(u.kind), r2(u.ox), r2(u.oz), r2(Math.atan2(u.uz, u.ux), 10000), r2(u.w), r2(u.d), r2(u.door.t), r2(u.door.w), r2(u.door.recess), r2(u.y), u.street, (u.avenue ? 1 : 0) | (u.locked ? 2 : 0) | (left ? 4 : 0) | (u.roofAccess ? 8 : 0), u.seed];
+      return [ki(u.kind), r2(u.ox), r2(u.oz), r2(Math.atan2(u.uz, u.ux), 10000), r2(u.w), r2(u.d), r2(u.door.t), r2(u.door.w), r2(u.door.recess), r2(u.y), u.street, (u.avenue ? 1 : 0) | (u.locked ? 2 : 0) | (left ? 4 : 0) | (u.roofAccess ? 8 : 0), u.seed, ...(u.hero ? [u.hero] : [])];
     })]);
   return { v: 2, streets: f.streets, kinds, districts, coverage: f.coverage, b };
 }
@@ -76,8 +78,8 @@ export function decodeIndex(w: WireIndex, kindHours: (k: string) => [string, str
     const units: UnitRec[] = us.map((u, k) => {
       const kind = w.kinds[u[0]] as UnitRec['kind'];
       const ux = Math.cos(u[3]), uz = Math.sin(u[3]); const left = (u[11] & 4) !== 0;
-      return { id: k === 0 && isCoreKind(kind) ? `b${id}` : `b${id}u${k}`, kind, ox: u[1], oz: u[2], ux, uz, nx: left ? -uz : uz, nz: left ? ux : -ux, w: u[4], d: u[5],
-        door: { t: u[6], w: u[7], recess: u[8] }, y: u[9], street: u[10], avenue: (u[11] & 1) !== 0, locked: (u[11] & 2) !== 0, roofAccess: (u[11] & 8) !== 0, seed: u[12], hours: kindHours(kind) };
+      return { id: u[13] ? (u[13] as unknown as string) : k === 0 && isCoreKind(kind) ? `b${id}` : `b${id}u${k}`, kind, ox: u[1], oz: u[2], ux, uz, nx: left ? -uz : uz, nz: left ? ux : -ux, w: u[4], d: u[5],
+        door: { t: u[6], w: u[7], recess: u[8] }, y: u[9], street: u[10], avenue: (u[11] & 1) !== 0, locked: (u[11] & 2) !== 0, roofAccess: (u[11] & 8) !== 0, seed: u[12], ...(u[13] ? { hero: u[13] as unknown as string } : {}), hours: kindHours(kind) };
     });
     return { id, i, j, use, style, year, floors, fh, top, gAvg, district: w.districts[d], roof: roof === 1, units, frontage, ...(address ? { address } : {}) };
   });

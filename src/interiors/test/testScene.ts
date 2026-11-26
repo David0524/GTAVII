@@ -188,6 +188,15 @@ export async function runInteriorsTest() {
   debug.setMode = (m: 'onfoot' | 'photo') => { mode = m; };
   debug.teleport = (x: number, y: number, z: number, deg: number) => { player.teleport(x, y, z, THREE.MathUtils.degToRad(deg)); orbit.snap({ x, y, z }, THREE.MathUtils.degToRad(deg)); };
   debug.whenIdle = () => new Promise<void>((res) => { const t = () => (frameCount > 20 && interiors.stats.pending === 0 && (mode === 'photo' || player.active) ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); });
+  /** Place the player on the door axis of unit `id`, `dist` metres outside (negative = inside), facing in. */
+  debug.walkTo = (id: string, dist: number, dy = 0) => {
+    const e = interiors.unit(id); if (!e) return null;
+    const u = e.u; const dx = u.ox + u.ux * u.door.t, dz = u.oz + u.uz * u.door.t;
+    const x = dx - u.nx * dist, z = dz - u.nz * dist, y = (dist > 0.3 ? heightAt(x, z) + SIDEWALK_H : u.y) + dy;
+    const yaw = Math.atan2(-u.nx, -u.nz);
+    mode = 'onfoot'; player.teleport(x, y, z, yaw); orbit.snap({ x, y, z }, yaw); orbit.pitch = -0.12;
+    return { x, y, z, yaw };
+  };
   debug.ready = true;
   renderer.setAnimationLoop((t) => {
     timer.update(t); const dt = Math.min(timer.getDelta(), 0.1); frames.push(dt * 1000);

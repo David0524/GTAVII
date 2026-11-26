@@ -61,6 +61,23 @@ async function main() {
         console.log(kind, 'done', meta.length);
       }
     });
+  } else if (mode === 'walk') {
+    // walk <unitId> <startX,startZ> : frames from 8 m outside to 4 m inside along the door axis
+    const [sx, sz] = (b ?? '').split(',').map(Number);
+    await withPage(async (page) => {
+      await page.goto(url(`at=${sx},${sz},0`));
+      await page.waitForFunction(() => (window as any).__INT?.ready, null, { timeout: 180_000 });
+      await page.evaluate(() => (window as any).__INT.whenIdle());
+      const dir = path.join(ROOT, `shots/interiors/walkin/${a.replace(/[^a-z0-9_.]/gi, '_')}`); fs.mkdirSync(dir, { recursive: true });
+      const log: unknown[] = [];
+      for (const d of [8, 5, 3, 1.5, 0.5, -0.5, -1.5, -3, -5]) {
+        await page.evaluate(([id, dist]) => (window as any).__INT.walkTo(id, dist), [a, d] as [string, number]);
+        await page.waitForTimeout(900);
+        const st = await page.evaluate(() => { const t = (window as any).__INT; const p = t.player.pos; return { inside: t.interiors.inside(p.x, p.y, p.z), live: t.interiors.stats.live, visCells: t.interiors.stats.visibleCells, draws: t.renderer.info.render.drawCalls, extHidden: t.interiors.exteriorHidden }; });
+        const f = path.join(dir, `d${String(d).replace('-', 'm').replace('.', 'p')}.png`); await page.screenshot({ path: f }); log.push({ d, ...st }); console.log(d, JSON.stringify(st));
+      }
+      fs.writeFileSync(path.join(dir, 'log.json'), JSON.stringify(log, null, 1));
+    });
   } else if (mode === 'url') {
     await withPage(async (page) => { const r = await shot(page, a, path.resolve(ROOT, b)); console.log(r); });
   }

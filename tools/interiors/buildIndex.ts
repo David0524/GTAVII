@@ -18,6 +18,9 @@ import { PLAYABLE } from '../../src/shared/bounds';
 import { decodeTerrain } from '../../src/shared/terrain';
 import { districtAt, type District } from '../../src/interiors/grid';
 import { KINDS, shopWeights, type InteriorKind, type ShopKind, type CoreKind } from '../../src/interiors/catalog';
+import { execSync } from 'node:child_process';
+import { normaliseStreet } from '../../src/interiors/grid';
+import { HERO_PLACEMENT } from '../../src/interiors/gen/heroes';
 import { encodeIndex, isCoreKind, type BuildingIdx, type IndexFile, type UnitRec } from '../../src/interiors/indexFormat';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
@@ -349,6 +352,43 @@ for (const b of blds) {
     }
   }
 }
+// ---------------------------------------------------------------- Tier A heroes: resolve narrative block faces to buildings
+let heroContent: { id: string; address: string; parent?: string; hours?: [string, string] }[] = [];
+try { heroContent = JSON.parse(execSync('git show origin/claude/sharp-maxwell-jnb6hr:content/interiors.json', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).interiors; } catch { console.warn('narrative content not reachable; heroes skipped'); }
+const heroLog: string[] = [];
+const avenueXAt = (name: string, z: number) => {
+  const n = normaliseStreet(name); let best = Infinity, bx = NaN;
+  for (const g of segs) if (streetNames[g.s] === n) { const t = Math.max(0, Math.min(1, (z - g.az) / ((g.bz - g.az) || 1e-9))); const x = g.ax + (g.bx - g.ax) * t; const zz = g.az + (g.bz - g.az) * t; const d = Math.abs(zz - z); if (d < best) { best = d; bx = x; } }
+  return bx;
+};
+for (const h of heroContent) {
+  const place = HERO_PLACEMENT[h.id]; if (!place || h.parent) continue;
+  const m = /^(.+?),\s*(.+?)[–-](.+?),\s*(north|south|east|west) side/i.exec(h.address);
+  if (!m) { heroLog.push(`${h.id}: unsupported address form "${h.address}"`); continue; }
+  const street = normaliseStreet(m[1]), sIdx = streetNames.indexOf(street);
+  const cand = out.filter((b) => b.frontage.some((e) => e[4] === sIdx)).map((b) => {
+    const e = b.frontage.find((q) => q[4] === sIdx)!; const mx = (e[0] + e[2]) / 2, mz = (e[1] + e[3]) / 2;
+    const xa = avenueXAt(m[2], mz), xb = avenueXAt(m[3], mz);
+    const between = mx > Math.min(xa, xb) && mx < Math.max(xa, xb);
+    const north = m[4].toLowerCase() === 'north' ? (b.units[0]?.nz ?? 0) < 0 : (b.units[0]?.nz ?? 0) > 0;
+    return { b, e, ok: between && north && b.year < 1975 && b.floors >= (place.minFloors ?? 0) };
+  }).filter((q) => q.ok).sort((p, q) => q.b.floors - p.b.floors || p.b.year - q.b.year);
+  const pick = cand[0];
+  if (!pick) { heroLog.push(`${h.id}: no building matches "${h.address}"`); continue; }
+  const b = pick.b, [ax, az, bx, bz] = pick.e, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
+  const w = Math.min(place.width, L - 0.6), t0 = (L - w) / 2;
+  const base = b.units.find((q) => q.street === sIdx) ?? b.units[0];
+  const ox = ax + ux * t0, oz = az + uz * t0;
+  // drop units that overlap the hero span on this frontage
+  b.units = b.units.filter((q) => { if (q.street !== sIdx) return true; const s0 = (q.ox - ax) * ux + (q.oz - az) * uz, s1 = s0 + q.w * Math.sign(q.ux * ux + q.uz * uz); return Math.max(s0, s1) <= t0 || Math.min(s0, s1) >= t0 + w; });
+  const hn = (-uz * base.nx + ux * base.nz) >= 0 ? [-uz, ux] : [uz, -ux];
+  const y = heightAt(ox + ux * w / 2 - base.nx, oz + uz * w / 2 - base.nz) + SIDEWALK_H;
+  b.units.unshift({ id: h.id, kind: 'hero', hero: h.id, ox: +ox.toFixed(3), oz: +oz.toFixed(3), ux, uz, nx: hn[0], nz: hn[1], w: +w.toFixed(2), d: Math.max(base.d, 16), door: { t: +(w / 2).toFixed(2), w: 1.6, recess: 0 }, y: +y.toFixed(3), street: sIdx, avenue: false, hours: h.hours, locked: false, seed: b.id * 7 + 1 });
+  b.roof = true;
+  heroLog.push(`${h.id} -> building ${b.id} (${b.address ?? 'no address'}, ${b.year}, ${b.floors} fl) w ${w.toFixed(1)}`);
+}
+console.log('heroes:', heroLog);
+
 const coverage = {
   ...cov,
   enterableShareOfGroundBuildings: +(cov.enterableBuildings / cov.groundBuildings).toFixed(4),
