@@ -182,7 +182,16 @@ async function main() {
   window.addEventListener('resize', () => onResize());
   window.addEventListener('orientationchange', () => onResize());
   window.visualViewport?.addEventListener('resize', () => onResize());
+  // The canvas's own layout size: fires on any change, whatever window events iOS does or doesn't send.
+  new ResizeObserver(() => onResize()).observe(view);
   onResize(true);
+  // Per-frame safety net. It only DETECTS a change; the resize itself runs as a separate task, never
+  // inside the frame callback (resizing the WebGPU canvas mid-frame broke rendering).
+  let resizeQueued = false;
+  const checkSize = () => {
+    if (resizeQueued || (view.clientWidth === lastW && view.clientHeight === lastH && (window.devicePixelRatio || 1) === lastDpr)) return;
+    resizeQueued = true; setTimeout(() => { resizeQueued = false; onResize(); }, 0);
+  };
   settings.subscribe((_s, k) => { if (k === 'fov') onResize(true); });
 
   // ?time=HH:MM sets the clock (screenshot rig), ?timescale=0 freezes it; ?night= overrides window lighting.
@@ -359,7 +368,7 @@ async function main() {
     input.endFrame();
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
-    onResize(); // cheap: two clientWidth reads; catches every size change the events miss
+    checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
     if (postfx) postfx.render(); else renderer.render(scene, camera);
     if (frameCount === 0) loadReport.mark('first-frame');
     loadReport.frameCpu(performance.now() - cpu0);
