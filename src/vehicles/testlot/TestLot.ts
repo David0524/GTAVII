@@ -214,6 +214,7 @@ export async function runTestLot() {
   const spawnPlayer = (x = 0, z = 40, yaw = 0) => {
     player?.dispose();
     player = factory.spawn(world, scene, MODELS[modelIdx].id, { x, y: 0.1, z, yaw }, variant);
+    player.security.keysIn = true; player.security.locked = false; // the tester owns this car
     player.setLights({ head: true });
     wire(player, 'player');
   };
@@ -303,6 +304,11 @@ export async function runTestLot() {
     if (e.code === 'KeyC') camMode = (camMode + 1) % 3;
     if (e.code >= 'Digit1' && e.code <= 'Digit4') player.applyDamage(ZONES[Number(e.code.slice(5)) - 1], 0.35);
     if (e.code === 'Digit5') api.crashTest();
+    if (e.code === 'KeyI') player.ignition(!player.engineRunning, { key: true });
+    if (e.code === 'KeyG') api.shoot();
+    if (e.code === 'KeyO') player.forceFailure('overheat');
+    if (e.code === 'KeyK') player.forceFailure('deadBattery');
+    if (e.code === 'KeyU') player.forceFailure('vapourLock');
   });
   window.addEventListener('keyup', (e) => keys.delete(e.code));
   let lightsOn = true, beacon = false;
@@ -395,6 +401,13 @@ export async function runTestLot() {
       return speed;
     },
     trafficMs: () => traffic?.lastMs ?? 0,
+    /** Fire a test round at the player car from the camera (or at a given local point). */
+    shoot(local?: { x: number; y: number; z: number }) {
+      const o = player.object;
+      const target = local ? o.localToWorld(new THREE.Vector3(local.x, local.y, local.z)) : o.localToWorld(new THREE.Vector3((Math.random() - 0.5) * 2, 0.4 + Math.random() * 0.9, (Math.random() - 0.5) * 4));
+      const n = camera.position.clone().sub(target).normalize();
+      return player.applyHit({ point: target, normal: n, type: 'bullet', source: 'tester' });
+    },
     hill: { x: HILL_X, heightAt: (x: number, z: number) => roadHeight(x, z) },
     moveTraffic,
     stats() {
@@ -433,9 +446,11 @@ export async function runTestLot() {
       `${MODELS[modelIdx].displayName}  #${variant}  (LOD0 ${player.asset.lod0.tris} tris)\n` +
       `${(Math.abs(ph.speed) * 2.237).toFixed(0)} mph  ${ph.reverse ? 'R' : 'D' + ph.gear}  ${ph.rpm.toFixed(0)} rpm  ` +
       `damage ${(player.damage * 100).toFixed(0)}% ${player.stage}  [F ${(player.zones.front * 100).toFixed(0)} R ${(player.zones.rear * 100).toFixed(0)} L ${(player.zones.left * 100).toFixed(0)} R ${(player.zones.right * 100).toFixed(0)}]\n` +
+      `${player.trim} · plate ${player.plate} · ${player.mileage.toFixed(0)} mi · ${player.engineRunning ? 'engine on' : 'ENGINE OFF'} ${player.engine.temp.toFixed(0)}°C${player.engine.overheating ? ' OVERHEATING' : ''} · fuel ${player.fuel.toFixed(1)} L · ${player.security.locked ? 'locked' : 'unlocked'}${player.security.keysIn ? ' keys' : ''}${player.security.hotwired ? ' hot-wired' : ''}\n` +
+      `glass F${player.components.glass.front} R${player.components.glass.rear} L${player.components.glass.left} R${player.components.glass.right} · tyres ${player.components.tyresFlat.map((f) => (f ? 'X' : 'o')).join('')} · radiator ${(player.components.radiator * 100).toFixed(0)}% engine ${(player.components.engine * 100).toFixed(0)}% tank ${(player.components.fuelTank * 100).toFixed(0)}%\n` +
       `physics ${physMs.toFixed(2)} ms/step (all vehicles)  player ${player.stepMs.toFixed(2)} ms` + (traffic ? `  traffic ${nTraffic} inst ${traffic.lastMs.toFixed(2)} ms` : '') + '\n' +
       log.slice(0, 4).join('\n') + '\n' +
-      (input.isTouch ? 'stick drive · BRAKE · HAND · NEXT model · CAM' : 'WASD drive · Space handbrake · F model · V variant · H lights · B beacon · C cam · R reset · 1-4 dent · 5 crash test'),
+      (input.isTouch ? 'stick drive · BRAKE · HAND · NEXT model · CAM' : 'WASD drive · Space handbrake · F model · V variant · H lights · B beacon · C cam · R reset · 1-4 dent · 5 crash test · I ignition · G shoot · O overheat · K dead battery · U vapour lock'),
     );
   };
   renderer.setAnimationLoop(loop);

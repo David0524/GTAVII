@@ -24,7 +24,9 @@ export interface MaterialSet {
   array: THREE.Material[];
   bySlot: Record<Slot, THREE.Material>;
   u: MatUniforms;
-  setPaint(hex: number, metallic: boolean): void;
+  /** Per-pane glass state uniforms (0/1). */
+  panes: Record<'front' | 'rear' | 'left' | 'right', { cracked: FloatUniform; broken: FloatUniform }>;
+  setPaint(hex: number): void;
   dispose(): void;
 }
 
@@ -99,21 +101,33 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
   const paint2 = o.paint2 !== undefined ? makePaint(o.paint2, false) : paint;
   const roof = o.roof === 'paint' ? paint : o.roof === 'paint2' ? paint2 : makePaint(o.roof, false);
 
-  // Glass: dark, glossy; rain streaks when wet; crazed when cracked.
-  const glass = new THREE.MeshPhysicalNodeMaterial({ color: 0x0b0e10, metalness: 0.1, roughness: 0.05, clearcoat: physical ? 1 : 0, clearcoatRoughness: 0.02 });
-  {
+  // Glass: dark, glossy; rain streaks when wet; crazed when cracked; per pane so a bullet or a
+  // smashed window affects only that pane. 'broken' = shattered out: you see the dark cabin.
+  const makeGlass = (cracked: FloatUniform, broken: FloatUniform) => {
+    const glass = new THREE.MeshPhysicalNodeMaterial({ color: 0x0b0e10, metalness: 0.1, roughness: 0.05, clearcoat: physical ? 1 : 0, clearcoatRoughness: 0.02 });
     const p: N = positionLocal;
     const nz = (x: N): N => mx_noise_float(x);
     const wob: N = nz(p.mul(vec3(6, 0.8, 6))).mul(0.6);
     const streak: N = (smoothstep(float(0.82), float(0.98), fract(p.x.add(p.z).mul(23).add(wob).add(nz(p.mul(vec3(40, 2, 40))).mul(0.3)))) as N)
       .mul(smoothstep(float(0.2), float(0.9), fract(p.y.mul(3).add((time as N).mul(0.35)).add(p.x.mul(7)))));
     const crack: N = (step(abs(nz(p.mul(11))), float(0.018)) as N).add(step(abs(nz(p.mul(4.5).add(3.1))), float(0.012)));
-    const crazed: N = (clamp(crack, 0, 1) as N).mul(u.cracked as N);
-    const wet: N = u.wet, burnt: N = u.burnt;
-    glass.colorNode = (mix(mix(color(0x0b0e10), color(0x5c6266), streak.mul(wet).mul(0.5)), color(0xa8aeb0), crazed.mul(0.75)) as N).mul(float(1).sub(burnt.mul(0.6)));
-    glass.roughnessNode = mix(float(0.05), float(0.5), crazed.add(burnt));
-  }
-  owned.push(glass);
+    const crazed: N = (clamp(crack, 0, 1) as N).mul(cracked as N);
+    const wet: N = u.wet, burnt: N = u.burnt, br: N = broken;
+    const lit: N = (mix(mix(color(0x0b0e10), color(0x5c6266), streak.mul(wet).mul(0.5)), color(0xa8aeb0), crazed.mul(0.75)) as N).mul(float(1).sub(burnt.mul(0.6)));
+    glass.colorNode = mix(lit, color(0x050404), br);
+    glass.roughnessNode = mix(mix(float(0.05), float(0.5), crazed.add(burnt)), float(1), br);
+    glass.clearcoatNode = float(1).sub(br).mul(physical ? 1 : 0);
+    glass.metalnessNode = mix(float(0.1), float(0), br);
+    owned.push(glass);
+    return glass;
+  };
+  const panes = {
+    front: { cracked: fu(0), broken: fu(0) }, rear: { cracked: fu(0), broken: fu(0) },
+    left: { cracked: fu(0), broken: fu(0) }, right: { cracked: fu(0), broken: fu(0) },
+  };
+  const glass = makeGlass(u.cracked, fu(0));
+  const glassF = makeGlass(panes.front.cracked, panes.front.broken), glassB = makeGlass(panes.rear.cracked, panes.rear.broken);
+  const glassL = makeGlass(panes.left.cracked, panes.left.broken), glassR = makeGlass(panes.right.cracked, panes.right.broken);
   const lamp = (c: number, e: number) => { const m = new THREE.MeshStandardNodeMaterial({ color: c, roughness: 0.15, metalness: 0, emissive: e, emissiveIntensity: 0 }); owned.push(m); return m; };
   const headlamp = lamp(0xe8e4d8, 0xfff0cc);
   const taillamp = lamp(0x5a0806, 0xff1a0a);
@@ -121,11 +135,11 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
   const reverse = lamp(0xd8d6d0, 0xffffff);
 
   const bySlot: Record<Slot, THREE.Material> = {
-    paint, paint2, roof, vinyl: vinylMat(o.vinyl), chrome: s.chrome!, trim: s.trim!, rubber: s.rubber!, glass, under: s.under!, wood: s.wood!,
+    paint, paint2, roof, vinyl: vinylMat(o.vinyl), chrome: s.chrome!, trim: s.trim!, rubber: s.rubber!, glass, glassF, glassB, glassL, glassR, under: s.under!, wood: s.wood!,
     white: s.white!, headlamp, taillamp, indicator, reverse, grille: s.grille!, interior: s.interior!,
   };
   return {
-    array: SLOTS.map((sl) => bySlot[sl]), bySlot, u,
+    array: SLOTS.map((sl) => bySlot[sl]), bySlot, u, panes,
     setPaint(hex: number) { ((paint as unknown as { userData: { base: { value: THREE.Color } } }).userData.base.value).setHex(hex); },
     dispose() { for (const m of owned) m.dispose(); },
   };
@@ -137,7 +151,7 @@ export function trafficSlotColor(slot: Slot): number | null {
     case 'chrome': return 0xb8b6b0;
     case 'trim': return 0x1c1d1e;
     case 'rubber': return 0x151515;
-    case 'glass': return 0x101315;
+    case 'glass': case 'glassF': case 'glassB': case 'glassL': case 'glassR': return 0x101315;
     case 'under': return 0x0d0c0b;
     case 'wood': return 0x6e4426;
     case 'white': return 0xe0ddd4;

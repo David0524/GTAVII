@@ -16,14 +16,18 @@ import type RAPIER from '@dimforge/rapier3d-compat';
 import type * as THREE from 'three/webgpu';
 import { MODELS, MODEL_BY_ID } from './models';
 import { getAsset, variantOf } from './assets';
-import { Vehicle } from './Vehicle';
+import { Vehicle, type VehicleInit } from './Vehicle';
+import type { VehicleSave } from './state';
 import { TrafficRenderer } from './traffic';
 import { resolve } from './registry';
 import type { TrafficInstance, VehicleClass } from '../shared/traffic';
 import { loadDecalFonts } from './gen/decals';
 import type { Quality } from './gen/materials';
 
-export type { Vehicle, VehicleEventType, SkidEvent, ImpactEvent, DamageEvent, DamageStage } from './Vehicle';
+export type { Vehicle, VehicleEventType, SkidEvent, ImpactEvent, DamageEvent, DamageStage, ComponentEvent, TheftEvent, EngineEvent, Hit, SeatId, VehicleInit } from './Vehicle';
+export { vehicleOfCollider } from './Vehicle';
+export type { VehicleSave, TrimTier, Condition, Upgrade, TrunkItem, FailureKind } from './state';
+export { UPGRADES, TRIM } from './state';
 export type { TrafficInstance, VehicleClass } from '../shared/traffic';
 export { CLASS_MODELS } from './registry';
 export { MODELS } from './models';
@@ -32,7 +36,9 @@ export interface VehicleFactory {
   models: readonly { id: string; class: string; displayName: string }[];
   /** Resolves when decal fonts are loaded (spawning before is fine; lettering uses fallbacks). */
   ready: Promise<void>;
-  spawn(world: RAPIER.World, scene: THREE.Object3D, modelId: string, pose: { x: number; y: number; z: number; yaw: number }, variant?: number): Vehicle;
+  spawn(world: RAPIER.World, scene: THREE.Object3D, modelId: string, pose: { x: number; y: number; z: number; yaw: number }, variant?: number, init?: VehicleInit): Vehicle;
+  /** Rebuild a saved car exactly (vehicle.serialize() -> save -> restore). */
+  restore(world: RAPIER.World, scene: THREE.Object3D, save: VehicleSave): Vehicle;
   /** Visual-only instanced proxies for AI traffic far from the player (no physics body). */
   createTrafficRenderer(maxInstances: number): { setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3): void; object: THREE.Object3D; dispose(): void; lastMs: number };
   /** Registry: every VehicleClass resolves to >= 1 model; the variant seeds model choice, paint, dirt, dents. */
@@ -46,11 +52,17 @@ export function createVehicleFactory(opts: { quality: Quality }): VehicleFactory
   return {
     models: MODELS.map((m) => ({ id: m.id, class: m.cls, displayName: m.displayName })),
     ready: loadDecalFonts(),
-    spawn(world, scene, modelId, pose, variant = 0) {
+    spawn(world, scene, modelId, pose, variant = 0, init) {
       const spec = MODEL_BY_ID.get(modelId);
       if (!spec) throw new Error(`unknown vehicle model "${modelId}"`);
       const v = variantOf(spec, variant);
-      return new Vehicle(world, scene, getAsset(spec, v), v, pose, q);
+      return new Vehicle(world, scene, getAsset(spec, v), v, pose, q, init);
+    },
+    restore(world, scene, save) {
+      const spec = MODEL_BY_ID.get(save.modelId);
+      if (!spec) throw new Error(`unknown vehicle model "${save.modelId}"`);
+      const v = variantOf(spec, save.variant);
+      return new Vehicle(world, scene, getAsset(spec, v), v, { x: save.pose.x, y: save.pose.y, z: save.pose.z, yaw: 0 }, q, { save });
     },
     createTrafficRenderer(max) { return new TrafficRenderer(max, q); },
     resolve,

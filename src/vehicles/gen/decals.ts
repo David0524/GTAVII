@@ -110,3 +110,19 @@ export function buildDecals(anchors: DecalAnchor[], seed: number, opKind: 'bus' 
   }
   return { group, lit, dispose() { for (const m of mats) m.dispose(); for (const t of texs) t.dispose(); group.traverse((o) => (o as THREE.Mesh).geometry?.dispose()); } };
 }
+
+/**
+ * Licence plate texture. Generic period plate: dark blue characters on a goldenrod field with a
+ * state legend (state names are public facts, not trademarks). Exact 1974 NY colours: (verify).
+ */
+export function drawPlate(text: string, opts: { commercial?: boolean } = {}): HTMLCanvasElement {
+  const c = canvas(256, 128), g = c.getContext('2d')!;
+  g.fillStyle = '#d9a53a'; g.fillRect(0, 0, 256, 128);
+  g.strokeStyle = '#1e2a4a'; g.lineWidth = 6; g.strokeRect(5, 5, 246, 118);
+  g.fillStyle = '#1e2a4a'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `600 18px ${GROT}`; g.fillText('NEW YORK', 128, 20);
+  g.font = `76px ${GOTHIC}`; g.fillText(text, 128, 72, 236);
+  if (opts.commercial) { g.font = `600 14px ${GROT}`; g.fillText('COMMERCIAL', 128, 112); }
+  else { g.font = `600 14px ${GROT}`; g.fillText('THE EMPIRE STATE', 128, 112); }
+  return c;
+}

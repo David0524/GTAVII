@@ -20,6 +20,8 @@ export interface GeneratedModel {
   beacon: THREE.BufferGeometry | null;
   decals: DecalAnchor[];
   colliders: BoxCollider[];
+  /** Licence-plate mounts (front may be absent on some classes). */
+  plates: { pos: V3; normal: V3 }[];
   /** Local-space lamp anchor points (for light cones / glows) */
   lamps: { head: V3[]; tail: V3[] };
   /** Extents in local space. */
@@ -397,7 +399,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   return {
     body, hood, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
     wheelR, wheelL, wheels, beacon, decals, colliders,
-    lamps: { head, tail },
+    lamps: { head, tail }, plates: plateMounts(m, Z, lastCargo),
     minZ: Z(0) - fDepth, maxZ, halfW: m.W / 2, height: Math.max(roofTop, ...(m.cargo ?? []).map((c) => c.y1)),
     tris: tris(body) + tris(hood) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
   };
@@ -431,16 +433,18 @@ function greenhouse(b: GeoBuilder, m: ModelSpec, o: GenOptions, Z: (s: number) =
   if (g.signBand) { vs.add(g.signBand[0]); vs.add(g.signBand[1]); }
   const vList = [...vs].sort((a, b2) => a - b2);
 
+  let paneSlot: Slot = 'glassR';
   const sideCell = (uc: number, vc: number): Slot => {
     const { k, u0, u1 } = bandAt(uc);
     const inWin = vc > g.winV[0] && vc < g.winV[1];
-    if (k === 'glass') return inWin ? 'glass' : pillarSlot(uc);
+    if (k === 'glass') return inWin ? paneSlot : pillarSlot(uc);
     if (k === 'door') return vc < g.winV[1] ? 'interior' : pillarSlot(uc);
-    if (k === 'opera') { const t = (uc - u0) / (u1 - u0); return t > 0.28 && t < 0.72 && vc > 0.4 && vc < 0.72 ? 'glass' : pillarSlot(uc); }
+    if (k === 'opera') { const t = (uc - u0) / (u1 - u0); return t > 0.28 && t < 0.72 && vc > 0.4 && vc < 0.72 ? paneSlot : pillarSlot(uc); }
     return pillarSlot(uc);
   };
   const inside: V3 = [0, m.beltY - 0.3, Z((g.sA0 + g.sC0) / 2)];
   for (const sx of [1, -1]) {
+    paneSlot = sx > 0 ? 'glassR' : 'glassL';
     const rows = uList.map((u) => vList.map((v) => [sx * hwAt(v), yAt(v), Z(lerp(lerp(g.sA0, g.sC0, u), lerp(g.sA1, g.sC1, u), v))] as V3));
     b.grid(rows, (i, j) => sideCell((uList[i] + uList[i + 1]) / 2, (vList[j] + vList[j + 1]) / 2), { inside });
   }
@@ -462,9 +466,10 @@ function greenhouse(b: GeoBuilder, m: ModelSpec, o: GenOptions, Z: (s: number) =
       const vc = (vList[i] + vList[i + 1]) / 2, xc = (xList[j] + xList[j + 1]) / 2;
       if (g.signBand && vc > g.signBand[0] && vc < g.signBand[1]) return 'trim';
       const kind = end === 'front' ? 'glass' : g.backlight ?? 'glass';
+      const pane: Slot = end === 'front' ? 'glassF' : 'glassB';
       const inFrame = Math.abs(xc) < 1 - fr && glassV(vc);
-      if (kind === 'glass') { if (g.splitWindshield && end === 'front' && Math.abs(xc) < 0.02) return 'trim'; return inFrame ? 'glass' : end === 'back' ? pillarSlot(1) : 'roof'; }
-      if (kind === 'twoWindows') return Math.abs(xc) > 0.06 && Math.abs(xc) < 0.82 && vc > 0.3 && vc < 0.88 ? 'glass' : 'roof';
+      if (kind === 'glass') { if (g.splitWindshield && end === 'front' && Math.abs(xc) < 0.02) return 'trim'; return inFrame ? pane : end === 'back' ? pillarSlot(1) : 'roof'; }
+      if (kind === 'twoWindows') return Math.abs(xc) > 0.06 && Math.abs(xc) < 0.82 && vc > 0.3 && vc < 0.88 ? pane : 'roof';
       return pillarSlot(1);
     }, { inside });
   }
@@ -592,4 +597,16 @@ function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry 
     b.latheX('trim', [[rim, face - 0.01], [rim * 0.85, face - 0.04], [rim * 0.5, face - 0.05], [rim * 0.35, face - 0.02], [rim * 0.2, face + 0.03], [0.001, face + 0.04]], segs, [0, 0, 0], mir);
   }
   return b.build();
+}
+
+// ======================================================================= plates
+function plateMounts(m: ModelSpec, Z: (s: number) => number, lastCargo: { s1: number } | null): { pos: V3; normal: V3 }[] {
+  const fb = m.bumper, rb = m.rearBumper ?? m.bumper;
+  const out = (k: string) => (k === '5mph' ? 0.085 : k === 'chrome' ? 0.045 : 0.04);
+  const front: { pos: V3; normal: V3 } = { pos: [0, fb.y + fb.h * 0.5, Z(0) - fb.depth - out(fb.kind)], normal: [0, 0, -1] };
+  const rearS = lastCargo ? lastCargo.s1 : m.L;
+  const rear: { pos: V3; normal: V3 } = lastCargo
+    ? { pos: [0.55, rb.y + rb.h + 0.12, Z(rearS) + 0.03], normal: [0, 0, 1] }
+    : { pos: [0, rb.y + rb.h + 0.1, Z(rearS) + 0.02], normal: [0, 0, 1] };
+  return m.cls === 'bus' ? [rear] : [front, rear];
 }
