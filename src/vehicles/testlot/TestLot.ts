@@ -11,6 +11,7 @@ import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
 import { BIKES } from '../twowheel/bikes';
 import type { TwoWheeler } from '../twowheel/TwoWheeler';
+import { SubwayTrain } from '../subway/SubwayTrain';
 import { ZONES } from '../gen/morphs';
 import { VehicleLights, type VehicleClass } from '../../shared/traffic';
 
@@ -285,6 +286,32 @@ export async function runTestLot() {
     traffic.setInstances(tcars, camera.position);
   };
 
+  // ------------------------------------------------------------------ subway (mode=subway): straight track south of the lot
+  let train: SubwayTrain | null = null;
+  const trainSim = { s: 60, v: 0, phase: 'dwell' as 'dwell' | 'run', t: 0, dir: 1 };
+  if (mode === 'subway') {
+    const TZ = 230;
+    const rail = new THREE.MeshStandardNodeMaterial({ color: 0x6a645c, metalness: 0.8, roughness: 0.4 });
+    const tie = new THREE.MeshStandardNodeMaterial({ color: 0x3a2a20, roughness: 0.95 });
+    for (const sx of [-0.72, 0.72]) { const m = new THREE.Mesh(new THREE.BoxGeometry(400, 0.15, 0.07), rail); m.position.set(0, 0.075, TZ + sx); scene.add(m); }
+    const ties = new THREE.InstancedMesh(new THREE.BoxGeometry(0.22, 0.12, 2.5), tie, 600);
+    for (let i = 0; i < 600; i++) ties.setMatrixAt(i, new THREE.Matrix4().makeTranslation(-200 + i * 0.66, 0.03, TZ));
+    scene.add(ties);
+    // a low platform edge to stand on
+    addStatic(world, scene, sidewalk, 0, 0.55, TZ - 3.0, 80, 1.1, 3.4);
+    train = new SubwayTrain(world, scene, { cars: 4, seed: variant + 3, graffiti: Number(params.get('graffiti') ?? 0.85), quality: qname });
+    // track runs along +x; the train's front is toward -x when s grows from the +x end
+    const pts = []; for (let x = 200; x >= -200; x -= 5) pts.push({ x, y: 0.15, z: TZ });
+    train.setTrack(pts);
+  }
+  const runTrain = (dt: number) => {
+    if (!train) return;
+    const ts = trainSim; ts.t += dt;
+    if (ts.phase === 'dwell') { const open = Math.min(1, Math.max(0, (ts.t - 1) / 1.5)) * (ts.t < 9 ? 1 : Math.max(0, 1 - (ts.t - 9) / 1.5)); train.setState({ s: ts.s, doorsOpen: open }); if (ts.t > 11) { ts.phase = 'run'; ts.t = 0; } }
+    else { ts.v = Math.min(ts.v + 1.1 * dt, 14); ts.s += ts.v * dt; if (ts.s > 330) { ts.s = 60; ts.v = 0; ts.phase = 'dwell'; ts.t = 0; } train.setState({ s: ts.s, doorsOpen: 0 }); }
+    train.update();
+  };
+
   // ------------------------------------------------------------------ input
   const input = new Input(renderer.domElement);
   if (input.isTouch || params.has('touch')) {
@@ -378,6 +405,7 @@ export async function runTestLot() {
     player.update(DT);
     for (const b of bikes) b.update(DT);
     for (const v of parked) v.update(DT);
+    runTrain(DT);
     world.step();
     skids.update(DT);
     physMs = physMs * 0.95 + (performance.now() - t0) * 0.05;
@@ -411,6 +439,7 @@ export async function runTestLot() {
     },
     trafficMs: () => traffic?.lastMs ?? 0,
     bikes,
+    get train() { return train; }, trainSim,
     get riding() { return riding; },
     /** Spawn a two-wheeler and ride it (input + camera). */
     rideBike(id: string, pose = { x: 0, z: 40, yaw: 0 }, variant = 0) {
