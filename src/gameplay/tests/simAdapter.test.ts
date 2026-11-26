@@ -134,3 +134,21 @@ test('pursuit tactics reach the sim: cut-off cars get urgent gotos, the tail car
   const agent = [...sim.copGoals.entries()].map(([, gl]) => gl).find((gl) => gl.kind === 'goto' && gl.urgent);
   assert.ok(agent && agent.x > pos[0], `a cut-off car races ahead: ${JSON.stringify(agent)} (${cut.id})`);
 });
+
+test('sim mirror: a dispatched radio car is spawned responding (the sim starts it out of sight), a beat post where it stands', () => {
+  const sim = new FakeSim(); const spawns: any[] = [];
+  const orig = sim.spawnPolice.bind(sim); sim.spawnPolice = (o: any) => { spawns.push(o); return orig(o); };
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  g.registerPolice('foot', 'pct.gramercy', 50, 50, { corrupt: 0 });
+  g.update(1 / 30);
+  assert.equal(spawns.find((o) => o.kind === 'foot').respondTo, undefined, 'a beat post spawns where it stands');
+  // a shooting called in: the precinct dispatches cars after its delay
+  g.policeSys.file({ witness: 'w1', perp: 'player', kinds: ['shooting'], desc: { clothes: [] }, lastKnown: [10, 5], crimeAt: [10, 5], via: 'callbox', time: 0 } as any);
+  for (let i = 0; i < 30 * 90 && !spawns.some((o) => o.kind === 'car'); i++) g.update(1 / 30);
+  const car = spawns.find((o) => o.kind === 'car');
+  assert.ok(car, 'a car was dispatched');
+  assert.ok(car.respondTo && Math.hypot(car.respondTo.x - 10, car.respondTo.z - 5) < 30 && car.siren, `responding to the scene: ${JSON.stringify(car)}`);
+});

@@ -29,7 +29,8 @@ export interface SimLike {
   readonly police?: readonly SimPoliceView[];
   setGoal(pedId: number, goal: SimPedGoal | null): boolean;
   kill?(pedId: number, bodySeconds?: number): boolean;
-  spawnPolice?(o: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean }): number;
+  /** `respondTo`: the sim starts the car on a free lane about 24 s of siren driving out (x/z ignored). */
+  spawnPolice?(o: { kind: 'foot' | 'car'; x: number; z: number; precinct?: string; siren?: boolean; respondTo?: { x: number; z: number } }): number;
   setPoliceGoal?(id: number, goal: SimPoliceGoal): boolean;
   setSiren?(id: number, on: boolean): void;
   despawnPolice?(id: number): boolean;
@@ -87,7 +88,11 @@ export class PoliceMirror {
       if (u.kind === 'helicopter' || u.state === 'combat' || u.state === 'down') { this.drop(u.id); continue; }
       let id = this.agentOf.get(u.id);
       if (id === undefined) {
-        id = sim.spawnPolice({ kind: u.kind.endsWith('car') || u.kind === 'roadblock' || u.kind === 'plainclothes' ? 'car' : 'foot', x: u.x, z: u.z, precinct: u.precinct, siren: u.state === 'enroute' || u.state === 'pursuit' });
+        const car = u.kind.endsWith('car') || u.kind === 'roadblock' || u.kind === 'plainclothes';
+        // a dispatched car comes in from out of sight with the siren on; gameplay already spent the dispatch delay
+        const scene = u.target ?? this.police.reports.find((r) => r.id === u.report)?.lastKnown ?? null;
+        const responding = car && u.state === 'enroute' && u.kind !== 'plainclothes' && scene;
+        id = sim.spawnPolice({ kind: car ? 'car' : 'foot', x: u.x, z: u.z, precinct: u.precinct, siren: u.state === 'enroute' || u.state === 'pursuit', ...(responding ? { respondTo: { x: scene![0], z: scene![1] } } : {}) });
         if (id < 0) continue; // no room in the sim: gameplay keeps the unit abstract this frame
         this.agentOf.set(u.id, id);
       }
