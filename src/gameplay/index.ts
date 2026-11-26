@@ -51,6 +51,10 @@ export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'repo
   | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
+/** How much a drink goes to your head (0..1 scale; effects stay modest and wear off in a few minutes). */
+export const DRINK: Record<string, number> = { 'item.beer': 0.18, 'item.whiskey': 0.3 }, SOBER_PER_S = 1 / 240;
+/** 1974 barber prices (cents) and the boxing gym. */
+export const BARBER: Record<string, number> = { 'clean-shaven': 150, moustache: 300, sideburns: 300, beard: 300, 'short hair': 300, 'long hair': 300 }, GYM_SESSION = 100, BOUT_PURSE = 2000;
 /** Side-window arc (radians off the car's nose) and spread penalty when shooting from a car. */
 export const DRIVEBY_ARC = [Math.PI / 6, (5 * Math.PI) / 6] as const, DRIVEBY_SPREAD = 1.6;
 /** Seconds before an unanswered radio check turns into an officer-down report. */
@@ -425,6 +429,7 @@ export class Gameplay {
     const lead = this.player.lead;
     if (def.kind === 'armor') { if (!this.inv.take(lead, itemId)) return false; this.healthSys.setArmor(this.player.id, def.armor ?? 0); this.inv.ensure(lead).armor = def.armor ?? 0; this.emit('notice', { kind: 'vest' }); return true; }
     if (def.kind !== 'consumable' || !this.inv.take(lead, itemId)) return false;
+    if (DRINK[itemId]) { const li = this.inv.ensure(lead); li.intox = Math.min(1, li.intox + DRINK[itemId]); this.emit('notice', { kind: 'drink', intox: li.intox }); return true; }
     this.healthSys.treat(this.player.id, { heal: def.heal ?? 0, stopBleeding: !!def.stopsBleeding, wearRelief: def.stopsBleeding ? (itemId === 'item.blue_plate' ? 0.5 : 0.3) : 0 });
     return true;
   }
@@ -625,6 +630,7 @@ export class Gameplay {
     const mode = this.pc.sprinting ? 'sprint' : this.pc.speed > 2.5 ? 'run' : this.pc.speed > 0.3 ? 'walk' : 'idle';
     if (!stepStamina(li.stamina, dt, mode, this.pc.tempF, this.pc.unlimitedSprint)) this.pc.sprinting = false;
     if (mode === 'sprint') learn(li.skills, 'sprintSecond', dt);
+    if (li.intox > 0) li.intox = Math.max(0, li.intox - SOBER_PER_S * dt);
     if (this.pc.jamClear > 0) { this.pc.jamClear -= dt; if (this.pc.jamClear <= 0) { const gs = this.gunState(); if (gs) gs.jammed = false; this.emit('notice', { kind: 'jamCleared' }); } }
     const fx = this.healthSys.effects(p.id);
     const g = this.currentGun();
@@ -649,7 +655,8 @@ export class Gameplay {
         const gs = this.gunState();
         if (this.pc.jamClear > 0) return;
         if (gs && !rollShot(gs, this.rng, this.pc.raining)) { this.pc.firing = false; g.cooldown = g.def.interval; this.emit('notice', { kind: 'jammed', weapon: g.def.id }); this.emit('shot', { shooter: p.id, weapon: g.def.id, origin, dir, player: true, jammed: true }); return; }
-        const rays = g.fire({ origin, dir, aiming: this.pc.aiming, moveFrac: Math.min(1, this.pc.speed / 3.4), mods: { ...this.mods(), swayDeg: fx.swayDeg, aimMul: this.mods().aimMul * fx.aimMul * (this.pc.vehicle ? DRIVEBY_SPREAD : 1) }, blind, rng: this.rng });
+        const drunk = this.inv.ensure(lead).intox;
+        const rays = g.fire({ origin, dir, aiming: this.pc.aiming, moveFrac: Math.min(1, this.pc.speed / 3.4), mods: { ...this.mods(), swayDeg: fx.swayDeg + drunk * 3, aimMul: (1 + drunk * 0.8) * this.mods().aimMul * fx.aimMul * (this.pc.vehicle ? DRIVEBY_SPREAD : 1) }, blind, rng: this.rng });
         for (const r of rays) this.pendingShots.push({ shooter: p.id, ray: r });
         this.inv.ensure(lead).loaded.set(g.def.id, g.loaded);
         this.emit('shot', { shooter: p.id, weapon: g.def.id, origin, dir, player: true, blind });
@@ -696,6 +703,7 @@ export class Gameplay {
   private applyDamage(id: string, d: { amount: number; region?: string; source?: string; type: DamageType; bleed?: number; power?: number }) {
     const before = this.healthSys.state(id);
     if (!before || before.dead) return null;
+    if (id === this.ringOpponent && before.hp - d.amount * 1.5 <= 0) d = { ...d, amount: Math.max(0, (before.hp - 5) / 1.5) }; // never lethal in the ring
     const res = this.healthSys.damage(id, { ...d, region: d.region as Region | undefined });
     const src = d.source ? this.actors.get(d.source) : null;
     const sp = src?.pos();
@@ -738,7 +746,7 @@ export class Gameplay {
       const res = this.applyDamage(h.target, { amount: h.damage, region: h.region, source: h.attacker, type: 'melee', bleed: h.bleed });
       this.emit('hit', { target: h.target, region: h.region, damage: res?.dealt ?? 0, melee: h.kind, blocked: h.blocked, counter: h.counter, shooter: h.attacker, killed: res?.killed });
       this.emit('melee', { ...h, attack: h.kind, kind: 'hit' });
-      if (h.attacker === this.player?.id && t && !h.blocked) {
+      if (h.attacker === this.player?.id && t && !h.blocked && !this.sanctioned) {
         const armed = this.reg.weapon(this.pc.weapon).class === 'melee' && this.pc.weapon !== 'weapon.fists';
         this.crime(t.kind === 'cop' ? 'assault_officer' : res?.killed ? 'homicide' : armed ? 'assault_weapon' : 'assault', { victim: t.id });
         if (t.kind === 'ped') this.port.command(t.id, { type: 'flee', fromX: this.player!.position()[0], fromZ: this.player!.position()[2] });
@@ -888,6 +896,41 @@ export class Gameplay {
     for (const a of this.actors.values()) { const q = a.pos(); const f = this.fire.at(q[0], q[2]); if (f) this.applyDamage(a.id, { amount: 4, type: 'fire', source: f.by ?? undefined }); }
     for (const [id, m] of this.fire.fuel) if (m.burning && this.props.get(id)) this.damageProp(id, 999, 'impact', null);
   }
+  /** Drunk: 0..1 for the engine's camera sway and control wobble (modest, short). */
+  intox() { return this.player ? this.inv.ensure(this.player.lead).intox : 0; }
+  /** Barber: a shave or a new look changes what witnesses remember about the face. */
+  groom(style: string) {
+    if (!this.player || !(style in BARBER) || !this.inv.spend(this.player.lead, BARBER[style], 'barber')) return false;
+    this.inv.ensure(this.player.lead).grooming = style; return true;
+  }
+  /** Boxing gym: an hour's session (a buck) builds strength or wind; time passes. */
+  train(kind: 'strength' | 'stamina', hours = 1) {
+    if (!this.player || !this.inv.spend(this.player.lead, GYM_SESSION * hours, 'gym')) return false;
+    const li = this.inv.ensure(this.player.lead);
+    learn(li.skills, kind === 'strength' ? 'meleeHit' : 'sprintSecond', kind === 'strength' ? 12 * hours : 900 * hours);
+    if (kind === 'stamina') li.stamina.base = li.stamina.max = Math.max(li.stamina.base, 60 + 0.8 * li.skills.stamina);
+    this.passTime(hours, 'wait');
+    return true;
+  }
+  /** An amateur bout: a sanctioned fight (no crime), fists only, a purse for the winner. */
+  bout(opponent = 'boxer'): string | null {
+    if (!this.player) return null;
+    const p = this.player.position();
+    this.sanctioned = true;
+    this.equip('weapon.fists');
+    const a = this.spawnCombatant({ id: opponent, faction: 'hood', squad: 'ring', pos: [p[0], p[1], p[2] - 3], yaw: 0, weapon: null, melee: 'weapon.fists', hp: 90 });
+    if (!a) return null;
+    this.ai.alert(opponent, [p[0], p[2]], this.player.id);
+    this.ringOpponent = opponent;
+    const off = this.healthSys.on('damaged', (e) => {
+      if (e.id !== opponent) return;
+      if (e.hp < 15) { this.sanctioned = false; this.ringOpponent = null; this.ai.knockOut(opponent); if (this.player) this.inv.addMoney(this.player.lead, BOUT_PURSE, 'purse'); this.emit('notice', { kind: 'boutWon', purse: BOUT_PURSE }); off(); }
+    });
+    return opponent;
+  }
+  sanctioned = false;
+  /** the ring: an amateur bout ends in a knockout, never a death */
+  private ringOpponent: string | null = null;
   /** Takedown from behind on an unaware enemy within 1.4 m: a blade kills, anything else knocks out. */
   takedown(): { id: string; lethal: boolean } | null {
     if (!this.player) return null;

@@ -32,7 +32,11 @@ export class Wardrobe extends Emitter<WardrobeEvents> {
     return true;
   }
 
-  look(lead: string): Look { return describeOutfit(this.reg, this.reg.outfits.get(this.wearing(lead))); }
+  look(lead: string): Look {
+    const l = describeOutfit(this.reg, this.reg.outfits.get(this.wearing(lead)));
+    const g = this.inv.ensure(lead).grooming;
+    return g ? { ...l, words: [...l.words, g] } : l;
+  }
 }
 
 export function describeOutfit(reg: Registry, o: OutfitDef | undefined): Look {

@@ -48,6 +48,8 @@ export const ITEMS: ItemDef[] = [
   I({ id: 'item.coffee', name: 'Coffee, regular', kind: 'consumable', price: 25, stack: 3, sellable: false, heal: 4 }),
   I({ id: 'item.sandwich', name: 'Ham on rye', kind: 'consumable', price: 95, stack: 3, sellable: false, heal: 15 }),
   I({ id: 'item.blue_plate', name: 'Blue-plate special', kind: 'consumable', price: 185, stack: 1, sellable: false, heal: 40, stopsBleeding: true, note: 'Eaten at the counter: a diner stops bleeding (you get cleaned up in the washroom).' }),
+  I({ id: 'item.beer', name: 'Beer', kind: 'consumable', price: 50, stack: 6, sellable: false, note: 'drink: modest, short sway' }),
+  I({ id: 'item.whiskey', name: 'Shot of rye', kind: 'consumable', price: 100, stack: 3, sellable: false, note: 'drink' }),
   I({ id: 'item.vest', name: 'Police-issue vest', kind: 'armor', armor: 60, price: 15000, stack: 1, sellable: true, illicit: true, note: 'Rare. Soft body armour was only reaching patrol in the mid-70s.' }),
   I({ id: 'item.newspaper', name: 'Evening paper', kind: 'misc', price: 20, stack: 1, sellable: false }),
   I({ id: 'item.street_map', name: 'Folding street map', kind: 'misc', price: 75, stack: 1, sellable: false }),
