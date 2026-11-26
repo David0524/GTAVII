@@ -99,6 +99,16 @@ What doesn't (expected for untextured, but noted honestly):
   report real numbers once someone runs `npm run shots` on a GPU machine. The rig records them
   in `shots/<phase>/report.json`.
 
+## Planned: playable boundary (user requirement: no invisible walls; design in docs/briefs/BOUNDARIES.md)
+| Layer | What | When |
+|---|---|---|
+| 0 | Expand the modelled city and set playable bounds mid-block: 10th–11th Aves west, 47th–48th Sts north. Use the real 1974 barriers: Penn Central rail cut, Lincoln Tunnel trench. The shared API `src/shared/bounds.ts` (`edgeDistance`, `inwardDirection`, `EDGE`) is published now. | Pipeline v2 (next, together with terrain if confirmed) |
+| 1 | Low-detail shells about 1.5 km beyond the edge, Hudson and East Rivers, New Jersey, Queens and Brooklyn silhouettes | Pipeline v2 plus Phase 3 |
+| 2 | Period blockers with real colliders: film shoot, utility trench with steam stack, water-main break, police barricade, block party | Phase 2 colliders, then Phase 5 dressing |
+| 3 | Gridlock and crowd ramp near the edge (sim stream, via `edgeDistance`) | Phase 5 |
+| 4 | "The reel runs out": grain, weave and light leak build up, then a leader countdown and a reel-change cut back to a safe pose facing inward. Shares its presentation with the character switch. | Phase 3 post stack, Phase 6 polish |
+| Map | The pause map is a 1974 folding street map that ends at the paper's edge | UI pass |
+
 ## Known issues / TODO
 - [ ] Decide on terrain (see Decisions).
 - [ ] Research the 46 flagged rows in docs/PERIOD_AUDIT.md (rooftop additions, 206 W 36th St undated towers).

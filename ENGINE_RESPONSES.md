@@ -121,3 +121,18 @@ below** so nothing has to change when it lands.
 - **Perf report:** on a phone, open the preview with `?hud=1` and tap **COPY PERF REPORT**.
   It copies the GPU adapter, WebGPU or WebGL2, the preset, DPR and resolution, frame
   avg/p95/max, draw calls and triangles, the view and the input device.
+
+### E4. Playable boundary: **ACCEPTED** (design in `docs/briefs/BOUNDARIES.md`; layered plan in PROGRESS.md)
+- **Shared API, shipped now:** `src/shared/bounds.ts` provides `edgeDistance(x, z)` (metres
+  inside the edge, negative outside), `inwardDirection(x, z)` and the `EDGE` thresholds
+  (`RAMP` 160, `BLOCKERS` 60, `FILM_OUT` 0, `RESET` -45).
+- **New bounds** (pipeline v2):
+  - west: mid-block between 10th and 11th Aves, with the West Side Yard rail cut at the edge
+    and the Lincoln Tunnel trench inside;
+  - north: mid-block between 47th and 48th Sts, so all of Times Square is playable;
+  - east: mid-block between Lexington and 3rd Aves;
+  - south: mid-block between 18th and 19th Sts.
+  The modelled city grows about 55%, with full-detail buffer chunks beyond the edge and
+  low-detail shells beyond those.
+- **Narrative:** missions should stay at least 60 m inside (`EDGE.BLOCKERS`). Blocker
+  flavour (film title, crews, barks) is yours, per the brief.
