@@ -63,3 +63,18 @@ test('carjacking: instant, the driver is a witness who reacts', () => {
   assert.equal(reacts.length, 1);
   assert.ok(r.has('crimeWitnessed'));
 });
+
+test('shooting from a car: drive-by weapons only, out of the side windows', () => {
+  const r = rig();
+  r.g.cars.add({ id: 'mine', vclass: 'sedan', colour: 'tan', owner: 'char.teddy_arce' });
+  r.g.enterCar('mine', 'keys');
+  r.g.setContext({ vehicleYaw: 0 }); // nose to -z
+  const shots: any[] = []; r.g.on('shot', (e) => { if (e.player && !e.jammed) shots.push(e); });
+  r.g.equip('weapon.service');
+  r.dir[0] = 0; r.dir[1] = 0; r.dir[2] = -1;           // through the windshield: no
+  r.g.setFiring(true); r.step(0.1); assert.equal(shots.length, 0);
+  r.dir[0] = 1; r.dir[2] = 0;                           // out of the right window: yes
+  r.g.setFiring(true); r.step(0.1); assert.equal(shots.length, 1);
+  r.g.inv.give('char.teddy_arce', 'item.pump'); r.g.equip('weapon.pump');
+  r.g.setFiring(true); r.step(0.1); assert.equal(shots.length, 1, 'no pump shotgun from the driver seat');
+});

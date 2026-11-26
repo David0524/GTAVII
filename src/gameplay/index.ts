@@ -10,7 +10,7 @@
 import { BoxWorld } from './core/boxworld';
 import { Emitter } from './core/events';
 import { Rng } from './core/rng';
-import { norm, type V3 } from './core/vec';
+import { norm, wrapAngle, type V3 } from './core/vec';
 import type { WorldQuery } from './core/world';
 import { DEFAULT_CONTENT } from './data/defaults';
 import type { GameplayContent, ItemDef, ShopDef, WeaponDef } from './data/schema';
@@ -47,6 +47,8 @@ export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'repo
   | 'copKilled' | 'essentialKilled' | 'cleared' | 'released';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
+/** Side-window arc (radians off the car's nose) and spread penalty when shooting from a car. */
+export const DRIVEBY_ARC = [Math.PI / 6, (5 * Math.PI) / 6] as const, DRIVEBY_SPREAD = 1.6;
 /** Seconds before an unanswered radio check turns into an officer-down report. */
 export const RADIO_SILENCE = 45;
 export const COMBAT_BUDGET: Record<Quality, { combatants: number; witnesses: number }> = {
@@ -63,6 +65,8 @@ export interface PlayerCombatState {
   weapon: string; aiming: boolean; firing: boolean; cover: CoverPoint | null; peek: boolean; blind: boolean;
   surrendered: boolean; vehicle: PlayerVehicle | null; indoors: boolean; subway: boolean; atHome: boolean; speed: number;
   sprinting: boolean; tempF: number; raining: boolean; unlimitedSprint: boolean; jamClear: number;
+  /** heading of the car the player sits in (drive-by arcs) */
+  vehicleYaw: number;
   lockLimb: Limb; device: 'touch' | 'pad' | 'mouse'; assist: AssistLevel;
 }
 
@@ -110,7 +114,7 @@ export class Gameplay {
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
-    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0,
+    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0,
   };
   /** Last frame's shot results (debug overlay tracers). */
   lastShots: ShotResult[] = [];
@@ -320,7 +324,7 @@ export class Gameplay {
   }
   setBlindFire(on: boolean) { this.pc.blind = on; }
   surrender(on: boolean) { this.pc.surrendered = on; }
-  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint'>>) { Object.assign(this.pc, c); }
+  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw'>>) { Object.assign(this.pc, c); }
   /** Take the gun and rounds off a downed enemy within reach. Guns come in random condition and tier. */
   loot(): { weapon: string | null; rounds: number } | null {
     if (!this.player) return null;
@@ -575,6 +579,12 @@ export class Gameplay {
         const a = p.aim();
         let dir: V3 = a.dir, origin: V3 = a.origin;
         if (this.pc.device === 'touch') { const ld = this.aimer.lockedDir(origin, this.aimTargets()); if (ld) dir = ld; }
+        // from a car: drive-by weapons only, out of the side windows (30°–150° off the nose either side)
+        if (this.pc.vehicle) {
+          if (!g.def.driveBy) { this.pc.firing = false; this.emit('notice', { kind: 'noDriveBy', weapon: g.def.id }); return; }
+          const off = Math.abs(wrapAngle(Math.atan2(-dir[0], -dir[2]) - this.pc.vehicleYaw));
+          if (off < DRIVEBY_ARC[0] || off > DRIVEBY_ARC[1]) return;
+        }
         const inCover = !!this.pc.cover && !this.pc.peek;
         const blind = inCover && this.pc.blind;
         if (inCover && !blind) return; // must peek or blind-fire from cover
@@ -582,7 +592,7 @@ export class Gameplay {
         const gs = this.gunState();
         if (this.pc.jamClear > 0) return;
         if (gs && !rollShot(gs, this.rng, this.pc.raining)) { this.pc.firing = false; g.cooldown = g.def.interval; this.emit('notice', { kind: 'jammed', weapon: g.def.id }); this.emit('shot', { shooter: p.id, weapon: g.def.id, origin, dir, player: true, jammed: true }); return; }
-        const rays = g.fire({ origin, dir, aiming: this.pc.aiming, moveFrac: Math.min(1, this.pc.speed / 3.4), mods: { ...this.mods(), swayDeg: fx.swayDeg, aimMul: this.mods().aimMul * fx.aimMul }, blind, rng: this.rng });
+        const rays = g.fire({ origin, dir, aiming: this.pc.aiming, moveFrac: Math.min(1, this.pc.speed / 3.4), mods: { ...this.mods(), swayDeg: fx.swayDeg, aimMul: this.mods().aimMul * fx.aimMul * (this.pc.vehicle ? DRIVEBY_SPREAD : 1) }, blind, rng: this.rng });
         for (const r of rays) this.pendingShots.push({ shooter: p.id, ray: r });
         this.inv.ensure(lead).loaded.set(g.def.id, g.loaded);
         this.emit('shot', { shooter: p.id, weapon: g.def.id, origin, dir, player: true, blind });

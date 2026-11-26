@@ -495,7 +495,7 @@ export async function runGameplayScene() {
     hud.limbs.style.display = touch && g.aimer.locked ? 'flex' : 'none';
     for (const b of hud.limbs.children) (b as HTMLElement).classList.toggle('on', (b as HTMLElement).dataset.l === g.aimer.limb);
     const runner = H.witnesses.find((w) => w.state === 'toReport' || w.state === 'calling');
-    if (runner) { const p = sim.peds.find((q) => q.id === runner.ped); if (p) hud.witness(edgeProject([p.x, p.y + 2.1, p.z]), runner.state === 'calling' ? 'ON THE CALL BOX' : 'WITNESS'); } else hud.witness(null, '');
+    if (runner) { const p = sim.peds.find((q) => q.id === runner.ped); if (p) hud.witness(edgeProject([p.x, p.y + 2.1, p.z]), runner.state === 'calling' ? (runner.target?.kind === 'payphone' ? 'ON THE PAYPHONE' : runner.target?.kind === 'unit' ? 'FLAGGING A PATROL CAR' : 'ON THE CALL BOX') : 'WITNESS'); } else hud.witness(null, '');
     showEncounter(H.encounter && (H.encounter.state === 'encounter' || H.encounter.state === 'approach') ? H.encounter.unit : null);
     const near = nearPrompt();
     hud.showPrompt(near);
