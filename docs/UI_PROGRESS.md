@@ -113,6 +113,18 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
   the title was drawn under it).
 - [x] Honest critique: below.
 
+## Type direction and restyle (user decision, verbatim: **"Do A"**)
+The user chose type direction **A, Transit Authority**, relayed by the oversight session on 2026-11-26.
+- **Fonts:** T74 Heros and T74 Heros Cn (TeX Gyre, renamed under GUST) carry the HUD, menus, map and plates. T74 Schola carries reading text, Libre Franklin the newspaper heads, and T74 Cursor only typed forms. The title is the constructed wordmark. Fraunces, League Gothic, Archivo and Courier Prime are removed. Licences are in `public/fonts/LICENSES.md`.
+- **Restyle,** per the user's "this looks very AI generated" and the rules in docs/research/UI_REFERENCES.md:
+  - flat and straight, with one accent (transit yellow) and red only for trouble;
+  - ruled label and right-aligned value rows, with focus shown as an inverted row;
+  - no tilt, tape, stamps, price tags, aged paper, coffee rings or film-leader gimmicks;
+  - the map is a white, Hagstrom-style street guide, and the parking ticket is a plain notification panel.
+- **Font payload (measured in game):** the phone loads 3 files, 47 KB; the desktop loads 5 files, 85 KB. Faces load only when used.
+- **Legibility:** at the smallest text setting (85%) the HUD's smallest text is 10 CSS px (concealment tag, minimap "N"). It's crisp at ×3 DPR, but a little under Apple's 11 pt guideline. That's open.
+- **Shots:** `shots/ui/game/` (in game, phone and desktop) and `shots/ui/` (lab).
+
 ## Touch controls (docs/briefs/TOUCH_CONTROLS.md; user: "our controls may be messy")
 **Built:** `src/ui/touch/TouchLayout.ts` behind `UiHost.touch`. Movement, look, jump and pedals go through Input.
 - **On foot:** stick, look, context, jump, weapon, menu.

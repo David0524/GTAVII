@@ -52,7 +52,7 @@ export async function capture(shots: Shot[]) {
         if (s.act) await s.act(page);
         await page.waitForTimeout(s.wait ?? 900);
         const file = path.join(OUT, `${s.name}_${size}.png`);
-        await page.screenshot({ path: file });
+        await page.screenshot({ path: file, timeout: 180_000 });
         results[`${s.name}_${size}`] = { ms: Date.now() - t0, errors: errs };
         console.log(`${s.name}_${size}: ${Date.now() - t0} ms${errs.length ? `  ERRORS: ${errs.join(' | ')}` : ''}`);
         await ctx.close();
