@@ -48,6 +48,9 @@ export class CinematicPlayer {
   /** Set by the UI root: shows the dialogue-choice overlay. */
   askChoice: AskChoice | null = null;
   private waiting = false;
+  /** Choice picks so far (choice ref -> option index): branch shots (showIf) follow them. */
+  private picks = new Map<string, number>();
+  private rebuild: () => Timeline = () => this.tl!;
   private held = new Set<number>();
   private choicesOf: (ref: string) => import('./schema').DialogueChoiceSet | null = () => null;
 
@@ -73,7 +76,8 @@ export class CinematicPlayer {
     const { scene, dialogue, choices, speaker } = await loadCutscene(id);
     this.choicesOf = choices; this.held.clear(); this.waiting = false;
     this.scene = scene; this.opts = opts;
-    this.tl = new Timeline(scene, dialogue, speaker);
+    this.picks = new Map(); this.rebuild = () => new Timeline(scene, dialogue, speaker, this.picks);
+    this.tl = this.rebuild();
     this.t = opts.startAt ?? 0; this.playing = true; this.paused = !!opts.paused; this.skipHeld = 0; this.lastLine = '';
     if (this.host.camera) { this.cam = this.host.camera.acquire('cinematics'); this.restoreFov = this.cam.fov; }
     this.host.freezePlayer?.(true);
@@ -140,13 +144,18 @@ export class CinematicPlayer {
     // a choice-hold shot freezes the frame here, untimed, until the player chooses
     const si = this.tl.shotIndexAt(this.t === this.tl.duration ? this.t - 1e-6 : this.t);
     for (let i = this.tl.shotIndexAt(t0); i <= si; i++) {
-      const sh = this.scene!.shots[i];
+      const sh = this.tl.shots[i];
       if (sh.waitFor === 'choice' && !this.held.has(i) && this.tl.shotStart[i] + sh.durationSec <= this.t + 1e-6) {
         this.held.add(i); this.t = this.tl.shotStart[i] + sh.durationSec; this.apply(0);
         const set = this.choicesOf(sh.choices ?? '');
         if (set && this.askChoice) {
           this.waiting = true;
-          this.askChoice(set.choices.map((c, k) => ({ id: c.goto ?? String(k), text: c.text })), (cid) => { this.waiting = false; this.host.commit?.('dialogue.choice', { ref: sh.choices, choice: cid }); });
+          const ids = set.choices.map((c, k) => c.goto ?? String(k));
+          this.askChoice(set.choices.map((c, k) => ({ id: ids[k], text: c.text })), (cid) => {
+            this.waiting = false; this.host.commit?.('dialogue.choice', { ref: sh.choices, choice: cid });
+            // the pick selects the branch shots that follow; everything up to this hold keeps its timing
+            if (sh.choices) { this.picks.set(sh.choices, Math.max(0, ids.indexOf(cid))); this.tl = this.rebuild(); }
+          });
           return;
         }
       }
@@ -161,7 +170,7 @@ export class CinematicPlayer {
 
   /** Pose the camera, actors and film layer for the current time. */
   private apply(dt: number) {
-    const tl = this.tl!, si = tl.shotIndexAt(this.t), shot = this.scene!.shots[si];
+    const tl = this.tl!, si = tl.shotIndexAt(this.t), shot = tl.shots[si];
     const pose = tl.camera(this.t, this.gameplayPose()); this.pose = pose;
     const cam = this.cam;
     if (cam) {
@@ -223,7 +232,7 @@ export class CinematicPlayer {
   stop(skipped: boolean) {
     if (!this.playing) return;
     this.playing = false;
-    const tl = this.tl!, last = this.scene!.shots[this.scene!.shots.length - 1];
+    const tl = this.tl!, last = tl.shots[tl.shots.length - 1];
     // Skipping fires the cues the player would have seen (state must end up the same either way).
     if (skipped) for (const e of tl.eventsBetween(this.t, tl.duration + 1)) if (e.kind === 'cue') this.host.commit?.(e.cue, e.data);
     if (this.cam) {

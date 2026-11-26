@@ -41,6 +41,8 @@ export interface Shot {
   /** Hold this frame, untimed, until something resolves (a dialogue choice: choices = "dlg.x#c1"). */
   waitFor?: 'choice';
   choices?: string;
+  /** Branch shot: plays only when the earlier choice hold `choice` resolved to `option` (0-based). */
+  showIf?: { choice: string; option: number };
 }
 
 export interface Cutscene {
@@ -63,7 +65,16 @@ export function validateCutscene(c: Cutscene): string[] {
   const errs: string[] = [];
   const isV3 = (v: unknown) => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
   if (!c || typeof c.id !== 'string') errs.push('id');
-  if (!Array.isArray(c?.shots) || !c.shots.length) { errs.push('shots: none'); return errs; }
+  if (!Array.isArray(c?.shots) || !c.shots.length) { errs.push('shots: none');   // branch shots must follow the choice hold they depend on
+  const holds = new Set<string>();
+  c.shots.forEach((s, i) => {
+    if (s.showIf) {
+      if (!holds.has(s.showIf.choice)) errs.push(`shots[${i}] (${s.id}): showIf.choice ${s.showIf.choice} is not an earlier choice hold`);
+      if (!Number.isInteger(s.showIf.option) || s.showIf.option < 0) errs.push(`shots[${i}] (${s.id}): showIf.option must be a 0-based index`);
+    }
+    if (s.waitFor === 'choice' && s.choices) holds.add(s.choices);
+  });
+  return errs; }
   const ids = new Set<string>();
   c.shots.forEach((s, i) => {
     const p = `shots[${i}]${s?.id ? ` (${s.id})` : ''}`;

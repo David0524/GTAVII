@@ -26,7 +26,7 @@ await withServer(async (base) => {
   await page.goto(`${base}/?title=0&quality=${size === 'phone' ? 'low' : 'high'}&play=${id}&cinepause=1${size === 'phone' ? '&touch=1' : ''}`);
   await page.waitForFunction(() => (window as any).__T74?.ui?.cinema?.tl, null, { timeout: 240_000 });
   await page.evaluate(() => document.fonts.ready);
-  const info = await page.evaluate(() => { const c = (window as any).__T74.ui.cinema; return { starts: c.tl.shotStart, durs: c.scene.shots.map((s: any) => s.durationSec), ids: c.scene.shots.map((s: any) => s.id), dur: c.tl.duration }; });
+  const info = await page.evaluate(() => { const c = (window as any).__T74.ui.cinema; return { starts: c.tl.shotStart, durs: c.tl.shots.map((s: any) => s.durationSec), ids: c.tl.shots.map((s: any) => s.id), dur: c.tl.duration }; });
   const frames: [string, number][] = info.ids.map((sid: string, i: number) => [`${String(i + 1).padStart(2, '0')}_${sid}`, info.starts[i] + info.durs[i] * 0.55]);
   frames.splice(1, 0, ['01b_s1_title', 3.2]);
   for (const [name, t] of frames) {

@@ -29,14 +29,20 @@ export class Timeline {
   readonly duration: number;
   readonly lines: ScheduledLine[] = [];
   readonly events: TimedEvent[] = [];
+  /** The shots that play: branch shots (showIf) only for the picked option, or all of them in 'all' mode (the tool). */
+  readonly shots: Shot[];
   private actorKeys = new Map<string, (ActorKey & { abs: number })[]>();
 
-  constructor(readonly scene: Cutscene, dialogue: (ref: string) => DialogueLine | null = () => null, speakerName: (id: string) => string = (s) => s) {
+  constructor(readonly scene: Cutscene, dialogue: (ref: string) => DialogueLine | null = () => null, speakerName: (id: string) => string = (s) => s,
+    picks: ReadonlyMap<string, number> | 'all' = new Map()) {
     normaliseCutscene(scene);
+    // Unresolved branches are left out, so a scene plays straight to its choice hold; the player rebuilds
+    // the timeline with the pick, which leaves every shot before the hold where it was.
+    this.shots = scene.shots.filter((s) => !s.showIf || picks === 'all' || picks.get(s.showIf.choice) === s.showIf.option);
     let t = 0;
-    for (const s of scene.shots) { this.shotStart.push(t); t += s.durationSec; }
+    for (const s of this.shots) { this.shotStart.push(t); t += s.durationSec; }
     this.duration = t;
-    scene.shots.forEach((s, i) => {
+    this.shots.forEach((s, i) => {
       const st = this.shotStart[i];
       let cursor = 0.3;
       for (const d of s.dialogue ?? []) {
@@ -66,7 +72,7 @@ export class Timeline {
 
   /** Camera pose at absolute time t. `gameplay` is the live gameplay pose for from/toGameplay shots. */
   camera(t: number, gameplay?: { pos: V3; look: V3; fov: number }): CamPose {
-    const i = this.shotIndexAt(t), shot = this.scene.shots[i], lt = Math.max(0, Math.min(shot.durationSec, t - this.shotStart[i]));
+    const i = this.shotIndexAt(t), shot = this.shots[i], lt = Math.max(0, Math.min(shot.durationSec, t - this.shotStart[i]));
     const keys = this.keysFor(shot, i, gameplay);
     const pose = evalKeys(keys, lt);
     const hh = shot.camera?.handheld ?? 0;

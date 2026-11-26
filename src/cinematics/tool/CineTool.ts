@@ -85,7 +85,8 @@ export class CineTool {
     const old = this.player.tl!;
     // keep the dialogue resolver from the player's load
     const lineOf = (ref: string) => old.lines.find((l) => l.ref === ref);
-    this.player.tl = new Timeline(sc, (ref) => { const l = lineOf(ref); return l ? { id: ref, speaker: l.speaker, text: l.text } : null; }, (s) => s);
+    // every branch shot is laid out in sequence in the tool ('all'), so each can be keyed
+    this.player.tl = new Timeline(sc, (ref) => { const l = lineOf(ref); return l ? { id: ref, speaker: l.speaker, text: l.text } : null; }, (s) => s, 'all');
     this.player.scene = sc;
     this.dirty = true;
     try { localStorage.setItem(`t74.cine.${this.id}`, JSON.stringify(extractLayout(sc, this.script!))); } catch { /* ignore */ }
