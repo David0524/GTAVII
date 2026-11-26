@@ -21,6 +21,7 @@ import { WaitPrompt, SleepMenu } from './screens/TimeScreens';
 import { CarLot, MyCarsTab, NoticeCard } from './screens/CarScreens';
 import { HomeUpgrades } from './screens/HomeScreens';
 import { Modal } from './screens/Modal';
+import { TouchLayout } from './touch/TouchLayout';
 import { SettingsTab } from './screens/SettingsTab';
 import { SavesTab, CreditsTab } from './screens/FrontTabs';
 import { TitleScreen } from './TitleScreen';
@@ -49,6 +50,8 @@ export interface UiRoot {
   /** Play an in-engine cutscene (content/cutscenes/<id>.json); resolves when it ends or is skipped. */
   playCutscene(id: string, opts?: PlayOptions): Promise<boolean>;
   readonly cinema: CinematicPlayer;
+  /** Touch controls (null on non-touch devices). */
+  readonly touch: TouchLayout | null;
   /** Persisted extras for the save section. */
   readonly extras: { newsRead: Set<string>; achievements: Record<string, string>; cutscenesSeen: Set<string> };
 }
@@ -88,6 +91,9 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   hub.add(new RecordTab(host, o.model));
   const savesTab = new SavesTab(host.saves); savesTab.onToast = toast; hub.add(savesTab);
   const settingsTab = new SettingsTab(input); settingsTab.onToast = toast; hub.add(settingsTab);
+  // touch controls (TOUCH_CONTROLS.md): built on touch devices; the settings tab opens the layout editor
+  const touch = input.isTouch ? new TouchLayout(host) : null;
+  if (touch) settingsTab.extraButtons.push(['Edit touch layout', () => { hub.hide(); touch.edit(() => hub.show('settings')); }]);
   const creditsTab = new CreditsTab(host.baseUrl); hub.add(creditsTab);
   const shop = new ShopCounter(input, host);
   const leads = new LeadPicker(input, host);
@@ -121,7 +127,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const cinema = new CinematicPlayer(host);
   cinema.askChoice = (cs, resolve) => choices.ask(cs, resolve);
   const root: UiRoot = {
-    hud, hub, model: o.model, mapScreen, title: null, toast, extras, cinema,
+    hud, hub, model: o.model, mapScreen, title: null, toast, extras, cinema, touch,
     playCutscene(id, opts = {}) {
       return new Promise<boolean>((res) => {
         const prev = root.state === 'cutscene' ? 'play' : root.state;
@@ -143,6 +149,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
     titleReady: (l) => title?.setReady(l),
     update(dt) {
       if (tool) { tool.update(dt); hud.setVisible(false); return; }
+      if (root.state !== 'play') touch?.setVisible(false);
       if (root.state === 'cutscene') { cinema.update(dt); choices.update(dt); hud.setVisible(false); return; }
       if (root.state === 'title') { if (hub.open) hub.update(dt); else title?.update(dt); hud.setVisible(false); return; }
       if (hub.open) hub.update(dt);
@@ -154,6 +161,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
         else if (input.pressed('weaponSelect')) root.show('weapons');
       }
       const blocking = Modal.current && Modal.current !== weapons && Modal.current !== choices;
+      if (touch) { touch.setVisible(root.state === 'play' && !hub.open && !blocking && input.activeDevice === 'touch'); touch.update(dt); }
       hud.setVisible(root.state === 'play' && !hub.open && !blocking && uiSettings.get('hud'));
       if (hud.visible) hud.update(dt);
     },

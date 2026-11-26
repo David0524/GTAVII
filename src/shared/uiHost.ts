@@ -180,7 +180,51 @@ export interface UiHost {
   continueGame?(): Promise<boolean>;
   /** Context button prompts for the HUD strip: [action, label]. */
   prompts?(): [import('../input/Input').ButtonAction, string][];
+  /** Touch controls (docs/briefs/TOUCH_CONTROLS.md). Absent: the touch layer runs on foot only (move, look, jump, use). */
+  touch?: TouchHost;
   /** Static map data. */
   readonly heroes: { name: string; x: number; z: number }[];
 }
 
+
+/**
+ * What the touch layer needs from gameplay and vehicles (TOUCH_CONTROLS.md). Shapes follow gameplay's
+ * "UI contract for TOUCH_CONTROLS.md" and vehicles' DriverAssist notes; the engine adapter forwards.
+ * Movement, look, jump and the analog pedals go through Input (touchMove, addLook, touchHeld,
+ * touchPedals), so pad and keyboard stay untouched. Everything optional degrades to "not shown".
+ */
+export type TouchMode = 'foot' | 'combat' | 'drive';
+export interface TouchContext { kind: string; label: string }
+export interface TouchHost {
+  /** Which control state to show. Combat = a weapon drawn or under fire. */
+  mode(): TouchMode;
+  /** A weapon is available (on-foot weapon button, drive-by button). */
+  armed(): boolean;
+  /** gameplay.contextAction(): the one context button (null hides it). */
+  context(): TouchContext | null;
+  /** gameplay.doContextAction(moveDir?). */
+  doContext(moveDir?: { x: number; z: number }): void;
+  /** gameplay.lockables(): world points the UI projects and hit-tests for tap-to-lock. */
+  lockables?(): { id: string; x: number; y: number; z: number; threat?: number }[];
+  locked?(): string | null;
+  lockTarget?(id: string | null): void;
+  swipeLock?(dir: 1 | -1): void;
+  /** World point to CSS px (null when behind the camera). */
+  project?(x: number, y: number, z: number): { x: number; y: number } | null;
+  /** fireMode 'tap' | 'button' (auto fires on its own). */
+  setFiring?(on: boolean): void;
+  reload?(): void;
+  swapWeapon?(dir: 1 | -1): void;
+  /** Cover near cover, roll otherwise; the label says which. */
+  coverLabel?(): string;
+  coverOrRoll?(): void;
+  /** On foot: tap draws or holsters; hold opens the wheel (concealable weapons only). */
+  drawWeapon?(): void;
+  weaponWheel?(open: boolean): void;
+  handbrake?(on: boolean): void;
+  horn?(on: boolean): void;
+  driveBy?(on: boolean): void;
+  /** Settings the touch layer forwards: gameplay.setContext/setAssist, vehicles' DriverAssist. */
+  configure?(c: { fireMode: 'auto' | 'tap' | 'button'; aimAssist: 'off' | 'low' | 'standard' | 'strong'; gyro: 'off' | 'aim' | 'always';
+    steerAssist: boolean; steerAssistStrength: number; autoAccelerate: boolean }): void;
+}

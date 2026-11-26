@@ -6,7 +6,7 @@
 import { settings, type SettingsData } from '../../settings/Settings';
 
 export type { Mode3 } from '../../settings/Settings';
-export type Consumer = 'ui' | 'engine' | 'audio' | 'gameplay' | 'input' | 'post';
+export type Consumer = 'ui' | 'engine' | 'audio' | 'gameplay' | 'input' | 'post' | 'vehicles';
 export type UiSettingsData = SettingsData;
 export const uiSettings = settings;
 
@@ -19,6 +19,8 @@ export const CONSUMER: Partial<Record<keyof SettingsData, Consumer>> = {
   cameraShake: 'engine', headBob: 'engine', filmGrain: 'post', motionBlur: 'post', onFootFollow: 'engine', vehicleFollow: 'engine', cutsceneLetterbox: 'ui',
   volMaster: 'audio', volEffects: 'audio', volMusic: 'audio', volDialogue: 'audio', volRadio: 'audio', volUi: 'audio', monoAudio: 'audio', radioOnEntry: 'audio',
   brightness: 'post', safeZone: 'ui', qualityPreset: 'engine', resolutionScale: 'engine', fpsCap: 'engine',
+  fireMode: 'gameplay', gyroAim: 'gameplay', steerMode: 'ui', steerAssist: 'vehicles', steerAssistStrength: 'vehicles', autoAccelerate: 'vehicles',
+  haptics: 'ui', touchAimSensitivity: 'ui', touchDriveLookSensitivity: 'ui', touchLayout: 'ui',
   units: 'ui', clock24: 'ui', touchButtonSize: 'ui', touchOpacity: 'ui', touchLeftHanded: 'ui', bindings: 'input', dayLengthMinutes: 'engine',
   controlPreset: 'input', padLookSensitivity: 'input', padLookCurve: 'input', padDeadzone: 'input', padInvertY: 'input', padVibration: 'input', padVibrationStrength: 'input',
   mouseSensitivity: 'input', mouseInvertY: 'input', touchLookSensitivity: 'input', fov: 'engine', hud: 'ui', subtitles: 'ui', subtitleScale: 'ui', buttonPrompts: 'ui',

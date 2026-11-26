@@ -40,7 +40,7 @@ await withServer(async (base) => {
   await step(page, 'new_game_opening_cutscene', async () => { await tap(t('.t74-menu button', /new game/i)); await page.waitForFunction(() => (window as any).__T74.ui.state === 'cutscene', null, { timeout: 30000 }); await page.waitForTimeout(2500); });
   await step(page, 'cutscene_pause_button', () => tap(t('.cine-pause')));
   await step(page, 'cutscene_skip_from_pause', async () => { await tap(t('.cine-menu button', /skip/i)); await page.waitForFunction(() => (window as any).__T74.ui.state === 'play', null, { timeout: 20000 }); await page.evaluate(() => (window as any).__T74.whenIdle()); });
-  await step(page, 'menu_button_opens_map', () => tap(t('.t74-btn', /MENU/)));
+  await step(page, 'menu_button_opens_map', () => tap(t('.tc-id-menu')));
   await step(page, 'map_filter_toggle', () => tap(t('.t74-filter').nth(2)));
   await step(page, 'map_tap_spot_card', async () => { const c = page.locator('.t74-foldmap'); const b = (await c.boundingBox())!; await page.touchscreen.tap(b.x + b.width * 0.62, b.y + b.height * 0.45); await page.locator('.t74-card').waitFor({ state: 'visible' }); });
   await step(page, 'map_pencil_route', () => tap(t('.t74-card button', /PENCIL A ROUTE/)));

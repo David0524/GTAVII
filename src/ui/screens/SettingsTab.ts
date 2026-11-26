@@ -26,8 +26,9 @@ const WIRED = new Set<keyof SettingsData>([
   'hudMinimap', 'hudObjective', 'hudCash', 'hudWeapon', 'hudClock', 'hudRadio', 'hudStamina', 'hudInjuries', 'hudLocation', 'hudDiscovery', 'hudTurns', 'hudPrompts',
   'minimapOrientation', 'minimapSize', 'subtitleMode', 'subtitleBackground', 'subtitleSpeakerNames', 'subtitleSpeakerColours',
   'textScale', 'colourMode', 'highContrast', 'reduceFlashing', 'reduceMotion', 'cutsceneLetterbox', 'filmGrain', 'units', 'clock24', 'safeZone', 'mapIconSize', 'touchButtonSize', 'touchOpacity', 'touchLeftHanded', 'skipTimers',
+  'haptics', 'touchAimSensitivity', 'touchDriveLookSensitivity', 'steerMode',
 ]);
-const WAITS: Record<string, string> = { audio: 'audio lands', gameplay: 'gameplay lands', engine: 'the engine wires it', post: 'the Phase 3 film grade lands', input: 'the input layer supports it', ui: 'the UI wires it' };
+const WAITS: Record<string, string> = { audio: 'audio lands', gameplay: 'gameplay lands', engine: 'the engine wires it', post: 'the Phase 3 film grade lands', vehicles: 'driving lands in the game', input: 'the input layer supports it', ui: 'the UI wires it' };
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 const M3: [string, string][] = [['on', 'On'], ['dynamic', 'Dynamic'], ['off', 'Off']];
@@ -53,6 +54,16 @@ export const ROWS: Row[] = [
   { key: 'touchButtonSize', label: 'Touch button size', kind: 'range', min: 0.8, max: 1.5, step: 0.1, fmt: pct },
   { key: 'touchOpacity', label: 'Touch button opacity', kind: 'range', min: 0.3, max: 1, step: 0.1, fmt: pct },
   { key: 'touchLeftHanded', label: 'Left-handed touch layout', help: 'Buttons on the left, stick on the right', kind: 'bool' },
+  { group: 'Touch controls', keys: ['fireMode', 'aimAssist', 'gyroAim', 'touchAimSensitivity', 'steerMode', 'steerAssist', 'steerAssistStrength', 'autoAccelerate', 'touchDriveLookSensitivity', 'haptics'] },
+  { key: 'fireMode', label: 'Firing', help: 'Automatic fires when your sights are on a locked target', kind: 'choice', options: [['auto', 'Automatic'], ['tap', 'Tap anywhere'], ['button', 'Fire button']] },
+  { key: 'gyroAim', label: 'Gyro aim', help: 'Tilt the phone to fine-tune aim. Turns aim assist off.', kind: 'choice', options: [['off', 'Off'], ['aim', 'While aiming'], ['always', 'Always']] },
+  { key: 'touchAimSensitivity', label: 'Aim sensitivity', kind: 'range', min: 0.2, max: 3, step: 0.1, fmt: pct },
+  { key: 'steerMode', label: 'Steering', help: 'Stick: slide left and right. Arrows: two buttons. Tilt: turn the phone.', kind: 'choice', options: [['stick', 'Stick'], ['arrows', 'Arrows'], ['tilt', 'Tilt']] },
+  { key: 'steerAssist', label: 'Steering assist', help: 'Smooths steering and helps catch slides', kind: 'bool' },
+  { key: 'steerAssistStrength', label: 'Steering assist strength', kind: 'range', min: 0, max: 1, step: 0.1, fmt: pct },
+  { key: 'autoAccelerate', label: 'Auto-accelerate', help: 'The car drives itself forward; the brake slows, stops and reverses', kind: 'bool' },
+  { key: 'touchDriveLookSensitivity', label: 'Look while driving', kind: 'range', min: 0.2, max: 3, step: 0.1, fmt: pct },
+  { key: 'haptics', label: 'Haptics', help: 'Light taps on lock-on, reload and impacts (where the phone supports it)', kind: 'bool' },
   { group: 'Camera and comfort', keys: ['fov', 'cameraShake', 'headBob', 'onFootFollow', 'vehicleFollow', 'motionBlur', 'filmGrain', 'cutsceneLetterbox'] },
   { key: 'fov', label: 'Field of view', kind: 'range', min: 50, max: 90, step: 1, fmt: (v) => `${v}°` },
   { key: 'cameraShake', label: 'Camera shake', kind: 'range', min: 0, max: 1, step: 0.1, fmt: pct },
@@ -104,7 +115,7 @@ export const ROWS: Row[] = [
   { key: 'reduceMotion', label: 'Reduce UI motion', kind: 'bool' },
   { key: 'menuNarration', label: 'Read menus aloud', help: 'Uses the browser\'s voice', kind: 'bool' },
   { key: 'unlimitedSprint', label: 'Unlimited sprint', kind: 'bool' },
-  { key: 'aimAssist', label: 'Aim assist', kind: 'choice', options: [['full', 'Lock on'], ['partial', 'Partial'], ['off', 'Off']] },
+  { key: 'aimAssist', label: 'Aim assist', kind: 'choice', options: [['strong', 'Strong'], ['standard', 'Standard'], ['low', 'Low'], ['off', 'Off']] },
   { key: 'skipTimers', label: 'Relax timers', help: 'Timed sections wait for you; dialogue choices never time out', kind: 'bool' },
   { group: 'Sound', keys: ['volMaster', 'volEffects', 'volMusic', 'volDialogue', 'volRadio', 'volUi', 'monoAudio', 'radioOnEntry'] },
   { key: 'volMaster', label: 'Master volume', kind: 'range', min: 0, max: 1, step: 0.05, fmt: pct },

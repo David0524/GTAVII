@@ -1,0 +1,28 @@
+✓ on foot shows ctx, jump, weapon, menu (jump,ctx,weapon,menu)
+✓ context label from gameplay
+✓ stick: forward walk (y=1.00)
+✓ stick past the rim sprints
+✓ release stops
+✓ context: steal car -> driving (drive)
+✓ driving shows gas, brake, hand brake, exit, drive-by, menu (gas,ctx,brake,handbrake,driveby,menu)
+✓ gas pedal is analog (slide up = more) (gas=0.70)
+✓ steering is horizontal only, with gas held (steer=0.53 y=0)
+✓ lifting both thumbs: no gas, no steer
+✓ light brake (hold at a light) (brake=0.25)
+✓ firm brake (reverse at a stop)
+✓ hand brake
+✓ exit sits where enter was (stable slot)
+✓ context: get out -> on foot (foot)
+✓ weapon tap draws -> combat (combat)
+✓ combat shows fire, cover, reload, context (fire,ctx,cover,reload,menu)
+✓ tap near an enemy locks it (56 px)
+✓ flick switches target
+✓ fire button press and release
+✓ reload
+✓ swipe on reload swaps weapon
+✓ cover
+✓ jump shares the fire slot (758,286 vs 758,286)
+✓ drag moves and saves the control ({"dx":40,"dy":30,"s":1})
+✓ reset restores the slot
+✓ left-handed: pedals move to the left (gas x=86)
+touch layer update: 0.006 ms (EMA, headless)

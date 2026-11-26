@@ -16,7 +16,6 @@ import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
 import { loadTerrain, heightAt } from './shared/terrain';
 import { Input } from './input/Input';
-import { TouchControls } from './ui/TouchControls';
 import { buildReport, mountReportButton } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
 import RAPIER from '@dimforge/rapier3d-compat';
@@ -73,17 +72,8 @@ async function main() {
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
-  let touch: TouchControls | null = null;
-  if (input.isTouch || params.has('touch')) {
-    input.isTouch = true;
-    touch = new TouchControls(input, [
-      { label: 'JUMP', action: 'jump', hold: true },
-      { label: 'RUN', action: 'sprint', hold: true },
-      { label: 'CAM', action: 'photo', hold: false },
-      { label: 'MENU', action: 'pause', hold: false },
-    ]);
-    document.body.classList.add('touch');
-  }
+  // touch: the UI's TouchLayout (src/ui/touch) is built by createUi when input.isTouch
+  if (input.isTouch || params.has('touch')) { input.isTouch = true; document.body.classList.add('touch'); }
 
   // ---------------------------------------------------------------- player + cameras
   const { spawn } = world.manifest;
@@ -254,7 +244,6 @@ async function main() {
   const flat = world.manifest.heroes.find((h) => h.name === 'Flatiron Building') ?? { x: 0, z: 0 };
   let titleT = 0;
   const attributionEl = document.getElementById('attribution');
-  const fsEl = document.querySelector('.t74-fs') as HTMLElement | null;
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -275,8 +264,6 @@ async function main() {
     ui.update(dt);
     const playing = ui.state === 'play' && !ui.paused;
     if (attributionEl) attributionEl.style.display = ui.state === 'title' || playing ? '' : 'none';
-    if (fsEl) fsEl.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
-    if (touch) touch.root.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
     if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (playing && input.pressed('jump')) jumpLatch = true;

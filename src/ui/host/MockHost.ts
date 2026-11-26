@@ -367,4 +367,36 @@ export class MockHost implements UiHost {
     }
     return { ok: true };
   }
+
+  // ---------------------------------------------------------------- touch (TOUCH_CONTROLS.md), scripted
+  /** Lab only: lockables are given straight in screen px (z = 0) and project() passes them through. */
+  touchMode: import('../../shared/uiHost').TouchMode = 'foot';
+  touchLog: string[] = [];
+  private lockedId: string | null = null;
+  private enemies = [{ id: 'npc.goon_1', x: 0.58, y: 0.42 }, { id: 'npc.goon_2', x: 0.71, y: 0.47 }, { id: 'npc.goon_3', x: 0.46, y: 0.5 }];
+  touch: import('../../shared/uiHost').TouchHost = {
+    mode: () => this.touchMode,
+    armed: () => true,
+    context: () => this.touchMode === 'foot' ? { kind: 'enterVehicle', label: 'Steal car' } : this.touchMode === 'combat' ? { kind: 'pickUp', label: 'Pick up .38' } : { kind: 'exitVehicle', label: 'Get out' },
+    doContext: () => {
+      this.touchLog.push(`context:${this.touchMode}`);
+      this.touchMode = this.touchMode === 'foot' ? 'drive' : this.touchMode === 'drive' ? 'foot' : 'combat';
+    },
+    lockables: () => this.enemies.map((e) => ({ id: e.id, x: e.x * innerWidth, y: e.y * innerHeight, z: 0, threat: 1 })),
+    project: (x, y) => ({ x, y }),
+    locked: () => this.lockedId,
+    lockTarget: (id) => { this.lockedId = id; this.touchLog.push(`lock:${id}`); },
+    swipeLock: (d) => { const i = this.enemies.findIndex((e) => e.id === this.lockedId); this.lockedId = this.enemies[(i + d + this.enemies.length) % this.enemies.length].id; this.touchLog.push(`swipe:${d}`); },
+    setFiring: (on) => this.touchLog.push(`fire:${on}`),
+    reload: () => this.touchLog.push('reload'),
+    swapWeapon: (d) => this.touchLog.push(`swap:${d}`),
+    coverLabel: () => 'Cover',
+    coverOrRoll: () => this.touchLog.push('cover'),
+    drawWeapon: () => { this.touchLog.push('draw'); this.touchMode = this.touchMode === 'combat' ? 'foot' : 'combat'; },
+    weaponWheel: (open) => { if (open) this.touchLog.push('wheel'); },
+    handbrake: (on) => this.touchLog.push(`handbrake:${on}`),
+    horn: (on) => this.touchLog.push(`horn:${on}`),
+    driveBy: (on) => this.touchLog.push(`driveby:${on}`),
+    configure: (c) => this.touchLog.push(`configure:${c.fireMode}/${c.aimAssist}/${c.autoAccelerate}`),
+  };
 }

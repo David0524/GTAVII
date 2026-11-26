@@ -5,6 +5,10 @@
  * screen edits this object; systems read it live.
  */
 export type Mode3 = 'on' | 'dynamic' | 'off';
+/** Aim assist strength (gameplay's setAssist levels; the old 'partial'/'full' values migrate to standard/strong). */
+export type AimAssist = 'off' | 'low' | 'standard' | 'strong';
+/** Per touch state, per element: offset from the default slot (CSS px at scale 1) and a size multiplier. */
+export type TouchLayoutData = Record<string, Record<string, { dx: number; dy: number; s: number }>>;
 export interface SettingsData {
   // controls: gamepad
   controlPreset: 'standard' | 'classic' | 'lefthanded';
@@ -35,7 +39,7 @@ export interface SettingsData {
   subtitleMode: 'off' | 'scene' | 'all'; subtitleBackground: 'none' | 'shadow' | 'solid'; subtitleSpeakerNames: boolean; subtitleSpeakerColours: boolean; captions: boolean;
   // accessibility
   textScale: number; colourMode: 'off' | 'protan' | 'deutan' | 'tritan'; highContrast: boolean; reduceFlashing: boolean; reduceMotion: boolean;
-  sprintMode: 'hold' | 'toggle'; aimMode: 'hold' | 'toggle'; holdDelay: number; tapAssist: boolean; unlimitedSprint: boolean; aimAssist: 'off' | 'partial' | 'full';
+  sprintMode: 'hold' | 'toggle'; aimMode: 'hold' | 'toggle'; holdDelay: number; tapAssist: boolean; unlimitedSprint: boolean; aimAssist: AimAssist;
   skipTimers: boolean; menuNarration: boolean;
   // camera and comfort
   cameraShake: number; headBob: number; filmGrain: number; motionBlur: boolean; onFootFollow: number; vehicleFollow: number; cutsceneLetterbox: boolean;
@@ -47,6 +51,10 @@ export interface SettingsData {
   units: 'imperial' | 'metric'; clock24: boolean;
   // touch layout
   touchButtonSize: number; touchOpacity: number; touchLeftHanded: boolean;
+  // touch controls (docs/briefs/TOUCH_CONTROLS.md): fire mode, gyro, steering, pedals, haptics, per-state sensitivity, layout edits
+  fireMode: 'auto' | 'tap' | 'button'; gyroAim: 'off' | 'aim' | 'always';
+  steerMode: 'stick' | 'arrows' | 'tilt'; steerAssist: boolean; steerAssistStrength: number; autoAccelerate: boolean;
+  haptics: boolean; touchAimSensitivity: number; touchDriveLookSensitivity: number; touchLayout: TouchLayoutData;
   // remapping: action -> keyboard codes / gamepad button indices
   bindings: Record<string, { keys: string[]; pad: number[] }>;
   // gameplay: real minutes per in-game day (TIME brief / ENGINE_RESPONSES E12)
@@ -63,12 +71,14 @@ export const DEFAULTS: SettingsData = {
   minimapOrientation: 'heading', minimapSize: 'medium', mapIconSize: 'normal',
   subtitleMode: 'all', subtitleBackground: 'shadow', subtitleSpeakerNames: true, subtitleSpeakerColours: true, captions: false,
   textScale: 1, colourMode: 'off', highContrast: false, reduceFlashing: false, reduceMotion: false,
-  sprintMode: 'hold', aimMode: 'hold', holdDelay: 1, tapAssist: false, unlimitedSprint: false, aimAssist: 'partial', skipTimers: false, menuNarration: false,
+  sprintMode: 'hold', aimMode: 'hold', holdDelay: 1, tapAssist: false, unlimitedSprint: false, aimAssist: 'standard', skipTimers: false, menuNarration: false,
   cameraShake: 1, headBob: 0.6, filmGrain: 1, motionBlur: true, onFootFollow: 0.6, vehicleFollow: 0.8, cutsceneLetterbox: true,
   volMaster: 1, volEffects: 0.9, volMusic: 0.8, volDialogue: 1, volRadio: 0.85, volUi: 0.7, monoAudio: false, radioOnEntry: 'last',
   brightness: 1, safeZone: 1, qualityPreset: 'auto', resolutionScale: 1, fpsCap: 60,
   units: 'imperial', clock24: false,
   touchButtonSize: 1, touchOpacity: 0.8, touchLeftHanded: false,
+  fireMode: 'auto', gyroAim: 'off', steerMode: 'stick', steerAssist: true, steerAssistStrength: 0.6, autoAccelerate: false,
+  haptics: true, touchAimSensitivity: 1, touchDriveLookSensitivity: 1, touchLayout: {},
   bindings: {},
   dayLengthMinutes: 48,
 };
@@ -87,6 +97,8 @@ class SettingsStore {
         for (const k of Object.keys(DEFAULTS) as (keyof SettingsData)[]) {
           if (k in saved && typeof saved[k] === typeof DEFAULTS[k]) (this.data as unknown as Record<string, unknown>)[k] = saved[k];
         }
+        // v1 aim assist values
+        const aa = this.data.aimAssist as string; if (aa === 'partial') this.data.aimAssist = 'standard'; else if (aa === 'full') this.data.aimAssist = 'strong';
       }
     } catch { /* private mode / blocked storage: defaults */ }
   }

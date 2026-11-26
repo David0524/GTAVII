@@ -1,0 +1,69 @@
+/* Touch controls. Flat and quiet (docs/research/UI_REFERENCES.md): translucent dark discs, one thin outline,
+   one accent for "pressed" and the locked target; type from the theme tokens. */
+.tc { position: fixed; inset: 0; z-index: 7; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  --tc-ease: 150ms ease-out; font-family: var(--f-ui); }
+.tc.hidden { display: none; }
+.tc-zone { position: absolute; top: 0; bottom: 0; }
+.tc-left { left: 0; width: 42%; }
+.tc-right { right: 0; width: 58%; }
+.tc.lefty .tc-left { left: auto; right: 0; }
+.tc.lefty .tc-right { right: auto; left: 0; }
+
+.tc-btn { position: absolute; transform: translate(50%, 50%) scale(var(--s, 1)); display: grid; place-items: center;
+  opacity: var(--tc-alpha, .85); transition: opacity var(--tc-ease), transform var(--tc-ease), right var(--tc-ease), bottom var(--tc-ease), left var(--tc-ease);
+  color: #f4f1ea; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; font-weight: 700; }
+.tc.lefty .tc-btn { transform: translate(-50%, 50%) scale(var(--s, 1)); }
+.tc-btn.tc-small { transform: translate(50%, -50%) scale(var(--s, 1)); }
+.tc.lefty .tc-btn.tc-small { transform: translate(50%, -50%) scale(var(--s, 1)); }
+.tc.editing .tc-mark { display: none; }
+.tc-btn.off { opacity: 0; pointer-events: none; transform: translate(50%, 50%) scale(calc(var(--s, 1) * .85)); }
+.tc-round, .tc-small { border-radius: 50%; background: #0e0e0e8c; box-shadow: inset 0 0 0 1.5px #ffffff8c; }
+.tc-small { border-radius: 10px; font-size: 10px; letter-spacing: .06em; }
+.tc-btn b { font-weight: inherit; text-align: center; line-height: 1.1; padding: 0 6px; pointer-events: none; }
+.tc-id-fire { box-shadow: inset 0 0 0 2px #fff; font-size: 13px; }
+.tc-id-ctx { font-size: 12px; letter-spacing: .02em; text-transform: none; font-weight: 600; }
+.tc-btn.on { background: var(--taxi); color: #111; box-shadow: none; }
+
+/* pedals: a ribbed pad; the fill rises with the thumb (analog) */
+.tc-pedal { border-radius: 12px; overflow: hidden; background: repeating-linear-gradient(0deg, #0e0e0e8c 0 9px, #1c1c1c8c 9px 12px); box-shadow: inset 0 0 0 1.5px #ffffff8c; align-content: start; padding-top: 10px; }
+.tc-pedal .tc-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; transform-origin: bottom; transform: scaleY(0); background: var(--taxi); opacity: .55; }
+.tc-pedal b { position: relative; }
+.tc-pedal.on { background: repeating-linear-gradient(0deg, #0e0e0ea6 0 9px, #1c1c1ca6 9px 12px); color: #fff; box-shadow: inset 0 0 0 2px var(--taxi); }
+
+/* the stick appears where the thumb lands */
+.tc-stick { position: absolute; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #ffffff59; background: #0e0e0e40; display: none; pointer-events: none; }
+.tc-stick.on { display: block; }
+.tc[data-mode="drive"] .tc-stick { height: 52px; margin-top: -26px; border-radius: 26px; width: 136px; margin-left: -68px; }
+.tc-knob { position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; background: #f4f1eab3; }
+
+/* combat: rings on lockable targets, brackets on the locked one */
+.tc-mark { position: absolute; left: -18px; top: -18px; width: 36px; height: 36px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #ffffff73; display: none; pointer-events: none; }
+.tc-mark.on { display: block; }
+.tc-mark.locked { border-radius: 0; box-shadow: none; background:
+  linear-gradient(var(--taxi) 0 0) 0 0 / 10px 2px, linear-gradient(var(--taxi) 0 0) 0 0 / 2px 10px,
+  linear-gradient(var(--taxi) 0 0) 100% 0 / 10px 2px, linear-gradient(var(--taxi) 0 0) 100% 0 / 2px 10px,
+  linear-gradient(var(--taxi) 0 0) 0 100% / 10px 2px, linear-gradient(var(--taxi) 0 0) 0 100% / 2px 10px,
+  linear-gradient(var(--taxi) 0 0) 100% 100% / 10px 2px, linear-gradient(var(--taxi) 0 0) 100% 100% / 2px 10px; background-repeat: no-repeat; }
+
+/* the clock moves left of the menu button on touch */
+body.touch .t74-clock { right: calc(70px + var(--safe-r)); }
+
+/* layout editor */
+.tc.editing { background: #000a; z-index: 95; }
+.tc.editing .tc-btn:not(.off) { opacity: 1; outline: 1px dashed #ffffff80; outline-offset: 4px; }
+.tc.editing .tc-btn.sel { outline: 2px solid var(--taxi); }
+.tc-edit { position: absolute; left: 50%; top: calc(10px + var(--safe-t)); transform: translateX(-50%); background: #111; color: #f4f1ea; padding: 8px 10px; display: grid; gap: 6px; min-width: min(560px, 70vw); box-shadow: inset 0 0 0 1px #ffffff33; }
+.tc-edit-tabs, .tc-edit-row { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; font-size: 13px; }
+.tc-edit button { font: 600 12px/1 var(--f-ui); color: #f4f1ea; background: none; border: 0; box-shadow: inset 0 0 0 1px #ffffff59; padding: 9px 12px; min-height: 36px; }
+.tc-edit button.on, .tc-edit button.primary { background: #f4f1ea; color: #111; }
+.tc-edit-row b { min-width: 48px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .tc-btn { transition: none; } }
+:root[data-motion="reduce"] .tc-btn { transition: none; }
+
+.t74-fs { position: fixed; top: calc(62px + var(--safe-t)); right: calc(16px + var(--safe-r)); z-index: 8; width: 36px; height: 30px; border: 0; background: #0e0e0e8c;
+  box-shadow: inset 0 0 0 1px #ffffff59; color: #f4f1ea; font-size: 15px; }
+:fullscreen .t74-fs, .t74-fs:fullscreen { display: none; }
+.t74-rotate { position: fixed; inset: 0; z-index: 200; display: none; place-items: center; align-content: center; background: #111; color: #f4f1ea;
+  font: 600 18px/1.3 var(--f-ui); text-align: center; padding: 24px; }
+.t74-rotate small { font-weight: 400; font-size: 13px; opacity: .7; }
+@media (orientation: portrait) and (pointer: coarse) { .t74-rotate { display: grid; } }
