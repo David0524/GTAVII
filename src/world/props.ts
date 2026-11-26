@@ -8,6 +8,7 @@
  */
 import type { BuildingRec, ChunkData } from '../shared/chunkFormat';
 import type { HeightFn, MeshArrays } from './meshBuilder';
+import { floorHeight, bayWidth, sillFrac } from '../shared/facade';
 
 type RGB = [number, number, number];
 class Geo {
@@ -82,7 +83,9 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
     const outer = b.rings[0]; const n = outer.length / 2;
     let gs = 0; for (let k = 0; k < n; k++) gs += hf(outer[2 * k], outer[2 * k + 1]);
     const gAvg = gs / n, top = gAvg + b.height;
-    const floorH = b.floors > 0 ? Math.min(5.6, Math.max(2.9, b.height / b.floors)) : 3.5;
+    const floorH = floorHeight(b.height, b.minHeight, b.floors);
+    // u along the outer ring at each vertex (the facade shader's uv.x; edges shorter than 1 mm add nothing there either)
+    const along: number[] = [0]; for (let k = 0; k < n; k++) { const j = (k + 1) % n; const L = Math.hypot(outer[2 * j] - outer[2 * k], outer[2 * j + 1] - outer[2 * k + 1]); along.push(along[k] + (L < 1e-3 ? 0 : L)); }
     let cx = 0, cz = 0; for (let k = 0; k < n; k++) { cx += outer[2 * k]; cz += outer[2 * k + 1]; } cx /= n; cz /= n;
     const area = Math.abs(outer.reduce((a, _v, i) => (i % 2 ? a : a + outer[i] * outer[(i + 3) % outer.length] - outer[(i + 2) % outer.length] * outer[i + 1]), 0)) / 2;
 
@@ -136,13 +139,16 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
         }
       }
       g.cat = 'ac unit';
-      // AC units on the facade window grid (same bays as FacadeMaterial)
-      const bay = style === 1 ? 2.6 : style === 2 || style === 3 ? 3.3 : style === 6 ? 1.9 : 2.45;
+      // AC units seated in real window cells: the shader's grid (u along the whole ring, bays of bayWidth,
+      // floors of floorH from the building's mean ground), resting on the sill, in grey-beige enamel
+      const bay = bayWidth(style), sill = sillFrac(style);
       if (style !== 5 && b.year < 1974) {
-        for (let f = 1; f < Math.min(b.floors, 14); f++) for (let i = 0; (i + 0.5) * bay < L; i++) {
+        const i0 = Math.ceil(along[k] / bay - 0.5), i1 = Math.floor((along[k] + L) / bay - 0.5);
+        for (let f = 1; f < Math.min(b.floors, 14); f++) for (let i = i0; i <= i1; i++) {
           if (rand(b.id * 31 + k, f * 97 + i) > 0.16) continue;
-          const s = (i + 0.5) * bay, sx = x0 + ux * s + wx * 0.3, sz = z0 + uz * s + wz * 0.3;
-          D(sx, sz, 'ac unit').box(sx, gAvg + f * floorH + floorH * 0.33, sz, 0.32, 0.22, 0.3, uxs, uzs, [0.42, 0.4, 0.36], true);
+          const s = (i + 0.5) * bay - along[k]; if (s < 0.6 || s > L - 0.6) continue; // whole unit on this wall
+          const sx = x0 + ux * s + wx * 0.24, sz = z0 + uz * s + wz * 0.24;
+          D(sx, sz, 'ac unit').box(sx, gAvg + (f + sill) * floorH + 0.2, sz, 0.3, 0.2, 0.26, uxs, uzs, [0.22, 0.21, 0.19], true);
         }
       }
       g.cat = 'awning';

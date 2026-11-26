@@ -327,6 +327,58 @@ for (const r of RESTORED_BUILDINGS) {
   log(`no-floating pass: ${lowered} raised parts lowered onto their real support`);
 }
 
+// Overlap pass (user report 2026-11-26, iPhone: "the building is weird"). Footprints from different sources
+// can overlap in volume (758 pairs): both drew walls and window grids in the same place, and the grids fought.
+// Taller buildings win: each lower building that a taller one covers from its base up is clipped by it.
+// Exact duplicates vanish; partial overlaps leave the lower building's real remainder.
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  const add = (k: number) => { const bb = bbox(buildings[k].poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } };
+  buildings.forEach((_b, k) => add(k));
+  const order = buildings.map((_b, k) => k).sort((a, b) => buildings[b].height - buildings[a].height || polyArea(buildings[b].poly) - polyArea(buildings[a].poly));
+  const rank = new Map(order.map((k, r) => [k, r]));
+  let clipped = 0, removed = 0, pieces = 0; const drop = new Set<number>(); const extra: Bldg[] = [];
+  for (const k of order) {
+    const b = buildings[k]; const bb = bbox(b.poly); const cutters: Poly[] = []; const seen = new Set<number>();
+    for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) for (const o of index.get(`${gx},${gz}`) ?? []) {
+      if (o === k || seen.has(o) || drop.has(o) || rank.get(o)! > rank.get(k)!) continue; seen.add(o);
+      const a = buildings[o];
+      if (a.minHeight > b.minHeight + 1) continue; // a starts above b's base: clipping would leave a hole under it
+      if (Math.min(a.height, b.height) <= Math.max(a.minHeight, b.minHeight) + 1) continue; // no vertical overlap
+      const ob = bbox(a.poly); if (ob.maxX <= bb.minX || ob.minX >= bb.maxX || ob.maxZ <= bb.minZ || ob.minZ >= bb.maxZ) continue;
+      cutters.push(a.poly);
+    }
+    if (!cutters.length) continue;
+    const before = polyArea(b.poly);
+    const rest = difference([b.poly], cutters).map((q) => cleanPoly(q)).filter((q): q is Poly => !!q && polyArea(q) >= 4).sort((x, y) => polyArea(y) - polyArea(x));
+    const after = rest.reduce((sum, q) => sum + polyArea(q), 0);
+    if (after > before - 0.5) continue; // touching only
+    if (!rest.length) { drop.add(k); removed++; continue; }
+    clipped++; b.poly = rest[0];
+    for (const q of rest.slice(1)) { extra.push({ ...b, id: nextId++, poly: q, name: undefined, flags: b.flags & ~BuildingFlag.Hero }); pieces++; }
+  }
+  const kept = buildings.filter((_b, k) => !drop.has(k));
+  buildings.length = 0; buildings.push(...kept, ...extra);
+  log(`overlap pass: ${clipped} buildings clipped by taller neighbours, ${removed} duplicates removed, ${pieces} split pieces`);
+}
+
+// Floor sanity (same report: some windows looked ~3 m wide). Floor-to-floor height comes from height / floors,
+// but source floor counts are sometimes wrong for the modelled height. Outside period-plausible ranges per
+// style, floors are re-derived from the height and the style's typical floor-to-floor.
+{
+  const TYPICAL: Record<number, [number, number, number]> = { // [min, typical, max] metres
+    0: [2.8, 3.5, 4.6], 1: [2.8, 3.2, 3.8], 2: [3.4, 4.4, 5.4], 3: [3.2, 4.0, 5.0], 4: [3.2, 3.8, 4.6], 5: [3.2, 3.7, 4.4],
+    6: [2.7, 3.0, 3.8], 7: [3.0, 4.0, 5.5], 8: [3.0, 5.0, 9.0], 9: [3.3, 3.75, 4.2], 10: [3.3, 4.0, 4.8], 11: [3.2, 3.6, 4.2],
+  };
+  let fixed = 0;
+  for (const b of buildings) {
+    const [lo, typ, hi] = TYPICAL[b.style] ?? TYPICAL[0];
+    const h = b.height - b.minHeight; const f = b.floors > 0 ? h / b.floors : 0;
+    if (f < lo || f > hi) { b.floors = Math.max(1, Math.round(h / typ)); fixed++; }
+  }
+  log(`floor sanity: ${fixed} buildings re-derived floors from height (period floor-to-floor by style)`);
+}
+
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
 const DRIVABLE = new Set(['motorway', 'motorway_link', 'trunk', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'residential', 'unclassified', 'living_street']);
 interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean }

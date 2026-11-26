@@ -9,6 +9,7 @@ import earcut from 'earcut';
 import { type ChunkData, type BuildingRec, GroundKind, Style, BuildingFlag } from '../shared/chunkFormat';
 import { buildingCondition } from '../shared/condition';
 import { buildProps } from './props';
+import { floorHeight } from '../shared/facade';
 
 export const SIDEWALK_H = 0.15;
 /** Ground height in chunk-local coordinates (road surface). */
@@ -116,7 +117,7 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
   const top = gAvg + Math.max(rec.height, rec.minHeight + 0.5);
   const bottom = rec.minHeight > 0 ? gAvg + rec.minHeight : gMin - 0.6; // sink into the ground: no light leaks at the sidewalk
   // Facade record: real floor-to-floor height from the data (clamped to period-plausible values).
-  const floorH = rec.floors > 0 ? Math.min(5.6, Math.max(2.9, rec.height / Math.max(1, rec.floors))) : 3.5;
+  const floorH = floorHeight(rec.height, rec.minHeight, rec.floors);
   const seed = ((Math.imul(rec.id, 2654435761) >>> 0) % 100000) / 100000;
   b.curFac = [rec.style, cond, floorH, seed];
   for (let r = 0; r < rec.rings.length; r++) {
