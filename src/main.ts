@@ -172,6 +172,7 @@ async function main() {
   // replace the placeholder answers below as they merge (health, inventory, heat, objectives, shops...).
   const locator = new Locator(streets);
   let loc = { district: '', crossing: '' }, locT = 0, frozen = false;
+  let objective: { text: string } | null = null;
   const uiEvents = new Emitter<UiEvents>();
   const LEAD_STYLE: Record<string, { colour: string; tagline: string }> = {
     'char.teddy_arce': { colour: '#c79a3c', tagline: 'Night desk, Hotel Corwin' }, 'char.delphine_moore': { colour: '#b2302a', tagline: 'Eighth Avenue' }, 'char.nick_varelas': { colour: '#2e4a6b', tagline: 'Varelas & Co., furs' },
@@ -185,7 +186,7 @@ async function main() {
     health: () => ({ hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 }),
     inventory: (lead = party.activeId) => { const l = party.leads.get(lead) ?? party.active; return { lead: l.id, cash: l.money, savings: 0, outfit: { name: 'Everyday clothes', hides: 'jacket', description: '' }, items: [] }; },
     heat: () => ({ phase: 'none', cones: [], units: [] }),
-    objective: () => null,
+    objective: () => objective,
     location: () => loc,
     shop: () => null, newspaper: () => null, businesses: () => [], completion: () => [], achievements: () => [],
     stats: () => [{ group: 'Time', label: 'Play time', value: `${Math.floor(performance.now() / 60000)} min this session` }],
@@ -200,6 +201,12 @@ async function main() {
     on: (k, cb) => uiEvents.on(k, cb),
     camera: director, scene,
     freezePlayer: (f) => { frozen = f; },
+    playerVisible: (v) => { body.object.visible = v; },
+    commit: (cue, data) => {
+      // Phase 7's mission runtime takes these over; until then the objective cue sets the HUD line.
+      const d = data as { text?: string } | undefined;
+      if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
+    },
     prompts: () => (mode === 'onfoot' ? [['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']]),
     newGame: () => { const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
     continueGame: async () => {

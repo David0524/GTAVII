@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m01_prow",
+  "context": "M1 o1. Flatiron north prow, dusk. Mayhew arrives from Fifth Ave.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Look at you. Same corner. You used to stand right there like a fire hydrant."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "You said it was important, Carl. I start at eleven."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "wry",
+      "text": "Eleven. Behind glass. In a hotel full of old men. That's a career?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "It's a job. You know anybody else hiring guys like me?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Walk with me. Like old times. Broadway, nice and slow, uptown."
+    }
+  ]
+}

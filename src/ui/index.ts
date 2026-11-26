@@ -25,6 +25,8 @@ import { PROMPT_CSS } from './Prompts';
 import { uiSectionProvider } from './save/uiSection';
 import { iosEvictionRisk } from '../save/SaveManager';
 import './ui.css';
+import { CinematicPlayer, type PlayOptions } from '../cinematics/CinematicPlayer';
+import { hasCutscene } from '../cinematics/content';
 
 export type UiState = 'title' | 'play' | 'paused' | 'cutscene';
 export interface UiOptions { model: MapModel; heroes?: { name: string; x: number; z: number }[]; lab?: boolean; title?: boolean }
@@ -41,6 +43,9 @@ export interface UiRoot {
   /** Title screen: city streaming progress 0..1, then ready with the latest save's label. */
   titleProgress(p: number): void;
   titleReady(continueLabel: string | null): void;
+  /** Play an in-engine cutscene (content/cutscenes/<id>.json); resolves when it ends or is skipped. */
+  playCutscene(id: string, opts?: PlayOptions): Promise<boolean>;
+  readonly cinema: CinematicPlayer;
   /** Persisted extras for the save section. */
   readonly extras: { newsRead: Set<string>; achievements: Record<string, string>; cutscenesSeen: Set<string> };
 }
@@ -98,8 +103,17 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   ]);
 
   let title: TitleScreen | null = null;
+  const cinema = new CinematicPlayer(host);
   const root: UiRoot = {
-    hud, hub, model: o.model, mapScreen, title: null, toast, extras,
+    hud, hub, model: o.model, mapScreen, title: null, toast, extras, cinema,
+    playCutscene(id, opts = {}) {
+      return new Promise<boolean>((res) => {
+        const prev = root.state === 'cutscene' ? 'play' : root.state;
+        root.state = 'cutscene'; hub.hide(); hud.setVisible(false);
+        void cinema.play(id, { ...opts, onEnd: (skipped) => { extras.cutscenesSeen.add(id); root.state = prev === 'title' ? 'play' : prev; opts.onEnd?.(skipped); res(skipped); } })
+          .catch((e) => { console.error(e); root.state = prev; res(true); });
+      });
+    },
     state: o.title ? 'title' : 'play',
     register: (n, f) => { screens.set(n, f); },
     show(name, params = {}) {
@@ -112,6 +126,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
     titleProgress: (p) => title?.progress(p),
     titleReady: (l) => title?.setReady(l),
     update(dt) {
+      if (root.state === 'cutscene') { cinema.update(dt); hud.setVisible(false); return; }
       if (root.state === 'title') { if (hub.open) hub.update(dt); else title?.update(dt); hud.setVisible(false); return; }
       if (hub.open) hub.update(dt);
       else if (root.state === 'paused') root.state = 'play';
@@ -136,6 +151,8 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
       else await host.newGame?.();
       savesTab.canSave = true;
       title!.close(); root.state = 'play';
+      // New game opens on M1's scene, which blends straight into play on the spawn shot.
+      if (c.kind === 'new' && hasCutscene('m01_opening')) void root.playCutscene('m01_opening');
     });
     root.title = title;
   }
@@ -154,6 +171,8 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   window.addEventListener('gamepadconnected', () => { toast(`Controller connected · ${input.pad.family === 'playstation' ? 'PlayStation' : input.pad.family === 'xbox' ? 'Xbox' : 'Gamepad'} layout`); input.rumble(0.4, 0.6, 180); });
   window.addEventListener('gamepaddisconnected', () => toast('Controller disconnected'));
   if (host.saves) iosSavesNote(host.saves);
+  const play = new URLSearchParams(location.search).get('play');
+  if (play && !o.title) setTimeout(() => void root.playCutscene(play, { paused: new URLSearchParams(location.search).has('cinepause') }), 0);
   return root;
 }
 

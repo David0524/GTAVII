@@ -134,8 +134,11 @@ export interface UiHost {
   scene?: import('three').Scene;
   /** Stop and resume player control (cutscenes). */
   freezePlayer?(frozen: boolean): void;
-  /** Engine performs the state change on a presentation's 'commit' cue (teleport, switch, time skip). */
+  /** Engine performs the state change on a presentation's 'commit' cue (teleport, switch, time skip).
+   *  Cinematics also forwards timeline cues here ('audio:<name>' for the audio stream, 'mission.*'). */
   commit?(cue: string, data?: unknown): void;
+  /** Hide the player's own body while a cutscene blocks the lead with its own actor. */
+  playerVisible?(visible: boolean): void;
   /** Front-end hooks the engine implements: start a new game / continue the latest save. */
   newGame?(): void | Promise<void>;
   continueGame?(): Promise<boolean>;
