@@ -21,15 +21,37 @@ export class Rng {
 }
 
 // ---------------------------------------------------------------- mesh builder
+/**
+ * Condition grade recipes (shared scale, src/shared/condition.ts: 0 derelict .. 4 pristine). One building reads the
+ * same inside and out. Applied at vertex emit (colour), to lights (output, failing tubes) and as stain decals in rooms.
+ */
+export const GRADE = [
+  { name: 'derelict', wear: 2.4, nicotine: 0.42, value: 0.74, sat: 0.72, lamp: 0.55, dying: 0.45, stains: 6 },
+  { name: 'worn', wear: 1.7, nicotine: 0.28, value: 0.87, sat: 0.84, lamp: 0.82, dying: 0.14, stains: 3 },
+  { name: 'lived_in', wear: 1.0, nicotine: 0.08, value: 1.0, sat: 1.0, lamp: 1.0, dying: 0.03, stains: 0.6 },
+  { name: 'kept', wear: 0.55, nicotine: 0, value: 1.03, sat: 1.05, lamp: 1.1, dying: 0, stains: 0 },
+  { name: 'pristine', wear: 0.2, nicotine: 0, value: 1.06, sat: 1.1, lamp: 1.25, dying: 0, stains: 0 },
+] as const;
+const NICOTINE_RGB = [0.72, 0.6, 0.36];
+/** Patterns that take nicotine/smoke yellowing (painted and papered surfaces, ceilings). */
+const YELLOWS = new Set([0, 6, 8, 9, 10, 12]);
 const lin = (v: number) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
 export class MeshB {
   p: number[] = []; n: number[] = []; c: number[] = []; uv: number[] = []; pat: number[] = []; idx: number[] = [];
+  grade = 2;
   get vcount() { return this.p.length / 3; }
   v(x: number, y: number, z: number, nx: number, ny: number, nz: number, u: number, w: number, m: Mat, shade = 1) {
     this.p.push(x, y, z); this.n.push(nx, ny, nz); this.uv.push(u, w);
     // albedo authored in sRGB; stored linear (emissive colours too)
-    this.c.push(lin(m.c[0]) * shade, lin(m.c[1]) * shade, lin(m.c[2]) * shade);
-    this.pat.push(m.pat, m.p ?? 0, m.wear ?? 0.35, m.e ?? 0);
+    const g = GRADE[this.grade];
+    let r = m.c[0], gg = m.c[1], b = m.c[2];
+    if ((m.e ?? 0) === 0) {
+      if (YELLOWS.has(m.pat) && g.nicotine > 0) { r += (NICOTINE_RGB[0] * (r + gg + b) / 1.68 - r) * g.nicotine; gg += (NICOTINE_RGB[1] * (r + gg + b) / 1.68 - gg) * g.nicotine; b += (NICOTINE_RGB[2] * (r + gg + b) / 1.68 - b) * g.nicotine; }
+      const l = 0.3 * r + 0.59 * gg + 0.11 * b;
+      r = (l + (r - l) * g.sat) * g.value; gg = (l + (gg - l) * g.sat) * g.value; b = (l + (b - l) * g.sat) * g.value;
+    }
+    this.c.push(lin(Math.max(0, r)) * shade, lin(Math.max(0, gg)) * shade, lin(Math.max(0, b)) * shade);
+    this.pat.push(m.pat, m.p ?? 0, Math.min(1, (m.wear ?? 0.35) * g.wear), m.e ?? 0);
   }
   tri(a: number, b: number, c: number) { this.idx.push(a, b, c); }
   /**
@@ -81,6 +103,9 @@ export class Kit {
   /** occluder boxes for baking shadows/AO (local AABBs) */
   readonly occluders: [number, number, number, number, number, number][] = [];
   cur = 0;
+  /** condition grade 0..4 for everything emitted after setCondition */
+  grade = 2;
+  setCondition(g: number) { this.grade = Math.max(0, Math.min(4, Math.round(g))); for (const c of this.cells) c.opaque.grade = c.glass.grade = this.grade; }
   /** tessellation edge (m) for large surfaces */
   tess: number;
   /** mobile Low: props simplify (fewer cylinder segments, goods as blocks) */
@@ -94,7 +119,8 @@ export class Kit {
   // ------------------------------------------------------------ cells
   cell(name: string, box: CellOut['box'], level = 0, outdoor = false): number {
     const id = this.cells.length;
-    this.cells.push({ id, name, level, box, opaque: new MeshB(), glass: new MeshB(), outdoor });
+    const opaque = new MeshB(), glass = new MeshB(); opaque.grade = glass.grade = this.grade;
+    this.cells.push({ id, name, level, box, opaque, glass, outdoor });
     this.cur = id; return id;
   }
   use(c: number) { this.cur = c; return this; }
@@ -223,6 +249,28 @@ export class Kit {
     ops: { z0?: Opening[]; x1?: Opening[]; z1?: Opening[]; x0?: Opening[] } = {}, o: { collide?: boolean; skip?: ('z0' | 'x1' | 'z1' | 'x0')[] } = {}) {
     if (m.floor) this.floor(x0, z0, x1, z1, y0, m.floor);
     if (m.ceiling) this.ceiling(x0, z0, x1, z1, y1, m.ceiling);
+    // structural cues per grade: derelict debris and fallen plaster; kept/pristine crown moulding + picture rail
+    if (this.grade === 0) {
+      const n = Math.round(((x1 - x0) * (z1 - z0)) / 6);
+      for (let q = 0; q < n; q++) { const x = this.rng.range(x0 + 0.3, x1 - 0.3), z = this.rng.range(z0 + 0.3, z1 - 0.3), sz = this.rng.range(0.1, 0.45); this.box(x - sz, y0, z - sz * 0.7, x + sz, y0 + this.rng.range(0.03, 0.18), z + sz * 0.7, { c: [0.5, 0.46, 0.4], pat: 23, p: 0, wear: 1 } as Mat, { occlude: false }); }
+      for (let q = 0; q < Math.max(1, n / 2); q++) { const x = this.rng.range(x0 + 0.5, x1 - 0.5), z = this.rng.range(z0 + 0.5, z1 - 0.5), sz = this.rng.range(0.3, 0.8); this.m.quad([x - sz, y1 - 0.003, z - sz], [2 * sz, 0, 0], [0, 0, 2 * sz], [0, -1, 0], { c: [0.25, 0.2, 0.16], pat: 10, p: 0, wear: 1 } as Mat, 99); }
+    } else if (this.grade >= 3 && y1 - y0 > 2.6) {
+      const mould = this.grade >= 4 ? ({ c: [0.86, 0.8, 0.66], pat: 0, p: 0, wear: 0.1 } as Mat) : ({ c: [0.78, 0.73, 0.62], pat: 0, p: 0, wear: 0.2 } as Mat);
+      const t = this.grade >= 4 ? 0.14 : 0.08;
+      for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, 1], [x1, z0, x1, z1, -1, 0], [x1, z1, x0, z1, 0, -1], [x0, z1, x0, z0, 1, 0]] as number[][]) {
+        const L = Math.hypot(bx - ax, bz - az), dx = (bx - ax) / L, dz = (bz - az) / L;
+        this.m.quad([ax + nx * t, y1 - t * 1.6, az + nz * t], [dx * L, 0, dz * L], [0, t * 1.6, 0], [nx, 0, nz], mould, 99);
+        this.m.quad([ax, y1 - t * 1.6, az], [dx * L, 0, dz * L], [nx * t, 0, nz * t], [0, -1, 0], mould, 99);
+        if (this.grade >= 4) this.m.quad([ax + nx * 0.015, y1 - 0.75, az + nz * 0.015], [dx * L, 0, dz * L], [0, 0.04, 0], [nx, 0, nz], { c: [0.7, 0.55, 0.3], pat: 13, p: 1, wear: 0.1 } as Mat, 99);
+      }
+    }
+    // water stains and soot blooms on ceilings and upper walls (worn and derelict grades)
+    const st = GRADE[this.grade].stains * ((x1 - x0) * (z1 - z0)) / 20;
+    for (let q = 0; q < Math.round(st); q++) {
+      const cx = this.rng.range(x0 + 0.3, x1 - 0.3), cz = this.rng.range(z0 + 0.3, z1 - 0.3), rr = this.rng.range(0.25, 0.9);
+      const stain = { c: [0.42, 0.33, 0.2] as [number, number, number], pat: 23, p: 0, wear: 0.9 } as Mat;
+      for (let b = 0; b < 3; b++) { const ox = this.rng.range(-rr, rr) * 0.5, oz = this.rng.range(-rr, rr) * 0.5, s = rr * this.rng.range(0.4, 0.8); this.m.quad([cx + ox - s, y1 - 0.004 - b * 0.001, cz + oz - s], [2 * s, 0, 0], [0, 0, 2 * s], [0, -1, 0], stain, 99); }
+    }
     const sk = o.skip ?? [], col = o.collide;
     // Walls run counter-clockwise in x/z (z0: +x, x1: +z, z1: -x, x0: -z), so side = 1 faces inward on every edge.
     // Openings are measured from each edge's start: z0 from x0, x1 from z0, z1 from x1, x0 from z1.
@@ -291,7 +339,9 @@ export class Kit {
   collider(c: ColliderOut) { this.colliders.push(c); }
 
   light(x: number, y: number, z: number, color: [number, number, number], intensity: number, kind: LightOut['kind'] = 'bulb', flicker?: number) {
-    this.lights.push({ x, y, z, color, intensity, kind, cell: this.cur, flicker });
+    const g = GRADE[this.grade];
+    const dying = kind !== 'neon' && kind !== 'window' && this.rng.chance(g.dying);
+    this.lights.push({ x, y, z, color, intensity: intensity * g.lamp * (dying ? 0.35 : 1), kind, cell: this.cur, flicker: dying ? 1 : flicker });
   }
   slot(role: string, x: number, y: number, z: number, yaw: number, hours?: [string, string]) {
     this.slots.push({ id: `${this.id}:${role}:${this.slots.filter((s) => s.role === role).length}`, role, x, y, z, yaw, hours });

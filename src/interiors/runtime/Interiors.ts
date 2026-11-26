@@ -190,7 +190,7 @@ export class Interiors {
       const { b, u } = e;
       const msg: WorkerReq = {
         seq, chunkUrl: new URL(`${this.base}chunks/${b.i}_${b.j}.bin`, location.href).href,
-        req: { unit: u, building: { id: b.id, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: b.fh, top: b.top, gAvg: b.gAvg, district: b.district, roof: b.roof, address: b.address }, quality: this.opts.quality, street: this.index.streets[u.street] ?? '' },
+        req: { unit: u, building: { id: b.id, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: b.fh, top: b.top, gAvg: b.gAvg, district: b.district, roof: b.roof, address: b.address, cond: b.cond }, quality: this.opts.quality, street: this.index.streets[u.street] ?? '' },
       };
       this.workers[k].postMessage(msg);
     }

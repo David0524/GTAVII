@@ -12,7 +12,7 @@ import { KINDS, type InteriorKind } from '../catalog';
 import { facadeOpenings, groundCeiling, unitEra } from '../facade';
 import { shipLadder } from './vertical';
 
-export interface BuildingInfo { id: number; use: number; style: number; year: number; floors: number; fh: number; top: number; gAvg: number; district: string; roof: boolean; address?: string }
+export interface BuildingInfo { id: number; use: number; style: number; year: number; floors: number; fh: number; top: number; gAvg: number; district: string; roof: boolean; address?: string; cond?: number }
 export interface GenCtx {
   k: Kit;
   unit: UnitRec;
@@ -30,6 +30,8 @@ export interface GenCtx {
   /** open now (affects lights on/off baked as lamp state, shutters): handled at runtime; kept for gallery */
   hero?: string;
 }
+/** Content overrides of the shared grade for heroes (homes.json grades: Teddy's Corwin worn; Delphine kept; Nick pristine). */
+export const HERO_COND: Record<string, number> = { 'interior.corwin_lobby': 1 };
 export const WALL_T = 0.3; // facade wall thickness (engine facade quad at z=0)
 export const PARTY = 0.12; // party-wall inset
 
@@ -37,6 +39,7 @@ export function makeCtx(k: Kit, unit: UnitRec, b: BuildingInfo, quality: GenCtx[
   const r = new Rng(unit.seed ^ 0x51ed);
   const H = groundCeiling(b.fh);
   const era = unitEra(unit, b.year);
+  k.setCondition(unit.kind === 'hero' && HERO_COND[unit.hero ?? ''] !== undefined ? HERO_COND[unit.hero ?? '']! : b.cond ?? 2);
   return { k, unit, b, r, quality, ring, street, H, era };
 }
 
@@ -52,9 +55,11 @@ export function wallMatFor(c: GenCtx, kind: InteriorKind): Mat {
     default: return r.pick([M.plasterCream, M.plasterGreen, M.brickPainted, M.panelingLight, M.plasterYellow]);
   }
 }
-export function ceilingMatFor(c: GenCtx): Mat { return c.era === 'modern' ? (c.r.chance(0.6) ? M.acoustic : M.ceilingPlaster) : c.era === 'deco' ? M.ceilingPlaster : M.tin; }
+export function ceilingMatFor(c: GenCtx): Mat { if (c.k.grade >= 4) return c.era === 'modern' ? M.ceilingPlaster : M.tin; return c.era === 'modern' ? (c.r.chance(0.6) ? M.acoustic : M.ceilingPlaster) : c.era === 'deco' ? M.ceilingPlaster : M.tin; }
 export function floorMatFor(c: GenCtx, kind: InteriorKind): Mat {
   const r = c.r;
+  if (c.k.grade >= 4 && r.chance(0.7)) return r.pick([M.terrazzo, M.marble, M.carpetRed]);
+  if (c.k.grade <= 1 && r.chance(0.6)) return r.pick([M.planksWorn, M.lino, M.linoGreen, M.concrete]);
   switch (kind) {
     case 'diner': return r.pick([M.checkerBW, M.checkerRed, M.terrazzo, M.lino]);
     case 'coffee_shop': return r.pick([M.hexWhite, M.terrazzo, M.lino, M.checkerBW]);

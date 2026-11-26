@@ -19,6 +19,7 @@ import { decodeTerrain } from '../../src/shared/terrain';
 import { districtAt, type District } from '../../src/interiors/grid';
 import { KINDS, shopWeights, type InteriorKind, type ShopKind, type CoreKind } from '../../src/interiors/catalog';
 import { execSync } from 'node:child_process';
+import { buildingCondition } from '../../src/shared/condition';
 import { normaliseStreet } from '../../src/interiors/grid';
 import { HERO_PLACEMENT } from '../../src/interiors/gen/heroes';
 import { encodeIndex, isCoreKind, type BuildingIdx, type IndexFile, type UnitRec } from '../../src/interiors/indexFormat';
@@ -340,7 +341,7 @@ for (const b of blds) {
   if (!roof && b.floors <= 3) { const ru = units.find((u) => !isCoreKind(u.kind) && !(KINDS as any)[u.kind]?.upstairs && u.d > 11 && u.w > 3.6); if (ru) { ru.roofAccess = true; roof = true; } }
   const addr = audit.find((a) => a.x >= b.minX && a.x <= b.maxX && a.z >= b.minZ && a.z <= b.maxZ && inRing(b.ring, a.x, a.z))?.address;
   out.push({
-    id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: +fh.toFixed(3), top: +top.toFixed(3), gAvg: +gAvg.toFixed(3), district, roof, units,
+    id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: +fh.toFixed(3), top: +top.toFixed(3), gAvg: +gAvg.toFixed(3), district, cond: buildingCondition({ id: b.id, year: b.year, style: b.style, use: b.use, floors: b.floors, flags: b.flags, avenueDistance: edges.some((e) => e.avenue) ? 10 : 60, x: cx }), roof, units,
     frontage: edges.map((e) => [+e.ax.toFixed(2), +e.az.toFixed(2), +e.bx.toFixed(2), +e.bz.toFixed(2), e.street]), ...(addr ? { address: addr } : {}),
   });
   if (inPlay) {

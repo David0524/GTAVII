@@ -97,6 +97,17 @@ async function main() {
         await page.screenshot({ path: path.join(dir, `${n++}_${m.name.replace(/\W+/g, '_')}.png`) }); console.log(m.name, JSON.stringify(st));
       }
     });
+  } else if (mode === 'grades') {
+    // grades <kind> <n>: the same interior at condition 0..4
+    await withPage(async (page) => {
+      await page.goto(url(`gallery=${a}&n=${b ?? 0}`));
+      await page.waitForFunction(() => (window as any).__INT?.ready, null, { timeout: 180_000 });
+      for (let g = 0; g <= 4; g++) {
+        await page.evaluate(([k, i, gg]) => (window as any).__INT.show(k, i, 'door', gg), [a, +(b ?? 0), g] as [string, number, number]);
+        await page.waitForTimeout(300);
+        const f = path.join(ROOT, `shots/interiors/grades/${a}_${b ?? 0}_g${g}.png`); fs.mkdirSync(path.dirname(f), { recursive: true }); await page.screenshot({ path: f });
+      }
+    });
   } else if (mode === 'url') {
     await withPage(async (page) => { const r = await shot(page, a, path.resolve(ROOT, b)); console.log(r); });
   }

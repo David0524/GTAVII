@@ -77,7 +77,7 @@ export async function runInteriorsTest() {
     const fly = new FlyCamera(camera, new Input(renderer.domElement));
     let label = '';
     /** Show seeded interior n (0..29) of `kind`; picks are spread evenly across the city's units of that kind. */
-    const show = async (kind: string, n: number, view: 'door' | 'back' | 'cam' = 'door') => {
+    const show = async (kind: string, n: number, view: 'door' | 'back' | 'cam' = 'door', cond?: number) => {
       const list: { b: BuildingIdx; u: UnitRec }[] = [];
       for (const { b, u } of interiors.allUnits()) if (u.kind === kind) list.push({ b, u });
       const step = Math.max(1, Math.floor(list.length / 30));
@@ -89,11 +89,11 @@ export async function runInteriorsTest() {
       const ring = rec ? Array.from(rec.rings[0], (v, k) => v + ((k % 2 ? pick.b.j : pick.b.i) + 0.5) * 200) : null;
       const t0 = performance.now();
       // built in the unit's local frame; rendered at the origin (frame ignored)
-      const built = buildInterior({ unit: pick.u, building: { ...pick.b }, quality: quality.name, ring, street: interiors.index.streets[pick.u.street] ?? '' });
+      const built = buildInterior({ unit: pick.u, building: { ...pick.b, ...(cond !== undefined ? { cond } : {}) }, quality: quality.name, ring, street: interiors.index.streets[pick.u.street] ?? '' });
       const ms = performance.now() - t0;
       let tris = 0;
       for (const c of built.cells) for (const [m, mt] of [[c.opaque, mat], [c.glass, glass]] as [MeshArrays | null, THREE.Material][]) if (m) { const me = new THREE.Mesh(geom(m), mt); me.userData.interior = look; holder.add(me); tris += m.index.length / 3; }
-      for (const d of built.doors) { if (d.street) continue; const g = new THREE.Group(); g.position.set(...d.hinge); g.rotation.y = d.yaw + d.swing * 1.5; const me = new THREE.Mesh(geom(d.mesh), mat); me.userData.interior = look; g.add(me); holder.add(g); }
+      for (const d of built.doors) { if (d.street || Math.hypot(d.hinge[0] - pick.u.door.t, d.hinge[2] - 1.5) < 2.5) continue; const g = new THREE.Group(); g.position.set(...d.hinge); g.rotation.y = d.yaw + d.swing * 1.5; const me = new THREE.Mesh(geom(d.mesh), mat); me.userData.interior = look; g.add(me); holder.add(g); }
       const street = new THREE.Mesh(new THREE.PlaneGeometry(80, 30).rotateX(-Math.PI / 2), streetMat); street.position.set(pick.u.w / 2, -0.05, -15); holder.add(street);
       const opp = new THREE.Mesh(new THREE.BoxGeometry(80, 25, 2), oppMat); opp.position.set(pick.u.w / 2, 12, -22); holder.add(opp);
       const cp = params.get('cam')?.split(',').map(Number);
