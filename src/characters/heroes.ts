@@ -107,7 +107,7 @@ function nick(): CharacterBuild {
   const act2 = (): Outfit => {
     const o = blank(31, 1, 51);
     const s = suit('#1e2638');
-    o.top = { kind: 'dressShirt', sleeve: 1.97, collar: 'spread', collarPoint: 0.11, open: 0, tucked: true, fit: 0.016, fabric: fab('#e8e0cc', { fade: 0.02, sheen: 0.15 }) };
+    o.top = { kind: 'dressShirt', sleeve: 1.97, collar: 'spread', collarPoint: 0.11, open: 0, tucked: true, fit: 0.008, fabric: fab('#e8e0cc', { fade: 0.02, sheen: 0.15 }) };
     o.bottom = { kind: 'trousers', rise: 0.01, flare: 0.02, length: 2.07, fit: 0.02, fabric: s, belt: fab(LEATHER.oxblood, { rough: 0.4, sheen: 0.3 }) };
     o.outer = { kind: 'suitJacket', length: 0.28, lapel: 0.115, open: 0, sleeve: 1.97, belted: false, fabric: s };
     o.tie = { ...fab(CLOTH.tieMaroon, { pattern: 'paisley', scale: 0.04, color2: CLOTH.mustard, sheen: 0.5, rough: 0.45 }), width: 0.125 };

@@ -39,6 +39,10 @@ export interface PieceSpec {
   slot?: number;
   /** Replacement base positions (e.g. a smoothed shoe last) for some compact vertices. */
   basePos?: Map<number, [number, number, number]>;
+  /** Replacement normals (offset direction) for vertices with a basePos. */
+  baseNormal?: Map<number, [number, number, number]>;
+  /** Replacement skin influences for some vertices (returns false to use the body's). */
+  skin?: (k: number, js: number[], ws: number[], w: number) => boolean;
 }
 
 /** Taubin λ|μ smoothing over the compact vertices of a surface region (no shrinkage). */
@@ -138,7 +142,9 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
     offset: (k) => topOff + (isArm(k) ? t.fit * 0.6 + smooth(0, 1.0, F.armS[k]) * 0.004 : t.fit * (0.5 + 0.5 * smooth(y.waist, y.chest, Y(k)))),
     sweat: sweatMask,
   });
-  if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => (mb.slot = 1, shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1), topOff + t.fit + 0.002, neckBack)));
+  // without a tie, a big 1970s collar is worn spread out over the jacket's lapels
+  const overLapel = !outfit.tie && !!outfit.outer && outfit.outer.lapel > 0;
+  if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => (mb.slot = 1, shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1) * (overLapel ? 1.15 : outfit.outer ? 0.5 : 0.85), topOff + t.fit + 0.002 + (overLapel ? 0.016 : 0), neckBack)));
   if (t.collar === 'mock') trims.push((mb) => (mb.slot = 1, neckBand(ctx, mb, t.fabric, topOff + 0.004, 0.05)));
 
   // ---- bottom ------------------------------------------------------------------------------------
@@ -155,9 +161,20 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
     });
   } else {
     const hemS = b.kind === 'shorts' ? b.length : b.length;
+    // Full-length trousers don't follow the foot: below the calf the leg becomes a straight tube
+    // continuing the shin, cut by a hem plane that sits low at the heel and breaks on the shoe's vamp.
+    const full = b.kind !== 'shorts' && b.length >= 2.0;
+    const tube = full ? trouserTube(ctx) : null;
+    const backY = 0.075 - (b.length - 2.0) * 0.28, frontY = backY + 0.038;
+    const hemField: Field = full ? (k) => {
+      if (!isLeg(k)) return isArm(k) || isHead(k) ? -1 : 1;
+      const q = tube!.pos.get(k); if (!q) return 1;
+      const fwd = tube!.fwd.get(k) ?? 0;
+      return (q[1] - (backY + (frontY - backY) * Math.max(0, fwd))) * 1.5;
+    } : legHem(hemS);
     pieces.push({
-      surface: 'helper-tights', fabric: b.fabric, hem: 0.005, hides: true, slot: 2,
-      fields: [below(waistTop), noArms, legHem(hemS)],
+      surface: 'helper-tights', fabric: b.fabric, hem: 0.005, hides: true, slot: 2, basePos: tube?.pos, baseNormal: tube?.nrm, skin: tube?.skin,
+      fields: [below(waistTop), noArms, hemField],
       offset: (k) => {
         const base = 0.006 + b.fit;
         if (!isLeg(k)) return base + (Y(k) < y.hip ? 0.004 : 0);
@@ -175,7 +192,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
 
   // ---- outer layer -------------------------------------------------------------------------------
   const o = outfit.outer;
-  if (o) addOuter(ctx, o, pieces, trims, { sleeve, noLegs, above, below, neckline, sweatMask, isArm, topOff: topOff + t.fit + 0.006, drape });
+  if (o) addOuter(ctx, o, pieces, trims, { sleeve, noLegs, above, below, neckline, sweatMask, isArm, topOff: topOff + t.fit * 0.75 + 0.003, drape });
 
   // ---- tie ---------------------------------------------------------------------------------------
   if (outfit.tie && !(o && o.open < 0.5 && o.lapel === 0)) trims.push((mb) => (mb.slot = 5, tie(ctx, mb, outfit.tie!, topOff + t.fit + 0.004)));
@@ -211,7 +228,7 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   pieces.push({
     surface: 'helper-tights', fabric: o.fabric, hem: thick, hides: true, slot: 3, basePos: h.drape, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
     fields: [h.neckline(0.02, 0.035), h.sleeve(sleeveS), h.above(Math.max(y.crotch + 0.04, Math.min(hemY, y.waist - 0.04))), h.noLegs, front],
-    offset: (k) => off + (h.isArm(k) ? 0.002 + 0.003 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
+    offset: (k) => off + (h.isArm(k) ? -0.001 + 0.003 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
     sweat: (k) => h.sweatMask(k) * 0.5,
   });
   if (hemY < y.waist - 0.04) {
@@ -227,6 +244,55 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
     pieces.push({ surface: 'helper-tights', fabric: o.fabric, hem: 0.003, hides: false, slot: 3, fields: [h.below(y.waist + 0.02), h.above(y.waist - 0.02), h.noLegs, front, (k) => (h.isArm(k) ? -1 : 1)], offset: () => off + 0.012 });
   }
   if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.004, buttonY, gorgeY, openAngle)));
+}
+
+/** Lower trouser legs as straight tubes continuing the shin (positions for leg vertices below mid-calf). */
+function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, number]>; nrm: Map<number, [number, number, number]>; fwd: Map<number, number>; skin: (k: number, js: number[], ws: number[], w: number) => boolean } {
+  const { F, shape } = ctx;
+  const P = shape.pos, J = shape.joints;
+  const pos = new Map<number, [number, number, number]>(), fwd = new Map<number, number>(), nrm = new Map<number, [number, number, number]>();
+  const Nb = F.normals.get('body')!;
+  const calfJ = new Map<number, number>();
+  for (const side of ['l', 'r'] as const) {
+    const part = side === 'l' ? PART.legL : PART.legR;
+    const A = [J[JI[`calf_${side}`] * 3], J[JI[`calf_${side}`] * 3 + 1], J[JI[`calf_${side}`] * 3 + 2]];
+    const B = [J[JI[`foot_${side}`] * 3], J[JI[`foot_${side}`] * 3 + 1], J[JI[`foot_${side}`] * 3 + 2]];
+    const ax = [B[0] - A[0], B[1] - A[1], B[2] - A[2]], al = Math.hypot(ax[0], ax[1], ax[2]) || 1;
+    const u = ax.map((v) => v / al);
+    const loc = (k: number) => { const d = [P[k * 3] - A[0], P[k * 3 + 1] - A[1], P[k * 3 + 2] - A[2]]; const t = d[0] * u[0] + d[1] * u[1] + d[2] * u[2]; const r = [d[0] - u[0] * t, d[1] - u[1] * t, d[2] - u[2] * t]; return { t, r }; };
+    // shin radius just above where the tube starts (the tube never gets narrower than the ankle bones)
+    let R0 = 0, n0 = 0, Ra = 0;
+    for (let k = 0; k < F.n; k++) {
+      if (F.part[k] !== part) continue;
+      const s = F.legS[k];
+      if (s > 1.62 && s < 1.7) { R0 += Math.hypot(...loc(k).r); n0++; }
+      if (s > 1.9 && s < 2.0) Ra = Math.max(Ra, Math.hypot(...loc(k).r));
+    }
+    R0 = Math.max(n0 ? R0 / n0 : 0.05, Ra + 0.004);
+    for (let k = 0; k < F.n; k++) {
+      if (F.part[k] !== part || F.legS[k] < 1.66) continue;
+      const { t, r } = loc(k);
+      let rl = Math.hypot(r[0], r[1], r[2]);
+      let dir = rl > 1e-5 ? r.map((v) => v / rl) : [0, 0, 1];
+      // foot vertices ahead of the ankle: wrap onto the tube's front
+      if (F.legS[k] > 2.0) { dir = [dir[0] * 0.4, 0, dir[2] * 0.4 + 0.6]; const l = Math.hypot(dir[0], dir[1], dir[2]) || 1; dir = dir.map((v) => v / l); rl = R0; }
+      const w = Math.min(1, Math.max(0, (F.legS[k] - 1.66) / 0.14));
+      const ww = w * w * (3 - 2 * w);
+      const tt = Math.min(t, al + 0.03);
+      const rr = rl + (R0 - rl) * ww;
+      const q: [number, number, number] = [A[0] + u[0] * tt + dir[0] * rr, A[1] + u[1] * tt + dir[1] * rr, A[2] + u[2] * tt + dir[2] * rr];
+      // keep the original position where blending hasn't started
+      pos.set(k, [P[k * 3] + (q[0] - P[k * 3]) * ww, P[k * 3 + 1] + (q[1] - P[k * 3 + 1]) * ww, P[k * 3 + 2] + (q[2] - P[k * 3 + 2]) * ww]);
+      fwd.set(k, dir[2]);
+      const nb = [Nb[k * 3] + (dir[0] - Nb[k * 3]) * ww, Nb[k * 3 + 1] + (dir[1] - Nb[k * 3 + 1]) * ww, Nb[k * 3 + 2] + (dir[2] - Nb[k * 3 + 2]) * ww];
+      const nl = Math.hypot(nb[0], nb[1], nb[2]) || 1;
+      nrm.set(k, [nb[0] / nl, nb[1] / nl, nb[2] / nl]);
+      // the tube hangs from the shin: calf-skinned, so the hem doesn't fold with the toes
+      if (F.legS[k] > 1.85) calfJ.set(k, JI[`calf_${side}`]);
+    }
+  }
+  const skin = (k: number, js: number[], ws: number[], w: number) => { const j = calfJ.get(k); if (j === undefined) return false; js.push(j); ws.push(w); return true; };
+  return { pos, nrm, fwd, skin };
 }
 
 // --- trims ---------------------------------------------------------------------------------------
@@ -288,27 +354,30 @@ function ribbon(ctx: GarmentCtx, mb: MeshBuilder, rows: [number, number, number]
 }
 
 function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number, off: number, backH: number) {
+  // stand (against the neck) → fold → fall (lying out over the collarbones), points spreading onto the chest
   const tr = torsoRadius(ctx);
   const y = ctx.F.y;
   const m = fabricMat(f);
-  // band around the back of the neck, then two long spread points falling onto the chest
+  void backH;
   for (const side of [1, -1]) {
     const rows: [number, number, number][][] = [];
-    const steps = 10;
+    const steps = ctx.lod === 0 ? 14 : 8;
     for (let i = 0; i <= steps; i++) {
       const u = i / steps; // 0 = centre back … 1 = collar point
-      const a = side * (Math.PI - u * (Math.PI - 0.12));
-      const baseY = y.neck + backH - u * 0.02;
-      const fold = u < 0.75 ? 0.035 : 0.035 + (u - 0.75) / 0.25 * point * 0.75; // collar leaf length
-      const inner = tr.at(baseY, a, off + 0.004);
-      const outerY = baseY - fold * (u < 0.75 ? 1 : 0.85);
-      const spread = u > 0.6 ? (u - 0.6) * 0.25 * side : 0;
-      // the leaf lies on the neck/collarbone, only the points reach the chest
-      const onChest = 0.85 + 0.15 * Math.pow(Math.max(0, (u - 0.7) / 0.3), 1.5);
-      const neckPt = tr.at(baseY, a + spread, off + 0.012);
-      const chestPt = tr.at(outerY, a + spread, off + 0.008);
-      const outer: [number, number, number] = [neckPt[0] + (chestPt[0] - neckPt[0]) * onChest, outerY, neckPt[2] + (chestPt[2] - neckPt[2]) * onChest];
-      rows.push([outer, inner]);
+      const a = side * (Math.PI - u * (Math.PI - 0.1));
+      const baseY = y.neck - 0.01 - 0.035 * u * u;          // the neckline drops toward the front
+      const foldY = baseY + 0.032 - 0.012 * u;               // stand height
+      const leaf = 0.042 + 0.012 * u + (u > 0.65 ? ((u - 0.65) / 0.35) ** 1.3 * point : 0);
+      const spread = u > 0.55 ? (u - 0.55) * 0.55 * side : 0;
+      const outerY = foldY - leaf;
+      const standBase = tr.at(baseY, a, off + 0.001);
+      const fold = tr.at(foldY, a, off + 0.007);
+      // the fall drapes on the shoulders/chest surface below, standing off it by its own thickness
+      const surf = tr.at(outerY, a + spread, off + 0.006 + 0.004 * (1 - u));
+      // the fall keeps its real length: it drapes toward the surface below but doesn't stretch over the shoulder
+      const dv = [surf[0] - fold[0], surf[1] - fold[1], surf[2] - fold[2]], dl = Math.hypot(dv[0], dv[1], dv[2]) || 1;
+      const outer: [number, number, number] = [fold[0] + (dv[0] / dl) * leaf, fold[1] + (dv[1] / dl) * leaf, fold[2] + (dv[2] / dl) * leaf];
+      rows.push([outer, fold, standBase]);
     }
     ribbon(ctx, mb, rows, m, side < 0);
   }
@@ -393,9 +462,10 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
       const k = v.ids[i], w = v.w[i];
       const o = offOf(k) + extraOff;
       const bp = p.basePos?.get(k);
-      for (let c = 0; c < 3; c++) pos[c] += ((bp ? bp[c] : P[k * 3 + c]) + N[k * 3 + c] * o) * w;
+      const bn = p.baseNormal?.get(k);
+      for (let c = 0; c < 3; c++) pos[c] += ((bp ? bp[c] : P[k * 3 + c]) + (bn ? bn[c] : N[k * 3 + c]) * o) * w;
       if (p.disp) { p.disp(k, disp); for (let c = 0; c < 3; c++) pos[c] += disp[c] * w; }
-      for (let c = 0; c < 4; c++) { const ww = model.skinW[k * 4 + c]; if (ww) { js.push(model.skinJ[k * 4 + c]); ws.push((ww / 255) * w); } }
+      if (!p.skin?.(k, js, ws, w)) for (let c = 0; c < 4; c++) { const ww = model.skinW[k * 4 + c]; if (ww) { js.push(model.skinJ[k * 4 + c]); ws.push((ww / 255) * w); } }
       if (p.dust) dust += p.dust(k) * w;
       if (p.sweat) sweat += p.sweat(k) * w;
     }

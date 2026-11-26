@@ -104,7 +104,7 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
       for (let s = 0; s < 200; s++) { const a = generateAppearance(hash2(seed, s)); if ((a.sex < 0.5) === female && a.age < 55) { seed = hash2(seed, s); break; } }
       const ov: Record<string, unknown> = { shoes };
       if (female) Object.assign(ov, { bottom: { kind: 'skirt', length: 0, flare: 0.06 }, dress: false, outer: null, hosiery: 0 });
-      else Object.assign(ov, { bottom: { length: 1.93 }, outer: null });
+      else Object.assign(ov, { outer: null });
       chars.push(factory.spawn(world, { seed, overrides: ov }));
     });
   } else if (scene === 'leads') {
