@@ -32,6 +32,9 @@ export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; lo
   idle_pockets: { clip: 'idle_pockets', layer: 'full', loop: true }, idle_hands_behind: { clip: 'idle_hands_behind', layer: 'full', loop: true }, idle_heat: { clip: 'idle_heat', layer: 'full', loop: true },
 };
 
+/** Measured stance-foot travel per warped cycle vs. the clip's root travel (tools/characters/scratch/slide.ts). */
+export let STRIDE_CAL = 0.87;
+export function setStrideCal(v: number) { STRIDE_CAL = v; }
 const MIRROR = JOINTS.map((j) => { const n = j.name; const m = n.endsWith('_l') ? n.slice(0, -2) + '_r' : n.endsWith('_r') ? n.slice(0, -2) + '_l' : n; return JI[m]; });
 const sm = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -44,7 +47,6 @@ export class Animator {
   /** Rest pelvis offset from the root (character metres). */
   private restPelvis: [number, number, number];
   private pelvisScale: number;
-  private legScale: number;
   private p: Personality;
   // locomotion state
   private speed = 0; private vx = 0; private vz = 0; private phase = 0; private strafePhase = 0; private turnPhase = 0;
@@ -53,6 +55,7 @@ export class Animator {
   private actions: Action[] = [];
   private events: AnimEvent[] = [];
   private lastPhase = 0;
+  private cadenceBoost = 1;
   /** Lean (radians) applied by the procedural layer, exposed for IK/debug. */
   lean = { pitch: 0, roll: 0 };
   /** Contact state per foot (true = planted) for foot locking. */
@@ -61,7 +64,7 @@ export class Animator {
   constructor(lib: AnimLibrary, restPelvis: [number, number, number], p: Personality) {
     this.lib = lib; this.p = p; this.restPelvis = restPelvis;
     this.pelvisScale = restPelvis[1] / lib.restPelvisHeight;
-    this.legScale = this.pelvisScale * p.stride;
+
     for (const n of ['Walk_Loop', 'Walk_Formal_Loop', 'Jog_Fwd_Loop', 'Sprint_Loop', 'Crouch_Fwd_Loop', 'Crouch_Idle_Loop', 'Jump_Loop', 'idle_relaxed', 'idle_heat', 'idle_pockets', 'idle_hands_behind', 'strafe_l', 'turn_step']) this.c[n] = lib.get(n);
     for (const n of MASKS.upper) this.upperMask[JI[n]] = 255;
     this.idleClip = p.heat > 0.7 && p.age > 30 ? this.c.idle_heat : this.c.idle_relaxed;
@@ -118,15 +121,18 @@ export class Animator {
     const wWalk = 1 - wRun;
     const wJog = wRun * (1 - wSprint);
     // cadence (cycles/s) from human gait data: walking ≈ 0.55 + 0.27 v, running ≈ 1.25 + 0.04 v
-    const cps = Math.max(0.35, (wWalk * (0.55 + 0.27 * fwdAbs) + wRun * (1.25 + 0.04 * fwdAbs)) * (crouch ? 0.8 : 1) / Math.sqrt(this.legScale));
+    const cps = Math.max(0.35, (wWalk * (0.55 + 0.27 * fwdAbs) + wRun * (1.25 + 0.04 * fwdAbs)) * (crouch ? 0.8 : 1) / Math.sqrt(this.pelvisScale) / this.p.stride);
     const dir = fwd >= -0.05 ? 1 : -1;
-    this.phase = (this.phase + dt * cps * dir + 10) % 1;
+    this.phase = (this.phase + dt * cps * this.cadenceBoost * dir + 10) % 1;
     // stride warp: amplitude so that stride (m per cycle) = v / cps, on this body's legs
-    const strideOf = (ci: number) => lib.clips[ci].info.speed * lib.clips[ci].info.duration * this.legScale;
+    const strideOf = (ci: number) => lib.clips[ci].info.speed * lib.clips[ci].info.duration * this.pelvisScale * STRIDE_CAL;
     const formal = this.p.formal;
     const walkClip = formal ? this.c.Walk_Formal_Loop : this.c.Walk_Loop;
     const clipStride = crouch ? strideOf(this.c.Crouch_Fwd_Loop) : wWalk * strideOf(walkClip) + wJog * strideOf(this.c.Jog_Fwd_Loop) + wSprint * strideOf(this.c.Sprint_Loop);
-    const kStride = Math.min(1.35, Math.max(0.25, (fwdAbs / cps) / Math.max(0.2, clipStride)));
+    let kStride = (fwdAbs / cps) / Math.max(0.2, clipStride);
+    // past the comfortable amplitude, people take faster steps rather than longer ones
+    if (kStride > 1.3) { this.cadenceBoost = kStride / 1.3; kStride = 1.3; } else this.cadenceBoost = 1;
+    kStride = Math.max(0.25, kStride);
 
     // --- base: idle ⊕ moving --------------------------------------------------------------------
     clearAcc(out);

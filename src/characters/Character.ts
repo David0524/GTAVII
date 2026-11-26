@@ -181,7 +181,7 @@ export class Character {
       lock.was = planted;
       lock.w += ((planted ? 1 : 0) - lock.w) * Math.min(1, dt * 14);
       const tp = new THREE.Vector3(fp.x, desired, fp.z);
-      if (lock.w > 0.01) tp.lerp(_v.set(lock.pos.x, desired, lock.pos.z), lock.w * 0.85);
+      if (lock.w > 0.01) tp.lerp(_v.set(lock.pos.x, desired, lock.pos.z), lock.w);
       targets[side] = { pos: tp, n: _n.clone(), w: 1 };
       need = Math.min(need, desired - fp.y);
       void lift;

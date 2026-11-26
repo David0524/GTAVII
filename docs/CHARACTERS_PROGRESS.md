@@ -56,20 +56,43 @@ src/characters/    rig.ts (56 joints, UAL names), format.ts (T74X container), in
   drawn, and tinted lenses are opaque.
 
 ## Measurements
-All in headless Chromium on this container's CPU. Rendering is SwiftShader **software**, so frame
-times are not meaningful; CPU-side numbers are. See `shots/characters/*.json`.
-- **Hero LOD0:**
-  - about 16.8k triangles main + 2.3k hair on average (max 19.3k + 3.9k) in 2 draws;
-  - build about 80 ms (assemble) + 9 ms (evaluate);
-  - per-frame update see `04_leads_act1.json` (`updateMs`).
-- **Crowd LODs (triangles):** LOD1 (near ring) about 7.2k + 1.4k hair; LOD2 about 4.1k;
-  LOD3 about 1.8k.
-- **Crowd, 400 agents (High):** CPU 0.34 ms avg and 1.0 ms p95 in `setAgents`, including 10
-  near-ring characters; 74 draws; about 545k triangles in view. See
-  `19_crowd_400_high.json` (final numbers there).
-- **Crowd, 120 agents (Low):** see `20_crowd_120_low.json`.
-- **Downloads:** body.bin 6.9 MiB + anims.bin 1.0 MiB = 7.9 MiB for High (budget 15).
-  Mobile Low currently loads the same files (budget 6 MiB: **over**; see known issues).
+CPU numbers come from this container's CPU: Node/V8 for the offline harnesses, headless Chromium for
+the scenes. Rendering here is SwiftShader **software**, so GPU frame times can't be measured.
+Real-device numbers are still needed (the user tests on an iPhone).
+
+**Heroes (LOD0)**
+- Triangles: about 16.8k main + 2.3k hair on average (max 19.3k + 3.9k); Teddy is 17.3k. 2 draws.
+- Per-frame update: **0.044 ms avg, 0.057 ms p95** (walking, foot IK on a 0.15 m curb, look-at;
+  `tools/characters/scratch/cpu.ts` harness). Budget 0.3 ms.
+- Build at spawn: about 80–110 ms (assemble) + 9 ms (evaluate), main thread.
+
+**Crowd LODs (triangles):** LOD1 (near ring) about 7.2k + 1.4k hair; LOD2 about 4.1k; LOD3 about 1.8k.
+
+**Crowd: 400 agents, High (`19_crowd_400_high`)**
+- `setAgents` CPU: **0.34 ms avg, 1.0 ms p95**, including 10 near-ring characters.
+- 74 draws, about 545k triangles in view; atlas 32 templates, half-float.
+
+**Crowd: 120 agents, Low (`20_crowd_120_low`):** see the json next to the shot.
+
+**Foot sliding** (`npx tsx tools/characters/measure-sliding.ts`; ankle drift while planted, 3 bodies
+× 3 crowd speeds):
+
+| Speed | Raw stride match (no IK lock: instanced crowds) | Near characters (IK lock) |
+|---|---|---|
+| 0.8 m/s | 30–110 mm/s | 1–7 mm/s |
+| 1.3 m/s | 110–165 mm/s | 9–14 mm/s |
+| 1.75 m/s | 160–210 mm/s | 17–23 mm/s |
+
+- Most of the raw figure is heel and toe roll inside the source clip's broad contact windows; the
+  signed (net) drift averages near zero after calibration (`STRIDE_CAL` in Animator).
+- Instanced crowds have no IK, so they show the raw figure. It reads at mid and far distance;
+  a tighter contact-window measure is next.
+
+**Downloads**
+- High: body.bin 6.9 MiB + anims.bin 1.0 MiB = **7.9 MiB** (budget 15).
+- **Mobile Low: body_low.bin 0.95 MiB + anims.bin 1.0 MiB = 1.95 MiB** (budget 6). It keeps only
+  the far-LOD vertices, 32 shape components and no expressions; Low uses LOD2 for heroes and the
+  near ring.
 
 ## Known issues (honest)
 - **Faces read as "game" faces:**
@@ -82,8 +105,6 @@ times are not meaningful; CPU-side numbers are. See `shots/characters/*.json`.
 - **Sandals and heels:** sandals render as closed shoes; heels don't tilt the foot (no ankle pitch).
 - **Skirts and coat tails** follow MakeHuman's helper weights: the legs poke through at long
   strides.
-- **Low-quality download** needs its own reduced body file (LOD3 vertex subset and K=32
-  components).
 - **No impostors** past 170 m (High); agents beyond are culled.
 - **The crowd near ring** builds over a few frames when someone walks into range (the instanced
   LOD shows meanwhile).
