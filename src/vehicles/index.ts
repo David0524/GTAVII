@@ -18,6 +18,10 @@ import { MODELS, MODEL_BY_ID } from './models';
 import { getAsset, variantOf } from './assets';
 import { Vehicle, type VehicleInit } from './Vehicle';
 import type { VehicleSave } from './state';
+import { TwoWheeler, type TwoWheelerSave } from './twowheel/TwoWheeler';
+import { BIKES, BIKE_BY_ID } from './twowheel/bikes';
+export type { TwoWheeler, TwoWheelerSave, CrashEvent } from './twowheel/TwoWheeler';
+export { BIKES } from './twowheel/bikes';
 import { TrafficRenderer } from './traffic';
 import { resolve } from './registry';
 import type { TrafficInstance, VehicleClass } from '../shared/traffic';
@@ -43,6 +47,9 @@ export interface VehicleFactory {
   createTrafficRenderer(maxInstances: number): { setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3): void; object: THREE.Object3D; dispose(): void; lastMs: number };
   /** Registry: every VehicleClass resolves to >= 1 model; the variant seeds model choice, paint, dirt, dents. */
   resolve(vclass: VehicleClass, variant: number): { modelId: string; paint: string };
+  /** Motorcycles, bicycles, the carrier trike (same driving contract; emits 'crash' for the rider ragdoll). */
+  spawnBike(world: RAPIER.World, scene: THREE.Object3D, modelId: string, pose: { x: number; y: number; z: number; yaw: number }, variant?: number): TwoWheeler;
+  restoreBike(world: RAPIER.World, scene: THREE.Object3D, save: TwoWheelerSave): TwoWheeler;
   /** Build geometry ahead of time to avoid a hitch on first spawn. */
   preload(modelIds?: string[]): void;
 }
@@ -50,7 +57,7 @@ export interface VehicleFactory {
 export function createVehicleFactory(opts: { quality: Quality }): VehicleFactory {
   const q = opts.quality;
   return {
-    models: MODELS.map((m) => ({ id: m.id, class: m.cls, displayName: m.displayName })),
+    models: [...MODELS.map((m) => ({ id: m.id, class: m.cls as string, displayName: m.displayName })), ...BIKES.map((b) => ({ id: b.id, class: b.cls as string, displayName: b.displayName }))],
     ready: loadDecalFonts(),
     spawn(world, scene, modelId, pose, variant = 0, init) {
       const spec = MODEL_BY_ID.get(modelId);
@@ -65,6 +72,15 @@ export function createVehicleFactory(opts: { quality: Quality }): VehicleFactory
       return new Vehicle(world, scene, getAsset(spec, v), v, { x: save.pose.x, y: save.pose.y, z: save.pose.z, yaw: 0 }, q, { save });
     },
     createTrafficRenderer(max) { return new TrafficRenderer(max, q); },
+    spawnBike(world, scene, modelId, pose, variant = 0) {
+      const spec = BIKE_BY_ID.get(modelId);
+      if (!spec) throw new Error(`unknown two-wheeler "${modelId}"`);
+      return new TwoWheeler(world, scene, spec, variant, pose, q);
+    },
+    restoreBike(world, scene, save) {
+      const spec = BIKE_BY_ID.get(save.modelId)!;
+      return new TwoWheeler(world, scene, spec, save.variant, { x: save.pose.x, y: save.pose.y, z: save.pose.z, yaw: 0 }, q, { save });
+    },
     resolve,
     preload(ids) {
       for (const id of ids ?? MODELS.map((m) => m.id)) {

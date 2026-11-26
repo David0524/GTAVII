@@ -9,6 +9,8 @@ import { DebugHud, FrameStats } from '../../ui/DebugHud';
 import { createVehicleFactory, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
+import { BIKES } from '../twowheel/bikes';
+import type { TwoWheeler } from '../twowheel/TwoWheeler';
 import { ZONES } from '../gen/morphs';
 import { VehicleLights, type VehicleClass } from '../../shared/traffic';
 
@@ -205,6 +207,9 @@ export async function runTestLot() {
   const log: string[] = [];
   let player: Vehicle;
   const parked: Vehicle[] = [];
+  const bikes: TwoWheeler[] = [];
+  let riding: TwoWheeler | null = null; // when set, input and camera go to the bike
+  let bikeIdx = -1;
   const wire = (v: Vehicle, key: string) => {
     v.on('skid', (e) => skids.add(e as SkidEvent, key));
     v.on('impact', (e) => { const i = e as ImpactEvent; log.unshift(`impact ${key} Δv ${i.speedChange.toFixed(1)} m/s zone ${i.zone} dmg ${(i.damage * 100).toFixed(0)}%`); log.length = Math.min(log.length, 5); });
@@ -309,6 +314,8 @@ export async function runTestLot() {
     if (e.code === 'KeyO') player.forceFailure('overheat');
     if (e.code === 'KeyK') player.forceFailure('deadBattery');
     if (e.code === 'KeyU') player.forceFailure('vapourLock');
+    if (e.code === 'KeyN') { bikeIdx = (bikeIdx + 1) % (BIKES.length + 1); if (bikeIdx === BIKES.length) { riding = null; } else { const p = player.object.position; api.rideBike(BIKES[bikeIdx].id, { x: p.x + 4, z: p.z, yaw: 0 }); } }
+    if (e.code === 'KeyJ' && riding?.crashed) riding.rightUp();
   });
   window.addEventListener('keyup', (e) => keys.delete(e.code));
   let lightsOn = true, beacon = false;
@@ -322,8 +329,8 @@ export async function runTestLot() {
   const camPos = new THREE.Vector3(0, 4, 50), camLook = new THREE.Vector3();
   let orbit = 0, orbitPitch = 0.12, turnT = 0;
   const updateCamera = (dt: number) => {
-    const o = player.object;
-    const g = player.asset.lod0;
+    const o = riding ? riding.object : player.object;
+    const g = riding ? { maxZ: 1.2, minZ: -1.2, height: 1.4 } : player.asset.lod0;
     const len = g.maxZ - g.minZ;
     if (turntable) {
       turnT += dt * 0.35;
@@ -338,7 +345,7 @@ export async function runTestLot() {
     const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(o.quaternion); fwd.y = 0; fwd.normalize();
     const yaw = Math.atan2(-fwd.x, -fwd.z) + orbit;
     if (camMode === 1) {
-      const seat = player.seatPose('driver');
+      const seat = (riding ?? player).seatPose('driver');
       camera.position.setFromMatrixPosition(seat).add(new THREE.Vector3(0, 0.55, 0).applyQuaternion(o.quaternion));
       camera.quaternion.copy(o.quaternion).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.05, orbit, 0, 'YXZ')));
       return;
@@ -366,8 +373,10 @@ export async function runTestLot() {
       const steerKey = mv.x;
       return { throttle: Math.max(0, mv.y), brake: Math.max(0, -mv.y, input.isHeld('sink') ? 1 : 0), steer: steerKey, handbrake: input.isHeld('jump') };
     })();
-    if (!turntable && !lineup) player.setInput(i);
+    if (riding) { riding.setInput(i); player.setInput({ throttle: 0, brake: 1, steer: 0, handbrake: true }); }
+    else if (!turntable && !lineup) player.setInput(i);
     player.update(DT);
+    for (const b of bikes) b.update(DT);
     for (const v of parked) v.update(DT);
     world.step();
     skids.update(DT);
@@ -401,6 +410,16 @@ export async function runTestLot() {
       return speed;
     },
     trafficMs: () => traffic?.lastMs ?? 0,
+    bikes,
+    get riding() { return riding; },
+    /** Spawn a two-wheeler and ride it (input + camera). */
+    rideBike(id: string, pose = { x: 0, z: 40, yaw: 0 }, variant = 0) {
+      const b = factory.spawnBike(world, scene, id, { x: pose.x, y: 0.2, z: pose.z, yaw: pose.yaw }, variant);
+      b.on('skid', (e) => skids.add(e as SkidEvent, b.id));
+      b.on('crash', (e) => { const c = e as { cause: string; speed: number }; log.unshift(`${b.id} CRASH (${c.cause}) at ${(c.speed * 2.237).toFixed(0)} mph — rider handed to ragdoll`); });
+      bikes.push(b); riding = b; return b;
+    },
+    stopRiding() { riding = null; },
     /** Fire a test round at the player car from the camera (or at a given local point). */
     shoot(local?: { x: number; y: number; z: number }) {
       const o = player.object;
@@ -443,6 +462,7 @@ export async function runTestLot() {
     const info = renderer.info.render;
     hud.set(
       `VEHICLE TEST LOT  [${backend.toUpperCase()} | ${qname}]  ${s.avg.toFixed(1)} ms (${s.fps.toFixed(0)} fps)  draws ${info.drawCalls}  tris ${(info.triangles / 1000).toFixed(0)}k\n` +
+      (riding ? `RIDING ${riding.spec.displayName} ${(Math.abs(riding.speed) * 2.237).toFixed(0)} mph lean ${(riding.lean * 57.3).toFixed(0)}°${riding.crashed ? ' CRASHED (J to right it)' : ''}\n` : '') +
       `${MODELS[modelIdx].displayName}  #${variant}  (LOD0 ${player.asset.lod0.tris} tris)\n` +
       `${(Math.abs(ph.speed) * 2.237).toFixed(0)} mph  ${ph.reverse ? 'R' : 'D' + ph.gear}  ${ph.rpm.toFixed(0)} rpm  ` +
       `damage ${(player.damage * 100).toFixed(0)}% ${player.stage}  [F ${(player.zones.front * 100).toFixed(0)} R ${(player.zones.rear * 100).toFixed(0)} L ${(player.zones.left * 100).toFixed(0)} R ${(player.zones.right * 100).toFixed(0)}]\n` +
@@ -450,7 +470,7 @@ export async function runTestLot() {
       `glass F${player.components.glass.front} R${player.components.glass.rear} L${player.components.glass.left} R${player.components.glass.right} · tyres ${player.components.tyresFlat.map((f) => (f ? 'X' : 'o')).join('')} · radiator ${(player.components.radiator * 100).toFixed(0)}% engine ${(player.components.engine * 100).toFixed(0)}% tank ${(player.components.fuelTank * 100).toFixed(0)}%\n` +
       `physics ${physMs.toFixed(2)} ms/step (all vehicles)  player ${player.stepMs.toFixed(2)} ms` + (traffic ? `  traffic ${nTraffic} inst ${traffic.lastMs.toFixed(2)} ms` : '') + '\n' +
       log.slice(0, 4).join('\n') + '\n' +
-      (input.isTouch ? 'stick drive · BRAKE · HAND · NEXT model · CAM' : 'WASD drive · Space handbrake · F model · V variant · H lights · B beacon · C cam · R reset · 1-4 dent · 5 crash test · I ignition · G shoot · O overheat · K dead battery · U vapour lock'),
+      (input.isTouch ? 'stick drive · BRAKE · HAND · NEXT model · CAM' : 'WASD drive · Space handbrake · F model · V variant · H lights · B beacon · C cam · R reset · 1-4 dent · 5 crash test · I ignition · G shoot · O overheat · K dead battery · U vapour lock · N bikes · J right a bike'),
     );
   };
   renderer.setAnimationLoop(loop);
