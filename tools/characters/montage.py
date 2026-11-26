@@ -9,7 +9,7 @@ ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 cat = {c['id']: c for c in json.load(open(os.path.join(ROOT, 'references/catalog.json')))}
 SETS = {
     '01_lineup_a.png': ['documerica_551651', 'documerica_548399', 'documerica_554312'],
-    '02_lineup_b.png': ['documerica_551646', 'documerica_549855', 'documerica_551658'],
+    '02_lineup_b.png': ['documerica_551646', 'documerica_551696'],
 }
 for shot, refs in SETS.items():
     lineup = Image.open(os.path.join(ROOT, 'shots/characters', shot)).convert('RGB')
