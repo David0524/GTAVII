@@ -1,5 +1,6 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import type * as THREE from 'three/webgpu';
+import { GROUPS } from '../shared/physicsGroups';
 
 /**
  * Physics world (Rapier, WASM). Fixed 60 Hz step with an accumulator.
@@ -66,7 +67,7 @@ export class Physics {
       if (!idx || idx.length < 3) continue;
       const v = new Float32Array(pos.length);
       for (let i = 0; i < pos.length; i += 3) { v[i] = pos[i] + g.ox; v[i + 1] = pos[i + 1]; v[i + 2] = pos[i + 2] + g.oz; }
-      const desc = RAPIER.ColliderDesc.trimesh(v, new Uint32Array(idx)).setFriction(0.8);
+      const desc = RAPIER.ColliderDesc.trimesh(v, new Uint32Array(idx)).setFriction(0.8).setCollisionGroups(GROUPS.world);
       out.push(this.world.createCollider(desc));
     }
     return out;

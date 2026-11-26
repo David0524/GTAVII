@@ -4,13 +4,13 @@
  * backgrounded (mobile browsers kill background tabs), and exports/imports checksummed files.
  * Settings are NOT here: they are per-device (src/settings); saves are per-profile.
  */
-import { SAVE_VERSION, migrate, toFile, fromFile, type SaveData } from './schema';
+import { SAVE_VERSION, migrate, toFile, fromFile, registeredSections, type SaveData, type SectionBlob } from './schema';
 import { AUTO_SLOTS, MemorySaveStore, type Profile, type SaveStore, type SlotMeta } from './SaveStore';
 import { IdbSaveStore } from './IdbSaveStore';
 
 export interface SaveProviders {
-  /** Snapshot of the current game state (without version/savedAt/label, which the manager fills). */
-  snapshot(): Omit<SaveData, 'version' | 'savedAt' | 'build' | 'label' | 'playtimeSec'>;
+  /** Snapshot of the engine-core game state (without version/savedAt/label/sections, which the manager fills). */
+  snapshot(): Omit<SaveData, 'version' | 'savedAt' | 'build' | 'label' | 'playtimeSec' | 'sections'>;
   /** Human label for the slot list, e.g. the nearest intersection + in-game date/time. */
   label(): string;
   /** Apply a loaded save to the running game. */
@@ -20,7 +20,21 @@ export interface SaveProviders {
 const LAST_PROFILE_KEY = 't74.lastProfile';
 const BUILD = `${import.meta.env?.MODE ?? 'dev'}`;
 
+/** A stream's live save section: how to read its current state and how to apply a loaded one. */
+export interface SectionProvider { name: string; capture(): unknown; restore(data: unknown): void }
+
 export class SaveManager {
+  private providers = new Map<string, SectionProvider>();
+  /** Sections from the last load that no live provider claimed (kept so they round-trip). */
+  private carried: Record<string, SectionBlob> = {};
+  /** Streams call this once at startup (after registerSection in schema). */
+  provideSection(p: SectionProvider) { this.providers.set(p.name, p); }
+  /** Capture named sections now (mission checkpoints: restore inventory on retry). */
+  snapshotSections(names: string[]): Record<string, unknown> {
+    const out: Record<string, unknown> = {}; for (const n of names) { const p = this.providers.get(n); if (p) out[n] = structuredClone(p.capture()); } return out;
+  }
+  restoreSections(snap: Record<string, unknown>) { for (const [n, d] of Object.entries(snap)) this.providers.get(n)?.restore(structuredClone(d)); }
+
   profile!: Profile;
   private autoIndex = 0;
   private playtime = 0;
@@ -60,7 +74,10 @@ export class SaveManager {
   }
 
   private build(): SaveData {
-    return { version: SAVE_VERSION, savedAt: new Date().toISOString(), build: BUILD, playtimeSec: Math.round(this.playtime), label: this.p.label(), ...this.p.snapshot() } as SaveData;
+    const sections: Record<string, SectionBlob> = { ...this.carried };
+    const ver = new Map(registeredSections().map((d) => [d.name, d.version]));
+    for (const [n, p] of this.providers) sections[n] = { v: ver.get(n) ?? 1, data: p.capture() };
+    return { version: SAVE_VERSION, savedAt: new Date().toISOString(), build: BUILD, playtimeSec: Math.round(this.playtime), label: this.p.label(), ...this.p.snapshot(), sections } as SaveData;
   }
 
   async save(slot: string): Promise<SlotMeta> {
@@ -87,6 +104,11 @@ export class SaveManager {
     const data = migrate(raw);
     this.playtime = data.playtimeSec;
     this.p.apply(data);
+    this.carried = {};
+    for (const [n, blob] of Object.entries(data.sections)) {
+      const p = this.providers.get(n);
+      if (p) p.restore(blob.data); else this.carried[n] = blob;
+    }
     return data;
   }
 

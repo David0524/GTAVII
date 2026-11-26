@@ -1,5 +1,12 @@
 # PROGRESS: Tenderloin '74 engine & city
 
+## Design pillar: "small map, very interactive" (user)
+Density per block beats area. Most shopfronts are enterable, most roofs reachable, and every
+block has something to do. The playable area is the dense story core: mid-block 21st/22nd to
+43rd/44th Sts, and 9th/10th to Madison/Park Aves, about 2.3 km². A full-detail 200 m buffer
+and low-detail shells keep Times Square, the rail yards and the skyline visible beyond the
+edge.
+
 Source of truth across sessions. Read this first; update it last.
 
 ## Status
@@ -7,11 +14,11 @@ Source of truth across sessions. Read this first; update it last.
 |---|---|
 | 1. Scaffold, data pipeline, untextured city, Flatiron spawn | **Done** (see critique below), plus landscape mobile support (added on request) |
 | 2. Walkable player, camera, collision (+ local saves, period UI) | **Done** (critique below) |
-| UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/` |
-| 3. Rendering pipeline + facade generation | **Next** (after integrating stream milestones) |
+| UI pass (title, HUD, pause, map, settings) | **Done**, shots in `shots/phase2/ui/`; **handed to the UI and cinematics stream** at the freeze commit |
+| 3. Rendering pipeline + facade generation **+ full day/night lighting cycle** (moved from Phase 6, per TIME.md) | **Next** |
 | 4. Vehicles & driving | — |
 | 5. Traffic, pedestrians, audio | — |
-| 6. Weather, day/night, polish, optimisation | — |
+| 6. Weather variety, polish, optimisation (day/night moved to Phase 3) | — |
 | 7. Hook APIs + docs for the narrative team | Contract drafted in NARRATIVE_BRIEF.md; implementation pending |
 
 ## Architecture
@@ -221,13 +228,136 @@ Rapier character controller (walk, run, jump, ledge climb) with colliders genera
 from the same footprint data. Orbit and chase camera. Touch buttons swap to JUMP/USE/SPRINT.
 Spawn on foot at the Flatiron.
 
+## Phase 3 look target (the bar Phase 3 shots are judged against)
+**The goal:** a frame grab from the game should sit next to these 1973 photographs and read as
+the same city, filmed on the same stock, with a 2031 open-world game's density of detail.
+
+**Reference frames** (`references/img/`, public-domain DOCUMERICA; credits in
+`references/catalog.json`):
+
+| # | Frame | What it pins down |
+|---|---|---|
+| A | `documerica_554297` (42nd St west of Seventh, Aug 1973) | Low warm sun on west faces, marquee panels with chasing bulbs, scaffolding, long sedans, rose-brown cast |
+| B | `documerica_554293` (Sixth Ave & 32nd St) | Street-level clutter: neon script, blade signs, box trucks, police scooter, soot on cornices, the cab's yellow |
+| C | `documerica_549867` (Garment District canyon) | A dark street floor under a bright sky slot, haze, handcarts, trucks double-parked, depth falling into warm grey |
+| D | `documerica_549869` (Herald Square traffic) | Saturation budget: only taxi yellow and truck red sing, everything else muted; chrome highlights; dense traffic |
+
+**Grade targets** (STYLE_GUIDE §1, measured from 87 photos). Phase 3 shots are measured with
+the same script (`tools/refs/lookmetrics.py`, to be added in Phase 3). Each shot's numbers must
+land in these bands:
+- **Tones:** shadow average near `#2e171d` (warm maroon, within ±12 per channel); midtone
+  average in the brown-rose family `#794d44` (±20); highlight average near cream `#d1b59e`
+  (±20).
+- **Luma:** p2 ≤ 20, p50 between 50 and 80 (low-key), p98 between 200 and 235 (nothing
+  clipped to white).
+- **Saturation:** at least 70% of saturated pixels in red-orange-yellow (hue 0–60° plus
+  330–360°). Saturated blue/green 10% or less (dusk sky excepted, in a sky-masked variant).
+
+**What "done" looks like:**
+- **Facades:**
+  - Every building's walls show its era and use. Tenements get brick with stoops and fire
+    escapes, cast-iron lofts their columns and big windows, masonry lofts their piers and
+    spandrels, prewar offices their limestone base, and setback towers their crowns.
+  - Window rhythm comes from real height and floors, and window rooms come from the
+    interiors tier-C shader.
+  - Roofs carry water towers, bulkheads and parapets. AC units are in roughly one window in
+    six.
+  - Ground floors have storefronts with awnings, roll-down gates and period signage (invented
+    names).
+  - Heroes (Flatiron, Empire State, Met Life, Penn/MSG, the Herald Square store, Hotel
+    Chelsea) are hand-modelled and recognisable in silhouette at 1 km.
+- **Ground:** asphalt patches and seams, faded lane paint and crosswalks, manholes with steam,
+  granite curbs with chipped edges, sidewalk slab joints, gratings, and a wet variant with
+  screen-space reflections.
+- **Wear:** soot streaks under every ledge, darker ground floors, curbside litter and bagged
+  trash, graffiti (act-keyed), potholes, cracked curbs, scaffolding sheds.
+- **Lighting:**
+  - Dusk: a low sun with cascaded shadows, warm on west faces.
+  - Night: sodium on the avenues and mercury on side streets, neon blooming into haze, lit
+    windows (incandescent, TV-blue, fluorescent).
+  - An environment map so chrome and glass read.
+- **Post:** filmic tonemap, split-tone, hue-selective saturation, halation, grain, a light
+  vignette, TAA, GTAO, bloom. Each is toggleable per preset.
+- **Budget:** a High preset hitting 60 fps at 1080p on a mid-range GPU, and Medium hitting
+  30 fps on a laptop. Proven on the user's devices with COPY PERF REPORT, not in this
+  container.
+
+**Times of day:** every look check runs at **noon, golden hour (about 7:30 PM), dusk
+(8:14 PM, the spawn) and night (about 11 PM)**.
+- **Noon:** hard, high sun; deep canyon shadows; haze-bleached sky slots (frame C).
+- **Golden hour:** warm low sun on west faces (frame A).
+- **Night is a showcase:**
+  - sodium on the avenues against mercury blue-green on the side streets;
+  - neon bleeding into haze;
+  - windows lit on per-building schedules (incandescent, TV-blue, office fluorescent);
+  - headlights, grating glow, and wet-street reflections when it rains.
+
+**Shot list for judging:** the Phase 2 rig viewpoints, re-shot at all four times. Four of them
+go side by side with frames A–D at matching angles: 42nd St & 7th, Sixth Ave & 32nd, a Garment
+District side street, and Herald Square.
+
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
 |---|---|---|---|
-| Engine (this session, integration owner) | `claude/tenderloin-74-engine-qi54lt` | this file | rendering, city, player, UI, shared contracts in `src/shared/`, merges |
-| Narrative | `claude/sharp-maxwell-jnb6hr` | NARRATIVE_BRIEF.md | `narrative/`, `content/`, NARRATIVE_PROGRESS.md |
-| Sim (traffic and pedestrian AI) | its own branch | docs/briefs/SIM_BRIEF.md | `src/sim/`, `tools/pipeline/lanes.ts`, SIM_PROGRESS.md |
-| Vehicles | its own branch | docs/briefs/VEHICLES_BRIEF.md | `src/vehicles/`, VEHICLES_PROGRESS.md, VEHICLE_REGISTRY.md |
+| Engine (this session, integration owner) | `claude/tenderloin-74-engine-qi54lt` | this file | rendering, city and pipeline, player and cameras (incl. the camera director), physics, saves (core plus the section registry), mission runtime (Phase 7), integration, shared contracts in `src/shared/` |
+| Narrative | `claude/sharp-maxwell-jnb6hr` | NARRATIVE_BRIEF.md | `narrative/`, `content/`, side quests |
+| Sim (traffic and pedestrian AI) | `claude/nice-sagan-2jh4m2` | docs/briefs/SIM_BRIEF.md | `src/sim/`, the lane pipeline |
+| Vehicles | `claude/youthful-newton-py223e` | docs/briefs/VEHICLES_BRIEF.md | `src/vehicles/` |
+| Characters | `claude/characters-74` | docs/briefs/CHARACTERS_BRIEF.md | `src/characters/` |
+| Audio | (oversight branch brief) | docs/briefs/AUDIO_BRIEF.md | `src/audio/` |
+| Interiors | `claude/interiors-tenderloin` | docs/briefs/INTERIORS_BRIEF.md | `src/interiors/` (tiers A/B; tier C window shader inside the engine's Phase 3 facade material) |
+| Gameplay systems | (new) | docs/briefs/GAMEPLAY_BRIEF.md, ECONOMY.md, CORE_SYSTEMS.md | combat, police, items, money, economy, its own save sections |
+| UI, map and cinematics | `claude/ui-cinematics` | docs/briefs/UI_CINEMATICS_BRIEF.md | **all of `src/ui/` and `src/settings/` after the freeze commit**, plus the cutscene system (`src/cinematics/`) |
+| Oversight | `claude/awesome-keller-i9tmmu` | — | cross-stream checks, briefs, the user's decisions |
+
+**Session directory** (for direct coordination with send_message; contracts still go through
+ENGINE_REQUESTS and ENGINE_RESPONSES, and the oversight session is copied on contract changes):
+
+| Stream | Session |
+|---|---|
+| Engine | `session_01H4ZSJ5agLRKP5qS2okvyAK` |
+| Narrative | `session_01H4ZSJ7VbJSVZUhFqooiSvX` |
+| Sim | `session_01H4ZSJ7ZFKbq3mXVPBgLaXc` |
+| Vehicles | `session_01H4ZSJ51q9zJhE3T3n4Hw3M` |
+| Audio | `session_01H4ZSJ6zQP5er585qGhpRft` |
+| Characters | `session_01H4ZSJ9HHC3JhC3uZj5pVfG` |
+| Gameplay | `session_01H4ZSJ7ih6pW16fwcDhuHtD` |
+| Interiors | `session_01H4ZSJ8LAo9NuN9usWP4Dn3` |
+| UI & cinematics | `session_01H4ZSJ9Htu5DPCDMJHKesiQ` |
+| Oversight | `session_01H4ZSJ99NBvPVUNdV2re88V` |
+
+**Helper models (user: use Sonnet/Haiku helpers only where it makes sense, to save usage):**
+- **When:** delegate only well-scoped, verifiable, low-judgement work to a helper subagent
+  (Agent tool, `model: 'haiku'` or `'sonnet'`).
+- **Haiku:**
+  - code and file searches;
+  - running tests, screenshot rigs and the period audit, then reporting numbers;
+  - fetching and summarising a web page;
+  - mechanical renames;
+  - validating content JSON against a schema.
+- **Sonnet:**
+  - bounded implementation from a precise spec with tests (a parser, converter, validator or
+    data script);
+  - research sweeps with sources;
+  - fixtures;
+  - first-draft docs you then edit.
+- **Keep on the main model:**
+  - architecture and shared contracts (`src/shared`, save sections, ENGINE_REQUESTS and
+    RESPONSES);
+  - shaders and look judgement;
+  - period-accuracy and licensing calls;
+  - anything touching another stream's contract;
+  - user-facing decisions;
+  - **reviewing every helper result before it's committed** (run the tests, spot-check).
+- **Don't:**
+  - delegate what takes a couple of tool calls;
+  - run helpers in parallel unless the work is truly independent;
+  - commit helper output to a contract unreviewed.
+
+**Master feature checklist:** [docs/briefs/FEATURE_AUDIT.md](docs/briefs/FEATURE_AUDIT.md), with an owner for every line.
+
+**`package.json`:** scripts are kept alphabetical. Streams add only their own `<stream>:*`
+scripts, never reorder existing lines, and the engine resolves conflicts at merge.
 
 **Merge rules (into the engine branch):**
 1. **When merges happen:** at each stream's "done means" milestone, and otherwise

@@ -6,10 +6,11 @@ import { buildDecals, drawPlate } from './gen/decals';
 import { VehiclePhysics, type DriveInput } from './physics';
 import { Emitter } from './effects';
 import { ZONES, type Zone } from './gen/morphs';
+import { CLASS_MODELS, PROPOSED_CLASS_MODELS } from './registry';
 import {
   type TrimTier, type Condition, type Upgrade, type Components, type Security, type Trunk, type TrunkItem, type GlassPane,
   type VehicleSave, type EngineEventType, type FailureKind,
-  effectivePhysics, newComponents, initialState, trunkCapacity, trunkAdd, trunkRemove, EngineSystems, tankLitres, TRIM,
+  effectivePhysics, conditionGrade, newComponents, initialState, trunkCapacity, trunkAdd, trunkRemove, EngineSystems, tankLitres, TRIM,
 } from './state';
 
 export type VehicleEventType = 'skid' | 'impact' | 'destroyed' | 'damage' | 'engine' | 'component' | 'theft';
@@ -56,6 +57,10 @@ const LOD_DIST: Record<Quality, [number, number]> = { low: [14, 70], medium: [28
 
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _q = new THREE.Quaternion();
 let nextId = 1;
+function vclassOf(modelId: string): string {
+  for (const [c, opts] of [...Object.entries(CLASS_MODELS), ...Object.entries(PROPOSED_CLASS_MODELS)]) if (opts.some(([id]) => id === modelId)) return c;
+  return 'sedan';
+}
 /** Collider handle -> vehicle, for attributing rams. */
 const OWNER = new Map<number, Vehicle>();
 export function vehicleOfCollider(c: RAPIER.Collider | null | undefined): Vehicle | null { return c ? OWNER.get(c.handle) ?? null : null; }
@@ -241,6 +246,8 @@ export class Vehicle {
   get load() { return this.physics.load; }
   get gear() { return this.physics.reverse ? -1 : this.physics.gear; }
   get mileage() { return this.condition.mileage; }
+  /** Shared 0–4 condition grade (derelict, worn, lived-in, kept, pristine). */
+  get grade() { return conditionGrade(this.condition, this.damage); }
   get fuel() { return this.engine.fuel; }
   get temperature() { return this.engine.temp; }
   get engineRunning() { return this.engine.running; }
@@ -683,7 +690,7 @@ export class Vehicle {
   serialize(): VehicleSave {
     const t = this.physics.body.translation(), r = this.physics.body.rotation();
     return {
-      v: 1, id: this.id, modelId: this.modelId, variant: this.variant.seed,
+      v: 1, id: this.id, modelId: this.modelId, variant: this.variant.seed, vclass: vclassOf(this.modelId), grade: this.grade,
       trim: this.trim, condition: { ...this.condition }, upgrades: [...this.upgrades],
       paint: this.paint, dirt: this.mats.u.dirt.value as number, plate: this.plate,
       zones: { ...this.zones }, damage: this.damage, stage: this.stage, burnT: this.burnT,

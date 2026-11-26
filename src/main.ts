@@ -7,7 +7,8 @@ import { loadSkyline } from './world/Skyline';
 import { Atmosphere } from './world/Atmosphere';
 import { FlyCamera } from './camera/FlyCamera';
 import { OrbitCamera } from './camera/OrbitCamera';
-import { DebugHud, FrameStats } from './ui/DebugHud';
+import { CameraDirector } from './camera/CameraDirector';
+import { DebugHud, FrameStats } from './engine/debug/DebugHud';
 import { Minimap, type StreetRec } from './ui/Minimap';
 import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
@@ -15,7 +16,7 @@ import { loadTerrain, heightAt } from './shared/terrain';
 import { Input } from './input/Input';
 import { TouchControls } from './ui/TouchControls';
 import { promptStrip, PROMPT_CSS } from './ui/Prompts';
-import { buildReport, mountReportButton } from './ui/PerfReport';
+import { buildReport, mountReportButton } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { PlayerController } from './player/PlayerController';
@@ -29,6 +30,7 @@ import { PauseMenu } from './ui/PauseMenu';
 import { TitleScreen } from './ui/TitleScreen';
 import { Locator } from './world/Districts';
 import { settings } from './settings/Settings';
+import { facadeUniforms } from './render/FacadeMaterial';
 
 /**
  * URL parameters (all optional):
@@ -87,9 +89,11 @@ async function main() {
   const player = new PlayerController(physics, start.x, startY, start.z, start.heading);
   const body: PlayerBody = new StandInBody();
   scene.add(body.object);
-  const orbit = new OrbitCamera(camera, input, physics, player.collider);
+  // Gameplay cameras write into director.gameplay; the director owns the real camera (cutscene hand-off).
+  const director = new CameraDirector(camera);
+  const orbit = new OrbitCamera(director.gameplay, input, physics, player.collider);
   orbit.snap({ x: start.x, y: startY, z: start.z }, start.heading);
-  const fly = new FlyCamera(camera, input);
+  const fly = new FlyCamera(director.gameplay, input);
   let mode: Mode = 'onfoot';
   const camParam = params.get('cam');
   if (camParam) {
@@ -99,7 +103,7 @@ async function main() {
   }
   const setMode = (m: Mode) => {
     if (m === mode) return;
-    if (m === 'photo') { const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ'); fly.set(camera.position.x, camera.position.y, camera.position.z, e.y, e.x); }
+    if (m === 'photo') { const e = new THREE.Euler().setFromQuaternion(director.gameplay.quaternion, 'YXZ'); fly.set(director.gameplay.position.x, director.gameplay.position.y, director.gameplay.position.z, e.y, e.x); }
     else orbit.snap(player.pos, orbit.yaw);
     mode = m; renderHint();
   };
@@ -151,11 +155,12 @@ async function main() {
   window.addEventListener('resize', onResize); onResize();
   settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
 
+  if (params.has('night')) facadeUniforms.night.value = Number(params.get('night'));
   const frames = new FrameStats();
   const clock = new THREE.Timer();
   let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return screen; }, get hudUi() { return gameHud; }, get pause() { return pause; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || screen === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -248,12 +253,13 @@ async function main() {
     clock.update(t);
     const dt = Math.min(clock.getDelta(), 0.1);
     frames.push(dt * 1000);
+    facadeUniforms.time.value += dt;
     input.poll(dt);
     if (screen === 'title') {
       titleT += dt;
       const a = -0.35 + titleT * 0.018, r = 150;
       fly.set(flat.x + Math.sin(a) * r, 26 + Math.sin(titleT * 0.05) * 4, flat.z - 40 - Math.cos(a) * r, 0, 0);
-      camera.lookAt(flat.x, 34, flat.z);
+      director.gameplay.lookAt(flat.x, 34, flat.z);
       const wanted = world.stats.ready + world.stats.loading;
       title!.progress(wanted ? world.stats.ready / wanted : 0);
       if (world.idle && frameCount > 10) { if (!titleReady) { titleReady = true; void saves.latest().then((l) => title!.setReady(l ? l.label : null)); } }
@@ -295,6 +301,7 @@ async function main() {
       fly.update(dt);
     }
     input.endFrame();
+    director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
     renderer.render(scene, camera);
     frameCount++;

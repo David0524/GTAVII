@@ -7,6 +7,7 @@
  */
 import type { PhysicsSpec, ModelSpec } from './gen/spec';
 import { rng } from './gen/rng';
+import { Condition as Grade } from '../shared/condition';
 
 // ============================================================================ trim tiers
 export type TrimTier = 'economy' | 'standard' | 'luxury' | 'police' | 'commercial';
@@ -59,6 +60,17 @@ export function deriveCondition(spec: ModelSpec, r: () => number): Condition {
     engine: wear(0.75), radiator: wear(0.65), battery: wear(0.6),
     tyreType: 'bias',
   };
+}
+
+/**
+ * The shared 0–4 condition scale (src/shared/condition.ts: derelict, worn, lived-in, kept,
+ * pristine), so a car parked outside a building reads with the same vocabulary as the building.
+ * From average wear plus body damage.
+ */
+export function conditionGrade(c: Condition, damage = 0): Grade {
+  const wear = (c.shocks + c.tyres + Math.abs(c.alignment) + c.brakes + c.engine + c.radiator + c.battery) / 7;
+  const score = 4 - wear * 4.5 - damage * 3;
+  return Math.max(0, Math.min(4, Math.round(score))) as Grade;
 }
 
 // ============================================================================ upgrades (period only)
@@ -342,6 +354,10 @@ export interface VehicleSave {
   v: 1;
   id: string;
   modelId: string; variant: number;
+  /** Shared traffic class (src/shared/traffic.ts) for the engine's garage section (E10). */
+  vclass: string;
+  /** Shared 0–4 condition grade (derelict .. pristine). */
+  grade: number;
   trim: TrimTier; condition: Condition; upgrades: Upgrade[];
   /** Body-shop respray (sRGB hex) or null for the factory paint. */
   paint: number | null;

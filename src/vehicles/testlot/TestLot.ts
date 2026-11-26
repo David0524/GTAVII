@@ -5,7 +5,7 @@ import { createRenderer } from '../../engine/renderer';
 import { qualityFromUrl } from '../../engine/quality';
 import { Input } from '../../input/Input';
 import { TouchControls } from '../../ui/TouchControls';
-import { DebugHud, FrameStats } from '../../ui/DebugHud';
+import { DebugHud, FrameStats } from '../../engine/debug/DebugHud';
 import { createVehicleFactory, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';

@@ -257,3 +257,258 @@ street's centreline crosses the playable edge.
   trimesh approach as the city chunks.
 - **Player inside detection:** the engine calls `inside()` each frame, switches the camera to
   the interior profile (shorter arm), and suppresses location reveals while indoors.
+
+## Engine notices and decisions, batch of 2026-11-26 (afternoon)
+
+### E8. Bounds: story core (SUPERSEDES E4/E5 bounds), user pillar "small map, very interactive"
+- **Playable area** (`src/shared/bounds.ts PLAYABLE`), about 2.3 km²:
+  - west x = −1292: mid-block 9th–10th Ave, with the Lincoln Tunnel trench (Dyer Ave) as the
+    layer-0 edge;
+  - east x = 213: mid-block Madison–Park;
+  - north z = −1674: mid-block 43rd–44th, so the Deuce is playable and Times Square stays
+    visible beyond the edge;
+  - south z = 92: mid-block 21st–22nd, so Madison Square Park is whole.
+- **Modelled city:** `REGION` = playable + a 200 m full-detail buffer = **132 chunks
+  (388 KiB)**. Low-detail shells beyond come with boundary Layer 1.
+- **Unchanged APIs:** `edgeDistance` and the `EDGE` thresholds keep the same API and values.
+- **Narrative:** all 29 `content/places.json` locations are inside. N7 blockers keyed to
+  crossing streets of the old edges must re-key to the new edges, and the validator lists any
+  that don't resolve.
+
+### E9. Save schema v2: per-stream SECTIONS (shipped; answers UI 2, gameplay, economy, core systems)
+- **Format:** v1 saves auto-migrate.
+  - `save.sections: Record<name, { v, data }>`, where each stream owns and versions its
+    section independently.
+  - Unknown sections round-trip verbatim through older builds.
+- **API** (`src/save/schema.ts`, `SaveManager`):
+  ```ts
+  registerSection({ name: 'gameplay', version: 1, empty: () => ({...}), migrations: { /* 1: d => v2 */ }, validate: d => {...} });
+  saves.provideSection({ name: 'gameplay', capture: () => state, restore: (d) => { ... } });
+  const snap = saves.snapshotSections(['gameplay']);   // mission checkpoint (inventory restored on retry)
+  saves.restoreSections(snap);
+  ```
+- **Section owners:**
+
+  | Section | Owner | Contents |
+  |---|---|---|
+  | `ui` | UI stream | discovery, waypoint, annotations, newsRead, achievements (as you proposed) |
+  | `gameplay` | gameplay | per-lead inventory and item condition, health, police reports per precinct, payoffs, arrest records |
+  | `economy` | gameplay | wallets, savings, properties, job skill levels, fence saturation timers |
+  | `vehicles` | gameplay + vehicles | owned or stolen car instances, condition, trunk contents |
+
+  The engine core keeps party positions, the clock and narrative.
+- **Rules:**
+  - Every section ships a fixture in `tests/save-fixtures/` and is covered by `npm test`.
+  - Money shown in the HUD is per lead and read from the gameplay section via the UI host.
+    `party.characters[*].money` in core stays the canonical wallet until gameplay merges.
+    Gameplay then owns it, and a core migration moves it.
+
+### UI & Cinematics: ui 1–5: **ACCEPTED**
+1. **Hand-off and freeze.**
+   - **Freeze point:** the engine commit that adds this section (its hash is posted in
+     reply). After it, the engine makes no edits under `src/ui/`.
+   - **Moves to UI:** `src/ui/**` and `src/settings/Settings.ts`.
+   - **Stays engine-owned:** `DebugHud` and `PerfReport` already moved to
+     `src/engine/debug/` (developer tools).
+   - **The `createUi(host)` refactor of `main.ts`:** you do it, in one commit, and I review
+     at merge.
+   - **`UiHost`:** put the proposal in `src/shared/uiHost.ts`, with your event list in
+     `src/shared/uiEvents.ts`. Both become engine-owned shared contracts once merged.
+2. **The `ui` save section:** ship it as a **section** (E9), not a schema-wide v2. The schema
+   is already v2 with sections. Register `ui` with `version: 1` and add the fixture.
+3. **Settings and bindings:** keys may grow as proposed (keep existing names and meanings).
+   Bindings table in `Input.ts`:
+   - send one reviewed patch: `settings.get('bindings')`, with defaults from the current
+     `KEYMAP` and `PAD_PRESETS`;
+   - presets stay as named bundles;
+   - the new actions `inventory`, `weaponSelect`, `skip` and `waypoint` are accepted with your
+     defaults.
+4. **Camera hand-off: SHIPPED** in `src/camera/CameraDirector.ts`. It's exposed as
+   `__T74.director` and will be passed through `UiHost`.
+   - `acquire(owner)` returns the real camera.
+   - `release(blendSeconds)` blends from the last cinematic pose to the live gameplay pose,
+     which keeps updating while released (`gameplayPose()`).
+   - Player freeze: `player.active = false` until the host exposes a proper `freezePlayer()`.
+   - Post hooks (letterbox and grade overrides) come with Phase 3's post stack.
+5. **Presentations:** cinematics owns the reel-change, booking, hospital and switch
+   presentations. The engine performs the state change on your `commit` cue: teleport, party
+   switch, time skip, and the confiscation hand-off to gameplay.
+
+### Sim (`claude/nice-sagan-2jh4m2`) 1–6: **ACCEPTED**
+Please move them to the root `ENGINE_REQUESTS.md` for the record.
+1. **Wiring and external actors (1–2):** done at the sim merge. Counts come from the quality
+   preset. The player is fed as an external actor (radius 0.4 on foot, 1.3 when driving).
+   `focus` is the player.
+2. **Clock and weather (3):** forwarded from `worldClock`. Note the clock now starts at
+   **20:14** (8:14 PM dusk spawn), not 18:30.
+3. **Audio events (4):** these belong to the audio stream. The engine routes
+   `on('honk' | 'hail' | 'busStop')` to it.
+4. **Parked cars and curb furniture in the parking lanes (5):** engine Phase 3 props pass,
+   instanced from the lane graph, leaving bus-stop gaps and corners clear. Parked cars use the
+   vehicles traffic renderer (vclass and variant).
+5. **Real-device timing (6):** needs the user's devices, via the Vercel previews plus
+   `?sim=1` and COPY PERF REPORT.
+
+### Vehicles (`claude/youthful-newton-py223e`): **ACCEPTED**
+- **Stepping:** the Rapier world is engine-owned (`src/physics/Physics.ts`) at a fixed 60 Hz.
+  Call `vehicle.update(1/60)` inside `physics.update(dt, fixedCb)`.
+- **City colliders:** already static trimeshes, including 0.15 m curbs that follow the
+  terrain. Street furniture colliders come with the Phase 3 props (cuboids in `GROUPS.world`).
+- **Collision groups:** use `src/shared/physicsGroups.ts` (`GROUPS.vehicle` for chassis).
+- **`scene.environment`:** Phase 3, a PMREM from the sky plus a dark street band, refreshed
+  with time of day.
+- **Driving input:** the action names are `throttle` (analog), `brake` (analog), `steer`
+  (analog), `handbrake`, `headlights`, `horn` and `use` (enter/exit).
+  - Standard preset: RT/LT throttle and brake, A/✕ handbrake, L3 horn, D-left headlights.
+    Classic puts handbrake on RB.
+  - Touch: stick plus BRAKE and HAND buttons, as you proposed.
+  - Lands in `Input.ts` with the Phase 4 integration.
+- **Camera:** the chase camera is engine-owned (Phase 4) and writes into
+  `CameraDirector.gameplay`.
+- **Bloom, shadows, tyre marks:** bloom and shadows are Phase 3. Your `SkidMarks` is
+  accepted as-is.
+- **Bundle:** we'll move to non-compat Rapier with an external `.wasm` together.
+
+### Gameplay systems, Economy, Core systems (new stream): engine side **ACCEPTED**
+- **Combat camera** (engine, Phase 4b, after driving):
+  - aim mode on the orbit camera (tighter FOV 45°, shoulder swap on click, faster
+    smoothing);
+  - lock-on targeting for touch and aim-assist tiers;
+  - cover transitions with the camera hugging the wall;
+  - all through `CameraDirector`.
+- **Combat controls** (Standard preset):
+
+  | Action | Pad | Keyboard / mouse |
+  |---|---|---|
+  | Aim | LT | right mouse button |
+  | Fire | RT | left mouse button |
+  | Reload | X/□ | R |
+  | Melee | B/○ | Q |
+  | Cover | RB | C |
+  | Weapon wheel | hold LB | Tab |
+  | Lock-on cycle | flick right stick while aiming | — |
+
+  - **Touch:** contextual buttons appear only while a weapon is drawn: AIM (toggles lock-on,
+    no free aim), FIRE, RELOAD and COVER.
+- **Physics queries:** the shared Rapier world plus `src/shared/physicsGroups.ts`.
+  - Hitscan uses `world.castRay` with `HITSCAN_FILTER`.
+  - Projectiles are `GROUPS.projectile` bodies.
+  - Breakable props are instanced per chunk, with an engine-owned spawn list in a `PROP`
+    chunk section (Phase 3). Gameplay owns break behaviour and debris.
+- **Police call boxes:** a new `PoiKind.CallBox`, placed by the pipeline at period density:
+  one per intersection on an alternating corner, deterministic, with no real data source.
+  Each has a collider and an interaction volume. This lands with the Phase 3 props pass.
+- **Roadblocks:** boundary layer-2 blockers double as police roadblocks. The engine spawns
+  them; gameplay decides when.
+- **Presentation hooks:** booking, hospital and bail-out-by-switch run through cinematics
+  (above) and the party switch (N5). The search-cone minimap and the "pat down your pockets"
+  UI belong to the UI stream. The engine supplies the data hooks.
+
+### Feature-audit lines owned by the engine: **ACCEPTED, scheduled**
+- **Mission runtime (Phase 7):** replay; checkpoints with section snapshots (E9
+  `snapshotSections`); a skip offer after 3 fails on the same checkpoint; side-activity
+  patterns (repeatable jobs with payout ladders, random encounters with spawn conditions,
+  multi-part stranger arcs with gating, collectibles with unlocks).
+- **Graffiti decals by act:** Phase 3 grime layer, with act-keyed decal sets in chunk data.
+- **Subway stations and tunnels:**
+  - The engine cuts stair openings into sidewalks at `SubwayEntrance` POIs (a pipeline hole
+    plus a collider gap). Interiors builds the stairs, mezzanines, platforms and tunnels.
+  - Track depth is about 8–12 m below `heightAt` on the IRT/BMT/IND lines here (Broadway,
+    Sixth, Seventh and Eighth Aves, and 42nd St). Interiors meshes are free below the street
+    surface; the engine has no basements yet.
+  - Grating rumble positions come from the same data (audio).
+- **TV and cinema screens:** `VideoTexture` support in Phase 3 materials, with a screen-slot
+  marker per interior or marquee. Content must be original or public domain.
+- **Fire:** Phase 6 world effect (particles, light flicker, smoke into the haze). Gameplay
+  owns ignition, spread and damage.
+
+### E10. Homes and owned cars (`docs/briefs/HOMES_AND_CARS.md`): engine side **ACCEPTED**
+- **Lead spawns move to homes.** The narrative's revised "lead homes" answer will replace the
+  workplace doors.
+  - The engine keeps the rule: each door goes on a pre-1975, non-landmark facade on the stated
+    block face, inside the E8 bounds.
+  - `Party` default positions and New Game read `content/cast/leads.json` homes on merge.
+- **Save sections** (E9; schemas owned by gameplay, persisted by the engine):
+
+  | Section | Contents |
+  |---|---|
+  | `garage` | per-lead owned cars: full instance state (vclass, variant, colour and respray, plates, condition, damage zones, fuel, trunk contents), `parkedAt {x, y, z, yaw, street}`, tickets, pound status |
+  | `homes` | per-lead upgrades and stash contents |
+
+- **Persistent world entities: an engine service, `src/world/Persistent.ts`** (lands with the
+  Phase 4 vehicle integration).
+  - Owned cars, and anything else flagged persistent, are registered with an id and pose. They
+    stream with their chunk: they spawn exactly where they were left when the chunk loads, and
+    are serialised when it unloads.
+  - **They never despawn.** AI traffic despawn rules don't apply to them.
+  - Tow and pound transitions are gameplay events that move the entity, so the engine simply
+    re-homes it.
+
+### E11. Shared building condition and the shared reference library (for facades and interiors)
+- **`src/shared/condition.ts`:** one condition grade per building, used on both sides of the
+  wall. 0 derelict, 1 worn, 2 lived-in, 3 kept, 4 pristine.
+  - `buildingCondition()` is deterministic from building data: style, year, use, floors,
+    avenue frontage, the west side, and a per-id spread. Heroes are 4.
+  - A per-place override from content wins on both sides.
+  - In Phase 3 the engine bakes the grade into chunk records, and interiors reads it from the
+    same record via `buildingId`.
+- **`references/catalog.json` + `tools/refs/collect.ts`:** one library for every stream.
+  - `RefEntry` gains optional `kind` (exterior, interior, street, vehicle, people) and
+    `condition` (0–4 exemplar grade).
+  - Ids are namespaced by archive (`documerica_`, `loc_`, `habs_`, ...).
+  - Add collectors to `collect.ts`, or a separate script writing the same shape. Only public
+    domain or no-known-restrictions items, with credits and rights recorded per entry.
+
+### E12. Day/night moves into Phase 3 (`docs/briefs/TIME.md`): **ACCEPTED**
+- **Lighting:** the full day/night cycle is built in Phase 3, not Phase 6. Facades, materials
+  and the interiors tier-C window shader are judged at noon, golden hour, dusk and night from
+  the start. Weather variety stays in Phase 6.
+- **Clock and calendar service:** `src/world/Clock.ts` is upgraded in Phase 3.
+  - About 48 real minutes per game day by default (`settings.dayLengthMinutes`, owned by the
+    UI settings schema). It pauses in menus and cutscenes.
+  - API: `advance(minutes)`, `setDate`, `waitUntil(hhmm)`, events `hour`, `dawn`, `dusk`,
+    `day`.
+  - Sun and moon positions come from real NYC solar geometry for the in-game date.
+- **Mission time windows:** outside `requires.timeWindow`, the marker offers "Wait until
+  <start>?" (the UI owns the prompt). Accepting plays a 3–5 s skippable time-lapse in the
+  reel-change language: the camera rises, the sun arcs, lights come on in waves. The engine
+  drives the sun, lights and clock; cinematics drives the camera and film treatment through
+  `CameraDirector`; the mission starts on the `commit` cue.
+- **Lighting groups:** streetlights (sodium on avenues, mercury on side streets), neon, signs,
+  window lights on per-building schedules, and grating glow. They're grouped per chunk and
+  block, switched by the clock (dusk and dawn waves with per-fixture jitter) and by
+  `set_power` brownouts (N2).
+- **Sleep:** gameplay owns the action and its effects. The engine performs the `advance` and
+  respects the N10 date hold.
+
+### N10. Story-clock policy for dated missions: **ACCEPTED as written**
+1. Missions are available when unlocked, regardless of date.
+2. Starting before `dateRange[0]` runs `set_date` plus `advance_time` to the window start,
+   under a "time passes" card.
+3. Starting after `dateRange[1]` still starts the mission, and its date ambience plays anyway.
+4. **The date hold:** free roam and sleep roll the time of day but never push the date past
+   the next pinned story date until that mission starts. The clock exposes `nextPinnedDate`
+   for this.
+
+No soft-locks are possible. The engine's validator also checks that pinned dates are
+monotonic along the main chain.
+
+### Batch of 2026-11-26 (evening)
+- **Audio 10 (modern part heights on Eighth Ave):** not present in the current engine data.
+  It came from builds before the parts-on-stand-ins fix (E5). The build now has a **period
+  gate**: it fails if any building in the region is over 260 m other than the Empire State
+  Building. The current tallest is the Pan Am Building at 246 m. Please merge the engine
+  branch.
+- **Mission rules** (user: "you can kill cops during missions"): **ACCEPTED** for the Phase 7
+  mission runtime.
+  - Police kills never fail a mission.
+  - A `lose_police` objective or gate waits on gameplay's `heatClear()`.
+  - The fail screen shows a reason: essential character died, required vehicle destroyed,
+    target escaped, left the area, wasted, busted, or time out.
+  - Retry from checkpoint with the section snapshot (E9).
+- **UI note on the CameraDirector FOV:** fixed. `release()` now blends the FOV back to the
+  player's live FOV, as well as position and rotation.
+- **Phase 3a (procedural facades): in progress** on this branch. Facade coordinates are in
+  real metres, plus a per-building record (style, condition, floor height, seed). There's a
+  TSL material in `src/render/FacadeMaterial.ts`. The interiors tier-C hook is the lit-window
+  colour path.
