@@ -18,10 +18,7 @@
         "Visual rhyme with the opening"
       ],
       "durationSec": 8,
-      "audio": [
-        "holiday quiet",
-        "a single cab horn"
-      ]
+      "notes": "audio: holiday quiet; a single cab horn"
     },
     {
       "id": "s2",
@@ -33,7 +30,7 @@
       "beats": [
         "l1–l2"
       ],
-      "durationSec": 7,
+      "durationSec": 9.4,
       "dialogue": [
         "dlg.m32_prow#l1",
         "dlg.m32_prow#l2"
@@ -49,7 +46,7 @@
       "beats": [
         "l3a/l3b/l3c/l3d by ending"
       ],
-      "durationSec": 5,
+      "durationSec": 5.2,
       "dialogue": [
         "dlg.m32_prow#l3a",
         "dlg.m32_prow#l3b",
@@ -67,7 +64,7 @@
       "beats": [
         "l4a/l4b/l4c and l5a/l5b/l5c by resolution"
       ],
-      "durationSec": 8,
+      "durationSec": 9.7,
       "dialogue": [
         "dlg.m32_prow#l4a",
         "dlg.m32_prow#l4b",
@@ -87,7 +84,7 @@
       "beats": [
         "l3: 'like a fire hydrant'"
       ],
-      "durationSec": 4,
+      "durationSec": 5.2,
       "dialogue": [
         "dlg.m32_prow#l3"
       ]
@@ -110,10 +107,7 @@
         "dlg.m32_prow#l7c",
         "dlg.m32_prow#l7d"
       ],
-      "film": [
-        "grain",
-        "end-of-reel flare"
-      ]
+      "notes": "film: grain; end-of-reel flare"
     }
   ]
 }

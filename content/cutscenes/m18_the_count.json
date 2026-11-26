@@ -18,11 +18,7 @@
         "The bare racks are the reveal"
       ],
       "durationSec": 5,
-      "lighting": "single bulb, hard shadows",
-      "film": [
-        "grain",
-        "slight gate weave"
-      ]
+      "notes": "lighting: single bulb, hard shadows | film: grain; slight gate weave"
     },
     {
       "id": "s2",
@@ -35,7 +31,7 @@
         "Variant A (relationship +3): l1t–l2t, the true count",
         "Variant B: l1f, the number Nick wants"
       ],
-      "durationSec": 8,
+      "durationSec": 9.4,
       "dialogue": [
         "dlg.m18_count#l1t",
         "dlg.m18_count#l2t",
@@ -52,7 +48,7 @@
       "beats": [
         "l1"
       ],
-      "durationSec": 4,
+      "durationSec": 5.2,
       "dialogue": [
         "dlg.m18_count#l1"
       ]
@@ -71,9 +67,7 @@
       "dialogue": [
         "dlg.m18_count#l2"
       ],
-      "film": [
-        "fade to black on the bulb"
-      ]
+      "notes": "film: fade to black on the bulb"
     }
   ]
 }

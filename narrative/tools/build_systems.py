@@ -270,6 +270,17 @@ pool("barks.cop_killed", "Consequences of killing a police officer (user: 'Fully
  ("street", "shocked", "They shot a cop. On Eighth Avenue. They shot a cop."),
  ("street", "low", "Get inside. Every cop in the city is coming here.")])
 
+pool("barks.route_calls", "No-GPS route call-outs (goto.routeCalledBy). {street}/{avenue} are filled by the UI's turn list; the HUD repeats each call with the speaker's name. 'voice' tags pick the pool by caller.", [
+ ("fare", "brisk", "Left on {street}."), ("fare", "brisk", "Right on {avenue}. Then keep going."), ("fare", "impatient", "Not this one, the next one. {street}."),
+ ("fare", "brisk", "Straight through the light. Straight."), ("fare", "relieved", "Here. Right here. Pull over."), ("fare", "annoyed", "You missed it! Go around the block. {street}'s one way."),
+ ("fare_tourist", "nervous", "The map says left? On, um, {street}?"), ("fare_tourist", "happy", "Oh! That's it! That's the building!"),
+ ("cabbie", "easy", "Take {avenue} up, it's faster than it looks."), ("cabbie", "easy", "{street} runs the other way. Next block, kid."),
+ ("cabbie", "wry", "Broadway does what it wants. Stay on {avenue}."), ("cabbie", "easy", "Pull up by the hydrant. Nobody tickets a hack at the hydrant."),
+ ("labour", "strained", "Left. On {street}. Hurry. Please hurry."), ("labour", "strained", "Pennington's on Ninth. Down {avenue}. Go!"),
+ ("odessa", "steady", "Slowly, Mr. Arce. Left at {street}. I'm in no hurry. You are."),
+ ("delphine", "brisk", "Rule nine: never take {avenue} after midnight. Take {street}."),
+ ("nick", "expansive", "Turn here! No, here! I own a building on this block, I should know.")])
+
 pool("barks.combat", "Generic enemy and ally combat barks (crews, stick-up men, security). No slurs.", [
  ("spot", "alert", "There! That's him!"), ("spot", "angry", "That's the one from Eighth Avenue!"), ("spot", "cold", "Lonnie said you'd come this way."),
  ("cover", "urgent", "Get down! Behind the car!"), ("cover", "urgent", "He's got a piece! Cover!"), ("flank", "urgent", "Go around! Take the alley!"),

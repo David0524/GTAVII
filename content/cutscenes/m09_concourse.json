@@ -18,15 +18,7 @@
         "Fireworks thud far above, through concrete"
       ],
       "durationSec": 5,
-      "audio": [
-        "distant fireworks",
-        "a train announcement, muffled"
-      ],
-      "lighting": "cold fluorescent; one tube flickering",
-      "film": [
-        "grain",
-        "slight overexposure on the tubes"
-      ]
+      "notes": "audio: distant fireworks; a train announcement, muffled | lighting: cold fluorescent; one tube flickering | film: grain; slight overexposure on the tubes"
     },
     {
       "id": "s2",
@@ -76,7 +68,7 @@
     },
     {
       "id": "s5",
-      "type": "insert",
+      "type": "choice hold",
       "lensMm": 100,
       "move": "static",
       "framing": "The envelope with her fifty, in his hand between them",
@@ -84,10 +76,11 @@
       "beats": [
         "The choice c1 is untimed; the envelope holds frame"
       ],
-      "durationSec": 0,
       "dialogue": [
         "dlg.m09_concourse#c1"
-      ]
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m09_concourse#c1"
     },
     {
       "id": "s6",
@@ -104,9 +97,7 @@
         "dlg.m09_concourse#l_end",
         "dlg.m09_concourse#l_end2"
       ],
-      "film": [
-        "fade to the Act 2 title card: HEAT"
-      ]
+      "notes": "film: fade to the Act 2 title card: HEAT"
     }
   ]
 }

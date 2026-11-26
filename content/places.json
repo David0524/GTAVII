@@ -8,8 +8,11 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -25,9 +28,12 @@
       "invented": true,
       "kind": "sro",
       "discovery": {
-        "method": "mission",
-        "source": "mission.dusk_on_broadway",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.dusk_on_broadway"
       }
     },
     {
@@ -42,9 +48,12 @@
       "invented": true,
       "kind": "precinct",
       "discovery": {
-        "method": "mission",
-        "source": "mission.yes",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.yes"
       }
     },
     {
@@ -55,9 +64,12 @@
       "invented": true,
       "kind": "bar",
       "discovery": {
-        "method": "mission",
-        "source": "mission.yes",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.yes"
       }
     },
     {
@@ -68,9 +80,12 @@
       "invented": false,
       "kind": "residence",
       "discovery": {
-        "method": "mission",
-        "source": "mission.night_desk",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.night_desk"
       }
     },
     {
@@ -81,9 +96,12 @@
       "invented": true,
       "kind": "office",
       "discovery": {
-        "method": "mission",
-        "source": "mission.contact_sheet",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.contact_sheet"
       }
     },
     {
@@ -98,9 +116,15 @@
       "invented": true,
       "kind": "diner",
       "discovery": {
-        "method": "npc_tip",
-        "source": "Bernard: 'Men like that always eat at twelve-forty' (M5)",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "tip"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "tipFrom": [
+          "char.bernard_ostrow"
+        ],
+        "note": "Bernard: 'Men like that always eat at twelve-forty' (M5)"
       }
     },
     {
@@ -111,9 +135,12 @@
       "invented": true,
       "kind": "garage",
       "discovery": {
-        "method": "overheard",
-        "source": "Carriers' radio chatter on W 37th St (M4)",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "overheard"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "note": "Carriers' radio chatter on W 37th St (M4)"
       }
     },
     {
@@ -128,9 +155,13 @@
       "invented": true,
       "kind": "loft",
       "discovery": {
-        "method": "walk_past",
-        "source": "Sign: VARELAS & CO. FURS",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign: VARELAS & CO. FURS"
       }
     },
     {
@@ -141,9 +172,13 @@
       "invented": true,
       "kind": "restaurant",
       "discovery": {
-        "method": "walk_past",
-        "source": "Sign",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign"
       }
     },
     {
@@ -154,9 +189,16 @@
       "invented": true,
       "kind": "cafe",
       "discovery": {
-        "method": "npc_tip",
-        "source": "Yiannis or Mayhew (M14)",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "tip"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "tipFrom": [
+          "char.yiannis_doukas",
+          "char.carl_mayhew"
+        ],
+        "note": "Yiannis or Mayhew (M14)"
       }
     },
     {
@@ -167,8 +209,11 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -180,8 +225,11 @@
       "kind": "landmark",
       "_brand": "Invented name replacing the real store at this location (N6 registry).",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -193,9 +241,12 @@
       "invented": true,
       "kind": "sro",
       "discovery": {
-        "method": "mission",
-        "source": "mission.the_club",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.the_club"
       }
     },
     {
@@ -206,9 +257,13 @@
       "invented": true,
       "kind": "diner",
       "discovery": {
-        "method": "walk_past",
-        "source": "Sign: ROYAL CAFETERIA, OPEN ALL NIGHT",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign: ROYAL CAFETERIA, OPEN ALL NIGHT"
       }
     },
     {
@@ -223,9 +278,12 @@
       "invented": true,
       "kind": "shop",
       "discovery": {
-        "method": "mission",
-        "source": "mission.the_club",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.the_club"
       }
     },
     {
@@ -236,9 +294,13 @@
       "invented": true,
       "kind": "shop",
       "discovery": {
-        "method": "walk_past",
-        "source": "Chasing bulbs on 42nd St",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Chasing bulbs on 42nd St"
       }
     },
     {
@@ -249,9 +311,15 @@
       "invented": true,
       "kind": "stand",
       "discovery": {
-        "method": "npc_tip",
-        "source": "Dwayne: 'Earl's the best on the street' (M4)",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "tip"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "tipFrom": [
+          "char.dwayne_little"
+        ],
+        "note": "Dwayne: 'Earl's the best on the street' (M4)"
       }
     },
     {
@@ -261,8 +329,11 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -278,9 +349,12 @@
       "invented": true,
       "kind": "loft",
       "discovery": {
-        "method": "mission",
-        "source": "mission.surcharge",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.surcharge"
       }
     },
     {
@@ -295,9 +369,13 @@
       "invented": true,
       "kind": "shop",
       "discovery": {
-        "method": "walk_past",
-        "source": "Palms on the W 28th St sidewalk at dawn",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Palms on the W 28th St sidewalk at dawn"
       }
     },
     {
@@ -308,9 +386,13 @@
       "invented": true,
       "kind": "shop",
       "discovery": {
-        "method": "walk_past",
-        "source": "Sign",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign"
       }
     },
     {
@@ -325,9 +407,12 @@
       "invented": true,
       "kind": "shop",
       "discovery": {
-        "method": "mission",
-        "source": "mission.surcharge",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.surcharge"
       }
     },
     {
@@ -342,9 +427,13 @@
       "invented": true,
       "kind": "restaurant",
       "discovery": {
-        "method": "walk_past",
-        "source": "Hangul sign on W 32nd St",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Hangul sign on W 32nd St"
       }
     },
     {
@@ -355,8 +444,11 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -368,9 +460,13 @@
       "invented": true,
       "kind": "office",
       "discovery": {
-        "method": "walk_past",
-        "source": "Sign",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign"
       }
     },
     {
@@ -380,8 +476,11 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -392,8 +491,11 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "always",
-        "source": null,
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
         "hiddenUntilIntroduced": false
       }
     },
@@ -404,9 +506,12 @@
       "invented": false,
       "kind": "landmark",
       "discovery": {
-        "method": "mission",
-        "source": "mission.exposure",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.exposure"
       }
     },
     {
@@ -421,9 +526,12 @@
       "invented": false,
       "kind": "residence",
       "discovery": {
-        "method": "mission",
-        "source": "mission.the_club",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.the_club"
       }
     },
     {
@@ -434,9 +542,12 @@
       "invented": true,
       "kind": "residence",
       "discovery": {
-        "method": "mission",
-        "source": "mission.brownout",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.brownout"
       }
     },
     {
@@ -447,9 +558,13 @@
       "invented": true,
       "kind": "hospital",
       "discovery": {
-        "method": "walk_past",
-        "source": "Sign: PENNINGTON GENERAL, EMERGENCY",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign: PENNINGTON GENERAL, EMERGENCY"
       }
     },
     {
@@ -460,9 +575,12 @@
       "invented": true,
       "kind": "office",
       "discovery": {
-        "method": "business_card",
-        "source": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest",
-        "hiddenUntilIntroduced": true
+        "via": [
+          "card"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "note": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest"
       }
     },
     {
@@ -473,9 +591,13 @@
       "invented": true,
       "kind": "shop",
       "discovery": {
-        "method": "walk_past",
-        "source": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail"
       }
     },
     {
@@ -486,9 +608,12 @@
       "invented": true,
       "kind": "lot",
       "discovery": {
-        "method": "newspaper_ad",
-        "source": "Sunday classifieds in The Daily Ticker",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "newspaper"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sunday classifieds in The Daily Ticker"
       }
     },
     {
@@ -503,9 +628,13 @@
       "invented": true,
       "kind": "precinct",
       "discovery": {
-        "method": "walk_past",
-        "source": "Green lamps outside",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Green lamps outside"
       }
     },
     {
@@ -520,11 +649,15 @@
       "invented": true,
       "kind": "precinct",
       "discovery": {
-        "method": "walk_past",
-        "source": "Green lamps outside",
-        "hiddenUntilIntroduced": false
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Green lamps outside"
       }
     }
   ],
-  "_discovery_note": "Map discovery (user: 'populate with new icons/tags throughout as you discover more stuff. Not all at once.'). Methods: always (landmarks), walk_past (sign seen within ~30 m), npc_tip, overheard, newspaper_ad, business_card, mission. Shady or story places stay hidden until introduced. Side-content places (economy.json, side_content.json) are discovered via npc_tip and overheard by default; the Ticker, fences, the chop shop, OTB and the pool hall via overheard or newspaper_ad."
+  "_discovery_note": "Format per the UI & cinematics chat: {via:[landmark|sight|tip|overheard|newspaper|card|mission], sightM, shady, tipFrom:[char ids], mission, hiddenUntilIntroduced, note}."
 }

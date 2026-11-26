@@ -75,6 +75,34 @@ CUTS = [
    shot("s6", "final", 28, "Testimony: camera stays as Teddy walks downtown. Public: he walks uptown, as at the start. New Pad: a car pulls up and he gets in the back. Ashes: the prow empty, seen from a cab window.", "Per N3 §4", "", ["l7a/l7b/l7c/l7d by ending", "FADE OUT; credits over the dusk"], 10,
         dlg=["dlg.m32_prow#l7a", "dlg.m32_prow#l7b", "dlg.m32_prow#l7c", "dlg.m32_prow#l7d"], film=["grain", "end-of-reel flare"])]},
 ]
+import glob as _g
+_DL = {}
+for _f in _g.glob(str(OUT.parent / "dialogue" / "*.json")):
+    _d = json.loads(open(_f).read()); _DL[_d["id"]] = {l["id"]: l for l in _d["lines"]}
+
+
+def fix_shot(s):
+    """UI chat format: free text goes to notes; choice holds wait for the choice; durations meet reading pace."""
+    notes = []
+    for k in ("audio", "lighting", "film"):
+        if k in s:
+            v = s.pop(k); notes.append(f"{k}: " + ("; ".join(v) if isinstance(v, list) else v))
+    if notes: s["notes"] = " | ".join(notes)
+    ch = [r for r in s.get("dialogue", []) if "#c" in r]
+    if s.get("durationSec") == 0 and ch:
+        s["type"] = "choice hold"; s["waitFor"] = "choice"; s["choices"] = ch[0]; s.pop("durationSec", None); return
+    groups = {}
+    for r in s.get("dialogue", []):
+        sid, _, lid = r.partition("#"); l = _DL.get(sid, {}).get(lid)
+        if l and "text" in l:
+            key = re.sub(r"[a-z]$", "", lid) if re.search(r"\d[a-z]$", lid) else lid  # ending variants: count once
+            groups[key] = max(groups.get(key, 0), max(1.6, 0.32 * len(l["text"].split())))
+    s["durationSec"] = round(max(s.get("durationSec", 0), sum(groups.values()) + 0.4), 1)
+
+
+import re
+for c in CUTS:
+    for sh in c["shots"]: fix_shot(sh)
 for c in CUTS:
     (OUT / f"{c['id'].split('.', 1)[1]}.json").write_text(json.dumps(c, ensure_ascii=False, indent=2) + "\n")
 print(len(CUTS), "cutscenes")

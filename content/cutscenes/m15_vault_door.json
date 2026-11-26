@@ -18,16 +18,7 @@
         "Steam rises off the ice in the headlights"
       ],
       "durationSec": 6,
-      "audio": [
-        "dripping",
-        "a compressor not running (silence)",
-        "a distant siren"
-      ],
-      "lighting": "headlights only; deep shadow",
-      "film": [
-        "grain heavy",
-        "lifted blacks"
-      ]
+      "notes": "audio: dripping; a compressor not running (silence); a distant siren | lighting: headlights only; deep shadow | film: grain heavy; lifted blacks"
     },
     {
       "id": "s2",
@@ -54,7 +45,7 @@
       "beats": [
         "l2–l3"
       ],
-      "durationSec": 7,
+      "durationSec": 8.1,
       "dialogue": [
         "dlg.m15_teddy_at_door#l2",
         "dlg.m15_teddy_at_door#l3"
@@ -101,7 +92,7 @@
       "beats": [
         "l7"
       ],
-      "durationSec": 4,
+      "durationSec": 4.9,
       "dialogue": [
         "dlg.m15_teddy_at_door#l7"
       ]

@@ -18,10 +18,7 @@
         "The ACT 3 title card fades: RESIGNATION"
       ],
       "durationSec": 6,
-      "audio": [
-        "the radio narration (invented, never a real voice)"
-      ],
-      "lighting": "warm lamps, a fan turning"
+      "notes": "audio: the radio narration (invented, never a real voice) | lighting: warm lamps, a fan turning"
     },
     {
       "id": "s2",
@@ -33,7 +30,7 @@
       "beats": [
         "l1–l2 (Radio)"
       ],
-      "durationSec": 7,
+      "durationSec": 7.4,
       "dialogue": [
         "dlg.m22_lobby_radio#l1",
         "dlg.m22_lobby_radio#l2"
@@ -49,7 +46,7 @@
       "beats": [
         "l3"
       ],
-      "durationSec": 4,
+      "durationSec": 4.6,
       "dialogue": [
         "dlg.m22_lobby_radio#l3"
       ]
@@ -64,7 +61,7 @@
       "beats": [
         "l4"
       ],
-      "durationSec": 4,
+      "durationSec": 5.2,
       "dialogue": [
         "dlg.m22_lobby_radio#l4"
       ]

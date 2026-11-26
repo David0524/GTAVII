@@ -1,0 +1,92 @@
+{
+  "id": "barks.route_calls",
+  "core": false,
+  "note": "No-GPS route call-outs (goto.routeCalledBy). {street}/{avenue} are filled by the UI's turn list; the HUD repeats each call with the speaker's name. 'voice' tags pick the pool by caller.",
+  "lines": [
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Left on {street}."
+    },
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Right on {avenue}. Then keep going."
+    },
+    {
+      "context": "fare",
+      "emotion": "impatient",
+      "text": "Not this one, the next one. {street}."
+    },
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Straight through the light. Straight."
+    },
+    {
+      "context": "fare",
+      "emotion": "relieved",
+      "text": "Here. Right here. Pull over."
+    },
+    {
+      "context": "fare",
+      "emotion": "annoyed",
+      "text": "You missed it! Go around the block. {street}'s one way."
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "nervous",
+      "text": "The map says left? On, um, {street}?"
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "happy",
+      "text": "Oh! That's it! That's the building!"
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Take {avenue} up, it's faster than it looks."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "{street} runs the other way. Next block, kid."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "wry",
+      "text": "Broadway does what it wants. Stay on {avenue}."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Pull up by the hydrant. Nobody tickets a hack at the hydrant."
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Left. On {street}. Hurry. Please hurry."
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Pennington's on Ninth. Down {avenue}. Go!"
+    },
+    {
+      "context": "odessa",
+      "emotion": "steady",
+      "text": "Slowly, Mr. Arce. Left at {street}. I'm in no hurry. You are."
+    },
+    {
+      "context": "delphine",
+      "emotion": "brisk",
+      "text": "Rule nine: never take {avenue} after midnight. Take {street}."
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Turn here! No, here! I own a building on this block, I should know."
+    }
+  ]
+}
