@@ -68,11 +68,15 @@ Real-device numbers are still needed (the user tests on an iPhone).
 
 **Crowd LODs (triangles):** LOD1 (near ring) about 7.2k + 1.4k hair; LOD2 about 4.1k; LOD3 about 1.8k.
 
-**Crowd: 400 agents, High (`19_crowd_400_high`)**
-- `setAgents` CPU: **0.34 ms avg, 1.0 ms p95**, including 10 near-ring characters.
-- 74 draws, about 545k triangles in view; atlas 32 templates, half-float.
+**Crowd: 400 agents, High (`19_crowd_400_high`, 145 measured frames)**
+- `setAgents` CPU: **0.40 ms avg, 1.2 ms p95** (budget 1.5 ms), including 10 near-ring
+  characters.
+- 74 draws, about 544k triangles in view (10 near, 46 mid, 158 far, 186 culled); atlas 33
+  templates, half-float.
 
-**Crowd: 120 agents, Low (`20_crowd_120_low`):** see the json next to the shot.
+**Crowd: 120 agents, Low (`20_crowd_120_low`)**
+- `setAgents` CPU: **0.18 ms avg, 0.5 ms p95**.
+- 18 draws, about 94k triangles; 12 templates; near ring of 2 at LOD2.
 
 **Foot sliding** (`npx tsx tools/characters/measure-sliding.ts`; ankle drift while planted, 3 bodies
 × 3 crowd speeds):
