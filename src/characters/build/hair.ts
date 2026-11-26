@@ -69,7 +69,8 @@ export function scalpField(ctx: Omit<HairCtx, 'covered'>): (k: number) => number
     const yy = P[k * 3 + 1];
     const fr = Math.max(0, (P[k * 3 + 2] - hc[2]) / (ff.headRadius * 0.9));
     const sd = Math.min(1, Math.abs(P[k * 3] - hc[0]) / (ff.headRadius * 0.85));
-    const fringeY = ff.browY + Math.max(st.fringe, 0.03) * s + app.hair.recession * 0.05 * s * (0.4 + sd);
+    // the tint stops 2 cm short of the shells' hairline so it never shows as a smudge below the hair
+    const fringeY = ff.browY + (Math.max(st.fringe, 0.03) + 0.02) * s + app.hair.recession * 0.05 * s * (0.4 + sd);
     const frontCut = fr > 0.35 ? yy - fringeY + (1 - fr) * 0.02 : 1;
     const earCut = sd > 0.75 && fr < 0.6 ? yy - (eyeY + 0.015 * s) : 1;
     return Math.min(frontCut, earCut, yy - (eyeY - 0.02 * s));

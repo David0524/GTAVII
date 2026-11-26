@@ -70,8 +70,7 @@ export class Character {
     this.build(opts.prebuilt);
     const formal = !!this.outfit.outer && (this.outfit.outer.kind === 'suitJacket' || this.outfit.outer.kind === 'sportCoat') || !!this.outfit.tie;
     this.animator = new Animator(lib, this.restPelvis, { stride: this.appearance.gait.stride, swing: this.appearance.gait.swing, bounce: this.appearance.gait.bounce, slump: this.appearance.slump, age: this.appearance.age, heat: opts.heat ?? 0.6, formal });
-    if (this.appearance.age > 60 && desc.seed % 3 === 0) this.animator.setIdle('idle_hands_behind');
-    else if (desc.seed % 5 === 0 && this.appearance.sex >= 0.5) this.animator.setIdle('idle_pockets');
+    // idle_pockets / idle_hands_behind need a hand-placement pass before they're used by default
   }
 
   private build(prebuilt?: Assembled) {

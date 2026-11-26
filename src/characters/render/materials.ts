@@ -221,10 +221,10 @@ export function hairMaterial(): THREE.MeshPhysicalNodeMaterial {
   const grey = m1.z.mul(step(0.5, mx_noise_float(vec3(uvA.mul(freq.mul(0.7)), 3)).add(0.5)));
   // inner layers darker (self-shadowing), tips lighter; grey strands mixed in by age
   m.colorNode = mix(mix(cA.mul(0.55), cB, h.mul(0.8).add(0.1)).mul(mix(0.8, 1.15, n)), vec3(0.72, 0.7, 0.67), grey);
-  m.roughnessNode = float(0.48);
+  m.roughnessNode = float(0.62);
   m.sheenNode = cA.mul(0.6).add(0.03);
   m.sheenRoughnessNode = float(0.35);
-  m.specularIntensityNode = float(0.6);
+  m.specularIntensityNode = float(0.3);
   sharedHair = m;
   void max; void min; void cos; void pow; void normalize; void length;
   return m;

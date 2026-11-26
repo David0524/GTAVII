@@ -17,9 +17,9 @@
       "props": [
         "briefcase"
       ],
-      "tris": 8868,
+      "tris": 8830,
       "draws": 2,
-      "buildMs": 116.3
+      "buildMs": 136.7
     },
     {
       "seed": 1977783798,
@@ -33,9 +33,9 @@
       "shoes": "workBoot",
       "hat": null,
       "props": [],
-      "tris": 7871,
+      "tris": 7839,
       "draws": 2,
-      "buildMs": 79.7
+      "buildMs": 71.9
     },
     {
       "seed": 4286010875,
@@ -49,9 +49,9 @@
       "shoes": "boot",
       "hat": null,
       "props": [],
-      "tris": 9300,
+      "tris": 9274,
       "draws": 2,
-      "buildMs": 61.5
+      "buildMs": 49.4
     },
     {
       "seed": 4022143663,
@@ -65,9 +65,9 @@
       "shoes": "sneaker",
       "hat": "fedora",
       "props": [],
-      "tris": 7754,
+      "tris": 7724,
       "draws": 2,
-      "buildMs": 52.3
+      "buildMs": 46.4
     },
     {
       "seed": 1422669857,
@@ -81,9 +81,9 @@
       "shoes": "wingtip",
       "hat": null,
       "props": [],
-      "tris": 7815,
+      "tris": 7801,
       "draws": 2,
-      "buildMs": 61.8
+      "buildMs": 46.7
     },
     {
       "seed": 2134067074,
@@ -97,9 +97,9 @@
       "shoes": "sandal",
       "hat": null,
       "props": [],
-      "tris": 9778,
+      "tris": 9728,
       "draws": 2,
-      "buildMs": 70.2
+      "buildMs": 39.4
     },
     {
       "seed": 84956558,
@@ -116,9 +116,9 @@
         "tote",
         "cigarette"
       ],
-      "tris": 9922,
+      "tris": 9814,
       "draws": 2,
-      "buildMs": 34.7
+      "buildMs": 46.8
     },
     {
       "seed": 2593002056,
@@ -134,9 +134,9 @@
       "props": [
         "briefcase"
       ],
-      "tris": 9110,
+      "tris": 9094,
       "draws": 2,
-      "buildMs": 40.4
+      "buildMs": 46.7
     },
     {
       "seed": 1571629204,
@@ -152,9 +152,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 8034,
+      "tris": 7988,
       "draws": 2,
-      "buildMs": 46.7
+      "buildMs": 45.4
     },
     {
       "seed": 2079497775,
@@ -168,26 +168,26 @@
       "shoes": "sneaker",
       "hat": null,
       "props": [],
-      "tris": 7358,
+      "tris": 7310,
       "draws": 2,
-      "buildMs": 33.8
+      "buildMs": 33.1
     }
   ],
   "updateMs": [
     0.1,
+    0.1,
+    0,
+    0.1,
     0,
     0,
     0.1,
     0,
     0,
-    0,
-    0,
-    0,
-    0.1
+    0
   ],
   "renderMsSoftware": [
-    3.900000000023283,
-    2.099999999976717,
-    2
+    5,
+    2.699999999953434,
+    2.4000000001396984
   ]
 }
