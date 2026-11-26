@@ -525,7 +525,17 @@ export class Gameplay {
     return res;
   }
   private drive(carId: string) { const c = this.cars.cars.get(carId); if (c) this.setContext({ vehicle: { id: c.id, vclass: c.vclass, colour: c.colour } }); }
-  exitCar() { const v = this.pc.vehicle; if (v && this.player) { const c = this.cars.cars.get(v.id); const p = this.player.position(); if (c) { c.x = p[0]; c.z = p[2]; } } this.setContext({ vehicle: null }); }
+  exitCar() {
+    const v = this.pc.vehicle;
+    if (v && this.player) {
+      const c = this.cars.cars.get(v.id); const p = this.player.position(); if (c) { c.x = p[0]; c.z = p[2]; }
+      // your own car left at the kerb: the sim's enforcement watches it (alternate side, hydrants, hours)
+      if (c && this.ownership.owned.get(c.id)?.owner === this.player.lead) { this.ownership.parkOnStreet(c.id); this.simLike?.registerParkedCar?.(c.id, p[0], p[2]); }
+    }
+    this.setContext({ vehicle: null });
+  }
+  /** The parking rule at a kerb right now (sim's parkingRule), for the UI's "can I leave it here?" hint. */
+  parkingRuleAt(x: number, z: number) { return this.simLike?.parkingRule?.(x, z, Math.floor(this.clock.clock.minutes)) ?? null; }
 
   // ------------------------------------------------------------------ crimes
   /** Report a crime by the player (or any perp). Perception runs immediately. */
@@ -626,6 +636,15 @@ export class Gameplay {
       sim.dispatch?.('ambulance', x, z);
     });
     if (typeof (sim as any).subwayStations === 'function') this.bindSubway(sim as unknown as SubwayBinding);
+    if (typeof sim.parkingRule === 'function') {
+      // the sim enforces the kerb (its parkingRule); gameplay keeps fines, the boot, the pound and garages
+      this.ownership.externalTickets = true;
+      const carOf = (e: any) => String(e.id ?? e.carId ?? e.vehicleId ?? '');
+      const hour = () => this.clock.clock.minutes / 60, day = () => this.clock.clock.day;
+      sim.on('ticketIssued', (e) => this.ownership.addTicket(carOf(e), day(), hour()));
+      sim.on('towDispatched', (e) => this.emit('notice', { kind: 'towDispatched', car: carOf(e) }));
+      sim.on('vehicleTowed', (e) => this.ownership.tow(carOf(e), day()));
+    }
     for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
     sim.on('cabReady', (e) => { const c = this.cab; if (c && c.id === e.cabId) { c.state = 'ready'; c.kerb = [e.x, e.z]; this.emit('cab', { kind: 'ready', ...e }); } });
     sim.on('cabTurnAhead', (e) => { if (this.cab?.id === e.cabId) this.emit('cab', { kind: 'turn', ...e }); });

@@ -105,6 +105,17 @@ export class Ownership extends Emitter<OwnEvents> {
     return true;
   }
 
+  /** The sim's parking layer writes the tickets (its parkingRule knows each kerb); gameplay keeps fines, boot and pound. */
+  externalTickets = false;
+  /** A ticket written by the sim's parking enforcement. */
+  addTicket(car: string, d: number, hourOfDay: number) {
+    const o = this.owned.get(car); if (!o || o.parked !== 'street') return false;
+    o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets });
+    if (!o.booted && o.tickets >= BOOT_AT) { o.booted = true; o.bootedAt = d * 24 + hourOfDay; this.emit('booted', { car: o.car }); }
+    return true;
+  }
+  /** Towed (by the sim's tow truck, or after a day in the boot). */
+  tow(car: string, d: number) { const o = this.owned.get(car); if (!o || o.parked === 'pound') return false; o.parked = 'pound'; o.impoundedDay = d; this.emit('towed', { car: o.car }); return true; }
   /** Game time passes (call on every timeAdvanced and periodically in play): tickets, boots, tows, garage expiry. */
   advance(fromDay: number, fromMin: number, toDay: number, toMin: number) {
     for (let d = fromDay; d <= toDay; d++) {
@@ -114,7 +125,7 @@ export class Ownership extends Emitter<OwnEvents> {
       for (const o of this.owned.values()) {
         if (o.parked === 'garage' && d > o.garageUntilDay) o.parked = 'street';
         if (o.parked !== 'street') continue;
-        if (hit) { o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets }); }
+        if (hit && !this.externalTickets) { o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets }); }
         if (!o.booted && o.tickets >= BOOT_AT) { o.booted = true; o.bootedAt = d * 24 + Math.max(a, 8 * 60) / 60; this.emit('booted', { car: o.car }); }
         if (o.booted && d * 24 + b / 60 - o.bootedAt >= TOW_AFTER_H) { o.parked = 'pound'; o.impoundedDay = d; this.emit('towed', { car: o.car }); }
       }

@@ -152,3 +152,31 @@ test('sim mirror: a dispatched radio car is spawned responding (the sim starts i
   assert.ok(car, 'a car was dispatched');
   assert.ok(car.respondTo && Math.hypot(car.respondTo.x - 10, car.respondTo.z - 5) < 30 && car.siren, `responding to the scene: ${JSON.stringify(car)}`);
 });
+
+test('sim parking: an owned car left at the kerb is registered; the sim writes the tickets, gameplay boots and impounds', () => {
+  class ParkingSim extends FakeSim {
+    hs = new Map<string, ((e: any) => void)[]>(); parked: any[] = [];
+    on(t: string, cb: (e: any) => void) { (this.hs.get(t) ?? this.hs.set(t, []).get(t)!).push(cb); }
+    fire(t: string, e: any) { for (const cb of this.hs.get(t) ?? []) cb(e); }
+    parkingRule(x: number) { return x > 0 ? { kind: 'alternate_side', until: 660 } : { kind: 'ok' }; }
+    registerParkedCar(id: string, x: number, z: number) { this.parked.push({ id, x, z }); }
+  }
+  const sim = new ParkingSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [5, 0, 0]; const T = 'char.teddy_arce';
+  g.bindPlayer({ id: 'player', lead: T, position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  g.inv.addMoney(T, 300000); g.ownership.restockWeek(0);
+  const l = g.ownership.lot[0]; const car = g.ownership.offer(T, l.id, l.ask).car!;
+  g.enterCar(car, 'keys'); g.exitCar();
+  assert.deepEqual(sim.parked[0], { id: car, x: 5, z: 0 });
+  assert.deepEqual(g.parkingRuleAt(5, 0), { kind: 'alternate_side', until: 660 });
+  // gameplay no longer writes its own alternate-side tickets...
+  g.ownership.advance(1, 0, 8, 0);
+  assert.equal(g.ownership.owned.get(car)!.tickets, 0);
+  // ...the sim's enforcement does, and three unpaid is the boot (gameplay's rule)
+  for (let i = 0; i < 3; i++) sim.fire('ticketIssued', { id: car });
+  assert.equal(g.ownership.owned.get(car)!.tickets, 3); assert.ok(g.ownership.owned.get(car)!.booted);
+  sim.fire('vehicleTowed', { vehicleId: car });
+  assert.equal(g.ownership.owned.get(car)!.parked, 'pound');
+});
