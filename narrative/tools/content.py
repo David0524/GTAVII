@@ -28,6 +28,8 @@ def jl(p):
 
 def load():
     cast = {c["id"]: c for f in (C / "cast").glob("*.json") for c in jl(f)}
+    if (C / "cast_service.json").exists():
+        cast.update({c["id"]: c for c in jl(C / "cast_service.json")["characters"]})
     places = {p["id"]: p for p in jl(C / "places.json")["places"]}
     flags = {f["id"]: f for f in jl(C / "flags.json")["flags"]}
     missions = {m["id"]: m for m in (jl(f) for f in sorted((C / "missions").glob("*.json")))}
@@ -237,7 +239,7 @@ def main():
     for pid, x in pools.items():
         if x.get("core") and len(x["lines"]) < 30: E(f"{pid}: core pool has {len(x['lines'])} lines (<30)")
         for l in x["lines"]:
-            if len(l["text"]) > LINE_MAX: E(f"{pid}: bark over {LINE_MAX}: {l['text']}")
+            if len(re.sub(r"\{[A-Za-z]+\}", "xxxxxxxx", l["text"])) > LINE_MAX: E(f"{pid}: bark over {LINE_MAX}: {l['text']}")
     blob = json.dumps([list(missions.values()), acts_doc, list(dialogue.values()), bnd])
     for ref in sorted(set(re.findall(r'"(npc\.[a-z_]+)"', blob))):
         if ref not in archs: E(f"archetype {ref} referenced but not defined")

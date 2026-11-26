@@ -1,0 +1,97 @@
+{
+  "id": "barks.combat",
+  "core": false,
+  "note": "Generic enemy and ally combat barks (crews, stick-up men, security). No slurs.",
+  "lines": [
+    {
+      "context": "spot",
+      "emotion": "alert",
+      "text": "There! That's him!"
+    },
+    {
+      "context": "spot",
+      "emotion": "angry",
+      "text": "That's the one from Eighth Avenue!"
+    },
+    {
+      "context": "spot",
+      "emotion": "cold",
+      "text": "Lonnie said you'd come this way."
+    },
+    {
+      "context": "cover",
+      "emotion": "urgent",
+      "text": "Get down! Behind the car!"
+    },
+    {
+      "context": "cover",
+      "emotion": "urgent",
+      "text": "He's got a piece! Cover!"
+    },
+    {
+      "context": "flank",
+      "emotion": "urgent",
+      "text": "Go around! Take the alley!"
+    },
+    {
+      "context": "reload",
+      "emotion": "urgent",
+      "text": "I'm empty! Cover me!"
+    },
+    {
+      "context": "hurt",
+      "emotion": "pained",
+      "text": "I'm hit! I'm hit!"
+    },
+    {
+      "context": "hurt",
+      "emotion": "pained",
+      "text": "My leg! Ah, my leg!"
+    },
+    {
+      "context": "retreat",
+      "emotion": "panicked",
+      "text": "Forget it! It's not worth it! Go!"
+    },
+    {
+      "context": "retreat",
+      "emotion": "panicked",
+      "text": "Cops are coming! Scatter!"
+    },
+    {
+      "context": "taunt",
+      "emotion": "cocky",
+      "text": "That all you got, old man?"
+    },
+    {
+      "context": "taunt",
+      "emotion": "cocky",
+      "text": "Come on out, collector! Bring the envelope!"
+    },
+    {
+      "context": "disarmed",
+      "emotion": "shocked",
+      "text": "Hey! That's my— Okay. Okay."
+    },
+    {
+      "context": "down_nonlethal",
+      "emotion": "groaning",
+      "text": "Uhh… nobody pays me enough for this."
+    },
+    {
+      "context": "ally_delphine",
+      "emotion": "cold",
+      "text": "Rule twenty: don't miss."
+    },
+    {
+      "context": "ally_teddy",
+      "emotion": "flat",
+      "text": "Drop it. Drop it and walk away."
+    },
+    {
+      "context": "ally_nick",
+      "emotion": "panicked",
+      "text": "I'm paying you men! Do something!"
+    }
+  ]
+}

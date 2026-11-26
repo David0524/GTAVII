@@ -1,0 +1,104 @@
+{
+  "_note": "Each lead's own home (user: 'The characters should all have their own home. Apartments should match the characters.'). Portrait dressing for the Interiors chat. Sleeping per TIME.md.",
+  "homes": [
+    {
+      "lead": "char.teddy_arce",
+      "interior": "interior.corwin_9f",
+      "where": "Hotel Corwin, room 9F (W 31st St, Broadway–6th Ave)",
+      "why": "The job comes with the room (N1). He lives where he works: eight by ten, a window onto an airshaft.",
+      "portrait": [
+        "Army footlocker as a table",
+        "academy class photo, turned face-down",
+        "expired hack licence tucked in the mirror",
+        "Saint Christopher on a nail",
+        "broken window air-conditioner with a towel in it",
+        "Carmen's tupperware, washed, never returned",
+        "a hot plate and one pan"
+      ],
+      "byAct": {
+        "1": "the nightstick in the footlocker",
+        "2": "the revolver in a coffee can on the shelf (after M7); collection envelopes counted on the bed",
+        "3": "Hollis's radio on the sill (after M19); the ledger copy under the floorboard (if wire)",
+        "epilogue": "packed (Testimony) / unchanged (Public) / a new suit on the door (New Pad) / bare (Ashes)"
+      },
+      "storyObjects": [
+        "item.nightstick",
+        "item.revolver_service",
+        "item.ledger"
+      ]
+    },
+    {
+      "lead": "char.delphine_moore",
+      "interior": "interior.penn_south_delphine",
+      "where": "Penn South co-op, a 7th-floor one-bedroom (W 27th St, 8th–9th Aves)",
+      "why": "Bought in 1965 as an ILGWU presser, when Penn South was union housing. She kept paying the maintenance when the work went south. Dignified, separate from Eighth Ave; nobody on the strip knows. Carmen Arce lives two buildings over, and they nod in the elevator.",
+      "portrait": [
+        "the pressing iron she kept, on a shelf like a trophy",
+        "a sewing machine with a cover she made",
+        "a framed union card (1963)",
+        "her mother's photo from Wilmington",
+        "a green notebook she never writes in (decoy)",
+        "two good dresses and five practical ones",
+        "plants: a lot of plants"
+      ],
+      "byAct": {
+        "1": "a beauty-shop magazine open on the table",
+        "2": "prints drying on a string over the bath (the photo file)",
+        "3": "the lease papers (if any) on the table; Tina's hairbrush in the bathroom (if she stays)",
+        "epilogue": "a key to W 37th St on a nail (shop) or a joint ledger with Mi-sook (kye)"
+      },
+      "storyObjects": [
+        "item.film_pack",
+        "item.print_brannock_1"
+      ],
+      "note": "Club cash still lives in the Arden boiler room (Marcus), not at home. That's her rule."
+    },
+    {
+      "lead": "char.nick_varelas",
+      "interior": "interior.varelas_apartment",
+      "where": "A prewar doorman building, Madison Ave & E 37th St (11th floor)",
+      "why": "Grand, bought in 1968 at the top of his rise. The doorman (Cas Wojcik) is a barometer of his finances.",
+      "portrait": [
+        "a grand piano nobody plays",
+        "Eleni's reading chair with her glasses on a ledger",
+        "framed photos: Kastoria lake, the first shop on W 29th St, a furriers' banquet 1962",
+        "amber worry beads on every table",
+        "a desk with a drawer of unpaid bills",
+        "the Delacroix 9mm in a velvet case (unloaded since 1956)",
+        "a balcony with dead geraniums"
+      ],
+      "byAct": {
+        "2": "bank letters on the hall table; the AC rattling",
+        "3": "a small suitcase by the door (Eleni)",
+        "epilogue": "piano sold (sold-on) / paid bills framed as a joke (kept) / a Housing Council thank-you letter on the piano (council)"
+      },
+      "storyObjects": [
+        "item.delacroix_9_continental"
+      ]
+    },
+    {
+      "lead": "principal",
+      "who": "char.carmen_arce",
+      "interior": "interior.carmen_apartment",
+      "where": "Penn South, W 26th St & 8th Ave",
+      "portrait": [
+        "sewing machine by the window",
+        "saint candles",
+        "Teddy's academy photo, face-up",
+        "a pot always on the stove"
+      ]
+    },
+    {
+      "lead": "principal",
+      "who": "char.odessa_pruitt",
+      "interior": "interior.corwin_floor11",
+      "where": "Corwin room 1104",
+      "portrait": [
+        "a window on the Empire State",
+        "church hats in boxes",
+        "the court notice in her Bible",
+        "a folding chair"
+      ]
+    }
+  ]
+}

@@ -222,3 +222,20 @@ agreed. Scale 1–10 except health.
 - **Mobile:** every combat objective is clearable with soft-lock aim on touch.
 - **Fallback:** combat beats become `survive`-style timed objectives with scripted enemies.
 - **Used by:** Act 1 (M1–M9) as of commit 40d2413+. Acts 2–3 are next.
+
+## From narrative: 13. Systems content delivered for Gameplay, Interiors and UI (schemas proposed)
+Written by `narrative/tools/build_systems.py`. The owning chats confirm or amend the shapes.
+| File | For | Contents |
+|---|---|---|
+| `content/police/precincts.json` | Gameplay | 3 invented precincts on real blocks (Midtown Central, Madison Square, Bryant Park), each with a desk sergeant, corruptibility 0–5, story-flag payoff effects, and the honest officers (Kearney, Greer, Navarro; Fisk of Internal Affairs) |
+| `content/cast_service.json` | Gameplay, Characters | 10 service characters: desk sergeants, IA detective, lawyer Maureen Kehoe, property clerk, bail bondsman, ER surgeon, doorman, car salesman, garage attendant |
+| `content/items/{weapons,ammo,consumables,keys,evidence}.json` | Gameplay | Invented gun makers and models by tier (street, service, quality, melee) with 1974 prices; ammo; consumables; keys; evidence. Maker names are batch-checked (weak), so they need individual and USPTO checks |
+| `content/shops.json` | Gameplay, UI | Diners, clothing (outfit changes defeat descriptions), pawn, hardware, newsstand, drugstore, liquor, licensed gun shop, with 1974 prices |
+| `content/crews.json` | Gameplay, Sim | 7 crews and their territories (all adults; defined by trade) |
+| `content/economy.json` | Gameplay | Money outside missions: hack fares, garment runs, locksmith call-outs, the tabloid photo desk, bail skips, fences, the chop shop, numbers, OTB, cards and pool, fight cards, businesses for sale (with trouble events), Nick's properties, the loan shark |
+| `content/homes.json` | Interiors, Gameplay | One home per lead with portrait dressing by act (Teddy: Corwin 9F; Delphine: Penn South; Nick: Madison & E 37th), plus Carmen's and Odessa's homes |
+| `content/cars.json` | Gameplay, Vehicles | A used lot, a showroom, newspaper classifieds (lemons and bargains), an insurer and garages. Makes come from the vehicles registry |
+| `content/barks/{police_radio,combat,surrender,ambulance,sleep}.json` | Gameplay, Audio | Dispatch lines with `{placeholder}` description templates (the heat cue); combat, surrender and arrest lines; ER lines; sleep and wake lines |
+| `content/dialogue/sys_bail_*` and `sys_lawyer_*` | Gameplay | Bail-out scenes for all six lead pairs (relationship +1 both ways) and a lawyer call for each lead |
+| `content/interiors.json` | Interiors | Added home interiors and subway interiors; Tier A marked |
+- **Lead homes changed:** Delphine is now at Penn South (W 27th St) and Nick at Madison Ave & E 37th St. Spawns are updated. The off-map night rule for Nick is no longer needed.

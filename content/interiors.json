@@ -18,7 +18,8 @@
         "lobby chairs",
         "elevator",
         "desk phone"
-      ]
+      ],
+      "tier": "A"
     },
     {
       "id": "interior.corwin_floor11",
@@ -53,7 +54,8 @@
         "Rita's lobby bar",
         "porter's stool",
         "service door"
-      ]
+      ],
+      "tier": "A"
     },
     {
       "id": "interior.arden_back_stairs",
@@ -70,7 +72,8 @@
         "service stairwell",
         "boiler room",
         "door to the lobby bar"
-      ]
+      ],
+      "tier": "A"
     },
     {
       "id": "interior.station_house_desk",
@@ -172,7 +175,8 @@
         "vault door",
         "loading dock to W 30th St"
       ],
-      "parent": "interior.varelas_office"
+      "parent": "interior.varelas_office",
+      "tier": "A"
     },
     {
       "id": "interior.lisle_office",
@@ -348,7 +352,8 @@
         "stairs to platforms",
         "entrance to the old 33rd Street passage (half-shuttered)"
       ],
-      "note": "Real station; line names per 1974 (BMT Broadway, IND Sixth Avenue). Graffiti on cars and walls per street_text."
+      "note": "Real station; line names per 1974 (BMT Broadway, IND Sixth Avenue). Graffiti on cars and walls per street_text.",
+      "tier": "A"
     },
     {
       "id": "interior.passage_33rd",
@@ -369,7 +374,8 @@
         "rats",
         "a locked gate (Teddy's keys open it in side content)"
       ],
-      "note": "Real underground passage from Herald Square toward Penn Station; sources differ on its closing (1970s or c.1990). Named after a real store, so in-game it's 'the old 33rd Street passage'."
+      "note": "Real underground passage from Herald Square toward Penn Station; sources differ on its closing (1970s or c.1990). Named after a real store, so in-game it's 'the old 33rd Street passage'.",
+      "tier": "A"
     },
     {
       "id": "interior.penn_ind_platform",
@@ -389,6 +395,86 @@
         "benches",
         "stairs up to the concourse"
       ]
+    },
+    {
+      "id": "interior.corwin_9f",
+      "address": "W 31st St, Broadway–6th Ave, north side (9th floor)",
+      "facade": "street",
+      "name": "Teddy's room, Corwin 9F",
+      "kind": "home",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "parent": "interior.corwin_lobby",
+      "tier": "A",
+      "contains": [
+        "bed (sleep)",
+        "footlocker",
+        "hot plate",
+        "airshaft window",
+        "broken AC"
+      ],
+      "dressing": "content/homes.json"
+    },
+    {
+      "id": "interior.penn_south_delphine",
+      "address": "W 27th St, 8th–9th Aves (Penn South, 7th floor)",
+      "facade": "street",
+      "name": "Delphine's apartment, Penn South",
+      "kind": "home",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "tier": "A",
+      "contains": [
+        "bed (sleep)",
+        "sewing machine",
+        "pressing iron shelf",
+        "bath (prints drying)",
+        "plants",
+        "wardrobe (outfit change)"
+      ],
+      "dressing": "content/homes.json"
+    },
+    {
+      "id": "interior.varelas_apartment",
+      "address": "Madison Ave & E 37th St (11th floor, doorman building)",
+      "facade": "avenue",
+      "name": "The Varelas apartment",
+      "kind": "home",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "tier": "A",
+      "contains": [
+        "bed (sleep)",
+        "grand piano",
+        "desk with the bills drawer",
+        "balcony",
+        "lobby with doorman (Cas Wojcik)",
+        "wardrobe"
+      ],
+      "dressing": "content/homes.json"
+    },
+    {
+      "id": "interior.carmen_apartment",
+      "address": "W 26th St & 8th Ave (Penn South)",
+      "facade": "avenue",
+      "name": "Carmen's apartment",
+      "kind": "home",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "kitchen table",
+        "sewing machine",
+        "saint candles"
+      ],
+      "dressing": "content/homes.json"
     }
   ]
 }

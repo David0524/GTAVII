@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "item.corwin_master_keys",
+      "name": "Corwin master key ring",
+      "opens": "every Corwin room, roof, basement; Teddy's 'Keys' special"
+    },
+    {
+      "id": "item.arden_service_key",
+      "name": "Arden service-door key",
+      "opens": "the Arden back stairs and boiler room (from Marcus)"
+    },
+    {
+      "id": "item.varelas_vault_key",
+      "name": "Vault wheel combination card",
+      "opens": "Varelas & Co. vaults"
+    },
+    {
+      "id": "item.locker_418_key",
+      "name": "Penn Station locker 418 key",
+      "opens": "Wurtz's locker (M27)"
+    },
+    {
+      "id": "item.passage_gate_key",
+      "name": "33rd St passage gate key",
+      "opens": "the shuttered gate in the old passage (side content)"
+    },
+    {
+      "id": "item.car_keys_owned",
+      "name": "Car keys (owned car)",
+      "opens": "a car the lead owns (cars.json)"
+    }
+  ]
+}

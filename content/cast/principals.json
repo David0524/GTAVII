@@ -1220,7 +1220,7 @@
         "Summer is when furriers go broke politely."
       ]
     },
-    "home": "off_map",
+    "home": "loc.varelas_apartment",
     "haunts": [
       {
         "at": "loc.varelas_loft",
@@ -1235,7 +1235,7 @@
       {
         "from": "18:30",
         "to": "08:30",
-        "at": "off_map",
+        "at": "loc.varelas_apartment",
         "activity": "home"
       },
       {

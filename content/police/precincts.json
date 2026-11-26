@@ -1,0 +1,77 @@
+{
+  "_note": "Invented precincts covering the playable area (E8). Real NYPD precinct numbers and houses are not used. 'corruptibility' is 0-5 (how cheaply reports go away). 'payoffs' ties the story's pad to the bribe system: flags move corruptibility. Gameplay owns the mechanics.",
+  "precincts": [
+    {
+      "id": "precinct.midtown_central",
+      "name": "Midtown Central",
+      "house": "loc.station_house",
+      "covers": "W 29th to W 43rd St, 6th Ave west to the edge (the Garment District, Penn Station, the Deuce, Eighth Ave)",
+      "deskSergeant": "char.pat_kearney",
+      "corruptibility": 4,
+      "why": "Wurtz's plainclothes 'conditions' unit works out of here. Collections are routine, and reports are cheap to lose.",
+      "payoffs": [
+        {
+          "if": "flag.teddy_collector",
+          "effect": "Teddy's own reports cost less to bury (he carries their envelopes)"
+        },
+        {
+          "if": "flag.ledger_to_prosecutor",
+          "effect": "corruptibility drops to 1 in the epilogue (unit suspended)"
+        },
+        {
+          "if": "flag.ledger_to_press",
+          "effect": "corruptibility drops to 2 (unit disbanded, the rest scared)"
+        },
+        {
+          "if": "flag.ledger_kept",
+          "effect": "corruptibility 5, but only for Teddy: the new pad"
+        }
+      ],
+      "honest": [
+        "char.pat_kearney (won't take money; can be persuaded by relationship)",
+        "char.luis_navarro (IA field associate)"
+      ]
+    },
+    {
+      "id": "precinct.madison_square",
+      "name": "Madison Square",
+      "house": "W 24th St, 6th–7th Aves, north side",
+      "covers": "W 22nd to W 29th St, the edge east to Madison (Flatiron, Madison Sq Park, the Flower and Fur Districts, Penn South)",
+      "deskSergeant": "char.sgt_bauman",
+      "corruptibility": 2,
+      "why": "An old-fashioned house: the florists and furriers pay small at Christmas, but nobody organises it. Since the Commission, nervous.",
+      "payoffs": [
+        {
+          "if": "flag.saw_surcharge",
+          "effect": "none (informational)"
+        }
+      ],
+      "honest": [
+        "char.sgt_bauman (takes a Christmas turkey, never cash)"
+      ]
+    },
+    {
+      "id": "precinct.bryant_park",
+      "name": "Bryant Park",
+      "house": "W 40th St, 5th–6th Aves, south side",
+      "covers": "W 29th to W 43rd St, 6th Ave east to the edge (Herald Square, Fifth Ave offices, the Library, Bryant Park)",
+      "deskSergeant": "char.sgt_greer",
+      "corruptibility": 1,
+      "why": "Fifth Avenue money wants a clean precinct. Bribes are expensive and risky here. Greer files everything twice.",
+      "payoffs": [
+        {
+          "if": "flag.nick_flipped",
+          "effect": "Nick's reports here are 'lost' (the Special Prosecutor's protection)"
+        }
+      ],
+      "honest": [
+        "char.sgt_greer",
+        "char.det_fisk (Internal Affairs; hunts players who bribe too often citywide)"
+      ]
+    }
+  ],
+  "reports": {
+    "note": "Per the CORE_SYSTEMS design: witnesses run to red police call boxes; each precinct keeps reports with descriptions (lead, clothing colours, vehicle). Narrative supplies the text below.",
+    "callBoxColour": "red (period police call boxes on lampposts)"
+  }
+}

@@ -15,8 +15,8 @@
 | Id | Name | Age | Occupation | Home | Missions |
 |---|---|---|---|---|---|
 | `char.teddy_arce` | Teodoro “Teddy” Arce | 34 | Night desk clerk, Hotel Corwin | Hotel Corwin (SRO), W 31st St (Broadway–6th Ave) | 1, 2, 3, 4, 5, 7, 9, 10, 12, 14, 15, 18, 19, 21, 22, 25, 26, 28, 29, 32 |
-| `char.delphine_moore` | Delphine Moore | 29 | Works the Eighth Ave strip and the midtown hotel bars | Hotel Arden (and its lobby bar), W 39th St & 8th Ave | 6, 8, 9, 11, 12, 13, 17, 18, 22, 23, 26, 27, 28, 31, 32 |
-| `char.nick_varelas` | Nikos “Nick” Varelas | 51 | Owner of Varelas & Co. (fur manufacturing and cold storage) | Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave) | 15, 16, 17, 18, 20, 21, 22, 24, 27, 28, 30, 32 |
+| `char.delphine_moore` | Delphine Moore | 29 | Works the Eighth Ave strip and the midtown hotel bars | Delphine's building, Penn South, W 27th St (8th Ave–9th Ave) | 6, 8, 9, 11, 12, 13, 17, 18, 22, 23, 26, 27, 28, 31, 32 |
+| `char.nick_varelas` | Nikos “Nick” Varelas | 51 | Owner of Varelas & Co. (fur manufacturing and cold storage) | The Varelas apartment building, Madison Ave & E 37th St | 15, 16, 17, 18, 20, 21, 22, 24, 27, 28, 30, 32 |
 
 ### Principal characters (12)
 
@@ -30,7 +30,7 @@
 | `char.carmen_arce` | Carmen Arce | 61 | Sewing-machine operator at Feld Frocks, W 37th St | Penn South co-op (Carmen's building), W 26th St & 8th Ave | 2, 7, 19, 25, 28 |
 | `char.odessa_pruitt` | Odessa Pruitt | 67 | Retired hotel laundress (thirty years in a big hotel's laundry) | Hotel Corwin (SRO), W 31st St (Broadway–6th Ave) | 2, 19, 26, 28, 30 |
 | `char.ray_bauer` | Ray Bauer | 44 | Operates three peep and game arcades on 42nd St and Eighth Ave and the bar concession at two Eighth Ave hotels | off map | 8, 11, 13, 22, 27 |
-| `char.eleni_varelas` | Eleni Varelas | 48 | Keeps the books at Varelas & Co. | off map | 16, 18, 20, 30 |
+| `char.eleni_varelas` | Eleni Varelas | 48 | Keeps the books at Varelas & Co. | The Varelas apartment building, Madison Ave & E 37th St | 16, 18, 20, 30 |
 | `char.jung_ho_baek` | Baek Jung-ho (“Mr. Baek”) | 41 | Co-owner with his wife of Seoul Star Imports, a wig and handbag wholesaler on W 29th St | off map | 4, 10, 16, 28, 30 |
 | `char.tina_mercado` | Tina Mercado | 26 | Works the Eighth Ave strip | Hotel Arden (and its lobby bar), W 39th St & 8th Ave | 6, 9, 11, 13, 23, 27, 31 |
 | `char.yiannis_doukas` | Yiannis Doukas | 44 | Head cutter at Varelas & Co. | off map | 15, 18, 28, 30 |
@@ -278,10 +278,10 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Rule one: I don't hold money I can't count. Rule two: I count everything.”
   - “Your badge says Brannock and your ring says married. I read both, honey.”
   - “I pressed dresses six years on Thirty-Eighth. Then the work went south. I didn't.”
-- **Home:** Hotel Arden (and its lobby bar), W 39th St & 8th Ave
-- **Haunts:** Royal Cafeteria, 8th Ave & W 40th St (Counting table at 4 a.m.; coffee and pie); Hotel Arden (and its lobby bar), W 39th St & 8th Ave (Rita's lobby bar; the back stairs Marcus keeps open); Closed beauty shop (Nick's building), W 37th St (7th Ave–8th Ave) (She walks past the papered window every afternoon); 8th Ave & W 41st St (Bus-terminal crowds she can disappear into)
+- **Home:** Delphine's building, Penn South, W 27th St (8th Ave–9th Ave)
+- **Haunts:** Royal Cafeteria, 8th Ave & W 40th St (Counting table at 4 a.m.; coffee and pie); Hotel Arden (and its lobby bar), W 39th St & 8th Ave (Rita's lobby bar; the back stairs Marcus keeps open); Closed beauty shop (Nick's building), W 37th St (7th Ave–8th Ave) (She walks past the papered window every afternoon); 8th Ave & W 41st St (Bus-terminal crowds she can disappear into); Penn South co-op (Carmen's building), W 26th St & 8th Ave (Home: Penn South, bought as a union presser in 1965; Carmen Arce two buildings over)
 - **Daily schedule (weekday):**
-  - 05:00–14:00 · sleep · Hotel Arden (and its lobby bar), W 39th St & 8th Ave
+  - 05:00–14:00 · sleep · Delphine's building, Penn South, W 27th St (8th Ave–9th Ave) — Her own co-op apartment (homes.json)
   - 14:00–16:00 · errand · Closed beauty shop (Nick's building), W 37th St (7th Ave–8th Ave) — Window-shopping her own future
   - 16:00–18:00 · socialize · 8th Ave & W 38th St — Club rounds: collections and payouts
   - 18:00–20:00 · socialize · Hotel Arden (and its lobby bar), W 39th St & 8th Ave — Rita's bar
@@ -314,11 +314,11 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “In Kastoria we say the beaver doesn't ask who wears the coat. I am a beaver.”
   - “Everybody gets paid. That's not corruption, my friend. That's payroll.”
   - “I bought a building. Nobody told me there were people in it.”
-- **Home:** Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave)
+- **Home:** The Varelas apartment building, Madison Ave & E 37th St
 - **Haunts:** The Iron Gate Chop House, W 36th St & 7th Ave (His corner table at lunch; the waiters know his order); Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Trade dinners in the ballroom; deals in the lobby); Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (The fur salon, his most important customer); Lisle & Associates, 11th floor, 5th Ave & W 36th St (Where he signs things he doesn't read); Kafeneio Kastoria (coffeehouse), W 29th St & 8th Ave (Backgammon with men who knew him as a nailer)
 - **Daily schedule (weekday):**
-  - 23:00–07:30 · home · off map — Upper East Side, never shown
-  - 07:30–08:30 · commute · Park Ave S & E 23rd St — Drives in himself
+  - 23:00–07:30 · home · The Varelas apartment building, Madison Ave & E 37th St — Madison Ave & E 37th St, doorman Cas Wojcik
+  - 07:30–08:30 · commute · Madison Ave & E 34th St — Drives in himself
   - 08:30–12:30 · work · Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave)
   - 12:30–14:30 · eat · The Iron Gate Chop House, W 36th St & 7th Ave
   - 14:30–18:00 · work · Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave) — Showroom and vault
@@ -390,7 +390,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
 - **Home:** off map
 - **Haunts:** Lisle & Associates, 11th floor, 5th Ave & W 36th St (Eleventh floor; he can see the Corwin's roof tank from his window); The Fifth Avenue Luncheonette, W 36th St (5th Ave–6th Ave) (12:40 every weekday, same stool, same tuna on rye: a tail-able routine); Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Afternoon meetings in the lobby, never upstairs)
 - **Daily schedule (weekday):**
-  - 19:00–08:00 · home · off map — Driven up Park Ave S
+  - 19:00–08:00 · home · off map — Driven up Madison Ave
   - 08:00–12:40 · work · Lisle & Associates, 11th floor, 5th Ave & W 36th St
   - 12:40–13:30 · eat · The Fifth Avenue Luncheonette, W 36th St (5th Ave–6th Ave)
   - 13:30–15:00 · work · Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St — Lobby meetings
@@ -624,10 +624,10 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Nikos, the vault holds four hundred coats. The bank thinks it holds nine hundred.”
   - “In this family I'm the one who reads. You're the one who signs.”
   - “Summer is when furriers go broke politely.”
-- **Home:** off map
+- **Home:** The Varelas apartment building, Madison Ave & E 37th St
 - **Haunts:** Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave) (Glass office overlooking the cutting floor); Ashgrove Trust, 34th St branch, 5th Ave & W 34th St (Her own account, under her maiden name)
 - **Daily schedule (weekday):**
-  - 18:30–08:30 · home · off map
+  - 18:30–08:30 · home · The Varelas apartment building, Madison Ave & E 37th St
   - 08:30–17:30 · work · Varelas & Co. loft and cold-storage vaults, W 30th St (6th Ave–7th Ave)
   - 17:30–18:30 · errand · Ashgrove Trust, 34th St branch, 5th Ave & W 34th St
 - **Relationships:** Nikos “Nick” Varelas (spouse, +1); Yiannis Doukas (ally, +2); Gordon Whitlock (distrusts, -2); Stavros Kallis (despises, -2)

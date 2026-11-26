@@ -263,6 +263,82 @@
       "at": "8th Ave & W 33rd St",
       "invented": false,
       "kind": "landmark"
+    },
+    {
+      "id": "loc.penn_south_delphine",
+      "name": "Delphine's building, Penn South",
+      "at": "W 27th St",
+      "between": [
+        "8th Ave",
+        "9th Ave"
+      ],
+      "side": "south",
+      "invented": false,
+      "kind": "residence"
+    },
+    {
+      "id": "loc.varelas_apartment",
+      "name": "The Varelas apartment building",
+      "at": "Madison Ave & E 37th St",
+      "side": "west",
+      "invented": true,
+      "kind": "residence"
+    },
+    {
+      "id": "loc.hospital",
+      "name": "Pennington General Hospital",
+      "at": "W 26th St & 9th Ave",
+      "side": "ne_corner",
+      "invented": true,
+      "kind": "hospital"
+    },
+    {
+      "id": "loc.lawyer_office",
+      "name": "Maureen Kehoe, Esq. (2nd floor)",
+      "at": "W 33rd St & 7th Ave",
+      "side": "se_corner",
+      "invented": true,
+      "kind": "office"
+    },
+    {
+      "id": "loc.bail_bonds",
+      "name": "Abend Bail Bonds",
+      "at": "W 31st St & 8th Ave",
+      "side": "nw_corner",
+      "invented": true,
+      "kind": "shop"
+    },
+    {
+      "id": "loc.galloway_lot",
+      "name": "Galloway Auto Exchange",
+      "at": "W 25th St & 9th Ave",
+      "side": "se_corner",
+      "invented": true,
+      "kind": "lot"
+    },
+    {
+      "id": "loc.precinct_madison_sq",
+      "name": "Madison Square station house",
+      "at": "W 24th St",
+      "between": [
+        "6th Ave",
+        "7th Ave"
+      ],
+      "side": "north",
+      "invented": true,
+      "kind": "precinct"
+    },
+    {
+      "id": "loc.precinct_bryant_park",
+      "name": "Bryant Park station house",
+      "at": "W 40th St",
+      "between": [
+        "5th Ave",
+        "6th Ave"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "precinct"
     }
   ]
 }

@@ -228,7 +228,7 @@
         "I pressed dresses six years on Thirty-Eighth. Then the work went south. I didn't."
       ]
     },
-    "home": "loc.arden_hotel",
+    "home": "loc.penn_south_delphine",
     "haunts": [
       {
         "at": "loc.eighth_ave_cafeteria",
@@ -245,14 +245,19 @@
       {
         "at": "8th Ave & W 41st St",
         "why": "Bus-terminal crowds she can disappear into"
+      },
+      {
+        "at": "loc.penn_south",
+        "why": "Home: Penn South, bought as a union presser in 1965; Carmen Arce two buildings over"
       }
     ],
     "schedule": [
       {
         "from": "05:00",
         "to": "14:00",
-        "at": "loc.arden_hotel",
-        "activity": "sleep"
+        "at": "loc.penn_south_delphine",
+        "activity": "sleep",
+        "note": "Her own co-op apartment (homes.json)"
       },
       {
         "from": "14:00",
@@ -429,7 +434,7 @@
         "I bought a building. Nobody told me there were people in it."
       ]
     },
-    "home": "loc.varelas_loft",
+    "home": "loc.varelas_apartment",
     "haunts": [
       {
         "at": "loc.steakhouse",
@@ -456,14 +461,14 @@
       {
         "from": "23:00",
         "to": "07:30",
-        "at": "off_map",
+        "at": "loc.varelas_apartment",
         "activity": "home",
-        "note": "Upper East Side, never shown"
+        "note": "Madison Ave & E 37th St, doorman Cas Wojcik"
       },
       {
         "from": "07:30",
         "to": "08:30",
-        "at": "5th Ave & E 23rd St",
+        "at": "Madison Ave & E 34th St",
         "activity": "commute",
         "note": "Drives in himself"
       },

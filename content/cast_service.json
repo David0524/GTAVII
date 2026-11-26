@@ -1,0 +1,201 @@
+{
+  "_note": "Service-tier characters for systems (precincts, lawyer, bail, hospital, homes, cars). Lighter sheets than the main cast. Names checked for famous namesakes only.",
+  "characters": [
+    {
+      "id": "char.sgt_bauman",
+      "tier": "service",
+      "name": "Sgt. Leo Bauman",
+      "age": 54,
+      "role": "Desk sergeant, Madison Square precinct",
+      "at": "W 24th St, 6th–7th Aves",
+      "schedule": "08:00–16:00 desk; otherwise off map",
+      "speech": {
+        "samples": [
+          "Florists bring me carnations at Christmas. I bring them back their tickets.",
+          "Sit. Fill out the form. Twice. We lose everything once.",
+          "You want a favour, go to Thirty-First. Here we do paperwork."
+        ]
+      },
+      "visual": "Round, bald, half-glasses, cardigan over the uniform shirt",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.sgt_greer",
+      "tier": "service",
+      "name": "Sgt. Thomasina “Tommie” Greer",
+      "age": 46,
+      "role": "Desk sergeant, Bryant Park precinct; one of few women sergeants",
+      "at": "W 40th St, 5th–6th Aves",
+      "schedule": "16:00–00:00 desk; otherwise off map",
+      "speech": {
+        "samples": [
+          "Put the envelope away before I have to write it down. I write everything down.",
+          "Description says brown jacket, tall, fast. That's half the city. Sit.",
+          "Twenty-two years. They didn't make me sergeant for being friendly."
+        ]
+      },
+      "visual": "Tall, grey bun, reading glasses on a chain, immaculate uniform",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.det_fisk",
+      "tier": "service",
+      "name": "Det. Sgt. Orrin Fisk",
+      "age": 41,
+      "role": "Internal Affairs; can't be bought",
+      "at": "Roams; appears when a lead bribes too often",
+      "schedule": "Appears by trigger",
+      "speech": {
+        "samples": [
+          "I'm not here about the crime. I'm here about who you paid.",
+          "Every envelope has a fingerprint on the inside, Mr. Arce.",
+          "Money talks. I listen to who it's talking to."
+        ]
+      },
+      "visual": "Thin, grey suit, brown shoes, notebook, never smiles",
+      "edges": [],
+      "note": "The honest-investigator counterweight to bribes (Gameplay heat). Never violent."
+    },
+    {
+      "id": "char.maureen_kehoe",
+      "tier": "service",
+      "name": "Maureen Kehoe, Esq.",
+      "age": 39,
+      "role": "Criminal lawyer; callable from any precinct payphone",
+      "at": "Office W 33rd St & 7th Ave (2nd floor over a luncheonette)",
+      "schedule": "09:00–21:00 office; always reachable by phone (answering service at night)",
+      "speech": {
+        "samples": [
+          "Don't say anything. Not 'hello', not 'officer', not your name. I'm on my way.",
+          "Fifty dollars now, fifty when you're out. I don't do Sundays. Today I do Sundays.",
+          "You were walking home from church. Which church? Think of one on the way."
+        ]
+      },
+      "visual": "Red hair going grey, a man's raincoat, a briefcase older than her clients",
+      "edges": [
+        {
+          "to": "char.teddy_arce",
+          "kind": "former_opponent",
+          "note": "She cross-examined him in 1969"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "id": "char.albert_pruss",
+      "tier": "service",
+      "name": "Albert Pruss",
+      "age": 62,
+      "role": "Property clerk: returns impounded items and cars",
+      "at": "Midtown Central station house, basement window",
+      "schedule": "09:00–17:00",
+      "speech": {
+        "samples": [
+          "Sign here, here and here. The car's got a dent. It came with the dent.",
+          "One revolver, one wallet, one shoe. Where's the other shoe? Not my problem.",
+          "Release fee's twelve dollars. Plus storage. Storage is the expensive part."
+        ]
+      },
+      "visual": "Small, sleeve garters, green eyeshade, a ledger as thick as a brick",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.bondsman_rizzo",
+      "tier": "service",
+      "name": "Frankie Abend, bail bondsman",
+      "age": 50,
+      "role": "Bail bondsman with a board of skips (economy giver)",
+      "at": "W 31st St & 8th Ave, storefront across from the Shamrock Rail",
+      "schedule": "10:00–02:00",
+      "speech": {
+        "samples": [
+          "Ten percent and your mother's wedding ring as collateral. Kidding. Mostly.",
+          "Board's on the wall. Bring 'em in breathing, I pay full.",
+          "Skip on me once, shame on you. Skip twice, I send Teddy."
+        ]
+      },
+      "visual": "Short-sleeve shirt, loud tie, a cigar, a .38 he never draws",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.dr_osei",
+      "tier": "service",
+      "name": "Dr. Kwame Osei",
+      "age": 44,
+      "role": "Emergency-room surgeon at Pennington General (hospital flow)",
+      "at": "Pennington General Hospital, W 26th St & 9th Ave",
+      "schedule": "20:00–08:00 nights",
+      "speech": {
+        "samples": [
+          "Two bullets out, one stays. It's lucky where it is. You're lucky I'm on.",
+          "Rest. You won't. Nobody on this ward ever does.",
+          "Sign yourself out against advice. Everybody does that too."
+        ]
+      },
+      "visual": "Tall, scrubs, half-moon glasses, Ghanaian-born, trained in London and Brooklyn",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.cas_wojcik",
+      "tier": "service",
+      "name": "Casimir “Cas” Wojcik",
+      "age": 61,
+      "role": "Doorman at Nick's building",
+      "at": "Madison Ave & E 37th St",
+      "schedule": "06:00–14:00 and 14:00–22:00 (alternating weeks)",
+      "speech": {
+        "samples": [
+          "Good morning, Mr. Varelas. A man from the bank called. Twice. I said you were swimming.",
+          "Mrs. Varelas left early. She took the small suitcase, not the big one. That's good.",
+          "Packages, sir. And a letter with no stamp. Somebody delivered by hand."
+        ]
+      },
+      "visual": "Grey uniform with gold piping, white gloves, a moustache waxed since 1948",
+      "edges": [],
+      "note": "Recurring at Nick's home; a barometer of Nick's finances."
+    },
+    {
+      "id": "char.dutch_galloway",
+      "tier": "service",
+      "name": "Dutch Galloway",
+      "age": 48,
+      "role": "Used-car salesman, Galloway Auto Exchange",
+      "at": "W 25th St & 9th Ave lot",
+      "schedule": "09:00–20:00",
+      "speech": {
+        "samples": [
+          "This one? Owned by a nun. Drove it to church. Backwards, apparently.",
+          "Cash, I'm your friend. Credit, I'm your cousin. Nobody trusts a cousin.",
+          "No warranty. But I'll cry with you if it breaks."
+        ]
+      },
+      "visual": "Plaid jacket, white belt, pinkie ring, a straw hat with a feather",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.sully_garage",
+      "tier": "service",
+      "name": "Sully McNamee",
+      "age": 57,
+      "role": "Parking-garage attendant (owned-car storage)",
+      "at": "W 33rd St, 7th–8th Aves (Penn Garage)",
+      "schedule": "16:00–04:00",
+      "speech": {
+        "samples": [
+          "Monthly's sixty. Hourly's robbery. I don't set the prices, I just park the robbery.",
+          "Your car's on four. Somebody tried the door. I tried his head.",
+          "Leave the keys. I don't drive 'em. Much."
+        ]
+      },
+      "visual": "Coveralls, a ticket punch, a transistor radio on the races",
+      "edges": [],
+      "note": ""
+    }
+  ]
+}

@@ -706,3 +706,19 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
 - **Cop lethality:** held pending the user's answer (the oversight session is asking). Only
   the authored mission targets are `lethal: false` today. Free-roam police are Gameplay's.
 - **Next:** step 3 (police and precincts, items and guns, economy, homes and cars).
+
+### Step 3: police, items, economy, homes and cars (first pass done)
+- See ENGINE_REQUESTS 13 for the file list.
+- **Precincts:** three invented precincts with corruptibility tied to story flags (the pad
+  becomes the mechanic). Honest officers: Kearney, Greer, Navarro and Fisk (IA).
+- **Guns and items:** an invented gun registry by tier, plus items, shops at 1974 prices, crews
+  and economy givers.
+- **Homes:** Teddy keeps Corwin 9F (the bible's choice). Delphine moves to a Penn South co-op
+  (dignified; near Carmen). Nick moves to a Madison Ave doorman building.
+- **Cars:** a used lot, a showroom, classifieds, an insurer and a garage.
+- **Barks:** police radio with description templates, combat, surrender, ambulance, and
+  bail-out for all six lead pairs.
+- **Name checks:** gun makers and some shop and car names are batch-checked (weak). They need
+  individual and USPTO checks before ship.
+- **Validators:** 0 errors; 32/32 reachable.
+- **Next:** step 4, N4b side content (40–60 pieces).

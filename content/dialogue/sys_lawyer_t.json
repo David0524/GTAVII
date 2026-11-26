@@ -1,0 +1,24 @@
+{
+  "id": "dlg.sys_lawyer_t",
+  "context": "Arrested char.teddy_arce calls Maureen Kehoe from the precinct payphone.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.maureen_kehoe",
+      "emotion": "brisk",
+      "text": "Kehoe. Don't say anything. Not even 'hello'. Which precinct?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Midtown Central. Kearney's desk. He's pretending not to know me."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.maureen_kehoe",
+      "emotion": "dry",
+      "text": "Fifty now, fifty when you're out. Sit. Look bored. I'll be there in twenty."
+    }
+  ]
+}

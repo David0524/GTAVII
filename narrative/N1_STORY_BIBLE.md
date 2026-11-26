@@ -203,6 +203,9 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
 ---
 
 ### 3b. Delphine Moore (char.delphine_moore). Introduced in mission 6, about 30 June.
+- **Home (revised 26 Nov, user: "The characters should all have their own home"):** a Penn South
+  co-op apartment bought in 1965 as a union presser. It's dignified and separate from Eighth Ave, and
+  Carmen Arce lives two buildings over. The club's money stays in the Arden boiler room (her rule).
 - 29. Born in Wilmington, North Carolina, in 1945. Came to Harlem in 1963 and spent six
   years as a presser in a dress shop on W 38th St. In 1969 the shop moved to the Carolinas,
   where the work went south and she couldn't go back for it. This follows the real postwar
@@ -235,6 +238,8 @@ and finally the Corwin. The person who asked him there is Mayhew. He has an offe
 ---
 
 ### 3c. Nikos "Nick" Varelas (char.nick_varelas). Introduced in mission 15, about 19 July.
+- **Home (revised 26 Nov):** a prewar doorman building at Madison Ave & E 37th St (inside the
+  story-core bounds). It's grand, with a drawer of unpaid bills, and Cas Wojcik on the door.
 - 51. Born in Kastoria, Greece, in 1923. He came to New York in 1948, after the civil war,
   as one of the thousands of Kastorians who took the place of the aging Jewish furriers
   **[S12]**. He started as a nailer on W 29th St and bought his first shop in 1955.
