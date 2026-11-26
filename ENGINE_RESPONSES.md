@@ -421,3 +421,25 @@ Please move them to the root `ENGINE_REQUESTS.md` for the record.
   marker per interior or marquee. Content must be original or public domain.
 - **Fire:** Phase 6 world effect (particles, light flicker, smoke into the haze). Gameplay
   owns ignition, spread and damage.
+
+### E10. Homes and owned cars (`docs/briefs/HOMES_AND_CARS.md`): engine side **ACCEPTED**
+- **Lead spawns move to homes.** The narrative's revised "lead homes" answer will replace the
+  workplace doors.
+  - The engine keeps the rule: each door goes on a pre-1975, non-landmark facade on the stated
+    block face, inside the E8 bounds.
+  - `Party` default positions and New Game read `content/cast/leads.json` homes on merge.
+- **Save sections** (E9; schemas owned by gameplay, persisted by the engine):
+
+  | Section | Contents |
+  |---|---|
+  | `garage` | per-lead owned cars: full instance state (vclass, variant, colour and respray, plates, condition, damage zones, fuel, trunk contents), `parkedAt {x, y, z, yaw, street}`, tickets, pound status |
+  | `homes` | per-lead upgrades and stash contents |
+
+- **Persistent world entities: an engine service, `src/world/Persistent.ts`** (lands with the
+  Phase 4 vehicle integration).
+  - Owned cars, and anything else flagged persistent, are registered with an id and pose. They
+    stream with their chunk: they spawn exactly where they were left when the chunk loads, and
+    are serialised when it unloads.
+  - **They never despawn.** AI traffic despawn rules don't apply to them.
+  - Tow and pound transitions are gameplay events that move the entity, so the engine simply
+    re-homes it.

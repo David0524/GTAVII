@@ -228,6 +228,64 @@ Rapier character controller (walk, run, jump, ledge climb) with colliders genera
 from the same footprint data. Orbit and chase camera. Touch buttons swap to JUMP/USE/SPRINT.
 Spawn on foot at the Flatiron.
 
+## Phase 3 look target (the bar Phase 3 shots are judged against)
+**The goal:** a frame grab from the game should sit next to these 1973 photographs and read as
+the same city, filmed on the same stock, with a 2031 open-world game's density of detail.
+
+**Reference frames** (`references/img/`, public-domain DOCUMERICA; credits in
+`references/catalog.json`):
+
+| # | Frame | What it pins down |
+|---|---|---|
+| A | `documerica_554297` (42nd St west of Seventh, Aug 1973) | Low warm sun on west faces, marquee panels with chasing bulbs, scaffolding, long sedans, rose-brown cast |
+| B | `documerica_554293` (Sixth Ave & 32nd St) | Street-level clutter: neon script, blade signs, box trucks, police scooter, soot on cornices, the cab's yellow |
+| C | `documerica_549867` (Garment District canyon) | A dark street floor under a bright sky slot, haze, handcarts, trucks double-parked, depth falling into warm grey |
+| D | `documerica_549869` (Herald Square traffic) | Saturation budget: only taxi yellow and truck red sing, everything else muted; chrome highlights; dense traffic |
+
+**Grade targets** (STYLE_GUIDE §1, measured from 87 photos). Phase 3 shots are measured with
+the same script (`tools/refs/lookmetrics.py`, to be added in Phase 3). Each shot's numbers must
+land in these bands:
+- **Tones:** shadow average near `#2e171d` (warm maroon, within ±12 per channel); midtone
+  average in the brown-rose family `#794d44` (±20); highlight average near cream `#d1b59e`
+  (±20).
+- **Luma:** p2 ≤ 20, p50 between 50 and 80 (low-key), p98 between 200 and 235 (nothing
+  clipped to white).
+- **Saturation:** at least 70% of saturated pixels in red-orange-yellow (hue 0–60° plus
+  330–360°). Saturated blue/green 10% or less (dusk sky excepted, in a sky-masked variant).
+
+**What "done" looks like:**
+- **Facades:**
+  - Every building's walls show its era and use. Tenements get brick with stoops and fire
+    escapes, cast-iron lofts their columns and big windows, masonry lofts their piers and
+    spandrels, prewar offices their limestone base, and setback towers their crowns.
+  - Window rhythm comes from real height and floors, and window rooms come from the
+    interiors tier-C shader.
+  - Roofs carry water towers, bulkheads and parapets. AC units are in roughly one window in
+    six.
+  - Ground floors have storefronts with awnings, roll-down gates and period signage (invented
+    names).
+  - Heroes (Flatiron, Empire State, Met Life, Penn/MSG, the Herald Square store, Hotel
+    Chelsea) are hand-modelled and recognisable in silhouette at 1 km.
+- **Ground:** asphalt patches and seams, faded lane paint and crosswalks, manholes with steam,
+  granite curbs with chipped edges, sidewalk slab joints, gratings, and a wet variant with
+  screen-space reflections.
+- **Wear:** soot streaks under every ledge, darker ground floors, curbside litter and bagged
+  trash, graffiti (act-keyed), potholes, cracked curbs, scaffolding sheds.
+- **Lighting:**
+  - Dusk: a low sun with cascaded shadows, warm on west faces.
+  - Night: sodium on the avenues and mercury on side streets, neon blooming into haze, lit
+    windows (incandescent, TV-blue, fluorescent).
+  - An environment map so chrome and glass read.
+- **Post:** filmic tonemap, split-tone, hue-selective saturation, halation, grain, a light
+  vignette, TAA, GTAO, bloom. Each is toggleable per preset.
+- **Budget:** a High preset hitting 60 fps at 1080p on a mid-range GPU, and Medium hitting
+  30 fps on a laptop. Proven on the user's devices with COPY PERF REPORT, not in this
+  container.
+
+**Shot list for judging:** the Phase 2 rig viewpoints, re-shot, placed side by side with frames
+A–D at matching angles: 42nd St & 7th, Sixth Ave & 32nd, a Garment District side street, and
+Herald Square.
+
 ## Workstreams and integration cadence
 | Stream | Branch | Brief | Owns |
 |---|---|---|---|
