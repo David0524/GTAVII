@@ -188,7 +188,7 @@ async function main() {
   const postfx = params.get('post') === '0' ? null : new PostFX(renderer, scene, camera, quality);
   const frames = new FrameStats();
   const clock = new THREE.Timer();
-  let hudT = 0, frameCount = 0, syncT = 0, titleReady = false;
+  let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
     backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
@@ -327,7 +327,13 @@ async function main() {
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
-    if (postfx) postfx.render(); else renderer.render(scene, camera);
+    // A menu over the game (pause hub, shop, any modal) holds the last frame instead of re-rendering the
+    // city behind it: same picture, a fraction of the GPU and battery (and the canvas keeps its last
+    // presented frame). Render again on any resize, which clears the drawing buffer.
+    const hold = ui.hub.open || (ui.state === 'play' && ui.paused);
+    const vw = view.width, vh = view.height;
+    if (!hold || heldFrames < 2 || vw !== heldW || vh !== heldH) { if (postfx) postfx.render(); else renderer.render(scene, camera); }
+    heldFrames = hold ? heldFrames + 1 : 0; heldW = vw; heldH = vh;
     if (frameCount === 0) loadReport.mark('first-frame');
     loadReport.frameCpu(performance.now() - cpu0);
     frameCount++;

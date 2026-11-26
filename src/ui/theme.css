@@ -93,7 +93,7 @@
 .t74-legal { position: absolute; z-index: 2; right: calc(16px + var(--safe-r)); bottom: calc(8px + var(--safe-b)); font: 10px var(--f-ui); color: rgba(239, 227, 196, .5); }
 
 /* pause */
-.t74-pause { background: rgba(14, 8, 9, .72); backdrop-filter: blur(10px) saturate(.6) sepia(.25); -webkit-backdrop-filter: blur(10px) saturate(.6) sepia(.25); }
+.t74-pause { background: rgba(12, 12, 12, .86); } /* flat scrim: no backdrop blur over the live canvas (costly on phones) */
 .t74-tabs { display: flex; gap: clamp(12px, 3vw, 38px); align-items: baseline; padding: calc(22px + var(--safe-t)) calc(5vw + var(--safe-r)) 0 calc(5vw + var(--safe-l)); border-bottom: 1px solid var(--hair); }
 .t74-tabs .brand { font: italic 800 22px var(--f-display); margin-right: auto; color: var(--cream); white-space: nowrap; }
 .t74-tabs button { all: unset; cursor: pointer; padding: 6px 2px 10px; font: 400 clamp(18px, 2vw, 26px)/1 var(--f-head); letter-spacing: .16em; color: var(--dim); border-bottom: 3px solid transparent; }
