@@ -85,7 +85,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     // generated head; then (pool=1) generated pedestrians with their matched pool heads.
     const act = num('act', 1);
     if (!qp.has('pool')) for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
-      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: qp.has('rbhair') ? { hat: null, ourHair: false } : { hat: null } }));
+      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, ...(qp.has('rbhair') ? { ourHair: false } : {}), ...JSON.parse(qp.get('ov') ?? '{}') } }));
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }
     if (qp.has('pool')) {

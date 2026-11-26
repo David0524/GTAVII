@@ -144,7 +144,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   });
   // without a tie, a big 1970s collar is worn spread out over the jacket's lapels
   const overLapel = !outfit.tie && !!outfit.outer && outfit.outer.lapel > 0;
-  if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => (mb.slot = 1, shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1) * (overLapel ? 1.15 : outfit.outer ? 0.5 : 0.85), topOff + t.fit + 0.002 + (overLapel ? 0.016 : 0), neckBack)));
+  if (t.collar === 'spread' || t.collar === 'polo') trims.push((mb) => (mb.slot = 1, shirtCollar(ctx, mb, t.fabric, t.collarPoint * (t.collar === 'polo' ? 0.7 : 1) * (overLapel ? 0.95 : outfit.outer ? 0.5 : 0.85), topOff + t.fit + 0.002 + (overLapel ? 0.016 : 0), neckBack, !!outfit.tie)));
   if (ctx.lod <= 1 && ['dressShirt', 'printShirt', 'workShirt', 'uniformShirt', 'blouse'].includes(t.kind)) {
     const yTop = y.neck - neckFront - 0.012, yBot = topHem + 0.03;
     const ys: number[] = []; const closedJacket = !!outfit.outer && outfit.outer.open < 0.5 && outfit.outer.kind !== 'vest';
@@ -312,16 +312,19 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
 
 // --- trims ---------------------------------------------------------------------------------------
 /** Radial map of the torso (tights helper) for placing trims on the body surface. */
-function torsoRadius(ctx: GarmentCtx) {
+/** The neck alone (no trapezius/shoulders), around the neck joint: shirt collars stand on this. */
+function neckRadius(ctx: GarmentCtx) { return torsoRadius(ctx, true); }
+
+function torsoRadius(ctx: GarmentCtx, neckOnly = false) {
   const { F, shape } = ctx;
   const P = shape.pos, J = shape.joints;
-  const NB = 48, y0 = F.y.crotch, y1 = F.y.neck + 0.08, NY = 40;
+  const NB = 48, y0 = neckOnly ? F.y.neck - 0.07 : F.y.crotch, y1 = F.y.neck + 0.08, NY = neckOnly ? 15 : 40;
   const r = new Float32Array(NB * NY);
   const T = F.tris('helper-tights', 0);
   const used = new Set<number>(T);
-  const cx = J[JI.spine_02 * 3], cz = J[JI.spine_02 * 3 + 2];
+  const cj = neckOnly ? JI.neck_01 : JI.spine_02, cx = J[cj * 3], cz = J[cj * 3 + 2];
   for (const k of used) {
-    if (F.part[k] !== PART.torso && F.part[k] !== PART.neck) continue;
+    if (neckOnly ? F.part[k] !== PART.neck : F.part[k] !== PART.torso && F.part[k] !== PART.neck) continue;
     const yy = P[k * 3 + 1]; if (yy < y0 || yy > y1) continue;
     const a = Math.atan2(P[k * 3] - cx, P[k * 3 + 2] - cz);
     const bi = Math.floor(((a / (2 * Math.PI) + 1) % 1) * NB), yi = Math.min(NY - 1, Math.floor(((yy - y0) / (y1 - y0)) * NY));
@@ -345,7 +348,7 @@ function torsoRadius(ctx: GarmentCtx) {
     const d = rr + off;
     return [cx + Math.sin(a) * d, yy, cz + Math.cos(a) * d];
   };
-  return { at };
+  return { at, center: [cx, cz] as [number, number] };
 }
 const torsoSkin = (ctx: GarmentCtx, yy: number, outJ: number[], outW: number[]) => {
   const J = ctx.shape.joints;
@@ -368,9 +371,9 @@ function ribbon(ctx: GarmentCtx, mb: MeshBuilder, rows: [number, number, number]
   mb.computeNormals(base, mb.count, i0);
 }
 
-function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number, off: number, backH: number) {
+function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number, off: number, backH: number, closed = false) {
   // stand (against the neck) → fold → fall (lying out over the collarbones), points spreading onto the chest
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx), nr = neckRadius(ctx);
   const y = ctx.F.y;
   const m = fabricMat(f);
   void backH;
@@ -379,19 +382,32 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
     const steps = ctx.lod === 0 ? 14 : 8;
     for (let i = 0; i <= steps; i++) {
       const u = i / steps; // 0 = centre back … 1 = collar point
-      const a = side * (Math.PI - u * (Math.PI - 0.1));
-      const baseY = y.neck - 0.01 - 0.035 * u * u;          // the neckline drops toward the front
+      // buttoned under a tie the stand closes at the throat; worn open the neckline drops at the front
+      const a = side * (Math.PI - u * (Math.PI - (closed ? 0.04 : 0.1)));
+      const baseY = y.neck - 0.01 - (closed ? 0.008 : 0.035) * u * u;
       const foldY = baseY + 0.032 - 0.012 * u;               // stand height
-      const leaf = 0.042 + 0.012 * u + (u > 0.65 ? ((u - 0.65) / 0.35) ** 1.3 * point : 0);
-      const spread = u > 0.55 ? (u - 0.55) * 0.55 * side : 0;
-      const outerY = foldY - leaf;
-      const standBase = tr.at(baseY, a, off + 0.001);
-      const fold = tr.at(foldY, a, off + 0.007);
-      // the fall drapes on the shoulders/chest surface below, standing off it by its own thickness
-      const surf = tr.at(outerY, a + spread, off + 0.006 + 0.004 * (1 - u));
-      // the fall keeps its real length: it drapes toward the surface below but doesn't stretch over the shoulder
-      const dv = [surf[0] - fold[0], surf[1] - fold[1], surf[2] - fold[2]], dl = Math.hypot(dv[0], dv[1], dv[2]) || 1;
-      const outer: [number, number, number] = [fold[0] + (dv[0] / dl) * leaf, fold[1] + (dv[1] / dl) * leaf, fold[2] + (dv[2] / dl) * leaf];
+      // fall depth 40 mm at the back; `point` is the whole point length at the tip (1970s: 70–125 mm)
+      const leaf = 0.04 + 0.006 * u + (u > 0.6 ? ((u - 0.6) / 0.4) ** 1.4 * Math.max(0, point - 0.046) : 0);
+      const spread = u > 0.6 ? (u - 0.6) * 0.4 * side : 0;
+      const standBase = nr.at(baseY, a, off + 0.001);
+      const fold = nr.at(foldY, a, off + 0.007);
+      // the fall folds down over the stand and hugs it (outer edge only a little proud of the neck);
+      // only the points flare out onto the chest. It never goes inside the body below.
+      // rotate outward (keeping the fall's length) until its edge clears the body below
+      let flare = 0.32 + 0.8 * Math.max(0, (u - 0.6) / 0.4), outer: [number, number, number] = fold;
+      const ra = a + spread;
+      for (let it = 0; it < 12; it++, flare *= 1.35) {
+        const dir = [Math.sin(ra) * flare, -1, Math.cos(ra) * flare], dl = Math.hypot(dir[0], dir[1], dir[2]);
+        outer = [fold[0] + (dir[0] / dl) * leaf, fold[1] + (dir[1] / dl) * leaf, fold[2] + (dir[2] / dl) * leaf];
+        // around the neck the fall only has to clear the stand; the points must clear the chest
+        if (u <= 0.75) {
+          const sc = nr.center;
+          if (Math.hypot(outer[0] - sc[0], outer[2] - sc[1]) >= Math.hypot(standBase[0] - sc[0], standBase[2] - sc[1]) + 0.005) break;
+        } else {
+          const sc = tr.center, surf = tr.at(outer[1], Math.atan2(outer[0] - sc[0], outer[2] - sc[1]), off + 0.006);
+          if (Math.hypot(outer[0] - sc[0], outer[2] - sc[1]) >= Math.hypot(surf[0] - sc[0], surf[2] - sc[1])) break;
+        }
+      }
       rows.push([outer, fold, standBase]);
     }
     ribbon(ctx, mb, rows, m, side < 0);
