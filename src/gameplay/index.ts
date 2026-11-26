@@ -39,6 +39,7 @@ import { learn, effects as skillFx } from './player/skills';
 import { migrate, SAVE_VERSION, type SaveV3 } from './save';
 import { vehicleLook, type PlayerVehicle } from './appearance';
 import { TimeKeeper, restQuality, type CantSleep } from './time';
+import { Cars, type EntryMethod } from './cars/theft';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
@@ -85,6 +86,10 @@ export class Gameplay {
   readonly budget: { combatants: number; witnesses: number };
   /** gameplay's side of the clock: sleep / wait rules and world effects (TIME.md) */
   readonly clock = new TimeKeeper();
+  /** car records: theft, hot cars, plates, trunks (CORE_SYSTEMS §5) */
+  readonly cars: Cars;
+  /** a car waiting on a hot-wire before it will start */
+  hotwiring: string | null = null;
   private bus = new Emitter<Record<GameplayEventType, any>>();
   private actors = new Map<string, Actor>();
   private tyres: TyreShape[] = [];
@@ -134,6 +139,7 @@ export class Gameplay {
     this.phones = new Phones(this.inv);
     this.melee = new MeleeSystem(this.rng, this.world);
     this.ai = new CombatAI(this.rng);
+    this.cars = new Cars(this.rng);
     this.port = this.nullPort();
     this.policeSys = new Police(this.reg.precincts, this.world, this.rng);
     this.policeSys.bribeSkill = (id) => (id === this.player?.id ? this.reg.leads.get(this.player.lead)?.bribeSkill ?? 0 : 0);
@@ -364,8 +370,37 @@ export class Gameplay {
   /** Diner counter: buy and eat in one go. */
   eatAt(shop: string, itemId: string) { if (!this.player) return false; const r = this.shops.buy(this.player.lead, shop, itemId); return r.ok && this.use(itemId); }
   changeOutfit(outfit: string, justBought = false) { return this.player ? this.wardrobe.change(this.player.lead, outfit, { atHome: this.pc.atHome, justBought }) : false; }
-  /** Chop shop: new plates for the lead's car (breaks the plate part of descriptions). */
-  swapPlates() { if (!this.player || !this.inv.take(this.player.lead, 'item.plates')) return false; this.inv.ensure(this.player.lead).plates++; return true; }
+  /** Chop shop: new plates on the car you're in (breaks the plate part of descriptions and reports). */
+  swapPlates() {
+    if (!this.player || !this.inv.take(this.player.lead, 'item.plates')) return false;
+    const v = this.pc.vehicle; if (v && this.cars.cars.has(v.id)) this.cars.swapPlates(v.id); else this.inv.ensure(this.player.lead).plates++;
+    return true;
+  }
+  /** Get into a car by a given method. Crimes go through the witness system with the method's noise. */
+  enterCar(carId: string, method: EntryMethod, timing?: number) {
+    if (!this.player) return null;
+    const lead = this.player.lead, sk = skillFx(this.inv.ensure(lead).skills);
+    const c = this.cars.cars.get(carId);
+    const driver = c?.driver ?? null;
+    const res = this.cars.enter(carId, lead, method, { lockMul: sk.lockTime, tempF: this.pc.tempF, timing });
+    if (!res.ok) { if (res.failed) this.emit('notice', { kind: 'slimjimFailed' }); return res; }
+    for (const k of res.crimes) this.crime(k, { noise: Math.max(res.noise, 8), victim: driver ?? undefined, visible: true });
+    if (method === 'slimjim' || method === 'hotwire') learn(this.inv.ensure(lead).skills, method === 'slimjim' ? 'lockPicked' : 'hotwired');
+    if (res.needsHotwire) { this.hotwiring = carId; return res; }
+    this.drive(carId);
+    return res;
+  }
+  /** Under the dash. Call after enterCar returned needsHotwire. */
+  hotwire() {
+    if (!this.hotwiring || !this.player) return null;
+    const id = this.hotwiring;
+    const res = this.cars.enter(id, this.player.lead, 'hotwire', { lockMul: skillFx(this.inv.ensure(this.player.lead).skills).lockTime, tempF: this.pc.tempF });
+    if (res.ok) { this.hotwiring = null; learn(this.inv.ensure(this.player.lead).skills, 'hotwired'); this.drive(id); }
+    else this.emit('notice', { kind: 'stalled' });
+    return res;
+  }
+  private drive(carId: string) { const c = this.cars.cars.get(carId); if (c) this.setContext({ vehicle: { id: c.id, vclass: c.vclass, colour: c.colour } }); }
+  exitCar() { const v = this.pc.vehicle; if (v && this.player) { const c = this.cars.cars.get(v.id); const p = this.player.position(); if (c) { c.x = p[0]; c.z = p[2]; } } this.setContext({ vehicle: null }); }
 
   // ------------------------------------------------------------------ crimes
   /** Report a crime by the player (or any perp). Perception runs immediately. */
@@ -477,6 +512,8 @@ export class Gameplay {
     // props, phones
     const pp = p?.position() ?? [0, 0, 0];
     this.props.update(dt, [pp[0], pp[2]]);
+    this.cars.update(dt);
+    if (this.pc.vehicle && this.player) { const c = this.cars.cars.get(this.pc.vehicle.id); if (c) { c.x = pp[0]; c.z = pp[2]; } }
     if (p) this.phones.update(dt, p.lead, pp[0], pp[2], this.busy());
     for (const d of [...this.pendingDiscoveries]) if (this.time >= d.at) {
       this.pendingDiscoveries.splice(this.pendingDiscoveries.indexOf(d), 1);
@@ -642,6 +679,14 @@ export class Gameplay {
       this.cover.release(e.suspect); this.pc.cover = null; this.pc.surrendered = false; this.aimer.release();
       this.outcomes.arrested(this.player.lead, e.precinct, e.heat, e.kinds);
     });
+    this.cars.on('ownerReport', (e) => {
+      const c = this.cars.cars.get(e.car); if (!c?.stolenBy) return;
+      const perp = c.stolenBy === this.player?.lead ? this.player.id : c.stolenBy;
+      this.policeSys.file({ witness: `owner:${e.car}`, perp, kinds: ['theft'], crimeIds: [-1000 - this.crimeSeq++], desc: { clothes: [], vehicle: { id: e.car, vclass: { v: e.vclass, c: 0.95 }, colour: { v: e.colour, c: 0.95 }, plate: { v: e.plate, c: 0.95 } } }, lastKnown: e.at, crimeAt: e.at, via: 'payphone', time: this.time });
+      this.emit('police', { kind: 'carReported', car: e.car, plate: e.plate });
+    });
+    this.cars.on('stolen', (e) => this.emit('notice', { kind: 'stolen', ...e }));
+    this.cars.on('driverReacts', (e) => { if (e.reaction === 'flee' || e.reaction === 'callbox') this.port.command(e.driver, { type: 'flee', fromX: this.player?.position()[0] ?? 0, fromZ: this.player?.position()[2] ?? 0 }); this.emit('notice', { kind: 'driverReacts', ...e }); });
     this.outcomes.on('wasted', (e) => this.emit('wasted', e));
     this.outcomes.on('arrested', (e) => { this.equip('weapon.fists'); this.emit('arrested', e); });
     this.outcomes.on('released', (e) => this.emit('released', e));
@@ -705,7 +750,7 @@ export class Gameplay {
     const p = this.player!;
     const prof = this.reg.lead(p.lead);
     const armed = this.reg.weapon(this.pc.weapon).class !== 'melee' && (this.pc.aiming || this.pc.firing);
-    return { subject: prof.description, sex: prof.sex, build: prof.build, look: this.wardrobe.look(p.lead), vehicle: vehicleLook(this.pc.vehicle, this.inv.ensure(p.lead).plates), armed };
+    return { subject: prof.description, sex: prof.sex, build: prof.build, look: this.wardrobe.look(p.lead), vehicle: vehicleLook(this.pc.vehicle, this.pc.vehicle ? this.cars.cars.get(this.pc.vehicle.id)?.plateGen ?? this.inv.ensure(p.lead).plates : 0), armed };
   }
   suspect(): SuspectCtx | null {
     const p = this.player; if (!p) return null;
@@ -787,7 +832,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -803,6 +848,7 @@ export class Gameplay {
     this.phones.deserialize(s.phones as any);
     this.props.deserialize(s.props as any);
     this.outcomes.deserialize(s.outcomes as any);
+    this.cars.deserialize((s as any).cars ?? []);
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);
       this.pc.weapon = this.inv.ensure(this.player.lead).equipped; this.guns.clear();

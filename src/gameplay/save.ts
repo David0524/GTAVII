@@ -26,6 +26,7 @@ export interface SaveV3 {
   phones: unknown;
   props: unknown;
   outcomes: unknown;
+  cars?: unknown;
   activeLead?: string;
 }
 
