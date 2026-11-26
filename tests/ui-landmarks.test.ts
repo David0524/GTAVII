@@ -17,7 +17,7 @@ test("the shipped registry renames every world.json hero that has a brand or tra
   const fs = await import('node:fs');
   const reg = new Landmarks(JSON.parse(fs.readFileSync('content/landmarks.json', 'utf8')).landmarks);
   const heroes: { name: string }[] = JSON.parse(fs.readFileSync('public/data/world.json', 'utf8')).heroes;
-  // Flatiron: a building name, kept. Hotel Chelsea: not on the user's rename list yet (raised with oversight and narrative).
-  const KEEP = new Set(['Flatiron Building', 'Hotel Chelsea']);
+  // Flatiron: a building name, kept as a place name (user decision).
+  const KEEP = new Set(['Flatiron Building']);
   for (const h of heroes) if (!KEEP.has(h.name)) assert.notEqual(reg.short(h.name), h.name, `${h.name} is shown under its real name`);
 });
