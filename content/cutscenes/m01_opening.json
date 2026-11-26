@@ -1,0 +1,126 @@
+{
+  "id": "cut.m01_opening",
+  "mission": "mission.dusk_on_broadway",
+  "before": "o1",
+  "_format": "PROPOSED to the UI & cinematics chat (owner of content/cutscenes and the tool). Shots carry lensMm (35mm-film equivalent), move, framing, blocking, beats, durationSec and optional dialogue refs (script#line), audio, lighting and film cues. The last shot is the gameplay blend.",
+  "time": "20:28",
+  "date": "1974-06-21",
+  "weather": "clear",
+  "skippable": true,
+  "logline": "The city at dusk, the Flatiron's prow, a man standing where he used to stand his post. Then up Broadway.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "establishing aerial (crane down)",
+      "lensMm": 40,
+      "move": "slow crane down from roof level of the Met Life tower toward Madison Sq Park",
+      "framing": "Wide; WTC towers tiny on the downtown horizon left; sun low behind New Jersey",
+      "blocking": "Park benches with sleepers; traffic streaming down Fifth",
+      "beats": [
+        "Title card fades in: TENDERLOIN '74",
+        "Streetlights flicker on along Broadway, one by one"
+      ],
+      "durationSec": 9,
+      "audio": [
+        "city bed: horns, a bus kneeling, a radio from an open window (Night Owl Radio jingle)"
+      ],
+      "lighting": "dusk key from the west, sodium lamps warming up",
+      "film": [
+        "grain 35mm",
+        "slight gate weave",
+        "halation on lamps"
+      ]
+    },
+    {
+      "id": "s2",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "static, then slow push",
+      "framing": "The Flatiron's prow centred, Broadway and Fifth splitting behind it",
+      "blocking": "A small figure on the sidewalk at the north tip, hands in pockets (Teddy)",
+      "beats": [
+        "A cab cuts through frame; its brake lights flare"
+      ],
+      "durationSec": 6,
+      "audio": [
+        "cab horn, distant"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "medium close",
+      "lensMm": 85,
+      "move": "handheld, subtle",
+      "framing": "Teddy from the waist up, the prow's limestone behind",
+      "blocking": "Teddy checks his watch, looks up Broadway",
+      "beats": [
+        "Insert: steel wristwatch reads 8:31"
+      ],
+      "durationSec": 5,
+      "lighting": "last sun on the building's west face, his face in shadow"
+    },
+    {
+      "id": "s4",
+      "type": "insert",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "His hand turning the Saint Christopher medal through his shirt",
+      "blocking": "",
+      "beats": [
+        "Tells the player: he's a man with a habit and a past"
+      ],
+      "durationSec": 3
+    },
+    {
+      "id": "s5",
+      "type": "over-the-shoulder",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Over Teddy's shoulder toward Fifth Ave; a big man crossing against the light",
+      "blocking": "Mayhew enters from the Fifth Ave side, sport coat over his arm, waving",
+      "beats": [
+        "Mayhew's grin before he's close enough to talk"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m01_prow#l1"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "slow dolly left",
+      "framing": "Both men, prow between them and the evening sky",
+      "blocking": "Mayhew stops a little too close; Teddy doesn't step back",
+      "beats": [
+        "Exchange l2–l4"
+      ],
+      "durationSec": 10,
+      "dialogue": [
+        "dlg.m01_prow#l2",
+        "dlg.m01_prow#l3",
+        "dlg.m01_prow#l4"
+      ]
+    },
+    {
+      "id": "s7",
+      "type": "gameplay blend",
+      "lensMm": 35,
+      "move": "camera pulls back and swings behind Teddy to the gameplay rig, matching world.json spawn heading (north up Broadway)",
+      "framing": "Exactly the spawn shot",
+      "blocking": "Mayhew starts walking uptown; Teddy follows",
+      "beats": [
+        "Mayhew: l5 ('Walk with me…')",
+        "HUD fades in with the objective 'Walk up Broadway with Mayhew'"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m01_prow#l5"
+      ],
+      "film": [
+        "reel-change language not used here; a continuous blend"
+      ]
+    }
+  ]
+}
