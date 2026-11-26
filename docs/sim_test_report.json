@@ -1,20 +1,20 @@
 {
-  "generated": "2026-11-26T15:55:49.343Z",
+  "generated": "2026-11-26T16:31:55.207Z",
   "note": "Headless Node timings, CPU only (container, no GPU); single thread.",
   "seed": 1974,
   "high": {
     "label": "High preset, 10 sim-minutes, all checks",
-    "seconds": 120,
+    "seconds": 600,
     "maxVehicles": 150,
     "maxPeds": 400,
     "final": {
-      "vehicles": 124,
-      "peds": 346
+      "vehicles": 144,
+      "peds": 400
     },
     "stepMs": {
-      "avg": 0.657,
-      "p95": 1.054,
-      "max": 27.709
+      "avg": 0.765,
+      "p95": 1.099,
+      "max": 22.048
     },
     "failures": {
       "vehOffRoad": 0,
@@ -31,21 +31,21 @@
       "animalOnRoad": 0
     },
     "examples": {},
-    "maxStationarySec": 38.8,
-    "maxStationaryWho": "#59 bus red link 509",
+    "maxStationarySec": 93.3,
+    "maxStationaryWho": "#336 car red link 610",
     "flow": {
-      "minMovingFraction": 0.33,
-      "avgMovingFraction": 0.59
+      "minMovingFraction": 0.17,
+      "avgMovingFraction": 0.48
     },
     "hooks": {
-      "escorts": 1,
-      "gotos": 1,
-      "witnesses": 0
+      "escorts": 3,
+      "gotos": 3,
+      "witnesses": 213
     },
     "wildlife": {
       "peakVisible": 180,
-      "startles": 35,
-      "scatters": 2,
+      "startles": 164,
+      "scatters": 10,
       "feeders": 2
     },
     "stats": {
@@ -53,32 +53,76 @@
       "wrongWay": 0,
       "vehCollisions": 0,
       "pedHits": 0,
-      "spawnedV": 503,
-      "despawnedV": 379,
-      "spawnedP": 886,
-      "despawnedP": 40,
-      "stuckDespawn": 0,
-      "honks": 504,
-      "hails": 6,
-      "boardings": 0,
-      "dropoffs": 0,
-      "busStops": 0,
-      "doubleParks": 2,
-      "jaywalks": 29,
-      "crossings": 193,
-      "laneChanges": 445
+      "spawnedV": 1147,
+      "despawnedV": 1003,
+      "spawnedP": 1743,
+      "despawnedP": 541,
+      "stuckDespawn": 29,
+      "honks": 4442,
+      "hails": 71,
+      "boardings": 3,
+      "dropoffs": 16,
+      "busStops": 1,
+      "doubleParks": 18,
+      "jaywalks": 127,
+      "crossings": 1653,
+      "laneChanges": 1642
     },
-    "stuckWhy": {},
-    "stuckLog": [],
+    "stuckWhy": {
+      "box": 7,
+      "queue": 7,
+      "peds": 13,
+      "conflict": 1,
+      "siren": 1
+    },
+    "stuckLog": [
+      "#30@-45,-150 head #30 car drive/box/box next 1794 link 458(Broadway) s35/40 @-45,-150 stop60",
+      "#24@-42,-138 head #24 car drive/box/box next 1792 link 456(Broadway) s49/54 @-42,-138 stop60",
+      "#22@-43,-143 head #22 cab drive/box/box next 1793 link 457(Broadway) s43/47 @-43,-143 stop60",
+      "#430@-51,-194 head #5 cab drive/box/box next 1794 link 458(Broadway) s37/40 @-44,-148 stop7",
+      "#229@-51,-154 head #229 cab drive//queue next 1793 link 457(Broadway) s29/47 @-51,-154 stop60",
+      "#496@-70,-211 head #5 cab drive/box/box next 1794 link 458(Broadway) s37/40 @-44,-148 stop39",
+      "#500@-73,-217 head #5 cab drive/box/box next 1794 link 458(Broadway) s37/40 @-44,-148 stop39",
+      "#510@-74,-211 head #228 bus drive/red/red next 1793 link 457(Broadway) s39/47 @-46,-145 stop39",
+      "#565@-76,-224 head #5 cab drive/box/box next 1794 link 458(Broadway) s37/40 @-44,-148 stop39",
+      "#608@-77,-218 head #228 bus drive/red/red next 1793 link 457(Broadway) s39/47 @-46,-145 stop39",
+      "#610@-78,-230 head #5 cab drive/box/box next 1794 link 458(Broadway) s37/40 @-44,-148 stop39",
+      "#906@-386,-1010 head #954 truck drive/red/red next 1129 link 751(West 35th Street) s191/197 @-585,-992 stop7",
+      "#873@-388,-1004 head #954 truck drive/red/red next 1129 link 751(West 35th Street) s191/197 @-585,-992 stop8",
+      "#833@-382,-1007 head #1558 car drive/red/red next 1130 link 45(West 35th Street) s24/245 @-644,-992 stop0",
+      "#1093@-311,-992 head #954 truck drive/red/red next 1130 link 45(West 35th Street) s31/245 @-652,-992 stop0",
+      "#899@-337,-980 head #1136 truck drive// next -1 link 1129(conn) s29/30 @-620,-992 stop0",
+      "#876@-334,-982 head #876 car drive/siren/red next 1610 link 468(6th Avenue) s58/59 @-334,-982 stop73",
+      "#1373@-331,-809 head #1373 car drive/peds/peds next 1018 link 413(6th Avenue) s55/59 @-331,-809 stop68",
+      "#1408@-328,-813 head #1408 cab drive/peds/peds next 1017 link 412(6th Avenue) s59/59 @-328,-813 stop71",
+      "#1422@-325,-805 head #1422 car drive/peds/queue next 1016 link 411(6th Avenue) s50/59 @-325,-805 stop64",
+      "#1425@-325,-813 head #1425 car drive/peds/peds next 1016 link 411(6th Avenue) s58/59 @-325,-813 stop66",
+      "#1429@-328,-799 head #1429 car drive/peds/queue next 1017 link 412(6th Avenue) s45/59 @-328,-799 stop62",
+      "#1453@-325,-798 head #1453 cab drive/peds/queue next 1016 link 411(6th Avenue) s44/59 @-325,-798 stop62",
+      "#1543@-328,-807 head #1543 cab drive/peds/queue next 1017 link 412(6th Avenue) s52/59 @-328,-807 stop64",
+      "#1174@-429,-1072 head #1360 car drive// next 1101 link 81(West 36th Street) s83/282 @-233,-1072 stop0",
+      "#2046@-560,-1634 head #2730 cab drive/red/red next 1374 link 534(West 43rd Street) s240/245 @-863,-1635 stop3",
+      "#2001@-592,-1634 head #2730 cab drive/red/red next 1374 link 534(West 43rd Street) s240/245 @-863,-1635 stop3",
+      "#2321@-583,-1464 head #2014 truck drive/red/red next 1493 link 178(West 41st Street) s238/244 @-862,-1464 stop30",
+      "#1990@-589,-1464 head #1990 cab drive/peds/peds next 1446 link 616(West 41st Street) s41/45 @-589,-1464 stop60"
+    ],
     "events": {
-      "subwayExit": 8,
-      "honk": 504,
-      "jaywalk": 29,
-      "doubleParked": 2,
-      "hail": 6,
-      "nearMiss": 12
+      "subwayExit": 11,
+      "honk": 4442,
+      "jaywalk": 127,
+      "doubleParked": 18,
+      "hail": 71,
+      "pickup": 3,
+      "goalReached": 3,
+      "subwayEnter": 2,
+      "escortProgress": 1,
+      "dropoff": 16,
+      "nearMiss": 22,
+      "dodge": 2,
+      "collision": 4,
+      "busStop": 1
     },
-    "hash": "d7af33e7:124/346",
+    "hash": "af5873f:144/400",
     "archetypeWarnings": []
   },
   "low": {
@@ -91,9 +135,9 @@
       "peds": 120
     },
     "stepMs": {
-      "avg": 0.174,
-      "p95": 0.381,
-      "max": 5.371
+      "avg": 0.171,
+      "p95": 0.314,
+      "max": 5.292
     },
     "failures": {
       "vehOffRoad": 0,

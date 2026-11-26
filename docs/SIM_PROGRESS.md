@@ -16,6 +16,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Boundaries layer 3 (city thickens at the edge) | **First pass**: spawn density ramps up over the last `EDGE.RAMP` m; traffic crawls bumper-to-bumper inside `EDGE.BLOCKERS`; no lanes/walk graph beyond the playable edge. Rubbernecking at blockers and chase roadblocks: not yet |
 | Gameplay hooks | **First pass**: `perceive()`, `setGoal()` (goto/follow/escort/flee/flagDownCar), `emit({type:'gunfire'})` with distance-scaled panic, civilians pull over for `siren` actors. Police pursuit/foot-cop AI: not yet |
 | Economy hook | `blockAt(x,z)` + `footTraffic(blockId)` rolling peds/min |
+| Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
 | Headless 10-minute deterministic test (`npm run test:sim`) | **Passing** (report: `docs/sim_test_report.json`) |
 | Playwright screenshots (`npm run build && npm run shots:sim -- --webgl`) | **Done** (`shots/sim/`) |
@@ -75,9 +76,10 @@ SubwayEntrance POIs). Steps (all deterministic; per-place choices hash coordinat
 9. Traffic graph pruned to its largest strongly connected component at lane-group level; every
    surviving lane is guaranteed an exit (no dead ends anywhere).
 
-Result (expanded city, engine pipeline v2, playable bounds from `src/shared/bounds.ts`): 402 junctions
-(305 signalized: 294 from OSM POIs, plus synthesized), 1685 lanes, 2247 connectors, 3140 conflicts,
-1078 walk nodes, 1822 walk edges (925 crosswalks), 5195 spots, 109 bus stops; lanes.bin 606 KiB.
+Result (small story-core map, engine E8 `PLAYABLE`): 198 junctions (150 signalized: 148 from OSM POIs,
+3 synthesized), 826 lanes, 1072 connectors, 1327 conflicts, 556 walk nodes, 972 walk edges (484
+crosswalks), 2894 spots, 66 bus stops, plus wildlife places (248 park, 254 corner, 139 ledge, 95 coop
+for pigeons; 629 kerbside trash, 108 subway for rats); lanes.bin 318 KiB.
 Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the chunks change.
 
 ### Traffic
@@ -115,6 +117,20 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
 - `threat` → flee along the graph away from the point (never into moving traffic) or cower; fast
   external vehicles make peds dodge.
 
+### Wildlife (`src/sim/wildlife.ts`)
+- Places come from the build step: park ground (grid inside park polygons, 3.2 m clear all round),
+  sidewalk corners, street-facing cornices of 9–40 m buildings (ledges), tenement rooftop coops,
+  kerbside trash in front of shops/stoops, subway entrances.
+- Groups activate within 110 m (pigeons) / 55 m (rats) of the focus, sized and rolled deterministically
+  per place and hour from the archetype weight (density day/night × schedule; rain halves it).
+  Caps: birds 0.5 × maxPeds, rats 0.15 × maxPeds (High 200/60, Low 60/18).
+- Pigeons peck and shuffle; anyone running within ~4 m, the player close by, a fast car at the kerb,
+  gunfire or a threat makes the flock burst up and arc (Bézier, staggered take-off) to the nearest
+  ledge/coop 15–120 m away, perch 25–90 s and drift back down when it's quiet. Old men
+  (`npc.pigeon_feeder`) sit by park flocks by day and the birds crowd their feet. Event `flockStartle`.
+- Rats dash around trash and subway entrances, mostly at night, and vanish from footsteps and
+  headlights, re-emerging later. Event `ratScatter`. Startle, never damage.
+
 ### Archetypes
 Runtime for the NARRATIVE_BRIEF slot schema. Built-ins: `npc.commuter`, `npc.worker_handcart`,
 `npc.shopper`, `npc.loiterer`, `npc.beat_cop`, `npc.vendor` (peds) and `npc.driver_private`,
@@ -142,7 +158,7 @@ Events: `honk {id,x,z,kind,archetype,reason,intensity}`, `collision`, `nearMiss`
 takes `until` in sim seconds (`sim.time`); default now + 60 s.
 
 ## Test results (`docs/sim_test_report.json`, seed 1974; earlier build also passed seed 7)
-10 simulated minutes on the merged engine data (terrain on, expanded city), focus touring Flatiron →
+10 simulated minutes on the merged engine data (terrain on, E8 small story-core bounds), focus touring Flatiron →
 Herald Square → 42nd St & 7th Ave. Scripted: a threat, a blocked lane, a closed street, a brownout
 (dark signals for 130 s), gunfire, the player walking a sidewalk, a scripted car driving through
 everything with its **siren on** for the middle third, and escort + goto goals on nearby peds.
@@ -157,8 +173,9 @@ Checked every other step against geometry independent of the sim:
 | peds inside buildings / on roadway when not crossing | 0 / 0 |
 | peds inside a moving vehicle | 0 |
 | any agent beyond the playable edge / non-finite or wild y | 0 / 0 |
-| deadlock: longest non-dwelling stop | 88 s (limit 180 s) |
-| network-wide flow | moving fraction ≥ 0.16 always, 0.52 average |
+| deadlock: longest non-dwelling stop | 93 s (limit 180 s) |
+| network-wide flow | moving fraction ≥ 0.17 always, 0.48 average |
+| wildlife: ground pigeons/rats inside buildings / on the roadway | 0 / 0 (peak 180 animals visible; 164 flock take-offs, 10 rat scatters, 2 park feeders) |
 | determinism (two runs, same seed) | identical hashes |
 | hooks | 3 escorts (3 waypoint progress events), 3 goto goals (2 reached in time), 142 witnesses returned by `perceive()` for the gunfire |
 
@@ -167,9 +184,9 @@ Activity in 10 min: 2037 lane changes, 1407 crosswalk crossings, 135 jaywalks, 1
 
 ## Performance (honest)
 Headless Node 22, **CPU only, single thread, this container** (no GPU), per fixed step:
-- **High (150 vehicles + 400 peds): 0.59 ms avg, 0.83 ms p95**, 19 ms max (the max is the
+- **High (150 vehicles + 400 peds + up to 200 birds/60 rats): 0.77 ms avg, 1.10 ms p95**, 22 ms max (the max is the
   full-ring refill when the focus teleports between tour stops).
-- **Mobile Low (40 + 120): 0.14 ms avg, 0.30 ms p95.**
+- **Mobile Low (40 + 120 + wildlife): 0.17 ms avg, 0.31 ms p95.**
 - In the headless browser (`shots/sim/report.json`) the HUD reads ~2.4–3.4 ms per `update()` call,
   but that is Chrome sharing the CPU with the SwiftShader software rasteriser, and up to three
   fixed steps per frame at ~100 ms frames. Needs a real-device measurement; if High exceeds 2 ms
@@ -228,8 +245,11 @@ What doesn't (yet):
       reactions, plate/description recognition: Gameplay will request these through ENGINE_REQUESTS.
 - [ ] Edge layer 3 extras: rubbernecking at edge blockers, chase roadblocks; retune when bounds shrink.
 - [ ] Interiors door hand-off: walk graph needs door nodes (`doorsForChunk`) + an `enter`/`exit` ped state.
-- [ ] Wildlife (pigeons/rats/strays/mounted unit), subway trains, emergency/service traffic, cab rides
-      as player fast travel: scoped by the control panel, not started.
+- [ ] Police pursuit (box-in, roadblocks, foot cops that tire, officer-down surges, car owners,
+      rubbernecking) is next per the coordinator's order; then emergency/service traffic + cab rides,
+      parking enforcement/tow/street cleaning, subway trains, Interiors doors, mounted police + strays.
+- [ ] Wildlife: rats on actual subway tracks need the engine's track geometry; pigeons don't yet react
+      to the player's car specifically (only generic external vehicles).
 - [ ] Real-hardware timing (desktop + phone); move to a worker if High > 2 ms on device.
 - [ ] Cab dispatch over the next 2–3 blocks; bus route ids and denser stop service.
 - [ ] Parked-car props for the parking lanes (engine) and kerb gaps at hydrants/bus stops.
