@@ -104,6 +104,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
 
   let title: TitleScreen | null = null;
   const cinema = new CinematicPlayer(host);
+  cinema.askChoice = (cs, resolve) => choices.ask(cs, resolve);
   const root: UiRoot = {
     hud, hub, model: o.model, mapScreen, title: null, toast, extras, cinema,
     playCutscene(id, opts = {}) {
@@ -127,7 +128,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
     titleReady: (l) => title?.setReady(l),
     update(dt) {
       if (tool) { tool.update(dt); hud.setVisible(false); return; }
-      if (root.state === 'cutscene') { cinema.update(dt); hud.setVisible(false); return; }
+      if (root.state === 'cutscene') { cinema.update(dt); choices.update(dt); hud.setVisible(false); return; }
       if (root.state === 'title') { if (hub.open) hub.update(dt); else title?.update(dt); hud.setVisible(false); return; }
       if (hub.open) hub.update(dt);
       else if (root.state === 'paused') root.state = 'play';

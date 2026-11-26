@@ -22,6 +22,8 @@ import { settings } from '../settings/Settings';
 import { esc } from '../ui/util';
 
 export interface PlayOptions { onEnd?: (skipped: boolean) => void; startAt?: number; paused?: boolean }
+/** How the player asks the UI for a choice (the UI's Choices overlay: untimed, ≤ 4, large buttons). */
+export type AskChoice = (choices: { id: string; text: string }[], resolve: (id: string) => void) => void;
 
 export class CinematicPlayer {
   tl: Timeline | null = null;
@@ -42,6 +44,12 @@ export class CinematicPlayer {
   /** Last evaluated pose (the tool reads it). */
   pose: ReturnType<Timeline['camera']> | null = null;
 
+  /** Set by the UI root: shows the dialogue-choice overlay. */
+  askChoice: AskChoice | null = null;
+  private waiting = false;
+  private held = new Set<number>();
+  private choicesOf: (ref: string) => import('./schema').DialogueChoiceSet | null = () => null;
+
   constructor(private host: UiHost) {
     this.actors.name = 'cinematics-actors';
     this.fx.className = 'cine-fx'; this.fx.style.display = 'none';
@@ -61,7 +69,8 @@ export class CinematicPlayer {
   private touchHold: () => boolean = () => false;
 
   async play(id: string, opts: PlayOptions = {}) {
-    const { scene, dialogue, speaker } = await loadCutscene(id);
+    const { scene, dialogue, choices, speaker } = await loadCutscene(id);
+    this.choicesOf = choices; this.held.clear(); this.waiting = false;
     this.scene = scene; this.opts = opts;
     this.tl = new Timeline(scene, dialogue, speaker);
     this.t = opts.startAt ?? 0; this.playing = true; this.paused = !!opts.paused; this.skipHeld = 0; this.lastLine = '';
@@ -123,9 +132,23 @@ export class CinematicPlayer {
       this.fx.classList.toggle('skipping', this.skipHeld > 0.05);
       if (this.skipHeld >= 1) { this.stop(true); return; }
     }
-    if (this.paused) return;
+    if (this.paused || this.waiting) return;
     const t0 = this.t;
     this.t = Math.min(this.tl.duration, this.t + dt);
+    // a choice-hold shot freezes the frame here, untimed, until the player chooses
+    const si = this.tl.shotIndexAt(this.t === this.tl.duration ? this.t - 1e-6 : this.t);
+    for (let i = this.tl.shotIndexAt(t0); i <= si; i++) {
+      const sh = this.scene!.shots[i];
+      if (sh.waitFor === 'choice' && !this.held.has(i) && this.tl.shotStart[i] + sh.durationSec <= this.t + 1e-6) {
+        this.held.add(i); this.t = this.tl.shotStart[i] + sh.durationSec; this.apply(0);
+        const set = this.choicesOf(sh.choices ?? '');
+        if (set && this.askChoice) {
+          this.waiting = true;
+          this.askChoice(set.choices.map((c, k) => ({ id: c.goto ?? String(k), text: c.text })), (cid) => { this.waiting = false; this.host.commit?.('dialogue.choice', { ref: sh.choices, choice: cid }); });
+          return;
+        }
+      }
+    }
     for (const e of this.tl.eventsBetween(t0, this.t)) {
       if (e.kind === 'card') this.card(e.cue, e.style ?? 'title', e.seconds ?? 4);
       else this.host.commit?.(e.kind === 'audio' ? `audio:${e.cue}` : e.cue, e.data);

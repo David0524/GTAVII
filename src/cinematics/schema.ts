@@ -38,6 +38,9 @@ export interface Shot {
   lighting?: string | Record<string, unknown>;
   film?: ShotFilm | string[];
   transition?: 'cut' | 'dissolve' | 'blend';
+  /** Hold this frame, untimed, until something resolves (a dialogue choice: choices = "dlg.x#c1"). */
+  waitFor?: 'choice';
+  choices?: string;
 }
 
 export interface Cutscene {
@@ -51,6 +54,7 @@ export interface Cutscene {
 }
 
 export interface DialogueLine { id: string; speaker: string; text: string; emotion?: string }
+export interface DialogueChoiceSet { id: string; choices: { text: string; goto?: string; setFlags?: string[] }[] }
 
 export class CutsceneError extends Error {}
 
@@ -64,7 +68,8 @@ export function validateCutscene(c: Cutscene): string[] {
   c.shots.forEach((s, i) => {
     const p = `shots[${i}]${s?.id ? ` (${s.id})` : ''}`;
     if (!s.id) errs.push(`${p}.id`); else if (ids.has(s.id)) errs.push(`${p}.id duplicate`); else ids.add(s.id);
-    if (!(s.durationSec > 0)) errs.push(`${p}.durationSec`);
+    if (!(s.durationSec > 0) && !(s.waitFor && s.durationSec === 0)) errs.push(`${p}.durationSec`);
+    if (s.waitFor === 'choice' && !/^dlg\.[\w.]+#\w+$/.test(s.choices ?? '')) errs.push(`${p}.choices (expected dlg.<script>#<choice id>)`);
     const keys = s.camera?.keys;
     if (keys) {
       if (!keys.length) errs.push(`${p}.camera.keys empty`);
