@@ -74,6 +74,17 @@
       ],
       "name": "World Trading Towers",
       "short": "Trading Towers"
+    },
+    {
+      "id": "lm.hotel_chelsea",
+      "real": "Hotel Chelsea",
+      "aliases": [
+        "Chelsea Hotel",
+        "The Chelsea"
+      ],
+      "name": "Hotel Kelsey",
+      "short": "Hotel Kelsey",
+      "sign": "HOTEL KELSEY"
     }
   ]
 }

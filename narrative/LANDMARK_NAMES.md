@@ -86,3 +86,16 @@ This name appears in one shopper bark, the activity note, and a code comment in 
 2. Replace every hard-coded occurrence in the content and builders with the chosen names.
 3. Rename ids where the old name is baked in.
 4. The engine and UI read map labels, signage and reveals from that registry.
+
+---
+
+## 8. Hotel Chelsea (222 W 23rd St): DECIDED as Hotel Kelsey (26 Nov 2026)
+Added after the UI chat found it among the world.json heroes. In 1974 it was the artists' and writers' hotel. It isn't named anywhere in narrative content yet, only as a world.json hero.
+
+| Option | Why | Search |
+|---|---|---|
+| ★ **Hotel Kelsey** | Rhymes, like Lacy's: swapped for another real word, and it reads instantly on the red-brick facade. | Clear (no NYC or other hotel of that exact name found). |
+| **Hotel Chelmsford** | Keeps the "Chel-" sound and the English-place-name origin (Chelsea is a London district; so is the Essex town). Sounds stuffier, which suits a joke on bohemians. | No hotel of that exact name. Chelmsford, England has many hotels named after the town, but none called "Hotel Chelmsford". |
+| **Hotel Shelley** | A poet pun for the writers' hotel, with the Chel/Shel sound. | **Collision:** an operating *Hotel Shelley* exists in Miami Beach (Art Deco, Collins Ave). Same service class, so not recommended. |
+
+Avoid *The Chelsean*, an operating hotel at 160 W 25th St.
