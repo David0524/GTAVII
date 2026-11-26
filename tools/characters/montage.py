@@ -8,9 +8,9 @@ import json, os
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..')
 cat = {c['id']: c for c in json.load(open(os.path.join(ROOT, 'references/catalog.json')))}
 SETS = {
-    '01_lineup_a.png': ['documerica_551651', 'documerica_548399', 'documerica_554312'],
-    '02_lineup_b.png': ['documerica_551646', 'documerica_551696'],
-    '04_leads_act1.png': ['documerica_551651', 'documerica_554312'],
+    '01_lineup_a.jpg': ['documerica_551651', 'documerica_548399', 'documerica_554312'],
+    '02_lineup_b.jpg': ['documerica_551646', 'documerica_551696'],
+    '04_leads_act1.jpg': ['documerica_551651', 'documerica_554312'],
 }
 for shot, refs in SETS.items():
     lineup = Image.open(os.path.join(ROOT, 'shots/characters', shot)).convert('RGB')
@@ -33,6 +33,7 @@ for shot, refs in SETS.items():
         d.text((x + 4, lineup.height + row_h + 16), f"NARA {rid.split('_')[1]}, {c['date']}", fill=(220, 210, 190))
         x += p.width + 10
     d.text((10, lineup.height + row_h + 44), 'Top: generated pedestrians (seeded, ?characters=1&scene=lineup). Bottom: public-domain DOCUMERICA photos (US National Archives) the wardrobe tables came from (docs/WARDROBE_1974.md).', fill=(200, 190, 170))
-    name = os.path.join(ROOT, 'shots/characters', shot.replace('.png', '_vs_refs.png'))
-    out.save(name)
+    name = os.path.join(ROOT, 'shots/characters', shot.replace('.jpg', '_vs_refs.jpg'))
+    if out.width > 1600: out = out.resize((1600, round(out.height * 1600 / out.width)), Image.LANCZOS)
+    out.save(name, quality=85, optimize=True)
     print('wrote', name, out.size)
