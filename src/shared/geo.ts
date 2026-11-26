@@ -47,10 +47,10 @@ export const TRUE_NORTH: [number, number] = [-S, -C];
 /** Modelled region in world metres (grid-aligned rectangle): the playable area (bounds.ts PLAYABLE)
  *  plus a 200 m full-detail buffer so the city continues past the edge (pipeline v2). */
 export const REGION = {
-  minX: -1780, // beyond 11th Ave (playable edge: mid-block 10th-11th)
-  maxX: 720, // ~3rd Ave (playable edge: mid-block Lexington-3rd)
-  minZ: -2190, // ~50th St (playable edge: mid-block 47th-48th)
-  maxZ: 520, // ~16th St (playable edge: mid-block 18th-19th)
+  minX: -1492, // past 10th Ave (playable edge: mid-block 9th-10th)
+  maxX: 413, // past Park Ave (playable edge: mid-block Madison-Park)
+  minZ: -1874, // ~46th St: Times Square stays visible and lit (playable edge: mid-block 43rd-44th)
+  maxZ: 292, // ~19th St (playable edge: mid-block 21st-22nd)
 };
 
 export const CHUNK_SIZE = 200; // metres; chunk (i,j) covers [i*S,(i+1)*S) x [j*S,(j+1)*S)

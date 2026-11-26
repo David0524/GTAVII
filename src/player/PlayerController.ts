@@ -2,6 +2,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import type { Physics } from '../physics/Physics';
 import type { Input } from '../input/Input';
 import { heightAt } from '../shared/terrain';
+import { GROUPS } from '../shared/physicsGroups';
 
 /**
  * Third-person on-foot controller: Rapier kinematic character controller on a capsule.
@@ -38,7 +39,7 @@ export class PlayerController {
   constructor(private physics: Physics, x: number, y: number, z: number, heading: number) {
     const w = physics.world;
     this.body = w.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(x, y + FOOT_TO_CENTER, z));
-    this.collider = w.createCollider(RAPIER.ColliderDesc.capsule(CAPSULE.halfHeight, CAPSULE.radius), this.body);
+    this.collider = w.createCollider(RAPIER.ColliderDesc.capsule(CAPSULE.halfHeight, CAPSULE.radius).setCollisionGroups(GROUPS.player), this.body);
     this.kcc = w.createCharacterController(0.03);
     this.kcc.enableAutostep(0.4, 0.15, false);
     this.kcc.enableSnapToGround(0.35);

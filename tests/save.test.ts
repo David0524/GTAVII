@@ -56,3 +56,19 @@ test('memory store: profiles, slots, overwrite, delete', async () => {
   await st.deleteProfile(p.id);
   assert.equal((await st.listSlots(p.id)).length, 0);
 });
+
+test('v1 saves gain an empty sections map; unknown sections round-trip verbatim', async () => {
+  const { registerSection } = await import('../src/save/schema.ts');
+  const v1 = migrate(JSON.parse(fs.readFileSync(path.join(FIX, 'v1.json'), 'utf8')));
+  assert.equal(v1.version, 2);
+  assert.ok(typeof v1.sections === 'object');
+  const v2 = migrate(JSON.parse(fs.readFileSync(path.join(FIX, 'v2.json'), 'utf8')));
+  assert.deepEqual(v2.sections.future_stream, { v: 3, data: { kept: 'verbatim' } });
+  // a registered section with a migration chain upgrades independently of the save version
+  registerSection({ name: 'demo', version: 2, empty: () => ({ cash: 0, savings: 0 }), migrations: { 1: (d: any) => ({ ...d, savings: 0 }) },
+    validate: (d: any) => { if (typeof d.cash !== 'number') throw new SaveFormatError('demo.cash'); } });
+  const raw = JSON.parse(fs.readFileSync(path.join(FIX, 'v2.json'), 'utf8'));
+  raw.sections.demo = { v: 1, data: { cash: 12 } };
+  assert.deepEqual(migrate(raw).sections.demo, { v: 2, data: { cash: 12, savings: 0 } });
+  assert.deepEqual(migrate(JSON.parse(fs.readFileSync(path.join(FIX, 'v1.json'), 'utf8'))).sections.demo, { v: 2, data: { cash: 0, savings: 0 } });
+});

@@ -465,6 +465,16 @@ for (const b of buildings) if (b.flags & BuildingFlag.Hero && b.name) {
   if (b.minHeight === 0 && a > h.area) { h.area = a; h.x = +c[0].toFixed(1); h.z = +c[1].toFixed(1); }
 }
 const heroes = [...heroMap.values()].map(({ area: _a, ...h }) => h);
+// Period regression gate (audio request 10): nothing in the modelled city may exceed 260 m except the
+// Empire State Building. Modern tower heights leaking in (e.g. via OSM parts) fail the build.
+{
+  const offenders = buildings.filter((b) => b.height > 260 && b.name !== 'Empire State Building');
+  if (offenders.length) {
+    for (const o of offenders) log('PERIOD GATE FAIL', o.id, o.height.toFixed(0), 'm', o.year, centroid(o.poly[0]).map((v) => v.toFixed(0)).join(','));
+    throw new Error(`period gate: ${offenders.length} building(s) taller than 260 m (see log)`);
+  }
+  log('period gate: ok (tallest non-ESB', Math.max(...buildings.filter((b) => b.name !== 'Empire State Building').map((b) => b.height)).toFixed(0), 'm)');
+}
 const world = {
   format: 'T74C', version: 1, generatedFrom: JSON.parse(fs.readFileSync(path.join(RAW, 'manifest.json'), 'utf8')),
   region: REGION, chunkSize: CHUNK_SIZE, gridRotationDeg: GRID_ROTATION_DEG,
