@@ -54,6 +54,7 @@ async function main() {
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
   loadReport.mark('renderer');
+  const expMul = Number(params.get('exp') ?? 1) || 1; // ?exp=: exposure multiplier for look A/B
   const trackGpu = (params.get('hud') === '1' || params.get('gpu') === '1') && params.get('gpu') !== '0';
 
   const scene = new THREE.Scene();
@@ -378,7 +379,7 @@ async function main() {
     facadeUniforms.night.value = nightOverride ?? light.night;
     facadeUniforms.minutes.value = worldClock.minutes;
     streetLightUniforms.lightsOn.value = light.lightsOn;
-    renderer.toneMappingExposure = light.exposure;
+    renderer.toneMappingExposure = light.exposure * expMul;
     { const f = mode === 'onfoot' ? body.object.position : camera.position; atmosphere.followFocus(f.x, f.y, f.z); }
     postUniforms.bloomStrength.value = 0.12 + 0.38 * light.lightsOn;
 

@@ -35,7 +35,7 @@ export const facadeUniforms = {
   /** Radians per drawing-buffer pixel (2 tan(fov/2) / height): rotation-invariant window LOD. Set on resize. */
   pixelAngle: uniform(0.0015),
   /** Canyon occlusion strength (0 = off). */
-  aoStrength: uniform(0.8),
+  aoStrength: uniform(0.5), // 0.8 left shaded canyon walls near-black from street level (iPhone noon report)
 };
 
 export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
