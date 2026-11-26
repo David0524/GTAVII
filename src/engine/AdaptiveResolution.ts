@@ -29,10 +29,13 @@ export class AdaptiveResolution {
     this.samples = []; this.t = 0;
     this.locked = Math.min(this.locked, p50);
     const target = this.locked < 20 ? 1000 / 60 : 1000 / 30;
-    if (p50 > target * 1.15 && this.scale > this.min) {
+    // Under a 30 Hz cap a frame that misses 33.3 ms costs a whole 16.7 ms more (50 ms). Only climb when
+    // even p95 is comfortably inside the deadline, never when any sizeable share of frames already slips.
+    const missedShare = a.filter((v) => v > target * 1.3).length / a.length;
+    if ((p50 > target * 1.15 || missedShare > 0.1) && this.scale > this.min) {
       this.ceiling = this.scale; this.ceilingT = 30;
       this.set(this.scale - 0.15);
-    } else if (p95 <= target * 1.1 && this.scale + 0.1 <= Math.min(this.ceiling, this.max) + 1e-6) {
+    } else if (p95 <= target * 1.1 && missedShare < 0.02 && this.scale + 0.1 <= Math.min(this.ceiling, this.max) + 1e-6) {
       this.set(this.scale + 0.1);
     }
   }

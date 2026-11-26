@@ -41,11 +41,16 @@ export function frameDiagnosis(): string {
   const iv = perfSamples.interval.summary(), cpu = perfSamples.cpu.summary(), gpu = perfSamples.gpu.summary();
   if (!iv.p50) return 'no samples yet';
   const work = Math.max(cpu.p50, perfSamples.gpuAvailable ? gpu.p50 : 0);
-  const near = (x: number, t: number) => Math.abs(x - t) < t * 0.06;
-  const locked = near(iv.p50, 33.33) ? 30 : near(iv.p50, 16.67) ? 60 : near(iv.p50, 8.33) ? 120 : near(iv.p50, 11.11) ? 90 : 0;
   const known = perfSamples.gpuAvailable ? '' : ' (GPU time unknown on this device: headroom is an upper bound)';
-  if (locked && work < iv.p50 * 0.6) return `locked to ${locked} Hz with headroom: work ~${work.toFixed(1)} ms of ${iv.p50.toFixed(1)} ms${known}. At 30 Hz this looks like a cap (iOS Low Power Mode, browser throttle or 60 Hz display halving), not the cost of the frame.`;
-  if (locked) return `locked to ${locked} Hz, busy: work ~${work.toFixed(1)} ms of ${iv.p50.toFixed(1)} ms${known}.`;
+  // Vsync quantisation: under a 30 Hz cap (iOS Low Power Mode caps Safari's rAF at 30 Hz) frames land on
+  // multiples of 33.3 ms, so a p50 of ~41 ms is a mix of 33 ms and 50 ms frames (missed deadlines), not a 41 ms wait.
+  const all = perfSamples.interval.values();
+  const onGrid = (period: number) => all.filter((v) => { const m = v / period; return Math.abs(m - Math.round(m)) < 0.12 && Math.round(m) >= 1; }).length / Math.max(1, all.length);
+  const g60 = onGrid(1000 / 60), g30 = onGrid(1000 / 30);
+  const capped30 = all.length > 30 && Math.min(...all) > 28 && g30 > 0.75;
+  const missed = (period: number) => all.filter((v) => v > period * 1.3).length / Math.max(1, all.length);
+  if (capped30) return `30 Hz cap (frames on multiples of 33.3 ms; likely iOS Low Power Mode): ${(missed(1000 / 30) * 100).toFixed(0)}% of frames missed the 33 ms deadline; work ~${work.toFixed(1)} ms (p95 js ${cpu.p95.toFixed(1)} / gpu ${perfSamples.gpuAvailable ? gpu.p95.toFixed(1) : '?'} ms)${known}.`;
+  if (g60 > 0.75) return `60 Hz vsync: ${(missed(1000 / 60) * 100).toFixed(0)}% of frames missed the 16.7 ms deadline; work ~${work.toFixed(1)} ms${known}.`;
   return `not vsync-locked: interval p50 ${iv.p50.toFixed(1)} ms, work ~${work.toFixed(1)} ms${known}.`;
 }
 
