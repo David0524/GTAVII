@@ -84,6 +84,9 @@ export class BodyModel {
     }
   }
 
+  /** Finest LOD stored for a group (the Low download drops the close LODs). */
+  minLod(group: string): number { const a = this.meta.availableLods?.[group] as number[] | undefined; return a && a.length ? Math.min(...a) : 0; }
+
   /** Triangle indices (split-vertex space) for a group at a LOD (0 = full). */
   indices(group: string, lod: number): Uint16Array {
     const g = this.groups.indexOf(group);

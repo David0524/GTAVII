@@ -95,6 +95,8 @@ export interface OutfitContext {
   propsList?: string[];
   /** 0 office … 1 manual worker / idle (drives wear). */
   grit?: number;
+  /** Content rule: no short hems, shorts or tank tops (e.g. npc.strip_worker: street clothes, never a costume). */
+  modest?: boolean;
 }
 
 // --- fabrics ------------------------------------------------------------------------------------
@@ -150,7 +152,8 @@ export function generateOutfit(seed: number, ctx: OutfitContext): Outfit {
   const brief = (ctx.wardrobe ?? '').toLowerCase();
 
   const preset = uniformPreset(arch, brief);
-  const o = preset ? preset(rng, male, age) : male ? menOutfit(rng, age, warm) : womenOutfit(rng, age, warm);
+  const o = preset ? preset(rng, male, age) : male ? menOutfit(rng, age, warm) : womenOutfit(rng, age, warm, !!ctx.modest);
+  if (ctx.modest && o.top.kind === 'tank') { o.top.kind = 'tee'; o.top.sleeve = 0.32; o.top.collar = 'crew'; }
 
   // weather layers
   if (!o.outer && (rain || (!warm && rng.chance(0.8)))) {
@@ -268,10 +271,10 @@ function menOutfit(rng: Rng, age: number, warm: boolean): Outfit {
   };
 }
 
-function womenOutfit(rng: Rng, age: number, warm: boolean): Outfit {
+function womenOutfit(rng: Rng, age: number, warm: boolean, modest = false): Outfit {
   const old = age >= 60, young = age < 30;
   const kind = rng.weighted<string>([
-    ['flares', old ? 0.6 : 3.5], ['pantsuit', old ? 0.3 : 1], ['dressKnee', age >= 35 ? 3.5 : 1.5], ['skirtShort', young ? 2 : 0.6], ['midi', 0.7], ['shorts', young && warm ? 0.4 : 0], ['skirtBlouse', old ? 2.5 : 1.2],
+    ['flares', old ? 0.6 : 3.5], ['pantsuit', old ? 0.3 : 1], ['dressKnee', age >= 35 ? 3.5 : 1.5], ['skirtShort', modest ? 0 : young ? 2 : 0.6], ['midi', 0.7], ['shorts', !modest && young && warm ? 0.4 : 0], ['skirtBlouse', old ? 2.5 : 1.2],
   ]);
   const topFab = topColor(rng, warm);
   if (rng.chance(0.25)) patterned(rng, topFab, [['floral', 2], ['stripeH', 1], ['paisley', 1], ['geometric', 1]]);

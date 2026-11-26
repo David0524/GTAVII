@@ -83,7 +83,7 @@ function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Ch
   const yaw = THREE.MathUtils.degToRad(num('yaw', 0));
   const spin = qp.has('spin');
   if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
-  else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.25, Math.max(5.5, w * 1.55)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }
+  else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.2, Math.max(5.5, w * 1.12 + 1.5)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }
   report.people = chars.map((c) => ({ seed: c.desc.seed, hero: c.desc.hero, sex: c.appearance.sex, age: c.appearance.age, hair: c.appearance.hair.style, facialHair: c.appearance.facialHair, top: c.outfit.top.kind, bottom: c.outfit.bottom.kind, outer: c.outfit.outer?.kind ?? null, shoes: c.outfit.shoes.kind, hat: c.outfit.hat?.kind ?? null, props: c.outfit.props, tris: c.stats.tris, draws: c.stats.draws, buildMs: +c.stats.buildMs.toFixed(1) }));
   let t = 0;
   return (dt: number) => {

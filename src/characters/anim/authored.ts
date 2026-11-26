@@ -32,9 +32,9 @@ function quatFromEuler(x: number, y: number, z: number, out: Float32Array, o: nu
 /** Relaxed standing posture from the A-pose: arms down at the sides, soft elbows, curled fingers. */
 export const RELAXED: Record<string, Euler> = {
   clavicle_l: [0, 0, -4], clavicle_r: [0, 0, 4],
-  upperarm_l: [-2, 4, -33], upperarm_r: [-2, -4, 33],
-  lowerarm_l: [0, -10, 0], lowerarm_r: [0, 10, 0],
-  hand_l: [0, -10, -6], hand_r: [0, 10, 6],
+  upperarm_l: [-4, 0, -35], upperarm_r: [-4, 0, 35],
+  lowerarm_l: [-12, 0, 0], lowerarm_r: [-12, 0, 0],
+  hand_l: [0, 0, -4], hand_r: [0, 0, 4],
   ...fingers('l', 14), ...fingers('r', 14),
   spine_01: [1, 0, 0], neck_01: [-2, 0, 0],
   thigh_l: [0, 0, -1.5], thigh_r: [0, 0, 1.5],

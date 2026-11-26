@@ -23,10 +23,12 @@ import { bakeTemplate, CROWD_INDEX, NB, CROWD_SET, type BakeClip } from './bake'
 import { crowdMaterial, ATLAS_ROWS } from './crowdMaterial';
 import { Character, type GroundFn } from '../Character';
 import { hash2 } from '../util/rng';
+import type { ArchetypeRegistry } from '../archetypes';
 
 export interface AgentView { id: number; archetype: string; variant: number; x: number; y: number; z: number; yaw: number; speed: number; state: string }
 
 interface Template {
+  archetype?: string;
   index: number; appearance: Appearance; outfit: Outfit; kind: string;
   clips: BakeClip[]; frameBase: number; height: number;
   lods: { mesh: THREE.Mesh; geo: THREE.InstancedBufferGeometry; attrs: THREE.InstancedBufferAttribute[]; count: number; tris: number }[];
@@ -75,7 +77,9 @@ export class CrowdRenderer {
   get pendingBuilds() { let n = 0; for (const st of this.agents.values()) if (st.pending) n++; return n; }
   readonly stats = { cpuMs: 0, near: 0, mid: 0, far: 0, culled: 0, draws: 0, tris: 0, templatesReady: 0, nearBuilds: 0 };
 
-  constructor(body: BodyModel, lib: AnimLibrary, opts: { max: number; quality: keyof typeof QUALITY; ground: () => GroundFn | null; baseUrl?: string }) {
+  constructor(body: BodyModel, lib: AnimLibrary, opts: { max: number; quality: keyof typeof QUALITY; ground: () => GroundFn | null; baseUrl?: string; archetypes?: ArchetypeRegistry; bodyUrl?: string; nearLod?: number }) {
+    this.nearLod = opts.nearLod ?? 1;
+    this.registry = opts.archetypes ?? null;
     this.body = body; this.lib = lib; this.max = opts.max; this.getGround = opts.ground;
     this.q = QUALITY[opts.quality];
     const cols = 32;
@@ -100,10 +104,12 @@ export class CrowdRenderer {
     try {
       this.worker = new Worker(new URL('./buildWorker.ts', import.meta.url), { type: 'module' });
       this.worker.onmessage = (e) => this.onWorker(e.data);
-      this.worker.postMessage({ type: 'init', url: (opts.baseUrl ?? import.meta.env.BASE_URL) + 'characters/body.bin' });
+      this.worker.postMessage({ type: 'init', url: opts.bodyUrl ?? (opts.baseUrl ?? import.meta.env.BASE_URL) + 'characters/body.bin' });
     } catch { this.worker = null; }
   }
   private plan: { kind: string; archetype?: string }[];
+  private registry: ArchetypeRegistry | null;
+  private nearLod: number;
 
   /** Build templates progressively (≈ one per call within a small time budget). */
   private buildTemplates(budgetMs: number) {
@@ -118,8 +124,13 @@ export class CrowdRenderer {
   private buildTemplate(i: number): Template {
     const fam = this.plan[i];
     const seed = hash2(0x7e3a, i * 7919 + 17);
+    // general templates take turns dressing as registered narrative archetypes (street ones, by density)
+    let arch = fam.archetype;
+    const street = this.registry?.all.filter((d) => !d.scripted && (d.density?.day ?? 0) + (d.density?.night ?? 0) > 0) ?? [];
+    if (fam.kind === 'general' && street.length) arch = street[i % street.length].id;
+    const ctx = this.registry?.outfitContext(arch) ?? { archetype: arch };
     const appearance = generateAppearance(seed, fam.kind === 'police' ? { minAge: 24, maxAge: 55 } : {});
-    const outfit = generateOutfit(seed ^ 0x5bd1e995, { sex: appearance.sex, age: appearance.age, archetype: fam.archetype });
+    const outfit = generateOutfit(seed ^ 0x5bd1e995, { sex: appearance.sex, age: appearance.age, ...ctx });
     const shape = this.body.evaluate({ ...appearance.body, stature: appearance.stature });
     const lod2 = assemble(this.body, shape, appearance, outfit, 2);
     const lod3 = assemble(this.body, shape, appearance, outfit, 3);
@@ -129,7 +140,7 @@ export class CrowdRenderer {
     this.atlasFrames += baked.frames;
     const lods = [lod2, lod3].map((a) => this.instancedLod(a));
     for (const l of lods) this.object.add(l.mesh);
-    return { index: i, appearance, outfit, kind: fam.kind, clips: baked.clips, frameBase, height: appearance.stature, lods };
+    return { index: i, archetype: arch, appearance, outfit, kind: fam.kind, clips: baked.clips, frameBase, height: appearance.stature, lods };
   }
 
   private writeAtlas(data: Float32Array, frameBase: number, frames: number) {
@@ -178,7 +189,7 @@ export class CrowdRenderer {
     const st = this.agents.get(m.id);
     if (!st || !st.pending) return;
     st.pending = false;
-    const ch = new Character(this.body, this.lib, { seed: m.appearance.seed }, { lod: 1, prebuilt: m.asm, appearance: m.appearance, outfit: m.outfit });
+    const ch = new Character(this.body, this.lib, { seed: m.appearance.seed }, { lod: this.nearLod, prebuilt: m.asm, appearance: m.appearance, outfit: m.outfit });
     ch.setGround(this.getGround());
     st.near = ch;
     this.object.add(ch.object);
@@ -202,10 +213,13 @@ export class CrowdRenderer {
     const sphere = new THREE.Sphere(new THREE.Vector3(), 1.2);
     const byFamily = new Map<string, Template[]>();
     for (const t of ready) { const k = t.kind; if (!byFamily.has(k)) byFamily.set(k, []); byFamily.get(k)!.push(t); }
+    const byArch = new Map<string, Template[]>();
+    for (const t of ready) if (t.archetype) { if (!byArch.has(t.archetype)) byArch.set(t.archetype, []); byArch.get(t.archetype)!.push(t); }
     for (const a of list) {
       seen.add(a.id);
       let st = this.agents.get(a.id);
-      const fam = byFamily.get(familyOf(a.archetype)) ?? byFamily.get('general') ?? ready;
+      const own = byArch.get(a.archetype) ?? byArch.get(`npc.${a.archetype}`) ?? [];
+      const fam = own.length ? own : byFamily.get(familyOf(a.archetype)) ?? byFamily.get('general') ?? ready;
       const tpl = fam[hash2(a.variant, 0x51) % fam.length];
       if (!st) { st = { phase: (hash2(a.id, 3) % 1000) / 1000, clip: 0, tpl: tpl.index, lastX: a.x, lastZ: a.z, vx: 0, vz: 0, near: null, pending: false }; this.agents.set(a.id, st); }
       if (!this.templates[st.tpl]) st.tpl = tpl.index;
@@ -226,7 +240,7 @@ export class CrowdRenderer {
       if (nearIds.has(a.id)) {
         if (!st.near && !st.pending && this.worker && this.workerReady && this.stats.nearBuilds - this.nearPool.size < 1e9) {
           st.pending = true;
-          this.worker.postMessage({ type: 'build', id: a.id, seed: hash2(a.variant, 0xc0ffee), archetype: a.archetype, lod: 1 });
+          this.worker.postMessage({ type: 'build', id: a.id, seed: hash2(a.variant, 0xc0ffee), archetype: a.archetype, lod: this.nearLod });
         }
         if (st.near) {
           st.near.object.position.set(a.x, a.y, a.z);

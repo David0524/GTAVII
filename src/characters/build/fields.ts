@@ -72,7 +72,7 @@ export function computeFields(model: BodyModel, shape: BodyShape): Fields {
   };
   for (const g of ['body', 'helper-tights', 'helper-skirt', 'helper-hair']) {
     const N = new Float32Array(n * 3);
-    const T = tris(g, 0);
+    const T = tris(g, model.minLod(g));
     for (let i = 0; i < T.length; i += 3) {
       const a = T[i] * 3, b = T[i + 1] * 3, c = T[i + 2] * 3;
       const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2];

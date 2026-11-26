@@ -54,6 +54,7 @@ export class Character {
   private footLock: Record<'l' | 'r', { pos: THREE.Vector3; w: number; was: boolean }> = { l: { pos: new THREE.Vector3(), w: 0, was: false }, r: { pos: new THREE.Vector3(), w: 0, was: false } };
   private pelvisDrop = 0;
   private wardrobeSets: CharacterBuild['wardrobeSets'];
+  private outfitCtx?: Partial<OutfitContext>;
   /** CPU time of the last update (ms), for budgets. */
   lastUpdateMs = 0;
   readonly stats = { tris: 0, hairTris: 0, draws: 0, buildMs: 0 };
@@ -63,6 +64,7 @@ export class Character {
     void this.lib;
     this.appearance = (opts.build?.appearance ?? (opts as { appearance?: Appearance }).appearance) ?? generateAppearance(desc.seed);
     this.outfit = (opts.build?.outfit ?? (opts as { outfit?: Outfit }).outfit) ?? generateOutfit(desc.seed ^ 0x5bd1e995, { sex: this.appearance.sex, age: this.appearance.age, archetype: desc.archetype, ...opts.outfitCtx });
+    this.outfitCtx = opts.outfitCtx;
     this.wardrobeSets = opts.build?.wardrobeSets;
     this.object.name = `character:${desc.hero ?? desc.archetype ?? 'ped'}:${desc.seed}`;
     this.build(opts.prebuilt);
@@ -107,7 +109,7 @@ export class Character {
   setGround(fn: GroundFn | null) { this.ground = fn; }
   setWardrobe(set: string) {
     const gen = this.wardrobeSets?.[set];
-    this.outfit = gen ? gen(this.desc.seed) : generateOutfit(this.desc.seed ^ (set.length * 0x9e3779b9), { sex: this.appearance.sex, age: this.appearance.age, archetype: this.desc.archetype });
+    this.outfit = gen ? gen(this.desc.seed) : generateOutfit(this.desc.seed ^ (set.length * 0x9e3779b9), { sex: this.appearance.sex, age: this.appearance.age, archetype: this.desc.archetype, ...this.outfitCtx });
     this.build();
   }
   on(type: 'footstep' | 'contact' | 'hail', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
