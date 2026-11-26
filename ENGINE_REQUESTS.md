@@ -29,6 +29,10 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
 - **What:** call `setClock(minutes, date)` from the world clock (N1), `setWeather(w)` from weather,
   `setPower(area, state)` from N2, and `setInterior(kind | null)` on interior enter/exit (the
   narrative `kind`s: diner, sro, bar, precinct, loft, cinema, shop; plus subway, stairwell).
+  For the Interiors stream's `inside(x, y, z) -> { kind, roomVolume }`: call
+  `setInterior(kind, { blend, roomVolume })` every frame near a door, where `blend` goes 0 → 1 as the
+  player passes through the doorway (street sound filtered through the door, then fading; room
+  tone and reverb fade in); `rooftop` is treated as open air (no muffling).
   `setPower` takes `'all'`, a district id (`garment`, `fur`, `flower`, `eighth`, `deuce`, `herald`)
   or `'x,z,radius'`. If you'd rather pass your N2 area object (`{ blocks }`, `{ at, radius }`,
   `{ district }`) I'll accept it as-is; tell me which.

@@ -99,11 +99,11 @@ export class Mixer {
     c.attack.setValueAtTime(L.comp.attack, t); c.release.setValueAtTime(L.comp.release, t);
   }
 
-  /** Inside a building: exterior ambience through walls and glass. */
-  setExterior(muffled: boolean) {
-    const t = this.ctx.currentTime;
-    this.extFilter.frequency.setTargetAtTime(muffled ? 650 : 20000, t, 0.25);
-    this.extGain.gain.setTargetAtTime(muffled ? 0.32 : 1, t, 0.25);
+  /** Inside a building: exterior ambience through walls and glass. amount 0 = street, 1 = deep inside. */
+  setExterior(amount: number) {
+    const t = this.ctx.currentTime, a = Math.max(0, Math.min(1, amount));
+    this.extFilter.frequency.setTargetAtTime(20000 * Math.pow(650 / 20000, a), t, 0.12);
+    this.extGain.gain.setTargetAtTime(1 - 0.68 * a, t, 0.12);
   }
 
   setReverb(p: ReverbParams, tc = 0.4) {

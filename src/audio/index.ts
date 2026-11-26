@@ -14,7 +14,8 @@ import { AudioRuntime } from './core/runtime';
 import { Mixer } from './core/mixer';
 import { VoiceManager, type Listener } from './core/voices';
 import { AcousticGeometry, type StreetRec } from './acoustics/geometry';
-import { CanyonAnalyzer, interiorReverb } from './acoustics/canyon';
+import { CanyonAnalyzer, interiorReverb, lerpReverb, OUTDOOR_KINDS } from './acoustics/canyon';
+import { RoomTone } from './world/roomTone';
 import { AssetBank, GROUPS } from './assets/bank';
 import { makeNoise, noiseBytes, bufferSource, type Noise } from './synth/live';
 import { CityMap, weekday } from './world/cityMap';
@@ -131,6 +132,7 @@ export class AudioSystem {
     await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic')]);
     this.ambience = new Ambience(this.env, REGION, this.radio.system);
     this.footsteps = new Footsteps(this.env, this.ambience.subway.gratings);
+    this.roomTone = new RoomTone(this.env, this.radio.system);
     this.ambience.start(); this.vehicles.start();
     if (this.sim) this.vehicles.bindSim(this.sim);
     this.loaded = true;
@@ -157,7 +159,9 @@ export class AudioSystem {
     if ((this.canyonT -= dt) <= 0) {
       this.canyonT = 0.1;
       const s = this.canyon.analyze(listener.position[0], listener.position[2]);
-      if (!env.interior) this.mixer.setReverb(this.canyon.toReverb(s), 0.5);
+      const I = this.interior;
+      if (I.kind && I.blend > 0) this.mixer.setReverb(lerpReverb(this.canyon.toReverb(s), interiorReverb(I.kind, I.volume), I.blend), 0.15);
+      else this.mixer.setReverb(this.canyon.toReverb(s), 0.5);
     }
     if ((this.preloadT -= dt) <= 0) { this.preloadT = 2; this.preload(); }
     { const n = performance.now(); this.timing.parts.canyon = (this.timing.parts.canyon ?? 0) + n - tc; this.timing.partsMax.canyon = Math.max(this.timing.partsMax.canyon ?? 0, n - tc); tc = n; }
@@ -166,7 +170,7 @@ export class AudioSystem {
     this.radio.system.update(dt); lap('radio');
     this.ambience?.update(dt); lap('ambience');
     this.vehicles.update(dt); lap('vehicles');
-    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); lap('footsteps');
+    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); lap('footsteps');
     this.vm.update(listener, dt); lap('voices');
     const ms = performance.now() - t0;
     this.timing.updateMs = ms; this.timing.updateMaxMs = Math.max(this.timing.updateMaxMs, ms); this.timing.frames++; this.timing.sumMs += ms;
@@ -213,14 +217,25 @@ export class AudioSystem {
     return worst;
   }
 
-  setInterior(kind: string | null) {
-    const env = this.env; if (!env || env.interior === kind) return;
-    env.interior = kind;
-    this.mixer.setExterior(!!kind);
-    this.vm.insideGain = kind ? 0.3 : 1; this.vm.insideLp = kind ? 700 : 20000;
-    if (kind) { this.mixer.setReverb(interiorReverb(kind), 0.15); void this.bank.loadGroup('interior'); }
-    else this.canyonT = 0;
+  /**
+   * Interior acoustics. `blend` (0..1) lets the engine fade through a doorway: 0 = still the street,
+   * 1 = inside (default 1 when kind is set). `roomVolume` (m^3) scales the room's reverb.
+   */
+  setInterior(kind: string | null, opts: { blend?: number; roomVolume?: number } = {}) {
+    const env = this.env; if (!env) return;
+    const blend = kind ? Math.max(0, Math.min(1, opts.blend ?? 1)) : 0;
+    this.interior = { kind, blend, volume: opts.roomVolume };
+    const outdoor = !!kind && OUTDOOR_KINDS.has(kind);
+    env.interior = kind && blend >= 0.5 && !outdoor ? kind : null;
+    const a = outdoor ? 0 : blend;
+    this.mixer.setExterior(a);
+    this.vm.insideGain = 1 - 0.7 * a; this.vm.insideLp = 20000 * Math.pow(700 / 20000, a);
+    this.roomTone?.set(kind, blend);
+    if (kind) void this.bank.loadGroup('interior');
+    this.canyonT = 0; // re-blend the reverb now
   }
+  private interior: { kind: string | null; blend: number; volume?: number } = { kind: null, blend: 0 };
+  private roomTone: RoomTone | null = null;
 
   attachVehicle(v: AttachedVehicle, profile: string): () => void { return this.vehicles.attach(v, profile); }
 
@@ -286,7 +301,7 @@ export class AudioSystem {
   /** Release every node and listener. After this the instance is dead. */
   dispose(closeContext = true) {
     this.loaded = false;
-    this.ambience?.dispose(); this.vehicles?.dispose(); this.radio?.system.dispose(); this.dialogue?.system.dispose();
+    this.ambience?.dispose(); this.roomTone?.dispose(); this.vehicles?.dispose(); this.radio?.system.dispose(); this.dialogue?.system.dispose();
     this.vm?.disposeAll(); this.mixer?.dispose(); this.bank?.dispose();
     clearAudioTimers(this.runtime.ctx);
     if (closeContext) this.runtime.dispose();

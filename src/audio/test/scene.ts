@@ -107,7 +107,9 @@ export async function startScene(params: URLSearchParams) {
   btn(veh, 'compactor', () => audio.play('truck.compactor', ahead(20)));
 
   const inter = el('<h3>Interior</h3>').appendChild(document.createElement('div')); inter.className = 'row';
-  const intSel = document.createElement('select'); intSel.add(new Option('(outside)', '')); for (const k of Object.keys(INTERIORS)) intSel.add(new Option(k, k)); intSel.onchange = () => audio.setInterior(intSel.value || null); inter.appendChild(intSel);
+  const intSel = document.createElement('select'); intSel.add(new Option('(outside)', '')); for (const k of Object.keys(INTERIORS)) intSel.add(new Option(k, k)); inter.appendChild(intSel);
+  const blendIn = document.createElement('input'); blendIn.type = 'range'; blendIn.min = '0'; blendIn.max = '1'; blendIn.step = '0.01'; blendIn.value = '1'; blendIn.title = 'doorway blend'; inter.appendChild(blendIn);
+  const applyInt = () => audio.setInterior(intSel.value || null, { blend: +blendIn.value }); intSel.onchange = applyInt; blendIn.oninput = applyInt;
   btn(inter, 'step', () => audio.footstep({ position: [L.x, 0.15, L.z], who: 'player' }));
 
   const radioRow = el('<h3>Radio (placeholder beds)</h3>').appendChild(document.createElement('div')); radioRow.className = 'row';

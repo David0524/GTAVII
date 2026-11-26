@@ -106,12 +106,24 @@ export const INTERIORS: Record<string, { rt60: number; damp: number; size: numbe
   shop: { rt60: 0.5, damp: 0.5, size: 0.5, predelay: 0.005, wet: 0.2, walls: 3, flutter: 0.1 },
   subway: { rt60: 1.9, damp: 0.25, size: 1.3, predelay: 0.015, wet: 0.45, walls: 5, flutter: 0.4 }, // tiled mezzanine
   stairwell: { rt60: 1.5, damp: 0.25, size: 0.6, predelay: 0.006, wet: 0.42, walls: 2, flutter: 0.6 },
+  /** Not an interior acoustically: open air above the canyons (no muffling; see OUTDOOR_KINDS). */
+  rooftop: { rt60: 0.6, damp: 0.5, size: 1.8, predelay: 0.05, wet: 0.08, walls: 30, flutter: 0 },
 };
+export const OUTDOOR_KINDS = new Set(['rooftop']);
 
-export function interiorReverb(kind: string): ReverbParams {
-  const p = INTERIORS[kind] ?? INTERIORS.shop;
+/** roomVolume (m^3, from the interiors' inside() query) scales size and RT60 around the kind's typical room. */
+export function interiorReverb(kind: string, roomVolume?: number): ReverbParams {
+  const base = INTERIORS[kind] ?? INTERIORS.shop; const typical = Math.pow(base.walls * 2, 3) * 0.4;
+  const k = roomVolume && roomVolume > 0 ? Math.max(0.5, Math.min(2.2, Math.cbrt(roomVolume / typical))) : 1;
+  const p = { ...base, rt60: base.rt60 * Math.sqrt(k), size: Math.min(2.4, base.size * k), walls: base.walls * k, predelay: base.predelay * k };
   return {
     early: { dL: p.walls, dR: p.walls * 1.3, gL: 0.55, gR: 0.5, dF: p.walls * 1.8, gF: 0.35, dB: p.walls * 1.5, gB: 0.3, flutter: p.flutter, gain: 0.8 },
     late: { rt60: p.rt60, damp: p.damp, size: p.size, predelay: p.predelay, gain: p.wet },
   };
+}
+
+/** Blend two reverb settings (doorway transitions). */
+export function lerpReverb(a: ReverbParams, b: ReverbParams, t: number): ReverbParams {
+  const m = <T extends Record<string, number>>(x: T, y: T) => Object.fromEntries(Object.keys(x).map((k) => [k, x[k] + (y[k] - x[k]) * t])) as T;
+  return { early: m(a.early, b.early), late: m(a.late, b.late) };
 }
