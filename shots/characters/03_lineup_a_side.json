@@ -19,7 +19,7 @@
       ],
       "tris": 10222,
       "draws": 2,
-      "buildMs": 173
+      "buildMs": 162.2
     },
     {
       "seed": 1977783798,
@@ -35,7 +35,7 @@
       "props": [],
       "tris": 9357,
       "draws": 2,
-      "buildMs": 108.5
+      "buildMs": 100.4
     },
     {
       "seed": 4286010875,
@@ -51,7 +51,7 @@
       "props": [],
       "tris": 10358,
       "draws": 2,
-      "buildMs": 102.8
+      "buildMs": 93.1
     },
     {
       "seed": 4022143663,
@@ -67,7 +67,7 @@
       "props": [],
       "tris": 9440,
       "draws": 2,
-      "buildMs": 80.2
+      "buildMs": 63.3
     },
     {
       "seed": 1422669857,
@@ -83,7 +83,7 @@
       "props": [],
       "tris": 9045,
       "draws": 2,
-      "buildMs": 83.3
+      "buildMs": 54.7
     },
     {
       "seed": 2134067074,
@@ -97,9 +97,9 @@
       "shoes": "sandal",
       "hat": null,
       "props": [],
-      "tris": 10358,
+      "tris": 10122,
       "draws": 2,
-      "buildMs": 64
+      "buildMs": 85.6
     },
     {
       "seed": 84956558,
@@ -116,9 +116,9 @@
         "tote",
         "cigarette"
       ],
-      "tris": 9971,
+      "tris": 9735,
       "draws": 2,
-      "buildMs": 68.7
+      "buildMs": 35.5
     },
     {
       "seed": 2593002056,
@@ -136,7 +136,7 @@
       ],
       "tris": 10444,
       "draws": 2,
-      "buildMs": 79.7
+      "buildMs": 61.6
     },
     {
       "seed": 1571629204,
@@ -154,7 +154,7 @@
       ],
       "tris": 9350,
       "draws": 2,
-      "buildMs": 45.6
+      "buildMs": 52.3
     },
     {
       "seed": 2079497775,
@@ -170,24 +170,24 @@
       "props": [],
       "tris": 9290,
       "draws": 2,
-      "buildMs": 78.6
+      "buildMs": 58.2
     }
   ],
   "updateMs": [
-    0,
-    0,
+    0.1,
+    0.1,
     0.1,
     0,
     0,
     0,
     0,
+    0,
     0.1,
-    0.1,
-    0
+    0.1
   ],
   "renderMsSoftware": [
-    3.3999999999068677,
-    2.1000000000931323,
-    1.7999999999301508
+    3.800000000745058,
+    2.599999999627471,
+    2
   ]
 }
