@@ -5,6 +5,7 @@
  */
 import type * as THREE from 'three/webgpu';
 import type { FrameStats } from './DebugHud';
+import { loadReport } from './LoadReport';
 
 export function gpuName(renderer: THREE.WebGPURenderer): string {
   const be = renderer.backend as unknown as { isWebGPUBackend?: boolean; adapter?: { info?: Record<string, string> }; device?: { adapterInfo?: Record<string, string> }; gl?: WebGL2RenderingContext };
@@ -38,6 +39,7 @@ export function buildReport(c: ReportCtx): string {
     `frame avg ${s.avg.toFixed(2)} ms · p95 ${s.p95.toFixed(2)} ms · max ${s.max.toFixed(1)} ms · ${s.fps.toFixed(0)} fps`,
     `draws ${r.drawCalls} · tris ${r.triangles} · chunks lod0 ${c.world.stats.lod0} lod1 ${c.world.stats.lod1}`,
     `view ${c.view} · input ${c.device}`,
+    loadReport.text(),
     `ua ${navigator.userAgent}`,
   ].join('\n');
 }

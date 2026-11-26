@@ -5,6 +5,7 @@ import type { QualitySettings } from '../engine/quality';
 import { heightAt, terrainLoaded } from '../shared/terrain';
 import { createFacadeMaterial } from '../render/FacadeMaterial';
 import { createGroundMaterial } from '../render/GroundMaterial';
+import { loadReport } from '../engine/debug/LoadReport';
 
 export interface WorldManifest {
   region: { minX: number; maxX: number; minZ: number; maxZ: number };
@@ -51,9 +52,10 @@ export class World {
   manifest!: WorldManifest;
   private chunks = new Map<string, ChunkState>();
   private workers: Worker[] = [];
-  private busy: boolean[] = [];
+  private busy: number[] = []; // jobs in flight per worker
+  private static readonly IN_FLIGHT = 3;
   private queue: string[] = [];
-  private pending = new Map<number, string>();
+  private pendingCount = 0;
   readonly buildingMat = createFacadeMaterial();
   readonly groundMat = createGroundMaterial();
   readonly propMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.05 });
@@ -74,7 +76,7 @@ export class World {
     for (let k = 0; k < n; k++) {
       const w = new Worker(new URL('./chunkWorker.ts', import.meta.url), { type: 'module' });
       w.onmessage = (ev: MessageEvent<ChunkResponse>) => this.onWorker(k, ev.data);
-      this.workers.push(w); this.busy.push(false);
+      this.workers.push(w); this.busy.push(0);
     }
     this.root.add(this.buildTerrainBase());
   }
@@ -125,17 +127,29 @@ export class World {
     for (const w of want) { const c = this.chunks.get(w.key)!; c.status = 'loading'; this.queue.push(w.key); }
     this.pump();
     this.stats.lod0 = lod0; this.stats.lod1 = lod1;
-    this.stats.loading = this.queue.length + this.pending.size;
+    this.stats.loading = this.queue.length + this.pendingCount;
   }
 
   /** True once every chunk the current camera wants is resident. */
-  get idle() { return this.queue.length === 0 && this.pending.size === 0; }
+  get idle() { return this.queue.length === 0 && this.pendingCount === 0; }
+
+  /** Chunks whose box lies within r of (x,z): how many exist and how many are resident. Gates the title
+   *  and the first view on the NEAR city only; everything else keeps streaming behind play. */
+  progressNear(x: number, z: number, r: number): { ready: number; total: number } {
+    const S = this.manifest.chunkSize; let ready = 0, total = 0;
+    for (const c of this.chunks.values()) {
+      const dx = Math.max(Math.abs(x - c.cx) - S / 2, 0), dz = Math.max(Math.abs(z - c.cz) - S / 2, 0);
+      if (Math.hypot(dx, dz) > r) continue;
+      total++; if (c.status === 'ready') ready++;
+    }
+    return { ready, total };
+  }
 
   private pump() {
-    for (let k = 0; k < this.workers.length && this.queue.length; k++) {
-      if (this.busy[k]) continue;
+    for (let round = 0; round < World.IN_FLIGHT; round++) for (let k = 0; k < this.workers.length && this.queue.length; k++) {
+      if (this.busy[k] > round) continue;
       const key = this.queue.shift()!;
-      this.busy[k] = true; this.pending.set(k, key);
+      this.busy[k]++; this.pendingCount++;
       const c = this.chunks.get(key)!;
       const req: ChunkRequest = { key, url: new URL(`${this.base}chunks/${key}.bin`, location.href).href, terrainUrl: new URL(`${this.base}terrain.bin`, location.href).href, chunkSize: this.manifest.chunkSize, i: c.info.i, j: c.info.j };
       this.workers[k].postMessage(req);
@@ -143,10 +157,12 @@ export class World {
   }
 
   private onWorker(k: number, msg: ChunkResponse) {
-    this.busy[k] = false; this.pending.delete(k);
+    this.busy[k] = Math.max(0, this.busy[k] - 1); this.pendingCount = Math.max(0, this.pendingCount - 1);
     if (!msg.ok) { console.warn('chunk failed', msg.key, msg.error); this.stats.failed++; const c = this.chunks.get(msg.key); if (c) c.status = 'idle'; this.pump(); return; }
     this.stats.parseMsTotal += msg.parseMs;
+    const t0 = performance.now();
     this.install(msg.mesh);
+    loadReport.chunkReady(msg.parseMs, performance.now() - t0);
     this.pump();
   }
 

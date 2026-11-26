@@ -19,7 +19,7 @@ async function run(page: Page, size: string, base: string, errs: string[]) {
   const shot = async (n: string) => { await page.waitForTimeout(700); await page.screenshot({ path: path.join(OUT, `${n}_${size}.png`) }); console.log(`  ${n}_${size}`); };
   await page.goto(`${base}/?quality=low${size === 'phone' ? '&touch=1' : ''}`);
   await page.waitForFunction(() => (window as any).__T74?.ui?.state === 'title', null, { timeout: 180_000 });
-  await page.waitForSelector('.t74-menu button', { timeout: 600_000 }) // the menu waits for the city to stream: ~145 s on headless SwiftShader since Phase 3;
+  await page.waitForSelector('.t74-menu button', { timeout: 600_000 }) // ceiling only: title-ready is ~10 s headless since engine adb6373;
   await page.evaluate(() => document.fonts.ready);
   await shot('01_title');
   await page.locator('.t74-menu button', { hasText: /new game/i }).click({ noWaitAfter: true, timeout: 120_000 });

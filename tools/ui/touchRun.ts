@@ -25,7 +25,7 @@ await withServer(async (base) => {
   const page = await ctx.newPage();
   const errs: string[] = []; page.on('pageerror', (e) => errs.push(String(e)));
   await page.goto(`${base}/?quality=low`);
-  await page.waitForSelector('.t74-menu button', { timeout: 600_000 }) // the menu waits for the city to stream: ~145 s on headless SwiftShader since Phase 3;
+  await page.waitForSelector('.t74-menu button', { timeout: 600_000 }) // ceiling only: title-ready is ~10 s headless since engine adb6373;
   const t = (sel: string, text?: RegExp) => (text ? page.locator(sel, { hasText: text }) : page.locator(sel));
 
   await step(page, 'title', async () => {});

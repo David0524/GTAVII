@@ -16,6 +16,7 @@ import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
 import { loadTerrain, heightAt } from './shared/terrain';
 import { Input } from './input/Input';
+import { loadReport } from './engine/debug/LoadReport';
 import { buildReport, mountReportButton } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
 import RAPIER from '@dimforge/rapier3d-compat';
@@ -41,10 +42,12 @@ import { PostFX, postUniforms } from './render/PostFX';
 type Mode = 'onfoot' | 'photo';
 
 async function main() {
+  loadReport.mark('main');
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
+  loadReport.mark('renderer');
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
@@ -56,8 +59,10 @@ async function main() {
   if (quality.shadows && params.get('shadows') !== '0') atmosphere.enableShadows(renderer, quality.name === 'high' || quality.name === 'ultra' ? 2048 : 1024);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
+  loadReport.mark('physics+terrain');
   const world = new World(quality);
   await world.load();
+  loadReport.mark('manifest');
   scene.add(world.root);
   world.onChunkReady.add((c) => physics.addChunk(c));
   world.onChunkUnload.add((k) => physics.removeChunk(k));
@@ -69,6 +74,7 @@ async function main() {
   scene.add(skyline);
   const streetLights = buildStreetLights(streets);
   scene.add(streetLights);
+  loadReport.mark('streets+lights');
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
@@ -176,7 +182,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -231,7 +237,7 @@ async function main() {
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
     prompts: () => (mode === 'onfoot' ? [['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']]),
-    newGame: () => { const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
+    newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
     continueGame: async () => {
       const last = await saves.latest().catch(() => null);
       if (!last) { host.newGame!(); return true; }
@@ -243,12 +249,16 @@ async function main() {
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.name === 'Flatiron Building') ?? { x: 0, z: 0 };
   let titleT = 0;
+  const TITLE_RADIUS = 300; // m around the title camera's target
+  let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const attributionEl = document.getElementById('attribution');
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
+    const cpu0 = performance.now();
     clock.update(t);
-    const dt = Math.min(clock.getDelta(), 0.1);
+    const rawDt = clock.getDelta(); loadReport.frame(rawDt * 1000);
+    const dt = Math.min(rawDt, 0.1);
     frames.push(dt * 1000);
     facadeUniforms.time.value += dt;
     input.poll(dt);
@@ -257,9 +267,16 @@ async function main() {
       const a = -0.35 + titleT * 0.018, r = 150;
       fly.set(flat.x + Math.sin(a) * r, 26 + Math.sin(titleT * 0.05) * 4, flat.z - 40 - Math.cos(a) * r, 0, 0);
       director.gameplay.lookAt(flat.x, 34, flat.z);
-      const wanted = world.stats.ready + world.stats.loading;
-      ui.titleProgress(wanted ? world.stats.ready / wanted : 0);
-      if (world.idle && frameCount > 10 && !titleReady) { titleReady = true; void saves.latest().then((l) => ui.titleReady(l ? l.label : null)); }
+      // Gate the title on the first view only (chunks around the Flatiron + compiled shaders); the rest of
+      // the city keeps streaming behind the menu and play (engine adb6373: load bug 2026-11-26).
+      const near = world.progressNear(flat.x, flat.z - 40, TITLE_RADIUS);
+      ui.titleProgress(near.total ? (near.ready / near.total) * (shadersReady ? 1 : 0.92) : 0);
+      if (!shaderWarm && near.ready > 0) {
+        shaderWarm = (renderer as unknown as { compileAsync(s: THREE.Object3D, c: THREE.Camera): Promise<void> }).compileAsync(scene, camera)
+          .catch(() => undefined).then(() => { shadersReady = true; loadReport.mark('shaders'); });
+        setTimeout(() => { shadersReady = true; }, 8000); // never block the menu on a slow/failed warm-up
+      }
+      if (near.ready === near.total && shadersReady && frameCount > 3 && !titleReady) { titleReady = true; loadReport.mark('title-ready'); console.info('[T74 load]\n' + loadReport.text()); void saves.latest().then((l) => ui.titleReady(l ? l.label : null)); }
     }
     ui.update(dt);
     const playing = ui.state === 'play' && !ui.paused;
@@ -280,7 +297,7 @@ async function main() {
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }
-    if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) player.active = true;
+    if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) { player.active = true; if (ui.state === 'play') loadReport.mark('playable'); }
 
     if (!playing && ui.state !== 'title' && ui.state !== 'cutscene') {
       // paused: world frozen, camera holds
@@ -302,6 +319,8 @@ async function main() {
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
     onResize(); // cheap: two clientWidth reads; catches every size change the events miss
     if (postfx) postfx.render(); else renderer.render(scene, camera);
+    if (frameCount === 0) loadReport.mark('first-frame');
+    loadReport.frameCpu(performance.now() - cpu0);
     frameCount++;
 
     const p = mode === 'onfoot' ? body.object.position : camera.position;
