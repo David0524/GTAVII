@@ -86,7 +86,7 @@ piece(15, "locksmith", "Teddy's Keys: Call-Outs", "lead", [T], [1, 2, 3], "Kraus
 piece(16, "fight_door", "Fight Night at the Garden", "job", [T, N], [1, 2, 3], "Madison Square Garden (invented fight cards)", "The promoter needs a door man, and Nick likes a ringside bet.",
       "Teddy works the door (spot the fake tickets, eject the drunk, non-lethal). Nick bets on invented fighters whose records are in the paper (newspapers.json).",
       ["melee", "betting", "newspapers"], "$30 a night; bets", "Ejections are soft-lock takedowns.")
-piece(17, "numbers_runner", "Earl's Runner", "job", [D, T], [2, 3], "Earl's stand and slip spots", "Runner pay, and the daily number in the paper.", "Pick up slips before noon past plainclothes who know what you're carrying. Ladder: Earl trusts you with the bank on Fridays.",
+piece(17, "numbers_runner", "Earl's Runner", "job", [D, T], [2, 3], "Earl's stand and slip spots", "Runner pay, and the street number: the last three digits of the track handle in the paper.", "Pick up slips before noon past plainclothes who know what you're carrying. Ladder: Earl trusts you with the bank on Fridays.",
       ["police heat", "crowds", "newspapers"], "$10 a day; Friday bank bonus", "Soft noon deadline.", upgrades="activity.numbers_slips")
 piece(18, "hill_races", "Murray Hill Wagers", "job", [N, T], [1, 2, 3], "Races within the core: Madison Ave hills, the 34th St two-way, Fifth's downhill",
       "Cabbies bet Nick's sedan can't beat them, on a small map.", "Short sprints that use the real relief (terrain on) and the 1974 one-ways. Wrong-way driving forfeits. Each race is a block-scale puzzle, not distance.",

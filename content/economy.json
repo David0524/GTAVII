@@ -60,7 +60,7 @@
       "id": "econ.numbers",
       "who": "char.earl_poole",
       "where": "loc.poole_shine",
-      "pays": "runner pay $10 a day; betting on the daily number (published in the paper)",
+      "pays": "runner pay $10 a day; the street number is the last three digits of the track handle printed in the paper (no legal daily number until 1980)",
       "links": "activity.numbers_slips"
     },
     {
