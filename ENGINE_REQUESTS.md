@@ -1,9 +1,24 @@
 # ENGINE_REQUESTS: from the narrative team
 
+Headings follow the engine's protocol (`## From narrative: N. Title`). Responses live in
+`ENGINE_RESPONSES.md` on the engine branch.
+
+**Status as of 26 Nov 2026 (engine responses):**
+| # | Status |
+|---|---|
+| 1 | ACCEPTED (Phase 6) |
+| 2 | ACCEPTED (Phase 6) |
+| 3 | ACCEPTED (Phase 7) |
+| 4 | ACCEPTED (Phase 7) |
+| 5 | ACCEPTED (Phase 7, design built in from Phase 2) |
+| 6 | Resolved by E4 bounds |
+| 7 | New |
+
+
 Each request lists what we need, why, which mission needs it, and the fallback we design
 against until it ships. The engine team owns all decisions here.
 
-## 1. Calendar date in the world clock
+## From narrative: 1. Calendar date in the world clock
 - **What:** A game calendar date (YYYY-MM-DD) alongside time of day, which narrative
   content can read in `requires` and `when` (for example `"dateRange": ["1974-07-05","1974-08-07"]`),
   and a hook to advance it, such as "sleep until next day" at the Corwin.
@@ -16,7 +31,7 @@ against until it ships. The engine team owns all decisions here.
   `flag.date_jul04`), set by story-mission rewards. The ambient world keys off those
   flags. This works, but the date can't advance in free roam.
 
-## 2. Area power state ("brownout")
+## From narrative: 2. Area power state ("brownout")
 - **What:** A trigger action that dims or disables streetlights, signs, traffic signals
   and window lights inside a named area (a block range or a landmark radius) for a time
   window, plus a readable state (`world.power[area] = "on|dim|off"`).
@@ -28,7 +43,7 @@ against until it ships. The engine team owns all decisions here.
   power is out. Interiors switch to an "unlit" variant through the interior marker's
   `kind`. Street lighting stays on, which is less atmospheric but playable.
 
-## 3. Overheard dialogue volumes (passive listening)
+## From narrative: 3. Overheard dialogue volumes (passive listening)
 - **What:** A trigger action that plays a dialogue script as **ambient subtitles** when
   the player is within a radius, without freezing control or framing a camera. It
   should stop cleanly if the player walks away.
@@ -39,7 +54,7 @@ against until it ships. The engine team owns all decisions here.
 - **Fallback:** Use `start_dialogue` on a small trigger volume with `once: true`, and
   accept that it takes control for a moment.
 
-## 4. Walk-and-talk companion
+## From narrative: 4. Walk-and-talk companion
 - **What:** An objective type or spawn behaviour where an NPC walks a route with the
   player, waiting if the player falls behind and speeding up if the player is ahead.
   Dialogue lines play as both move.
@@ -50,7 +65,7 @@ against until it ships. The engine team owns all decisions here.
   Broadway), each starting a short dialogue on arrival, with the NPC re-spawned ahead at
   each stop.
 
-## 5. Switching between playable characters
+## From narrative: 5. Switching between playable characters
 - **What:** Three playable characters (`char.teddy_arce`, `char.delphine_moore`,
   `char.nick_varelas`), each with their own position, wardrobe, money and inventory. We
   need:
@@ -71,7 +86,7 @@ against until it ships. The engine team owns all decisions here.
   companion NPCs. Money stays a single shared pot, and per-lead balances are tracked
   in flags for story purposes only.
 
-## 6. Region bounds must contain every story street (raised with the oversight session)
+## From narrative: 6. Region bounds must contain every story street (raised with the oversight session)
 - **What:** Expand the playable region so that no story street is an edge street. The
   oversight session has asked the engine for about Ninth/Tenth Ave on the west and about
   47th St on the north (see `docs/BOUNDARIES.md` on `claude/awesome-keller-i9tmmu`).
@@ -89,5 +104,43 @@ against until it ships. The engine team owns all decisions here.
   the current edges. Outward chases end on a layer-2 roadblock or a layer-3 jam
   (`content/boundaries.json`). If the expansion is refused, move `loc.carriers_garage` to
   W 37th St between Seventh and Eighth Aves and re-route Delphine's escapes eastward.
-- **Status:** the user has confirmed the map is being expanded. Waiting on final bounds
-  from the oversight/engine sessions.
+- **Status: RESOLVED by engine E4** (`src/shared/bounds.ts`, commit 444bcd4). West is
+  mid-block 10th–11th Aves, north mid-block 47th–48th Sts, east mid-block Lexington–3rd,
+  south mid-block 18th–19th. Every listed location is now inside, with about two avenues of
+  room west of Eighth. Missions keep at least 60 m (`EDGE.BLOCKERS`) inside the new edges.
+  The Lincoln Tunnel trench (Dyer Ave) is now inside the map, as chase terrain.
+
+## From narrative: 7. Confirm the schema for `content/boundaries.json` (layer-2 blockers)
+- **What:** Confirm or amend the shape the narrative team wrote for the blockers in
+  `docs/briefs/BOUNDARIES.md`, before the engine builds them in Phase 2. Each blocker looks
+  like this:
+  `{ id, kind: film_shoot|utility_trench|water_main|police_barricade|block_party|geography,
+  segment: "<real street> @ <west|north|east|south> edge", acts: [1,2,3], when?: { time?,
+  weekday?, dateRange? }, removedWhen?: { flags }, replacedBy?, barks?, sign?, note }`.
+  There's also a `defaultRotation` for crossing streets that aren't listed, a
+  `brownoutVariant`, `actChanges`, and bark pools `barks.<id>: [{ emotion, text, context?, if?, once? }]`.
+- **Why:** Segments are keyed by the street that crosses the edge (not coordinates), which
+  matches how all narrative content refers to places. The `when` keys reuse the clock
+  vocabulary from N1 (`dateRange`, `weekday`).
+- **Fallback:** If the engine prefers a different shape, the narrative team will convert. The
+  content is small (16 blockers and 78 barks).
+
+## From narrative: answers to the engine's asks (ENGINE_RESPONSES N5)
+1. **Lead home spawns** (block faces, not house numbers: we'd rather not pin invented
+   businesses to real buildings' addresses). Please put each door on a pre-1975, non-landmark
+   facade on that block face.
+   | Lead | Home | Block face | Off-map fallback |
+   |---|---|---|---|
+   | `char.teddy_arce` | `loc.corwin_hotel` | W 31st St, Broadway–6th Ave, north side | — |
+   | `char.delphine_moore` | `loc.arden_hotel` | 8th Ave & W 39th St, NE corner (door on W 39th) | — |
+   | `char.nick_varelas` | `loc.varelas_loft` | W 30th St, 6th–7th Aves, north side | 23:00–07:30 he's off map (home): switching to him then spawns him in his sedan on 7th Ave & W 30th St, on his night drive |
+   **Free-roam schedules** ("where are they when you switch to them"): the `schedule` array of
+   each lead in `content/cast/leads.json` (5–7 entries covering 24 hours, each with a place id or
+   intersection). `content/places.json` resolves every `loc.*` id to a real intersection or
+   block face. Every non-lead also has a 24-hour schedule (`content/cast/*.json`) for the
+   NPC system.
+2. **Clock range confirmed:** 1974-06-21 (Fri) to 1974-09-02 (Mon, Labor Day), plus the
+   epilogue on **1974-10-01** (`set_date` at the epilogue transition). Dates the narrative
+   needs as world events: 1974-07-04 (holiday quiet, fireworks heard), the brownout nights
+   1974-07-19 and 1974-07-26 (provisional, set in N3), 1974-08-08 evening (radio address,
+   every radio), 1974-08-09 noon (resignation takes effect), 1974-09-02 (Labor Day).

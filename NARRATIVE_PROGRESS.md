@@ -68,8 +68,11 @@ Applied:
   press, or Teddy keeps it).
 - No third branch: two is enough, and the brief allows two or three.
 
-**26 Nov 2026, coordination.** The user confirmed that the **oversight session**
-(`session_01H4ZSJ99NBvPVUNdV2re88V`) speaks for them, and that the map is being expanded
+**26 Nov 2026, coordination.** The user confirmed they set up the **oversight session**
+(`session_01H4ZSJ99NBvPVUNdV2re88V`) and told me to follow its suggestion. (Its own
+correction: it relays the user's decisions word for word and coordinates the streams.
+Content calls stay with the user and each stream, and format and contract calls stay with
+the engine.) and that the map is being expanded
 (talk to the oversight session for details). Requests taken from it:
 - **Appearance sheets** for the Characters workstream. They're now an `appearance` block on
   all 3 leads and 12 principals: build, height, skin tone and hex, hair and hex, face,
@@ -87,6 +90,19 @@ Applied:
 - Name checks: "Night Rate" (no 1970s film by that title), Hudson Union (no such utility),
   and Kettle & Crane (chosen after "Lamplight" and "Halyard" turned out to be real
   production companies). The Audio workstream will consume N5 barks and N6 radio content.
+
+**26 Nov 2026, standing instruction** (the user's words, relayed by oversight): *"Yes, keep
+each chat pushing to its next milestone."* Work continuously through N2 → boundaries → N3 →
+N4 (opener and Act 1 chain first, for the engine's vertical slice). Commit and push at each
+step. Stop to ask the user only about scope cuts, sensitive-subject changes, or real people
+and licences. Creative calls are mine ("All your calls") and get logged here.
+
+**Engine responses (ENGINE_RESPONSES.md on the engine branch):** requests 1–5 were all
+ACCEPTED. The bounds are final (E4): west mid-block 10th–11th, north 47th–48th, east
+Lexington–3rd, south 18th–19th. Missions keep 60 m inside the edge. The Dyer Ave tunnel
+trench is now playable terrain. Terrain relief (E1) is proposed, so missions mustn't depend
+on flat ground. Answers to the engine's asks (lead spawns, clock range) are filed in
+ENGINE_REQUESTS.
 
 ## Current proposal
 - **Leads:** Teddy Arce (ex-cop, night clerk: *access*), Delphine Moore (former presser,

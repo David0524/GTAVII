@@ -1,7 +1,6 @@
 {
-  "_note": "Narrative contribution to docs/briefs/BOUNDARIES.md (layer 2: diegetic blockers). The engine owns placement, colliders and region bounds. 'edge' and 'at' are PROVISIONAL until the expanded bounds are confirmed (requested: west about Ninth/Tenth Ave, north about 47th St). All names are invented; real public institutions (the police) appear by office only. Bark lines are 90 characters or fewer and work as subtitles.",
-  "boundsPending": true,
-
+  "_note": "Narrative contribution to docs/briefs/BOUNDARIES.md (layer 2: diegetic blockers). The engine owns placement, colliders and the schema (pending confirmation: ENGINE_REQUESTS 'From narrative: 7'). Segments are keyed by the real street that crosses the playable edge. Bounds (engine E4, src/shared/bounds.ts): west mid-block 10th–11th Aves; north mid-block 47th–48th Sts; east mid-block Lexington–3rd Aves; south mid-block 18th–19th Sts. Blockers sit within EDGE.BLOCKERS (60 m) of the edge. All names are invented; the police appear by office only. Bark lines are 90 characters or fewer.",
+  "boundsPending": false,
   "fiction": {
     "film": {
       "title": "NIGHT RATE",
@@ -10,160 +9,661 @@
       "director": "Lew Abernathy (invented; never seen, always 'Mr. Abernathy wants quiet')",
       "first_ad": "Bobbi Sarno (invented; the voice on the bullhorn)",
       "slate": "NIGHT RATE · PROD. 7406 · SC. 41 · TK. 9 · DIR. ABERNATHY · CAM. B",
-      "trucks": ["KETTLE & CRANE GRIP & ELECTRIC", "STAR WAGON 3 — TALENT ONLY", "HONEYWAGON", "CRAFT SERVICE"],
-      "signs": ["FILMING IN PROGRESS — PLEASE USE OTHER STREET", "NO PARKING — MOTION PICTURE PERMIT", "QUIET PLEASE — ROLLING WHEN RED LIGHT IS ON"],
+      "trucks": [
+        "KETTLE & CRANE GRIP & ELECTRIC",
+        "STAR WAGON 3 — TALENT ONLY",
+        "HONEYWAGON",
+        "CRAFT SERVICE"
+      ],
+      "signs": [
+        "FILMING IN PROGRESS — PLEASE USE OTHER STREET",
+        "NO PARKING — MOTION PICTURE PERMIT",
+        "QUIET PLEASE — ROLLING WHEN RED LIGHT IS ON"
+      ],
       "why": "Location crime pictures were common on 1974 NYC streets, and the shoot echoes the game's own 35mm look. At night it's the best-lit block in the city."
     },
     "agencies": [
-      { "id": "agency.hudson_union", "name": "Hudson Union Steam & Power", "stencil": "HUDSON UNION — STEAM — KEEP BACK", "trade": "Invented utility: steam mains, electric conduit and the striped steam chimneys. Takes the place of the real utility everywhere in the game." },
-      { "id": "agency.street_openings", "name": "Bureau of Street Openings", "stencil": "BUREAU OF STREET OPENINGS — PERMIT No.", "trade": "Invented city bureau that stencils sawhorses and permits trenches." },
-      { "id": "agency.mains_hydrants", "name": "Board of Mains & Hydrants", "stencil": "BD. OF MAINS & HYDRANTS — DANGER", "trade": "Invented city board responsible for water-main breaks and hydrant caps." },
-      { "id": "agency.west_side_viaduct", "name": "Elevated Highway Division", "stencil": "ELEVATED HWY DIV. — STRUCTURE CLOSED", "trade": "Invented office stencilled on the barriers under the closed elevated highway deck." }
+      {
+        "id": "agency.hudson_union",
+        "name": "Hudson Union Steam & Power",
+        "stencil": "HUDSON UNION — STEAM — KEEP BACK",
+        "trade": "Invented utility: steam mains, electric conduit and the striped steam chimneys. Takes the place of the real utility everywhere in the game."
+      },
+      {
+        "id": "agency.street_openings",
+        "name": "Bureau of Street Openings",
+        "stencil": "BUREAU OF STREET OPENINGS — PERMIT No.",
+        "trade": "Invented city bureau that stencils sawhorses and permits trenches."
+      },
+      {
+        "id": "agency.mains_hydrants",
+        "name": "Board of Mains & Hydrants",
+        "stencil": "BD. OF MAINS & HYDRANTS — DANGER",
+        "trade": "Invented city board responsible for water-main breaks and hydrant caps."
+      },
+      {
+        "id": "agency.west_side_viaduct",
+        "name": "Elevated Highway Division",
+        "stencil": "ELEVATED HWY DIV. — STRUCTURE CLOSED",
+        "trade": "Invented office stencilled on the barriers under the closed elevated highway deck."
+      }
     ],
     "workSuspendedSign": "WORK SUSPENDED — FUNDS PENDING — BUREAU OF STREET OPENINGS",
     "_workSuspendedWhy": "The fiscal-crisis nod: by late summer, trenches stay open because the city can't pay to close them. These signs multiply as the acts go on (P5)."
   },
-
   "blockers": [
-    { "id": "blocker.film_night_rate", "kind": "film_shoot", "edge": "west", "at": "W 44th St & 10th Ave (provisional)",
-      "acts": [1, 2], "when": { "time": ["16:00", "05:00"] },
-      "removedWhen": { "flags": ["flag.act3_started"] }, "replacedBy": "blocker.trench_hudson_west",
-      "barks": "barks.film_pa", "note": "Wraps the day Act 3 begins. The PAs' last bark on 7 Aug is the wrap call. In daytime the trucks are parked but there's no shoot (the trucks still block the street)." },
-    { "id": "blocker.trench_hudson_west", "kind": "utility_trench", "edge": "west", "at": "W 44th St & 10th Ave (provisional)",
-      "acts": [3], "barks": "barks.utility_crew", "sign": "WORK SUSPENDED — FUNDS PENDING — BUREAU OF STREET OPENINGS",
-      "note": "Replaces the film shoot in the same spot. A city with no money leaves the hole open." },
-    { "id": "blocker.rail_yard_fence", "kind": "geography", "edge": "west", "at": "W 31st St & 10th Ave (provisional)",
-      "acts": [1, 2, 3], "note": "Real: the Penn Central rail yards in a sunken cut. A chain-link fence, rusted signal masts, freight cars. No barks; ambient yard sounds come from the audio team." },
-    { "id": "blocker.tunnel_trench", "kind": "geography", "edge": "west", "at": "W 39th St & Dyer Ave (provisional)",
-      "acts": [1, 2, 3], "note": "Real: the tunnel-approach trench. The traffic jam into it is the edge (layer 3)." },
-    { "id": "blocker.dead_highway", "kind": "geography", "edge": "west", "at": "beyond 12th Ave (horizon only)",
-      "acts": [1, 2, 3], "sign": "ELEVATED HWY DIV. — STRUCTURE CLOSED",
-      "note": "Real: the elevated West Side Highway, closed after its December 1973 collapse. It's visible from the western streets, rusting and empty." },
-
-    { "id": "blocker.barricade_north_47", "kind": "police_barricade", "edge": "north", "at": "W 47th St & 7th Ave (provisional)",
-      "acts": [1, 2, 3], "barks": "barks.barricade_cop",
-      "note": "Wooden police sawhorses and a beat cop waving people off. In chases this is the roadblock. On the night of 8 Aug (M22) a crowd collects here around a radio in a parked cab." },
-    { "id": "blocker.trench_north_hudson", "kind": "utility_trench", "edge": "north", "at": "W 47th St & 8th Ave (provisional)",
-      "acts": [1, 2, 3], "barks": "barks.utility_crew", "sign": "HUDSON UNION — STEAM — KEEP BACK",
-      "note": "Striped steam chimney venting; steel plates; at night a lit flasher on a sawhorse. In Act 3 the work-suspended sign goes up." },
-
-    { "id": "blocker.water_main_east", "kind": "water_main", "edge": "east", "at": "E 29th St & 3rd Ave (provisional)",
-      "acts": [2], "when": { "dateRange": ["1974-07-08", "1974-08-07"] }, "barks": "barks.utility_crew", "sign": "BD. OF MAINS & HYDRANTS — DANGER",
-      "note": "The heat-wave water-main break: a flooded block, a geyser, the Board's truck. Content rule: children appear only playing at an opened hydrant on a different, safe corner, never in traffic or danger." },
-    { "id": "blocker.trench_east_hudson", "kind": "utility_trench", "edge": "east", "at": "E 37th St & 3rd Ave (provisional)",
-      "acts": [1, 2, 3], "barks": "barks.utility_crew" },
-
-    { "id": "blocker.block_party_south", "kind": "block_party", "edge": "south", "at": "W 17th St, 7th–8th Aves (provisional)",
-      "acts": [1, 2, 3], "when": { "days": ["sat", "sun"], "time": ["12:00", "23:00"] }, "barks": "barks.block_party",
-      "note": "A block association's summer party: card tables, a bandstand of folding chairs, a salsa trio, kids' races at the far end. It's passable on foot, and the crowd thickens into layer 3." },
-    { "id": "blocker.film_second_unit_south", "kind": "film_shoot", "edge": "south", "at": "W 17th St & 6th Ave (provisional)",
-      "acts": [2], "when": { "days": ["mon", "tue", "wed", "thu", "fri"], "time": ["20:00", "04:00"] }, "barks": "barks.film_pa",
-      "removedWhen": { "flags": ["flag.act3_started"] },
-      "note": "The second unit of NIGHT RATE shooting a cab chase. Gives the south edge a reason on weeknights in Act 2." },
-    { "id": "blocker.barricade_south", "kind": "police_barricade", "edge": "south", "at": "W 17th St & 5th Ave (provisional)",
-      "acts": [1, 2, 3], "barks": "barks.barricade_cop" }
+    {
+      "id": "blocker.film_night_rate",
+      "kind": "film_shoot",
+      "segment": "W 44th St @ west edge",
+      "acts": [
+        1,
+        2
+      ],
+      "when": {
+        "time": [
+          "16:00",
+          "05:00"
+        ]
+      },
+      "removedWhen": {
+        "flags": [
+          "flag.act3_started"
+        ]
+      },
+      "replacedBy": "blocker.trench_hudson_west",
+      "barks": "barks.film_pa",
+      "note": "The main unit, set in the Hell's Kitchen blocks west of Tenth. It wraps the day Act 3 begins; the PAs' last bark on 7 Aug is the wrap call. By day the trucks are parked across the street with no shoot."
+    },
+    {
+      "id": "blocker.trench_hudson_west",
+      "kind": "utility_trench",
+      "segment": "W 44th St @ west edge",
+      "acts": [
+        3
+      ],
+      "barks": "barks.utility_crew",
+      "sign": "WORK SUSPENDED — FUNDS PENDING — BUREAU OF STREET OPENINGS",
+      "note": "Replaces the film shoot on the same street. A city with no money leaves the hole open."
+    },
+    {
+      "id": "blocker.rail_yard_fence",
+      "kind": "geography",
+      "segment": "W 30th–33rd Sts @ west edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "note": "Real: the West Side Yard, the Penn Central rail cut. A chain-link fence, rusted signal masts, freight cars. No barks; the audio team supplies yard ambience."
+    },
+    {
+      "id": "blocker.dead_highway",
+      "kind": "geography",
+      "segment": "beyond 12th Ave (horizon only)",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "sign": "ELEVATED HWY DIV. — STRUCTURE CLOSED",
+      "note": "Real: the elevated West Side Highway, closed after its December 1973 collapse. Visible from the western streets, rusting and empty."
+    },
+    {
+      "id": "blocker.block_party_west",
+      "kind": "block_party",
+      "segment": "W 46th St @ west edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "when": {
+        "weekday": [
+          "sat",
+          "sun"
+        ],
+        "time": [
+          "12:00",
+          "23:00"
+        ]
+      },
+      "barks": "barks.block_party",
+      "note": "A Hell's Kitchen block association's summer party: card tables, a bandstand of folding chairs, a salsa trio, and kids' races at the far end (away from traffic). Passable on foot; the crowd thickens into layer 3."
+    },
+    {
+      "id": "blocker.trench_west_38",
+      "kind": "utility_trench",
+      "segment": "W 38th St @ west edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.utility_crew",
+      "sign": "HUDSON UNION — STEAM — KEEP BACK"
+    },
+    {
+      "id": "blocker.barricade_times_sq_north",
+      "kind": "police_barricade",
+      "segment": "7th Ave @ north edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.barricade_cop",
+      "note": "Wooden police sawhorses and a beat cop just past the north end of the bow-tie. This is the main chase roadblock for anything fleeing up Seventh or Broadway. On the night of 8 Aug (M22) a crowd gathers around a parked cab's radio."
+    },
+    {
+      "id": "blocker.barricade_broadway_north",
+      "kind": "police_barricade",
+      "segment": "Broadway @ north edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.barricade_cop"
+    },
+    {
+      "id": "blocker.trench_8th_north",
+      "kind": "utility_trench",
+      "segment": "8th Ave @ north edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.utility_crew",
+      "sign": "HUDSON UNION — STEAM — KEEP BACK",
+      "note": "Eighth Ave is northbound, so traffic flows out here; this is the busiest blocker. A striped steam chimney, steel plates and a night flasher. The work-suspended sign goes up in Act 3."
+    },
+    {
+      "id": "blocker.trench_6th_north",
+      "kind": "utility_trench",
+      "segment": "6th Ave @ north edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.utility_crew",
+      "sign": "BUREAU OF STREET OPENINGS — PERMIT No. 74-2216",
+      "note": "Sixth Ave is northbound and flows out here."
+    },
+    {
+      "id": "blocker.water_main_east",
+      "kind": "water_main",
+      "segment": "E 29th St @ east edge",
+      "acts": [
+        2
+      ],
+      "when": {
+        "dateRange": [
+          "1974-07-08",
+          "1974-08-07"
+        ]
+      },
+      "barks": "barks.utility_crew",
+      "sign": "BD. OF MAINS & HYDRANTS — DANGER",
+      "note": "The heat-wave water-main break: a flooded block, a geyser, the Board's truck. Content rule: children appear only playing at an opened hydrant on a separate, safe corner, never in traffic or danger."
+    },
+    {
+      "id": "blocker.trench_east_37",
+      "kind": "utility_trench",
+      "segment": "E 37th St @ east edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.utility_crew"
+    },
+    {
+      "id": "blocker.film_second_unit_south",
+      "kind": "film_shoot",
+      "segment": "5th Ave @ south edge",
+      "acts": [
+        2
+      ],
+      "when": {
+        "weekday": [
+          "mon",
+          "tue",
+          "wed",
+          "thu",
+          "fri"
+        ],
+        "time": [
+          "20:00",
+          "04:00"
+        ]
+      },
+      "barks": "barks.film_pa",
+      "removedWhen": {
+        "flags": [
+          "flag.act3_started"
+        ]
+      },
+      "replacedBy": "blocker.barricade_5th_south",
+      "note": "The second unit of NIGHT RATE shooting a cab chase down Fifth, which is southbound and flows out here. Gives the south edge a reason on weeknights in Act 2."
+    },
+    {
+      "id": "blocker.barricade_5th_south",
+      "kind": "police_barricade",
+      "segment": "5th Ave @ south edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.barricade_cop",
+      "note": "Default occupant of this segment whenever the second unit isn't shooting."
+    },
+    {
+      "id": "blocker.barricade_7th_south",
+      "kind": "police_barricade",
+      "segment": "7th Ave @ south edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.barricade_cop",
+      "note": "Seventh is southbound and flows out here. The chase roadblock."
+    },
+    {
+      "id": "blocker.trench_broadway_south",
+      "kind": "utility_trench",
+      "segment": "Broadway @ south edge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "barks": "barks.utility_crew",
+      "sign": "HUDSON UNION — STEAM — KEEP BACK",
+      "note": "Broadway is southbound and flows out here."
+    }
   ],
-
   "brownoutVariant": {
     "_note": "On brownout nights (ENGINE_REQUESTS #2) blockers stay physical but lose their lights. The film shoot runs on its own generators and becomes the only bright block for miles, which is a useful landmark on dark nights. Barricades get kerosene flare pots. Utility crews work by truck headlight.",
     "barks": "barks.brownout_edge"
   },
-
   "actChanges": [
-    { "act": 1, "summary": "Every blocker is fresh and busy. NIGHT RATE shoots at night on the west edge; trenches are staffed; weekend block parties start." },
-    { "act": 2, "summary": "Heat and money run out. The east water main breaks; NIGHT RATE adds a second unit on the south edge; trenches are half-staffed, and the first work-suspended signs appear." },
-    { "act": 3, "summary": "NIGHT RATE wraps (flag.act3_started), and its west-edge street becomes an abandoned trench, a hole the city can't afford to fill. Work-suspended signs are everywhere. On 8 Aug a crowd gathers at the north barricade around a cab radio." },
-    { "act": "epilogue", "summary": "October: the trenches are still open. If the engine later expands the region, a blocker is simply removed to open the next district (for example the west trench is finally filled)." }
+    {
+      "act": 1,
+      "summary": "Every blocker is fresh and busy. NIGHT RATE shoots at night on the west edge; trenches are staffed; weekend block parties start."
+    },
+    {
+      "act": 2,
+      "summary": "Heat and money run out. The east water main breaks; NIGHT RATE adds a second unit on the south edge; trenches are half-staffed, and the first work-suspended signs appear."
+    },
+    {
+      "act": 3,
+      "summary": "NIGHT RATE wraps (flag.act3_started), and its west-edge street becomes an abandoned trench, a hole the city can't afford to fill. Work-suspended signs are everywhere. On 8 Aug a crowd gathers at the north barricade around a cab radio."
+    },
+    {
+      "act": "epilogue",
+      "summary": "October: the trenches are still open. If the engine later expands the region, a blocker is simply removed to open the next district (for example the west trench is finally filled)."
+    }
   ],
-
   "barks": {
     "barks.film_pa": [
-      { "emotion": "urgent", "text": "Picture's up! Hold it right there, pal!" },
-      { "emotion": "urgent", "text": "Rolling! Nobody moves! That means you in the hat!" },
-      { "emotion": "weary", "text": "Sir, this is a closed set. Use Forty-Third." },
-      { "emotion": "weary", "text": "Mr. Abernathy wants quiet. I want a sandwich. Nobody's happy." },
-      { "emotion": "friendly", "text": "You want to be in pictures? Stand right there and look tired. Perfect." },
-      { "emotion": "urgent", "text": "Background, cross! Cab, wait for my hand! And… hold." },
-      { "emotion": "angry", "text": "Hey! You walked through take nine! Do you know what film costs?" },
-      { "emotion": "weary", "text": "Reset! Back to one! Somebody wet the street again!" },
-      { "emotion": "friendly", "text": "Coffee's for crew. You look like crew. Don't tell anybody." },
-      { "emotion": "urgent", "text": "Car coming through! Is that ours? That's not ours! Stop that car!" },
-      { "emotion": "wry", "text": "No, we're not the TV news. We're the movie about the TV news' bad night." },
-      { "emotion": "weary", "text": "Street's closed till four a.m. Union rules. Take it up with the union." },
-      { "emotion": "urgent", "text": "Lock it up! Lock it up! Picture's up on the corner!" },
-      { "emotion": "friendly", "text": "Autographs after wrap. Not mine. I'm nobody." },
-      { "emotion": "wry", "text": "This block's playing Cleveland tonight. Go around, it's cheaper." },
-      { "emotion": "weary", "text": "Wet down the street again. Mr. Abernathy says the dry looks fake." },
-      { "emotion": "urgent", "text": "Kill the radio! Whose radio? Kill it!" },
-      { "emotion": "wry", "text": "That's a wrap on Forty-Fourth, folks! Thanks for nothing, New York!", "if": "flag.act3_started", "once": true }
+      {
+        "emotion": "urgent",
+        "text": "Picture's up! Hold it right there, pal!"
+      },
+      {
+        "emotion": "urgent",
+        "text": "Rolling! Nobody moves! That means you in the hat!"
+      },
+      {
+        "emotion": "weary",
+        "text": "Sir, this is a closed set. Use Forty-Third."
+      },
+      {
+        "emotion": "weary",
+        "text": "Mr. Abernathy wants quiet. I want a sandwich. Nobody's happy."
+      },
+      {
+        "emotion": "friendly",
+        "text": "You want to be in pictures? Stand right there and look tired. Perfect."
+      },
+      {
+        "emotion": "urgent",
+        "text": "Background, cross! Cab, wait for my hand! And… hold."
+      },
+      {
+        "emotion": "angry",
+        "text": "Hey! You walked through take nine! Do you know what film costs?"
+      },
+      {
+        "emotion": "weary",
+        "text": "Reset! Back to one! Somebody wet the street again!"
+      },
+      {
+        "emotion": "friendly",
+        "text": "Coffee's for crew. You look like crew. Don't tell anybody."
+      },
+      {
+        "emotion": "urgent",
+        "text": "Car coming through! Is that ours? That's not ours! Stop that car!"
+      },
+      {
+        "emotion": "wry",
+        "text": "No, we're not the TV news. We're the movie about the TV news' bad night."
+      },
+      {
+        "emotion": "weary",
+        "text": "Street's closed till four a.m. Union rules. Take it up with the union."
+      },
+      {
+        "emotion": "urgent",
+        "text": "Lock it up! Lock it up! Picture's up on the corner!"
+      },
+      {
+        "emotion": "friendly",
+        "text": "Autographs after wrap. Not mine. I'm nobody."
+      },
+      {
+        "emotion": "wry",
+        "text": "This block's playing Cleveland tonight. Go around, it's cheaper."
+      },
+      {
+        "emotion": "weary",
+        "text": "Wet down the street again. Mr. Abernathy says the dry looks fake."
+      },
+      {
+        "emotion": "urgent",
+        "text": "Kill the radio! Whose radio? Kill it!"
+      },
+      {
+        "emotion": "wry",
+        "text": "That's a wrap on Forty-Fourth, folks! Thanks for nothing, New York!",
+        "if": "flag.act3_started",
+        "once": true
+      }
     ],
     "barks.barricade_cop": [
-      { "emotion": "flat", "text": "Street's closed. Go around." },
-      { "emotion": "flat", "text": "Nothing to see. Keep it moving." },
-      { "emotion": "weary", "text": "Around the block, buddy. Same as everybody." },
-      { "emotion": "annoyed", "text": "You deaf? I said closed. C-L-O-S-E-D." },
-      { "emotion": "weary", "text": "Twelve hours on a sawhorse. Don't make it thirteen." },
-      { "emotion": "flat", "text": "Use the avenue. That's what it's there for." },
-      { "emotion": "annoyed", "text": "Back it up. Back it UP. There you go." },
-      { "emotion": "wry", "text": "What's going on? Overtime is what's going on." },
-      { "emotion": "flat", "text": "Sidewalk only, ma'am. Watch the plates." },
-      { "emotion": "annoyed", "text": "Hey, hey, hey! Not past the horses!" },
-      { "emotion": "weary", "text": "City pays me to stand here. Barely. So I'm standing." },
-      { "emotion": "flat", "text": "Detour's posted. Read the sign." },
-      { "emotion": "wry", "text": "If I knew why it's closed, I'd be a sergeant." },
-      { "emotion": "annoyed", "text": "You honk one more time, you're getting a ticket for music." },
-      { "emotion": "flat", "text": "Turn it around, pal. Nice and easy." },
-      { "emotion": "weary", "text": "Hot enough for you? Me neither. Go around." },
-      { "emotion": "flat", "text": "Nobody in, nobody out. Orders." },
-      { "emotion": "wry", "text": "Best seat in the city and I can't sit down." },
-      { "emotion": "annoyed", "text": "Lady, I don't care if you live there. Use the other end." },
-      { "emotion": "flat", "text": "Move along. The night's long enough." },
-      { "emotion": "alarmed", "text": "Whoa! Whoa! Slow down! This is a roadblock!", "context": "chase" },
-      { "emotion": "alarmed", "text": "Pull over! Pull it over right now!", "context": "chase" },
-      { "emotion": "alarmed", "text": "Get him at the horses! He's not getting through here!", "context": "chase" },
-      { "emotion": "annoyed", "text": "You'd have had better luck through the Lincoln Tunnel, wise guy.", "context": "chase" },
-      { "emotion": "weary", "text": "Rain. Of course it's rain. Go around, folks.", "context": "rain" },
-      { "emotion": "flat", "text": "Watch the puddle. It's deeper than it looks.", "context": "rain" },
-      { "emotion": "wry", "text": "Lights out on the whole block and they still want me standing here.", "context": "brownout" },
-      { "emotion": "flat", "text": "Mind the flare pots. Go around.", "context": "brownout" },
-      { "emotion": "grave", "text": "You hear the radio? He's going. Tomorrow noon, they're saying.", "context": "aug08" },
-      { "emotion": "weary", "text": "History's on the radio, pal. Traffic's still on the avenue.", "context": "aug08" },
-      { "emotion": "flat", "text": "Running? Nobody runs past me. Walk it.", "context": "player_running" },
-      { "emotion": "annoyed", "text": "Easy with the shoving. I got nowhere to put you either.", "context": "collision" }
+      {
+        "emotion": "flat",
+        "text": "Street's closed. Go around."
+      },
+      {
+        "emotion": "flat",
+        "text": "Nothing to see. Keep it moving."
+      },
+      {
+        "emotion": "weary",
+        "text": "Around the block, buddy. Same as everybody."
+      },
+      {
+        "emotion": "annoyed",
+        "text": "You deaf? I said closed. C-L-O-S-E-D."
+      },
+      {
+        "emotion": "weary",
+        "text": "Twelve hours on a sawhorse. Don't make it thirteen."
+      },
+      {
+        "emotion": "flat",
+        "text": "Use the avenue. That's what it's there for."
+      },
+      {
+        "emotion": "annoyed",
+        "text": "Back it up. Back it UP. There you go."
+      },
+      {
+        "emotion": "wry",
+        "text": "What's going on? Overtime is what's going on."
+      },
+      {
+        "emotion": "flat",
+        "text": "Sidewalk only, ma'am. Watch the plates."
+      },
+      {
+        "emotion": "annoyed",
+        "text": "Hey, hey, hey! Not past the horses!"
+      },
+      {
+        "emotion": "weary",
+        "text": "City pays me to stand here. Barely. So I'm standing."
+      },
+      {
+        "emotion": "flat",
+        "text": "Detour's posted. Read the sign."
+      },
+      {
+        "emotion": "wry",
+        "text": "If I knew why it's closed, I'd be a sergeant."
+      },
+      {
+        "emotion": "annoyed",
+        "text": "You honk one more time, you're getting a ticket for music."
+      },
+      {
+        "emotion": "flat",
+        "text": "Turn it around, pal. Nice and easy."
+      },
+      {
+        "emotion": "weary",
+        "text": "Hot enough for you? Me neither. Go around."
+      },
+      {
+        "emotion": "flat",
+        "text": "Nobody in, nobody out. Orders."
+      },
+      {
+        "emotion": "wry",
+        "text": "Best seat in the city and I can't sit down."
+      },
+      {
+        "emotion": "annoyed",
+        "text": "Lady, I don't care if you live there. Use the other end."
+      },
+      {
+        "emotion": "flat",
+        "text": "Move along. The night's long enough."
+      },
+      {
+        "emotion": "alarmed",
+        "text": "Whoa! Whoa! Slow down! This is a roadblock!",
+        "context": "chase"
+      },
+      {
+        "emotion": "alarmed",
+        "text": "Pull over! Pull it over right now!",
+        "context": "chase"
+      },
+      {
+        "emotion": "alarmed",
+        "text": "Get him at the horses! He's not getting through here!",
+        "context": "chase"
+      },
+      {
+        "emotion": "annoyed",
+        "text": "You'd have had better luck through the Lincoln Tunnel, wise guy.",
+        "context": "chase"
+      },
+      {
+        "emotion": "weary",
+        "text": "Rain. Of course it's rain. Go around, folks.",
+        "context": "rain"
+      },
+      {
+        "emotion": "flat",
+        "text": "Watch the puddle. It's deeper than it looks.",
+        "context": "rain"
+      },
+      {
+        "emotion": "wry",
+        "text": "Lights out on the whole block and they still want me standing here.",
+        "context": "brownout"
+      },
+      {
+        "emotion": "flat",
+        "text": "Mind the flare pots. Go around.",
+        "context": "brownout"
+      },
+      {
+        "emotion": "grave",
+        "text": "You hear the radio? He's going. Tomorrow noon, they're saying.",
+        "context": "aug08"
+      },
+      {
+        "emotion": "weary",
+        "text": "History's on the radio, pal. Traffic's still on the avenue.",
+        "context": "aug08"
+      },
+      {
+        "emotion": "flat",
+        "text": "Running? Nobody runs past me. Walk it.",
+        "context": "player_running"
+      },
+      {
+        "emotion": "annoyed",
+        "text": "Easy with the shoving. I got nowhere to put you either.",
+        "context": "collision"
+      }
     ],
     "barks.utility_crew": [
-      { "emotion": "flat", "text": "Steam main. Don't stand on the plates." },
-      { "emotion": "wry", "text": "Hole's been here since June. It'll be here at Christmas." },
-      { "emotion": "weary", "text": "Funds pending. Means we wait. Means you go around." },
-      { "emotion": "flat", "text": "Hudson Union, buddy. We own under the street. You own the sidewalk." },
-      { "emotion": "alarmed", "text": "Back up! She's venting! Back up!" },
-      { "emotion": "wry", "text": "City says fix it. City says no money. We dig half a hole." },
-      { "emotion": "flat", "text": "Main's busted. Whole block's a swimming pool. Go around." },
-      { "emotion": "weary", "text": "Hundred and four in the trench today. Bring me a soda or go away." },
-      { "emotion": "wry", "text": "Lights are out? Not my department. Ask the other guys in our department." },
-      { "emotion": "flat", "text": "Plates are hot. Shoes'll melt. Your call." },
-      { "emotion": "wry", "text": "Work suspended. That's not a sign, that's a philosophy." },
-      { "emotion": "flat", "text": "Truck's coming out backwards. Clear the way." }
+      {
+        "emotion": "flat",
+        "text": "Steam main. Don't stand on the plates."
+      },
+      {
+        "emotion": "wry",
+        "text": "Hole's been here since June. It'll be here at Christmas."
+      },
+      {
+        "emotion": "weary",
+        "text": "Funds pending. Means we wait. Means you go around."
+      },
+      {
+        "emotion": "flat",
+        "text": "Hudson Union, buddy. We own under the street. You own the sidewalk."
+      },
+      {
+        "emotion": "alarmed",
+        "text": "Back up! She's venting! Back up!"
+      },
+      {
+        "emotion": "wry",
+        "text": "City says fix it. City says no money. We dig half a hole."
+      },
+      {
+        "emotion": "flat",
+        "text": "Main's busted. Whole block's a swimming pool. Go around."
+      },
+      {
+        "emotion": "weary",
+        "text": "Hundred and four in the trench today. Bring me a soda or go away."
+      },
+      {
+        "emotion": "wry",
+        "text": "Lights are out? Not my department. Ask the other guys in our department."
+      },
+      {
+        "emotion": "flat",
+        "text": "Plates are hot. Shoes'll melt. Your call."
+      },
+      {
+        "emotion": "wry",
+        "text": "Work suspended. That's not a sign, that's a philosophy."
+      },
+      {
+        "emotion": "flat",
+        "text": "Truck's coming out backwards. Clear the way."
+      }
     ],
     "barks.block_party": [
-      { "emotion": "happy", "text": "Block party! Cars go around, people come in!" },
-      { "emotion": "happy", "text": "Two raffle tickets for a quarter. Prize is a fan. A fan, in July!" },
-      { "emotion": "friendly", "text": "You live on this block? You do now. Grab a plate." },
-      { "emotion": "happy", "text": "Band's on at eight. They know three songs. Very well." },
-      { "emotion": "annoyed", "text": "Mister, that's the dance floor. Walk around the dance floor." },
-      { "emotion": "friendly", "text": "Block association thanks you. Dues are two dollars. Kidding. Mostly." },
-      { "emotion": "happy", "text": "Who made the pernil? Whoever made the pernil, marry me." },
-      { "emotion": "friendly", "text": "Street's closed for the party. Park on the avenue, come back hungry." },
-      { "emotion": "wry", "text": "Cops gave us till eleven. Cops always give us till eleven." },
-      { "emotion": "happy", "text": "Rain? Rain's just free air-conditioning. Keep playing!", "context": "rain" },
-      { "emotion": "friendly", "text": "Easy, you'll knock the cake over. The cake is the whole party." },
-      { "emotion": "happy", "text": "Lights out? Bring the candles! Party's not over!", "context": "brownout" }
+      {
+        "emotion": "happy",
+        "text": "Block party! Cars go around, people come in!"
+      },
+      {
+        "emotion": "happy",
+        "text": "Two raffle tickets for a quarter. Prize is a fan. A fan, in July!"
+      },
+      {
+        "emotion": "friendly",
+        "text": "You live on this block? You do now. Grab a plate."
+      },
+      {
+        "emotion": "happy",
+        "text": "Band's on at eight. They know three songs. Very well."
+      },
+      {
+        "emotion": "annoyed",
+        "text": "Mister, that's the dance floor. Walk around the dance floor."
+      },
+      {
+        "emotion": "friendly",
+        "text": "Block association thanks you. Dues are two dollars. Kidding. Mostly."
+      },
+      {
+        "emotion": "happy",
+        "text": "Who made the pernil? Whoever made the pernil, marry me."
+      },
+      {
+        "emotion": "friendly",
+        "text": "Street's closed for the party. Park on the avenue, come back hungry."
+      },
+      {
+        "emotion": "wry",
+        "text": "Cops gave us till eleven. Cops always give us till eleven."
+      },
+      {
+        "emotion": "happy",
+        "text": "Rain? Rain's just free air-conditioning. Keep playing!",
+        "context": "rain"
+      },
+      {
+        "emotion": "friendly",
+        "text": "Easy, you'll knock the cake over. The cake is the whole party."
+      },
+      {
+        "emotion": "happy",
+        "text": "Lights out? Bring the candles! Party's not over!",
+        "context": "brownout"
+      }
     ],
     "barks.brownout_edge": [
-      { "emotion": "wry", "text": "Whole city's dark and the movie people still got lights. Figures." },
-      { "emotion": "flat", "text": "Careful, no streetlights past here. Go around by the avenue." },
-      { "emotion": "weary", "text": "Hudson Union says an hour. Hudson Union always says an hour." },
-      { "emotion": "alarmed", "text": "Watch it! Signal's out! Nobody's got the light!" }
+      {
+        "emotion": "wry",
+        "text": "Whole city's dark and the movie people still got lights. Figures."
+      },
+      {
+        "emotion": "flat",
+        "text": "Careful, no streetlights past here. Go around by the avenue."
+      },
+      {
+        "emotion": "weary",
+        "text": "Hudson Union says an hour. Hudson Union always says an hour."
+      },
+      {
+        "emotion": "alarmed",
+        "text": "Watch it! Signal's out! Nobody's got the light!"
+      }
     ]
+  },
+  "bounds": {
+    "west": "mid-block 10th–11th Aves",
+    "north": "mid-block W 47th–48th Sts",
+    "east": "mid-block Lexington–3rd Aves",
+    "south": "mid-block 18th–19th Sts",
+    "source": "engine E4, src/shared/bounds.ts (commit 444bcd4)"
+  },
+  "defaultRotation": {
+    "_note": "For any edge-crossing street not listed above, the engine picks from this rotation (seeded by street name, so it's stable). Prioritise streets whose 1974 one-way direction flows OUT of the map: 5th Ave, Broadway and 7th Ave (south edge); 6th and 8th Aves (north edge); and odd-numbered westbound side streets at the west edge.",
+    "kinds": [
+      "utility_trench",
+      "police_barricade",
+      "utility_trench",
+      "water_main"
+    ],
+    "weekendSideStreets": "block_party"
   }
 }
