@@ -635,3 +635,12 @@ not rushed").
   and the Phase 4 driving context reads them. They reset on window blur.
 - **Safe areas:** `viewport-fit=cover` is set in `index.html`, and `env(safe-area-inset-*)` is
   available, including the `--safe-*` variables in `theme.css`. No engine change is needed.
+
+### Gameplay 15, `nearestTalkable(x, z, radius)` and `talk(id)`: **ACCEPTED (Phase 7, mission and trigger runtime)**
+- **Shape:** `nearestTalkable` returns `{ id, name, kind: 'mission' | 'side' | 'named', x, z, prompt } | null`.
+  `talk(id)` starts the conversation or mission intro, or returns `false` if the character is
+  busy or out of their time window.
+- **Wiring:** the runtime calls `gameplay.bindTalk({ nearestTalkable, talk })` at integration, as
+  701f4cb expects. Until then, gameplay's fallback to sim ped barks stays in place.
+- **Candidates:** narrative's cast and activity registries, filtered by the story clock. A
+  character outside their mission window is not talkable; the `waitPrompt` path handles waiting.
