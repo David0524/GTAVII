@@ -597,7 +597,7 @@ dependency).
 ## N7 pre-pass notes
 - **Reachability:** all 32 missions are reachable from M1 via unlocks, and every required flag
   is set by an earlier mission.
-- **Dates:** every mission's dates fit inside its act. 25 of the dated missions use
+- **Dates:** every mission's dates fit inside its act. 26 of 32 missions use
   single-day windows, which needs the clock policy in ENGINE_REQUESTS 10 so the story never
   soft-locks.
 - **Endings:** all four are reachable. B3 and B4 are always open. B2 has 3 of 4

@@ -184,7 +184,7 @@ with a fallback. Validation is in `narrative/tools/content.py`.
 | Compound conditions on choices and lines | `requires: { all: [flags], any: [flags], none: [flags], atLeast: { n, of: [flags] }, relationship: { "char.<lead>/char.<npc>": ">=2" } }`; gated choices carry `disabledText` and are shown greyed with that reason | Branch B (M29: B1 needs the wire OR Nick's flip; B2 needs 2 of 4 corroborations AND the editor neutralised); lead resolutions (M30, M31) | Missions set summary flags (for example `flag.b1_open`) before the choice |
 
 ## From narrative: 10. Story-clock policy for dated missions (no soft-locks)
-- **What:** 25 of 32 story missions carry a `requires.dateRange` (many of them a single day:
+- **What:** 26 of 32 story missions have a single-day `requires.dateRange` (for example
   4 July, 8 August, Labor Day and so on). Proposed policy:
   1. A story mission becomes available when it's unlocked, whatever today's date is.
   2. When the player starts it, if the world date is **before** `dateRange[0]`, the engine
