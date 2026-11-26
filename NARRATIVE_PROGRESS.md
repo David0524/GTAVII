@@ -21,6 +21,7 @@ narrative/N1_STORY_BIBLE.md  premise, loglines, pillars, PC, social geography, a
 narrative/N2_CAST.md       GENERATED cast sheets; edit content/cast/*.json and re-run the tool
 narrative/tools/cast.py    validates the cast (line length, 24h schedules, ids, edges, places) and renders N2_CAST.md
 content/cast/*.json        cast source of truth: leads, principals, secondary
+content/boundaries.json    map-edge blockers, invented film shoot and agencies, edge barks (with the oversight BOUNDARIES design)
 content/places.json        narrative place ids (loc.*) pinned to real intersections and block faces
 ENGINE_REQUESTS.md         capabilities needed beyond the draft hook contract, with fallbacks
 content/                   (from N4 on) machine-readable missions, triggers, dialogue, etc.
@@ -67,6 +68,26 @@ Applied:
   press, or Teddy keeps it).
 - No third branch: two is enough, and the brief allows two or three.
 
+**26 Nov 2026, coordination.** The user confirmed that the **oversight session**
+(`session_01H4ZSJ99NBvPVUNdV2re88V`) speaks for them, and that the map is being expanded
+(talk to the oversight session for details). Requests taken from it:
+- **Appearance sheets** for the Characters workstream. They're now an `appearance` block on
+  all 3 leads and 12 principals: build, height, skin tone and hex, hair and hex, face,
+  posture, gait, mannerisms, and wardrobe per act. Validated by `cast.py`.
+- **Boundary content** for `docs/briefs/BOUNDARIES.md` (layer 2). Now in
+  `content/boundaries.json`:
+  - the invented film shoot NIGHT RATE (Kettle & Crane Pictures);
+  - the invented utility Hudson Union Steam & Power, plus three invented city bodies;
+  - 12 blockers with act and time rules;
+  - 78 barks (32 of them for the barricade cop).
+
+  Placements are provisional until the bounds are confirmed.
+- **Edge rule:** no mission, tail or chase within one block of an edge. ENGINE_REQUESTS #6
+  lists the story locations that need the expanded bounds.
+- Name checks: "Night Rate" (no 1970s film by that title), Hudson Union (no such utility),
+  and Kettle & Crane (chosen after "Lamplight" and "Halyard" turned out to be real
+  production companies). The Audio workstream will consume N5 barks and N6 radio content.
+
 ## Current proposal
 - **Leads:** Teddy Arce (ex-cop, night clerk: *access*), Delphine Moore (former presser,
   works the Eighth Ave strip and banks the women's savings club: *reading people, photo
@@ -109,6 +130,8 @@ Applied:
   district has legitimate, sympathetic principal or secondary characters (enforced in N2).
 
 ## Open questions / research to do in N2–N3
+- `flag.act3_started` (used by `content/boundaries.json`) must go into `content/FLAGS.md` when
+  that file is created in N3/N4.
 - Which 1974 side-street one-ways the engine assumes (DATA_SOURCES says OSM today). This
   matters for the street-race and tail missions, so I'll check with the engine team.
 - Whether there was a 1974 Hotel Pennsylvania convention calendar (a texture detail, low

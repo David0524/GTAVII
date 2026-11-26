@@ -126,7 +126,29 @@
       25,
       29,
       32
-    ]
+    ],
+    "appearance": {
+      "build": "Big and heavy, gone to fat over old muscle",
+      "heightCm": 180,
+      "skinTone": "Fair, flushed and ruddy, with broken veins on the nose",
+      "skinHex": "#E2B59A",
+      "hair": "Thinning sandy-grey hair combed over; pale eyebrows",
+      "hairHex": "#A89A80",
+      "face": "Fleshy and boyish, small blue eyes, a quick wet smile",
+      "posture": "Leans in close; arm around shoulders; hat pushed back",
+      "mannerisms": [
+        "chews a toothpick",
+        "mops his neck with a handkerchief",
+        "calls everyone 'kid'",
+        "pats his breast pocket where envelopes used to go"
+      ],
+      "gait": "A heavy, sweating amble",
+      "wardrobeByAct": {
+        "act1": "Short-sleeve dress shirt with sweat rings, clip-on tie, plaid sport coat over his arm",
+        "act2": "Same, more rumpled; a straw hat",
+        "act3": "Shirt untucked and tie gone; the sport coat left in the car (M25)"
+      }
+    }
   },
   {
     "id": "char.howard_lisle",
@@ -266,7 +288,28 @@
       29,
       30,
       32
-    ]
+    ],
+    "appearance": {
+      "build": "Tall, thin and narrow-shouldered",
+      "heightCm": 188,
+      "skinTone": "Pale and indoor, never sunburnt",
+      "skinHex": "#E8CDB5",
+      "hair": "Silver hair, neatly parted, barbered every Friday",
+      "hairHex": "#BDBDBD",
+      "face": "Long face, thin lips, horn-rimmed glasses, grey eyes that don't blink much",
+      "posture": "Upright, hands clasped behind his back; listens with his head tilted",
+      "mannerisms": [
+        "uncaps and recaps his fountain pen",
+        "folds his newspaper into exact quarters",
+        "never touches money with his hands"
+      ],
+      "gait": "An even, measured stride; never hurries",
+      "wardrobeByAct": {
+        "act1": "Dove-grey tropical-weight suit, starched white shirt, regimental tie, black wingtips",
+        "act2": "The same in a lighter grey; a summer straw fedora outdoors",
+        "act3": "Navy suit for appearances; the final night, his jacket off for the first time in the game"
+      }
+    }
   },
   {
     "id": "char.dennis_wurtz",
@@ -408,7 +451,28 @@
       26,
       27,
       32
-    ]
+    ],
+    "appearance": {
+      "build": "Big and thick-necked; a sailor's forearms gone soft",
+      "heightCm": 185,
+      "skinTone": "Fair skin tanned red-brown from his boat",
+      "skinHex": "#D9A483",
+      "hair": "Sandy crew cut going grey",
+      "hairHex": "#B9A27A",
+      "face": "Square jaw, small eyes, a crooked grin; a faded Navy tattoo on his forearm (anchor, no lettering)",
+      "posture": "Leans on cars and doorframes, filling them",
+      "mannerisms": [
+        "crunches mints",
+        "talks about his diet",
+        "flicks through photographs like playing cards"
+      ],
+      "gait": "A swaggering roll",
+      "wardrobeByAct": {
+        "act1": "Knit polo, grey slacks, white sneakers",
+        "act2": "Maroon windbreaker over the polo; gold chain",
+        "act3": "A suit for the inquiry he expects, worn badly"
+      }
+    }
   },
   {
     "id": "char.ruth_calloway",
@@ -539,7 +603,28 @@
       28,
       29,
       32
-    ]
+    ],
+    "appearance": {
+      "build": "Medium height, slim, quick",
+      "heightCm": 165,
+      "skinTone": "Medium brown with a warm undertone",
+      "skinHex": "#8D5A3B",
+      "hair": "Pressed hair pinned back for court; a natural afro on weekends, never seen at work",
+      "hairHex": "#1A1412",
+      "face": "Oval face, sharp brows, wire-rimmed glasses pushed up into her hair",
+      "posture": "Leans forward over tables; papers always in her arms",
+      "mannerisms": [
+        "clicks her pen while thinking",
+        "asks questions she knows the answers to",
+        "checks her watch when she mentions September"
+      ],
+      "gait": "A brisk walk; takes stairs two at a time",
+      "wardrobeByAct": {
+        "act1": "Seen only in parked cars: tan raincoat",
+        "act2": "Belted shirtwaist dresses, flat shoes, tan raincoat",
+        "act3": "A dark pantsuit; by the end, the raincoat in the heat because she slept in her office"
+      }
+    }
   },
   {
     "id": "char.augie_lomax",
@@ -664,7 +749,28 @@
       20,
       24,
       30
-    ]
+    ],
+    "appearance": {
+      "build": "Squat and broad, with a belly; a trucker's shoulders",
+      "heightCm": 165,
+      "skinTone": "Pale, weathered, with a sun-browned neck and forearms; greyish by Act 3 as the illness shows",
+      "skinHex": "#D8B596",
+      "hair": "Bald with a grey fringe under a flat cap",
+      "hairHex": "#8E8E8E",
+      "face": "A heavy jaw always working a cigar, a pushed-in nose, bright suspicious eyes",
+      "posture": "Hands on his hips at the dispatch window",
+      "mannerisms": [
+        "chews his cigar instead of smoking it",
+        "speaks into the radio handset even when he could shout",
+        "counts trucks under his breath"
+      ],
+      "gait": "A rolling, bow-legged stride",
+      "wardrobeByAct": {
+        "act1": "Green work shirt with name patch, suspenders, work trousers, steel-toe boots",
+        "act2": "Same; a cardigan in the cold of the garage at dawn",
+        "act3": "His good suit, bought for his wife's funeral, worn for the sale"
+      }
+    }
   },
   {
     "id": "char.carmen_arce",
@@ -783,7 +889,29 @@
       19,
       25,
       28
-    ]
+    ],
+    "appearance": {
+      "build": "Small and quick, slightly round-shouldered from forty years at a machine",
+      "heightCm": 152,
+      "skinTone": "Warm light brown",
+      "skinHex": "#B88563",
+      "hair": "Grey hair in a weekly set, held with bobby pins",
+      "hairHex": "#A7A39E",
+      "face": "Round face, glasses on a chain, a laughing mouth and sharp eyes",
+      "posture": "Leans forward with hands busy",
+      "mannerisms": [
+        "feeds people instead of answering",
+        "crosses herself at bad news",
+        "straightens Teddy's collar",
+        "jabs the air with a finger to make union points"
+      ],
+      "gait": "Short, rapid steps",
+      "wardrobeByAct": {
+        "act1": "Print shirtwaist dress, cardigan, union pin",
+        "act2": "Work smock over the dress, pincushion on her wrist",
+        "act3": "Her church dress and the union pin for the march"
+      }
+    }
   },
   {
     "id": "char.odessa_pruitt",
@@ -912,7 +1040,28 @@
       26,
       28,
       30
-    ]
+    ],
+    "appearance": {
+      "build": "Tall and slight; walks with a cane",
+      "heightCm": 175,
+      "skinTone": "Deep brown with a warm undertone",
+      "skinHex": "#4E3022",
+      "hair": "White hair in a neat bun, nearly always under a hat",
+      "hairHex": "#EDEDED",
+      "face": "Fine-boned, with deep lines from laughing and from not laughing; spectacles for reading only",
+      "posture": "Never stoops, and sits upright on a folding chair as if it were a throne",
+      "mannerisms": [
+        "taps her cane once for order",
+        "offers peppermints before bad news",
+        "addresses everyone by title and surname"
+      ],
+      "gait": "A slow, deliberate walk with the cane",
+      "wardrobeByAct": {
+        "act1": "Print dresses, a cameo brooch",
+        "act2": "A black dress and hat after Hollis's death (M19)",
+        "act3": "A white church hat and white gloves for the march"
+      }
+    }
   },
   {
     "id": "char.ray_bauer",
@@ -1029,7 +1178,28 @@
       13,
       22,
       27
-    ]
+    ],
+    "appearance": {
+      "build": "Thin and wiry; never still",
+      "heightCm": 175,
+      "skinTone": "Olive and tanned",
+      "skinHex": "#C9A27C",
+      "hair": "A greying pompadour dyed too black, with grey roots showing",
+      "hairHex": "#151515",
+      "face": "A narrow face, tinted glasses, a quick nervous grin with a gold tooth",
+      "posture": "Bounces on his heels; hands always moving",
+      "mannerisms": [
+        "jingles coins in his changer belt",
+        "laughs before he speaks",
+        "never finishes a threat"
+      ],
+      "gait": "Quick, jittery steps",
+      "wardrobeByAct": {
+        "act1": "Orange print shirt, white belt, two-tone loafers",
+        "act2": "Same, sweat-stained",
+        "act3": "A brand-new beige leisure suit for 'going legit', with the price tag still on the sleeve"
+      }
+    }
   },
   {
     "id": "char.eleni_varelas",
@@ -1129,7 +1299,28 @@
       18,
       20,
       30
-    ]
+    ],
+    "appearance": {
+      "build": "Slender, very still",
+      "heightCm": 163,
+      "skinTone": "Fair olive",
+      "skinHex": "#D2B190",
+      "hair": "Dark hair with a grey streak, in a low chignon",
+      "hairHex": "#2B2421",
+      "face": "Fine features, reading glasses on a chain, a mouth that doesn't give much away",
+      "posture": "Sits upright with her hands folded over the ledger",
+      "mannerisms": [
+        "runs adding-machine tape through her fingers",
+        "says 'Nikos' instead of 'Nick' when angry",
+        "takes her glasses off to deliver bad news"
+      ],
+      "gait": "A quiet, measured walk",
+      "wardrobeByAct": {
+        "act1": "Offstage",
+        "act2": "Tailored navy sheath dresses, pearl earrings",
+        "act3": "A grey travelling suit, packed for leaving or for staying"
+      }
+    }
   },
   {
     "id": "char.jung_ho_baek",
@@ -1242,7 +1433,28 @@
       16,
       28,
       30
-    ]
+    ],
+    "appearance": {
+      "build": "Slight and neat",
+      "heightCm": 170,
+      "skinTone": "Light with a warm undertone",
+      "skinHex": "#D8B48E",
+      "hair": "Black hair, short and side-parted",
+      "hairHex": "#121212",
+      "face": "Black-framed glasses, a calm face that rarely shows surprise",
+      "posture": "Very still when listening, with his hands behind the counter",
+      "mannerisms": [
+        "checks every figure on his pocket calculator",
+        "answers a question with a question",
+        "bows slightly to customers and not at all to collectors"
+      ],
+      "gait": "Brisk and neat",
+      "wardrobeByAct": {
+        "act1": "White short-sleeve shirt, dark slacks, cardigan",
+        "act2": "Same; a tie for the meeting with Nick",
+        "act3": "A dark suit for signing (or not signing) the deed"
+      }
+    }
   },
   {
     "id": "char.tina_mercado",
@@ -1362,7 +1574,29 @@
       23,
       27,
       31
-    ]
+    ],
+    "appearance": {
+      "build": "Petite and quick",
+      "heightCm": 155,
+      "skinTone": "Light tan with a warm undertone",
+      "skinHex": "#C99A72",
+      "hair": "Long dark-brown hair in a high ponytail",
+      "hairHex": "#3A2418",
+      "face": "A round, animated face, big gold hoops, a bruise under makeup that she won't explain (Act 1)",
+      "posture": "Always moving; sits on counters",
+      "mannerisms": [
+        "sings under her breath",
+        "nicknames everyone",
+        "brushes her hair when she's nervous",
+        "goes dead still when she's serious"
+      ],
+      "gait": "Quick, bouncy steps in platform sandals",
+      "wardrobeByAct": {
+        "act1": "Bright pink wrap top, denim flares, platform sandals",
+        "act2": "A denim jacket over the same; hair down when she's hiding something",
+        "act3": "A plain black dress for the confession (M23); a beautician's smock in the finale if she chose Delphine"
+      }
+    }
   },
   {
     "id": "char.yiannis_doukas",
@@ -1464,6 +1698,27 @@
       18,
       28,
       30
-    ]
+    ],
+    "appearance": {
+      "build": "Wiry and strong; forearms scarred from the knife",
+      "heightCm": 172,
+      "skinTone": "Olive, tanned",
+      "skinHex": "#B88C68",
+      "hair": "Black curly hair going grey, with a thick black moustache",
+      "hairHex": "#2A2522",
+      "face": "A lean face, hooded eyes, a nose broken in a 1960 strike",
+      "posture": "Arms crossed; leans over the cutting table",
+      "mannerisms": [
+        "runs his thumb against the nap of a pelt",
+        "calls Nick 'Niko' when he's being honest",
+        "taps the union card in his shirt pocket"
+      ],
+      "gait": "A short, steady stride",
+      "wardrobeByAct": {
+        "act1": "Offstage",
+        "act2": "White work smock dusted with fur, grey trousers, flat cap",
+        "act3": "Shirtsleeves and the flat cap for the march"
+      }
+    }
   }
 ]

@@ -20,6 +20,8 @@ ID_RE = re.compile(r"^char\.[a-z0-9_]+$")
 HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 ACTIVITIES = {"sleep", "home", "work", "eat", "drink", "errand", "socialize", "commute", "drive", "loiter"}
+APPEARANCE = ["build", "heightCm", "skinTone", "skinHex", "hair", "hairHex", "face", "posture",
+              "mannerisms", "gait", "wardrobeByAct"]
 TIER_LIMITS = {"lead": (3, 3), "principal": (8, 14), "secondary": (20, 40)}
 REQUIRED = ["id", "tier", "name", "age", "born", "origin", "occupation", "want", "need", "secret",
             "speech", "home", "haunts", "schedule", "edges", "arc", "visual", "missions"]
@@ -115,6 +117,24 @@ def validate(chars, places):
         for m in c["missions"]:
             if m not in MISSIONS:
                 errs.append(f"{cid}: mission {m} outside 1-32")
+        if c["tier"] in ("lead", "principal"):
+            ap = c.get("appearance")
+            if not ap:
+                errs.append(f"{cid}: leads and principals need an 'appearance' sheet")
+            else:
+                for k in APPEARANCE:
+                    if k not in ap:
+                        errs.append(f"{cid}: appearance missing '{k}'")
+                if not 140 <= ap.get("heightCm", 0) <= 205:
+                    errs.append(f"{cid}: implausible heightCm")
+                for k in ("skinHex", "hairHex"):
+                    if not HEX_RE.match(ap.get(k, "")):
+                        errs.append(f"{cid}: bad {k}")
+                for k in ("act1", "act2", "act3"):
+                    if k not in ap.get("wardrobeByAct", {}):
+                        errs.append(f"{cid}: wardrobeByAct missing {k}")
+                if len(ap.get("mannerisms", [])) < 3:
+                    errs.append(f"{cid}: needs at least 3 mannerisms")
         if not c["edges"]:
             warns.append(f"{cid}: no relationship edges")
     # every character should be connected to someone (in- or out-edge)
@@ -146,7 +166,10 @@ def render(chars, places):
     w("> **Generated file. Don't edit by hand.** The source of truth is `content/cast/*.json` (with")
     w("> `content/places.json`). Regenerate with `python3 narrative/tools/cast.py`, which also")
     w("> validates sample-line length (90 characters or fewer), 24-hour schedules, ids, places,")
-    w("> relationship edges and tier counts.")
+    w("> relationship edges, tier counts and appearance sheets (leads and principals).")
+    w(">")
+    w("> **Likeness rule:** appearance sheets describe invented people only. No face, body or styling is")
+    w("> modelled on a real person, actor or existing fictional character (see the Characters brief).")
     w("")
     tiers = [("lead", "Leads (playable)"), ("principal", "Principal characters"), ("secondary", "Secondary characters")]
     w("## Roster")
@@ -204,6 +227,14 @@ def render(chars, places):
             v = c["visual"]
             w(f"- **Visual:** palette {' '.join('`' + p + '`' for p in v['palette'])}. *Silhouette:* {v['silhouette']}")
             w(f"  *Wardrobe:* {v['wardrobe']} *Props:* {', '.join(v['props'])}.")
+            ap = c.get("appearance")
+            if ap:
+                w(f"- **Appearance:** {ap['heightCm']} cm; {ap['build']}. *Skin:* {ap['skinTone']} (`{ap['skinHex']}`). "
+                  f"*Hair:* {ap['hair']} (`{ap['hairHex']}`). *Face:* {ap['face']}.")
+                w(f"  *Posture:* {ap['posture']}. *Gait:* {ap['gait']}. *Mannerisms:* {'; '.join(ap['mannerisms'])}.")
+                w("- **Wardrobe by act:**")
+                for k, v in ap["wardrobeByAct"].items():
+                    w(f"  - *{k}:* {v}")
             w(f"- **Missions:** {', '.join(map(str, c['missions']))}")
     w("")
     return "\n".join(L)

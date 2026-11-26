@@ -70,3 +70,24 @@ against until it ships. The engine team owns all decisions here.
   pick the player spawn and wardrobe. In joint missions the other leads are
   companion NPCs. Money stays a single shared pot, and per-lead balances are tracked
   in flags for story purposes only.
+
+## 6. Region bounds must contain every story street (raised with the oversight session)
+- **What:** Expand the playable region so that no story street is an edge street. The
+  oversight session has asked the engine for about Ninth/Tenth Ave on the west and about
+  47th St on the north (see `docs/BOUNDARIES.md` on `claude/awesome-keller-i9tmmu`).
+- **Story locations at or past today's edges** (between Eighth and Ninth Aves; about 44th St):
+  - `loc.carriers_garage`, W 38th St & 9th Ave: Augie Lomax and Héctor Villalba;
+    missions 4, 14, 16, 20, 24, 30.
+  - Augie's after-work corner at 9th Ave & W 39th St.
+  - Delphine's whole turf: Eighth Ave from 34th to 42nd St and the 42nd St Deuce
+    (`loc.arden_hotel` at W 39th & 8th, `loc.bauer_arcade` at W 42nd & 8th,
+    `loc.eighth_ave_cafeteria` at 8th Ave & W 40th). Her escapes need blocks to the west.
+  - Penn South, Eighth to Ninth Aves, W 23rd–29th (`loc.penn_south`, Carmen's home).
+- **Needed by:** Delphine's solo missions (6, 8, 11, 13, 23, 31), every Garment District
+  trucking mission, and the Labor Day finale.
+- **Fallback until confirmed:** missions, tails and chases stay at least one block inside
+  the current edges. Outward chases end on a layer-2 roadblock or a layer-3 jam
+  (`content/boundaries.json`). If the expansion is refused, move `loc.carriers_garage` to
+  W 37th St between Seventh and Eighth Aves and re-route Delphine's escapes eastward.
+- **Status:** the user has confirmed the map is being expanded. Waiting on final bounds
+  from the oversight/engine sessions.

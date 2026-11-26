@@ -3,7 +3,10 @@
 > **Generated file. Don't edit by hand.** The source of truth is `content/cast/*.json` (with
 > `content/places.json`). Regenerate with `python3 narrative/tools/cast.py`, which also
 > validates sample-line length (90 characters or fewer), 24-hour schedules, ids, places,
-> relationship edges and tier counts.
+> relationship edges, tier counts and appearance sheets (leads and principals).
+>
+> **Likeness rule:** appearance sheets describe invented people only. No face, body or styling is
+> modelled on a real person, actor or existing fictional character (see the Characters brief).
 
 ## Roster
 
@@ -255,6 +258,13 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Learns the whole truth about 1971 and decides who gets the ledger (Branch B). Ends at the Flatiron prow, either leaving the car or becoming the man in the back seat.
 - **Visual:** palette `#3B3A36` `#C9B99A` `#7A5C3E` `#1F2A44`. *Silhouette:* Medium build gone slightly soft; slight stoop; hands in pockets; stands square like a cop when tense.
   *Wardrobe:* Pale khaki short-sleeve shirt over a ribbed undershirt, brown poly slacks, scuffed black cop oxfords he never replaced; navy zip windbreaker in rain; steel wristwatch. *Props:* heavy hotel key ring, folded evening paper, Saint Christopher medal, hack-stand change in a sock.
+- **Appearance:** 175 cm; Medium build going soft at the middle; strong forearms; slight stoop. *Skin:* Warm light brown with an olive undertone; sallow under fluorescent light; stubble shows by 3 a.m. (`#B98A67`). *Hair:* Black, thick, short and side-parted; first grey at the temples; clean-shaven by evening, shadowed by dawn (`#1C1814`). *Face:* Heavy brows, a nose broken once and badly set, tired eyes with deep lids, a small scar through the left eyebrow.
+  *Posture:* Leans on counters and walls; squares up like a cop when tense; keeps his back to a wall. *Gait:* Unhurried patrol pace; quick and economical when it counts. *Mannerisms:* jingles the hotel key ring when thinking; rubs his Saint Christopher medal through his shirt; checks the door every time someone enters; points directions with two fingers, the way a traffic cop does.
+- **Wardrobe by act:**
+  - *act1:* The desk: pale khaki short-sleeve shirt over an undershirt, brown poly slacks, scuffed black cop oxfords
+  - *act2:* The collector: a cheap tan sport coat bought to look like a businessman on collection runs, loosened brown tie, inside pockets sized for envelopes; navy windbreaker on wet nights
+  - *act3:* The witness: a white shirt Carmen pressed, dark trousers, no jacket, sleeves rolled; the navy windbreaker for the Labor Day night
+  - *epilogue:* Set by the ending: a borrowed suit (Testimony), the desk khakis (Ledger Goes Public) or a new grey suit that fits too well (New Pad)
 - **Missions:** 1, 2, 3, 4, 5, 7, 9, 10, 12, 14, 15, 18, 19, 21, 22, 25, 26, 28, 29, 32
 
 ### Delphine Moore  `char.delphine_moore`
@@ -284,6 +294,13 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Moves the club out of Wurtz's reach, confronts Lonnie and Tina's betrayal, and decides whether the photos become evidence, a weapon or a bargain. Gets the shop, or keeps the club, on her own terms.
 - **Visual:** palette `#6B1E2E` `#E8D7B0` `#C08A3E` `#1A1A1A`. *Silhouette:* Tall and straight-backed; long stride; short natural hair; bag held across the body.
   *Wardrobe:* Oxblood jersey wrap dress or slacks with a cream blouse; cream belted raincoat in wet weather; low block heels she can run in; a gold bracelet her mother gave her. Dignified street clothes, never costume. *Props:* instant camera in a deep shoulder bag, a small green notebook she never writes in (the real ledger is in her head), transit tokens, a folded street map of the Arden's back stairs, drawn by Marcus.
+- **Appearance:** 178 cm; Tall and long-limbed; a presser's strong shoulders and hands. *Skin:* Deep brown with a cool undertone (`#5A3825`). *Hair:* Short natural afro, cropped close; a silk scarf at dawn and in rain (`#141010`). *Face:* High cheekbones, wide-set watchful eyes, a small burn scar on the back of her right hand from a pressing iron; reading glasses she hides.
+  *Posture:* Upright, chin level; bag strap across her body; sits facing the door. *Gait:* A long, unbroken stride that eats blocks; she never runs unless she has to. *Mannerisms:* counts on her fingers under the table; taps the camera bag twice before a risk; turns her mother's gold bracelet when she's lying; gives rules by number, holding up fingers.
+- **Wardrobe by act:**
+  - *act1:* Oxblood jersey wrap dress, gold bracelet, low block heels she can run in
+  - *act2:* Practical for heat and flight: dark slacks, cream blouse, cream belted raincoat, flat sandals with a strap
+  - *act3:* The lease meeting: a camel pantsuit bought for one appointment, a cream shell, small gold earrings; changes into slacks and flats for the finale
+  - *epilogue:* Her own shop (if she got the lease): a white smock over a dark dress; otherwise the camel suit, re-worn
 - **Missions:** 6, 8, 9, 11, 12, 13, 17, 18, 22, 23, 26, 27, 28, 31, 32
 
 ### Nikos “Nick” Varelas  `char.nick_varelas`
@@ -314,6 +331,13 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Calloway offers him a deal (M24). Decides the Corwin's fate (M30): sell, keep, or sell it to the tenants as a co-op, like the union building where Carmen lives.
 - **Visual:** palette `#14213D` `#F2EEE3` `#8C8C8C` `#5C2A1E`. *Silhouette:* Short, barrel-chested, heavy shoulders; moves slowly, as if the room should wait for him.
   *Wardrobe:* Summer-weight midnight-blue suits, ivory shirts with a monogram, wide silk ties, cordovan loafers. Jacket off and sleeves rolled in the vault. Never wears fur in summer (and makes the joke every time). *Props:* amber worry beads, gold signet ring, car keys on a silver fob, long black sedan of an invented make.
+- **Appearance:** 168 cm; Short, barrel-chested, heavy shoulders, thickening waist; scarred, thick-fingered hands from nailing furs. *Skin:* Light olive, sun-weathered, ruddy at the neck when angry (`#C8A17E`). *Hair:* Thick iron-grey hair combed straight back with tonic; heavy dark eyebrows; clean-shaven (`#7A7570`). *Face:* Broad face, deep-set dark eyes, laugh lines that go hard when he stops smiling, a gold canine.
+  *Posture:* Chin up; stands in the middle of a room and lets people come to him; moves slowly. *Gait:* A slow, heavy, rolling walk; never hurries in public, and drives fast in private. *Mannerisms:* clicks amber worry beads; touches his signet ring before he lies; adjusts his cuffs before a negotiation; pats his pockets for car keys when nervous.
+- **Wardrobe by act:**
+  - *act1:* Not seen on screen (offstage)
+  - *act2:* Midnight-blue summer suits, monogrammed ivory shirts, wide silk ties, cordovan loafers; M15 in a dinner jacket with the bow tie pulled loose and sleeves rolled in the vault
+  - *act3:* The same suits, rumpled, tie gone by mid-act; a plain charcoal suit for the deal with Calloway and for the closing
+  - *epilogue:* October: a camel overcoat over the charcoal suit; a fur-collared coat only if he kept the firm
 - **Missions:** 15, 16, 17, 18, 20, 21, 22, 24, 27, 28, 30, 32
 
 ## Principal characters
@@ -344,6 +368,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* The resignation night panics him. In M25 he tells Teddy the truth in the same car, then either flips or runs.
 - **Visual:** palette `#4A4E3F` `#B5A88A` `#8E3B2E` `#2B2B2B`. *Silhouette:* Heavy, ruddy, hat pushed back; sport coat carried over the arm in the heat.
   *Wardrobe:* Short-sleeve dress shirts with sweat rings, a clip-on tie, a plaid sport coat, brown crepe-soled shoes. *Props:* toothpick, racing form folded to the late double, a station-house key he isn't supposed to have.
+- **Appearance:** 180 cm; Big and heavy, gone to fat over old muscle. *Skin:* Fair, flushed and ruddy, with broken veins on the nose (`#E2B59A`). *Hair:* Thinning sandy-grey hair combed over; pale eyebrows (`#A89A80`). *Face:* Fleshy and boyish, small blue eyes, a quick wet smile.
+  *Posture:* Leans in close; arm around shoulders; hat pushed back. *Gait:* A heavy, sweating amble. *Mannerisms:* chews a toothpick; mops his neck with a handkerchief; calls everyone 'kid'; pats his breast pocket where envelopes used to go.
+- **Wardrobe by act:**
+  - *act1:* Short-sleeve dress shirt with sweat rings, clip-on tie, plaid sport coat over his arm
+  - *act2:* Same, more rumpled; a straw hat
+  - *act3:* Shirt untucked and tie gone; the sport coat left in the car (M25)
 - **Missions:** 1, 7, 9, 10, 14, 21, 22, 25, 29, 32
 
 ### Howard Lisle  `char.howard_lisle`
@@ -372,6 +402,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Moves to close the syndicate before Labor Day: plea deals, the arson plan, a bid for Mayhew's silence. His fate follows Branch B.
 - **Visual:** palette `#6E7B8B` `#EDEBE4` `#3A2E2A` `#9B8E6E`. *Silhouette:* Tall, thin and narrow-shouldered; walks with his hands behind his back; never hurries.
   *Wardrobe:* Dove-grey tropical-weight suits, starched white shirts, regimental tie, horn-rimmed glasses, polished black wingtips. *Props:* fountain pen, slim calfskin briefcase, the morning paper folded to the bond tables.
+- **Appearance:** 188 cm; Tall, thin and narrow-shouldered. *Skin:* Pale and indoor, never sunburnt (`#E8CDB5`). *Hair:* Silver hair, neatly parted, barbered every Friday (`#BDBDBD`). *Face:* Long face, thin lips, horn-rimmed glasses, grey eyes that don't blink much.
+  *Posture:* Upright, hands clasped behind his back; listens with his head tilted. *Gait:* An even, measured stride; never hurries. *Mannerisms:* uncaps and recaps his fountain pen; folds his newspaper into exact quarters; never touches money with his hands.
+- **Wardrobe by act:**
+  - *act1:* Dove-grey tropical-weight suit, starched white shirt, regimental tie, black wingtips
+  - *act2:* The same in a lighter grey; a summer straw fedora outdoors
+  - *act3:* Navy suit for appearances; the final night, his jacket off for the first time in the game
 - **Missions:** 5, 16, 20, 21, 22, 24, 29, 30, 32
 
 ### Lt. Dennis Wurtz  `char.dennis_wurtz`
@@ -400,6 +436,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Cleans house after the resignation: burns informants and hunts the photo file. His locker is the endgame lever (M27).
 - **Visual:** palette `#7F1D1D` `#D9C9A3` `#F5F5F5` `#222222`. *Silhouette:* Big and thick-necked with a crew cut; leans on things; takes up doorways.
   *Wardrobe:* Short-sleeve knit polo, maroon windbreaker, grey slacks, white sneakers (the plainclothes giveaway), a thin gold chain. *Props:* roll of mints, a manila folder of photographs, keys to an unmarked green sedan.
+- **Appearance:** 185 cm; Big and thick-necked; a sailor's forearms gone soft. *Skin:* Fair skin tanned red-brown from his boat (`#D9A483`). *Hair:* Sandy crew cut going grey (`#B9A27A`). *Face:* Square jaw, small eyes, a crooked grin; a faded Navy tattoo on his forearm (anchor, no lettering).
+  *Posture:* Leans on cars and doorframes, filling them. *Gait:* A swaggering roll. *Mannerisms:* crunches mints; talks about his diet; flicks through photographs like playing cards.
+- **Wardrobe by act:**
+  - *act1:* Knit polo, grey slacks, white sneakers
+  - *act2:* Maroon windbreaker over the polo; gold chain
+  - *act3:* A suit for the inquiry he expects, worn badly
 - **Missions:** 8, 11, 13, 18, 22, 23, 26, 27, 32
 
 ### Ruth Calloway  `char.ruth_calloway`
@@ -428,6 +470,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Offers Nick a deal. Her deadline makes her reckless. Her ending depends on who gets the ledger.
 - **Visual:** palette `#2F4F4F` `#F5F5DC` `#8B4513` `#111111`. *Silhouette:* Medium height, quick walk, arms full of files; glasses pushed up into her hair.
   *Wardrobe:* Belted shirtwaist dresses or a dark pantsuit, flat shoes, a tan raincoat in any weather. *Props:* accordion file, a pocket tape recorder, a dented thermos.
+- **Appearance:** 165 cm; Medium height, slim, quick. *Skin:* Medium brown with a warm undertone (`#8D5A3B`). *Hair:* Pressed hair pinned back for court; a natural afro on weekends, never seen at work (`#1A1412`). *Face:* Oval face, sharp brows, wire-rimmed glasses pushed up into her hair.
+  *Posture:* Leans forward over tables; papers always in her arms. *Gait:* A brisk walk; takes stairs two at a time. *Mannerisms:* clicks her pen while thinking; asks questions she knows the answers to; checks her watch when she mentions September.
+- **Wardrobe by act:**
+  - *act1:* Seen only in parked cars: tan raincoat
+  - *act2:* Belted shirtwaist dresses, flat shoes, tan raincoat
+  - *act3:* A dark pantsuit; by the end, the raincoat in the heat because she slept in her office
 - **Missions:** 12, 21, 22, 24, 28, 29, 32
 
 ### August “Augie” Lomax  `char.augie_lomax`
@@ -456,6 +504,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Squeezed to flip. Hector betrays him first. A last morning in the booth.
 - **Visual:** palette `#556B2F` `#A0522D` `#DCDCDC` `#333333`. *Silhouette:* Squat, bald under a flat cap, rolling walk; jaw always working a cigar.
   *Wardrobe:* Green work shirt with a name patch, suspenders, grey work trousers, steel-toe boots. *Props:* clipboard of route sheets, dispatch radio handset, unlit cigar.
+- **Appearance:** 165 cm; Squat and broad, with a belly; a trucker's shoulders. *Skin:* Pale, weathered, with a sun-browned neck and forearms; greyish by Act 3 as the illness shows (`#D8B596`). *Hair:* Bald with a grey fringe under a flat cap (`#8E8E8E`). *Face:* A heavy jaw always working a cigar, a pushed-in nose, bright suspicious eyes.
+  *Posture:* Hands on his hips at the dispatch window. *Gait:* A rolling, bow-legged stride. *Mannerisms:* chews his cigar instead of smoking it; speaks into the radio handset even when he could shout; counts trucks under his breath.
+- **Wardrobe by act:**
+  - *act1:* Green work shirt with name patch, suspenders, work trousers, steel-toe boots
+  - *act2:* Same; a cardigan in the cold of the garage at dawn
+  - *act3:* His good suit, bought for his wife's funeral, worn for the sale
 - **Missions:** 4, 14, 16, 20, 24, 30
 
 ### Carmen Arce  `char.carmen_arce`
@@ -484,6 +538,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Brings the garment operators to the march, and tells Teddy what she knew.
 - **Visual:** palette `#2E5E4E` `#F0E6D2` `#B22222` `#5A4A42`. *Silhouette:* Small and quick, forward-leaning; glasses on a chain.
   *Wardrobe:* Print shirtwaist dress, a cardigan in any weather, union pin, sensible black shoes. *Props:* wrist pincushion, rosary, folding shopping cart.
+- **Appearance:** 152 cm; Small and quick, slightly round-shouldered from forty years at a machine. *Skin:* Warm light brown (`#B88563`). *Hair:* Grey hair in a weekly set, held with bobby pins (`#A7A39E`). *Face:* Round face, glasses on a chain, a laughing mouth and sharp eyes.
+  *Posture:* Leans forward with hands busy. *Gait:* Short, rapid steps. *Mannerisms:* feeds people instead of answering; crosses herself at bad news; straightens Teddy's collar; jabs the air with a finger to make union points.
+- **Wardrobe by act:**
+  - *act1:* Print shirtwaist dress, cardigan, union pin
+  - *act2:* Work smock over the dress, pincushion on her wrist
+  - *act3:* Her church dress and the union pin for the march
 - **Missions:** 2, 7, 19, 25, 28
 
 ### Odessa Pruitt  `char.odessa_pruitt`
@@ -512,6 +572,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Leads the march (M28). Meets Nick face to face (M30).
 - **Visual:** palette `#4B0082` `#FFF8DC` `#708090` `#C0A060`. *Silhouette:* Tall and slight, walks with a cane, never stoops.
   *Wardrobe:* Print dresses, a church hat for any official business, white cotton gloves, a cameo brooch. *Props:* folding chair, tin of peppermints, Bible with notices pressed inside.
+- **Appearance:** 175 cm; Tall and slight; walks with a cane. *Skin:* Deep brown with a warm undertone (`#4E3022`). *Hair:* White hair in a neat bun, nearly always under a hat (`#EDEDED`). *Face:* Fine-boned, with deep lines from laughing and from not laughing; spectacles for reading only.
+  *Posture:* Never stoops, and sits upright on a folding chair as if it were a throne. *Gait:* A slow, deliberate walk with the cane. *Mannerisms:* taps her cane once for order; offers peppermints before bad news; addresses everyone by title and surname.
+- **Wardrobe by act:**
+  - *act1:* Print dresses, a cameo brooch
+  - *act2:* A black dress and hat after Hollis's death (M19)
+  - *act3:* A white church hat and white gloves for the march
 - **Missions:** 2, 19, 26, 28, 30
 
 ### Ray Bauer  `char.ray_bauer`
@@ -539,6 +605,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Exposed after the resignation night. Whether he lives depends on what the leads do in M27.
 - **Visual:** palette `#FF8C00` `#2F2F2F` `#E0E0E0` `#6A5ACD`. *Silhouette:* Thin and restless; greying pompadour; never fully still.
   *Wardrobe:* Orange print shirts, a white belt, tinted glasses, two-tone loafers. *Props:* coin-changer belt, huge key ring, transistor radio tuned to the races.
+- **Appearance:** 175 cm; Thin and wiry; never still. *Skin:* Olive and tanned (`#C9A27C`). *Hair:* A greying pompadour dyed too black, with grey roots showing (`#151515`). *Face:* A narrow face, tinted glasses, a quick nervous grin with a gold tooth.
+  *Posture:* Bounces on his heels; hands always moving. *Gait:* Quick, jittery steps. *Mannerisms:* jingles coins in his changer belt; laughs before he speaks; never finishes a threat.
+- **Wardrobe by act:**
+  - *act1:* Orange print shirt, white belt, two-tone loafers
+  - *act2:* Same, sweat-stained
+  - *act3:* A brand-new beige leisure suit for 'going legit', with the price tag still on the sleeve
 - **Missions:** 8, 11, 13, 22, 27
 
 ### Eleni Varelas  `char.eleni_varelas`
@@ -565,6 +637,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Gives Nick an ultimatum. She stays or leaves depending on what he does with the Corwin.
 - **Visual:** palette `#000080` `#C0C0C0` `#F5F5F5` `#2B2B2B`. *Silhouette:* Elegant and still; sits upright; reading glasses on a chain.
   *Wardrobe:* Tailored navy sheath dresses, pearl earrings, low heels. *Props:* adding-machine tape, pencil behind her ear, ledgers in green cloth.
+- **Appearance:** 163 cm; Slender, very still. *Skin:* Fair olive (`#D2B190`). *Hair:* Dark hair with a grey streak, in a low chignon (`#2B2421`). *Face:* Fine features, reading glasses on a chain, a mouth that doesn't give much away.
+  *Posture:* Sits upright with her hands folded over the ledger. *Gait:* A quiet, measured walk. *Mannerisms:* runs adding-machine tape through her fingers; says 'Nikos' instead of 'Nick' when angry; takes her glasses off to deliver bad news.
+- **Wardrobe by act:**
+  - *act1:* Offstage
+  - *act2:* Tailored navy sheath dresses, pearl earrings
+  - *act3:* A grey travelling suit, packed for leaving or for staying
 - **Missions:** 16, 18, 20, 30
 
 ### Baek Jung-ho (“Mr. Baek”)  `char.jung_ho_baek`
@@ -592,6 +670,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Brings the merchants to the march. Owns his building or loses it.
 - **Visual:** palette `#36454F` `#FFFFFF` `#B8860B` `#4A4A4A`. *Silhouette:* Slight and neat; very still when listening.
   *Wardrobe:* White short-sleeve shirt, dark slacks, a cardigan even in July, black-framed glasses. *Props:* pocket electronic calculator (new and expensive in 1974, his pride), receipt book, wig stands in the window.
+- **Appearance:** 170 cm; Slight and neat. *Skin:* Light with a warm undertone (`#D8B48E`). *Hair:* Black hair, short and side-parted (`#121212`). *Face:* Black-framed glasses, a calm face that rarely shows surprise.
+  *Posture:* Very still when listening, with his hands behind the counter. *Gait:* Brisk and neat. *Mannerisms:* checks every figure on his pocket calculator; answers a question with a question; bows slightly to customers and not at all to collectors.
+- **Wardrobe by act:**
+  - *act1:* White short-sleeve shirt, dark slacks, cardigan
+  - *act2:* Same; a tie for the meeting with Nick
+  - *act3:* A dark suit for signing (or not signing) the deed
 - **Missions:** 4, 10, 16, 28, 30
 
 ### Tina Mercado  `char.tina_mercado`
@@ -620,6 +704,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Confesses (M23). Either chooses Delphine over Lonnie in M27, or runs. She survives in every ending.
 - **Visual:** palette `#FF69B4` `#FFD700` `#1E90FF` `#000000`. *Silhouette:* Small, quick and animated; high ponytail; big gold hoops.
   *Wardrobe:* Bright pink wrap top, denim flares, platform sandals, a denim jacket at dawn. *Props:* hairbrush in her purse, pocket radio, a magazine clipping of hairstyles.
+- **Appearance:** 155 cm; Petite and quick. *Skin:* Light tan with a warm undertone (`#C99A72`). *Hair:* Long dark-brown hair in a high ponytail (`#3A2418`). *Face:* A round, animated face, big gold hoops, a bruise under makeup that she won't explain (Act 1).
+  *Posture:* Always moving; sits on counters. *Gait:* Quick, bouncy steps in platform sandals. *Mannerisms:* sings under her breath; nicknames everyone; brushes her hair when she's nervous; goes dead still when she's serious.
+- **Wardrobe by act:**
+  - *act1:* Bright pink wrap top, denim flares, platform sandals
+  - *act2:* A denim jacket over the same; hair down when she's hiding something
+  - *act3:* A plain black dress for the confession (M23); a beautician's smock in the finale if she chose Delphine
 - **Missions:** 6, 9, 11, 13, 23, 27, 31
 
 ### Yiannis Doukas  `char.yiannis_doukas`
@@ -647,6 +737,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - *Act 3:* Takes the crew to the march, or to Kallis.
 - **Visual:** palette `#8B7D6B` `#FFFFFF` `#2F4F4F` `#A9A9A9`. *Silhouette:* Wiry; forearms scarred from the knife; flat cap.
   *Wardrobe:* White work smock dusted with fur, grey trousers, rubber-soled shoes. *Props:* furrier's knife (a work tool, never used as a weapon), flat carpenter's pencil, union card.
+- **Appearance:** 172 cm; Wiry and strong; forearms scarred from the knife. *Skin:* Olive, tanned (`#B88C68`). *Hair:* Black curly hair going grey, with a thick black moustache (`#2A2522`). *Face:* A lean face, hooded eyes, a nose broken in a 1960 strike.
+  *Posture:* Arms crossed; leans over the cutting table. *Gait:* A short, steady stride. *Mannerisms:* runs his thumb against the nap of a pelt; calls Nick 'Niko' when he's being honest; taps the union card in his shirt pocket.
+- **Wardrobe by act:**
+  - *act1:* Offstage
+  - *act2:* White work smock dusted with fur, grey trousers, flat cap
+  - *act3:* Shirtsleeves and the flat cap for the march
 - **Missions:** 15, 18, 28, 30
 
 ## Secondary characters
