@@ -26,7 +26,7 @@ async function main() {
   if (q.get('touch') === '1') { input.isTouch = true; document.body.classList.add('touch'); }
   if (q.get('pad') === '1') (input as unknown as { activeDevice: string }).activeDevice = 'xbox';
   const st = document.createElement('style'); st.textContent = PROMPT_CSS; document.head.appendChild(st);
-  const host = new MockHost(input, streets, base);
+  const host = new MockHost(input, streets, base, world.heroes);
   const heat = q.get('heat'); if (heat) host.heatPhase = heat as HeatView['phase'];
   // mock player starts at the Flatiron prow facing up Broadway
   host.pos = { x: Number(q.get('x') ?? 4), z: Number(q.get('z') ?? -52), yaw: Number(q.get('yaw') ?? 0.21) };

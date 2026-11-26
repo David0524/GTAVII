@@ -5,7 +5,8 @@
  * Pure functions over StreetRec[] so the build tool and the runtime share them.
  * World frame (src/shared/geo.ts): grid-aligned, north = -z, west = -x.
  */
-export interface StreetRec { n: string; c: string; w: number; o: number; p: number[] }
+import type { StreetRec } from '../../shared/uiHost';
+export type { StreetRec };
 
 const ORD: Record<string, string> = { '1': 'st', '2': 'nd', '3': 'rd' };
 function ordinal(n: number) { const t = n % 100; return `${n}${t >= 11 && t <= 13 ? 'th' : ORD[String(n % 10)] ?? 'th'}`; }

@@ -66,7 +66,7 @@ export class MockHost implements UiHost {
   obj: ObjectiveView | null = { text: 'Walk up Broadway with Mayhew', target: { x: 18, z: -240, label: 'Broadway & W 26 St' }, mission: 'Dusk on Broadway' };
   owned = new Set<string>(['biz.laundromat']);
 
-  constructor(readonly input: Input, readonly streets: StreetRec[], readonly baseUrl = '/') {}
+  constructor(readonly input: Input, readonly streets: StreetRec[], readonly baseUrl = '/', readonly heroes: { name: string; x: number; z: number }[] = []) {}
 
   on<K extends keyof UiEvents>(k: K, cb: (e: UiEvents[K]) => void) { return this.ev.on(k, cb); }
   emit<K extends keyof UiEvents>(k: K, e: UiEvents[K]) { this.ev.emit(k, e); }

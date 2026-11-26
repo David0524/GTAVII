@@ -16,7 +16,9 @@ import { settings } from '../settings/Settings';
 
 export type ButtonAction =
   | 'rise' | 'sink' | 'sprint' | 'jump' | 'use' | 'photo' | 'map' | 'hud' | 'pause'
-  | 'confirm' | 'back' | 'navUp' | 'navDown' | 'navLeft' | 'navRight' | 'tabPrev' | 'tabNext';
+  | 'confirm' | 'back' | 'navUp' | 'navDown' | 'navLeft' | 'navRight' | 'tabPrev' | 'tabNext'
+  // UI stream (ENGINE_RESPONSES ui 3): pockets, weapon selector, cutscene skip (hold), map waypoint
+  | 'inventory' | 'weaponSelect' | 'skip' | 'waypoint';
 export type Device = 'kbm' | 'touch' | PadFamily;
 
 const KEYMAP: Record<string, ButtonAction> = {
@@ -24,14 +26,42 @@ const KEYMAP: Record<string, ButtonAction> = {
   KeyF: 'use', KeyP: 'photo', KeyM: 'map', F3: 'hud', Backquote: 'hud', Escape: 'pause',
   Enter: 'confirm', Backspace: 'back', ArrowUp: 'navUp', ArrowDown: 'navDown', ArrowLeft: 'navLeft', ArrowRight: 'navRight',
   BracketLeft: 'tabPrev', BracketRight: 'tabNext',
+  KeyI: 'inventory', Tab: 'weaponSelect', KeyX: 'waypoint',
 };
+/** Keys that also trigger a second action (a key may serve gameplay and a context like cutscenes). */
+const KEY_EXTRA: Record<string, ButtonAction[]> = { Space: ['skip'], Enter: ['skip'] };
+
+/** Default keyboard binding per action (derived from KEYMAP; the settings screen shows and edits these). */
+export const DEFAULT_KEYS: Partial<Record<ButtonAction, string[]>> = {};
+for (const [code, a] of Object.entries(KEYMAP)) (DEFAULT_KEYS[a] ??= []).push(code);
+for (const [code, as] of Object.entries(KEY_EXTRA)) for (const a of as) (DEFAULT_KEYS[a] ??= []).push(code);
+/** Actions the player may rebind (menu navigation stays fixed so a bad binding can always be undone). */
+export const REBINDABLE: ButtonAction[] = ['sprint', 'jump', 'use', 'photo', 'map', 'pause', 'inventory', 'weaponSelect', 'waypoint', 'skip', 'rise', 'sink', 'hud'];
+
+/** Effective code -> actions map: defaults, with any action the player rebound taking only its new keys. */
+function buildKeymap(bindings: Record<string, { keys: string[]; pad: number[] }>): Map<string, ButtonAction[]> {
+  const m = new Map<string, ButtonAction[]>();
+  for (const [a, codes] of Object.entries(DEFAULT_KEYS) as [ButtonAction, string[]][]) {
+    const b = bindings[a];
+    for (const code of b && b.keys.length ? b.keys : codes) { const l = m.get(code) ?? []; if (!l.includes(a)) l.push(a); m.set(code, l); }
+  }
+  return m;
+}
 
 /** Gamepad button -> actions per preset (docs/CONTROLS.md). A button may serve gameplay and menus;
  *  context decides which action is read. Menu navigation is identical across presets. */
 const MENU_PAD: [Btn, ButtonAction][] = [
   [Btn.A, 'confirm'], [Btn.B, 'back'], [Btn.Up, 'navUp'], [Btn.Down, 'navDown'], [Btn.Left, 'navLeft'], [Btn.Right, 'navRight'],
   [Btn.LB, 'tabPrev'], [Btn.RB, 'tabNext'], [Btn.Menu, 'pause'], [Btn.View, 'map'], [Btn.Up, 'hud'],
+  [Btn.Down, 'inventory'], [Btn.LB, 'weaponSelect'], [Btn.A, 'skip'], [Btn.X, 'waypoint'],
 ];
+
+/** Preset bundle with the player's per-action pad overrides applied (an overridden action keeps only its new buttons). */
+function padMap(preset: [Btn, ButtonAction][], bindings: Record<string, { keys: string[]; pad: number[] }>): [Btn, ButtonAction][] {
+  const out = preset.filter(([, a]) => !(bindings[a]?.pad.length));
+  for (const [a, b] of Object.entries(bindings)) for (const btn of b.pad) out.push([btn as Btn, a as ButtonAction]);
+  return out;
+}
 export const PAD_PRESETS: Record<'standard' | 'classic' | 'lefthanded', [Btn, ButtonAction][]> = {
   standard: [[Btn.L3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], ...MENU_PAD],
   classic: [[Btn.A, 'sprint'], [Btn.X, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], ...MENU_PAD],
@@ -57,13 +87,17 @@ export class Input {
   readonly touchHeld = new Set<ButtonAction>();
   isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   wheel = 0;
+  private keymap = buildKeymap(settings.get('bindings'));
+  private padmap: [Btn, ButtonAction][] = [];
+  private padPreset = '';
 
   constructor(private dom: HTMLElement) {
     this.activeDevice = this.isTouch ? 'touch' : 'kbm';
+    settings.subscribe((_s, k) => { if (k === 'bindings') { this.keymap = buildKeymap(settings.get('bindings')); this.padPreset = ''; } if (k === 'controlPreset') this.padPreset = ''; });
     window.addEventListener('keydown', (e) => {
-      if (!this.keys.has(e.code)) { const a = KEYMAP[e.code]; if (a) this.edges.add(a); }
+      if (!this.keys.has(e.code)) for (const a of this.keymap.get(e.code) ?? []) this.edges.add(a);
       this.keys.add(e.code);
-      if (e.code === 'F3' || e.code === 'Escape') e.preventDefault();
+      if (e.code === 'F3' || e.code === 'Escape' || e.code === 'Tab') e.preventDefault();
       this.setDevice('kbm');
     });
     window.addEventListener('keyup', (e) => this.keys.delete(e.code));
@@ -123,9 +157,10 @@ export class Input {
     }
 
     this.held.clear();
-    for (const [code, a] of Object.entries(KEYMAP)) if (k.has(code)) this.held.add(a);
+    for (const code of k) for (const a of this.keymap.get(code) ?? []) this.held.add(a);
     for (const a of this.touchHeld) this.held.add(a);
-    for (const [b, a] of PAD_PRESETS[s.controlPreset] ?? PAD_PRESETS.standard) { if (this.pad.down(b)) this.held.add(a); if (this.pad.pressed(b)) this.edges.add(a); }
+    if (this.padPreset !== s.controlPreset) { this.padPreset = s.controlPreset; this.padmap = padMap(PAD_PRESETS[s.controlPreset] ?? PAD_PRESETS.standard, s.bindings); }
+    for (const [b, a] of this.padmap) { if (this.pad.down(b)) this.held.add(a); if (this.pad.pressed(b)) this.edges.add(a); }
 
     const kv = (this.held.has('rise') || this.held.has('jump') ? 1 : 0) - (this.held.has('sink') ? 1 : 0);
     this.vertical = Math.max(-1, Math.min(1, kv + this.pad.rt - this.pad.lt));

@@ -99,7 +99,7 @@ stations.forEach((st, si) => {
 // ------------------------------------------------------------ 3. generated everyday places (placeholders)
 function blockFace(): { x: number; z: number; addr: string } | null {
   for (let tries = 0; tries < 40; tries++) {
-    const n = 19 + Math.floor(rnd() * 29); // W/E 19th..47th
+    const n = 21 + Math.floor(rnd() * 23); // W/E 21st..43rd (story-core bounds)
     const ai = Math.floor(rnd() * (AVES.length - 1));
     const a0 = AVES[ai], a1 = AVES[ai + 1];
     const westSide = ai < 5;
@@ -117,7 +117,7 @@ function blockFace(): { x: number; z: number; addr: string } | null {
 }
 function corner(avenueOnly = true): { x: number; z: number; addr: string } | null {
   for (let tries = 0; tries < 40; tries++) {
-    const n = 19 + Math.floor(rnd() * 29);
+    const n = 21 + Math.floor(rnd() * 23);
     const ave = pick(AVES);
     const west = AVES.indexOf(ave) < 6;
     const st = `${west ? 'W' : 'E'} ${n}th St`;
@@ -164,8 +164,8 @@ const GEN: Gen[] = [
     blurb: ['Someone who might need a hand. Or might be trouble.'] },
   { cat: 'hospital', n: 1, where: 'face', reveal: ['sight', 'tip', 'mission'], sightM: 60,
     names: ['Hospital (name pending, narrative)'], blurb: ['Emergency room. You wake up here when it goes wrong.'] },
-  { cat: 'payphone', n: 40, where: 'corner', reveal: ['sight'], sightM: 22, names: ['Payphone'], blurb: ['10¢ a call. Contacts and jobs ring through here.'] },
-  { cat: 'callbox', n: 26, where: 'corner', reveal: ['sight'], sightM: 22, names: ['Police call box'], blurb: ['Red post with a handset. Witnesses run to these to report you.'] },
+  { cat: 'payphone', n: 32, where: 'corner', reveal: ['sight'], sightM: 22, names: ['Payphone'], blurb: ['10¢ a call. Contacts and jobs ring through here.'] },
+  { cat: 'callbox', n: 16, where: 'corner', reveal: ['sight'], sightM: 22, names: ['Police call box'], blurb: ['Red post with a handset. Witnesses run to these to report you.'] },
 ];
 for (const g of GEN) {
   for (let k = 0; k < g.n; k++) {

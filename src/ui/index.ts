@@ -16,6 +16,8 @@ import { Business } from './screens/Business';
 import { Record as RecordTab } from './screens/Record';
 import { ShopCounter, LeadPicker, WeaponSelect, Choices } from './screens/Overlays';
 import { Modal } from './screens/Modal';
+import { SettingsTab } from './screens/SettingsTab';
+import { SavesTab, CreditsTab } from './screens/FrontTabs';
 
 export interface UiOptions { model: MapModel; heroes: { name: string; x: number; z: number }[]; lab?: boolean }
 
@@ -50,6 +52,9 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const paper = new Newspaper(host, o.model); paper.onToast = toast; hub.add(paper);
   const business = new Business(host); business.onToast = toast; hub.add(business);
   hub.add(new RecordTab(host, o.model));
+  const savesTab = new SavesTab(host.saves); savesTab.onToast = toast; hub.add(savesTab);
+  const settingsTab = new SettingsTab(host.input); settingsTab.onToast = toast; hub.add(settingsTab);
+  const creditsTab = new CreditsTab(host.baseUrl); hub.add(creditsTab);
   const shop = new ShopCounter(host.input, host);
   const leads = new LeadPicker(host.input, host);
   const weapons = new WeaponSelect(host.input, host);
