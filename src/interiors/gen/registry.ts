@@ -3,6 +3,7 @@ import type { GenCtx } from './common';
 import { genDiner, genBar, genDeli } from './food';
 import * as R from './retail';
 import { genTenement, genLoft, genApartmentLobby } from './vertical';
+import * as Hl from './halls';
 
 export type Generator = (c: GenCtx) => void;
 export const genGenericShop = R.genGenericShop;
@@ -29,4 +30,12 @@ export const GENERATORS: Record<string, Generator> = {
   sro: (c) => genTenement(c, true),
   loft: genLoft,
   apartment_lobby: genApartmentLobby,
+  office_lobby: Hl.genOfficeLobby,
+  hotel_lobby: Hl.genHotelLobby,
+  garage: Hl.genGarage,
+  church: Hl.genChurch,
+  union_hall: Hl.genUnionHall,
+  cinema_lobby: Hl.genCinemaLobby,
+  pool_hall: (c) => Hl.genUpstairs(c, 'pool_hall'),
+  gym: (c) => Hl.genUpstairs(c, 'gym'),
 };

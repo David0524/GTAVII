@@ -40,15 +40,26 @@ async function shot(page: Page, q: string, file: string, settle = 600) {
 async function main() {
   const [mode, a, b] = args;
   if (mode === 'gallery') {
+    // one page load per kind; interiors are swapped in-page (__INT.show)
+    const kinds = a === 'all' ? ['diner', 'coffee_shop', 'bar', 'deli', 'bodega', 'liquor', 'barber', 'beauty', 'pawn', 'laundromat', 'shoe_repair', 'tailor', 'newsstand', 'clothing', 'hardware', 'florist', 'garment_showroom', 'fur_showroom', 'pool_hall', 'gym', 'cinema_lobby', 'tenement', 'sro', 'apartment_lobby', 'office_lobby', 'hotel_lobby', 'loft', 'garage', 'church', 'union_hall'] : a.split(',');
     const [lo, hi] = (b ?? '0-29').split('-').map(Number);
+    const view = opt('view', 'door');
     await withPage(async (page) => {
-      const meta: unknown[] = [];
-      for (let n = lo; n <= (hi ?? lo); n++) {
-        const file = path.join(ROOT, `shots/interiors/gallery/${a}/${String(n).padStart(2, '0')}.png`);
-        const r = await shot(page, `gallery=${a}&n=${n}`, file, 300);
-        console.log(a, n, r.label?.split('\n')[0]); meta.push({ n, ...r });
+      for (const kind of kinds) {
+        await page.goto(url(`gallery=${kind}&n=${lo}&view=${view}`));
+        await page.waitForFunction(() => (window as any).__INT?.ready, null, { timeout: 180_000 });
+        const meta: unknown[] = [];
+        for (let n = lo; n <= (hi ?? lo); n++) {
+          const r = await page.evaluate(([k, i, v]) => (window as any).__INT.show(k, i, v), [kind, n, view] as [string, number, string]);
+          await page.waitForTimeout(250);
+          const file = path.join(ROOT, `shots/interiors/gallery/${kind}/${view === 'door' ? '' : view + '_'}${String(n).padStart(2, '0')}.png`);
+          fs.mkdirSync(path.dirname(file), { recursive: true });
+          await page.screenshot({ path: file });
+          meta.push({ n, ...(r as object) });
+        }
+        fs.writeFileSync(path.join(ROOT, `shots/interiors/gallery/${kind}/meta${view === 'door' ? '' : '_' + view}.json`), JSON.stringify(meta, null, 1));
+        console.log(kind, 'done', meta.length);
       }
-      fs.writeFileSync(path.join(ROOT, `shots/interiors/gallery/${a}/meta.json`), JSON.stringify(meta, null, 1));
     });
   } else if (mode === 'url') {
     await withPage(async (page) => { const r = await shot(page, a, path.resolve(ROOT, b)); console.log(r); });
