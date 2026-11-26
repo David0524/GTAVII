@@ -81,6 +81,7 @@ async function main() {
   };
   (window as unknown as { __T74: typeof debug }).__T74 = debug;
   document.getElementById('loading')?.remove();
+  if (params.get('sim') === '1') import('./sim/debug/SimDebugView').then((m) => m.attachSimDebug(scene, camera));
 
   renderer.setAnimationLoop((t) => {
     clock.update(t);

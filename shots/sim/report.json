@@ -1,0 +1,144 @@
+{
+  "note": "Headless SwiftShader in a CPU-only container; frame times are the software rasteriser, sim update ms are real JS time on this CPU.",
+  "quality": "high",
+  "report": [
+    {
+      "view": "01_herald_square",
+      "cam": "-250,42,-909,75.43,-22.12",
+      "simTime": 5.6999999999999895,
+      "vehicles": 135,
+      "peds": 106,
+      "updateMsAvg": 2.7719298245940815,
+      "updateMsP95": 5.600000000093132,
+      "frameMs": 98.43859649122807,
+      "stats": {
+        "redLight": 0,
+        "wrongWay": 0,
+        "vehCollisions": 0,
+        "pedHits": 0,
+        "spawnedV": 136,
+        "despawnedV": 1,
+        "spawnedP": 106,
+        "despawnedP": 0,
+        "stuckDespawn": 0,
+        "honks": 4,
+        "hails": 0,
+        "boardings": 0,
+        "dropoffs": 0,
+        "busStops": 0,
+        "doubleParks": 0,
+        "jaywalks": 0,
+        "crossings": 1,
+        "laneChanges": 63
+      },
+      "events": {
+        "honk": 4
+      }
+    },
+    {
+      "view": "02_flatiron_spawn",
+      "cam": "-19,30,95,-8.32,-12.86",
+      "simTime": 4.499999999999994,
+      "vehicles": 122,
+      "peds": 246,
+      "updateMsAvg": 3.1695652173872553,
+      "updateMsP95": 8,
+      "frameMs": 98.10000000091699,
+      "stats": {
+        "redLight": 0,
+        "wrongWay": 0,
+        "vehCollisions": 0,
+        "pedHits": 0,
+        "spawnedV": 122,
+        "despawnedV": 0,
+        "spawnedP": 247,
+        "despawnedP": 1,
+        "stuckDespawn": 0,
+        "honks": 1,
+        "hails": 0,
+        "boardings": 0,
+        "dropoffs": 0,
+        "busStops": 0,
+        "doubleParks": 0,
+        "jaywalks": 0,
+        "crossings": 0,
+        "laneChanges": 32
+      },
+      "events": {
+        "honk": 1
+      }
+    },
+    {
+      "view": "03_42nd_and_7th",
+      "cam": "-605,34,-1455,-3.01,-19.67",
+      "simTime": 5.59999999999999,
+      "vehicles": 124,
+      "peds": 218,
+      "updateMsAvg": 3.384210526387681,
+      "updateMsP95": 7.600000000093132,
+      "frameMs": 98.47166666984558,
+      "stats": {
+        "redLight": 0,
+        "wrongWay": 0,
+        "vehCollisions": 0,
+        "pedHits": 0,
+        "spawnedV": 128,
+        "despawnedV": 4,
+        "spawnedP": 218,
+        "despawnedP": 0,
+        "stuckDespawn": 0,
+        "honks": 3,
+        "hails": 0,
+        "boardings": 0,
+        "dropoffs": 0,
+        "busStops": 0,
+        "doubleParks": 0,
+        "jaywalks": 0,
+        "crossings": 1,
+        "laneChanges": 66
+      },
+      "events": {
+        "honk": 3
+      }
+    },
+    {
+      "view": "04_herald_square_street_level",
+      "cam": "-330,1.7,-850,7.77,-0.10",
+      "simTime": 4.999999999999992,
+      "vehicles": 117,
+      "peds": 140,
+      "updateMsAvg": 2.923529411766532,
+      "updateMsP95": 9.5,
+      "frameMs": 98.14561403843395,
+      "stats": {
+        "redLight": 0,
+        "wrongWay": 0,
+        "vehCollisions": 0,
+        "pedHits": 0,
+        "spawnedV": 117,
+        "despawnedV": 0,
+        "spawnedP": 140,
+        "despawnedP": 0,
+        "stuckDespawn": 0,
+        "honks": 2,
+        "hails": 0,
+        "boardings": 0,
+        "dropoffs": 0,
+        "busStops": 0,
+        "doubleParks": 0,
+        "jaywalks": 0,
+        "crossings": 1,
+        "laneChanges": 50
+      },
+      "events": {
+        "honk": 2
+      }
+    }
+  ],
+  "logs": [
+    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x19b4003c0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}
