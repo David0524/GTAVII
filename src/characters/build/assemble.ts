@@ -63,6 +63,10 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
   const stubble = app.sex >= 0.5 ? (app.facialHair === 'none' ? 0.35 : 0.6) : 0;
   const scalp = scalpField({ ...ctx, face: ff, app });
   const hairLin = lin(app.hair.color);
+  // MakeHuman CC0 skin detail layer: age band × sex × dominant ancestry (render/materials.ts)
+  const mac = app.body.macro as unknown as { african: number; asian: number; caucasian: number };
+  const ancI = mac.african >= mac.asian && mac.african >= mac.caucasian ? 0 : mac.asian >= mac.caucasian ? 1 : 2;
+  const skinLayer = (app.age < 36 ? 0 : app.age < 58 ? 1 : 2) * 6 + (app.sex >= 0.5 ? 1 : 0) * 3 + ancI;
   const skinVert = (s: number) => {
     let v = used[s];
     if (v >= 0) return v;
@@ -81,7 +85,8 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
       const tone = sc > 0 ? skinBase.map((c, i) => c + (hairLin[i] * 0.7 - c) * sc * 0.85) as [number, number, number] : skinBase;
       m = { cA: tone, cB: [red, app.skin.freckles, app.skin.ageSpots], m0: [masks[0], masks[1], masks[2] * stubble, masks[5]], m1: [KIND.skin, app.skin.melanin, age01, app.skin.sheen] };
     }
-    v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, m, [masks[3], masks[6]]);
+    const isSkin = m.m1[0] === KIND.skin || m.m1[0] === KIND.hosiery;
+    v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer] : undefined);
     used[s] = v;
     return v;
   };

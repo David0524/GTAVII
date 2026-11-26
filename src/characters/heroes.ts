@@ -54,7 +54,7 @@ function delphine(): CharacterBuild {
     a.body.locals = { ...a.body.locals, 'measure/measure-shoulder-dist-incr': 0.35, 'armslegs/lr-hand-scale-incr': 0.2, 'cheek/lr-cheek-bones-incr': 0.5, 'eyes/lr-eye-trans-out': 0.3 };
     a.stature = 1.78;
     a.skin = { ...a.skin, tone: '#5a3825', melanin: 0.78, freckles: 0, redness: 0.08, ageSpots: 0 };
-    a.hair = { ...a.hair, style: 'afroShort', color: '#141010', texture: 0.95, grey: 0, recession: 0, thinning: 0, volume: 0.5 };
+    a.hair = { ...a.hair, style: 'afroShort', color: '#141010', texture: 0.95, grey: 0, recession: 0, thinning: 0, volume: 0.3 };
     a.facialHair = 'none'; a.eyeColor = '#2a1a10'; a.slump = 0.0;
     a.gait = { stride: 1.12, swing: 0.9, bounce: 0.85, speed: 1.08 };
   });

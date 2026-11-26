@@ -7,6 +7,7 @@ export function toGeometry(g: GeoArrays): THREE.BufferGeometry {
   geo.setAttribute('position', new THREE.BufferAttribute(g.position, 3));
   geo.setAttribute('normal', new THREE.BufferAttribute(g.normal, 3));
   geo.setAttribute('uv', new THREE.BufferAttribute(g.uv, 2));
+  geo.setAttribute('uv1', new THREE.BufferAttribute(g.uv1, 3));
   geo.setAttribute('skinIndex', new THREE.BufferAttribute(g.skinIndex, 4));
   geo.setAttribute('skinWeight', new THREE.BufferAttribute(g.skinWeight, 4));
   geo.setAttribute('cA', new THREE.BufferAttribute(g.cA, 3));

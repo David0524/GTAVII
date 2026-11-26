@@ -169,6 +169,7 @@ export class CrowdRenderer {
     geo.setAttribute('position', new THREE.BufferAttribute(g.position, 3));
     geo.setAttribute('normal', new THREE.BufferAttribute(g.normal, 3));
     geo.setAttribute('uv', new THREE.BufferAttribute(g.uv, 2));
+    geo.setAttribute('uv1', new THREE.BufferAttribute(g.uv1, 3));
     geo.setAttribute('cA', new THREE.BufferAttribute(g.cA, 3));
     geo.setAttribute('cB', new THREE.BufferAttribute(g.cB, 3));
     geo.setAttribute('m0', new THREE.BufferAttribute(g.m0, 4));
@@ -357,7 +358,7 @@ function mergeHair(main: GeoArrays, hair: GeoArrays | null): GeoArrays {
     return out;
   };
   return {
-    position: cat(main.position, hair.position, 3), normal: cat(main.normal, hair.normal, 3), uv: cat(main.uv, hair.uv, 2),
+    position: cat(main.position, hair.position, 3), normal: cat(main.normal, hair.normal, 3), uv: cat(main.uv, hair.uv, 2), uv1: cat(main.uv1, hair.uv1, 3),
     skinIndex: cat(main.skinIndex, hair.skinIndex, 4), skinWeight: cat(main.skinWeight, hair.skinWeight, 4),
     cA: cat(main.cA, hair.cA, 3), cB: cat(main.cB, hair.cB, 3),
     // hair becomes a coarse "tweed" cloth surface (pattern 10) in the crowd material

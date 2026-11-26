@@ -36,7 +36,8 @@ fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(TMP, { recursive: true });
  * The near-ring pool, tagged by eye from the library's previews (sex, apparent age band, broad
  * ancestry weights african/asian/caucasian for matching our generated bodies, hair category).
  * Excluded: heads whose mesh includes headwear implausible on 1974 Midtown streets (hijab,
- * burqa, keffiyeh, hood up), and the three heads used as the leads' bases (no lookalikes).
+ * burqa, keffiyeh, hood up), and the heads used as the leads' bases (Male_Adult_07, Male_Adult_14,
+ * Female_Adult_11): no pedestrian shares a lead's base face.
  */
 interface Tag { sex: 0 | 1; age: [number, number]; anc: [number, number, number]; hair: 'short' | 'long' | 'curly' | 'bald' | 'tied' }
 const POOL: Record<string, Tag> = {
@@ -48,7 +49,6 @@ const POOL: Record<string, Tag> = {
   Female_Adult_07: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'tied' },
   Female_Adult_08: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
   Female_Adult_09: { sex: 0, age: [35, 55], anc: [0, 0, 1], hair: 'tied' },
-  Female_Adult_11: { sex: 0, age: [25, 45], anc: [0.15, 0.05, 0.8], hair: 'tied' },
   Female_Adult_12: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
   Female_Adult_13: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'short' },
   Female_Adult_14: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'long' },
@@ -74,7 +74,7 @@ const POOL: Record<string, Tag> = {
 };
 
 interface DeformOp { at: string; radius: number; scale?: [number, number, number]; offset?: [number, number, number]; mirror?: boolean }
-interface LeadSpec { id: string; base: string; skinTarget: string; hairTarget?: string; deform: DeformOp[]; hairScale?: number; texSize?: number }
+interface LeadSpec { id: string; base: string; skinTarget: string; hairTarget?: string; deform: DeformOp[]; hairScale?: number; texSize?: number; ownHair?: boolean }
 
 const mapBone = (n: string): number => {
   const b = n.replace('Bip01_', '');
@@ -155,9 +155,27 @@ function build(name: string, id: string, texC: number, texN: number, lead?: Lead
       }
     }
     if (lead.hairScale) {
-      const hc = lm.Head;
-      for (let v = 0; v < nv; v++) if (kind[v] === 1) for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * lead.hairScale;
+      // cropped hair: cards scale toward the head centre; hair *volume* modelled in the head mesh
+      // (anything beyond the skull, above the brow) is compressed onto a thin layer over the skull
+      const hc = [lm.Head[0], lm.Head[1] + 0.03, lm.Head[2] - 0.01], skull = 0.1, browY = (lm.LEye[1] + lm.REye[1]) / 2 + 0.02;
+      for (let v = 0; v < nv; v++) {
+        const d = Math.hypot(pos[v * 3] - hc[0], pos[v * 3 + 1] - hc[1], pos[v * 3 + 2] - hc[2]);
+        if (kind[v] === 1) { for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * lead.hairScale; continue; }
+        // the crown above the brow, and anything behind the skull above the nape (buns, ponytails)
+        const behind = pos[v * 3 + 2] < hc[2] - 0.04 && pos[v * 3 + 1] > lm.Neck[1] + 0.03;
+        if (d > skull && (pos[v * 3 + 1] > browY - 0.04 || behind)) {
+          const nd = skull + (d - skull) * Math.max(0.05, lead.hairScale - 0.55);
+          for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * (nd / d);
+        }
+      }
     }
+  }
+  if (lead?.hairScale) {
+    const hc = [lm.Head[0], lm.Head[1] + 0.03, lm.Head[2] - 0.01];
+    const out = (v: number) => kind[v] === 1 && pos[v * 3 + 2] < hc[2] - 0.03 && Math.hypot(pos[v * 3] - hc[0], pos[v * 3 + 1] - hc[1], pos[v * 3 + 2] - hc[2]) > 0.085;
+    const keep: number[] = [];
+    for (let t = nSkin; t < idx.length; t += 3) if (!(out(idx[t]) || out(idx[t + 1]) || out(idx[t + 2]))) keep.push(idx[t], idx[t + 1], idx[t + 2]);
+    idx.length = nSkin; idx.push(...keep);
   }
   // --- quantise ---
   const mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
@@ -216,7 +234,7 @@ print(json.dumps(list(cs[len(cs)//2]) if cs else [180,140,110]))`, path.join(dir
   fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);
   const total = blob.length + sizes.c + sizes.n + sizes.o;
   console.log(id.padEnd(18), 'verts', nv, 'tris', idx.length / 3, `(cards ${(idx.length - nSkin) / 3})`, 'bin', blob.length, 'tex', sizes, 'total KB', (total / 1024).toFixed(0), 'skin', outRGB);
-  return { id, source: name, bytes: total, tag: POOL[name] ?? null, skinRGB: outRGB, lead: lead?.id ?? null };
+  return { id, source: name, bytes: total, tag: POOL[name] ?? null, skinRGB: outRGB, lead: lead?.id ?? null, ownHair: !!lead?.ownHair };
 }
 
 const index: any[] = [];

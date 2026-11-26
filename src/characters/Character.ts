@@ -9,7 +9,7 @@ import type { BodyModel } from './body/BodyModel';
 import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
-import { fitHead, headMesh, neckProfile, neckSampler, type HeadAsset, type NeckData } from './heads/rocketbox';
+import { fitHead, headMesh, headWithHairMesh, neckProfile, neckSampler, type HeadAsset, type NeckData } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
 import { Animator, type LocoInput } from './anim/Animator';
@@ -108,10 +108,14 @@ export class Character {
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     const { bones, skeleton, root } = buildSkeleton(this.asm.joints);
     this.bones = bones; this.skeleton = skeleton;
-    const { main, hair } = createSkinnedMeshes(this.asm.main, this.asm.hair, skeleton, root);
-    this.meshes = hair ? [main, hair] : [main];
     const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
-    if (rb && this.rbFit) this.meshes.push(headMesh(rb, this.rbFit, skeleton, main.bindMatrix, { lift: this.asm.lift, tint: this.desc.overrides?.headTint as [number, number, number] | undefined, neck: this.rbNeck ?? undefined, bodyTone: this.appearance.skin.tone, noCards: !!this.desc.overrides?.ourHair }));
+    const merge = !!(rb && this.rbFit && this.desc.overrides?.ourHair && this.asm.hair);
+    const { main, hair } = createSkinnedMeshes(this.asm.main, merge ? null : this.asm.hair, skeleton, root);
+    this.meshes = hair ? [main, hair] : [main];
+    const hopts = { lift: this.asm.lift, tint: this.desc.overrides?.headTint as [number, number, number] | undefined, neck: this.rbNeck ?? undefined, bodyTone: this.appearance.skin.tone, noCards: !!this.desc.overrides?.ourHair };
+    // leads: head + our hair in one draw; near ring: head (with its own hair cards) as the second draw
+    if (merge) this.meshes.push(headWithHairMesh(rb!, this.rbFit!, this.asm.hair!, skeleton, main.bindMatrix, hopts));
+    else if (rb && this.rbFit) this.meshes.push(headMesh(rb, this.rbFit, skeleton, main.bindMatrix, hopts));
     for (const m of this.meshes) this.object.add(m);
     const p = bones[JI.pelvis].position;
     this.restPelvis = [p.x, p.y, p.z];

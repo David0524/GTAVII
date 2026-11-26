@@ -16,7 +16,7 @@ import { registerAuthored } from './anim/authored';
 import { Character, type CharacterDesc, type GroundFn } from './Character';
 import { HEROES } from './heroes';
 import { CrowdRenderer, type AgentView } from './crowd/CrowdRenderer';
-import { charUniforms, setFabricMaps } from './render/materials';
+import { charUniforms, setFabricMaps, setSkinMaps } from './render/materials';
 import { ArchetypeRegistry, type ArchetypeDef } from './archetypes';
 import { castBuild, type CastEntry } from './cast';
 import { HeadLibrary, type HeadAsset } from './heads/rocketbox';
@@ -53,6 +53,13 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
   // fabric detail maps (≈70 KB Low / 270 KB High; relief stays flat if they fail)
   const tag = opts.quality === 'low' ? 'lo' : 'hi', tl = new THREE.TextureLoader();
   await Promise.all([tl.loadAsync(`${base}fabric_a_${tag}.webp`), tl.loadAsync(`${base}fabric_b_${tag}.webp`)]).then(([a, b]) => setFabricMaps(a, b)).catch((e) => console.warn('characters: fabric maps', e));
+  // MakeHuman CC0 skin detail strip (18 tiles High, 6 Low, stacked vertically)
+  try {
+    const t = await tl.loadAsync(`${base}skins_${tag}.webp`);
+    t.colorSpace = THREE.NoColorSpace; t.flipY = false; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = 4;
+    const layers = Math.round((t.image as { height: number }).height / (t.image as { width: number }).width);
+    setSkinMaps(t, layers);
+  } catch (e) { console.warn('characters: skin maps', e); }
   // Rocketbox heads (Medium and above): the leads' altered heads are preloaded; the near-ring pool
   // loads on demand. Low keeps our generated heads everywhere.
   const heads = opts.quality === 'low' ? null : await new HeadLibrary(base + 'rb/').init();
@@ -72,7 +79,7 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
       // leads wear their Rocketbox-based heads unless a scene opts out (overrides.rbHead === false)
       const lh = desc.hero ? leadHeads.get(leadOf(desc.hero)) : undefined;
       // the leads keep our strand-card hair (it follows their sheets) over the head
-      if (lh && desc.overrides?.rbHead === undefined) desc = { ...desc, overrides: { ourHair: true, ...desc.overrides, rbHead: lh } };
+      if (lh && desc.overrides?.rbHead === undefined) desc = { ...desc, overrides: { ourHair: !heads?.lead(`lead_${leadOf(desc.hero!)}`)?.ownHair, ...desc.overrides, rbHead: lh } };
       if (desc.overrides?.rbHead === false) { const { rbHead: _x, ...rest } = desc.overrides; void _x; desc = { ...desc, overrides: rest }; }
       const ch = new Character(body, anims, desc, { lod: hero ? heroLod : pedLod, build, heat: charUniforms.heat.value, outfitCtx: archetypes.outfitContext(desc.archetype) });
       if (build && desc.act) ch.setWardrobe(`act${desc.act}`);

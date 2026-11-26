@@ -11,11 +11,13 @@
 import * as THREE from 'three/webgpu';
 import { texture, uv, attribute, float, vec3, uniform, normalMap, normalView, mix, dot } from 'three/tsl';
 import { readContainer } from '../format';
+import type { GeoArrays } from '../build/MeshBuilder';
+import { hairMaterial } from '../render/materials';
 import { JOINT_INDEX as JI } from '../rig';
 import type { Appearance } from '../body/appearance';
 
 export interface HeadTag { sex: 0 | 1; age: [number, number]; anc: [number, number, number]; hair: 'short' | 'long' | 'curly' | 'bald' | 'tied' }
-export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null }
+export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean }
 export interface HeadAsset {
   id: string;
   meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
@@ -205,8 +207,9 @@ function headMaterial(h: HeadAsset, tint: [number, number, number], bodyLin: [nu
   m.normalNode = isCard.select(normalView, normalMap(tn));
   m.roughnessNode = isCard.select(float(0.65), float(0.5));
   // warm transmission through ears and nose, like our own skin shader; none on the cards
-  m.thicknessColorNode = isCard.select(vec3(0), vec3(0.4, 0.1, 0.05));
-  m.thicknessScaleNode = isCard.select(float(0), float(1));
+  // scaled by the skin's own colour, so darker skin doesn't glow orange
+  m.thicknessColorNode = isCard.select(vec3(0), skinC.mul(vec3(1.1, 0.45, 0.3)));
+  m.thicknessScaleNode = isCard.select(float(0), float(0.5));
   m.thicknessPowerNode = float(3); m.thicknessDistortionNode = float(0.15);
   return m;
 }
@@ -216,3 +219,36 @@ export function tintFor(h: HeadAsset | HeadIndexEntry, targetHex: string): [numb
   const src = ('meta' in h ? h.meta.skinRGB : h.skinRGB).map(toLin), dst = hexRGB(targetHex).map(toLin);
   return [0, 1, 2].map((i) => Math.min(1.25, Math.max(0.8, (dst[i] + 0.005) / (src[i] + 0.005)))) as [number, number, number];
 }
+
+/**
+ * Leads keep our strand-card hair: their head and hair share one draw (2 draws per character).
+ * The head's vertices join the hair geometry tagged sub 5 (m1.y) with the fade in m0.x.
+ */
+export function headWithHairMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, hair: GeoArrays, skeleton: THREE.Skeleton, bindMatrix: THREE.Matrix4, o: HeadMeshOpts) {
+  const tmp = headMesh(h, fit, skeleton, bindMatrix, { ...o, noCards: true });
+  const hg = tmp.geometry;
+  const P = hg.attributes.position.array as Float32Array, N = hg.attributes.normal.array as Float32Array, U = hg.attributes.uv.array as Float32Array;
+  const F = hg.attributes.hfade.array as Float32Array, idx = hg.index!.array;
+  const n = P.length / 3, hn = hair.vertexCount;
+  const cat = (a: ArrayLike<number>, k: number, extra: (v: number, c: number) => number, Ctor: any = Float32Array) => { const out = new Ctor((hn + n) * k); out.set(a as any); for (let v = 0; v < n; v++) for (let c = 0; c < k; c++) out[(hn + v) * k + c] = extra(v, c); return out; };
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(cat(hair.position, 3, (v, c) => P[v * 3 + c]), 3));
+  geo.setAttribute('normal', new THREE.BufferAttribute(cat(hair.normal, 3, (v, c) => N[v * 3 + c]), 3));
+  geo.setAttribute('uv', new THREE.BufferAttribute(cat(hair.uv, 2, (v, c) => U[v * 2 + c]), 2));
+  geo.setAttribute('skinIndex', new THREE.BufferAttribute(cat(hair.skinIndex, 4, (v, c) => h.sj[v * 4 + c], Uint16Array), 4));
+  geo.setAttribute('skinWeight', new THREE.BufferAttribute(cat(hair.skinWeight, 4, (v, c) => h.sw[v * 4 + c]), 4));
+  geo.setAttribute('cA', new THREE.BufferAttribute(cat(hair.cA, 3, () => 0), 3));
+  geo.setAttribute('cB', new THREE.BufferAttribute(cat(hair.cB, 3, () => 0), 3));
+  geo.setAttribute('m0', new THREE.BufferAttribute(cat(hair.m0, 4, (v, c) => (c === 0 ? F[v] : 1)), 4));
+  geo.setAttribute('m1', new THREE.BufferAttribute(cat(hair.m1, 4, (_v, c) => (c === 0 ? 7 : c === 1 ? 5 : 0)), 4));
+  const I = new Uint32Array(hair.index.length + idx.length); I.set(hair.index); for (let i = 0; i < idx.length; i++) I[hair.index.length + i] = idx[i] + hn;
+  geo.setIndex(new THREE.BufferAttribute(I, 1));
+  geo.computeBoundingSphere();
+  tmp.geometry.dispose();
+  const bt = o.bodyTone ? hexRGB(o.bodyTone).map(toLin) as [number, number, number] : null;
+  const m = new THREE.SkinnedMesh(geo, hairMaterial({ color: h.color, normal: h.normal, tint: o.tint ?? [1, 1, 1], bodyLin: bt }));
+  m.bind(skeleton, bindMatrix);
+  m.frustumCulled = false; m.castShadow = true;
+  return m;
+}
+

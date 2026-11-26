@@ -9,10 +9,10 @@
  *   zoom=1, lod=n, seed=n, dbg=n|nobump
  */
 import * as THREE from 'three/webgpu';
-import { normalGeometry } from 'three/tsl';
+import { normalGeometry, attribute, vec3, vec2, float, texture, uv } from 'three/tsl';
 import { createRenderer } from '../../engine/renderer';
 import { createCharacterFactory, type CharacterFactory, type Character } from '../index';
-import { characterMaterial, surfaceNodes } from '../render/materials';
+import { characterMaterial, surfaceNodes, skinMaps } from '../render/materials';
 import type { AgentView } from '../crowd/CrowdRenderer';
 import { hash2 } from '../util/rng';
 import { generateAppearance } from '../body/appearance';
@@ -37,6 +37,10 @@ export async function runCharactersTest() {
   const quality = (qp.get('quality') ?? 'high') as 'low' | 'high';
   const factory = await createCharacterFactory({ quality });
   if (qp.get('dbg') === 'n') { const mm = characterMaterial(); mm.colorNode = normalGeometry.mul(0.5).add(0.5); mm.normalNode = null; }
+  if (qp.get('dbg') === 'skin2') { const mm = characterMaterial(); const u = attribute('uv1', 'vec3'); mm.colorNode = texture(skinMaps.strip, vec2(u.x, float(1).sub(u.y).add(5).div(18))).rgb.sub(0.5).mul(6).add(0.5); mm.normalNode = null; }
+  if (qp.get('dbg') === 'skin3') { const mm = characterMaterial(); mm.colorNode = texture(skinMaps.strip, uv()).rgb; mm.normalNode = null; }
+  if (qp.get('dbg') === 'uv1') { const mm = characterMaterial(); mm.colorNode = attribute('uv1', 'vec3').mul(vec3(1, 1, 1 / 18)); mm.normalNode = null; }
+  if (qp.get('dbg') === 'skin') { const mm = characterMaterial(); mm.colorNode = surfaceNodes().skinDet; mm.normalNode = null; }
   if (qp.get('dbg') === 'fabric') { const mm = characterMaterial(); mm.colorNode = surfaceNodes().detail; mm.normalNode = null; }
   if (qp.get('dbg') === 'nobump') characterMaterial().normalNode = null;
   factory.setClimate({ heat: 0.7 });

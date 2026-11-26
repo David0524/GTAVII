@@ -14,18 +14,6 @@
    "lead": "lead_teddy"
   },
   {
-   "id": "lead_delphine",
-   "source": "Female_Party_02",
-   "bytes": 581508,
-   "tag": null,
-   "skinRGB": [
-    90,
-    56,
-    37
-   ],
-   "lead": "lead_delphine"
-  },
-  {
    "id": "lead_nick",
    "source": "Male_Adult_14",
    "bytes": 196648,
@@ -226,30 +214,6 @@
     137,
     114,
     100
-   ],
-   "lead": null
-  },
-  {
-   "id": "Female_Adult_11",
-   "source": "Female_Adult_11",
-   "bytes": 191028,
-   "tag": {
-    "sex": 0,
-    "age": [
-     25,
-     45
-    ],
-    "anc": [
-     0.15,
-     0.05,
-     0.8
-    ],
-    "hair": "tied"
-   },
-   "skinRGB": [
-    167,
-    115,
-    83
    ],
    "lead": null
   },
@@ -780,6 +744,19 @@
     96
    ],
    "lead": null
+  },
+  {
+   "id": "lead_delphine",
+   "source": "Female_Adult_11",
+   "bytes": 409716,
+   "tag": null,
+   "skinRGB": [
+    90,
+    56,
+    37
+   ],
+   "lead": "lead_delphine",
+   "ownHair": true
   }
  ]
 }

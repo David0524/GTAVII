@@ -10,8 +10,8 @@
  */
 import * as THREE from 'three/webgpu';
 import {
-  attribute, positionGeometry, normalGeometry, texture, float, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
-  mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize,
+  attribute, positionGeometry, normalGeometry, texture, float, vec2, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
+  mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize, normalMap, normalView,
 } from 'three/tsl';
 
 /** Global character look controls (heat drives sweat; set by the engine's weather/time). */
@@ -37,6 +37,13 @@ export function setFabricMaps(a: THREE.Texture, b: THREE.Texture) {
   for (const t of [a, b]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.NoColorSpace; t.anisotropy = 4; t.needsUpdate = true; }
   fabricMaps.a = a; fabricMaps.b = b;
 }
+/**
+ * Skin detail (MakeHuman CC0 skins, normalised to detail; tools/characters/build-skins.py): a
+ * texture array sampled with the MakeHuman UVs (attribute uv1 = u, v, layer). High has 18 layers
+ * (age × sex × ancestry), Low 6 (age × sex). Installed by the factory before materials are built.
+ */
+export const skinMaps = { strip: (() => { const t = new THREE.DataTexture(new Uint8Array([128, 128, 128, 255]), 1, 1); t.needsUpdate = true; return t; })() as THREE.Texture, layers: 18 };
+export function setSkinMaps(strip: THREE.Texture, layers: number) { skinMaps.strip = strip; skinMaps.layers = layers; }
 /** Real-world tile size of the scanned swatches (m). */
 const FABRIC_TILE = 0.27;
 
@@ -48,6 +55,16 @@ export function surfaceNodes(tint?: (col: any) => any) {
   const uvA = attribute('uv', 'vec2');
   const kind = floor(m1.x.add(0.5));
   const p = positionGeometry; // rest pose: patterns stick to the body
+  // photographic skin detail (CC0 MakeHuman skins) through the MakeHuman UVs; sampled always (uniform control flow)
+  const u1 = attribute('uv1', 'vec3');
+  // tiles are stacked top to bottom; Low's 6 tiles are ancestry-averaged (layer / 3)
+  const L = skinMaps.layers;
+  const layer = (L < 18 ? floor(u1.z.div(3)) : u1.z).max(0);
+  // keep a 1-texel margin inside each tile so mips/filtering don't bleed between neighbours
+  const tv = float(1).sub(u1.y).clamp(0.002, 0.998);
+  const skinTex = texture(skinMaps.strip, vec2(u1.x, layer.add(tv).div(L))).rgb.mul(2);
+  // the default skins are smooth after normalisation: lift their contrast a little
+  const skinDetail = mix(vec3(1), skinTex.sub(1).mul(1.8).add(1).max(0.2), step(0, u1.z).mul(0.9));
 
   // --- cloth patterns ------------------------------------------------------------------------
   const pattern = Fn(() => {
@@ -102,7 +119,7 @@ export function surfaceNodes(tint?: (col: any) => any) {
     If(kind.equal(KIND.skin), () => {
       // tone variation, redness, lips, brows, stubble, freckles, age spots
       const melanin = m1.y;
-      const base = cA.mul(mix(0.94, 1.06, nLow)).toVar();
+      const base = cA.mul(mix(0.94, 1.06, nLow)).mul(skinDetail).toVar();
       base.assign(mix(base, base.mul(vec3(1.06, 0.9, 0.9)), cB.x.mul(0.35).mul(smoothstep(0.3, 0.8, nLow))));
       const lips = m0.x;
       base.assign(mix(base, base.mul(vec3(0.78, 0.52, 0.52)).mul(mix(1.1, 0.85, melanin)), lips.mul(0.85)));
@@ -190,7 +207,7 @@ export function surfaceNodes(tint?: (col: any) => any) {
   });
 
   const col = tint ? tint(color()) : color();
-  return { color: col, roughness: roughness(), height: height(), kind, m0, m1, detail: vec3(fa.x, fa.y, fb.z) };
+  return { color: col, roughness: roughness(), height: height(), kind, m0, m1, detail: vec3(fa.x, fa.y, fb.z), skinDet: skinTex.mul(0.5) };
 }
 
 let shared: THREE.MeshSSSNodeMaterial | null = null;
@@ -222,8 +239,11 @@ export function characterMaterial(): THREE.MeshSSSNodeMaterial {
 }
 
 let sharedHair: THREE.MeshPhysicalNodeMaterial | null = null;
-export function hairMaterial(): THREE.MeshPhysicalNodeMaterial {
-  if (sharedHair) return sharedHair;
+const tex2D = texture; // (hairMaterial shadows `texture` with the hair-texture attribute)
+/** rb: a Rocketbox face merged into this draw (leads keep our hair): vertices with sub 5 use its textures. */
+export interface HairFace { color: THREE.Texture; normal: THREE.Texture; tint: [number, number, number]; bodyLin: [number, number, number] | null }
+export function hairMaterial(rb?: HairFace): THREE.MeshPhysicalNodeMaterial {
+  if (sharedHair && !rb) return sharedHair;
   const m = new THREE.MeshPhysicalNodeMaterial({ side: THREE.DoubleSide });
   const cA = attribute('cA', 'vec3'), cB = attribute('cB', 'vec3');
   const m0 = attribute('m0', 'vec4'), m1 = attribute('m1', 'vec4');
@@ -268,6 +288,22 @@ export function hairMaterial(): THREE.MeshPhysicalNodeMaterial {
   // cards: darker near the root and on inner layers, strand-to-strand variation, lighter tips
   const cardCol = mix(cA.mul(0.62), cB, cv.mul(0.55).add(h.mul(0.25))).mul(mix(0.72, 1.18, strand));
   m.colorNode = mix(sub.equal(4).select(cardCol, shellCol), vec3(0.72, 0.7, 0.67), grey);
+  if (rb) {
+    // the face: texture × tint, neck fading into the body tone (m0.x = fade), normal-mapped, opaque
+    const isFace = sub.equal(5);
+    const tc = tex2D(rb.color, uvA).rgb.mul(vec3(rb.tint[0], rb.tint[1], rb.tint[2]));
+    const nb = rb.bodyLin ? vec3(rb.bodyLin[0], rb.bodyLin[1], rb.bodyLin[2]) : tc;
+    const neckC = nb.mul(dot(tc, vec3(0.3, 0.6, 0.1)).div(dot(nb, vec3(0.3, 0.6, 0.1)).add(1e-4)).clamp(0.6, 1.4));
+    const faceCol = mix(tc, neckC, m0.x.mul(rb.bodyLin ? 0.9 : 0));
+    m.colorNode = isFace.select(faceCol, m.colorNode as any) as any;
+    m.opacityNode = isFace.select(float(1), m.opacityNode as any) as any;
+    m.normalNode = isFace.select(normalMap(tex2D(rb.normal, uvA)), normalView);
+    m.roughnessNode = isFace.select(float(0.5), float(0.62));
+    m.sheenNode = isFace.select(vec3(0.03), cA.mul(0.6).add(0.03));
+    m.sheenRoughnessNode = float(0.35);
+    m.specularIntensityNode = isFace.select(float(0.5), float(0.3));
+    return m;
+  }
   m.roughnessNode = float(0.62);
   m.sheenNode = cA.mul(0.6).add(0.03);
   m.sheenRoughnessNode = float(0.35);

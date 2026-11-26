@@ -6,27 +6,112 @@
     "hairTarget": "#1c1814",
     "texSize": 1024,
     "deform": [
-      { "at": "MNose", "radius": 0.034, "scale": [1.04, 1.1, 1.1] },
-      { "at": "MNose", "radius": 0.02, "offset": [0.0018, 0.0015, 0.0025] },
-      { "at": "MJaw", "radius": 0.07, "scale": [1.06, 1.02, 1.0] },
-      { "at": "LCheek", "radius": 0.03, "offset": [0.0015, -0.0015, 0.0015], "mirror": true },
-      { "at": "LInnerEyebrow", "radius": 0.025, "offset": [0, -0.002, 0.001], "mirror": true }
+      {
+        "at": "MNose",
+        "radius": 0.034,
+        "scale": [
+          1.04,
+          1.1,
+          1.1
+        ]
+      },
+      {
+        "at": "MNose",
+        "radius": 0.02,
+        "offset": [
+          0.0018,
+          0.0015,
+          0.0025
+        ]
+      },
+      {
+        "at": "MJaw",
+        "radius": 0.07,
+        "scale": [
+          1.06,
+          1.02,
+          1.0
+        ]
+      },
+      {
+        "at": "LCheek",
+        "radius": 0.03,
+        "offset": [
+          0.0015,
+          -0.0015,
+          0.0015
+        ],
+        "mirror": true
+      },
+      {
+        "at": "LInnerEyebrow",
+        "radius": 0.025,
+        "offset": [
+          0,
+          -0.002,
+          0.001
+        ],
+        "mirror": true
+      }
     ]
   },
   {
     "id": "lead_delphine",
-    "base": "Female_Party_02",
+    "base": "Female_Adult_11",
     "skinTarget": "#5a3825",
     "hairTarget": "#141010",
     "texSize": 1024,
-    "hairScale": 0.82,
+    "hairScale": 0.65,
     "deform": [
-      { "at": "LCheek", "radius": 0.035, "offset": [0.0025, 0.003, 0.002], "mirror": true },
-      { "at": "LEye", "radius": 0.022, "offset": [0.0022, 0, 0], "mirror": true },
-      { "at": "MNose", "radius": 0.028, "scale": [1.1, 1.0, 0.96] },
-      { "at": "MJaw", "radius": 0.06, "scale": [0.95, 1.03, 1.0] },
-      { "at": "MBottomLip", "radius": 0.02, "scale": [1.05, 1.08, 1.04] }
-    ]
+      {
+        "at": "LCheek",
+        "radius": 0.035,
+        "offset": [
+          0.0025,
+          0.003,
+          0.002
+        ],
+        "mirror": true
+      },
+      {
+        "at": "LEye",
+        "radius": 0.022,
+        "offset": [
+          0.0022,
+          0,
+          0
+        ],
+        "mirror": true
+      },
+      {
+        "at": "MNose",
+        "radius": 0.028,
+        "scale": [
+          1.1,
+          1.0,
+          0.96
+        ]
+      },
+      {
+        "at": "MJaw",
+        "radius": 0.06,
+        "scale": [
+          0.95,
+          1.03,
+          1.0
+        ]
+      },
+      {
+        "at": "MBottomLip",
+        "radius": 0.02,
+        "scale": [
+          1.05,
+          1.08,
+          1.04
+        ]
+      }
+    ],
+    "ownHair": true
   },
   {
     "id": "lead_nick",
@@ -35,11 +120,53 @@
     "hairTarget": "#7a7570",
     "texSize": 1024,
     "deform": [
-      { "at": "MJaw", "radius": 0.08, "scale": [1.1, 1.04, 1.02] },
-      { "at": "LMasseter", "radius": 0.035, "offset": [0.004, -0.003, 0.0], "mirror": true },
-      { "at": "MNose", "radius": 0.032, "scale": [1.12, 1.05, 1.06] },
-      { "at": "MMiddleEyebrow", "radius": 0.035, "offset": [0, -0.0015, 0.003] },
-      { "at": "LOuterEyebrow", "radius": 0.022, "offset": [0, -0.0025, 0.001], "mirror": true }
+      {
+        "at": "MJaw",
+        "radius": 0.08,
+        "scale": [
+          1.1,
+          1.04,
+          1.02
+        ]
+      },
+      {
+        "at": "LMasseter",
+        "radius": 0.035,
+        "offset": [
+          0.004,
+          -0.003,
+          0.0
+        ],
+        "mirror": true
+      },
+      {
+        "at": "MNose",
+        "radius": 0.032,
+        "scale": [
+          1.12,
+          1.05,
+          1.06
+        ]
+      },
+      {
+        "at": "MMiddleEyebrow",
+        "radius": 0.035,
+        "offset": [
+          0,
+          -0.0015,
+          0.003
+        ]
+      },
+      {
+        "at": "LOuterEyebrow",
+        "radius": 0.022,
+        "offset": [
+          0,
+          -0.0025,
+          0.001
+        ],
+        "mirror": true
+      }
     ]
   }
 ]
