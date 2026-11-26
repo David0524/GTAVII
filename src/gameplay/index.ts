@@ -43,6 +43,7 @@ import { Cars, type EntryMethod } from './cars/theft';
 import { FireSystem } from './props/fire';
 import { Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
+import { simAgentPort, type SimLike } from './integration/simAdapter';
 import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
@@ -204,6 +205,7 @@ export class Gameplay {
   }
   bindSim(sim: SimBinding) {
     this.sim = sim;
+    if (typeof (sim as any).setGoal === 'function') { this.port = simAgentPort(sim as unknown as SimLike); sim.on('collision', (e) => this.onSimCollision(e)); return; }
     this.port = {
       peds: () => (sim.peds as readonly any[]).map(pedSnap),
       ped: (id) => { const raw = (sim.peds as readonly any[]).find((q) => `${q.id}` === id || `ped:${q.id}` === id); return raw ? pedSnap(raw) : undefined; },

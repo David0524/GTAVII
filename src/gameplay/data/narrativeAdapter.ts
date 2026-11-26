@@ -55,12 +55,12 @@ const slug = (s: string) => 'item.' + s.toLowerCase().replace(/[^a-z0-9]+/g, '_'
 const zSt = (n: number) => -32 - (n - 23) * 80.9;
 const X = { edgeW: -1580, ave8: -878, ave7: -605, ave6: -330, ave5: -20, madison: 90, edgeE: 520 };
 const Z = { edgeS: 320, edgeN: -1990 };
-/** Precinct houses → areas. Narrative's `covers` is prose; these rectangles follow it (gaps go to the
+/** Precinct houses → areas, matching narrative's structured `bounds` (commit 74b531e: Madison Square up to mid-block 28th–29th; Midtown Central / Bryant Park split on the 6th Ave centreline) (gaps go to the
  *  nearest house: north of 43rd joins the house below it, south of 22nd joins Madison Square). */
 const AREAS: Record<string, { area: number[]; station: [number, number] }> = {
-  'precinct.midtown_central': { area: rect(X.edgeW, X.ave6, Z.edgeN, zSt(29)), station: [-742, -650] },
-  'precinct.bryant_park': { area: rect(X.ave6, X.edgeE, Z.edgeN, zSt(29)), station: [-175, zSt(40) + 8] },
-  'precinct.madison_square': { area: rect(X.edgeW, X.edgeE, zSt(29), Z.edgeS), station: [-470, zSt(24) - 8] },
+  'precinct.midtown_central': { area: rect(X.edgeW, X.ave6, Z.edgeN, zSt(28.5)), station: [-742, -650] },
+  'precinct.bryant_park': { area: rect(X.ave6, X.edgeE, Z.edgeN, zSt(28.5)), station: [-175, zSt(40) + 8] },
+  'precinct.madison_square': { area: rect(X.edgeW, X.edgeE, zSt(28.5), Z.edgeS), station: [-470, zSt(24) - 8] },
 };
 function rect(x0: number, x1: number, z0: number, z1: number) { return [x0, z0, x1, z0, x1, z1, x0, z1]; }
 

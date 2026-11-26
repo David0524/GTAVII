@@ -36,6 +36,8 @@ export interface Unit {
   /** who last paid this cop, and when (Delphine's Evidence) */
   tookFrom: string | null; tookAt: number; tookReport: number | null;
   indoorCheck?: number;
+  /** where this unit wants to be and how fast (for an external mover) */
+  target?: [number, number] | null; pace?: number;
 }
 export interface Report {
   id: number; precinct: string; kinds: CrimeKind[]; heat: number; description: Description; lastKnown: [number, number]; crimeAt: [number, number];
@@ -115,6 +117,8 @@ export class Police extends Emitter<PoliceEvents> {
   priorsOf: (perp: string, precinct: string) => number = () => 0;
   /** Seconds between one unit's call-out and the others acting on it (1974 radio). */
   relayDelay = 3;
+  /** true when the sim moves units (gameplay only decides where); see integration/simAdapter.ts */
+  externalMovement = false;
   private relays: { at: number; r: number; pos: [number, number, number]; who: string }[] = [];
   placeName: (x: number, z: number) => string = (x, z) => `${x.toFixed(0)}, ${z.toFixed(0)}`;
   /** Lead-specific: how good they are at buying people. */
@@ -435,6 +439,8 @@ export class Police extends Emitter<PoliceEvents> {
       case 'leave': { const p = this.pct(u.precinct); target = p.station; pace = spec.speed; break; }
     }
     if (u.state !== 'pursuit' && (u.kind === 'foot' || u.kind === 'plainclothes')) stepStamina(u.stamina, dt, u.speed > 2 ? 'walk' : 'idle');
+    u.target = target; u.pace = pace;
+    if (this.externalMovement) return; // the sim drives and walks them (integration/simAdapter.ts reads target/pace, writes x/z/yaw/speed)
     if (!target) { u.speed = 0; return; }
     const dx = target[0] - u.x, dz = target[1] - u.z, d = Math.hypot(dx, dz);
     if (d < 0.05) { u.speed = 0; return; }
