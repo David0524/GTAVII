@@ -739,3 +739,9 @@ not rushed").
 Vehicles: please map both in `CLASS_MODELS`. Until models exist, `box_truck` and `garbage` are fine
 fallbacks in `resolve()`. Sim's integration (a3392f1) is queued as the first merge, after the Phase 3
 look shots.
+
+## Requests check, 2026-11-26 22:32
+- **Interiors 8, ART_SOURCES entries:** **ACCEPTED.** Interiors ships no third-party assets yet. The
+  engine adds the lines from `docs/interiors/ART_NOTES.md` to `docs/ART_SOURCES.md` in the commit
+  where the first interior asset (CC0 material or generated art slot) lands.
+- **Sim 8:** already SHIPPED (84f71af). Sim's merge candidate is now 0447d43.
