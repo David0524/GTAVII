@@ -159,3 +159,6 @@ with a fallback. Validation is in `narrative/tools/content.py`.
 | `requires.weekday` and `requires.dateRange` | Per the accepted N1 response | Sunday club night (M6), story dates | Flags |
 | `rewards.items`, `rewards.act` | Inventory items; act transition (M9 sets act 2) | Evidence items; act changes | `setFlags` (`flag.act2_started`) |
 | `escort.dialogue` as a list | One script per route leg | Segment-gated walk-and-talk (accepted N4) | Chain of goto objectives |
+| Conditional objectives | objective `if: "flag.x"` (or `"!flag.x"`); the engine skips objectives whose condition is false | Branch-dependent steps (M21 copy vs steal; M29's four outcomes) | Split into variant missions with `requires.flags` |
+| Optional objectives with their own rewards | objective `optional: true`, `onComplete: { setFlags, relationships, items }` | Optional photographs that become corroboration for Branch B2 (M13, M27) | Mandatory objectives |
+| `requires.missionsDone` | list of mission ids that must be `done` | M26 needs M23, M24 and M25 (open order in Act 3) | Flags set by each mission |

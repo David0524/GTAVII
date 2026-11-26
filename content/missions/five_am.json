@@ -1,0 +1,112 @@
+{
+  "id": "mission.five_am",
+  "title": "Five A.M.",
+  "number": 10,
+  "act": 2,
+  "chapter": 4,
+  "playAs": "char.teddy_arce",
+  "date": "1974-07-08",
+  "durationMin": 13,
+  "pillars": [
+    "P3",
+    "P1"
+  ],
+  "giver": "char.carl_mayhew",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "04:30",
+      "08:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-08",
+      "1974-07-08"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.carl_mayhew",
+    "at": "loc.corwin_hotel",
+    "note": "Phone call to the night desk at 04:15: 'Flowers first. They open early.'"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Flower District, W 28th St at dawn",
+      "to": "loc.moretti_flowers",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Collect from Anna Moretti",
+      "script": "dlg.m10_moretti"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "The Baeks' shop, W 29th St",
+      "to": "loc.baek_wholesale",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Collect from Mr. Baek. Again.",
+      "script": "dlg.m10_baek"
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "text": "Bring it to Mayhew, the Shamrock Rail",
+      "marker": "interior.shamrock_rail"
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Watch Mayhew count",
+      "script": "dlg.m10_count"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o5"
+  ],
+  "rewards": {
+    "money": 200,
+    "setFlags": [],
+    "unlock": [
+      "mission.tax_day",
+      "activity.collections"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.anna_moretti": -1
+    }
+  },
+  "npcs": [
+    "char.anna_moretti",
+    "char.jung_ho_baek",
+    "char.mi_sook_baek",
+    "char.carl_mayhew"
+  ],
+  "archetypes": [
+    "npc.florist_wholesaler",
+    "npc.flower_truck_driver"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.moretti_flowers",
+    "loc.baek_wholesale",
+    "loc.cop_bar"
+  ],
+  "mobile": "Walking at dawn, two blocks between stops, no timers. Moretti's sidewalk jungle of potted palms is a soft-collision crowd, so take it slowly. Both collection choices are untimed.",
+  "design": "P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue)."
+}

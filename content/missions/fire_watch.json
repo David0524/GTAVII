@@ -1,0 +1,151 @@
+{
+  "id": "mission.fire_watch",
+  "title": "Fire Watch",
+  "number": 26,
+  "act": 3,
+  "chapter": 9,
+  "playAs": "char.teddy_arce",
+  "date": "1974-08-20",
+  "durationMin": 18,
+  "pillars": [
+    "P5",
+    "P4"
+  ],
+  "giver": "char.odessa_pruitt",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "23:00",
+      "05:00"
+    ],
+    "weather": [
+      "overcast"
+    ],
+    "dateRange": [
+      "1974-08-20",
+      "1974-08-20"
+    ],
+    "missionsDone": [
+      "mission.shoebox",
+      "mission.flip",
+      "mission.the_car"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.corwin_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Night desk. A rumour about tonight.",
+      "script": "dlg.m26_rumour"
+    },
+    {
+      "id": "o2",
+      "type": "wait",
+      "text": "Watch the lobby until 2 a.m.",
+      "until": "02:00",
+      "at": "interior.corwin_lobby"
+    },
+    {
+      "id": "o3",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Watch the corner, 31st & Sixth",
+      "to": "W 31st St & 6th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o5",
+      "type": "photo",
+      "text": "Photograph the man with the cans",
+      "subject": "npc.hired_firebug",
+      "minScreenFraction": 0.06
+    },
+    {
+      "id": "o6",
+      "type": "switch_to",
+      "text": "(Teddy)",
+      "character": "char.teddy_arce",
+      "cut": "hard"
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "text": "A false alarm empties the lobby",
+      "script": "dlg.m26_false_alarm"
+    },
+    {
+      "id": "o8",
+      "type": "follow",
+      "text": "Follow the firebug to whoever's paying",
+      "target": "npc.hired_firebug",
+      "keepWithinM": 70
+    },
+    {
+      "id": "o9",
+      "type": "dialogue",
+      "text": "Prentiss, in his car, with the money",
+      "script": "dlg.m26_prentiss"
+    }
+  ],
+  "fail": [
+    {
+      "type": "target_lost",
+      "objective": "o8"
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3",
+    "o6",
+    "o8"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.arson_stopped"
+    ],
+    "unlock": [
+      "mission.exposure"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.manny_soto": 1,
+      "char.teddy_arce/char.inez_rivera": 1,
+      "char.delphine_moore/char.teddy_arce": 1
+    }
+  },
+  "npcs": [
+    "char.odessa_pruitt",
+    "char.gus_wilkie",
+    "char.manny_soto",
+    "char.inez_rivera",
+    "char.vic_prentiss",
+    "char.delphine_moore",
+    "char.luis_navarro"
+  ],
+  "archetypes": [
+    "npc.hired_firebug",
+    "npc.firefighter",
+    "npc.sro_resident"
+  ],
+  "vehicles": [
+    "vehicle_role.fire_engine"
+  ],
+  "locations": [
+    "loc.corwin_hotel",
+    "W 31st St & 6th Ave"
+  ],
+  "mobile": "Content rule: **there's no fire.** Failing resets to the checkpoint. The false alarm brings real fire engines (ambience), and the tenants are walked out safely by Inez and Odessa. Inez's children are at her sister's (dialogue says so). Gus helps or hinders based on his relationship with Teddy (−3 means he leaves the service door open). The wait is a skippable time-advance.",
+  "design": "Prentiss's plan, stopped. Delphine's photo plus the tail give Teddy leverage over Prentiss. The relationship gates from N3 §5 pay off visibly: Manny unlocks the service door at +3, and Gus at −3 is the risk."
+}

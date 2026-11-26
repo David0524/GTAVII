@@ -88,8 +88,13 @@ def main():
         if st.get("spawn") and st["spawn"] not in spawns: E(f"{w}: start spawn unknown")
         ids = [o["id"] for o in m["objectives"]]
         if len(ids) != len(set(ids)): E(f"{w}: duplicate objective ids")
+        for mdone in rq.get("missionsDone", []):
+            if mdone not in planned: E(f"{w}: requires.missionsDone unknown {mdone}")
         for o in m["objectives"]:
             ow = f"{w}.{o['id']}"
+            if o.get("if"): flag_ok(ow + " if", o["if"].lstrip("!"))
+            for f in o.get("onComplete", {}).get("setFlags", []): flag_ok(ow + " onComplete", f)
+            rel_ok(ow, o.get("onComplete", {}).get("relationships"))
             if o["type"] not in OBJ_TYPES: E(f"{ow}: unknown objective type {o['type']}")
             t = o.get("text", "")
             if not t: E(f"{ow}: missing objective text")
@@ -126,8 +131,9 @@ def main():
     # chain integrity: every written mission (except #1) is unlocked by its predecessor if written
     by_num = {m["number"]: m for m in missions.values()}
     for n, m in by_num.items():
-        if n > 1 and (n - 1) in by_num and m["id"] not in by_num[n - 1]["rewards"].get("unlock", []):
-            W(f"{m['id']}: not unlocked by mission #{n-1} (check Act 3 parallel order)")
+        unlocked_by = [x for x in missions.values() if m["id"] in x["rewards"].get("unlock", [])]
+        if n > 1 and not unlocked_by:
+            W(f"{m['id']}: not unlocked by any written mission")
 
     # dialogue
     for did, d in dialogue.items():

@@ -1,13 +1,301 @@
 {
   "_note": "Interior entry markers. The brief's contract asks for a real address. Narrative gives block faces (no house numbers) so the engine places doors on a suitable pre-1975, non-landmark facade; names are provisional until the N6 trademark search.",
   "interiors": [
-    { "id": "interior.corwin_lobby", "address": "W 31st St, Broadway–6th Ave, north side", "facade": "street", "name": "Hotel Corwin", "kind": "sro", "hours": ["00:00", "24:00"], "contains": ["desk behind glass", "mailboxes", "room-key board", "lobby chairs", "elevator", "desk phone"] },
-    { "id": "interior.corwin_floor11", "address": "W 31st St, Broadway–6th Ave, north side", "facade": "street", "name": "Hotel Corwin, 11th floor", "kind": "sro", "hours": ["00:00", "24:00"], "parent": "interior.corwin_lobby", "contains": ["corridor", "room 1104 (Odessa)", "room 1112 (Hollis)", "shared bathroom", "window to the Empire State"] },
-    { "id": "interior.arden_lobby", "address": "8th Ave & W 39th St, NE corner (door on W 39th)", "facade": "street", "name": "Hotel Arden", "kind": "bar", "hours": ["00:00", "24:00"], "contains": ["Rita's lobby bar", "porter's stool", "service door"] },
-    { "id": "interior.arden_back_stairs", "address": "8th Ave & W 39th St, NE corner (service door on W 39th)", "facade": "street", "name": "Hotel Arden, back stairs", "kind": "sro", "hours": ["00:00", "24:00"], "parent": "interior.arden_lobby", "contains": ["service stairwell", "boiler room", "door to the lobby bar"] },
-    { "id": "interior.station_house_desk", "address": "W 31st St, 7th–8th Aves, south side", "facade": "street", "name": "Midtown Central station house", "kind": "precinct", "hours": ["00:00", "24:00"], "contains": ["front desk (Kearney)", "muster room door", "wanted board"] },
-    { "id": "interior.shamrock_rail", "address": "W 31st St & 8th Ave, SE corner", "facade": "avenue", "name": "The Shamrock Rail", "kind": "bar", "hours": ["11:00", "04:00"] },
-    { "id": "interior.royal_cafeteria", "address": "8th Ave & W 40th St, west side", "facade": "avenue", "name": "Royal Cafeteria", "kind": "diner", "hours": ["00:00", "24:00"] },
-    { "id": "interior.penn_station_concourse", "address": "8th Ave & W 33rd St (Penn Station entrance)", "facade": "avenue", "name": "Penn Station concourse", "kind": "shop", "hours": ["00:00", "24:00"], "real": true, "note": "Real public place: the 1968 underground station beneath Madison Square Garden. Two exits (Eighth and Seventh Aves) matter for chases." }
+    {
+      "id": "interior.corwin_lobby",
+      "address": "W 31st St, Broadway–6th Ave, north side",
+      "facade": "street",
+      "name": "Hotel Corwin",
+      "kind": "sro",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "desk behind glass",
+        "mailboxes",
+        "room-key board",
+        "lobby chairs",
+        "elevator",
+        "desk phone"
+      ]
+    },
+    {
+      "id": "interior.corwin_floor11",
+      "address": "W 31st St, Broadway–6th Ave, north side",
+      "facade": "street",
+      "name": "Hotel Corwin, 11th floor",
+      "kind": "sro",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "parent": "interior.corwin_lobby",
+      "contains": [
+        "corridor",
+        "room 1104 (Odessa)",
+        "room 1112 (Hollis)",
+        "shared bathroom",
+        "window to the Empire State"
+      ]
+    },
+    {
+      "id": "interior.arden_lobby",
+      "address": "8th Ave & W 39th St, NE corner (door on W 39th)",
+      "facade": "street",
+      "name": "Hotel Arden",
+      "kind": "bar",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "Rita's lobby bar",
+        "porter's stool",
+        "service door"
+      ]
+    },
+    {
+      "id": "interior.arden_back_stairs",
+      "address": "8th Ave & W 39th St, NE corner (service door on W 39th)",
+      "facade": "street",
+      "name": "Hotel Arden, back stairs",
+      "kind": "sro",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "parent": "interior.arden_lobby",
+      "contains": [
+        "service stairwell",
+        "boiler room",
+        "door to the lobby bar"
+      ]
+    },
+    {
+      "id": "interior.station_house_desk",
+      "address": "W 31st St, 7th–8th Aves, south side",
+      "facade": "street",
+      "name": "Midtown Central station house",
+      "kind": "precinct",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "front desk (Kearney)",
+        "muster room door",
+        "wanted board"
+      ]
+    },
+    {
+      "id": "interior.shamrock_rail",
+      "address": "W 31st St & 8th Ave, SE corner",
+      "facade": "avenue",
+      "name": "The Shamrock Rail",
+      "kind": "bar",
+      "hours": [
+        "11:00",
+        "04:00"
+      ]
+    },
+    {
+      "id": "interior.royal_cafeteria",
+      "address": "8th Ave & W 40th St, west side",
+      "facade": "avenue",
+      "name": "Royal Cafeteria",
+      "kind": "diner",
+      "hours": [
+        "00:00",
+        "24:00"
+      ]
+    },
+    {
+      "id": "interior.penn_station_concourse",
+      "address": "8th Ave & W 33rd St (Penn Station entrance)",
+      "facade": "avenue",
+      "name": "Penn Station concourse",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "real": true,
+      "note": "Real public place: the 1968 underground station beneath Madison Square Garden. Two exits (Eighth and Seventh Aves) matter for chases."
+    },
+    {
+      "id": "interior.corwin_basement",
+      "address": "W 31st St, Broadway–6th Ave, north side",
+      "facade": "street",
+      "name": "Hotel Corwin, basement",
+      "kind": "sro",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "boiler (1911)",
+        "main electrical panel",
+        "Gus's room"
+      ],
+      "parent": "interior.corwin_lobby"
+    },
+    {
+      "id": "interior.varelas_office",
+      "address": "W 30th St, 6th–7th Aves, north side",
+      "facade": "street",
+      "name": "Varelas & Co., penthouse office",
+      "kind": "loft",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "Nick's desk",
+        "Eleni's glass office",
+        "view of the cutting floor"
+      ]
+    },
+    {
+      "id": "interior.varelas_vault",
+      "address": "W 30th St, 6th–7th Aves, north side",
+      "facade": "street",
+      "name": "Varelas & Co., cold-storage vaults",
+      "kind": "loft",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "compressor room",
+        "racks of stored coats",
+        "vault door",
+        "loading dock to W 30th St"
+      ],
+      "parent": "interior.varelas_office"
+    },
+    {
+      "id": "interior.lisle_office",
+      "address": "5th Ave & W 36th St, west side",
+      "facade": "avenue",
+      "name": "Lisle & Associates, 11th floor",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "Marjorie's outer office",
+        "Lisle's office",
+        "ledger cabinet",
+        "freight stairs to W 37th St"
+      ]
+    },
+    {
+      "id": "interior.bank_branch",
+      "address": "5th Ave & W 34th St, east side",
+      "facade": "avenue",
+      "name": "Fifth Avenue Trust, 34th St branch",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "banking floor",
+        "Whitlock's corner office"
+      ]
+    },
+    {
+      "id": "interior.kallis_salon",
+      "address": "W 29th St & 7th Ave, NE corner",
+      "facade": "avenue",
+      "name": "Kallis Fur Salon",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "showroom",
+        "Kallis's desk"
+      ]
+    },
+    {
+      "id": "interior.herald_lunch_counter",
+      "address": "W 34th St & Broadway",
+      "facade": "avenue",
+      "name": "Herald Square department store, lunch counter",
+      "kind": "diner",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "U-shaped counter",
+        "stools",
+        "the fur salon one floor up"
+      ]
+    },
+    {
+      "id": "interior.iron_gate",
+      "address": "W 36th St & 7th Ave, NE corner",
+      "facade": "avenue",
+      "name": "The Iron Gate Chop House",
+      "kind": "diner",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "corner booths",
+        "Nick's table"
+      ]
+    },
+    {
+      "id": "interior.hanyang_house",
+      "address": "W 32nd St, 5th Ave–Broadway, north side",
+      "facade": "street",
+      "name": "Hanyang House",
+      "kind": "diner",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "dining room",
+        "back room (kye meetings)"
+      ]
+    },
+    {
+      "id": "interior.carriers_garage",
+      "address": "W 38th St & 9th Ave, NW corner",
+      "facade": "street",
+      "name": "Seventh Avenue Carriers' Association garage",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "truck bays",
+        "glass dispatch booth"
+      ]
+    },
+    {
+      "id": "interior.beauty_shop",
+      "address": "W 37th St, 7th–8th Aves, north side",
+      "facade": "street",
+      "name": "Closed beauty shop",
+      "kind": "shop",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "two old chairs",
+        "papered window"
+      ]
+    }
   ]
 }

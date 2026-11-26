@@ -1,0 +1,112 @@
+{
+  "id": "mission.partners_meeting",
+  "title": "Partners' Meeting",
+  "number": 20,
+  "act": 2,
+  "chapter": 7,
+  "playAs": "char.nick_varelas",
+  "date": "1974-08-01",
+  "durationMin": 12,
+  "pillars": [
+    "P1",
+    "P4"
+  ],
+  "giver": "char.howard_lisle",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "10:00",
+      "13:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-01",
+      "1974-08-01"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.howard_lisle",
+    "at": "loc.varelas_loft",
+    "note": "A telegram-style note from Lisle's office: 'Partners, 11 a.m.'"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Drive to Lisle's, Fifth & 36th",
+      "to": "loc.lisle_office",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Up to the 11th floor",
+      "marker": "interior.lisle_office"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "The partners' meeting",
+      "script": "dlg.m20_meeting"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Marjorie leaves the ledger open",
+      "script": "dlg.m20_marjorie"
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "text": "Lunch alone at the Iron Gate",
+      "marker": "interior.iron_gate"
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Call Eleni from the booth",
+      "script": "dlg.m20_eleni_call"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2",
+    "o4"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.carbon_copy"
+    ],
+    "relationships": {
+      "char.nick_varelas/char.marjorie_kell": 1,
+      "char.nick_varelas/char.howard_lisle": -2
+    }
+  },
+  "npcs": [
+    "char.howard_lisle",
+    "char.marjorie_kell",
+    "char.augie_lomax",
+    "char.dennis_wurtz",
+    "char.eleni_varelas",
+    "char.hector_villalba"
+  ],
+  "archetypes": [
+    "npc.office_lunch_crowd"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan"
+  ],
+  "locations": [
+    "loc.lisle_office",
+    "loc.steakhouse"
+  ],
+  "mobile": "Driving is optional (it's five blocks). The meeting is one dialogue with two untimed choices. No timers.",
+  "design": "Nick sees the ledger: his name on every hotel, every surcharge and every 'consideration'. The oldest page is dated autumn 1971, initialled C.M. (Mayhew, N3 §6). Marjorie leaves it open on purpose. That's the first crack in Lisle's office."
+}

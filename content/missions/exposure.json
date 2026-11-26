@@ -1,0 +1,157 @@
+{
+  "id": "mission.exposure",
+  "title": "Exposure",
+  "number": 27,
+  "act": 3,
+  "chapter": 9,
+  "playAs": "char.delphine_moore",
+  "date": "1974-08-22",
+  "durationMin": 15,
+  "pillars": [
+    "P1",
+    "P4"
+  ],
+  "giver": "char.dennis_wurtz",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "20:00",
+      "00:30"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-22",
+      "1974-08-22"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.dennis_wurtz",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Wurtz wants the whole club now",
+      "script": "dlg.m27_wurtz_club"
+    },
+    {
+      "id": "o2",
+      "type": "switch_to",
+      "text": "(Nick)",
+      "character": "char.nick_varelas",
+      "cut": "transition"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Wurtz at the showroom, smiling",
+      "script": "dlg.m27_wurtz_showroom"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Buy a locker key from Brannock",
+      "script": "dlg.m27_brannock_key"
+    },
+    {
+      "id": "o5",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o6",
+      "type": "goto",
+      "text": "Penn Station lockers, Eighth Ave",
+      "to": "loc.penn_station_lockers",
+      "radius": 15
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "text": "Open Wurtz's locker",
+      "script": "dlg.m27_locker"
+    },
+    {
+      "id": "o8",
+      "type": "photo",
+      "text": "Photograph Lisle's dinner guest",
+      "subject": "npc.editor_brother_in_law",
+      "with": "char.howard_lisle",
+      "minScreenFraction": 0.06,
+      "optional": true,
+      "onComplete": {
+        "setFlags": [
+          "flag.editor_neutralised"
+        ],
+        "items": [
+          "item.print_editor_lisle"
+        ]
+      }
+    },
+    {
+      "id": "o9",
+      "type": "enter_interior",
+      "text": "Back to Rita's. Tina's decided.",
+      "marker": "interior.arden_lobby"
+    },
+    {
+      "id": "o10",
+      "type": "dialogue",
+      "text": "Tina's choice",
+      "script": "dlg.m27_tina"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3",
+    "o5",
+    "o7",
+    "o9"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.have_wurtz_locker"
+    ],
+    "unlock": [
+      "mission.the_march"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.nick_varelas": 1,
+      "char.nick_varelas/char.delphine_moore": 1,
+      "char.nick_varelas/char.jimmy_brannock": 0
+    }
+  },
+  "npcs": [
+    "char.dennis_wurtz",
+    "char.jimmy_brannock",
+    "char.howard_lisle",
+    "char.tina_mercado",
+    "char.lonnie_gage",
+    "char.ray_bauer",
+    "char.claudette_bijou",
+    "char.nick_varelas"
+  ],
+  "archetypes": [
+    "npc.penn_porter",
+    "npc.hotel_bar_regular",
+    "npc.editor_brother_in_law"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "loc.varelas_loft",
+    "loc.penn_station_lockers",
+    "loc.hotel_pennsylvania"
+  ],
+  "mobile": "Spending is the solution: Nick buys the key, so there's no lockpicking. The optional photo is signposted ('Claudette says the paper's man drinks at the Pennsylvania') so players know it opens a Branch B option. Two switches, both at calm beats.",
+  "design": "The mirror pays off: Wurtz's photographs (his insurance) become the leads' evidence. The optional photo neutralises the editor's conflict for B2 and is signposted here, as N3 §9 requires. Tina's resolution (flag.tina_stays or flag.tina_gone) and Bauer's fate (flag.bauer_burned if Delphine trades him to save Tina) are set in dlg.m27_tina."
+}

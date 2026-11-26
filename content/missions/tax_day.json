@@ -1,0 +1,125 @@
+{
+  "id": "mission.tax_day",
+  "title": "Tax Day",
+  "number": 11,
+  "act": 2,
+  "chapter": 4,
+  "playAs": "char.delphine_moore",
+  "date": "1974-07-10",
+  "durationMin": 12,
+  "pillars": [
+    "P1",
+    "P2"
+  ],
+  "giver": "char.tina_mercado",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "15:00",
+      "20:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-10",
+      "1974-07-10"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.rita_haines",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Club business at Rita's bar",
+      "script": "dlg.m11_rounds"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Dues at the Royal Cafeteria",
+      "marker": "interior.royal_cafeteria"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Tina's late with her dues",
+      "script": "dlg.m11_tina"
+    },
+    {
+      "id": "o4",
+      "type": "evade",
+      "text": "Shake Lonnie: Bauer's arcade, 42nd St",
+      "from": [
+        "char.lonnie_gage"
+      ],
+      "breakDistanceM": 70,
+      "safeZones": [
+        "loc.bauer_arcade"
+      ],
+      "fallback": "goto loc.bauer_arcade with timeLimitSec 120"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Bauer's nervous about something",
+      "script": "dlg.m11_bauer"
+    },
+    {
+      "id": "o6",
+      "type": "deliver",
+      "text": "Hide the money: the Arden boiler room",
+      "item": "item.club_cash",
+      "to": "interior.arden_back_stairs"
+    }
+  ],
+  "fail": [
+    {
+      "type": "caught",
+      "note": "Proposed; fallback timer."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o5"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.lunch_counter"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.ray_bauer": 1,
+      "char.delphine_moore/char.tina_mercado": -1
+    }
+  },
+  "npcs": [
+    "char.rita_haines",
+    "char.tina_mercado",
+    "char.lonnie_gage",
+    "char.ray_bauer",
+    "char.jimmy_brannock",
+    "char.marcus_teague"
+  ],
+  "archetypes": [
+    "npc.strip_worker",
+    "npc.arcade_patron",
+    "npc.bus_terminal_crowd"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "loc.eighth_ave_cafeteria",
+    "loc.bauer_arcade"
+  ],
+  "mobile": "The evade is solved by the arcade's two doors (42nd St and 8th Ave). Lonnie is slower in the crowd. No combat. Day-into-dusk light helps readability.",
+  "design": "Moving cash under surveillance (P1). Tina's lateness and Lonnie's tail are linked, which seeds her secret. Bauer hints that 'somebody downtown' asks about Wurtz."
+}

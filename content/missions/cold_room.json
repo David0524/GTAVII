@@ -1,0 +1,105 @@
+{
+  "id": "mission.cold_room",
+  "title": "Cold Room",
+  "number": 14,
+  "act": 2,
+  "chapter": 5,
+  "playAs": "char.teddy_arce",
+  "date": "1974-07-18",
+  "durationMin": 12,
+  "pillars": [
+    "P1",
+    "P3"
+  ],
+  "giver": "char.carl_mayhew",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "11:00",
+      "15:00"
+    ],
+    "weather": [
+      "clear"
+    ],
+    "dateRange": [
+      "1974-07-18",
+      "1974-07-18"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.carl_mayhew",
+    "at": "loc.corwin_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "Collect at Kallis Furs, 29th & 7th",
+      "marker": "interior.kallis_salon"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Mr. Kallis pays like a gentleman",
+      "script": "dlg.m14_kallis"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Varelas & Co. vaults, W 30th St",
+      "marker": "interior.varelas_vault"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Yiannis shows you the cold room",
+      "script": "dlg.m14_yiannis"
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Meet Mayhew at the kafeneio, 29th & 8th",
+      "to": "loc.kafeneio",
+      "radius": 15
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Say a name and watch Mayhew",
+      "script": "dlg.m14_mayhew"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2",
+    "o4"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.brownout"
+    ]
+  },
+  "npcs": [
+    "char.stavros_kallis",
+    "char.yiannis_doukas",
+    "char.carl_mayhew",
+    "char.augie_lomax"
+  ],
+  "archetypes": [
+    "npc.fur_worker",
+    "npc.garment_pushboy"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.kallis_furs",
+    "loc.varelas_loft",
+    "loc.kafeneio"
+  ],
+  "mobile": "Three short walks within the Fur District with no timers. The vault interior is cold, so breath shows (a visual cue only).",
+  "design": "Maps the vaults for M15 and M18. Seeds Mayhew's secret: if Teddy says 'Lisle', Mayhew drops his toothpick (N3 §6). Nick is absent ('Mr. Varelas is at the bank'), which builds anticipation."
+}

@@ -1,0 +1,171 @@
+{
+  "id": "mission.cold_storage",
+  "title": "Cold Storage",
+  "number": 18,
+  "act": 2,
+  "chapter": 6,
+  "playAs": "char.nick_varelas",
+  "switchPoints": [
+    "o4",
+    "o7",
+    "o9"
+  ],
+  "date": "1974-07-26",
+  "durationMin": 20,
+  "pillars": [
+    "P1",
+    "P5",
+    "P4"
+  ],
+  "giver": "char.eleni_varelas",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "22:00",
+      "03:00"
+    ],
+    "weather": [
+      "overcast"
+    ],
+    "dateRange": [
+      "1974-07-26",
+      "1974-07-26"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.varelas_loft",
+    "note": "The second brownout: set_power off for W 26th–34th, 6th–8th Aves, 22:00–02:00."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The plan, in the dark office",
+      "script": "dlg.m18_plan"
+    },
+    {
+      "id": "o2",
+      "type": "enter_vehicle",
+      "text": "Bring the truck round, W 30th St",
+      "vehicle": "vehicle_role.box_truck"
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Bales to the garage, 39th & Tenth",
+      "item": "item.fur_bales",
+      "to": "W 39th St & 10th Ave"
+    },
+    {
+      "id": "o4",
+      "type": "switch_to",
+      "text": "(Teddy)",
+      "character": "char.teddy_arce",
+      "cut": "transition"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Collection night. Something's wrong.",
+      "script": "dlg.m18_teddy"
+    },
+    {
+      "id": "o6",
+      "type": "follow",
+      "text": "Follow Wurtz's green sedan",
+      "target": "char.dennis_wurtz",
+      "keepWithinM": 90
+    },
+    {
+      "id": "o7",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o8",
+      "type": "photo",
+      "text": "Photograph Wurtz taking Nick's cut",
+      "subject": "char.dennis_wurtz",
+      "with": "char.nick_varelas",
+      "minScreenFraction": 0.06,
+      "optional": true,
+      "onComplete": {
+        "items": [
+          "item.print_wurtz_nick"
+        ]
+      }
+    },
+    {
+      "id": "o9",
+      "type": "switch_to",
+      "text": "(Nick)",
+      "character": "char.nick_varelas",
+      "cut": "hard"
+    },
+    {
+      "id": "o10",
+      "type": "dialogue",
+      "text": "Yiannis has counted the vault",
+      "script": "dlg.m18_count"
+    }
+  ],
+  "fail": [
+    {
+      "type": "vehicle_destroyed"
+    },
+    {
+      "type": "target_lost",
+      "objective": "o6"
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o7",
+    "o9",
+    "o10"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.vault_claim_paid"
+    ],
+    "unlock": [
+      "mission.rewiring"
+    ],
+    "relationships": {
+      "char.nick_varelas/char.yiannis_doukas": -1,
+      "char.teddy_arce/char.nick_varelas": 1,
+      "char.delphine_moore/char.nick_varelas": 0
+    }
+  },
+  "npcs": [
+    "char.eleni_varelas",
+    "char.yiannis_doukas",
+    "char.dennis_wurtz",
+    "char.jimmy_brannock",
+    "char.teddy_arce",
+    "char.delphine_moore"
+  ],
+  "archetypes": [
+    "npc.fur_worker",
+    "npc.plainclothes",
+    "npc.brownout_crowd"
+  ],
+  "vehicles": [
+    "vehicle_role.box_truck",
+    "vehicle_role.unmarked_sedan"
+  ],
+  "locations": [
+    "loc.varelas_loft",
+    "W 39th St & 10th Ave",
+    "W 30th St & 8th Ave"
+  ],
+  "mobile": "Five checkpoints across 20 minutes. Switches only at safe beats. The truck drive has no timer; the brownout's dark signals are all-way stops. The tail of Wurtz is generous because his car is slow and lit by its own headlights.",
+  "design": "**First mission with all three leads.** The insurance job: half the pledged coats go 'missing' in the dark. Wurtz's unit protects it for a cut, Teddy is the collector who sees it, and Delphine photographs the cut. In dlg.m18_count Yiannis gives the true count only if his relationship with Nick is +3. Otherwise he gives Nick the number Nick wants, which matters in M30."
+}

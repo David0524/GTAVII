@@ -1,0 +1,108 @@
+{
+  "id": "mission.flip",
+  "title": "Flip",
+  "number": 24,
+  "act": 3,
+  "chapter": 8,
+  "playAs": "char.nick_varelas",
+  "date": "1974-08-14",
+  "durationMin": 13,
+  "pillars": [
+    "P4",
+    "P1"
+  ],
+  "giver": "char.ruth_calloway",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "11:00",
+      "16:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-14",
+      "1974-08-14"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.ruth_calloway",
+    "at": "loc.herald_sq_store"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "Calloway, Herald Square lunch counter",
+      "marker": "interior.herald_lunch_counter"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "She has an offer. It expires.",
+      "script": "dlg.m24_calloway"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Augie's garage, 38th & Ninth",
+      "marker": "interior.carriers_garage"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Augie's selling. To whom?",
+      "script": "dlg.m24_augie"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Villalba, on the radio, too calm",
+      "script": "dlg.m24_villalba"
+    },
+    {
+      "id": "o6",
+      "type": "goto",
+      "text": "Back to the loft before Lisle calls",
+      "to": "loc.varelas_loft",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2",
+    "o3",
+    "o5"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.fire_watch"
+    ]
+  },
+  "npcs": [
+    "char.ruth_calloway",
+    "char.augie_lomax",
+    "char.hector_villalba",
+    "char.eleni_varelas"
+  ],
+  "archetypes": [
+    "npc.truck_driver",
+    "npc.lunch_counter_regular"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan"
+  ],
+  "locations": [
+    "loc.herald_sq_store",
+    "loc.carriers_garage",
+    "loc.varelas_loft"
+  ],
+  "mobile": "Calm dialogue plus one cross-town drive (west on 37th, then up Ninth to the garage; back east on 38th, then down Seventh). No timers.",
+  "design": "Calloway's deal: testify against Lisle for immunity on the insurance fraud. Accepting sets flag.nick_flipped (in dialogue), which opens B1 even if Teddy burned the wire. Augie, sick, admits the sale. If Nick's relationship with Villalba is −3, Villalba tips Lisle about Nick's visit."
+}

@@ -1,0 +1,130 @@
+{
+  "id": "mission.shoebox",
+  "title": "Shoebox",
+  "number": 23,
+  "act": 3,
+  "chapter": 8,
+  "playAs": "char.delphine_moore",
+  "date": "1974-08-12",
+  "durationMin": 14,
+  "pillars": [
+    "P1",
+    "P4"
+  ],
+  "giver": "char.marcus_teague",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "21:00",
+      "02:00"
+    ],
+    "weather": [
+      "rain"
+    ],
+    "dateRange": [
+      "1974-08-12",
+      "1974-08-12"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "The Arden boiler room",
+      "marker": "interior.arden_back_stairs"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Marcus: Ricky talked. They know.",
+      "script": "dlg.m23_marcus"
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Club money to Hanyang House, W 32nd",
+      "item": "item.club_shoebox",
+      "to": "interior.hanyang_house"
+    },
+    {
+      "id": "o4",
+      "type": "evade",
+      "text": "Brannock's on you. Penn Station.",
+      "from": [
+        "char.jimmy_brannock"
+      ],
+      "breakDistanceM": 80,
+      "safeZones": [
+        "interior.penn_station_concourse"
+      ],
+      "fallback": "goto interior.penn_station_concourse with timeLimitSec 120"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Mi-sook opens the back room",
+      "script": "dlg.m23_mi_sook"
+    },
+    {
+      "id": "o6",
+      "type": "enter_interior",
+      "text": "Back to the Arden. Tina's waiting.",
+      "marker": "interior.arden_lobby"
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "text": "Tina tells you everything",
+      "script": "dlg.m23_tina"
+    }
+  ],
+  "fail": [
+    {
+      "type": "caught",
+      "note": "Proposed; fallback timer."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o5",
+    "o6"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.fire_watch"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.mi_sook_baek": 1,
+      "char.delphine_moore/char.marcus_teague": 1
+    }
+  },
+  "npcs": [
+    "char.marcus_teague",
+    "char.jimmy_brannock",
+    "char.ricky_vail",
+    "char.mi_sook_baek",
+    "char.tina_mercado",
+    "char.claudette_bijou"
+  ],
+  "archetypes": [
+    "npc.rain_pedestrian",
+    "npc.penn_porter"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "loc.penn_station_lockers",
+    "loc.korean_restaurant"
+  ],
+  "mobile": "Rain makes the crowds thinner and the streets readable. The escape uses Penn Station's two exits. The shoebox delivery has no timer. Tina's confession has untimed choices: forgive her, confront her, or cover the $1,100 yourself.",
+  "design": "Two credit clubs, side by side: the kye's back room takes in the women's money for safekeeping. Tina confesses that Lonnie is her cousin and that the leak and the $1,100 went to him. Choices set flag.delphine_forgave_tina and/or flag.club_count_settled (in dialogue)."
+}

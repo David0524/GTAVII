@@ -444,6 +444,30 @@
       ],
       "world": "Epilogue world set (date 1974-10-01).",
       "notes": ""
+    },
+    {
+      "id": "flag.arson_stopped",
+      "setBy": [
+        "mission.fire_watch"
+      ],
+      "readBy": [
+        "ambient",
+        "mission.the_march"
+      ],
+      "world": "Corwin tenants sit outside on folding chairs at night; a bedsheet banner reads 'WE STAYED UP'.",
+      "notes": "Always set: M26 can't end in a fire."
+    },
+    {
+      "id": "flag.teddy_spared_mayhew",
+      "setBy": [
+        "mission.the_car"
+      ],
+      "readBy": [
+        "mission.labor_day",
+        "epilogue"
+      ],
+      "world": "None.",
+      "notes": "Choice in M25: let Mayhew go or bring him to Calloway."
     }
   ]
 }

@@ -1,0 +1,119 @@
+{
+  "id": "mission.the_ledger",
+  "title": "The Ledger",
+  "number": 29,
+  "act": 3,
+  "chapter": 10,
+  "playAs": "char.teddy_arce",
+  "date": "1974-08-28",
+  "durationMin": 14,
+  "pillars": [
+    "P4",
+    "P1"
+  ],
+  "giver": "char.bernard_ostrow",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "18:00",
+      "22:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-28",
+      "1974-08-28"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.bernard_ostrow",
+    "at": "loc.corwin_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Bernard lays out what you have",
+      "script": "dlg.m29_inventory"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Decide who gets the ledger",
+      "script": "dlg.m29_choice"
+    },
+    {
+      "id": "o3a",
+      "type": "goto",
+      "text": "Calloway's car, Fifth & 36th",
+      "to": "5th Ave & W 36th St",
+      "radius": 20,
+      "if": "flag.ledger_to_prosecutor"
+    },
+    {
+      "id": "o3b",
+      "type": "enter_interior",
+      "text": "Nora Finch, the Shamrock Rail",
+      "marker": "interior.shamrock_rail",
+      "if": "flag.ledger_to_press"
+    },
+    {
+      "id": "o3c",
+      "type": "enter_interior",
+      "text": "Lisle's table, the Iron Gate",
+      "marker": "interior.iron_gate",
+      "if": "flag.ledger_kept"
+    },
+    {
+      "id": "o3d",
+      "type": "enter_interior",
+      "text": "The Corwin boiler. Open the door.",
+      "marker": "interior.corwin_basement",
+      "if": "flag.ledger_burned"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Hand it over. Or don't.",
+      "script": "dlg.m29_handover"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1",
+    "o2",
+    "o4"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.closing",
+      "mission.lease"
+    ]
+  },
+  "npcs": [
+    "char.bernard_ostrow",
+    "char.ruth_calloway",
+    "char.nora_finch",
+    "char.howard_lisle",
+    "char.luis_navarro"
+  ],
+  "archetypes": [
+    "npc.office_lunch_crowd",
+    "npc.night_reader"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.corwin_hotel",
+    "5th Ave & W 36th St",
+    "loc.cop_bar",
+    "loc.steakhouse"
+  ],
+  "mobile": "**Branch B** is an untimed choice with a confirm step. Unavailable options are shown greyed out, with the reason ('Needs a witness who'll testify'), so the player sees the cost of earlier choices. One short trip afterwards.",
+  "design": "**Branch B** (N3 §3). dlg.m29_choice gates options with `if`: B1 needs flag.branch_a_wire or flag.nick_flipped; B2 needs two corroborations plus flag.editor_neutralised; B3 and B4 are always available. o3c meets Lisle at the Iron Gate because it's dinnertime. In the New Pad epilogue Teddy takes Lisle's luncheonette stool."
+}

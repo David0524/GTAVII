@@ -1,0 +1,129 @@
+{
+  "id": "mission.margin_call",
+  "title": "Margin Call",
+  "number": 16,
+  "act": 2,
+  "chapter": 6,
+  "playAs": "char.nick_varelas",
+  "date": "1974-07-22",
+  "durationMin": 14,
+  "pillars": [
+    "P1",
+    "P5"
+  ],
+  "giver": "char.eleni_varelas",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "09:00",
+      "14:30"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-22",
+      "1974-07-22"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.eleni_varelas",
+    "at": "loc.varelas_loft"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "Fifth Avenue Trust, 34th St branch",
+      "marker": "interior.bank_branch"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Whitlock loves you less in July",
+      "script": "dlg.m16_whitlock"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Kallis wants a word, 29th & Seventh",
+      "marker": "interior.kallis_salon"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Hear Kallis's 'fair' price",
+      "script": "dlg.m16_kallis"
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "The Baeks' shop, W 29th St",
+      "to": "loc.baek_wholesale",
+      "radius": 15
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "The Baeks want to buy your building",
+      "script": "dlg.m16_baeks"
+    },
+    {
+      "id": "o7",
+      "type": "enter_interior",
+      "text": "Lisle's office, Fifth & 36th",
+      "marker": "interior.lisle_office"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "Lisle has paper for you to sign",
+      "script": "dlg.m16_lisle"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o6",
+    "o7"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.the_lease"
+    ],
+    "relationships": {
+      "char.nick_varelas/char.gordon_whitlock": -1,
+      "char.nick_varelas/char.stavros_kallis": -1
+    }
+  },
+  "npcs": [
+    "char.gordon_whitlock",
+    "char.stavros_kallis",
+    "char.jung_ho_baek",
+    "char.mi_sook_baek",
+    "char.howard_lisle",
+    "char.marjorie_kell",
+    "char.eleni_varelas"
+  ],
+  "archetypes": [
+    "npc.bank_teller",
+    "npc.office_lunch_crowd"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan"
+  ],
+  "locations": [
+    "loc.bank_branch",
+    "loc.kallis_furs",
+    "loc.baek_wholesale",
+    "loc.lisle_office"
+  ],
+  "mobile": "Four short stops, any order after o2 (the engine can present o3–o8 as a list). Driving is optional because the stops are close. Choices are untimed.",
+  "design": "Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches."
+}

@@ -1,0 +1,95 @@
+{
+  "id": "mission.lease",
+  "title": "Lease",
+  "number": 31,
+  "act": 3,
+  "chapter": 10,
+  "playAs": "char.delphine_moore",
+  "date": "1974-08-31",
+  "durationMin": 12,
+  "pillars": [
+    "P4",
+    "P1"
+  ],
+  "giver": "char.claudette_bijou",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "14:00",
+      "18:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-31",
+      "1974-08-31"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.claudette_bijou",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Claudette wants a full count",
+      "script": "dlg.m31_count"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The shop, W 37th St",
+      "to": "loc.beauty_shop",
+      "radius": 15
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Keys, or no keys",
+      "script": "dlg.m31_lease"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Hanyang House back room",
+      "script": "dlg.m31_kye",
+      "if": "!flag.delphine_shop"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1",
+    "o2",
+    "o3"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.labor_day"
+    ]
+  },
+  "npcs": [
+    "char.claudette_bijou",
+    "char.tina_mercado",
+    "char.rita_haines",
+    "char.mi_sook_baek",
+    "char.nick_varelas"
+  ],
+  "archetypes": [
+    "npc.strip_worker"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "loc.beauty_shop",
+    "loc.korean_restaurant"
+  ],
+  "mobile": "Walking and talking only. The count is a dialogue, not arithmetic. Untimed choices.",
+  "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them."
+}
