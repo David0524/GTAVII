@@ -24,7 +24,7 @@ import { StandInBody } from '../../player/StandInBody';
 import { OrbitCamera } from '../../camera/OrbitCamera';
 import { FlyCamera } from '../../camera/FlyCamera';
 import { Input } from '../../input/Input';
-import { FrameStats } from '../../ui/DebugHud';
+import { FrameStats } from '../../engine/debug/DebugHud';
 import { createInteriors } from '../index';
 import { buildShell, type ShellArrays } from './testShell';
 import { buildInterior } from '../build';

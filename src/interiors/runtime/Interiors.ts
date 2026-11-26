@@ -145,6 +145,7 @@ export class Interiors {
     const hy = this.frameYaw(L);
     return L.built.slots.map((s) => { const v = new THREE.Vector3(s.x, s.y, s.z).applyMatrix4(L.matrix); return { id: s.id, role: s.role, x: v.x, y: v.y, z: v.z, yaw: this.toWorldHeading(L, s.yaw, hy) }; });
   }
+  /** All marker types are in spec.ts MarkerType (brief contract plus economy/time/burglary additions). */
   markers(interiorId: string) {
     const L = this.live.get(interiorId); if (!L) return [];
     return L.built.markers.map((m) => { const v = new THREE.Vector3(m.x, m.y, m.z).applyMatrix4(L.matrix); return { id: m.id, type: m.type, x: v.x, y: v.y, z: v.z, name: m.name }; });

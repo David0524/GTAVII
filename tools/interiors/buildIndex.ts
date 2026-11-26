@@ -148,7 +148,17 @@ function frontage(b: B): Edge[] {
     const st = nearestStreet(mx, mz); if (!st || st.d > 14) continue;
     out.push({ ax, az, bx, bz, L, ux, uz, nx: -ox, nz: -oz, street: st.s, avenue: st.avenue });
   }
-  return out;
+  // merge collinear consecutive frontage edges (footprints often split a straight front into several segments)
+  const merged: Edge[] = [];
+  for (const e of out) {
+    const p = merged[merged.length - 1];
+    if (p && p.street === e.street && Math.hypot(p.bx - e.ax, p.bz - e.az) < 0.05 && p.ux * e.ux + p.uz * e.uz > 0.9986) {
+      p.bx = e.bx; p.bz = e.bz; p.L = Math.hypot(p.bx - p.ax, p.bz - p.az); p.ux = (p.bx - p.ax) / p.L; p.uz = (p.bz - p.az) / p.L;
+      p.nx = ccw ? -p.uz : p.uz; p.nz = ccw ? p.ux : -p.ux;
+    } else merged.push({ ...e });
+  }
+  if (merged.length > 1) { const f = merged[0], l = merged[merged.length - 1]; if (f.street === l.street && Math.hypot(l.bx - f.ax, l.bz - f.az) < 0.05 && f.ux * l.ux + f.uz * l.uz > 0.9986) { f.ax = l.ax; f.az = l.az; f.L = Math.hypot(f.bx - f.ax, f.bz - f.az); f.ux = (f.bx - f.ax) / f.L; f.uz = (f.bz - f.az) / f.L; f.nx = ccw ? -f.uz : f.uz; f.nz = ccw ? f.ux : -f.ux; merged.pop(); } }
+  return merged;
 }
 
 // ---------------------------------------------------------------- rect fitting inside the footprint
@@ -157,7 +167,7 @@ const rectPts = (q: Rect, step = 1.0) => {
   const pts: [number, number][] = [];
   const nu = Math.max(2, Math.ceil(q.w / step)), nd = Math.max(2, Math.ceil(q.d / step));
   for (let a = 0; a <= nu; a++) for (let c = 0; c <= nd; c++) {
-    const s = 0.05 + (q.w - 0.1) * (a / nu), t = 0.05 + (q.d - 0.1) * (c / nd);
+    const s = 0.2 + (q.w - 0.4) * (a / nu), t = 0.3 + (q.d - 0.35) * (c / nd);
     pts.push([q.ox + q.ux * s + q.nx * t, q.oz + q.uz * s + q.nz * t]);
   }
   return pts;
@@ -204,10 +214,10 @@ function shopChance(b: B, avenue: boolean): number {
   const u = b.use;
   if (u === 9 || u === 11 || u === 0 || u === 8 || u === 10 || u === 7) return 0;
   if (b.flags & BuildingFlag.Hero) return 0;
-  if (u <= 3) return avenue ? 0.8 : 0.18; // avenue tenements almost always had storefronts
-  if (u === 4) return avenue ? 0.95 : 0.7;
-  if (u === 5) return b.floors <= 3 ? 0.95 : avenue ? 0.9 : 0.6;
-  if (u === 6) return 0.35;
+  if (u <= 3) return avenue ? 0.9 : 0.3; // avenue tenements almost always had storefronts
+  if (u === 4) return 1;
+  if (u === 5) return 1;
+  if (u === 6) return 0.8;
   return 0;
 }
 
@@ -215,6 +225,7 @@ function shopChance(b: B, avenue: boolean): number {
 const out: BuildingIdx[] = [];
 const cov = { buildingsPlayable: 0, groundBuildings: 0, enterableBuildings: 0, roofBuildings: 0, commercialFrontageM: 0, enterableCommercialFrontageM: 0, allFrontageM: 0, enterableFrontageM: 0, units: 0, shopUnits: 0, cores: 0 } as Record<string, number>;
 const kindCount: Record<string, number> = {};
+const lost: Record<string, number> = {};
 for (const b of blds) {
   const cx = (b.minX + b.maxX) / 2, cz = (b.minZ + b.maxZ) / 2;
   const inPlay = cx >= PLAYABLE.minX && cx <= PLAYABLE.maxX && cz >= PLAYABLE.minZ && cz <= PLAYABLE.maxZ;
@@ -233,7 +244,7 @@ for (const b of blds) {
   let gs = 0; const nv = b.ring.length / 2; for (let k = 0; k < b.ring.length; k += 2) gs += heightAt(b.ring[k], b.ring[k + 1]);
   const gAvg = gs / nv; const top = gAvg + Math.max(b.height, b.minHeight + 0.5);
   const fh = Math.max(2.8, Math.min(5.2, b.floors > 0 ? b.height / b.floors : 3.2));
-  const units: UnitRec[] = []; const taken: Rect[] = [];
+  const units: UnitRec[] = []; const taken: Rect[] = []; const wantD = new Map<number, number>();
   const h0 = hash(b.id, 1);
   const core = coreKindFor(b, district, h0);
   // edges by preference: the core door goes on a side street when there is one (NYC residential entrances)
@@ -252,10 +263,13 @@ for (const b of blds) {
   }
   const mkUnit = (e: Edge, t0: number, w: number, kind: InteriorKind, idx: number, maxD: number): UnitRec | null => {
     const base = { ox: e.ax + e.ux * t0, oz: e.az + e.uz * t0, ux: e.ux, uz: e.uz, nx: e.nx, nz: e.nz, w };
-    const d = fitDepth(b, base, maxD, taken);
-    const minD = kind === 'tenement' || kind === 'loft' ? 6.5 : 3.5;
+    // pass 1: shops claim a shallow strip so corner units don't swallow the other frontage; pass 2 deepens
+    const d = fitDepth(b, base, isCoreKind(kind) ? maxD : Math.min(maxD, 4.5), taken);
+    const small = kind === 'newsstand' || kind === 'shoe_repair' || kind === 'tailor' || kind === 'florist' || kind === 'barber' || kind === 'liquor' || kind === 'bodega';
+    const minD = kind === 'tenement' || kind === 'loft' ? 6.5 : small ? 2.6 : 3.5;
     if (d < minD) return null;
     taken.push({ ...base, d });
+    wantD.set(taken.length - 1, maxD);
     const seed = Math.floor(hash(b.id, idx, 77) * 2 ** 31);
     const info = kind === 'hero' ? null : KINDS[kind];
     const dw = kind === 'garage' ? Math.min(6, w - 1) : ['church', 'hotel_lobby', 'office_lobby', 'cinema_lobby', 'union_hall'].includes(kind) ? 1.6 : 0.95;
@@ -283,31 +297,44 @@ for (const b of blds) {
   let idx = 1; let prevKind: string | null = null;
   for (const e of [...edges].sort((p, q) => (p.avenue === q.avenue ? q.L - p.L : p.avenue ? -1 : 1))) {
     const chance = shopChance(b, e.avenue);
-    if (chance <= 0) continue;
+    if (chance <= 0) { if (commercial && inPlay && !(e === coreEdge && units.length)) lost.nochance = (lost.nochance ?? 0) + e.L; continue; }
     const spans: [number, number][] = [];
     if (e === coreEdge && coreSpan && units.length) { spans.push([0, coreSpan[0] - 0.3], [coreSpan[1] + 0.3, e.L]); } else spans.push([0, e.L]);
     for (const [s0, s1] of spans) {
-      const L = s1 - s0; if (L < 3.2) continue;
+      const L = s1 - s0; if (L < 3.2) { if (commercial && inPlay) lost.short = (lost.short ?? 0) + Math.max(0, L); continue; }
       const n = Math.max(1, Math.round(L / (5.5 + hash(b.id, idx, 11) * 3)));
       const w = L / n;
       for (let k = 0; k < n; k++, idx++) {
-        if (hash(b.id, idx, 12) > chance) continue;
+        if (hash(b.id, idx, 12) > chance) { if (commercial && inPlay) lost.chance = (lost.chance ?? 0) + w; continue; }
         let kind: ShopKind = pickWeighted(shopWeights(district, e.avenue), hash(b.id, idx, 13));
         for (let tries = 0; (kind === prevKind || KINDS[kind].minW > w) && tries < 6; tries++) kind = pickWeighted(shopWeights(district, e.avenue), hash(b.id, idx, 14 + tries));
-        if (KINDS[kind].minW > w) continue;
-        const upstairs = KINDS[kind].upstairs;
-        const uw = upstairs ? Math.min(w, 3.0) : w;
-        const t0 = s0 + k * w + (upstairs ? (w - uw) / 2 : 0);
+        if (KINDS[kind].minW > w) { if (commercial && inPlay) lost.minw = (lost.minw ?? 0) + w; continue; }
+        const upstairs: boolean = !!KINDS[kind].upstairs;
+        const uw: number = upstairs ? Math.min(w, 3.0) : w;
+        const t0: number = s0 + k * w + (upstairs ? (w - uw) / 2 : 0);
         const maxD = upstairs ? 7 : kind === 'cinema_lobby' ? 22 : kind === 'diner' || kind === 'bar' || kind === 'laundromat' ? 20 : 15;
-        const u = mkUnit(e, t0, uw, kind, idx, maxD);
-        if (u) { units.push(u); prevKind = kind; }
+        let u = mkUnit(e, t0, uw, kind, idx, maxD);
+        // corner/irregular retries: inset the bay, then fall back to a small-shop kind that fits shallow space
+        if (!u && uw > 4.2 && !KINDS[kind].upstairs) u = mkUnit(e, t0 + 0.6, uw - 1.2, kind, idx, maxD);
+        if (!u && !KINDS[kind].upstairs) { const alt = pickWeighted<ShopKind>((['newsstand', 'shoe_repair', 'tailor', 'bodega', 'liquor', 'barber'] as ShopKind[]).map((q) => [q, 1]), hash(b.id, idx, 31)); if (KINDS[alt].minW <= uw) u = mkUnit(e, t0, uw, alt, idx, 8) ?? (uw > 4.2 ? mkUnit(e, t0 + 0.6, uw - 1.2, alt, idx, 8) : null); }
+        if (u) { units.push(u); prevKind = u.kind; } else if (commercial && inPlay) { lost.fit = (lost.fit ?? 0) + w; if (process.env.DBG && w > 6) { const mx = e.ax + e.ux * (t0 + uw / 2), mz = e.az + e.uz * (t0 + uw / 2); let dd = 0; while (dd < 30 && inPoly(b.ring, b.holes, mx + e.nx * (dd + 0.3), mz + e.nz * (dd + 0.3))) dd += 0.25; const tk = taken.some((o) => inRect(o, mx + e.nx * 1.5, mz + e.nz * 1.5)); console.error('fitfail', b.id, kind, 'depthAtMid', dd.toFixed(2), 'taken', tk, 'flags', b.flags, 'area', b.area.toFixed(0)); } }
       }
     }
+  }
+  // pass 2: deepen shop units into the space nobody else claimed
+  for (let ti = 0; ti < taken.length; ti++) {
+    const md = wantD.get(ti); const q = taken[ti]; if (!md || md <= q.d) continue;
+    const others = taken.filter((_, k) => k !== ti);
+    const nd = fitDepth(b, { ox: q.ox, oz: q.oz, ux: q.ux, uz: q.uz, nx: q.nx, nz: q.nz, w: q.w }, md, others);
+    if (nd > q.d) { q.d = nd; const u = units.find((x) => Math.abs(x.ox - q.ox) < 0.01 && Math.abs(x.oz - q.oz) < 0.01 && Math.abs(x.w - q.w) < 0.02); if (u) u.d = +nd.toFixed(2); }
   }
   if (!units.length) continue;
   units.forEach((u, k) => { u.id = k === 0 && isCoreKind(u.kind) ? `b${b.id}` : `b${b.id}u${k}`; });
   const roofCore = units[0]?.kind;
-  const roof = (roofCore === 'tenement' || roofCore === 'loft' || roofCore === 'sro' || (roofCore === 'apartment_lobby' && hash(b.id, 21) < 0.6)) && b.floors <= 16;
+  let roof = (roofCore === 'tenement' || roofCore === 'loft' || roofCore === 'sro' || roofCore === 'apartment_lobby') && b.floors <= 16;
+  if ((roofCore === 'office_lobby' || roofCore === 'hotel_lobby') && b.floors <= 14 && units[0].d >= 9) roof = true;
+  // low taxpayers: a ship's ladder in a deep shop's back room up to a roof hatch
+  if (!roof && b.floors <= 3) { const ru = units.find((u) => !isCoreKind(u.kind) && !(KINDS as any)[u.kind]?.upstairs && u.d > 11 && u.w > 3.6); if (ru) { ru.roofAccess = true; roof = true; } }
   const addr = audit.find((a) => a.x >= b.minX && a.x <= b.maxX && a.z >= b.minZ && a.z <= b.maxZ && inRing(b.ring, a.x, a.z))?.address;
   out.push({
     id: b.id, i: b.i, j: b.j, use: b.use, style: b.style, year: b.year, floors: b.floors, fh: +fh.toFixed(3), top: +top.toFixed(3), gAvg: +gAvg.toFixed(3), district, roof, units,
@@ -334,4 +361,4 @@ fs.mkdirSync(path.join(DATA, 'interiors'), { recursive: true });
 fs.writeFileSync(path.join(DATA, 'interiors/index.json'), JSON.stringify(encodeIndex(file, (k) => (KINDS as Record<string, { hours?: [string, string] }>)[k]?.hours)));
 fs.mkdirSync(path.join(ROOT, 'docs/interiors'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'docs/interiors/coverage.json'), JSON.stringify({ coverage, kinds: kindCount }, null, 2));
-console.log(coverage, kindCount, `index ${(fs.statSync(path.join(DATA, 'interiors/index.json')).size / 1024).toFixed(0)} KiB`);
+console.log(coverage, 'lost commercial frontage m:', lost, kindCount, `index ${(fs.statSync(path.join(DATA, 'interiors/index.json')).size / 1024).toFixed(0)} KiB`);

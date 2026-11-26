@@ -10,6 +10,7 @@ import * as P from '../kit/props';
 import type { UnitRec } from '../indexFormat';
 import { KINDS, type InteriorKind } from '../catalog';
 import { facadeOpenings, groundCeiling, unitEra } from '../facade';
+import { shipLadder } from './vertical';
 
 export interface BuildingInfo { id: number; use: number; style: number; year: number; floors: number; fh: number; top: number; gAvg: number; district: string; roof: boolean; address?: string }
 export interface GenCtx {
@@ -211,7 +212,7 @@ export function backRoom(c: GenCtx, s: ShopShell, style: 'storage' | 'kitchen' |
     P.chair(k, { x: (x0 + x1) / 2, z: z1 - 0.35, yaw: Math.PI });
     P.fileCabinet(k, { x: x1 - 0.4, z: z1 - 0.75, yaw: 0 });
     k.box(x0 + 0.1, 0, z1 - 0.7, x0 + 0.8, 0.9, z1 - 0.1, M.black, { collide: 'cover' }); // safe
-    k.marker('register', x0 + 0.45, 0.9, z1 - 0.8, 'safe');
+    k.marker('safe', x0 + 0.45, 0.9, z1 - 0.8, 'office safe');
   }
   // cartons stacked along a wall
   for (let x = x0 + 0.2; x < x1 - 0.6; x += r.range(0.5, 0.8)) {
@@ -220,6 +221,7 @@ export function backRoom(c: GenCtx, s: ShopShell, style: 'storage' | 'kitchen' |
     for (let q = 0; q < h; q++) { const hh = r.range(0.3, 0.45); k.box(x, y, z0 + 0.15, x + 0.48, y + hh, z0 + 0.6, tint(M.paper, r.pick(['#b8996a', '#a98a5a', '#c4a87a'])), { collide: q === 0 }); y += hh; }
   }
   k.marker('hide', (x0 + x1) / 2, 0, (z0 + z1) / 2, 'back room');
+  if (c.unit.roofAccess) shipLadder(c, s.backCell, s.H);
   k.use(s.cell);
 }
 

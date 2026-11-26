@@ -83,9 +83,12 @@ export class Kit {
   cur = 0;
   /** tessellation edge (m) for large surfaces */
   tess: number;
+  /** mobile Low: props simplify (fewer cylinder segments, goods as blocks) */
+  readonly low: boolean;
   constructor(seed: number, public readonly id: string, quality: 'low' | 'medium' | 'high' | 'ultra') {
     this.rng = new Rng(seed);
     this.tess = quality === 'low' ? 1.1 : quality === 'medium' ? 0.8 : 0.6;
+    this.low = quality === 'low';
   }
 
   // ------------------------------------------------------------ cells
@@ -153,6 +156,7 @@ export class Kit {
   }
   /** Vertical cylinder (stools, poles, columns, bottles). */
   cyl(cx: number, y0: number, cz: number, r: number, h: number, mat: Mat, seg = 10, o: BoxOpts & { top?: boolean; r1?: number } = {}) {
+    if (this.low) seg = Math.max(4, Math.round(seg * 0.5));
     const mb = o.glass ? this.g : this.m, r1 = o.r1 ?? r, v0 = mb.vcount, sh = o.shade ?? 1;
     for (let k = 0; k <= seg; k++) {
       const a = (k / seg) * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);

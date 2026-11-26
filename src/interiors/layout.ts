@@ -40,3 +40,27 @@ export function roofHatchWorld(u: UnitRec, b: Pick<BuildingIdx, 'floors' | 'top'
   const pts = [[L.x0, L.zs], [L.x1, L.zs], [L.x1, L.ze], [L.x0, L.ze]];
   return pts.flatMap(([x, z]) => [u.ox + u.ux * x + u.nx * z, u.oz + u.uz * x + u.nz * z]);
 }
+
+/** Fire-stair tower at the back corner of an office/hotel lobby (same flight geometry as coreLayout). */
+export function towerLayout(u: UnitRec, b: Pick<BuildingIdx, 'floors' | 'top' | 'roof' | 'fh'>): CoreLayout {
+  const L = coreLayout({ ...u, w: Math.min(u.w, 2.9) + 0 } as UnitRec, b);
+  const x1 = u.w - PARTY_INSET, x0 = Math.max(PARTY_INSET, x1 - 2.7);
+  return { ...L, x0, x1, flightW: Math.min(1.25, (x1 - x0 - 0.08) / 2) };
+}
+/** Ship's-ladder roof hatch in a low building's shop back room (unit-local rect x0,z0,x1,z1). */
+export function shopRoofHatch(u: UnitRec): [number, number, number, number] {
+  const x1 = u.w - PARTY_INSET, z1 = u.d - PARTY_INSET;
+  return [x1 - 1.8, z1 - 3.0, x1 - 0.1, z1 - 0.1];
+}
+/** Every roof hatch of a building in world x/z rings (for cutting the roof). */
+export function roofHatchesWorld(b: BuildingIdx): number[][] {
+  const out: number[][] = [];
+  for (const u of b.units) {
+    let r: number[] | null = null;
+    if (u.roofAccess) { const [x0, z0, x1, z1] = shopRoofHatch(u); r = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]].flatMap(([x, z]) => [u.ox + u.ux * x + u.nx * z, u.oz + u.uz * x + u.nz * z]); }
+    else if (u === b.units[0] && ['tenement', 'loft', 'sro', 'apartment_lobby'].includes(u.kind)) r = roofHatchWorld(u, b);
+    else if (u === b.units[0] && b.roof && (u.kind === 'office_lobby' || u.kind === 'hotel_lobby')) { const L = towerLayout(u, b); r = [[L.x0, L.zs], [L.x1, L.zs], [L.x1, L.ze], [L.x0, L.ze]].flatMap(([x, z]) => [u.ox + u.ux * x + u.nx * z, u.oz + u.uz * x + u.nz * z]); }
+    if (r) out.push(r);
+  }
+  return out;
+}

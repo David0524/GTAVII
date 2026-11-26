@@ -139,7 +139,11 @@ export function shelves(k: Kit, f: Frame, len: number, o: { h?: number; d?: numb
       if (r.next() > fill) { x += r.range(0.1, 0.4); continue; }
       const kind = goods === 'mixed' ? r.pick(['cans', 'boxes', 'bottles', 'jars'] as const) : goods;
       const col = goodsColour(r.next(), kind);
-      if (kind === 'cans' || kind === 'jars') {
+      if (k.low && (kind === 'cans' || kind === 'jars' || kind === 'bottles')) {
+        // Low: a row of goods becomes one block with the same silhouette height
+        const n = r.int(2, 6), ww = n * (kind === 'bottles' ? 0.085 : 0.08), hh = kind === 'bottles' ? 0.27 : 0.13;
+        pbox(k, f, x, y, d * 0.25, Math.min(len - 0.05, x + ww), y + hh, d * 0.7, col, { occlude: false }); x += ww + 0.02;
+      } else if (kind === 'cans' || kind === 'jars') {
         const rad = kind === 'cans' ? 0.038 : 0.045, hh = kind === 'cans' ? 0.12 : 0.14, n = r.int(2, 6);
         for (let q = 0; q < n && x < len - 0.1; q++, x += rad * 2.1) { const [wx, wz] = toWorld(f, x + rad, d * 0.45); k.cyl(wx, y, wz, rad, hh, col, 7, { top: true }); }
       } else if (kind === 'bottles') {

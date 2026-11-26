@@ -7,7 +7,7 @@
 import { M, type Mat, tint } from '../kit/materials';
 import * as P from '../kit/props';
 import { type GenCtx, WALL_T, fitRect, revealBox } from './common';
-import { coreLayout, type CoreLayout } from '../layout';
+import { coreLayout, shopRoofHatch, type CoreLayout } from '../layout';
 import { facadeOpenings } from '../facade';
 
 interface VStyle { wall: Mat; floor: Mat; groundFloor: Mat; ceil: Mat; tread: Mat; stringer: Mat; rail: Mat; door: Mat; bulbI: number }
@@ -89,6 +89,9 @@ function apartment(c: GenCtx, side: 'x0' | 'x1', zDoor: number, y0: number, fh: 
   P.bareBulb(k, (rc[0] + rc[2]) / 2, (rc[1] + rc[3]) / 2, y0 + H, 1.3);
   k.slot('resident', (rc[0] + rc[2]) / 2, y0, rc[3] - 2.3, Math.PI);
   k.marker('hide', rc[0] + 0.5, y0, rc[3] - 0.5, 'closet');
+  k.marker('burglary', rc[2] - 0.5, y0, rc[3] - 1.2, 'kitchen drawer / coffee can');
+  if (d > 5) k.marker('tv', (rc[0] + rc[2]) / 2, y0 + 0.45, rc[1] + 3.0, 'console TV');
+  k.marker('wait', (rc[0] + rc[2]) / 2, y0 + 0.44, rc[1] + 1.0, 'sofa');
   k.use(hallCell);
   return true;
 }
@@ -113,6 +116,7 @@ function roofTop(c: GenCtx, L: CoreLayout, stairCell: number) {
   // the bulkhead exterior box's front face covers the door opening: cut it by drawing the front wall separately
   k.wall(L.x1 + t, L.zs - t, L.x0 - t, L.zs - t, y - 0.05, y + bh + 0.1, ext, 1, [{ s0: L.x1 + t - (dx + doorW), s1: L.x1 + t - dx, y0: y, y1: y + 2.05 }], { collide: false });
   k.marker('spawn', (L.x0 + L.x1) / 2, y, L.zs - 1.2, 'roof');
+  k.marker('stash', L.x0 - 0.4, y, L.ze - 0.4, 'loose flashing by the bulkhead');
   const fr = k.rng;
   // dressing on the tar: chimney stack, TV antennas, vent pipes, a pigeon coop, beach chairs, clothesline, water tank
   const spots = [[-3.5, 1.5], [3.0, 2.5], [-2.5, 6.5], [4.5, 7.0], [0.5, 9.0], [-5.0, 4.0]].map(([ox, oz]) => [L.x0 + ox, L.zs + oz]);
@@ -232,6 +236,7 @@ export function genTenement(c: GenCtx, sro = false, mode: 'tenement' | 'loft' = 
     if (f > 0 && r.chance(0.3)) P.trashCan(k, L.x1 - 0.35, L.zs - 0.4);
     if (prevCell >= 0) k.portalFloor(prevCell, cell, L.x0, L.zs + L.landing, L.x1, L.ze, y0);
     k.marker('hide', L.x1 - 0.4, y0, L.ze - 0.4, `under stair ${f}`);
+    if (f === 0) k.marker('stash', L.x1 - 0.3, 0, L.ze - 0.3, 'behind the stair radiator');
     for (const q of lp) loftFloor(c, q.rc, y0, L, q.side, f, q.dz);
     if (top && L.roof) roofTop(c, L, cell);
     if (top && !L.roof) k.ceiling(L.x0, L.zs + L.landing, L.x1, L.ze, yc - 0.01, st.ceil);
@@ -315,3 +320,66 @@ export function genApartmentLobby(c: GenCtx) {
 }
 
 export { coreFacade };
+
+/**
+ * Fire-stair tower (office and hotel lobbies): a stair compartment at the back corner, entered from the
+ * lobby through a door, rising through every floor (locked floor doors) to a roof bulkhead.
+ */
+export function stairTower(c: GenCtx, L: CoreLayout, lobbyCell: number) {
+  const { k, unit: u } = c;
+  const fw = L.flightW, half = L.fh / 2, zBackL = L.zs + L.landing + L.run;
+  const wall = M.plasterCream, tread = M.concrete;
+  const run = L.run / Math.ceil(Math.round(L.fh / 0.19) / 2);
+  let prev = -1;
+  for (let f = 0; f < L.floors; f++) {
+    const y0 = f * L.fh;
+    const cell = k.cell(`fire_stair${f}`, [L.x0, y0, L.zs, L.x1, y0 + L.fh, L.ze], f);
+    const dx0 = L.x0 + 0.2, dx1 = dx0 + 0.9;
+    // front wall (toward the lobby / floor) with the stair door, both faces
+    k.wall(L.x1, L.zs, L.x0, L.zs, y0, y0 + L.fh, wall, 1, [{ s0: L.x1 - dx1, s1: L.x1 - dx0, y0, y1: y0 + 2.1, depth: 0.15 }]);
+    k.wall(L.x0, L.zs - 0.15, L.x1, L.zs - 0.15, y0, y0 + L.fh, f === 0 ? M.marble : wall, -1, [{ s0: dx0 - L.x0, s1: dx1 - L.x0, y0, y1: y0 + 2.1 }], { collide: false });
+    k.wall(L.x1, L.zs, L.x1, L.ze, y0, y0 + L.fh, wall, 1);
+    k.wall(L.x0, L.ze, L.x0, L.zs, y0, y0 + L.fh, wall, 1);
+    k.wall(L.x1, L.ze, L.x0, L.ze, y0, y0 + L.fh, wall, 1);
+    if (f === 0) { k.floor(L.x0, L.zs, L.x1, L.zs + L.landing, 0, tread); k.portalRect(lobbyCell, cell, dx0, L.zs - 0.15, dx1, L.zs - 0.15, 0, 2.1); }
+    else k.box(L.x0, y0 - 0.2, L.zs, L.x1, y0, L.zs + L.landing, tread, { collide: true, faces: 0b001100 });
+    k.door(`${u.id}:fire${f}`, dx0, y0, L.zs - 0.07, 0.9, 2.1, 0, f === 0 ? -1 : 1, { cellA: cell, cellB: f === 0 ? lobbyCell : -1, locked: f > 0, mat: tint(M.steel, '#5a5a52') });
+    k.box(dx0, y0 + 2.2, L.zs - 0.18, dx0 + 0.35, y0 + 2.35, L.zs - 0.16, M.exitSign, { occlude: false });
+    k.stair(L.x0 + fw, L.zs + L.landing, 0, 1, fw, y0, y0 + half, tread, { run, stringer: M.paintGrey, rail: 'right', railMat: M.paintGrey });
+    k.box(L.x0, y0 + half - 0.2, zBackL, L.x1, y0 + half, L.ze, tread, { collide: true });
+    k.stair(L.x1 - fw, zBackL, 0, -1, fw, y0 + half, y0 + L.fh, tread, { run, stringer: M.paintGrey, rail: 'right', railMat: M.paintGrey });
+    P.bareBulb(k, (L.x0 + L.x1) / 2, L.zs + 0.5, y0 + L.fh - 0.2, 1.2);
+    if (prev >= 0) k.portalFloor(prev, cell, L.x0, L.zs + L.landing, L.x1, L.ze, y0);
+    if (f === L.floors - 1) roofTop(c, L, cell);
+    prev = cell;
+  }
+  k.marker('hide', L.x1 - 0.4, 0, L.ze - 0.4, 'fire stair');
+  k.use(lobbyCell);
+}
+
+/** Low taxpayer roof access: a steep two-lane switchback ship's stair in the back room up to a hatch bulkhead. */
+export function shipLadder(c: GenCtx, backCell: number, H: number) {
+  const { k, unit: u } = c;
+  const [hx0, hz0, hx1, hz1] = shopRoofHatch(u);
+  const roofY = Math.max(H + 0.5, c.b.top - u.y);
+  const n = Math.max(2, Math.ceil(roofY / 2.05)); const rise = roofY / n;
+  const lane = (hx1 - hx0) / 2, land = 0.55, runL = hz1 - hz0 - 2 * land;
+  k.use(backCell);
+  let prevCell = backCell;
+  for (let q = 0; q < n; q++) {
+    const y0 = q * rise; const a = q % 2 === 0;
+    if (q > 0) {
+      const cell = k.cell(`ladder${q}`, [hx0, y0 - 0.2, hz0, hx1, y0 + rise, hz1], q);
+      k.wall(hx1, hz0, hx1, hz1, y0 - 0.2, y0 + rise, M.brickPainted, 1); k.wall(hx0, hz1, hx0, hz0, y0 - 0.2, y0 + rise, M.brickPainted, 1);
+      k.wall(hx0, hz0, hx1, hz0, y0 - 0.2, y0 + rise, M.brickPainted, 1); k.wall(hx1, hz1, hx0, hz1, y0 - 0.2, y0 + rise, M.brickPainted, 1);
+      k.portalFloor(prevCell, cell, hx0, hz0, hx1, hz1, y0); prevCell = cell;
+    }
+    // landing at the start end, flight to the other end
+    if (a) { k.box(hx0, y0 - 0.12, hz1 - land, hx1, y0, hz1, M.steel, { collide: q > 0 }); k.stair(hx1, hz1 - land, 0, -1, lane, y0, y0 + rise, M.steel, { run: runL / Math.max(2, Math.round(rise / 0.19)), stringer: M.paintGrey, rail: 'left', railMat: M.steel, soffit: null }); }
+    else { k.box(hx0, y0 - 0.12, hz0, hx1, y0, hz0 + land, M.steel, { collide: true }); k.stair(hx0 + lane, hz0 + land, 0, 1, lane, y0, y0 + rise, M.steel, { run: runL / Math.max(2, Math.round(rise / 0.19)), stringer: M.paintGrey, rail: 'left', railMat: M.steel, soffit: null }); }
+  }
+  // tiny bulkhead hut over the hatch, reusing the roof dressing
+  const L: CoreLayout = { x0: hx0, x1: hx1, zs: hz0, ze: hz1, landing: land, run: runL, flightW: lane, floors: Math.max(1, c.b.floors), fh: roofY / Math.max(1, c.b.floors), roofY, vest: 0, stairs: true, roof: true };
+  roofTop(c, L, prevCell);
+  k.use(backCell);
+}

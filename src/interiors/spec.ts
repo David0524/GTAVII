@@ -55,7 +55,9 @@ export interface DoorOut {
 }
 /** yaw = heading in the interior's local frame, 0 = facing local -z (engine heading convention). */
 export interface SlotOut { id: string; role: string; x: number; y: number; z: number; yaw: number; hours?: [string, string] }
-export type MarkerType = 'shop' | 'register' | 'hide' | 'payphone' | 'wardrobe' | 'spawn' | 'prop';
+/** Gameplay/economy/time hooks. register/safe = robbery; burglary = apartment/office loot; stash = hidden storage;
+ *  bed/wait = sleep or pass time; tv = playback surface; service = barber/tailor service point; deposit_box = bank. */
+export type MarkerType = 'shop' | 'register' | 'safe' | 'burglary' | 'stash' | 'hide' | 'payphone' | 'wardrobe' | 'bed' | 'wait' | 'tv' | 'service' | 'deposit_box' | 'spawn' | 'prop';
 export interface MarkerOut { id: string; type: MarkerType; x: number; y: number; z: number; name?: string }
 export interface LightOut { x: number; y: number; z: number; color: [number, number, number]; intensity: number; kind: 'bulb' | 'tube' | 'neon' | 'window'; cell: number; flicker?: number }
 export interface MoverOut {

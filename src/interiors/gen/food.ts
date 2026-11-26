@@ -43,6 +43,7 @@ function counterRun(c: GenCtx, s: ShopShell, side: 'x0' | 'x1', zStart: number, 
   const staffX = wallX + sx * (backD + aisle / 2);
   k.slot(isBar ? 'bartender' : 'counterman', staffX, 0, (zStart + zEnd) / 2, side === 'x1' ? Math.PI / 2 : -Math.PI / 2);
   k.marker('shop', counterFrontX + sx * 0.6, 0, (zStart + zEnd) / 2, isBar ? 'bar' : 'counter');
+  k.marker('wait', stoolX, 0.72, zStart + 0.45, isBar ? 'bar stool' : 'counter stool');
   // register at the door end of the counter
   const regZ = side === 'x1' ? zStart + 0.5 : zStart + 0.5;
   P.register(k, { x: counterFrontX - sx * 0.35, z: regZ, yaw: side === 'x1' ? Math.PI / 2 : -Math.PI / 2 }, isBar ? 1.07 : 1.0);
@@ -83,6 +84,7 @@ function counterRun(c: GenCtx, s: ShopShell, side: 'x0' | 'x1', zStart: number, 
     P.pbox(k, tf, -0.05, 2.25, 0, 0.6, 2.28, 0.45, M.woodDark, { occlude: false });
     P.pbox(k, tf, 0.02, 2.28, 0.05, 0.55, 2.7, 0.42, M.woodDark, { occlude: false });
     P.pbox(k, tf, 0.07, 2.33, 0.04, 0.45, 2.64, 0.05, r.chance(0.7) ? M.tvGlow : tint(M.glass, '#2a3230'), { occlude: false });
+    { const [tx, tz] = P.toWorld(tf, 0.26, 0.04); k.marker('tv', tx, 2.48, tz, 'bar TV'); }
   }
 }
 

@@ -68,6 +68,7 @@ export function genBarber(c: GenCtx, beauty = false) {
     else P.barberChair(k, { x: mx + sx * 1.0, z, yaw: side === 'x1' ? -Math.PI / 2 : Math.PI / 2 });
     P.sink(k, { x: mx + sx * 0.3, z: z + 0.6, yaw: side === 'x1' ? -Math.PI / 2 : Math.PI / 2 });
     k.slot(beauty ? 'beautician' : 'barber', mx + sx * 1.6, 0, z, side === 'x1' ? Math.PI / 2 : -Math.PI / 2);
+    k.marker('service', mx + sx * 1.0, 0.47, z, beauty ? 'set and dry' : 'haircut and shave');
     if (r.chance(0.5)) k.slot('customer_chair', mx + sx * 1.0, 0.47, z, side === 'x1' ? -Math.PI / 2 : Math.PI / 2);
   }
   // waiting chairs + magazine table on the other wall, coat rack, barber pole by the door (outside is engine's)
@@ -128,6 +129,7 @@ export function genTailor(c: GenCtx) {
   k.box(fx, 0.02, s.z1 - 1.0, fx + 1.0, 2.1, s.z1 - 0.98, tint(M.fabricRust, '#6a2a24'), { occlude: false });
   k.marker('hide', fx + 0.5, 0, s.z1 - 0.5, 'fitting booth');
   k.slot('tailor', (s.x0 + s.x1) / 2, 0, s.z1 - 1.6, 0);
+  k.marker('service', (s.x0 + s.x1) / 2, 0, s.z1 - 2.2, 'alterations');
   backRoom(c, s, 'storage');
 }
 

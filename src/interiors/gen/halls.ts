@@ -5,8 +5,8 @@
 import { M, type Mat, tint } from '../kit/materials';
 import * as P from '../kit/props';
 import { type GenCtx, WALL_T, PARTY, fitRect, revealBox } from './common';
-import { coreFacade } from './vertical';
-import { coreLayout } from '../layout';
+import { coreFacade, stairTower } from './vertical';
+import { coreLayout, towerLayout } from '../layout';
 import { facadeOpenings } from '../facade';
 
 function bigRoom(c: GenCtx, name: string, H: number, m: { floor: Mat; wall: Mat; ceiling: Mat; frame?: Mat; door?: Mat }) {
@@ -23,11 +23,13 @@ function bigRoom(c: GenCtx, name: string, H: number, m: { floor: Mat; wall: Mat;
 export function genOfficeLobby(c: GenCtx) {
   const { k, r } = c; const H = Math.min(5.2, Math.max(3.8, c.b.fh * 1.25));
   const s = bigRoom(c, 'lobby', H, { floor: r.pick([M.terrazzo, M.marble, tint(M.terrazzo, '#9a8e7a')]), wall: r.pick([M.marble, tint(M.marble, '#b8a98a'), M.panelingLight]), ceiling: c.b.year < 1935 ? M.tin : M.acoustic, frame: tint(M.chrome, '#b08a4a'), door: tint(M.chrome, '#a8a49a') });
-  const W = s.x1 - s.x0, D = s.z1 - s.z0;
+  const tower = c.b.roof ? towerLayout(c.unit, c.b) : null;
+  if (tower) stairTower(c, tower, s.cell);
+  const W = s.x1 - s.x0 - (tower ? 2.9 : 0), D = s.z1 - s.z0;
   // elevator bank on the back wall (or both side walls in deep lobbies)
   const cars = Math.max(1, Math.min(4, Math.floor((W - 0.6) / 1.8)));
   for (let q = 0; q < cars; q++) P.elevatorDoors(k, { x: s.x0 + (W / cars) * (q + 0.5), z: s.z1 - 0.02, yaw: 0 }, 1.05, 2.25, tint(M.chrome, r.pick(['#8a7a5a', '#9a9a92', '#6a5a3a'])));
-  if (D > 12 && W > 5) for (let q = 0; q < 2; q++) { P.elevatorDoors(k, { x: s.x0 + 0.02, z: s.z1 - 3 - q * 1.9, yaw: -Math.PI / 2 }, 1.05); P.elevatorDoors(k, { x: s.x1 - 0.02, z: s.z1 - 3 - q * 1.9, yaw: Math.PI / 2 }, 1.05); }
+  if (D > 12 && W > 5) for (let q = 0; q < 2; q++) { P.elevatorDoors(k, { x: s.x0 + 0.02, z: s.z1 - 3 - q * 1.9 - (tower ? 2 : 0), yaw: -Math.PI / 2 }, 1.05); if (!tower) P.elevatorDoors(k, { x: s.x1 - 0.02, z: s.z1 - 3 - q * 1.9, yaw: Math.PI / 2 }, 1.05); }
   // directory board, starter's podium, cigar stand by the door, mail chute, sand urn ashtrays
   const dirf = { x: s.x0 + 0.02, z: s.z0 + Math.min(3, D * 0.3), yaw: -Math.PI / 2 };
   P.pbox(k, dirf, -0.6, 1.0, -0.03, 0.6, 2.2, 0.0, M.black, { occlude: false });
@@ -48,6 +50,8 @@ export function genOfficeLobby(c: GenCtx) {
 export function genHotelLobby(c: GenCtx) {
   const { k, r } = c; const H = Math.min(6, Math.max(4.2, c.b.fh * 1.4));
   const s = bigRoom(c, 'lobby', H, { floor: r.pick([M.terrazzo, M.carpetRed, M.marble]), wall: r.pick([M.wallpaper, M.marble, M.panelingLight, M.wallpaperGreen]), ceiling: M.tin, frame: tint(M.chrome, '#b08a4a'), door: M.woodDark });
+  const tower = c.b.roof ? towerLayout(c.unit, c.b) : null;
+  if (tower) stairTower(c, tower, s.cell);
   const W = s.x1 - s.x0, D = s.z1 - s.z0;
   // front desk across the back third, key rack and pigeonholes behind it, bell, register book
   const dz = s.z0 + D * 0.62;
@@ -58,12 +62,13 @@ export function genHotelLobby(c: GenCtx) {
   for (let x = 0.08; x < deskLen - 0.1; x += 0.14) for (let y = 1.08; y < 2.3; y += 0.18) P.pbox(k, kf, x, y, -0.02, x + 0.11, y + 0.14, 0, r.chance(0.3) ? M.paper : M.black, { occlude: false });
   k.slot('desk_clerk', s.x0 + W / 2, 0, dz + 1.2, 0);
   k.marker('shop', s.x0 + W / 2, 0, dz - 0.7, 'front desk');
+  k.marker('wait', s.x0 + 1, 0.42, s.z0 + 2.2, 'lobby armchair');
   P.register(k, { x: s.x0 + W / 2 + 1, z: dz + 0.35, yaw: 0 }, 1.1);
   // lounge: armchairs, sofa, potted palms (tubs), standing ashtrays, columns
   for (let q = 0; q < Math.min(4, Math.floor(W / 2)); q++) { const x = s.x0 + 1 + q * 1.8; P.armchair(k, { x, z: s.z0 + 2.2, yaw: Math.PI }, r.pick([M.vinylGreen, M.fabricCamel, M.vinylBrown, M.fabricRust])); if (r.chance(0.3)) k.slot('guest_lounge', x, 0.42, s.z0 + 2.2, Math.PI); }
   if (W > 6) for (const x of [s.x0 + W / 3, s.x0 + (2 * W) / 3]) k.box(x - 0.3, 0, s.z0 + D * 0.4 - 0.3, x + 0.3, H, s.z0 + D * 0.4 + 0.3, M.marble, { collide: 'cover' });
   for (const x of [s.x0 + 0.6, s.x1 - 0.6]) { k.cyl(x, 0, s.z0 + 0.9, 0.3, 0.5, tint(M.steel, '#7a6a4a'), 10, { collide: true }); for (let q = 0; q < 6; q++) k.obox(x, 0.9, s.z0 + 0.9, 0.04, 0.5, 0.35, q, tint(M.fabricOlive, '#3a5a2a')); }
-  P.elevatorDoors(k, { x: s.x1 - 0.02, z: s.z1 - 1.4, yaw: Math.PI / 2 }, 1.05);
+  P.elevatorDoors(k, { x: tower ? s.x0 + 0.02 : s.x1 - 0.02, z: s.z1 - (tower ? 3.4 : 1.4), yaw: tower ? -Math.PI / 2 : Math.PI / 2 }, 1.05);
   for (let q = 0; q < 2; q++) P.payphone(k, { x: s.x0 + 0.02, z: s.z1 - 1 - q * 0.75, yaw: -Math.PI / 2 }, 'hotel payphone');
   for (let z = s.z0 + 2; z < s.z1; z += 3.5) P.pendant(k, s.x0 + W / 2, z, H, 1.2, 3.0, tint(M.chrome, '#b08a4a'));
   k.marker('hide', s.x0 + 0.5, 0, s.z1 - 0.5, 'luggage room');
