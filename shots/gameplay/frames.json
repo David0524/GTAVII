@@ -132,6 +132,93 @@
     }
   },
   {
+    "file": "05_melee_closing.png",
+    "note": "Melee yard: an unarmed hood closes in; the windup is telegraphed (longer for NPCs so a thumb can react).",
+    "state": {
+      "hp": 72,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "hood:charge"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.6175000000046567,
+        "gameplayP95": 2.799999999930151,
+        "frameAvg": 14.519999999992432,
+        "frameP95": 105.40000000002328,
+        "combat": {
+          "combatMs": 0.2000000000698492,
+          "policeMs": 0,
+          "totalMs": 0.2000000000698492,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "06_melee_exchange.png",
+    "note": "The exchange: block / parry on the telegraph, then a counter (×2 damage after a parry).",
+    "state": {
+      "hp": 53,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "hood:charge"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.5157894736927885,
+        "gameplayP95": 1.7999999999301508,
+        "frameAvg": 11.270175438594856,
+        "frameP95": 36.5,
+        "combat": {
+          "combatMs": 0.09999999997671694,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.2000000000698492,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "07_melee_grapple_shove.png",
+    "note": "Grab, then shove: a fighter driven into the yard wall is slammed (extra damage, knockdown).",
+    "state": {
+      "hp": 52,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "hood:charge"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.4608695652231277,
+        "gameplayP95": 1.5,
+        "frameAvg": 10.001449275363669,
+        "frameP95": 20.199999999953434,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0,
+          "totalMs": 0,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
     "file": "08_witness_runs_to_callbox.png",
     "note": "W 31st St between 7th and 8th Aves (real block). A shot into the air: people scatter, a witness breaks for the red call box. Red lines: the witness's run and what they last saw. \"Someone's running for the call box.\"",
     "state": {
