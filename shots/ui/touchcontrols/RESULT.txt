@@ -28,4 +28,4 @@
 ✓ iPhone: fullscreen button opens the install card
 ✓ card: Safari steps, Add to Home Screen (Play full screen × iPhone only plays full screen from the Home Screen. Installed, your sav)
 ✓ card closes
-touch layer update: 0.013 ms (EMA, headless)
+touch layer update: 0.008 ms (EMA, headless)
