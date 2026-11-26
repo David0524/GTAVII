@@ -195,6 +195,7 @@ test('real intersections: pursuit corners and roadblocks come from the sim\'s la
   g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
   g.bindSim(sim as any);
   const cps = g.policeSys.chokepoints([0, 0]);
-  assert.deepEqual(cps.map((c) => [c.x, c.z]), [[200, -5]], 'junctions under 60 m are too close to cut off');
-  assert.ok(Math.abs(cps[0].yaw - Math.PI) < 1e-9, 'a car laid across the approach arm');
+  assert.equal(cps.length, 1, 'junctions under 60 m are too close to cut off');
+  // the suspect is west of the junction: block the west arm (yaw pi/2 heads -x), 15 m out
+  assert.ok(Math.abs(cps[0].x - 185) < 1e-6 && Math.abs(cps[0].z - -5) < 1e-6, `on the arm facing the suspect: ${JSON.stringify(cps[0])}`);
 });

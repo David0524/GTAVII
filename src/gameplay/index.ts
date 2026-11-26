@@ -637,9 +637,15 @@ export class Gameplay {
     });
     if (typeof (sim as any).subwayStations === 'function') this.bindSubway(sim as unknown as SubwayBinding);
     if (sim.nearestIntersections) {
-      // real junctions for pursuit cut-offs and roadblocks (a car laid across the first approach arm)
+      // real junctions for pursuit cut-offs and roadblocks. The sim parks the car broadside on the lane nearest the
+      // point it's given, so block the arm the suspect is coming along: a point 15 m out on the arm that faces them.
+      // (heading (dx, dz) = (-sin yaw, -cos yaw), pointing away from the junction)
       const ni = sim.nearestIntersections.bind(sim);
-      this.policeSys.chokepoints = (n) => ni(n[0], n[1], 450, 12).filter((j) => j.dist > 60).map((j) => ({ x: j.x, z: j.z, yaw: (j.armYaw[0] ?? 0) + Math.PI / 2 }));
+      this.policeSys.chokepoints = (n) => ni(n[0], n[1], 450, 12).filter((j) => j.dist > 60).map((j) => {
+        const tx = n[0] - j.x, tz = n[1] - j.z;
+        const yaw = j.armYaw.length ? j.armYaw.reduce((best, y) => (-Math.sin(y) * tx - Math.cos(y) * tz > -Math.sin(best) * tx - Math.cos(best) * tz ? y : best)) : 0;
+        return { x: j.x - Math.sin(yaw) * 15, z: j.z - Math.cos(yaw) * 15, yaw: yaw + Math.PI / 2 };
+      });
     }
     if (typeof sim.parkingRule === 'function') {
       // the sim enforces the kerb (its parkingRule); gameplay keeps fines, the boot, the pound and garages
