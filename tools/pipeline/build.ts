@@ -301,6 +301,32 @@ for (const r of RESTORED_BUILDINGS) {
   log(`osm parts: ${replaced.size} footprints replaced by ${added.length} parts`);
 }
 
+// Global no-floating pass: every raised part (minHeight > 0) must be supported across its whole footprint,
+// not just at its centroid. Sample the centroid and points near each vertex against ALL buildings; lower the
+// base onto the weakest support (or the ground) so nothing hangs in the air (found: 1912 parts at 6th & 34th).
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } });
+  const supportAt = (p: P, self: number, below: number) => {
+    let best = 0;
+    for (const k of index.get(`${Math.floor(p[0] / GRID)},${Math.floor(p[1] / GRID)}`) ?? []) {
+      if (k === self) continue; const o = buildings[k];
+      if (o.height <= below + 1.5 && o.height > best && pointInPoly(p, o.poly)) best = o.height;
+    }
+    return best;
+  };
+  let lowered = 0;
+  buildings.forEach((b, k) => {
+    if (b.minHeight <= 0) return;
+    const c = centroid(b.poly[0]);
+    const samples: P[] = [c, ...b.poly[0].map(([x, z]) => [x + (c[0] - x) * 0.15, z + (c[1] - z) * 0.15] as P)];
+    const weakest = Math.min(...samples.map((pt) => supportAt(pt, k, b.minHeight)));
+    if (weakest < b.minHeight - 1.5) { b.minHeight = weakest; lowered++; }
+  });
+  stats.groundedParts += lowered;
+  log(`no-floating pass: ${lowered} raised parts lowered onto their real support`);
+}
+
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
 const DRIVABLE = new Set(['motorway', 'motorway_link', 'trunk', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'residential', 'unclassified', 'living_street']);
 interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean }
@@ -457,6 +483,12 @@ if (flat) {
   for (const v of terr.h) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
   log(`terrain: ${terr.nx}x${terr.nz} @ ${terr.cell} m, spawn NAVD88 ${terr.base.toFixed(1)} m, relief ${lo.toFixed(1)}..${hi.toFixed(1)} m, ${terrainRejected} outlier samples dropped (${((Date.now() - t0t) / 1000).toFixed(1)} s)`);
 }
+// Hero facade styles (hand-tuned treatments in FacadeMaterial / props)
+const HERO_STYLE: Record<string, number> = {
+  'Empire State Building': Style.HeroDeco, 'Flatiron Building': Style.HeroBeaux, 'Metropolitan Life Insurance Company Tower': Style.HeroBeaux,
+  'New York Life Building': Style.HeroBeaux, 'Hotel Chelsea': Style.HeroChelsea,
+};
+for (const b of buildings) if (b.name && HERO_STYLE[b.name] !== undefined) b.style = HERO_STYLE[b.name];
 const heroMap = new Map<string, { name: string; ids: number[]; x: number; z: number; height: number; area: number }>();
 for (const b of buildings) if (b.flags & BuildingFlag.Hero && b.name) {
   const c = centroid(b.poly[0]); const a = polyArea(b.poly);

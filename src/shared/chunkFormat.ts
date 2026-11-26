@@ -28,6 +28,9 @@ export const enum Style {
   Postwar = 6, // 1946-1974 white brick / curtain wall
   LowCommercial = 7, // 1-3 floor taxpayer, garage
   Civic = 8, // station, arena, church, school
+  HeroDeco = 9, // Empire State: limestone, aluminium spandrel strips between narrow window columns
+  HeroBeaux = 10, // Flatiron / Met Life / N.Y. Life: terra cotta & limestone, rusticated base, floor banding
+  HeroChelsea = 11, // Hotel Chelsea: red brick with cast-iron balconies on every floor
 }
 
 export const enum GroundKind { Road = 0, Sidewalk = 1, Park = 2, Lot = 3, Plaza = 4 }

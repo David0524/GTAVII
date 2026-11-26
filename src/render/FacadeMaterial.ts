@@ -40,8 +40,10 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
 
   // ---------------------------------------------------------------- window grid
   const isTenement = style.equal(1), isCast = style.equal(2), isLoft = style.equal(3), isPostwar = style.equal(6), isLow = style.equal(7);
-  const bay = select(isTenement, float(2.6), select(isCast.or(isLoft), float(3.3), select(isPostwar, float(1.9), float(2.45))));
-  const winFrac = select(isCast.or(isLoft), float(0.78), select(isPostwar, float(0.82), float(0.5)));
+  const isDeco = style.equal(9), isBeaux = style.equal(10), isChelsea = style.equal(11);
+  const bay = select(isDeco, float(1.55), select(isBeaux, float(1.8), select(isChelsea, float(2.4),
+    select(isTenement, float(2.6), select(isCast.or(isLoft), float(3.3), select(isPostwar, float(1.9), float(2.45)))))));
+  const winFrac = select(isDeco, float(0.42), select(isBeaux, float(0.58), select(isCast.or(isLoft), float(0.78), select(isPostwar, float(0.82), float(0.5)))));
   const sill = select(isCast.or(isLoft), float(0.2), float(0.3));
   const head = select(isCast.or(isLoft), float(0.86), float(0.84));
   const fu = fract(u.div(bay)), fv = fract(v.div(floorH));
@@ -68,7 +70,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const winMask = mix(winMaskSharp, coverage, lodFade);
 
   // ---------------------------------------------------------------- wall material
-  const brickStyle = isTenement.or(isLoft).or(isLow).or(style.equal(0));
+  const brickStyle = isTenement.or(isLoft).or(isLow).or(style.equal(0)).or(isChelsea);
   const course = fract(v.div(0.077));
   const rowOff = floor(v.div(0.077)).mul(0.5);
   const head2 = fract(u.div(0.205).add(rowOff));
@@ -84,7 +86,10 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const underSill = smoothstep(0.55, 0.0, fv).mul(streak);
   const soot = clamp(dirt.mul(0.55).mul(underSill.mul(0.7).add(0.3)).add(select(groundFloor, float(0.18), float(0))).add(dirt.mul(0.15)), 0, 0.8);
   const wallBase = vertexColor().rgb.mul(blotch.mul(0.22).add(0.88));
-  const wall = wallBase.mul(float(1).sub(mortarK)).mul(float(1).sub(band)).mul(float(1).sub(soot));
+  // hero treatments: Beaux-Arts rusticated base (horizontal grooves on the lower floors) and strong cornice bands
+  const rustic = select(isBeaux.and(v.lessThan(floorH.mul(3))), step(fract(v.div(0.42)), 0.08).mul(0.3).mul(mortarFade.max(0.4)), float(0));
+  const heroBand = select(isBeaux, smoothstep(0.1, 0.0, fv).mul(0.18), float(0));
+  const wall = wallBase.mul(float(1).sub(mortarK)).mul(float(1).sub(band)).mul(float(1).sub(soot)).mul(float(1).sub(rustic)).mul(float(1).sub(heroBand));
 
   // ---------------------------------------------------------------- glass, shades, boarded, lit
   const winId = floorIdx.mul(97.13).add(bayIdx.mul(13.7)).add(seed.mul(1000));
@@ -118,10 +123,13 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   // ---------------------------------------------------------------- roofs
   const tar = vec3(0.13, 0.12, 0.115).mul(mx_noise_float(vec3(u.mul(0.4), v.mul(0.4), seed.mul(5))).mul(0.25).add(0.85));
 
-  const color = select(isRoof, tar, mix(wall, glassCol, winMask));
+  const spandrel = select(isDeco, inU.mul(float(1).sub(inV)).mul(float(1).sub(lodFade.mul(0.5))), float(0));
+  const aluminium = vec3(0.42, 0.42, 0.4);
+  const wallDeco = mix(wall, aluminium, spandrel);
+  const color = select(isRoof, tar, mix(wallDeco, glassCol, winMask));
   m.colorNode = color;
   m.roughnessNode = select(isRoof, float(0.95), mix(float(0.9), select(boarded.or(shadeHere), float(0.8), float(0.12)), winMask));
-  m.metalnessNode = float(0);
+  m.metalnessNode = spandrel.mul(0.6);
   m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask).mul(facadeUniforms.litScale));
   void abs; void min; void vec2;
   return m;

@@ -112,6 +112,14 @@ export function buildProps(data: ChunkData, hf: HeightFn): MeshArrays {
           if (f < Math.min(b.floors, 12) - 1) g.box(ex + uxs * half * 0.4, y + floorH / 2, ez + uzs * half * 0.4, 0.35, floorH / 2, 0.03, uxs, uzs, IRON);
         }
       }
+      // Hotel Chelsea: cast-iron balconies across the street facade on every upper floor
+      if (style === 11) {
+        for (let f = 1; f < b.floors; f++) {
+          const y = gAvg + f * floorH + 0.05;
+          g.box(mx + wx * 0.55, y, mz + wz * 0.55, L / 2 - 0.4, 0.05, 0.55, uxs, uzs, IRON);
+          g.box(mx + wx * 1.05, y + 0.5, mz + wz * 1.05, L / 2 - 0.4, 0.45, 0.02, uxs, uzs, [0.05, 0.045, 0.04]); // railing panel
+        }
+      }
       // AC units on the facade window grid (same bays as FacadeMaterial)
       const bay = style === 1 ? 2.6 : style === 2 || style === 3 ? 3.3 : style === 6 ? 1.9 : 2.45;
       if (style !== 5 && b.year < 1974) {

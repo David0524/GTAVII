@@ -73,6 +73,9 @@ const STYLE_COLORS: Record<number, RGB> = {
   [Style.Postwar]: [0.6, 0.6, 0.58], // white brick / curtain wall
   [Style.LowCommercial]: [0.38, 0.34, 0.3],
   [Style.Civic]: [0.5, 0.5, 0.52],
+  [Style.HeroDeco]: [0.66, 0.62, 0.54],
+  [Style.HeroBeaux]: [0.7, 0.6, 0.47],
+  [Style.HeroChelsea]: [0.42, 0.19, 0.14],
 };
 const GROUND_COLORS: Record<number, RGB> = {
   [GroundKind.Road]: [0.11, 0.105, 0.1],

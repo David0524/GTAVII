@@ -170,7 +170,7 @@ async function main() {
   const clock = new THREE.Timer();
   let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return screen; }, get hudUi() { return gameHud; }, get pause() { return pause; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || screen === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
