@@ -42,7 +42,7 @@ import { vehicleLook, type PlayerVehicle } from './appearance';
 import { TimeKeeper, restQuality, type CantSleep } from './time';
 import { Cars, type EntryMethod } from './cars/theft';
 import { FireSystem } from './props/fire';
-import { Ownership } from './cars/ownership';
+import { TICKET, TICKET_MAJOR, Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
 import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
 import type { SuspectMotion } from './police/pursuit';
@@ -80,8 +80,8 @@ export interface DoorsBinding { doorsForChunk(i: number, j: number): readonly Do
 /** Engine mission/trigger runtime (ENGINE_REQUESTS 15): named characters and givers the player can talk to. */
 export interface TalkBinding { nearestTalkable(x: number, z: number, radius: number): { id: string; name: string; x: number; z: number } | null; talk(id: string): void }
 /** Sim's subway layer (claude/nice-sagan-2jh4m2): stations with entrances, and the deterministic timetable. */
-export interface SubwayStation { id: string; name: string; line: string; x: number; z: number; entrances: { x: number; z: number }[] }
-export interface SubwayBinding { subwayStations(): readonly SubwayStation[]; nextTrains?(stationId: string, n: number): { line: string; dir: 'uptown' | 'downtown'; inSec: number }[] }
+export interface SubwayStation { id: string; name: string; line: string; x: number; z: number; entrances: { x: number; z: number }[]; /** counts up from the line's downtown end */ order?: number; /** stations of one complex across lines (herald_sq, times_sq) */ complex?: string }
+export interface SubwayBinding { subwayStations(): readonly SubwayStation[]; nextTrains?(stationId: string, n: number): { line: string; dir: 'uptown' | 'downtown'; inSec: number }[]; trainTravel?(fromId: string, toId: string): { dir: 'uptown' | 'downtown'; sec: number } | null }
 export interface VehiclesBinding { on(type: 'impact' | 'destroyed', cb: (e: any) => void): void }
 
 interface Actor { id: string; kind: 'player' | 'npc' | 'ped' | 'cop'; team: 'player' | 'enemy' | 'civilian' | 'police'; pos: () => V3; yaw: () => number; stance: () => 'stand' | 'crouch' | 'down'; vehicleId?: string }
@@ -636,12 +636,17 @@ export class Gameplay {
       sim.dispatch?.('ambulance', x, z);
     });
     if (typeof (sim as any).subwayStations === 'function') this.bindSubway(sim as unknown as SubwayBinding);
+    if (sim.nearestIntersections) {
+      // real junctions for pursuit cut-offs and roadblocks (a car laid across the first approach arm)
+      const ni = sim.nearestIntersections.bind(sim);
+      this.policeSys.chokepoints = (n) => ni(n[0], n[1], 450, 12).filter((j) => j.dist > 60).map((j) => ({ x: j.x, z: j.z, yaw: (j.armYaw[0] ?? 0) + Math.PI / 2 }));
+    }
     if (typeof sim.parkingRule === 'function') {
       // the sim enforces the kerb (its parkingRule); gameplay keeps fines, the boot, the pound and garages
       this.ownership.externalTickets = true;
-      const carOf = (e: any) => String(e.id ?? e.carId ?? e.vehicleId ?? '');
+      const carOf = (e: any) => String(e.carId ?? e.id ?? e.vehicleId ?? '');
       const hour = () => this.clock.clock.minutes / 60, day = () => this.clock.clock.day;
-      sim.on('ticketIssued', (e) => this.ownership.addTicket(carOf(e), day(), hour()));
+      sim.on('ticketIssued', (e) => this.ownership.addTicket(carOf(e), day(), hour(), e.fine === 'major' ? TICKET_MAJOR : TICKET));
       sim.on('towDispatched', (e) => this.emit('notice', { kind: 'towDispatched', car: carOf(e) }));
       sim.on('vehicleTowed', (e) => this.ownership.tow(carOf(e), day()));
     }
@@ -709,20 +714,31 @@ export class Gameplay {
    */
   private stakeOutLine(from: SubwayStation) {
     const rep = this.policeSys.reportFor(this.player!.id); if (!rep) return [];
-    const line = (this.subway!.subwayStations()).filter((s) => s.line === from.line && s.id !== from.id);
-    const trains = this.subway!.nextTrains?.(from.id, 4) ?? [];
+    const sub = this.subway!;
+    const line = sub.subwayStations().filter((s) => s.line === from.line && s.id !== from.id);
+    const trains = sub.nextTrains?.(from.id, 4) ?? [];
     const wait = (dir: 'uptown' | 'downtown') => trains.find((t) => t.line === from.line && t.dir === dir)?.inSec ?? 150;
-    // uptown is -z in the world frame
-    const ahead = (dir: 'uptown' | 'downtown') => line.filter((s) => (dir === 'uptown' ? s.z < from.z : s.z > from.z)).sort((a, b) => Math.abs(a.z - from.z) - Math.abs(b.z - from.z)).slice(0, 2);
+    // a line's stops in order (sim's `order` counts up from the downtown end; z as a fallback, uptown is -z)
+    const rank = (s: SubwayStation) => s.order ?? -s.z, here = rank(from);
+    const ahead = (dir: 'uptown' | 'downtown') => line.filter((s) => (dir === 'uptown' ? rank(s) > here : rank(s) < here)).sort((a, b) => Math.abs(rank(a) - here) - Math.abs(rank(b) - here)).slice(0, 2);
+    const free = [...this.policeSys.units.values()].filter((u) => (u.kind === 'radio_car' || u.kind === 'sector_car' || u.kind === 'plainclothes') && !['combat', 'arrest', 'down', 'leave', 'roadblock'].includes(u.state));
     const eyes = [...this.policeSys.units.values()].find((u) => u.ownDesc && (u.state === 'pursuit' || u.state === 'approach' || u.state === 'encounter'));
     if (eyes?.ownDesc) rep.description = mergeDesc(rep.description, eyes.ownDesc);
-    const free = [...this.policeSys.units.values()].filter((u) => (u.kind === 'radio_car' || u.kind === 'sector_car' || u.kind === 'plainclothes') && !['combat', 'arrest', 'down', 'leave', 'roadblock'].includes(u.state));
-    const staked: string[] = [];
+    const staked: string[] = [], complexes = new Set<string>();
     for (const dir of ['uptown', 'downtown'] as const) ahead(dir).forEach((st, i) => {
-      const trainEta = wait(dir) + (i + 1) * Gameplay.SUBWAY_STOP_SECONDS;
-      const exit = st.entrances[0] ?? { x: st.x, z: st.z };
-      const u = free.filter((q) => !staked.includes(q.id)).map((q) => ({ q, eta: this.policeSys.relayDelay + Math.hypot(q.x - exit.x, q.z - exit.z) / 13 })).filter((c) => c.eta < trainEta).sort((a, b) => a.eta - b.eta)[0];
-      if (u && this.policeSys.stakeOut(u.q.id, [exit.x, exit.z], rep)) { staked.push(u.q.id); this.emit('police', { kind: 'subwayStakeout', unit: u.q.id, station: st.id, name: st.name, trainEta: Math.round(trainEta), unitEta: Math.round(u.eta) }); }
+      if (st.complex && complexes.has(st.complex)) return; // one complex, not its platforms twice
+      // the car's deadline: the next train, a 25 s dwell, then the run (sim's trainTravel; 95 s a stop if absent)
+      const run = sub.trainTravel?.(from.id, st.id)?.sec ?? (i + 1) * Gameplay.SUBWAY_STOP_SECONDS;
+      const trainEta = wait(dir) + 25 + run;
+      const pick = free.filter((q) => !staked.includes(q.id)).map((q) => {
+        // the entrance this car reaches first (big stations have 5-14)
+        const exit = (st.entrances.length ? st.entrances : [{ x: st.x, z: st.z }]).map((e) => ({ e, d: Math.hypot(q.x - e.x, q.z - e.z) })).sort((a, b) => a.d - b.d)[0];
+        return { q, exit: exit.e, eta: this.policeSys.relayDelay + exit.d / 13 };
+      }).filter((c) => c.eta < trainEta).sort((a, b) => a.eta - b.eta)[0];
+      if (pick && this.policeSys.stakeOut(pick.q.id, [pick.exit.x, pick.exit.z], rep)) {
+        staked.push(pick.q.id); if (st.complex) complexes.add(st.complex);
+        this.emit('police', { kind: 'subwayStakeout', unit: pick.q.id, station: st.id, name: st.name, trainEta: Math.round(trainEta), unitEta: Math.round(pick.eta) });
+      }
     });
     this.emit('radio', { precinct: rep.precinct, at: [from.x, from.z], text: `${this.reg.precincts.find((q) => q.id === rep.precinct)?.name ?? 'Central'}, suspect went into the subway at ${from.name}. Cars to the next stops on the ${from.line === 'sixth' ? 'Sixth Avenue' : from.line === 'seventh' ? 'Seventh Avenue' : from.line === 'eighth' ? 'Eighth Avenue' : from.line === 'broadway' ? 'Broadway' : 'Lexington'} line.` });
     return staked;

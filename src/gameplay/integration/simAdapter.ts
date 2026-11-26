@@ -35,6 +35,8 @@ export interface SimLike {
   setSiren?(id: number, on: boolean): void;
   despawnPolice?(id: number): boolean;
   takeVehicle?(vehicleId: number): { ownerPedId: number; vclass: string; variant: number; x: number; z: number; yaw: number } | null;
+  /** Real lane-graph junctions (2+ named streets), nearest first; armYaw = each approach road's yaw pointing away. */
+  nearestIntersections?(x: number, z: number, radius: number, max?: number): { id: string; x: number; z: number; dist: number; signal: boolean; streets: string[]; armYaw: number[] }[];
   /** Parking (sim): the rule at a kerb now, and registering a parked car for enforcement (ticketIssued / towDispatched / vehicleTowed). */
   parkingRule?(x: number, z: number, minute?: number, dow?: number): unknown;
   registerParkedCar?(id: string, x: number, z: number): void;

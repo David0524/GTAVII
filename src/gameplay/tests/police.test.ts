@@ -250,3 +250,22 @@ test('subway: seen going underground, cars race the train to the next stops; get
   r.step(60, 1 / 10, () => {});
   assert.ok(seenAgain, `met at ${watched}: ${a.state} at ${a.x.toFixed(0)},${a.z.toFixed(0)}`);
 });
+
+test('subway stakeout uses the sim timetable: line order, trainTravel deadlines, one complex once, the entrance the car reaches first', () => {
+  const r = rig();
+  const st = (id: string, order: number, z: number, complex?: string, line = 'sixth') => ({ id, name: id, line, x: 0, z, order, complex, entrances: [{ x: 40, z }, { x: -40, z }] });
+  // order, not z, decides which way is uptown (this line bends)
+  const stations = [st('s23', 1, 0), st('hsq6', 2, 60, 'herald_sq'), st('s42', 3, -500), st('hsqB', 2, 60, 'herald_sq', 'broadway')];
+  r.g.bindSubway({ subwayStations: () => stations, nextTrains: () => [{ line: 'sixth', dir: 'uptown', inSec: 30 }], trainTravel: (_a, b) => (b === 'hsq6' ? { dir: 'uptown', sec: 92 } : { dir: 'uptown', sec: 200 }) });
+  r.g.policeSys.file({ witness: 'w', perp: 'player', kinds: ['shooting'], desc: { clothes: [] }, lastKnown: [0, 0], crimeAt: [0, 0], via: 'callbox', time: 0 } as any);
+  const near = r.g.registerPolice('radio_car', 'pct.gramercy', 30, 200, { corrupt: 0 });
+  const far = r.g.registerPolice('radio_car', 'pct.gramercy', 1200, 200, { corrupt: 0 });
+  near.state = 'pursuit'; near.lostFor = 0;
+  const sent: any[] = []; r.g.on('police', (e: any) => { if (e.kind === 'subwayStakeout') sent.push(e); });
+  r.g.enterSubway();
+  const hsq = sent.find((e) => e.station === 'hsq6');
+  assert.ok(hsq && hsq.trainEta === 30 + 25 + 92, `deadline = wait + dwell + run: ${JSON.stringify(sent)}`);
+  assert.equal(near.searchPts[0][0], 40, 'the near car takes the entrance on its side of the street');
+  assert.ok(!sent.some((e) => e.station === 'hsqB'), 'the complex is staked once');
+  assert.ok(!sent.some((e) => e.unit === far.id && e.station === 'hsq6'), 'a car that cannot beat the train is not sent there');
+});

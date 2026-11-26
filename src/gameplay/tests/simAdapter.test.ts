@@ -175,8 +175,26 @@ test('sim parking: an owned car left at the kerb is registered; the sim writes t
   g.ownership.advance(1, 0, 8, 0);
   assert.equal(g.ownership.owned.get(car)!.tickets, 0);
   // ...the sim's enforcement does, and three unpaid is the boot (gameplay's rule)
-  for (let i = 0; i < 3; i++) sim.fire('ticketIssued', { id: car });
-  assert.equal(g.ownership.owned.get(car)!.tickets, 3); assert.ok(g.ownership.owned.get(car)!.booted);
-  sim.fire('vehicleTowed', { vehicleId: car });
+  sim.fire('ticketIssued', { carId: car, reasons: ['alternate_side'], fine: 'minor', street: 'W 31st St' });
+  sim.fire('ticketIssued', { carId: car, reasons: ['hydrant'], fine: 'major', street: 'W 31st St' });
+  sim.fire('ticketIssued', { carId: car, reasons: ['alternate_side'], fine: 'minor', street: 'W 31st St' });
+  const ow = g.ownership.owned.get(car)!;
+  assert.equal(ow.tickets, 3); assert.ok(ow.booted);
+  assert.equal(g.ownership.owed(ow), 1500 + 2500 + 1500, 'minor $15, major $25');
+  sim.fire('vehicleTowed', { carId: car, truckId: 9, to: 'pound' });
   assert.equal(g.ownership.owned.get(car)!.parked, 'pound');
+});
+
+test('real intersections: pursuit corners and roadblocks come from the sim\'s lane graph', () => {
+  class JunctionSim extends FakeSim {
+    nearestIntersections(x: number, z: number) { return [{ id: 'j1', x: x + 30, z, dist: 30, signal: true, streets: ['A', 'B'], armYaw: [0] }, { id: 'j2', x: x + 200, z: z - 5, dist: 200, signal: true, streets: ['W 31st St', '8th Ave'], armYaw: [Math.PI / 2, 0] }]; }
+  }
+  const sim = new JunctionSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  const cps = g.policeSys.chokepoints([0, 0]);
+  assert.deepEqual(cps.map((c) => [c.x, c.z]), [[200, -5]], 'junctions under 60 m are too close to cut off');
+  assert.ok(Math.abs(cps[0].yaw - Math.PI) < 1e-9, 'a car laid across the approach arm');
 });

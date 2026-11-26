@@ -22,12 +22,14 @@ export const SHOWROOM: { model: string; name: string; vclass: string; price: num
   { model: 'showroom.luxury', name: 'full-size luxury sedan, new', vclass: 'luxury', price: 950000 },
   { model: 'showroom.limousine', name: 'stretch limousine with a partition', vclass: 'limousine', price: 1650000 },
 ];
+/** 1974 parking fines: a minor violation $15, a major one (hydrant, bus stop, tow-away) $25. */
+export const TICKET_MAJOR = 2500;
 export const TICKET = 1500, BOOT_AT = 3, TOW_AFTER_H = 24, POUND_FEE = 4000, POUND_DAY = 500, GARAGE_MONTH = 6000;
 /** Alternate-side cleaning: Mon/Thu 8–11 a.m. on our side streets (day 0 = Friday 21 June 1974). */
 export function cleaningWindow(day: number, minutes: number) { const dow = (day + 5) % 7; return (dow === 1 || dow === 4) && minutes >= 8 * 60 && minutes < 11 * 60; }
 
 export interface Listing { id: string; vclass: string; colour: string; condition: number; ask: number; seller: 'lot' | 'private'; known: [number, number]; patience: number; floor: number }
-export interface Owned { car: string; owner: string; parked: 'street' | 'garage' | 'pound'; tickets: number; booted: boolean; bootedAt: number; impoundedDay: number; garageUntilDay: number }
+export interface Owned { car: string; owner: string; parked: 'street' | 'garage' | 'pound'; tickets: number; /** cents owed on unpaid tickets (absent in old saves: tickets x TICKET) */ fines?: number; booted: boolean; bootedAt: number; impoundedDay: number; garageUntilDay: number }
 export interface OwnEvents extends Record<string, unknown> {
   bought: { lead: string; car: string; cents: number; from: 'lot' | 'private' };
   sold: { lead: string; car: string; cents: number };
@@ -109,13 +111,15 @@ export class Ownership extends Emitter<OwnEvents> {
   lend(car: string, from: string, to: string) { const o = this.owned.get(car), c = this.cars.cars.get(car); if (!o || o.owner !== from || !c) return false; o.owner = to; c.owner = to; return true; }
   rentGarage(lead: string, car: string, today: number) { const o = this.owned.get(car); if (!o || o.owner !== lead || !this.inv.spend(lead, GARAGE_MONTH, 'garage')) return false; o.parked = 'garage'; o.garageUntilDay = today + 30; return true; }
   parkOnStreet(car: string) { const o = this.owned.get(car); if (o && o.parked !== 'pound') o.parked = 'street'; }
-  payTickets(lead: string, car: string) { const o = this.owned.get(car); if (!o || !o.tickets) return false; if (!this.inv.spend(lead, o.tickets * TICKET, 'tickets')) return false; o.tickets = 0; o.booted = false; return true; }
+  /** Cents owed on unpaid tickets. */
+  owed(o: Owned) { return o.fines ?? o.tickets * TICKET; }
+  payTickets(lead: string, car: string) { const o = this.owned.get(car); if (!o || !o.tickets) return false; if (!this.inv.spend(lead, this.owed(o), 'tickets')) return false; o.tickets = 0; o.fines = 0; o.booted = false; return true; }
   /** Get it out of the pound: fee + storage + any tickets. */
   release(lead: string, car: string, today: number) {
     const o = this.owned.get(car); if (!o || o.parked !== 'pound') return false;
-    const cents = POUND_FEE + POUND_DAY * Math.max(0, today - o.impoundedDay) + o.tickets * TICKET;
+    const cents = POUND_FEE + POUND_DAY * Math.max(0, today - o.impoundedDay) + this.owed(o);
     if (!this.inv.spend(lead, cents, 'pound')) return false;
-    o.parked = 'street'; o.tickets = 0; o.booted = false; o.impoundedDay = -1;
+    o.parked = 'street'; o.tickets = 0; o.fines = 0; o.booted = false; o.impoundedDay = -1;
     this.emit('released', { car, cents });
     return true;
   }
@@ -123,9 +127,9 @@ export class Ownership extends Emitter<OwnEvents> {
   /** The sim's parking layer writes the tickets (its parkingRule knows each kerb); gameplay keeps fines, boot and pound. */
   externalTickets = false;
   /** A ticket written by the sim's parking enforcement. */
-  addTicket(car: string, d: number, hourOfDay: number) {
+  addTicket(car: string, d: number, hourOfDay: number, cents = TICKET) {
     const o = this.owned.get(car); if (!o || o.parked !== 'street') return false;
-    o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets });
+    o.fines = this.owed(o) + cents; o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets });
     if (!o.booted && o.tickets >= BOOT_AT) { o.booted = true; o.bootedAt = d * 24 + hourOfDay; this.emit('booted', { car: o.car }); }
     return true;
   }
@@ -140,7 +144,7 @@ export class Ownership extends Emitter<OwnEvents> {
       for (const o of this.owned.values()) {
         if (o.parked === 'garage' && d > o.garageUntilDay) o.parked = 'street';
         if (o.parked !== 'street') continue;
-        if (hit && !this.externalTickets) { o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets }); }
+        if (hit && !this.externalTickets) { o.fines = this.owed(o) + TICKET; o.tickets++; this.emit('ticket', { car: o.car, owner: o.owner, tickets: o.tickets }); }
         if (!o.booted && o.tickets >= BOOT_AT) { o.booted = true; o.bootedAt = d * 24 + Math.max(a, 8 * 60) / 60; this.emit('booted', { car: o.car }); }
         if (o.booted && d * 24 + b / 60 - o.bootedAt >= TOW_AFTER_H) { o.parked = 'pound'; o.impoundedDay = d; this.emit('towed', { car: o.car }); }
       }
