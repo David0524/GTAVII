@@ -26,7 +26,7 @@ import { CHUNK_SIZE } from '../../src/shared/geo.ts';
 import { edgeDistance } from '../../src/shared/bounds.ts';
 import { cumLengths, hash2, offsetPoly, polyIntersect, polyLength, pointInPolygon, projectOnPoly, reversePoly, sampleAt, subPoly } from '../../src/sim/geom.ts';
 import {
-  writeLaneGraph, JuncFlag, LinkKind, RoadFlag, Turn, LinkFlag, WalkKind, SpotKind,
+  writeLaneGraph, JuncFlag, WildKind, type WildSpot, LinkKind, RoadFlag, Turn, LinkFlag, WalkKind, SpotKind,
   type Junction, type Link, type Road, type WalkEdge, type WalkNode, type Spot, type BusStop, type LaneGraph,
 } from '../../src/sim/laneFormat.ts';
 
@@ -65,6 +65,7 @@ const world = JSON.parse(fs.readFileSync(path.join(DATA, 'world.json'), 'utf8'))
 // chunk ground + POIs in world coords
 interface PolyW { rings: Float32Array[]; minX: number; minZ: number; maxX: number; maxZ: number }
 const buildingsW: PolyW[] = [], roadsW: PolyW[] = [], parksW: PolyW[] = [];
+const bldInfo: { p: PolyW; h: number; style: number }[] = [];
 const signals: [number, number][] = [], subways: [number, number][] = [];
 const toWorld = (rings: Float32Array[], ox: number, oz: number): PolyW => {
   let minX = Infinity, minZ = Infinity, maxX = -Infinity, maxZ = -Infinity;
@@ -76,7 +77,7 @@ for (const c of world.chunks) {
   const buf = fs.readFileSync(path.join(DATA, 'chunks', `${c.key}.bin`));
   const d = readChunk(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
   const ox = (d.i + 0.5) * CHUNK_SIZE, oz = (d.j + 0.5) * CHUNK_SIZE;
-  for (const b of d.buildings) if (b.minHeight < 3) buildingsW.push(toWorld(b.rings, ox, oz));
+  for (const b of d.buildings) if (b.minHeight < 3) { const pw = toWorld(b.rings, ox, oz); buildingsW.push(pw); bldInfo.push({ p: pw, h: b.height, style: b.style }); }
   for (const g of d.ground) {
     if (g.kind === GroundKind.Road) roadsW.push(toWorld(g.rings, ox, oz));
     else if (g.kind === GroundKind.Park) parksW.push(toWorld(g.rings, ox, oz));
@@ -746,8 +747,56 @@ links.forEach((l, li) => {
 });
 log(`spots ${spots.length} (storefront ${spots.filter((s) => s.kind === SpotKind.Storefront).length}, stoop ${spots.filter((s) => s.kind === SpotKind.Stoop).length}, corner ${spots.filter((s) => s.kind === SpotKind.Corner).length}, subway ${subwayOk}/${subways.length}, bus ${busStops.length})`);
 
+// ------------------------------------------------------------------ wildlife places (pigeons, rats)
+const wild: WildSpot[] = [];
+{
+  const nearWalk = (x: number, z: number, r: number) => walkEdges.some((e) => e.kind === WalkKind.Sidewalk && projectOnPoly(e.pts, x, z).d < r);
+  // pigeons on park ground: a grid inside each park polygon, near its paths/edges
+  for (const pk of parksW) for (let x = Math.ceil(pk.minX / 14) * 14; x < pk.maxX; x += 14) for (let z = Math.ceil(pk.minZ / 14) * 14; z < pk.maxZ; z += 14) {
+    if (!inRegion(x, z, -3) || !pointInPolygon(pk.rings, x, z) || inBuilding.has(x, z) || onRoad.has(x, z)) continue;
+    if (hash2(x, z) % 3 === 0) continue;
+    let ring = true; for (let a = 0; a < 8 && ring; a++) { const px = x + 3.2 * Math.cos(a * Math.PI / 4), pz = z + 3.2 * Math.sin(a * Math.PI / 4); ring = !inBuilding.has(px, pz) && !onRoad.has(px, pz); }
+    if (!ring) continue;
+    wild.push({ kind: WildKind.PigeonPark, x, z, y: 0, heading: 0 });
+  }
+  // pigeons on sidewalk corners (every other corner spot)
+  for (const sp of spots) if (sp.kind === SpotKind.Corner && hash2(sp.x, sp.z) % 2 === 0) wild.push({ kind: WildKind.PigeonCorner, x: sp.x, z: sp.z, y: 0, heading: 0 });
+  // ledges: street-facing cornice of low/mid buildings; coops: some tenement roofs
+  for (const b of bldInfo) {
+    const r = b.p.rings[0];
+    let cx = 0, cz = 0; for (let k = 0; k < r.length; k += 2) { cx += r[k]; cz += r[k + 1]; } cx /= r.length / 2; cz /= r.length / 2;
+    if (!inRegion(cx, cz, -5)) continue;
+    if (b.h >= 9 && b.h <= 40 && hash2(cx, cz) % 3 === 0) {
+      for (let k = 0; k < r.length - 2; k += 2) {
+        const ax = r[k], az = r[k + 1], bx = r[k + 2], bz = r[k + 3], L = Math.hypot(bx - ax, bz - az);
+        if (L < 8) continue;
+        let nx = (bz - az) / L, nz = -(bx - ax) / L; // one of the normals; pick the one pointing away from the centroid
+        const mx = (ax + bx) / 2, mz = (az + bz) / 2;
+        if ((mx - cx) * nx + (mz - cz) * nz < 0) { nx = -nx; nz = -nz; }
+        const x = mx + nx * 0.3, z = mz + nz * 0.3;
+        if (!nearWalk(x + nx * 2.5, z + nz * 2.5, 4)) continue; // faces a sidewalk
+        wild.push({ kind: WildKind.PigeonLedge, x, z, y: b.h, heading: Math.atan2(-nx, -nz) });
+        break;
+      }
+    }
+    if (b.style === 1 /* Tenement */ && b.h <= 26 && hash2(cz, cx) % 9 === 0) wild.push({ kind: WildKind.PigeonCoop, x: cx, z: cz, y: b.h, heading: 0 });
+  }
+  // rats: kerbside trash in front of shops and stoops (night), subway entrances
+  for (const sp of spots) {
+    if ((sp.kind === SpotKind.Storefront || sp.kind === SpotKind.Stoop) && hash2(sp.z, sp.x) % 4 === 0) {
+      const e = walkEdges[sp.edge], o = [0, 0, 0, 0];
+      sampleAt(e.pts, cumLengths(e.pts), sp.s, o);
+      const lr = -e.side * e.half; // kerb side of the walking band
+      const x = o[0] - o[3] * lr, z = o[1] + o[2] * lr;
+      if (okPoint(x, z)) wild.push({ kind: WildKind.RatTrash, x, z, y: 0, heading: sp.heading });
+    } else if (sp.kind === SpotKind.Subway) wild.push({ kind: WildKind.RatSubway, x: sp.x, z: sp.z, y: 0, heading: sp.heading });
+  }
+  const c = (k: number) => wild.filter((w) => w.kind === k).length;
+  log(`wildlife places: pigeon park ${c(WildKind.PigeonPark)}, corner ${c(WildKind.PigeonCorner)}, ledge ${c(WildKind.PigeonLedge)}, coop ${c(WildKind.PigeonCoop)}; rat trash ${c(WildKind.RatTrash)}, subway ${c(WildKind.RatSubway)}`);
+}
+
 // ------------------------------------------------------------------ write
-const graph: LaneGraph = { names, roads, junctions, links, walkNodes, walkEdges, spots, busStops };
+const graph: LaneGraph = { names, roads, junctions, links, walkNodes, walkEdges, spots, busStops, wild };
 const bytes = writeLaneGraph(graph);
 fs.writeFileSync(path.join(DATA, 'lanes.bin'), bytes);
 log(`wrote public/data/lanes.bin: ${(bytes.length / 1024).toFixed(0)} KiB`);

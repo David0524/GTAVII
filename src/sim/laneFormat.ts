@@ -17,6 +17,7 @@
  *     'WEDG'  a i32 | b i32 | kind u8 | owner i32 | arm i8 | opposite i32 | side i8 | half f32 | poly
  *     'SPOT'  kind u8 | x,z i16dm | heading f32 | edge i32 | s f32
  *     'BSTP'  link i32 | s f32 | spot i32
+ *     'WILD'  kind u8 | x,z i16dm | y f32 (height above road surface) | heading f32   (pigeon/rat places)
  *   poly   : n u16 | n * (x i16dm, z i16dm)
  */
 export const LANE_MAGIC = 0x4c343754; // 'T74L'
@@ -29,6 +30,8 @@ export const enum Turn { Straight = 0, Right = 1, Left = 2 }
 export const enum LinkFlag { CurbLane = 1, BusStop = 2 }
 export const enum WalkKind { Sidewalk = 0, Crosswalk = 1 }
 export const enum SpotKind { Storefront = 0, Stoop = 1, Subway = 2, Corner = 3, BusStop = 4 }
+/** Wildlife places. Ground spots are on sidewalk/park ground; ledges and coops are up on buildings (y = metres above the road surface). */
+export const enum WildKind { PigeonPark = 0, PigeonCorner = 1, PigeonLedge = 2, PigeonCoop = 3, RatTrash = 4, RatSubway = 5 }
 
 export interface Road { name: number; cls: number; oneway: number; flags: number; width: number; sidewalk: number; pts: Float32Array }
 export interface Phase { green: number; yellow: number; allRed: number }
@@ -46,14 +49,15 @@ export interface WalkNode { x: number; z: number; kind: number; junction: number
 export interface WalkEdge { a: number; b: number; kind: number; owner: number; arm: number; opposite: number; side: number; half: number; pts: Float32Array }
 export interface Spot { kind: number; x: number; z: number; heading: number; edge: number; s: number }
 export interface BusStop { link: number; s: number; spot: number }
+export interface WildSpot { kind: number; x: number; z: number; y: number; heading: number }
 
 export interface LaneGraph {
   names: string[]; roads: Road[]; junctions: Junction[]; links: Link[];
-  walkNodes: WalkNode[]; walkEdges: WalkEdge[]; spots: Spot[]; busStops: BusStop[];
+  walkNodes: WalkNode[]; walkEdges: WalkEdge[]; spots: Spot[]; busStops: BusStop[]; wild: WildSpot[];
 }
 
 const tag = (s: string) => (s.charCodeAt(0) | (s.charCodeAt(1) << 8) | (s.charCodeAt(2) << 16) | (s.charCodeAt(3) << 24)) >>> 0;
-const T = { NAME: tag('NAME'), ROAD: tag('ROAD'), JUNC: tag('JUNC'), LINK: tag('LINK'), WNOD: tag('WNOD'), WEDG: tag('WEDG'), SPOT: tag('SPOT'), BSTP: tag('BSTP') };
+const T = { NAME: tag('NAME'), ROAD: tag('ROAD'), JUNC: tag('JUNC'), LINK: tag('LINK'), WNOD: tag('WNOD'), WEDG: tag('WEDG'), SPOT: tag('SPOT'), BSTP: tag('BSTP'), WILD: tag('WILD') };
 
 // ---------------------------------------------------------------- writer
 class W {
@@ -114,6 +118,7 @@ export function writeLaneGraph(g: LaneGraph): Uint8Array {
   });
   w.section(T.SPOT, g.spots.length, () => { for (const s of g.spots) { w.u8(s.kind); w.dm(s.x); w.dm(s.z); w.f32(s.heading); w.i32(s.edge); w.f32(s.s); } });
   w.section(T.BSTP, g.busStops.length, () => { for (const b of g.busStops) { w.i32(b.link); w.f32(b.s); w.i32(b.spot); } });
+  w.section(T.WILD, g.wild.length, () => { for (const b of g.wild) { w.u8(b.kind); w.dm(b.x); w.dm(b.z); w.f32(b.y); w.f32(b.heading); } });
   return new Uint8Array(w.buf, 0, w.o).slice();
 }
 
@@ -132,7 +137,7 @@ export function readLaneGraph(buf: ArrayBuffer): LaneGraph {
   const dm = () => { const v = dv.getInt16(o, true) / 10; o += 2; return v; };
   const poly = () => { const n = u16(); const a = new Float32Array(n * 2); for (let k = 0; k < n * 2; k++) a[k] = dm(); return a; };
   const dec = new TextDecoder();
-  const g: LaneGraph = { names: [], roads: [], junctions: [], links: [], walkNodes: [], walkEdges: [], spots: [], busStops: [] };
+  const g: LaneGraph = { names: [], roads: [], junctions: [], links: [], walkNodes: [], walkEdges: [], spots: [], busStops: [], wild: [] };
   while (o < buf.byteLength) {
     const t = u32(), len = u32(), end = o + len, count = u32();
     for (let k = 0; k < count; k++) {
@@ -158,6 +163,7 @@ export function readLaneGraph(buf: ArrayBuffer): LaneGraph {
       else if (t === T.WEDG) g.walkEdges.push({ a: i32(), b: i32(), kind: u8(), owner: i32(), arm: i8(), opposite: i32(), side: i8(), half: f32(), pts: poly() });
       else if (t === T.SPOT) g.spots.push({ kind: u8(), x: dm(), z: dm(), heading: f32(), edge: i32(), s: f32() });
       else if (t === T.BSTP) g.busStops.push({ link: i32(), s: f32(), spot: i32() });
+      else if (t === T.WILD) g.wild.push({ kind: u8(), x: dm(), z: dm(), y: f32(), heading: f32() });
       else { o = end; break; }
     }
     o = end;

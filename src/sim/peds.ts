@@ -85,7 +85,7 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
     // crowds thicken toward the playable edge (BOUNDARIES layer 3)
     const ramp = Math.max(0, Math.min(1, 1 - edgeDistance(tmp[0], tmp[1]) / EDGE.RAMP));
     if (!full && S.rng.next() > 0.5 + 0.5 * ramp) continue;
-    const arch = S.reg.pick((a) => a.behaviour !== 'driver', tmp[0], tmp[1], S.minute, S.rng.next());
+    const arch = S.reg.pick((a) => a.behaviour !== 'driver' && a.behaviour !== 'critter', tmp[0], tmp[1], S.minute, S.rng.next());
     if (!arch) continue;
     const p = newPed(S, arch, edge, s);
     if (arch.behaviour === 'vendor') {
@@ -130,6 +130,17 @@ export function spawnPedAt(S: SimCore, x: number, z: number, reason: string) {
   const p = newPed(S, arch, best, Math.max(0.1, Math.min(bs, S.net.walkLen[best] - 0.1)));
   addPed(S, p);
   S.emit(reason, { id: p.id, x: p.x, z: p.z });
+}
+
+/** A ped of a given archetype on the sidewalk nearest (x,z) (wildlife feeders, scripted spawns). */
+export function spawnPedNear(S: SimCore, x: number, z: number, arch: ArchetypeRt, r: number): Ped | null {
+  const near = S.net.sidewalksNear(x, z, r, new Set());
+  let best = -1, bd = r, bs = 0;
+  for (const e of near) { const pr = projectOnPoly(S.net.g.walkEdges[e].pts, x, z); if (pr.d < bd) { bd = pr.d; best = e; bs = pr.s; } }
+  if (best < 0) return null;
+  const p = newPed(S, arch, best, Math.max(0.1, Math.min(bs, S.net.walkLen[best] - 0.1)));
+  p.lat = 0; addPed(S, p);
+  return p;
 }
 
 export function despawnPed(S: SimCore, p: Ped) {
@@ -284,6 +295,10 @@ export function stepPeds(S: SimCore, dt: number) {
         if (p.goal?.kind === 'follow' && (p.goal.replanT = (p.goal.replanT ?? 0) - dt) <= 0) { p.goal.replanT = 2; const E = g.walkEdges[p.edge]; replan(S, p, p.dir > 0 ? E.b : E.a); }
         break;
       }
+      case 'feed': // pigeon feeder on his bench spot; walks back to the sidewalk when done
+        p.timer -= dt; p.v = 0;
+        if (p.timer <= 0) { const e = g.walkEdges[p.edge]; sampleAt(e.pts, net.walkCum[p.edge], p.s, tmp); p.toEdge = p.edge; p.toS = p.s; goFree(p, tmp[0], tmp[1], 'attach'); }
+        break;
       case 'vendor': case 'loiter': case 'hail': case 'waitBus': case 'cower': case 'pause': {
         p.timer -= dt; p.v = 0;
         if (p.state === 'hail' && p.hail && p.hail.claimedBy >= 0) p.timer = Math.max(p.timer, 2); // wait for the cab
@@ -328,6 +343,7 @@ export function stepPeds(S: SimCore, dt: number) {
             placeOnEdge(S, p);
           } else if (then === 'vanish') { despawnPed(S, p); S.stats.despawnedP++; S.emit('subwayEnter', { id: p.id, x: p.x, z: p.z }); }
           else if (then === 'loiter') { p.state = 'loiter'; p.timer = S.rng.range(20, 120) * (S.minute > 20 * 60 || S.minute < 5 * 60 ? 2 : 1); p.yaw = g.spots[p.spot].heading; }
+          else if (then === 'feed') { p.state = 'feed'; p.timer = S.rng.range(240, 600); }
           else if (then === 'waitBus') { p.state = 'waitBus'; p.timer = S.rng.range(60, 240); p.yaw = g.spots[p.spot].heading; }
           else if (then === 'hail') {
             p.state = 'hail'; p.timer = S.rng.range(25, 60);
@@ -448,7 +464,7 @@ export function threaten(S: SimCore, x: number, z: number, r: number) {
     if (d < r * 0.6 && S.rng.chance(0.2) && p.state !== 'free' && !p.onRoad) { p.state = 'cower'; p.timer = S.rng.range(4, 8); continue; }
     if (p.state === 'waitCross' || p.state === 'pause') { p.state = 'flee'; continue; }
     if (p.state === 'free') { p.then = p.then === 'attach' ? 'flee' : p.then === 'vanish' ? 'vanish' : 'flee'; if (p.then === 'flee' && p.toEdge < 0) p.toEdge = p.edge; continue; }
-    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'cower') {
+    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'cower' || p.state === 'feed') {
       if (p.spot >= 0 && S.spotOwner[p.spot] === p.id) S.spotOwner[p.spot] = -1;
       p.spot = -1; p.goalSpot = -1;
       const e = g.walkEdges[p.edge]; sampleAt(e.pts, net.walkCum[p.edge], p.s, tmp);
@@ -594,7 +610,7 @@ export function gunfire(S: SimCore, x: number, z: number, loudness: number) {
     const f = 1 - d / loudness; // 1 at the muzzle, 0 at the edge of hearing
     if (S.rng.next() > 0.25 + 0.75 * f) continue;
     if (f > 0.75 && !p.onRoad && p.state !== 'free' && S.rng.chance(0.35)) { p.state = 'cower'; p.timer = S.rng.range(5, 12); continue; }
-    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus') threaten(S, x, z, 0.1 + d / 1.6 + 0.01);
+    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'feed') threaten(S, x, z, 0.1 + d / 1.6 + 0.01);
     else threatenOne(S, p, x, z, 2.2 + 2.6 * f);
   }
 }

@@ -10,7 +10,7 @@
  */
 import type { Network } from './network';
 
-export type Behaviour = 'walker' | 'loiterer' | 'vendor' | 'commuter' | 'driver' | 'beat_cop' | 'worker';
+export type Behaviour = 'walker' | 'loiterer' | 'vendor' | 'commuter' | 'driver' | 'beat_cop' | 'worker' | 'critter';
 export type VehicleKind = 'car' | 'cab' | 'truck' | 'bus';
 export interface ArchetypeDef {
   id: string; behaviour: Behaviour; palette?: string[]; wardrobe?: string; props?: string[];
@@ -41,6 +41,11 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
     density: { day: 0.12, night: 0.1 }, barks: 'barks.beat_cop', params: { walkSpeed: 1.0, jaywalk: 0 } },
   { id: 'npc.vendor', behaviour: 'vendor', palette: ['#e8e2d0', '#8b0000'], wardrobe: 'White apron, paper hat', props: ['vendor_cart'],
     schedule: [{ from: '08:00', to: '21:00', activity: 'sell' }], density: { day: 0.25, night: 0.03 }, barks: 'barks.vendor' },
+  { id: 'npc.pigeon_feeder', behaviour: 'loiterer', palette: ['#5a5348', '#3c3a36', '#8a8070'], wardrobe: 'Old man, overcoat even in summer, paper bag of bread crumbs', props: ['bread_bag'],
+    schedule: [{ from: '08:00', to: '18:00', activity: 'feed pigeons' }], density: { day: 0.03, night: 0 }, barks: 'barks.park', params: { walkSpeed: 0.8, jaywalk: 0.2 } },
+  // Wildlife (behaviour 'critter': flocks and swarms run by src/sim/wildlife.ts, not as pedestrians)
+  { id: 'npc.pigeon_flock', behaviour: 'critter', palette: ['#8C8C8C', '#4B0082'], wardrobe: 'Pigeons', schedule: [{ from: '05:00', to: '21:00', activity: 'loiter' }], density: { day: 0.5, night: 0 } },
+  { id: 'npc.rat_swarm', behaviour: 'critter', palette: ['#3B3B3B'], wardrobe: 'Rats', schedule: [{ from: '00:00', to: '24:00', activity: 'loiter' }], density: { day: 0.1, night: 0.4 } },
   // Drivers (vehicle archetypes)
   { id: 'npc.driver_private', behaviour: 'driver', vehicle: 'car', density: { day: 1, night: 0.6 }, barks: 'barks.driver', params: { patience: 6, aggression: 0.4 } },
   { id: 'npc.cab_driver', behaviour: 'driver', vehicle: 'cab', props: ['cab'], density: { day: 0.8, night: 1 }, barks: 'barks.cabbie', params: { patience: 3, aggression: 0.8 } },
@@ -49,13 +54,14 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
   { id: 'npc.bus_driver', behaviour: 'driver', vehicle: 'bus', props: ['bus'], density: { day: 0.12, night: 0.05 }, barks: 'barks.bus', params: { patience: 8, aggression: 0.2 } },
 ];
 
-const BEHAVIOURS: Behaviour[] = ['walker', 'loiterer', 'vendor', 'commuter', 'driver', 'beat_cop', 'worker'];
-const DEFAULT_SPEED: Record<Behaviour, number> = { walker: 1.3, loiterer: 1.0, vendor: 1.0, commuter: 1.5, driver: 0, beat_cop: 1.0, worker: 1.1 };
-const DEFAULT_JAY: Record<Behaviour, number> = { walker: 0.3, loiterer: 0.5, vendor: 0.2, commuter: 0.45, driver: 0, beat_cop: 0, worker: 0.5 };
+const BEHAVIOURS: Behaviour[] = ['walker', 'loiterer', 'vendor', 'commuter', 'driver', 'beat_cop', 'worker', 'critter'];
+const DEFAULT_SPEED: Record<Behaviour, number> = { walker: 1.3, loiterer: 1.0, vendor: 1.0, commuter: 1.5, driver: 0, beat_cop: 1.0, worker: 1.1, critter: 0 };
+const DEFAULT_JAY: Record<Behaviour, number> = { walker: 0.3, loiterer: 0.5, vendor: 0.2, commuter: 0.45, driver: 0, beat_cop: 0, worker: 0.5, critter: 0 };
 
 export function parseTime(s: string): number {
   const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim());
   if (!m) throw new Error(`bad time "${s}"`);
+  if (+m[1] === 24 && +m[2] === 0) return 1440; // "24:00" = end of day
   return (+m[1] % 24) * 60 + +m[2];
 }
 /** Is minute-of-day t inside [from, to) (wrapping past midnight)? */

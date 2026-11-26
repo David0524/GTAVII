@@ -70,7 +70,11 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
     const pMesh = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.24, 1.15, 3, 8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), maxP);
     const sigs = sim.signalStates();
     const sMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshBasicMaterial({ color: 0xffffff }), sigs.length);
-    for (const m of [vMesh, pMesh, sMesh]) { m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); root.add(m); }
+    const maxW = 260;
+    const wMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), maxW);
+    for (const m of [vMesh, pMesh, sMesh, wMesh]) { m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); root.add(m); }
+    for (let i = 0; i < maxW; i++) wMesh.setColorAt(i, new THREE.Color(0xffffff));
+    wMesh.count = 0;
     const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), P = new THREE.Vector3(), S = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), C = new THREE.Color();
     sigs.forEach((s, i) => { M.makeTranslation(s.x, heightAt(s.x, s.z) + 2.6, s.z); sMesh.setMatrixAt(i, M); sMesh.setColorAt(i, C.set(0xffffff)); });
     // instance colours must exist before the first render so the material compiles with them
@@ -110,8 +114,17 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
         if (p.state === 'jaywalking') C.set(0xff4fa3); else if (p.state === 'flee') C.set(0xff2020);
         pMesh.setColorAt(i, C);
       }
+      const ws = sim.wildlife;
+      wMesh.count = Math.min(maxW, ws.length);
+      for (let i = 0; i < wMesh.count; i++) {
+        const a = ws[i], bird = a.species === 'pigeon';
+        Q.setFromAxisAngle(up, a.yaw); P.set(a.x, a.y + (bird ? 0.15 : 0.06), a.z);
+        S.set(bird ? (a.state === 'fly' ? 0.6 : 0.18) : 0.1, bird ? 0.2 : 0.1, bird ? 0.3 : 0.32);
+        M.compose(P, Q, S); wMesh.setMatrixAt(i, M);
+        wMesh.setColorAt(i, C.set(bird ? (a.variant % 5 === 0 ? 0xb8b0a8 : 0x7d8088) : 0x2b2622));
+      }
       sim.signalStates(sigs).forEach((s, i) => sMesh.setColorAt(i, C.set(SIG_COLOR[s.state])));
-      for (const m of [vMesh, pMesh, sMesh]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+      for (const m of [vMesh, pMesh, sMesh, wMesh]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
       if ((hudT -= dt) <= 0) {
         hudT = 0.25;
         const ms = [...state.ms].sort((a, b) => a - b);
@@ -120,7 +133,8 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
         hud.textContent = `SIM  vehicles ${vs.length}  peds ${ps.length}\n` +
           `update ${avg.toFixed(2)} ms avg  ${(ms[Math.floor(ms.length * 0.95)] ?? 0).toFixed(2)} p95\n` +
           `honks ${st.honks}  hails ${st.hails}  jaywalks ${st.jaywalks}\n` +
-          `double-parked ${st.doubleParks}  bus stops ${st.busStops}  fares ${st.boardings}`;
+          `double-parked ${st.doubleParks}  bus stops ${st.busStops}  fares ${st.boardings}\n` +
+          `pigeons+rats ${sim.wildlife.length}`;
       }
       requestAnimationFrame(loop);
     };

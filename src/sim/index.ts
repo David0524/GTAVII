@@ -13,6 +13,8 @@ import { AgentGrid, Network, Sig } from './network';
 import { despawnPed, dodgeActors, gunfire, setPedGoal, spawnPedAt, spawnPeds, stepPeds, threaten } from './peds';
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
+import { Wildlife, type WildlifeView } from './wildlife';
+export type { WildlifeView } from './wildlife';
 import { despawnVehicle, honk, rebuildOcc, spawnVehicles, stepVehicles, vehicleContacts } from './traffic';
 
 export type { ArchetypeDef } from './archetypes';
@@ -45,6 +47,9 @@ export const SIM_DT = 1 / 30;
 export class Simulation {
   readonly vehicles: readonly TrafficVehicleView[] = [];
   readonly peds: readonly PedView[] = [];
+  /** Pigeons and rats near the focus (one view per animal; instance them). */
+  get wildlife(): readonly WildlifeView[] { return this.wild?.views ?? []; }
+  private wild!: Wildlife;
   /** Wall-clock ms spent in the last update() call. */
   lastUpdateMs = 0;
   private core!: SimCore;
@@ -119,6 +124,7 @@ export class Simulation {
     };
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Connector) core.preds[l.next[0]].push(i); });
     this.core = core;
+    this.wild = new Wildlife(core, g.wild, Math.round(this.opts.maxPeds * 0.5), Math.round(this.opts.maxPeds * 0.15));
     g.links.forEach((l, i) => {
       if (l.kind !== LinkKind.Lane || !net.isSignal(l.endJ)) return;
       const o = [0, 0, 0, 0]; sampleAt(l.pts, net.cum[i], net.len[i], o);
@@ -166,6 +172,7 @@ export class Simulation {
     dodgeActors(S);
     stepPeds(S, h);
     vehicleContacts(S, this.contactCd);
+    this.wild.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -209,6 +216,7 @@ export class Simulation {
 
   private writeViews(alpha: number) {
     const S = this.core;
+    this.wild.writeViews(alpha);
     const lerpYaw = (a: number, b: number) => { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * alpha; };
     const vs = this.vehicles as TrafficVehicleView[];
     while (vs.length < S.vehicles.length) vs.push({ id: 0, vclass: 'sedan', variant: 0, x: 0, y: 0, z: 0, yaw: 0, speed: 0, lights: 0, state: '' });
@@ -253,10 +261,12 @@ export class Simulation {
     if (event.type === 'gunfire') {
       const loud = event.loudness ?? event.radius ?? 120;
       gunfire(S, event.x, event.z, loud);
+      this.wild.alarm(event.x, event.z, loud * 0.8);
       for (const v of S.vehicles) if (Math.hypot(v.x - event.x, v.z - event.z) < loud * 0.5) honk(S, v, 'gunfire', 1);
     } else if (event.type === 'threat') {
       const r = event.radius ?? 25;
       threaten(S, event.x, event.z, r);
+      this.wild.alarm(event.x, event.z, r * 2);
       for (const v of S.vehicles) if (Math.hypot(v.x - event.x, v.z - event.z) < r * 1.5) honk(S, v, 'threat', 1);
     } else if (event.type === 'blockLane') {
       const r = event.radius ?? 6;
@@ -344,6 +354,8 @@ export class Simulation {
     return out;
   }
 
+  /** Wildlife counters and raw animals (tests/debug). */
+  debugWildlife() { return { startles: this.wild.startles, scatters: this.wild.scatters, feeders: this.wild.feeders, groups: this.wild.groupCount, animals: this.wild.allAnimals() }; }
   /** Raw internal agents, for tests and debug tools only. */
   debugAgents(): { vehicles: readonly Vehicle[]; peds: readonly Ped[]; core: SimCore } { return { vehicles: this.core.vehicles, peds: this.core.peds, core: this.core }; }
 }

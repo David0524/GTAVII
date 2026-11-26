@@ -86,7 +86,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const hooks = { escorts: 0, gotos: 0, witnesses: 0 };
   for (const t of ['escortProgress', 'escortDone', 'goalReached']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
-  const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0 };
+  const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
   const examples: Record<string, string[]> = {};
   const seen = new Set<string>();
   const note = (k: string, s: string) => { fail[k]++; const key = k + s.split(' at ')[0].split(' ')[0]; if (seen.has(key)) return; seen.add(key); (examples[k] ??= []).length < 8 && examples[k].push(s); };
@@ -95,6 +95,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const times: number[] = [];
   const steps = Math.round(opts.seconds / SIM_DT);
   const o = [0, 0, 0, 0];
+  let wildPeak = 0;
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
   for (let k = 0; k < steps; k++) {
     const t = k * SIM_DT;
@@ -184,6 +185,15 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
         if (Math.abs(dx * fx + dz * fz) < v.len / 2 && Math.abs(dx * fz - dz * fx) < v.wid / 2 && v.v > 0.5) note('pedHitByVehicle', `ped #${p.id} (${p.state} e${p.edge}k${g.walkEdges[p.edge].kind} s${p.s.toFixed(1)} road${p.onRoad} t${sim.time.toFixed(1)}) veh ${v.kind} L${v.link}k${g.links[v.link].kind} s${v.s.toFixed(1)} v${v.v.toFixed(1)} ${v.blockedBy} & veh #${v.id} at ${p.x.toFixed(1)},${p.z.toFixed(1)}`);
       }
     }
+    if (k % 30 === 0) {
+      const W = sim.debugWildlife();
+      wildPeak = Math.max(wildPeak, sim.wildlife.length);
+      for (const { species, a, ground } of W.animals) {
+        if (!ground) continue;
+        if (inBuilding.has(a.x, a.z)) note('animalInBuilding', `${species} #${a.id} ${a.state} at ${a.x.toFixed(1)},${a.z.toFixed(1)}`);
+        if (onRoad.has(a.x, a.z)) note('animalOnRoad', `${species} #${a.id} ${a.state} at ${a.x.toFixed(1)},${a.z.toFixed(1)}`);
+      }
+    }
     for (const id of [...still.keys()]) if (!vehicles.some((v) => v.id === id)) still.delete(id);
   }
   times.sort((a, b) => a - b);
@@ -194,7 +204,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    hooks, stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
+    hooks, wildlife: (() => { const W = sim.debugWildlife(); return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
   };
 }
 
@@ -228,6 +238,7 @@ async function main() {
   if (full.maxStationarySec > 180) problems.push(`deadlock: a vehicle stood still ${full.maxStationarySec} s (${full.maxStationaryWho})`);
   if (full.flow.minMovingFraction < 0.05) problems.push(`network-wide stall: moving fraction fell to ${full.flow.minMovingFraction}`);
   if (!report.determinism.equal) problems.push('non-deterministic');
+  if (full.wildlife.peakVisible === 0 || full.wildlife.startles === 0) problems.push(`wildlife inactive: ${JSON.stringify(full.wildlife)}`);
   report.pass = problems.length === 0; report.problems = problems;
   fs.writeFileSync(path.join(ROOT, 'docs/sim_test_report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify({ high: { ...full, examples: undefined }, low: { stepMs: low.stepMs, final: low.final }, determinism: report.determinism }, null, 1));

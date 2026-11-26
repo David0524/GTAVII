@@ -32,7 +32,9 @@ const VIEWS = [
   { name: '02_flatiron_spawn', cam: look(g(-19, 30, 95), g(0, 0, -35)) },
   { name: '03_42nd_and_7th', cam: look(g(-605, 34, -1455), g(-600, 0, -1550)) },
   { name: '04_herald_square_street_level', cam: look(g(-330, 1.7, -850), g(-345, 1.5, -960)) },
-];
+  // pigeons and feeders in Madison Square Park at midday
+  { name: '05_madison_square_pigeons', cam: look(g(40, 7, -40), g(85, 0, -110)), extra: { simclock: '13:00' } },
+] as { name: string; cam: string; extra?: Record<string, string> }[];
 
 async function main() {
   const port = 4174;
@@ -46,14 +48,14 @@ async function main() {
   const report: any[] = [];
   try {
     for (const v of VIEWS) {
-      const q = new URLSearchParams({ quality, sim: '1', hud: '0', minimap: '0', ...(forceWebGL ? { webgl: '1' } : {}), cam: v.cam });
+      const q = new URLSearchParams({ quality, sim: '1', hud: '0', minimap: '0', ...(forceWebGL ? { webgl: '1' } : {}), cam: v.cam, ...(v.extra ?? {}) });
       await page.goto(`http://localhost:${port}/?${q}`);
       await page.waitForFunction(() => (window as any).__T74 && (window as any).__T74SIM?.ready, null, { timeout: 180_000 });
       await page.evaluate(() => (window as any).__T74.whenIdle());
       await page.waitForTimeout(settle * 1000);
       const stats = await page.evaluate(() => {
         const s = (window as any).__T74SIM; const ms = [...s.ms].sort((a: number, b: number) => a - b);
-        return { simTime: s.sim.time, vehicles: s.sim.vehicles.length, peds: s.sim.peds.length, updateMsAvg: ms.reduce((a: number, b: number) => a + b, 0) / ms.length, updateMsP95: ms[Math.floor(ms.length * 0.95)], frameMs: (window as any).__T74.frames.summary().avg, stats: { ...s.sim.stats }, events: s.events };
+        return { simTime: s.sim.time, vehicles: s.sim.vehicles.length, peds: s.sim.peds.length, wildlife: s.sim.wildlife.length, updateMsAvg: ms.reduce((a: number, b: number) => a + b, 0) / ms.length, updateMsP95: ms[Math.floor(ms.length * 0.95)], frameMs: (window as any).__T74.frames.summary().avg, stats: { ...s.sim.stats }, events: s.events };
       });
       await page.screenshot({ path: path.join(outDir, `${v.name}.png`) });
       report.push({ view: v.name, cam: v.cam, ...stats });
