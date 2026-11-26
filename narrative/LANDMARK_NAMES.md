@@ -1,4 +1,4 @@
-# Landmark names: sound-alike renames (proposal; the user picks)
+# Landmark names: sound-alike renames (DECIDED 26 Nov 2026: oversight set, see content/landmarks.json)
 
 **User decision (relayed by oversight, verbatim):** "Rename but that's a silly rename. They should be kinda similar to the actual name. Look how GTA does it."
 

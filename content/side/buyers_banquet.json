@@ -19,7 +19,7 @@
     {
       "id": "o2",
       "type": "goto",
-      "text": "Hotel Pennsylvania, 7th Ave",
+      "text": "Hotel Pennsylvanian, 7th Ave",
       "to": "loc.hotel_pennsylvania",
       "radius": 20
     },
@@ -56,7 +56,7 @@
   "rewards": {
     "text": "Fall orders (Nick's finances)"
   },
-  "where": "Hotel Pennsylvania ballroom",
+  "where": "Hotel Pennsylvanian ballroom",
   "systems": [
     "interiors",
     "dialogue",

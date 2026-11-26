@@ -257,7 +257,7 @@
       "acts": [
         2
       ],
-      "where": "Madison Square Garden / Penn Station / Seventh Ave",
+      "where": "Penn Square Garden / Penn Station / Seventh Ave",
       "hook": "During the summer horse show at the Garden (invented), a horse gets loose and trots down Seventh Avenue.",
       "twist": "Herd, don't chase: crowds and traffic spook it. Use the 1974 one-ways to get ahead and calm it with sugar from a diner.",
       "systems": [
@@ -420,7 +420,7 @@
         2,
         3
       ],
-      "where": "Madison Square Garden (invented fight cards)",
+      "where": "Penn Square Garden (invented fight cards)",
       "hook": "The promoter needs a door man, and Nick likes a ringside bet.",
       "twist": "Teddy works the door (spot the fake tickets, eject the drunk, non-lethal). Nick bets on invented fighters whose records are in the paper (newspapers.json).",
       "systems": [
@@ -999,7 +999,7 @@
       "acts": [
         2
       ],
-      "where": "Hotel Pennsylvania ballroom",
+      "where": "Hotel Pennsylvanian ballroom",
       "hook": "Nick hosts out-of-town buyers; Kallis sabotages.",
       "twist": "A social stealth puzzle: keep buyers happy at the right table while finding Kallis's man spiking the champagne.",
       "systems": [

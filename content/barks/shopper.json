@@ -26,7 +26,7 @@
     {
       "context": "idle",
       "emotion": "tourist",
-      "text": "Which way is the Empire State Building? Oh. Up. Of course."
+      "text": "Which way is the Empire Estate Building? Oh. Up. Of course."
     },
     {
       "context": "idle",
@@ -156,7 +156,7 @@
     {
       "context": "idle",
       "emotion": "tourist",
-      "text": "Is that the World Trade Center down there? It's so tall!"
+      "text": "Are those the World Trading Towers down there? So tall!"
     }
   ]
 }

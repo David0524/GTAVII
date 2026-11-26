@@ -57,7 +57,7 @@
 | `char.stavros_kallis` | Stavros Kallis | 60 | Owner of Kallis Fur Salon | off map | 16, 30 |
 | `char.lonnie_gage` | Lonnie Gage | 38 | Pimp controlling women outside Delphine's club | off map | 6, 11, 23, 27 |
 | `char.rita_haines` | Rita Haines | 44 | Bartender at the Arden's lobby bar (Bauer's concession) | Hotel Arden (and its lobby bar), W 39th St & 8th Ave | 6, 8, 13, 23, 31 |
-| `char.claudette_bijou` | Claudette Bijou | 33 | Chambermaid at the Hotel Pennsylvania | off map | 6, 23, 31 |
+| `char.claudette_bijou` | Claudette Bijou | 33 | Chambermaid at the Hotel Pennsylvanian | off map | 6, 23, 31 |
 | `char.marcus_teague` | Marcus Teague | 52 | Night porter at the Hotel Arden | off map | 8, 23, 27 |
 | `char.nora_finch` | Nora Finch | 35 | Reporter at an invented evening tabloid (masthead assigned in N6) | off map | 22, 28, 29 |
 | `char.delroy_tate` | Delroy Tate | 40 | Yellow-cab driver on leased shifts | off map | 3, 21, 32 |
@@ -315,7 +315,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Everybody gets paid. That's not corruption, my friend. That's payroll.”
   - “I bought a building. Nobody told me there were people in it.”
 - **Home:** The Varelas apartment building, Madison Ave & E 37th St
-- **Haunts:** The Iron Gate Chop House, W 36th St & 7th Ave (His corner table at lunch; the waiters know his order); Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Trade dinners in the ballroom; deals in the lobby); Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (The fur salon, his most important customer); Lisle & Associates, 11th floor, 5th Ave & W 36th St (Where he signs things he doesn't read); Kafeneio Kastoria (coffeehouse), W 29th St & 8th Ave (Backgammon with men who knew him as a nailer)
+- **Haunts:** The Iron Gate Chop House, W 36th St & 7th Ave (His corner table at lunch; the waiters know his order); Hotel Pennsylvanian (ballroom, lobby), 7th Ave & W 33rd St (Trade dinners in the ballroom; deals in the lobby); Lacy's, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (The fur salon, his most important customer); Lisle & Associates, 11th floor, 5th Ave & W 36th St (Where he signs things he doesn't read); Kafeneio Kastoria (coffeehouse), W 29th St & 8th Ave (Backgammon with men who knew him as a nailer)
 - **Daily schedule (weekday):**
   - 23:00–07:30 · home · The Varelas apartment building, Madison Ave & E 37th St — Madison Ave & E 37th St, doorman Cas Wojcik
   - 07:30–08:30 · commute · Madison Ave & E 34th St — Drives in himself
@@ -388,12 +388,12 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Nobody is being evicted. They're being relocated, with a bonus. Read it.”
   - “I don't break laws. I read them more carefully than the men who wrote them.”
 - **Home:** off map
-- **Haunts:** Lisle & Associates, 11th floor, 5th Ave & W 36th St (Eleventh floor; he can see the Corwin's roof tank from his window); The Fifth Avenue Luncheonette, W 36th St (5th Ave–6th Ave) (12:40 every weekday, same stool, same tuna on rye: a tail-able routine); Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Afternoon meetings in the lobby, never upstairs)
+- **Haunts:** Lisle & Associates, 11th floor, 5th Ave & W 36th St (Eleventh floor; he can see the Corwin's roof tank from his window); The Fifth Avenue Luncheonette, W 36th St (5th Ave–6th Ave) (12:40 every weekday, same stool, same tuna on rye: a tail-able routine); Hotel Pennsylvanian (ballroom, lobby), 7th Ave & W 33rd St (Afternoon meetings in the lobby, never upstairs)
 - **Daily schedule (weekday):**
   - 19:00–08:00 · home · off map — Driven up Madison Ave
   - 08:00–12:40 · work · Lisle & Associates, 11th floor, 5th Ave & W 36th St
   - 12:40–13:30 · eat · The Fifth Avenue Luncheonette, W 36th St (5th Ave–6th Ave)
-  - 13:30–15:00 · work · Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St — Lobby meetings
+  - 13:30–15:00 · work · Hotel Pennsylvanian (ballroom, lobby), 7th Ave & W 33rd St — Lobby meetings
   - 15:00–19:00 · work · Lisle & Associates, 11th floor, 5th Ave & W 36th St
 - **Relationships:** Nikos “Nick” Varelas (counsel to, +0); Sgt. Carl Mayhew (owns, -1); Lt. Dennis Wurtz (partner, +1); August “Augie” Lomax (counsel to, +0); Vic Prentiss (employs, +1); Marjorie Kell (employs, +0); Ruth Calloway (former boss, -2)
 - **Arc:**
@@ -456,11 +456,11 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “Everybody in your building is a witness. Most just don't know it yet.”
   - “I have a budget for coffee and a budget for you. Guess which is bigger.”
 - **Home:** off map
-- **Haunts:** Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (Lunch-counter meets; crowds hide conversations); 5th Ave & W 36th St (Parked surveillance across from Lisle's office); Public Library, Fifth Ave main branch, 5th Ave & W 41st St (Reads property records in the reading room)
+- **Haunts:** Lacy's, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway (Lunch-counter meets; crowds hide conversations); 5th Ave & W 36th St (Parked surveillance across from Lisle's office); Public Library, Fifth Ave main branch, 5th Ave & W 41st St (Reads property records in the reading room)
 - **Daily schedule (weekday):**
   - 20:00–08:00 · home · off map
   - 08:00–12:30 · work · off map — Office downtown
-  - 12:30–13:30 · eat · Baxter & Lowe, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway
+  - 12:30–13:30 · eat · Lacy's, Herald Square (department store: lunch counter, fur salon), W 34th St & Broadway
   - 13:30–17:00 · work · Public Library, Fifth Ave main branch, 5th Ave & W 41st St
   - 17:00–20:00 · work · 5th Ave & W 36th St — Watching Lisle's door
 - **Relationships:** Teodoro “Teddy” Arce (recruits, +1); Howard Lisle (hunts, -3); Ray Bauer (runs informant, +0); Ptl. Luis Navarro (ally, +1); Nikos “Nick” Varelas (offers deal, +0); Nora Finch (rival, -1)
@@ -550,7 +550,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
 
 - **Age:** 67 (born 1907) · **Origin:** Savannah, Georgia; came to New York in 1929
 - **Occupation:** Retired hotel laundress (thirty years in a big hotel's laundry); Corwin resident in room 1104 since 1956; head of the tenants' committee
-- **Want:** Keep her room and the window that faces the Empire State.
+- **Want:** Keep her room and the window that faces the Empire Estate.
 - **Need:** Let younger people lead, and let herself be helped.
 - **Secret:** She's two months behind on rent because she's been paying for Mr. Hollis's heart medicine. A court notice is hidden in her Bible.
 - **Speech:** Church cadence; formal address ('Mr. Arce'); exact dates; scripture paraphrased into threats.
@@ -1177,7 +1177,7 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
 ### Claudette Bijou  `char.claudette_bijou`
 
 - **Age:** 33 (born 1941) · **Origin:** Port-au-Prince, Haiti; came in 1964
-- **Occupation:** Chambermaid at the Hotel Pennsylvania; club member; sends money home
+- **Occupation:** Chambermaid at the Hotel Pennsylvanian; club member; sends money home
 - **Want:** Bring her mother to New York.
 - **Need:** Trust the club with more than ten dollars.
 - **Secret:** She keeps half her savings outside the club, sewn into a coat lining.
@@ -1186,11 +1186,11 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
   - “At home the police also taxed us. Here they tax the maids too.”
   - “Delphine, I trust your head. I don't trust your shoebox.”
 - **Home:** off map
-- **Haunts:** Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St (Works the 14th to 18th floors); Hotel Arden (and its lobby bar), W 39th St & 8th Ave (Club meetings)
+- **Haunts:** Hotel Pennsylvanian (ballroom, lobby), 7th Ave & W 33rd St (Works the 14th to 18th floors); Hotel Arden (and its lobby bar), W 39th St & 8th Ave (Club meetings)
 - **Daily schedule (weekday):**
   - 16:30–06:30 · home · off map — Flatbush
   - 06:30–07:00 · commute · 7th Ave & W 33rd St
-  - 07:00–15:00 · work · Hotel Pennsylvania (ballroom, lobby), 7th Ave & W 33rd St
+  - 07:00–15:00 · work · Hotel Pennsylvanian (ballroom, lobby), 7th Ave & W 33rd St
   - 15:00–16:00 · errand · 6th Ave & W 34th St — Money-order office
   - 16:00–16:30 · socialize · Hotel Arden (and its lobby bar), W 39th St & 8th Ave — Club business on Sundays
 - **Relationships:** Delphine Moore (club member, +2); Tina Mercado (club member, +1)

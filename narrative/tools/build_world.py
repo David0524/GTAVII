@@ -62,8 +62,8 @@ biz("biz.hanyang_house", "Hanyang House", "Korean restaurant", "loc.korean_resta
 biz("biz.ashgrove_trust", "Ashgrove Trust Company", "Bank (34th St branch)", "loc.bank_branch",
     "Replaces 'Fifth Avenue Trust', which was a real NYC trust company (1907 bank run).", ["ASHGROVE TRUST COMPANY · MEMBER F.D.I.C."], CLEARED,
     note="F.D.I.C. is a real public institution; 'member' wording is period-plausible.")
-biz("biz.baxter_lowe", "Baxter & Lowe", "Department store at Herald Square", "loc.herald_sq_store",
-    "Invented in place of the real store on Herald Square (a trademark).", ["BAXTER & LOWE (huge rooftop letters)", "BAXTER & LOWE · HERALD SQUARE · LUNCH COUNTER · FUR SALON 5"], CLEARED)
+biz("biz.baxter_lowe", "Lacy's", "Department store at Herald Square", "loc.herald_sq_store",
+    "Invented in place of the real store on Herald Square (a trademark).", ["LACY'S (huge rooftop letters)", "LACY'S · HERALD SQUARE · LUNCH COUNTER · FUR SALON 5"], CLEARED)
 biz("biz.kettle_crane", "Kettle & Crane Pictures", "Film production (NIGHT RATE)", "content/boundaries.json",
     "Location crime-picture shoots were common on 1970s NYC streets.", ["KETTLE & CRANE GRIP & ELECTRIC (truck sides)"], CLEARED,
     note="Chosen after 'Lamplight' and 'Halyard' turned out to be real production companies.")

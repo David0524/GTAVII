@@ -15,7 +15,7 @@ def shot(id, type_, lens, move, frame, blocking, beats, dur, dlg=None, audio=Non
 
 CUTS = [
  {"id": "cut.m09_concourse", "mission": "mission.independence_day", "before": "o10", "time": "22:40", "date": "1974-07-04", "skippable": True,
-  "logline": "Under Madison Square Garden, after the fight: two strangers who were on opposite sides of an envelope an hour ago.",
+  "logline": "Under Penn Square Garden, after the fight: two strangers who were on opposite sides of an envelope an hour ago.",
   "shots": [
    shot("s1", "wide", 24, "static", "The 1968 concourse: low ceiling, fluorescent strips, a shuttered newsstand", "Teddy and Delphine burst through the Eighth Ave doors and slow to a walk", ["Fireworks thud far above, through concrete"], 5,
         audio=["distant fireworks", "a train announcement, muffled"], light="cold fluorescent; one tube flickering", film=["grain", "slight overexposure on the tubes"]),

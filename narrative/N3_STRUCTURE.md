@@ -45,7 +45,7 @@ Time windows are in-game. Weather: **C** = clear, **O** = overcast, **R** = summ
 | 2 | mission.night_desk | T | 22 Jun | 21:00–23:30 | any | 10 | P3 P5 | Hub tutorial. The sale notice, Prentiss's "welcome", Hollis on 11, Carmen on the phone. | 3 |
 | 3 | mission.hack | T | 24 Jun | 19:00–23:00 | any | 14 | P2 P3 | Delroy lends his cab. Three fares on the 1974 one-ways; Navarro at Herald Square. | 4, activity.cab_fares |
 | 4 | mission.surcharge | T | 26 Jun | 07:00–15:00 | C/O | 15 | P1 P3 | A day job for Feld. Racks with Dwayne; the Carriers' envelope at Baek's; Augie remembers Teddy. | 5 |
-| 5 | mission.contact_sheet | T | 28 Jun | 12:20–14:30 | C/O | 13 | P1 P2 | Tail Lisle to lunch and photograph the face from 1971. Then the Hotel Pennsylvania lobby, and Mayhew. | 6 |
+| 5 | mission.contact_sheet | T | 28 Jun | 12:20–14:30 | C/O | 13 | P1 P2 | Tail Lisle to lunch and photograph the face from 1971. Then the Hotel Pennsylvanian lobby, and Mayhew. | 6 |
 | 6 | mission.the_club | **D** | 30 Jun | 18:00–22:30 | any | 12 | P1 P3 P4 | **Delphine introduced.** Payout night at Rita's bar; Claudette's turn. Brannock raises the tax. | 7 |
 | 7 | mission.yes | T | 1 Jul | 16:00–21:00 | any | 11 | P4 P5 | Vacate notices; dinner at Carmen's; Kearney's desk; the Shamrock Rail. Teddy says yes. | 8 |
 | 8 | mission.back_stairs | D | 2 Jul | 21:00–01:00 | any | 10 | P1 P2 | First photograph of Brannock collecting. The sweep; escape by the Arden's back stairs. | 9 |
@@ -194,7 +194,7 @@ appear in free roam in every ending, as set by their resolutions.
 | Mission | Seed |
 |---|---|
 | M1 | On the walk, Mayhew avoids W 35th St: "Not that way, kid. Not tonight." |
-| M5 | Teddy photographs Lisle at lunch and recognises the face from the back seat. Then he photographs Lisle **with Mayhew** in the Hotel Pennsylvania lobby. |
+| M5 | Teddy photographs Lisle at lunch and recognises the face from the back seat. Then he photographs Lisle **with Mayhew** in the Hotel Pennsylvanian lobby. |
 | M7 | Teddy may show Mayhew the photo (`flag.mayhew_saw_photo`). If he does, Mayhew stops calling him "kid". |
 | M14 | In the Fur District Teddy says Lisle's name, and Mayhew drops his toothpick. |
 | M21 | The ledger's oldest page is dated autumn 1971 and has Mayhew's initials. |

@@ -64,7 +64,7 @@ piece(9, "telegrams", "The Last Telegrams", "job", [ANY], [1, 2, 3], "A telegrap
       "Telegraph messengers are a dying trade. The office needs someone fast, on foot or bike.",
       "Each telegram is a tiny story you see delivered (a death, a birth, a winning number). Choose whether to deliver bad news before or after the recipient's shift.",
       ["on foot", "bike", "interiors", "time of day"], "$2–4 a telegram + tips; a 'messenger' outfit that makes you invisible to witnesses", "No timers except a soft 'before 6 p.m.'.", parts=1)
-piece(10, "garden_runaway", "The Runaway from the Garden", "encounter", [ANY], [2], "Madison Square Garden / Penn Station / Seventh Ave",
+piece(10, "garden_runaway", "The Runaway from the Garden", "encounter", [ANY], [2], "Penn Square Garden / Penn Station / Seventh Ave",
       "During the summer horse show at the Garden (invented), a horse gets loose and trots down Seventh Avenue.",
       "Herd, don't chase: crowds and traffic spook it. Use the 1974 one-ways to get ahead and calm it with sugar from a diner.",
       ["driving", "crowds", "one-ways"], "$40 from the stable; a Garden ticket stub (fight-card access)", "Slow pursuit; the horse waits at corners.", parts=1)
@@ -83,7 +83,7 @@ piece(14, "chop_list", "The Dukes' Weekly List", "job", [ANY], [2, 3], "The Dyer
 piece(15, "locksmith", "Teddy's Keys: Call-Outs", "lead", [T], [1, 2, 3], "Krause Hardware; doors everywhere", "Locked out, locked in, locked up: the hardware store sends Teddy.",
       "Every call-out is a door with a story behind it (a dead man's flat, a runaway's room (adult), a safe that holds love letters). Teddy's 'Keys' skill opens; his ex-cop eye notices what's wrong.",
       ["keys", "interiors", "Teddy's skills"], "$10–25 a call; one call-out each act feeds a main-story clue", "Lockpicking is a held button with a rhythm, no precision.")
-piece(16, "fight_door", "Fight Night at the Garden", "job", [T, N], [1, 2, 3], "Madison Square Garden (invented fight cards)", "The promoter needs a door man, and Nick likes a ringside bet.",
+piece(16, "fight_door", "Fight Night at the Garden", "job", [T, N], [1, 2, 3], "Penn Square Garden (invented fight cards)", "The promoter needs a door man, and Nick likes a ringside bet.",
       "Teddy works the door (spot the fake tickets, eject the drunk, non-lethal). Nick bets on invented fighters whose records are in the paper (newspapers.json).",
       ["melee", "betting", "newspapers"], "$30 a night; bets", "Ejections are soft-lock takedowns.")
 piece(17, "numbers_runner", "Earl's Runner", "job", [D, T], [2, 3], "Earl's stand and slip spots", "Runner pay, and the street number: the last three digits of the track handle in the paper.", "Pick up slips before noon past plainclothes who know what you're carrying. Ladder: Earl trusts you with the bank on Fridays.",
@@ -145,7 +145,7 @@ piece(36, "practice_chair", "The Practice Chair", "lead", [D], [2, 3], "A barber
 piece(37, "rent_day", "Rent Day", "lead", [N], [2, 3], "Nick's properties (the W 29th building, W 37th storefront, the Corwin)", "Rent day at Nick's buildings never goes smoothly.",
       "Trouble events (a burst pipe, a tenant strike, a cop's hand out) where Nick can spend, listen, or fight badly, and each choice shows up in the Corwin's fate.",
       ["economy", "bribes", "relationships"], "Rent income; Odessa trust", "Choice menus with short actions.")
-piece(38, "buyers_banquet", "The Buyers' Banquet", "lead", [N], [2], "Hotel Pennsylvania ballroom", "Nick hosts out-of-town buyers; Kallis sabotages.",
+piece(38, "buyers_banquet", "The Buyers' Banquet", "lead", [N], [2], "Hotel Pennsylvanian ballroom", "Nick hosts out-of-town buyers; Kallis sabotages.",
       "A social stealth puzzle: keep buyers happy at the right table while finding Kallis's man spiking the champagne.", ["interiors", "dialogue", "tells"], "Fall orders (Nick's finances)", "Tap-to-talk.", upgrades="activity.buyers_tour")
 piece(39, "insomnia_drives", "Nick Can't Sleep", "lead", [N], [2, 3], "Night drives anywhere", "Nick drives at night when he can't sleep.",
       "Map discovery as character: each drive reveals a hidden place (an after-hours club, a garage, a rooftop bar) through a memory Nick tells aloud.",

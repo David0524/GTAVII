@@ -42,7 +42,7 @@ a("npc.office_lunch_crowd", "commuter", ["#2F4F4F", "#FFFFFF", "#8B4513", "#B0C4
 a("npc.lunch_counter_regular", "loiterer", ["#FFFFFF", "#000080"], "Office clothes, a hat on the next stool.", ["coffee cup"],
   s(("11:30", "14:30", "Lunch counters (Herald Sq store, Fifth Ave)", "eat")), 0.3, 0.0, "barks.office")
 a("npc.trade_dinner_guest", "loiterer", ["#000000", "#FFFFFF", "#DAA520"], "Dinner jackets and cocktail dresses, period formal.", ["cocktail glass"],
-  s(("19:00", "23:00", "Hotel Pennsylvania ballroom", "socialize")), 0.0, 0.2, "barks.office", scripted=True)
+  s(("19:00", "23:00", "Hotel Pennsylvanian ballroom", "socialize")), 0.0, 0.2, "barks.office", scripted=True)
 a("npc.deuce_crowd", "walker", ["#FF4500", "#2F2F2F", "#FFD700", "#4B0082"], "The whole city in one block: sailors on leave, students, drifters, couples, hustlers (implied), office workers cutting through. Flares, denim, leisure suits.",
   ["hot dog", "movie ticket"], s(("10:00", "04:00", "W 42nd St (7th–8th Aves), Times Square", "loiter")), 0.6, 0.6, "barks.deuce")
 a("npc.arcade_patron", "loiterer", ["#2F2F2F", "#FF8C00"], "Young men in T-shirts and jackets; old men in fedoras.", ["roll of quarters"],
@@ -82,7 +82,7 @@ a("npc.night_reader", "loiterer", ["#8B4513", "#F5DEB3"], "Cardigan, glasses, a 
 a("npc.penn_south_neighbor", "loiterer", ["#2E5E4E", "#F0E6D2", "#B22222"], "House dresses, guayaberas, undershirts, slippers on the plaza.", ["domino set", "folding chair"],
   s(("09:00", "22:00", "Penn South plaza, W 23rd–29th, 8th–9th Aves", "socialize")), 0.4, 0.2, "barks.neighbor")
 a("npc.hotel_bellhop", "worker", ["#800000", "#DAA520"], "Bellhop jacket with brass buttons, pillbox cap.", ["luggage cart"],
-  s(("07:00", "23:00", "Hotel Pennsylvania lobby", "work")), 0.2, 0.1, "barks.service")
+  s(("07:00", "23:00", "Hotel Pennsylvanian lobby", "work")), 0.2, 0.1, "barks.service")
 a("npc.office_cleaner", "worker", ["#708090", "#FFFFFF"], "Grey work dress or coveralls.", ["mop bucket"],
   s(("19:00", "03:00", "Office buildings, Fifth Ave", "work")), 0.0, 0.1, "barks.service")
 a("npc.night_watchman", "worker", ["#2F4F4F", "#C0C0C0"], "Guard uniform, cap, flashlight, time clock on a strap.", ["flashlight", "watchman's clock"],
@@ -101,7 +101,7 @@ a("npc.lonnie_crew", "loiterer", ["#2F2F2F", "#8B0000"], "Leather jackets, wide 
   note="No combat required (mobile rule). Escapes are solved by routes.")
 a("npc.hired_firebug", "walker", ["#2F2F2F", "#696969"], "Work clothes, cap pulled low.", ["two cans (unlabelled)"], s(("01:00", "04:00", "W 31st St (M26 only)", "loiter")), 0.0, 0.0, None, scripted=True,
   note="M26 only. No method shown (content rule 6).")
-a("npc.editor_brother_in_law", "loiterer", ["#000080", "#FFFFFF"], "An expensive blazer and a club tie.", ["cocktail glass"], s(("20:00", "23:00", "Hotel Pennsylvania bar (M27 only)", "drink")), 0.0, 0.0, None, scripted=True)
+a("npc.editor_brother_in_law", "loiterer", ["#000080", "#FFFFFF"], "An expensive blazer and a club tie.", ["cocktail glass"], s(("20:00", "23:00", "Hotel Pennsylvanian bar (M27 only)", "drink")), 0.0, 0.0, None, scripted=True)
 a("npc.firefighter", "worker", ["#000000", "#FFD700", "#B22222"], "Turnout coat, helmet (generic, no real insignia).", ["axe", "hose"], s(("00:00", "24:00", "Scripted scenes only", "work")), 0.0, 0.0, "barks.emergency", scripted=True)
 for pid, desc, area in [("npc.landlord_absentee", "Leisure suit, a car too nice for the block.", "W 29th St & 8th Ave"),
                         ("npc.claimant", "Neck brace by day, handball shorts by evening.", "W 26th St & 9th Ave"),
@@ -115,7 +115,7 @@ a("npc.cab_fare_night_worker", "commuter", ["#FFFFFF", "#4682B4"], "Nurse's whit
 a("npc.wholesaler_gate", "vendor", ["#8B4513", "#F5DEB3"], "Shirt sleeves and vest.", ["roll-gate hook"], s(("18:00", "20:00", "Broadway wholesale strip", "work")), 0.2, 0.0, "barks.wholesaler",
   note="Variant used by the M1 overheard trigger (closing gates).")
 
-for pid, desc, area, pal in [("npc.club_maid", "Hotel chambermaid's grey uniform and apron; a cardigan after work.", "Hotel Pennsylvania", ["#808080", "#FFFFFF"]),
+for pid, desc, area, pal in [("npc.club_maid", "Hotel chambermaid's grey uniform and apron; a cardigan after work.", "Hotel Pennsylvanian", ["#808080", "#FFFFFF"]),
                              ("npc.club_hatcheck", "Black dress, white collar, a hat-check stub book.", "W 40th St supper clubs", ["#000000", "#FFFFFF"]),
                              ("npc.kafeneio_widow", "Black dress and cardigan, worry beads, a handbag held in both hands.", "Kafeneio Kastoria", ["#000000", "#696969"]),
                              ("npc.parish_priest", "Clerical black, a straw hat, a roof-fund envelope.", "The church on W 31st St", ["#000000", "#FFFFFF"])]:

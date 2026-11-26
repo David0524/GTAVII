@@ -181,7 +181,7 @@ S("dlg.act_patronage_kye", "Patronage: Hanyang House back room.",
 
 # ---- Buyers' tour (Nick)
 for key, sight, lines in [
-    ("empire", "the Empire State", [("npc.trade_dinner_guest", "awed", "That's the tallest building in the world?"),
+    ("empire", "the Empire Estate", [("npc.trade_dinner_guest", "awed", "That's the tallest building in the world?"),
                                     (N, "charming", "Was. Downtown they built two taller. New York is never satisfied.")]),
     ("garment", "the Garment District", [("npc.trade_dinner_guest", "alarmed", "Why is everyone pushing racks in the street?"),
                                          (N, "proud", "That's the factory floor. Three miles long, one block wide.")]),

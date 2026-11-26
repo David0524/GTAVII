@@ -249,13 +249,13 @@
     },
     {
       "id": "biz.baxter_lowe",
-      "name": "Baxter & Lowe",
+      "name": "Lacy's",
       "trade": "Department store at Herald Square",
       "where": "loc.herald_sq_store",
       "era": "Invented in place of the real store on Herald Square (a trademark).",
       "sign": [
-        "BAXTER & LOWE (huge rooftop letters)",
-        "BAXTER & LOWE · HERALD SQUARE · LUNCH COUNTER · FUR SALON 5"
+        "LACY'S (huge rooftop letters)",
+        "LACY'S · HERALD SQUARE · LUNCH COUNTER · FUR SALON 5"
       ],
       "check": "cleared: exact-name search, no real business found",
       "story": true,

@@ -37,7 +37,7 @@
         "room 1104 (Odessa)",
         "room 1112 (Hollis)",
         "shared bathroom",
-        "window to the Empire State"
+        "window to the Empire Estate"
       ]
     },
     {
@@ -124,7 +124,7 @@
         "24:00"
       ],
       "real": true,
-      "note": "Real public place: the 1968 underground station beneath Madison Square Garden. Two exits (Eighth and Seventh Aves) matter for chases."
+      "note": "Real public place: the 1968 underground station beneath Penn Square Garden. Two exits (Eighth and Seventh Aves) matter for chases."
     },
     {
       "id": "interior.corwin_basement",
@@ -229,7 +229,7 @@
       "id": "interior.herald_lunch_counter",
       "address": "W 34th St & Broadway",
       "facade": "avenue",
-      "name": "Baxter & Lowe, lunch counter",
+      "name": "Lacy's, lunch counter",
       "kind": "diner",
       "hours": [
         "00:00",
@@ -569,9 +569,9 @@
     },
     {
       "id": "interior.garden_lobby",
-      "address": "8th Ave & W 33rd St (Madison Square Garden entrance)",
+      "address": "8th Ave & W 33rd St (Penn Square Garden entrance)",
       "facade": "street",
-      "name": "Madison Square Garden: doors, lobby, back corridor",
+      "name": "Penn Square Garden: doors, lobby, back corridor",
       "kind": "shop",
       "hours": [
         "17:00",
@@ -605,9 +605,9 @@
     },
     {
       "id": "interior.pennsylvania_ballroom",
-      "address": "7th Ave & W 33rd St (Hotel Pennsylvania)",
+      "address": "7th Ave & W 33rd St (Hotel Pennsylvanian)",
       "facade": "street",
-      "name": "Hotel Pennsylvania ballroom",
+      "name": "Hotel Pennsylvanian ballroom",
       "kind": "bar",
       "hours": [
         "18:00",

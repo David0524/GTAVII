@@ -50,7 +50,7 @@
       "type": "deliver",
       "item": "item.club_payout_claudette",
       "to": "loc.hotel_pennsylvania",
-      "text": "Pay Claudette, Hotel Pennsylvania",
+      "text": "Pay Claudette, Hotel Pennsylvanian",
       "note": "Staff entrance on W 33rd St. On foot down Eighth Ave.",
       "requireNoHeat": true
     },
