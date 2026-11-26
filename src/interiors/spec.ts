@@ -59,6 +59,8 @@ export interface SlotOut { id: string; role: string; x: number; y: number; z: nu
  *  bed/wait = sleep or pass time; tv = playback surface; service = barber/tailor service point; deposit_box = bank. */
 export type MarkerType = 'shop' | 'register' | 'safe' | 'burglary' | 'stash' | 'hide' | 'payphone' | 'wardrobe' | 'bed' | 'wait' | 'tv' | 'service' | 'deposit_box' | 'spawn' | 'prop';
 export interface MarkerOut { id: string; type: MarkerType; x: number; y: number; z: number; name?: string }
+/** A surface the generated-art packs can fill (menu, poster, sign, photo, packaging, calendar). Local frame, facing (nx,nz). */
+export interface ArtSlotOut { id: string; use: 'menu' | 'poster' | 'sign' | 'photo' | 'packaging' | 'calendar' | 'notice'; w: number; h: number; x: number; y: number; z: number; nx: number; nz: number }
 export interface LightOut { x: number; y: number; z: number; color: [number, number, number]; intensity: number; kind: 'bulb' | 'tube' | 'neon' | 'window'; cell: number; flicker?: number }
 export interface MoverOut {
   /** vertical elevator cab: shaft position (local x,z), stops (local y), cab size */
@@ -79,6 +81,7 @@ export interface BuiltInterior {
   markers: MarkerOut[];
   lights: LightOut[];
   movers: MoverOut[];
+  art: ArtSlotOut[];
   /** interior volume (m^3) and reverb class for the audio stream */
   volume: number; reverb: string;
   /** local AABB of everything */

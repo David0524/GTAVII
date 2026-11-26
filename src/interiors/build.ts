@@ -49,7 +49,7 @@ export function buildInterior(req: BuildRequest): BuiltInterior {
   return {
     id: u.id, kind: u.kind, buildingId: req.building.id,
     frame: { ox: u.ox, oy: u.y, oz: u.oz, ux: u.ux, uz: u.uz, nx: u.nx, nz: u.nz },
-    cells, portals: k.portals, colliders: k.colliders, doors: k.doors, slots: k.slots, markers: k.markers, lights: k.lights, movers: k.movers,
+    cells, portals: k.portals, colliders: k.colliders, doors: k.doors, slots: k.slots, markers: k.markers, lights: k.lights, movers: k.movers, art: k.art,
     volume: Math.round(volume), reverb: u.kind === 'hero' ? 'hall' : KINDS[u.kind].reverb, box,
     stats: { verts, tris, genMs: +(t1 - t0).toFixed(2), bakeMs: +(t2 - t1).toFixed(2), cells: cells.length },
   };

@@ -4,7 +4,7 @@
  * three.js. Everything is generated, nothing is shipped.
  */
 import { type Mat, M } from './materials';
-import type { CellOut, ColliderOut, DoorOut, LightOut, MarkerOut, MarkerType, MeshArrays, MoverOut, PortalOut, SlotOut } from '../spec';
+import type { ArtSlotOut, CellOut, ColliderOut, DoorOut, LightOut, MarkerOut, MarkerType, MeshArrays, MoverOut, PortalOut, SlotOut } from '../spec';
 
 export type V3 = [number, number, number];
 
@@ -100,6 +100,7 @@ export class Kit {
   readonly markers: MarkerOut[] = [];
   readonly doors: DoorOut[] = [];
   readonly movers: MoverOut[] = [];
+  readonly art: ArtSlotOut[] = [];
   /** occluder boxes for baking shadows/AO (local AABBs) */
   readonly occluders: [number, number, number, number, number, number][] = [];
   cur = 0;
@@ -342,6 +343,9 @@ export class Kit {
     const g = GRADE[this.grade];
     const dying = kind !== 'neon' && kind !== 'window' && this.rng.chance(g.dying);
     this.lights.push({ x, y, z, color, intensity: intensity * g.lamp * (dying ? 0.35 : 1), kind, cell: this.cur, flicker: dying ? 1 : flicker });
+  }
+  artSlot(use: ArtSlotOut['use'], x: number, y: number, z: number, w: number, h: number, nx: number, nz: number) {
+    this.art.push({ id: `${this.id}:art:${use}:${this.art.filter((a) => a.use === use).length}`, use, w, h, x, y, z, nx, nz });
   }
   slot(role: string, x: number, y: number, z: number, yaw: number, hours?: [string, string]) {
     this.slots.push({ id: `${this.id}:${role}:${this.slots.filter((s) => s.role === role).length}`, role, x, y, z, yaw, hours });

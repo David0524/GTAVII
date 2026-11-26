@@ -137,7 +137,7 @@ export function genUnionHall(c: GenCtx) {
   for (let z = s.z0 + 2; z < s.z1 - 3.5; z += 0.95) for (let x = s.x0 + 0.8; x < s.x1 - 0.5; x += 0.55) { if (Math.abs(x - (s.x0 + W / 2)) < 0.5) continue; if (r.chance(0.08)) continue; P.chromeChair(k, { x, z, yaw: Math.PI }, M.paintGrey); }
   P.table(k, { x: s.x0 + 1.0, z: s.z0 + 1.0, yaw: 0 }, 1.6, 0.7, M.formicaCream);
   for (const ox of [0.5, 1.0]) k.cyl(s.x0 + 0.2 + ox, 0.75, s.z0 + 1.0, 0.14, 0.5, M.chrome, 10);
-  for (let z = s.z0 + 2; z < s.z1 - 3; z += 3) { k.box(s.x1 - 0.03, 1.1, z, s.x1 - 0.01, 2.1, z + 1.6, tint(M.paper, '#a8834a'), { occlude: false }); for (let q = 0; q < 5; q++) k.box(s.x1 - 0.035, 1.2 + r.range(0, 0.7), z + 0.1 + r.range(0, 1.2), s.x1 - 0.03, 1.4 + r.range(0, 0.7), z + 0.3 + r.range(0, 1.2), M.paper, { occlude: false }); }
+  for (let z = s.z0 + 2; z < s.z1 - 3; z += 3) { k.artSlot('notice', s.x1 - 0.036, 1.6, z + 0.8, 1.6, 1.0, -1, 0); k.box(s.x1 - 0.03, 1.1, z, s.x1 - 0.01, 2.1, z + 1.6, tint(M.paper, '#a8834a'), { occlude: false }); for (let q = 0; q < 5; q++) k.box(s.x1 - 0.035, 1.2 + r.range(0, 0.7), z + 0.1 + r.range(0, 1.2), s.x1 - 0.03, 1.4 + r.range(0, 0.7), z + 0.3 + r.range(0, 1.2), M.paper, { occlude: false }); }
   for (let x = s.x0 + 1.5; x < s.x1; x += 3) for (let z = s.z0 + 1.5; z < s.z1; z += 3) P.fluorescent(k, x, z, H, 1.22, 2.4, Math.PI / 2);
   k.slot('speaker', s.x0 + W / 2, 0.6, s.z1 - 1.2, 0);
   for (let q = 0; q < 6; q++) k.slot('member', s.x0 + 1 + r.range(0, W - 2), 0, s.z0 + 2 + r.range(0, D - 6), Math.PI);
@@ -156,7 +156,7 @@ export function genCinemaLobby(c: GenCtx) {
   k.slot('cashier', s.x0 + 1.0, 0, s.z0 + 1.3, 0); k.marker('register', s.x0 + 1.0, 1.0, s.z0 + 0.8, 'ticket booth');
   P.displayCase(k, { x: s.x1 - 0.8, z: s.z0 + 1.0, yaw: Math.PI / 2 }, Math.min(3.5, lobbyD - 1.5), { goods: 'candy', d: 0.7 });
   k.slot('concession', s.x1 - 0.35, 0, s.z0 + 2.2, Math.PI / 2); k.marker('shop', s.x1 - 1.6, 0, s.z0 + 2.2, 'concession');
-  for (let z = s.z0 + 1.5; z < s.z0 + lobbyD; z += 1.4) { k.box(s.x0 + 0.01, 1.0, z, s.x0 + 0.05, 2.4, z + 0.9, M.black, { occlude: false }); k.box(s.x0 + 0.05, 1.08, z + 0.06, s.x0 + 0.055, 2.32, z + 0.84, tint(M.sign, r.pick(['#c0503a', '#d0a040', '#3a5a8a', '#efe3c4']), { e: 0.6 }), { occlude: false }); }
+  for (let z = s.z0 + 1.5; z < s.z0 + lobbyD; z += 1.4) { k.box(s.x0 + 0.01, 1.0, z, s.x0 + 0.05, 2.4, z + 0.9, M.black, { occlude: false }); k.artSlot('poster', s.x0 + 0.06, 1.7, z + 0.45, 0.78, 1.24, 1, 0); k.box(s.x0 + 0.05, 1.08, z + 0.06, s.x0 + 0.055, 2.32, z + 0.84, tint(M.sign, r.pick(['#c0503a', '#d0a040', '#3a5a8a', '#efe3c4']), { e: 0.6 }), { occlude: false }); }
   for (let x = s.x0 + 1; x < s.x1; x += 2.5) P.globeLight(k, x, s.z0 + lobbyD / 2, H, 2.6);
   // auditorium cell
   const za = s.z0 + lobbyD;

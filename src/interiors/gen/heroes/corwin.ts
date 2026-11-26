@@ -220,6 +220,8 @@ function teddy(k: Kit, rc: [number, number, number, number], y0: number) {
   const fx = x0 + 1.6, fz = z1 - 0.9;
   k.box(fx - 0.45, y0, fz - 0.25, fx + 0.45, y0 + 0.42, fz + 0.25, tint(M.paintDarkGreen, '#3a4a32'), { collide: 'cover' });
   k.box(fx - 0.4, y0 + 0.42, fz - 0.22, fx - 0.1, y0 + 0.44, fz + 0.02, M.paper); // academy photo, face down
+  k.artSlot('photo', fx - 0.25, y0 + 0.445, fz - 0.1, 0.25, 0.2, 0, 0);
+  k.artSlot('calendar', x0 + 0.03, y0 + 1.5, z0 + 2.0, 0.3, 0.45, 1, 0);
   k.marker('stash', fx, y0 + 0.2, fz, 'footlocker (nightstick, act 1)');
   // mirror with the expired hack licence tucked in it, Saint Christopher on a nail
   P.mirror(k, { x: x1 - 0.02, z: z1 - 1.0, yaw: Math.PI / 2 }, 0.4, 0.55, y0 + 1.3);

@@ -60,6 +60,7 @@ function counterRun(c: GenCtx, s: ShopShell, side: 'x0' | 'x1', zStart: number, 
     place((f) => { P.pbox(k, f, 0, topY, 0.05, 0.9, topY + 0.04, 0.55, M.black); P.pbox(k, f, 0, topY + 0.04, 0.05, 0.9, topY + 0.06, 0.55, M.steel); }, 0.9);
     // menu board with changeable letters
     const mf = wallFrame(s, side, along0 + len * 0.15, 0.04);
+    { const [ax, az] = P.toWorld(mf, len * 0.35, -0.01); k.artSlot('menu', ax, 2.1, az, len * 0.7, 0.7, side === 'x1' ? -1 : 1, 0); }
     P.pbox(k, mf, 0, 1.75, 0, len * 0.7, 2.45, 0.04, M.black, { occlude: false });
     P.pbox(k, mf, 0.05, 1.8, -0.005, len * 0.7 - 0.05, 2.4, 0, tint(M.newsprint, '#2a2622', { p: 2 }), { occlude: false });
     // shelf of cups above the back bar
