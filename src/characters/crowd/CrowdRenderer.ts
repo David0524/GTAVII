@@ -69,6 +69,10 @@ export class CrowdRenderer {
   private max: number;
   private carts: THREE.InstancedMesh;
   /** Measurements for the stress test (ms, counts). */
+  /** Optional: tell the renderer which camera drives LOD (else the first camera that draws it). */
+  setCamera(cam: THREE.Camera) { this.camera = cam; }
+  /** Pending near-ring builds (tests wait for 0). */
+  get pendingBuilds() { let n = 0; for (const st of this.agents.values()) if (st.pending) n++; return n; }
   readonly stats = { cpuMs: 0, near: 0, mid: 0, far: 0, culled: 0, draws: 0, tris: 0, templatesReady: 0, nearBuilds: 0 };
 
   constructor(body: BodyModel, lib: AnimLibrary, opts: { max: number; quality: keyof typeof QUALITY; ground: () => GroundFn | null; baseUrl?: string }) {
@@ -89,7 +93,7 @@ export class CrowdRenderer {
     this.carts.count = 0; this.carts.frustumCulled = false;
     this.object.add(this.carts);
     // camera capture: the first draw of the frame tells us which camera renders us
-    const hook = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicNodeMaterial());
+    const hook = new THREE.Mesh(new THREE.PlaneGeometry(0.001, 0.001), new THREE.MeshBasicNodeMaterial({ colorWrite: false, depthWrite: false }));
     hook.frustumCulled = false;
     hook.onBeforeRender = (_r, _s, cam) => { this.camera = cam; };
     this.object.add(hook);
@@ -249,8 +253,8 @@ export class CrowdRenderer {
       const h = (k: number) => ((hash2(v, k) % 10000) / 10000);
       lod.attrs[0].array.set([a.x, a.y, a.z, a.yaw], i * 4);
       lod.attrs[1].array.set([T.frameBase + off + f0, T.frameBase + off + f1, fp - Math.floor(fp), 1 + (h(9) - 0.5) * 0.05], i * 4);
-      lod.attrs[2].array.set([(h(1) - 0.5) * 1.6, 0.75 + h(2) * 0.5, (h(3) - 0.5) * 0.9, 0.75 + h(4) * 0.5], i * 4);
-      lod.attrs[3].array.set([(h(5) - 0.5) * 1.2, 0.8 + h(6) * 0.4, (h(7) - 0.5) * 0.25, 0], i * 4);
+      lod.attrs[2].array.set([(h(1) - 0.5) * 0.9, 0.78 + h(2) * 0.4, (h(3) - 0.5) * 0.5, 0.8 + h(4) * 0.4], i * 4);
+      lod.attrs[3].array.set([(h(5) - 0.5) * 0.7, 0.8 + h(6) * 0.4, (h(7) - 0.5) * 0.25, 0], i * 4);
       if (T.kind === 'worker' && a.speed > 0.2 && carts < this.carts.count + 1e9 && carts < (this.carts.instanceMatrix.count)) {
         const m = new THREE.Matrix4().makeRotationY(a.yaw).setPosition(a.x + Math.sin(a.yaw) * 0.9, a.y, a.z + Math.cos(a.yaw) * 0.9);
         this.carts.setMatrixAt(carts++, m);

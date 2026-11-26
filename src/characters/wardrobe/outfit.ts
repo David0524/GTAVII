@@ -105,6 +105,7 @@ const jitter = (rng: Rng, hex: string, amt = 0.05): string => {
   const out = ch.map((c) => Math.round(Math.min(255, Math.max(0, c + l + rng.normal(0, amt * 80)))));
   return '#' + out.map((c) => c.toString(16).padStart(2, '0')).join('');
 };
+const shade = (hex: string, k: number) => '#' + [16, 8, 0].map((sh) => Math.min(255, Math.round(((parseInt(hex.slice(1), 16) >> sh) & 255) * k)).toString(16).padStart(2, '0')).join('');
 function fabric(rng: Rng, color: string, o: Partial<Fabric> = {}): Fabric {
   return {
     color: jitter(rng, color), color2: o.color2 ? jitter(rng, o.color2, 0.03) : jitter(rng, color, 0.12),
@@ -132,7 +133,8 @@ function patterned(rng: Rng, f: Fabric, opts: [Pattern, number][]) {
     houndstooth: [0.008, 0.016], paisley: [0.05, 0.1], floral: [0.04, 0.1], rib: [0.004, 0.006], tweed: [0.004, 0.008], denim: [0.003, 0.004], geometric: [0.04, 0.09],
   };
   f.scale = rng.range(...sc[f.pattern]);
-  if (f.pattern !== 'solid') f.color2 = jitter(rng, rng.pick([C('white'), C('cream'), C('red70'), C('mustard'), C('navy'), C('rust'), C('chocolate'), C('royalBlue')]), 0.05);
+  // mostly tonal prints (a lighter or darker shade of the ground colour); contrasting accents are rarer
+  if (f.pattern !== 'solid') f.color2 = rng.chance(0.6) ? shade(f.color, rng.chance(0.5) ? 1.45 : 0.55) : jitter(rng, rng.pick([C('white'), C('cream'), C('red70'), C('navy'), C('rust'), C('chocolate')]), 0.05);
   return f;
 }
 

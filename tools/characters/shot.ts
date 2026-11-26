@@ -38,7 +38,7 @@ try {
     await page.waitForTimeout(+arg('wait', '1500'));
     const out = path.resolve(ROOT, outs[i] ?? outs[0]);
     fs.mkdirSync(path.dirname(out), { recursive: true });
-    await page.screenshot({ path: out });
+    await page.screenshot({ path: out, timeout: 180000 });
     const report = await page.evaluate(() => (window as any).__CHAR?.report ?? null);
     if (report) fs.writeFileSync(out.replace(/\.png$/, '.json'), JSON.stringify(report, null, 2));
     console.log('shot', out, report ? JSON.stringify(report).slice(0, 400) : '');

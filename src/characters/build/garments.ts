@@ -292,7 +292,7 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
       const outerY = baseY - fold * (u < 0.75 ? 1 : 0.85);
       const spread = u > 0.6 ? (u - 0.6) * 0.25 * side : 0;
       // the leaf lies on the neck/collarbone, only the points reach the chest
-      const onChest = Math.pow(Math.max(0, (u - 0.7) / 0.3), 1.5);
+      const onChest = 0.85 + 0.15 * Math.pow(Math.max(0, (u - 0.7) / 0.3), 1.5);
       const neckPt = tr.at(baseY, a + spread, off + 0.012);
       const chestPt = tr.at(outerY, a + spread, off + 0.008);
       const outer: [number, number, number] = [neckPt[0] + (chestPt[0] - neckPt[0]) * onChest, outerY, neckPt[2] + (chestPt[2] - neckPt[2]) * onChest];

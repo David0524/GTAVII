@@ -143,6 +143,7 @@ export class Character {
         const b = this.bones[JI[`ball_${e.foot}`]];
         const pos = worldPos(b, new THREE.Vector3());
         const g = this.ground?.(pos.x, pos.z);
+        if (g) pos.y = g.y; // the sound source is the contact point on the ground
         this.emit('footstep', { type: 'footstep', foot: e.foot, position: pos, surface: g?.surface ?? 'concrete', speed: e.speed ?? 0, character: this } satisfies FootstepEvent);
       } else if (e.type === 'contact') {
         const hand = e.data?.hand === 'l' ? 'hand_l' : 'hand_r';

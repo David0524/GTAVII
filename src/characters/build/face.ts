@@ -55,7 +55,7 @@ export function faceMasks(k: number, P: Float32Array, F: Fields, ff: FaceFrame, 
   // brows
   for (const e of [ff.eyeL, ff.eyeR]) {
     const bx = (x - e[0]) / (0.025 * s), by = (y - ff.browY + Math.abs(x - e[0]) * 0.12) / (0.0055 * s);
-    if (front > 0.03 * s) out[1] = Math.max(out[1], (1 - sm(0.6, 1.1, Math.hypot(bx * (1 + 0.3 * Math.sign(x - e[0]) * Math.sign(e[0])), by))) * (1 - sm(0.8, 1.2, Math.abs(bx))));
+    if (front > 0.012 * s) out[1] = Math.max(out[1], (1 - sm(0.6, 1.1, Math.hypot(bx * (1 + 0.3 * Math.sign(x - e[0]) * Math.sign(e[0])), by))) * (1 - sm(0.8, 1.2, Math.abs(bx))));
   }
   // beard area: below the cheekbone line, above the neck crease, front and sides, minus lips
   const cheekLine = ff.noseTip[1] - 0.006 * s - Math.abs(x) * 0.25;
