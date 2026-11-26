@@ -8,7 +8,7 @@ into `docs/briefs/`. Read this first each session and update it last.
 ## How to run
 | What | Command |
 |---|---|
-| Headless suite (85 tests, about 40 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
+| Headless suite (101 tests, about 60 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
 | CPU bench (writes `shots/gameplay/bench.json`) | `npx tsx tools/gameplay/bench.ts` |
 | Test scene | `npm run dev`, then `/?gameplay=1` (`&station=lot\|yard\|block\|shop`, `&lead=teddy\|delphine\|nick`, `&touch=1`, `&overlays=0`) |
 | Recorded frames | `npm run build && npx tsx tools/gameplay/record.ts [--only a,b] [--skip c]` → `shots/gameplay/*.png` plus `frames.json` (a note and the live game state per frame) |
@@ -36,6 +36,7 @@ plus a thin test scene.
 | `cars/ownership.ts` | Buying cars: a weekly lot and classifieds with hidden condition, inspection, haggling. Also titles, selling, lending, alternate-side tickets, the boot, the pound, garages. |
 | `props/fire.ts` | Firebombs, car and prop fires, spread by exposure, burning, arson as a crime, fire engines |
 | `meta/stats.ts`, `meta/travel.ts` | Stats and completion feed for the UI chat; cab meter (1973 rates) and the subway (token or jump, breaking contact) |
+| `economy/*` | Free-roam money (ECONOMY.md), built by a Sonnet helper against my contracts and reviewed by me: jobs (cab, garment rush, locksmith, photos, bail skips, tow), crime (registers, safes, burglary, pickpocketing, collections, hijacks, the chop list), fences with saturation, gambling (the number, OTB, cards, pool, fights), property with weekly trouble, Nick's loans, and a deterministic 20-hour simulation (`economy_sim.test.ts` → `shots/gameplay/economy_curve.json`) |
 | `data/narrativeAdapter.ts` | Narrative's systems content → gameplay schema (dollars → cents, tiers, `precinct.*`, street-range precinct areas), tested on a snapshot |
 | `outcomes.ts` | Hospital (capped bill, the attendants' cut, half the loose ammo, a max-HP penalty) and custody (the clerk takes illicit items and 20% of cash; desk, lawyer, bail by another lead, or a night in holding; records and retrieval) |
 | `time.ts` | Sleep and wait rules, rest quality (heatwave without AC), world advance (reports cool, restocks, autosave) |
@@ -248,8 +249,25 @@ The camera direction is set straight up for all of it.
   - the encounter panel covers the cop it's about.
 - **The diegetic police UI is half there:** the radio line and the witness marker work. The
   minimap cones live in a debug radar until the engine's minimap layer exists (ENGINE_REQUESTS 4).
-- **The economy isn't integrated yet:** jobs, robbery, gambling and property are being built
-  against the wallet and clock contracts. There's no 20-hour money curve in this branch yet.
+- **The economy is in, but the balance is provisional.** Measured against a reference of $150
+  per real hour of missions:
+  - **Rates:**
+    - best legal job: cab, 0.44×;
+    - best crime: the chop list, 0.71×;
+    - property: 0.28–0.31×.
+  - **Exploits are bounded:** robbing the same register again pays $87, then $23 over the next
+    ten; fencing ten fur lots to one fence gets $536 against $1,440 at full price.
+  - **The 20-hour run:** cash goes from $365 to $1,275, peaking at $1,782 before a $1,100
+    newsstand purchase.
+  - **My reservation:** the targets are partly met through long attempt cycles. A chop delivery
+    counts about 57 game hours, roughly 1.9 real hours. In play that would feel slow.
+    - The rebalance: raise the mission reference once narrative's mission pay is settled
+      (missions currently pay almost nothing), shorten the cycles to the real time an attempt
+      takes, and let supply caps (pools, the weekly list, fence saturation) do the bounding.
+    - Business payback, at 5–10 game weeks, is longer than a 20-hour playthrough. It needs a
+      decision on whether property is late-game.
+  - **Not yet wired** into the facade or the scene (it runs against `Inventory` and `TimeKeeper`
+    directly).
 - **Content is placeholder:** gameplay's own invented weapons, shops and prices run unless
   narrative's adapter content is passed in. The adapter works on a snapshot, but the scene
   doesn't load narrative's files yet.
