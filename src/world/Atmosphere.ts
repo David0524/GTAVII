@@ -51,6 +51,26 @@ export class Atmosphere {
   }
 
   private tmp = { a: new THREE.Color(), b: new THREE.Color() };
+
+  /** Shadows: one map following the player (2k High / 1k Medium), 160 m across, re-aimed every frame. */
+  enableShadows(renderer: THREE.WebGPURenderer, mapSize: number) {
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const sh = this.sun.shadow;
+    this.sun.castShadow = true;
+    sh.mapSize.set(mapSize, mapSize);
+    const cam = sh.camera as THREE.OrthographicCamera;
+    cam.left = -80; cam.right = 80; cam.top = 80; cam.bottom = -80; cam.near = 10; cam.far = 1200;
+    sh.bias = -0.0004; sh.normalBias = 0.6;
+  }
+  /** Keep the shadow frustum centred on the focus (texel-snapped to avoid shimmer). */
+  followFocus(x: number, y: number, z: number) {
+    const texel = 160 / this.sun.shadow.mapSize.x;
+    const sx = Math.round(x / texel) * texel, sz = Math.round(z / texel) * texel;
+    this.sun.target.position.set(sx, y, sz);
+    this.sun.position.set(sx + this.lightDir.x * 500, y + this.lightDir.y * 500, sz + this.lightDir.z * 500);
+    this.sun.target.updateMatrixWorld();
+  }
   readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0, exposure: 1 };
 
   /** Recompute sun, sky, lights and haze from the world clock. Cheap; call every frame. */

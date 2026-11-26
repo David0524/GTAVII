@@ -53,6 +53,7 @@ async function main() {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
   const atmosphere = new Atmosphere(scene);
+  if (quality.shadows && params.get('shadows') !== '0') atmosphere.enableShadows(renderer, quality.name === 'high' || quality.name === 'ultra' ? 2048 : 1024);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
   const world = new World(quality);
@@ -294,6 +295,7 @@ async function main() {
     facadeUniforms.night.value = nightOverride ?? light.night;
     streetLightUniforms.lightsOn.value = light.lightsOn;
     renderer.toneMappingExposure = light.exposure;
+    { const f = mode === 'onfoot' ? body.object.position : camera.position; atmosphere.followFocus(f.x, f.y, f.z); }
     postUniforms.bloomStrength.value = 0.12 + 0.38 * light.lightsOn;
 
     // physics colliders stream around the player; the player waits until the ground under it exists
