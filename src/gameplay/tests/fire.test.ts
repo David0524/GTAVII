@@ -33,3 +33,14 @@ test('stop, drop and roll: dodging while burning usually puts you out', () => {
   }
   assert.ok(out >= 10 && out <= 19, `${out}/20`);
 });
+
+test('a hydrant opens with a pipe (vandalism if seen) and geysers', () => {
+  const r = rig();
+  r.g.addProp('h', 'hydrant', 1, 0, 0);
+  r.sim.add('w', 6, 0, { yaw: Math.atan2(5, 0), nerve: 0.9 });
+  const gz: any[] = []; r.g.on('geyser', (e) => gz.push(e));
+  assert.equal(r.g.openHydrant(), null, 'not with bare hands');
+  r.g.inv.give('char.teddy_arce', 'item.pipe'); r.g.equip('weapon.pipe');
+  assert.equal(r.g.openHydrant(), 'h');
+  assert.ok(gz[0]?.on && r.has('crimeWitnessed'));
+});

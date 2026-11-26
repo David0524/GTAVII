@@ -893,6 +893,17 @@ export class Gameplay {
     const base = sp < 0.2 ? 0 : this.pc.crouch ? 2 : this.pc.sprinting ? 20 : sp > 2.5 ? 12 : 6;
     return base * sk;
   }
+  /** Open a hydrant the 1974 way: a wrench or a length of pipe on the nut (any blunt melee weapon). Vandalism if seen. */
+  openHydrant(): string | null {
+    if (!this.player || this.reg.weapon(this.pc.weapon).family !== 'blunt') return null;
+    const p = this.player.position();
+    for (const pr of this.props.list.values()) {
+      if (pr.type !== 'hydrant' || this.props.isBroken(pr.id) || Math.hypot(pr.x - p[0], pr.z - p[2]) > 1.6) continue;
+      this.props.damage(pr.id, 9999, 'melee', this.player.id);
+      return pr.id;
+    }
+    return null;
+  }
   /** Throw a firebomb at a point (lock-on target or aim point). Arson: a witnessed crime, and the fire spreads. */
   throwMolotov(at: V3) {
     if (!this.player || !this.inv.take(this.player.lead, 'item.molotov')) return null;

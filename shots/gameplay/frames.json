@@ -420,7 +420,7 @@
       "reports": [
         {
           "pct": "pct.midtown_central",
-          "heat": 3.22,
+          "heat": 3.23,
           "tier": 3,
           "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks, may be armed…"
         }
@@ -440,14 +440,14 @@
         "filed"
       ],
       "timings": {
-        "gameplayAvg": 0.2037234042522643,
-        "gameplayP95": 0.5,
-        "frameAvg": 7.703191489368059,
-        "frameP95": 13.900000000139698,
+        "gameplayAvg": 0.2596774193546718,
+        "gameplayP95": 0.599999999627471,
+        "frameAvg": 8.606810035851641,
+        "frameP95": 18.200000000186265,
         "combat": {
           "combatMs": 0.10000000009313226,
-          "policeMs": 0.09999999986030161,
-          "totalMs": 0.19999999995343387,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.20000000018626451,
           "ballisticsMs": 0
         }
       }
@@ -455,29 +455,34 @@
   },
   {
     "file": "16_hydrant_geyser.png",
-    "note": "A hydrant shot open: it geysers for 90 s and pushes people back; breaking it is vandalism and the witnesses treat it like any other crime.",
+    "note": "A hydrant opened with a length of pipe on a hot afternoon: it geysers for 90 s and pushes people back. Opening it is vandalism, and the witnesses treat it like any other crime.",
     "state": {
       "hp": 100,
       "money": 4000,
-      "reports": [],
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 1.4,
+          "tier": 1,
+          "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks…"
+        }
+      ],
       "units": [
-        "foot:enroute",
-        "radio_car:search"
+        "foot:post",
+        "radio_car:pursuit"
       ],
       "ai": [],
       "witnesses": [
         "calling",
         "bystander",
         "toReport",
-        "bystander",
-        "toReport",
         "bystander"
       ],
       "timings": {
-        "gameplayAvg": 0.42327586208181134,
-        "gameplayP95": 1.3000000000465661,
-        "frameAvg": 14.762931034478743,
-        "frameP95": 40,
+        "gameplayAvg": 0.3598130841034456,
+        "gameplayP95": 0.7000000001862645,
+        "frameAvg": 13.954205607451394,
+        "frameP95": 34.799999999813735,
         "combat": {
           "combatMs": 0.10000000009313226,
           "policeMs": 0,
@@ -491,7 +496,7 @@
     "file": "17_touch_lockon.png",
     "note": "Phone landscape (844×390): touch layout. AIM locks the best target, ◀ ▶ cycle, HEAD/BODY/LEGS pick a limb, hold FIRE for assisted fire. No precise free aim needed.",
     "state": {
-      "hp": 100,
+      "hp": 76,
       "money": 4000,
       "reports": [],
       "units": [
@@ -499,22 +504,22 @@
         "radio_car:post"
       ],
       "ai": [
-        "gang:suppress",
+        "gang:inCover",
         "gang:peek",
         "gang:flank",
         "gang:inCover"
       ],
       "witnesses": [],
       "timings": {
-        "gameplayAvg": 0.43088235292474136,
-        "gameplayP95": 0.9000000001396984,
-        "frameAvg": 11.4397058823413,
-        "frameP95": 27.199999999953434,
+        "gameplayAvg": 0.7276923076822781,
+        "gameplayP95": 2.8000000002793968,
+        "frameAvg": 15.601538461518402,
+        "frameP95": 40.1999999997206,
         "combat": {
-          "combatMs": 0.8000000000465661,
+          "combatMs": 0.19999999972060323,
           "policeMs": 0,
-          "totalMs": 0.8000000000465661,
-          "ballisticsMs": 0.30000000004656613
+          "totalMs": 0.19999999972060323,
+          "ballisticsMs": 0
         }
       }
     }

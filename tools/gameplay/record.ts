@@ -125,12 +125,10 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
   hydrant: {
     url: 'station=block',
     run: async ({ ev, wait, shot }) => {
-      await ev(`(() => { const G = __GP; G.g.equip('weapon.pump'); G.g.inv.give('char.teddy_arce', 'item.pump'); G.g.inv.give('char.teddy_arce', 'item.ammo_12', 20); G.g.equip('weapon.pump'); G.g.currentGun().loaded = 5; G.teleport(-711, G.BLOCK.zS + 2.2, Math.PI/2); const h = G.propDefs.find(p => p.id === 'b_hyd'); G.aimAt([h.x, h.y + 0.4, h.z]); G.g.setContext({ device: 'mouse' }); G.g.setAiming(true); })()`);
-      await wait(0.5);
-      for (let i = 0; i < 6 && !(await ev<boolean>(`__GP.g.props.isBroken('b_hyd')`)); i++) { await ev(`__GP.g.setFiring(true)`); await wait(1.0); }
-      await ev(`(() => { const G = __GP; G.g.setAiming(false); const h = G.propDefs.find(p => p.id === 'b_hyd'); G.setCam([h.x - 6, h.y + 2.2, h.z + 5], [h.x, h.y + 1.2, h.z]); })()`);
-      await wait(1.2);
-      await shot('16_hydrant_geyser', 'A hydrant shot open: it geysers for 90 s and pushes people back; breaking it is vandalism and the witnesses treat it like any other crime.');
+      // the 1974 way: a length of pipe on the hydrant's nut on a hot afternoon
+      await ev(`(() => { const G = __GP; G.g.inv.give('char.teddy_arce', 'item.pipe'); G.g.equip('weapon.pipe'); const h = G.propDefs.find(p => p.id === 'b_hyd'); G.teleport(h.x - 1.0, h.z + 0.6, -Math.PI/2); G.g.openHydrant(); G.setCam([h.x - 6, h.y + 2.4, h.z + 5.5], [h.x, h.y + 1.4, h.z]); })()`);
+      await wait(2.5);
+      await shot('16_hydrant_geyser', 'A hydrant opened with a length of pipe on a hot afternoon: it geysers for 90 s and pushes people back. Opening it is vandalism, and the witnesses treat it like any other crime.');
     },
   },
   touch: {
@@ -147,7 +145,7 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
 };
 
 async function main() {
-  const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'pipe' });
+  const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'pipe', detached: true });
   for (let i = 0; i < 60; i++) { try { await fetch(`http://localhost:${PORT}/`); break; } catch { await new Promise((r) => setTimeout(r, 500)); } }
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   for (const [name, sc] of Object.entries(SCENARIOS)) {
@@ -175,7 +173,7 @@ async function main() {
     if (errs.length) console.log(`  page errors: ${errs.slice(0, 3).join(' | ')}`);
     await page.close();
   }
-  await browser.close(); server.kill();
+  await browser.close(); try { process.kill(-server.pid!); } catch { server.kill(); } // the whole npx → vite group
   const prev = fs.existsSync(path.join(OUT, 'frames.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'frames.json'), 'utf8')) : [];
   const merged = [...prev.filter((p: any) => !notes.some((n) => n.file === p.file)), ...notes].sort((a, b) => a.file.localeCompare(b.file));
   fs.writeFileSync(path.join(OUT, 'frames.json'), JSON.stringify(merged, null, 2));
