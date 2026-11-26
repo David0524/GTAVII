@@ -22,7 +22,7 @@ export interface WorldManifest {
 type ChunkState = {
   key: string; cx: number; cz: number; info: WorldManifest['chunks'][number];
   status: 'idle' | 'loading' | 'ready';
-  group?: THREE.Group; lod0?: THREE.Group; lod1?: THREE.Mesh; props?: THREE.Mesh;
+  group?: THREE.Group; lod0?: THREE.Group; lod1?: THREE.Mesh; props?: THREE.Mesh; detail?: THREE.Mesh[];
   lod: -1 | 0 | 1;
 };
 
@@ -60,6 +60,8 @@ export class World {
   readonly buildingMat = createFacadeMaterial();
   readonly groundMat = createGroundMaterial();
   readonly propMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.05 });
+  /** Debug/bench: mesh names to hide in every chunk ('buildings' | 'ground' | 'props' | 'lod1'). */
+  readonly debugHide = new Set<string>();
   stats = { ready: 0, lod0: 0, lod1: 0, loading: 0, parseMsTotal: 0, failed: 0 };
 
   constructor(private quality: QualitySettings, private base = import.meta.env.BASE_URL + 'data/') {
@@ -122,6 +124,13 @@ export class World {
         if (target === -1 && d > lod1Radius * 1.25) { this.unload(c); continue; }
         this.setLod(c, target);
         if (c.props) c.props.visible = d <= this.quality.propsRadius;
+        if (c.detail) for (let q = 0; q < 4; q++) { // quadrant boxes: 100 m, centred +-50 m from the chunk centre
+          const qx = c.cx + (q & 1 ? 50 : -50), qz = c.cz + (q & 2 ? 50 : -50);
+          const qd = Math.hypot(Math.max(Math.abs(camPos.x - qx) - 50, 0), Math.max(Math.abs(camPos.z - qz) - 50, 0));
+          c.detail[q].visible = qd <= this.quality.detailRadius && !this.debugHide.has('props');
+        }
+        if (this.debugHide.size && c.group) c.group.traverse((o) => { if (this.debugHide.has(o.name)) o.visible = false; else if (o.name === 'buildings' || o.name === 'ground') o.visible = true; });
+        if (this.debugHide.has('lod1') && c.lod1) c.lod1.visible = false;
         if (c.lod === 0) lod0++; else if (c.lod === 1) lod1++;
       }
     }
@@ -130,6 +139,16 @@ export class World {
     this.pump();
     this.stats.lod0 = lod0; this.stats.lod1 = lod1;
     this.stats.loading = this.queue.length + this.pendingCount;
+  }
+
+  /** Undo debugHide: show chunk meshes again and let setLod re-apply LOD visibility next update. */
+  clearDebugHide() {
+    this.debugHide.clear();
+    for (const c of this.chunks.values()) {
+      if (!c.group) continue;
+      c.group.traverse((o) => { if (o.name === 'buildings' || o.name === 'ground') o.visible = true; });
+      c.lod = -1 as -1 | 0 | 1; if (c.lod0) c.lod0.visible = false; if (c.lod1) c.lod1.visible = false;
+    }
   }
 
   /** True once every chunk the current camera wants is resident. */
@@ -178,15 +197,16 @@ export class World {
     const g = new THREE.Mesh(toGeometry(m.ground), this.groundMat); g.name = 'ground';
     b.castShadow = b.receiveShadow = true; g.receiveShadow = true;
     const pr = new THREE.Mesh(toGeometry(m.props), this.propMat); pr.name = 'props'; pr.castShadow = true; pr.receiveShadow = true;
-    lod0.add(b, g, pr);
+    const detail = m.detail.map((d) => { const dm = new THREE.Mesh(toGeometry(d), this.propMat); dm.name = 'detail'; dm.castShadow = true; dm.receiveShadow = true; return dm; });
+    lod0.add(b, g, pr, ...detail);
     const lod1 = new THREE.Mesh(toGeometry(m.buildingsLod1), this.buildingMat); lod1.name = 'lod1';
     group.add(lod0, lod1);
     lod0.visible = false; lod1.visible = false;
-    Object.assign(c, { group, lod0, lod1, props: pr, status: 'ready', lod: -1 });
+    Object.assign(c, { group, lod0, lod1, props: pr, detail, status: 'ready', lod: -1 });
     group.userData = { chunk: m.key, stats: m.stats };
     this.root.add(group);
     this.stats.ready++;
-    for (const cb of this.onChunkReady) cb({ key: m.key, ox: c.cx, oz: c.cz, parts: [b.geometry, g.geometry, pr.geometry] });
+    for (const cb of this.onChunkReady) cb({ key: m.key, ox: c.cx, oz: c.cz, parts: [b.geometry, g.geometry, pr.geometry] }); // detail props get no colliders (AC units, fire escapes)
   }
 
   private setLod(c: ChunkState, lod: -1 | 0 | 1) {
@@ -200,7 +220,7 @@ export class World {
     if (!c.group) return;
     c.group.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose(); });
     this.root.remove(c.group);
-    Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, props: undefined, status: 'idle', lod: -1 });
+    Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, props: undefined, detail: undefined, status: 'idle', lod: -1 });
     this.stats.ready--;
     for (const cb of this.onChunkUnload) cb(c.key);
   }

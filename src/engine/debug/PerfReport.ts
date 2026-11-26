@@ -49,6 +49,21 @@ export function frameDiagnosis(): string {
   return `not vsync-locked: interval p50 ${iv.p50.toFixed(1)} ms, work ~${work.toFixed(1)} ms${known}.`;
 }
 
+/** Best-guess device class from screen points and DPR (labelled as a guess in the report). */
+export function deviceGuess(): string {
+  const w = Math.min(screen.width, screen.height), h = Math.max(screen.width, screen.height), d = Math.round(window.devicePixelRatio || 1);
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+  if (!ios) return `${w}x${h}@${d}x (non-iOS)`;
+  const T: [number, number, number, string][] = [
+    [440, 956, 3, 'iPhone 16/17 Pro Max class'], [430, 932, 3, 'iPhone 14/15 Pro Max or 15/16 Plus class'],
+    [402, 874, 3, 'iPhone 16/17 Pro class'], [393, 852, 3, 'iPhone 14 Pro/15/15 Pro/16 class'], [390, 844, 3, 'iPhone 12/13/14 class'],
+    [428, 926, 3, 'iPhone 12/13 Pro Max or 14 Plus class'], [375, 812, 3, 'iPhone X/XS/11 Pro/mini class'],
+    [414, 896, 3, 'iPhone XS Max/11 Pro Max class'], [414, 896, 2, 'iPhone XR/11 class'], [375, 667, 2, 'iPhone SE (2nd/3rd)/8 class'],
+  ];
+  const hit = T.find(([a, b, c]) => a === w && b === h && c === d);
+  return hit ? `${hit[3]} (guess from ${w}x${h}@${d}x)` : `unknown iOS device ${w}x${h}@${d}x`;
+}
+
 export function buildReport(c: ReportCtx): string {
   const s = c.frames.summary();
   const r = c.renderer.info.render;
@@ -61,7 +76,7 @@ export function buildReport(c: ReportCtx): string {
     `frame avg ${s.avg.toFixed(2)} ms · p95 ${s.p95.toFixed(2)} ms · max ${s.max.toFixed(1)} ms · ${s.fps.toFixed(0)} fps`,
     `interval p50 ${perfSamples.interval.summary().p50.toFixed(2)} ms · js/frame p50 ${perfSamples.cpu.summary().p50.toFixed(2)} ms p95 ${perfSamples.cpu.summary().p95.toFixed(2)} ms · gpu/frame ${perfSamples.gpuAvailable ? `p50 ${perfSamples.gpu.summary().p50.toFixed(2)} ms p95 ${perfSamples.gpu.summary().p95.toFixed(2)} ms` : perfSamples.gpuAvailable === false ? 'unavailable (no timestamp-query)' : 'off (add ?gpu=1)'}`,
     `diagnosis ${frameDiagnosis()}`,
-    `device ${new URLSearchParams(location.search).get('device') ?? '(add &device=YourPhoneModel to the URL)'} · screen ${screen.width}x${screen.height} · cores ${navigator.hardwareConcurrency ?? '?'} · mem ${(navigator as { deviceMemory?: number }).deviceMemory ?? '?'} GB · standalone ${matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone ? 'yes' : 'no'}`,
+    `device ${((d) => (d && !/[<>]|model/i.test(d) ? d : deviceGuess()))(new URLSearchParams(location.search).get('device'))} · screen ${screen.width}x${screen.height} · cores ${navigator.hardwareConcurrency ?? '?'} · mem ${(navigator as { deviceMemory?: number }).deviceMemory ?? '?'} GB · standalone ${matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone ? 'yes' : 'no'}`,
     `draws ${r.drawCalls} · tris ${r.triangles} · chunks lod0 ${c.world.stats.lod0} lod1 ${c.world.stats.lod1}`,
     `view ${c.view} · input ${c.device}`,
     ...(c.extra ?? []),

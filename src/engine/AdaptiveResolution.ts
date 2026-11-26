@@ -1,9 +1,11 @@
 /**
  * Adaptive render resolution (oversight, first iPhone report: "preset Low at DPR 1.13 on a DPR-3 phone is
  * very soft"). Hill-climbs the renderer pixel ratio while the frame keeps its vsync-locked interval:
- *   - the "locked" interval is the best p50 seen (16.7 ms at 60 Hz, 33.3 ms when iOS caps to 30 Hz);
- *   - every 2.5 s window with p95 within 12% of it raises the scale by 0.1, up to min(devicePixelRatio, 2);
- *   - a window with p50 more than 20% over it drops the scale by 0.15 and holds a ceiling for 30 s
+ *   - the target is a real vsync rate: 16.7 ms if any window has reached 60 Hz, else 33.3 ms (30 Hz).
+ *     (It used to lock onto the best p50 seen; on the iPhone that was 34 ms while frames ran at 41 ms,
+ *     so it never backed off.)
+ *   - every 2.5 s window with p95 within 10% of the target raises the scale by 0.1, up to min(DPR, 2);
+ *   - a window with p50 more than 15% over it drops the scale by 0.15 and holds a ceiling for 30 s
  *     (no oscillation between two sizes).
  * Starts once loading has settled. On by default on touch devices; ?adaptive=0 / ?adaptive=1 to force.
  */
@@ -26,10 +28,11 @@ export class AdaptiveResolution {
     const a = this.samples.sort((x, y) => x - y), p50 = a[a.length >> 1], p95 = a[Math.floor(a.length * 0.95)];
     this.samples = []; this.t = 0;
     this.locked = Math.min(this.locked, p50);
-    if (p50 > this.locked * 1.2 && this.scale > this.min) {
+    const target = this.locked < 20 ? 1000 / 60 : 1000 / 30;
+    if (p50 > target * 1.15 && this.scale > this.min) {
       this.ceiling = this.scale; this.ceilingT = 30;
       this.set(this.scale - 0.15);
-    } else if (p95 <= this.locked * 1.12 && this.scale + 0.1 <= Math.min(this.ceiling, this.max) + 1e-6) {
+    } else if (p95 <= target * 1.1 && this.scale + 0.1 <= Math.min(this.ceiling, this.max) + 1e-6) {
       this.set(this.scale + 0.1);
     }
   }
@@ -38,5 +41,5 @@ export class AdaptiveResolution {
     if (v === this.scale) return;
     this.scale = v; this.apply(v);
   }
-  describe() { return `adaptive dpr ${this.scale.toFixed(2)} (range ${this.min.toFixed(2)}-${this.max.toFixed(2)}, locked interval ${Number.isFinite(this.locked) ? this.locked.toFixed(1) : '?'} ms)`; }
+  describe() { return `adaptive dpr ${this.scale.toFixed(2)} (range ${this.min.toFixed(2)}-${this.max.toFixed(2)}, best p50 ${Number.isFinite(this.locked) ? this.locked.toFixed(1) : '?'} ms, target ${Number.isFinite(this.locked) ? (this.locked < 20 ? '60' : '30') : '?'} Hz)`; }
 }
