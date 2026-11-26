@@ -43,7 +43,7 @@
       "type": "deliver",
       "text": "Slips to Earl's stand",
       "to": "W 35th St & 9th Ave",
-      "item": "item.number_slips",
+      "item": "item.slips",
       "radius": 15
     }
   ],

@@ -31,7 +31,7 @@
       "type": "deliver",
       "text": "Rack to the shop, W 38th & 9th",
       "to": "W 38th St & 9th Ave",
-      "item": "item.garment_rack",
+      "item": "item.garment_racks",
       "radius": 15
     },
     {
@@ -39,7 +39,7 @@
       "type": "deliver",
       "text": "Second rack, W 36th & 7th",
       "to": "W 36th St & 7th Ave",
-      "item": "item.garment_rack",
+      "item": "item.garment_racks",
       "radius": 15
     },
     {

@@ -130,6 +130,15 @@ W("items/consumables.json", {"items": [
   {"id": "item.ice", "name": "Ice block (5 lb)", "price": 0.40, "effect": "heat relief; brownout activity"}, {"id": "item.candles", "name": "Candles (box)", "price": 0.60},
   {"id": "item.subway_token", "name": "Subway token", "price": 0.35}, {"id": "item.newspaper", "name": "Newspaper", "price": 0.15, "effect": "reveals map tips (discovery)"},
   {"id": "item.film_pack", "name": "Instant-camera film pack", "price": 4.50, "effect": "10 photos (Delphine)"}, {"id": "item.dime", "name": "Dime (payphone)", "price": 0.10}]})
+W("items/quest.json", {"_note": "Carried quest items for activities and side quests (not weapons or evidence).", "items": [
+  {"id": "item.film_reel", "name": "Film reel (1947 picture)"}, {"id": "item.flashlights", "name": "Box of flashlights"},
+  {"id": "item.flower_order", "name": "Flower order (Moretti)"}, {"id": "item.garment_racks", "name": "Garment racks"},
+  {"id": "item.ice_candles", "name": "Ice and candles (brownout relief)"}, {"id": "item.money_order", "name": "Postal money order"},
+  {"id": "item.paper_bundle", "name": "Newspaper bundle (bulldog edition)"}, {"id": "item.slips", "name": "Numbers slips"},
+  {"id": "item.purse", "name": "Stolen purse"}, {"id": "item.stored_coat", "name": "Customer's stored fur coat"},
+  {"id": "item.telegram", "name": "Telegram"}, {"id": "item.vehicle", "name": "A car on the Dukes' list (the car itself; Gameplay delivers vehicles)"},
+  {"id": "item.wanted_goods", "name": "Marty's want-list goods (radio, camera, fur)"}, {"id": "item.water", "name": "Water cans"},
+  {"id": "item.ice", "name": "Ice block"}]})
 W("items/keys.json", {"items": [
   {"id": "item.corwin_master_keys", "name": "Corwin master key ring", "opens": "every Corwin room, roof, basement; Teddy's 'Keys' special"},
   {"id": "item.arden_service_key", "name": "Arden service-door key", "opens": "the Arden back stairs and boiler room (from Marcus)"},

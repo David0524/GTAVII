@@ -29,7 +29,7 @@
       "type": "deliver",
       "text": "Stand one, W 34th & 7th",
       "to": "W 34th St & 7th Ave",
-      "item": "item.newspaper_bundle",
+      "item": "item.paper_bundle",
       "radius": 15
     },
     {
@@ -37,7 +37,7 @@
       "type": "deliver",
       "text": "Stand two, E 34th & Madison",
       "to": "E 34th St & Madison Ave",
-      "item": "item.newspaper_bundle",
+      "item": "item.paper_bundle",
       "radius": 15
     },
     {
@@ -45,7 +45,7 @@
       "type": "deliver",
       "text": "Stand three, W 28th & 8th",
       "to": "W 28th St & 8th Ave",
-      "item": "item.newspaper_bundle",
+      "item": "item.paper_bundle",
       "radius": 15
     },
     {
