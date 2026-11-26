@@ -51,7 +51,13 @@ function buildCar(lod: 0 | 1): THREE.BufferGeometry {
       for (let k = 0; k <= n; k++) {
         box('paint', xo, CAR.sillY, CAR.winTopY, z, z + pier, 0.05); box('white', xi, CAR.sillY, CAR.winTopY, z, z + pier, 0.02);
         z += pier;
-        if (k < n) { box(glass, sx * (HW - 0.045), CAR.sillY, CAR.winTopY, z, z + winW, 0.03); z += winW; }
+        if (k < n) {
+          box(glass, sx * (HW - 0.045), CAR.sillY, CAR.winTopY, z, z + winW, 0.03);
+          // black rubber gaskets top and bottom, standing proud of the skin
+          box('rubber', sx * (HW + 0.002), CAR.winTopY - 0.02, CAR.winTopY + 0.02, z - 0.02, z + winW + 0.02, 0.015);
+          box('rubber', sx * (HW + 0.002), CAR.sillY - 0.02, CAR.sillY + 0.02, z - 0.02, z + winW + 0.02, 0.015);
+          z += winW;
+        }
       }
     }
     // door headers above each opening

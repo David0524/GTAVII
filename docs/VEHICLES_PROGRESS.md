@@ -4,6 +4,29 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 4: after the usage reset (engine-independent gaps)
+- **Merged** the engine at adb6373. The engine accepted request 7, so the registry now resolves
+  every shared class: the emergency vehicles, mail, ice cream, motorcycle, police motorcycle
+  and bicycle (messenger 80%, carrier trike 20%).
+- **The traffic renderer instances two-wheelers:** frame, steering assembly and wheels merged
+  at LOD1; the police bike's beacon follows the Siren bit.
+- **Interiors visible through the glass** (passenger cars, LOD0):
+  - bench seats with headrests, upholstered in a period colour chosen by the variant;
+  - a dash with a padded top, a steering wheel and column, a parcel shelf and a headliner.
+  - Per-pane glass is tinted and see-through at opacity 0.58. Cracked glass goes milky and
+    shattered glass opens. LOD1/LOD2 keep opaque glass because they have no cabin.
+- **Wheels:**
+  - full covers with a rolled lip, a concentric groove and a domed centre cap;
+  - wider period whitewalls.
+  - A lathe winding bug had made dished truck hubs render hollow from outside. Wheel lathes now
+    take an explicit inboard point. High-sill vehicles get a back disc.
+- **Brightwork on trucks and emergency vehicles:** black window surrounds, door shut lines and
+  handles. Subway windows get rubber gaskets.
+- **Rapier:** the engine's `src/shared/rapier.ts` has **not landed yet**. All vehicles imports go
+  through `src/vehicles/rapier.ts`, so the switch is a one-line change.
+- **Budget:** the sedan's LOD0 is now about 8.3k triangles (whitewalls, covers, cabin), 4% over
+  the ≈8k target. Every other model is within 5.2–7.9k.
+
 ## Session 3c: touch driving (user decision: analog gas and brake pedals by default)
 - **Physics:**
   - Torque-converter **idle creep**: 2.3 mph with no pedals; any brake holds the car.
