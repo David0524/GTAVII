@@ -44,9 +44,11 @@ await withServer(async (base) => {
   await step(page, 'map_filter_toggle', () => tap(t('.t74-filter').nth(2)));
   await step(page, 'map_tap_spot_card', async () => { const c = page.locator('.t74-foldmap'); const b = (await c.boundingBox())!; await page.touchscreen.tap(b.x + b.width * 0.62, b.y + b.height * 0.45); await page.locator('.t74-card').waitFor({ state: 'visible' }); });
   await step(page, 'map_pencil_route', () => tap(t('.t74-card button', /PENCIL A ROUTE/)));
-  for (const tab of ['POCKETS', 'PAPER', 'BUSINESS', 'RECORD', 'SAVES', 'SETTINGS', 'CREDITS']) await step(page, `tab_${tab.toLowerCase()}`, () => tap(t('.t74-tabs button', new RegExp(`^${tab}$`))));
-  await step(page, 'settings_remap_page', async () => { await tap(t('.t74-tabs button', /^SETTINGS$/)); await tap(t('.u-settings .np-pages button', /Buttons/)); });
-  await step(page, 'saves_slot_save', async () => { await tap(t('.t74-tabs button', /^SAVES$/)); await tap(t('.t74-slot .acts button', /^SAVE$/)); });
+  for (const tab of ['POCKETS', 'PAPER', 'BUSINESS', 'RECORD']) await step(page, `tab_${tab.toLowerCase()}`, () => tap(t('.t74-tabs button', new RegExp(`^${tab}$`, 'i'))));
+  // Saves, Settings and Credits live under System (a secondary strip)
+  for (const tab of ['SAVES', 'SETTINGS', 'CREDITS']) await step(page, `tab_system_${tab.toLowerCase()}`, async () => { await tap(t('.t74-tabs button', /^SYSTEM$/i)); await tap(t('.t74-subtabs button', new RegExp(`^${tab}$`, 'i'))); });
+  await step(page, 'settings_remap_page', async () => { await tap(t('.t74-tabs button', /^SYSTEM$/i)); await tap(t('.t74-subtabs button', /^SETTINGS$/i)); await tap(t('.u-settings .np-pages button', /Buttons/)); });
+  await step(page, 'saves_slot_save', async () => { await tap(t('.t74-tabs button', /^SYSTEM$/i)); await tap(t('.t74-subtabs button', /^SAVES$/i)); await tap(t('.t74-slot .acts button', /^SAVE$/)); });
   await step(page, 'resume_to_play', async () => { await tap(t('.t74-tabs .resume')); await page.waitForFunction(() => (window as any).__T74.ui.state === 'play'); });
 
   console.log(log.join('\n'));

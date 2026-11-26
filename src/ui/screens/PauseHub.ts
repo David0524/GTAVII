@@ -10,6 +10,8 @@ import { esc } from '../util';
 
 export interface Tab {
   id: string; label: string;
+  /** Tabs sharing a group collapse into one top-level tab with a secondary strip (Saves · Settings · Credits under System). */
+  group?: string;
   el: HTMLElement;
   /** Called each time the tab becomes active; hands back its focusable items. */
   open(setNav: (items: NavItem[], keep?: boolean) => void): void;
@@ -23,6 +25,8 @@ export interface Tab {
 export class PauseHub {
   readonly root = document.createElement('div');
   private tabsEl = document.createElement('div');
+  private subEl = document.createElement('div');
+  private lastInGroup = new Map<string, string>();
   private body = document.createElement('div');
   private foot = document.createElement('div');
   readonly nav: MenuNav;
@@ -37,7 +41,8 @@ export class PauseHub {
     this.tabsEl.className = 't74-tabs';
     this.body.className = 'u-hubbody';
     this.foot.className = 't74-foot';
-    this.root.append(this.tabsEl, this.body, this.foot);
+    this.subEl.className = 't74-subtabs';
+    this.root.append(this.tabsEl, this.subEl, this.body, this.foot);
     this.root.style.display = 'none';
     document.body.appendChild(this.root);
   }
@@ -60,11 +65,17 @@ export class PauseHub {
     const t = this.tabs.find((x) => x.id === id) ?? this.tabs[0];
     this.active = t.id; t.el.style.display = '';
     const st = this.input.promptStyle;
-    this.tabsEl.innerHTML = `<span class="brand">Tenderloin '74</span>` + this.visible.map((x) => `<button data-t="${x.id}" class="${x.id === t.id ? 'active' : ''}">${esc(x.label)}</button>`).join('') +
+    if (t.group) this.lastInGroup.set(t.group, t.id);
+    this.tabsEl.innerHTML = `<span class="brand">Tenderloin '74</span>` + this.entries.map((e) => `<button data-t="${e.id}" class="${(e.group ? t.group === e.group : e.id === t.id) ? 'active' : ''}">${esc(e.label)}</button>`).join('') +
       (st === 'touch' ? '' : `<span class="hint">${glyph('tabPrev', st)} ${glyph('tabNext', st)}</span>`) + `<button class="resume">${this.only ? 'BACK' : 'RESUME'} ✕</button>`;
     this.tabsEl.querySelectorAll<HTMLElement>('button[data-t]').forEach((b) => b.addEventListener('click', () => this.select(b.dataset.t!)));
     this.tabsEl.querySelector('.resume')!.addEventListener('click', () => this.hide());
     this.tabsEl.querySelector('button.active')?.scrollIntoView?.({ inline: 'nearest', block: 'nearest' });
+    // the group's own strip under the bar
+    this.subEl.innerHTML = '';
+    const members = t.group && !this.only ? this.visible.filter((x) => x.group === t.group) : [];
+    this.subEl.style.display = members.length > 1 ? '' : 'none';
+    for (const x of members) { const b = document.createElement('button'); b.textContent = x.label; b.className = x.id === t.id ? 'active' : ''; b.addEventListener('click', () => this.select(x.id)); this.subEl.appendChild(b); }
     t.open((items, keep) => this.nav.set(items, keep));
     this.foot.innerHTML = st === 'touch'
       ? `<span>Tap to choose</span>${t.hint ? `<span>${t.hint}</span>` : ''}`
@@ -81,5 +92,21 @@ export class PauseHub {
     if (this.nav.update(dt) === 'back' && !t?.back?.()) this.hide();
   }
   private get visible() { return this.only ? this.tabs.filter((t) => this.only!.includes(t.id)) : this.tabs; }
-  private cycle(d: number) { const v = this.visible, i = v.findIndex((t) => t.id === this.active); this.select(v[(i + d + v.length) % v.length].id); }
+  /** Top-level bar entries: ungrouped tabs, plus one entry per group (opens its last-used member). Flat when `only` is set. */
+  private get entries(): { id: string; label: string; group?: string }[] {
+    if (this.only) return this.visible.map((t) => ({ id: t.id, label: t.label }));
+    const out: { id: string; label: string; group?: string }[] = [], seen = new Set<string>();
+    for (const t of this.visible) {
+      if (!t.group) { out.push({ id: t.id, label: t.label }); continue; }
+      if (seen.has(t.group)) continue; seen.add(t.group);
+      out.push({ id: this.lastInGroup.get(t.group) ?? t.id, label: t.group, group: t.group });
+    }
+    return out;
+  }
+  /** LB/RB walk the top-level entries (a group counts once). */
+  private cycle(d: number) {
+    const e = this.entries, cur = this.tabs.find((t) => t.id === this.active);
+    const i = e.findIndex((x) => (x.group ? x.group === cur?.group : x.id === this.active));
+    this.select(e[(i + d + e.length) % e.length].id);
+  }
 }

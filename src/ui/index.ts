@@ -97,6 +97,8 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   if (touch) touch.onWheel = () => root.show('weapons');
   if (touch) settingsTab.extraButtons.push(['Edit touch layout', () => { hub.hide(); touch.edit(() => hub.show('settings')); }]);
   const creditsTab = new CreditsTab(host.baseUrl); hub.add(creditsTab);
+  // fewer top-level tabs for thumbs (oversight review): Saves, Settings and Credits live under one System tab
+  for (const t of [savesTab, settingsTab, creditsTab]) (t as { group?: string }).group = 'System';
   const shop = new ShopCounter(input, host);
   const leads = new LeadPicker(input, host);
   const weapons = new WeaponSelect(input, host);
