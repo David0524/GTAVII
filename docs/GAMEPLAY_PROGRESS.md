@@ -192,5 +192,68 @@ The camera direction is set straight up for all of it.
 - There are no animations: poses are rigid stand-ins (the characters stream owns them;
   ENGINE_REQUESTS 9).
 
-## Honest critique
-*(Written after reviewing the recorded frames; see the end of this file.)*
+## Honest critique (from the recorded frames and the headless runs, 2026-11-26)
+
+### What already feels like a 2031 open world (the systems)
+- **The police are knowledge, not a meter.**
+  - Frames 08–11: one shot on W 31st St sends people scattering; one breaks for the call box, and
+    you can watch the red line of their run.
+  - The report says what they saw ("…male, thirties, medium build, white short-sleeve shirt,
+    brown slacks, may be armed…"), and the radio says it back to you.
+  - Units come out of the actual station house on that block, with sight cones on the ground.
+  - Change the shirt and they walk past you (frame 15).
+  - Nothing here is a copied mechanic, and it plays like 1974.
+- **Bribes have texture.**
+  - $10 for a shots-fired report is refused with a line, and $150 to a cop in a house on the pad
+    makes the report vanish (frames 13–14).
+  - An honest cop takes offence, and the report gets worse.
+  - Nick's Payroll and Delphine's photo of a cop with his hand out are real rules, not flavour
+    text.
+- **Gunfights have intent.**
+  - Frames 01–04: the crew spreads into cover, the non-token shooters suppress the car instead of
+    all firing at once, one flanks, and they bark it.
+  - Rounds come through the car door (the HUD shows him bleeding behind it), and the engine block
+    is the safe spot.
+  - Losing two men breaks the rest: one runs ("Forget this!"), one gives up.
+- **The rules are consistent.**
+  - A gun in hand or too big for your clothes is visible, and is reported as a gun seen.
+  - Teddy in shirtsleeves can't hide a service revolver; a windbreaker can.
+  - Five witnesses to one shot make one shots-fired report.
+  - A dead cop is found by radio silence even when nobody saw it.
+  - Several of these came out of bugs the frames exposed, and they're now covered by tests.
+- **The fairness work is measurable:**
+  - NPC melee telegraphs are long enough to parry on a phone (`ai.test`);
+  - first shots from a new angle miss;
+  - touch lock-on wins a fight with the camera pointed at the sky (`touch.test`).
+
+### What still looks and feels like a prototype
+- **Presentation is placeholder:**
+  - capsule-and-box people with rigid poses, no animation, no ragdoll;
+  - block-out cars; flat-shaded city; WebGL2 in software rendering.
+  - Melee in particular reads poorly as stills (frame 06): without the characters stream's
+    animations a parry is just a colour change, and *weighty* hits need hit-stop, camera
+    impulse, sound and a stagger animation.
+- **Locomotion of others is fake:**
+  - the stand-in sim walks in straight lines;
+  - police cars drive down the middle of the block and through parked cars;
+  - foot cops don't use the sidewalk graph.
+
+  Chases are only a centrepiece once the sim's police agents exist (ENGINE_REQUESTS 8).
+- **Cameras:** the test scene's camera clips into the player and walls when he faces a cop at
+  close range (frames 12–14, 16). The engine's camera work isn't mine, but encounters will need
+  a framed two-shot.
+- **The HUD is honest but busy:**
+  - with debug overlays on, the labels overlap when enemies bunch up;
+  - three stacked subtitles ("Someone's running for the call box." twice) should merge;
+  - the encounter panel covers the cop it's about.
+- **The diegetic police UI is half there:** the radio line and the witness marker work. The
+  minimap cones live in a debug radar until the engine's minimap layer exists (ENGINE_REQUESTS 4).
+- **The economy isn't integrated yet:** jobs, robbery, gambling and property are being built
+  against the wallet and clock contracts. There's no 20-hour money curve in this branch yet.
+- **Content is placeholder:** gameplay's own invented weapons, shops and prices run unless
+  narrative's adapter content is passed in. The adapter works on a snapshot, but the scene
+  doesn't load narrative's files yet.
+- **Perf is CPU-only and partly contended:**
+  - the clean bench meets budgets with margin;
+  - rare single-frame spikes (JIT/GC) are unexplained beyond that;
+  - there's no phone measurement yet.
