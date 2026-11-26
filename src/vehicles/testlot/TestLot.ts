@@ -179,11 +179,17 @@ export async function runTestLot() {
   const turntable = mode === 'turntable';
   if (lineup) {
     // every model parked along one curb of the block street, nose to tail
-    let z = -60;
+    // spaced by bumper extents (front of each = rear of the previous + a gap)
+    let cursor = -75;
     MODELS.forEach((m, i) => {
-      const v = factory.spawn(world, scene, m.id, { x: ROAD / 2 - 2.2 - (m.W > 2.3 ? 0.3 : 0), y: 0.1, z, yaw: 0 }, i + variant);
+      const mid = m.sF + m.wheelbase / 2;
+      const front = mid + m.bumper.depth + 0.05;
+      const rear = (m.cargo ? m.cargo[m.cargo.length - 1].s1 : m.L) - mid + (m.rearBumper ?? m.bumper).depth + 0.05;
+      const z = cursor + front;
+      const v = factory.spawn(world, scene, m.id, { x: ROAD / 2 - 1.5 - m.W / 2, y: 0.1, z, yaw: 0 }, i + variant);
+      v.brakeLight = false; v.setInput({ throttle: 0, brake: 1, steer: 0, handbrake: true });
       parked.push(v);
-      z += (m.cargo ? m.cargo[m.cargo.length - 1].s1 : m.L) + 1.6;
+      cursor = z + rear + 1.4;
     });
     spawnPlayer(-30, 40);
   } else if (turntable) {
@@ -215,7 +221,7 @@ export async function runTestLot() {
       tcars.push({ modelId: weights[(i * 7) % weights.length], variant: i, x: 0, y: 0, z: 0, yaw: 0, brake: false, lane: road + dir * 2.6, axis, dir, v: 4 + (i % 5) });
       const c = tcars[i];
       const along = ((i * 37) % 300) - 150;
-      if (axis === 0) { c.x = c.lane; c.z = along - 50; c.yaw = dir > 0 ? Math.PI : 0; } else { c.z = c.lane - 50; c.x = along; c.yaw = dir > 0 ? -Math.PI / 2 : Math.PI / 2; }
+      if (axis === 0) { c.x = c.lane; c.z = along - 50; c.yaw = dir > 0 ? Math.PI : 0; } else { c.z = c.lane - 6; c.x = along; c.yaw = dir > 0 ? -Math.PI / 2 : Math.PI / 2; }
     }
   }
   const moveTraffic = (dt: number) => {

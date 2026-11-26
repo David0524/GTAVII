@@ -1,0 +1,195 @@
+# VEHICLES_PROGRESS: Tenderloin '74 vehicles workstream
+
+This file is the source of truth for the vehicles workstream: read it first, update it last.
+Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
+`claude/tenderloin-74-engine-qi54lt`.
+
+## Status (session 1)
+| Area | State |
+|---|---|
+| Procedural generator (`src/vehicles/gen/`) | **Done, v1.** One loft generator builds every body: sedans, coupe, wagon, taxi, bus, trucks |
+| Roster (10 models, all invented) | **Done.** Registry in `docs/VEHICLE_REGISTRY.md` |
+| LODs | LOD0 5.6–7.6k tris (bus 9.0k). LOD1 1.1–1.5k (bus 2.1k). LOD2 is a 72-tri box. **Both are over the brief's targets for the bus, and LOD1 is over ~1k for most models** |
+| Materials (TSL node) | Clearcoat paint with a dirt mask, chrome, glass with rain streaks and cracking, rubber, vinyl, woodgrain, emissive lamps. **Rain streaks are implemented but not yet checked visually** |
+| Physics | **Done, v1.** Custom raycast suspension on a Rapier body, bias-ply tyre curve, lock-up and wheelspin, 3-speed automatic, weight transfer emerges from soft springs |
+| Skid events, tyre marks | **Done**, with an optional `SkidMarks` helper |
+| Collision → damage | **Done.** Contact-impulse sensing into 4 morph zones, then stages intact → dented → battered → smoking → burning → destroyed |
+| Damage visuals | Bent panels (morph targets), popped hood, cracked glass, broken lamps, steam/smoke, fire with light, burnt shell. **Detaching wheels not done** (stretch goal) |
+| Traffic instancing | **Done.** 3 instanced draws per model per LOD, with per-instance paint and brake state |
+| Test scene `?vehicles=1` | **Done.** Lot, grid of 20 m blocks with 0.15 m curbs, crash wall, posts, ramp, parked cars |
+| Shots and measurements | **Done** with `npm run build && npm run shots:vehicles` → `shots/vehicles/` |
+
+## Architecture
+```
+src/vehicles/
+  index.ts          createVehicleFactory() — the integration contract (spawn, traffic renderer, preload)
+  models.ts         the 10 ModelSpecs (shape + physics parameters)
+  assets.ts         variantOf(spec, n) (paint/vinyl/wheels/grime) and the geometry cache per trim
+  Vehicle.ts        contract object: setInput/update/seatPose/on/dispose + damage, lights, fx
+  physics.ts        VehiclePhysics: raycast wheels, tyres, transmission, contact-impulse sampling
+  traffic.ts        TrafficRenderer: instanced visual proxies
+  effects.ts        world-space smoke/fire sprite emitters
+  SkidMarks.ts      optional tyre-mark ring buffer fed by 'skid' events
+  gen/builder.ts    GeoBuilder: indexed triangles per material slot, grids with auto winding, sweeps, lathes
+  gen/spec.ts       ModelSpec / PhysicsSpec types
+  gen/body.ts       generate(): loft body + greenhouse + cargo + grille/lamps/bumpers/trim/extras + wheels + colliders
+  gen/morphs.ts     4 damage morph targets (front/rear/left/right), baked with normals
+  gen/materials.ts  per-vehicle MaterialSet (TSL), shared trim materials
+  gen/decals.ts     canvas lettering (rate card, POLICE, roof sign, destination sign, fleet names)
+  testlot/TestLot.ts  ?vehicles=1 scene, chase cam, HUD, window.__VEH automation API
+tools/shots/vehicles.ts  screenshot + metrics rig
+```
+- **How the generator works.** The body is a loft of cross-sections along the length:
+  - Plan width has rounded corners. The bottom profile rises over the wheel arches (or stays
+    at hub height for fender skirts). The top profile gives hood, cowl and deck heights.
+  - Each section has crisp creases at the shoulder.
+  - The greenhouse is a (u, v) patch. u runs from A to C pillar and v from belt to roof. Bands
+    along u become glass, pillar, opera window, door opening or blank panel.
+  - Windshield and backlight are bowed patches, and the roof is crowned.
+  - Trucks add cargo modules (box, or packer with hopper). Everything goes into one indexed
+    geometry with one group per material slot, so one car is one mesh with up to about 16 draws.
+- **Variants.** `variant` is a seed. It picks paint from the model's period palette, metallic,
+  vinyl roof and colour, whitewalls, wheel covers and grime. Geometry is cached per trim
+  combination, so 100 variants of a model share a few geometries.
+- **Damage.** Rapier contact impulses on the chassis colliders (read each step through
+  `contactPairsWith`, so no engine event queue is needed) are turned into Δv.
+  - Δv over 1.6 m/s accumulates severity, which is assigned to a zone by the local contact point.
+  - Severity drives the morph influences and the total damage.
+  - Thresholds: 0.35 battered (lamps break when their zone is over 0.35, hood pops when front
+    is over 0.45, glass cracks when total is over 0.4). 0.65 smoking, with power cut. 0.95
+    burning, which becomes destroyed after 10 s.
+
+## Decisions (and why)
+- **Custom raycast suspension instead of Rapier's `DynamicRayCastVehicleController`.** The
+  brief allowed either. The custom version gives control over the bias-ply slip curve, brake
+  lock-up (no ABS in 1974), the wheelspin state, the skid metric, and three rays per wheel so
+  0.15 m curbs ride up smoothly instead of snagging. It costs about 0.02 ms per vehicle per
+  step.
+- **Tyre forces.** Longitudinal force acts at the contact patch, giving full dive and squat
+  with no anti-dive geometry, as in the period. Lateral force acts 0.1 m above it, standing in
+  for a low roll centre.
+- **Brakes are strong enough to lock** at full pedal (0.95 g capacity, 68% front). A keyboard
+  panic stop skids, as a 1974 car without ABS would. Partial analog brake does not lock.
+- **Holding brake at a standstill engages reverse.** Negative throttle also works. This is
+  documented in `index.ts`.
+- **Impact sensing reads contact impulses** rather than requiring an EventQueue, so the engine
+  can step the world however it likes.
+- **Traffic proxies use LOD1 and LOD2 geometry split three ways**: paint (instance colour),
+  fixed parts (vertex colour), and tail lamps (instance colour carries brake state). That
+  makes 3 draws per model per LOD.
+- **Name clearance:** four candidate names matched real historic makers and were replaced
+  (see the registry).
+
+## Measurements (honest: headless Chromium in a container, WebGL2 via SwiftShader software rendering)
+Physics and CPU timings come from the browser's JS engine and mean something. Frame times do
+**not** (software rasteriser), so none are quoted. Everything is in `shots/vehicles/report.json`.
+
+**Physics cost** per vehicle per 60 Hz step: `update()` 0.015–0.020 ms, and `update()` +
+`world.step()` (one car on the lot) 0.026–0.031 ms. The budget is under 0.5 ms.
+
+**Traffic `setInstances()` CPU:**
+- 150 instances: 0.06 ms average, 0.2 ms p95. Budget is 1.5 ms on High.
+- 40 instances: 0.03 ms. Mobile Low budget.
+
+**Driving numbers** (flat asphalt, full throttle/brake, scripted; from `metrics` in the rig):
+
+| model | 0–30 mph | 0–60 mph | top mph | 60–0 ft | dive° | squat° | roll° @ lat g |
+|---|---|---|---|---|---|---|---|
+| Bancroft sedan | 4.2 s | 11.9 s | 91 | 185 | 3.0 | 1.8 | 6.4 @ 0.77 |
+| Bancroft Patrol | 3.9 | 10.2 | 100 | 178 | 1.8 | 0.9 | 2.8 @ 0.87 |
+| Tiverton coupe | 4.3 | 11.3 | 96 | 185 | 2.9 | 1.7 | 6.3 @ 0.74 |
+| Ferris compact | 4.1 | 18.0 | 68 | 182 | 2.2 | 1.2 | 4.2 @ 0.81 |
+| Homestead wagon | 4.5 | 12.8 | 87 | 185 | 3.0 | 2.0 | 6.3 @ 0.74 |
+| Fareway taxi | 4.3 | 12.6 | 86 | 182 | 2.1 | 1.3 | 4.3 @ 0.76 |
+| CT-40 bus | 11.6 | — | 49 | 220 | 0.4 | 0.3 | 1.9 @ 0.51 |
+| B-60 box truck | 5.6 | 33.8 | 63 | 186 | 0.9 | 0.5 | 2.4 @ 0.63 |
+| Walk-In step van | 5.2 | 31.5 | 62 | 174 | 1.5 | 0.9 | 2.9 @ 0.72 |
+| B-80 refuse truck | 7.9 | — | 53 | 209 | 1.2 | 0.9 | 2.7 @ 0.62 |
+
+Period road tests of 1973–74 full-size cars generally quote 0–60 in about 10–12 s and 60–0 in
+about 160–190 ft. These numbers sit in that range by design, not by citation; treat them as
+tuning targets.
+
+**30 mph wall impact** (Bancroft, 13.41 m/s into the static crash wall): one impact event,
+Δv 13.3 m/s, zone front. Result: front zone 0.88, total damage 0.44, stage "battered". The
+hood pops, headlamps break, glass cracks, and the radiator steams. Two more hits take it to
+smoking and then burning.
+
+## Shots (`shots/vehicles/`)
+- `turntable_<id>.png`: four views per model. `turntable_all.png` is the roster contact sheet,
+  and `variants_bancroft.png` shows 8 variants.
+- `lineup_street.png` and `lineup_vs_references.png`: every model parked on the block street,
+  next to DOCUMERICA photos 549851, 554331 and 549921.
+- `drive_skids.png`: wheelspin launch, locked-wheel panic stop, handbrake turn, power-on tail
+  slide, nose dive (side view) and body roll (front view), with tyre marks.
+- `damage_stages.png`: intact, then the 30 mph wall hit, side hit, smoking, burning and burnt
+  out. `damage_crumple_closeup.png` shows a taxi after a 30 mph hit.
+- `traffic_150.png`: 150 instanced proxies on the block grid.
+
+## Critique: against the references
+**What reads right:**
+- Proportions: long hoods and decks, low belts, thin pillars, big chrome bumpers, and 5-mph
+  bumpers on the newest cars.
+- Next to DOCUMERICA 549851 and 554331, the Bancroft and Fareway silhouettes, with their
+  wheel-to-body ratio and greenhouse share, sit comfortably among the photographed sedans and
+  cabs.
+- The yellow-cab mass (yellow body, roof sign, rate card) gives the right "sea of taxis" read
+  from above (`traffic_150.png`).
+- The bus has a roller destination sign, split flat windshield, posts and livery band.
+  Compared with photo 549921 it reads as a 1970s city transit bus without being that bus.
+- Trucks: the ribbed aluminium box, packer body and walk-in van all read at street distance.
+
+**What doesn't (yet):**
+- **Too clean and too CG.** The references are grainy, warm, low-contrast 35mm. Paint has a
+  dirt mask, but there is no film grade, grain or halation yet (engine post stack). Grime is
+  noise, not streaks or rust.
+- **Body surfaces are slab-like.** Missing pieces:
+  - Door seams, door handles and wheel-arch lips.
+  - Side-glass chrome frames on sedans; the drip rails are there.
+  - Hood ornaments are skipped on purpose.
+
+  Fender tops are flat where real cars had a crowned fender line.
+- **Glass is opaque dark.** There is no interior, so you can't see seats or people as you can
+  in 549851. Interiors would need a cheap interior card.
+- **Damage is zone-level.** All the glass cracks together, a side hit dents the whole flank
+  rather than one door, and the burnt shell keeps bright chrome and intact tyres.
+- **Triangle budget.** LOD1 is about 1.2–1.5k, over the "≈1k" target. The bus is 9k at LOD0
+  and 2.1k at LOD1. The next step is to fold small parts into the body loft at LOD1.
+- **Traffic proxies** don't spin their wheels, show no indicators, and share one second colour
+  per model.
+- **Turn signals:** only hazards exist, because left and right indicator lamps share one
+  material.
+- **WebGPU path untested.** Every shot is WebGL2 on SwiftShader.
+
+## Critique: against the originality rule
+- **No real names, badges, crests or fleet names.** Four candidate names that matched historic
+  makers were swapped out (see the registry).
+- **The taxi** deliberately avoids Checker cues: no rounded '50s fenders, no checker band, a
+  1970s sedan body.
+- **The bus** avoids the GM "fishbowl" cues: flat split windshield, no curved one-piece glass,
+  no upper-rear louvres. The livery is invented.
+- **Risk to watch:** the Bancroft and Homestead use the generic 1970s Detroit full-size
+  template. That's the brief's intent, but anyone tuning front ends should keep grille and lamp
+  combinations generic. Don't tune toward a specific photo's car.
+
+## Known issues / TODO (next session)
+- [ ] Get LOD1 to about 1k: merge lamp and grille boxes into the loft cap and use 6-segment
+      wheels. Bus LOD0 to 8k.
+- [ ] Door seams and handles as normal-only detail, plus side-glass frames, fender crowns and
+      arch lips.
+- [ ] Per-window glass damage, and separate left and right indicator materials.
+- [ ] Detachable wheels (stretch), and burnt-shell tyres and chrome.
+- [ ] Cheap interiors (seat and dash silhouettes, a driver on a card) behind lighter glass.
+- [ ] Check rain streaks visually once the engine has weather. The uniform is `setWetness()`.
+- [ ] Verify the WebGPU backend on real hardware, and measure real frame cost of 150 proxies.
+- [ ] Swap the test lot for the city's colliders (engine), and tune curb behaviour on real
+      geometry.
+- [ ] Engine asks are in `docs/ENGINE_REQUESTS.md`.
+
+## How to run
+- `npm run dev`, then open `/?vehicles=1`. Optional parameters: `&model=<id>&variant=<n>`,
+  `&mode=turntable|lineup|traffic`, `&quality=low|…|ultra`, `&webgl=1`.
+- Keys: WASD/arrows drive, Space handbrake, F next model, V next variant, H lights, B beacon,
+  C camera, R reset, 1–4 dent a zone, 5 runs the 30 mph crash test.
+- Touch: the stick drives, plus BRAKE, HAND, NEXT and CAM buttons.
+- `npm run build && npm run shots:vehicles [-- --only turntable,lineup,drive,damage,traffic,metrics] [--models a,b]`

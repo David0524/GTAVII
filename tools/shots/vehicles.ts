@@ -17,7 +17,8 @@ const only = new Set(arg('only', 'turntable,lineup,drive,damage,traffic,metrics'
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
-const report: Record<string, unknown> = { date: new Date().toISOString(), note: 'Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.' };
+const prevReport = fs.existsSync(path.join(OUT, 'report.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'report.json'), 'utf8')) : {};
+const report: Record<string, unknown> = { ...prevReport, date: new Date().toISOString(), note: 'Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.' };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare const window: any;
@@ -100,9 +101,9 @@ async function main() {
       await page.evaluate(() => window.__VEH.simulate(1.5));
       const shots: Buffer[] = [];
       const cams: [number, number, number, number, number, number, number][] = [
-        [1.8, 1.6, -64, 3.0, 1.0, -30, 50], // down the curb lane, eye level
-        [-3.5, 1.7, -40, 3.6, 1.0, -20, 45],
-        [-2.5, 6, -10, 3.0, 0.5, -38, 50], // from a second-floor window
+        [0.6, 1.45, -82, 3.6, 0.9, -55, 38], // down the curb lane, eye level, longish lens
+        [-1.2, 1.6, -38, 3.8, 0.9, -24, 40], // middle of the line (trucks and bus)
+        [-2.5, 7, -30, 3.4, 0.4, -60, 48], // from a second-floor window
       ];
       for (const c of cams) { await page.evaluate((c: number[]) => window.__VEH.setCamera(...c), c); shots.push(await snap(page)); }
       await sheet(page, shots, 3, 640, 360, 'lineup_street.png');
@@ -117,7 +118,7 @@ async function main() {
     if (only.has('drive')) {
       await open(page, 'mode=drive&quality=high');
       const frames: Buffer[] = [], labels: string[] = [];
-      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 3, { x: -20, z: 20, yaw: 0 }); V.player.setLights({ head: true }); V.setAuto({ throttle: 1, brake: 0, steer: 0, handbrake: false }); V.simulate(5.5); });
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 3, { x: -110, z: 160, yaw: 0 }); V.player.setLights({ head: true }); V.setAuto({ throttle: 1, brake: 0, steer: 0, handbrake: false }); V.simulate(5.5); });
       const seq: [string, any, number][] = [
         ['full-throttle launch: wheelspin marks', null, 0],
         ['panic stop from 40 mph: locked wheels', { throttle: 0, brake: 1, steer: 0, handbrake: false }, 1.0],
@@ -144,7 +145,7 @@ async function main() {
       await open(page, 'mode=drive&quality=high');
       const frames: Buffer[] = [], labels: string[] = [];
       await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 2, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.player.setLights({ head: true }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.5); });
-      const shotAt = async (label: string) => { await camRel(page, [-4.5, 1.7, -6.5], 42, 0.35); frames.push(await snap(page)); labels.push(label); };
+      const shotAt = async (label: string) => { await camRel(page, [-5.4, 1.8, -1.2], 44, 0.35); frames.push(await snap(page)); labels.push(label); };
       await shotAt('intact');
       const crash = await page.evaluate(() => {
         const V = window.__VEH, ev: any[] = [];
@@ -165,7 +166,7 @@ async function main() {
       await shotAt(`burnt out (${await page.evaluate(() => window.__VEH.player.stage)})`);
       await sheet(page, frames, 3, 640, 360, 'damage_stages.png', labels);
       // close-up of the crumple from the front three-quarter
-      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 1, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4); V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.0); V.setPose({ x: 30, y: 0.2, z: 30, yaw: Math.PI / 2 }); V.simulate(0.6); });
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 1, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4); V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.0); V.player.setPose({ x: 30, y: 0.2, z: 30, yaw: Math.PI / 2 }); V.simulate(0.6); });
       const close: Buffer[] = [];
       await camRel(page, [3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
       await camRel(page, [-3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
