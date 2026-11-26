@@ -1,3 +1,4 @@
+import { assignPursuit, type RoleAssignment, type SuspectMotion } from '../police/pursuit';
 import type { AgentCommand, AgentPort, PedSnapshot } from '../police/ports';
 import type { Police, Unit } from '../police/police';
 import type { Cars } from '../cars/theft';
@@ -69,11 +70,19 @@ export function simAgentPort(sim: SimLike): AgentPort {
 export class PoliceMirror {
   private agentOf = new Map<string, number>();
   private lastGoal = new Map<string, string>();
-  constructor(private sim: SimLike, private police: Police, private player: () => string = () => 'player') { police.externalMovement = !!sim.spawnPolice; }
+  /** Pursuit roles for this frame (unit id → role), recomputed by `update` when a suspect motion is supplied. */
+  roles = new Map<string, RoleAssignment>();
+  constructor(private sim: SimLike, private police: Police, private player: () => string = () => 'player', private suspect?: () => SuspectMotion | null) { police.externalMovement = !!sim.spawnPolice; }
 
   update() {
     const sim = this.sim; if (!sim.spawnPolice || !sim.setPoliceGoal || !sim.police) return;
     const views = new Map(sim.police.map((v) => [v.id, v]));
+    this.roles.clear();
+    const s = this.suspect?.();
+    if (s) {
+      const chasers = [...this.police.units.values()].filter((u) => u.state === 'pursuit' && u.kind !== 'helicopter' && u.kind !== 'roadblock');
+      for (const a of assignPursuit(chasers.map((u) => ({ id: u.id, car: u.kind.endsWith('car'), x: u.x, z: u.z, seesSuspect: u.lostFor === 0 })), s, this.police.chokepoints)) this.roles.set(a.id, a);
+    }
     for (const u of this.police.units.values()) {
       if (u.kind === 'helicopter' || u.state === 'combat' || u.state === 'down') { this.drop(u.id); continue; }
       let id = this.agentOf.get(u.id);
@@ -96,7 +105,13 @@ export class PoliceMirror {
     switch (u.state) {
       case 'post': return { kind: 'patrol', around: u.post ?? [u.x, u.z], radius: 12, maxSpeed: 1.4 };
       case 'search': return { kind: 'search', x: t[0], z: t[1], radius: 40, maxSpeed: max };
-      case 'pursuit': return u.kind.endsWith('car') && u.lostFor === 0 ? { kind: 'boxIn', target: this.player(), maxSpeed: max } : { kind: 'pursue', target: this.player(), maxSpeed: max };
+      case 'pursuit': {
+        const r = this.roles.get(u.id);
+        if (r?.role === 'box') return { kind: 'boxIn', target: this.player(), maxSpeed: max };
+        if (r?.role === 'cutoff' && r.to) return { kind: 'goto', x: r.to[0], z: r.to[1], urgent: true };
+        if (r?.role === 'search' && r.to) return { kind: 'search', x: r.to[0], z: r.to[1], radius: 60, maxSpeed: max };
+        return { kind: 'pursue', target: this.player(), maxSpeed: max };
+      }
       case 'approach': return { kind: 'pursue', target: this.player(), maxSpeed: u.kind === 'foot' ? 2.2 : 6 };
       case 'roadblock': return { kind: 'roadblock', x: u.x, z: u.z, yaw: u.yaw };
       case 'suspicious': case 'encounter': case 'arrest': return { kind: 'goto', x: u.x, z: u.z, maxSpeed: 0.5 };

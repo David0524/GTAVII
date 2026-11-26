@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Gameplay } from '../index';
-import { PoliceMirror, type SimLike, type SimPedView, type SimPoliceView } from '../integration/simAdapter';
+import { type SimLike, type SimPedView, type SimPoliceView } from '../integration/simAdapter';
+import { assignPursuit } from '../police/pursuit';
 
 /** A fake with the sim stream's published shapes (src/sim/index.ts on claude/nice-sagan-2jh4m2). */
 class FakeSim implements SimLike {
@@ -28,7 +29,7 @@ test('sim adapter: witnesses run through setGoal, cops are sim agents gameplay s
   g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
   g.bindSim(sim as any);
   g.addProp('box', 'call_box', 30, 0, -10);
-  const mirror = new PoliceMirror(sim, g.policeSys);
+  assert.ok(g.mirror, 'bindSim builds the police mirror'); const mirror = g.mirror!; // g.update also drives it
   g.crime('shots_fired', { noise: 120 });
   for (let i = 0; i < 60; i++) { g.update(1 / 30); mirror.update(); }
   const goal = sim.goals.get(7);
@@ -95,4 +96,41 @@ test('sim services: a broke rider stiffs the cabbie and the ride still ends; fir
   g.policeSys.file({ witness: 'w1', perp: 'player', kinds: ['shooting'], desc: { clothes: [] }, lastKnown: [5, 5], crimeAt: [5, 5], via: 'callbox', time: 0 } as any);
   g.policeSys.file({ witness: 'w2', perp: 'player', kinds: ['shooting'], desc: { clothes: [] }, lastKnown: [6, 5], crimeAt: [6, 5], via: 'callbox', time: 1 } as any);
   assert.deepEqual(sim.dispatched.filter((d) => d[0] === 'ambulance'), [['ambulance', 5, 5]]);
+});
+
+test('pursuit tactics: one car tails, a second boxes only when the suspect is slowed, the rest cut off corners ahead', () => {
+  const choke = (n: [number, number]) => [{ x: n[0] + 250, z: n[1], yaw: 0 }, { x: n[0] - 250, z: n[1], yaw: 0 }, { x: n[0], z: n[1] + 250, yaw: 0 }, { x: n[0], z: n[1] - 250, yaw: 0 }];
+  const cars = [0, 1, 2, 3].map((i) => ({ id: `c${i}`, car: true, x: -30 - i * 20, z: 0, seesSuspect: i < 2 }));
+  const fast = assignPursuit([...cars, { id: 'f', car: false, x: -10, z: 0, seesSuspect: true }], { x: 0, z: 0, vx: 15, vz: 0, inVehicle: true }, choke);
+  const role = (a: typeof fast, id: string) => a.find((r) => r.id === id)!;
+  assert.equal(role(fast, 'c0').role, 'tail');
+  assert.equal(role(fast, 'c1').role, 'tail', 'no boxing at speed');
+  assert.equal(role(fast, 'f').role, 'foot');
+  assert.equal(role(fast, 'c2').role, 'cutoff'); assert.deepEqual(role(fast, 'c2').to, [250, 0], 'the corner ahead first');
+  assert.ok(role(fast, 'c3').role === 'cutoff' && role(fast, 'c3').to![0] !== -250, 'never the corner behind');
+  const slow = assignPursuit(cars, { x: 0, z: 0, vx: 2, vz: 0, inVehicle: true }, choke);
+  assert.equal(role(slow, 'c1').role, 'box', 'stuck at a light: box them in');
+  const onFoot = assignPursuit(cars.slice(0, 3), { x: 0, z: 0, vx: 0, vz: -5, inVehicle: false }, choke);
+  assert.ok(onFoot.every((r) => r.role === 'cutoff'), 'cars cut off a runner instead of tailing on the sidewalk');
+  assert.ok(!onFoot.some((r) => r.to![1] === 250), 'never the corner behind a runner');
+  assert.equal(new Set(onFoot.map((r) => r.to?.join())).size, onFoot.length, 'one car per corner');
+  const lost = assignPursuit(cars.map((c) => ({ ...c, seesSuspect: false })), { x: 0, z: 0, vx: 10, vz: 0, inVehicle: true }, choke);
+  assert.ok(lost.every((r) => r.role === 'search'));
+  assert.ok(lost[1].to![0] > lost[0].to![0], 'searchers spread along the route ahead');
+});
+
+test('pursuit tactics reach the sim: cut-off cars get urgent gotos, the tail car pursues', () => {
+  const sim = new FakeSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  g.setContext({ vehicle: { id: 'car', kind: 'car', seat: 'driver' } as any });
+  const units = [0, 1, 2].map((i) => g.registerPolice('radio_car', 'pct.gramercy', -40 - i * 30, 0, { corrupt: 0 }));
+  for (let f = 0; f < 30; f++) { pos[0] += 0.5; for (const u of units) { u.state = 'pursuit'; u.lostFor = 0; } g.update(1 / 30); }
+  const goals = units.map((u) => g.mirror!.roles.get(u.id)!.role);
+  assert.deepEqual(goals.slice().sort(), ['cutoff', 'tail', 'tail']);
+  const cut = units[goals.indexOf('cutoff')];
+  const agent = [...sim.copGoals.entries()].map(([, gl]) => gl).find((gl) => gl.kind === 'goto' && gl.urgent);
+  assert.ok(agent && agent.x > pos[0], `a cut-off car races ahead: ${JSON.stringify(agent)} (${cut.id})`);
 });

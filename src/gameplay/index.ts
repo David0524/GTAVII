@@ -43,7 +43,8 @@ import { Cars, type EntryMethod } from './cars/theft';
 import { FireSystem } from './props/fire';
 import { Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
-import { simAgentPort, type SimLike } from './integration/simAdapter';
+import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
+import type { SuspectMotion } from './police/pursuit';
 import { Economy } from './economy';
 import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 
@@ -219,7 +220,7 @@ export class Gameplay {
   }
   bindSim(sim: SimBinding) {
     this.sim = sim;
-    if (typeof (sim as any).setGoal === 'function') { this.port = simAgentPort(sim as unknown as SimLike); this.simLike = sim as unknown as SimLike; this.bindSimServices(this.simLike); sim.on('collision', (e) => this.onSimCollision(e)); return; }
+    if (typeof (sim as any).setGoal === 'function') { this.port = simAgentPort(sim as unknown as SimLike); this.simLike = sim as unknown as SimLike; this.bindSimServices(this.simLike); if (this.simLike.spawnPolice) this.mirror = new PoliceMirror(this.simLike, this.policeSys, () => this.player?.id ?? 'player', () => this.suspectMotion()); sim.on('collision', (e) => this.onSimCollision(e)); return; }
     this.port = {
       peds: () => (sim.peds as readonly any[]).map(pedSnap),
       ped: (id) => { const raw = (sim.peds as readonly any[]).find((q) => `${q.id}` === id || `ped:${q.id}` === id); return raw ? pedSnap(raw) : undefined; },
@@ -594,6 +595,16 @@ export class Gameplay {
   // ------------------------------------------------------------------ fast travel
   // ------------------------------------------------------------------ sim services: responders and the real cab ride
   private simLike: SimLike | null = null;
+  /** Sim police agents stand in for gameplay's units (created by bindSim when the sim can spawn police). */
+  mirror: PoliceMirror | null = null;
+  private motion = { x: 0, z: 0, vx: 0, vz: 0, init: false };
+  /** The player's position and smoothed velocity, used for pursuit cut-offs. */
+  suspectMotion(): SuspectMotion | null { if (!this.player || !this.motion.init) return null; const m = this.motion; return { x: m.x, z: m.z, vx: m.vx, vz: m.vz, inVehicle: !!this.pc.vehicle }; }
+  private trackMotion(dt: number) {
+    if (!this.player || dt <= 0) return; const p = this.player.position(), m = this.motion;
+    if (!m.init) { m.x = p[0]; m.z = p[2]; m.init = true; return; }
+    const k = Math.min(1, dt * 3); m.vx += ((p[0] - m.x) / dt - m.vx) * k; m.vz += ((p[2] - m.z) / dt - m.vz) * k; m.x = p[0]; m.z = p[2];
+  }
   /** The cab the player called or is riding: board point for the meter, destination. */
   cab: { id: number; state: 'called' | 'ready' | 'riding'; kerb?: [number, number]; from?: [number, number]; dest?: [number, number] } | null = null;
   private bindSimServices(sim: SimLike) {
@@ -817,6 +828,7 @@ export class Gameplay {
       this.pendingDiscoveries.splice(this.pendingDiscoveries.indexOf(d), 1);
       this.policeSys.file({ witness: 'radio', perp: d.perp, kinds: ['officer_down'], desc: { clothes: [] }, lastKnown: d.where, crimeAt: d.where, via: 'unit', time: this.time });
     }
+    this.trackMotion(dt); this.mirror?.update();
     const clear = this.heatClear();
     if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
     this.wasClear = clear;
