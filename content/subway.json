@@ -1,5 +1,5 @@
 {
-  "_note": "Subway stations inside the story-core bounds (E8), as named in 1974. Line names, not route letters (1974 letter service differs from today's). 'verified' = confirmed by a source in this session; 'to_verify' = well known but not yet checked against a period source.",
+  "_note": "Subway stations inside the story-core bounds (E8), as named in 1974. Line names, not route letters (1974 letter service differs from today's). 'verified' = confirmed by a source in this session; 'to_verify' = well known but not yet checked against a period source. Canonical list agreed with the sim (src/sim/subway.ts): each station maps to a sim trunk line (simLine) and the nearest numbered cross street (crossStreet); 'complex' groups free transfers.",
   "stations": [
     {
       "id": "station.herald_sq",
@@ -11,7 +11,13 @@
       "at": "W 34th St & 6th Ave",
       "interior": "interior.herald_sq_station",
       "status": "verified",
-      "source": "Wikipedia, 34th Street–Herald Square station (IND platforms opened 1940; BMT 1917)"
+      "source": "Wikipedia, 34th Street–Herald Square station (IND platforms opened 1940; BMT 1917)",
+      "simLine": "sixth",
+      "crossStreet": "34th",
+      "complex": "herald_sq",
+      "alsoSimLines": [
+        "broadway"
+      ]
     },
     {
       "id": "station.penn_ind",
@@ -21,7 +27,11 @@
       ],
       "at": "8th Ave & W 33rd St",
       "interior": "interior.penn_ind_platform",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "eighth",
+      "crossStreet": "34th",
+      "complex": "penn",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.penn_irt",
@@ -30,7 +40,11 @@
         "IRT Broadway–Seventh Avenue"
       ],
       "at": "7th Ave & W 33rd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "seventh",
+      "crossStreet": "34th",
+      "complex": "penn",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.28th_irt",
@@ -39,7 +53,11 @@
         "IRT Broadway–Seventh Avenue"
       ],
       "at": "7th Ave & W 28th St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "seventh",
+      "crossStreet": "28th",
+      "complex": "28th_7th",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.28th_bmt",
@@ -48,7 +66,11 @@
         "BMT Broadway"
       ],
       "at": "Broadway & W 28th St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "broadway",
+      "crossStreet": "28th",
+      "complex": "28th_bway",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.23rd_irt",
@@ -57,7 +79,11 @@
         "IRT Broadway–Seventh Avenue"
       ],
       "at": "7th Ave & W 23rd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "seventh",
+      "crossStreet": "23rd",
+      "complex": "23rd_7th",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.23rd_ind8",
@@ -66,7 +92,11 @@
         "IND Eighth Avenue"
       ],
       "at": "8th Ave & W 23rd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "eighth",
+      "crossStreet": "23rd",
+      "complex": "23rd_8th",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.23rd_ind6",
@@ -75,7 +105,11 @@
         "IND Sixth Avenue"
       ],
       "at": "6th Ave & W 23rd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "sixth",
+      "crossStreet": "23rd",
+      "complex": "23rd_6th",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.23rd_bmt",
@@ -84,7 +118,11 @@
         "BMT Broadway"
       ],
       "at": "Broadway & E 23rd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "broadway",
+      "crossStreet": "23rd",
+      "complex": "23rd_bway",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.42nd_ind8",
@@ -93,16 +131,25 @@
         "IND Eighth Avenue"
       ],
       "at": "8th Ave & W 42nd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "eighth",
+      "crossStreet": "42nd",
+      "complex": "port_authority",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
     },
     {
       "id": "station.42nd_ind6",
-      "name": "42nd St–Bryant Park",
+      "name": "42nd St",
       "lines": [
         "IND Sixth Avenue"
       ],
       "at": "6th Ave & W 42nd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "sixth",
+      "crossStreet": "42nd",
+      "complex": "bryant",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
+      "modernName": "42nd St–Bryant Park"
     },
     {
       "id": "station.times_sq",
@@ -112,7 +159,15 @@
         "BMT Broadway"
       ],
       "at": "7th Ave & W 42nd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "seventh",
+      "crossStreet": "42nd",
+      "complex": "times_sq",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
+      "alsoSimLines": [
+        "broadway",
+        "flushing"
+      ]
     },
     {
       "id": "station.path_33",
@@ -121,7 +176,81 @@
         "PATH (to New Jersey)"
       ],
       "at": "6th Ave & W 33rd St",
-      "status": "to_verify"
+      "status": "confirmed_general",
+      "simLine": "path",
+      "crossStreet": "33rd",
+      "complex": "herald_sq",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship."
+    },
+    {
+      "id": "station.33rd_lex",
+      "name": "33rd St",
+      "lines": [
+        "IRT Lexington Avenue"
+      ],
+      "at": "Park Ave S & E 33rd St",
+      "simLine": "lexington",
+      "crossStreet": "33rd",
+      "complex": "33rd_park",
+      "status": "confirmed_general",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
+      "edge": true
+    },
+    {
+      "id": "station.28th_lex",
+      "name": "28th St",
+      "lines": [
+        "IRT Lexington Avenue"
+      ],
+      "at": "Park Ave S & E 28th St",
+      "simLine": "lexington",
+      "crossStreet": "28th",
+      "complex": "28th_park",
+      "status": "confirmed_general",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
+      "edge": true
+    },
+    {
+      "id": "station.23rd_lex",
+      "name": "23rd St",
+      "lines": [
+        "IRT Lexington Avenue"
+      ],
+      "at": "Park Ave S & E 23rd St",
+      "simLine": "lexington",
+      "crossStreet": "23rd",
+      "complex": "23rd_park",
+      "status": "confirmed_general",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
+      "edge": true
+    },
+    {
+      "id": "station.5th_flushing",
+      "name": "Fifth Avenue",
+      "lines": [
+        "IRT Flushing"
+      ],
+      "at": "5th Ave & W 42nd St",
+      "simLine": "flushing",
+      "crossStreet": "42nd",
+      "complex": "bryant",
+      "status": "confirmed_general",
+      "source": "All of these stations opened between 1904 and 1940 and were in service in 1974; that's general knowledge, and I didn't reopen each article in this session. Recheck before ship.",
+      "note": "Linked to the IND 42nd St platforms (complex 'bryant')."
+    },
+    {
+      "id": "station.path_23",
+      "name": "23rd St (PATH)",
+      "lines": [
+        "PATH (to New Jersey)"
+      ],
+      "at": "6th Ave & W 23rd St",
+      "simLine": "path",
+      "crossStreet": "23rd",
+      "complex": "23rd_6th",
+      "status": "verified",
+      "source": "Wikipedia, 23rd Street station (PATH): opened 1908; no street entrances of its own, reached through the IND Sixth Ave station's entrances",
+      "note": "Sim: PATH entrances are the IND's; don't cluster as a separate Sixth Ave station."
     }
   ],
   "passages": [
@@ -135,5 +264,52 @@
       "source": "Wikipedia, Gimbels Passageway; Untapped Cities; Subwaynut"
     }
   ],
-  "fare": "35¢ token (since 1972) [S17]"
+  "fare": "35¢ token (since 1972) [S17]",
+  "lines": [
+    {
+      "simKey": "eighth",
+      "name": "Eighth Avenue line",
+      "company1974": "IND Eighth Avenue",
+      "under": "8th Ave"
+    },
+    {
+      "simKey": "seventh",
+      "name": "Seventh Avenue line",
+      "company1974": "IRT Broadway–Seventh Avenue",
+      "under": "7th Ave"
+    },
+    {
+      "simKey": "sixth",
+      "name": "Sixth Avenue line",
+      "company1974": "IND Sixth Avenue",
+      "under": "6th Ave"
+    },
+    {
+      "simKey": "broadway",
+      "name": "Broadway line",
+      "company1974": "BMT Broadway",
+      "under": "Broadway"
+    },
+    {
+      "simKey": "lexington",
+      "name": "Lexington Avenue line",
+      "company1974": "IRT Lexington Avenue",
+      "under": "Park Ave S (east edge; stations sit just outside the Madison–Park mid-block bound)"
+    },
+    {
+      "simKey": "flushing",
+      "name": "Flushing line",
+      "company1974": "IRT Flushing",
+      "under": "W 42nd St (Times Sq to Fifth Ave)",
+      "note": "Not yet in sim LINES; proposed (runs along 42nd St, not an avenue)."
+    },
+    {
+      "simKey": "path",
+      "name": "Hudson Tubes (PATH)",
+      "company1974": "PATH",
+      "under": "6th Ave (stacked with the IND)",
+      "note": "Not a subway line; separate fare. Shares IND Sixth Ave entrances at 23rd St."
+    }
+  ],
+  "signage": "On 1974 signs, the IND Sixth Ave 42nd St platforms read '42nd St'. The station is known today as 42nd St–Bryant Park; a search found no documented rename date, so use the plain '42nd St' as the period-safe name. Station names are plain place names."
 }
