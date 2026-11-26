@@ -32,6 +32,8 @@ export interface LeadInv {
   intox: number;
   /** barber: what witnesses notice about the face and hair ('' = as the lead starts) */
   grooming: string;
+  /** home upgrades bought for this lead's place (HOMES_AND_CARS): 'ac' | 'safe' | 'lock' */
+  home: Set<string>;
 }
 export interface InvEvents extends Record<string, unknown> {
   changed: { lead: string; id: string; delta: number; qty: number };
@@ -47,7 +49,7 @@ export class Inventory extends Emitter<InvEvents> {
     if (!l) {
       const p = this.reg.leads.get(lead);
       const sk = Object.fromEntries(SKILLS.map((k) => [k, p?.skills?.[k] ?? 50])) as Skills;
-      l = { money: 0, items: new Map(), loaded: new Map(), equipped: 'weapon.fists', outfits: new Set(), wearing: '', armor: 0, plates: 0, savings: 0, guns: new Map(), stash: new Map(), stashGuns: new Map(), skills: sk, stamina: makeStamina(60 + 0.8 * sk.stamina), intox: 0, grooming: '' };
+      l = { money: 0, items: new Map(), loaded: new Map(), equipped: 'weapon.fists', outfits: new Set(), wearing: '', armor: 0, plates: 0, savings: 0, guns: new Map(), stash: new Map(), stashGuns: new Map(), skills: sk, stamina: makeStamina(60 + 0.8 * sk.stamina), intox: 0, grooming: '', home: new Set() };
       this.leads.set(lead, l);
       if (p) {
         l.money = p.startMoney;
@@ -167,7 +169,7 @@ export class Inventory extends Emitter<InvEvents> {
     for (const [id, l] of this.leads) out[id] = {
       money: l.money, items: [...l.items].map(([i, q]) => ({ id: i, qty: q })), loaded: Object.fromEntries(l.loaded), equipped: l.equipped,
       outfits: [...l.outfits], wearing: l.wearing, armor: l.armor, plates: l.plates,
-      savings: l.savings, guns: Object.fromEntries(l.guns), stash: [...l.stash].map(([i, q]) => ({ id: i, qty: q })), stashGuns: Object.fromEntries(l.stashGuns), skills: { ...l.skills }, stamina: { ...l.stamina }, grooming: l.grooming,
+      savings: l.savings, guns: Object.fromEntries(l.guns), stash: [...l.stash].map(([i, q]) => ({ id: i, qty: q })), stashGuns: Object.fromEntries(l.stashGuns), skills: { ...l.skills }, stamina: { ...l.stamina }, grooming: l.grooming, home: [...l.home],
     };
     return out;
   }
@@ -184,7 +186,7 @@ export class Inventory extends Emitter<InvEvents> {
         money: d.money, items, loaded: new Map(Object.entries(d.loaded ?? {})), equipped: d.equipped ?? 'weapon.fists',
         outfits: new Set(d.outfits ?? []), wearing: d.wearing ?? '', armor: d.armor ?? 0, plates: d.plates ?? 0,
         savings: d.savings ?? 0, guns, stash: new Map((d.stash ?? []).filter((x) => this.reg.items.has(x.id)).map((x) => [x.id, x.qty])), stashGuns: new Map(Object.entries(d.stashGuns ?? {})), skills,
-        stamina: d.stamina ?? makeStamina(60 + 0.8 * skills.stamina), intox: 0, grooming: d.grooming ?? '',
+        stamina: d.stamina ?? makeStamina(60 + 0.8 * skills.stamina), intox: 0, grooming: d.grooming ?? '', home: new Set(d.home ?? []),
       });
     }
   }
@@ -192,5 +194,5 @@ export class Inventory extends Emitter<InvEvents> {
 export interface SavedLeadInv {
   money: number; items: { id: string; qty: number }[]; loaded: Record<string, number>; equipped: string; outfits: string[]; wearing: string; armor: number; plates: number;
   // v4
-  savings?: number; guns?: Record<string, GunState>; stash?: { id: string; qty: number }[]; stashGuns?: Record<string, GunState>; skills?: Partial<Skills>; stamina?: StaminaState; grooming?: string;
+  savings?: number; guns?: Record<string, GunState>; stash?: { id: string; qty: number }[]; stashGuns?: Record<string, GunState>; skills?: Partial<Skills>; stamina?: StaminaState; grooming?: string; home?: string[];
 }

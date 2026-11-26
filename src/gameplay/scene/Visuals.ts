@@ -68,6 +68,8 @@ export class Body {
   }
   dispose() { this.root.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh) { m.geometry.dispose(); } }); }
 }
+/** Witness colour words → stand-in tint, so a change of clothes shows on the placeholder body. */
+export const CLOTH: Record<string, number> = { white: 0xd9d4c8, cream: 0xd8cdb4, tan: 0xa07a52, camel: 0xa07a52, brown: 0x5a3326, black: 0x1c1a18, grey: 0x6f6a5e, charcoal: 0x3a3836, navy: 0x1f2a44, 'dark blue': 0x3c4a63, 'powder blue': 0x8fa8c8, orange: 0xc06a2a, red: 0xa44030, yellow: 0xc79a3c, green: 0x4f5a2e, straw: 0xc9b07a };
 export function bodyColor(kind: string, seed = 0) { return (COL as any)[kind] ?? CIV[seed % CIV.length]; }
 
 /** A placeholder full-size 1970s sedan block-out (vehicles stream owns the real models). */

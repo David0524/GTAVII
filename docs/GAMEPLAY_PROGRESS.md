@@ -8,7 +8,7 @@ into `docs/briefs/`. Read this first each session and update it last.
 ## How to run
 | What | Command |
 |---|---|
-| Headless suite (66 tests, about 30 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
+| Headless suite (85 tests, about 40 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
 | CPU bench (writes `shots/gameplay/bench.json`) | `npx tsx tools/gameplay/bench.ts` |
 | Test scene | `npm run dev`, then `/?gameplay=1` (`&station=lot\|yard\|block\|shop`, `&lead=teddy\|delphine\|nick`, `&touch=1`, `&overlays=0`) |
 | Recorded frames | `npm run build && npx tsx tools/gameplay/record.ts [--only a,b] [--skip c]` → `shots/gameplay/*.png` plus `frames.json` (a note and the live game state per frame) |
@@ -33,6 +33,10 @@ plus a thin test scene.
 | `items/*` | `inventory.ts`: money in cents, savings, stash, gun states, skills, stamina. Also `shop.ts` (invariant-safe), `wardrobe.ts`, `phone.ts` (payphones, ringing, answering service), `guns.ts` (tiers, condition, jams, concealment) and `registry.ts`. |
 | `props/props.ts` | Breakable furniture with stages: a hydrant geyser, papers, glass, coins, call boxes and booths that stop working. Props reset after 10 min when unseen. |
 | `cars/theft.ts` | Car records: entry methods, owner reports with plate/colour/class, hot cars, plate swaps, respray, trunks |
+| `cars/ownership.ts` | Buying cars: a weekly lot and classifieds with hidden condition, inspection, haggling. Also titles, selling, lending, alternate-side tickets, the boot, the pound, garages. |
+| `props/fire.ts` | Firebombs, car and prop fires, spread by exposure, burning, arson as a crime, fire engines |
+| `meta/stats.ts`, `meta/travel.ts` | Stats and completion feed for the UI chat; cab meter (1973 rates) and the subway (token or jump, breaking contact) |
+| `data/narrativeAdapter.ts` | Narrative's systems content → gameplay schema (dollars → cents, tiers, `precinct.*`, street-range precinct areas), tested on a snapshot |
 | `outcomes.ts` | Hospital (capped bill, the attendants' cut, half the loose ammo, a max-HP penalty) and custody (the clerk takes illicit items and 20% of cash; desk, lawyer, bail by another lead, or a night in holding; records and retrieval) |
 | `time.ts` | Sleep and wait rules, rest quality (heatwave without AC), world advance (reports cool, restocks, autosave) |
 | `player/stamina.ts`, `skills.ts` | Heat-aware stamina with an exhaustion gate, fitness and an unlimited toggle; six skills that grow with use and have diminishing returns |
@@ -51,6 +55,16 @@ plus a thin test scene.
   - shop buy/sell invariants, fuzzed over 25 seeds × 300 transactions plus a profit-loop check
     on every stocked item;
   - beyond the brief: combat, AI, melee, CORE_SYSTEMS rules, cars, time, and touch-only play.
+- **Beyond the brief (oversight docs):**
+  - stealth: sneak, footstep noise, suspicion, takedowns;
+  - fire;
+  - car theft, hot cars and ownership;
+  - drive-by arcs;
+  - lead abilities: Payroll, Evidence, Disappear, Old Beat;
+  - time: sleep, wait, world advance;
+  - fast travel; drinking, the barber, the boxing gym;
+  - stats and completion;
+  - the narrative content adapter.
 - **Recorded test-scene frames** in `shots/gameplay/` (SwiftShader, software rendering):
   shootout behind cover, peek-fire, blind fire, morale breaking, melee closing, exchange and
   grapple-shove, a witness running to the call box, a witness on the call box, the report and

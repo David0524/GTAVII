@@ -40,3 +40,12 @@ test('no sleeping while they are looking for you; waiting at a counter passes ti
   assert.equal(r2.g.clock.clock.minutes, 14 * 60);
   assert.equal(r2.g.health.get('player').hp, hp, 'no healing from waiting');
 });
+
+test('home upgrade: an air conditioner makes a heatwave night a full rest', () => {
+  const r = rig();
+  r.g.setClock({ day: 1, minutes: 23 * 60, heatwave: true }); r.g.setContext({ atHome: true });
+  r.g.inv.addMoney('char.teddy_arce', 20000);
+  assert.ok(r.g.buyHomeUpgrade('ac'));
+  assert.ok(!r.g.buyHomeUpgrade('ac'), 'once');
+  assert.equal(r.g.sleep(7).quality, 1);
+});

@@ -19,7 +19,7 @@ import { rayCapsule, type V3 } from '../core/vec';
 import { humanoidHitbox } from '../combat/ballistics';
 import type { PropType } from '../props/props';
 import { RapierWorldQuery } from './RapierWorldQuery';
-import { Body, bodyColor, carMesh, Fx, PropMeshes, type Pose } from './Visuals';
+import { Body, bodyColor, carMesh, CLOTH, Fx, PropMeshes, type Pose } from './Visuals';
 import { Hud, btn, el } from './Hud';
 import { Overlays } from './Overlays';
 import { plateFor } from '../appearance';
@@ -319,7 +319,9 @@ export async function runGameplayScene() {
   g.on('police', (e) => { if (e.kind === 'stop') hud.say('bark', '"Hey — you. Hold it."', 3); if (e.kind === 'pursuit' && e.suspect === 'player') hud.say('bark', '"Stop! Police!"', 3); if (e.kind === 'lost') hud.say('notice', 'They lost you.', 3); });
   g.on('notice', (e) => { if (e.kind === 'surrendered') hud.say('notice', 'He gives up.', 2.5); if (e.kind === 'fled') hud.say('notice', 'He runs.', 2.5); });
   g.on('ring', () => hud.say('notice', 'A payphone is ringing nearby.', 4));
-  g.on('wear', (e) => toast(`Changed: ${g.wardrobe.look(e.lead).headline}`));
+  const tintPlayer = () => { const top = g.wardrobe.look(lead).pieces.find((p) => p.slot === 'full' || p.slot === 'outer') ?? g.wardrobe.look(lead).pieces.find((p) => p.slot === 'top'); if (top && CLOTH[top.colour] !== undefined) pbody.setTint(CLOTH[top.colour]); };
+  tintPlayer();
+  g.on('wear', (e) => { toast(`Changed: ${g.wardrobe.look(e.lead).headline}`); tintPlayer(); });
   g.on('wasted', async (e) => {
     await hud.titleCard(e.hospital.name.toUpperCase(), `Discharged six hours later.\nBill $${(e.bill / 100).toFixed(2)} · paid $${(e.paid / 100).toFixed(2)}${e.debt ? ` · you owe $${(e.debt / 100).toFixed(2)}` : ''}`);
     go(station === 'block' ? 'block' : 'lot');

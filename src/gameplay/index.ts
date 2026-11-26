@@ -52,6 +52,8 @@ export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'repo
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
 /** How much a drink goes to your head (0..1 scale; effects stay modest and wear off in a few minutes). */
+/** Home upgrades, 1974 prices (cents): a window air conditioner, a floor safe, a police lock. */
+export const HOME_UPGRADES: Record<string, number> = { ac: 18900, safe: 12000, lock: 3500 };
 export const DRINK: Record<string, number> = { 'item.beer': 0.18, 'item.whiskey': 0.3 }, SOBER_PER_S = 1 / 240;
 /** 1974 barber prices (cents) and the boxing gym. */
 export const BARBER: Record<string, number> = { 'clean-shaven': 150, moustache: 300, sideburns: 300, beard: 300, 'short hair': 300, 'long hair': 300 }, GYM_SESSION = 100, BOUT_PURSE = 2000;
@@ -502,11 +504,18 @@ export class Gameplay {
     if (!this.pc.atHome) return 'notHome';
     return null;
   }
+  /** Buy a home upgrade for the active lead's place. AC improves rest in the heatwave; the safe and lock are kept for home-security hooks. */
+  buyHomeUpgrade(u: 'ac' | 'safe' | 'lock') {
+    if (!this.player) return false;
+    const li = this.inv.ensure(this.player.lead);
+    if (li.home.has(u) || !this.inv.spend(this.player.lead, HOME_UPGRADES[u], `home:${u}`)) return false;
+    li.home.add(u); return true;
+  }
   /** Sleep in your bed until `hour` (7 morning, 19 evening, or any). Restores, clears injury carry-over, autosaves, advances the world. */
   sleep(hour: number, o: { hasAC?: boolean } = {}): { ok: boolean; reason?: CantSleep; hours?: number; quality?: number } {
     const why = this.canSleep(); if (why) return { ok: false, reason: why };
     const hours = this.clock.until(hour) / 60;
-    const q = restQuality(this.clock.clock.heatwave, !!o.hasAC);
+    const q = restQuality(this.clock.clock.heatwave, o.hasAC ?? (!!this.player && this.inv.ensure(this.player.lead).home.has('ac')));
     this.passTime(hours, 'sleep');
     if (this.player) {
       const id = this.player.id, li = this.inv.ensure(this.player.lead);
