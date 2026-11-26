@@ -1,7 +1,7 @@
 {
   "quality": "high",
   "forceWebGL": true,
-  "date": "2026-11-26T14:12:56.932Z",
+  "date": "2026-11-26T14:22:04.910Z",
   "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
   "views": [
     {
@@ -13,13 +13,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 87,
-      "triangles": 99754,
+      "triangles": 98870,
       "chunks": {
         "ready": 88,
         "lod0": 38,
         "lod1": 50,
         "loading": 0,
-        "parseMsTotal": 970.899999999674,
+        "parseMsTotal": 934.6999999999534,
         "failed": 0
       }
     },
@@ -32,13 +32,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 31,
-      "triangles": 27991,
+      "triangles": 27537,
       "chunks": {
         "ready": 88,
         "lod0": 44,
         "lod1": 44,
         "loading": 0,
-        "parseMsTotal": 1191.6999999983236,
+        "parseMsTotal": 908.7000000006519,
         "failed": 0
       }
     },
@@ -51,13 +51,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 69,
-      "triangles": 79282,
+      "triangles": 78353,
       "chunks": {
         "ready": 88,
         "lod0": 49,
         "lod1": 39,
         "loading": 0,
-        "parseMsTotal": 1045.5000000006985,
+        "parseMsTotal": 847.3000000007451,
         "failed": 0
       }
     },
@@ -70,13 +70,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 48,
-      "triangles": 43847,
+      "triangles": 43488,
       "chunks": {
         "ready": 88,
         "lod0": 52,
         "lod1": 36,
         "loading": 0,
-        "parseMsTotal": 863.4999999988358,
+        "parseMsTotal": 839.7999999993481,
         "failed": 0
       }
     },
@@ -89,13 +89,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 37,
-      "triangles": 34205,
+      "triangles": 33873,
       "chunks": {
         "ready": 88,
         "lod0": 42,
         "lod1": 46,
         "loading": 0,
-        "parseMsTotal": 882.4999999995343,
+        "parseMsTotal": 778.4999999997672,
         "failed": 0
       }
     },
@@ -108,13 +108,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 20,
-      "triangles": 26080,
+      "triangles": 25674,
       "chunks": {
         "ready": 88,
         "lod0": 33,
         "lod1": 55,
         "loading": 0,
-        "parseMsTotal": 834.8999999980442,
+        "parseMsTotal": 810.8000000007451,
         "failed": 0
       }
     },
@@ -127,13 +127,13 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 104,
-      "triangles": 120376,
+      "triangles": 119430,
       "chunks": {
         "ready": 88,
         "lod0": 12,
         "lod1": 76,
         "loading": 0,
-        "parseMsTotal": 825.6000000007916,
+        "parseMsTotal": 890.8999999999069,
         "failed": 0
       }
     },
@@ -146,21 +146,21 @@
       "max": 100,
       "fps": 10,
       "drawCalls": 7,
-      "triangles": 11591,
+      "triangles": 11183,
       "chunks": {
         "ready": 88,
         "lod0": 30,
         "lod1": 58,
         "loading": 0,
-        "parseMsTotal": 852.3999999994412,
+        "parseMsTotal": 830.6000000010245,
         "failed": 0
       }
     }
   ],
   "logs": [
-    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-    "[warning] [.WebGL-0x3ebc003b8800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    "[warning] [.WebGL-0x115c003b4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x115c003b4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x115c003b4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x115c003b4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
   ]
 }
