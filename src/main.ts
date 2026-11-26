@@ -154,15 +154,30 @@ async function main() {
   if (params.get('hud') !== '1') hud.toggle(false);
   const minimap = params.get('minimap') === '0' ? null : new Minimap(document.body, streets, world.manifest.region, world.manifest.heroes);
 
-  const onResize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  // Viewport sync. The canvas fills #app via CSS; every frame we compare its real client size (and the
+  // device pixel ratio) with what the renderer was last sized to, and resize on any change. Resize events
+  // alone are not enough on iOS Safari: on rotation it can fire 'resize' with the pre-rotation
+  // innerWidth and no follow-up event, leaving a portrait-width frame on a landscape screen (bug report
+  // 2026-11-26, iPhone landscape: 3D covered the left ~45% only).
+  const view = renderer.domElement; view.classList.add('t74-view');
+  let lastW = 0, lastH = 0, lastDpr = 0, lastFov = -1;
+  const onResize = (force = false) => {
+    const w = view.clientWidth || window.innerWidth, h = view.clientHeight || window.innerHeight;
+    const dpr = window.devicePixelRatio || 1, fov = settings.get('fov');
+    if (!force && w === lastW && h === lastH && dpr === lastDpr && fov === lastFov) return;
+    if (dpr !== lastDpr && lastDpr) renderer.setPixelRatio(Math.min(dpr, matchMedia('(pointer: coarse)').matches ? 1.5 : 2) * quality.pixelRatio);
+    lastW = w; lastH = h; lastDpr = dpr; lastFov = fov;
+    camera.aspect = w / h;
     // Keep the horizontal field of view sane on very wide phone screens (19.5:9 landscape).
-    camera.fov = settings.get('fov') - (camera.aspect > 2 ? 8 : 0);
+    camera.fov = fov - (camera.aspect > 2 ? 8 : 0);
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h, false); // CSS owns the element size; this sets the drawing buffer + viewport
   };
-  window.addEventListener('resize', onResize); onResize();
-  settings.subscribe((_s, k) => { if (k === 'fov') onResize(); });
+  window.addEventListener('resize', () => onResize());
+  window.addEventListener('orientationchange', () => onResize());
+  window.visualViewport?.addEventListener('resize', () => onResize());
+  onResize(true);
+  settings.subscribe((_s, k) => { if (k === 'fov') onResize(true); });
 
   // ?time=HH:MM sets the clock (screenshot rig), ?timescale=0 freezes it; ?night= overrides window lighting.
   if (params.has('time')) setTime(params.get('time')!);
@@ -326,6 +341,7 @@ async function main() {
     input.endFrame();
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
+    onResize(); // cheap: two clientWidth reads; catches every size change the events miss
     if (postfx) postfx.render(); else renderer.render(scene, camera);
     frameCount++;
 
