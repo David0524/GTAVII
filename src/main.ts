@@ -17,7 +17,8 @@ import { Input } from './input/Input';
 import { TouchControls } from './ui/TouchControls';
 import { promptStrip, PROMPT_CSS } from './ui/Prompts';
 import { loadReport } from './engine/debug/LoadReport';
-import { buildReport, mountReportButton } from './engine/debug/PerfReport';
+import { AdaptiveResolution } from './engine/AdaptiveResolution';
+import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { PlayerController } from './player/PlayerController';
@@ -52,6 +53,7 @@ async function main() {
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
   loadReport.mark('renderer');
+  const trackGpu = params.get('hud') === '1' || params.has('gpu');
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
@@ -178,11 +180,26 @@ async function main() {
     camera.fov = fov - (camera.aspect > 2 ? 8 : 0);
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false); // CSS owns the element size; this sets the drawing buffer + viewport
+    facadeUniforms.pixelAngle.value = (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) / Math.max(1, h * renderer.getPixelRatio());
   };
   window.addEventListener('resize', () => onResize());
   window.addEventListener('orientationchange', () => onResize());
   window.visualViewport?.addEventListener('resize', () => onResize());
+  // The canvas's own layout size: fires on any change, whatever window events iOS does or doesn't send.
+  new ResizeObserver(() => onResize()).observe(view);
   onResize(true);
+  const adaptiveOn = params.get('adaptive') === '1' || (params.get('adaptive') !== '0' && matchMedia('(pointer: coarse)').matches);
+  const basePr = renderer.getPixelRatio();
+  const adaptive = adaptiveOn ? new AdaptiveResolution(basePr, basePr * 0.8, Math.max(basePr, Math.min(window.devicePixelRatio || 1, 2)), (pr) => {
+    renderer.setPixelRatio(pr); onResize(true); // also refreshes the drawing buffer size and the window-LOD pixel angle
+  }) : null;
+  // Per-frame safety net. It only DETECTS a change; the resize itself runs as a separate task, never
+  // inside the frame callback (resizing the WebGPU canvas mid-frame broke rendering).
+  let resizeQueued = false;
+  const checkSize = () => {
+    if (resizeQueued || (view.clientWidth === lastW && view.clientHeight === lastH && (window.devicePixelRatio || 1) === lastDpr)) return;
+    resizeQueued = true; setTimeout(() => { resizeQueued = false; onResize(); }, 0);
+  };
   settings.subscribe((_s, k) => { if (k === 'fov') onResize(true); });
 
   // ?time=HH:MM sets the clock (screenshot rig), ?timescale=0 freezes it; ?night= overrides window lighting.
@@ -206,6 +223,7 @@ async function main() {
   const report = mountReportButton(() => buildReport({
     renderer, backend, quality: quality.name, frames, world, device: input.activeDevice,
     view: `${camera.position.x.toFixed(0)},${camera.position.y.toFixed(0)},${camera.position.z.toFixed(0)} ${mode}`,
+    extra: [adaptive ? adaptive.describe() : 'adaptive dpr off', `props radius ${quality.propsRadius} m · lod0 ${quality.lod0Radius} m · lod1 ${quality.lod1Radius} m`],
   }));
   report.show(hud.visible);
   document.getElementById('loading')?.remove();
@@ -261,8 +279,9 @@ async function main() {
   });
   renderHint();
   // title-screen camera: slow drift past the Flatiron at dusk
-  const flat = world.manifest.heroes.find((h) => h.name === 'Flatiron Building') ?? { x: 0, z: 0 };
+  const flat = world.manifest.heroes.find((h) => h.id === 'lm.flatiron') ?? { x: 0, z: 0 };
   let titleT = 0;
+  let lastRenderT = -1e9, pausedFrameDrawn = false, heldW = 0, heldH = 0;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const attributionEl = document.getElementById('attribution');
@@ -292,7 +311,8 @@ async function main() {
   renderer.setAnimationLoop((t) => {
     const cpu0 = performance.now();
     clock.update(t);
-    const rawDt = clock.getDelta(); loadReport.frame(rawDt * 1000);
+    const rawDt = clock.getDelta(); loadReport.frame(rawDt * 1000); if (frameCount > 0) perfSamples.interval.push(rawDt * 1000);
+    if (adaptive && frameCount > 0 && (screen === 'play' || titleReady) && world.idle) adaptive.update(rawDt * 1000, rawDt);
     const dt = Math.min(rawDt, 0.1);
     frames.push(dt * 1000);
     facadeUniforms.time.value += dt;
@@ -333,6 +353,7 @@ async function main() {
     const light = atmosphere.update();
     atmosphere.updateEnvironment(renderer);
     facadeUniforms.night.value = nightOverride ?? light.night;
+    facadeUniforms.minutes.value = worldClock.minutes;
     streetLightUniforms.lightsOn.value = light.lightsOn;
     renderer.toneMappingExposure = light.exposure;
     { const f = mode === 'onfoot' ? body.object.position : camera.position; atmosphere.followFocus(f.x, f.y, f.z); }
@@ -360,10 +381,24 @@ async function main() {
     input.endFrame();
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
-    onResize(); // cheap: two clientWidth reads; catches every size change the events miss
-    if (postfx) postfx.render(); else renderer.render(scene, camera);
+    checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
+    // Battery and heat on phones (oversight relay): the title drift renders at 24 fps on touch devices, and
+    // an open pause menu holds the last frame instead of re-rendering the city behind it. Hidden tabs
+    // already stop: the loop runs on requestAnimationFrame, which browsers suspend in the background.
+    const capTitle = screen === 'title' && input.isTouch && frameCount > 3 && t - lastRenderT < 1000 / 24;
+    // (a resize clears the canvas, so a held frame is only kept while the drawing buffer size is unchanged)
+    const holdPaused = (screen === 'paused' || pause.open) && screen !== 'title' && pausedFrameDrawn && view.width === heldW && view.height === heldH;
+    if (!capTitle && !holdPaused) {
+      if (postfx) postfx.render(); else renderer.render(scene, camera);
+      lastRenderT = t; pausedFrameDrawn = screen === 'paused' || pause.open; heldW = view.width; heldH = view.height;
+    }
     if (frameCount === 0) loadReport.mark('first-frame');
-    loadReport.frameCpu(performance.now() - cpu0);
+    loadReport.frameCpu(performance.now() - cpu0); perfSamples.cpu.push(performance.now() - cpu0);
+    if (trackGpu && frameCount % 6 === 0) {
+      const be = renderer.backend as unknown as { trackTimestamp?: boolean };
+      perfSamples.gpuAvailable = !!be.trackTimestamp;
+      if (be.trackTimestamp) void renderer.resolveTimestampsAsync().then((ms) => { if (typeof ms === 'number' && ms > 0) perfSamples.gpu.push(ms); }).catch(() => undefined);
+    }
     frameCount++;
 
     const p = mode === 'onfoot' ? body.object.position : camera.position;

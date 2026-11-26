@@ -606,7 +606,16 @@ for (const b of buildings) if (b.flags & BuildingFlag.Hero && b.name) {
   h.ids.push(b.id); h.height = Math.max(h.height, +b.height.toFixed(1));
   if (b.minHeight === 0 && a > h.area) { h.area = a; h.x = +c[0].toFixed(1); h.z = +c[1].toFixed(1); }
 }
-const heroes = [...heroMap.values()].map(({ area: _a, ...h }) => h);
+// Player-visible names come from the narrative registry (content/landmarks.json, user decision 2026-11-26):
+// real brand / trademarked landmark names are replaced by sound-alikes; plain place names stay real.
+// `real` is dev-only matching and never reaches world.json. Heroes get a stable id for engine lookups.
+type Landmark = { id: string; real: string; aliases?: string[]; name: string; short?: string };
+const LANDMARKS: Landmark[] = fs.existsSync(path.join(ROOT, 'content/landmarks.json')) ? JSON.parse(fs.readFileSync(path.join(ROOT, 'content/landmarks.json'), 'utf8')).landmarks : [];
+const slug = (n: string) => 'lm.' + n.toLowerCase().replace(/building|the /g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+const heroes = [...heroMap.values()].map(({ area: _a, name, ...h }) => {
+  const lm = LANDMARKS.find((l) => l.real === name || l.aliases?.includes(name));
+  return { id: lm?.id ?? slug(name), name: lm?.name ?? name, short: lm?.short ?? lm?.name ?? name, ...h };
+});
 // Period regression gate (audio request 10): nothing in the modelled city may exceed 260 m except the
 // Empire State Building. Modern tower heights leaking in (e.g. via OSM parts) fail the build.
 {
