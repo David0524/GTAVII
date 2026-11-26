@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "savedAt": "2026-11-26T15:00:00.000Z",
+  "build": "fixture",
+  "playtimeSec": 754,
+  "label": "W 31st St & Broadway — Fri Jun 21, 8:14 PM",
+  "world": { "date": "1974-06-21", "minutes": 1214, "weather": "clear" },
+  "party": {
+    "activeCharacter": "char.teddy_arce",
+    "characters": {
+      "char.teddy_arce": { "money": 40, "inventory": ["item.cab_medallion_receipt"], "wardrobe": "default", "at": { "x": -2.15, "y": 0.15, "z": -19.4, "heading": 0.2588 } },
+      "char.delphine_moore": { "money": 25, "inventory": [], "wardrobe": "default", "at": { "x": -879, "y": 1.2, "z": -1390, "heading": 0 } },
+      "char.nick_varelas": { "money": 300, "inventory": [], "wardrobe": "default", "at": { "x": -560, "y": 0.4, "z": -600, "heading": 1.57 } }
+    }
+  },
+  "narrative": { "act": 1, "flags": { "flag.week_01": true }, "missions": { "mission.dusk_on_broadway": "active" }, "relationships": { "char.mayhew": 1 } }
+}

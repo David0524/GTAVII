@@ -45,6 +45,7 @@ Each building is dated from three independent sources:
 - **0:** not a finished building (under construction, skybridge, marked for demolition) → removed.
 - **1:** a reviewed manual override → as stated.
 - **2:** OSM date ≤ 1974 → kept. OSM date > 1974 → removed.
+- **2c:** the exception to the first half of rule 2. If PLUTO and the footprint agree on a year after 1974 and OSM is less than 15 years earlier, the gap is construction start vs completion, so the building is removed.
 - **2b:** the exception to rule 2. If PLUTO and the footprint both say ≤ 1974, two sources agree, so the building is kept and the OSM date is read as a renovation.
 - **3:** PLUTO or the footprint says > 1974 → removed.
 - **3b:** the exception to rule 3. If only the footprint says > 1974 and the building keeps an original-series BIN (below 1076000), it's read as an alteration and kept. This only applies when the height is plausible for the era: up to 30 m before 1890, up to 80 m from 1890 to 1915.
@@ -93,8 +94,12 @@ Sanity check: everything here should be a modern tower.
 - **Rooftop additions.** Where a pre-1975 building gained floors later, today's roof height is
   used unless an override fixes it. Only 1107 Broadway is corrected so far. Rule-3b rows are
   the likeliest candidates.
-- **Partial year coverage.** A building completed during 1974 (e.g. 1166 Avenue of the
-  Americas) is removed, because the data has years, not months.
+- **Partial year coverage.** The data has years, not months, so a building dated 1974 is
+  kept (e.g. 1166 Avenue of the Americas, completed 1974). Whether it was finished by summer
+  isn't checked.
+- **Hidden predecessors.** Some removed towers were built over older buildings that stood in
+  1974, e.g. the Palace Theatre (1913) under the 1990 DoubleTree at 1568 Broadway. Restore
+  these by override as they're researched.
 - **Stand-in content.** Stand-ins are plausible period types, not the specific buildings that
   stood on each lot. Known predecessors can be added to `RESTORED_BUILDINGS` as research
   turns them up.

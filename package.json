@@ -14,6 +14,8 @@
     "data": "npm run data:fetch && npm run data:build && npm run data:audit",
     "shots": "tsx tools/shots/capture.ts",
     "data:audit": "python3 tools/pipeline/audit_report.py",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "//sim": "---- ambient sim workstream (keep this block last) ----",
     "data:lanes": "tsx tools/pipeline/lanes.ts",
     "test:sim": "tsx tools/sim/headless.ts",
     "shots:sim": "tsx tools/shots/simShots.ts",

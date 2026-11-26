@@ -19,6 +19,7 @@ Each building is dated from three independent sources:
 - **0:** not a finished building (under construction, skybridge, marked for demolition) → removed.
 - **1:** a reviewed manual override → as stated.
 - **2:** OSM date ≤ 1974 → kept. OSM date > 1974 → removed.
+- **2c:** the exception to the first half of rule 2. If PLUTO and the footprint agree on a year after 1974 and OSM is less than 15 years earlier, the gap is construction start vs completion, so the building is removed.
 - **2b:** the exception to rule 2. If PLUTO and the footprint both say ≤ 1974, two sources agree, so the building is kept and the OSM date is read as a renovation.
 - **3:** PLUTO or the footprint says > 1974 → removed.
 - **3b:** the exception to rule 3. If only the footprint says > 1974 and the building keeps an original-series BIN (below 1076000), it's read as an alteration and kept. This only applies when the height is plausible for the era: up to 30 m before 1890, up to 80 m from 1890 to 1915.
@@ -35,11 +36,11 @@ Each building is dated from three independent sources:
 period stand-in, which looks fine. A wrongly kept glass tower would break the setting.
 
 ## Results (play region)
-- **Totals:** 3025 footprints or lots were examined. **2668 were kept, 341 were
-  removed and replaced by stand-ins or parking lots,** and 16 records weren't
+- **Totals:** 6610 footprints or lots were examined. **5685 were kept, 893 were
+  removed and replaced by stand-ins or parking lots,** and 32 records weren't
   finished buildings.
-- **By rule:** 0: 16, 1: 4, 2: 173, 3: 229, 4: 2518, 5: 15, 2b: 3, 3b: 5, L0: 21, L1: 2, L2: 27, L3: 12.
-- **OSM building parts:** 23 parts dated after 1974 were dropped from towers
+- **By rule:** 0: 32, 1: 4, 2: 346, 3: 584, 4: 5391, 5: 32, 2b: 4, 2c: 1, 3b: 8, L0: 69, L1: 17, L2: 87, L3: 35.
+- **OSM building parts:** 50 parts dated after 1974 were dropped from towers
   (later rooftop additions and crowns).
 - **Distant skyline:** 1180 pre-1975 towers were kept and 1097 newer or undated ones
   removed. The Pan Am Building (1963) and the WTC twins were added by hand.
@@ -60,6 +61,11 @@ research time.
 
 | Address | Name | PLUTO | Footprint | OSM | Height m | Decision | Why |
 |---|---|---|---|---|---|---|---|
+| 222 EAST 44TH STREET |  | 1964 | 2018 |  | 147.8 | remove | built after 1974 per footprint |
+| 1568A BROADWAY |  | 1989 | 1913 | 1990 | 146 | remove | OSM start_date 1990 |
+| 560 3 AVENUE | Murray Hill Mews | 1975 | 1975 | 1974 | 114.9 | remove | PLUTO and footprint agree on 1975/1975; OSM 1974 read as construction start |
+| 230 EAST 20 STREET |  | 1920 | 2019 |  | 76.8 | remove | built after 1974 per footprint |
+| 338 WEST 39 STREET |  | 2017 | 1926 |  | 71.9 | remove | built after 1974 per PLUTO |
 | 469 7 AVENUE |  | 1921 | 2015 |  | 70.1 | keep | footprint year 2015 on original-series BIN read as an alteration; height may include a later addition |
 | 290 5 AVENUE |  | 1900 | 2020 |  | 68 | remove | built after 1974 per footprint |
 | 206 WEST 36 STREET |  |  |  |  | 67 | remove | undated tower 67 m: assumed modern |
@@ -69,38 +75,81 @@ research time.
 | 481 7 AVENUE |  | 1906 | 2016 |  | 54 | keep | footprint year 2016 on original-series BIN read as an alteration; height may include a later addition |
 | 300 W 30TH STREET |  | 2020 | 1900 |  | 51.8 | remove | built after 1974 per PLUTO |
 | 206 WEST 36 STREET |  |  |  |  | 49 | remove | undated tower 49 m: assumed modern |
+| 221 EAST 37 STREET |  |  |  |  | 48.1 | remove | undated tower 48 m: assumed modern |
 | 21 WEST 20 STREET |  | 1927 | 2016 |  | 47.5 | remove | built after 1974 per footprint |
+| 122 5TH AVENUE |  | 1900 | 2026 |  | 45.6 | remove | built after 1974 per footprint |
 | 452 5 AVENUE | HSBC Tower | 1902 | 1902 | 1984 | 45.1 | keep | PLUTO and footprint agree on 1902/1902; OSM 1984 treated as renovation |
 | 128 WEST 26TH STREET |  | 2021 | 1930 |  | 45.1 | remove | built after 1974 per PLUTO |
+| 510 WEST 22ND STREET |  | 1920 | 2017 |  | 44.8 | remove | built after 1974 per footprint |
+| 230 EAST 20 STREET |  | 1920 | 2019 |  | 43.6 | remove | built after 1974 per footprint |
 | 15 EAST 20 STREET |  | 1844 | 2016 |  | 43.6 | remove | built after 1974 per footprint |
+| 701 7 AVENUE | 20 Times Square | 1909 | 1909 | 2018 | 37.8 | keep | PLUTO and footprint agree on 1909/1909; OSM 2018 treated as renovation |
+| 105 EAST 16 STREET |  | 1914 | 2016 |  | 37.6 | keep | footprint year 2016 on original-series BIN read as an alteration; height may include a later addition |
+| 441 WEST 37 STREET |  | 2020 | 1910 |  | 36.6 | remove | built after 1974 per PLUTO |
 | 280 8 AVENUE |  | 1963 | 2025 |  | 36.6 | remove | built after 1974 per footprint |
 | 137 WEST 23 STREET |  | 1973 | 1980 |  | 34.4 | keep | footprint year 1980 on original-series BIN read as an alteration; height may include a later addition |
+| 346 WEST 40 STREET | DoubleTree by Hilton Hotel | 2014 | 1931 | 2017 | 32.7 | remove | OSM start_date 2017 |
+| 491 11 AVENUE |  |  |  |  | 30.4 | keep | undated, 30 m: assumed c.1920 |
 | 218 WEST 43 STREET | Todd Haimes Theatre | 2000 | 2000 | 1918 | 27.7 | keep | OSM start_date 1918 |
 | 232 WEST 31 STREET |  |  |  |  | 26 | keep | undated, 26 m: assumed c.1920 |
+| 116 7 AVENUE |  | 1910 | 2020 |  | 25.9 | remove | built after 1974 per footprint |
+| 520 WEST 45 STREET |  | 1905 | 2011 |  | 25 | remove | built after 1974 per footprint |
 | 214 WEST 43 STREET | Lyric Theatre | 1903 | 1903 | 1998 | 23.6 | keep | PLUTO and footprint agree on 1903/1903; OSM 1998 treated as renovation |
 | 842 AVENUE OF THE AMERICAS |  | 2020 | 1925 |  | 23.3 | remove | built after 1974 per PLUTO |
 | 153 WEST 44 STREET | Hudson Theatre | 1988 | 1988 | 1903 | 23.2 | keep | OSM start_date 1903 |
+| 55 WEST 17 STREET |  | 2015 | 1920 |  | 23.2 | remove | built after 1974 per PLUTO |
+| 44 EAST 50 STREET | 50th Street Ventilation Building |  |  |  | 23.2 | keep | undated, 23 m: assumed c.1920 |
+| 523 WEST 48 STREET |  | 2013 | 1940 |  | 22.9 | remove | built after 1974 per PLUTO |
 | 42 WEST 33 STREET | Solari | 2016 | 1920 |  | 22.7 | remove | built after 1974 per PLUTO |
 | 236 WEST 24 STREET |  | 1920 | 2015 |  | 19 | keep | footprint year 2015 on original-series BIN read as an alteration; height may include a later addition |
 | WEST 34 STREET |  |  |  |  | 18.6 | keep | undated, 19 m: assumed c.1920 |
 | 14 WEST 31 STREET | Murray Hill Substation |  |  |  | 18.5 | keep | undated, 18 m: assumed c.1920 |
+| 222 EAST 40 STREET | House 39 | 2015 | 1963 | 2016 | 18.3 | remove | OSM start_date 2016 |
+| 108 EAST 19 STREET | IRT Substation #12 |  |  |  | 18.3 | keep | undated, 18 m: assumed c.1920 |
 | 36 WEST 26 STREET |  | 1920 | 2018 |  | 18 | keep | footprint year 2018 on original-series BIN read as an alteration; height may include a later addition |
+| 521 WEST 41 STREET |  |  |  |  | 16 | keep | undated, 16 m: assumed c.1920 |
+| 521 WEST 41 STREET |  |  |  |  | 15.7 | keep | undated, 16 m: assumed c.1920 |
+| 521 WEST 41 STREET |  |  |  |  | 15.7 | keep | undated, 16 m: assumed c.1920 |
+| 521 WEST 41 STREET |  |  |  |  | 15.3 | keep | undated, 15 m: assumed c.1920 |
+| 162 11 AVENUE |  | 1930 | 2020 |  | 15.2 | keep | footprint year 2020 on original-series BIN read as an alteration; height may include a later addition |
+| 318 WEST 47 STREET |  | 2015 | 1930 |  | 15.1 | remove | built after 1974 per PLUTO |
+| 521 WEST 41 STREET |  |  |  |  | 14.6 | keep | undated, 15 m: assumed c.1920 |
 | 227 LEXINGTON AVENUE |  | 2017 | 1915 |  | 14.6 | remove | built after 1974 per PLUTO |
 | 1 HERALD SQUARE |  |  |  |  | 14.6 | keep | undated, 15 m: assumed c.1920 |
+| 538 THIRD AVENUE |  | 2024 | 1890 |  | 14.5 | remove | built after 1974 per PLUTO |
 | 130 WEST 23RD STREET |  | 2019 | 1910 |  | 14.4 | remove | built after 1974 per PLUTO |
 | 242 WEST 22 STREET |  | 2016 | 1901 |  | 14.3 | remove | built after 1974 per PLUTO |
+| 321 WEST 38TH STREET |  | 1920 | 2015 |  | 14.3 | remove | built after 1974 per footprint |
+| 504 WEST 22ND STREET |  | 1910 | 2015 |  | 14.2 | remove | built after 1974 per footprint |
 | 130 WEST 23RD STREET |  | 2019 | 1920 |  | 13.9 | remove | built after 1974 per PLUTO |
 | 392 7 AVENUE |  |  |  |  | 12.9 | keep | undated, 13 m: assumed c.1920 |
+| 138 WEST 19 STREET |  | 1920 | 2015 |  | 12.2 | remove | built after 1974 per footprint |
 | 32 EAST 32 STREET | Hotel 32 32 | 2008 | 1900 |  | 11 | remove | built after 1974 per PLUTO |
 | 149 WEST 28 STREET |  |  |  |  | 10.9 | keep | undated, 11 m: assumed c.1920 |
+| 281 11 AVENUE |  |  |  |  | 10.8 | keep | undated, 11 m: assumed c.1920 |
+| 607 WEST 47 STREET |  | 2020 | 1940 |  | 10.3 | remove | built after 1974 per PLUTO |
 | EAST 21 STREET |  |  |  |  | 10 | keep | undated, 10 m: assumed c.1920 |
 |  |  |  |  |  | 10 | keep | undated, 10 m: assumed c.1920 |
+| 547 WEST 47TH STREET |  | 2020 | 1946 |  | 9.8 | remove | built after 1974 per PLUTO |
+| 521 WEST 41 STREET |  |  |  |  | 9.4 | keep | undated, 9 m: assumed c.1920 |
 | 227 LEXINGTON AVENUE |  | 2017 | 1915 |  | 9.3 | remove | built after 1974 per PLUTO |
+| 135 7 AVENUE | West 19th Street |  |  |  | 8.2 | keep | undated, 8 m: assumed c.1920 |
+| 683 11 AVENUE |  |  |  |  | 7.9 | keep | undated, 8 m: assumed c.1920 |
 | 107 EAST 28 STREET |  |  |  |  | 7.1 | keep | undated, 7 m: assumed c.1920 |
+| 547 WEST 47TH STREET |  | 2020 | 1946 |  | 6.7 | remove | built after 1974 per PLUTO |
+| 1166 AVENUE OF THE AMERICAS |  | 1975 | 1974 |  | 6.1 | remove | built after 1974 per PLUTO |
 | 380 7 AVENUE |  |  |  |  | 6 | keep | undated, 6 m: assumed c.1920 |
+| 502 10 AVENUE |  |  |  |  | 5.8 | keep | undated, 6 m: assumed c.1920 |
+| 135 7 AVENUE |  |  |  |  | 5.4 | keep | undated, 5 m: assumed c.1920 |
+| WEST 30 STREET |  |  |  |  | 5.2 | keep | undated, 5 m: assumed c.1920 |
+| 639 11 AVENUE |  | 2016 | 1955 |  | 4.8 | remove | built after 1974 per PLUTO |
+| WEST 37 STREET |  |  |  |  | 4.7 | keep | undated, 5 m: assumed c.1920 |
+| 532 WEST 20TH STREET |  | 2019 | 1900 |  | 4.7 | remove | built after 1974 per PLUTO |
+| 135 EAST 45 STREET |  | 1940 | 1978 |  | 4.6 | keep | footprint year 1978 on original-series BIN read as an alteration; height may include a later addition |
 | 1060 AVENUE OF THE AMERICAS |  | 1920 | 2000 |  | 4.6 | remove | built after 1974 per footprint |
 | 116 WEST 28 STREET |  | 2010 | 1910 |  | 4.3 | remove | built after 1974 per PLUTO |
 | 67 WEST 23 STREET |  | 1976 | 1920 |  | 3.9 | remove | built after 1974 per PLUTO |
+| 69 EAST 17 STREET |  | 1800 | 2009 |  | 3.3 | remove | built after 1974 per footprint |
 | 140 LEXINGTON AVENUE |  |  |  |  | 3 | keep | undated, 3 m: assumed c.1920 |
 | 140 LEXINGTON AVENUE |  |  |  |  | 3 | keep | undated, 3 m: assumed c.1920 |
 | 476 5 AVENUE |  | 1911 | 1995 |  | 3 | remove | built after 1974 per footprint |
@@ -113,45 +162,45 @@ Sanity check: everything here should be a modern tower.
 | Address | Name | PLUTO | Footprint | OSM | Height m | Decision | Why |
 |---|---|---|---|---|---|---|---|
 | 51 EAST 42 STREET |  | 2017 | 2021 |  | 427 | remove | built after 1974 per PLUTO |
+| 500 WEST 33 STREET |  | 2015 | 2018 |  | 385.6 | remove | built after 1974 per PLUTO |
+| 34 HUDSON YARDS |  | 2015 | 2018 |  | 316.7 | remove | built after 1974 per PLUTO |
+| 527 WEST 34 STREET |  | 2018 | 2022 |  | 313.6 | remove | built after 1974 per PLUTO |
+| 427 10 AVENUE |  | 2019 | 2021 |  | 308.2 | remove | built after 1974 per PLUTO |
+| 395 9TH AVENUE |  | 2015 | 2020 |  | 304.2 | remove | built after 1974 per PLUTO |
+| 553 WEST 30 STREET | The Shed | 2015 | 2016 |  | 275.5 | remove | built after 1974 per PLUTO |
+| 2 MANHATTAN WEST |  | 2020 | 2022 |  | 274.9 | remove | built after 1974 per PLUTO |
 | 1111 AVENUE OF THE AMERICAS | Bank of America Tower | 2005 | 2005 | 2009 | 270.6 | remove | OSM start_date 2009 |
 | 15 EAST 30TH STREET | 126 Madison Avenue | 2017 | 2023 |  | 245.4 | remove | built after 1974 per PLUTO |
+| 138 EAST 50TH STREET |  | 2017 | 2023 |  | 244.4 | remove | built after 1974 per PLUTO |
 | 45 EAST 22 STREET |  | 2014 | 2015 |  | 237.1 | remove | built after 1974 per PLUTO |
 | 620 8 AVENUE | The New York Times Building | 2003 | 2003 | 2007 | 230.1 | remove | OSM start_date 2007 |
 | 1472 BROADWAY |  | 1998 | 1998 |  | 224.6 | remove | built after 1974 per PLUTO |
+| 383 MADISON AVENUE | 383 Madison Avenue | 1999 | 1999 | 2001 | 221.1 | remove | OSM start_date 2001 |
+| 371 9 AVENUE |  | 2015 | 2018 |  | 214 | remove | built after 1974 per PLUTO |
+| 270 PARK AVENUE |  | 2021 | 2023 |  | 213.4 | remove | built after 1974 per PLUTO |
 | 1459 BROADWAY | Times Square Tower | 2002 | 2002 | 2004 | 209.6 | remove | OSM start_date 2004 |
+| 533 11 AVENUE |  | 2005 | 2005 |  | 205.1 | remove | built after 1974 per PLUTO |
+| 1177 AVENUE OF THE AMERICAS | Americas Tower | 1988 | 1988 | 1992 | 202.5 | remove | OSM start_date 1992 |
 | 277 FIFTH AVENUE |  | 2017 | 2021 |  | 202.1 | remove | built after 1974 per PLUTO |
+| 1585 BROADWAY | Morgan Stanley Building | 1987 | 1987 | 1990 | 201.2 | remove | OSM start_date 1990 |
+| 311 11TH AVENUE |  | 2020 | 2021 |  | 194.2 | remove | built after 1974 per PLUTO |
 | 101 PARK AVENUE |  | 1982 | 1982 | 1982 | 192.2 | remove | OSM start_date 1982 |
+| 350 WEST 42 STREET | The Orion | 2004 | 2004 | 2006 | 192 | remove | OSM start_date 2006 |
 | 23 EAST 22 STREET | One Madison | 2008 | 2008 | 2010 | 190.5 | remove | OSM start_date 2010 |
 | 835 AVENUE OF THE AMERICAS | Eventi | 2010 | 2010 | 2010 | 190 | remove | OSM start_date 2010 |
+| 825 8 AVENUE | One Worldwide Plaza | 1987 | 1987 | 1989 | 188.5 | remove | OSM start_date 1989 |
+| 7 EAST 48 STREET | Tower 49 | 1984 | 1984 | 1985 | 187.9 | remove | OSM start_date 1985 |
+| 560 10 AVENUE | One MiMA Tower | 2008 | 2008 | 2011 | 185.9 | remove | OSM start_date 2011 |
+| 551 10 AVENUE |  | 2013 | 2016 |  | 185.6 | remove | built after 1974 per PLUTO |
 | 132 WEST 32 STREET | The Epic | 2005 | 2005 | 2007 | 184.4 | remove | OSM start_date 2007 |
 | 425 5 AVENUE | 425 Fifth Avenue | 2003 | 2003 | 2003 | 182.9 | remove | OSM start_date 2003 |
 | 640 8 AVENUE | 11 Times Square | 2007 |  | 2011 | 182.3 | remove | OSM start_date 2011 |
 | 400 5 AVENUE | 400 Fifth Avenue | 2010 | 2010 | 2010 | 180.4 | remove | OSM start_date 2010 |
+| 505 WEST 35TH STREET | The Set | 2020 | 2023 |  | 178.9 | remove | built after 1974 per PLUTO |
+| 1535 BROADWAY | New York Marriott Marquis | 1995 | 1985 | 1985 | 176 | remove | OSM start_date 1985 |
+| 1538 BROADWAY | Bertelsmann Building | 1989 | 1989 | 1990 | 175.3 | remove | OSM start_date 1990 |
 | 11 EAST 29 STREET |  | 2005 | 2005 |  | 175.2 | remove | built after 1974 per PLUTO |
-| 109 WEST 31 STREET | Tower 111 | 2008 | 2008 | 2011 | 172.8 | remove | OSM start_date 2011 |
-| 592 7 AVENUE | 5 Times Square | 2000 | 2000 | 2002 | 164.8 | remove | OSM start_date 2002 |
-| 300 MADISON AVENUE |  | 2002 | 2002 | 2003 | 162.9 | remove | OSM start_date 2003 |
-| 270 WEST 43 STREET | The Westin | 2000 | 2000 | 2002 | 161.8 | remove | OSM start_date 2002 |
-| 3 PARK AVENUE | 3 Park Avenue | 1977 | 1977 | 1976 | 161.7 | remove | OSM start_date 1976 |
-| 1227 BROADWAY |  | 2017 | 2023 |  | 155.8 | remove | built after 1974 per PLUTO |
-| 1155 AVENUE OF THE AMERICAS | 1155 Avenue of the Americas | 1984 | 1984 | 1984 | 155.8 | remove | OSM start_date 1984 |
-| 35 WEST 28TH STREET |  | 2018 | 2021 |  | 154.8 | remove | built after 1974 per PLUTO |
-| 855 AVENUE OF THE AMERICAS |  | 2014 |  |  | 151.5 | remove | built after 1974 per PLUTO |
-| 147 EAST 44 STREET | Two Grand Central Tower | 1982 | 1982 |  | 150.4 | remove | built after 1974 per PLUTO |
-| 3 TIMES SQUARE | 3 Times Square | 1999 | 1999 | 2001 | 148.9 | remove | OSM start_date 2001 |
-| 153 WEST 44 STREET | Millennium Hotel Broadway Times Square | 1988 | 1988 | 1990 | 147.1 | remove | OSM start_date 1990 |
-| 30 EAST 31 STREET |  | 2017 | 2020 |  | 146 | remove | built after 1974 per PLUTO |
-| 321 5 AVENUE |  | 2005 | 2005 | 2006 | 145.7 | remove | OSM start_date 2006 |
-| 66 WEST 38 STREET | The Atlas | 2001 | 2001 | 2002 | 141.1 | remove | OSM start_date 2002 |
-| 7 EAST 28 STREET | Anagram NoMad | 1998 | 1998 | 1999 | 139.1 | remove | OSM start_date 1999 |
-| 172 MADISON AVENUE |  | 2016 | 2015 |  | 139 | remove | built after 1974 per PLUTO |
-| 101 WEST 24 STREET | Chelsea Stratus | 2006 | 2006 | 2008 | 137.5 | remove | OSM start_date 2008 |
-| 140 WEST 28 STREET |  | 2018 | 2019 |  | 137.2 | remove | built after 1974 per PLUTO |
-| 402 PARK AVENUE SOUTH |  | 2013 | 2016 |  | 136.2 | remove | built after 1974 per PLUTO |
-| 425 LEXINGTON AVENUE | 425 Lexington | 1987 | 1987 | 1987 | 133.6 | remove | OSM start_date 1987 |
-| 218 WEST 35 STREET | Renaissance | 2010 | 2010 |  | 131.4 | remove | built after 1974 per PLUTO |
-| 234 WEST 42 STREET |  | 1999 | 1999 |  | 131.3 | remove | built after 1974 per PLUTO |
-| 234 WEST 42 STREET |  | 1999 | 1999 | 2000 | 131.3 | remove | OSM start_date 2000 |
+| 135 WEST 45 STREET |  | 2009 | 2009 |  | 174.9 | remove | built after 1974 per PLUTO |
 
 ## Distant skyline: kept towers over 200 m
 - 1 LIBERTY PLAZA 223 m, 1973
@@ -183,8 +232,12 @@ Sanity check: everything here should be a modern tower.
 - **Rooftop additions.** Where a pre-1975 building gained floors later, today's roof height is
   used unless an override fixes it. Only 1107 Broadway is corrected so far. Rule-3b rows are
   the likeliest candidates.
-- **Partial year coverage.** A building completed during 1974 (e.g. 1166 Avenue of the
-  Americas) is removed, because the data has years, not months.
+- **Partial year coverage.** The data has years, not months, so a building dated 1974 is
+  kept (e.g. 1166 Avenue of the Americas, completed 1974). Whether it was finished by summer
+  isn't checked.
+- **Hidden predecessors.** Some removed towers were built over older buildings that stood in
+  1974, e.g. the Palace Theatre (1913) under the 1990 DoubleTree at 1568 Broadway. Restore
+  these by override as they're researched.
 - **Stand-in content.** Stand-ins are plausible period types, not the specific buildings that
   stood on each lot. Known predecessors can be added to `RESTORED_BUILDINGS` as research
   turns them up.

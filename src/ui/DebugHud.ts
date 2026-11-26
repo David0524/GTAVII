@@ -22,7 +22,7 @@ export class DebugHud {
       background: '#0009', font: '11px/1.35 ui-monospace, Menlo, Consolas, monospace', pointerEvents: 'none', whiteSpace: 'pre',
     });
     parent.appendChild(this.el);
-    window.addEventListener('keydown', (e) => { if (e.code === 'F3' || e.code === 'Backquote') { this.visible = !this.visible; this.el.style.display = this.visible ? '' : 'none'; } });
   }
   set(text: string) { if (this.visible) this.el.textContent = text; }
+  toggle(v = !this.visible) { this.visible = v; this.el.style.display = v ? '' : 'none'; }
 }

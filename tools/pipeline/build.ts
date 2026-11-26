@@ -12,6 +12,7 @@ import {
 } from '../../src/shared/chunkFormat.ts';
 import { RAW, OUT, ROOT, ensureDir, log } from './common.ts';
 import { dateBuilding, osmYear, type Dating } from './dating.ts';
+import { buildTerrain, encodeTerrain, rejected as terrainRejected } from './terrain.ts';
 import {
   AVENUE_DIRECTION_1974, HERO_NAMES, HERO_POINTS, CUTOFF_YEAR, RESTORED_BUILDINGS, SKYLINE_ADDITIONS, TWO_WAY_STREETS, roadwayWidth,
 } from './era1974.ts';
@@ -103,7 +104,7 @@ interface Bldg {
 const buildings: Bldg[] = [];
 const lots: Poly[] = []; // stand-in parking lots
 let nextId = 1;
-const stats = { footprints: 0, removedPost1974: 0, standIns: 0, parkingLots: 0, osmParts: 0, restored: 0, heroes: 0, noYear: 0, groundedParts: 0, notBuildings: 0, droppedModernParts: 0, orphanBuildings: 0, orphanStandIns: 0 };
+const stats = { footprints: 0, removedPost1974: 0, standIns: 0, parkingLots: 0, osmParts: 0, restored: 0, heroes: 0, noYear: 0, groundedParts: 0, notBuildings: 0, droppedModernParts: 0, orphanBuildings: 0, orphanStandIns: 0, partsOnStandIns: 0 };
 
 function classify(year: number, use: number, floors: number, height: number, bldgclass: string): number {
   const cls = bldgclass?.[0] ?? '';
@@ -261,6 +262,9 @@ for (const r of RESTORED_BUILDINGS) {
     if (!poly) continue;
     const host = findContaining(centroid(poly[0]));
     if (host.length !== 1) continue;
+    // Never attach OSM parts to a stand-in or restored building: those parts describe the modern
+    // building that was removed (e.g. Hudson Yards tower tiers landing on a 1910 loft stand-in).
+    if (buildings[host[0]].flags & (BuildingFlag.StandIn | BuildingFlag.Restored)) { stats.partsOnStandIns++; continue; }
     (partsFor.get(host[0]) ?? partsFor.set(host[0], []).get(host[0])!).push({ poly, height: h, minHeight: minH });
   }
   const replaced = new Set<number>();
@@ -416,6 +420,7 @@ const skylineAudit = { kept: 0, removed: 0, keptTall: [] as string[], removedTal
   }
   for (const s of SKYLINE_ADDITIONS) {
     const [x, z] = project(s.lon, s.lat);
+    if (inRegion([x, z])) continue; // now modelled in full detail (e.g. the Pan Am Building since pipeline v2)
     const sx = (s as { sizeX?: number }).sizeX ?? s.size, sz = (s as { sizeZ?: number }).sizeZ ?? s.size;
     emitBox(x, z, sx, sz, ((s.heading - GRID_ROTATION_DEG) * Math.PI) / 180, s.height);
   }
@@ -442,6 +447,15 @@ if (flat) {
     if (mid[1] < spawn.z && (!best || d < best.d)) { const dir: P = b[1] < a[1] ? [b[0] - a[0], b[1] - a[1]] : [a[0] - b[0], a[1] - b[1]]; best = { d, dir }; }
   }
   if (best) spawn.heading = +Math.atan2(-best.dir[0], -best.dir[1]).toFixed(4); // yaw: 0 = -Z (uptown), positive turns toward -X
+}
+// Terrain height field (always generated; runtime use is gated by TERRAIN_ENABLED in src/shared/terrain.ts)
+{
+  const t0t = Date.now();
+  const terr = buildTerrain(footprints, [spawn.x, spawn.z]);
+  fs.writeFileSync(path.join(OUT, 'terrain.bin'), encodeTerrain(terr));
+  let lo = Infinity, hi = -Infinity;
+  for (const v of terr.h) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  log(`terrain: ${terr.nx}x${terr.nz} @ ${terr.cell} m, spawn NAVD88 ${terr.base.toFixed(1)} m, relief ${lo.toFixed(1)}..${hi.toFixed(1)} m, ${terrainRejected} outlier samples dropped (${((Date.now() - t0t) / 1000).toFixed(1)} s)`);
 }
 const heroMap = new Map<string, { name: string; ids: number[]; x: number; z: number; height: number; area: number }>();
 for (const b of buildings) if (b.flags & BuildingFlag.Hero && b.name) {
@@ -476,7 +490,7 @@ log('spawn', spawn, 'heroes', heroes.map((h) => `${h.name} (${h.ids.length} part
     footprintsInRegion: inReg.length,
     kept: by((r) => r.d.keep), removed: by((r) => !r.d.keep && r.d.rule !== '0'), notBuildings: by((r) => r.d.rule === '0'),
     flaggedForReview: by((r) => r.d.flagged), overrides: by((r) => r.d.rule === '1'),
-    byRule: Object.fromEntries(['0', '1', '2', '2b', '3', '3b', '4', '5', 'L0', 'L1', 'L2', 'L3'].map((k) => [k, by((r) => r.d.rule === k)])),
+    byRule: Object.fromEntries(['0', '1', '2', '2b', '2c', '3', '3b', '4', '5', 'L0', 'L1', 'L2', 'L3'].map((k) => [k, by((r) => r.d.rule === k)])),
     skyline: { kept: skylineAudit.kept, removed: skylineAudit.removed },
   };
   fs.writeFileSync(path.join(ROOT, 'docs/period_audit_summary.json'), JSON.stringify({ summary, skylineKeptOver200m: skylineAudit.keptTall.sort(), skylineRemovedOver150m: skylineAudit.removedTall.sort() }, null, 2));

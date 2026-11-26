@@ -1,4 +1,5 @@
 import type { Input, ButtonAction } from '../input/Input';
+import { settings } from '../settings/Settings';
 
 /**
  * Landscape touch layout (phones/tablets):
@@ -74,7 +75,8 @@ export class TouchControls {
     });
     right.addEventListener('pointermove', (e) => {
       if (e.pointerId !== this.lookId) return;
-      input.addLook(-(e.clientX - this.lookLast.x) * this.lookSpeed, -(e.clientY - this.lookLast.y) * this.lookSpeed);
+      const k = this.lookSpeed * settings.get('touchLookSensitivity');
+      input.addLook(-(e.clientX - this.lookLast.x) * k, -(e.clientY - this.lookLast.y) * k);
       this.lookLast = { x: e.clientX, y: e.clientY };
     });
     const endLook = (e: PointerEvent) => { if (e.pointerId === this.lookId) this.lookId = null; };
@@ -102,6 +104,11 @@ export class TouchControls {
       } catch { /* iOS Safari: no fullscreen/orientation lock; the rotate prompt covers it */ }
     });
     document.body.appendChild(fs);
+
+    // A controller takes over: hide the on-screen controls; the next touch brings them back.
+    const show = (d: string) => { const on = d === 'touch'; this.root.style.display = on ? '' : 'none'; fs.style.display = on ? '' : 'none'; };
+    input.onDeviceChange(show);
+    show(input.activeDevice);
 
     const rot = document.createElement('div'); rot.className = 't74-rotate';
     rot.innerHTML = '↻<br><br>ROTATE YOUR DEVICE<br>TENDERLOIN \'74 PLAYS IN LANDSCAPE';
