@@ -23,7 +23,7 @@ const W = 960, H = 540, FOV = 60; // vertical fov at this aspect (no wide-screen
 const STEP = 4; // degrees per step
 const N = Number(process.env.WIN_STEPS ?? 7);
 const LIMIT = 0.03; // at most 3% of lit pixels may change state between steps
-const CAMS = (process.env.WIN_CAM ? [0] : [0, 1]).map((i) => [
+const CAMS = (process.env.WIN_CAM ? process.env.WIN_CAM.split(',').map(Number) : [0, 1]).map((i) => [
   { name: 'madison-sq-north', x: 25, y: 12, z: -150, yaw: 150 },
   { name: 'broadway-30s', x: -230, y: 20, z: -760, yaw: 20 },
 ][i]);

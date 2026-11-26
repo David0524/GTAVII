@@ -41,7 +41,13 @@ export const facadeUniforms = {
 export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const m = new THREE.MeshStandardNodeMaterial({ vertexColors: true });
   const fac = attribute('facade', 'vec4');
-  const style = fac.x, cond = fac.y, floorH = fac.z, seed = fac.w;
+  // Per-building values arrive as interpolated vertex attributes. Interpolation of a constant is NOT exact
+  // (4.0 can arrive as 3.9999998 at some pixels, depending on the view), so integers are rounded and the
+  // seed is quantised before anything compares or hashes them. Unrounded, style.equal(4) and the hashed
+  // window id flipped per pixel as the camera moved: the "window lights bug out" report (2026-11-26).
+  const style = floor(fac.x.add(0.5)), cond = floor(fac.y.add(0.5)), floorH = fac.z;
+  const seedQ = floor(fac.w.mul(65521).add(0.5)); // exact integer 0..65521 per building
+  const seed = seedQ.div(65521); // for continuous noise offsets
   const st = uv();
   const u = st.x, v = st.y;
   const isRoof = normalWorld.y.greaterThan(0.6);
@@ -66,7 +72,10 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   // storefronts: tall glass between narrow piers on commercial ground floors (not tenement stoops)
   const storeU = edge(float(0.07), fu, aa.div(bay)).mul(float(1).sub(edge(float(0.93), fu, aa.div(bay))));
   const storeV = edge(float(0.45), v, aa).mul(float(1).sub(edge(floorH.mul(0.82), v, aa)));
-  const hasStore = isTenement.not().or(hash(bayIdx.add(seed.mul(911))).lessThan(0.35));
+  // Stable integer window id: building seed, floor and bay, combined in uint arithmetic (exact, wraps mod 2^32).
+  const idHash = (salt: number) => hash(seedQ.toUint().mul(2654435761).add(floorIdx.max(0).toUint().mul(40503)).add(bayIdx.max(0).toUint().mul(97)).add(salt));
+  const bayHash = hash(seedQ.toUint().mul(2654435761).add(bayIdx.max(0).toUint().mul(97)).add(911));
+  const hasStore = isTenement.not().or(bayHash.lessThan(0.35));
   const storeMask = select(groundFloor.and(hasStore), storeU.mul(storeV), float(0));
   const upperMask = select(groundFloor.and(hasStore), float(0), inU.mul(inV));
   const winMaskSharp = clamp(storeMask.add(upperMask), 0, 1).mul(select(v.greaterThan(0.2), float(1), float(0)));
@@ -108,8 +117,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const wall = wallBase.mul(float(1).sub(mortarK)).mul(float(1).sub(band)).mul(float(1).sub(soot)).mul(float(1).sub(rustic)).mul(float(1).sub(heroBand));
 
   // ---------------------------------------------------------------- glass, shades, boarded, lit
-  const winId = floorIdx.mul(97.13).add(bayIdx.mul(13.7)).add(seed.mul(1000));
-  const rnd = hash(winId), rnd2 = hash(winId.add(17.3)), rnd3 = hash(winId.add(41.9));
+  const rnd = idHash(1), rnd2 = idHash(17), rnd3 = idHash(41);
   const shadeDown = rnd2.mul(0.8); // fraction of the window covered by a pulled shade
   const shadeHere = fv.greaterThan(head.sub(head.sub(sill).mul(shadeDown))).and(groundFloor.not());
   const glassDay = mix(vec3(0.05, 0.055, 0.06), vec3(0.11, 0.1, 0.09), rnd3);
