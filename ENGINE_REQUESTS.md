@@ -28,6 +28,7 @@ Gameplay lives in `src/gameplay/` on `claude/gameplay-74`; the integration contr
 - **Fallback:** the `?gameplay=1` test scene is the integration reference.
 
 ## From gameplay: 2. A gameplay section in the versioned save
+- **Update:** engine E9 ships `registerSection`/`provideSection`/`snapshotSections`. Gameplay registers one section, `gameplay`, with `serialize`/`deserialize` (v4), and mission checkpoints use `snapshotSections`.
 - **What:** store `gameplay: unknown` (the result of `serialize()`) and pass it back to
   `deserialize()`. Gameplay owns the shape and its migrations (`src/gameplay/save.ts`, currently
   v3). Your draft per-character shape (N5: money in dollars, `inventory: string[]`, `wardrobe`)
@@ -93,6 +94,7 @@ Gameplay lives in `src/gameplay/` on `claude/gameplay-74`; the integration contr
 - **Fallback:** the HUD title card in the test scene.
 
 ## From gameplay: 8. To sim (relay): behaviour control and police agents
+- **Update 2026-11-26: SHIPPED by sim.** Gameplay builds against it in `src/gameplay/integration/simAdapter.ts`: `simAgentPort` (setGoal/kill), `PoliceMirror` (sim police agents driven by gameplay decisions), `stealSimCar` (takeVehicle). `child` is not needed: the sim has no child agents by rule.
 The sim's `setGoal`/`perceive`/`gunfire` hooks (sim message, 2026-11-26) cover most of this.
 Gameplay's `AgentPort` maps onto them:
 - `goto` → `setGoal(id, {kind:'goto', x, z, speed})`;
@@ -132,6 +134,7 @@ Melee windups are gameplay-timed (NPCs: windup × 1.2 + 0.22 s), so clips should
 `duration` gameplay passes. Ragdoll: blend on death and knockdown when you have it.
 
 ## From gameplay: 10. To vehicles (relay): impact event shape, tyres, trunks, plates
+- **Update 2026-11-26:** vehicles shipped `applyHit(hit)` (per-pane glass, tyres, radiator, engine, fuel tank, bullet holes) and ram attribution on `impact`. Gameplay's `tyreShot` and `impact` events (with `material: 'metal_thin'`, `id` = vehicle id) map onto `applyHit` in the integration glue. Car theft and ownership use vehicles' `serialize`/`restore` for owned cars.
 - **`impact` event shape:** `{ vehicleId, speed (m/s), dv (m/s, this vehicle's velocity change), ped?, occupant?, driver?, prop? }`.
   Gameplay turns this into pedestrian, occupant and prop damage, plus hit-and-run crimes.
 - **Tyres:** `damageTyre(wheel)`, because gameplay resolves tyre hits from its batched shots.
