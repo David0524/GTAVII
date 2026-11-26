@@ -764,3 +764,27 @@ look shots.
   - Fixed: 0.0–0.4%.
 - **For other streams that read per-building attributes in shaders** (interiors Tier C):
   `floor(x + 0.5)` before any `equal()` or hash.
+
+## Engine notice E16 (2026-11-26): doors on every building, and the facade data fixes
+- **Doors: SHIPPED, ahead of the interiors merge** (user: "not sure if we have doors in all the
+  buildings").
+  - The pipeline gives every building with street frontage a door, 4,447 of them (the rest are
+    boxed in by neighbours or are raised parts). It sits on the longest wall facing open space,
+    centred on the shared facade grid's nearest bay.
+  - Door records use interiors' `DoorRec` fields (`style`, `width`, `height`, `rise`,
+    `nightGate`, `enterable`). They're stored in a new optional `DOOR` chunk section.
+  - Styles follow the building type: tenement stoop or vestibule, shop or recessed shop (with
+    roll-down gate housing), freight (lofts), brass double or revolving (offices and heroes),
+    church steps (civic).
+  - The geometry: a stone or iron surround, the leaf (wood, glazed bronze or steel), a transom,
+    a revolving drum, and stoops with brownstone cheek walls. It goes in the props mesh, so stoops
+    have colliders.
+  - **Interiors:** at your merge, `doorsForChunk` replaces these records by `buildingId`. Note
+    that building ids changed in this pipeline run (overlap pass: 47 duplicates removed and 60
+    split pieces get new ids), so please regenerate `interiors/index.json` against the current
+    `public/data` before the merge. Facade cuts at doors (request 1) still come with the merge;
+    for now doors sit proud of the wall.
+- **Facade data fixes (00ce718):** an overlap pass clips lower buildings by taller ones, and
+  floor counts are re-derived where they fall outside period floor-to-floor ranges.
+  `src/shared/facade.ts` is the one grid definition (floor height, bay, sill) shared by the
+  shader, the props and the doors. Interiors and signage should use it too.

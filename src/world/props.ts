@@ -162,9 +162,59 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
       }
     }
   }
+  buildDoors(data, hf, g);
   for (const geo of [g, ...dq]) for (const [k, v] of Object.entries(geo.tris)) propTris[k] = (propTris[k] ?? 0) + v;
   return { props: g.finish(), detail: dq.map((q) => q.finish()) };
 }
+/**
+ * Door geometry from the chunk's door records (one per building, interiors' DoorRec fields): a stone or iron
+ * surround (jambs + lintel), the leaf proud of the wall (wood, glazed bronze, steel), a transom, a roll-down
+ * gate housing over shops, a revolving drum, and stoop / church steps with stone cheek walls where `rise` > 0.
+ * Part of the main props mesh, so stoops get colliders. Door base = sidewalk level (terrain + curb).
+ */
+const WOOD: RGB = [0.11, 0.065, 0.04], GLASS: RGB = [0.045, 0.05, 0.055], BRONZE: RGB = [0.2, 0.15, 0.08], STONE: RGB = [0.26, 0.2, 0.16];
+const BROWNSTONE: RGB = [0.22, 0.13, 0.1], STEEL_GREEN: RGB = [0.13, 0.15, 0.12], GATE: RGB = [0.1, 0.1, 0.1];
+function buildDoors(data: ChunkData, hf: HeightFn, g: Geo) {
+  g.cat = 'door';
+  for (const d of data.doors) {
+    if (d.style === 'internal') continue;
+    const nx = -Math.sin(d.yaw), nz = -Math.cos(d.yaw); // outward
+    const ux = nz, uz = -nx; // along the wall, so that box()'s w axis = outward
+    const y0 = hf(d.x, d.z) + 0.15, base = y0 + d.rise, hw = d.width / 2, H = d.height;
+    const at = (s: number, out: number) => [d.x + ux * s + nx * out, d.z + uz * s + nz * out] as const;
+    const stoneish = d.style === 'stoop' || d.style === 'church' || d.style === 'vestibule' || d.style === 'brass_double';
+    const sur: RGB = stoneish ? STONE : IRON;
+    // surround: jambs + lintel
+    for (const side of [-1, 1]) { const [px, pz] = at(side * (hw + 0.1), 0.06); g.box(px, base + H / 2 + 0.06, pz, 0.1, H / 2 + 0.06, 0.07, ux, uz, sur, true); }
+    { const [px, pz] = at(0, 0.07); g.box(px, base + H + 0.14, pz, hw + 0.22, 0.12, 0.08, ux, uz, sur, true); }
+    // transom light over shop / vestibule / church doors
+    if (d.style !== 'freight' && d.style !== 'revolving') { const [px, pz] = at(0, 0.02); g.box(px, base + H + 0.36, pz, hw, 0.18, 0.02, ux, uz, GLASS, true); }
+    // leaf
+    const leaf: RGB = d.style === 'freight' ? STEEL_GREEN : d.style === 'shop' || d.style === 'shop_recessed' || d.style === 'brass_double' ? GLASS : WOOD;
+    const recess = d.style === 'shop_recessed' || d.style === 'vestibule' ? -0.0 : 0.02;
+    { const [px, pz] = at(0, recess + 0.02); g.box(px, base + H / 2, pz, hw, H / 2, 0.02, ux, uz, leaf, true); }
+    if (leaf === GLASS) { // bronze stiles and kick plate on glazed doors
+      for (const side of [-1, 0, 1]) { if (side === 0 && d.width < 1.5) continue; const [px, pz] = at(side * (hw - 0.05), 0.05); g.box(px, base + H / 2, pz, 0.05, H / 2, 0.02, ux, uz, BRONZE, true); }
+      const [px, pz] = at(0, 0.05); g.box(px, base + 0.15, pz, hw, 0.15, 0.02, ux, uz, BRONZE, true);
+    }
+    if (d.nightGate) { const [px, pz] = at(0, 0.2); g.box(px, base + H + 0.62, pz, hw + 0.25, 0.16, 0.2, ux, uz, GATE, true); } // roll-down gate housing
+    if (d.style === 'revolving') { const [px, pz] = at(0, 0.55); g.cylinder(px, base, pz, 1.1, H, GLASS, 10); g.box(px, base + H + 0.08, pz, 1.15, 0.08, 1.15, ux, uz, BRONZE); }
+    // steps: stoop (brownstone, 4 risers + landing, cheek walls) or church steps (2 risers, wide)
+    if (d.rise > 0.01) {
+      const risers = d.style === 'stoop' ? 4 : 2, r = d.rise / risers, tread = 0.3, landing = d.style === 'stoop' ? 1.2 : 0.6;
+      const halfW = d.style === 'stoop' ? hw + 0.35 : hw + 1.0, col = d.style === 'stoop' ? BROWNSTONE : STONE;
+      for (let k = 0; k < risers; k++) {
+        const depth = landing + (risers - 1 - k) * tread, top = y0 + (k + 1) * r;
+        const [px, pz] = at(0, depth / 2); g.box(px, (y0 - 0.3 + top) / 2, pz, halfW, (top - y0 + 0.3) / 2, depth / 2, ux, uz, col, true);
+      }
+      if (d.style === 'stoop') {
+        const depth = landing + (risers - 1) * tread;
+        for (const side of [-1, 1]) { const [px, pz] = at(side * (halfW + 0.12), depth / 2); g.box(px, y0 + d.rise / 2 + 0.25, pz, 0.12, d.rise / 2 + 0.4, depth / 2, ux, uz, col, true); }
+      }
+    }
+  }
+}
+
 /** Running triangle totals per prop category (profiling tools read this). */
 export const propTris: Record<string, number> = {};
 export type { BuildingRec };
