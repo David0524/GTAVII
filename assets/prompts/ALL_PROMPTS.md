@@ -50,12 +50,12 @@ Create a cardboard sign lettered in red and black marker, corners curled, a litt
 ### 003. `int.corwin_notice_no_visitors` · priority 1 · status: **todo**
 - **file:** `int_corwin_notice_no_visitors.png` · **size:** 1360×1000 (1.36:1) · **owner:** interiors
 - **use:** Corwin lobby desk partition notice (0.30 × 0.22 m); ingest to art/interiors/corwin_notice_no_visitors.png
-- **text policy:** exact · **text:** `NO VISITORS AFTER 11 P.M. — MGT.`
+- **text policy:** exact · **text:** `NO VISITORS AFTER 11 P.M. — MGMT.`
 - **accept:** text letter-perfect and legible at 512 px; the card fills the frame; no real brand or logo; 1974-plausible materials only
 - **prompt:**
 
 ```text
-Create a hand-lettered hotel-desk notice: black marker capitals on a yellowed card, slightly crooked, two strips of old cellophane tape, a brown nicotine stain at one corner. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: "NO VISITORS AFTER 11 P.M. — MGT.". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.36:1.
+Create a hand-lettered hotel-desk notice: black marker capitals on a yellowed card, slightly crooked, two strips of old cellophane tape, a brown nicotine stain at one corner. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: "NO VISITORS AFTER 11 P.M. — MGMT.". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.36:1.
 ```
 
 ### 004. `int.corwin_notice_rent` · priority 1 · status: **todo**

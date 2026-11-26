@@ -7,8 +7,8 @@
     "aspect": "1.36:1",
     "size": "1360×1000",
     "sizeFinal": true,
-    "prompt": "Create a hand-lettered hotel-desk notice: black marker capitals on a yellowed card, slightly crooked, two strips of old cellophane tape, a brown nicotine stain at one corner. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: \"NO VISITORS AFTER 11 P.M. — MGT.\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.36:1.",
-    "text": "NO VISITORS AFTER 11 P.M. — MGT.",
+    "prompt": "Create a hand-lettered hotel-desk notice: black marker capitals on a yellowed card, slightly crooked, two strips of old cellophane tape, a brown nicotine stain at one corner. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: \"NO VISITORS AFTER 11 P.M. — MGMT.\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.36:1.",
+    "text": "NO VISITORS AFTER 11 P.M. — MGMT.",
     "textPolicy": "exact",
     "accept": [
       "text letter-perfect and legible at 512 px",
