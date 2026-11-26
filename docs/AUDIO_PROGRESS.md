@@ -111,38 +111,40 @@ What will sound like a tech demo (worst first):
    Distant traffic is mostly that in reality too; mid-distance pass-bys are thin because only the
    nearest 6 (High) / 2 (Low) cars are full engines.
 
-## Measurements (`npm run audio:test`, 60 s per run; all assertions passed)
-Generated 2026-11-26T15:43:27.337Z. Headless Chromium OfflineAudioContext in a CPU-only container: timings are CPU-only, not device numbers.
+## Measurements (`npm run audio:test`, 60 s per run, on the merged engine data: 182 chunks with terrain; all assertions passed)
+Generated 2026-11-26T16:49:15.667Z. Headless Chromium OfflineAudioContext in a CPU-only container: timings are CPU-only, not device numbers.
 
 Meter self-test: 1 kHz at −23 dBFS reads -22.99 LUFS; fs/4 sine true peak -0.17 dBTP. Limiter torture (impulses ×4, +12 dB bursts, fs/4 sines, 20 kHz sweep): -1.46 dBTP out, 0 safety clamps.
 
 | Scene | Preset / profile | Integrated LUFS (ffmpeg) | True peak dBTP | Short-term max | LRA LU | Limiter >1 dB / max GR | Real voices max / cap | update ms p50 / p95 / p99 / max | Leaked nodes | NaN / denormals |
 |---|---|---|---|---|---|---|---|---|---|---|
-| herald_rush | high / mobile | -14.27 (-14.3) | -1.50 | -11.2 | 5.0 | 0.0 % / -0.9 dB | 39 / 64 | 0.30 / 0.80 / 1.60 / 15.9 | 0 (of 403 wired) | 0 / 0 |
-| side_3am | high / mobile | -24.79 (-24.8) | -7.42 | -18.2 | 10.2 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.30 / 0.80 / 3.8 | 0 (of 132 wired) | 0 / 0 |
-| eighth_rain | high / mobile | -15.29 (-15.3) | -1.50 | -12.7 | 4.9 | 0.0 % / -0.2 dB | 39 / 64 | 0.30 / 0.70 / 1.50 / 7.7 | 0 (of 401 wired) | 0 / 0 |
-| herald_rush | high / homeTheatre | -21.48 (-21.5) | -4.41 | -16.7 | 8.2 | 0.0 % / 0.0 dB | 39 / 64 | 0.30 / 0.70 / 1.70 / 5.5 | 0 (of 403 wired) | 0 / 0 |
-| side_3am | high / homeTheatre | -34.22 (-34.2) | -16.34 | -27.5 | 10.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.30 / 0.60 / 5.0 | 0 (of 132 wired) | 0 / 0 |
-| eighth_rain | high / homeTheatre | -23.15 (-23.2) | -5.40 | -19.7 | 6.6 | 0.0 % / 0.0 dB | 39 / 64 | 0.30 / 0.60 / 1.40 / 3.6 | 0 (of 401 wired) | 0 / 0 |
-| herald_rush | low / mobile | -16.15 (-16.2) | -1.50 | -13.0 | 4.9 | 0.0 % / -0.7 dB | 24 / 24 | 0.20 / 0.60 / 1.20 / 3.8 | 0 (of 346 wired) | 0 / 0 |
+| herald_rush | high / mobile | -15.47 (-15.5) | -1.50 | -11.1 | 7.0 | 1.2 % / -4.3 dB | 36 / 64 | 0.40 / 1.20 / 2.60 / 24.2 | 0 (of 411 wired) | 0 / 0 |
+| side_3am | high / mobile | -26.75 (-26.8) | -11.36 | -22.6 | 6.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.40 / 0.70 / 6.0 | 0 (of 132 wired) | 0 / 0 |
+| eighth_rain | high / mobile | -15.61 (-15.6) | -1.50 | -12.2 | 6.4 | 0.0 % / -1.0 dB | 30 / 64 | 0.30 / 0.80 / 1.80 / 5.0 | 0 (of 323 wired) | 0 / 0 |
+| herald_rush | high / homeTheatre | -22.52 (-22.5) | -1.50 | -16.5 | 10.9 | 0.9 % / -2.7 dB | 36 / 64 | 0.50 / 1.10 / 2.50 / 16.9 | 0 (of 411 wired) | 0 / 0 |
+| side_3am | high / homeTheatre | -36.23 (-36.2) | -20.79 | -32.1 | 6.3 | 0.0 % / 0.0 dB | 13 / 64 | 0.10 / 0.40 / 0.80 / 6.3 | 0 (of 132 wired) | 0 / 0 |
+| eighth_rain | high / homeTheatre | -23.36 (-23.4) | -5.17 | -17.7 | 9.6 | 0.0 % / 0.0 dB | 30 / 64 | 0.40 / 0.90 / 1.90 / 11.3 | 0 (of 323 wired) | 0 / 0 |
+| herald_rush | low / mobile | -16.44 (-16.4) | -1.87 | -13.8 | 4.5 | 0.0 % / 0.0 dB | 24 / 24 | 0.30 / 0.80 / 1.60 / 5.7 | 0 (of 323 wired) | 0 / 0 |
 
 | Session (scenes back to back) | Integrated LUFS | Target | True peak dBTP | LRA LU |
 |---|---|---|---|---|
-| high/mobile | -15.39 | −16 ±1 | -1.50 | 15.8 |
-| high/homeTheatre | -22.78 | −23 ±1 | -4.41 | 18.9 |
+| high/mobile | -16.05 | −16 ±1 | -1.50 | 15.9 |
+| high/homeTheatre | -23.27 | −23 ±1 | -1.50 | 19.5 |
 
 | Scene | Octave bands 63..8k (dB) | L/R correlation | Bank MB (budget) | Mean update parts (ms) |
 |---|---|---|---|---|
-| herald_rush (high) | -23.2 / -22 / -22.2 / -23.7 / -26.6 / -30.8 / -36 / -42.5 | 0.666 | 38.1 (58), evicted 0, streamed 4 | canyon 0.016, radio 0.004, ambience 0.083, vehicles 0.065, footsteps 0.027, voices 0.169 |
-| side_3am (high) | -32.9 / -31.9 / -32.5 / -34.7 / -38.1 / -42.4 / -47.6 / -54.3 | 0.535 | 38.1 (58), evicted 0, streamed 4 | canyon 0.012, radio 0.003, ambience 0.041, vehicles 0.030, footsteps 0.004, voices 0.050 |
-| eighth_rain (high) | -23.8 / -23 / -23.9 / -25.9 / -28.6 / -31.2 / -34.4 / -38.9 | 0.719 | 38.1 (58), evicted 0, streamed 4 | canyon 0.014, radio 0.003, ambience 0.082, vehicles 0.063, footsteps 0.013, voices 0.147 |
-| herald_rush (low) | -23.6 / -23.8 / -24.6 / -25.9 / -28.3 / -31.8 / -36.4 / -42.5 | 0.681 | 22.6 (23), evicted 4, streamed 4 | canyon 0.012, radio 0.004, ambience 0.079, vehicles 0.037, footsteps 0.010, voices 0.115 |
+| herald_rush (high) | -23.9 / -22.9 / -23.4 / -25.2 / -28.4 / -32.6 / -37.6 / -43.6 | 0.604 | 38.1 (58), evicted 0, streamed 4 | canyon 0.021, radio 0.008, ambience 0.140, vehicles 0.113, footsteps 0.038, voices 0.251 |
+| side_3am (high) | -34.4 / -33.8 / -34.8 / -37.2 / -40.8 / -45.4 / -51.1 / -58.1 | 0.4 | 38.1 (58), evicted 0, streamed 4 | canyon 0.015, radio 0.004, ambience 0.050, vehicles 0.031, footsteps 0.005, voices 0.065 |
+| eighth_rain (high) | -24.5 / -23.5 / -24.1 / -26 / -28.4 / -31 / -34.2 / -38.6 | 0.756 | 38.1 (58), evicted 0, streamed 4 | canyon 0.014, radio 0.004, ambience 0.119, vehicles 0.067, footsteps 0.017, voices 0.174 |
+| herald_rush (low) | -24 / -24.1 / -24.7 / -26.1 / -28.8 / -33 / -38.1 / -44.4 | 0.647 | 22.6 (23), evicted 4, streamed 4 | canyon 0.016, radio 0.006, ambience 0.097, vehicles 0.053, footsteps 0.013, voices 0.148 |
 
 Failures: none
 
 Reading the numbers honestly:
-- **Main-thread budget:** p95 is 0.8 ms on High and 0.6 ms on Low, inside the 1 ms and 1.5 ms budgets.
-  But p99 is 1.6 ms on High, and there is one 16 ms spike per run, from first-frame voice promotions.
+- **Main-thread budget:** Herald Square on High now runs p95 1.1–1.2 ms (it was 0.8 ms on the smaller
+  pre-merge city): **over the 1 ms budget**. Low stays at 0.8 ms (budget 1.5). The same code varies by
+  about 0.3 ms between runs on this shared container. The voice manager is the largest part (see the parts
+  column); that's the next optimisation. There is still one first-frame spike per run from voice promotions.
   The HRTF warm-up and the promotion cap reduced it but haven't removed it. These are CPU-only
   numbers from headless Chromium; phones will be slower.
 - **Memory:** the High preset decodes 38 MB of its 58 MB budget (plus 2.4 MB of noise tables). The
@@ -186,6 +188,9 @@ Recorded as scope additions to plan for; the brief's "done means" came first.
   turn-by-turn callouts; winded breathing from stamina; fire crackle; crowd panic; hydrant geysers.
 - **Cutscene mixing:** timeline cues from the UI & cinematics stream (snapshot API: duck world,
   hold radio, spot effects).
+
+- **Music cost:** one station feed renders at 7–10× realtime in headless Chromium (about 10–14 % of one
+  core, CPU-only). Fine on desktop; heavy on phones, so Low should cap world radios to one feed.
 
 ## Known issues / next
 - eSpeak speech is intelligible but robotic; music is credible as period radio filler, not as hits. Both are swappable behind the same APIs.
