@@ -55,6 +55,7 @@ export const ITEMS: ItemDef[] = [
   I({ id: 'item.film_pack', name: 'Instant film (10 exposures)', kind: 'photo', price: 549, stack: 10, sellable: false }),
   I({ id: 'item.plates', name: 'Set of plates', kind: 'misc', price: 4000, stack: 2, sellable: false, illicit: true, note: 'Chop-shop plate swap breaks the plate part of a description.' }),
   I({ id: 'item.key_corwin', name: 'Corwin pass key', kind: 'key', price: 0, stack: 1, sellable: false }),
+  I({ id: 'item.bag', name: 'Gym bag', kind: 'misc', price: 450, stack: 1, sellable: true, note: 'Hides one long gun; you must take it out to use it.' }),
   I({ id: 'item.ledger_page', name: 'Ledger page', kind: 'evidence', price: 0, stack: 20, sellable: false }),
 ];
 
@@ -123,23 +124,26 @@ export const PRECINCTS: PrecinctDef[] = [
 /** Lead combat profiles: the starting split from the brief, pending agreement with narrative. */
 export const LEADS: LeadProfile[] = [
   {
-    id: 'char.teddy_arce', name: 'Teddy', description: 'male, thirties, medium build', sex: 'male', build: 'medium', maxHp: 110,
-    aim: { revolver: 0.6, pistol: 0.85, long: 0.9, auto: 1.0, default: 0.9 }, recoilControl: 0.75, reloadSpeed: 0.7,
-    melee: { damage: 1.0, speed: 1.0, parryWindow: 0.16, dodgeIframes: 0.22 }, sprint: 1.0, evasion: 0.1, bribeSkill: 0.15, hiresMuscle: false, regenCeiling: 0.6,
+    id: 'char.teddy_arce', name: 'Teddy', description: 'male, thirties, medium build', sex: 'male', build: 'medium', maxHp: 100,
+    aim: { revolver: 0.7, pistol: 0.7, long: 1.0, auto: 1.15, default: 0.85 }, recoilControl: 0.75, reloadSpeed: 0.7,
+    melee: { damage: 1.0, speed: 1.0, parryWindow: 0.16, dodgeIframes: 0.22 }, sprint: 1.0, evasion: 0.24, bribeSkill: 0.15, hiresMuscle: false, regenCeiling: 0.6,
+    skills: { stamina: 50, strength: 60, shooting: 80, driving: 60, stealth: 40, lockwork: 70 }, crowdCover: 0.4, abilities: ['old_beat', 'keys'],
     startMoney: 4000, startItems: [{ id: 'item.service', qty: 1 }, { id: 'item.ammo_38', qty: 24 }, { id: 'item.bandage', qty: 2 }, { id: 'item.key_corwin', qty: 1 }],
     startOutfits: ['outfit.teddy_desk', 'outfit.teddy_jacket'], home: 'loc.corwin_hotel', homeAt: [-200, -680],
   },
   {
-    id: 'char.delphine_moore', name: 'Delphine', description: 'female, thirties, slim', sex: 'female', build: 'slim', maxHp: 95,
-    aim: { revolver: 1.0, pistol: 0.95, long: 1.15, auto: 1.1, default: 1.0 }, recoilControl: 1.0, reloadSpeed: 0.95,
-    melee: { damage: 1.25, speed: 1.25, parryWindow: 0.22, dodgeIframes: 0.32 }, sprint: 1.12, evasion: 0.35, bribeSkill: 0.05, hiresMuscle: false, regenCeiling: 0.6,
+    id: 'char.delphine_moore', name: 'Delphine', description: 'female, late twenties, slim', sex: 'female', build: 'slim', maxHp: 90,
+    aim: { revolver: 1.15, pistol: 1.15, long: 1.6, auto: 1.3, default: 1.15 }, recoilControl: 1.05, reloadSpeed: 0.95,
+    melee: { damage: 1.15, speed: 1.3, parryWindow: 0.22, dodgeIframes: 0.32 }, sprint: 1.12, evasion: 0.42, bribeSkill: 0.05, hiresMuscle: false, regenCeiling: 0.6,
+    skills: { stamina: 80, strength: 55, shooting: 50, driving: 30, stealth: 85, lockwork: 40 }, crowdCover: 0.9, abilities: ['evidence', 'disappear'],
     startMoney: 2500, startItems: [{ id: 'item.knife', qty: 1 }, { id: 'item.film_pack', qty: 1 }, { id: 'item.bandage', qty: 1 }],
     startOutfits: ['outfit.delphine_strip', 'outfit.delphine_day'], home: 'loc.arden_hotel', homeAt: [-860, -1180],
   },
   {
-    id: 'char.nick_varelas', name: 'Nick', description: 'heavy-set male, fifties, well dressed', sex: 'male', build: 'heavy', maxHp: 100,
-    aim: { revolver: 1.45, pistol: 1.4, long: 1.5, auto: 1.6, default: 1.45 }, recoilControl: 1.4, reloadSpeed: 1.35,
-    melee: { damage: 0.8, speed: 0.85, parryWindow: 0.12, dodgeIframes: 0.16 }, sprint: 0.88, evasion: 0.0, bribeSkill: 0.3, hiresMuscle: true, regenCeiling: 0.5,
+    id: 'char.nick_varelas', name: 'Nick', description: 'heavy-set male, fifties, well dressed', sex: 'male', build: 'heavy', maxHp: 110,
+    aim: { revolver: 1.45, pistol: 1.45, long: 1.3, auto: 1.6, default: 1.45 }, recoilControl: 1.4, reloadSpeed: 1.35,
+    melee: { damage: 1.1, speed: 0.8, parryWindow: 0.12, dodgeIframes: 0.16 }, sprint: 0.88, evasion: 0.06, bribeSkill: 0.3, hiresMuscle: true, regenCeiling: 0.5,
+    skills: { stamina: 30, strength: 50, shooting: 30, driving: 80, stealth: 20, lockwork: 20 }, crowdCover: 0.2, abilities: ['payroll', 'muscle'],
     startMoney: 30000, startItems: [{ id: 'item.snub', qty: 1 }, { id: 'item.ammo_38', qty: 15 }],
     startOutfits: ['outfit.nick_suit', 'outfit.nick_weekend'], home: 'loc.varelas_loft', homeAt: [-470, -600],
   },

@@ -5,18 +5,20 @@
  *  v1  the engine's draft per-character shape (ENGINE_RESPONSES N5): characters[id] = { money (DOLLARS,
  *      float), inventory: string[] (item ids, one each), at, wardrobe }.
  *  v2  first gameplay shape: leads[id] = { money (cents), items:[{id,qty}], outfits, wearing }, payoffs.
- *  v3  current: full systems (inventory with loaded rounds/equipped/armor/plates, health per lead,
+ *  v3  full systems (inventory with loaded rounds/equipped/armor/plates, health per lead,
  *      police reports + payoffs, shop stock, phones, props, outcomes).
+ *  v4  current: + savings, gun instance state (tier/condition/jam), home stash, skills, stamina,
+ *      arrest records, custody, max-health penalty. All additive: v3 → v4 fills defaults on load.
  * Migrations are pure functions, applied in order; unknown future versions are rejected (never guessed).
  */
 import type { SavedLeadInv } from './items/inventory';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export interface SaveV1 { characters: Record<string, { money: number; inventory: string[]; at?: unknown; wardrobe?: string }>; activeCharacter?: string }
 export interface SaveV2 { v: 2; leads: Record<string, { money: number; items: { id: string; qty: number }[]; outfits: string[]; wearing: string }>; payoffs?: Record<string, number> }
 export interface SaveV3 {
-  v: 3;
+  v: 3 | 4;
   inventory: Record<string, SavedLeadInv>;
   health: Record<string, unknown>;
   police: unknown;
@@ -38,6 +40,7 @@ export function migrate(raw: unknown): SaveV3 {
   if (v > SAVE_VERSION) throw new Error(`gameplay save v${v} is newer than this build (v${SAVE_VERSION})`);
   if (v === 1) s = v1to2(s as unknown as SaveV1) as unknown as Record<string, unknown>;
   if ((s.v as number) === 2) s = v2to3(s as unknown as SaveV2) as unknown as Record<string, unknown>;
+  if ((s.v as number) === 3) s = { ...s, v: 4 }; // additive: defaults are filled by each system's deserialize
   return s as unknown as SaveV3;
 }
 

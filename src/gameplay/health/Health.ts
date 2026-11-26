@@ -46,6 +46,8 @@ interface Bleed { rate: number; age: number; minor: boolean }
 export interface HealthState {
   id: string; maxHp: number; hp: number; armor: number; isPlayer: boolean; regenCeiling: number;
   wear: Record<Region, number>; bleeds: Bleed[]; sinceDamage: number; dead: boolean; burning: number; lastSource: string | null;
+  /** temporary max-health penalty after hospital discharge: fraction and seconds left */
+  penalty: number; penaltyT: number;
 }
 
 export interface HealthEvents extends Record<string, unknown> {
@@ -63,7 +65,7 @@ export class HealthSystem extends Emitter<HealthEvents> {
   register(id: string, o: HealthOpts): HealthState {
     const s: HealthState = {
       id, maxHp: o.maxHp, hp: o.maxHp, armor: o.armor ?? 0, isPlayer: !!o.isPlayer, regenCeiling: o.regenCeiling ?? 0.6,
-      wear: { head: 0, torso: 0, arm_l: 0, arm_r: 0, leg_l: 0, leg_r: 0 }, bleeds: [], sinceDamage: 1e9, dead: false, burning: 0, lastSource: null,
+      wear: { head: 0, torso: 0, arm_l: 0, arm_r: 0, leg_l: 0, leg_r: 0 }, bleeds: [], sinceDamage: 1e9, dead: false, burning: 0, lastSource: null, penalty: 0, penaltyT: 0,
     };
     this.states.set(id, s);
     return s;
@@ -160,17 +162,25 @@ export class HealthSystem extends Emitter<HealthEvents> {
         s.hp = Math.max(0, s.hp - FIRE_DPS * dt); s.sinceDamage = 0;
         if (s.hp <= 0) { this.kill(s, 'fire'); continue; }
       }
+      if (s.penaltyT > 0) { s.penaltyT -= dt; if (s.penaltyT <= 0) s.penalty = 0; }
+      if (s.hp > this.effMax(s)) s.hp = this.effMax(s);
       // regeneration (partial)
-      const ceil = s.maxHp * s.regenCeiling;
+      const ceil = this.effMax(s) * s.regenCeiling;
       if (s.sinceDamage > REGEN_DELAY && s.bleeds.length === 0 && s.hp < ceil) s.hp = Math.min(ceil, s.hp + REGEN_RATE * dt);
       // natural recovery of injuries
       for (const r of REGIONS) if (s.wear[r] > 0) s.wear[r] = Math.max(0, s.wear[r] - NATURAL_RECOVERY * dt);
     }
   }
 
+  /** Max health after any temporary penalty. */
+  effMax(s: HealthState) { return s.maxHp * (1 - s.penalty); }
+  /** Discharged from hospital: reduced max health for a while (a diner meal or rest at home clears it). */
+  penalize(id: string, frac: number, secs: number) { const s = this.states.get(id); if (!s) return; s.penalty = frac; s.penaltyT = secs; if (s.hp > this.effMax(s)) s.hp = this.effMax(s); }
+  clearPenalty(id: string) { const s = this.states.get(id); if (s) { s.penalty = 0; s.penaltyT = 0; } }
+
   heal(id: string, amount: number) {
     const s = this.states.get(id); if (!s || s.dead) return 0;
-    const before = s.hp; s.hp = Math.min(s.maxHp, s.hp + amount);
+    const before = s.hp; s.hp = Math.min(this.effMax(s), s.hp + amount);
     if (s.hp > before) this.emit('healed', { id, amount: s.hp - before, hp: s.hp });
     return s.hp - before;
   }
@@ -208,11 +218,11 @@ export class HealthSystem extends Emitter<HealthEvents> {
 
   serialize(id: string) {
     const s = this.states.get(id); if (!s) return null;
-    return { hp: +s.hp.toFixed(2), armor: +s.armor.toFixed(2), wear: { ...s.wear }, bleeds: s.bleeds.map((b) => ({ ...b })) };
+    return { hp: +s.hp.toFixed(2), armor: +s.armor.toFixed(2), wear: { ...s.wear }, bleeds: s.bleeds.map((b) => ({ ...b })), penalty: s.penalty, penaltyT: +s.penaltyT.toFixed(2) };
   }
   deserialize(id: string, d: ReturnType<HealthSystem['serialize']>) {
     const s = this.states.get(id); if (!s || !d) return;
-    s.hp = d.hp; s.armor = d.armor; s.wear = { ...s.wear, ...d.wear }; s.bleeds = d.bleeds.map((b) => ({ ...b })); s.dead = s.hp <= 0;
+    s.hp = d.hp; s.armor = d.armor; s.wear = { ...s.wear, ...d.wear }; s.bleeds = d.bleeds.map((b) => ({ ...b })); s.dead = s.hp <= 0; s.penalty = d.penalty ?? 0; s.penaltyT = d.penaltyT ?? 0;
   }
 }
 

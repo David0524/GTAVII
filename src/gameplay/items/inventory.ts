@@ -1,5 +1,8 @@
 import { Emitter } from '../core/events';
 import type { Registry } from './registry';
+import { DEFAULT_GUN, type GunState } from './guns';
+import { SKILLS, type Skills } from '../player/skills';
+import { makeStamina, type StaminaState } from '../player/stamina';
 
 /**
  * Per-lead inventory and money. Money is integer cents. Ammo items count ROUNDS (buying one box at a
@@ -15,6 +18,16 @@ export interface LeadInv {
   wearing: string;
   armor: number;                 // vest points remaining when worn
   plates: number;                // plate-swap generation of the lead's car (description breaking)
+  /** protected money (bank / home safe): never lost to death or arrest */
+  savings: number;
+  /** gun instance state per owned firearm (tier, condition, jam) */
+  guns: Map<string, GunState>;
+  /** home stash: safe from death and arrest */
+  stash: Map<string, number>;
+  /** gun instance state for firearms sitting in the stash */
+  stashGuns: Map<string, GunState>;
+  skills: Skills;
+  stamina: StaminaState;
 }
 export interface InvEvents extends Record<string, unknown> {
   changed: { lead: string; id: string; delta: number; qty: number };
@@ -29,7 +42,8 @@ export class Inventory extends Emitter<InvEvents> {
     let l = this.leads.get(lead);
     if (!l) {
       const p = this.reg.leads.get(lead);
-      l = { money: 0, items: new Map(), loaded: new Map(), equipped: 'weapon.fists', outfits: new Set(), wearing: '', armor: 0, plates: 0 };
+      const sk = Object.fromEntries(SKILLS.map((k) => [k, p?.skills?.[k] ?? 50])) as Skills;
+      l = { money: 0, items: new Map(), loaded: new Map(), equipped: 'weapon.fists', outfits: new Set(), wearing: '', armor: 0, plates: 0, savings: 0, guns: new Map(), stash: new Map(), stashGuns: new Map(), skills: sk, stamina: makeStamina(60 + 0.8 * sk.stamina) };
       this.leads.set(lead, l);
       if (p) {
         l.money = p.startMoney;
@@ -60,6 +74,7 @@ export class Inventory extends Emitter<InvEvents> {
     if (add <= 0) return 0;
     l.items.set(id, have + add);
     if (def.kind === 'weapon' && def.weapon && !l.loaded.has(def.weapon)) l.loaded.set(def.weapon, 0);
+    if (def.kind === 'weapon' && def.weapon && this.reg.weapon(def.weapon).class !== 'melee' && !l.guns.has(def.weapon)) l.guns.set(def.weapon, { ...DEFAULT_GUN });
     this.emit('changed', { lead, id, delta: add, qty: have + add });
     return add;
   }
@@ -71,7 +86,7 @@ export class Inventory extends Emitter<InvEvents> {
     if (have === qty) l.items.delete(id); else l.items.set(id, have - qty);
     const def = this.reg.items.get(id);
     if (def?.kind === 'weapon' && have === qty && def.weapon) {
-      l.loaded.delete(def.weapon);
+      l.loaded.delete(def.weapon); l.guns.delete(def.weapon);
       if (l.equipped === def.weapon) l.equipped = 'weapon.fists';
     }
     this.emit('changed', { lead, id, delta: -qty, qty: have - qty });
@@ -97,6 +112,29 @@ export class Inventory extends Emitter<InvEvents> {
     if (pay > 0) this.spend(lead, pay, reason);
     return pay;
   }
+
+  /** Cash on hand → savings (bank teller or home safe). */
+  deposit(lead: string, cents: number) { if (!this.spend(lead, cents, 'deposit')) return false; this.ensure(lead).savings += cents; return true; }
+  withdraw(lead: string, cents: number) { const l = this.ensure(lead); if (!Number.isInteger(cents) || cents < 0 || l.savings < cents) return false; l.savings -= cents; this.addMoney(lead, cents, 'withdraw'); return true; }
+  /** Move items between the lead's pockets and the home stash (safe from death and arrest). */
+  toStash(lead: string, id: string, qty = 1) {
+    const l = this.ensure(lead), w = this.reg.items.get(id)?.weapon, gs = w ? l.guns.get(w) : undefined;
+    if (!this.take(lead, id, qty)) return false;
+    l.stash.set(id, (l.stash.get(id) ?? 0) + qty);
+    if (gs) l.stashGuns.set(id, gs);
+    return true;
+  }
+  fromStash(lead: string, id: string, qty = 1) {
+    const l = this.ensure(lead), have = l.stash.get(id) ?? 0;
+    if (have < qty) return false;
+    const got = this.give(lead, id, qty); if (got <= 0) return false;
+    if (have - got <= 0) l.stash.delete(id); else l.stash.set(id, have - got);
+    const w = this.reg.items.get(id)?.weapon, sg = l.stashGuns.get(id);
+    if (w && sg) { l.guns.set(w, sg); l.stashGuns.delete(id); }
+    return true;
+  }
+  /** Lend between leads (Nick's loans; interest is tracked by the economy). */
+  transfer(from: string, to: string, cents: number, reason = 'loan') { if (!this.spend(from, cents, reason)) return false; this.addMoney(to, cents, reason); return true; }
 
   /** Weapons the lead carries (fists always). */
   weapons(lead: string): string[] {
@@ -125,6 +163,7 @@ export class Inventory extends Emitter<InvEvents> {
     for (const [id, l] of this.leads) out[id] = {
       money: l.money, items: [...l.items].map(([i, q]) => ({ id: i, qty: q })), loaded: Object.fromEntries(l.loaded), equipped: l.equipped,
       outfits: [...l.outfits], wearing: l.wearing, armor: l.armor, plates: l.plates,
+      savings: l.savings, guns: Object.fromEntries(l.guns), stash: [...l.stash].map(([i, q]) => ({ id: i, qty: q })), stashGuns: Object.fromEntries(l.stashGuns), skills: { ...l.skills }, stamina: { ...l.stamina },
     };
     return out;
   }
@@ -133,11 +172,21 @@ export class Inventory extends Emitter<InvEvents> {
     for (const [id, d] of Object.entries(s)) {
       const items = new Map<string, number>();
       for (const it of d.items) if (this.reg.items.has(it.id) && it.qty > 0) items.set(it.id, it.qty); // unknown ids (removed content) are dropped, never crash a load
+      const p = this.reg.leads.get(id);
+      const skills = Object.fromEntries(SKILLS.map((k) => [k, d.skills?.[k] ?? p?.skills?.[k] ?? 50])) as Skills;
+      const guns = new Map<string, GunState>(Object.entries(d.guns ?? {}));
+      for (const [i] of items) { const w = this.reg.items.get(i)?.weapon; if (w && this.reg.weapon(w).class !== 'melee' && !guns.has(w)) guns.set(w, { ...DEFAULT_GUN }); }
       this.leads.set(id, {
         money: d.money, items, loaded: new Map(Object.entries(d.loaded ?? {})), equipped: d.equipped ?? 'weapon.fists',
         outfits: new Set(d.outfits ?? []), wearing: d.wearing ?? '', armor: d.armor ?? 0, plates: d.plates ?? 0,
+        savings: d.savings ?? 0, guns, stash: new Map((d.stash ?? []).filter((x) => this.reg.items.has(x.id)).map((x) => [x.id, x.qty])), stashGuns: new Map(Object.entries(d.stashGuns ?? {})), skills,
+        stamina: d.stamina ?? makeStamina(60 + 0.8 * skills.stamina),
       });
     }
   }
 }
-export interface SavedLeadInv { money: number; items: { id: string; qty: number }[]; loaded: Record<string, number>; equipped: string; outfits: string[]; wearing: string; armor: number; plates: number }
+export interface SavedLeadInv {
+  money: number; items: { id: string; qty: number }[]; loaded: Record<string, number>; equipped: string; outfits: string[]; wearing: string; armor: number; plates: number;
+  // v4
+  savings?: number; guns?: Record<string, GunState>; stash?: { id: string; qty: number }[]; stashGuns?: Record<string, GunState>; skills?: Partial<Skills>; stamina?: StaminaState;
+}

@@ -14,7 +14,8 @@ const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots/gameplay');
 fs.mkdirSync(OUT, { recursive: true });
 const args = process.argv.slice(2);
-const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null;
+const only = args.includes('--only') ? args[args.indexOf('--only') + 1].split(',') : null;
+const skip = args.includes('--skip') ? args[args.indexOf('--skip') + 1].split(',') : [];
 const PORT = 4175;
 
 type Ctx = { page: Page; shot: (name: string, note: string) => Promise<void>; ev: <T>(fn: string) => Promise<T>; wait: (s: number) => Promise<void> };
@@ -45,6 +46,8 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
       await ev(`(() => { const G = __GP; G.g.equip('weapon.fists'); const p = G.player.pos; G.face(-Math.PI/2, -0.15); G.spawnCrew(1, { faction: 'hood', at: [p.x + 5, p.z], weapons: [null], melee: 'weapon.fists' });
         // auto-parry: block 0.22 s after each telegraph (human reaction), then counter
         window.__mel = []; G.g.on('melee', (e) => { window.__mel.push(e.kind); if (e.kind === 'windup' && e.id !== 'player') setTimeout(() => { G.g.block(true); setTimeout(() => G.g.block(false), 250); }, 220); if (e.kind === 'parried' && e.defender === 'player') setTimeout(() => G.g.meleeAttack('light'), 120); }); })()`);
+      // side-on camera so both fighters read
+      await ev(`(() => { const G = __GP; const p = G.player.pos; G.setCam([p.x + 2.4, p.y + 1.8, p.z + 5.2], [p.x + 2.4, p.y + 1.0, p.z]); })()`);
       await wait(2.5);
       await shot('05_melee_closing', 'Melee yard: an unarmed hood closes in; the windup is telegraphed (longer for NPCs so a thumb can react).');
       await wait(2.5);
@@ -62,7 +65,8 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
       await ev(`(() => { const G = __GP; G.g.setFiring(false); G.g.setAiming(false); G.face(-Math.PI/2, -0.3); })()`);
       await wait(2.5);
       await shot('08_witness_runs_to_callbox', 'W 31st St between 7th and 8th Aves (real block). A shot into the air: people scatter, a witness breaks for the red call box. Red lines: the witness\'s run and what they last saw. "Someone\'s running for the call box."');
-      await wait(5);
+      { const t0 = Date.now(); while (Date.now() - t0 < 40000) { const c = await ev<number>(`[...__GP.g.witnesses.list.values()].filter(w => w.state === 'calling').length`); if (c) break; await wait(0.5); } }
+      await wait(1);
       await shot('09_witness_on_callbox', 'The witness on the call box (6 s call). Break the box, catch them, or be gone — nothing is reported until the call goes through.');
     },
   },
@@ -147,7 +151,7 @@ async function main() {
   for (let i = 0; i < 60; i++) { try { await fetch(`http://localhost:${PORT}/`); break; } catch { await new Promise((r) => setTimeout(r, 500)); } }
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   for (const [name, sc] of Object.entries(SCENARIOS)) {
-    if (only && only !== name) continue;
+    if ((only && !only.includes(name)) || skip.includes(name)) continue;
     const page = await browser.newPage({ viewport: sc.viewport ?? { width: 1280, height: 720 }, deviceScaleFactor: 1, hasTouch: sc.url.includes('touch') });
     const errs: string[] = [];
     page.on('pageerror', (e) => errs.push(e.message));

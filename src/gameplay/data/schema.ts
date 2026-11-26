@@ -119,6 +119,12 @@ export interface LeadProfile {
   startOutfits: string[];
   home: string;               // place id where the wardrobe is stored
   homeAt: [number, number];
+  /** starting skills 0–100 (narrative 1–10 sheet × 10); improve with use (player/skills.ts) */
+  skills?: Partial<Record<'stamina' | 'strength' | 'shooting' | 'driving' | 'stealth' | 'lockwork', number>>;
+  /** 0..1: how well crowds hide them once line of sight breaks (Delphine's "Disappear") */
+  crowdCover?: number;
+  /** lead abilities agreed with narrative (ENGINE_REQUESTS narrative 11) */
+  abilities?: ('old_beat' | 'keys' | 'evidence' | 'disappear' | 'payroll' | 'muscle')[];
 }
 
 export interface GameplayContent {

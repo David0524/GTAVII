@@ -42,9 +42,9 @@ test('save round-trip: inventory, money, loaded rounds, outfits, health, police,
   assert.equal(b.g.shops.stockOf('shop.test_newsstand', 'item.street_map'), 9);
 });
 
-test('migration fixture v1 (engine draft, dollars) → v3', () => {
+test('migration fixture v1 (engine draft, dollars) → v4', () => {
   const m = migrate(fx('save_v1.json'));
-  assert.equal(m.v, 3);
+  assert.equal(m.v, 4);
   assert.equal(m.inventory[T].money, 4035, '$40.35 → 4035¢ (rounded, not truncated)');
   assert.deepEqual(m.inventory[T].items.find((i) => i.id === 'item.bandage'), { id: 'item.bandage', qty: 2 });
   const { g } = rig();
@@ -59,7 +59,7 @@ test('migration fixture v1 (engine draft, dollars) → v3', () => {
   const h = rig(); h.g.deserialize(s); assert.deepEqual(h.g.serialize().inventory, s.inventory);
 });
 
-test('migration fixture v2 → v3; future versions are refused', () => {
+test('migration fixture v2 → v4; future versions are refused', () => {
   const { g } = rig();
   g.deserialize(fx('save_v2.json'));
   assert.equal(g.inventory.of(T).money, 1234);
@@ -150,13 +150,19 @@ test('payphones: a dime a call, incoming calls ring the nearest working phone, m
   assert.equal(r.g.phones.place(T, 'booth1', 'service').reason, 'broken');
 });
 
-test('wasted: hospital bill paid as far as cash goes, the rest is a debt; discharged at 60%', () => {
+test('wasted: capped bill from cash, the attendants\' cut, half the loose ammo, guns kept, savings safe, max-health penalty', () => {
   const r = rig();
-  r.g.inv.spend(T, 3500);
+  r.g.inv.deposit(T, 1000); // $10 in savings
+  r.g.inv.spend(T, 2000);   // $10 left on hand
+  const ammo0 = r.g.inv.count(T, 'item.ammo_38');
   r.g.health.damage('player', { amount: 500, region: 'torso', type: 'bullet' });
   const w = r.events.find((x) => x.type === 'wasted')!.e;
-  assert.ok(w.bill >= 8500 && w.paid === 500 && w.debt === w.bill - 500);
+  assert.ok(w.bill >= 8500 && w.bill <= 25000 && w.paid === 1000 && w.debt === w.bill - 1000);
   assert.equal(r.g.inventory.of(T).money, 0);
-  assert.equal(r.g.health.get('player').hp, 66);
-  assert.ok(r.g.inv.has(T, 'item.service'), 'nothing confiscated at the hospital');
+  assert.equal(r.g.inv.ensure(T).savings, 1000, 'savings are safe');
+  assert.equal(r.g.inv.count(T, 'item.ammo_38'), ammo0 - Math.ceil(ammo0 / 2), 'half the loose ammo');
+  assert.ok(r.g.inv.has(T, 'item.service'), 'the hospital keeps no guns');
+  const s = r.g.healthSys.state('player')!;
+  assert.equal(s.hp, 60); assert.equal(r.g.healthSys.effMax(s), 80, '20% max-health penalty');
+  r.step(301, 0.5); assert.equal(r.g.healthSys.effMax(s), 100);
 });

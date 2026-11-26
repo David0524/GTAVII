@@ -29,18 +29,24 @@ import { Gun, NEUTRAL_MODS, type ShooterMods, type ShotRay } from './combat/weap
 import { humanoidHitbox, resolveShots, type ActorHitbox, type ShotResult, type TyreShape } from './combat/ballistics';
 import { Witnesses, type ReportPoint } from './police/witnesses';
 import { Police, type SuspectCtx, type UnitKind } from './police/police';
-import type { Crime, CrimeKind } from './police/crime';
+import { radiusOf as radiusOfCrime, type Crime, type CrimeKind } from './police/crime';
 import type { Appearance } from './police/description';
 import type { AgentCommand, AgentPort, PedSnapshot } from './police/ports';
-import { Outcomes } from './outcomes';
+import { Outcomes, type Release } from './outcomes';
+import { conceal, rollShot, TIERS, JAM_CLEAR, DEFAULT_GUN, lootGun, type Concealment } from './items/guns';
+import { stepStamina } from './player/stamina';
+import { learn, effects as skillFx } from './player/skills';
 import { migrate, SAVE_VERSION, type SaveV3 } from './save';
 import { vehicleLook, type PlayerVehicle } from './appearance';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
-  | 'impact' | 'bark' | 'radio' | 'witness' | 'police' | 'melee' | 'money' | 'pickup' | 'ring' | 'call' | 'wear' | 'geyser' | 'tyreShot' | 'notice';
+  | 'impact' | 'bark' | 'radio' | 'witness' | 'police' | 'melee' | 'money' | 'pickup' | 'ring' | 'call' | 'wear' | 'geyser' | 'tyreShot' | 'notice'
+  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
+/** Seconds before an unanswered radio check turns into an officer-down report. */
+export const RADIO_SILENCE = 45;
 export const COMBAT_BUDGET: Record<Quality, { combatants: number; witnesses: number }> = {
   low: { combatants: 6, witnesses: 4 }, medium: { combatants: 9, witnesses: 5 }, high: { combatants: 12, witnesses: 6 }, ultra: { combatants: 16, witnesses: 8 },
 };
@@ -54,6 +60,7 @@ interface Actor { id: string; kind: 'player' | 'npc' | 'ped' | 'cop'; team: 'pla
 export interface PlayerCombatState {
   weapon: string; aiming: boolean; firing: boolean; cover: CoverPoint | null; peek: boolean; blind: boolean;
   surrendered: boolean; vehicle: PlayerVehicle | null; indoors: boolean; subway: boolean; atHome: boolean; speed: number;
+  sprinting: boolean; tempF: number; raining: boolean; unlimitedSprint: boolean; jamClear: number;
   lockLimb: Limb; device: 'touch' | 'pad' | 'mouse'; assist: AssistLevel;
 }
 
@@ -88,9 +95,14 @@ export class Gameplay {
   private sim: SimBinding | null = null;
   private port: AgentPort;
   private flags = new Set<string>();
+  /** Story-critical NPCs: their death fails the mission (essentialKilled). Narrative clears them at arc end. */
+  readonly essential = new Set<string>();
+  private wasClear = true;
+  private pendingDiscoveries: { at: number; perp: string; where: [number, number] }[] = [];
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
+    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0,
   };
   /** Last frame's shot results (debug overlay tracers). */
   lastShots: ShotResult[] = [];
@@ -129,6 +141,7 @@ export class Gameplay {
     this.witnesses.maxCandidates = this.budget.witnesses * 4;
     this.outcomes = new Outcomes(this.reg, this.inv, this.healthSys, this.policeSys, this.rng);
     this.outcomes.flag = (f) => this.flags.has(f);
+    this.policeSys.priorsOf = (perp, pct) => (perp === this.player?.id ? this.outcomes.priors(this.player.lead, pct) : 0);
     this.wire();
   }
 
@@ -284,7 +297,40 @@ export class Gameplay {
   }
   setBlindFire(on: boolean) { this.pc.blind = on; }
   surrender(on: boolean) { this.pc.surrendered = on; }
-  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed'>>) { Object.assign(this.pc, c); }
+  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint'>>) { Object.assign(this.pc, c); }
+  /** Take the gun and rounds off a downed enemy within reach. Guns come in random condition and tier. */
+  loot(): { weapon: string | null; rounds: number } | null {
+    if (!this.player) return null;
+    const p = this.player.position(), lead = this.player.lead;
+    for (const a of this.ai.agents.values()) {
+      if (a.alive || !a.gun || a.looted || Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) > 2.5) continue;
+      a.looted = true;
+      const item = this.reg.itemForWeapon(a.gun.def.id);
+      const state = lootGun(this.rng, a.faction);
+      const inv = this.inv.ensure(lead);
+      if (item && this.inv.give(lead, item.id) > 0) inv.guns.set(a.gun.def.id, state);
+      else if (item) { const cur = inv.guns.get(a.gun.def.id); if (cur && state.condition > cur.condition) inv.guns.set(a.gun.def.id, state); }
+      const rounds = a.gun.def.ammo ? this.inv.give(lead, a.gun.def.ammo, Math.min(30, a.ammo + a.gun.loaded)) : 0;
+      this.emit('pickup', { kind: 'gun', weapon: a.gun.def.id, rounds, at: a.pos, cents: 0 });
+      return { weapon: a.gun.def.id, rounds };
+    }
+    return null;
+  }
+  /** One tap clears a jam (JAM_CLEAR s). */
+  clearJam() { const gs = this.gunState(); if (gs?.jammed && this.pc.jamClear <= 0) { this.pc.jamClear = JAM_CLEAR; this.emit('notice', { kind: 'clearingJam' }); return true; } return false; }
+  /** Put the gun away (it's concealed again if the outfit allows). */
+  holster() { this.equip('weapon.fists'); }
+  /** Clean every gun the lead owns (safehouse action). */
+  cleanGuns() { if (!this.player || !this.pc.atHome) return false; for (const gs of this.inv.ensure(this.player.lead).guns.values()) { gs.condition = 1; gs.jammed = false; } return true; }
+  concealment(): Concealment | null {
+    if (!this.player) return null;
+    const lead = this.player.lead;
+    const carried = this.inv.weapons(lead).map((w) => this.reg.weapon(w));
+    return conceal(this.wardrobe.look(lead), carried, this.pc.weapon, this.inv.has(lead, 'item.bag'), this.pc.tempF);
+  }
+  gunState() { if (!this.player) return null; const w = this.reg.weapon(this.pc.weapon); return w.class === 'melee' ? null : this.inv.ensure(this.player.lead).guns.get(w.id) ?? null; }
+  /** Custody: how the lead gets out (desk | lawyer | bail by another lead | night). */
+  release(how: Release, by?: string) { return this.outcomes.release(how, by); }
   /** Point a gun at / get in a witness's face. */
   intimidate(pedId: string) {
     if (!this.player) return 'none' as const;
@@ -329,13 +375,23 @@ export class Gameplay {
       const app = this.appearance();
       const ev = this.reg.lead(this.player.lead).evasion;
       const ws = this.witnesses.crime(c, { ...app, evasion: ev, pos: [at[0], at[1] + 1.2, at[2]] });
-      this.policeSys.witnessedByUnit(kind, this.suspect()!, c.at);
+      const saw = this.policeSys.witnessedByUnit(kind, this.suspect()!, c.at);
+      if (!saw && radiusOfCrime(c) > 30) this.policeSys.heard(c.at, radiusOfCrime(c) * 0.8);
       if (ws.length) this.emit('crimeWitnessed', { crime: c, witnesses: ws.map((w) => ({ ped: w.ped, saw: w.saw })) });
     }
     // gunfire scatters the street (sim flee)
     if (kind === 'shots_fired' || kind === 'shooting' || kind === 'homicide') this.sim?.emit({ type: 'threat', x: at[0], z: at[2], radius: (o.noise ?? 60) * 0.6 });
     return c;
   }
+
+  /** Mission "lose the police" gate: no open report on the player and no unit with eyes on / closing on them. */
+  heatClear(): boolean {
+    const id = this.player?.id; if (!id) return true;
+    if (this.policeSys.reports.some((r) => r.perp === id)) return false;
+    for (const u of this.policeSys.units.values()) if (['pursuit', 'approach', 'encounter', 'suspicious', 'combat'].includes(u.state)) return false;
+    return true;
+  }
+  setEssential(id: string, on = true) { if (on) this.essential.add(id); else this.essential.delete(id); }
 
   // ------------------------------------------------------------------ frame
   update(dt: number) {
@@ -373,11 +429,24 @@ export class Gameplay {
     const pp = p?.position() ?? [0, 0, 0];
     this.props.update(dt, [pp[0], pp[2]]);
     if (p) this.phones.update(dt, p.lead, pp[0], pp[2], this.busy());
+    for (const d of [...this.pendingDiscoveries]) if (this.time >= d.at) {
+      this.pendingDiscoveries.splice(this.pendingDiscoveries.indexOf(d), 1);
+      this.policeSys.file({ witness: 'radio', perp: d.perp, kinds: ['officer_down'], desc: { clothes: [] }, lastKnown: d.where, crimeAt: d.where, via: 'unit', time: this.time });
+    }
+    const clear = this.heatClear();
+    if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
+    this.wasClear = clear;
     this.timings.totalMs = now() - T0;
   }
 
   private updatePlayer(dt: number, p: PlayerBinding) {
     const lead = p.lead;
+    // stamina and fitness
+    const li = this.inv.ensure(lead);
+    const mode = this.pc.sprinting ? 'sprint' : this.pc.speed > 2.5 ? 'run' : this.pc.speed > 0.3 ? 'walk' : 'idle';
+    if (!stepStamina(li.stamina, dt, mode, this.pc.tempF, this.pc.unlimitedSprint)) this.pc.sprinting = false;
+    if (mode === 'sprint') learn(li.skills, 'sprintSecond', dt);
+    if (this.pc.jamClear > 0) { this.pc.jamClear -= dt; if (this.pc.jamClear <= 0) { const gs = this.gunState(); if (gs) gs.jammed = false; this.emit('notice', { kind: 'jamCleared' }); } }
     const fx = this.healthSys.effects(p.id);
     const g = this.currentGun();
     if (g) {
@@ -392,6 +461,9 @@ export class Gameplay {
         const blind = inCover && this.pc.blind;
         if (inCover && !blind) return; // must peek or blind-fire from cover
         if (blind) origin = [origin[0], this.pc.cover!.y + (this.pc.cover!.height === 'low' ? 1.25 : 1.7), origin[2]];
+        const gs = this.gunState();
+        if (this.pc.jamClear > 0) return;
+        if (gs && !rollShot(gs, this.rng, this.pc.raining)) { this.pc.firing = false; g.cooldown = g.def.interval; this.emit('notice', { kind: 'jammed', weapon: g.def.id }); this.emit('shot', { shooter: p.id, weapon: g.def.id, origin, dir, player: true, jammed: true }); return; }
         const rays = g.fire({ origin, dir, aiming: this.pc.aiming, moveFrac: Math.min(1, this.pc.speed / 3.4), mods: { ...this.mods(), swayDeg: fx.swayDeg, aimMul: this.mods().aimMul * fx.aimMul }, blind, rng: this.rng });
         for (const r of rays) this.pendingShots.push({ shooter: p.id, ray: r });
         this.inv.ensure(lead).loaded.set(g.def.id, g.loaded);
@@ -400,8 +472,10 @@ export class Gameplay {
         if (!g.def.auto) this.pc.firing = false;
       }
     }
-    // brandishing near civilians: a gun out and aimed in the street is menacing (rate limited)
-    if (this.pc.aiming && g && this.time - this.lastMenace > 8) {
+    // visible weapons (in hand, or too big for the outfit) and aiming in the street are menacing (rate limited)
+    const cc = this.concealment();
+    const shows = (this.pc.aiming && !!g) || (!!cc && cc.visible.some((w) => this.reg.weapon(w).class !== 'melee' || w !== 'weapon.fists'));
+    if (shows && !this.pc.indoors && this.time - this.lastMenace > 8) {
       const pp = p.position();
       for (const q of this.port.peds()) if (q.alive && Math.hypot(q.x - pp[0], q.z - pp[2]) < 10) { this.lastMenace = this.time; this.crime('menacing', { victim: q.id }); break; }
     }
@@ -414,6 +488,7 @@ export class Gameplay {
     const byPlayer = r.shooter === this.player?.id;
     for (const h of r.actorHits) {
       const target = this.actors.get(h.actorId);
+      if (byPlayer && this.player) learn(this.inv.ensure(this.player.lead).skills, h.region === 'head' ? 'headshot' : 'shotHit');
       const res = this.applyDamage(h.actorId, { amount: h.damage, region: h.region, source: r.shooter, type: 'bullet', power: r.shot.power });
       this.emit('hit', { target: h.actorId, region: h.region, damage: res?.dealt ?? 0, point: h.point, shooter: r.shooter, killed: res?.killed, through: h.through });
       if (byPlayer && target) {
@@ -461,6 +536,13 @@ export class Gameplay {
       }
       this.ai.onDied(e.id);
       const u = this.policeSys.units.get(e.id); if (u) u.state = 'down';
+      if (a?.kind === 'cop' || u) {
+        const at = a?.pos() ?? [u!.x, 0, u!.z];
+        this.emit('copKilled', { id: e.id, by: e.source, at, precinct: u?.precinct ?? null });
+        // a downed officer is always found: his radio goes quiet. Unwitnessed, the report has no description.
+        if (e.source) this.pendingDiscoveries.push({ at: this.time + RADIO_SILENCE, perp: e.source, where: [at[0], at[2]] });
+      }
+      if (this.essential.has(e.id)) this.emit('essentialKilled', { id: e.id, by: e.source, reason: `${e.id} was killed` });
       if (a?.kind === 'ped') this.port.command(e.id, { type: 'anim', name: 'die' });
       this.melee.remove(e.id);
     });
@@ -504,7 +586,7 @@ export class Gameplay {
     this.policeSys.on('reportFiled', (e) => this.emit('reportFiled', { precinct: e.report.precinct, severity: e.report.heat, description: e.report.description, lastKnown: e.report.lastKnown, via: e.via, merged: e.merged, id: e.report.id }));
     this.policeSys.on('radio', (e) => this.emit('radio', e));
     this.policeSys.on('dispatched', (e) => { this.registerCop(e.unit.id); this.emit('police', { kind: 'dispatched', unit: e.unit.id, unitKind: e.unit.kind, report: e.report.id }); });
-    for (const k of ['spotted', 'stop', 'pursuit', 'lost', 'bribe', 'roadblock', 'standDown', 'cleared'] as const) this.policeSys.on(k, (e: any) => this.emit('police', { kind: k, ...e }));
+    for (const k of ['spotted', 'stop', 'pursuit', 'lost', 'bribe', 'roadblock', 'standDown', 'cleared', 'investigate'] as const) this.policeSys.on(k, (e: any) => this.emit('police', { kind: k, ...e }));
     this.policeSys.on('engage', (e) => this.copEngage(e.unit));
     this.policeSys.on('arrested', (e) => {
       if (!this.player || e.suspect !== this.player.id) return;
@@ -513,6 +595,7 @@ export class Gameplay {
     });
     this.outcomes.on('wasted', (e) => this.emit('wasted', e));
     this.outcomes.on('arrested', (e) => { this.equip('weapon.fists'); this.emit('arrested', e); });
+    this.outcomes.on('released', (e) => this.emit('released', e));
     this.outcomes.on('propertyReturned', (e) => this.emit('notice', { kind: 'propertyReturned', ...e }));
     this.inv.on('money', (e) => this.emit('money', e));
     this.wardrobe.on('wear', (e) => this.emit('wear', e));
@@ -558,14 +641,16 @@ export class Gameplay {
   mods(): ShooterMods {
     if (!this.player) return NEUTRAL_MODS;
     const p = this.reg.lead(this.player.lead), fam = this.reg.weapon(this.pc.weapon).family;
-    return { aimMul: p.aim[fam] ?? p.aim.default, recoilMul: p.recoilControl, reloadMul: p.reloadSpeed, swayDeg: 0 };
+    const t = TIERS[(this.gunState() ?? DEFAULT_GUN).tier], sk = skillFx(this.inv.ensure(this.player.lead).skills);
+    return { aimMul: (p.aim[fam] ?? p.aim.default) * t.spread * sk.aimMul, recoilMul: p.recoilControl * t.recoil, reloadMul: p.reloadSpeed * t.reload, swayDeg: 0 };
   }
   profileOf(lead: string, npc: boolean): FighterProfile { const m = this.reg.lead(lead).melee; return { damage: m.damage, speed: m.speed, parryWindow: m.parryWindow, dodgeIframes: m.dodgeIframes, npc }; }
   private syncPlayerFighter() { if (!this.player) return; const f = this.melee.fighters.get(this.player.id); if (f) { f.pos = this.player.position(); f.yaw = yawOf(this.player.aim().dir); } }
   private playerStance(): 'stand' | 'crouch' | 'down' { const c = this.pc.cover; return c && !this.pc.peek && c.height === 'low' ? 'crouch' : 'stand'; }
   /** Movement multiplier for the engine's controller (limp, crouch in cover). */
   moveMul() { if (!this.player) return 1; const e = this.healthSys.effects(this.player.id); return e.speedMul * this.reg.lead(this.player.lead).sprint; }
-  canSprint() { return this.player ? this.healthSys.effects(this.player.id).canSprint : true; }
+  canSprint() { if (!this.player) return true; const st = this.inv.ensure(this.player.lead).stamina; return this.healthSys.effects(this.player.id).canSprint && (this.pc.unlimitedSprint || !st.exhausted); }
+  stamina() { if (!this.player) return null; const st = this.inv.ensure(this.player.lead).stamina; return { value: st.value, max: st.max, exhausted: st.exhausted }; }
 
   appearance(): Appearance {
     const p = this.player!;
@@ -577,7 +662,7 @@ export class Gameplay {
     const p = this.player; if (!p) return null;
     const h = this.healthSys.state(p.id);
     return {
-      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee',
+      id: p.id, pos: p.position(), appearance: this.appearance(), speed: this.pc.speed, weaponDrawn: (this.pc.aiming && this.reg.weapon(this.pc.weapon).class !== 'melee') || (this.concealment()?.visible.some((w) => this.reg.weapon(w).class !== 'melee') ?? false), oddLook: this.concealment()?.heatLook ?? false,
       bleeding: !!h && h.bleeds.length > 0, indoors: this.pc.indoors, subway: this.pc.subway, inVehicle: !!this.pc.vehicle, surrendered: this.pc.surrendered,
     };
   }
@@ -653,7 +738,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 3, inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);

@@ -12,7 +12,7 @@ function shooting(seed?: { nerve?: number }) {
   r.g.equip('weapon.service');
   r.g.setAiming(true); r.g.setFiring(true);
   r.step(0.1);
-  r.g.setFiring(false); r.g.setAiming(false);
+  r.g.setFiring(false); r.g.setAiming(false); r.g.holster(); // gun put away (a visible gun gets you stopped on sight)
   return r;
 }
 
@@ -122,7 +122,8 @@ test('a broken call box sends the witness to a payphone; intimidating a timid wi
   const q = rig();
   q.g.addProp('box1', 'call_box', 40, 0, 0);
   q.sim.add('w1', 5, 0, { yaw: Math.atan2(5, 0), nerve: 0.05 });
-  q.g.equip('weapon.service'); q.g.setAiming(true); q.g.setFiring(true); q.step(0.1); q.g.setFiring(false); q.g.setAiming(false); // gun lowered: no ongoing menacing
+  q.g.setContext({ atHome: true }); q.g.changeOutfit('outfit.teddy_jacket'); q.g.setContext({ atHome: false }); // a jacket hides a holstered revolver
+  q.g.equip('weapon.service'); q.g.setAiming(true); q.g.setFiring(true); q.step(0.1); q.g.setFiring(false); q.g.setAiming(false); q.g.holster(); // gun put away: no ongoing menacing
   q.step(0.4);
   let res = 'none'; for (let i = 0; i < 4 && res !== 'silenced'; i++) res = q.g.intimidate('w1');
   assert.equal(res, 'silenced');

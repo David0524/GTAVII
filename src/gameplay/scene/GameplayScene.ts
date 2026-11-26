@@ -171,7 +171,7 @@ export async function runGameplayScene() {
   car('b_sedan', -690, heightAt(-690, BLOCK.zN + 2.2), BLOCK.zN + 2.2, Math.PI / 2, 0x5a3326);
   car('b_cab', -780, heightAt(-780, BLOCK.zN + 2.2), BLOCK.zN + 2.2, Math.PI / 2, 0xe3a92a);
   const parkedRadio = g.registerPolice('radio_car', 'pct.midtown_central', -735, BLOCK.zS - 2.3, { corrupt: 0 });
-  parkedRadio.yaw = -Math.PI / 2; parkedRadio.state = 'search'; parkedRadio.searchFor = -1e9; parkedRadio.speed = 0;
+  parkedRadio.yaw = -Math.PI / 2;
   (parkedRadio as any).parked = true;
 
   // ---------------------------------------------------------------- bodies, FX, overlays, HUD
@@ -470,7 +470,7 @@ export async function runGameplayScene() {
       } else if (u.kind !== 'helicopter') {
         let cm = copCars.get(u.id);
         if (!cm) { cm = (u as any).parked ? cars.get('b_radio')! : carMesh(u.kind === 'plainclothes' ? 0x4a4038 : 0x1f2a44, u.kind !== 'plainclothes'); if (!(u as any).parked) scene.add(cm); copCars.set(u.id, cm); }
-        if (!(u as any).parked) { const y = inBlockArea(u.x, u.z) ? heightAt(u.x, u.z) : lotY; cm.position.set(u.x, y, u.z); cm.rotation.y = u.yaw; }
+        { const y = inBlockArea(u.x, u.z) ? heightAt(u.x, u.z) : lotY; cm.position.set(u.x, y, u.z); cm.rotation.y = u.yaw; }
         const bub = cm.getObjectByName('bubble') as THREE.Mesh | undefined;
         if (bub) (bub.material as THREE.MeshStandardMaterial).emissiveIntensity = ['enroute', 'pursuit', 'approach'].includes(u.state) ? (Math.sin(frame * 0.5) > 0 ? 4 : 0.2) : 0.5;
       }

@@ -45,7 +45,7 @@ export interface Agent {
   morale: number; bravery: number; target: string | null; lastKnown: [number, number] | null; seeT: number; unseenT: number;
   track: number; cover: CoverPoint | null; goal: [number, number] | null; token: boolean; suppressed: number; flinch: number;
   barkCd: Record<string, number>; stance: 'stand' | 'crouch' | 'down'; leader: boolean; aimDir: V3; firing: boolean; burst: number;
-  alive: boolean; downedAt: number;
+  alive: boolean; downedAt: number; looted: boolean;
 }
 export interface CombatTarget { id: string; pos: V3; vel: [number, number]; team: 'player' | 'enemy'; alive: boolean; inCover: boolean; stance: 'stand' | 'crouch' | 'down' }
 
@@ -86,7 +86,7 @@ export class CombatAI extends Emitter<AiEvents> {
       id: o.id, faction: o.faction, squad: o.squad, pos: [...o.pos] as V3, yaw: o.yaw ?? 0, vel: [0, 0],
       gun: o.gun ? new Gun(o.gun) : null, melee: o.melee, ammo: o.ammo ?? 30, state: 'idle', t: 0, think: this.rng.range(0, 1 / THINK_HZ),
       morale: bravery, bravery, target: null, lastKnown: null, seeT: 0, unseenT: 0, track: 0, cover: null, goal: null, token: false, suppressed: 0, flinch: 0,
-      barkCd: {}, stance: 'stand', leader: !!o.leader, aimDir: [0, 0, -1], firing: false, burst: 0, alive: true, downedAt: -1,
+      barkCd: {}, stance: 'stand', leader: !!o.leader, aimDir: [0, 0, -1], firing: false, burst: 0, alive: true, downedAt: -1, looted: false,
     };
     this.agents.set(a.id, a);
     this.squadSize.set(o.squad, (this.squadSize.get(o.squad) ?? 0) + 1);
