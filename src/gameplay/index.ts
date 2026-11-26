@@ -42,6 +42,7 @@ import { TimeKeeper, restQuality, type CantSleep } from './time';
 import { Cars, type EntryMethod } from './cars/theft';
 import { FireSystem } from './props/fire';
 import { Ownership } from './cars/ownership';
+import { Stats } from './meta/stats';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
@@ -100,6 +101,9 @@ export class Gameplay {
   readonly fire: FireSystem;
   /** owned cars: buying, haggling, titles, tickets, the boot, the pound, garages */
   readonly ownership: Ownership;
+  /** stats and completion feed for the UI chat */
+  readonly stats = new Stats();
+  private lastPos: V3 | null = null;
   private fireTick = 0;
   /** a car waiting on a hot-wire before it will start */
   hotwiring: string | null = null;
@@ -567,6 +571,8 @@ export class Gameplay {
     this.timings.policeMs = now() - pt0;
     // props, phones
     const pp = p?.position() ?? [0, 0, 0];
+    if (p && this.lastPos) { const d = Math.hypot(pp[0] - this.lastPos[0], pp[2] - this.lastPos[2]); if (d < 50) this.stats.add(p.lead, this.pc.vehicle ? 'distanceDriven' : 'distanceOnFoot', d); }
+    this.lastPos = [pp[0], pp[1], pp[2]];
     this.props.update(dt, [pp[0], pp[2]]);
     this.cars.update(dt);
     this.updateFire(dt);
@@ -753,6 +759,7 @@ export class Gameplay {
     });
     this.cars.on('stolen', (e) => this.emit('notice', { kind: 'stolen', ...e }));
     this.cars.on('driverReacts', (e) => { if (e.reaction === 'flee' || e.reaction === 'callbox') this.port.command(e.driver, { type: 'flee', fromX: this.player?.position()[0] ?? 0, fromZ: this.player?.position()[2] ?? 0 }); this.emit('notice', { kind: 'driverReacts', ...e }); });
+    this.wireStats();
     this.outcomes.on('wasted', (e) => this.emit('wasted', e));
     this.outcomes.on('arrested', (e) => { this.equip('weapon.fists'); this.emit('arrested', e); });
     this.outcomes.on('released', (e) => this.emit('released', e));
@@ -761,6 +768,27 @@ export class Gameplay {
     this.wardrobe.on('wear', (e) => this.emit('wear', e));
     this.phones.on('ring', (e) => this.emit('ring', e));
     for (const k of ['answered', 'placed', 'message', 'ringStop'] as const) this.phones.on(k, (e: any) => this.emit('call', { kind: k, ...e }));
+  }
+
+  private wireStats() {
+    const L = () => this.player?.lead ?? '';
+    const me = () => this.player?.id;
+    this.bus.on('shot', (e) => { if (e.player && !e.jammed) this.stats.add(L(), 'shotsFired'); });
+    this.bus.on('hit', (e) => { if (e.shooter !== me()) return; if (e.melee) this.stats.add(L(), 'meleeHits'); else { this.stats.add(L(), 'shotsHit'); if (e.region === 'head') this.stats.add(L(), 'headshots'); } if (e.killed) this.stats.add(L(), 'kills'); });
+    this.bus.on('copKilled', (e) => { if (e.by === me()) this.stats.add(L(), 'copsKilled'); });
+    this.bus.on('melee', (e) => { if (e.kind === 'parried' && e.defender === me()) this.stats.add(L(), 'parries'); if (e.kind === 'takedown' && !e.lethal) this.stats.add(L(), 'knockouts'); });
+    this.bus.on('wasted', (e) => { this.stats.add(e.lead, 'timesWasted'); this.stats.add(e.lead, 'hospitalCents', e.paid); });
+    this.bus.on('arrested', (e) => this.stats.add(e.lead, 'timesArrested'));
+    this.bus.on('police', (e) => { if (e.kind === 'bribe') { if (e.result === 'accepted') { this.stats.add(L(), 'bribesPaid'); this.stats.add(L(), 'bribeCents', e.cents); } else this.stats.add(L(), 'bribesRefused'); } if (e.kind === 'lost') this.stats.add(L(), 'chasesEscaped'); });
+    this.bus.on('witness', (e) => { if (e.kind === 'silenced') this.stats.add(L(), 'witnessesSilenced'); });
+    this.bus.on('reportFiled', (e) => { if (!e.merged) this.stats.add(L(), 'reportsAgainst'); });
+    this.bus.on('notice', (e) => { if (e.kind === 'stolen') this.stats.add(L(), 'carsStolen'); if (e.kind === 'car_bought') this.stats.add(e.lead, 'carsBought'); });
+    this.bus.on('propBroken', (e) => { if (e.by === me()) { this.stats.add(L(), 'propsBroken'); if (e.type === 'hydrant') this.stats.add(L(), 'hydrantsOpened'); } });
+    this.bus.on('fire', (e) => { if (e.kind === 'ignited' && e.fire.by === me() && e.fire.source === 'molotov') this.stats.add(L(), 'firesStarted'); });
+    this.bus.on('money', (e) => this.stats.add(e.lead, e.delta > 0 ? 'moneyEarned' : 'moneySpent', Math.abs(e.delta)));
+    this.bus.on('call', (e) => { if (e.kind === 'placed') this.stats.add(e.lead, 'phoneCalls'); });
+    this.shops.on('outfitBought', (e) => this.stats.add(e.lead, 'outfitsBought'));
+    this.clock.on('timeAdvanced', (e) => { if (e.how === 'sleep' && this.player) this.stats.add(this.player.lead, 'nightsSlept'); });
   }
 
   /** Cop units become physical: health, melee body and hit capsules. */
@@ -945,7 +973,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -963,6 +991,7 @@ export class Gameplay {
     this.outcomes.deserialize(s.outcomes as any);
     this.cars.deserialize((s as any).cars ?? []);
     this.ownership.deserialize((s as any).ownership);
+    this.stats.deserialize((s as any).stats);
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);
       this.pc.weapon = this.inv.ensure(this.player.lead).equipped; this.guns.clear();
