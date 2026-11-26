@@ -1,11 +1,11 @@
 import * as THREE from 'three/webgpu';
 import { SLOTS, type Slot } from './gen/builder';
 import { trafficSlotColor, type Quality } from './gen/materials';
-import { getAsset, variantOf } from './assets';
+import { getAsset } from './assets';
 import type { ModelSpec } from './gen/spec';
 import { MODEL_BY_ID } from './models';
-
-export interface TrafficInstance { modelId: string; variant: number; x: number; y: number; z: number; yaw: number; brake: boolean }
+import { resolve } from './registry';
+import { VehicleLights, type TrafficInstance } from '../shared/traffic';
 
 /**
  * Split a grouped vehicle geometry into three draw-call-friendly parts:
@@ -16,16 +16,18 @@ export interface TrafficInstance { modelId: string; variant: number; x: number; 
 function splitForInstancing(spec: ModelSpec, g: THREE.BufferGeometry) {
   const pos = g.getAttribute('position'), nrm = g.getAttribute('normal');
   const idx = g.index!;
-  const out = { paint: [] as number[], fixed: [] as number[], fixedCol: [] as number[], tail: [] as number[] };
+  const out = { paint: [] as number[], fixed: [] as number[], fixedCol: [] as number[], tail: [] as number[], head: [] as number[], sign: [] as number[] };
   const roofFixed = typeof spec.roofColor === 'number' ? spec.roofColor : spec.roofColor === 'paint2' ? spec.paint2 ?? 0xffffff : null;
   const c = new THREE.Color();
   const push = (arr: number[], i: number) => arr.push(pos.getX(i), pos.getY(i), pos.getZ(i), nrm.getX(i), nrm.getY(i), nrm.getZ(i));
   for (const grp of g.groups) {
     const slot = SLOTS[grp.materialIndex!] as Slot;
-    let target: 'paint' | 'fixed' | 'tail';
+    let target: 'paint' | 'fixed' | 'tail' | 'head' | 'sign';
     let col: number | null = null;
     if (slot === 'paint' || (slot === 'roof' && roofFixed === null)) target = 'paint';
     else if (slot === 'taillamp') target = 'tail';
+    else if (slot === 'headlamp') target = 'head';
+    else if (slot === 'white' && (spec.cls === 'taxi' || spec.cls === 'police')) target = 'sign'; // roof light box / beacon
     else {
       target = 'fixed';
       col = slot === 'paint2' ? spec.paint2 ?? 0xdddddd : slot === 'roof' ? roofFixed! : trafficSlotColor(slot) ?? 0x888888;
@@ -46,7 +48,7 @@ function splitForInstancing(spec: ModelSpec, g: THREE.BufferGeometry) {
     if (col) geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
     return geo;
   };
-  return { paint: mk(out.paint), fixed: mk(out.fixed, out.fixedCol), tail: mk(out.tail) };
+  return { paint: mk(out.paint), fixed: mk(out.fixed, out.fixedCol), tail: mk(out.tail), head: mk(out.head), sign: mk(out.sign) };
 }
 
 /** Body + wheels merged into one geometry so a whole car is three instanced draws. */
@@ -55,6 +57,11 @@ function withWheels(spec: ModelSpec, lod: 1 | 2): THREE.BufferGeometry {
   if (lod === 2) return a.lod2;
   const g = a.lod1;
   const parts: THREE.BufferGeometry[] = [g.body.clone()];
+  if (g.beacon) { // police roof beacon: route its red lens to the 'sign' part (via the otherwise unused white slot)
+    const bc = g.beacon.clone();
+    for (const grp of bc.groups) if (SLOTS[grp.materialIndex!] === 'taillamp') grp.materialIndex = SLOTS.indexOf('white');
+    parts.push(bc);
+  }
   for (const w of g.wheels) {
     const wg = (w.side > 0 ? g.wheelR : g.wheelL).clone();
     wg.translate(w.x, w.y, w.z);
@@ -86,7 +93,7 @@ function mergeGrouped(gs: THREE.BufferGeometry[]): THREE.BufferGeometry {
   return out;
 }
 
-interface ModelBatch { paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; tail: THREE.InstancedMesh; n: number }
+interface ModelBatch { paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; tail: THREE.InstancedMesh; head: THREE.InstancedMesh; sign: THREE.InstancedMesh | null; meshes: THREE.InstancedMesh[]; n: number }
 
 /**
  * Visual-only traffic: per model and LOD, three InstancedMeshes. No physics bodies.
@@ -95,10 +102,16 @@ interface ModelBatch { paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; t
 export class TrafficRenderer {
   readonly object = new THREE.Group();
   private batches = new Map<string, [ModelBatch, ModelBatch]>();
-  private colorCache = new Map<string, THREE.Color>();
-  private mats: { paint: THREE.Material; fixed: THREE.Material; tail: THREE.Material };
+  private resolveCache = new Map<string, { modelId: string; paint: THREE.Color }>();
+  private lampCols = {
+    brake: new THREE.Color(0xff2a10).multiplyScalar(2.2), tailRun: new THREE.Color(0xc01808), tailOff: new THREE.Color(0x4a0806),
+    reverse: new THREE.Color(0xffffff).multiplyScalar(1.6), amber: new THREE.Color(0xff9a20).multiplyScalar(2),
+    headOn: new THREE.Color(0xfff0cc).multiplyScalar(2), headOff: new THREE.Color(0x8a8780),
+    signOn: new THREE.Color(0xfff2d0).multiplyScalar(1.8), signOff: new THREE.Color(0xc8c4b8),
+    beacon: new THREE.Color(0xff2010).multiplyScalar(3), beaconOff: new THREE.Color(0x5a0a08),
+  };
+  private mats: { paint: THREE.Material; fixed: THREE.Material; lamp: THREE.Material };
   private _m = new THREE.Matrix4(); private _q = new THREE.Quaternion(); private _p = new THREE.Vector3(); private _s = new THREE.Vector3(1, 1, 1); private _y = new THREE.Vector3(0, 1, 0);
-  private brakeOn = new THREE.Color(0xff2a10).multiplyScalar(2.2); private brakeOff = new THREE.Color(0x4a0806);
   /** Distance (m) beyond which the box impostor is used. */
   lod2Distance: number;
   lastMs = 0;
@@ -109,7 +122,7 @@ export class TrafficRenderer {
     this.mats = {
       paint: new THREE.MeshStandardNodeMaterial({ roughness: 0.45, metalness: 0.1 }),
       fixed: new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 0.4, metalness: 0.3 }),
-      tail: new THREE.MeshBasicNodeMaterial({}),
+      lamp: new THREE.MeshBasicNodeMaterial({}),
     };
   }
 
@@ -128,7 +141,11 @@ export class TrafficRenderer {
           this.object.add(m);
           return m;
         };
-        return { paint: im(parts.paint, this.mats.paint, true), fixed: im(parts.fixed, this.mats.fixed, false), tail: im(parts.tail, this.mats.tail, true), n: 0 };
+        const paint = im(parts.paint, this.mats.paint, true), fixed = im(parts.fixed, this.mats.fixed, false);
+        paint.name = 'traffic-paint';
+        const tail = im(parts.tail, this.mats.lamp, true), head = im(parts.head, this.mats.lamp, true);
+        const sign = parts.sign.getAttribute('position').count ? im(parts.sign, this.mats.lamp, true) : null;
+        return { paint, fixed, tail, head, sign, meshes: [paint, fixed, tail, head, ...(sign ? [sign] : [])], n: 0 };
       };
       b = [mk(1), mk(2)];
       this.batches.set(modelId, b);
@@ -136,30 +153,41 @@ export class TrafficRenderer {
     return b[lod];
   }
 
-  private paintOf(modelId: string, variant: number) {
-    const k = modelId + ':' + variant;
-    let c = this.colorCache.get(k);
-    if (!c) { c = new THREE.Color(variantOf(MODEL_BY_ID.get(modelId)!, variant).paint); this.colorCache.set(k, c); }
-    return c;
+  private resolved(vclass: TrafficInstance['vclass'], variant: number) {
+    const k = vclass + ':' + variant;
+    let r = this.resolveCache.get(k);
+    if (!r) { const x = resolve(vclass, variant); r = { modelId: x.modelId, paint: new THREE.Color(x.paint) }; this.resolveCache.set(k, r); }
+    return r;
   }
 
-  setInstances(list: TrafficInstance[], camera?: THREE.Vector3) {
+  /** Instances follow the shared contract (src/shared/traffic.ts); light bits drive the lamp parts. */
+  setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3) {
     const t0 = performance.now();
     for (const pair of this.batches.values()) for (const b of pair) b.n = 0;
     const d2 = this.lod2Distance * this.lod2Distance;
+    const blink = Math.floor(t0 / 380) % 2 === 0;
+    const L = this.lampCols;
     for (const it of list) {
+      const r = this.resolved(it.vclass, it.variant);
       const far = camera ? (it.x - camera.x) ** 2 + (it.z - camera.z) ** 2 > d2 : false;
-      const b = this.batch(it.modelId, far ? 1 : 0);
+      const b = this.batch(r.modelId, far ? 1 : 0);
       if (b.n >= this.maxInstances) continue;
       this._q.setFromAxisAngle(this._y, it.yaw);
       this._m.compose(this._p.set(it.x, it.y, it.z), this._q, this._s);
       const i = b.n++;
-      b.paint.setMatrixAt(i, this._m); b.fixed.setMatrixAt(i, this._m); b.tail.setMatrixAt(i, this._m);
-      b.paint.setColorAt(i, this.paintOf(it.modelId, it.variant));
-      b.tail.setColorAt(i, it.brake ? this.brakeOn : this.brakeOff);
+      for (const m of b.meshes) m.setMatrixAt(i, this._m);
+      b.paint.setColorAt(i, r.paint);
+      const lt = it.lights;
+      const flash = blink && (lt & (VehicleLights.Hazard | VehicleLights.IndicatorLeft | VehicleLights.IndicatorRight)) !== 0;
+      b.tail.setColorAt(i, flash ? L.amber : lt & VehicleLights.Brake ? L.brake : lt & VehicleLights.Reverse ? L.reverse : lt & VehicleLights.Head ? L.tailRun : L.tailOff);
+      b.head.setColorAt(i, lt & VehicleLights.Head ? L.headOn : L.headOff);
+      if (b.sign) {
+        const police = r.modelId === 'bancroft_patrol';
+        b.sign.setColorAt(i, police ? (lt & VehicleLights.Siren && blink ? L.beacon : L.beaconOff) : lt & VehicleLights.RoofLight ? L.signOn : L.signOff);
+      }
     }
     for (const pair of this.batches.values()) for (const b of pair) {
-      for (const m of [b.paint, b.fixed, b.tail]) {
+      for (const m of b.meshes) {
         m.count = b.n;
         if (b.n) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
         m.visible = b.n > 0;
@@ -169,7 +197,7 @@ export class TrafficRenderer {
   }
 
   dispose() {
-    for (const pair of this.batches.values()) for (const b of pair) for (const m of [b.paint, b.fixed, b.tail]) { m.geometry.dispose(); m.dispose(); }
+    for (const pair of this.batches.values()) for (const b of pair) for (const m of b.meshes) { m.geometry.dispose(); m.dispose(); }
     Object.values(this.mats).forEach((m) => m.dispose());
     this.object.removeFromParent();
   }

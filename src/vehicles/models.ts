@@ -9,7 +9,9 @@ const C = {
   avocado: 0x5b6b2f, harvest: 0xc89a2c, rust: 0x8a3b1e, bronze: 0x6e4a2a, cream: 0xe6dab4, brown: 0x4a2f1d,
   white: 0xe7e4da, forest: 0x2e3d2c, burgundy: 0x5a1c22, powder: 0x8fa6b8, silver: 0xa6a6a1, navy: 0x1f2a40,
   black: 0x121314, tan: 0xb89b6e, orange: 0xc2581e, lime: 0x8c9a3a, red: 0x9b2a20, gold: 0xa8843e, teal: 0x2f5a52,
-  copper: 0x8c4b2b, mint: 0x9fb8a0, taxi: 0xe2a61d, aluminium: 0xc9c9c2,
+  copper: 0x8c4b2b, mint: 0x9fb8a0, taxi: 0xe3a92a, aluminium: 0xc9c9c2,
+  // docs/STYLE_GUIDE.md §2 tokens
+  sgBrown: 0x5a3326, sgMaroon: 0x4a1f22, sgCream: 0xd8cdb4, sgAvocado: 0x6b6b3a, sgHarvest: 0xc79a3c, sgWhite: 0xd9d4c8, truckRed: 0xb2302a,
 };
 
 const carPhysics = (o: Partial<PhysicsSpec>): PhysicsSpec => ({
@@ -50,7 +52,7 @@ const bancroft: ModelSpec = {
   wheelStyle: 'fullcover', whitewall: true,
   extras: ['mirrorL', 'antenna'],
   seats: carSeats(0.1),
-  palette: [C.avocado, C.harvest, C.rust, C.bronze, C.cream, C.brown, C.white, C.forest, C.burgundy, C.powder, C.silver, C.navy, C.gold],
+  palette: [C.sgAvocado, C.sgHarvest, C.rust, C.bronze, C.sgCream, C.sgBrown, C.sgWhite, C.forest, C.sgMaroon, C.powder, C.silver, C.navy, C.gold, C.sgBrown, C.sgWhite],
   metallicChance: 0.35, vinylChance: 0.4,
   physics: carPhysics({}),
 };
@@ -64,6 +66,16 @@ const police: ModelSpec = {
   extras: ['bubble', 'spotlight', 'mirrorL', 'antenna'],
   metallicChance: 0, vinylChance: 0,
   physics: carPhysics({ torque: 470, freqF: 1.25, freqR: 1.35, zeta: 0.3, antiRoll: 0.4, muPeak: 0.9 }),
+};
+
+const bancroftCab: ModelSpec = {
+  ...bancroft, id: 'bancroft_cab', cls: 'taxi', displayName: 'Ostrander Bancroft Taxi',
+  palette: [C.taxi, 0xdfa328, 0xd99c25, 0xe6ad30],
+  trim: { side: { y: 0.6, kind: 'rubber' } },
+  wheelStyle: 'hubcap', whitewall: false,
+  extras: ['taxiLight', 'mirrorL', 'antenna'],
+  metallicChance: 0, vinylChance: 0,
+  physics: carPhysics({ mass: 2000, freqF: 1.1, freqR: 1.25, zeta: 0.24, antiRoll: 0.18 }),
 };
 
 const tiverton: ModelSpec = {
@@ -141,7 +153,7 @@ const fareway: ModelSpec = {
   wheelStyle: 'hubcap', whitewall: false,
   extras: ['taxiLight', 'mirrorL', 'antenna'],
   seats: carSeats(0.05, 0.64),
-  palette: [C.taxi, 0xe0a521, 0xd99a1a, 0xe8b02a],
+  palette: [C.taxi, 0xdfa328, 0xd99c25, 0xe6ad30],
   metallicChance: 0, vinylChance: 0,
   physics: carPhysics({ mass: 1850, freqF: 1.15, freqR: 1.3, zeta: 0.25, torque: 360 }),
 };
@@ -200,7 +212,7 @@ const b60: ModelSpec = {
   wheelStyle: 'truck', whitewall: false,
   extras: ['mirrorsBoth'],
   seats: { driver: [-0.48, 1.62, -1.55], passenger: [0.48, 1.62, -1.55] },
-  palette: [C.white, C.red, C.navy, C.forest, C.orange, C.harvest],
+  palette: [C.sgWhite, C.truckRed, C.truckRed, C.navy, C.forest, C.orange, C.harvest],
   paint2: C.aluminium, roofColor: 'paint',
   metallicChance: 0, vinylChance: 0,
   physics: truckPhysics({}),
@@ -238,5 +250,5 @@ const b80: ModelSpec = {
   physics: truckPhysics({ mass: 12500, comY: 1.2, frontWeight: 0.33, torque: 1150, cdA: 6.5, brakeForce: 0.55 }),
 };
 
-export const MODELS: readonly ModelSpec[] = [bancroft, police, tiverton, ferris, homestead, fareway, ct40, b60, walkin, b80];
+export const MODELS: readonly ModelSpec[] = [bancroft, police, bancroftCab, tiverton, ferris, homestead, fareway, ct40, b60, walkin, b80];
 export const MODEL_BY_ID = new Map(MODELS.map((m) => [m.id, m]));

@@ -4,6 +4,49 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 2: engine merge and integration (2026-11-26)
+- **Merged** `claude/tenderloin-74-engine-qi54lt` at a24eda4 with a merge commit. The only
+  conflict was package.json; the test lot was ported to `Input.poll(dt)`.
+- **Traffic contract:** `createTrafficRenderer().setInstances(readonly TrafficInstance[])` now
+  follows `src/shared/traffic.ts`.
+  - `resolve(vclass, variant)` lives in `src/vehicles/registry.ts`. Every class resolves, and
+    the variant seed picks the model (taxi: 70% Bancroft cab, 30% Fareway) and the paint.
+  - Light bits drive emissive instanced parts: head, brake, reverse and tail running lamps;
+    hazard and indicators blink amber on the tail lamps; the taxi roof light; the police
+    beacon (Siren). Each model now has up to 5 instanced draws per LOD.
+- **Style guide applied:**
+  - taxi yellow `#e3a92a`, plus the STYLE_GUIDE car tokens (brown, maroon, cream, avocado,
+    harvest gold, ageing white) and truck red in the palettes;
+  - 1973 rate-card text;
+  - a new `bancroft_cab` model, because period cabs were mostly ordinary full-size sedans.
+- **Hills in the test lot:** a 12 m crowned street (2.5% crown) west of the grid, with an 8%
+  climb to a 6 m crest, a 12% descent, and a 5% cross-fall parking section. Measured with the
+  `hill` API on `window.__VEH`:
+
+  | test | Bancroft | B-60 box truck |
+  |---|---|---|
+  | Climb to crest at 0.7 throttle | 10.9 s, 40 mph at the crest | 12.6 s, 28 mph |
+  | Parked on 12%, handbrake on | 0.08 m settle, then holds | 0.08 m |
+  | 5% cross-fall, handbrake on | 0.05 m drift, 1° lean | 0.03 m drift |
+  | 35 mph panic stop down 12% | 74 ft | 82 ft |
+
+  **Known behaviour:** holding the foot brake at a standstill engages reverse, which is the
+  game convention, so on a hill the car backs up. Park with the handbrake. Released on 12%,
+  the car rolls back slowly (1.5 mph after 3 s), because engine braking at idle is generous.
+  That's acceptable but not tuned.
+- **Audio hooks:** `Vehicle.rpm`, `Vehicle.load` (0..1) and `Vehicle.gear` (−1 = reverse).
+- **Engine requests** moved to the root `ENGINE_REQUESTS.md` (`## From vehicles: N.` format).
+  Items the engine already answered were dropped; `docs/ENGINE_REQUESTS.md` was deleted.
+- **Relayed by the oversight session, not yet started, waiting for the user to confirm scope:**
+  - bullet damage API, and an attacker id on impacts;
+  - trim tier × condition physics, period failure modes (overheating, vapour lock, flooding,
+    weak battery), damage that changes handling;
+  - theft entry points, trunks and plates;
+  - maintenance upgrades;
+  - roster additions: motorcycles, bicycles, ambulance, fire engine and ladder truck, mail
+    truck, ice-cream truck, graffiti subway cars;
+  - two-wheeler physics.
+
 ## Status (session 1)
 | Area | State |
 |---|---|
@@ -184,7 +227,7 @@ smoking and then burning.
 - [ ] Verify the WebGPU backend on real hardware, and measure real frame cost of 150 proxies.
 - [ ] Swap the test lot for the city's colliders (engine), and tune curb behaviour on real
       geometry.
-- [ ] Engine asks are in `docs/ENGINE_REQUESTS.md`.
+- [ ] Engine asks are in the root `ENGINE_REQUESTS.md`; check `ENGINE_RESPONSES.md` each session.
 
 ## How to run
 - `npm run dev`, then open `/?vehicles=1`. Optional parameters: `&model=<id>&variant=<n>`,

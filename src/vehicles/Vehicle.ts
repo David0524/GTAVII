@@ -130,6 +130,10 @@ export class Vehicle {
 
   get body() { return this.physics.body; }
   get speed() { return this.physics.speed; }
+  /** Engine rpm, 0..1 load, gear (-1 = reverse): for the audio workstream. */
+  get rpm() { return this.physics.rpm; }
+  get load() { return this.physics.load; }
+  get gear() { return this.physics.reverse ? -1 : this.physics.gear; }
 
   setInput(i: DriveInput) {
     const inp = this.physics.input;

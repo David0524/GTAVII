@@ -33,15 +33,14 @@ function draw(kind: DecalAnchor['kind'], seed: number): { c: HTMLCanvasElement; 
   const r = rng(seed * 7919 + kind.length);
   switch (kind) {
     case 'fare': {
+      // 1973 rate format (docs/STYLE_GUIDE.md §6, ref 549869)
       const c = canvas(512, 256), g = c.getContext('2d')!;
       g.fillStyle = '#111'; g.textBaseline = 'top';
-      g.font = `bold 46px ${MONO}`; g.fillText('RATE', 12, 6);
-      g.font = `bold 58px ${GOTHIC}`; g.fillText('65¢', 150, 0);
-      g.font = `bold 28px ${MONO}`; g.fillText('FIRST 1/6 MILE', 260, 14);
-      g.font = `bold 58px ${GOTHIC}`; g.fillText('10¢', 150, 76);
-      g.font = `bold 28px ${MONO}`; g.fillText('EACH ADD\'L 1/6', 260, 90);
-      g.font = `bold 24px ${MONO}`; g.fillText('10¢ EACH 72 SEC WAITING', 14, 170);
-      g.fillText('PASSENGERS PAY TOLLS', 14, 206);
+      g.font = `bold 72px ${GOTHIC}`; g.fillText('60¢', 14, 4);
+      g.font = `bold 30px ${MONO}`; g.fillText('FIRST 1/5', 150, 14); g.fillText('MILE', 150, 46);
+      g.font = `bold 72px ${GOTHIC}`; g.fillText('10¢', 14, 112);
+      g.font = `bold 30px ${MONO}`; g.fillText('EACH ADD\'L', 150, 120); g.fillText('1/5 MILE', 150, 152);
+      g.font = `bold 22px ${MONO}`; g.fillText('PASSENGERS PAY TOLLS', 14, 216);
       return { c, emissive: false };
     }
     case 'unit': {

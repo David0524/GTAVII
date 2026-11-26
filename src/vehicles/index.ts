@@ -17,12 +17,15 @@ import type * as THREE from 'three/webgpu';
 import { MODELS, MODEL_BY_ID } from './models';
 import { getAsset, variantOf } from './assets';
 import { Vehicle } from './Vehicle';
-import { TrafficRenderer, type TrafficInstance } from './traffic';
+import { TrafficRenderer } from './traffic';
+import { resolve } from './registry';
+import type { TrafficInstance, VehicleClass } from '../shared/traffic';
 import { loadDecalFonts } from './gen/decals';
 import type { Quality } from './gen/materials';
 
 export type { Vehicle, VehicleEventType, SkidEvent, ImpactEvent, DamageEvent, DamageStage } from './Vehicle';
-export type { TrafficInstance } from './traffic';
+export type { TrafficInstance, VehicleClass } from '../shared/traffic';
+export { CLASS_MODELS } from './registry';
 export { MODELS } from './models';
 
 export interface VehicleFactory {
@@ -31,7 +34,9 @@ export interface VehicleFactory {
   ready: Promise<void>;
   spawn(world: RAPIER.World, scene: THREE.Object3D, modelId: string, pose: { x: number; y: number; z: number; yaw: number }, variant?: number): Vehicle;
   /** Visual-only instanced proxies for AI traffic far from the player (no physics body). */
-  createTrafficRenderer(maxInstances: number): { setInstances(list: TrafficInstance[], camera?: THREE.Vector3): void; object: THREE.Object3D; dispose(): void; lastMs: number };
+  createTrafficRenderer(maxInstances: number): { setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3): void; object: THREE.Object3D; dispose(): void; lastMs: number };
+  /** Registry: every VehicleClass resolves to >= 1 model; the variant seeds model choice, paint, dirt, dents. */
+  resolve(vclass: VehicleClass, variant: number): { modelId: string; paint: string };
   /** Build geometry ahead of time to avoid a hitch on first spawn. */
   preload(modelIds?: string[]): void;
 }
@@ -48,6 +53,7 @@ export function createVehicleFactory(opts: { quality: Quality }): VehicleFactory
       return new Vehicle(world, scene, getAsset(spec, v), v, pose, q);
     },
     createTrafficRenderer(max) { return new TrafficRenderer(max, q); },
+    resolve,
     preload(ids) {
       for (const id of ids ?? MODELS.map((m) => m.id)) {
         const spec = MODEL_BY_ID.get(id)!;

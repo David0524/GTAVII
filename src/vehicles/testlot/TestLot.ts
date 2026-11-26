@@ -10,6 +10,7 @@ import { createVehicleFactory, type Vehicle, type SkidEvent, type ImpactEvent, t
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
 import { ZONES } from '../gen/morphs';
+import { VehicleLights, type VehicleClass } from '../../shared/traffic';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type N = any;
@@ -150,6 +151,48 @@ export async function runTestLot() {
   addStatic(world, scene, concreteBlock, 55, 1, 30, 1.2, 2, 30);
   addStatic(world, scene, concreteBlock, -30, 0.55, 25, 5, 0.3, 9, 0, -0.17);
 
+  // ------------------------------------------------------------------ hill road (slopes, crown, cross-fall)
+  // West of the grid: a 12 m crowned street. Flat, then +8% up to a 6 m crest, then a 12% descent
+  // (steeper than most Manhattan streets; the real city has about 5–15 m of relief), plus a
+  // 5% cross-fall section for parking tests.
+  const HILL_X = -100;
+  const hillProfile = (z: number) => {
+    if (z > 60) return 0;
+    if (z > -15) return (60 - z) * 0.08;
+    if (z > -45) return 6 - 0.0025 * (z + 30) * (z + 30) + 0.5625; // rounded crest
+    if (z > -95) return Math.max(0, 6 - (-45 - z) * 0.12);
+    return 0;
+  };
+  const crossFall = (z: number) => (z > 110 && z < 170 ? 0.05 * Math.min(1, (z - 110) / 8, (170 - z) / 8) : 0);
+  const roadHeight = (x: number, z: number) => {
+    const u = x - HILL_X, a = Math.abs(u);
+    const base = hillProfile(z) + crossFall(z) * u;
+    if (a <= 6) return base + 0.15 * (1 - (u / 6) ** 2); // 2.5% crown at the edge
+    return base * Math.max(0, 1 - (a - 6) / 6) + 0.0 * a; // embankment down to the lot
+  };
+  {
+    const xs: number[] = []; for (let u = -12; u <= 12; u += 1) xs.push(HILL_X + u);
+    const zs: number[] = []; for (let z = 190; z >= -130; z -= 2) zs.push(z);
+    const pos = new Float32Array(xs.length * zs.length * 3), idx: number[] = [];
+    zs.forEach((z, j) => xs.forEach((x, i) => { const k = (j * xs.length + i) * 3; pos[k] = x; pos[k + 1] = roadHeight(x, z) + 0.01; pos[k + 2] = z; }));
+    for (let j = 0; j < zs.length - 1; j++) for (let i = 0; i < xs.length - 1; i++) {
+      const a = j * xs.length + i, b = a + 1, c = a + xs.length, d = c + 1;
+      idx.push(a, b, c, b, d, c); // CCW seen from above (z decreases with j)
+    }
+    world.createCollider(RAPIER.ColliderDesc.trimesh(pos, new Uint32Array(idx)).setFriction(1));
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+    const hill = new THREE.Mesh(g, asphalt); hill.receiveShadow = true; scene.add(hill);
+    // centre line paint along the crown
+    const line = new THREE.MeshStandardNodeMaterial({ color: 0xd9c98a, roughness: 0.7 });
+    for (let z = 186; z > -126; z -= 6) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 3), line);
+      const h0 = roadHeight(HILL_X, z), h1 = roadHeight(HILL_X, z - 1);
+      m.position.set(HILL_X, h0 + 0.165, z - 1.5); m.rotation.set(-Math.PI / 2 + Math.atan2(h1 - h0, 1), 0, 0);
+      scene.add(m);
+    }
+  }
+
   // ------------------------------------------------------------------ vehicles
   const qname = quality.name;
   const factory = createVehicleFactory({ quality: qname });
@@ -210,15 +253,15 @@ export async function runTestLot() {
   // ------------------------------------------------------------------ traffic (visual-only instanced proxies)
   const nTraffic = mode === 'traffic' ? Number(params.get('n') ?? (qname === 'low' ? 40 : 150)) : 0;
   const traffic = nTraffic ? factory.createTrafficRenderer(nTraffic) : null;
-  const tcars: { modelId: string; variant: number; x: number; y: number; z: number; yaw: number; brake: boolean; lane: number; axis: 0 | 1; dir: number; v: number }[] = [];
+  const tcars: { vclass: VehicleClass; variant: number; x: number; y: number; z: number; yaw: number; lights: number; lane: number; axis: 0 | 1; dir: number; v: number }[] = [];
   if (traffic) {
     scene.add(traffic.object);
-    const weights = ['fareway', 'fareway', 'fareway', 'bancroft', 'bancroft', 'tiverton', 'ferris', 'homestead', 'b60', 'walkin', 'bancroft_patrol', 'ct40', 'b80'];
+    const weights: VehicleClass[] = ['taxi', 'taxi', 'taxi', 'sedan', 'sedan', 'hardtop', 'compact', 'wagon', 'box_truck', 'step_van', 'police', 'bus', 'garbage'];
     for (let i = 0; i < nTraffic; i++) {
       const axis = (i % 2) as 0 | 1, dir = i % 4 < 2 ? 1 : -1;
       const lane = Math.floor(i / 4) % 5 - 2;
       const road = lane * (BLOCK + ROAD);
-      tcars.push({ modelId: weights[(i * 7) % weights.length], variant: i, x: 0, y: 0, z: 0, yaw: 0, brake: false, lane: road + dir * 2.6, axis, dir, v: 4 + (i % 5) });
+      tcars.push({ vclass: weights[(i * 7) % weights.length], variant: i, x: 0, y: 0, z: 0, yaw: 0, lights: 0, lane: road + dir * 2.6, axis, dir, v: 4 + (i % 5) });
       const c = tcars[i];
       const along = ((i * 37) % 300) - 150;
       if (axis === 0) { c.x = c.lane; c.z = along - 50; c.yaw = dir > 0 ? Math.PI : 0; } else { c.z = c.lane - 6; c.x = along; c.yaw = dir > 0 ? -Math.PI / 2 : Math.PI / 2; }
@@ -229,7 +272,9 @@ export async function runTestLot() {
     for (const c of tcars) {
       const d = c.v * dt * c.dir;
       if (c.axis === 0) { c.z += d; if (c.z > 100) c.z -= 300; if (c.z < -200) c.z += 300; } else { c.x += d; if (c.x > 150) c.x -= 300; if (c.x < -150) c.x += 300; }
-      c.brake = Math.sin(c.x * 0.1 + c.z * 0.13) > 0.6;
+      const brake = Math.sin(c.x * 0.1 + c.z * 0.13) > 0.6;
+      c.lights = VehicleLights.Head | (brake ? VehicleLights.Brake : 0) | (c.vclass === 'taxi' && c.variant % 3 === 0 ? VehicleLights.RoofLight : 0)
+        | (c.vclass === 'police' && c.variant % 2 === 0 ? VehicleLights.Siren : 0) | (c.variant % 17 === 0 ? VehicleLights.Hazard : 0);
     }
     traffic.setInstances(tcars, camera.position);
   };
@@ -350,6 +395,7 @@ export async function runTestLot() {
       return speed;
     },
     trafficMs: () => traffic?.lastMs ?? 0,
+    hill: { x: HILL_X, heightAt: (x: number, z: number) => roadHeight(x, z) },
     moveTraffic,
     stats() {
       const g = player.asset.lod0;

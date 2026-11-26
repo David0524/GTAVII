@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-26T15:18:58.923Z",
+  "date": "2026-11-26T15:26:51.560Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -28,17 +28,17 @@
   "traffic": {
     "high_150": {
       "instances": 150,
-      "setInstancesMsAvg": 0.055000000004656616,
-      "setInstancesMsP95": 0.19999999972060323,
-      "drawCalls": 181,
-      "triangles": 347675
+      "setInstancesMsAvg": 0.08166666665347293,
+      "setInstancesMsP95": 0.20000000018626451,
+      "drawCalls": 230,
+      "triangles": 357983
     },
     "low_40": {
       "instances": 40,
-      "setInstancesMsAvg": 0.02666666666821887,
+      "setInstancesMsAvg": 0.030833333342646558,
       "setInstancesMsP95": 0.10000000009313226,
-      "drawCalls": 111,
-      "triangles": 18783
+      "drawCalls": 131,
+      "triangles": 26475
     }
   },
   "driving": {
@@ -180,6 +180,11 @@
     "bancroft_patrol": {
       "lod0": 7512,
       "lod1": 1482,
+      "lod2": 72
+    },
+    "bancroft_cab": {
+      "lod0": 7276,
+      "lod1": 1386,
       "lod2": 72
     },
     "tiverton": {

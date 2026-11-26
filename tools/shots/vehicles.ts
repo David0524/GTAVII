@@ -136,6 +136,13 @@ async function main() {
       await camRel(page, [7, 1.0, 0], 40, 0.4); frames.push(await snap(page)); labels.push('nose dive under braking (side view)');
       await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 1, { x: -60, z: 40, yaw: 0 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.5); V.player.body.setLinvel({ x: 0, y: 0, z: -14 }, true); V.simulate(0.05); V.setAuto({ throttle: 0.3, brake: 0, steer: 0.8, handbrake: false }); V.simulate(1.2); });
       await camRel(page, [0, 1.2, -9], 40, 0.4); frames.push(await snap(page)); labels.push('body roll in a 30 mph turn (front view)');
+      // hills: crest of the 8% climb, parked on the 12% descent with the handbrake, crowned street
+      await page.evaluate(() => { const V = window.__VEH, H = V.hill; V.setModel('bancroft_cab', 4, { x: H.x - 2, z: 70, yaw: 0 }); V.setAuto({ throttle: 0.7, brake: 0, steer: 0, handbrake: false }); V.simulate(9.2); });
+      await camRel(page, [6, 1.2, 2], 40, 0.4); frames.push(await snap(page)); labels.push(`climbing the 8% grade — ${await page.evaluate(() => (window.__VEH.player.speed * 2.237).toFixed(0))} mph`);
+      await page.evaluate(() => { const V = window.__VEH, H = V.hill; V.setModel('bancroft', 5, { x: H.x - 2.5, z: -70, yaw: Math.PI }); V.player.setPose({ x: H.x - 2.5, y: H.heightAt(H.x - 2.5, -70) + 0.4, z: -70, yaw: Math.PI }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: true }); V.simulate(3); });
+      await camRel(page, [7, 1.3, 0], 40, 0.4); frames.push(await snap(page)); labels.push('parked on the 12% descent, handbrake on');
+      await page.evaluate(() => { const V = window.__VEH, H = V.hill; V.setModel('fareway', 2, { x: H.x + 2.5, z: 140, yaw: Math.PI }); V.player.setPose({ x: H.x + 2.5, y: H.heightAt(H.x + 2.5, 140) + 0.4, z: 140, yaw: Math.PI }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: true }); V.simulate(2); });
+      await camRel(page, [0, 1.4, -9], 40, 0.4); frames.push(await snap(page)); labels.push('parked on a crowned street with 5% cross-fall');
       await sheet(page, frames, 3, 640, 360, 'drive_skids.png', labels);
       console.log('drive');
     }
@@ -184,7 +191,7 @@ async function main() {
           for (let k = 0; k < 120; k++) { V.moveTraffic(1 / 60); t.push(V.trafficMs()); }
           t.sort((a, b) => a - b);
           V.setCamera(-40, 30, 30, 0, 0, -60, 50);
-          return { instances: V.scene.getObjectByName('vehicle-traffic').children.reduce((s: number, m: any) => s + (m.visible ? m.count : 0), 0) / 3, setInstancesMsAvg: t.reduce((a, b) => a + b, 0) / t.length, setInstancesMsP95: t[Math.floor(t.length * 0.95)] };
+          return { instances: V.scene.getObjectByName('vehicle-traffic').children.reduce((s: number, m: any) => s + (m.visible && m.name === 'traffic-paint' ? m.count : 0), 0), setInstancesMsAvg: t.reduce((a, b) => a + b, 0) / t.length, setInstancesMsP95: t[Math.floor(t.length * 0.95)] };
         });
         await page.waitForTimeout(500);
         const draw = await page.evaluate(() => { window.__VEH.renderOnce(); const i = window.__VEH.renderer.info.render; return { drawCalls: i.drawCalls, triangles: i.triangles }; });

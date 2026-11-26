@@ -349,7 +349,8 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     }
   }
   if (m.cls === 'taxi') {
-    for (const sx of [1, -1]) decals.push({ kind: 'fare', pos: [sx * (sideX(3.3, 0.62) + 0.008), 0.62, Z(3.3)], normal: [sx, 0, 0], w: 0.42, h: 0.21 });
+    const sFare = lerp(gh.sA0, gh.sC0, 0.7); // middle of the rear door
+    for (const sx of [1, -1]) decals.push({ kind: 'fare', pos: [sx * (sideX(sFare, 0.62) + 0.008), 0.62, Z(sFare)], normal: [sx, 0, 0], w: 0.42, h: 0.21 });
     for (const sx of [1, -1]) decals.push({ kind: 'unit', pos: [sx * (sideX(1.4, 0.68) + 0.008), 0.68, Z(1.4)], normal: [sx, 0, 0], w: 0.34, h: 0.11 });
   }
   if (m.cls === 'police') {

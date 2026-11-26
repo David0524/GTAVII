@@ -39,6 +39,8 @@ export class VehiclePhysics {
   /** Signed speed along the vehicle's forward axis (m/s). */
   speed = 0;
   rpm = 800; gear = 1; reverse = false;
+  /** 0..1 engine load (effective throttle incl. shift torque cut), for audio. */
+  load = 0;
   /** 0..1 engine power multiplier (damage). */
   power = 1;
   private shiftT = 0; private revT = 0; private steerNow = 0;
@@ -151,6 +153,7 @@ export class VehiclePhysics {
     if (this.reverse) this.gear = 1;
     const torque = p.torque * this.torqueAt(Math.max(coupled, 900)) * this.power;
     let driveForce = drive * torque * tr2 * ratio * 0.85 / R * (this.shiftT > 0.2 ? 0.45 : 1);
+    this.load = drive * (this.shiftT > 0.2 ? 0.45 : 1) * this.power;
     if (this.reverse) driveForce = -driveForce;
     // engine braking when off the throttle
     const engBrake = drive < 0.05 && speedAbs > 1 ? Math.sign(this.speed) * Math.min(0.035 * p.mass * G, 6 * speedAbs * ratio) : 0;
