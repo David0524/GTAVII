@@ -45,6 +45,8 @@ export class DriverAssist {
   slip = 0; counterSteer = 0;
 
   constructor(settings: Partial<AssistSettings> = {}) { this.s = { ...TOUCH_DEFAULTS, ...settings }; }
+  /** Apply settings changes live (the UI forwards its settings store on every change). */
+  configure(settings: Partial<AssistSettings>) { Object.assign(this.s, settings); }
 
   apply(raw: DriveInput, car: AssistTarget, dt: number): DriveInput {
     const s = this.s;
