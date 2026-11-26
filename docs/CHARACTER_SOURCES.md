@@ -13,8 +13,10 @@ Only the derived binaries in `public/characters/` are shipped; raw downloads liv
 | `public/characters/anims.bin` | 0.97 MiB | `tools/characters/build-anims.ts` | Quaternius Universal Animation Library 1 and 2, Standard tier (39 clips) | CC0 1.0 |
 | `public/characters/body_low.bin` | 0.95 MiB | `tools/characters/build-low.ts` | subset of `body.bin` (Low quality) | CC0 1.0 (MakeHuman assets) |
 | `public/characters/fabric_{a,b}_{hi,lo}.webp` | 275 KiB (hi, 512²) / 74 KiB (lo, 256²) | see §5 | Poly Haven displacement maps, high-passed and channel-packed | CC0 1.0 |
+| `public/characters/skins_{hi,lo}.webp` | 150 KiB / 21 KiB | `tools/characters/build-skins.py` | MakeHuman default skins, detail only (§7) | CC0 1.0 |
+| `public/characters/rb/*` | 0.83 MiB leads + 5.5 MiB near-ring pool (on demand; none on Low) | `tools/characters/build-rocketbox.ts` | Microsoft Rocketbox adult heads (§6) | MIT (notice shipped) |
 
-Everything else is generated at runtime by our own code (fabric *relief* uses the §5 maps): garments, shoes, hats, glasses,
+Everything else is generated at runtime by our own code (fabric *relief* uses the §5 maps, skin detail the §7 maps; faces close to the camera are §6 heads): garments, shoes, hats, glasses,
 props, hair, eyeballs, skin and cloth shading, the authored animation clips, the crowd bake.
 
 ## 1. MakeHuman assets (CC0)
@@ -113,17 +115,23 @@ props, hair, eyeballs, skin and cloth shading, the authored animation clips, the
 - **Shared log:** `docs/briefs/ART_ASSETS.md` asks for `docs/ART_SOURCES.md`; that is a shared
   file, so the entry is requested in `ENGINE_REQUESTS.md` (characters 4) instead of edited here.
 
-## 6. Microsoft Rocketbox (MIT): evaluation only, not shipped to players
-- **What:** heads (skin, eyes, teeth, eyelashes and hair cards; 1024² WebP colour, normal and
-  opacity textures) of three **adult** avatars: `Male_Adult_12`, `Male_Adult_03` and
-  `Female_Adult_11`. The library's `Children` folder is never used.
+## 6. Microsoft Rocketbox (MIT): lead heads and the near-ring pool
+- **What:** heads (skin, eyes, teeth, eyelashes and hair cards; WebP colour, normal and opacity
+  textures) of **adult** avatars only. The library's `Children` folder is never used.
+  - **Near-ring pool** (Medium and above, people close to the camera): 30 heads, `Female_Adult_01–05,
+    07–09, 12–15, 17`, `Female_Party_01`, `Male_Adult_01–06, 08–13, 15–17, 20` (512² textures,
+    about 5.5 MiB in all, fetched on demand only when a pedestrian needs one). Excluded: heads whose
+    mesh includes headwear implausible on 1974 Midtown streets (hijab, burqa, keffiyeh, hood up),
+    and the three leads' bases (no pedestrian shares a lead's base face).
+  - **Leads** (1024² textures, 0.83 MiB for all three): `lead_teddy` from `Male_Adult_07`,
+    `lead_delphine` from `Female_Adult_11`, `lead_nick` from `Male_Adult_14`.
 - **Source:** https://github.com/microsoft/Microsoft-Rocketbox (fetched 2026-11-26; blobless
   sparse clone, HEAD of `master`).
 - **Licence:** the repository's `LICENSE.md` is MIT; the README says "November 2020 License
   Update: The library of avatars is now released under MIT License" (the older 2020 announcement
   said research and academic use; the MIT update supersedes it). MIT permits redistribution in a
   web game provided the copyright and permission notice ship with it, so a copy is at
-  `public/characters/eval/LICENSE-Rocketbox.md`. Full text:
+  `public/characters/rb/LICENSE-Rocketbox.md` and `index.json` names the licence. Full text:
 
 ```
 MIT License
@@ -148,11 +156,46 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-- **Edits:** head piece extracted by bone dominance; units to metres; bones remapped to our rig;
-  textures resized from 2048² TGA to 1024² WebP (q88). Built by
-  `tools/characters/build-rocketbox.ts`.
-- **Files:** `public/characters/eval/rb_<name>.bin` and `rb_<name>_{color,normal,opacity}.webp`.
-  They're used only by the `?characters=1&scene=rocketbox` evaluation scene.
+- **Edits (all heads):** head piece extracted by bone dominance; units to metres; bones remapped
+  to our rig; vertices welded and quantised; textures resized from 2048² TGA to WebP. At runtime
+  each head is fitted to our skeleton (interocular distance, eye midpoint), its skin tone is moved
+  toward the generated body's (tint clamped to ±25%), and our body's neck is cut along the head's
+  neck edge and conformed to it.
+- **Likeness: the leads are altered so each is its own character.** None of the three is a stock
+  Rocketbox face:
+  - landmark-driven feature deformations, all listed in `tools/characters/rb_leads.json`:
+    - Teddy: nose widened and lengthened, jaw broadened, cheeks lowered, inner brows lowered;
+    - Delphine: cheekbones raised and widened, eyes set wider, nose wider and less projecting, jaw
+      narrowed and lengthened, lower lip fuller;
+    - Nick: jaw and masseters widened, nose enlarged, brow ridge heavier, outer brows lowered.
+  - Lab colour transfer of skin and hair to each character's appearance sheet (Teddy `#b98a67`,
+    hair `#1c1814`; Delphine `#5a3825`, hair `#141010`; Nick `#c8a17e`, hair `#7a7570`).
+  - Hair:
+    - Delphine: the base's slicked-back hair, with its bun compressed onto the skull and the
+      bun's cards removed;
+    - Teddy: the base's own short crop (it matches his sheet, a near-black side parting);
+    - Nick: our generated strand cards, because his base is bald.
+  - Rocketbox avatars are generic library characters, not scans of named public people; the edits
+    above are there so that the leads aren't recognisably any library avatar either.
+- **Files:** `public/characters/rb/<id>.bin` and `<id>_{c,n,o}.webp` (`c` colour, `n` normal, `o`
+  hair/lash opacity), `index.json` (ids, tags, measured skin colour, lead flags),
+  `LICENSE-Rocketbox.md`. Built by `tools/characters/build-rocketbox.ts --pool --leads` (texture
+  steps in `rb_tex.py`).
+
+## 7. MakeHuman default skins (CC0): skin detail for every body
+- **What:** the 18 default MakeHuman skins (young, middle-aged and old; African, Asian and
+  Caucasian; female and male), 2048² diffuse maps on the MakeHuman base-mesh UVs (which are our
+  body's UVs).
+- **Source:** the MakeHuman system assets package (`makehuman_system_assets_cc0.zip`, the same
+  CC0 package as §1), folder `skins/<age>_<ancestry>_<sex>/`.
+- **Licence:** CC0 1.0. Each skin's `.mhmat` file states it was "explicitly released as CC0 in
+  september 2020".
+- **Edits:** each map is divided by its own median colour, so only detail is kept (pores, lips,
+  brows, freckles, ageing, nail beds) while our generator's skin tone still sets the colour.
+  - High: 18 tiles of 384² in one strip, `skins_hi.webp`, 150 KiB.
+  - Low: 6 tiles of 256², averaged over ancestry, `skins_lo.webp`, 21 KiB.
+  - Built by `tools/characters/build-skins.py`.
+- **Files:** `public/characters/skins_hi.webp`, `public/characters/skins_lo.webp`.
 
 ## 4. Tooling (not shipped)
 - three 0.187.0 (MIT) is used inside the build scripts for maths.

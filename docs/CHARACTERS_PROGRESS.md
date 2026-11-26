@@ -15,9 +15,10 @@ last.
 | Hair | Strand cards (alpha-to-coverage) for 14 straight/wavy styles, combed by per-style geodesic flow fields over a radial head map, on solid volume shells; clumped Worley shells for afros and curls; set-curl bumps; ponytail/braid/bun pieces; crowds keep the opaque outer shell |
 | Skin, cloth, hair materials | TSL: SSS approximation, procedural patterns, wear/sweat; CC0 Poly Haven fabric scans as triplanar bump detail (wool, denim, jersey, poplin, corduroy, leather) |
 | Animation | Animator (blend space with stride warp, layers, posture, lean), foot IK with locking, look-at, hand IK, seat pose, events |
-| Heroes | Teddy, Delphine and Nick from the narrative appearance sheets (7fffd4f), wardrobe sets per act |
+| Faces | **User decision: Rocketbox for leads and nearby people.** Leads wear altered Rocketbox-based heads (feature deformations, recolour); the near ring (Medium+) gets matched pool heads (30); distant crowds and Low keep our heads; every body has MakeHuman CC0 skin detail |
+| Heroes | Teddy, Delphine and Nick from the narrative appearance sheets (7fffd4f), wardrobe sets per act; 2 draws each |
 | Crowd | GPU-instanced templates (baked half-float bone atlas), LOD2/LOD3, a worker-built near ring of full characters, per-agent colour variation, hand carts |
-| Test scenes | `?characters=1&scene=lineup|leads|course|slide|crowd|shoes|hair|street` (deterministic with `&t=`); `street` runs the crowd on a real street of the engine's city. All shots: `bash tools/characters/shots.sh` |
+| Test scenes | `?characters=1&scene=lineup|leads|course|slide|crowd|shoes|hair|street|rocketbox` (deterministic with `&t=`); `street` runs the crowd on a real street of the engine's city. All shots: `bash tools/characters/shots.sh` |
 | Integration | API in `src/characters/index.ts`; engine wiring requested in ENGINE_REQUESTS ("From characters: 3") |
 
 ## Architecture
@@ -106,10 +107,13 @@ is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
 | 1.3 m/s | 110–165 mm/s | 8–17 mm/s |
 | 1.75 m/s | 160–210 mm/s | 17–28 mm/s |
 
-**Downloads**
-- High: body.bin 6.9 MiB + anims.bin 0.97 MiB + fabric maps 0.26 MiB = **8.13 MiB** (budget 15).
-- **Mobile Low: body_low.bin 0.95 MiB + anims.bin 0.97 MiB + fabric maps 0.07 MiB = 1.99 MiB**
-  (budget 6; oversight's target was about 1.95 MiB, so the fabric set adds 0.04 MiB).
+**Downloads** (re-measured after the faces block)
+- **High:** body 6.9 + anims 0.97 + fabric maps 0.26 + skin detail 0.15 = 8.28 MiB at start, plus
+  the three lead heads, 0.83 MiB, preloaded = **9.12 MiB**. The near-ring pool, 30 heads of 79–342
+  KiB (mean 187), loads only on demand; if every one of them were fetched, the worst case is
+  **14.59 MiB** (budget 15). In practice the 10-person near ring needs 10–20 heads per area.
+- **Mobile Low:** body_low 0.95 + anims 0.97 + fabric maps 0.07 + skin detail 0.02 = **2.01 MiB**
+  (budget 6; oversight's target was about 2 MiB). No Rocketbox heads on Low.
 
 ## Critique of the lineup and leads (honest)
 Shots: `shots/characters/01_lineup_a_vs_refs.png` and `02_lineup_b_vs_refs.png` show 20 seeded
@@ -180,7 +184,7 @@ including close-ups. Locomotion frames are `10`–`17`; crowds are `19` and `20`
 - The lighting in the lineup and lead shots is a neutral test rig; `24`–`26` use the engine's own
   atmosphere on a real street (West 22nd Street at 13:30).
 
-## Rocketbox evaluation (user-approved, via oversight; nothing switched)
+## Rocketbox evaluation (user-approved, via oversight; superseded by the faces block below)
 **Question:** would Microsoft Rocketbox avatars close the realism gap? (`27_rocketbox_ab`,
 `28_rocketbox_faces_ab`; scene `?characters=1&scene=rocketbox`.)
 - **Licence:** MIT (repo `LICENSE.md`; README "November 2020 License Update"). Redistributable in
@@ -228,9 +232,73 @@ user's decision (base-mesh choices are theirs).**
   our own baked albedo/normal detail) map onto our existing UVs. That would close part of the gap
   for everyone, including Low and the leads, without a second asset family.
 
+## Faces block (user decision: "Rocketbox for leads + nearby people")
+Shots: `27_rocketbox_ab` (each lead: Rocketbox-based head beside our head), `28a`–`28f` (head
+close-ups of the same), `29_pool_heads` (generated pedestrians with matched pool heads), `30_neck_seam`,
+leads `04`–`09` and the street `24`–`26` (near-ring heads); the leads beside the references:
+`04_leads_act1_vs_refs`.
+
+**What was built**
+1. **Leads:** Teddy, Delphine and Nick get Rocketbox-based heads altered to their sheets, not
+   stock faces (bases, edits and the likeness note: `CHARACTER_SOURCES.md` §6).
+   - Landmark deformations (nose, jaw, cheeks, brows, eyes, lips), then Lab recolour of the skin
+     and hair to the sheet hex.
+   - **2 draws per lead:** the head is merged into the hair draw; the hair material gained a face
+     branch.
+   - Hair:
+     - Delphine: her base's close hair, with the bun compressed onto the skull and its cards
+       dropped. Our afroShort shell read as a cap over the Rocketbox skull.
+     - Teddy: his base's own crop. Close up it clearly beats our cards, and it fits his sheet
+       (near-black side parting).
+     - Nick: our cards (his base is bald).
+2. **Near ring (Medium and above):**
+   - each near pedestrian gets a pool head matched by sex, age band, ancestry weights and hair
+     category;
+   - tint toward the body's tone, clamped to ±25%;
+   - no duplicates among near or pending characters;
+   - heads load on demand, and the body is built headless in the worker.
+   - Variety comes from tint, our wardrobe, hats and props.
+3. **Distant crowds and Low** keep our heads, with **MakeHuman CC0 skin detail** (lips,
+   eyelids, brows, pores, ageing) on our UVs for every body:
+   - High: 18 skins (age × sex × ancestry);
+   - Low: 6, averaged over ancestry;
+   - adds 0.15 MiB on High and 0.02 MiB on Low.
+4. **Neck seam:**
+   - Rocketbox necks are cut on a slant, higher at the nape. A level cut left gaps, and
+     stretching the head onto our neck flared at the nape.
+   - Now the head's neck edge (height and radius by angle, from its boundary loop) is measured at
+     load. Our skin is cut along it and our neck conforms to its radius just below.
+   - The last few centimetres of the head's neck take the body colour outright.
+5. **Wardrobe fixes asked for in the same decision:**
+   - fewer men in dramatic flares: big flares only for some men under 35, otherwise
+     straight/slight;
+   - older women's set curls: soft dense volume instead of white frizz;
+   - shirt collars rebuilt again. The point length was being added to a 46 mm fall, giving
+     18 cm leaves. Now the stand sits on the neck (not the trapezius), the fall hugs it, and it
+     closes at the throat under a tie.
+
+**Measured**
+- Leads: 2 draws each (body + head-and-hair). Heads: Teddy 3.2k triangles, Delphine 3.4k (with
+  their own hair cards), Nick 2.9k plus our hair cards; whole-character totals in
+  `27_rocketbox_ab.json`. Per-frame CPU unchanged (the head is one more skinned piece).
+- Pool heads: 79–342 KiB each, 2.9k–5.5k triangles (23 of 30 with hair/lash cards); our head
+  and hair are dropped, so a near-ring pedestrian is still 2 draws (body + head). Crowd timings
+  with near-ring heads: see Measurements (`19`, `24`–`26`).
+
+**Honest state**
+- Close up, the leads' and near pedestrians' faces are a large step up: real eyes, skin and
+  ageing. Delphine's hair is close-cropped and pulled back rather than a natural crop; that's a
+  deviation from her sheet, and it stays until a cropped-natural Rocketbox base or authored card
+  set exists.
+- The neck seam is clean in side and back views. A small tone step remains under some lights,
+  because our skin shader and the Rocketbox material shade differently.
+- Nick's grey slick hair (our cards) looks noisy up close in SwiftShader shots, which have no
+  MSAA, so alpha-to-coverage falls back to dither. Needs a real-GPU check.
+- Collars: no longer oversized, but still flat ribbons without a visible roll.
+
 ## Known issues (honest)
-- **Faces** read as "game" faces: dark eye rims, no wet-line geometry, no blinks, little visible
-  ageing (next block).
+- **Faces** (our heads, distant crowds and Low): still mannequin-like close up; they're only seen
+  at distance now. No blinks or lip-sync yet on any head (Rocketbox facial bones are there).
 - **Hair:** shell speckle without TAA; procedural strand alpha on cards (no authored strand
   textures); grey coily hair shows dark gaps.
 - **Cloth:** no folds; lapels are ribbons; boot shafts hug the leg.
@@ -245,10 +313,9 @@ user's decision (base-mesh choices are theirs).**
   the worker before gameplay spawns heroes mid-scene.
 
 ## Next
-1. **Decision needed from the user:** the Rocketbox hybrid (above). Meanwhile, the next block
-   is faces: albedo/normal detail and age, eye rims, blinks (Rocketbox's facial-bone layout is a
-   good reference), lip-sync. Then posture (pockets, contrapposto, folded arms), impostors, and
-   a ledge-aligned climb.
+1. Faces block follow-ups: blinks and lip-sync on the Rocketbox facial bones; a real-GPU check
+   of card hair; a cropped-natural option for Delphine. Then posture (pockets, contrapposto,
+   folded arms), impostors, and a ledge-aligned climb.
 2. Consume `content/npc_archetypes/*.json` (53 archetypes). `npc.strip_worker` must vary in
    background and is never costumed or framed sexually.
 3. **Scope added by oversight (backlog, in priority order):**

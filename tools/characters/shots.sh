@@ -32,6 +32,15 @@ declare -a SHOTS=(
   "24_street_eye|$C&scene=street&n=140&t=1|1600|900"
   "25_street_400|$C&scene=street&n=400&cs=0&cy=6&fov=55&t=1|1600|900"
   "26_street_120_low|$C&scene=street&n=120&quality=low&t=1|1280|720"
+  "27_rocketbox_ab|$C&scene=rocketbox&t=0.6|1600|900"
+  "28a_teddy_rb|$C&scene=rocketbox&t=0.6&zoom=head&focus=0&yaw=-25|900|900"
+  "28b_teddy_ours|$C&scene=rocketbox&t=0.6&zoom=head&focus=1&yaw=-25|900|900"
+  "28c_delphine_rb|$C&scene=rocketbox&t=0.6&zoom=head&focus=2&yaw=-25|900|900"
+  "28d_delphine_ours|$C&scene=rocketbox&t=0.6&zoom=head&focus=3&yaw=-25|900|900"
+  "28e_nick_rb|$C&scene=rocketbox&t=0.6&zoom=head&focus=4&yaw=-25|900|900"
+  "28f_nick_ours|$C&scene=rocketbox&t=0.6&zoom=head&focus=5&yaw=-25|900|900"
+  "29_pool_heads|$C&scene=rocketbox&pool=1&n=8&t=0.6|1600|900"
+  "30_neck_seam|$C&scene=rocketbox&t=0.6&zoom=head&focus=2&yaw=150|900|900"
 )
 for s in "${SHOTS[@]}"; do
   IFS='|' read -r name url w h <<< "$s"
