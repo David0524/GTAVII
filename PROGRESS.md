@@ -300,6 +300,22 @@ Herald Square.
 | UI, map and cinematics | `claude/ui-cinematics` | docs/briefs/UI_CINEMATICS_BRIEF.md | **all of `src/ui/` and `src/settings/` after the freeze commit**, plus the cutscene system (`src/cinematics/`) |
 | Oversight | `claude/awesome-keller-i9tmmu` | — | cross-stream checks, briefs, the user's decisions |
 
+**Session directory** (for direct coordination with send_message; contracts still go through
+ENGINE_REQUESTS and ENGINE_RESPONSES, and the oversight session is copied on contract changes):
+
+| Stream | Session |
+|---|---|
+| Engine | `session_01H4ZSJ5agLRKP5qS2okvyAK` |
+| Narrative | `session_01H4ZSJ7VbJSVZUhFqooiSvX` |
+| Sim | `session_01H4ZSJ7ZFKbq3mXVPBgLaXc` |
+| Vehicles | `session_01H4ZSJ51q9zJhE3T3n4Hw3M` |
+| Audio | `session_01H4ZSJ6zQP5er585qGhpRft` |
+| Characters | `session_01H4ZSJ9HHC3JhC3uZj5pVfG` |
+| Gameplay | `session_01H4ZSJ7ih6pW16fwcDhuHtD` |
+| Interiors | `session_01H4ZSJ8LAo9NuN9usWP4Dn3` |
+| UI & cinematics | `session_01H4ZSJ9Htu5DPCDMJHKesiQ` |
+| Oversight | `session_01H4ZSJ99NBvPVUNdV2re88V` |
+
 **Master feature checklist:** [docs/briefs/FEATURE_AUDIT.md](docs/briefs/FEATURE_AUDIT.md), with an owner for every line.
 
 **`package.json`:** scripts are kept alphabetical. Streams add only their own `<stream>:*`
