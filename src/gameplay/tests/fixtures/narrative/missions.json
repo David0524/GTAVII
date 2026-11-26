@@ -1,5 +1,5 @@
 {
- "_source": "narrative claude/sharp-maxwell-jnb6hr 0912179 content/missions/*.json (order, duration, play-as, rewards incl. debt)",
+ "_source": "narrative claude/sharp-maxwell-jnb6hr b5dd122 content/missions/*.json (order, duration, play-as, rewards incl. debt)",
  "missions": [
   {
    "id": "mission.dusk_on_broadway",
@@ -317,9 +317,9 @@
    "act": 3,
    "playAs": "char.delphine_moore",
    "durationMin": 18,
-   "money": 3000,
+   "money": 4000,
    "moneyByLead": {
-    "char.delphine_moore": 3000
+    "char.delphine_moore": 4000
    },
    "moneyIf": [],
    "debt": null
@@ -368,10 +368,10 @@
    "act": 3,
    "playAs": "char.delphine_moore",
    "durationMin": 18,
-   "money": 9000,
+   "money": 9500,
    "moneyByLead": {
-    "char.delphine_moore": 4000,
-    "char.nick_varelas": 5000
+    "char.delphine_moore": 6500,
+    "char.nick_varelas": 3000
    },
    "moneyIf": [],
    "debt": null

@@ -1,9 +1,9 @@
 {
  "description": "25-hour playthrough on narrative's story pay (snapshot f0a96c9), deterministic (seed 1974). 1 game minute = 2 real seconds. Money in dollars. User decision: \"Yes, but in GTA VI you can really rack up money. Like 10s of thousands\".",
- "storyPay": 112300,
+ "storyPay": 113800,
  "storyHours": 8.72,
  "storyEndRealHour": 21.563888888888886,
- "netWorth": 117258.47,
+ "netWorth": 118758.47,
  "realHours": 25,
  "gameHours": 750,
  "curve": [
@@ -180,104 +180,104 @@
   {
    "realHour": 17,
    "gameHour": 510,
-   "total": 62405.99,
+   "total": 63405.99,
    "leads": {
     "Teddy": 16667.17,
-    "Delphine": 14196.26,
+    "Delphine": 15196.26,
     "Nick": 31542.56
    }
   },
   {
    "realHour": 18,
    "gameHour": 540,
-   "total": 84299.71,
+   "total": 85799.71,
    "leads": {
     "Teddy": 20060.89,
-    "Delphine": 19696.26,
-    "Nick": 44542.56
+    "Delphine": 23196.26,
+    "Nick": 42542.56
    }
   },
   {
    "realHour": 19,
    "gameHour": 570,
-   "total": 83499.71,
+   "total": 75499.71,
    "leads": {
     "Teddy": 20460.89,
-    "Delphine": 18496.26,
-    "Nick": 44542.56
+    "Delphine": 12496.26,
+    "Nick": 42542.56
    }
   },
   {
    "realHour": 20,
    "gameHour": 600,
-   "total": 83414.83,
+   "total": 75414.83,
    "leads": {
     "Teddy": 20460.89,
-    "Delphine": 18411.38,
-    "Nick": 44542.56
+    "Delphine": 12411.38,
+    "Nick": 42542.56
    }
   },
   {
    "realHour": 21,
    "gameHour": 630,
-   "total": 92525.32,
+   "total": 84525.32,
    "leads": {
     "Teddy": 25571.38,
-    "Delphine": 22411.38,
-    "Nick": 44542.56
+    "Delphine": 16411.38,
+    "Nick": 42542.56
    }
   },
   {
    "realHour": 22,
    "gameHour": 660,
-   "total": 113203.3,
+   "total": 105203.3,
    "leads": {
     "Teddy": 34319.36,
-    "Delphine": 28376.38,
-    "Nick": 50507.56
+    "Delphine": 22376.38,
+    "Nick": 48507.56
    }
   },
   {
    "realHour": 23,
    "gameHour": 690,
-   "total": 114800.75,
+   "total": 106800.75,
    "leads": {
     "Teddy": 35916.81,
-    "Delphine": 28376.38,
-    "Nick": 50507.56
+    "Delphine": 22376.38,
+    "Nick": 48507.56
    }
   },
   {
    "realHour": 24,
    "gameHour": 720,
-   "total": 106058.47,
+   "total": 107558.47,
    "leads": {
     "Teddy": 36106.55,
-    "Delphine": 19444.36,
-    "Nick": 50507.56
+    "Delphine": 22944.36,
+    "Nick": 48507.56
    }
   },
   {
    "realHour": 25,
    "gameHour": 750,
-   "total": 106058.47,
+   "total": 107558.47,
    "leads": {
     "Teddy": 36106.55,
-    "Delphine": 19444.36,
-    "Nick": 50507.56
+    "Delphine": 22944.36,
+    "Nick": 48507.56
    }
   }
  ],
  "final": {
   "Teddy": 36106.55,
-  "Delphine": 19444.36,
-  "Nick": 50507.56
+  "Delphine": 22944.36,
+  "Nick": 48507.56
  },
- "totalCash": 106058.47,
+ "totalCash": 107558.47,
  "assetsAtPurchasePrice": 11200,
  "startCash": 365,
  "earned": {
-  "mission": 112300,
+  "mission": 113800,
   "legal": 233.41,
   "crime": 4967.56,
   "gamble": -12.43,
@@ -386,14 +386,14 @@
   }
  ],
  "hourlyVsMissions": {
-  "missionsPerRealHour": 12883.37,
+  "missionsPerRealHour": 13055.45,
   "bestLegal": {
    "id": "job.cab",
    "ratio": 0.005
   },
   "bestCrime": {
    "id": "crime.hijack",
-   "ratio": 0.085
+   "ratio": 0.084
   },
   "all": {
    "job.cab": {
@@ -433,7 +433,7 @@
     "dollarsPerRealHour": 596.84
    },
    "crime.hijack": {
-    "vsMissions": 0.085,
+    "vsMissions": 0.084,
     "dollarsPerRealHour": 1100.8
    },
    "crime.pickpocket": {
@@ -441,7 +441,7 @@
     "dollarsPerRealHour": 77.82
    },
    "crime.collections": {
-    "vsMissions": 0.065,
+    "vsMissions": 0.064,
     "dollarsPerRealHour": 836.83
    },
    "crime.chop": {
@@ -453,31 +453,31 @@
     "dollarsPerRealHour": 337.89
    },
    "biz.laundromat": {
-    "vsMissions": 0.043,
+    "vsMissions": 0.042,
     "dollarsPerRealHour": 553.7
    },
    "biz.diner": {
-    "vsMissions": 0.116,
+    "vsMissions": 0.115,
     "dollarsPerRealHour": 1496.74
    },
    "biz.poolhall": {
-    "vsMissions": 0.079,
+    "vsMissions": 0.078,
     "dollarsPerRealHour": 1023.08
    },
    "biz.arcade": {
-    "vsMissions": 0.219,
+    "vsMissions": 0.216,
     "dollarsPerRealHour": 2817.83
    },
    "biz.garage": {
-    "vsMissions": 0.26,
+    "vsMissions": 0.256,
     "dollarsPerRealHour": 3344.91
    },
    "biz.rooming_house": {
-    "vsMissions": 0.319,
+    "vsMissions": 0.315,
     "dollarsPerRealHour": 4108.05
    },
    "biz.supper_club": {
-    "vsMissions": 0.456,
+    "vsMissions": 0.45,
     "dollarsPerRealHour": 5881
    }
   }

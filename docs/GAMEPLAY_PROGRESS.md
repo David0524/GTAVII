@@ -349,7 +349,7 @@ Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
       - mid tier at 8.6 / 8.6 / 8.7 / 8.9 / 11.4 h;
       - with the best-paying choices, the Deuce arcade at 20.2–21.4 h; typical play buys nothing big before 18 h;
       - the story ends at about 22 h;
-      - story-end net worth $114–125k in typical play, about $31–47k Teddy, $18–25k Delphine and $45–56k Nick, after a premium car, suits and a watch.
+      - story-end net worth $114–125k in typical play, about $34–49k Teddy, $22–28k Delphine and $42–54k Nick (narrative b5dd122), after a premium car, suits and a watch.
   - **No runaway:** a free-roam-only grinder makes under 25% of what the story pays in the same 25 h.
   - **Wired into `Gameplay`:** `g.economy.attempt(lead, activity)`. Its crimes go through the
     witness system, and it's saved in gameplay's section. It isn't in the test scene's UI yet.
