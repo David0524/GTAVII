@@ -175,5 +175,6 @@
     "loc.steakhouse"
   ],
   "mobile": "The infiltration is about timing and doors (the watchman has a fixed loop shown on a radio clock), not stealth reflexes. Being spotted resets to the o7 checkpoint. Nick's dinner is a calm dialogue that the player can stretch with menu choices. Branch variants via `if` (ENGINE_REQUESTS 8).",
-  "design": "**End of Act 2.** Branch A pays off. With the wire, Marjorie lets Teddy in, he copies the ledger and returns it, and she hands over her carbons (flag.have_marjorie_carbons, set in dialogue). Burned, he steals it, and Lisle knows by morning. Either way the oldest page is Mayhew's. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "**End of Act 2.** Branch A pays off. With the wire, Marjorie lets Teddy in, he copies the ledger and returns it, and she hands over her carbons (flag.have_marjorie_carbons, set in dialogue). Burned, he steals it, and Lisle knows by morning. Either way the oldest page is Mayhew's. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "dusk"
 }

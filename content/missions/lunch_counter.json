@@ -130,5 +130,6 @@
     "5th Ave & W 36th St"
   ],
   "mobile": "**Branch A** is an untimed two-option choice with a confirm step ('Are you sure?'), because it persists. Delphine's tail goes down Broadway and Sixth through lunch crowds, so it's generous.",
-  "design": "**Branch A.** Calloway offers the wire. Choices in dlg.m12_calloway set flag.branch_a_wire or flag.branch_a_burned and the N3 §3 relationship changes. Delphine, two stools down because she followed her fifty dollars, learns who Calloway is, which gives her leverage in P4. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "**Branch A.** Calloway offers the wire. Choices in dlg.m12_calloway set flag.branch_a_wire or flag.branch_a_burned and the N3 §3 relationship changes. Delphine, two stools down because she followed her fifty dollars, learns who Calloway is, which gives her leverage in P4. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

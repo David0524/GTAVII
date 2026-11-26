@@ -151,5 +151,6 @@
     "loc.corwin_hotel"
   ],
   "mobile": "No fail states. The escort matches the player's pace and waits, so there's no exact pacing on touch. Dialogue segments are gated by route leg. Objective text names real corners. One untimed choice (3 options). Long dusk light keeps the walk readable on small screens.",
-  "design": "Earns the spawn shot. The streetlights come on as the pair walk north (the engine dusk cycle at 20:31 sunset). Mayhew's 'Not anymore' about W 35th St seeds the 1971 secret. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "Earns the spawn shot. The streetlights come on as the pair walk north (the engine dusk cycle at 20:31 sunset). Mayhew's 'Not anymore' about W 35th St seeds the 1971 secret. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night"
 }

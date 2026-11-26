@@ -142,5 +142,6 @@
     "loc.steakhouse"
   ],
   "mobile": "**Branch B** is an untimed choice with a confirm step. Unavailable options are shown greyed out, with the reason ('Needs a witness who'll testify'), so the player sees the cost of earlier choices. One short trip afterwards.",
-  "design": "**Branch B** (N3 §3). dlg.m29_choice gates options with `if`: B1 needs flag.branch_a_wire or flag.nick_flipped; B2 needs two corroborations plus flag.editor_neutralised; B3 and B4 are always available. o3c meets Lisle at the Iron Gate because it's dinnertime. In the New Pad epilogue Teddy takes Lisle's luncheonette stool. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "**Branch B** (N3 §3). dlg.m29_choice gates options with `if`: B1 needs flag.branch_a_wire or flag.nick_flipped; B2 needs two corroborations plus flag.editor_neutralised; B3 and B4 are always available. o3c meets Lisle at the Iron Gate because it's dinnertime. In the New Pad epilogue Teddy takes Lisle's luncheonette stool. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "dusk"
 }

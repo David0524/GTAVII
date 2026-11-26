@@ -128,5 +128,6 @@
     "loc.cop_bar"
   ],
   "mobile": "Walking at dawn, two blocks between stops, no timers. Moretti's sidewalk jungle of potted palms is a soft-collision crowd, so take it slowly. Both collection choices are untimed.",
-  "design": "P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "dawn"
 }

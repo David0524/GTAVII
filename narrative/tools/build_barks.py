@@ -515,6 +515,34 @@ pool("barks.emergency", False, "Firefighters and ambulance crews (scripted scene
  ("collision", "brisk", "Move, move, hose coming through!"),
  ("idle", "flat", "Building's fine. Go back up. Nobody's hurt."))
 
+pool("barks.sleep", False, "TIME.md: waking up (by lead), a bad night in the heat, and the SRO desk clerk renting a room. 'who' marks lead-specific lines.",
+ ("wake", "groggy", "(Teddy) Seven a.m. Somebody's radio. Somebody's always got a radio."),
+ ("wake", "dry", "(Teddy) Up. Shower down the hall. Hot water's a rumour."),
+ ("wake", "tired", "(Teddy) Dreamt about the car again. Thirty-Fifth Street. Coffee."),
+ ("wake", "brisk", "(Delphine) Rule one before coffee: count the box. Then coffee."),
+ ("wake", "warm", "(Delphine) Afternoon light through the curtain. Nobody banging on the door. A good day."),
+ ("wake", "dry", "(Delphine) Feet still hurt. Feet always hurt. Up."),
+ ("wake", "groggy", "(Nick) Eleni's already at the office. Eleni is always already at the office."),
+ ("wake", "proud", "(Nick) Morning. Somewhere a bank is thinking about me. Let it think."),
+ ("wake", "worried", "(Nick) Bills in the drawer. Close the drawer. Shave."),
+ ("wake_heat", "miserable", "(Teddy) Window painted shut. Slept in a puddle. The fan just moved the hot around."),
+ ("wake_heat", "tired", "(Teddy) Ninety at midnight. Ninety at six. Ninety is the new zero."),
+ ("wake_heat", "miserable", "(Delphine) Too hot to sleep, too hot to think. Rule two: think anyway."),
+ ("wake_heat", "tired", "(Delphine) Wet towel on the neck, all night. Like sleeping in soup."),
+ ("wake_heat", "miserable", "(Nick) Even the air-conditioner gave up. Like my bank."),
+ ("wake_heat", "dry", "(Nick) I slept on the balcony. Madison Avenue sounds like a war."),
+ ("wake_brownout", "uneasy", "Woke up in the dark. Power came back at four. The refrigerator's crying."),
+ ("rent_room", "flat", "Room's four-fifty a night. Bath down the hall. Key back by noon."),
+ ("rent_room", "tired", "Sign the book. Any name. Everybody's Smith on Eighth Avenue."),
+ ("rent_room", "wry", "Fan's extra. Fifty cents. Window opens. Mostly."),
+ ("rent_room", "suspicious", "No visitors after eleven. That's the rule. I enforce it with my eyes closed."),
+ ("rent_room", "friendly", "Corwin's full of old men, but they're quiet. Mostly. Eleven-oh-four sings."),
+ ("rent_room", "flat", "Weekly's twenty-two. Nightly's four-fifty. You look nightly."),
+ ("rent_room", "weary", "Elevator's out. Room's on seven. Builds character."),
+ ("rent_room", "wry", "Cash. In advance. I don't take checks, IOUs, or sad stories."),
+ ("cant_sleep", "flat", "Can't sleep now. Sirens on the block. Somebody's looking for somebody."),
+ ("cant_sleep", "tired", "Not now. Too much going on. Sleep's for people with nothing to do."))
+
 for p in P.values():
     (OUT / f"{p['id'].split('.', 1)[1]}.json").write_text(json.dumps(p, ensure_ascii=False, indent=2) + "\n")
 core = [p for p in P.values() if p["core"]]

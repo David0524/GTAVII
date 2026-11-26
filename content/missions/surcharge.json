@@ -162,5 +162,6 @@
     "W 37th St & 7th Ave"
   ],
   "mobile": "Following is generous (40 m) through rush-hour crowds, and losing Dwayne only fails after 30 s out of range with a 'Dwayne's at 36th & Seventh' hint. Pushing a rack is one held button. The step-in choice is untimed.",
-  "design": "The surcharge is shown, not explained: envelopes on dashboards, the Baeks' refusal, Augie's 'I remember you from the Christmas list'. The choice sets relationships only (Baek +1 and Augie −1 if Teddy steps in; Baek −1 if he walks on). Those are applied in the dialogue's setRelationships. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "The surcharge is shown, not explained: envelopes on dashboards, the Baeks' refusal, Augie's 'I remember you from the Christmas list'. The choice sets relationships only (Baek +1 and Augie −1 if Teddy steps in; Baek −1 if he walks on). Those are applied in the dialogue's setRelationships. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "day"
 }

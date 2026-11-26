@@ -17,7 +17,7 @@
     "notFlags": [],
     "act": 2,
     "timeWindow": [
-      "15:00",
+      "12:00",
       "20:00"
     ],
     "weather": [
@@ -142,5 +142,6 @@
     "loc.bauer_arcade"
   ],
   "mobile": "The evade is solved by the arcade's two doors (42nd St and 8th Ave). Lonnie is slower in the crowd. No combat. Day-into-dusk light helps readability.",
-  "design": "Moving cash under surveillance (P1). Tina's lateness and Lonnie's tail are linked, which seeds her secret. Bauer hints that 'somebody downtown' asks about Wurtz. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Moving cash under surveillance (P1). Tina's lateness and Lonnie's tail are linked, which seeds her secret. Bauer hints that 'somebody downtown' asks about Wurtz. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

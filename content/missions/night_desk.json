@@ -139,5 +139,6 @@
     "loc.corwin_hotel"
   ],
   "mobile": "Interior-only hub tutorial: big USE prompts on the desk, the mailboxes, the elevator and room 1112. The elevator ride is a 3-second cut, not a control. No timers.",
-  "design": "Teaches the hub: desk ledger (save), room-key board (fast travel to floors), phone (calls from cast). Prentiss's first friendly offer establishes P5. Bernard reads the notice aloud and names 'Corwin Residential Associates, H. Lisle, counsel'. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "Teaches the hub: desk ledger (save), room-key board (fast travel to floors), phone (calls from cast). Prentiss's first friendly offer establishes P5. Bernard reads the notice aloud and names 'Corwin Residential Associates, H. Lisle, counsel'. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night"
 }

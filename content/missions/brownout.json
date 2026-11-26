@@ -154,5 +154,6 @@
     "W 37th St & 9th Ave"
   ],
   "mobile": "The brownout (set_power, ENGINE N2) darkens W 28th–34th. Dark signals are all-way stops for AI. The ice truck is slow and waits for you. There's no timer, but Yiannis calls the thermometer every minute as urgency flavour. The route uses the 1974 one-ways (west on 37th, back down Ninth or Seventh).",
-  "design": "Introduces Nick through crisis and money (spending is a verb: the ice costs $300). It ends with the first meeting: Teddy at the vault door in his collector's coat, and Nick in a dinner jacket, sleeves rolled, wet to the elbows. Neither knows the other is tied to the Corwin until the last line. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Introduces Nick through crisis and money (spending is a verb: the ice costs $300). It ends with the first meeting: Teddy at the vault door in his collector's coat, and Nick in a dinner jacket, sleeves rolled, wet to the elbows. Neither knows the other is tied to the Corwin until the last line. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night"
 }

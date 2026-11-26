@@ -130,5 +130,6 @@
     "loc.corwin_hotel"
   ],
   "mobile": "Two short drives and a lobby scene. The resolution choice is untimed. Gated options are greyed with a reason.",
-  "design": "Nick's resolution (N3 §3): sell on, keep, or give it to the council. Signing the Baeks' deed sets flag.baek_bought_building if it wasn't already set in M16. 'Nobody told me there were people in it' finally gets its answer from Odessa. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Nick's resolution (N3 §3): sell on, keep, or give it to the council. Signing the Baeks' deed sets flag.baek_bought_building if it wasn't already set in M16. 'Nobody told me there were people in it' finally gets its answer from Odessa. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

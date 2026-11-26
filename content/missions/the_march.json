@@ -156,5 +156,6 @@
     "W 34th St & 7th Ave"
   ],
   "mobile": "Walking pace with the escort matching the player (Odessa uses a cane, so it's slow on purpose). The crowd is dense but passable. No timers. One untimed choice for Nick at the end.",
-  "design": "P5 turned around: the city's working people show up. Every community's sympathetic figure marches: Carmen and Mei-lin, Moretti with flowers, the Baeks, Dwayne. Nick's walk to Odessa builds the non-transactional bond (N3 §3) that gates the council resolution. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "P5 turned around: the city's working people show up. Every community's sympathetic figure marches: Carmen and Mei-lin, Moretti with flowers, the Baeks, Dwayne. Nick's walk to Odessa builds the non-transactional bond (N3 §3) that gates the council resolution. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

@@ -135,5 +135,6 @@
     "loc.corwin_hotel"
   ],
   "mobile": "Interior only. The stairs (the elevator is dead) are a short climb with fading audio, not a stamina test. No timers.",
-  "design": "Content rule: **the death is off screen.** Teddy opens the door, the camera stays on his face and on Odessa behind him, and Hollis's radio is still playing. Nothing is shown. Afterwards Carmen arrives with the news that Feld has gone south (flag.feld_left), and grief turns into organising. Prentiss appears with condolence flowers, and the room goes silent. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Content rule: **the death is off screen.** Teddy opens the door, the camera stays on his face and on Odessa behind him, and Hollis's radio is still playing. Nothing is shown. Afterwards Carmen arrives with the news that Feld has gone south (flag.feld_left), and grief turns into organising. Prentiss appears with condolence flowers, and the room goes silent. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

@@ -153,5 +153,6 @@
     "loc.hotel_pennsylvania"
   ],
   "mobile": "The photo objectives auto-frame when the subject is in view and the shutter button is held, so precise aim isn't needed. The size threshold is generous. The tail follows a fixed, learnable route (Lisle walks W 36th → 6th Ave → W 33rd → 7th Ave), so a player who knows it can wait ahead. Lunch-crowd density gives cover.",
-  "design": "Lisle's routine (cast schedule 12:40) becomes gameplay. Calloway sits in a parked car across Fifth Ave and Teddy notices her (one line), seeding M12. The photo with Mayhew sets up M7's choice. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "Lisle's routine (cast schedule 12:40) becomes gameplay. Calloway sits in a parked car across Fifth Ave and Teddy notices her (one line), seeding M12. The photo with Mayhew sets up M7's choice. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "day"
 }

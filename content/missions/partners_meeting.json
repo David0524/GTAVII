@@ -124,5 +124,6 @@
     "loc.steakhouse"
   ],
   "mobile": "Driving is optional (it's five blocks). The meeting is one dialogue with two untimed choices. No timers.",
-  "design": "Nick sees the ledger: his name on every hotel, every surcharge and every 'consideration'. The oldest page is dated autumn 1971, initialled C.M. (Mayhew, N3 §6). Marjorie leaves it open on purpose. That's the first crack in Lisle's office. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Nick sees the ledger: his name on every hotel, every surcharge and every 'consideration'. The oldest page is dated autumn 1971, initialled C.M. (Mayhew, N3 §6). Marjorie leaves it open on purpose. That's the first crack in Lisle's office. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

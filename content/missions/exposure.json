@@ -174,5 +174,6 @@
     "loc.hotel_pennsylvania"
   ],
   "mobile": "Spending is the solution: Nick buys the key, so there's no lockpicking. The optional photo is signposted ('Claudette says the paper's man drinks at the Pennsylvania') so players know it opens a Branch B option. Two switches, both at calm beats.",
-  "design": "The mirror pays off: Wurtz's photographs (his insurance) become the leads' evidence. The optional photo neutralises the editor's conflict for B2 and is signposted here, as N3 §9 requires. Tina's resolution (flag.tina_stays or flag.tina_gone) and Bauer's fate (flag.bauer_burned if Delphine trades him to save Tina) are set in dlg.m27_tina. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "The mirror pays off: Wurtz's photographs (his insurance) become the leads' evidence. The optional photo neutralises the editor's conflict for B2 and is signposted here, as N3 §9 requires. Tina's resolution (flag.tina_stays or flag.tina_gone) and Bauer's fate (flag.bauer_burned if Delphine trades him to save Tina) are set in dlg.m27_tina. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night"
 }

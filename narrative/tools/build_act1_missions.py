@@ -313,6 +313,17 @@ for m in M:
     m["pillars"] = sorted(set(m["pillars"]))
     m["design"] = m["design"] + " COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
 
+
+def tod_label(w):
+    """Time-of-day label for UI mission cards (TIME.md). Night = window starts 19:00 or later or before 05:00."""
+    if not w: return "any"
+    h = int(w[0][:2])
+    if 4 <= h < 6: return "dawn"
+    if 6 <= h < 17: return "day"
+    if 17 <= h < 20: return "dusk"
+    return "night"
+for m in M:
+    m["timeOfDay"] = tod_label(m["requires"].get("timeWindow"))
 for m in M:
     (OUT / f"{m['id'].split('.',1)[1]}.json").write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n")
 print(len(M), "missions written")

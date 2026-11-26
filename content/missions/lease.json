@@ -113,5 +113,6 @@
     "loc.korean_restaurant"
   ],
   "mobile": "Walking and talking only. The count is a dialogue, not arithmetic. Untimed choices.",
-  "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

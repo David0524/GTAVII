@@ -161,5 +161,6 @@
     "loc.arden_hotel"
   ],
   "mobile": "Rain and darkness: photo targets get a subtle rim light (engine photo mode), and the size threshold is generous. Bryant Park's trees and benches give cover. Being spotted is warned twice.",
-  "design": "Delphine's file reaches three prints (Brannock from M8, Wurtz and Ricky now, and Brannock at Earl's stand if taken), which sets flag.photo_file_3, one corroboration for B2. Ricky is drawn with dignity: scared, and counting days. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Delphine's file reaches three prints (Brannock from M8, Wurtz and Ricky now, and Brannock at Earl's stand if taken), which sets flag.photo_file_3, one corroboration for B2. Ricky is drawn with dignity: scared, and counting days. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night"
 }

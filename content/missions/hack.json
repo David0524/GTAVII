@@ -151,5 +151,6 @@
     "W 42nd St & 8th Ave"
   ],
   "mobile": "No timers on fares (the meter is flavour). Wrong-way driving is allowed but honked at, and the fare complains, which teaches the one-ways without punishing. Hints are written as a 1974 New Yorker would give directions. The fare to 42nd St shows the Deuce's marquees for the first time.",
-  "design": "P2 tutorial. Each fare follows one avenue's 1974 direction. On the last fare, Teddy passes a woman in an oxblood dress at 8th & W 40th (Delphine, unnamed). It's foreshadowing only, with no interaction. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "P2 tutorial. Each fare follows one avenue's 1974 direction. On the last fare, Teddy passes a woman in an oxblood dress at 8th & W 40th (Delphine, unnamed). It's foreshadowing only, with no interaction. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "dusk"
 }

@@ -193,5 +193,6 @@
     "loc.penn_station_lockers"
   ],
   "mobile": "Four checkpoints. Switches only at the safe beats (o5 after the handover, o8 at the ambush). The tail is generous; 'spotted' is warned twice before it fails. The escape is solved by Penn Station's two entrances (Eighth Ave and Seventh Ave), so it's route knowledge, not speed. No fighting.",
-  "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night"
 }

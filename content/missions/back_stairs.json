@@ -154,5 +154,6 @@
     "loc.bauer_arcade"
   ],
   "mobile": "The chase is on foot and solved by route knowledge (M6 taught the back stairs). Brannock is slower than Delphine and loses her at any door with two exits. There's no aiming; the photo auto-frames. Generous break distance.",
-  "design": "Delphine's power is witnessing. Bauer's arcade is a second safe zone, which seeds his double life. Wurtz is glimpsed in the car, not confronted. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py."
+  "design": "Delphine's power is witnessing. Bauer's arcade is a second safe zone, which seeds his double life. Wurtz is glimpsed in the car, not confronted. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night"
 }

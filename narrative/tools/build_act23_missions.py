@@ -59,7 +59,7 @@ M.append(mission(10, "mission.five_am", "Five A.M.", 2, 4, T, "1974-07-08", ("04
   start={"type": "talk", "who": "char.carl_mayhew", "at": "loc.corwin_hotel", "note": "Phone call to the night desk at 04:15: 'Flowers first. They open early.'"},
   mobile="Walking at dawn, two blocks between stops, no timers. Moretti's sidewalk jungle of potted palms is a soft-collision crowd, so take it slowly. Both collection choices are untimed.",
   design="P3: the Flower District at 5 a.m. Moretti refuses and tells Teddy about her slashed tyres (seeds Villalba). The Baeks pay with their calculator out and ask for a receipt (P1 as comedy). If flag.teddy_returned_tax, Mayhew finds the count short by fifty (handled in dialogue)."))
-M.append(mission(11, "mission.tax_day", "Tax Day", 2, 4, D, "1974-07-10", ("15:00", "20:00"), ["any"], 12, ["P1", "P2"],
+M.append(mission(11, "mission.tax_day", "Tax Day", 2, 4, D, "1974-07-10", ("12:00", "20:00"), ["any"], 12, ["P1", "P2"],
   "char.tina_mercado", [
    O("o1", "dialogue", "Club business at Rita's bar", script="dlg.m11_rounds"),
    O("o2", "enter_interior", "Dues at the Royal Cafeteria", marker="interior.royal_cafeteria"),
@@ -161,7 +161,7 @@ M.append(mission(16, "mission.margin_call", "Margin Call", 2, 6, N, "1974-07-22"
   start={"type": "talk", "who": "char.eleni_varelas", "at": "loc.varelas_loft"},
   mobile="Four short stops, any order after o2 (the engine can present o3–o8 as a list). Driving is optional because the stops are close. Choices are untimed.",
   design="Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches."))
-M.append(mission(17, "mission.the_lease", "The Lease", 2, 6, D, "1974-07-24", ("16:00", "19:00"), ["any"], 13, ["P4", "P1"],
+M.append(mission(17, "mission.the_lease", "The Lease", 2, 6, D, "1974-07-24", ("10:00", "19:00"), ["any"], 13, ["P4", "P1"],
   "char.delphine_moore", [
    O("o1", "goto", "The empty shop, W 37th St", to="loc.beauty_shop", radius=15),
    O("o2", "dialogue", "The agent says no. Politely.", script="dlg.m17_agent"),
@@ -525,6 +525,17 @@ for m in M:
                    "rats, a platform fight with a train coming, and a one-stop ride on a graffiti-covered local. Content rule: the third rail is a "
                    "visible hazard with no instructional detail. Then the kye hand-off and Tina's confession, as before.")
 
+
+def tod_label(w):
+    """Time-of-day label for UI mission cards (TIME.md). Night = window starts 19:00 or later or before 05:00."""
+    if not w: return "any"
+    h = int(w[0][:2])
+    if 4 <= h < 6: return "dawn"
+    if 6 <= h < 17: return "day"
+    if 17 <= h < 20: return "dusk"
+    return "night"
+for m in M:
+    m["timeOfDay"] = tod_label(m["requires"].get("timeWindow"))
 for m in M:
     (OUT / f"{m['id'].split('.', 1)[1]}.json").write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n")
 print(len(M), "missions written")

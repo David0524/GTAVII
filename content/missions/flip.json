@@ -128,5 +128,6 @@
     "loc.varelas_loft"
   ],
   "mobile": "Calm dialogue plus one cross-town drive (west on 37th, then up Ninth to the garage; back east on 38th, then down Seventh). No timers.",
-  "design": "Calloway's deal: testify against Lisle for immunity on the insurance fraud. Accepting sets flag.nick_flipped (in dialogue), which opens B1 even if Teddy burned the wire. Augie, sick, admits the sale. If Nick's relationship with Villalba is −3, Villalba tips Lisle about Nick's visit. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Calloway's deal: testify against Lisle for immunity on the insurance fraud. Accepting sets flag.nick_flipped (in dialogue), which opens B1 even if Teddy burned the wire. Augie, sick, admits the sale. If Nick's relationship with Villalba is −3, Villalba tips Lisle about Nick's visit. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

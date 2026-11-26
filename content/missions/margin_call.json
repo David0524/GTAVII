@@ -141,5 +141,6 @@
     "loc.lisle_office"
   ],
   "mobile": "Four short stops, any order after o2 (the engine can present o3–o8 as a list). Driving is optional because the stops are close. Choices are untimed.",
-  "design": "Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Shows Nick's world from the top (P1). The Baeks' offer is the first way out. Accepting in dlg.m16_baeks sets flag.baek_bought_building (a resolution that persists to M30). Lisle offers a bridge loan in exchange for more signatures, and Nick signs without reading. Marjorie watches. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

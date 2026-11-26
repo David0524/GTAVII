@@ -20,7 +20,7 @@
     "notFlags": [],
     "act": 2,
     "timeWindow": [
-      "16:00",
+      "10:00",
       "19:00"
     ],
     "weather": [
@@ -143,5 +143,6 @@
     "loc.varelas_loft"
   ],
   "mobile": "Walk, talk and a short drive (three blocks). The midpoint mission is deliberately calm. No timers.",
-  "design": "**Midpoint: all three leads are playable.** Two people who bank for others meet. Eleni respects the club's books, while Nick is charmed and wary. The lease is promised 'after the season', which ties Delphine's resolution to Nick's survival (M31 gate). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "**Midpoint: all three leads are playable.** Two people who bank for others meet. Eleni respects the club's books, while Nick is charmed and wary. The lease is promised 'after the season', which ties Delphine's resolution to Nick's survival (M31 gate). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }

@@ -172,5 +172,6 @@
     "W 31st St & 6th Ave"
   ],
   "mobile": "Content rule: **there's no fire.** Failing resets to the checkpoint. The false alarm brings real fire engines (ambience), and the tenants are walked out safely by Inez and Odessa. Inez's children are at her sister's (dialogue says so). Gus helps or hinders based on his relationship with Teddy (−3 means he leaves the service door open). The wait is a skippable time-advance.",
-  "design": "Prentiss's plan, stopped. Delphine's photo plus the tail give Teddy leverage over Prentiss. The relationship gates from N3 §5 pay off visibly: Manny unlocks the service door at +3, and Gus at −3 is the risk. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Prentiss's plan, stopped. Delphine's photo plus the tail give Teddy leverage over Prentiss. The relationship gates from N3 §5 pay off visibly: Manny unlocks the service door at +3, and Gus at −3 is the risk. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night"
 }

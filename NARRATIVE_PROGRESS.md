@@ -694,4 +694,15 @@ These messages arrived while N5 and N6 were being written (they crossed). Record
 - **Validators:** 0 errors; 32/32 reachable.
 - **Still open in step 2:** the lead stats need agreement from the Gameplay chat (sent;
   awaiting a reply).
+- **Day/night (TIME.md):** the user said, verbatim, "Include day/night cycle. Some missions
+  may make sense to be day only or night only. So time will change when you start the
+  mission. You can sleep in your bed to turn night to day."
+  - All 32 windows were reviewed. 14 day, 13 night, 4 dusk and 1 dawn, each justified by
+    the story or setting.
+  - M11 and M17 were loosened. Every mission now carries a `timeOfDay` label for the UI cards.
+  - Clock request #10 matches TIME.md's hold/jump rule.
+  - `barks.sleep` has 26 lines: waking by lead, a bad night in the heat, a brownout night, the
+    SRO clerk renting a room ($4.50 a night, $22 a week) and "can't sleep now".
+- **Cop lethality:** held pending the user's answer (the oversight session is asking). Only
+  the authored mission targets are `lethal: false` today. Free-roam police are Gameplay's.
 - **Next:** step 3 (police and precincts, items and guns, economy, homes and cars).

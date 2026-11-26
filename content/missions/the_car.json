@@ -128,5 +128,6 @@
     "loc.corwin_hotel"
   ],
   "mobile": "The emotional peak is a dialogue in a parked car. The final walk home in the rain is optional pacing (it can be skipped by fast travel to the desk). No timers.",
-  "design": "Kearney gives Teddy the 1969–71 Christmas list (always, so it's a critical-path corroboration). In the car, Mayhew tells the truth: the 1971 meet was Lisle buying a case, and Teddy was the alibi. The final choice is to let him go or take him to Calloway (flag.teddy_spared_mayhew, in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Kearney gives Teddy the 1969–71 Christmas list (always, so it's a critical-path corroboration). In the car, Mayhew tells the truth: the 1971 meet was Lisle buying a case, and Teddy was the alibi. The final choice is to let him go or take him to Calloway (flag.teddy_spared_mayhew, in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night"
 }

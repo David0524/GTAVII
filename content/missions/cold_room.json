@@ -129,5 +129,6 @@
     "loc.kafeneio"
   ],
   "mobile": "Three short walks within the Fur District with no timers. The vault interior is cold, so breath shows (a visual cue only).",
-  "design": "Maps the vaults for M15 and M18. Seeds Mayhew's secret: if Teddy says 'Lisle', Mayhew drops his toothpick (N3 §6). Nick is absent ('Mr. Varelas is at the bank'), which builds anticipation. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py."
+  "design": "Maps the vaults for M15 and M18. Seeds Mayhew's secret: if Teddy says 'Lisle', Mayhew drops his toothpick (N3 §6). Nick is absent ('Mr. Varelas is at the bank'), which builds anticipation. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day"
 }
