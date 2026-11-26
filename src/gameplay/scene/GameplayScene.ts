@@ -177,7 +177,8 @@ export async function runGameplayScene() {
   // ---------------------------------------------------------------- bodies, FX, overlays, HUD
   const fx = new Fx(); scene.add(fx.root);
   const overlays = new Overlays(g, camera); scene.add(overlays.root);
-  overlays.setEnabled(params.get('overlays') !== '0');
+  // debug overlays: on by default on desktop, off on phones (they'd sit under the thumbs); ?overlays=1 forces them
+  overlays.setEnabled(params.get('overlays') === '1' || (params.get('overlays') !== '0' && !(input.isTouch || params.has('touch'))));
   const hud = new Hud();
   const bodies = new Map<string, Body>();
   const copCars = new Map<string, THREE.Group>();

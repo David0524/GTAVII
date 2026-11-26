@@ -17,7 +17,7 @@ import type { V3 } from '../core/vec';
 export type PropType = 'hydrant' | 'newsstand' | 'phone_booth' | 'mailbox' | 'parking_meter' | 'trash_can' | 'storefront_glass' | 'call_box';
 export interface PropDef { hp: number; material: Material; half: V3; stages: number; cover: 'low' | 'high' | null; bulletMul: number; impactMul: number }
 export const PROP_DEFS: Record<PropType, PropDef> = {
-  hydrant: { hp: 160, material: 'metal_thick', half: [0.2, 0.42, 0.2], stages: 2, cover: null, bulletMul: 0.25, impactMul: 1 },
+  hydrant: { hp: 110, material: 'metal_thick', half: [0.2, 0.42, 0.2], stages: 2, cover: null, bulletMul: 0.35, impactMul: 1 }, // bullets at 0.35×; slams into it count fully (a wrench-opening action is a TODO)
   newsstand: { hp: 120, material: 'wood', half: [1.4, 1.2, 0.8], stages: 3, cover: 'high', bulletMul: 0.6, impactMul: 1.2 },
   phone_booth: { hp: 110, material: 'metal_thin', half: [0.5, 1.15, 0.5], stages: 3, cover: 'high', bulletMul: 0.7, impactMul: 1.2 },
   mailbox: { hp: 140, material: 'metal_thick', half: [0.32, 0.6, 0.27], stages: 2, cover: 'low', bulletMul: 0.35, impactMul: 1 },

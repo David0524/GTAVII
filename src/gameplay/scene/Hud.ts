@@ -52,8 +52,8 @@ const CSS = `
 .gp-nav .gp-btn.on { background: #e3a92a; color: #0d0b09; }
 .gp-prompt { position: absolute; left: 50%; top: 62%; transform: translateX(-50%); font: 600 13px Archivo; letter-spacing: .05em; background: #0d0b09cc; padding: 5px 10px; display: none; }
 .gp-vig { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 0 #6a0a0a; transition: box-shadow .25s; }
-.gp-touch { position: absolute; right: calc(10px + env(safe-area-inset-right)); bottom: calc(10px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4, 60px); gap: 8px; pointer-events: auto; z-index: 9; }
-.gp-touch button { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #efe3c466; background: #0d0b0999; color: #efe3c4; font: 700 10px Archivo; letter-spacing: .05em; touch-action: none; }
+.gp-touch { position: absolute; right: calc(10px + env(safe-area-inset-right)); bottom: calc(88px + env(safe-area-inset-bottom)); /* above the engine's JUMP / RUN */ display: grid; grid-template-columns: repeat(4, 54px); gap: 6px; pointer-events: auto; z-index: 9; }
+.gp-touch button { width: 54px; height: 54px; border-radius: 50%; border: 2px solid #efe3c466; background: #0d0b0999; color: #efe3c4; font: 700 10px Archivo; letter-spacing: .05em; touch-action: none; }
 .gp-touch button.big { border-color: #e3a92a; color: #e3a92a; }
 .gp-touch button.on { background: #e3a92a55; }
 .gp-limbs { position: absolute; right: calc(290px + env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); display: none; flex-direction: column; gap: 6px; pointer-events: auto; z-index: 9; }
