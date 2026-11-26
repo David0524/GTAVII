@@ -9,6 +9,7 @@
  * (pan), triggers (zoom), confirm (select the place under the reticle, or pencil a waypoint there),
  * and 'use' to clear the waypoint. Redraws only when something changed.
  */
+import { landmarks } from './landmarkData';
 import { PLAYABLE } from '../../shared/bounds';
 import type { StreetRec } from './grid';
 import type { MapModel } from './MapModel';
@@ -29,7 +30,6 @@ const DISTRICTS: [string, number, number][] = [
 ];
 const AVES = ['11th Avenue', '10th Avenue', '9th Avenue', '8th Avenue', '7th Avenue', '6th Avenue', '5th Avenue', 'Madison Avenue', 'Park Avenue South', 'Lexington Avenue', '3rd Avenue', 'Broadway'];
 function settingsIconScale() { return settings.get('mapIconSize') === 'large' ? 1.3 : 1; }
-const SHORT: Record<string, string> = { 'Metropolitan Life Insurance Company Tower': 'Met Life Tower', 'Empire State Building': 'Empire State Bldg.', 'Madison Square Garden': 'Madison Sq. Garden', 'New York Life Building': 'N.Y. Life Bldg.', 'Flatiron Building': 'Flatiron Bldg.', "Macy's": 'Herald Sq. store' };
 
 export interface FoldingMapSelection { place?: Place; at?: { x: number; z: number }; mission?: { id: string; title: string; x: number; z: number; window?: [string, string]; blurb?: string } }
 
@@ -256,7 +256,7 @@ export class FoldingMap {
     g.fillStyle = '#2e171d';
     for (const h of this.heroes) {
       g.fillStyle = '#2e171d'; g.beginPath(); g.rect(tx(h.x) - 3, tz(h.z) - 3, 6, 6); g.fill();
-      if (Z > 0.22) L.point(g, SHORT[h.name] ?? h.name, tx(h.x), tz(h.z), { font: `600 ${Math.max(10, Math.min(12.5, Z * 26))}px 'Courier Prime', monospace`, colour: '#2e171d', symbol: 6, leader: true });
+      if (Z > 0.22) L.point(g, landmarks.short(h.name), tx(h.x), tz(h.z), { font: `600 ${Math.max(10, Math.min(12.5, Z * 26))}px 'Courier Prime', monospace`, colour: '#2e171d', symbol: 6, leader: true });
     }
     // 2. pencil notes on lead homes
     for (const d of drawnPlaces) if (d.p.cat === 'home' && Z > 0.2) {
