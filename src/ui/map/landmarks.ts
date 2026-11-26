@@ -9,12 +9,8 @@
  */
 export interface LandmarkEntry { id?: string; real?: string; aliases?: string[]; name: string; short?: string }
 
-/** Map labels used before the registry exists (abbreviations only; no renames are invented here). */
-const FALLBACK_SHORT: Record<string, string> = {
-  'Metropolitan Life Insurance Company Tower': 'Met Life Tower', 'Empire State Building': 'Empire State Bldg.',
-  'Madison Square Garden': 'Madison Sq. Garden', 'New York Life Building': 'N.Y. Life Bldg.', 'Flatiron Building': 'Flatiron Bldg.',
-  "Macy's": 'Herald Sq. store',
-};
+/** Abbreviations for landmarks that keep their real name (not renamed by the registry). */
+const FALLBACK_SHORT: Record<string, string> = { 'Flatiron Building': 'Flatiron Bldg.' };
 
 export class Landmarks {
   private byKey = new Map<string, LandmarkEntry>();

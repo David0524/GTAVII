@@ -9,6 +9,15 @@ test('landmark labels come from the registry, by real name, alias or id; unknown
   assert.equal(lm.name('met life tower'), 'Mercantile Life Tower');
   assert.equal(lm.short('lm.met_life'), 'Mercantile Tower');
   assert.equal(lm.short("Macy’s"), "Garrity's", 'curly apostrophe and no short: falls back to the display name');
-  assert.equal(lm.short('Empire State Building'), 'Empire State Bldg.', 'no registry entry yet: the legacy abbreviation');
+  assert.equal(lm.short('Flatiron Building'), 'Flatiron Bldg.', 'not renamed: the abbreviation');
   assert.equal(lm.name('Corwin Hotel'), 'Corwin Hotel');
+});
+
+test("the shipped registry renames every world.json hero that has a brand or trademarked name", async () => {
+  const fs = await import('node:fs');
+  const reg = new Landmarks(JSON.parse(fs.readFileSync('content/landmarks.json', 'utf8')).landmarks);
+  const heroes: { name: string }[] = JSON.parse(fs.readFileSync('public/data/world.json', 'utf8')).heroes;
+  // Flatiron: a building name, kept. Hotel Chelsea: not on the user's rename list yet (raised with oversight and narrative).
+  const KEEP = new Set(['Flatiron Building', 'Hotel Chelsea']);
+  for (const h of heroes) if (!KEEP.has(h.name)) assert.notEqual(reg.short(h.name), h.name, `${h.name} is shown under its real name`);
 });
