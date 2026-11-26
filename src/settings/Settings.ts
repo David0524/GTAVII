@@ -5,6 +5,7 @@
  */
 export interface SettingsData {
   // controls: gamepad
+  controlPreset: 'standard' | 'classic' | 'lefthanded';
   padLookSensitivity: number; // 0.2..3
   padLookCurve: number; // response exponent 1 (linear)..3
   padDeadzone: number; // 0.05..0.35 radial
@@ -25,6 +26,7 @@ export interface SettingsData {
 }
 
 export const DEFAULTS: SettingsData = {
+  controlPreset: 'standard',
   padLookSensitivity: 1, padLookCurve: 1.8, padDeadzone: 0.14, padInvertY: false, padVibration: true, padVibrationStrength: 0.8,
   mouseSensitivity: 1, mouseInvertY: false, touchLookSensitivity: 1,
   fov: 60, hud: true, subtitles: true, subtitleScale: 1, buttonPrompts: 'auto',
