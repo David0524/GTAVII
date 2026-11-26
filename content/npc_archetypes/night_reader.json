@@ -1,0 +1,27 @@
+{
+  "id": "npc.night_reader",
+  "behaviour": "loiterer",
+  "palette": [
+    "#8B4513",
+    "#F5DEB3"
+  ],
+  "wardrobe": "Cardigan, glasses, a library book.",
+  "props": [
+    "book"
+  ],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "22:00",
+      "area": "Bryant Park benches, the Library steps",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.05
+  },
+  "barks": "barks.park",
+  "scripted": false,
+  "note": ""
+}

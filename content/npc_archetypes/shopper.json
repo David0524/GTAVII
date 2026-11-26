@@ -1,0 +1,28 @@
+{
+  "id": "npc.shopper",
+  "behaviour": "walker",
+  "palette": [
+    "#FF6347",
+    "#FFFACD",
+    "#4682B4"
+  ],
+  "wardrobe": "Summer dresses, shopping bags, sun hats, tourists' cameras.",
+  "props": [
+    "shopping bags"
+  ],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "19:00",
+      "area": "Herald Square, 34th St",
+      "activity": "errand"
+    }
+  ],
+  "density": {
+    "day": 0.7,
+    "night": 0.05
+  },
+  "barks": "barks.shopper",
+  "scripted": false,
+  "note": ""
+}

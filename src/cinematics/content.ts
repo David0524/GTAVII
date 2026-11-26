@@ -1,20 +1,26 @@
 /**
- * Loads cutscenes, dialogue and cast names from content/ (narrative's folder; cutscene layout is
- * written by the ?cine=1 tool). Vite bundles them lazily, so unused scenes cost nothing.
+ * Loads cutscenes, dialogue and cast names from content/. A cutscene is narrative's script
+ * (content/cutscenes/<id>.json) plus this stream's layout (content/cutscenes/layout/<id>.layout.json,
+ * written by the ?cine= tool), merged by shot id. Vite bundles them lazily, so unused scenes cost nothing.
  */
-import type { Cutscene, DialogueLine, DialogueChoiceSet } from './schema';
+import type { Cutscene, CutsceneLayout, DialogueLine, DialogueChoiceSet } from './schema';
+import { applyLayout } from './schema';
 
 const SCENES = import.meta.glob<Cutscene>('/content/cutscenes/*.json', { import: 'default' });
+const LAYOUTS = import.meta.glob<CutsceneLayout>('/content/cutscenes/layout/*.layout.json', { import: 'default' });
 const DIALOGUE = import.meta.glob<{ id: string; lines: (DialogueLine & Partial<DialogueChoiceSet>)[] }>('/content/dialogue/*.json', { import: 'default' });
 const CAST = import.meta.glob<{ id: string; name: string }[]>('/content/cast/*.json', { import: 'default', eager: true });
 
 export function cutsceneIds(): string[] { return Object.keys(SCENES).map((p) => p.replace(/^.*\/(.*)\.json$/, '$1')); }
 export function hasCutscene(id: string) { return `/content/cutscenes/${id}.json` in SCENES; }
 
-export async function loadCutscene(id: string): Promise<{ scene: Cutscene; dialogue: (ref: string) => DialogueLine | null; choices: (ref: string) => DialogueChoiceSet | null; speaker: (castId: string) => string }> {
+export async function loadCutscene(id: string): Promise<{ scene: Cutscene; script: Cutscene; dialogue: (ref: string) => DialogueLine | null; choices: (ref: string) => DialogueChoiceSet | null; speaker: (castId: string) => string }> {
   const load = SCENES[`/content/cutscenes/${id}.json`];
   if (!load) throw new Error(`no cutscene ${id}`);
-  const scene = structuredClone(await load());
+  const script = structuredClone(await load());
+  const lay = LAYOUTS[`/content/cutscenes/layout/${id}.layout.json`];
+  const { scene, orphans } = applyLayout(script, lay ? await lay() : null);
+  if (orphans.length) console.warn(`cutscene ${id}: layout has shots the script no longer has: ${orphans.join(', ')}`);
   const scripts = new Set<string>();
   for (const s of scene.shots) { for (const d of s.dialogue ?? []) scripts.add((typeof d === 'string' ? d : d.ref).split('#')[0]); if (s.choices) scripts.add(s.choices.split('#')[0]); }
   const lines = new Map<string, DialogueLine>(); const choiceSets = new Map<string, DialogueChoiceSet>();
@@ -24,7 +30,7 @@ export async function loadCutscene(id: string): Promise<{ scene: Cutscene; dialo
     const doc = await f();
     for (const l of doc.lines ?? []) { if (l.text) lines.set(`${doc.id}#${l.id}`, l); if (l.choices) choiceSets.set(`${doc.id}#${l.id}`, { id: l.id, choices: l.choices }); }
   }
-  return { scene, dialogue: (ref) => lines.get(ref) ?? null, choices: (ref) => choiceSets.get(ref) ?? null, speaker: speakerName };
+  return { scene, script, dialogue: (ref) => lines.get(ref) ?? null, choices: (ref) => choiceSets.get(ref) ?? null, speaker: speakerName };
 }
 
 const NAMES = new Map<string, string>();

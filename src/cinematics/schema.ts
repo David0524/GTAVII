@@ -95,3 +95,64 @@ export function normaliseCutscene(c: Cutscene): Cutscene { for (const s of c.sho
 /** Vertical field of view (degrees) for a 35 mm-film focal length (24 mm gate height). */
 export function lensToFov(mm: number) { return (2 * Math.atan(12 / mm) * 180) / Math.PI; }
 export function fovToLens(fovDeg: number) { return 12 / Math.tan((fovDeg * Math.PI) / 360); }
+
+/**
+ * Two files per cutscene so two streams never edit the same file:
+ *  - content/cutscenes/<id>.json         narrative's SCRIPT (shots, framing notes, beats, dialogue refs)
+ *  - content/cutscenes/layout/<id>.layout.json   this stream's LAYOUT (camera, blocking, timing), written by the tool
+ * Layout is keyed by shot id; a layout shot the script no longer has is reported, not played.
+ */
+export interface ShotLayout {
+  durationSec?: number;
+  camera?: Shot['camera']; actors?: Shot['actors']; cards?: Shot['cards']; cues?: Shot['cues'];
+  audio?: { t: number; cue: string }[]; film?: ShotFilm; transition?: Shot['transition'];
+  waitFor?: Shot['waitFor']; choices?: string;
+  dialogueTiming?: Record<string, { t?: number; seconds?: number }>;
+  notes?: string;
+}
+export interface CutsceneLayout {
+  id: string; format: 't74-cutscene-layout'; version: 1;
+  anchor?: Cutscene['anchor']; cast?: Cutscene['cast'];
+  shots: Record<string, ShotLayout>;
+  [k: string]: unknown;
+}
+const LAYOUT_KEYS = ['camera', 'actors', 'cards', 'cues', 'transition', 'waitFor', 'choices'] as const;
+
+/** Script + layout -> playable cutscene. Returns the merged scene and any orphaned layout shot ids. */
+export function applyLayout(script: Cutscene, layout: CutsceneLayout | null | undefined): { scene: Cutscene; orphans: string[] } {
+  const scene = structuredClone(script);
+  if (!layout) return { scene, orphans: [] };
+  if (layout.anchor) scene.anchor = layout.anchor;
+  if (layout.cast) scene.cast = layout.cast;
+  const ids = new Set(scene.shots.map((s) => s.id));
+  for (const s of scene.shots) {
+    const L = layout.shots[s.id]; if (!L) continue;
+    if (L.durationSec !== undefined) s.durationSec = L.durationSec;
+    for (const k of LAYOUT_KEYS) if (L[k] !== undefined) (s as unknown as Record<string, unknown>)[k] = structuredClone(L[k]);
+    const scriptNotes: string[] = [];
+    if (L.audio) { scriptNotes.push(...(s.audio ?? []).filter((a): a is string => typeof a === 'string').map((a) => `audio: ${a}`)); s.audio = structuredClone(L.audio); }
+    if (L.film) { if (Array.isArray(s.film)) scriptNotes.push(`film: ${s.film.join('; ')}`); s.film = { ...L.film }; }
+    if (L.dialogueTiming && s.dialogue) s.dialogue = s.dialogue.map((d) => { const ref = typeof d === 'string' ? d : d.ref, tm = L.dialogueTiming![ref]; return tm ? { ref, ...tm } : d; });
+    if (scriptNotes.length || L.notes) s.notes = [s.notes, ...scriptNotes, L.notes && `layout: ${L.notes}`].filter(Boolean).join(' | ');
+  }
+  return { scene, orphans: Object.keys(layout.shots).filter((id) => !ids.has(id)) };
+}
+
+/** The inverse, for the tool's Export: only the layout layer of an edited scene (the script is narrative's). */
+export function extractLayout(scene: Cutscene, script: Cutscene): CutsceneLayout {
+  const byId = new Map(script.shots.map((s) => [s.id, s]));
+  const out: CutsceneLayout = { id: scene.id, format: 't74-cutscene-layout', version: 1, anchor: scene.anchor, cast: scene.cast, shots: {} };
+  for (const s of scene.shots) {
+    const src = byId.get(s.id), L: ShotLayout = {};
+    if (!src || src.durationSec !== s.durationSec) L.durationSec = s.durationSec;
+    for (const k of LAYOUT_KEYS) if (s[k] !== undefined && JSON.stringify(s[k]) !== JSON.stringify(src?.[k])) (L as Record<string, unknown>)[k] = structuredClone(s[k]);
+    const au = (s.audio ?? []).filter((a): a is { t: number; cue: string } => typeof a === 'object'); if (au.length) L.audio = au;
+    if (s.film && !Array.isArray(s.film)) L.film = { ...s.film };
+    const tm: Record<string, { t?: number; seconds?: number }> = {};
+    for (const d of s.dialogue ?? []) if (typeof d === 'object' && (d.t !== undefined || d.seconds !== undefined)) tm[d.ref] = { ...(d.t !== undefined && { t: d.t }), ...(d.seconds !== undefined && { seconds: d.seconds }) };
+    if (Object.keys(tm).length) L.dialogueTiming = tm;
+    const ln = s.notes?.match(/layout: (.*)$/); if (ln) L.notes = ln[1];
+    out.shots[s.id] = L;
+  }
+  return out;
+}

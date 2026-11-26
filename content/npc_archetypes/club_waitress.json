@@ -1,0 +1,28 @@
+{
+  "id": "npc.club_waitress",
+  "behaviour": "commuter",
+  "palette": [
+    "#FFFFFF",
+    "#4682B4",
+    "#000000"
+  ],
+  "wardrobe": "Diner waitress uniform under a light coat after shift.",
+  "props": [
+    "handbag"
+  ],
+  "schedule": [
+    {
+      "from": "06:00",
+      "to": "15:00",
+      "area": "8th Ave diners",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.05
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": "A club member (Walk Her Home); not a sex worker."
+}

@@ -1,0 +1,167 @@
+{
+  "id": "barks.sro",
+  "core": true,
+  "note": "Residents of SRO hotels (the Corwin and others): elderly, seamen, pensioners, welfare-placed families.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "warm",
+      "text": "Evening. You working the desk tonight?"
+    },
+    {
+      "context": "greet",
+      "emotion": "formal",
+      "text": "Good morning. Lovely day to stay indoors."
+    },
+    {
+      "context": "greet",
+      "emotion": "cheerful",
+      "text": "There he is! Any mail for eleven-twelve?"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Fifty years in this city. My room's eight by ten. I measured."
+    },
+    {
+      "context": "idle",
+      "emotion": "sad",
+      "text": "My neighbor moved out. Took the five hundred. Took his radio."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "I was a welder on the Liberty ships. Now I'm a professional sitter."
+    },
+    {
+      "context": "idle",
+      "emotion": "worried",
+      "text": "They put another paper under the door. I didn't read it."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Elevator's out again. Eleven floors. I'm seventy-three."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Hot water comes Tuesdays. Today is not Tuesday."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "New management. Old roaches. Same as always."
+    },
+    {
+      "context": "complain",
+      "emotion": "worried",
+      "text": "They say 'relocation.' I say, relocate where?"
+    },
+    {
+      "context": "rain",
+      "emotion": "cheerful",
+      "text": "Rain! Good. Cools the bricks."
+    },
+    {
+      "context": "rain",
+      "emotion": "weary",
+      "text": "Roof leaks on nine when it rains. Bring a pot."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Window's painted shut. I'm cooking like a chop."
+    },
+    {
+      "context": "heat",
+      "emotion": "worried",
+      "text": "Too hot to sleep, too hot to sit. I just exist."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Horns all night. Who are they honking at? God?"
+    },
+    {
+      "context": "collision",
+      "emotion": "startled",
+      "text": "Oh! Easy, young man. These bones are original."
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Careful. I've got eggs in this bag."
+    },
+    {
+      "context": "player_running",
+      "emotion": "worried",
+      "text": "Is there a fire? Is it us?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running. I remember running. Nineteen-forty, roughly."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "alarmed",
+      "text": "Get that car off the curb! Old people live here!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Power's out. Somebody check on Mr. Hollis."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Dark again. At least the roaches can't see us."
+    },
+    {
+      "context": "night",
+      "emotion": "lonely",
+      "text": "Can't sleep. Nobody can sleep. We all sit in the lobby."
+    },
+    {
+      "context": "night",
+      "emotion": "warm",
+      "text": "Night desk keeps the lights on. Thank God for the night desk."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Mrs. Pruitt's calling a meeting. Bring a chair."
+    },
+    {
+      "context": "idle",
+      "emotion": "sad",
+      "text": "Checks come the third. Third's a long way off."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "You want a cookie? They're stale. Like me."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Prentiss came by again. With doughnuts. Doughnuts!"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "I've lived here longer than the paint."
+    },
+    {
+      "context": "rain",
+      "emotion": "sad",
+      "text": "My late wife loved summer rain. She loved everything, really."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Somebody's buying hotels. Nobody's buying soap."
+    }
+  ]
+}

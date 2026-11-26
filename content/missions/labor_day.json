@@ -1,0 +1,172 @@
+{
+  "id": "mission.labor_day",
+  "title": "Labor Day",
+  "number": 32,
+  "act": 3,
+  "chapter": 10,
+  "playAs": "char.nick_varelas",
+  "date": "1974-09-02",
+  "durationMin": 20,
+  "pillars": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5"
+  ],
+  "giver": "char.teddy_arce",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "21:00",
+      "01:00"
+    ],
+    "weather": [
+      "clear"
+    ],
+    "dateRange": [
+      "1974-09-02",
+      "1974-09-02"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.varelas_loft",
+    "note": "Labor Day night; the Garment District is empty. Ending-specific setup comes from Branch B flags (N3 §4)."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_vehicle",
+      "text": "Your car, 37th & Seventh",
+      "vehicle": "vehicle_role.nick_sedan"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Down Seventh to 23rd. Don't stop.",
+      "to": "W 23rd St & 7th Ave",
+      "radius": 25
+    },
+    {
+      "id": "o3",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o4",
+      "type": "combat",
+      "mode": "survive",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 3
+        },
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Brannock's men in the Penn concourse",
+      "durationSec": 75,
+      "note": "Converted from the evade (20-min cap): fight through, then out on Seventh. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Down Broadway to Madison Square",
+      "to": "Broadway & W 25th St",
+      "radius": 25
+    },
+    {
+      "id": "o6",
+      "type": "switch_to",
+      "text": "(Teddy)",
+      "character": "char.teddy_arce",
+      "cut": "transition"
+    },
+    {
+      "id": "o7",
+      "type": "goto",
+      "text": "The Flatiron prow",
+      "to": "loc.flatiron_prow",
+      "radius": 10
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "Where you started",
+      "script": "dlg.m32_prow",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "vehicle_destroyed"
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3",
+    "o4",
+    "o5",
+    "o6",
+    "o7"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.epilogue_started"
+    ],
+    "unlock": [],
+    "setDate": "1974-10-01"
+  },
+  "npcs": [
+    "char.teddy_arce",
+    "char.delphine_moore",
+    "char.carl_mayhew",
+    "char.dennis_wurtz",
+    "char.jimmy_brannock",
+    "char.ruth_calloway",
+    "char.delroy_tate",
+    "char.howard_lisle"
+  ],
+  "archetypes": [
+    "npc.holiday_stroller",
+    "npc.plainclothes"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan",
+    "vehicle_role.cab",
+    "vehicle_role.unmarked_sedan"
+  ],
+  "locations": [
+    "W 37th St & 7th Ave",
+    "W 23rd St & 7th Ave",
+    "loc.penn_station_lockers",
+    "Broadway & W 25th St",
+    "loc.flatiron_prow"
+  ],
+  "mobile": "Five checkpoints across 20 minutes. Each lead's run is 3–5 minutes. Nick's drive follows Seventh's southbound one-way. Pursuers end on the south-edge barricade or in a jam if the player strays (content/boundaries.json). Delroy's cab can block a street if his relationship with Teddy is +2 or more (route knowledge, not reflexes).",
+  "design": "The finale converges three runs on the prow where the game began. The ending-specific content in dlg.m32_prow and the pursuers' presence are keyed to the Branch B flags. The final shot follows N3 §4 ('who stands there, facing which way'). Rewards move the clock to the epilogue (1974-10-01). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night",
+  "essential": [],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

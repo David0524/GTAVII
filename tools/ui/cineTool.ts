@@ -1,7 +1,7 @@
 /**
  * Drives the ?cine= tool like a person would, to lay out / refine a scene and export it:
  * open the scene, go to a shot, fly the camera to a mark, set the lens, key it, export via the tool's
- * Export button (captured download) and write it to content/cutscenes/<id>.json. Screenshots the tool.
+ * Export button (captured download) and write it to content/cutscenes/layout/<id>.layout.json (the layout layer; the script stays narrative's). Screenshots the tool.
  *   npx tsx tools/ui/cineTool.ts m01_opening
  */
 import { chromium } from 'playwright';
@@ -52,7 +52,7 @@ await withServer(async (base) => {
   await page.evaluate(() => (window as any).__T74.whenIdle()); await page.waitForTimeout(800);
   await page.screenshot({ path: path.join(OUT, `tool_${id}_s1.png`) });
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('.ct-export')]);
-  const file = path.join(ROOT, 'content/cutscenes', `${id}.json`);
+  const file = path.join(ROOT, 'content/cutscenes/layout', `${id}.layout.json`);
   await dl.saveAs(file);
   const errsInFile = await page.evaluate(() => (window as any).__CINE.errors);
   console.log(`exported -> ${path.relative(ROOT, file)} (validation: ${errsInFile.length ? errsInFile.join('; ') : 'ok'})`);

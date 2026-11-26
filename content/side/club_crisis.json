@@ -1,0 +1,59 @@
+{
+  "id": "mission.side_club_crisis",
+  "kind": "side",
+  "title": "The Club's Emergencies",
+  "number": null,
+  "leads": [
+    "char.delphine_moore"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Delphine hears the member's trouble",
+      "script": "dlg.side_club_crisis_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The member's walk-up, W 38th & 9th",
+      "to": "W 38th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Settle it, by whatever means",
+      "script": "dlg.side_club_crisis_2"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Report back to the club",
+      "to": "loc.penn_south_delphine",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Club trust (M31 gates)"
+  },
+  "where": "Club members' homes and workplaces",
+  "systems": [
+    "bail",
+    "keys",
+    "bribes",
+    "melee"
+  ],
+  "mobile": "Varied, short.",
+  "rank": 35,
+  "slice": false
+}

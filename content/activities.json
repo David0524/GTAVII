@@ -1,0 +1,1647 @@
+{
+  "_note": "Repeatable side activities (N4). Objective templates use {placeholders} filled from the pool entries. The schema is proposed in ENGINE_REQUESTS (From narrative: 9). content.py checks every objective after substituting the longest pool value (40-character limit).",
+  "activities": [
+    {
+      "id": "activity.cab_fares",
+      "title": "Hack: Cab Fares",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.hack",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "18:00",
+          "04:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "enter_vehicle",
+        "vehicle": "vehicle_role.cab",
+        "at": "loc.penn_hack_stand",
+        "note": "Delroy's leased cab, nights only."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "Pick up the fare",
+          "to": "{pickup}",
+          "radius": 15
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "Fare to {dropName}",
+          "to": "{drop}",
+          "radius": 20
+        }
+      ],
+      "pool": {
+        "pickup": [
+          {
+            "pickup": "loc.penn_hack_stand"
+          },
+          {
+            "pickup": "loc.hotel_pennsylvania"
+          },
+          {
+            "pickup": "W 42nd St & 7th Ave"
+          },
+          {
+            "pickup": "W 34th St & Broadway"
+          },
+          {
+            "pickup": "W 23rd St & 7th Ave"
+          },
+          {
+            "pickup": "Madison Ave & E 28th St"
+          }
+        ],
+        "drop": [
+          {
+            "drop": "W 23rd St & 8th Ave",
+            "dropName": "the Chelsea"
+          },
+          {
+            "drop": "W 34th St & 6th Ave",
+            "dropName": "Herald Square"
+          },
+          {
+            "drop": "W 42nd St & 8th Ave",
+            "dropName": "the Deuce"
+          },
+          {
+            "drop": "5th Ave & W 41st St",
+            "dropName": "the Library"
+          },
+          {
+            "drop": "Madison Ave & E 24th St",
+            "dropName": "Madison Square"
+          },
+          {
+            "drop": "W 28th St & 6th Ave",
+            "dropName": "the Flower District"
+          },
+          {
+            "drop": "W 41st St & 9th Ave",
+            "dropName": "Hell's Kitchen"
+          },
+          {
+            "drop": "Madison Ave & E 30th St",
+            "dropName": "Madison and 30th"
+          }
+        ]
+      },
+      "payout": {
+        "perFare": [
+          3,
+          7
+        ],
+        "tipBonus": "Tips scale with taking the 1974 one-way route. Wrong-way driving halves the tip, and the fare complains."
+      },
+      "cooldownMin": 0,
+      "vehicles": [
+        "vehicle_role.cab"
+      ],
+      "mobile": "No timer on fares; tips reward route knowledge, not speed. Five fares per shift, then Delroy wants his cab back.",
+      "design": "The core P2 loop. Fare chatter (N5 barks.cab_fare) teaches landmarks. About 30% of fares carry a rumour that hints at the next story beat."
+    },
+    {
+      "id": "activity.collections",
+      "title": "Collections",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.five_am",
+      "acts": [
+        2
+      ],
+      "pillars": [
+        "P1",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "04:30",
+          "20:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.carl_mayhew",
+        "at": "loc.cop_bar",
+        "note": "A weekly list arrives at the desk on Mondays."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "Collect at {stopName}",
+          "to": "{stop}",
+          "radius": 15
+        },
+        {
+          "id": "o2",
+          "type": "dialogue",
+          "text": "Collect, count, or let it slide",
+          "script": "dlg.act_collection_{stopKey}"
+        }
+      ],
+      "pool": {
+        "stop": [
+          {
+            "stop": "loc.moretti_flowers",
+            "stopName": "Moretti's, W 28th",
+            "stopKey": "moretti"
+          },
+          {
+            "stop": "loc.baek_wholesale",
+            "stopName": "the Baeks', W 29th",
+            "stopKey": "baek"
+          },
+          {
+            "stop": "loc.kallis_furs",
+            "stopName": "Kallis Furs",
+            "stopKey": "kallis"
+          },
+          {
+            "stop": "loc.poole_shine",
+            "stopName": "Earl's stand",
+            "stopKey": "earl"
+          },
+          {
+            "stop": "loc.feld_loft",
+            "stopName": "Feld's loft",
+            "stopKey": "feld"
+          },
+          {
+            "stop": "loc.bauer_arcade",
+            "stopName": "Bauer's arcade",
+            "stopKey": "bauer"
+          }
+        ]
+      },
+      "payout": {
+        "weekly": 200,
+        "note": "Teddy can let a stop slide (payer +1, Mayhew -1, short count) or press (payer -1, Mayhew +1)."
+      },
+      "cooldownMin": 1440,
+      "vehicles": [],
+      "mobile": "Walking rounds in any order, with no timer. Each stop is a short untimed choice.",
+      "design": "P1 made repeatable and morally loaded: every envelope is a person. Act 2 only (by Act 3 there's no pad left to collect for)."
+    },
+    {
+      "id": "activity.desk_requests",
+      "title": "Night Desk Requests",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.night_desk",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P3",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "23:00",
+          "07:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "interior.corwin_lobby",
+        "note": "The desk phone or the bell: a resident needs something."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "dialogue",
+          "text": "Answer the desk bell",
+          "script": "dlg.act_desk_{requestKey}"
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "{errandText}",
+          "to": "{errand}",
+          "radius": 15
+        },
+        {
+          "id": "o3",
+          "type": "enter_interior",
+          "text": "Back to the desk",
+          "marker": "interior.corwin_lobby"
+        }
+      ],
+      "pool": {
+        "request": [
+          {
+            "requestKey": "medicine",
+            "errandText": "All-night pharmacy, 34th & 7th",
+            "errand": "W 34th St & 7th Ave"
+          },
+          {
+            "requestKey": "fan",
+            "errandText": "Fan from the hardware store",
+            "errand": "6th Ave & W 31st St"
+          },
+          {
+            "requestKey": "letter",
+            "errandText": "Read Mr. Hollis a letter",
+            "errand": "interior.corwin_floor11"
+          },
+          {
+            "requestKey": "locked_out",
+            "errandText": "Inez's key, the laundromat",
+            "errand": "Broadway & W 30th St"
+          },
+          {
+            "requestKey": "phone",
+            "errandText": "Payphone call for Odessa, 32nd",
+            "errand": "Broadway & W 32nd St"
+          }
+        ]
+      },
+      "payout": {
+        "money": 0,
+        "relationships": "+1 with the resident (gates in N3 §5)"
+      },
+      "cooldownMin": 60,
+      "vehicles": [],
+      "mobile": "Two-block errands from the hub, with no timers. Never the same resident twice in a row.",
+      "design": "P3/P4: the Corwin's residents become people you owe and who owe you. This builds the +3 gates that pay off in M26."
+    },
+    {
+      "id": "activity.bulldog_run",
+      "title": "Bulldog Edition Run",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.hack",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "05:00",
+          "07:30"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "W 34th St & 7th Ave",
+        "note": "A newspaper truck driver who's a man short after Teddy's shift."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "enter_vehicle",
+          "text": "Into the newspaper truck",
+          "vehicle": "vehicle_role.news_truck"
+        },
+        {
+          "id": "o2",
+          "type": "deliver",
+          "text": "Bundles to the {standName} stand",
+          "to": "{stand}",
+          "item": "item.paper_bundle"
+        }
+      ],
+      "pool": {
+        "stand": [
+          {
+            "stand": "W 34th St & Broadway",
+            "standName": "Herald Square"
+          },
+          {
+            "stand": "7th Ave & W 33rd St",
+            "standName": "Penn Station"
+          },
+          {
+            "stand": "W 42nd St & 7th Ave",
+            "standName": "42nd St"
+          },
+          {
+            "stand": "Broadway & W 23rd St",
+            "standName": "Flatiron"
+          },
+          {
+            "stand": "8th Ave & W 40th St",
+            "standName": "bus terminal"
+          },
+          {
+            "stand": "5th Ave & W 41st St",
+            "standName": "Library"
+          }
+        ]
+      },
+      "payout": {
+        "perRun": 12
+      },
+      "cooldownMin": 720,
+      "vehicles": [
+        "vehicle_role.news_truck"
+      ],
+      "mobile": "Six drops. The dawn schedule is generous, and being late only shrinks the tip.",
+      "design": "The weekly front page (N6) is printed on every bundle, so this is how the player reads the news as the story moves."
+    },
+    {
+      "id": "activity.garment_rush",
+      "title": "Garment Rush",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.surcharge",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P3",
+        "P1"
+      ],
+      "when": {
+        "time": [
+          "07:00",
+          "15:00"
+        ],
+        "weather": [
+          "clear",
+          "overcast"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.dwayne_little",
+        "at": "W 37th St & 7th Ave"
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "deliver",
+          "text": "Racks to {buyerName}",
+          "to": "{buyer}",
+          "item": "item.garment_racks",
+          "timeLimitSec": 420
+        }
+      ],
+      "pool": {
+        "buyer": [
+          {
+            "buyer": "W 35th St & 7th Ave",
+            "buyerName": "the store dock"
+          },
+          {
+            "buyer": "Broadway & W 30th St",
+            "buyerName": "a Broadway jobber"
+          },
+          {
+            "buyer": "W 38th St & 8th Ave",
+            "buyerName": "a dye house"
+          },
+          {
+            "buyer": "W 36th St & 9th Ave",
+            "buyerName": "the Jersey bus"
+          }
+        ]
+      },
+      "payout": {
+        "perRun": 15,
+        "surcharge": "If Teddy uses a Carriers' truck, $3 goes to the envelope on the dash (P1)."
+      },
+      "cooldownMin": 120,
+      "vehicles": [
+        "vehicle_role.box_truck"
+      ],
+      "mobile": "Hand truck or box truck. The timer is generous, and missing it only cuts the pay. Rush-hour gridlock on 37th is the challenge; side streets are the answer.",
+      "design": "The brief's 'deliveries for the garment trade'. In Act 3 the routes thin out (runaway shops) and Dwayne says why."
+    },
+    {
+      "id": "activity.flower_dawn",
+      "title": "Flower Truck at Dawn",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.five_am",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P3",
+        "P2"
+      ],
+      "when": {
+        "time": [
+          "04:30",
+          "07:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.anna_moretti",
+        "at": "loc.moretti_flowers",
+        "note": "Unlocked once Teddy has let Moretti's envelope slide at least once."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "enter_vehicle",
+          "text": "Moretti's flower truck",
+          "vehicle": "vehicle_role.flower_truck"
+        },
+        {
+          "id": "o2",
+          "type": "deliver",
+          "text": "Arrangements to {destName}",
+          "to": "{dest}",
+          "item": "item.flower_order"
+        }
+      ],
+      "pool": {
+        "dest": [
+          {
+            "dest": "loc.hotel_pennsylvania",
+            "destName": "the Pennsylvania"
+          },
+          {
+            "dest": "W 31st St & 7th Ave",
+            "destName": "the church on 31st"
+          },
+          {
+            "dest": "W 34th St & Broadway",
+            "destName": "the Herald Sq store"
+          },
+          {
+            "dest": "W 23rd St & 9th Ave",
+            "destName": "the funeral home"
+          }
+        ]
+      },
+      "payout": {
+        "perRun": 10,
+        "relationships": "+1 Moretti per 3 runs"
+      },
+      "cooldownMin": 720,
+      "vehicles": [
+        "vehicle_role.flower_truck"
+      ],
+      "mobile": "Dawn light, no timer. In Act 2 the sabotage shows up as a slow puncture: drive gently (holding the throttle down is the mechanic).",
+      "design": "Turns an enemy (Moretti) into an ally through work (P3). The sabotage clue pays off in M24 (Villalba)."
+    },
+    {
+      "id": "activity.tenant_canvass",
+      "title": "Tenant Canvass",
+      "lead": "char.teddy_arce",
+      "unlockedBy": "mission.the_address",
+      "acts": [
+        3
+      ],
+      "pillars": [
+        "P5",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "10:00",
+          "20:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.odessa_pruitt",
+        "at": "loc.corwin_hotel"
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "Canvass {hotelName}",
+          "to": "{hotel}",
+          "radius": 15
+        },
+        {
+          "id": "o2",
+          "type": "dialogue",
+          "text": "Knock. Ask. Listen.",
+          "script": "dlg.act_canvass_{hotelKey}"
+        }
+      ],
+      "pool": {
+        "hotel": [
+          {
+            "hotel": "loc.corwin_hotel",
+            "hotelName": "the Corwin",
+            "hotelKey": "corwin"
+          },
+          {
+            "hotel": "Broadway & W 32nd St",
+            "hotelName": "the hotel on 32nd",
+            "hotelKey": "h32"
+          },
+          {
+            "hotel": "Broadway & W 29th St",
+            "hotelName": "the hotel on 29th",
+            "hotelKey": "h29"
+          },
+          {
+            "hotel": "8th Ave & W 37th St",
+            "hotelName": "an Eighth Ave hotel",
+            "hotelKey": "h8th"
+          }
+        ]
+      },
+      "payout": {
+        "money": 0,
+        "note": "Every 10 signatures adds marchers in M28 (crowd size only)."
+      },
+      "cooldownMin": 240,
+      "vehicles": [],
+      "mobile": "Door-to-door dialogue with short choices, no timers.",
+      "design": "Act 3 organising turns P5 around. Residents of other SROs get named lines (N5), which widens the world beyond the Corwin."
+    },
+    {
+      "id": "activity.club_rounds",
+      "title": "Club Rounds",
+      "lead": "char.delphine_moore",
+      "unlockedBy": "mission.the_club",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P1",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "14:00",
+          "20:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.rita_haines",
+        "at": "loc.arden_hotel"
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "Dues from {memberName}",
+          "to": "{member}",
+          "radius": 15
+        },
+        {
+          "id": "o2",
+          "type": "dialogue",
+          "text": "Collect, advance, or forgive",
+          "script": "dlg.act_club_{memberKey}"
+        }
+      ],
+      "pool": {
+        "member": [
+          {
+            "member": "loc.eighth_ave_cafeteria",
+            "memberName": "a waitress, 40th & 8th",
+            "memberKey": "waitress"
+          },
+          {
+            "member": "loc.hotel_pennsylvania",
+            "memberName": "a maid at the Pennsylvania",
+            "memberKey": "maid"
+          },
+          {
+            "member": "8th Ave & W 38th St",
+            "memberName": "Tina, 38th & Eighth",
+            "memberKey": "tina"
+          },
+          {
+            "member": "8th Ave & W 41st St",
+            "memberName": "a woman at the terminal",
+            "memberKey": "terminal"
+          },
+          {
+            "member": "W 40th St & 8th Ave",
+            "memberName": "the hat-check girl, 40th",
+            "memberKey": "hatcheck"
+          }
+        ]
+      },
+      "payout": {
+        "money": 0,
+        "note": "The club balance is an inventory count. Forgiving dues helps relationships and hurts the count (the M31 gate)."
+      },
+      "cooldownMin": 1440,
+      "vehicles": [],
+      "mobile": "Walking, untimed. Each member has a short scene (N5).",
+      "design": "The women's club as a daily institution: rent day, a sick child, a lost job. Sex work is context, never content."
+    },
+    {
+      "id": "activity.photo_jobs",
+      "title": "Photo Jobs",
+      "lead": "char.delphine_moore",
+      "unlockedBy": "mission.contact_prints",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P1",
+        "P2"
+      ],
+      "when": {
+        "time": [
+          "10:00",
+          "02:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.rita_haines",
+        "at": "loc.arden_hotel",
+        "note": "Rita's jobs board: envelopes left at the bar by people who need a picture taken."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "Find {subjectName}",
+          "to": "{subjectAt}",
+          "radius": 30
+        },
+        {
+          "id": "o2",
+          "type": "photo",
+          "text": "Get the picture",
+          "subject": "{subject}",
+          "minScreenFraction": 0.06
+        }
+      ],
+      "pool": {
+        "job": [
+          {
+            "subjectAt": "W 29th St & 8th Ave",
+            "subjectName": "the absentee landlord",
+            "subject": "npc.landlord_absentee"
+          },
+          {
+            "subjectAt": "W 26th St & 9th Ave",
+            "subjectName": "the 'disabled' claimant",
+            "subject": "npc.claimant"
+          },
+          {
+            "subjectAt": "W 39th St & 9th Ave",
+            "subjectName": "the radio fence",
+            "subject": "npc.fence"
+          },
+          {
+            "subjectAt": "loc.penn_hack_stand",
+            "subjectName": "the bookie's runner",
+            "subject": "npc.bookie_runner"
+          },
+          {
+            "subjectAt": "Madison Ave & E 37th St",
+            "subjectName": "the trench contractor",
+            "subject": "npc.contractor"
+          }
+        ]
+      },
+      "payout": {
+        "perJob": [
+          15,
+          40
+        ]
+      },
+      "cooldownMin": 180,
+      "vehicles": [],
+      "mobile": "Auto-framing photo mode with generous thresholds. Subjects keep schedules, so patience beats reflexes.",
+      "design": "The brief's 'photo assignments' in Delphine's terms: P1 as evidence. Nothing voyeuristic. Every subject is a petty fraud tied to the city's money troubles (P5)."
+    },
+    {
+      "id": "activity.walk_her_home",
+      "title": "Walk Her Home",
+      "lead": "char.delphine_moore",
+      "unlockedBy": "mission.back_stairs",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "23:00",
+          "05:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "loc.arden_hotel",
+        "note": "A club member asks for company to the subway or her building."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "escort",
+          "text": "Walk {name} home",
+          "who": "{npc}",
+          "pace": "match",
+          "waitRadius": 10,
+          "route": [
+            "loc.arden_hotel",
+            "{dest}"
+          ]
+        },
+        {
+          "id": "o2",
+          "type": "dialogue",
+          "text": "Say goodnight",
+          "script": "dlg.act_walkhome_{key}"
+        }
+      ],
+      "pool": {
+        "walk": [
+          {
+            "name": "Claudette",
+            "destName": "the 34th St subway",
+            "dest": "W 34th St & 7th Ave",
+            "npc": "char.claudette_bijou",
+            "key": "claudette"
+          },
+          {
+            "name": "a waitress",
+            "destName": "her building",
+            "dest": "W 41st St & 9th Ave",
+            "npc": "npc.club_waitress",
+            "key": "waitress"
+          },
+          {
+            "name": "Tina",
+            "destName": "the bus terminal",
+            "dest": "8th Ave & W 41st St",
+            "npc": "char.tina_mercado",
+            "key": "tina"
+          },
+          {
+            "name": "the new girl",
+            "destName": "the women's residence",
+            "dest": "W 38th St & 9th Ave",
+            "npc": "npc.club_newcomer",
+            "key": "newcomer"
+          }
+        ]
+      },
+      "payout": {
+        "money": 0,
+        "relationships": "+1 club member"
+      },
+      "cooldownMin": 120,
+      "vehicles": [],
+      "mobile": "Walking with a pace-matching companion. If a car slows alongside, Delphine reads the plate aloud (dialogue) and it drives off. No combat.",
+      "design": "Safety as solidarity. The danger is real and implied, never shown as violence against the women."
+    },
+    {
+      "id": "activity.numbers_slips",
+      "title": "Numbers Slips",
+      "lead": "char.delphine_moore",
+      "unlockedBy": "mission.contact_prints",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P1",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "09:00",
+          "13:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.earl_poole",
+        "at": "loc.poole_shine"
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "Pick up slips: {spotName}",
+          "to": "{spot}",
+          "radius": 12
+        },
+        {
+          "id": "o2",
+          "type": "deliver",
+          "text": "Slips back to Earl by noon",
+          "to": "loc.poole_shine",
+          "item": "item.slips",
+          "timeLimitSec": 900
+        }
+      ],
+      "pool": {
+        "spot": [
+          {
+            "spot": "W 40th St & 9th Ave",
+            "spotName": "barber, 40th & 9th"
+          },
+          {
+            "spot": "8th Ave & W 40th St",
+            "spotName": "newsstand, 40th & 8th"
+          },
+          {
+            "spot": "W 36th St & 9th Ave",
+            "spotName": "candy store, 36th"
+          },
+          {
+            "spot": "W 37th St & 7th Ave",
+            "spotName": "Dwayne's rack route"
+          }
+        ]
+      },
+      "payout": {
+        "perRun": 10
+      },
+      "cooldownMin": 1440,
+      "vehicles": [],
+      "mobile": "A generous noon deadline; missing it only cuts the pay. No gambling mechanics for the player.",
+      "design": "The period numbers game as a neighbourhood economy (Earl's 'the state can't shine shoes'). Non-functional: no odds, no instructions."
+    },
+    {
+      "id": "activity.read_the_room",
+      "title": "Read the Room",
+      "lead": "char.delphine_moore",
+      "unlockedBy": "mission.tax_day",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P4",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "20:00",
+          "02:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "enter_interior",
+        "marker": "interior.arden_lobby",
+        "note": "Rita: 'Somebody in here is a cop. Which one?'"
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "dialogue",
+          "text": "Watch the bar. Who's the cop?",
+          "script": "dlg.act_read_room_{round}"
+        },
+        {
+          "id": "o2",
+          "type": "dialogue",
+          "text": "Tell Rita",
+          "script": "dlg.act_read_room_answer"
+        }
+      ],
+      "pool": {
+        "round": [
+          {
+            "round": "arden_1"
+          },
+          {
+            "round": "arden_2"
+          },
+          {
+            "round": "pennsylvania_1"
+          },
+          {
+            "round": "pennsylvania_2"
+          },
+          {
+            "round": "shamrock_1"
+          }
+        ]
+      },
+      "payout": {
+        "money": 5,
+        "relationships": "+1 Rita for a correct read"
+      },
+      "cooldownMin": 240,
+      "vehicles": [],
+      "mobile": "Observation: tap NPCs to see a 'tell' line (shoes, a ring, a newspaper folded wrong). No timers.",
+      "design": "Delphine's power, noticing, as a parlour game. The tells foreshadow how the plainclothes behave in later missions."
+    },
+    {
+      "id": "activity.fur_deliveries",
+      "title": "Coats Out of Storage",
+      "lead": "char.nick_varelas",
+      "unlockedBy": "mission.brownout",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P1",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "09:00",
+          "18:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "who": "char.yiannis_doukas",
+        "at": "loc.varelas_loft"
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "enter_vehicle",
+          "text": "The delivery sedan",
+          "vehicle": "vehicle_role.nick_sedan"
+        },
+        {
+          "id": "o2",
+          "type": "deliver",
+          "text": "Coat to {clientName}",
+          "to": "{client}",
+          "item": "item.stored_coat"
+        }
+      ],
+      "pool": {
+        "client": [
+          {
+            "client": "loc.hotel_pennsylvania",
+            "clientName": "a guest at the Pennsylvania"
+          },
+          {
+            "client": "W 34th St & Broadway",
+            "clientName": "the Herald Sq fur salon"
+          },
+          {
+            "client": "W 42nd St & 8th Ave",
+            "clientName": "an agent on 42nd St"
+          },
+          {
+            "client": "Madison Ave & E 27th St",
+            "clientName": "a widow on Madison Ave"
+          }
+        ]
+      },
+      "payout": {
+        "perRun": 20,
+        "note": "After M18 some coats are 'missing', and the client scene becomes a lie Nick has to sell (P4)."
+      },
+      "cooldownMin": 240,
+      "vehicles": [
+        "vehicle_role.nick_sedan"
+      ],
+      "mobile": "Short drives, untimed, with one choice in the client conversation.",
+      "design": "Nick personally delivering a coat in August is the joke and the point: he does it so clients don't ask for an inventory."
+    },
+    {
+      "id": "activity.gentlemens_wager",
+      "title": "Gentlemen's Wager",
+      "lead": "char.nick_varelas",
+      "unlockedBy": "mission.margin_call",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P1"
+      ],
+      "when": {
+        "time": [
+          "22:00",
+          "03:00"
+        ],
+        "weather": [
+          "clear",
+          "overcast"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "loc.steakhouse",
+        "note": "A cabbie at the Iron Gate's back door bets Nick his sedan can't beat a hack to a corner."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "enter_vehicle",
+          "text": "Your sedan, 36th & Seventh",
+          "vehicle": "vehicle_role.nick_sedan"
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "Race to {finishName}",
+          "to": "{finish}",
+          "radius": 20,
+          "race": {
+            "rival": "vehicle_role.cab",
+            "oneWaysEnforced": true
+          }
+        }
+      ],
+      "pool": {
+        "finish": [
+          {
+            "finish": "loc.flatiron_prow",
+            "finishName": "the Flatiron"
+          },
+          {
+            "finish": "W 34th St & Broadway",
+            "finishName": "Herald Square"
+          },
+          {
+            "finish": "W 42nd St & 8th Ave",
+            "finishName": "the Deuce"
+          },
+          {
+            "finish": "W 26th St & 8th Ave",
+            "finishName": "Penn South"
+          },
+          {
+            "finish": "Madison Ave & E 30th St",
+            "finishName": "Madison and 30th"
+          }
+        ]
+      },
+      "payout": {
+        "stake": [
+          20,
+          100
+        ],
+        "note": "Wrong-way driving forfeits the bet. Rivals obey the 1974 directions and know the shortcuts."
+      },
+      "cooldownMin": 60,
+      "vehicles": [
+        "vehicle_role.nick_sedan"
+      ],
+      "mobile": "Won by route choice (one-ways; 23rd, 34th and 42nd are two-way), not by drifting. No rubber-banding; rivals race fair. The bet can be declined.",
+      "design": "The brief's 'street races obeying 1974 one-ways'. A rich man racing working men for money is its own commentary (P1)."
+    },
+    {
+      "id": "activity.patronage",
+      "title": "Patronage",
+      "lead": "char.nick_varelas",
+      "unlockedBy": "mission.the_lease",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P1",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "10:00",
+          "20:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "loc.varelas_loft",
+        "note": "Requests arrive at the office: a union widow, a cop's retirement party, a church roof."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "dialogue",
+          "text": "Read the request",
+          "script": "dlg.act_patronage_{reqKey}"
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "In person: {whereName}",
+          "to": "{where}",
+          "radius": 15
+        }
+      ],
+      "pool": {
+        "req": [
+          {
+            "reqKey": "widow",
+            "whereName": "the kafeneio",
+            "where": "loc.kafeneio"
+          },
+          {
+            "reqKey": "retirement",
+            "whereName": "the Shamrock Rail",
+            "where": "loc.cop_bar"
+          },
+          {
+            "reqKey": "church",
+            "whereName": "the church on 31st",
+            "where": "W 31st St & 7th Ave"
+          },
+          {
+            "reqKey": "tenants",
+            "whereName": "the Corwin lobby",
+            "where": "loc.corwin_hotel"
+          },
+          {
+            "reqKey": "kye",
+            "whereName": "Hanyang House",
+            "where": "loc.korean_restaurant"
+          }
+        ]
+      },
+      "payout": {
+        "cost": [
+          25,
+          200
+        ],
+        "relationships": "Varies: buying goodwill from people who can tell when it's bought."
+      },
+      "cooldownMin": 720,
+      "vehicles": [],
+      "mobile": "Spending is a dialogue choice. No timers.",
+      "design": "Nick's verb, money, put to the test. Some recipients are grateful, some are insulted, and the cop's party puts him in a photo Delphine might take (a cross-lead consequence)."
+    },
+    {
+      "id": "activity.buyers_tour",
+      "title": "The Buyers' Tour",
+      "lead": "char.nick_varelas",
+      "unlockedBy": "mission.margin_call",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "10:00",
+          "17:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "loc.hotel_pennsylvania",
+        "note": "Out-of-town buyers in the lobby want to see the district."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "enter_vehicle",
+          "text": "Your sedan on Seventh",
+          "vehicle": "vehicle_role.nick_sedan"
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "Show them {sightName}",
+          "to": "{sight}",
+          "radius": 25
+        },
+        {
+          "id": "o3",
+          "type": "dialogue",
+          "text": "Sell them the city",
+          "script": "dlg.act_buyers_{sightKey}"
+        }
+      ],
+      "pool": {
+        "sight": [
+          {
+            "sight": "5th Ave & W 34th St",
+            "sightName": "the Empire State",
+            "sightKey": "empire"
+          },
+          {
+            "sight": "W 37th St & 7th Ave",
+            "sightName": "the Garment District",
+            "sightKey": "garment"
+          },
+          {
+            "sight": "W 42nd St & 7th Ave",
+            "sightName": "Times Square",
+            "sightKey": "times"
+          },
+          {
+            "sight": "loc.flatiron_prow",
+            "sightName": "the Flatiron",
+            "sightKey": "flatiron"
+          }
+        ]
+      },
+      "payout": {
+        "perTour": 30
+      },
+      "cooldownMin": 1440,
+      "vehicles": [
+        "vehicle_role.nick_sedan"
+      ],
+      "mobile": "Short drives with a talkative back seat. No timers.",
+      "design": "A guided tour that teaches landmarks (P2) while Nick sells a city that's going broke. The buyers' barks (N5) carry period small talk."
+    },
+    {
+      "id": "activity.postcards",
+      "title": "Postcards",
+      "lead": [
+        "char.teddy_arce",
+        "char.delphine_moore",
+        "char.nick_varelas"
+      ],
+      "unlockedBy": "mission.contact_sheet",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P2",
+        "P3"
+      ],
+      "when": {
+        "time": [
+          "06:00",
+          "21:00"
+        ],
+        "weather": [
+          "clear",
+          "overcast"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "W 34th St & Broadway",
+        "note": "A postcard printer on Broadway buys photographs of landmarks taken in good light."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "photo",
+          "text": "Photograph {landmarkName}",
+          "subject": "{landmark}",
+          "minScreenFraction": 0.25
+        }
+      ],
+      "pool": {
+        "landmark": [
+          {
+            "landmark": "loc.flatiron_prow",
+            "landmarkName": "the Flatiron"
+          },
+          {
+            "landmark": "5th Ave & W 34th St",
+            "landmarkName": "the Empire State"
+          },
+          {
+            "landmark": "8th Ave & W 33rd St",
+            "landmarkName": "the Garden"
+          },
+          {
+            "landmark": "loc.hotel_pennsylvania",
+            "landmarkName": "the Pennsylvania"
+          },
+          {
+            "landmark": "W 34th St & Broadway",
+            "landmarkName": "Herald Square"
+          },
+          {
+            "landmark": "loc.bryant_park",
+            "landmarkName": "Bryant Park"
+          },
+          {
+            "landmark": "W 42nd St & 7th Ave",
+            "landmarkName": "Times Square"
+          },
+          {
+            "landmark": "W 23rd St & 8th Ave",
+            "landmarkName": "the Chelsea"
+          },
+          {
+            "landmark": "W 23rd St & 7th Ave",
+            "landmarkName": "the towers from 23rd St"
+          }
+        ]
+      },
+      "payout": {
+        "perPhoto": 5,
+        "bonus": "Golden hour pays double."
+      },
+      "cooldownMin": 0,
+      "vehicles": [],
+      "mobile": "Photo mode with auto-framing. Landmarks are big. No timers.",
+      "design": "Photo mode as map teaching. The 'towers from 23rd St' card uses the skyline layer (the World Trade Center)."
+    },
+    {
+      "id": "activity.brownout_relief",
+      "title": "Brownout Relief",
+      "lead": [
+        "char.teddy_arce",
+        "char.delphine_moore",
+        "char.nick_varelas"
+      ],
+      "unlockedBy": "mission.brownout",
+      "acts": [
+        2,
+        3
+      ],
+      "pillars": [
+        "P5",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "20:00",
+          "03:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "auto",
+        "note": "Only on dim or off power nights (ENGINE N2). Someone on the street needs help."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "goto",
+          "text": "{needText}",
+          "to": "{needAt}",
+          "radius": 20
+        },
+        {
+          "id": "o2",
+          "type": "deliver",
+          "text": "Bring the {itemName}",
+          "to": "{needAt}",
+          "item": "{item}"
+        }
+      ],
+      "pool": {
+        "need": [
+          {
+            "needText": "Ice for the Corwin's diabetics",
+            "needAt": "loc.corwin_hotel",
+            "itemName": "ice",
+            "item": "item.ice"
+          },
+          {
+            "needText": "Candles for the Royal Cafeteria",
+            "needAt": "loc.eighth_ave_cafeteria",
+            "itemName": "candles",
+            "item": "item.candles"
+          },
+          {
+            "needText": "Flashlights for the kafeneio",
+            "needAt": "loc.kafeneio",
+            "itemName": "flashlights",
+            "item": "item.flashlights"
+          },
+          {
+            "needText": "Water to a stuck elevator",
+            "needAt": "W 30th St & 6th Ave",
+            "itemName": "water",
+            "item": "item.water"
+          }
+        ]
+      },
+      "payout": {
+        "money": 0,
+        "relationships": "+1 with locals"
+      },
+      "cooldownMin": 0,
+      "vehicles": [],
+      "mobile": "Short walks or drives in the dark, steering by lit landmarks. No timers.",
+      "design": "P5 at street level, for any lead. Each lead's version has its own lines (N5)."
+    },
+    {
+      "id": "activity.payphone_calls",
+      "title": "Payphone Calls",
+      "lead": [
+        "char.teddy_arce",
+        "char.delphine_moore",
+        "char.nick_varelas"
+      ],
+      "unlockedBy": "mission.night_desk",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P3",
+        "P4"
+      ],
+      "when": {
+        "time": [
+          "08:00",
+          "02:00"
+        ],
+        "weather": [
+          "any"
+        ]
+      },
+      "start": {
+        "type": "auto",
+        "note": "A payphone rings as the lead walks past. Cast members call with small asks."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "dialogue",
+          "text": "Answer the payphone",
+          "script": "dlg.act_payphone_{callerKey}"
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "{askText}",
+          "to": "{askAt}",
+          "radius": 15
+        }
+      ],
+      "pool": {
+        "caller": [
+          {
+            "callerKey": "carmen",
+            "askText": "Ma's prescription, 8th & 25th",
+            "askAt": "8th Ave & W 25th St"
+          },
+          {
+            "callerKey": "delroy",
+            "askText": "Meet Delroy at the cab line",
+            "askAt": "loc.penn_hack_stand"
+          },
+          {
+            "callerKey": "tina",
+            "askText": "Bring Tina a coffee",
+            "askAt": "loc.eighth_ave_cafeteria"
+          },
+          {
+            "callerKey": "eleni",
+            "askText": "Eleni needs the ledger",
+            "askAt": "loc.varelas_loft"
+          },
+          {
+            "callerKey": "bernard",
+            "askText": "Bernard's library book",
+            "askAt": "loc.nypl_main"
+          }
+        ]
+      },
+      "payout": {
+        "money": 0,
+        "relationships": "+1 caller"
+      },
+      "cooldownMin": 90,
+      "vehicles": [],
+      "mobile": "One tap to answer, then a short errand. Ignoring it costs nothing.",
+      "design": "Keeps the cast present between missions, and teaches the phone as the 1974 way to reach someone."
+    },
+    {
+      "id": "activity.hot_pavement",
+      "title": "Hot Pavement",
+      "lead": [
+        "char.teddy_arce",
+        "char.delphine_moore",
+        "char.nick_varelas"
+      ],
+      "unlockedBy": "mission.margin_call",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "pillars": [
+        "P3",
+        "P5"
+      ],
+      "when": {
+        "time": [
+          "13:00",
+          "18:00"
+        ],
+        "weather": [
+          "clear"
+        ]
+      },
+      "start": {
+        "type": "talk",
+        "at": "W 26th St & 8th Ave",
+        "note": "An ice-cream driver's helper quit in the heat, and the Penn South kids are waiting."
+      },
+      "loop": [
+        {
+          "id": "o1",
+          "type": "enter_vehicle",
+          "text": "Into the ice-cream truck",
+          "vehicle": "vehicle_role.ice_cream_truck"
+        },
+        {
+          "id": "o2",
+          "type": "goto",
+          "text": "Next stop: {stopName}",
+          "to": "{stop}",
+          "radius": 20
+        }
+      ],
+      "pool": {
+        "stop": [
+          {
+            "stop": "W 26th St & 8th Ave",
+            "stopName": "Penn South plaza"
+          },
+          {
+            "stop": "W 27th St & 9th Ave",
+            "stopName": "Chelsea Park"
+          },
+          {
+            "stop": "W 29th St & 9th Ave",
+            "stopName": "the hydrant on 29th"
+          },
+          {
+            "stop": "Madison Ave & E 24th St",
+            "stopName": "Madison Square"
+          }
+        ]
+      },
+      "payout": {
+        "perRun": 8
+      },
+      "cooldownMin": 720,
+      "vehicles": [
+        "vehicle_role.ice_cream_truck"
+      ],
+      "mobile": "Slow, gentle driving through a playful crowd, with no timers. Content rule: children are ambient customers only and never in traffic danger (the truck is limited to walking speed near crowds).",
+      "design": "Summer texture and a breather from the crime plot (P3)."
+    }
+  ]
+}

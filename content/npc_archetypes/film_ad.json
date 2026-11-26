@@ -1,0 +1,28 @@
+{
+  "id": "npc.film_ad",
+  "behaviour": "worker",
+  "palette": [
+    "#000000",
+    "#FFD700"
+  ],
+  "wardrobe": "Film crew first A.D.: headset, bullhorn, clipboard, sunburn.",
+  "props": [
+    "bullhorn",
+    "clipboard"
+  ],
+  "schedule": [
+    {
+      "from": "16:00",
+      "to": "05:00",
+      "area": "NIGHT RATE shoot, W 41st St",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.1
+  },
+  "barks": "barks.film_pa",
+  "scripted": true,
+  "note": ""
+}

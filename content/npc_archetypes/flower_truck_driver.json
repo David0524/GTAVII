@@ -1,0 +1,27 @@
+{
+  "id": "npc.flower_truck_driver",
+  "behaviour": "driver",
+  "palette": [
+    "#228B22",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Green work jacket, cap.",
+  "props": [
+    "flower truck"
+  ],
+  "schedule": [
+    {
+      "from": "04:00",
+      "to": "09:00",
+      "area": "W 28th St and deliveries",
+      "activity": "drive"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.05
+  },
+  "barks": "barks.truck_driver",
+  "scripted": false,
+  "note": ""
+}

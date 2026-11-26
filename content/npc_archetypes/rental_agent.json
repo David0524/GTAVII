@@ -1,0 +1,28 @@
+{
+  "id": "npc.rental_agent",
+  "behaviour": "worker",
+  "palette": [
+    "#556B2F",
+    "#F5F5DC"
+  ],
+  "wardrobe": "Cheap suit, clip-on tie, a ring of keys.",
+  "props": [
+    "ring of keys",
+    "clipboard"
+  ],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "17:00",
+      "area": "W 37th St storefronts",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.office",
+  "scripted": true,
+  "note": ""
+}

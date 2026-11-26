@@ -1,0 +1,27 @@
+{
+  "id": "npc.penn_porter",
+  "behaviour": "worker",
+  "palette": [
+    "#B22222",
+    "#000000"
+  ],
+  "wardrobe": "Red cap, porter's jacket.",
+  "props": [
+    "luggage cart"
+  ],
+  "schedule": [
+    {
+      "from": "06:00",
+      "to": "23:00",
+      "area": "Penn Station concourse",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.2,
+    "night": 0.1
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": ""
+}

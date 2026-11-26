@@ -1,0 +1,59 @@
+{
+  "id": "mission.side_purse_snatch",
+  "kind": "side",
+  "title": "Snatch on Thirty-Fourth",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Herald Square crowds, W 34th",
+      "to": "W 34th St & 6th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "chase",
+      "text": "Chase the purse thief",
+      "target": "npc.stickup_man"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Through the store's two doors",
+      "marker": "interior.herald_lunch_counter"
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Return the purse to the owner",
+      "to": "W 34th St & 7th Ave",
+      "item": "item.purse",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "The owner's thanks; heat reduction"
+  },
+  "where": "Herald Square crowds",
+  "systems": [
+    "chase",
+    "witness system (positive)",
+    "crowds"
+  ],
+  "mobile": "Generous catch distance.",
+  "rank": 24,
+  "slice": false
+}

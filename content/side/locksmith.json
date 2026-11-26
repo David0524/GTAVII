@@ -1,0 +1,64 @@
+{
+  "id": "mission.side_locksmith",
+  "kind": "side",
+  "title": "Teddy's Keys: Call-Outs",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Krause sends Teddy out",
+      "script": "dlg.side_locksmith_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The locked door, W 27th & 8th",
+      "to": "W 27th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "wait",
+      "text": "Work the lock, rhythm",
+      "seconds": 10
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Note what is wrong inside",
+      "script": "dlg.side_locksmith_2"
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Back to Krause Hardware, W 30th",
+      "to": "W 30th St & 9th Ave",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$10–25 a call; one call-out each act feeds a main-story clue"
+  },
+  "where": "Krause Hardware; doors everywhere",
+  "systems": [
+    "keys",
+    "interiors",
+    "Teddy's skills"
+  ],
+  "mobile": "Lockpicking is a held button with a rhythm, no precision.",
+  "rank": 15,
+  "slice": false
+}

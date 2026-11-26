@@ -1,0 +1,25 @@
+{
+  "id": "npc.lonnie_crew",
+  "behaviour": "loiterer",
+  "palette": [
+    "#2F2F2F",
+    "#8B0000"
+  ],
+  "wardrobe": "Leather jackets, wide collars, hats.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "20:00",
+      "to": "04:00",
+      "area": "8th Ave",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.street_tough",
+  "scripted": true,
+  "note": "No combat required (mobile rule). Escapes are solved by routes."
+}

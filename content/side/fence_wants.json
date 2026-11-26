@@ -1,0 +1,66 @@
+{
+  "id": "mission.side_fence_wants",
+  "kind": "side",
+  "title": "Marty's Want List",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Marty's, W 39th St & 9th Ave",
+      "to": "W 39th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Marty names this week's want",
+      "script": "dlg.side_fence_wants_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Check the pawnshop, W 35th & 8th",
+      "to": "W 35th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Bring the item to Marty",
+      "to": "W 39th St & 9th Ave",
+      "item": "item.wanted_goods",
+      "radius": 15
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Take the cut",
+      "script": "dlg.side_fence_wants_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "30–50% of value"
+  },
+  "where": "Marty the fence, W 39th St & 9th Ave",
+  "systems": [
+    "items",
+    "economy",
+    "interiors"
+  ],
+  "mobile": "Inventory menu.",
+  "rank": 21,
+  "slice": false
+}

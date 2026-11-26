@@ -1,0 +1,526 @@
+{
+  "_note": "One front page per in-game week (N6), plus the epilogue. Ending-dependent pages carry 'requires'. Real background is never attributed to a named person.",
+  "pages": [
+    {
+      "id": "news.w01",
+      "week": 1,
+      "dateRange": [
+        "1974-06-21",
+        "1974-06-27"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "LONGEST DAY, SHORTEST FUSE",
+      "subhead": "Heat, a broke city and hotels changing hands on Broadway",
+      "items": [
+        "Night clerk foils stick-up at W 31st St hotel",
+        "City borrows again to meet payroll, comptroller warns",
+        "SRO row: three Broadway hotels sold in a month",
+        "Subway graffiti arrests top last year's pace"
+      ],
+      "realBackground": [
+        "short-term borrowing [S3]",
+        "graffiti arrests [S17]"
+      ],
+      "missionRefs": [
+        "M1"
+      ],
+      "economy": {
+        "dailyNumber": "834",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the fifth at 5-1",
+        "fightCard": "Garden: 'Iron' Eddie Mallory vs Ray 'Sailor' Dempster",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w02",
+      "week": 2,
+      "dateRange": [
+        "1974-06-28",
+        "1974-07-04"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "A QUIET FOURTH IN A NERVOUS CITY",
+      "subhead": "Fireworks on the rivers; empty streets in midtown",
+      "items": [
+        "Shots on Eighth Ave on the Fourth; two men flee into Penn Station",
+        "Hudson Union asks customers to 'conserve, conserve, conserve'",
+        "Garment makers eye the South: 'New York costs too much'",
+        "Vacate notices at a W 31st St hotel; tenants vow to stay"
+      ],
+      "realBackground": [
+        "utility conservation appeals [S15]",
+        "runaway shops [S20]"
+      ],
+      "missionRefs": [
+        "M9"
+      ],
+      "economy": {
+        "dailyNumber": "323",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the seventh at 5-1",
+        "fightCard": "Garden: 'Iron' Eddie Mallory vs Ray 'Sailor' Dempster",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w03",
+      "week": 3,
+      "dateRange": [
+        "1974-07-05",
+        "1974-07-11"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "FLOWER TRUCKS SLASHED ON 28TH",
+      "subhead": "Wholesalers blame 'trucking politics'; police shrug",
+      "items": [
+        "Dawn brawl among the palms on 28th St",
+        "Hudson Union: August reserves 'negative'",
+        "Heat sends 14 to hospital in midtown",
+        "Special Prosecutor's office: 'investigations continue'"
+      ],
+      "realBackground": [
+        "the utility projected negative August reserve margins [S15]",
+        "the Special Prosecutor's office [S2]"
+      ],
+      "missionRefs": [
+        "M10"
+      ],
+      "economy": {
+        "dailyNumber": "710",
+        "raceResults": "Belmar Downs (invented): Hydrant Mambo wins the seventh at 5-1",
+        "fightCard": "Garden: Benny 'The Bell' Okoro vs 'Iron' Eddie Mallory",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w04",
+      "week": 4,
+      "dateRange": [
+        "1974-07-12",
+        "1974-07-18"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "WHO OWNS THE OLD HOTELS?",
+      "subhead": "A paper trail of 'associates' and 'counsel' leads nowhere",
+      "items": [
+        "Robbers routed at a fur vault on 30th St",
+        "Bryant Park: dealers back by dusk, office workers stay away",
+        "Drug-law cases clog the courts; mandatory terms bite",
+        "Fur trade's slow summer: 'we're storing, not selling'"
+      ],
+      "realBackground": [
+        "Bryant Park's decline [S13]",
+        "the 1973 drug laws [S14]"
+      ],
+      "missionRefs": [
+        "M14"
+      ],
+      "economy": {
+        "dailyNumber": "777",
+        "raceResults": "Belmar Downs (invented): Tar Beach wins the fifth at 10-1",
+        "fightCard": "Garden: Luis 'Cha-Cha' Ortiz vs Ray 'Sailor' Dempster",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w05",
+      "week": 5,
+      "dateRange": [
+        "1974-07-19",
+        "1974-07-25"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "LIGHTS OUT!",
+      "subhead": "Brownout darkens Fur District; vault owners race for ice",
+      "items": [
+        "Looters rush ice truck in brownout",
+        "Signals dead from 26th to 34th; cops direct traffic by flashlight",
+        "Hudson Union: 'equipment strain, not shortage'",
+        "Herald Square store opens its doors as a cooling centre"
+      ],
+      "realBackground": [
+        "invented brownout, consistent with the projected shortfall [S15]"
+      ],
+      "missionRefs": [
+        "M15"
+      ],
+      "economy": {
+        "dailyNumber": "095",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the third at 11-1",
+        "fightCard": "Garden: Benny 'The Bell' Okoro vs 'Iron' Eddie Mallory",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w06",
+      "week": 6,
+      "dateRange": [
+        "1974-07-26",
+        "1974-08-01"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "OLD SEAMAN DIES IN HOTEL HEAT",
+      "subhead": "Power was cut for 'rewiring', tenants say. Owners send flowers.",
+      "items": [
+        "Gunfire as furrier's truck is hijacked",
+        "Second brownout: furrier reports vault failure, coats 'spoiled'",
+        "Dress house quits 37th St overnight; workers find empty loft",
+        "Heat wave to break 'by the weekend' (it doesn't)"
+      ],
+      "missionRefs": [
+        "M18"
+      ],
+      "economy": {
+        "dailyNumber": "050",
+        "raceResults": "Belmar Downs (invented): Sodium Light wins the third at 11-1",
+        "fightCard": "Garden: Benny 'The Bell' Okoro vs Luis 'Cha-Cha' Ortiz",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w07",
+      "week": 7,
+      "dateRange": [
+        "1974-08-02",
+        "1974-08-08"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "CAPITAL ON THE BRINK",
+      "subhead": "Washington waits; midtown sweats",
+      "items": [
+        "Freight-stair scuffle at Fifth Ave law office",
+        "Night watchman: 'nothing missing' from Fifth Ave law office",
+        "Hotel tenants form committee: 'We live here'",
+        "Garment pushboys fewer every season"
+      ],
+      "missionRefs": [
+        "M21"
+      ],
+      "economy": {
+        "dailyNumber": "717",
+        "raceResults": "Belmar Downs (invented): Tar Beach wins the third at 4-1",
+        "fightCard": "Garden: Benny 'The Bell' Okoro vs Luis 'Cha-Cha' Ortiz",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w08",
+      "week": 8,
+      "dateRange": [
+        "1974-08-09",
+        "1974-08-15"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "PRESIDENT RESIGNS",
+      "subhead": "Historic noon hand-over; Times Square crowds listened all night",
+      "items": [
+        "Chase beneath Herald Square: woman escapes through old passage",
+        "'Who's next?' Panic in the precincts as probes widen",
+        "Trucking combine 'for sale', sources say",
+        "Calm at the Corwin: residents keep their radio on"
+      ],
+      "realBackground": [
+        "the resignation, effective at noon on 9 Aug 1974 [S16]; never named"
+      ],
+      "missionRefs": [
+        "M23"
+      ],
+      "economy": {
+        "dailyNumber": "994",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the seventh at 11-1",
+        "fightCard": "Garden: Ray 'Sailor' Dempster vs 'Iron' Eddie Mallory",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w09",
+      "week": 9,
+      "dateRange": [
+        "1974-08-16",
+        "1974-08-22"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "FALSE ALARM EMPTIES 31ST ST HOTEL",
+      "subhead": "Tenants walked out by neighbours; 'someone wanted us out', says committee",
+      "items": [
+        "Shootout on W 35th St; ex-sergeant unhurt",
+        "Fur insurance claim questioned",
+        "Plainclothes unit 'reviewing procedures'",
+        "Rain at last"
+      ],
+      "missionRefs": [
+        "M25"
+      ],
+      "economy": {
+        "dailyNumber": "360",
+        "raceResults": "Belmar Downs (invented): Sodium Light wins the third at 5-1",
+        "fightCard": "Garden: Luis 'Cha-Cha' Ortiz vs Benny 'The Bell' Okoro",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w10",
+      "week": 10,
+      "dateRange": [
+        "1974-08-23",
+        "1974-08-29"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "TENANTS MARCH ON HERALD SQ",
+      "subhead": "Hotel residents, garment workers and florists fill Broadway",
+      "items": [
+        "March scuffle: hired men routed by tenants",
+        "'Who owns the Tenderloin?' signs everywhere",
+        "Store owners close for an hour 'in sympathy'",
+        "Owner of Corwin seen walking with marchers"
+      ],
+      "missionRefs": [
+        "M28"
+      ],
+      "economy": {
+        "dailyNumber": "790",
+        "raceResults": "Belmar Downs (invented): Tar Beach wins the third at 10-1",
+        "fightCard": "Garden: Ray 'Sailor' Dempster vs Benny 'The Bell' Okoro",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w11_ledger_to_prosecutor",
+      "week": 11,
+      "dateRange": [
+        "1974-08-30",
+        "1974-09-02"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "PROSECUTOR WIDENS HOTEL PROBE",
+      "subhead": "Witness to testify; lawyer's office sealed",
+      "items": [
+        "Labor Day: running fight ends at the Flatiron",
+        "Lieutenant suspended pending inquiry",
+        "Hotel tenants: 'We'll believe it in court'",
+        "Labor Day traffic"
+      ],
+      "requires": {
+        "all": [
+          "flag.ledger_to_prosecutor"
+        ]
+      },
+      "missionRefs": [
+        "M32"
+      ],
+      "economy": {
+        "dailyNumber": "335",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the seventh at 10-1",
+        "fightCard": "Garden: Benny 'The Bell' Okoro vs Ray 'Sailor' Dempster",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w11_ledger_to_press",
+      "week": 11,
+      "dateRange": [
+        "1974-08-30",
+        "1974-09-02"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "THE LEDGER",
+      "subhead": "Twenty hotels, a lieutenant's boat and a lawyer who never touched cash",
+      "items": [
+        "Labor Day: running fight ends at the Flatiron",
+        "Page nine: the Corwin, in their own words",
+        "Plainclothes unit disbanded",
+        "Editor's note on a family conflict, disclosed"
+      ],
+      "requires": {
+        "all": [
+          "flag.ledger_to_press"
+        ]
+      },
+      "missionRefs": [
+        "M32"
+      ],
+      "economy": {
+        "dailyNumber": "140",
+        "raceResults": "Belmar Downs (invented): Brass Token wins the third at 10-1",
+        "fightCard": "Garden: Ray 'Sailor' Dempster vs Benny 'The Bell' Okoro",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w11_ledger_kept",
+      "week": 11,
+      "dateRange": [
+        "1974-08-30",
+        "1974-09-02"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "HEAT WAVE BREAKS",
+      "subhead": "A quiet end to a long summer",
+      "items": [
+        "Labor Day: running fight ends at the Flatiron",
+        "Lunch-counter regular takes new stool, waitresses note",
+        "Hotel probe 'stalls'",
+        "Labor Day traffic"
+      ],
+      "requires": {
+        "all": [
+          "flag.ledger_kept"
+        ]
+      },
+      "missionRefs": [
+        "M32"
+      ],
+      "economy": {
+        "dailyNumber": "826",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the third at 6-1",
+        "fightCard": "Garden: Ray 'Sailor' Dempster vs Benny 'The Bell' Okoro",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w11_ledger_burned",
+      "week": 11,
+      "dateRange": [
+        "1974-08-30",
+        "1974-09-02"
+      ],
+      "masthead": "biz.evening_dispatch",
+      "headline": "HOTELS SOLD FOR 'CONVERSION'",
+      "subhead": "Investors close on Broadway portfolio",
+      "items": [
+        "Labor Day: running fight ends at the Flatiron",
+        "Tenants given thirty days",
+        "Boiler fire at W 31st St hotel, no injuries",
+        "Labor Day traffic"
+      ],
+      "requires": {
+        "all": [
+          "flag.ledger_burned"
+        ]
+      },
+      "missionRefs": [
+        "M32"
+      ],
+      "economy": {
+        "dailyNumber": "856",
+        "raceResults": "Belmar Downs (invented): Sodium Light wins the fifth at 9-1",
+        "fightCard": "Garden: Ray 'Sailor' Dempster vs Benny 'The Bell' Okoro",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    },
+    {
+      "id": "news.w12",
+      "week": 12,
+      "dateRange": [
+        "1974-10-01",
+        "1974-10-01"
+      ],
+      "masthead": "biz.daily_ticker",
+      "headline": "CITY FACES $1.5 BILLION GAP",
+      "subhead": "Mayor's plan: cuts, freezes, and 'shared sacrifice'",
+      "items": [
+        "Furs back in season on 30th St",
+        "Corwin Hotel: see page 3",
+        "Subway fare 'safe through winter'"
+      ],
+      "realBackground": [
+        "the budget gap reported from Oct 1974 [S3]"
+      ],
+      "economy": {
+        "dailyNumber": "995",
+        "raceResults": "Belmar Downs (invented): Night Desk wins the third at 11-1",
+        "fightCard": "Garden: Benny 'The Bell' Okoro vs Ray 'Sailor' Dempster",
+        "prices": {
+          "subway": "35¢",
+          "paper": "15¢",
+          "coffee": "20¢",
+          "rye_bottle": "$4.50"
+        },
+        "classifieds": "cars.json listings; businesses for sale (economy.json); rooms by the week"
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "npc.cab_fare_tourist",
+  "behaviour": "commuter",
+  "palette": [
+    "#FF6347",
+    "#FFFACD"
+  ],
+  "wardrobe": "Sun hat, camera, map.",
+  "props": [
+    "camera",
+    "street map"
+  ],
+  "schedule": [
+    {
+      "from": "18:00",
+      "to": "04:00",
+      "area": "Cab pickups",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.cab_fare",
+  "scripted": true,
+  "note": ""
+}

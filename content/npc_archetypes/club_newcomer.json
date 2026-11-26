@@ -1,0 +1,27 @@
+{
+  "id": "npc.club_newcomer",
+  "behaviour": "walker",
+  "palette": [
+    "#FFE4E1",
+    "#696969"
+  ],
+  "wardrobe": "A young woman (adult) in a cheap summer dress, one suitcase.",
+  "props": [
+    "suitcase"
+  ],
+  "schedule": [
+    {
+      "from": "18:00",
+      "to": "02:00",
+      "area": "8th Ave & W 41st St (bus terminal)",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.02
+  },
+  "barks": "barks.strip",
+  "scripted": true,
+  "note": "New arrival the club looks after (Walk Her Home). Adult; written as protected, not prey."
+}

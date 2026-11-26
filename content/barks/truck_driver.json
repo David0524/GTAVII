@@ -1,0 +1,162 @@
+{
+  "id": "barks.truck_driver",
+  "core": true,
+  "note": "Delivery and Garment District truck drivers (Carriers' trucks, flower trucks, ice trucks).",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "gruff",
+      "text": "Make way, buddy. Truck coming through."
+    },
+    {
+      "context": "horn",
+      "emotion": "angry",
+      "text": "Move your heap! I got forty racks and a schedule!"
+    },
+    {
+      "context": "horn",
+      "emotion": "impatient",
+      "text": "Come on! Thirty-Seventh's a parking lot!"
+    },
+    {
+      "context": "horn",
+      "emotion": "gruff",
+      "text": "Beep beep, baby. Big truck, small street."
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "You hit my truck? You hit my truck!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Watch the mirror! That's my good mirror!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "You cut me off! In a sedan! Against a truck!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Wrong way, wiseguy! This is one way!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "gruff",
+      "text": "Get out of the loading zone! It's a zone! For loading!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Run faster, the truck's catching up. Kidding."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Double-park, unload, ticket. Double-park, unload, ticket."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Envelope on the dash. Don't ask what's in it. I don't."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Union driver twenty years. Augie don't hire amateurs."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Delivered dresses to Ohio once. They sent 'em back. Too New York."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Twelve tickets this week. Twelve! City's eating me alive."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Gas lines last winter, gas prices this summer. Whose idea?"
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Pushboys in the street. Racks everywhere. I'm a truck, not a ballerina."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain. Tarp the load. Tarp the load!"
+    },
+    {
+      "context": "rain",
+      "emotion": "weary",
+      "text": "Wet streets, slow streets. Overtime nobody pays."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Cab's a hundred and fifty degrees. I'm cooking with the engine."
+    },
+    {
+      "context": "brownout",
+      "emotion": "alert",
+      "text": "Lights out! Watch the intersection! Nobody knows who goes!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Ice truck to the fur vault? In this? Sure. Overtime."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Four a.m. Flower run. Then sleep. Then flower run."
+    },
+    {
+      "context": "horn",
+      "emotion": "angry",
+      "text": "You stop for a pigeon? A pigeon?!"
+    },
+    {
+      "context": "collision",
+      "emotion": "gruff",
+      "text": "Insurance is gonna love this. Love it."
+    },
+    {
+      "context": "idle",
+      "emotion": "easy",
+      "text": "Seventh Avenue before seven. Only time it's beautiful."
+    },
+    {
+      "context": "complain",
+      "emotion": "low",
+      "text": "Augie's coughing again. Nobody says nothing."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Morning, Dwayne! Your racks are in the way. As usual."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "annoyed",
+      "text": "Back it up! Back it UP! Okay. Good. Idiot."
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "Wet flowers. Mrs. Moretti says that's a feature."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Fur in July, ice in July, everything backwards in July."
+    }
+  ]
+}

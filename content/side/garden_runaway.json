@@ -1,0 +1,69 @@
+{
+  "id": "mission.side_garden_runaway",
+  "kind": "side",
+  "title": "The Runaway from the Garden",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The stable hand's panic",
+      "script": "dlg.side_garden_runaway_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Find the horse, 7th Ave & 33rd",
+      "to": "W 33rd St & 7th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "follow",
+      "text": "Herd it down Seventh Avenue",
+      "target": "npc.holiday_stroller",
+      "keepWithinM": 30
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Sugar from the diner, W 30th",
+      "to": "W 30th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o5",
+      "type": "wait",
+      "text": "Calm the horse at the corner",
+      "seconds": 15
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Return it to the stable",
+      "script": "dlg.side_garden_runaway_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$40 from the stable; a Garden ticket stub (fight-card access)"
+  },
+  "where": "Madison Square Garden / Penn Station / Seventh Ave",
+  "systems": [
+    "driving",
+    "crowds",
+    "one-ways"
+  ],
+  "mobile": "Slow pursuit; the horse waits at corners.",
+  "rank": 10,
+  "slice": false
+}

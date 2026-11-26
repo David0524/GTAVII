@@ -1,0 +1,27 @@
+{
+  "id": "npc.stickup_man",
+  "behaviour": "walker",
+  "palette": [
+    "#2F2F2F",
+    "#8B4513"
+  ],
+  "wardrobe": "An out-of-work man in a cheap jacket with a cheap gun (adult). Desperate, not a monster.",
+  "props": [
+    "street-tier handgun"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Scripted scenes only",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.street_tough",
+  "scripted": true,
+  "note": "M1 and M7 stick-ups. Can be disarmed and let go."
+}

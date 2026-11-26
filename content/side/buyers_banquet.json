@@ -1,0 +1,68 @@
+{
+  "id": "mission.side_buyers_banquet",
+  "kind": "side",
+  "title": "The Buyers' Banquet",
+  "number": null,
+  "leads": [
+    "char.nick_varelas"
+  ],
+  "acts": [
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Nick's buyers' briefing",
+      "script": "dlg.side_buyers_banquet_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Hotel Pennsylvania, 7th Ave",
+      "to": "loc.hotel_pennsylvania",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Seat the buyers at the right table",
+      "script": "dlg.side_buyers_banquet_2"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Find the man spiking the champagne",
+      "script": "dlg.side_buyers_banquet_3"
+    },
+    {
+      "id": "o5",
+      "type": "combat",
+      "text": "Quietly remove Kallis's man",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.hotel_bellhop",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Fall orders (Nick's finances)"
+  },
+  "where": "Hotel Pennsylvania ballroom",
+  "systems": [
+    "interiors",
+    "dialogue",
+    "tells"
+  ],
+  "mobile": "Tap-to-talk.",
+  "rank": 38,
+  "slice": false
+}

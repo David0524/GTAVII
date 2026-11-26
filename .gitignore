@@ -6,3 +6,4 @@ data/raw*/
 shots/tmp/
 dist-test/
 .claude/worktrees/
+__pycache__/

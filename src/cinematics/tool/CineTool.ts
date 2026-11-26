@@ -10,14 +10,14 @@
  *    easing, handheld; "focus on" an actor sets the focus distance;
  *  - actors: pick one, click the ground to key their mark at the playhead, [ and ] turn them;
  *  - shot ops: add after, duplicate, delete, duration, start/end on the gameplay camera;
- *  - validation as you go; Export downloads the JSON (and keeps an autosave in this browser).
+ *  - validation as you go; Export downloads the layout JSON (content/cutscenes/layout/<id>.layout.json) (and keeps an autosave in this browser).
  * The tool owns the camera (CameraDirector owner 'cine-tool') while open.
  */
 import * as THREE from 'three/webgpu';
 import type { UiHost } from '../../shared/uiHost';
 import { CinematicPlayer } from '../CinematicPlayer';
 import { cutsceneIds, loadCutscene } from '../content';
-import { validateCutscene, lensToFov, fovToLens, type Cutscene, type Shot, type CamKey, type V3 } from '../schema';
+import { validateCutscene, lensToFov, fovToLens, applyLayout, extractLayout, type Cutscene, type CutsceneLayout, type Shot, type CamKey, type V3 } from '../schema';
 import { Timeline } from '../Timeline';
 import { esc } from '../../ui/util';
 import { heightAt, CURB_HEIGHT } from '../../shared/terrain';
@@ -30,6 +30,7 @@ export class CineTool {
   readonly root = document.createElement('div');
   private player: CinematicPlayer;
   private scene: Cutscene | null = null;
+  private script: Cutscene | null = null;
   private id = '';
   private shotI = 0;
   private mode: 'edit' | 'preview' = 'edit';
@@ -67,8 +68,10 @@ export class CineTool {
   async open(id: string) {
     if (!id || id === '1') id = cutsceneIds()[0];
     const saved = (() => { try { return localStorage.getItem(`t74.cine.${id}`); } catch { return null; } })();
-    const { scene } = await loadCutscene(id);
-    this.scene = saved ? JSON.parse(saved) as Cutscene : scene;
+    const { scene, script } = await loadCutscene(id);
+    this.script = script;
+    // the autosave holds only layout, so a script change by narrative is never shadowed by a stale copy
+    this.scene = saved ? applyLayout(script, JSON.parse(saved) as CutsceneLayout).scene : scene;
     this.id = id; this.shotI = 0; this.dirty = !!saved;
     await this.player.play(id, { paused: true });
     this.player.scene = this.scene; this.rebuild();
@@ -85,7 +88,7 @@ export class CineTool {
     this.player.tl = new Timeline(sc, (ref) => { const l = lineOf(ref); return l ? { id: ref, speaker: l.speaker, text: l.text } : null; }, (s) => s);
     this.player.scene = sc;
     this.dirty = true;
-    try { localStorage.setItem(`t74.cine.${this.id}`, JSON.stringify(sc)); } catch { /* ignore */ }
+    try { localStorage.setItem(`t74.cine.${this.id}`, JSON.stringify(extractLayout(sc, this.script!))); } catch { /* ignore */ }
     this.render();
   }
 
@@ -200,8 +203,9 @@ export class CineTool {
   }
 
   private export() {
-    const text = JSON.stringify(this.scene, null, 1);
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = `${this.id}.json`; a.click();
+    // only the layout layer: content/cutscenes/layout/<id>.layout.json (the script is narrative's file)
+    const text = JSON.stringify(extractLayout(this.scene!, this.script!), null, 1);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = `${this.id}.layout.json`; a.click();
     void navigator.clipboard?.writeText(text).catch(() => {});
     this.dirty = false; this.render();
   }

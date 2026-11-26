@@ -1,0 +1,184 @@
+{
+  "_note": "Invented makers and models by tier (street / service / quality). No real makers, models or trademarks. Stats are Gameplay's; narrative gives names, period price, flavour and where it's found. No functional or instructional detail (content rule 6).",
+  "makers": [
+    {
+      "name": "Hartwell Arms",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    },
+    {
+      "name": "Ferrante Arms",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    },
+    {
+      "name": "Lyle-Brandt",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    },
+    {
+      "name": "Akers",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    },
+    {
+      "name": "Mercer",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    },
+    {
+      "name": "Boone",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    },
+    {
+      "name": "Delacroix",
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+    }
+  ],
+  "weapons": [
+    {
+      "id": "item.akers_25_vestpocket",
+      "name": "Akers .25 “Vestpocket”",
+      "tier": "street",
+      "class": "pocket pistol",
+      "price": 25,
+      "where": [
+        "fences",
+        "the Deuce (street sale)"
+      ],
+      "flavour": "Fits in a sock. Misses in a sock."
+    },
+    {
+      "id": "item.boone_22_parlor",
+      "name": "Boone .22 “Parlor”",
+      "tier": "street",
+      "class": "small revolver",
+      "price": 30,
+      "where": [
+        "pawnshops"
+      ],
+      "flavour": "Grandfather's target gun, pawned twice."
+    },
+    {
+      "id": "item.mercer_38_pocketbook",
+      "name": "Mercer .38 “Pocketbook”",
+      "tier": "street",
+      "class": "snub-nose revolver",
+      "price": 45,
+      "where": [
+        "fences",
+        "Delphine's bag (start of game)"
+      ],
+      "flavour": "Delphine's. Five shots, short barrel, heavy for its size."
+    },
+    {
+      "id": "item.revolver_service",
+      "name": "Hartwell .38 “Patrolman”",
+      "tier": "service",
+      "class": "service revolver",
+      "price": 110,
+      "where": [
+        "M7 (Mayhew returns Teddy's)",
+        "the gun shop on W 38th St"
+      ],
+      "flavour": "Six shots, four-inch barrel. Teddy's old service piece, oiled by Mayhew for two years."
+    },
+    {
+      "id": "item.ferrante_12_farmhand",
+      "name": "Ferrante 12-gauge “Farmhand”",
+      "tier": "service",
+      "class": "pump shotgun",
+      "price": 95,
+      "where": [
+        "the gun shop",
+        "the Carriers' garage (looted)"
+      ],
+      "flavour": "Built for Ohio barns, sold on Ninth Avenue."
+    },
+    {
+      "id": "item.lyle_brandt_45_commissioner",
+      "name": "Lyle-Brandt .45 “Commissioner”",
+      "tier": "quality",
+      "class": "automatic pistol",
+      "price": 210,
+      "where": [
+        "Lisle's security (looted)",
+        "a fence's special order"
+      ],
+      "flavour": "Heavy, accurate, expensive. Rich men's bodyguards carry it."
+    },
+    {
+      "id": "item.delacroix_9_continental",
+      "name": "Delacroix 9mm “Continental”",
+      "tier": "quality",
+      "class": "automatic pistol",
+      "price": 240,
+      "where": [
+        "Nick's desk drawer (unloaded, since 1956)"
+      ],
+      "flavour": "European, elegant. Nick bought it to feel like a man who'd use it."
+    },
+    {
+      "id": "item.hartwell_30_longshot",
+      "name": "Hartwell .30 “Longshot”",
+      "tier": "quality",
+      "class": "hunting rifle",
+      "price": 160,
+      "where": [
+        "the gun shop (permit required)"
+      ],
+      "flavour": "A deer rifle in a city with no deer."
+    },
+    {
+      "id": "item.straight_razor",
+      "name": "Straight razor",
+      "tier": "melee",
+      "class": "blade",
+      "price": 4,
+      "where": [
+        "barber supply",
+        "Delphine (start)"
+      ],
+      "flavour": "Her father's, from Wilmington."
+    },
+    {
+      "id": "item.tire_iron",
+      "name": "Tyre iron",
+      "tier": "melee",
+      "class": "blunt",
+      "price": 3,
+      "where": [
+        "any truck",
+        "hardware store"
+      ]
+    },
+    {
+      "id": "item.nightstick",
+      "name": "Nightstick",
+      "tier": "melee",
+      "class": "blunt",
+      "price": 0,
+      "where": [
+        "Teddy's footlocker"
+      ],
+      "flavour": "Teddy kept it. Nobody asked for it back."
+    },
+    {
+      "id": "item.crowbar",
+      "name": "Crowbar",
+      "tier": "melee",
+      "class": "blunt/tool",
+      "price": 4,
+      "where": [
+        "hardware store"
+      ],
+      "flavour": "Opens crates and arguments."
+    },
+    {
+      "id": "item.bat",
+      "name": "Softball bat",
+      "tier": "melee",
+      "class": "blunt",
+      "price": 6,
+      "where": [
+        "sporting goods",
+        "Penn South"
+      ]
+    }
+  ]
+}

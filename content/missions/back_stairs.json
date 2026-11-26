@@ -1,0 +1,179 @@
+{
+  "id": "mission.back_stairs",
+  "title": "Back Stairs",
+  "number": 8,
+  "act": 1,
+  "chapter": 3,
+  "playAs": "char.delphine_moore",
+  "date": "1974-07-02",
+  "durationMin": 13,
+  "pillars": [
+    "P1",
+    "P2"
+  ],
+  "giver": "char.marcus_teague",
+  "requires": {
+    "flags": [
+      "flag.tax_raised"
+    ],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "21:00",
+      "01:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-02",
+      "1974-07-03"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.arden_hotel",
+    "cut": "transition"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "to": "8th Ave & W 38th St",
+      "radius": 25,
+      "text": "Find Brannock's car, Eighth & 38th"
+    },
+    {
+      "id": "o2",
+      "type": "photo",
+      "subject": "char.jimmy_brannock",
+      "with": "char.lonnie_gage",
+      "minScreenFraction": 0.06,
+      "text": "Photograph the handoff"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "script": "dlg.m08_spotted",
+      "text": "Brannock saw the flash"
+    },
+    {
+      "id": "o3b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "character": "char.lonnie_gage"
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie blocks the stairwell",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "note": "Lonnie is essential here (he has an Act 3 arc); the mission fails if he dies. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o4",
+      "type": "evade",
+      "from": [
+        "char.jimmy_brannock"
+      ],
+      "breakDistanceM": 80,
+      "safeZones": [
+        "interior.arden_back_stairs",
+        "loc.bauer_arcade"
+      ],
+      "fallback": "goto interior.arden_back_stairs with timeLimitSec 90 (timer fail = caught)",
+      "text": "Lose him: the Arden's back stairs"
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "marker": "interior.arden_lobby",
+      "text": "Sit at Rita's bar like nothing happened",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "script": "dlg.m08_rita",
+      "text": "Let Rita cover for you",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3b",
+    "o4"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.photo_file_started"
+    ],
+    "unlock": [
+      "mission.independence_day"
+    ],
+    "items": [
+      "item.print_brannock_1"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.rita_haines": 1,
+      "char.delphine_moore/char.jimmy_brannock": -1
+    }
+  },
+  "npcs": [
+    "char.jimmy_brannock",
+    "char.lonnie_gage",
+    "char.marcus_teague",
+    "char.rita_haines",
+    "char.ray_bauer",
+    "char.dennis_wurtz"
+  ],
+  "archetypes": [
+    "npc.strip_worker",
+    "npc.plainclothes",
+    "npc.arcade_patron"
+  ],
+  "vehicles": [
+    "vehicle_role.unmarked_sedan"
+  ],
+  "locations": [
+    "8th Ave & W 38th St",
+    "loc.arden_hotel",
+    "loc.bauer_arcade"
+  ],
+  "mobile": "The chase is on foot and solved by route knowledge (M6 taught the back stairs). Brannock is slower than Delphine and loses her at any door with two exits. There's no aiming; the photo auto-frames. Generous break distance.",
+  "design": "Delphine's power is witnessing. Bauer's arcade is a second safe zone, which seeds his double life. Wurtz is glimpsed in the car, not confronted. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.jimmy_brannock",
+      "reason": "died"
+    },
+    {
+      "character": "char.lonnie_gage",
+      "reason": "died"
+    },
+    {
+      "character": "char.rita_haines",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

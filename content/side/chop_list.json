@@ -1,0 +1,65 @@
+{
+  "id": "mission.side_chop_list",
+  "kind": "side",
+  "title": "The Dukes' Weekly List",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "The Dukes' garage, W 36th & 9th",
+      "to": "W 36th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Read the week's chalk list",
+      "script": "dlg.side_chop_list_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Scout the target car, W 32nd",
+      "to": "W 32nd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "enter_vehicle",
+      "text": "Take the car",
+      "vehicle": "vehicle_role.sedan"
+    },
+    {
+      "id": "o5",
+      "type": "deliver",
+      "text": "Deliver it to the garage",
+      "to": "W 36th St & 9th Ave",
+      "item": "item.vehicle",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$100–600 per car"
+  },
+  "where": "The Dyer Avenue Dukes' garage, W 36th St & 9th Ave",
+  "systems": [
+    "car theft",
+    "witnesses",
+    "relationships"
+  ],
+  "mobile": "No precision driving; the garage door is a big target.",
+  "rank": 14,
+  "slice": false
+}

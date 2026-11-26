@@ -1,0 +1,100 @@
+{
+  "_note": "Crews and territories for Gameplay (hostility, encounters). All members are adults. Crews are defined by trade, not ethnicity (N1 rule).",
+  "crews": [
+    {
+      "id": "crew.carriers",
+      "name": "The Carriers' drivers",
+      "boss": "char.augie_lomax",
+      "territory": "Garment District, W 35th–40th St, 7th–9th Aves; the garage at W 38th & 9th",
+      "archetypes": [
+        "npc.carrier_muscle",
+        "npc.truck_driver"
+      ],
+      "hostileWhen": "Teddy steps in at the Baeks' (M4) or Moretti's sabotage is exposed",
+      "weapons": [
+        "item.tire_iron",
+        "item.ferrante_12_farmhand"
+      ]
+    },
+    {
+      "id": "crew.lonnie",
+      "name": "Lonnie's crew",
+      "boss": "char.lonnie_gage",
+      "territory": "Eighth Ave, W 34th–42nd St",
+      "archetypes": [
+        "npc.lonnie_crew"
+      ],
+      "hostileWhen": "always toward Delphine after M6",
+      "weapons": [
+        "item.akers_25_vestpocket",
+        "item.straight_razor"
+      ]
+    },
+    {
+      "id": "crew.dyer_dukes",
+      "name": "The Dyer Avenue Dukes",
+      "boss": "(invented, side content)",
+      "territory": "The tunnel-trench blocks, W 34th–40th St near 9th Ave",
+      "archetypes": [
+        "npc.stickup_man"
+      ],
+      "hostileWhen": "car-theft side content; they run the chop shop",
+      "weapons": [
+        "item.tire_iron",
+        "item.boone_22_parlor"
+      ],
+      "note": "Car thieves and the chop-shop crew (economy)."
+    },
+    {
+      "id": "crew.lisle_security",
+      "name": "Lisle's hired security",
+      "boss": "char.howard_lisle (never on scene)",
+      "territory": "Fifth Ave & W 36th St; the Broadway hotels Lisle owns",
+      "archetypes": [
+        "npc.lisle_driver"
+      ],
+      "hostileWhen": "from M21 on",
+      "weapons": [
+        "item.lyle_brandt_45_commissioner"
+      ]
+    },
+    {
+      "id": "crew.kallis_men",
+      "name": "Kallis's men",
+      "boss": "char.stavros_kallis",
+      "territory": "Fur District, W 27th–30th St",
+      "archetypes": [
+        "npc.kallis_driver"
+      ],
+      "hostileWhen": "toward Nick from M16",
+      "weapons": [
+        "item.tire_iron"
+      ]
+    },
+    {
+      "id": "crew.prentiss_movers",
+      "name": "Prentiss's 'movers'",
+      "boss": "char.vic_prentiss",
+      "territory": "The SRO hotels on Broadway, W 28th–32nd St",
+      "archetypes": [
+        "npc.prentiss_mover",
+        "npc.hired_firebug"
+      ],
+      "hostileWhen": "toward Teddy from M2",
+      "weapons": [
+        "item.crowbar"
+      ]
+    },
+    {
+      "id": "crew.wurtz_unit",
+      "name": "The 'conditions' unit (police)",
+      "boss": "char.dennis_wurtz",
+      "territory": "Eighth Ave, the Deuce, Bryant Park (Midtown Central)",
+      "archetypes": [
+        "npc.plainclothes"
+      ],
+      "hostileWhen": "per story; they're police, so the Gameplay police rules apply",
+      "note": "Not a gang: a corrupt police unit. Lethality rules are held pending the user's decision."
+    }
+  ]
+}

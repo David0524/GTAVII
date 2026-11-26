@@ -1,0 +1,299 @@
+{
+  "_note": "Graffiti tags (invented writers; real 1970s writers' tags avoided), slogans by act, posters and handbills. Placement is by area; the engine picks walls.",
+  "tags": [
+    {
+      "tag": "RIZO 147",
+      "style": "subway-car tag, bubble letters",
+      "areas": [
+        "subway cars",
+        "W 34th St station"
+      ]
+    },
+    {
+      "tag": "NOVA 33",
+      "style": "marker, tall letters",
+      "areas": [
+        "8th Ave",
+        "Penn Station"
+      ]
+    },
+    {
+      "tag": "KITO 29",
+      "style": "spray, arrow tails",
+      "areas": [
+        "W 28th–29th Sts",
+        "roll gates"
+      ]
+    },
+    {
+      "tag": "LUZ 106",
+      "style": "small and neat, a star over the Z",
+      "areas": [
+        "Penn South",
+        "W 26th St"
+      ]
+    },
+    {
+      "tag": "TOMBO 52",
+      "style": "big outline",
+      "areas": [
+        "W 30s near 9th Ave",
+        "W 30s near 10th"
+      ]
+    },
+    {
+      "tag": "SPIN 8",
+      "style": "drips",
+      "areas": [
+        "8th Ave",
+        "the Deuce"
+      ]
+    },
+    {
+      "tag": "DOC GREEN",
+      "style": "one colour, green",
+      "areas": [
+        "Bryant Park",
+        "6th Ave"
+      ]
+    },
+    {
+      "tag": "MOTOR 1",
+      "style": "fast tag",
+      "areas": [
+        "truck doors",
+        "Garment District"
+      ]
+    }
+  ],
+  "slogans": [
+    {
+      "act": 1,
+      "text": "BUY A COP A COFFEE (THEY CAN'T)",
+      "where": "Station-house block, chalk",
+      "note": "A joke about the post-Commission era, half scrubbed."
+    },
+    {
+      "act": 1,
+      "text": "CITY BROKE — WE KNEW",
+      "where": "Broadway hoardings"
+    },
+    {
+      "act": 1,
+      "text": "VOTE (torn)",
+      "where": "Old 1973 campaign posters, faded and unreadable"
+    },
+    {
+      "act": 2,
+      "text": "WE LIVE HERE",
+      "where": "Corwin windows, other SROs",
+      "requires": {
+        "all": [
+          "flag.vacate_notices"
+        ]
+      }
+    },
+    {
+      "act": 2,
+      "text": "NO VACATE",
+      "where": "SRO doors on Broadway"
+    },
+    {
+      "act": 2,
+      "text": "LIGHTS OUT — RENT STILL DUE",
+      "where": "W 28th–34th Sts after a brownout"
+    },
+    {
+      "act": 2,
+      "text": "WALTER HOLLIS 1900–1974 SHIPMATE",
+      "where": "Corwin lobby window, hand-painted",
+      "requires": {
+        "all": [
+          "flag.hollis_dead"
+        ]
+      }
+    },
+    {
+      "act": 3,
+      "text": "WHO OWNS THE TENDERLOIN?",
+      "where": "Stencils from Broadway to 8th Ave"
+    },
+    {
+      "act": 3,
+      "text": "WE STAYED UP",
+      "where": "Corwin bedsheet banner",
+      "requires": {
+        "all": [
+          "flag.arson_stopped"
+        ]
+      }
+    },
+    {
+      "act": 3,
+      "text": "FELD OWES US",
+      "where": "W 37th St loft door",
+      "requires": {
+        "all": [
+          "flag.feld_left"
+        ]
+      },
+      "note": "Painted by the operators."
+    },
+    {
+      "act": "epilogue",
+      "text": "CORWIN STAYS",
+      "where": "Corwin facade banner",
+      "requires": {
+        "any": [
+          "flag.corwin_to_council",
+          "flag.corwin_kept"
+        ]
+      }
+    },
+    {
+      "act": "epilogue",
+      "text": "FOR CONVERSION — LUXURY RESIDENCES",
+      "where": "Hoardings on the Corwin",
+      "requires": {
+        "all": [
+          "flag.corwin_sold_on"
+        ]
+      }
+    },
+    {
+      "act": "epilogue",
+      "text": "PAGE NINE",
+      "where": "Stencil, all over midtown",
+      "requires": {
+        "all": [
+          "flag.ledger_to_press"
+        ]
+      }
+    }
+  ],
+  "posters": [
+    {
+      "title": "TENANTS' MEETING — CORWIN LOBBY — SUNDAY 7 P.M. — BRING A CHAIR",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Corwin, Broadway SROs"
+    },
+    {
+      "title": "THE LOCAL — OPERATORS' MEETING — SEVERANCE IS A RIGHT",
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Garment District lampposts"
+    },
+    {
+      "title": "OPEN CALL! KETTLE & CRANE PICTURES SEEKS 'NEW YORK FACES' FOR NIGHT RATE",
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Hell's Kitchen, 8th Ave"
+    },
+    {
+      "title": "VELVET MOON: 'FIST OF THE PAPER TIGER' · 'HOUSE OF THE WAX SAINT' · 'THUNDER OF THE SILVER FIST'",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "W 42nd St marquee and one-sheets",
+      "note": "Invented grindhouse titles. The engine rotates triple bills weekly."
+    },
+    {
+      "title": "MADISON SQUARE GARDEN — FRIDAY: 'IRON' EDDIE MALLORY vs. BENNY 'THE BELL' OKORO — 10 ROUNDS",
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Penn Station, 8th Ave",
+      "note": "Invented boxers."
+    },
+    {
+      "title": "BLOCK PARTY — W 46TH ST — SAT & SUN — BAND, RAFFLE, FAN PRIZE",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Hell's Kitchen (matches the boundaries blocker)"
+    },
+    {
+      "title": "CONSERVE! TURN IT OFF — HUDSON UNION",
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Subway cars, bus shelters"
+    },
+    {
+      "title": "LOST: ORANGE CAT 'COMMISSIONER'. ANSWERS TO NOTHING. REWARD.",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Penn South lampposts"
+    },
+    {
+      "title": "ROOF FUND — SACRED HEART AND ALL SAINTS — GIVE WHAT YOU CAN",
+      "acts": [
+        2,
+        3
+      ],
+      "where": "W 31st St church doors"
+    },
+    {
+      "title": "한국어 교실 — KOREAN CLASSES FOR CHILDREN — SATURDAYS — HANYANG HOUSE",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "W 32nd St"
+    },
+    {
+      "title": "ΧΟΡΟΣ — GREEK DANCE — KASTORIAN SOCIETY — AUGUST 15",
+      "acts": [
+        2
+      ],
+      "where": "Fur District"
+    },
+    {
+      "title": "ROOMS — WEEKLY — NO QUESTIONS — INQUIRE DESK",
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "8th Ave hotel doors"
+    },
+    {
+      "title": "MARCH! FRIDAY AUG 23 — CORWIN TO HERALD SQ — WHO OWNS THE TENDERLOIN?",
+      "acts": [
+        3
+      ],
+      "where": "Everywhere on Broadway"
+    },
+    {
+      "title": "NOTICE — CORWIN RESIDENTIAL ASSOCIATES — 'RELOCATION ASSISTANCE AVAILABLE'",
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Corwin mailboxes",
+      "requires": {
+        "all": [
+          "flag.corwin_sold"
+        ]
+      }
+    }
+  ]
+}

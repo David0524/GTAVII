@@ -1,0 +1,57 @@
+{
+  "id": "barks.radio_crowd",
+  "core": false,
+  "note": "Night of 8 Aug 1974: crowds around car radios and storefront TVs. The President is never named.",
+  "lines": [
+    {
+      "context": "idle",
+      "emotion": "grave",
+      "text": "He's going. He's actually going. Tomorrow noon."
+    },
+    {
+      "context": "idle",
+      "emotion": "stunned",
+      "text": "I never thought I'd hear a President say that."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "First time in history. And I'm standing next to a hot-dog cart."
+    },
+    {
+      "context": "idle",
+      "emotion": "angry",
+      "text": "Good riddance. Should've been sooner."
+    },
+    {
+      "context": "idle",
+      "emotion": "sad",
+      "text": "Whatever you thought of him, it's a sad night for the country."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Turn it up! Turn it up! The cabbie's got the best radio!"
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "If a President can go down, anybody can. Anybody."
+    },
+    {
+      "context": "idle",
+      "emotion": "cynical",
+      "text": "And tomorrow the rent's still due."
+    },
+    {
+      "context": "idle",
+      "emotion": "grave",
+      "text": "Quiet, quiet, he's talking."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Times Square's never been this quiet. Listen to that."
+    }
+  ]
+}

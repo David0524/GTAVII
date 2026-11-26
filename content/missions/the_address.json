@@ -1,0 +1,201 @@
+{
+  "id": "mission.the_address",
+  "title": "The Address",
+  "number": 22,
+  "act": 3,
+  "chapter": 8,
+  "playAs": "char.teddy_arce",
+  "date": "1974-08-08",
+  "durationMin": 18,
+  "pillars": [
+    "P4",
+    "P5",
+    "P2"
+  ],
+  "giver": "char.odessa_pruitt",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "20:30",
+      "00:30"
+    ],
+    "weather": [
+      "overcast"
+    ],
+    "dateRange": [
+      "1974-08-08",
+      "1974-08-08"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.corwin_hotel",
+    "note": "Real background: the President's televised resignation address (evening of 8 Aug 1974). He's never named or shown. The radio audio is invented narration ('the President, speaking from the Oval Office tonight...')."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Every radio in the lobby is on",
+      "script": "dlg.m22_lobby_radio"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Mayhew's at the Shamrock Rail",
+      "marker": "interior.shamrock_rail"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Mayhew knows. He's sweating.",
+      "script": "dlg.m22_mayhew"
+    },
+    {
+      "id": "o4",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "The radio crowd, 42nd & Seventh",
+      "to": "W 42nd St & 7th Ave",
+      "radius": 30
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "42nd Street listens to a cab radio",
+      "script": "dlg.m22_crowd"
+    },
+    {
+      "id": "o6b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's crew moves on Tina in the crowd",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o7",
+      "type": "switch_to",
+      "text": "(Nick)",
+      "character": "char.nick_varelas",
+      "cut": "transition"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "Lisle on the phone, very calm",
+      "script": "dlg.m22_lisle_call",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o9",
+      "type": "goto",
+      "text": "Drive to the Pennsylvania",
+      "to": "loc.hotel_pennsylvania",
+      "radius": 20
+    },
+    {
+      "id": "o10",
+      "type": "dialogue",
+      "text": "Everyone's selling everyone",
+      "script": "dlg.m22_lobby_deals"
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o3",
+    "o4",
+    "o6b",
+    "o7",
+    "o9"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.shoebox",
+      "mission.flip",
+      "mission.the_car"
+    ]
+  },
+  "npcs": [
+    "char.odessa_pruitt",
+    "char.carl_mayhew",
+    "char.tina_mercado",
+    "char.rita_haines",
+    "char.howard_lisle",
+    "char.augie_lomax",
+    "char.ray_bauer",
+    "char.nora_finch"
+  ],
+  "archetypes": [
+    "npc.radio_crowd",
+    "npc.sro_resident",
+    "npc.hotel_bellhop"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan"
+  ],
+  "locations": [
+    "loc.corwin_hotel",
+    "loc.cop_bar",
+    "W 42nd St & 7th Ave",
+    "loc.hotel_pennsylvania"
+  ],
+  "mobile": "Three short scenes, one per lead, with a checkpoint at each switch. The Times Square crowd stays 60 m or more inside the north edge (45th St, not 47th). No timers.",
+  "design": "The Act 3 opener. A real event as weather: in the syndicate, everyone suddenly wonders who'll go down with whom. Mayhew has learned about the wire or the theft (branch-dependent lines). Delphine overhears Tina on a payphone with Lonnie (a seed for M23). Nick watches Lisle work the hotel lobby like a man selling lifeboats. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.augie_lomax",
+      "reason": "died"
+    },
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    },
+    {
+      "character": "char.howard_lisle",
+      "reason": "died"
+    },
+    {
+      "character": "char.nora_finch",
+      "reason": "died"
+    },
+    {
+      "character": "char.ray_bauer",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

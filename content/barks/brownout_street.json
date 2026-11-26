@@ -1,0 +1,67 @@
+{
+  "id": "barks.brownout_street",
+  "core": false,
+  "note": "Any pedestrian on a dim or dark power night (ENGINE N2).",
+  "lines": [
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Whole block's dark! Is it the whole city?"
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Hudson Union says an hour. Hudson Union always says an hour."
+    },
+    {
+      "context": "brownout",
+      "emotion": "alarmed",
+      "text": "Watch it! Signal's out! Nobody's got the light!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "warm",
+      "text": "Somebody's got a radio! Come on, sit on the stoop!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "low",
+      "text": "Hold your bag tight. Dark streets have long arms."
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "My mother's on the twelfth floor. Elevator's out."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "No lights, no TV, no fans. Just us and the heat."
+    },
+    {
+      "context": "brownout",
+      "emotion": "friendly",
+      "text": "Candles for sale! Candles! Quarter apiece!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "tired",
+      "text": "Ice cream truck's giving it away before it melts!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "low",
+      "text": "Fur vaults on Thirtieth need power. Somebody's sweating more than us."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "City can't pay for lights. Now we see what we're worth."
+    },
+    {
+      "context": "brownout",
+      "emotion": "grave",
+      "text": "Stay together, everybody. Stay where it's lit."
+    }
+  ]
+}

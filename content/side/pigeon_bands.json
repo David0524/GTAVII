@@ -1,0 +1,64 @@
+{
+  "id": "mission.side_pigeon_bands",
+  "kind": "side",
+  "title": "Leg Bands",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The Commodore's band list",
+      "script": "dlg.side_pigeon_bands_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The first flock, Bryant Park",
+      "to": "loc.bryant_park",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "photo",
+      "text": "Photograph a banded pigeon",
+      "subject": "npc.pigeon_flock",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o4",
+      "type": "photo",
+      "text": "Photograph a second band",
+      "subject": "npc.pigeon_flock",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Tell the Commodore the story",
+      "script": "dlg.side_pigeon_bands_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "The Commodore's final race"
+  },
+  "where": "Pigeons across the core",
+  "systems": [
+    "photo mode",
+    "pigeons"
+  ],
+  "mobile": "Bands are highlighted when the camera is up.",
+  "rank": 45,
+  "slice": false
+}

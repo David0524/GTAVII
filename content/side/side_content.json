@@ -1,0 +1,1377 @@
+{
+  "_note": "N4b side content: all pieces with hook, twist, systems, place, leads, acts, reward, mobile note and rank. Full mission-format specs exist for the 5 slice candidates (content/side/<id>.json). The rest are specced to this level; full specs are N4b part 2.",
+  "pieces": [
+    {
+      "rank": 1,
+      "id": "side.pigeon_commodore",
+      "title": "The Pigeon Commodore",
+      "kind": "arc",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Rooftop coop over W 29th St & 7th Ave; rooftops across the Fur District",
+      "hook": "Old Ignatz Halloran races pigeons from a tar-roof coop and swears someone is stealing his champions mid-race.",
+      "twist": "Rooftop pursuit by sight: follow a bird's flight line across roofs, fire escapes and stairwells (enterable buildings), photograph its leg band to prove which roof it landed on. In Act 3 his birds carry a message for the march.",
+      "systems": [
+        "rooftops and interiors",
+        "photo mode",
+        "pigeons (ambient)",
+        "brownout (birds roost early)"
+      ],
+      "reward": "$20 a race; the final race unlocks a pigeon-post messenger that shows the next story marker",
+      "mobile": "Following is by viewpoint, not aim. Birds pause on landmarks. Every roof route has a stairwell exit.",
+      "parts": 4,
+      "upgrades": null,
+      "slice": true
+    },
+    {
+      "rank": 2,
+      "id": "side.night_rate_stunts",
+      "title": "Night Rate: Stunt Driver",
+      "kind": "map",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2
+      ],
+      "where": "The NIGHT RATE shoot at W 41st St & the west edge (boundaries.json)",
+      "hook": "The film's stunt driver quit. The first A.D. bullhorns at anyone who looks like they can drive.",
+      "twist": "Takes are judged by the director's shot list (hit the mark, skid on cue, miss the camera car). On take 3 a real police car joins the 'chase' and the witness system can't tell film from crime.",
+      "systems": [
+        "driving",
+        "1974 one-ways",
+        "police witnesses",
+        "the map-edge film shoot"
+      ],
+      "reward": "$50 a take; a crew jacket (outfit) and the director's thanks in the Act 3 wrap party",
+      "mobile": "Takes are 60–90 s with generous marks. Retakes are free. No precision steering at walking-speed sections.",
+      "parts": 3,
+      "upgrades": null,
+      "slice": true
+    },
+    {
+      "rank": 3,
+      "id": "side.photo_night_desk",
+      "title": "The Night Desk at the Ticker",
+      "kind": "lead",
+      "leads": [
+        "char.delphine_moore"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "The Daily Ticker midtown bureau, W 26th St & 7th Ave",
+      "hook": "The tabloid's night photo editor buys prints by the hour, more if you're first.",
+      "twist": "Race the police radio: dispatch lines (barks.police_radio) are the clue. Get there before the press car, frame the shot before the cops tape it off. Never the dead, never victims' faces (content rule).",
+      "systems": [
+        "police radio",
+        "photo mode",
+        "fast on foot / cabs",
+        "heat (cops shoo you)"
+      ],
+      "reward": "$10–75 a print; first-on-scene bonus; a press-pass outfit that lowers witness heat at scenes",
+      "mobile": "Auto-framing; the 'first' timer is generous and shown on the HUD. Missing it pays less, never fails.",
+      "parts": 1,
+      "upgrades": "activity.photo_jobs",
+      "slice": true
+    },
+    {
+      "rank": 4,
+      "id": "side.hack_turns",
+      "title": "Hack: Call Your Turns",
+      "kind": "job",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Penn Station cab line; anywhere in the core",
+      "hook": "Cab fares, where the passenger calls the turns the 1974 way.",
+      "twist": "No GPS: each fare talks you there ('left on Thirty-Fourth, then down Seventh'). Ladder: licensed hack in Act 2 (Maureen Kehoe), rush-hour fares, then regulars with their own little arcs.",
+      "systems": [
+        "driving",
+        "1974 one-ways",
+        "terrain (Murray Hill)",
+        "dialogue"
+      ],
+      "reward": "$3–7 a fare + tips (route-knowledge bonus); regulars pay double",
+      "mobile": "Turns are called 6+ seconds early and repeated on the HUD as text. Wrong turns cost tips, never fail.",
+      "parts": 1,
+      "upgrades": "activity.cab_fares",
+      "slice": true
+    },
+    {
+      "rank": 5,
+      "id": "side.hollis_postcards",
+      "title": "Hollis's Postcards",
+      "kind": "collectible",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Pawnshops, fences, the Corwin, Earl's stand, the Royal (20 hidden across the core)",
+      "hook": "Walter Hollis mailed himself a postcard from every port he ever reached. Over the years they ended up all over the district.",
+      "twist": "Each card is a short scene (the port, the year, one sentence of his voice). After Hollis dies (M19), bringing them to Odessa builds a lobby memorial wall, and the last card answers what he meant by 'shipmate'.",
+      "systems": [
+        "pawnshops and fences",
+        "interiors",
+        "relationships (Odessa)"
+      ],
+      "reward": "A memorial in the Corwin lobby; Odessa +1 per five cards; the last card unlocks Hollis's radio station preset",
+      "mobile": "Cards glint at close range; an 'ask around' prompt points to the right block.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": true
+    },
+    {
+      "rank": 6,
+      "id": "side.the_lost_husband",
+      "title": "Mrs. Cho's Late Husband",
+      "kind": "arc",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "The Velvet Moon and the Deuce's 24-hour cinemas",
+      "hook": "A widow insists her husband, ten years dead, is alive. She saw him last night at a triple feature on 42nd St.",
+      "twist": "He's a bit-part actor in an old crime picture still playing the grindhouses. Track which cinema shows which reel by the marquees (street_text), get the projectionist to run the scene, and give her one more evening.",
+      "systems": [
+        "interiors (cinemas)",
+        "marquee text",
+        "dialogue"
+      ],
+      "reward": "Her late husband's watch (sell or keep); the Velvet Moon midnight screening unlocked",
+      "mobile": "No timers; marquees are readable from the sidewalk.",
+      "parts": 3,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 7,
+      "id": "side.weather_prophet",
+      "title": "The Man Who Sells the Weather",
+      "kind": "arc",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Herald Square, by the newsstand",
+      "hook": "A street prophet with a barometer and a sandwich board predicts brownouts and is right twice.",
+      "twist": "His readings become a free-roam forecast: bring him readings from three rooftop gauges and he tells you which blocks go dark next brownout (lets you prepare).",
+      "systems": [
+        "brownout",
+        "rooftops",
+        "calendar"
+      ],
+      "reward": "Brownout warnings on the minimap; a barometer prop for a lead's home",
+      "mobile": "Short walks; no timers.",
+      "parts": 3,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 8,
+      "id": "side.four_pianos",
+      "title": "Four Pianos",
+      "kind": "arc",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Walk-ups across the core; the Varelas apartment",
+      "hook": "Two brothers move pianos up tenement stairs for a living, and they're one man short and one rope old.",
+      "twist": "A physics-and-timing job on real stairwells: rope, landings, the piano swinging toward a window. The fourth piano is Nick's, sold in his Act 3 decline (if he sells).",
+      "systems": [
+        "interiors (stairwells)",
+        "physics props",
+        "Nick's arc"
+      ],
+      "reward": "$25 a piano; the brothers become muscle Nick can hire",
+      "mobile": "One held button with a rhythm prompt; generous timing.",
+      "parts": 4,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 9,
+      "id": "side.telegrams",
+      "title": "The Last Telegrams",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "A telegraph office on W 34th St (invented); deliveries across the core",
+      "hook": "Telegraph messengers are a dying trade. The office needs someone fast, on foot or bike.",
+      "twist": "Each telegram is a tiny story you see delivered (a death, a birth, a winning number). Choose whether to deliver bad news before or after the recipient's shift.",
+      "systems": [
+        "on foot",
+        "bike",
+        "interiors",
+        "time of day"
+      ],
+      "reward": "$2–4 a telegram + tips; a 'messenger' outfit that makes you invisible to witnesses",
+      "mobile": "No timers except a soft 'before 6 p.m.'.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 10,
+      "id": "side.garden_runaway",
+      "title": "The Runaway from the Garden",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2
+      ],
+      "where": "Madison Square Garden / Penn Station / Seventh Ave",
+      "hook": "During the summer horse show at the Garden (invented), a horse gets loose and trots down Seventh Avenue.",
+      "twist": "Herd, don't chase: crowds and traffic spook it. Use the 1974 one-ways to get ahead and calm it with sugar from a diner.",
+      "systems": [
+        "driving",
+        "crowds",
+        "one-ways"
+      ],
+      "reward": "$40 from the stable; a Garden ticket stub (fight-card access)",
+      "mobile": "Slow pursuit; the horse waits at corners.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 11,
+      "id": "side.garment_rush",
+      "title": "Garment Rush: Racks and Gridlock",
+      "kind": "job",
+      "leads": [
+        "char.teddy_arce",
+        "char.delphine_moore"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "W 35th–39th St, 7th–9th Aves",
+      "hook": "Pushboys need extra hands, and the trucks won't move.",
+      "twist": "Rack-pushing time trials through gridlock, with the hills (terrain on) turning a rack into a runaway. The routes thin out as shops move south in Act 3.",
+      "systems": [
+        "terrain",
+        "crowds",
+        "garment economy"
+      ],
+      "reward": "$15 a run; a speed ladder unlocks Dwayne's sketches being seen",
+      "mobile": "One held button; hills telegraphed.",
+      "parts": 1,
+      "upgrades": "activity.garment_rush",
+      "slice": false
+    },
+    {
+      "rank": 12,
+      "id": "side.bulldog_scoop",
+      "title": "Bulldog Edition: The Scoop",
+      "kind": "job",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Newsstands across the core",
+      "hook": "Deliver the bulldog edition before the rival paper's truck.",
+      "twist": "The front page (newspapers.json) changes weekly, and some weeks you deliver news you made. Beat the rival truck to six stands with one-ways and short cuts.",
+      "systems": [
+        "driving",
+        "one-ways",
+        "newspapers"
+      ],
+      "reward": "$12 a run; 'scoop' bonus",
+      "mobile": "Soft timer; no fail.",
+      "parts": 1,
+      "upgrades": "activity.bulldog_run",
+      "slice": false
+    },
+    {
+      "rank": 13,
+      "id": "side.skip_board",
+      "title": "Abend's Board of Skips",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Abend Bail Bonds, W 31st St & 8th Ave",
+      "hook": "A wall of mugshots, each with a story and a bail amount.",
+      "twist": "Every skip has a personality and a weakness (a mother's birthday, a pool habit, a fear of pigeons). Find them by asking around, bring them in breathing. Non-lethal only.",
+      "systems": [
+        "witness system",
+        "interiors",
+        "combat (non-lethal)",
+        "dialogue"
+      ],
+      "reward": "10% of bail; regulars give tips",
+      "mobile": "Investigation by talking; takedowns on soft lock.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 14,
+      "id": "side.chop_list",
+      "title": "The Dukes' Weekly List",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "The Dyer Avenue Dukes' garage, W 36th St & 9th Ave",
+      "hook": "A weekly list of wanted cars, chalked on a board.",
+      "twist": "Car theft through Gameplay's systems: witnesses, call boxes, descriptions. The twist is choosing whose car: a slumlord's sedan earns respect, a cabbie's livelihood earns enemies.",
+      "systems": [
+        "car theft",
+        "witnesses",
+        "relationships"
+      ],
+      "reward": "$100–600 per car",
+      "mobile": "No precision driving; the garage door is a big target.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 15,
+      "id": "side.locksmith",
+      "title": "Teddy's Keys: Call-Outs",
+      "kind": "lead",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Krause Hardware; doors everywhere",
+      "hook": "Locked out, locked in, locked up: the hardware store sends Teddy.",
+      "twist": "Every call-out is a door with a story behind it (a dead man's flat, a runaway's room (adult), a safe that holds love letters). Teddy's 'Keys' skill opens; his ex-cop eye notices what's wrong.",
+      "systems": [
+        "keys",
+        "interiors",
+        "Teddy's skills"
+      ],
+      "reward": "$10–25 a call; one call-out each act feeds a main-story clue",
+      "mobile": "Lockpicking is a held button with a rhythm, no precision.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 16,
+      "id": "side.fight_door",
+      "title": "Fight Night at the Garden",
+      "kind": "job",
+      "leads": [
+        "char.teddy_arce",
+        "char.nick_varelas"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Madison Square Garden (invented fight cards)",
+      "hook": "The promoter needs a door man, and Nick likes a ringside bet.",
+      "twist": "Teddy works the door (spot the fake tickets, eject the drunk, non-lethal). Nick bets on invented fighters whose records are in the paper (newspapers.json).",
+      "systems": [
+        "melee",
+        "betting",
+        "newspapers"
+      ],
+      "reward": "$30 a night; bets",
+      "mobile": "Ejections are soft-lock takedowns.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 17,
+      "id": "side.numbers_runner",
+      "title": "Earl's Runner",
+      "kind": "job",
+      "leads": [
+        "char.delphine_moore",
+        "char.teddy_arce"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Earl's stand and slip spots",
+      "hook": "Runner pay, and the daily number in the paper.",
+      "twist": "Pick up slips before noon past plainclothes who know what you're carrying. Ladder: Earl trusts you with the bank on Fridays.",
+      "systems": [
+        "police heat",
+        "crowds",
+        "newspapers"
+      ],
+      "reward": "$10 a day; Friday bank bonus",
+      "mobile": "Soft noon deadline.",
+      "parts": 1,
+      "upgrades": "activity.numbers_slips",
+      "slice": false
+    },
+    {
+      "rank": 18,
+      "id": "side.hill_races",
+      "title": "Murray Hill Wagers",
+      "kind": "job",
+      "leads": [
+        "char.nick_varelas",
+        "char.teddy_arce"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Races within the core: Madison Ave hills, the 34th St two-way, Fifth's downhill",
+      "hook": "Cabbies bet Nick's sedan can't beat them, on a small map.",
+      "twist": "Short sprints that use the real relief (terrain on) and the 1974 one-ways. Wrong-way driving forfeits. Each race is a block-scale puzzle, not distance.",
+      "systems": [
+        "terrain",
+        "one-ways",
+        "driving"
+      ],
+      "reward": "$20–100 stakes",
+      "mobile": "Route choice wins, not reflexes; no rubber-banding.",
+      "parts": 1,
+      "upgrades": "activity.gentlemens_wager",
+      "slice": false
+    },
+    {
+      "rank": 19,
+      "id": "side.corner_pocket",
+      "title": "Corner Pocket",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Corner Pocket Billiards, over a W 41st St storefront (invented)",
+      "hook": "A pool hall where the regulars hustle each other.",
+      "twist": "Read the hustler (Delphine's tells), or be the hustler (Nick's money). Pool itself is a simple aim-assisted shot game.",
+      "systems": [
+        "interiors",
+        "betting",
+        "Read the Room tells"
+      ],
+      "reward": "Stakes",
+      "mobile": "Aim assist on; one-touch shots.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 20,
+      "id": "side.otb_tips",
+      "title": "The Teletrack Tip",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Eighth Avenue Teletrack (invented OTB parlour)",
+      "hook": "Cab fares and barflies whisper tips on invented races.",
+      "twist": "Cross-system: tips overheard in cab fares, bar barks and the subway grates. Bet on them at the Teletrack. Some tips are fixes, and Wurtz's unit knows which.",
+      "systems": [
+        "overheard dialogue",
+        "betting",
+        "police heat"
+      ],
+      "reward": "Bets",
+      "mobile": "Menus only.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 21,
+      "id": "side.fence_wants",
+      "title": "Marty's Want List",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Marty the fence, W 39th St & 9th Ave",
+      "hook": "A fence with weekly wants: a radio, a fur (!), a camera.",
+      "twist": "Find the wanted item in the world (pawnshops, shops, burglaries via Gameplay), or tip off the owner instead and get a reward.",
+      "systems": [
+        "items",
+        "economy",
+        "interiors"
+      ],
+      "reward": "30–50% of value",
+      "mobile": "Inventory menu.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 22,
+      "id": "side.own_business",
+      "title": "Own a Business",
+      "kind": "job",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Businesses for sale (economy.json)",
+      "hook": "Buy Hanyang House's half share, the Royal, the arcade, the hardware store, or a Ninth Avenue garage.",
+      "twist": "Weekly income plus 'trouble' events (a health inspector's tip, Lonnie's crew, a skimming night manager) that come as short side jobs.",
+      "systems": [
+        "economy",
+        "combat",
+        "bribes"
+      ],
+      "reward": "$40–150 a week",
+      "mobile": "Trouble events are short and skippable (income dips).",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 23,
+      "id": "side.hydrant_war",
+      "title": "Hydrant War",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Any hot afternoon, side streets near 9th Ave",
+      "hook": "Kids (ambient) have opened a hydrant; a cop wants it shut; the block wants it open.",
+      "twist": "Choose: fit a spray cap (a block party breaks out), shut it (the cop owes you), or bribe the cop to look away. No danger to children (content rule).",
+      "systems": [
+        "heat",
+        "bribes",
+        "police"
+      ],
+      "reward": "Relationship and reputation on the block",
+      "mobile": "A one-choice scene.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 24,
+      "id": "side.purse_snatch",
+      "title": "Snatch on Thirty-Fourth",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Herald Square crowds",
+      "hook": "A purse thief bolts through the shoppers.",
+      "twist": "Chase through the department store's two doors. Being seen helping lowers your own heat with witnesses (positive witness system).",
+      "systems": [
+        "chase",
+        "witness system (positive)",
+        "crowds"
+      ],
+      "reward": "The owner's thanks; heat reduction",
+      "mobile": "Generous catch distance.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 25,
+      "id": "side.stuck_elevator",
+      "title": "Between Floors",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2
+      ],
+      "where": "Office buildings on Fifth Ave during brownouts",
+      "hook": "A brownout traps people in an elevator.",
+      "twist": "Use keys and stairwells to reach the machine room, crank the car down by hand (timing prompt), and meet who was inside (sometimes Lisle's secretary).",
+      "systems": [
+        "brownout",
+        "interiors",
+        "keys"
+      ],
+      "reward": "Reward and a story contact",
+      "mobile": "Rhythm prompt; no fail state.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 26,
+      "id": "side.baby_cab",
+      "title": "Pennington, Fast",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Anywhere; ends at Pennington General",
+      "hook": "A woman in labour (adult) flags you down.",
+      "twist": "Drive to the hospital on the one-ways with her calling the turns between breaths. Potholes hurt; the hills help.",
+      "systems": [
+        "driving",
+        "one-ways",
+        "hospital"
+      ],
+      "reward": "A name you choose for the baby (it appears in the epilogue paper's birth notices)",
+      "mobile": "Soft timer, never fails.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 27,
+      "id": "side.monte",
+      "title": "Three-Card Monte",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "W 42nd St, the Deuce",
+      "hook": "A cardboard-box monte game with a crowd.",
+      "twist": "Spot the shills (Read the Room tells), win once, or bust it and anger the crew. Delphine reads it instantly; Nick loses on purpose to buy information.",
+      "systems": [
+        "tells",
+        "crews",
+        "betting"
+      ],
+      "reward": "Cash or information",
+      "mobile": "Tap-to-pick.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 28,
+      "id": "side.tar_beach",
+      "title": "Tar Beach Thief",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Roofs of the W 30s walk-ups",
+      "hook": "Someone stole a radio off a tar beach while its owner sunbathed.",
+      "twist": "A rooftop chase across parapets and over planks between buildings; the thief drops into a stairwell (enterable).",
+      "systems": [
+        "rooftops",
+        "chase",
+        "interiors"
+      ],
+      "reward": "$10 and a cold soda",
+      "mobile": "Jumps are auto-vaults.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 29,
+      "id": "side.lost_tourists",
+      "title": "Which Way's Up?",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Herald Square, Penn Station exits",
+      "hook": "A family from Ohio with a folded map.",
+      "twist": "Reverse no-GPS: you give the directions as choices ('two blocks up, west side of Seventh'), and they walk it. Wrong directions show up later in the paper as a funny letter.",
+      "systems": [
+        "map knowledge",
+        "dialogue"
+      ],
+      "reward": "Small tip; map-knowledge stat",
+      "mobile": "Choice menu.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 30,
+      "id": "side.bryant_brawl",
+      "title": "Break It Up",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Bryant Park benches",
+      "hook": "Two men fight over a bench at dusk.",
+      "twist": "Non-lethal takedowns, or talk them down, or let them fight and pick a winner (betting crowd).",
+      "systems": [
+        "melee",
+        "dialogue"
+      ],
+      "reward": "Reputation",
+      "mobile": "Soft lock.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 31,
+      "id": "side.runaway_rack",
+      "title": "Runaway Rack",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "W 37th St hill toward 9th Ave (terrain)",
+      "hook": "A loaded garment rack gets loose on the slope.",
+      "twist": "Catch it before the intersection; use parked trucks as brakes.",
+      "systems": [
+        "terrain",
+        "physics"
+      ],
+      "reward": "A thank-you from the shop (a free suit)",
+      "mobile": "One run; generous.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 32,
+      "id": "side.three_am_phone",
+      "title": "The Three A.M. Phone",
+      "kind": "arc",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Payphone at W 33rd St & 8th Ave",
+      "hook": "A payphone rings at 3 a.m. every night. Nobody else will answer it.",
+      "twist": "An anonymous caller feeds tips about the syndicate, each checkable (a truck, a meeting, a stash). The caller is Marjorie Kell (reveal in part 4).",
+      "systems": [
+        "payphones",
+        "time of day",
+        "photo mode"
+      ],
+      "reward": "Story intel; corroboration evidence route for Branch B",
+      "mobile": "Calls are subtitled; tips are marked on the minimap only after you check them.",
+      "parts": 4,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 33,
+      "id": "side.old_beat",
+      "title": "Old Beat Favours",
+      "kind": "lead",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Midtown Central; the old foot posts",
+      "hook": "Kearney asks for things he can't do in uniform.",
+      "twist": "Small off-book favours (find a missing ledger page, sit with a dying informant, return a kid's bike to the right stoop) that build the 'Old Beat' special.",
+      "systems": [
+        "Teddy's specials",
+        "relationships",
+        "police system"
+      ],
+      "reward": "Relationship with Kearney (unlocks report downgrades)",
+      "mobile": "Short walks and talks.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 34,
+      "id": "side.hack_license",
+      "title": "Getting Licensed",
+      "kind": "lead",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        2
+      ],
+      "where": "Taxi bureau (invented), Kehoe's office, a doctor, a photo booth",
+      "hook": "Teddy wants his hack licence back. The city wants seven forms.",
+      "twist": "A comic bureaucracy crawl across the small map: each office needs something from another. Shortcut with a bribe, or do it straight and earn Kehoe's respect.",
+      "systems": [
+        "bribes",
+        "interiors",
+        "the clock (office hours)"
+      ],
+      "reward": "Licensed hack (+50% fares)",
+      "mobile": "Each step is a short walk.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 35,
+      "id": "side.club_crisis",
+      "title": "The Club's Emergencies",
+      "kind": "lead",
+      "leads": [
+        "char.delphine_moore"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Club members' homes and workplaces",
+      "hook": "A member's rent is due, a member's son (adult) is in the Tombs, a member's landlord changed the lock.",
+      "twist": "Each emergency uses a different system (bail, keys, a bribe, a fight), and how Delphine solves it changes the club's vote in M31.",
+      "systems": [
+        "bail",
+        "keys",
+        "bribes",
+        "melee"
+      ],
+      "reward": "Club trust (M31 gates)",
+      "mobile": "Varied, short.",
+      "parts": 1,
+      "upgrades": "activity.club_rounds",
+      "slice": false
+    },
+    {
+      "rank": 36,
+      "id": "side.practice_chair",
+      "title": "The Practice Chair",
+      "kind": "lead",
+      "leads": [
+        "char.delphine_moore"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "A barbershop on W 38th St (invented)",
+      "hook": "Tina wants to learn hair. A barber lets them practise after hours.",
+      "twist": "A gentle rhythm game (cut, wash, set) with regulars who talk. A rest from the violence; it pays off the shop dream.",
+      "systems": [
+        "interiors",
+        "relationships"
+      ],
+      "reward": "Tina +1; the epilogue shop's first customers",
+      "mobile": "Tap rhythm; no fail.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 37,
+      "id": "side.rent_day",
+      "title": "Rent Day",
+      "kind": "lead",
+      "leads": [
+        "char.nick_varelas"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Nick's properties (the W 29th building, W 37th storefront, the Corwin)",
+      "hook": "Rent day at Nick's buildings never goes smoothly.",
+      "twist": "Trouble events (a burst pipe, a tenant strike, a cop's hand out) where Nick can spend, listen, or fight badly, and each choice shows up in the Corwin's fate.",
+      "systems": [
+        "economy",
+        "bribes",
+        "relationships"
+      ],
+      "reward": "Rent income; Odessa trust",
+      "mobile": "Choice menus with short actions.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 38,
+      "id": "side.buyers_banquet",
+      "title": "The Buyers' Banquet",
+      "kind": "lead",
+      "leads": [
+        "char.nick_varelas"
+      ],
+      "acts": [
+        2
+      ],
+      "where": "Hotel Pennsylvania ballroom",
+      "hook": "Nick hosts out-of-town buyers; Kallis sabotages.",
+      "twist": "A social stealth puzzle: keep buyers happy at the right table while finding Kallis's man spiking the champagne.",
+      "systems": [
+        "interiors",
+        "dialogue",
+        "tells"
+      ],
+      "reward": "Fall orders (Nick's finances)",
+      "mobile": "Tap-to-talk.",
+      "parts": 1,
+      "upgrades": "activity.buyers_tour",
+      "slice": false
+    },
+    {
+      "rank": 39,
+      "id": "side.insomnia_drives",
+      "title": "Nick Can't Sleep",
+      "kind": "lead",
+      "leads": [
+        "char.nick_varelas"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Night drives anywhere",
+      "hook": "Nick drives at night when he can't sleep.",
+      "twist": "Map discovery as character: each drive reveals a hidden place (an after-hours club, a garage, a rooftop bar) through a memory Nick tells aloud.",
+      "systems": [
+        "map discovery",
+        "driving",
+        "time of day"
+      ],
+      "reward": "Hidden places unlocked on the minimap",
+      "mobile": "Just drive; nothing to fail.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 40,
+      "id": "side.projectionist",
+      "title": "The Projectionist's Reels",
+      "kind": "collectible",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Cinemas, pawnshops and alleys on the Deuce",
+      "hook": "A projectionist lost reels of a 1940s New York picture across the Deuce.",
+      "twist": "Find 12 reels; each restores a scene. With all 12, the Velvet Moon holds a midnight screening of an invented lost film shot on these very streets.",
+      "systems": [
+        "interiors",
+        "the Deuce",
+        "cinema"
+      ],
+      "reward": "A screening cutscene; the film's poster for a lead's home",
+      "mobile": "Reels glint; marquees hint.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 41,
+      "id": "side.passage_shops",
+      "title": "Behind the Passage Gate",
+      "kind": "map",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "The old 33rd Street passage",
+      "hook": "Teddy's keys open a shuttered gate in the old passage.",
+      "twist": "Forgotten shopfronts from the 1940s: a shoeshine stand's last customer list, a florist's frozen calendar. A quiet exploration with rats, and a cache of period cash.",
+      "systems": [
+        "subway",
+        "keys",
+        "rats"
+      ],
+      "reward": "$ and lore",
+      "mobile": "Flashlight auto-aims.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 42,
+      "id": "side.last_train",
+      "title": "Last Train Home",
+      "kind": "map",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Subway platforms (subway.json)",
+      "hook": "A tipsy office worker (adult) asks you to get her home on the last train.",
+      "twist": "Escort through stations, transfers and a stalled train in a tunnel. Rats, a sermon, a three-piece band. Get off at the right stop.",
+      "systems": [
+        "subway",
+        "escort",
+        "time of day"
+      ],
+      "reward": "Her thanks and a business card (a future job)",
+      "mobile": "Pace-matched escort.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 43,
+      "id": "side.rizo_147",
+      "title": "RIZO 147",
+      "kind": "arc",
+      "leads": [
+        "char.delphine_moore"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Subway cars, the passage, a rooftop",
+      "hook": "A graffiti writer wants his best piece photographed before the Transit Authority buffs it.",
+      "twist": "Find his whole-car piece on a moving train by timing station arrivals, photograph it, and protect his sketchbook from a rival crew. It's about art, not vandalism glamour.",
+      "systems": [
+        "subway",
+        "photo mode",
+        "time of day"
+      ],
+      "reward": "His piece on the Ticker's front page; a tag on a lead's home wall",
+      "mobile": "Train times on the HUD; auto-frame.",
+      "parts": 3,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 44,
+      "id": "side.water_tank_radio",
+      "title": "The Water-Tank Voice",
+      "kind": "map",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "A rooftop water tank near W 36th St & 9th Ave",
+      "hook": "Someone is living in a rooftop water tank, and leaving clues about the block on chalked rooftops.",
+      "twist": "A rooftop clue hunt across the walk-ups: read the chalk, climb the right stairwell, find the man in the tank and hear what he's seen from up there. (Reframed 26 Nov: no radio-station content, per the user.)",
+      "systems": [
+        "rooftops",
+        "interiors",
+        "map discovery"
+      ],
+      "reward": "A hidden rooftop place unlocked on the minimap",
+      "mobile": "Clues are large chalk marks; stairwells are enterable.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 45,
+      "id": "side.pigeon_bands",
+      "title": "Leg Bands",
+      "kind": "collectible",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Pigeons across the core",
+      "hook": "The Commodore's lost birds still wear his bands.",
+      "twist": "Photograph 15 banded pigeons (ambient flocks); each band leads back to a part of his story.",
+      "systems": [
+        "photo mode",
+        "pigeons"
+      ],
+      "reward": "The Commodore's final race",
+      "mobile": "Bands are highlighted when the camera is up.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 46,
+      "id": "side.wanted_1971",
+      "title": "The Posters of '71",
+      "kind": "collectible",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Station-house corridors, post office walls",
+      "hook": "Old wanted posters from 1971 are still pinned up.",
+      "twist": "Collect 8. Together they show who was on the street the night of Mayhew's meet, adding lore to M25.",
+      "systems": [
+        "interiors",
+        "Teddy's past"
+      ],
+      "reward": "Lore; a hidden line in M25",
+      "mobile": "Tap to read.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 47,
+      "id": "side.marquee_letters",
+      "title": "Marquee Letters",
+      "kind": "collectible",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "Around the Deuce",
+      "hook": "Someone stole the Velvet Moon's marquee letters.",
+      "twist": "Find 20 letters; the owner spells a message on the marquee chosen by you (from a list), visible for the rest of the game.",
+      "systems": [
+        "street text",
+        "the Deuce"
+      ],
+      "reward": "A marquee message of your choice",
+      "mobile": "Letters glint.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 48,
+      "id": "side.club_ious",
+      "title": "The Club's Last IOUs",
+      "kind": "collectible",
+      "leads": [
+        "char.delphine_moore"
+      ],
+      "acts": [
+        3
+      ],
+      "where": "Bus terminal lockers, a church, a train station",
+      "hook": "Women who left the city left IOUs with the club.",
+      "twist": "Find their last addresses and send their savings home by money order. Bittersweet, and it changes the club's vote.",
+      "systems": [
+        "items",
+        "post office"
+      ],
+      "reward": "Club trust; epilogue postcards",
+      "mobile": "Short walks.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 49,
+      "id": "side.fire_escape_gardens",
+      "title": "Fire-Escape Gardens",
+      "kind": "collectible",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        1,
+        2
+      ],
+      "where": "Fire escapes across the core",
+      "hook": "Tomato plants on fire escapes all over the West Side.",
+      "twist": "Photograph 15. Moretti pays for the best, and the last belongs to Carmen.",
+      "systems": [
+        "photo mode",
+        "rooftops"
+      ],
+      "reward": "Moretti flowers for the march; Carmen +1",
+      "mobile": "Auto-frame.",
+      "parts": 1,
+      "upgrades": null,
+      "slice": false
+    },
+    {
+      "rank": 50,
+      "id": "side.collections_marked",
+      "title": "Marked Money",
+      "kind": "job",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        2
+      ],
+      "where": "Collection stops (activity.collections)",
+      "hook": "Calloway marks some bills to trace the pad.",
+      "twist": "Collection rounds with a twist: decide which envelopes carry marked bills (if Teddy wore the wire) or spot them (if he burned it). The stops are moral scenes, not a pickup route.",
+      "systems": [
+        "the wire branch",
+        "relationships"
+      ],
+      "reward": "Weekly pay; Branch-B corroboration",
+      "mobile": "Menus.",
+      "parts": 1,
+      "upgrades": "activity.collections",
+      "slice": false
+    },
+    {
+      "rank": 51,
+      "id": "side.desk_requests",
+      "title": "Night Desk Requests",
+      "kind": "job",
+      "leads": [
+        "char.teddy_arce"
+      ],
+      "acts": [
+        1,
+        2,
+        3
+      ],
+      "where": "The Corwin",
+      "hook": "Residents ring the desk bell at night.",
+      "twist": "Two-block errands that build relationship gates; in Act 3 they become organising tasks.",
+      "systems": [
+        "interiors",
+        "relationships"
+      ],
+      "reward": "Relationship gates (M26)",
+      "mobile": "Short.",
+      "parts": 1,
+      "upgrades": "activity.desk_requests",
+      "slice": false
+    },
+    {
+      "rank": 52,
+      "id": "side.brownout_relief",
+      "title": "Brownout Relief",
+      "kind": "encounter",
+      "leads": [
+        "any"
+      ],
+      "acts": [
+        2,
+        3
+      ],
+      "where": "Brownout blocks",
+      "hook": "Dark blocks need ice, candles and a hand.",
+      "twist": "Navigate by lit landmarks only; looters (combat) or bribes.",
+      "systems": [
+        "brownout",
+        "combat",
+        "items"
+      ],
+      "reward": "Local reputation",
+      "mobile": "Lit landmarks on the minimap.",
+      "parts": 1,
+      "upgrades": "activity.brownout_relief",
+      "slice": false
+    }
+  ]
+}

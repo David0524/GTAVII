@@ -1,0 +1,27 @@
+{
+  "id": "npc.office_cleaner",
+  "behaviour": "worker",
+  "palette": [
+    "#708090",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Grey work dress or coveralls.",
+  "props": [
+    "mop bucket"
+  ],
+  "schedule": [
+    {
+      "from": "19:00",
+      "to": "03:00",
+      "area": "Office buildings, Fifth Ave",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.1
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": ""
+}

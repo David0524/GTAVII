@@ -1,0 +1,63 @@
+{
+  "id": "mission.side_fire_escape_gardens",
+  "kind": "side",
+  "title": "Fire-Escape Gardens",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Moretti's tomato wager",
+      "script": "dlg.side_fire_escape_gardens_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Fire escape row, W 28th & 9th",
+      "to": "W 28th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "photo",
+      "text": "Photograph a fire-escape garden",
+      "subject": "npc.penn_south_neighbor",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o4",
+      "type": "photo",
+      "text": "Photograph a second garden",
+      "subject": "npc.penn_south_neighbor",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Show Moretti the shots",
+      "script": "dlg.side_fire_escape_gardens_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Moretti flowers for the march; Carmen +1"
+  },
+  "where": "Fire escapes across the core",
+  "systems": [
+    "photo mode",
+    "rooftops"
+  ],
+  "mobile": "Auto-frame.",
+  "rank": 49,
+  "slice": false
+}

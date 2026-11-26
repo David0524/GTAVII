@@ -1,0 +1,57 @@
+{
+  "id": "barks.ambulance",
+  "core": false,
+  "note": "Ambulance attendants and the ER (hospital flow).",
+  "lines": [
+    {
+      "context": "arrive",
+      "emotion": "brisk",
+      "text": "Make room! Make room! Who's hurt?"
+    },
+    {
+      "context": "arrive",
+      "emotion": "weary",
+      "text": "Third shooting tonight. Third. Okay, on the stretcher."
+    },
+    {
+      "context": "treat",
+      "emotion": "calm",
+      "text": "Stay with me. Look at me. What's your name?"
+    },
+    {
+      "context": "treat",
+      "emotion": "brisk",
+      "text": "Pressure here. Hold it. Harder."
+    },
+    {
+      "context": "transport",
+      "emotion": "urgent",
+      "text": "Pennington General! Go, go!"
+    },
+    {
+      "context": "transport",
+      "emotion": "calm",
+      "text": "Ten minutes to the hospital. You'll make it. You're too stubborn not to."
+    },
+    {
+      "context": "er",
+      "emotion": "brisk",
+      "text": "Bay four. Get Dr. Osei."
+    },
+    {
+      "context": "discharge",
+      "emotion": "dry",
+      "text": "You're out. Hospital bill's in the envelope. Don't come back. You'll come back."
+    },
+    {
+      "context": "heat",
+      "emotion": "weary",
+      "text": "Heatstroke on the third floor. The old men are dropping like flies in this."
+    },
+    {
+      "context": "brownout",
+      "emotion": "urgent",
+      "text": "Generator's on! Generator's on! Keep bagging!"
+    }
+  ]
+}

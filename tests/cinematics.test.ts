@@ -2,9 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { Timeline, readingTime } from '../src/cinematics/Timeline';
-import { validateCutscene, lensToFov, fovToLens, type Cutscene, type DialogueLine } from '../src/cinematics/schema';
+import { validateCutscene, lensToFov, fovToLens, applyLayout, extractLayout, type Cutscene, type CutsceneLayout, type DialogueLine } from '../src/cinematics/schema';
 
-const m01 = JSON.parse(fs.readFileSync('content/cutscenes/m01_opening.json', 'utf8')) as Cutscene;
+const m01Script = JSON.parse(fs.readFileSync('content/cutscenes/m01_opening.json', 'utf8')) as Cutscene;
+const m01Layout = JSON.parse(fs.readFileSync('content/cutscenes/layout/m01_opening.layout.json', 'utf8')) as CutsceneLayout;
+const m01 = applyLayout(m01Script, m01Layout).scene;
 const prow = JSON.parse(fs.readFileSync('content/dialogue/m01_prow.json', 'utf8')) as { id: string; lines: DialogueLine[] };
 const dlg = (ref: string) => { const [s, l] = ref.split('#'); return s === prow.id ? prow.lines.find((x) => x.id === l) ?? null : null; };
 
@@ -68,12 +70,28 @@ test('validation catches broken layouts with precise paths', () => {
 });
 
 test("every cutscene narrative ships validates and times (script-only files play with placeholders)", () => {
-  for (const f of fs.readdirSync('content/cutscenes')) {
+  for (const f of fs.readdirSync('content/cutscenes').filter((n) => n.endsWith('.json'))) {
     const c = JSON.parse(fs.readFileSync(`content/cutscenes/${f}`, 'utf8')) as Cutscene;
     const tl = new Timeline(c);
     assert.ok(Number.isFinite(tl.duration) && tl.duration > 0, `${f}: duration ${tl.duration}`);
     const errs = validateCutscene(c).filter((e) => !/not in cast/.test(e));
     assert.deepEqual(errs, [], `${f}: ${errs.join('; ')}`);
     for (let t = 0; t <= tl.duration; t += 0.5) { const p = tl.camera(t); assert.ok(p.pos.every(Number.isFinite), `${f} camera NaN at ${t}`); }
+  }
+});
+
+test('script and layout stay separate: every layout matches a script, and extract(apply) round-trips', () => {
+  for (const f of fs.readdirSync('content/cutscenes/layout')) {
+    const id = f.replace('.layout.json', '');
+    assert.ok(fs.existsSync(`content/cutscenes/${id}.json`), `${f}: no script`);
+    const script = JSON.parse(fs.readFileSync(`content/cutscenes/${id}.json`, 'utf8')) as Cutscene;
+    const layout = JSON.parse(fs.readFileSync(`content/cutscenes/layout/${f}`, 'utf8')) as CutsceneLayout;
+    const { scene, orphans } = applyLayout(script, layout);
+    assert.deepEqual(orphans, [], `${f}: layout shots missing from the script`);
+    const again = applyLayout(script, extractLayout(scene, script)).scene;
+    assert.deepEqual(new Timeline(again, dlg).camera(20), new Timeline(scene, dlg).camera(20));
+    assert.equal(new Timeline(again).duration, new Timeline(scene).duration);
+    // the script's own text survives the merge
+    for (const s of script.shots) assert.equal(scene.shots.find((x) => x.id === s.id)!.framing, s.framing);
   }
 });
