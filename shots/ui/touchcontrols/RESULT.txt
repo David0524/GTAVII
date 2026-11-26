@@ -25,4 +25,7 @@
 ✓ drag moves and saves the control ({"dx":40,"dy":30,"s":1})
 ✓ reset restores the slot
 ✓ left-handed: pedals move to the left (gas x=86)
-touch layer update: 0.026 ms (EMA, headless)
+✓ iPhone: fullscreen button opens the install card
+✓ card: Safari steps, Add to Home Screen (Play full screen × iPhone only plays full screen from the Home Screen. Installed, your sav)
+✓ card closes
+touch layer update: 0.013 ms (EMA, headless)

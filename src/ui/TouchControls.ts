@@ -1,5 +1,6 @@
 import type { Input, ButtonAction } from '../input/Input';
 import { settings } from '../settings/Settings';
+import { fullscreenRoute, enterFullscreen, showInstallCard } from './touch/installCard';
 
 /**
  * Landscape touch layout (phones/tablets):
@@ -110,12 +111,10 @@ export class TouchControls {
     apply(); settings.subscribe((_s, k) => { if (k === 'touchButtonSize' || k === 'touchOpacity' || k === 'touchLeftHanded') apply(); });
 
     const fs = document.createElement('button'); fs.className = 't74-fs'; fs.textContent = '⛶'; fs.title = 'Fullscreen';
-    fs.addEventListener('click', async () => {
-      try {
-        await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
-        await (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('landscape');
-      } catch { /* iOS Safari: no fullscreen/orientation lock; the rotate prompt covers it */ }
-    });
+    // fullscreen API where it exists; iPhone has none for pages, so it explains Add to Home Screen instead
+    const route = fullscreenRoute();
+    fs.addEventListener('click', () => { if (route === 'api') void enterFullscreen(); else if (route === 'install') showInstallCard('fullscreen'); });
+    if (route === 'none') fs.style.visibility = 'hidden';
     document.body.appendChild(fs);
 
     // A controller takes over: hide the on-screen controls; the next touch brings them back.

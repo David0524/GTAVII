@@ -28,6 +28,7 @@ import { TitleScreen } from './TitleScreen';
 import { PROMPT_CSS } from './Prompts';
 import { uiSectionProvider } from './save/uiSection';
 import { iosEvictionRisk } from '../save/SaveManager';
+import { showInstallCard, installCardSnoozed } from './touch/installCard';
 import './ui.css';
 import { CinematicPlayer, type PlayOptions } from '../cinematics/CinematicPlayer';
 import { hasCutscene } from '../cinematics/content';
@@ -208,16 +209,11 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   return root;
 }
 
-/** iOS clears site storage after ~7 days unvisited unless installed: gentle, dismissible, in-world note. */
+/** iOS clears site storage after ~7 days unvisited unless installed: after the first save, the install card
+ *  (src/ui/touch/installCard.ts) explains Add to Home Screen; a stronger reminder after a long absence. */
 function iosSavesNote(saves: NonNullable<UiHost['saves']>) {
   const ios = iosEvictionRisk(); if (!ios.atRisk) return;
-  let snoozed = false; try { snoozed = Date.now() - Date.parse(localStorage.getItem('t74.iosNoteSnooze') ?? '0') < 3 * 86400000; } catch { /* ignore */ }
   const long = (ios.daysSinceLastVisit ?? 0) > 4;
-  if (snoozed && !long) return;
-  saves.onSaved.add(function once() {
-    saves.onSaved.delete(once);
-    const n = el('div', 'u-iosnote', `<b>${long ? 'WELCOME BACK. KEEP YOUR SAVES SAFE' : 'A NOTE ABOUT SAVES'}</b>On iPhone and iPad, saves can be cleared after a week away. Share → <i>Add to Home Screen</i> keeps them for good. <button>Got it</button>`);
-    n.querySelector('button')!.addEventListener('click', () => { n.remove(); try { localStorage.setItem('t74.iosNoteSnooze', new Date().toISOString()); } catch { /* ignore */ } });
-    document.body.appendChild(n);
-  });
+  if (installCardSnoozed() && !long) return;
+  saves.onSaved.add(function once() { saves.onSaved.delete(once); showInstallCard('saves', { welcomeBack: long }); });
 }

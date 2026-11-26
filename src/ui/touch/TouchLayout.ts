@@ -15,6 +15,7 @@
 import type { UiHost, TouchMode } from '../../shared/uiHost';
 import type { Input } from '../../input/Input';
 import { settings } from '../../settings/Settings';
+import { fullscreenRoute, enterFullscreen, showInstallCard, type FullscreenRoute } from './installCard';
 import './touch.css';
 
 type Slot = 'primary' | 'ctx' | 'a' | 'b' | 'c' | 'menu' | 'arrowL' | 'arrowR';
@@ -48,6 +49,7 @@ export class TouchLayout {
   private ctxT = 0; private lastLabel = '';
   private visible = true;
   private fs = document.createElement('button');
+  private fsRoute: FullscreenRoute = 'api';
   private editing: { state: TouchMode; sel: string | null; onDone: () => void; panel: HTMLElement } | null = null;
   /** Diagnostics for the rig. */
   readonly cost = { frame: 0 };
@@ -81,11 +83,10 @@ export class TouchLayout {
     this.root.append(left, right, this.stickBase);
     for (const d of this.defs) this.root.appendChild(this.build(d));
     // fullscreen (tries to lock landscape) and the portrait "rotate" prompt, carried over from the old TouchControls
-    this.fs.className = 't74-fs'; this.fs.textContent = '⛶'; this.fs.title = 'Fullscreen';
-    this.fs.addEventListener('click', async () => {
-      try { await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }); await (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('landscape'); }
-      catch { /* iOS Safari: no fullscreen or orientation lock; the rotate prompt covers it */ }
-    });
+    // fullscreen: the API where it exists; on iPhone (no element fullscreen) the install card; hidden when installed
+    this.fs.className = 't74-fs'; this.fs.textContent = '⛶'; this.fs.title = 'Full screen';
+    this.fsRoute = fullscreenRoute();
+    this.fs.addEventListener('click', () => { if (this.fsRoute === 'api') void enterFullscreen(); else if (this.fsRoute === 'install') showInstallCard('fullscreen'); });
     const rot = document.createElement('div'); rot.className = 't74-rotate'; rot.innerHTML = '↻<br><br>Rotate your phone<br><small>Tenderloin ’74 plays in landscape</small>';
     document.body.append(this.fs, rot);
     for (let i = 0; i < 10; i++) { const m = document.createElement('div'); m.className = 'tc-mark'; this.root.appendChild(m); this.marks.push(m); }
@@ -256,7 +257,7 @@ export class TouchLayout {
     }
   }
   setVisible(v: boolean) {
-    if (v === this.visible) return; this.visible = v; this.root.classList.toggle('hidden', !v); this.fs.style.display = v ? '' : 'none';
+    if (v === this.visible) return; this.visible = v; this.root.classList.toggle('hidden', !v); this.fs.style.display = v && this.fsRoute !== 'none' ? '' : 'none';
     if (!v) { this.input.touchMove.x = this.input.touchMove.y = 0; this.input.touchHeld.clear(); this.input.touchPedals.gas = this.input.touchPedals.brake = 0; this.stick.id = -1; this.look.id = -1; this.stickBase.classList.remove('on'); }
   }
 

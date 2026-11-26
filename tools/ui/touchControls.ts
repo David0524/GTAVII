@@ -128,6 +128,18 @@ await withServer(async (base) => {
   await shot('drive_lefthanded');
   await page.evaluate(() => import(/* @vite-ignore */ '/src/settings/Settings.ts' as string).then((m) => m.settings.set('touchLeftHanded', false)));
 
+  // ---- iPhone: no element fullscreen -> the button opens the Add to Home Screen card (forced with ?ios=1)
+  await page.goto(`${base}/uilab.html?screen=hud&touch=1&city=0&waypoint=0&ios=1`);
+  await page.waitForFunction(() => (window as any).__UI?.ui?.touch, null, { timeout: 120_000 }); await page.waitForTimeout(600);
+  await page.locator('.t74-fs').tap();
+  const card = page.locator('.u-installcard');
+  check('iPhone: fullscreen button opens the install card', await card.isVisible());
+  const txt = await card.innerText();
+  check('card: Safari steps, Add to Home Screen', /Share in the toolbar/.test(txt) && /Add to Home Screen/.test(txt), txt.replace(/\s+/g, ' ').slice(0, 90));
+  await shot('ios_install_card');
+  await card.locator('.ic-ok').tap();
+  check('card closes', !(await card.isVisible()));
+
   const cost = await page.evaluate(() => (window as any).__UI.ui.touch.cost.frame);
   log.push(`touch layer update: ${cost.toFixed(3)} ms (EMA, headless)`);
   if (errs.length) { log.push(`PAGE ERRORS: ${errs.join(' | ')}`); fails++; }

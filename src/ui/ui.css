@@ -338,10 +338,6 @@ html { font-size: calc(16px * var(--ui-scale, 1)); }
 :root[data-colour="protan"] .pk-zone.show, :root[data-colour="deutan"] .pk-zone.show { border-top-color: var(--bad); border-top-style: dashed; }
 :root[data-motion="reduce"] * { transition-duration: 0s !important; animation-duration: 0s !important; }
 .u-prompts { transition: opacity .5s; }
-.u-iosnote { position: fixed; left: 50%; bottom: calc(18px + var(--safe-b)); transform: translateX(-50%) rotate(-1.2deg); max-width: 380px; padding: 12px 14px; background: var(--paper);
-  color: var(--soot); font: 12px/1.45 var(--f-type); box-shadow: 0 6px 18px #000a; z-index: 60; }
-.u-iosnote b { display: block; font: 400 14px var(--f-head); letter-spacing: .14em; color: var(--red); }
-.u-iosnote button { all: unset; cursor: pointer; text-decoration: underline; margin-left: 4px; font-weight: 700; }
 .t74-minimap { background: #1c1311; }
 .t74-minimap canvas { position: absolute; inset: 0; }
 .t74-minimap .t74-mm-base { inset: auto; left: 0; top: 0; width: auto; height: auto; transform-origin: 0 0; will-change: transform; }
@@ -558,3 +554,18 @@ body.touch .ts-sleepbody, body.touch .car-body, body.touch .hm-body { padding-to
 @media (max-width: 700px) { .ts-sleepbody, .car-body, .hm-body { grid-template-columns: 1fr; } }
 .t74-tabs .resume { white-space: nowrap; }
 @media (max-height: 480px) { body.touch .t74-tabs { gap: 14px; } body.touch .t74-tabs button { font-size: 17px; letter-spacing: .12em; } }
+
+/* Install card (iOS fullscreen + saves): a printed instruction card, flat and straight */
+.u-installcard { position: fixed; z-index: 120; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 24px); overflow: auto;
+  background: #f4f1ea; color: #111; font: 400 14px/1.45 var(--f-ui); box-shadow: 0 0 0 1px #0003, 0 10px 30px #000a; }
+.u-installcard .ic-head { display: flex; align-items: center; justify-content: space-between; background: #111; color: #f4f1ea; padding: 10px 14px; }
+.u-installcard .ic-head b { font-weight: 700; font-size: 15px; }
+.u-installcard .ic-x { all: unset; cursor: pointer; font-size: 22px; line-height: 1; padding: 2px 6px; min-width: 32px; min-height: 32px; text-align: center; }
+.u-installcard p { margin: 12px 14px 4px; }
+.u-installcard ol { margin: 6px 14px 4px 34px; padding: 0; }
+.u-installcard li { padding: 5px 0; border-top: 1px solid #0002; }
+.u-installcard li:first-child { border-top: 0; }
+.u-installcard .ic-share { display: inline-block; width: 13px; height: 15px; vertical-align: -2px; border: 1.5px solid currentColor; border-top: 0; position: relative; margin: 0 2px; }
+.u-installcard .ic-share::after { content: '↑'; position: absolute; left: 50%; top: -9px; transform: translateX(-50%); font-size: 12px; font-weight: 700; }
+.u-installcard .ic-foot { display: flex; justify-content: flex-end; padding: 8px 14px 14px; }
+.u-installcard .ic-ok { all: unset; cursor: pointer; background: #111; color: #f4f1ea; font-weight: 700; padding: 10px 18px; min-height: 24px; }
