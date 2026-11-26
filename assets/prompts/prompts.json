@@ -819,6 +819,72 @@
       ],
       "priority": 3,
       "status": "todo"
+    },
+    {
+      "id": "ui.lead_portrait.delphine",
+      "file": "ui_lead_delphine.jpg",
+      "owner": "ui",
+      "use": "Lead-switch cards (pause hub) and the Pockets header; engine path public/ui/leads/delphine.jpg; shown about 160×200 CSS px",
+      "aspect": "4:5",
+      "size": "800×1000",
+      "sizeFinal": false,
+      "prompt": "Create a 1974 New York press or ID-style colour photograph of an invented fictional person (not resembling any real person, celebrity or actor). Head and shoulders, three-quarter view, plain light-grey seamless backdrop, flat even light, slight film grain, true colour (no sepia, no vignette, no frame, no border). Eye line about 38% from the top of the frame; the same framing as a passport-style portrait. All hair, eyewear, collars and fabrics strictly 1974. A woman of 29, deep-brown skin with a cool undertone, a short cropped natural afro, high cheekbones, wide-set watchful eyes, small gold earrings and a thin gold bracelet just visible. Wearing a cream blouse under an open cream belted raincoat. Expression: composed, level, assessing the photographer. NO TEXT AT ALL: no letters, numbers, captions or watermarks. Aspect ratio 4:5.",
+      "text": null,
+      "textPolicy": "none",
+      "accept": [
+        "no text or watermark",
+        "face identifiable at 80 px wide",
+        "framing consistent across all three, eye line at about 38% from the top",
+        "no modern items (glasses, hair, collars all 1974)",
+        "must not resemble any real person",
+        "placeholder pass: the final style follows the user's pending type and visual pick"
+      ],
+      "priority": 4,
+      "status": "todo"
+    },
+    {
+      "id": "ui.lead_portrait.nick",
+      "file": "ui_lead_nick.jpg",
+      "owner": "ui",
+      "use": "Lead-switch cards (pause hub) and the Pockets header; engine path public/ui/leads/nick.jpg; shown about 160×200 CSS px",
+      "aspect": "4:5",
+      "size": "800×1000",
+      "sizeFinal": false,
+      "prompt": "Create a 1974 New York press or ID-style colour photograph of an invented fictional person (not resembling any real person, celebrity or actor). Head and shoulders, three-quarter view, plain light-grey seamless backdrop, flat even light, slight film grain, true colour (no sepia, no vignette, no frame, no border). Eye line about 38% from the top of the frame; the same framing as a passport-style portrait. All hair, eyewear, collars and fabrics strictly 1974. A man of 51, short and barrel-chested, light olive sun-weathered skin, thick iron-grey hair combed straight back with tonic, heavy dark eyebrows, clean-shaven, a broad face with deep-set dark eyes and laugh lines. Wearing a midnight-blue summer suit, an ivory shirt and a wide silk tie. Expression: a host's half-smile that stops at the eyes. NO TEXT AT ALL: no letters, numbers, captions or watermarks. Aspect ratio 4:5.",
+      "text": null,
+      "textPolicy": "none",
+      "accept": [
+        "no text or watermark",
+        "face identifiable at 80 px wide",
+        "framing consistent across all three, eye line at about 38% from the top",
+        "no modern items (glasses, hair, collars all 1974)",
+        "must not resemble any real person",
+        "placeholder pass: the final style follows the user's pending type and visual pick"
+      ],
+      "priority": 4,
+      "status": "todo"
+    },
+    {
+      "id": "ui.lead_portrait.teddy",
+      "file": "ui_lead_teddy.jpg",
+      "owner": "ui",
+      "use": "Lead-switch cards (pause hub) and the Pockets header; engine path public/ui/leads/teddy.jpg; shown about 160×200 CSS px",
+      "aspect": "4:5",
+      "size": "800×1000",
+      "sizeFinal": false,
+      "prompt": "Create a 1974 New York press or ID-style colour photograph of an invented fictional person (not resembling any real person, celebrity or actor). Head and shoulders, three-quarter view, plain light-grey seamless backdrop, flat even light, slight film grain, true colour (no sepia, no vignette, no frame, no border). Eye line about 38% from the top of the frame; the same framing as a passport-style portrait. All hair, eyewear, collars and fabrics strictly 1974. A man of 34, warm light-brown skin with an olive undertone, thick short black side-parted hair with first grey at the temples, heavy brows, a nose once broken and badly set, tired deep-lidded eyes, a small scar through the left eyebrow, a faint evening shadow of stubble. Wearing a cheap tan sport coat, a loosened brown tie and a white shirt. Expression: wary, patient, a little worn down. NO TEXT AT ALL: no letters, numbers, captions or watermarks. Aspect ratio 4:5.",
+      "text": null,
+      "textPolicy": "none",
+      "accept": [
+        "no text or watermark",
+        "face identifiable at 80 px wide",
+        "framing consistent across all three, eye line at about 38% from the top",
+        "no modern items (glasses, hair, collars all 1974)",
+        "must not resemble any real person",
+        "placeholder pass: the final style follows the user's pending type and visual pick"
+      ],
+      "priority": 4,
+      "status": "todo"
     }
   ]
 }
