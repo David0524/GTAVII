@@ -40,11 +40,12 @@ import { migrate, SAVE_VERSION, type SaveV3 } from './save';
 import { vehicleLook, type PlayerVehicle } from './appearance';
 import { TimeKeeper, restQuality, type CantSleep } from './time';
 import { Cars, type EntryMethod } from './cars/theft';
+import { FireSystem } from './props/fire';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
   | 'impact' | 'bark' | 'radio' | 'witness' | 'police' | 'melee' | 'money' | 'pickup' | 'ring' | 'call' | 'wear' | 'geyser' | 'tyreShot' | 'notice'
-  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released';
+  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
 /** Side-window arc (radians off the car's nose) and spread penalty when shooting from a car. */
@@ -94,6 +95,9 @@ export class Gameplay {
   readonly clock = new TimeKeeper();
   /** car records: theft, hot cars, plates, trunks (CORE_SYSTEMS §5) */
   readonly cars: Cars;
+  /** fires: molotovs, car fires, arson, spread, engines */
+  readonly fire: FireSystem;
+  private fireTick = 0;
   /** a car waiting on a hot-wire before it will start */
   hotwiring: string | null = null;
   private bus = new Emitter<Record<GameplayEventType, any>>();
@@ -146,6 +150,7 @@ export class Gameplay {
     this.melee = new MeleeSystem(this.rng, this.world);
     this.ai = new CombatAI(this.rng);
     this.cars = new Cars(this.rng);
+    this.fire = new FireSystem(this.rng);
     this.port = this.nullPort();
     this.policeSys = new Police(this.reg.precincts, this.world, this.rng);
     this.policeSys.bribeSkill = (id) => (id === this.player?.id ? this.reg.leads.get(this.player.lead)?.bribeSkill ?? 0 : 0);
@@ -234,6 +239,7 @@ export class Gameplay {
     const d = this.props.boxes().find((b) => b.id === id)!;
     this.world.add(d);
     if (type === 'call_box') this.witnesses.addPoint({ id, kind: 'callbox', x, z, broken: false });
+    if (type === 'newsstand' || type === 'trash_can') this.fire.addFlammable(id, x, z, 'paper');
     if (type === 'phone_booth') { this.phones.add({ id, x, z, broken: false }); this.witnesses.addPoint({ id, kind: 'payphone', x, z, broken: false }); }
     if (type === 'newsstand' || type === 'mailbox' || type === 'phone_booth' || type === 'trash_can') this.cover.add({ id, c: [x, y + d.h[1], z], half: d.h as [number, number, number], yaw, height: type === 'newsstand' || type === 'phone_booth' ? 'high' : 'low' });
   }
@@ -242,10 +248,12 @@ export class Gameplay {
   addCover(id: string, c: V3, half: [number, number, number], yaw: number, material: 'brick' | 'concrete' | 'wood' | 'metal_thick' = 'concrete') {
     this.world.add({ id, c, h: half, yaw, material });
     this.cover.add({ id, c, half, yaw, height: half[1] * 2 > 1.35 ? 'high' : 'low' });
+    if (material === 'wood') this.fire.addFlammable(id, c[0], c[2], 'wood');
   }
   /** A parked/driven car: hollow thin-metal body, solid engine block, four tyres, cover all round. */
   addCar(id: string, x: number, y: number, z: number, yaw: number, size: { length: number; width: number; height: number } = { length: 5.4, width: 2.0, height: 1.38 }) {
     const hl = size.length / 2, hw = size.width / 2;
+    this.fire.addFlammable(id, x, z, 'car');
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw);
     const bodyY = y + 0.3 + (size.height - 0.3) / 2;
     this.world.add({ id, c: [x, bodyY, z], h: [hw, (size.height - 0.3) / 2, hl], yaw, material: 'metal_thin', hollow: true });
@@ -312,7 +320,12 @@ export class Gameplay {
   setLimb(l: Limb) { this.aimer.limb = l; this.pc.lockLimb = l; }
   meleeAttack(kind: AttackKind) { if (!this.player) return false; this.syncPlayerFighter(); return this.melee.attack(this.player.id, kind); }
   block(held: boolean) { if (this.player) { this.syncPlayerFighter(); this.melee.block(this.player.id, held); } }
-  dodge(dir: [number, number]) { if (!this.player) return false; this.syncPlayerFighter(); return this.melee.dodge(this.player.id, dir); }
+  dodge(dir: [number, number]) {
+    if (!this.player) return false; this.syncPlayerFighter();
+    const ok = this.melee.dodge(this.player.id, dir);
+    if (ok && this.healthSys.state(this.player.id)?.burning) this.healthSys.treat(this.player.id, { extinguish: this.rng.chance(0.7) }); // stop, drop and roll
+    return ok;
+  }
   grappleAction(how: 'shove' | 'knee' | 'throw', dir?: [number, number]) { return this.player ? this.melee.grappleAction(this.player.id, how, dir) : false; }
   struggle() { return this.player ? this.melee.struggle(this.player.id) : false; }
   /** Toggle cover: enter the nearest point in the move direction, or leave. */
@@ -551,6 +564,7 @@ export class Gameplay {
     const pp = p?.position() ?? [0, 0, 0];
     this.props.update(dt, [pp[0], pp[2]]);
     this.cars.update(dt);
+    this.updateFire(dt);
     if (this.pc.vehicle && this.player) { const c = this.cars.cars.get(this.pc.vehicle.id); if (c) { c.x = pp[0]; c.z = pp[2]; } }
     if (p) this.phones.update(dt, p.lead, pp[0], pp[2], this.busy());
     for (const d of [...this.pendingDiscoveries]) if (this.time >= d.at) {
@@ -708,6 +722,7 @@ export class Gameplay {
     });
     this.props.on('reset', (e) => { const b = this.world.get(e.id); if (b) b.enabled = true; if (e.type === 'call_box' || e.type === 'phone_booth') { this.witnesses.setBroken(e.id, false); this.phones.setBroken(e.id, false); } });
     this.props.on('geyser', (e) => this.emit('geyser', e));
+    for (const k of ['ignited', 'spread', 'out', 'engines'] as const) this.fire.on(k, (e: any) => this.emit('fire', { kind: k, ...e }));
     this.props.on('coins', (e) => { if (this.player) { this.inv.addMoney(this.player.lead, e.cents, 'coins'); this.emit('pickup', { kind: 'coins', ...e }); } });
     this.witnesses.on('witnessed', (e) => this.emit('witness', { kind: 'witnessed', ...e }));
     this.witnesses.on('heading', (e) => this.emit('witness', { kind: 'heading', ...e }));
@@ -792,6 +807,22 @@ export class Gameplay {
     const sp = this.pc.speed, sk = skillFx(this.inv.ensure(this.player.lead).skills).sneakNoise;
     const base = sp < 0.2 ? 0 : this.pc.crouch ? 2 : this.pc.sprinting ? 20 : sp > 2.5 ? 12 : 6;
     return base * sk;
+  }
+  /** Throw a firebomb at a point (lock-on target or aim point). Arson: a witnessed crime, and the fire spreads. */
+  throwMolotov(at: V3) {
+    if (!this.player || !this.inv.take(this.player.lead, 'item.molotov')) return null;
+    const p = this.player.position();
+    if (Math.hypot(at[0] - p[0], at[2] - p[2]) > 22) { const d = norm([at[0] - p[0], 0, at[2] - p[2]]); at = [p[0] + d[0] * 22, at[1], p[2] + d[2] * 22]; }
+    const f = this.fire.start(at[0], at[2], 'molotov', this.player.id);
+    this.crime('arson', { noise: 35 });
+    return f;
+  }
+  private updateFire(dt: number) {
+    this.fire.update(dt);
+    if ((this.fireTick += dt) < 0.5 || !this.fire.fires.size) return;
+    this.fireTick = 0;
+    for (const a of this.actors.values()) { const q = a.pos(); const f = this.fire.at(q[0], q[2]); if (f) this.applyDamage(a.id, { amount: 4, type: 'fire', source: f.by ?? undefined }); }
+    for (const [id, m] of this.fire.fuel) if (m.burning && this.props.get(id)) this.damageProp(id, 999, 'impact', null);
   }
   /** Takedown from behind on an unaware enemy within 1.4 m: a blade kills, anything else knocks out. */
   takedown(): { id: string; lethal: boolean } | null {

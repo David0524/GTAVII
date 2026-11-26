@@ -55,6 +55,7 @@ export const ITEMS: ItemDef[] = [
   I({ id: 'item.film_pack', name: 'Instant film (10 exposures)', kind: 'photo', price: 549, stack: 10, sellable: false }),
   I({ id: 'item.plates', name: 'Set of plates', kind: 'misc', price: 4000, stack: 2, sellable: false, illicit: true, note: 'Chop-shop plate swap breaks the plate part of a description.' }),
   I({ id: 'item.key_corwin', name: 'Corwin pass key', kind: 'key', price: 0, stack: 1, sellable: false }),
+  I({ id: 'item.molotov', name: 'Firebomb', kind: 'misc', price: 300, stack: 3, sellable: false, illicit: true, note: 'Fence only. An item, never a recipe (content rule 6).' }),
   I({ id: 'item.photo_evidence', name: 'Instant photo: a cop with his hand out', kind: 'photo', price: 0, stack: 20, sellable: false }),
   I({ id: 'item.bag', name: 'Gym bag', kind: 'misc', price: 450, stack: 1, sellable: true, note: 'Hides one long gun; you must take it out to use it.' }),
   I({ id: 'item.ledger_page', name: 'Ledger page', kind: 'evidence', price: 0, stack: 20, sellable: false }),
@@ -70,7 +71,7 @@ export const SHOPS: ShopDef[] = [
   S({ id: 'shop.test_pawn', name: 'Pawnshop (test)', kind: 'pawn', markup: 1.1, buyback: 0.4, buysKinds: ['weapon', 'armor', 'misc'], stock: [{ item: 'item.knife', qty: 2 }, { item: 'item.bat', qty: 1 }] }),
   S({ id: 'shop.test_fence', name: 'Fence (test)', kind: 'fence', markup: 1.35, buyback: 0.3, buysKinds: ['weapon', 'ammo', 'armor'], stock: [
     { item: 'item.snub', qty: 2 }, { item: 'item.pistol', qty: 1 }, { item: 'item.pump', qty: 1 }, { item: 'item.sawnoff', qty: 1 }, { item: 'item.rifle', qty: 1 },
-    { item: 'item.ammo_38', qty: 10 }, { item: 'item.ammo_9', qty: 6 }, { item: 'item.ammo_12', qty: 6 }, { item: 'item.ammo_30', qty: 4 }, { item: 'item.vest', qty: 1 }, { item: 'item.plates', qty: 2 },
+    { item: 'item.ammo_38', qty: 10 }, { item: 'item.ammo_9', qty: 6 }, { item: 'item.ammo_12', qty: 6 }, { item: 'item.ammo_30', qty: 4 }, { item: 'item.vest', qty: 1 }, { item: 'item.plates', qty: 2 }, { item: 'item.molotov', qty: 2 },
   ] }),
   S({ id: 'shop.test_fence_trusted', name: 'Fence, back room (test)', kind: 'fence', markup: 1.5, buyback: 0.3, requiresFlag: 'flag.fence_trusted', stock: [{ item: 'item.smg', qty: 1 }, { item: 'item.ammo_45', qty: 4 }] }),
 ];
