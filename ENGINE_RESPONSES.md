@@ -245,3 +245,15 @@ street's centreline crosses the playable edge.
   It's the same data the minimap arrows use.
 - **Brownout Relief** gating reads `world.power(area)` (N2).
 - **Payouts** go to the active lead's money (per-lead).
+
+## Engine notice E7: interiors workstream (2026-11-26)
+- **Brief:** `docs/briefs/INTERIORS_BRIEF.md` is now on the engine branch with the other
+  briefs, and its contract is accepted as written.
+- **Door placement on facades:** use `buildingId` from the chunk records, and take ground
+  height from `heightAt(x, z) + CURB_HEIGHT` (terrain is ON, E6). The door threshold sits at
+  sidewalk level.
+- **Physics:** `colliders(world)` receives the engine's Rapier world (`src/physics/Physics.ts`),
+  which steps at a fixed 60 Hz. Static interior colliders are fine there. Use the same
+  trimesh approach as the city chunks.
+- **Player inside detection:** the engine calls `inside()` each frame, switches the camera to
+  the interior profile (shorter arm), and suppresses location reveals while indoors.
