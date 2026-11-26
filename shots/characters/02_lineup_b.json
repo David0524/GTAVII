@@ -17,9 +17,9 @@
       "props": [
         "handbag"
       ],
-      "tris": 9946,
+      "tris": 10622,
       "draws": 2,
-      "buildMs": 103
+      "buildMs": 112.7
     },
     {
       "seed": 2486719551,
@@ -33,9 +33,9 @@
       "shoes": "sneaker",
       "hat": null,
       "props": [],
-      "tris": 8302,
+      "tris": 9904,
       "draws": 2,
-      "buildMs": 73.2
+      "buildMs": 103
     },
     {
       "seed": 427522784,
@@ -51,9 +51,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 7668,
+      "tris": 9316,
       "draws": 2,
-      "buildMs": 56
+      "buildMs": 76.4
     },
     {
       "seed": 1048119932,
@@ -69,9 +69,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 7653,
+      "tris": 9185,
       "draws": 2,
-      "buildMs": 56.2
+      "buildMs": 54.5
     },
     {
       "seed": 1257398256,
@@ -87,9 +87,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 7592,
+      "tris": 9164,
       "draws": 2,
-      "buildMs": 44.4
+      "buildMs": 52.1
     },
     {
       "seed": 183788950,
@@ -103,9 +103,9 @@
       "shoes": "sneaker",
       "hat": null,
       "props": [],
-      "tris": 8328,
+      "tris": 10398,
       "draws": 2,
-      "buildMs": 46.6
+      "buildMs": 56.8
     },
     {
       "seed": 2289262834,
@@ -121,9 +121,9 @@
       "props": [
         "briefcase"
       ],
-      "tris": 8639,
+      "tris": 9997,
       "draws": 2,
-      "buildMs": 50.4
+      "buildMs": 82.4
     },
     {
       "seed": 3754428764,
@@ -139,9 +139,9 @@
       "props": [
         "newspaper"
       ],
-      "tris": 9166,
+      "tris": 10936,
       "draws": 2,
-      "buildMs": 42.8
+      "buildMs": 121.6
     },
     {
       "seed": 3119854232,
@@ -157,9 +157,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 8689,
+      "tris": 9884,
       "draws": 2,
-      "buildMs": 72.1
+      "buildMs": 48.3
     },
     {
       "seed": 3475696813,
@@ -173,26 +173,26 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 7610,
+      "tris": 8734,
       "draws": 2,
-      "buildMs": 47.2
+      "buildMs": 56.5
     }
   ],
   "updateMs": [
     0,
     0,
-    0.1,
-    0,
-    0,
-    0,
     0,
     0.1,
-    0.1,
+    0,
+    0,
+    0,
+    0,
+    0,
     0
   ],
   "renderMsSoftware": [
-    4.600000000093132,
-    2.2000000001862645,
-    2.1999999997206032
+    3.7999999998137355,
+    2,
+    1.599999999627471
   ]
 }
