@@ -1,0 +1,62 @@
+{
+  "id": "mission.side_stuck_elevator",
+  "kind": "side",
+  "title": "Between Floors",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Dark office tower, E 34th & 5th",
+      "to": "E 34th St & 5th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "The doorman's plea",
+      "script": "dlg.side_stuck_elevator_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Find the stairwell and machine room",
+      "to": "E 34th St & 5th Ave",
+      "radius": 10
+    },
+    {
+      "id": "o4",
+      "type": "wait",
+      "text": "Crank the car down, timing",
+      "seconds": 20
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Meet who was inside",
+      "script": "dlg.side_stuck_elevator_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Reward and a story contact"
+  },
+  "where": "Office buildings on Fifth Ave during brownouts",
+  "systems": [
+    "brownout",
+    "interiors",
+    "keys"
+  ],
+  "mobile": "Rhythm prompt; no fail state.",
+  "rank": 25,
+  "slice": false
+}

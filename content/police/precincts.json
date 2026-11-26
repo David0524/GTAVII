@@ -3,6 +3,17 @@
   "precincts": [
     {
       "id": "precinct.midtown_central",
+      "bounds": {
+        "streets": [
+          "W 29th St",
+          "W 43rd St"
+        ],
+        "avenues": [
+          "6th Ave",
+          "west edge"
+        ],
+        "edges": "north: mid-block 28th–29th St; south: mid-block 43rd–44th (map edge); east: 6th Ave centreline; west: map edge"
+      },
       "name": "Midtown Central",
       "house": "loc.station_house",
       "covers": "W 29th to W 43rd St, 6th Ave west to the edge (the Garment District, Penn Station, the Deuce, Eighth Ave)",
@@ -34,6 +45,17 @@
     },
     {
       "id": "precinct.madison_square",
+      "bounds": {
+        "streets": [
+          "south edge",
+          "W 28th St"
+        ],
+        "avenues": [
+          "west edge",
+          "east edge"
+        ],
+        "edges": "north: mid-block 28th–29th St; south: map edge (mid-block 21st–22nd); east and west: map edges"
+      },
       "name": "Madison Square",
       "house": "W 24th St, 6th–7th Aves, north side",
       "covers": "W 22nd to W 29th St, the edge east to Madison (Flatiron, Madison Sq Park, the Flower and Fur Districts, Penn South)",
@@ -52,6 +74,17 @@
     },
     {
       "id": "precinct.bryant_park",
+      "bounds": {
+        "streets": [
+          "W 29th St",
+          "W 43rd St"
+        ],
+        "avenues": [
+          "6th Ave",
+          "east edge"
+        ],
+        "edges": "north: mid-block 28th–29th St; south: map edge; west: 6th Ave centreline (6th Ave itself belongs to Bryant Park); east: map edge (mid-block Madison–Park)"
+      },
       "name": "Bryant Park",
       "house": "W 40th St, 5th–6th Aves, south side",
       "covers": "W 29th to W 43rd St, 6th Ave east to the edge (Herald Square, Fifth Ave offices, the Library, Bryant Park)",

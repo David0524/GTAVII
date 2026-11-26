@@ -1,0 +1,63 @@
+{
+  "id": "mission.side_bryant_brawl",
+  "kind": "side",
+  "title": "Break It Up",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Bryant Park benches",
+      "to": "loc.bryant_park",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "combat",
+      "text": "Break up the fight",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.park_sleeper",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Talk the winner down",
+      "script": "dlg.side_bryant_brawl_1"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "The crowd's verdict",
+      "script": "dlg.side_bryant_brawl_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1"
+  ],
+  "rewards": {
+    "text": "Reputation"
+  },
+  "where": "Bryant Park benches",
+  "systems": [
+    "melee",
+    "dialogue"
+  ],
+  "mobile": "Soft lock.",
+  "rank": 30,
+  "slice": false
+}

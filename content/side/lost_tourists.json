@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_lost_tourists",
+  "kind": "side",
+  "title": "Which Way's Up?",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "The Ohio family, W 34th & 7th",
+      "to": "W 34th St & 7th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Choose the directions",
+      "script": "dlg.side_lost_tourists_1"
+    },
+    {
+      "id": "o3",
+      "type": "follow",
+      "text": "Watch them walk it",
+      "target": "npc.holiday_stroller",
+      "keepWithinM": 40
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Take their thanks",
+      "script": "dlg.side_lost_tourists_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1"
+  ],
+  "rewards": {
+    "text": "Small tip; map-knowledge stat"
+  },
+  "where": "Herald Square, Penn Station exits",
+  "systems": [
+    "map knowledge",
+    "dialogue"
+  ],
+  "mobile": "Choice menu.",
+  "rank": 29,
+  "slice": false
+}

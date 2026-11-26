@@ -162,9 +162,10 @@ piece(42, "last_train", "Last Train Home", "map", [ANY], [1, 2, 3], "Subway plat
 piece(43, "rizo_147", "RIZO 147", "arc", [D], [2, 3], "Subway cars, the passage, a rooftop", "A graffiti writer wants his best piece photographed before the Transit Authority buffs it.",
       "Find his whole-car piece on a moving train by timing station arrivals, photograph it, and protect his sketchbook from a rival crew. It's about art, not vandalism glamour.",
       ["subway", "photo mode", "time of day"], "His piece on the Ticker's front page; a tag on a lead's home wall", "Train times on the HUD; auto-frame.", parts=3)
-piece(44, "water_tank_radio", "The Water-Tank Station", "map", [ANY], [2, 3], "A rooftop water tank near W 36th St", "A pirate radio voice breaks into Night Owl Radio after 2 a.m.",
-      "Triangulate the signal with a car radio (stronger and weaker by block), climb the right building, and meet the DJ living in a water tank.",
-      ["radio", "rooftops", "driving"], "A new radio station preset ('Tank Radio')", "Signal meter on the HUD.")
+piece(44, "water_tank_radio", "The Water-Tank Voice", "map", [ANY], [2, 3], "A rooftop water tank near W 36th St & 9th Ave",
+      "Someone is living in a rooftop water tank, and leaving clues about the block on chalked rooftops.",
+      "A rooftop clue hunt across the walk-ups: read the chalk, climb the right stairwell, find the man in the tank and hear what he's seen from up there. (Reframed 26 Nov: no radio-station content, per the user.)",
+      ["rooftops", "interiors", "map discovery"], "A hidden rooftop place unlocked on the minimap", "Clues are large chalk marks; stairwells are enterable.")
 piece(45, "pigeon_bands", "Leg Bands", "collectible", [ANY], [1, 2, 3], "Pigeons across the core", "The Commodore's lost birds still wear his bands.", "Photograph 15 banded pigeons (ambient flocks); each band leads back to a part of his story.",
       ["photo mode", "pigeons"], "The Commodore's final race", "Bands are highlighted when the camera is up.")
 piece(46, "wanted_1971", "The Posters of '71", "collectible", [T], [2, 3], "Station-house corridors, post office walls", "Old wanted posters from 1971 are still pinned up.",

@@ -782,3 +782,24 @@ how GTA handles these things".
   - **Kept on my own model:** story, voice, dialogue, sensitive subjects and every final pass.
   - Every helper output is validated (`content.py` now checks `content/side/*.json`) and
     reviewed before commit.
+
+### N4b part 2: specs (helper-filled, reviewed) and stats accepted
+- **47 side specs** in `content/side/*.json`, filled by a Sonnet helper from my outlines. I
+  reviewed them: validator clean, 32/32 reachable, and sampled specs read well.
+  - The water-tank piece was reframed away from pirate radio, per the user's no-stations
+    instruction.
+  - Stand-in archetypes were used where no better one exists.
+- **Follow-ups (mine):**
+  - Write the side dialogue (`dlg.side_*`, 89 scripts).
+  - Add the recurring side givers as characters: Mrs. Cho, the weather prophet, RIZO 147,
+    Marty the fence, the projectionist, the piano brothers, the promoter, the barber.
+  - Register the invented `item.*` ids the specs use (telegram, film reel, money order and
+    others).
+  - The interiors wish-list goes to the Interiors chat: cinemas, pool hall, Teletrack, the
+    Garden's doors, barbershop, taxi bureau, an office tower lobby and machine room, the
+    Pennsylvania ballroom, and walk-up stairwells and roofs.
+- **Lead stats ACCEPTED by Gameplay** (ENGINE_REQUESTS 11, provisional). Payroll was amended
+  (35% cheaper bribes, +0.3 to acceptance rolls, auto below heat 2; honest cops are never
+  buyable).
+- **Precincts** now carry structured `bounds` for Gameplay.
+- **Cutscenes** for M9, M15, M18, M22, M25 and M32 are written (by me).

@@ -1,0 +1,68 @@
+{
+  "id": "mission.side_garment_rush",
+  "kind": "side",
+  "title": "Garment Rush: Racks and Gridlock",
+  "number": null,
+  "leads": [
+    "char.teddy_arce",
+    "char.delphine_moore"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Pushboys need hands",
+      "script": "dlg.side_garment_rush_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The rack dock, W 37th & 8th",
+      "to": "W 37th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Rack to the shop, W 38th & 9th",
+      "to": "W 38th St & 9th Ave",
+      "item": "item.garment_rack",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Second rack, W 36th & 7th",
+      "to": "W 36th St & 7th Ave",
+      "item": "item.garment_rack",
+      "radius": 15
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Collect the run's pay",
+      "script": "dlg.side_garment_rush_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "$15 a run; a speed ladder unlocks Dwayne's sketches being seen"
+  },
+  "where": "W 35th–39th St, 7th–9th Aves",
+  "systems": [
+    "terrain",
+    "crowds",
+    "garment economy"
+  ],
+  "mobile": "One held button; hills telegraphed.",
+  "rank": 11,
+  "slice": false
+}

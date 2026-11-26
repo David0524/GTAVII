@@ -1,0 +1,68 @@
+{
+  "id": "mission.side_weather_prophet",
+  "kind": "side",
+  "title": "The Man Who Sells the Weather",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The prophet's barometer pitch",
+      "script": "dlg.side_weather_prophet_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Reach the Herald Sq newsstand",
+      "to": "W 34th St & 6th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Roof gauge one, W 31st St",
+      "to": "W 31st St & 7th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "wait",
+      "text": "Read the gauge",
+      "seconds": 10
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Report the first reading",
+      "script": "dlg.side_weather_prophet_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Brownout warnings on the minimap; a barometer prop for a lead's home"
+  },
+  "where": "Herald Square, by the newsstand",
+  "systems": [
+    "brownout",
+    "rooftops",
+    "calendar"
+  ],
+  "mobile": "Short walks; no timers.",
+  "rank": 7,
+  "slice": false,
+  "parts": 3,
+  "laterParts": [
+    "Part 2: Bring readings from the second and third rooftop gauges.",
+    "Part 3: He names the blocks that go dark next brownout; the player prepares."
+  ]
+}

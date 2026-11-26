@@ -1148,7 +1148,7 @@
     {
       "rank": 44,
       "id": "side.water_tank_radio",
-      "title": "The Water-Tank Station",
+      "title": "The Water-Tank Voice",
       "kind": "map",
       "leads": [
         "any"
@@ -1157,16 +1157,16 @@
         2,
         3
       ],
-      "where": "A rooftop water tank near W 36th St",
-      "hook": "A pirate radio voice breaks into Night Owl Radio after 2 a.m.",
-      "twist": "Triangulate the signal with a car radio (stronger and weaker by block), climb the right building, and meet the DJ living in a water tank.",
+      "where": "A rooftop water tank near W 36th St & 9th Ave",
+      "hook": "Someone is living in a rooftop water tank, and leaving clues about the block on chalked rooftops.",
+      "twist": "A rooftop clue hunt across the walk-ups: read the chalk, climb the right stairwell, find the man in the tank and hear what he's seen from up there. (Reframed 26 Nov: no radio-station content, per the user.)",
       "systems": [
-        "radio",
         "rooftops",
-        "driving"
+        "interiors",
+        "map discovery"
       ],
-      "reward": "A new radio station preset ('Tank Radio')",
-      "mobile": "Signal meter on the HUD.",
+      "reward": "A hidden rooftop place unlocked on the minimap",
+      "mobile": "Clues are large chalk marks; stairwells are enterable.",
       "parts": 1,
       "upgrades": null,
       "slice": false

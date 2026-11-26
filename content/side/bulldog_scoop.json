@@ -1,0 +1,74 @@
+{
+  "id": "mission.side_bulldog_scoop",
+  "kind": "side",
+  "title": "Bulldog Edition: The Scoop",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Teddy collects the bulldog bundles",
+      "script": "dlg.side_bulldog_scoop_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_vehicle",
+      "text": "Into the delivery van at Penn",
+      "vehicle": "vehicle_role.van"
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Stand one, W 34th & 7th",
+      "to": "W 34th St & 7th Ave",
+      "item": "item.newspaper_bundle",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Stand two, E 34th & Madison",
+      "to": "E 34th St & Madison Ave",
+      "item": "item.newspaper_bundle",
+      "radius": 15
+    },
+    {
+      "id": "o5",
+      "type": "deliver",
+      "text": "Stand three, W 28th & 8th",
+      "to": "W 28th St & 8th Ave",
+      "item": "item.newspaper_bundle",
+      "radius": 15
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Tell the desk you beat the rival truck",
+      "script": "dlg.side_bulldog_scoop_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$12 a run; 'scoop' bonus"
+  },
+  "where": "Newsstands across the core",
+  "systems": [
+    "driving",
+    "one-ways",
+    "newspapers"
+  ],
+  "mobile": "Soft timer; no fail.",
+  "rank": 12,
+  "slice": false
+}

@@ -1,0 +1,71 @@
+{
+  "id": "mission.side_fight_door",
+  "kind": "side",
+  "title": "Fight Night at the Garden",
+  "number": null,
+  "leads": [
+    "char.teddy_arce",
+    "char.nick_varelas"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The promoter's door job",
+      "script": "dlg.side_fight_door_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The Garden doors, W 33rd & 7th",
+      "to": "W 33rd St & 7th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Check tickets at the door",
+      "script": "dlg.side_fight_door_2"
+    },
+    {
+      "id": "o4",
+      "type": "combat",
+      "text": "Eject the drunk, soft lock",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.holiday_stroller",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Nick's ringside bet",
+      "script": "dlg.side_fight_door_3"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$30 a night; bets"
+  },
+  "where": "Madison Square Garden (invented fight cards)",
+  "systems": [
+    "melee",
+    "betting",
+    "newspapers"
+  ],
+  "mobile": "Ejections are soft-lock takedowns.",
+  "rank": 16,
+  "slice": false
+}

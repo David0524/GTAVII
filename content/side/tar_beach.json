@@ -1,0 +1,62 @@
+{
+  "id": "mission.side_tar_beach",
+  "kind": "side",
+  "title": "Tar Beach Thief",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The sunbather's loss",
+      "script": "dlg.side_tar_beach_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Walk-up roof, W 32nd & 8th",
+      "to": "W 32nd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "chase",
+      "text": "Chase the thief across the roofs",
+      "target": "npc.stickup_man"
+    },
+    {
+      "id": "o4",
+      "type": "enter_interior",
+      "text": "Down into the stairwell",
+      "marker": "interior.arden_back_stairs"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Return the radio",
+      "script": "dlg.side_tar_beach_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$10 and a cold soda"
+  },
+  "where": "Roofs of the W 30s walk-ups",
+  "systems": [
+    "rooftops",
+    "chase",
+    "interiors"
+  ],
+  "mobile": "Jumps are auto-vaults.",
+  "rank": 28,
+  "slice": false
+}

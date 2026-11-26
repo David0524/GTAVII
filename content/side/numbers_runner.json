@@ -1,0 +1,66 @@
+{
+  "id": "mission.side_numbers_runner",
+  "kind": "side",
+  "title": "Earl's Runner",
+  "number": null,
+  "leads": [
+    "char.delphine_moore",
+    "char.teddy_arce"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Earl's morning slips",
+      "script": "dlg.side_numbers_runner_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Slip spot one, W 36th & 8th",
+      "to": "W 36th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Slip spot two, W 40th & 9th",
+      "to": "W 40th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "evade",
+      "text": "Slip the plainclothes tail",
+      "seconds": 30
+    },
+    {
+      "id": "o5",
+      "type": "deliver",
+      "text": "Slips to Earl's stand",
+      "to": "W 35th St & 9th Ave",
+      "item": "item.number_slips",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$10 a day; Friday bank bonus"
+  },
+  "where": "Earl's stand and slip spots",
+  "systems": [
+    "police heat",
+    "crowds",
+    "newspapers"
+  ],
+  "mobile": "Soft noon deadline.",
+  "rank": 17,
+  "slice": false
+}

@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_monte",
+  "kind": "side",
+  "title": "Three-Card Monte",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "The box game, W 42nd & 8th",
+      "to": "W 42nd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "wait",
+      "text": "Watch the crowd and the shills",
+      "seconds": 15
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Play, or call the shill",
+      "script": "dlg.side_monte_1"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Collect or take the aftermath",
+      "script": "dlg.side_monte_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1"
+  ],
+  "rewards": {
+    "text": "Cash or information"
+  },
+  "where": "W 42nd St, the Deuce",
+  "systems": [
+    "tells",
+    "crews",
+    "betting"
+  ],
+  "mobile": "Tap-to-pick.",
+  "rank": 27,
+  "slice": false
+}
