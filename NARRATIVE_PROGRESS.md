@@ -861,3 +861,4 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   provisional until the engine defines sign slots. Four Deuce cinemas were added to the registry (The
   Cormorant, The Gilded Lyre, The Pharaoh, The Comet), each exact-name searched and cleared.
 
+- **Cutscene branches:** the UI accepted `showIf {choice, option}` (UI commit cd3cd9d) and merged all 7 new scripts. Branch shot ids (s5a…, s6a…, s4a–s4d) freeze once a scene is laid out, the same rule as other shot ids.
