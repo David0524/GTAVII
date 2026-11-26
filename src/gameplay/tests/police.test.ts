@@ -190,3 +190,9 @@ test('after an accepted bribe nobody else on that report keeps coming', () => {
   assert.ok(!r.has('police', 'stop') || r.events.filter((e) => e.type === 'police' && e.e.kind === 'stop').every((e) => e.t <= r.events.find((x) => x.type === 'police' && x.e.kind === 'bribe')!.t), 'no new stop after the bribe');
   assert.ok(r.g.heatClear(), 'clear');
 });
+
+test('severity: repeats of one kind barely add; distinct kinds add more', async () => {
+  const { reportSeverity } = await import('../police/crime');
+  assert.ok(reportSeverity(['weapon_seen', 'weapon_seen', 'weapon_seen', 'weapon_seen', 'weapon_seen', 'weapon_seen']) < 1.3);
+  assert.ok(reportSeverity(['shots_fired', 'menacing']) > reportSeverity(['shots_fired', 'shots_fired']));
+});

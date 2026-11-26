@@ -165,7 +165,7 @@ export async function runGameplayScene() {
   }
   const propMeshes = new PropMeshes(propDefs); scene.add(propMeshes.root);
   // the precinct's beat cop and a parked radio car on the block (Midtown Central's station house is on this block)
-  const beat = g.registerPolice('foot', 'pct.midtown_central', -812, BLOCK.zS + 1.5, { corrupt: 0.7 });
+  const beat = g.registerPolice('foot', 'pct.midtown_central', -630, BLOCK.zS + 1.5, { corrupt: 0.7 }); // the corner post at 7th Ave
   beat.yaw = Math.PI / 2;
   car('b_radio', -735, heightAt(-735, BLOCK.zS - 2.3), BLOCK.zS - 2.3, -Math.PI / 2, 0x1f2a44, true);
   car('b_sedan', -690, heightAt(-690, BLOCK.zN + 2.2), BLOCK.zN + 2.2, Math.PI / 2, 0x5a3326);

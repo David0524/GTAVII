@@ -140,7 +140,7 @@ export class Police extends Emitter<PoliceEvents> {
     if (r) {
       f.kinds.forEach((k, i) => { const id = f.crimeIds?.[i]; if (id === undefined || !r!.crimeIds.has(id)) { r!.kinds.push(k); if (id !== undefined) r!.crimeIds.add(id); } });
       r.description = merge(r.description, f.desc); r.lastKnown = f.lastKnown; r.sources++; r.sinceSighting = 0;
-      r.heat = Math.min(MAX_HEAT, Math.max(r.heat, reportSeverity(r.kinds)) + 0.15);
+      r.heat = Math.min(MAX_HEAT, Math.max(r.heat, reportSeverity(r.kinds) + 0.4 * Math.min(3, this.priorsOf(r.perp, r.precinct))));
     } else {
       r = { id: this.nextReport++, precinct: pct.id, kinds: [...f.kinds], heat: Math.min(MAX_HEAT, reportSeverity(f.kinds) + 0.4 * Math.min(3, this.priorsOf(f.perp, pct.id))), description: f.desc, lastKnown: f.lastKnown, crimeAt: f.crimeAt, age: 0, sinceSighting: 0, units: [], sources: 1, perp: f.perp, spawned: {}, pending: [], crimeIds: new Set(f.crimeIds ?? []) };
       this.reports.push(r);
@@ -501,7 +501,7 @@ export class Police extends Emitter<PoliceEvents> {
 
 function crimeWords(k: CrimeKind[]) {
   const top = [...k].sort((a, b) => SEVERITY[b] - SEVERITY[a])[0];
-  const W: Record<CrimeKind, string> = { vandalism: 'malicious mischief', reckless: 'a reckless driver', menacing: 'a man menacing', resisting: 'a man resisting', bribery_attempt: 'a bribery attempt', assault: 'an assault', theft: 'a robbery', assault_weapon: 'an assault with a weapon', carjack: 'a car stolen at gunpoint', hit_and_run: 'a hit-and-run', shots_fired: 'shots fired', shooting: 'a shooting', assault_officer: 'an officer assaulted', homicide: 'a homicide', officer_down: 'officer down' };
+  const W: Record<CrimeKind, string> = { weapon_seen: 'someone with a gun', vandalism: 'malicious mischief', reckless: 'a reckless driver', menacing: 'someone menacing people', resisting: 'someone resisting', bribery_attempt: 'a bribery attempt', assault: 'an assault', theft: 'a robbery', assault_weapon: 'an assault with a weapon', carjack: 'a car stolen at gunpoint', hit_and_run: 'a hit-and-run', shots_fired: 'shots fired', shooting: 'a shooting', assault_officer: 'an officer assaulted', homicide: 'a homicide', officer_down: 'officer down' };
   return W[top];
 }
 const capital = (s: string) => s.replace(/^…?(\w)/, (m, c) => m.replace(c, c.toUpperCase()));

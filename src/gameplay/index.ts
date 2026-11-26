@@ -576,7 +576,8 @@ export class Gameplay {
     const shows = (this.pc.aiming && !!g) || (!!cc && cc.visible.some((w) => this.reg.weapon(w).class !== 'melee' || w !== 'weapon.fists'));
     if (shows && !this.pc.indoors && this.time - this.lastMenace > 8) {
       const pp = p.position();
-      for (const q of this.port.peds()) if (q.alive && Math.hypot(q.x - pp[0], q.z - pp[2]) < 10) { this.lastMenace = this.time; this.crime('menacing', { victim: q.id }); break; }
+      // pointing it at people is menacing; just having it on show is a gun seen
+      for (const q of this.port.peds()) if (q.alive && Math.hypot(q.x - pp[0], q.z - pp[2]) < 10) { this.lastMenace = this.time; this.crime(this.pc.aiming ? 'menacing' : 'weapon_seen', { victim: q.id }); break; }
     }
     // keep the player's melee fighter in sync
     this.syncPlayerFighter();

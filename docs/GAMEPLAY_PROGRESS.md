@@ -1,14 +1,182 @@
 # GAMEPLAY_PROGRESS: combat, damage, police, items, economy
 
-Source of truth for the gameplay stream (branch `claude/gameplay-74`, brief `docs/briefs/GAMEPLAY_BRIEF.md`).
-Read first each session, update last. (Work in progress: fuller write-up lands with the test scene.)
+This is the source of truth for the gameplay stream: branch `claude/gameplay-74`, brief
+`docs/briefs/GAMEPLAY_BRIEF.md`. The oversight session also assigned `CORE_SYSTEMS.md`,
+`ECONOMY.md`, `FEATURE_AUDIT.md` (gameplay lines), `HOMES_AND_CARS.md` and `TIME.md`, all copied
+into `docs/briefs/`. Read this first each session and update it last.
 
-## Done
-- Headless core in `src/gameplay/` (no three.js): health/injury/bleeding/regen, guns, batched ballistics
-  with penetration, melee with parry/dodge/grapple, cover points, aim assist / touch lock-on, combat AI,
-  witnesses → call boxes → precinct reports → response → bribes, inventory/money (cents), shops,
-  wardrobe, payphones, breakable props, wasted/arrested outcomes, versioned save with migrations.
-- Tests: `npx tsx --test src/gameplay/tests/*.test.ts`
+## How to run
+| What | Command |
+|---|---|
+| Headless suite (66 tests, about 30 s) | `npx tsx --test src/gameplay/tests/*.test.ts` |
+| CPU bench (writes `shots/gameplay/bench.json`) | `npx tsx tools/gameplay/bench.ts` |
+| Test scene | `npm run dev`, then `/?gameplay=1` (`&station=lot\|yard\|block\|shop`, `&lead=teddy\|delphine\|nick`, `&touch=1`, `&overlays=0`) |
+| Recorded frames | `npm run build && npx tsx tools/gameplay/record.ts [--only a,b] [--skip c]` → `shots/gameplay/*.png` plus `frames.json` (a note and the live game state per frame) |
 
-## Next
-- Save/shop/AI/perf tests, `?gameplay=1` scene, recorded frames, docs.
+`ENGINE_REQUESTS.md` lists the engine requests (12 so far, including relays to sim, characters,
+vehicles and audio).
+
+## Architecture
+`src/gameplay/` is a **headless core** (no three.js or DOM; deterministic with a seeded `Rng`)
+plus a thin test scene.
+
+| Module | What |
+|---|---|
+| `index.ts` | `Gameplay`: the brief's contract plus the additions in ENGINE_REQUESTS 1. It wires every system, translates events into crimes, batches shots per frame, and does save/load. |
+| `health/Health.ts` | Six injury regions, bleeding (clotting, treatment), partial regeneration, a vest, fire, a max-HP penalty, and fall, vehicle and occupant damage curves |
+| `combat/weapons.ts`, `ballistics.ts` | Guns (magazine, full or per-round interruptible reload, recoil, bloom, spread). Batched hitscan against capsule hitboxes and the world, with material penetration (car doors yes, brick no), tyres and near-miss suppression. |
+| `combat/melee.ts` | Windup, active and recovery phases; light, heavy, kick and grapple (shove, knee, throw); block, parry (with a ×2 counter) and dodge i-frames; poise, stagger and knockdown; environmental slams. NPC telegraphs are 1.2× + 0.22 s, so a phone player can react. |
+| `combat/cover.ts`, `aim.ts`, `ai.ts` | Cover points from objects; touch lock-on, pad soft-lock and mouse friction; enemy AI. The AI does utility decisions at 4 Hz and runs on attack tokens (2, +1 per 4 enemies, capped at 4): cover, peek, suppress (including pinning a hidden target), flank, advance, charge, retreat, surrender, flee. It has morale, barks, and aim error that tightens with tracking. |
+| `police/witnesses.ts` | Perception: sight cone, LOS and light; hearing by noise × canyon. Witnesses go shock → flee or report → run to a call box, payphone or patrol car → call → file. They can be intimidated or paid, a broken call box reroutes them, and children are never used. |
+| `police/description.ts` | Witness memory with per-field confidence, merging, matching, and radio phrasing |
+| `police/police.ts` | Per-precinct reports, heat and tiers, decay, the pad (payoffs), and dispatch: foot, radio car, sector cars, plainclothes, roadblocks, helicopter. Units have beat posts, hearing, sight cones and recognition. A unit goes stop → encounter → pursuit → lost → search, and arrests. Bribes have three outcomes: accepted, refused or insulted. Also: officer-down (citywide, unbribable, slow), radio relay delay, foot cops who tire, priors, chase `phase()` and `elapse()`. |
+| `items/*` | `inventory.ts`: money in cents, savings, stash, gun states, skills, stamina. Also `shop.ts` (invariant-safe), `wardrobe.ts`, `phone.ts` (payphones, ringing, answering service), `guns.ts` (tiers, condition, jams, concealment) and `registry.ts`. |
+| `props/props.ts` | Breakable furniture with stages: a hydrant geyser, papers, glass, coins, call boxes and booths that stop working. Props reset after 10 min when unseen. |
+| `cars/theft.ts` | Car records: entry methods, owner reports with plate/colour/class, hot cars, plate swaps, respray, trunks |
+| `outcomes.ts` | Hospital (capped bill, the attendants' cut, half the loose ammo, a max-HP penalty) and custody (the clerk takes illicit items and 20% of cash; desk, lawyer, bail by another lead, or a night in holding; records and retrieval) |
+| `time.ts` | Sleep and wait rules, rest quality (heatwave without AC), world advance (reports cool, restocks, autosave) |
+| `player/stamina.ts`, `skills.ts` | Heat-aware stamina with an exhaustion gate, fitness and an unlimited toggle; six skills that grow with use and have diminishing returns |
+| `save.ts` | v4 with migrations from v1 (the engine's draft shape, in dollars) through v4; fixtures in `tests/fixtures/` |
+| `data/schema.ts`, `defaults.ts` | Content schema plus validator; placeholder content until narrative's files merge (`docs/GAMEPLAY_CONTENT_SCHEMA.md`) |
+| `scene/*` | The `?gameplay=1` test scene: Rapier world query, stand-in visuals and FX, HUD and touch layer, debug overlays and radar, director (`window.__GP`) |
+| `testing/StandInSim.ts` | Stand-in pedestrians implementing the sim binding, until the sim's behaviour API merges |
+
+## Done (against the brief's "Done means")
+- **Headless suite (66 tests)** covering:
+  - damage, injury and regeneration maths (`health.test.ts`);
+  - the witness → call box → report → response → decay → bribe → clear path (`police.test.ts`,
+    `officer.test.ts`);
+  - inventory and money through save and load, with v1/v2 migration fixtures
+    (`economy.test.ts`);
+  - shop buy/sell invariants, fuzzed over 25 seeds × 300 transactions plus a profit-loop check
+    on every stocked item;
+  - beyond the brief: combat, AI, melee, CORE_SYSTEMS rules, cars, time, and touch-only play.
+- **Recorded test-scene frames** in `shots/gameplay/` (SwiftShader, software rendering):
+  shootout behind cover, peek-fire, blind fire, morale breaking, melee closing, exchange and
+  grapple-shove, a witness running to the call box, a witness on the call box, the report and
+  radio line, the patrol response, being stopped, a bribe refused, a bribe accepted, a
+  description broken by a change of clothes, a hydrant geyser, and the touch lock-on layout.
+  Notes and the live game state per frame are in `frames.json`.
+- **Touch-only playthrough notes:** below, backed by `tests/touch.test.ts`, where the camera
+  points at the sky the whole time.
+- **Honest critique:** below.
+
+## Touch-only playthrough notes
+Every combat action has a large button. None needs a precise drag on the look area (the look area
+only moves the camera).
+
+| Action | Touch | Why no precise aim is needed |
+|---|---|---|
+| Lock a target | AIM | Locks the best visible threat in a 160° cone around where the camera faces (pitch ignored), else the best anywhere in range |
+| Switch target | ◀ ▶ | Cycles by screen side |
+| Pick a limb | HEAD / BODY / LEGS (shown while locked) | Assisted fire goes at the chosen point; spread and lead skill still apply |
+| Shoot | hold FIRE | Assisted fire at the locked limb; auto-reload when empty |
+| Cover / peek / blind fire | COVER; AIM to peek; hold BLIND | Cover snaps to the nearest point in the stick direction |
+| Reload / clear a jam | RELOAD (and one tap on a jam) | — |
+| Melee light / heavy | tap / hold FIRE with a melee weapon or fists | Melee auto-faces the nearest opponent in the arc |
+| Block / parry / dodge | hold GUARD / press GUARD on the telegraph / tap GUARD | NPC windups are ≥ 0.37 s, so there's time to react |
+| Grab, shove, knee | GRAB; stick + GRAB shoves | A shove into a wall, car or booth slams |
+| Lean on a witness | THREAT | Within 7 m |
+| Interact (shop, payphone, closet) | USE | — |
+
+The headless proof (`touch.test.ts`):
+- a three-man gunfight won from cover with lock-on and hold-FIRE only;
+- target cycling across all three targets and a limb pick;
+- a melee hit, a dodge and a block driven by buttons.
+
+The camera direction is set straight up for all of it.
+
+## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
+`shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, 3,480 frames):
+| Case | Avg | p95 | p99 | Max | Budget |
+|---|---|---|---|---|---|
+| 12 combatants, High | 0.049 | 0.123 | 0.349 | 3.0 | ≤ 1.5 ms ✔ (one spike >1.5 ms in ~3,500 frames: JIT/GC) |
+| 6 combatants, Low (×3 phone estimate) | 0.022 (≈0.07) | 0.057 | 0.218 | 0.62 | ✔ |
+| Police and witnesses, 400 peds | 0.027 | 0.172 | 0.40 | 3.4 | ≤ 0.3 ms avg ✔, p99 over |
+| Police and witnesses, 120 peds | 0.013 | 0.049 | 0.131 | 3.4 | ✔ |
+
+- **Caveats:**
+  - These are desktop-container CPU timings.
+  - The ×3 phone factor is an estimate, not a measurement.
+  - The rare max spikes are single frames, at warm-up and when a crime's perception pass runs
+    LOS rays for up to 24 candidates.
+- **Not measured:** real-browser frame cost on a phone. In-browser timings in the scene under
+  SwiftShader are dominated by software rendering, so they aren't representative. They're logged
+  per frame in `frames.json`.
+- The first bench run showed real problems, now fixed:
+  - **every one of 400 pedestrians became a tracked witness** (p95 1.2 ms). It's now capped to
+    the nearest candidates per crime, with heard-only witnesses limited;
+  - **AI stopped shooting at a hidden player** (0.9 shots/s for 11 enemies). They now pin his
+    cover.
+
+## Decisions (and why)
+- **The headless core has no three.js:** tests run in Node and the engine can wire it into its
+  own loop.
+- **Money in integer cents:** 10¢ calls and 25¢ coffees; floats drift.
+- **The head is lethal for NPCs, doubled for the player:** fair on a phone. Bleeding never kills
+  the player (it stops at 10% hp as a warning); NPCs can bleed out.
+- **NPC melee telegraphs = 1.2× + 0.22 s:** human reaction time on a touchscreen.
+- **Attack tokens:** a squad can't all shoot you at once. The rest suppress or flank, and that's
+  readable.
+- **A crime counts once per report,** however many people saw it. A report merges accounts;
+  severity doesn't multiply.
+- **A gun in hand, or one too big for the outfit, is visible** and is reported as menacing. That
+  makes clothes matter twice: description and concealment.
+- **Officer-down** (user decision: "Fully lethal everywhere"):
+  - always discovered after 45 s of radio silence, even unwitnessed (with no description);
+  - citywide, can't be bribed or desk-dealt, decays at 0.12× the normal rate;
+  - surge response;
+  - no mission fail by itself, per the user's clarification. Missions fail on `essentialKilled`.
+- **Lead stats:** narrative's proposal accepted (narrative 11) with the 1–10 → schema mapping
+  sent to narrative. Payroll gives Nick cheaper bribes and a better roll, never a guarantee;
+  honest cops stay honest.
+- **Weapon names:**
+  - "Tarrant" was renamed because it's too close to the historic maker Tranter;
+  - "Ranger" was renamed because Winchester and others use it.
+
+  See `docs/WEAPON_REGISTRY.md`.
+
+## Next (milestone plan, including the oversight docs)
+1. **Integration with the engine** (ENGINE_REQUESTS 1–3, 7, 12) and merging narrative's
+   systems content. That means adapters for `content/items`, `shops.json`,
+   `police/precincts.json` (dollars → cents, `precinct.*` ids) and the radio bark templates.
+2. **Economy** (ECONOMY.md):
+   - jobs, crime, gambling, property and loans runtime (a helper is building the module; I
+     review balance);
+   - the 20-hour headless money simulation against the hourly targets.
+3. **Chases with the sim** (CORE_SYSTEMS §1), against sim's police agent API
+   (ENGINE_REQUESTS 8):
+   - foot chases on the walk graph, box-in, intersection blocks;
+   - fire escapes and interiors (Interiors `markers`/`inside()`);
+   - questioning witnesses, searching parked cars.
+4. **Arrest presentation:** cuffs → back seat → booking reel-cut; a lawyer from the precinct
+   payphone; the bail-out character switch (engine).
+5. **Vehicles:** condition and failure modes fed to the vehicles API, shooting from cars
+   (drive-by arcs), ramming damage, trunk UI.
+6. **HOMES_AND_CARS:** buying cars (lot, classifieds, haggling), titles and plates,
+   alternate-side tickets, the pound and the boot, garages, home upgrades (AC → rest quality).
+7. **FEATURE_AUDIT lines:**
+   - stealth: crouch, noise, takedowns, crowd hiding using `crowdCover`;
+   - fire: molotovs, spread to props, fire engines;
+   - fast travel: cabs and the subway (fare evasion as a witnessed crime, the third rail);
+   - drunk effects, the boxing gym, barbers and tailors;
+   - the stats and completion feed to the UI chat;
+   - original arcade games last.
+8. **Perf:** cut allocations in the AI/police think loops (the rare max spikes), and a
+   real-phone measurement with `?gameplay=1&hud=1`.
+
+## Known issues
+- The stand-in sim walks in straight lines; police cars in the test scene drive straight down
+  the block. The real sim's lanes and walk graph fix this (ENGINE_REQUESTS 8).
+- City colliders have no materials (all brick/asphalt), so storefront glass only exists where
+  gameplay places a `storefront_glass` prop (ENGINE_REQUESTS 5).
+- The parked radio car's collision box stays where it was parked if the unit drives off (test
+  scene only).
+- In the test scene the player capsule can clip into a car while sliding along cover. The slide
+  pull-in needs a collision check.
+- Overlay labels overlap when enemies bunch up (debug only).
+- There are no animations: poses are rigid stand-ins (the characters stream owns them;
+  ENGINE_REQUESTS 9).
+
+## Honest critique
+*(Written after reviewing the recorded frames; see the end of this file.)*
