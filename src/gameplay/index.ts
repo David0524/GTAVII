@@ -41,6 +41,7 @@ import { vehicleLook, type PlayerVehicle } from './appearance';
 import { TimeKeeper, restQuality, type CantSleep } from './time';
 import { Cars, type EntryMethod } from './cars/theft';
 import { FireSystem } from './props/fire';
+import { Ownership } from './cars/ownership';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
@@ -97,6 +98,8 @@ export class Gameplay {
   readonly cars: Cars;
   /** fires: molotovs, car fires, arson, spread, engines */
   readonly fire: FireSystem;
+  /** owned cars: buying, haggling, titles, tickets, the boot, the pound, garages */
+  readonly ownership: Ownership;
   private fireTick = 0;
   /** a car waiting on a hot-wire before it will start */
   hotwiring: string | null = null;
@@ -151,6 +154,8 @@ export class Gameplay {
     this.ai = new CombatAI(this.rng);
     this.cars = new Cars(this.rng);
     this.fire = new FireSystem(this.rng);
+    this.ownership = new Ownership(this.inv, this.cars);
+    this.clock.on('timeAdvanced', (e) => { this.ownership.advance(e.fromDay, e.fromMinutes, e.toDay, e.toMinutes); this.ownership.restockWeek(Math.floor(e.toDay / 7)); });
     this.port = this.nullPort();
     this.policeSys = new Police(this.reg.precincts, this.world, this.rng);
     this.policeSys.bribeSkill = (id) => (id === this.player?.id ? this.reg.leads.get(this.player.lead)?.bribeSkill ?? 0 : 0);
@@ -723,6 +728,7 @@ export class Gameplay {
     this.props.on('reset', (e) => { const b = this.world.get(e.id); if (b) b.enabled = true; if (e.type === 'call_box' || e.type === 'phone_booth') { this.witnesses.setBroken(e.id, false); this.phones.setBroken(e.id, false); } });
     this.props.on('geyser', (e) => this.emit('geyser', e));
     for (const k of ['ignited', 'spread', 'out', 'engines'] as const) this.fire.on(k, (e: any) => this.emit('fire', { kind: k, ...e }));
+    for (const k of ['bought', 'sold', 'ticket', 'booted', 'towed', 'released'] as const) this.ownership.on(k, (e: any) => this.emit('notice', { kind: `car_${k}`, ...e }));
     this.props.on('coins', (e) => { if (this.player) { this.inv.addMoney(this.player.lead, e.cents, 'coins'); this.emit('pickup', { kind: 'coins', ...e }); } });
     this.witnesses.on('witnessed', (e) => this.emit('witness', { kind: 'witnessed', ...e }));
     this.witnesses.on('heading', (e) => this.emit('witness', { kind: 'heading', ...e }));
@@ -939,7 +945,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -956,6 +962,7 @@ export class Gameplay {
     this.props.deserialize(s.props as any);
     this.outcomes.deserialize(s.outcomes as any);
     this.cars.deserialize((s as any).cars ?? []);
+    this.ownership.deserialize((s as any).ownership);
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);
       this.pc.weapon = this.inv.ensure(this.player.lead).equipped; this.guns.clear();

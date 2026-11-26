@@ -27,6 +27,7 @@ export interface SaveV3 {
   props: unknown;
   outcomes: unknown;
   cars?: unknown;
+  ownership?: unknown;
   activeLead?: string;
 }
 
