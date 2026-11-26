@@ -126,7 +126,7 @@ export const LEADS: LeadProfile[] = [
     id: 'char.teddy_arce', name: 'Teddy', description: 'male, thirties, medium build', sex: 'male', build: 'medium', maxHp: 110,
     aim: { revolver: 0.6, pistol: 0.85, long: 0.9, auto: 1.0, default: 0.9 }, recoilControl: 0.75, reloadSpeed: 0.7,
     melee: { damage: 1.0, speed: 1.0, parryWindow: 0.16, dodgeIframes: 0.22 }, sprint: 1.0, evasion: 0.1, bribeSkill: 0.15, hiresMuscle: false, regenCeiling: 0.6,
-    startMoney: 4000, startItems: [{ id: 'item.service', qty: 1 }, { id: 'item.ammo_38', qty: 1 }, { id: 'item.bandage', qty: 2 }, { id: 'item.key_corwin', qty: 1 }],
+    startMoney: 4000, startItems: [{ id: 'item.service', qty: 1 }, { id: 'item.ammo_38', qty: 24 }, { id: 'item.bandage', qty: 2 }, { id: 'item.key_corwin', qty: 1 }],
     startOutfits: ['outfit.teddy_desk', 'outfit.teddy_jacket'], home: 'loc.corwin_hotel', homeAt: [-200, -680],
   },
   {
@@ -140,7 +140,7 @@ export const LEADS: LeadProfile[] = [
     id: 'char.nick_varelas', name: 'Nick', description: 'heavy-set male, fifties, well dressed', sex: 'male', build: 'heavy', maxHp: 100,
     aim: { revolver: 1.45, pistol: 1.4, long: 1.5, auto: 1.6, default: 1.45 }, recoilControl: 1.4, reloadSpeed: 1.35,
     melee: { damage: 0.8, speed: 0.85, parryWindow: 0.12, dodgeIframes: 0.16 }, sprint: 0.88, evasion: 0.0, bribeSkill: 0.3, hiresMuscle: true, regenCeiling: 0.5,
-    startMoney: 30000, startItems: [{ id: 'item.snub', qty: 1 }, { id: 'item.ammo_38', qty: 1 }],
+    startMoney: 30000, startItems: [{ id: 'item.snub', qty: 1 }, { id: 'item.ammo_38', qty: 15 }],
     startOutfits: ['outfit.nick_suit', 'outfit.nick_weekend'], home: 'loc.varelas_loft', homeAt: [-470, -600],
   },
 ];

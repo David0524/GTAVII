@@ -34,18 +34,18 @@ export class Outcomes extends Emitter<OutcomeEvents> {
   flag: (id: string) => boolean = () => false;
   constructor(private reg: Registry, private inv: Inventory, private health: HealthSystem, private police: Police, private rng: Rng) { super(); }
 
-  hospitalBill(lead: string) {
-    const s = this.health.state(lead);
+  hospitalBill(healthId: string) {
+    const s = this.health.state(healthId);
     let wear = 0; if (s) for (const v of Object.values(s.wear)) wear += Math.min(1, v);
     return 8500 + Math.round(wear * 2500);
   }
-  wasted(lead: string, at: [number, number], source: string | null = null) {
+  wasted(lead: string, at: [number, number], source: string | null = null, healthId = lead) {
     const h = nearest(HOSPITALS, at);
-    const bill = this.hospitalBill(lead);
+    const bill = this.hospitalBill(healthId);
     const paid = this.inv.payUpTo(lead, bill, 'hospital');
     const debt = bill - paid;
     if (debt > 0) this.debt.set(lead, (this.debt.get(lead) ?? 0) + debt);
-    this.health.restore(lead, 0.6);
+    this.health.restore(healthId, 0.6);
     this.emit('wasted', { lead, at, hospital: h, bill, paid, debt, hoursLost: 6, source });
   }
 

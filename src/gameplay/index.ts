@@ -125,6 +125,8 @@ export class Gameplay {
     this.witnesses = new Witnesses({ peds: () => this.port.peds(), ped: (id) => this.port.ped(id), command: (id, cmd) => this.port.command(id, cmd) }, this.world, this.rng,
       (x, z) => this.light(x, z),
       () => [...this.policeSys.units.values()].filter((u) => u.kind !== 'helicopter' && u.kind !== 'roadblock').map((u) => ({ id: u.id, x: u.x, z: u.z, available: u.state === 'search' || u.state === 'enroute' })));
+    this.witnesses.maxReporters = this.budget.witnesses;
+    this.witnesses.maxCandidates = this.budget.witnesses * 4;
     this.outcomes = new Outcomes(this.reg, this.inv, this.healthSys, this.policeSys, this.rng);
     this.outcomes.flag = (f) => this.flags.has(f);
     this.wire();
@@ -454,7 +456,7 @@ export class Gameplay {
       if (e.id === this.player?.id) {
         const p = this.player.position();
         this.cover.release(e.id); this.pc.cover = null; this.aimer.release();
-        this.outcomes.wasted(this.player.lead, [p[0], p[2]], e.source);
+        this.outcomes.wasted(this.player.lead, [p[0], p[2]], e.source, this.player.id);
         return;
       }
       this.ai.onDied(e.id);
@@ -474,7 +476,7 @@ export class Gameplay {
         if (t.kind === 'ped') this.port.command(t.id, { type: 'flee', fromX: this.player!.position()[0], fromZ: this.player!.position()[2] });
       }
     });
-    for (const k of ['windup', 'parried', 'guardBroken', 'stagger', 'knockdown', 'dodge', 'grab', 'release', 'whiff'] as const) this.melee.on(k, (e: any) => this.emit('melee', { kind: k, ...e }));
+    for (const k of ['windup', 'parried', 'guardBroken', 'stagger', 'knockdown', 'dodge', 'grab', 'release', 'whiff'] as const) this.melee.on(k, (e: any) => this.emit('melee', { ...e, attack: e.kind, kind: k }));
     this.melee.on('slam', (e) => { if (this.props.get(e.surface)) this.damageProp(e.surface, e.damage * 2, 'melee', e.attacker); this.emit('melee', { kind: 'slam', ...e }); });
     this.melee.on('weaponBroken', (e) => { if (e.id === this.player?.id) { const item = this.reg.itemForWeapon(e.weapon); if (item) this.inv.take(this.player.lead, item.id); this.equip('weapon.fists'); } this.emit('melee', { kind: 'weaponBroken', ...e }); });
     this.ai.on('fire', (e) => {

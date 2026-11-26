@@ -31,7 +31,7 @@ export interface WitnessEvents extends Record<string, unknown> {
   panicked: { ped: string };
 }
 
-export const SIGHT_DAY = 48, SIGHT_NIGHT = 24, FOV = (150 * Math.PI) / 180, CALL_TIME = { callbox: 6, payphone: 12, unit: 4 }, MAX_REPORTERS = 6;
+export const MAX_HEARD_ONLY = 3, SIGHT_DAY = 48, SIGHT_NIGHT = 24, FOV = (150 * Math.PI) / 180, CALL_TIME = { callbox: 6, payphone: 12, unit: 4 }, MAX_REPORTERS = 6;
 const ARRIVE = 1.6, FLAG_RANGE = 70, THINK = 0.2;
 
 export class Witnesses extends Emitter<WitnessEvents> {
@@ -40,6 +40,9 @@ export class Witnesses extends Emitter<WitnessEvents> {
   private acc = 0;
   time = 0;
   stats = { perceptionMs: 0, thinkMs: 0 };
+  /** quality budget: at most this many people run to report one crime; perception considers the nearest maxCandidates */
+  maxReporters = MAX_REPORTERS;
+  maxCandidates = 24;
 
   constructor(private port: AgentPort, private world: WorldQuery, private rng: Rng, private light: LightAt = () => 1,
     private units: () => { id: string; x: number; z: number; available: boolean }[] = () => []) { super(); }
@@ -53,10 +56,18 @@ export class Witnesses extends Emitter<WitnessEvents> {
     const R = Math.max(radiusOf(c), SIGHT_DAY);
     const out: Witness[] = [];
     let reporters = [...this.list.values()].filter((w) => w.crimes.has(c.id) && (w.state === 'toReport' || w.state === 'calling')).length;
+    // Candidates nearest first. Only the nearest MAX_CANDIDATES get perception (LOS rays) and memory;
+    // everyone further out just hears a commotion and scatters (the sim's threat reaction), untracked.
+    const cands: { p: PedSnapshot; dist: number }[] = [];
     for (const p of this.port.peds()) {
       if (!p.alive || p.id === c.perp) continue;
-      const dx = c.at[0] - p.x, dz = c.at[2] - p.z, dist = Math.hypot(dx, dz);
-      if (dist > R) continue;
+      const dist = Math.hypot(c.at[0] - p.x, c.at[2] - p.z);
+      if (dist <= R) cands.push({ p, dist });
+    }
+    cands.sort((a, b) => a.dist - b.dist);
+    let heardOnly = 0;
+    for (const { p, dist } of cands.slice(0, this.maxCandidates)) {
+      const dx = c.at[0] - p.x, dz = c.at[2] - p.z;
       const heard = dist <= radiusOf(c);
       const lit = this.light(p.x, p.z);
       const sight = SIGHT_NIGHT + (SIGHT_DAY - SIGHT_NIGHT) * lit;
@@ -64,6 +75,7 @@ export class Witnesses extends Emitter<WitnessEvents> {
       let saw = false;
       if (c.visible && dist <= sight && (facing || heard || p.id === c.victim)) saw = this.los(p, perp.pos);
       if (!saw && !heard) continue;
+      if (!saw && ++heardOnly > MAX_HEARD_ONLY) continue;
       const clarity = saw ? Math.max(0.15, (1 - dist / sight) * (0.55 + 0.45 * lit) * (1 - perp.evasion * 0.5) + (p.id === c.victim ? 0.25 : 0)) : 0;
       const desc = saw ? observe(perp, clarity, this.rng) : { clothes: [] };
       const kinds: CrimeKind[] = saw ? [c.kind] : [c.kind === 'shooting' || c.kind === 'homicide' || c.kind === 'officer_down' ? 'shots_fired' : c.kind];
@@ -79,7 +91,7 @@ export class Witnesses extends Emitter<WitnessEvents> {
           state: 'shock', t: 0, nerve, target: null, shockFor: this.rng.range(0.5, 1.5) * (1.3 - nerve * 0.5), fleeFor: 0, attempts: 0,
         };
         // Who reports: most do; the timid and those far away mostly just get clear. Children never do.
-        const reports = !p.child && reporters < MAX_REPORTERS && this.rng.chance(saw ? 0.55 + nerve * 0.4 : 0.35 + nerve * 0.3);
+        const reports = !p.child && reporters < this.maxReporters && this.rng.chance(saw ? 0.55 + nerve * 0.4 : 0.35 + nerve * 0.3);
         if (!reports) w.fleeFor = -1; // bystander after shock
         else reporters++;
         this.list.set(p.id, w);

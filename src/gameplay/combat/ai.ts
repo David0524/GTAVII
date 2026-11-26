@@ -234,11 +234,18 @@ export class CombatAI extends Emitter<AiEvents> {
         const [p0, p1] = F.peekTime;
         if (a.t > this.rng.range(p0, p1) * (1 + a.suppressed * 0.5)) {
           if (a.token && (sees || a.unseenT < 3)) { this.setState(a, 'peek'); a.burst = a.gun?.def.auto ? this.rng.int(3, 6) : this.rng.int(1, 3); }
+          // pin a target that went to ground: rounds into their cover (thin car doors let some through)
+          else if (a.lastKnown && a.unseenT < 25 && tgt.inCover && this.rng.chance(a.token ? 0.8 : 0.4)) { this.setState(a, 'suppress'); a.burst = a.gun?.def.auto ? 5 : 2; this.bark(a, a.token ? 'behind_cover' : 'cover_me', 7); }
           else if (!a.token && a.unseenT < 6 && this.rng.chance(0.45)) { this.setState(a, 'suppress'); a.burst = a.gun?.def.auto ? 5 : 2; this.bark(a, 'cover_me', 7); }
           else if (tgt.inCover && a.unseenT > 2.5 && this.squadFlankFree(a) && this.rng.chance(F.flanks)) {
             const from: [number, number] = [a.pos[0], a.pos[2]];
             const c = ctx.cover.best(a.pos[0], a.pos[2], tgt.pos[0], tgt.pos[2], { who: a.id, flankFrom: from, maxDist: 24 });
             if (c) { ctx.cover.claim(c, a.id); a.cover = c; a.goal = [c.x, c.z]; this.setState(a, 'flank'); this.bark(a, 'flanking', 6); }
+          } else if (a.unseenT > 4) {
+            // can't see them from here and they aren't pinned: work closer, cover to cover
+            const c = ctx.cover.best(a.pos[0], a.pos[2], tgt.pos[0], tgt.pos[2], { who: a.id, prefer: 'toward', maxDist: 18 });
+            if (c && c !== a.cover && Math.hypot(c.x - tgt.pos[0], c.z - tgt.pos[2]) < dist - 2) { ctx.cover.claim(c, a.id); a.cover = c; a.goal = [c.x, c.z]; this.setState(a, 'moveToCover'); }
+            else { ctx.cover.release(a.id); a.cover = null; a.goal = a.lastKnown; this.setState(a, 'advance'); }
           } else a.t = 0;
         }
         break;

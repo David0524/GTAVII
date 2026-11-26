@@ -125,8 +125,8 @@ test('melee: light attack lands after its windup; out of reach whiffs', () => {
 
 test('melee: parry inside the window staggers the attacker and arms a x2 counter', () => {
   const d = duel();
-  d.m.attack('b', 'light'); // NPC windup 0.13*1.35 ≈ 0.176 s
-  d.run(0.1); d.m.block('a', true); d.run(0.2);
+  d.m.attack('b', 'light'); // NPC windup 0.13*1.2 + 0.22 ≈ 0.376 s
+  d.run(0.25); d.m.block('a', true); d.run(0.3);
   assert.ok(d.ev.includes('parried')); assert.equal(d.b.state, 'stagger'); assert.equal(d.hits.length, 0);
   d.m.block('a', false); d.run(0.05);
   d.m.attack('a', 'light'); d.run(0.3);
@@ -136,12 +136,12 @@ test('melee: parry inside the window staggers the attacker and arms a x2 counter
 test('melee: block soaks lights, heavy breaks the guard; dodge i-frames avoid a hit', () => {
   const d = duel();
   d.m.block('a', true); d.run(0.5); // held long before: no parry
-  d.m.attack('b', 'light'); d.run(0.4);
+  d.m.attack('b', 'light'); d.run(0.6);
   assert.ok(d.hits[0].blocked && d.hits[0].damage < 3);
-  d.run(1); d.m.attack('b', 'heavy'); d.run(0.8);
+  d.run(1); d.m.attack('b', 'heavy'); d.run(1.0);
   assert.ok(d.ev.includes('guardBroken'));
   const e = duel();
-  e.m.attack('b', 'light'); e.run(0.12); assert.ok(e.m.dodge('a', [1, 0])); e.run(0.3);
+  e.m.attack('b', 'light'); e.run(0.3); assert.ok(e.m.dodge('a', [1, 0])); e.run(0.3);
   assert.equal(e.hits.length, 0, 'dodged');
 });
 

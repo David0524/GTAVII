@@ -8,7 +8,7 @@ import type { Region } from '../health/Health';
 /**
  * Melee: timing-based but readable.
  *  - Every attack has windup → active → recover phases. The windup is announced (`windup` event) so
- *    animation and a telegraph glint can show it; NPC windups are 35% longer than the player's.
+ *    animation and a telegraph glint can show it; NPC windups are 20% longer plus 0.22 s (human reaction time) — readable on a phone.
  *  - Light (fast, chains), heavy (breaks a guard), kick (pushes back), grapple (then shove / knee / throw).
  *  - Defence: hold block (−80% damage, heavy attacks break it), PARRY by starting a block within the
  *    lead's parryWindow before the hit lands (attacker staggers; your next light hit is a ×2 counter),
@@ -27,7 +27,8 @@ export const ATTACKS: Record<AttackKind, AttackSpec> = {
   kick: { windup: 0.24, active: 0.1, recover: 0.4, poise: 38, push: 2.2, arcDeg: 60, regions: [['torso', 0.55], ['leg_l', 0.2], ['leg_r', 0.25]] },
   grapple: { windup: 0.15, active: 0.12, recover: 0.5, poise: 0, push: 0, arcDeg: 60, regions: [['torso', 1]] },
 };
-export const NPC_TELEGRAPH = 1.35;
+/** NPC windups are stretched and padded so a human (≈ 0.25 s reaction on a phone) can see one coming and parry it. */
+export const NPC_TELEGRAPH = 1.2, NPC_TELEGRAPH_ADD = 0.22;
 const DODGE_TIME = 0.45, DODGE_COOLDOWN = 0.6, DODGE_DIST = 2.2;
 const STAGGER = 0.6, PARRY_STAGGER = 0.85, KNOCKDOWN = 1.3, POISE_MAX = 100, POISE_REGEN = 30, COUNTER_WINDOW = 0.9;
 
@@ -77,8 +78,8 @@ export class MeleeSystem extends Emitter<MeleeEvents> {
   private phase(f: Fighter): AttackSpec & { windup: number } {
     const a = ATTACKS[f.attack ?? 'light'];
     const sp = (f.weapon.melee?.speed ?? 1) * f.profile.speed;
-    const tele = f.profile.npc ? NPC_TELEGRAPH : 1;
-    return { ...a, windup: (a.windup * tele) / sp, recover: a.recover / sp };
+    const windup = f.profile.npc ? (a.windup * NPC_TELEGRAPH) / sp + NPC_TELEGRAPH_ADD : a.windup / sp;
+    return { ...a, windup, recover: a.recover / sp };
   }
 
   /** Start an attack; returns false if busy. */
