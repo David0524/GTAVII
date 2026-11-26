@@ -221,12 +221,11 @@ export interface TouchHost {
   setFiring?(on: boolean): void;
   reload?(): void;
   swapWeapon?(dir: 1 | -1): void;
-  /** Cover near cover, roll otherwise; the label says which. */
+  /** Cover near cover, leave cover, or roll otherwise; the label says which ('Cover' | 'Leave' | 'Roll'). */
   coverLabel?(): string;
-  coverOrRoll?(): void;
-  /** On foot: tap draws or holsters; hold opens the wheel (concealable weapons only). */
+  coverOrRoll?(moveDir?: { x: number; z: number }): void;
+  /** On foot: tap draws or holsters (gameplay remembers the last gun); hold opens the UI's weapon selector. */
   drawWeapon?(): void;
-  weaponWheel?(open: boolean): void;
   handbrake?(on: boolean): void;
   horn?(on: boolean): void;
   driveBy?(on: boolean): void;

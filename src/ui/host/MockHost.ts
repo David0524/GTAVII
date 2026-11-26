@@ -393,7 +393,6 @@ export class MockHost implements UiHost {
     coverLabel: () => 'Cover',
     coverOrRoll: () => this.touchLog.push('cover'),
     drawWeapon: () => { this.touchLog.push('draw'); this.touchMode = this.touchMode === 'combat' ? 'foot' : 'combat'; },
-    weaponWheel: (open) => { if (open) this.touchLog.push('wheel'); },
     handbrake: (on) => this.touchLog.push(`handbrake:${on}`),
     horn: (on) => this.touchLog.push(`horn:${on}`),
     driveBy: (on) => this.touchLog.push(`driveby:${on}`),

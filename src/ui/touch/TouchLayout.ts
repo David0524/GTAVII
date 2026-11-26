@@ -52,6 +52,9 @@ export class TouchLayout {
   /** Diagnostics for the rig. */
   readonly cost = { frame: 0 };
 
+  /** Long-press on Weapon: the UI's weapon selector (index.ts opens the 'weapons' overlay). */
+  onWheel: (() => void) | null = null;
+
   constructor(private host: UiHost, private input: Input = host.input) {
     const t = host.touch;
     const armed = () => !!t?.armed();
@@ -116,7 +119,7 @@ export class TouchLayout {
         case 'driveby': t?.driveBy?.(true); break;
         case 'steerL': this.arrows.l = true; break;
         case 'steerR': this.arrows.r = true; break;
-        case 'weapon': longTimer = window.setTimeout(() => { long = true; t?.weaponWheel?.(true); hap(); }, 300); break;
+        case 'weapon': longTimer = window.setTimeout(() => { long = true; this.onWheel?.(); hap(); }, 300); break;
         case 'ctx': if (this.mode === 'drive') longTimer = window.setTimeout(() => { long = true; t?.horn?.(true); }, 450); break;
       }
     });
@@ -138,9 +141,9 @@ export class TouchLayout {
         case 'driveby': t?.driveBy?.(false); break;
         case 'steerL': this.arrows.l = false; break;
         case 'steerR': this.arrows.r = false; break;
-        case 'weapon': if (long) t?.weaponWheel?.(false); else if (tap) t?.drawWeapon?.(); break;
+        case 'weapon': if (!long && tap) t?.drawWeapon?.(); break;
         case 'reload': { const dx = e.clientX - sx; if (Math.abs(dx) > 28) t?.swapWeapon?.(dx > 0 ? 1 : -1); else t?.reload?.(); hap(); break; }
-        case 'cover': t?.coverOrRoll?.(); break;
+        case 'cover': t?.coverOrRoll?.(this.moveDir()); break;
         case 'ctx': if (long) t?.horn?.(false); else if (t) t.doContext(this.moveDir()); else inp.tap('use'); hap(); break;
         case 'menu': inp.tap('pause'); break;
       }

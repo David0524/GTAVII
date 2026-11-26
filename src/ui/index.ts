@@ -93,6 +93,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const settingsTab = new SettingsTab(input); settingsTab.onToast = toast; hub.add(settingsTab);
   // touch controls (TOUCH_CONTROLS.md): built on touch devices; the settings tab opens the layout editor
   const touch = input.isTouch ? new TouchLayout(host) : null;
+  if (touch) touch.onWheel = () => root.show('weapons');
   if (touch) settingsTab.extraButtons.push(['Edit touch layout', () => { hub.hide(); touch.edit(() => hub.show('settings')); }]);
   const creditsTab = new CreditsTab(host.baseUrl); hub.add(creditsTab);
   const shop = new ShopCounter(input, host);
