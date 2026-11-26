@@ -41,7 +41,7 @@ export function readNpy(b: Buffer): Npy {
   const shape = /'shape':\s*\(([^)]*)\)/.exec(header)![1].split(',').map((s) => s.trim()).filter(Boolean).map(Number);
   if (/'fortran_order':\s*True/.test(header)) throw new Error('npy: fortran order unsupported');
   const off = hoff + hlen;
-  const raw = b.buffer.slice(b.byteOffset + off, b.byteOffset + b.length);
+  const raw = new Uint8Array(b.subarray(off)).buffer as ArrayBuffer;
   const n = shape.reduce((a, c) => a * c, 1);
   const map: Record<string, (r: ArrayBuffer) => Npy['data']> = {
     '<i2': (r) => new Int16Array(r, 0, n), '<u2': (r) => new Uint16Array(r, 0, n), '<i4': (r) => new Int32Array(r, 0, n), '<u4': (r) => new Uint32Array(r, 0, n),

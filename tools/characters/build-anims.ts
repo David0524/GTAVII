@@ -230,7 +230,7 @@ for (const [file, names] of Object.entries(CLIPS)) {
   }
 }
 const blobs: Record<string, ArrayBufferView> = {};
-clipsMeta.forEach((c, i) => { blobs[`rot_${i}`] = rotBlobs[i]; blobs[`pel_${i}`] = pelvisBlobs[i]; });
+clipsMeta.forEach((_c, i) => { blobs[`rot_${i}`] = rotBlobs[i]; blobs[`pel_${i}`] = pelvisBlobs[i]; });
 const bin = writeContainer({ version: 1, source: 'Quaternius Universal Animation Library 1+2 (CC0), retargeted', numJoints: NUM_JOINTS, restPelvisHeight: ourPelvisH, clips: clipsMeta }, blobs);
 fs.writeFileSync(path.join(OUT, 'anims.bin'), bin);
 console.log('wrote anims.bin', (bin.length / 1048576).toFixed(2), 'MiB', clipsMeta.length, 'clips');

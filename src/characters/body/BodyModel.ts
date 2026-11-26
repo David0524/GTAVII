@@ -10,6 +10,8 @@ export interface BodyDesc {
   macro: MacroParams;
   /** Local modifiers by key (see BodyModel.localKeys), each -1..1 (paired) or 0..1 (single). */
   locals?: Record<string, number>;
+  /** Target stature in metres (uniform scale after the shape is built). */
+  stature?: number;
 }
 
 export interface BodyShape {
@@ -23,7 +25,7 @@ export interface BodyShape {
 
 interface LocalDef { name: string; count: number; scale: number; offset: number }
 const NEG = /-(decr|in|down|backward|less|min|compress|concave|narrow|small|uncommon|close)$/;
-const POS = /-(incr|out|up|forward|more|max|uncompress|convex|wide|big|ideal|far)$/;
+const OPP: Record<string, string> = { decr: 'incr', in: 'out', down: 'up', backward: 'forward', less: 'more', min: 'max', compress: 'uncompress', concave: 'convex', narrow: 'wide', small: 'big', uncommon: 'ideal', close: 'far' };
 
 export class BodyModel {
   readonly meta: any;
@@ -51,6 +53,7 @@ export class BodyModel {
   /** key → [negative target, positive target] (either may be absent). */
   readonly localKeys = new Map<string, [string | null, string | null]>();
   private readonly blobs: Map<string, ArrayBufferView>;
+  private static readonly warned = new Set<string>();
 
   static async load(url: string): Promise<BodyModel> {
     const r = await fetch(url);
@@ -70,11 +73,13 @@ export class BodyModel {
     this.localIdx = b('localIdx'); this.localD = b('localD');
     let off = 0;
     for (const d of c.meta.locals as { name: string; count: number; scale: number }[]) { this.locals.set(d.name, { ...d, offset: off }); off += d.count; }
+    // Paired targets are addressed by their positive name ("…-incr", "…-up", "…-out", "…-forward");
+    // a negative value applies the opposite target.
     for (const name of this.locals.keys()) {
-      const neg = NEG.test(name), pos = POS.test(name);
-      const key = neg || pos ? name.replace(neg ? NEG : POS, '') : name;
+      const m = NEG.exec(name);
+      const key = m ? name.slice(0, m.index) + '-' + OPP[m[1]] : name;
       const e = this.localKeys.get(key) ?? [null, null];
-      if (neg) e[0] = name; else e[1] = name;
+      if (m) e[0] = name; else e[1] = name;
       this.localKeys.set(key, e);
     }
   }
@@ -103,16 +108,21 @@ export class BodyModel {
     for (const [key, v] of Object.entries(desc.locals ?? {})) {
       if (!v) continue;
       const pair = this.localKeys.get(key);
-      if (!pair) continue;
-      const name = v < 0 ? pair[0] : pair[1] ?? pair[0];
-      if (!name) continue;
-      const amt = pair[1] === null && pair[0] !== null ? v : Math.abs(v);
-      this.applyLocal(pos, name, amt);
+      if (!pair) { if (!BodyModel.warned.has(key)) { BodyModel.warned.add(key); console.warn(`characters: unknown body modifier ${key}`); } continue; }
+      const name = v < 0 ? pair[0] : pair[1];
+      if (name) this.applyLocal(pos, name, Math.abs(v));
     }
     // ground the soles
     let minY = Infinity;
     for (let i = 1; i < D; i += 3) if (pos[i] < minY) minY = pos[i];
     for (let i = 1; i < D; i += 3) pos[i] -= minY;
+    // uniform stature scale (head top regressed below)
+    if (desc.stature) {
+      const top = this.meta.landmarks.head_top as number[];
+      let hy = 0; for (const i of top) hy += pos[i * 3 + 1] / top.length;
+      const s = desc.stature / hy;
+      for (let d = 0; d < D; d++) pos[d] *= s;
+    }
     // joints
     const J = this.meta.joints as { name: string; parent: number; reg: number[] }[];
     const joints = new Float32Array(J.length * 3);
