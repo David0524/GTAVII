@@ -74,3 +74,50 @@
 1. Give each lead a home spawn (a real address) and a free-roam schedule sketch for "where
    are they when you switch to them" (three to five daily locations).
 2. Confirm the date range for the clock, which starts 1974-06-21.
+
+## Engine notices: 2026-11-26 (for every stream)
+
+### E1. Terrain with real relief: **PROPOSED, waiting for the user to confirm directly** (relayed through the oversight session)
+The ground will follow Manhattan's real 5–15 m relief instead of y = 0. Until this is
+confirmed and **SHIPPED**, keep assuming flat ground, but **read heights only through the API
+below** so nothing has to change when it lands.
+- **Pipeline:** a height field on a 5 m grid, interpolated from the footprint dataset's
+  per-building `ground_elevation` (NAVD88 ft → m, re-based so the Flatiron spawn is y ≈ 0).
+  It's smoothed under roadways so streets don't bump.
+  - Shipped as `public/data/terrain.bin`: about 250 KB, global, so you can sample it without
+    loading chunks.
+  - Also shipped per chunk, in chunk format v2, section `HGHT`.
+- **Shared API** (engine-owned, in `src/shared/terrain.ts`):
+  ```ts
+  export function loadTerrain(baseUrl?: string): Promise<void>;
+  export function heightAt(x: number, z: number): number;          // road-surface height, bilinear
+  export function surfaceAt(x: number, z: number): { y: number; kind: 'road' | 'sidewalk' | 'park' | 'lot' | 'building' };
+  export const CURB_HEIGHT = 0.15;                                  // sidewalk = road surface + 0.15 at the curb
+  ```
+  Before shipping, `heightAt` returns 0 and `surfaceAt` uses the current flat ground, so code
+  written now keeps working.
+- **What each stream does:**
+  - **Sim:** sample `heightAt` for lane and sidewalk graph nodes and agent y.
+  - **Vehicles:** the engine supplies city colliders that follow the terrain; your test lot
+    can stay flat.
+  - **Characters:** foot IK already handles curbs; slopes are at most about 4%.
+  - **Audio:** no change.
+
+### E2. New workstreams: audio and characters
+- **Their briefs are now in** `docs/briefs/AUDIO_BRIEF.md` and `docs/briefs/CHARACTERS_BRIEF.md`
+  on the engine branch. All briefs live together.
+- **Same rules as the other streams:** one guarded line in `main.ts`, requests go in the
+  root `ENGINE_REQUESTS.md` (`## From audio:` and `## From characters:`), and the merge
+  cadence in PROGRESS.md applies.
+- **Phase 2 player** will drive the characters contract, `Character.setLocomotion()`,
+  instead of its own placeholder body. Until characters merge, the engine uses a capsule
+  stand-in that implements the same interface.
+
+### E3. Phone testing
+- **Build:** `npm run build` needs no environment variables, and all asset URLs respect
+  `BASE_URL`.
+- **Hosting:** `vercel.json` sets cache headers and MIME types for `/assets`, `/data`,
+  `/fonts` and `*.wasm`.
+- **Perf report:** on a phone, open the preview with `?hud=1` and tap **COPY PERF REPORT**.
+  It copies the GPU adapter, WebGPU or WebGL2, the preset, DPR and resolution, frame
+  avg/p95/max, draw calls and triangles, the view and the input device.

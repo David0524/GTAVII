@@ -12,6 +12,7 @@ import { SIDEWALK_H } from './world/meshBuilder';
 import { Input } from './input/Input';
 import { TouchControls } from './ui/TouchControls';
 import { promptStrip, PROMPT_CSS } from './ui/Prompts';
+import { buildReport, mountReportButton } from './ui/PerfReport';
 
 /**
  * URL parameters (all optional):
@@ -60,7 +61,8 @@ async function main() {
   }
 
   const hud = new DebugHud(document.body);
-  if (params.get('hud') === '0' || (input.isTouch && !params.has('hud'))) { hud.visible = false; hud.el.style.display = 'none'; }
+  // ?hud=1 forces the debug HUD on (phone testing), ?hud=0 forces it off; default: on for desktop, off for touch.
+  if (params.get('hud') === '0' || (input.isTouch && params.get('hud') !== '1')) hud.toggle(false);
   const minimap = params.get('minimap') === '0' ? null : new Minimap(document.body, streets, world.manifest.region, world.manifest.heroes);
 
   window.addEventListener('resize', () => {
@@ -81,6 +83,11 @@ async function main() {
     setCamera: (x: number, y: number, z: number, yawDeg: number, pitchDeg = 0) => fly.set(x, y, z, THREE.MathUtils.degToRad(yawDeg), THREE.MathUtils.degToRad(pitchDeg)),
   };
   (window as unknown as { __T74: typeof debug }).__T74 = debug;
+  const report = mountReportButton(() => buildReport({
+    renderer, backend, quality: quality.name, frames, world, device: input.activeDevice,
+    view: `${camera.position.x.toFixed(0)},${camera.position.y.toFixed(0)},${camera.position.z.toFixed(0)}`,
+  }));
+  report.show(hud.visible);
   document.getElementById('loading')?.remove();
 
   // Controls hint (follows the active device) and controller connect/disconnect toasts.
@@ -110,7 +117,7 @@ async function main() {
     const dt = Math.min(clock.getDelta(), 0.1);
     frames.push(dt * 1000);
     input.poll(dt);
-    if (input.pressed('hud')) hud.toggle();
+    if (input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
     fly.update(dt);
     input.endFrame();
     world.update(camera.position);
