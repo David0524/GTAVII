@@ -301,7 +301,7 @@ export class TouchLayout {
     const s = settings.data;
     this.root.style.setProperty('--tc-scale', String(s.touchButtonSize));
     this.root.style.setProperty('--tc-alpha', String(s.touchOpacity));
-    this.root.classList.toggle('lefty', s.touchLeftHanded);
+    this.root.classList.toggle('lefty', s.touchLeftHanded); document.body.classList.toggle('touch-lefty', s.touchLeftHanded);
     this.place();
     this.host.touch?.configure?.({ fireMode: s.fireMode, aimAssist: s.aimAssist, gyro: s.gyroAim, steerAssist: s.steerAssist, steerAssistStrength: s.steerAssistStrength, autoAccelerate: s.autoAccelerate });
     (this.els.get('gas')!.lastElementChild as HTMLElement).textContent = s.autoAccelerate ? 'Auto' : 'Gas';

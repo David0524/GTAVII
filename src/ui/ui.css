@@ -79,6 +79,7 @@ body.touch .u-objective .txt { font-size: 15px; }
   padding: 5px 10px; background: rgba(16,10,10,.78); font: 600 13px var(--f-ui); letter-spacing: .03em; border-left: 3px solid #6b6660; }
 .u-turn small { display: block; font: 400 10px var(--f-head); letter-spacing: .24em; color: var(--dim); }
 body.touch .u-turn { bottom: auto; top: calc(var(--mm-h, 150px) + 22px + var(--safe-t)); padding: 4px 8px; font-size: 12px; max-width: 30vw; }
+body.touch.touch-lefty .u-turn { left: auto; right: calc(14px + var(--safe-r)); top: calc(110px + var(--safe-t)); text-align: right; }
 body.touch .u-loc { top: auto !important; bottom: calc(26% + var(--safe-b)) !important; }
 body.touch .u-loc .name { font-size: clamp(24px, 6vh, 38px); }
 body.touch .u-notes { bottom: auto; top: calc(74px + var(--safe-t)); }
@@ -100,6 +101,7 @@ body.touch .u-note b { font-size: 11px; }
 .u-stamina i { display: block; height: 100%; background: linear-gradient(90deg, #d9c9a0, #efe3c4); border-radius: 2px; transition: width .2s; }
 .u-stamina.low i { background: linear-gradient(90deg, #b2302a, #e3a92a); }
 body.touch .u-stamina { bottom: auto; top: calc(var(--mm-h, 150px) + 14px + var(--safe-t)); width: clamp(130px, 22vh + 6vw, 190px); }
+body.touch.touch-lefty .u-stamina { left: auto; right: calc(16px + var(--safe-r)); top: calc(96px + var(--safe-t)); }
 body.touch .u-cash { top: calc(64px + var(--safe-t)); right: calc(72px + var(--safe-r)); }
 body.touch .u-cash .amt { font-size: 17px; }
 body.touch .u-weapon { top: calc(98px + var(--safe-t)); right: calc(72px + var(--safe-r)); }

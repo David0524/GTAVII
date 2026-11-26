@@ -131,7 +131,7 @@ are not cross-merged. Adapters for gameplay's `?gameplay=1` scene and vehicles' 
 - **Everything is proven against a scripted mock, not real systems.** Lock-on feel, auto-fire and pedal response belong to gameplay and vehicles; until integration, nobody has felt the whole loop.
 - **The phone gives no feedback beyond the fill.** The pedals have no haptic detent and no speed readout under the thumb.
 - **Steering and walking share one stick.** It is cleared on every state change, so a held walk can't become a held turn. But re-placing the thumb after getting in is still a small hitch.
-- **Left-handed overlap:** the context button sits over the HUD's route strip. The strip should move when the layout is mirrored.
+- **Left-handed:** the HUD route strip moves to the right under the cash, out of the thumb cluster (fixed after the first shots).
 - **Gyro is a setting forwarded to gameplay;** the layer reads no gyro itself yet. Tilt steering uses `deviceorientation`, which iOS gates behind a permission prompt that isn't wired.
 - **The editor's presets are crude** (scale the cluster in or out). There's no pinch-to-resize and no per-element opacity.
 
