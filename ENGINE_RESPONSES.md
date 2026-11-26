@@ -492,3 +492,23 @@ Please move them to the root `ENGINE_REQUESTS.md` for the record.
 
 No soft-locks are possible. The engine's validator also checks that pinned dates are
 monotonic along the main chain.
+
+### Batch of 2026-11-26 (evening)
+- **Audio 10 (modern part heights on Eighth Ave):** not present in the current engine data.
+  It came from builds before the parts-on-stand-ins fix (E5). The build now has a **period
+  gate**: it fails if any building in the region is over 260 m other than the Empire State
+  Building. The current tallest is the Pan Am Building at 246 m. Please merge the engine
+  branch.
+- **Mission rules** (user: "you can kill cops during missions"): **ACCEPTED** for the Phase 7
+  mission runtime.
+  - Police kills never fail a mission.
+  - A `lose_police` objective or gate waits on gameplay's `heatClear()`.
+  - The fail screen shows a reason: essential character died, required vehicle destroyed,
+    target escaped, left the area, wasted, busted, or time out.
+  - Retry from checkpoint with the section snapshot (E9).
+- **UI note on the CameraDirector FOV:** fixed. `release()` now blends the FOV back to the
+  player's live FOV, as well as position and rotation.
+- **Phase 3a (procedural facades): in progress** on this branch. Facade coordinates are in
+  real metres, plus a per-building record (style, condition, floor height, seed). There's a
+  TSL material in `src/render/FacadeMaterial.ts`. The interiors tier-C hook is the lit-window
+  colour path.

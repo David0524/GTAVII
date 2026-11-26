@@ -3,6 +3,7 @@ import type { ChunkRequest, ChunkResponse } from './chunkWorker';
 import type { ChunkMeshes, MeshArrays } from './meshBuilder';
 import type { QualitySettings } from '../engine/quality';
 import { heightAt, terrainLoaded } from '../shared/terrain';
+import { createFacadeMaterial } from '../render/FacadeMaterial';
 
 export interface WorldManifest {
   region: { minX: number; maxX: number; minZ: number; maxZ: number };
@@ -28,6 +29,8 @@ function toGeometry(m: MeshArrays): THREE.BufferGeometry {
   g.setAttribute('normal', new THREE.BufferAttribute(m.normal, 3));
   g.setAttribute('color', new THREE.BufferAttribute(m.color, 3));
   g.setIndex(new THREE.BufferAttribute(m.index, 1));
+  if (m.uv) g.setAttribute('uv', new THREE.BufferAttribute(m.uv, 2));
+  if (m.facade) g.setAttribute('facade', new THREE.BufferAttribute(m.facade, 4));
   g.computeBoundingSphere();
   g.computeBoundingBox();
   return g;
@@ -49,7 +52,7 @@ export class World {
   private busy: boolean[] = [];
   private queue: string[] = [];
   private pending = new Map<number, string>();
-  readonly buildingMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, metalness: 0 });
+  readonly buildingMat = createFacadeMaterial();
   readonly groundMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
   stats = { ready: 0, lod0: 0, lod1: 0, loading: 0, parseMsTotal: 0, failed: 0 };
 
