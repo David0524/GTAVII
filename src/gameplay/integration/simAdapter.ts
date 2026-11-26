@@ -33,6 +33,12 @@ export interface SimLike {
   setSiren?(id: number, on: boolean): void;
   despawnPolice?(id: number): boolean;
   takeVehicle?(vehicleId: number): { ownerPedId: number; vclass: string; variant: number; x: number; z: number; yaw: number } | null;
+  /** Responders (sim claude/nice-sagan-2jh4m2): spawn 150–250 m out, run with sirens, work the scene, leave. */
+  dispatch?(role: 'ambulance' | 'fire', x: number, z: number): number[];
+  /** Player cab: callCab → cabReady {cabId,x,z,kerb}; boardCab drives the legal route (cabTurnAhead, cabRideArrived); leaveCab releases it; cabGaveUp after 90 s. */
+  callCab?(x: number, z: number): number;
+  boardCab?(cabId: number, dest: { x: number; z: number }): boolean;
+  leaveCab?(cabId: number): void;
   on(type: string, cb: (e: any) => void): void;
   emit(e: any): void;
 }

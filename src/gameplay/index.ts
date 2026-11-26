@@ -50,7 +50,7 @@ import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
   | 'impact' | 'bark' | 'radio' | 'witness' | 'police' | 'melee' | 'money' | 'pickup' | 'ring' | 'call' | 'wear' | 'geyser' | 'tyreShot' | 'notice'
-  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire' | 'context';
+  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire' | 'context' | 'cab';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
 /** How much a drink goes to your head (0..1 scale; effects stay modest and wear off in a few minutes). */
@@ -68,6 +68,8 @@ export const COMBAT_BUDGET: Record<Quality, { combatants: number; witnesses: num
 };
 
 export interface PlayerBinding { id: string; lead: string; position(): [number, number, number]; aim(): { origin: [number, number, number]; dir: [number, number, number] } }
+/** Crimes that leave someone needing an ambulance once they're called in. */
+const HURT_KINDS: ReadonlySet<string> = new Set(['shooting', 'homicide', 'assault_weapon', 'officer_down', 'assault_officer', 'hit_and_run']);
 export interface SimBinding { on(type: string, cb: (e: any) => void): void; emit(e: any): void; peds: readonly unknown[]; vehicles: readonly unknown[]; command?(id: string, c: AgentCommand): void }
 /** Interiors' door list (INTERIORS_BRIEF `doorsForChunk`); chunk (i,j) covers [i*S,(i+1)*S) × [j*S,(j+1)*S). */
 export interface DoorInfo { id: string; x: number; z: number; yaw: number; kind: string; locked: boolean; hours?: [string, string] }
@@ -217,7 +219,7 @@ export class Gameplay {
   }
   bindSim(sim: SimBinding) {
     this.sim = sim;
-    if (typeof (sim as any).setGoal === 'function') { this.port = simAgentPort(sim as unknown as SimLike); sim.on('collision', (e) => this.onSimCollision(e)); return; }
+    if (typeof (sim as any).setGoal === 'function') { this.port = simAgentPort(sim as unknown as SimLike); this.simLike = sim as unknown as SimLike; this.bindSimServices(this.simLike); sim.on('collision', (e) => this.onSimCollision(e)); return; }
     this.port = {
       peds: () => (sim.peds as readonly any[]).map(pedSnap),
       ped: (id) => { const raw = (sim.peds as readonly any[]).find((q) => `${q.id}` === id || `ped:${q.id}` === id); return raw ? pedSnap(raw) : undefined; },
@@ -590,6 +592,54 @@ export class Gameplay {
   }
 
   // ------------------------------------------------------------------ fast travel
+  // ------------------------------------------------------------------ sim services: responders and the real cab ride
+  private simLike: SimLike | null = null;
+  /** The cab the player called or is riding: board point for the meter, destination. */
+  cab: { id: number; state: 'called' | 'ready' | 'riding'; kerb?: [number, number]; from?: [number, number]; dest?: [number, number] } | null = null;
+  private bindSimServices(sim: SimLike) {
+    // engines for fires; an ambulance for a shooting or a stabbing once someone has called it in
+    this.fire.on('engines', (e: any) => sim.dispatch?.('fire', e.at[0], e.at[1]));
+    this.policeSys.on('reportFiled', ({ report: r }) => {
+      if (!r.kinds.some((k) => HURT_KINDS.has(k))) return;
+      const [x, z] = r.crimeAt;
+      if (this.ambulanceAt.some((q) => Math.hypot(q[0] - x, q[1] - z) < 80)) return; // one bus per scene
+      this.ambulanceAt.push([x, z]); if (this.ambulanceAt.length > 8) this.ambulanceAt.shift();
+      sim.dispatch?.('ambulance', x, z);
+    });
+    for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
+    sim.on('cabReady', (e) => { const c = this.cab; if (c && c.id === e.cabId) { c.state = 'ready'; c.kerb = [e.x, e.z]; this.emit('cab', { kind: 'ready', ...e }); } });
+    sim.on('cabTurnAhead', (e) => { if (this.cab?.id === e.cabId) this.emit('cab', { kind: 'turn', ...e }); });
+    sim.on('cabGaveUp', (e) => { if (this.cab?.id === e.cabId) { this.cab = null; this.emit('cab', { kind: 'gaveUp', ...e }); } });
+    sim.on('cabRideArrived', (e) => { if (this.cab?.id === e.cabId) this.arriveCab(e.x, e.z); });
+  }
+  private ambulanceAt: [number, number][] = [];
+  /** Phone or whistle for a cab (sim picks the free cab with the shortest legal drive). False when no sim cab or none free. */
+  hailCab() {
+    if (!this.player || !this.simLike?.callCab || this.cab) return false;
+    const p = this.player.position(); const id = this.simLike.callCab(p[0], p[2]);
+    if (id < 0) return false;
+    this.cab = { id, state: 'called' }; this.emit('cab', { kind: 'called', cabId: id }); return true;
+  }
+  /** Get in and give the address. The meter runs from here; the fare is paid on arrival. */
+  boardCab(x: number, z: number) {
+    if (!this.player || !this.cab || this.cab.state !== 'ready' || !this.simLike?.boardCab) return false;
+    const p = this.player.position();
+    if (!this.simLike.boardCab(this.cab.id, { x, z })) return false;
+    Object.assign(this.cab, { state: 'riding', from: [p[0], p[2]], dest: [x, z] });
+    this.setContext({ vehicle: { id: `cab:${this.cab.id}`, kind: 'cab', seat: 'passenger' } as any });
+    this.emit('cab', { kind: 'boarded', cabId: this.cab.id }); return true;
+  }
+  /** Get out early (or on arrival): pay the meter for the distance driven. Stiffing the cabbie is a witnessed fare_evasion. */
+  leaveCabNow() { if (this.cab?.state === 'riding' && this.player) { const p = this.player.position(); this.arriveCab(p[0], p[2]); } else if (this.cab) { this.simLike?.leaveCab?.(this.cab.id); this.cab = null; } }
+  private arriveCab(x: number, z: number) {
+    const c = this.cab!; const from = c.from ?? [x, z]; const lead = this.player!.lead;
+    const fare = cabFare(Math.abs(x - from[0]) + Math.abs(z - from[1])), tip = cabTip(fare);
+    const tipped = this.inv.spend(lead, fare + tip, 'cab'); const paid = tipped || this.inv.spend(lead, fare, 'cab');
+    this.setContext({ vehicle: null });
+    if (!paid) this.crime('fare_evasion', { noise: 25 });
+    this.simLike?.leaveCab?.(c.id); this.cab = null;
+    this.emit('cab', { kind: 'arrived', cabId: c.id, fare, tip: tipped ? tip : 0, paid, x, z });
+  }
   /** Ride a cab to (x,z): pay the meter + tip, advance the clock by the ride (the engine teleports or plays it). */
   cabTo(x: number, z: number, skip = true) {
     if (!this.player) return null;

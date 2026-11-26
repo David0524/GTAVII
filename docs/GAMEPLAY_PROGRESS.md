@@ -101,6 +101,20 @@ The headless proof (`touch.test.ts`):
 
 The camera direction is set straight up for all of it.
 
+### Sim services (sim claude/nice-sagan-2jh4m2): responders and the real cab
+- **Responders.**
+  - A fire's `engines` call becomes `sim.dispatch('fire', x, z)`.
+  - A filed report with someone hurt (shooting, homicide, assault with a weapon, officer down or assaulted, hit-and-run) becomes `sim.dispatch('ambulance', x, z)` at the crime. That's one ambulance per 80 m scene, and only after someone has called it in.
+  - The sim's `dispatched`, `responderArrived` and `responderLeft` events are forwarded as `notice`.
+- **Cab.**
+  - `hailCab()` calls the sim's `callCab` and waits for `cabReady` (the UI walks the player to `cab.kerb`).
+  - `boardCab(x, z)` starts the meter and sets the vehicle context to `cab:<id>`.
+  - On `cabRideArrived`, the fare plus tip for the distance driven is paid. With fare only, the player gets no tip; with nothing, it's a `fare_evasion` crime.
+  - `leaveCabNow()` gets out early and pays for the distance so far.
+  - Events: `cab {kind: called | ready | boarded | turn | arrived | gaveUp}`. `turn` carries the sim's `cabTurnAhead`, for "Call Your Turns".
+  - `cabTo()` (pay, then skip time) stays as the fast-travel fallback.
+- **Tests:** `simAdapter.test.ts`.
+
 ### UI contract for TOUCH_CONTROLS.md (the UI chat owns the layout; gameplay owns these)
 | Need | Query / command | Event |
 |---|---|---|
