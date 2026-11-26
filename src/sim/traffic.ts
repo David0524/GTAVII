@@ -108,7 +108,7 @@ function chooseRoute(S: SimCore, v: Vehicle) {
   for (const lane of grp) for (const c of linkOf(S, lane).next) {
     const C = linkOf(S, c);
     let p = C.turn === Turn.Straight ? 0.7 : 0.15;
-    if (v.kind === 'bus') p = C.turn === Turn.Straight ? 0.97 : 0.015;
+    if (v.kind === 'bus') p = (C.turn === Turn.Straight ? 0.97 : 0.015) * (linkOf(S, C.next[0]).laneIndex === 0 ? 6 : 1);
     // spread straight choices over the lanes; small preference for keeping the current lane
     p /= C.turn === Turn.Straight ? grp.length : 1;
     if (lane === v.link) p *= 1.6;
@@ -159,7 +159,7 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
       T: kind === 'cab' ? 0.9 : kind === 'bus' ? 1.6 : 1.3 - 0.4 * ag, aMax: kind === 'bus' || kind === 'truck' ? 1.1 : 1.8 + ag * 0.6,
       bComf: 2.4, s0: kind === 'cab' ? 1.5 : 2.0,
       state: 'drive', dwell: 0, lat: 0, latTarget: 0, passable: false, lcFrom: -1, lcT: 1, lcCd: S.rng.range(0, 1),
-      stopT: 0, waitT: 0, honkCd: S.rng.range(0, 4), greenWait: 0, force: false, pullT: 0, atLine: false,
+      stopT: 0, waitT: 0, honkCd: S.rng.range(0, 4), greenWait: 0, force: false, pullT: 0, atLine: false, hailFrom: -1,
       x: 0, z: 0, yaw: 0, px: 0, pz: 0, pyaw: 0,
       fare: kind === 'cab' && S.rng.chance(0.5), fareT: S.rng.range(30, 160), hail: null, stopAt: -1, stopLink: -1, stopKind: '',
       dpDone: !S.rng.chance(0.45), busServed: -1, blockedBy: '', why: '',
@@ -410,7 +410,8 @@ function laneChangeLogic(S: SimCore, v: Vehicle, obs: Obs) {
   if (L.kind !== LinkKind.Lane || v.state !== 'drive' || v.lcT < 1 || L.laneCount < 2) return;
   const dEnd = net.len[v.link] - v.s;
   if (dEnd < 12) return; // no lane changes into the stop-line queue / junction mouth
-  const aggressive = v.kind === 'cab' || v.arch.aggression > 0.7;
+  // cabs, aggressive drivers, and buses pulling in to their stop (buses muscle in) accept tight gaps
+  const aggressive = v.kind === 'cab' || v.arch.aggression > 0.7 || (v.kind === 'bus' && v.stopLink >= 0);
   // mandatory: curb lane for stops, desired turn lane
   let target = -1;
   if (v.stopLink >= 0 && v.stopLink !== v.link && net.g.links[v.stopLink].group === L.group) target = v.stopLink;
@@ -465,15 +466,41 @@ function periodBehaviour(S: SimCore, v: Vehicle, dt: number) {
       v.stopLink = lane0; v.stopAt = Math.min(net.len[lane0] - 15, v.s * (net.len[lane0] / len) + 25); v.stopKind = 'dropoff';
     }
   }
-  // cab: look for hails ahead on this block
-  if (v.kind === 'cab' && !v.fare && !v.hail && v.state === 'drive' && L.kind === LinkKind.Lane && v.stopLink < 0) {
-    for (const h of S.hails) {
-      if (h.claimedBy >= 0 || h.road !== L.owner || h.side !== L.dir) continue;
-      const lane0 = net.groups.get(L.group)![0];
+  // cab: answer hails on this block, or on a block it can turn or continue into (cabbies cruise for fares)
+  if (v.kind === 'cab' && !v.fare && v.state === 'drive' && L.kind === LinkKind.Lane && v.stopLink < 0) {
+    const grp = net.groups.get(L.group)!, lane0 = grp[0];
+    const sNow = v.s * (net.len[lane0] / len);
+    const stopHere = (h: Hail): boolean => {
       const p = projectS(S, lane0, h.x, h.z);
-      const sNow = v.s * (net.len[lane0] / len);
-      if (p - sNow < 18 || p - sNow > 110 || p > net.len[lane0] - 6) continue;
+      if (p - sNow < 5 || p > net.len[lane0] - 6) return false;
       h.claimedBy = v.id; v.hail = h; v.stopLink = lane0; v.stopAt = p; v.stopKind = 'pickup';
+      return true;
+    };
+    if (v.hail) {
+      // a hail claimed from the previous block: stop if it's on this one, else let it go
+      const h = v.hail;
+      if (L.group === v.hailFrom) { /* still approaching the turn toward the fare: keep the claim */ }
+      else if (h.road === L.owner && h.side === L.dir) { if (!stopHere(h)) { h.claimedBy = -1; v.hail = null; } }
+      else { // one more block to go? re-route, else give the fare up
+        const via = hailVia(S, L.group, h, 1);
+        if (via >= 0) { v.want = via; v.hailFrom = L.group; if (S.srcLane[via] === v.link) v.next = via; } else { h.claimedBy = -1; v.hail = null; }
+      }
+    } else for (const h of S.hails) {
+      if (Math.hypot(h.x - v.x, h.z - v.z) > 170) continue;
+      if (h.claimedBy >= 0) {
+        // a cab right on the hail's block beats one still approaching from the next block
+        const other = h.claimedBy === v.id ? null : S.vehicles.find((w) => w.id === h.claimedBy);
+        if (!(other && other.stopLink < 0 && h.road === L.owner && h.side === L.dir)) continue;
+        if (!stopHere(h)) continue;
+        other.hail = null; other.hailFrom = -1;
+        S.emit('hailAnswered', { cab: v.id, ped: h.ped, x: h.x, z: h.z }); break;
+      }
+      if (h.road === L.owner && h.side === L.dir) { if (stopHere(h)) { S.emit('hailAnswered', { cab: v.id, ped: h.ped, x: h.x, z: h.z }); break; } continue; }
+      // within two blocks: route toward the hail's road, on the hail's kerb side
+      const via = hailVia(S, L.group, h, 2);
+      if (via < 0) continue;
+      h.claimedBy = v.id; v.hail = h; v.want = via; v.hailFrom = L.group;
+      if (S.srcLane[via] === v.link) v.next = via;
       S.emit('hailAnswered', { cab: v.id, ped: h.ped, x: h.x, z: h.z });
       break;
     }
@@ -502,6 +529,20 @@ function periodBehaviour(S: SimCore, v: Vehicle, dt: number) {
     if (v.hail) { v.hail.claimedBy = -1; v.hail = null; }
     v.stopLink = -1; v.stopAt = -1;
   } else if (v.stopLink === v.link && v.s > v.stopAt + 3) { if (v.hail) { v.hail.claimedBy = -1; v.hail = null; } v.stopLink = -1; }
+}
+
+/** First connector from lane group `grp` on a path of <= depth blocks into the hail's road and kerb side, or -1. */
+function hailVia(S: SimCore, grp: number, h: Hail, depth: number): number {
+  const net = S.net;
+  for (const lane of net.groups.get(grp)!) for (const c of net.g.links[lane].next) {
+    const T = net.g.links[net.g.links[c].next[0]];
+    if (T.owner === h.road && T.dir === h.side) return c;
+  }
+  if (depth > 1) for (const lane of net.groups.get(grp)!) for (const c of net.g.links[lane].next) {
+    const T = net.g.links[net.g.links[c].next[0]];
+    if (hailVia(S, T.group, h, depth - 1) >= 0) return c;
+  }
+  return -1;
 }
 
 function projectS(S: SimCore, lane: number, x: number, z: number): number {

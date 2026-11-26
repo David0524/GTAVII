@@ -734,7 +734,8 @@ links.forEach((l, li) => {
   if (l.kind !== LinkKind.Lane || l.laneIndex !== 0 || !(roads[l.owner].flags & RoadFlag.BusRoute)) return;
   const L = polyLength(l.pts);
   if (L < 45 || hash2(l.pts[0], l.pts[1]) % 2) return;
-  const s = 12;
+  // far-side stop, far enough into the block that a bus entering in another lane can reach the kerb
+  const s = Math.max(18, Math.min(40, L * 0.45));
   const side = l.dir; // curb (right of travel) = road right side when travelling forward
   const we = sideEdge[l.owner][side === 1 ? 0 : 1];
   if (we < 0) return;

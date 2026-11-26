@@ -227,9 +227,13 @@ What works:
 What doesn't (yet):
 - **Placeholder bodies** are deliberately crude (boxes/capsules); vehicle off-tracking is a rigid
   chord between axles, which reads fine from above but a bus corner looks stiff at street level.
-- **Too few buses serve stops** (1 in 10 min) and **cabs answer few hails** (7 of 74): the hail
-  has to be on the cab's current block, on its kerb side, 18–110 m ahead. Needs a dispatch-style
-  search over the next blocks. Bus routes are street-name based, not real route numbers.
+- **Cabs and buses (improved).** Cabs now answer hails on their block or route up to two blocks toward
+  one, re-checking at each block; a cab already on the hail's block can take over a fare from one still
+  approaching. Hailers wait 45–100 s. Buses favour the kerb lane, push in to reach their stop, stops sit
+  18–40 m into the block, and there are more buses (density 0.35 day). Fixed-focus probe at Herald
+  Square, 400 s: 52 hails → 31 claimed → 15 fares; 12 bus stops served by ~4 buses. In the 10-minute
+  touring test (camera jumps, gunfire and threats cancel hails): 74 hails → 3 fares, 8 bus stops.
+  Still thin: cabs only stop at the kerb on their right, so one-way streets lose half their hails.
 - **Horns are frequent** (~3.4 per vehicle per minute in heavy 17:30 traffic). Period-plausible,
   but the audio side should rate-limit spatially; the sim emits intensity/reason to help.
 - **Spill-back jams at Madison Square** (Broadway/Fifth split) at peak density are realistic but

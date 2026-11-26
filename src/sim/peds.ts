@@ -346,7 +346,7 @@ export function stepPeds(S: SimCore, dt: number) {
           else if (then === 'feed') { p.state = 'feed'; p.timer = S.rng.range(240, 600); }
           else if (then === 'waitBus') { p.state = 'waitBus'; p.timer = S.rng.range(60, 240); p.yaw = g.spots[p.spot].heading; }
           else if (then === 'hail') {
-            p.state = 'hail'; p.timer = S.rng.range(25, 60);
+            p.state = 'hail'; p.timer = S.rng.range(45, 100); // people wait a while for a cab
             const E = g.walkEdges[p.edge];
             p.hail = { ped: p.id, road: E.owner, side: E.side, x: p.x, z: p.z, claimedBy: -1, t: S.t };
             S.hails.push(p.hail); S.stats.hails++;

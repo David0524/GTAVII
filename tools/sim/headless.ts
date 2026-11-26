@@ -95,7 +95,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const times: number[] = [];
   const steps = Math.round(opts.seconds / SIM_DT);
   const o = [0, 0, 0, 0];
-  let wildPeak = 0;
+  let wildPeak = 0, powerChangedAt = -1;
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
   for (let k = 0; k < steps; k++) {
     const t = k * SIM_DT;
@@ -107,8 +107,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     if (k === Math.round(150 / SIM_DT)) sim.emit({ type: 'blockLane', x: f.x, z: f.z - 60, until: sim.time + 90 });
     if (k === Math.round(260 / SIM_DT)) sim.emit({ type: 'closeStreet', x: f.x, z: f.z - 80, radius: 20, until: sim.time + 60 });
     // brownout: dark signals = all-way stops (narrative N2)
-    if (k === Math.round(200 / SIM_DT)) sim.setSignalPower({ x: f.x, z: f.z, radius: 180 }, false);
-    if (k === Math.round(330 / SIM_DT)) sim.setSignalPower({ x: f.x, z: f.z, radius: 5000 }, true);
+    if (k === Math.round(200 / SIM_DT)) { sim.setSignalPower({ x: f.x, z: f.z, radius: 180 }, false); powerChangedAt = sim.time; }
+    if (k === Math.round(330 / SIM_DT)) { sim.setSignalPower({ x: f.x, z: f.z, radius: 5000 }, true); powerChangedAt = sim.time; }
     if (k === Math.round(420 / SIM_DT)) { sim.emit({ type: 'gunfire', x: f.x + 20, z: f.z, loudness: 150 }); hooks.witnesses = sim.perceive({ x: f.x + 20, z: f.z, loudness: 150, visibility: 60 }).peds.length; }
     // escort + goto goals on two nearby peds (narrative N4, gameplay scripted goals)
     if (k === Math.round(30 / SIM_DT) || k === Math.round(230 / SIM_DT) || k === Math.round(430 / SIM_DT)) {
@@ -158,7 +158,8 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       const pl = prevLink.get(v.id);
       if (pl !== undefined && pl !== v.link && g.links[pl].kind === LinkKind.Lane && (g.links[v.link].kind === LinkKind.Connector || g.links[pl].group !== g.links[v.link].group)) {
         // crossed the stop line during the last two steps: check both step times
-        const red = net.laneSignal(pl, sim.time) === Sig.Red && net.laneSignal(pl, sim.time - SIM_DT) === Sig.Red && net.laneSignal(pl, sim.time - 2 * SIM_DT) === Sig.Red;
+        // signals are re-evaluated with today's power state; skip the instant power was switched (a car that crossed a dead signal is legal)
+        const red = sim.time - powerChangedAt > 0.2 && net.laneSignal(pl, sim.time) === Sig.Red && net.laneSignal(pl, sim.time - SIM_DT) === Sig.Red && net.laneSignal(pl, sim.time - 2 * SIM_DT) === Sig.Red;
         if (red) note('redLight', `#${v.id} ran red from lane ${pl} at t=${sim.time.toFixed(1)}`);
       }
       prevLink.set(v.id, v.link);

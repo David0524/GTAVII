@@ -17,6 +17,8 @@ export interface Vehicle {
   lat: number; latTarget: number; passable: boolean;
   lcFrom: number; lcT: number; lcCd: number;
   stopT: number; waitT: number; honkCd: number; greenWait: number; force: boolean; pullT: number; atLine: boolean;
+  /** lane group a cab was on when it claimed a hail on the next block */
+  hailFrom: number;
   x: number; z: number; yaw: number; px: number; pz: number; pyaw: number;
   fare: boolean; fareT: number; hail: Hail | null; stopAt: number; stopLink: number; stopKind: string;
   dpDone: boolean; busServed: number; blockedBy: string;

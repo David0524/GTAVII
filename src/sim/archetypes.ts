@@ -51,7 +51,7 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
   { id: 'npc.cab_driver', behaviour: 'driver', vehicle: 'cab', props: ['cab'], density: { day: 0.8, night: 1 }, barks: 'barks.cabbie', params: { patience: 3, aggression: 0.8 } },
   { id: 'npc.delivery_driver', behaviour: 'driver', vehicle: 'truck', props: ['truck'], schedule: [{ from: '05:00', to: '19:00', area: 'Garment District', activity: 'deliver' }],
     density: { day: 0.45, night: 0.08 }, barks: 'barks.trucker', params: { patience: 5, aggression: 0.5 } },
-  { id: 'npc.bus_driver', behaviour: 'driver', vehicle: 'bus', props: ['bus'], density: { day: 0.12, night: 0.05 }, barks: 'barks.bus', params: { patience: 8, aggression: 0.2 } },
+  { id: 'npc.bus_driver', behaviour: 'driver', vehicle: 'bus', props: ['bus'], density: { day: 0.35, night: 0.12 }, barks: 'barks.bus', params: { patience: 8, aggression: 0.2 } },
 ];
 
 const BEHAVIOURS: Behaviour[] = ['walker', 'loiterer', 'vendor', 'commuter', 'driver', 'beat_cop', 'worker', 'critter'];
