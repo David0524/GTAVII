@@ -435,6 +435,57 @@ for (const b of buildings) {
   (chunkBuildings.get(key) ?? chunkBuildings.set(key, []).get(key)!).push(b);
 }
 
+// ------------------------------------------------------------------ wall occlusion bake (sky openness per wall)
+// For every wall edge: cast three horizontal rays (-30, 0, +30 deg) from its midpoint along the outward
+// normal; record the mean distance to the facing wall and the facing building's height. The facade shader
+// turns (distance, height, own y) into the elevation angle of the facing skyline = canyon occlusion.
+const AO_CELL = 25, AO_MAX = 127;
+const aoGrid = new Map<string, { x0: number; z0: number; x1: number; z1: number; h: number }[]>();
+for (const b of buildings) for (const r of b.poly) for (let k = 0; k < r.length; k++) {
+  const a = r[k], c = r[(k + 1) % r.length];
+  const e = { x0: a[0], z0: a[1], x1: c[0], z1: c[1], h: b.height };
+  const ia0 = Math.floor(Math.min(a[0], c[0]) / AO_CELL), ia1 = Math.floor(Math.max(a[0], c[0]) / AO_CELL);
+  const ja0 = Math.floor(Math.min(a[1], c[1]) / AO_CELL), ja1 = Math.floor(Math.max(a[1], c[1]) / AO_CELL);
+  for (let ii = ia0; ii <= ia1; ii++) for (let jj = ja0; jj <= ja1; jj++) { const key = `${ii},${jj}`; (aoGrid.get(key) ?? aoGrid.set(key, []).get(key)!).push(e); }
+}
+function aoRay(px: number, pz: number, dx: number, dz: number): [number, number] {
+  let best = AO_MAX, h = 0; const seen = new Set<object>();
+  for (let t = 0; t <= AO_MAX + AO_CELL; t += AO_CELL / 2) {
+    const key = `${Math.floor((px + dx * t) / AO_CELL)},${Math.floor((pz + dz * t) / AO_CELL)}`;
+    for (const e of aoGrid.get(key) ?? []) {
+      if (seen.has(e)) continue; seen.add(e);
+      const ex = e.x1 - e.x0, ez = e.z1 - e.z0, den = dx * ez - dz * ex; if (Math.abs(den) < 1e-9) continue;
+      const wx = e.x0 - px, wz = e.z0 - pz;
+      const tt = (wx * ez - wz * ex) / den, s = (wx * dz - wz * dx) / den;
+      if (tt > 0.05 && tt < best && s >= 0 && s <= 1) { best = tt; h = e.h; }
+    }
+    if (best < t) break;
+  }
+  return [best, h];
+}
+function wallAO(b: Bldg): [number, number][][] {
+  return b.poly.map((r) => {
+    let area = 0; for (let k = 0; k < r.length; k++) { const a = r[k], c = r[(k + 1) % r.length]; area += a[0] * c[1] - c[0] * a[1]; }
+    return r.map((a, k) => {
+      const c = r[(k + 1) % r.length]; const dx = c[0] - a[0], dz = c[1] - a[1], L = Math.hypot(dx, dz); if (L < 1e-3) return [AO_MAX, 0] as [number, number];
+      let nx = dz / L, nz = -dx / L; if (!(area > 0)) { nx = -nx; nz = -nz; } // same convention as meshBuilder.extrude
+      const mx = (a[0] + c[0]) / 2 + nx * 0.3, mz = (a[1] + c[1]) / 2 + nz * 0.3;
+      let dSum = 0, hMax = 0;
+      for (const ang of [-0.52, 0, 0.52]) {
+        const ca = Math.cos(ang), sa = Math.sin(ang);
+        const [d, h] = aoRay(mx, mz, nx * ca - nz * sa, nz * ca + nx * sa);
+        dSum += d * Math.cos(ang); if (d < AO_MAX) hMax = Math.max(hMax, h);
+      }
+      return [dSum / 3, hMax] as [number, number];
+    });
+  });
+}
+{
+  const t = Date.now(); let n = 0;
+  for (const b of buildings) { (b as any).ao = wallAO(b); n++; }
+  log(`wall occlusion baked for ${n} buildings in ${((Date.now() - t) / 1000).toFixed(1)} s`);
+}
+
 const toLocal = (poly: Poly, ox: number, oz: number): [number, number][][] => poly.map((r) => r.map(([x, z]) => [x - ox, z - oz] as [number, number]));
 const signals: P[] = [], entrances: P[] = [];
 for (const e of osm) if (e.type === 'node' && e.tags) {
@@ -460,7 +511,7 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
   pushG(GroundKind.Road, roads); pushG(GroundKind.Sidewalk, sidewalks); pushG(GroundKind.Park, parkHere); pushG(GroundKind.Lot, lotsHere);
 
   const bl = (chunkBuildings.get(chunkKey(i, j)) ?? []).map<WBuilding>((b) => ({
-    id: b.id, year: b.year, use: b.use, style: b.style, floors: b.floors, flags: b.flags, height: b.height, minHeight: b.minHeight, rings: toLocal(b.poly, ox, oz),
+    id: b.id, year: b.year, use: b.use, style: b.style, floors: b.floors, flags: b.flags, height: b.height, minHeight: b.minHeight, rings: toLocal(b.poly, ox, oz), ao: (b as any).ao,
   }));
   const inChunk = (p: P) => p[0] >= minX && p[0] < maxX && p[1] >= minZ && p[1] < maxZ;
   const pois: WPoi[] = [

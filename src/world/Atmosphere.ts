@@ -39,7 +39,7 @@ export class Atmosphere {
   readonly lightDir = new THREE.Vector3();
 
   constructor(private scene: THREE.Scene) {
-    this.sky.scale.setScalar(40000);
+    this.sky.scale.setScalar(24000); // box corners (sqrt(3) x 12 km = 20.8 km) must stay inside the 30 km camera far plane, or the sky clips to an ellipse
     this.sky.turbidity.value = 8;
     this.sky.rayleigh.value = 2.2;
     this.sky.mieCoefficient.value = 0.012;

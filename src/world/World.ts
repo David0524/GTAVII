@@ -32,6 +32,7 @@ function toGeometry(m: MeshArrays): THREE.BufferGeometry {
   g.setIndex(new THREE.BufferAttribute(m.index, 1));
   if (m.uv) g.setAttribute('uv', new THREE.BufferAttribute(m.uv, 2));
   if (m.facade) g.setAttribute('facade', new THREE.BufferAttribute(m.facade, 4));
+  if (m.wallAO) g.setAttribute('wallAO', new THREE.BufferAttribute(m.wallAO, 2));
   g.computeBoundingSphere();
   g.computeBoundingBox();
   return g;

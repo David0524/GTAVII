@@ -53,7 +53,10 @@ async function main() {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
   const atmosphere = new Atmosphere(scene);
-  atmosphere.envEnabled = params.get('env') === '1'; // sky IBL: opt-in until verified against the look target
+  if (params.has('ao')) facadeUniforms.aoStrength.value = Number(params.get('ao'));
+  // sky IBL: opt-in until verified against the look target; ?env=<intensity> (the raw sky is ~20x brighter than the fill)
+  atmosphere.envEnabled = params.has('env') && params.get('env') !== '0';
+  if (atmosphere.envEnabled) atmosphere.envIntensity = Number(params.get('env')) || 0.05;
   if (quality.shadows && params.get('shadows') !== '0') atmosphere.enableShadows(renderer, quality.name === 'high' || quality.name === 'ultra' ? 2048 : 1024);
 
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);

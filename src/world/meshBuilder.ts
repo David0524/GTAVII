@@ -24,6 +24,8 @@ export interface MeshArrays {
   uv?: Float32Array;
   /** Per-building facade record: style, condition (0..4), floor height (m), seed (0..1). */
   facade?: Float32Array;
+  /** Wall occlusion: x = distance to the facing wall (m, 127 = open), y = its height (m). */
+  wallAO?: Float32Array;
 }
 export interface ChunkMeshes {
   key: string;
@@ -43,7 +45,8 @@ export interface ChunkMeshes {
 
 class Builder {
   p: number[] = []; n: number[] = []; c: number[] = []; idx: number[] = [];
-  uv: number[] = []; fac: number[] = [];
+  uv: number[] = []; fac: number[] = []; ao: number[] = [];
+  curAO: [number, number] = [127, 0];
   /** When set, every vert() also records facade uv + attributes (building meshes). */
   facadeMode = false;
   curUV: [number, number] = [0, 0];
@@ -51,12 +54,12 @@ class Builder {
   get vcount() { return this.p.length / 3; }
   vert(x: number, y: number, z: number, nx: number, ny: number, nz: number, col: [number, number, number]) {
     this.p.push(x, y, z); this.n.push(nx, ny, nz); this.c.push(col[0], col[1], col[2]);
-    if (this.facadeMode) { this.uv.push(this.curUV[0], this.curUV[1]); this.fac.push(...this.curFac); }
+    if (this.facadeMode) { this.uv.push(this.curUV[0], this.curUV[1]); this.fac.push(...this.curFac); this.ao.push(this.curAO[0], this.curAO[1]); }
   }
   quad(a: number, b: number, c: number, d: number) { this.idx.push(a, b, c, a, c, d); }
   finish(): MeshArrays {
     const m: MeshArrays = { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx) };
-    if (this.facadeMode) { m.uv = new Float32Array(this.uv); m.facade = new Float32Array(this.fac); }
+    if (this.facadeMode) { m.uv = new Float32Array(this.uv); m.facade = new Float32Array(this.fac); m.wallAO = new Float32Array(this.ao); }
     return m;
   }
 }
@@ -127,6 +130,7 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
       if (!ccw) { nx = -nx; nz = -nz; }
       const v = b.vcount;
       const vb = bottom - gAvg, vt = top - gAvg;
+      const ao = rec.ao?.[r]; b.curAO = ao ? [ao[2 * k] / 2, ao[2 * k + 1] * 2] : [127, 0];
       b.curUV = [along, vb]; b.vert(x0, bottom, z0, nx, 0, nz, col);
       b.curUV = [along + L, vb]; b.vert(x1, bottom, z1, nx, 0, nz, col);
       b.curUV = [along + L, vt]; b.vert(x1, top, z1, nx, 0, nz, col);
@@ -135,6 +139,7 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
       along += L;
     }
   }
+  b.curAO = [127, 0];
   // Roof
   const flat: number[] = []; const holes: number[] = [];
   for (let r = 0; r < rec.rings.length; r++) {

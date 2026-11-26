@@ -28,6 +28,8 @@ export const facadeUniforms = {
   time: uniform(0),
   /** Global scale on window emission (exposure tuning / debugging). */
   litScale: uniform(0.5),
+  /** Canyon occlusion strength (0 = off). */
+  aoStrength: uniform(0.8),
 };
 
 export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
@@ -131,6 +133,14 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   m.roughnessNode = select(isRoof, float(0.95), mix(float(0.9), select(boarded.or(shadeHere), float(0.8), float(0.12)), winMask));
   m.metalnessNode = spandrel.mul(0.6);
   m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask).mul(facadeUniforms.litScale));
+  // ---------------------------------------------------------------- baked canyon occlusion (indirect light only)
+  // wallAO = (distance to the facing wall, its height). The facing skyline's elevation angle seen from this
+  // point blocks that share of the sky: deep side-street canyons go dim at the bottom, avenues stay open.
+  const wao = attribute('wallAO', 'vec2');
+  const rise = wao.y.sub(v).max(0).div(wao.x.max(1)); // tan(elevation)
+  const blocked = rise.div(rise.mul(rise).add(1).sqrt()); // sin(elevation)
+  const contact = mix(float(0.55), float(1), smoothstep(-0.3, 3.0, v)); // sidewalk contact darkening
+  m.aoNode = select(isRoof, float(1), float(1).sub(blocked.mul(facadeUniforms.aoStrength)).mul(contact));
   void abs; void min; void vec2;
   return m;
 }

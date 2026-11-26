@@ -32,7 +32,9 @@ export function createGroundMaterial(): THREE.MeshStandardNodeMaterial {
   const jx = abs(fract(x.div(1.5)).sub(0.5)).mul(1.5), jz = abs(fract(z.div(1.5)).sub(0.5)).mul(1.5);
   const joint = smoothstep(0.035, 0.0, min(float(0.75).sub(jx), float(0.75).sub(jz))).mul(fine);
   const slabTone = mx_noise_float(vec3(x.div(1.5).floor(), z.div(1.5).floor(), 5.5)).mul(0.06);
-  const stain = smoothstep(0.62, 0.8, n2).mul(0.25);
+  // stains: soft and low-contrast (hard 3 m blotches read as camouflage from above)
+  const n4 = mx_noise_float(vec3(x.mul(0.9), z.mul(0.9), 2.2)).mul(0.5).add(0.5);
+  const stain = smoothstep(0.58, 0.95, n2).mul(0.1).add(smoothstep(0.7, 0.95, n4).mul(0.08));
   const gum = smoothstep(0.93, 0.97, n3).mul(fine).mul(0.35);
   const concrete = vec3(0.2, 0.178, 0.155).mul(float(1).add(slabTone)).mul(float(1).sub(joint.mul(0.45))).mul(float(1).sub(stain)).mul(float(1).sub(gum));
 

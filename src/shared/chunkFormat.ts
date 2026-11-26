@@ -44,6 +44,8 @@ export interface Ring { pts: Int16Array } // interleaved x,z in cm
 export interface BuildingRec {
   id: number; year: number; use: number; style: number; floors: number; flags: number;
   height: number; minHeight: number; rings: Float32Array[]; // metres, chunk-local, interleaved x,z
+  /** Optional wall occlusion per ring: 2 bytes per edge (see TAG_WAO). */
+  ao?: Uint8Array[];
 }
 export interface GroundRec { kind: number; rings: Float32Array[] }
 export interface PoiRec { kind: number; x: number; z: number; heading: number }
@@ -55,6 +57,9 @@ export const TAG_BLDG = tag('BLDG') >>> 0;
 export const TAG_GRND = tag('GRND') >>> 0;
 export const TAG_POIS = tag('POIS') >>> 0;
 export const TAG_PNT = tag('PNT ') >>> 0;
+/** Wall occlusion (optional): per building, per ring, per edge (starting at vertex k): openDist u8 (0.5 m,
+ *  255 = open sky to 127 m) | oppHeight u8 (2 m units; height of what the wall faces). Baked by the pipeline. */
+export const TAG_WAO = tag('WAO ') >>> 0;
 
 // ---------------------------------------------------------------- reader
 export function readChunk(buf: ArrayBuffer): ChunkData {
@@ -91,6 +96,10 @@ export function readChunk(buf: ArrayBuffer): ChunkData {
       }
     } else if (t === TAG_GRND) {
       for (let k = 0; k < count; k++) { const kind = dv.getUint8(o); o += 1; out.ground.push({ kind, rings: rings() }); }
+    } else if (t === TAG_WAO) {
+      for (let k = 0; k < count && k < out.buildings.length; k++) {
+        const b = out.buildings[k]; b.ao = b.rings.map((r) => { const n = r.length; const a = new Uint8Array(buf, o, n).slice(); o += n; return a; });
+      }
     } else if (t === TAG_PNT) {
       for (let k = 0; k < count; k++) {
         const kind = dv.getUint8(o), width = dv.getUint8(o + 1) / 100, n = dv.getUint16(o + 2, true); o += 4;
@@ -136,7 +145,7 @@ function writeRings(w: ByteWriter, rings: [number, number][][]) {
   for (const r of rings) { w.u16(r.length); for (const [x, z] of r) { w.i16(clampI16(x * 100)); w.i16(clampI16(z * 100)); } }
 }
 
-export interface WBuilding { id: number; year: number; use: number; style: number; floors: number; flags: number; height: number; minHeight: number; rings: [number, number][][] }
+export interface WBuilding { id: number; year: number; use: number; style: number; floors: number; flags: number; height: number; minHeight: number; rings: [number, number][][]; ao?: [number, number][][] }
 export interface WGround { kind: number; rings: [number, number][][] }
 export interface WPoi { kind: number; x: number; z: number; heading: number }
 export interface WPaint { kind: number; width: number; pts: [number, number][] }
@@ -152,6 +161,9 @@ export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p
       w.u32(x.id); w.u16(x.year); w.u8(x.use); w.u8(x.style); w.u8(Math.min(255, x.floors)); w.u8(x.flags);
       w.u16(clampU16(x.height * 10)); w.u16(clampU16(x.minHeight * 10)); writeRings(w, x.rings);
     }
+  });
+  if (b.some((x) => x.ao)) section(TAG_WAO, b.length, () => {
+    for (const x of b) x.rings.forEach((r, ri) => r.forEach((_, k) => { const e = x.ao?.[ri]?.[k] ?? [127.5, 0]; w.u8(Math.min(255, Math.round(e[0] * 2))); w.u8(Math.min(255, Math.round(e[1] / 2))); }));
   });
   section(TAG_GRND, g.length, () => { for (const x of g) { w.u8(x.kind); writeRings(w, x.rings); } });
   section(TAG_PNT, paint.length, () => {

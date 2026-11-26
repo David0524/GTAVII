@@ -13,6 +13,10 @@ const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return
 const phase = arg('phase', 'phase1');
 const quality = arg('quality', 'high');
 const forceWebGL = args.includes('--webgl');
+const onlyViews = arg('views', ''); // e.g. --views A,D,E (phase3 name prefixes)
+const onlyTimes = arg('times', ''); // e.g. --times 12:30,23:00
+const extra = new URLSearchParams(arg('extra', '')); // extra URL params, e.g. --extra env=1
+const tag = arg('tag', ''); // filename suffix for A/B runs
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const outDir = path.join(ROOT, 'shots', phase);
 fs.mkdirSync(outDir, { recursive: true });
@@ -78,10 +82,12 @@ async function main() {
   page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
   const report: any[] = [];
-  const list = p3 ? P3_VIEWS.flatMap((v) => P3_TIMES.map((t) => ({ name: `${v.name}_${t.replace(':', '')}`, cam: v.cam, at: undefined as string | undefined, time: t }))) : VIEWS.map((v) => ({ ...v, time: undefined as string | undefined }));
+  const views3 = onlyViews ? P3_VIEWS.filter((v) => onlyViews.split(',').some((p) => v.name.startsWith(p + '_'))) : P3_VIEWS;
+  const times3 = onlyTimes ? onlyTimes.split(',') : P3_TIMES;
+  const list = p3 ? views3.flatMap((v) => times3.map((t) => ({ name: `${v.name}_${t.replace(':', '')}${tag ? '_' + tag : ''}`, cam: v.cam, at: undefined as string | undefined, time: t }))) : VIEWS.map((v) => ({ ...v, time: undefined as string | undefined }));
   page.setDefaultTimeout(600000);
   for (const v of list) {
-    const q = new URLSearchParams({ quality, fresh: '1', title: '0', hud: p3 ? '0' : '1', ...(p3 ? { minimap: '0', camrel: '1', timescale: '0' } : {}), ...(v.time ? { time: v.time } : {}), ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}) });
+    const q = new URLSearchParams({ quality, fresh: '1', title: '0', hud: p3 ? '0' : '1', ...(p3 ? { minimap: '0', camrel: '1', timescale: '0' } : {}), ...(v.time ? { time: v.time } : {}), ...(forceWebGL ? { webgl: '1' } : {}), ...(v.cam ? { cam: v.cam } : {}), ...(v.at ? { at: v.at } : {}), ...Object.fromEntries(extra) });
     await page.goto(`http://localhost:${port}/?${q}`);
     await page.waitForFunction(() => (window as any).__T74, null, { timeout: 120_000 });
     await page.evaluate(() => (window as any).__T74.whenIdle());
