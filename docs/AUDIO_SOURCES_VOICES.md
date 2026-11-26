@@ -345,7 +345,7 @@ Totals: 1428 lines, 93.9 min, Opus 13.0 MB, AAC 18.4 MB.
 | 34d091273bb39ac4 | char.marjorie_kell | low | wasm en-us+f5 p59 s160 | 6.56 |
 | 55cb52a4af0a3269 | char.marjorie_kell | low | wasm en-us+f5 p59 s160 | 5.35 |
 | 6a5b9af686e35f19 | char.marjorie_kell | low | wasm en-us+f5 p59 s160 | 6.54 |
-| 97ed766cd4d68237 | char.marjorie_kell | flat | wasm en-us+f5 p59 s160 | 4.25 |
+| 97ed766cd4d68237 | char.marjorie_kell | flat | wasm en-us+f5 p59 s160 | 4.26 |
 | cecb5018505e116f | char.marjorie_kell | low | wasm en-us+f5 p59 s160 | 7.68 |
 | d8dcf924f007a29d | char.marjorie_kell | flat | wasm en-us+f5 p59 s160 | 2.54 |
 | 0e974290e82c8d71 | char.maureen_kehoe | brisk | wasm en-us+m5 p58 s169 | 3.87 |
@@ -1191,7 +1191,7 @@ Totals: 1428 lines, 93.9 min, Opus 13.0 MB, AAC 18.4 MB.
 | ab2bc66597efa89a | npc.radio_crowd | wry | wasm en-us+f5 p52 s166 | 4.05 |
 | b570b0d2ac43dea9 | npc.radio_crowd | cynical | wasm en-us+f5 p52 s166 | 1.80 |
 | ba152bd6026c0e15 | npc.radio_crowd | sad | wasm en-us+f5 p52 s166 | 3.82 |
-| c7e16694a3a57ae9 | npc.radio_crowd | grave | wasm en-us+f5 p52 s166 | 4.03 |
+| c7e16694a3a57ae9 | npc.radio_crowd | grave | wasm en-us+f5 p52 s166 | 4.05 |
 | c7e8a6af99656152 | npc.radio_crowd | radio | wasm en-us+f5 p52 s166 | 4.54 |
 | d5937d1344040766 | npc.radio_crowd | low | wasm en-us+f5 p52 s166 | 4.25 |
 | 5bb4b068deb8d897 | npc.rental_agent | smooth | wasm en-us+m7 p61 s171 | 3.70 |

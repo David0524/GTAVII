@@ -112,7 +112,8 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
     the step then copies the current lines into `public/audio/voice/` (ignored by git).
   - **Never fails the build** (`--soft`): if content is missing, the WASM or ffmpeg can't load, or a line
     fails, it logs a warning and exits 0; anything not rendered plays the placeholder voice.
-  - Measured (4 cores, CPU-only): cold cache — see AUDIO_PROGRESS; warm cache — about a second.
+  - Measured (4 cores, CPU-only): cold cache 223 s; warm cache after a fresh checkout 1 s; missing
+    content exits 0 with a warning.
     Deployed output 38 MB (Opus + AAC), fetched per line on demand.
 - **Why:** keeps ~35 MB per narrative revision out of git, keeps GPL code out of the shipped game, and
   keeps preview deploys fast across branches.

@@ -176,8 +176,9 @@ public/audio/voice/, pushed with --force-with-lease."
 - `npm run audio:voices` renders with eSpeak NG compiled to WASM plus `ffmpeg-static`: no system packages,
   so it runs on Vercel. Neither tool is imported by game code; checked: the production bundle contains
   neither. Licence handling in AUDIO_SOURCES.md.
-- Measured (4 cores, CPU-only): full render 237 s for 1,428 lines (93.9 min of speech); with the
-  manifest cache, 1 s. Deployed output 38 MB (Opus 13.0 MB + AAC 18.4 MB + manifest), fetched per line.
+- Measured (4 cores, CPU-only): cold cache 223–237 s for 1,428 lines (93.9 min of speech); warm cache
+  after a fresh checkout (the Vercel case, cache in `node_modules/.cache/t74-voices/`) 1 s. Deploy uses
+  `npm run audio:voices:build` (`--soft`): missing content or a tool failure logs a warning and exits 0. Deployed output 38 MB (Opus 13.0 MB + AAC 18.4 MB + manifest), fetched per line.
 - Branch history rewritten and force-pushed (5f076a2 → 5497fca): no commit contains `public/audio/voice/`;
   engine commits kept their hashes; the engine session was told.
 - The WASM build takes no SSML, so emotion is applied as rate, pitch and level offsets (was SSML prosody).
