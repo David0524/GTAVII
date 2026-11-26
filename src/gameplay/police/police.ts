@@ -37,6 +37,8 @@ export interface Unit {
 export interface Report {
   id: number; precinct: string; kinds: CrimeKind[]; heat: number; description: Description; lastKnown: [number, number]; crimeAt: [number, number];
   age: number; sinceSighting: number; units: string[]; sources: number; perp: string; spawned: Partial<Record<UnitKind, number>>; pending: { kind: UnitKind; at: number }[];
+  /** crimes already counted (several witnesses to one gunshot add one shots-fired, not five) */
+  crimeIds: Set<number>;
 }
 export interface SuspectCtx { id: string; pos: [number, number, number]; appearance: Appearance; speed: number; weaponDrawn: boolean; bleeding: boolean; indoors: boolean; subway: boolean; inVehicle: boolean; surrendered: boolean; oddLook?: boolean }
 
@@ -136,10 +138,11 @@ export class Police extends Emitter<PoliceEvents> {
     // NOTE: merging keys on the perp id for robustness; descriptions are merged so what police KNOW is still only what was reported.
     const merged = !!r;
     if (r) {
-      r.kinds.push(...f.kinds); r.description = merge(r.description, f.desc); r.lastKnown = f.lastKnown; r.sources++; r.sinceSighting = 0;
+      f.kinds.forEach((k, i) => { const id = f.crimeIds?.[i]; if (id === undefined || !r!.crimeIds.has(id)) { r!.kinds.push(k); if (id !== undefined) r!.crimeIds.add(id); } });
+      r.description = merge(r.description, f.desc); r.lastKnown = f.lastKnown; r.sources++; r.sinceSighting = 0;
       r.heat = Math.min(MAX_HEAT, Math.max(r.heat, reportSeverity(r.kinds)) + 0.15);
     } else {
-      r = { id: this.nextReport++, precinct: pct.id, kinds: [...f.kinds], heat: Math.min(MAX_HEAT, reportSeverity(f.kinds) + 0.4 * Math.min(3, this.priorsOf(f.perp, pct.id))), description: f.desc, lastKnown: f.lastKnown, crimeAt: f.crimeAt, age: 0, sinceSighting: 0, units: [], sources: 1, perp: f.perp, spawned: {}, pending: [] };
+      r = { id: this.nextReport++, precinct: pct.id, kinds: [...f.kinds], heat: Math.min(MAX_HEAT, reportSeverity(f.kinds) + 0.4 * Math.min(3, this.priorsOf(f.perp, pct.id))), description: f.desc, lastKnown: f.lastKnown, crimeAt: f.crimeAt, age: 0, sinceSighting: 0, units: [], sources: 1, perp: f.perp, spawned: {}, pending: [], crimeIds: new Set(f.crimeIds ?? []) };
       this.reports.push(r);
     }
     this.emit('reportFiled', { report: r, via: f.via, merged });
@@ -448,6 +451,22 @@ export class Police extends Emitter<PoliceEvents> {
     return res('accepted');
   }
 
+  /** Hours pass off-screen (sleep, custody, hospital): reports cool as if unwatched; everyone out searching has gone back. */
+  elapse(seconds: number, hidden = 2) {
+    for (const r of [...this.reports]) {
+      const pad = this.isCitywide(r) ? 0 : this.payoffOf(r.precinct);
+      r.heat -= DECAY * (this.isCitywide(r) ? OFFICER_DOWN_DECAY : 1) * (1 + 1.5 * pad) * hidden * 1.5 * seconds;
+      r.age += seconds; r.sinceSighting += seconds; r.pending = [];
+      if (r.heat < 0.3) this.clear(r, 'decay');
+    }
+    for (const u of [...this.units.values()]) {
+      if (u.post) { u.x = u.post[0]; u.z = u.post[1]; u.report = null; u.recog = 0; u.ownDesc = null; u.stamina.value = u.stamina.max; u.stamina.exhausted = false; this.setState(u, 'post'); }
+      else this.units.delete(u.id);
+    }
+    for (const r of this.reports) { r.units = []; r.spawned = {}; }
+    this.relays.length = 0;
+  }
+
   /** Where a chase stands, for HUD cues, audio and missions (CORE_SYSTEMS §1): read from the world, not a meter. */
   phase(perp: string): 'none' | 'spotted' | 'pursuit' | 'lost' | 'searching' | 'cooling' {
     const r = this.reportFor(perp);
@@ -475,7 +494,7 @@ export class Police extends Emitter<PoliceEvents> {
   deserialize(d: ReturnType<Police['serialize']>) {
     this.reports.length = 0; this.units.clear(); this.payoff.clear();
     for (const [k, v] of Object.entries(d?.payoff ?? {})) this.payoff.set(k, v);
-    for (const r of d?.reports ?? []) this.reports.push({ ...r, sinceSighting: 120, units: [], sources: 1, spawned: {}, pending: [] });
+    for (const r of d?.reports ?? []) this.reports.push({ ...r, sinceSighting: 120, units: [], sources: 1, spawned: {}, pending: [], crimeIds: new Set() });
     this.nextReport = d?.nextReport ?? 1;
   }
 }

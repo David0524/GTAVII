@@ -16,12 +16,12 @@ import type { AgentPort, LightAt, PedSnapshot } from './ports';
 export interface ReportPoint { id: string; kind: 'callbox' | 'payphone'; x: number; z: number; broken: boolean }
 export type WitnessState = 'shock' | 'flee' | 'toReport' | 'calling' | 'filed' | 'silenced' | 'bystander' | 'dead';
 export interface Witness {
-  ped: string; perp: string; crimes: Set<number>; kinds: CrimeKind[]; desc: Description; saw: boolean;
+  ped: string; perp: string; crimes: Set<number>; kinds: CrimeKind[]; kindIds: number[]; desc: Description; saw: boolean;
   lastSeen: [number, number]; lastSeenT: number; crimeAt: [number, number];
   state: WitnessState; t: number; nerve: number; target: { kind: 'callbox' | 'payphone' | 'unit'; id: string; x: number; z: number } | null;
   shockFor: number; fleeFor: number; attempts: number;
 }
-export interface FiledReport { witness: string; perp: string; kinds: CrimeKind[]; desc: Description; lastKnown: [number, number]; crimeAt: [number, number]; via: 'callbox' | 'payphone' | 'unit'; unit?: string; time: number }
+export interface FiledReport { witness: string; perp: string; kinds: CrimeKind[]; /** crime ids behind `kinds` (same order): one crime seen by five people counts once */ crimeIds?: number[]; desc: Description; lastKnown: [number, number]; crimeAt: [number, number]; via: 'callbox' | 'payphone' | 'unit'; unit?: string; time: number }
 export interface WitnessEvents extends Record<string, unknown> {
   witnessed: { ped: string; crime: number; saw: boolean; dist: number };
   heading: { ped: string; to: 'callbox' | 'payphone' | 'unit'; id: string; x: number; z: number };
@@ -82,12 +82,12 @@ export class Witnesses extends Emitter<WitnessEvents> {
       let w = this.list.get(p.id);
       if (w && w.state === 'silenced' && w.perp === c.perp) continue; // scared or paid off: they saw nothing
       if (w && w.state !== 'filed' && w.state !== 'silenced' && w.state !== 'dead' && w.perp === c.perp) {
-        w.crimes.add(c.id); w.kinds.push(...kinds); w.desc = merge(w.desc, desc); w.saw ||= saw;
+        if (!w.crimes.has(c.id)) { w.kinds.push(...kinds); w.kindIds.push(...kinds.map(() => c.id)); } w.crimes.add(c.id); w.desc = merge(w.desc, desc); w.saw ||= saw;
         if (saw) { w.lastSeen = [perp.pos[0], perp.pos[2]]; w.lastSeenT = this.time; }
       } else {
         const nerve = p.nerve ?? this.rng.range(0.15, 0.95);
         w = {
-          ped: p.id, perp: c.perp, crimes: new Set([c.id]), kinds, desc, saw, lastSeen: [perp.pos[0], perp.pos[2]], lastSeenT: this.time, crimeAt: [c.at[0], c.at[2]],
+          ped: p.id, perp: c.perp, crimes: new Set([c.id]), kinds, kindIds: kinds.map(() => c.id), desc, saw, lastSeen: [perp.pos[0], perp.pos[2]], lastSeenT: this.time, crimeAt: [c.at[0], c.at[2]],
           state: 'shock', t: 0, nerve, target: null, shockFor: this.rng.range(0.5, 1.5) * (1.3 - nerve * 0.5), fleeFor: 0, attempts: 0,
         };
         // Who reports: most do; the timid and those far away mostly just get clear. Children never do.
@@ -178,7 +178,7 @@ export class Witnesses extends Emitter<WitnessEvents> {
           const tg = w.target!;
           if (tg.kind !== 'unit' && this.points.get(tg.id)?.broken) { this.route(w, p); break; }
           if (w.t >= CALL_TIME[tg.kind]) {
-            const r: FiledReport = { witness: w.ped, perp: w.perp, kinds: [...w.kinds], desc: w.desc, lastKnown: w.lastSeen, crimeAt: w.crimeAt, via: tg.kind, unit: tg.kind === 'unit' ? tg.id : undefined, time: this.time };
+            const r: FiledReport = { witness: w.ped, perp: w.perp, kinds: [...w.kinds], crimeIds: [...w.kindIds], desc: w.desc, lastKnown: w.lastSeen, crimeAt: w.crimeAt, via: tg.kind, unit: tg.kind === 'unit' ? tg.id : undefined, time: this.time };
             w.state = 'filed'; w.t = 0;
             fileReport(r);
             this.emit('filed', r);

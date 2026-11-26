@@ -62,7 +62,7 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
     run: async ({ ev, wait, shot }) => {
       await ev(`(() => { const G = __GP; G.g.equip('weapon.service'); G.teleport(-792, G.BLOCK.zS + 1.6, Math.PI/2); G.face(Math.PI/2 + 0.3, 0.25); G.g.setAiming(true); G.g.setFiring(true); })()`);
       await wait(0.5);
-      await ev(`(() => { const G = __GP; G.g.setFiring(false); G.g.setAiming(false); G.face(-Math.PI/2, -0.3); })()`);
+      await ev(`(() => { const G = __GP; G.g.setFiring(false); G.g.setAiming(false); G.g.holster(); G.face(-Math.PI/2, -0.3); })()`);
       await wait(2.5);
       await shot('08_witness_runs_to_callbox', 'W 31st St between 7th and 8th Aves (real block). A shot into the air: people scatter, a witness breaks for the red call box. Red lines: the witness\'s run and what they last saw. "Someone\'s running for the call box."');
       { const t0 = Date.now(); while (Date.now() - t0 < 40000) { const c = await ev<number>(`[...__GP.g.witnesses.list.values()].filter(w => w.state === 'calling').length`); if (c) break; await wait(0.5); } }
@@ -112,7 +112,7 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
       const t0 = Date.now();
       while (Date.now() - t0 < 90000) { const n = await ev<number>(`__GP.g.policeSys.reports.length`); if (n) break; await wait(1); }
       const before = await ev<string>(`__GP.g.appearance().look.words.join(', ')`);
-      // ducks inside (the Corwin stands in) and comes back out in different clothes
+      // ducks inside (a doorway stands in for home) and comes back out in different clothes
       await ev(`(() => { const G = __GP; G.g.setContext({ atHome: true }); G.g.changeOutfit('outfit.teddy_jacket'); G.g.setContext({ atHome: false }); G.teleport(-700, G.BLOCK.zS + 1.6, Math.PI/2); G.face(Math.PI/2, -0.25); })()`);
       while (Date.now() - t0 < 200000) { const k = await ev<number>(`[...__GP.g.policeSys.units.values()].filter(u => u.state === 'search' && Math.hypot(u.x - __GP.player.pos.x, u.z - __GP.player.pos.z) < 30).length`); if (k) break; await wait(1); }
       const m = await ev<number>(`(() => { const G = __GP; const r = G.g.policeSys.reports[0]; return r ? 0 : 0; })()`);

@@ -25,6 +25,10 @@ export class Shops extends Emitter<ShopEvents> {
     super();
     for (const s of reg.shops.values()) this.stock.set(s.id, new Map(s.stock.map((x) => [x.item, x.qty])));
   }
+  /** Overnight: shops and fences restock up to their listed stock (never above, never removing what's there). */
+  restock() {
+    for (const s of this.reg.shops.values()) { const st = this.stock.get(s.id)!; for (const x of s.stock) { const cur = st.get(x.item)!; if (cur !== -1 && cur < x.qty) st.set(x.item, x.qty); } }
+  }
   stockOf(shop: string, item: string) { return this.stock.get(shop)?.get(item); }
   listing(shop: string) {
     const s = this.reg.shops.get(shop); if (!s) return [];

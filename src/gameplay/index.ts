@@ -38,6 +38,7 @@ import { stepStamina } from './player/stamina';
 import { learn, effects as skillFx } from './player/skills';
 import { migrate, SAVE_VERSION, type SaveV3 } from './save';
 import { vehicleLook, type PlayerVehicle } from './appearance';
+import { TimeKeeper, restQuality, type CantSleep } from './time';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
@@ -82,6 +83,8 @@ export class Gameplay {
   readonly policeSys: Police;
   readonly outcomes: Outcomes;
   readonly budget: { combatants: number; witnesses: number };
+  /** gameplay's side of the clock: sleep / wait rules and world effects (TIME.md) */
+  readonly clock = new TimeKeeper();
   private bus = new Emitter<Record<GameplayEventType, any>>();
   private actors = new Map<string, Actor>();
   private tyres: TyreShape[] = [];
@@ -382,6 +385,52 @@ export class Gameplay {
     // gunfire scatters the street (sim flee)
     if (kind === 'shots_fired' || kind === 'shooting' || kind === 'homicide') this.sim?.emit({ type: 'threat', x: at[0], z: at[2], radius: (o.noise ?? 60) * 0.6 });
     return c;
+  }
+
+  // ------------------------------------------------------------------ time (TIME.md)
+  /** Engine clock feed (minutes since midnight, game day, temperature). */
+  setClock(c: { day?: number; minutes?: number; tempF?: number; heatwave?: boolean; date?: string }) {
+    this.clock.setClock(c); if (c.tempF !== undefined) this.pc.tempF = c.tempF;
+    this.outcomes.day = this.clock.clock.day; this.shops.clock = () => this.clock.clock.minutes;
+  }
+  canSleep(): CantSleep {
+    if (this.clock.inMission) return 'mission';
+    const ph = this.player ? this.policeSys.phase(this.player.id) : 'none';
+    if (ph === 'pursuit' || ph === 'spotted') return 'pursuit';
+    if (ph === 'lost' || ph === 'searching') return 'police';
+    if (!this.pc.atHome) return 'notHome';
+    return null;
+  }
+  /** Sleep in your bed until `hour` (7 morning, 19 evening, or any). Restores, clears injury carry-over, autosaves, advances the world. */
+  sleep(hour: number, o: { hasAC?: boolean } = {}): { ok: boolean; reason?: CantSleep; hours?: number; quality?: number } {
+    const why = this.canSleep(); if (why) return { ok: false, reason: why };
+    const hours = this.clock.until(hour) / 60;
+    const q = restQuality(this.clock.clock.heatwave, !!o.hasAC);
+    this.passTime(hours, 'sleep');
+    if (this.player) {
+      const id = this.player.id, li = this.inv.ensure(this.player.lead);
+      this.healthSys.clearPenalty(id);
+      this.healthSys.treat(id, { stopBleeding: true, wearRelief: 0.6 * q, heal: 999 * q });
+      li.stamina.value = li.stamina.max * q; li.stamina.exhausted = false;
+      this.clock.emit('rested', { lead: this.player.lead, quality: q });
+    }
+    this.clock.emit('autosave', { reason: 'sleep', day: this.clock.clock.day });
+    return { ok: true, hours, quality: q };
+  }
+  /** Wait 1–2 h at a diner counter, bench or lobby: no save, no healing. Not with police searching or in pursuit. */
+  wait(hours: number) {
+    const why = this.canSleep(); if (why && why !== 'notHome') return { ok: false, reason: why };
+    this.passTime(Math.max(0.25, Math.min(2, hours)), 'wait');
+    return { ok: true };
+  }
+  /** Shared world advance for any skipped time (sleep, wait, custody, hospital). */
+  passTime(hours: number, how: 'sleep' | 'wait' | 'custody' | 'hospital' | 'mission') {
+    const secs = hours * 3600;
+    this.policeSys.elapse(secs, how === 'sleep' || how === 'custody' ? 2 : 1);
+    this.props.update(secs, [1e9, 1e9]);
+    if (how !== 'wait' || this.clock.clock.minutes + hours * 60 >= 24 * 60) this.shops.restock();
+    this.clock.advance(hours, how);
+    this.outcomes.day = this.clock.clock.day;
   }
 
   /** Mission "lose the police" gate: no open report on the player and no unit with eyes on / closing on them. */

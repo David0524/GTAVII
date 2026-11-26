@@ -161,3 +161,32 @@ test('a cop who sees it happen gives chase at once', () => {
   r.g.equip('weapon.service'); r.g.setAiming(true); r.g.setFiring(true); r.step(0.1);
   assert.ok(r.has('police', 'pursuit'));
 });
+
+test('five witnesses to one gunshot make one shots-fired, not five', () => {
+  const r = rig();
+  r.g.addProp('box1', 'call_box', 30, 0, -10);
+  for (let i = 0; i < 5; i++) r.sim.add(`w${i}`, 6 + i, 2, { yaw: Math.atan2(6 + i, 2), nerve: 0.95 });
+  r.g.equip('weapon.service'); r.g.setAiming(true); r.g.setFiring(true); r.step(0.05); r.g.setFiring(false); r.g.setAiming(false); r.g.holster();
+  r.g.setContext({ atHome: true }); r.g.changeOutfit('outfit.teddy_jacket'); r.g.setContext({ atHome: false });
+  r.until(() => r.g.policeSys.reports.length > 0 && r.g.policeSys.reports[0].sources >= 3, 120);
+  const rep = r.g.policeSys.reports[0];
+  assert.ok(rep.sources >= 3, `several accounts (${rep.sources})`);
+  assert.equal(rep.kinds.filter((k) => k === 'shots_fired').length, 1, rep.kinds.join(','));
+  assert.ok(rep.heat < 3.6, `heat ${rep.heat}`);
+});
+
+test('after an accepted bribe nobody else on that report keeps coming', () => {
+  const r = rig();
+  r.g.addProp('box1', 'call_box', 30, 0, -10);
+  r.sim.add('w1', 8, 0, { yaw: Math.atan2(8, 0), nerve: 0.95 });
+  r.g.equip('weapon.service'); r.g.setAiming(true); r.g.setFiring(true); r.step(0.05); r.g.setFiring(false); r.g.setAiming(false); r.g.holster();
+  r.until(() => r.has('police', 'stop'), 400);
+  const id = r.g.hud()!.encounter!.unit;
+  r.g.policeSys.units.get(id)!.corrupt = 1; r.g.policeSys.setPayoff('pct.gramercy', 1); r.g.inv.addMoney('char.teddy_arce', 50000);
+  assert.equal(r.g.police.bribe(id, 20000), 'accepted');
+  // then a jacket over the holstered revolver: in shirtsleeves it would keep showing (menacing)
+  r.g.inv.ensure('char.teddy_arce').wearing = 'outfit.teddy_jacket';
+  r.step(90);
+  assert.ok(!r.has('police', 'stop') || r.events.filter((e) => e.type === 'police' && e.e.kind === 'stop').every((e) => e.t <= r.events.find((x) => x.type === 'police' && x.e.kind === 'bribe')!.t), 'no new stop after the bribe');
+  assert.ok(r.g.heatClear(), 'clear');
+});
