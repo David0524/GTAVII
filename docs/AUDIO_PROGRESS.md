@@ -158,6 +158,11 @@ Reading the numbers honestly:
   covered by `?audio=1` only. The render ran before the last interior commit, so the WAVs don't
   exercise that code.
 
+## Paused: radio stations (user instruction relayed by oversight, 2026-11-26 16:31)
+"Don't do radio stations right now." What exists stays in place and working (station framework,
+procedural music, DJ/news playback with rendered speech, in-car radio, window/bar radios); no further
+radio work until resumed. Everything else continues.
+
 ## Backlog relayed from the oversight session (2026-11-26; not in the original brief)
 Recorded as scope additions to plan for; the brief's "done means" came first.
 - **Combat (Gameplay stream):** period gunfire by invented model and tier (cheap guns sound cheap),
