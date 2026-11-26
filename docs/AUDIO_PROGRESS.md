@@ -13,8 +13,8 @@ Branch: `claude/audio-tenderloin-74` (from `claude/tenderloin-74-engine-qi54lt`)
 | Ambience (beds, gratings + real subway lines, AC, steam, neon, signals, sirens, window/bar radios, birds, kids, garment district, weather, brownout, calendar events) | **Done, first pass** |
 | Vehicles (procedural engines, traffic mass, horns, skids, impacts, brakes, doors, compactor, manholes) | **Done, first pass** (driven by a mock sim until sim/vehicles merge) |
 | Reactions (honk, collision, nearMiss, hail), footsteps by surface, crowd walla | **Done, first pass** |
-| Radio framework (real-time stations, news by date, static, speakers) | **Done**; **music = PLACEHOLDER beds, awaiting your choice of source** |
-| Dialogue/barks, subtitle timing, overheard N3, phone/radio filters | **Done**; **voice = PLACEHOLDER formant mumble, awaiting your choice of source** |
+| Radio framework (real-time stations, news by date, static, speakers) | **Done**; music = **procedural period-style instrumentals** (soul/disco, salsa, easy strings, jazz), narrative's 4 stations wired |
+| Dialogue/barks, subtitle timing, overheard N3, phone/radio filters | **Done**; voice = **eSpeak NG rendered offline** for all 1,428 narrative lines (dialogue, barks, DJ patter); formant mumble only as fallback |
 | UI sounds (menus, map, reel-change switch, pickups, phone) | **Done** |
 | Offline test, WAVs, report | **Done** — `npm run audio:test` → `shots/audio/` |
 | Engine wiring | Requested (ENGINE_REQUESTS.md "From audio" 1–10); my only `main.ts` change is the guarded `?audio` line |
@@ -71,6 +71,14 @@ tools/audio/          render.ts (the test), loudness.ts (BS.1770-4 + TP), wav.ts
 - **Lightning is audio-led** (emits `lightning` with the delay before thunder) so the visual comes
   first, per the never-audio-only rule (requested from the engine).
 - **Settings, wiring, world state and the never-audio-only UI** are engine-owned; requested.
+- **Free music and voice (user decision 2026-11-26).** Music is generated live per song seed in the
+  worklet (deterministic, so stations can be joined mid-song). Speech is rendered offline with eSpeak
+  NG: formant synthesis means no real person's voice is imitated and no model licence is involved,
+  and keeping it a build step keeps GPL code out of the shipped game. Files are keyed by
+  hash(speaker|emotion|text) so edits fall back to the placeholder voice instead of breaking. Cost:
+  34 MB of encoded speech in the repo (Opus + AAC). Casting reads the pronouns in the narrative's own
+  cast descriptions, never names; 6 named characters with no cast entry get a neutral voice until
+  narrative adds them; overrides in `tools/audio/casting.json`.
 
 ## Honest critique of the renders (`shots/audio/*.wav`)
 **Read this first:** I can't hear. This critique comes from measurements (stems per bus and per
@@ -175,6 +183,7 @@ Recorded as scope additions to plan for; the brief's "done means" came first.
   hold radio, spot effects).
 
 ## Known issues / next
-- Music and voice sources need your decision (placeholders ship behind the final APIs).
+- eSpeak speech is intelligible but robotic; music is credible as period radio filler, not as hits. Both are swappable behind the same APIs.
+- Re-run `npm run audio:voices` whenever narrative text changes (needs `apt-get install espeak-ng`).
 - Real-device checklist not yet run (iOS unlock, interruptions, silent switch, Bluetooth).
 - Mock sim drives traffic/peds; re-measure once the sim and vehicles streams merge.

@@ -26,6 +26,7 @@ import { RadioSystem } from './radio/radio';
 import type { StationDef } from './radio/stations';
 import { stationsFromNarrative } from './radio/narrative';
 import { DialogueSystem, runAudioSleepers, type Script } from './dialogue/dialogue';
+import { VoiceLibrary } from './dialogue/voiceLibrary';
 import { Rng } from './worklets/dsp';
 import { readChunk, type ChunkData } from '../shared/chunkFormat';
 import { REGION } from '../shared/geo';
@@ -57,6 +58,7 @@ export class AudioSystem {
   private loaded = false;
   private customStations = false;
   private useContent = true;
+  private voiceLib: VoiceLibrary | null = null;
   private ready: Promise<void>;
   radio!: { setStation(id: string | null): void; readonly stations: readonly { id: string; name: string }[]; readonly system: RadioSystem };
   dialogue!: { play(scriptId: string, lineId: string, at?: Vec3, opts?: { filter?: 'phone' | 'radio' }): Promise<void>; on(type: 'subtitle' | 'subtitleEnd', cb: (e: any) => void): void; overhear: DialogueSystem['overhear']; registerScript(s: Script): void; bark: DialogueSystem['bark']; readonly system: DialogueSystem };
@@ -94,6 +96,7 @@ export class AudioSystem {
     this.vehicles = new VehicleAudio(env);
     const radio = new RadioSystem(env, stations);
     const dlg = new DialogueSystem(env, this.baseUrl); dlg.contentEnabled = this.useContent;
+    this.voiceLib = new VoiceLibrary(ctx, this.baseUrl); dlg.lib = this.voiceLib; radio.voices = this.voiceLib;
     radio.onSubtitle = (e) => env.emit('radioSubtitle', e);
     // Reaction barks from the narrative's bark pools (content/barks/*.json), positional, subtitled as overheard.
     (this.listeners.bark ??= []).push((e: { pool?: string; context?: string; at?: Vec3; delay?: number }) => {
@@ -124,6 +127,7 @@ export class AudioSystem {
     if (this.quality.hrtf > 0) { const pn = this.runtime.ctx.createPanner(); pn.panningModel = 'HRTF'; pn.disconnect(); }
     this.geo.build(chunks, streets!);
     this.env.map = new CityMap(streets!);
+    await this.voiceLib?.init(this.useContent);
     // Narrative radio content if the engine serves content/ (else the PLACEHOLDER stations stay).
     if (!this.customStations) {
       try { const r = await fetch(this.baseUrl + 'content/radio.json'); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const defs = stationsFromNarrative(await r.json()); if (defs.length) this.radio.system.setStations(defs); } } catch { /* no content */ }
@@ -288,7 +292,7 @@ export class AudioSystem {
     return {
       state: this.runtime.state, voices: { ...this.vm?.stats }, mixer: { ...this.mixer?.stats }, bank: { ...this.bank?.stats, budget: this.bank?.budgetBytes, noiseBytes: this.noise ? noiseBytes(this.noise) : 0 },
       canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats,
-      dialogue: this.dialogue?.system.stats, radioFeeds: this.radio?.system.activeFeeds, geo: this.geo.stats, timing: { ...this.timing, samples: undefined }, load: this.loadStats,
+      dialogue: this.dialogue?.system.stats, speech: this.voiceLib?.stats, radioFeeds: this.radio?.system.activeFeeds, geo: this.geo.stats, timing: { ...this.timing, samples: undefined }, load: this.loadStats,
       emitters: this.ambience?.emitterCounts(), outputLatency: (this.runtime.ctx as AudioContext).outputLatency ?? 0, baseLatency: (this.runtime.ctx as AudioContext).baseLatency ?? 0,
     };
   }

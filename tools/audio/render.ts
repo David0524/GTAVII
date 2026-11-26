@@ -60,6 +60,14 @@ async function main() {
   await page.goto('http://127.0.0.1:5199/?audio=offline');
   await page.waitForFunction(() => (window as any).__T74AUDIO?.ready, null, { timeout: 120000 });
   let report_limiter: any = null;
+  const report_music: any[] = [];
+  for (const [style, name, bpm] of [[0, 'soul', 104], [1, 'easy', 80], [2, 'jazz', 132], [3, 'salsa', 96]] as const) {
+    const m = await page.evaluate(([s, b]) => (window as any).__T74AUDIO.renderMusic(s, 1974 + s, b, 20), [style, bpm] as const);
+    const { L, R } = decode(m.pcm, m.sr); const lm = measure(L, R, m.sr);
+    writeWav16(`${OUT}/music_${name}.wav`, resample48to32(L), resample48to32(R), 32000);
+    report_music.push({ style: name, bpm, lufs: lm.integrated, truePeak: lm.truePeak, nan: m.nan, realtimeFactor: m.realtimeFactor });
+    console.log(`music ${name}: ${lm.integrated.toFixed(1)} LUFS, TP ${lm.truePeak.toFixed(1)}, ${m.realtimeFactor.toFixed(0)}x realtime (one feed, CPU-only)`);
+  }
   const ids: string[] = await page.evaluate(() => (window as any).__T74AUDIO.scenarios);
   {
     const lt = await page.evaluate(() => (window as any).__T74AUDIO.limiterTest());
@@ -111,7 +119,8 @@ async function main() {
     if (Math.abs(m.integrated - tgt) > TARGET.tol) report.failures.push(`session ${key}: ${m.integrated.toFixed(2)} LUFS, target ${tgt} +-${TARGET.tol}`);
   }
   report.consoleErrors = logs.slice(0, 50);
-  report.limiter = report_limiter;
+  report.limiter = report_limiter; report.music = report_music;
+  for (const m of report_music) if (m.nan || m.truePeak > 0) report.failures.push(`music ${m.style}: nan ${m.nan}, TP ${m.truePeak.toFixed(1)}`);
   if (report_limiter && report_limiter.truePeak > TARGET.tpMax) report.failures.push(`limiter torture true peak ${report_limiter.truePeak.toFixed(2)} dBTP`);
   writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2));
   await browser.close(); await server.close();

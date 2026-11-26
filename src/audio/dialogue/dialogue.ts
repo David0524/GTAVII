@@ -20,6 +20,7 @@ import type { SourceGraph, Voice } from '../core/voices';
 import type { Vec3 } from '../config';
 import { syllableScript, speakerVoice, readingTime, type SpeakerVoice } from './voice';
 import { hash } from '../vehicles/vehicles';
+import type { VoiceLibrary } from './voiceLibrary';
 
 export interface Line { id: string; speaker?: string; emotion?: string; text?: string; if?: string; choices?: unknown[] }
 export interface Script { id: string; lines: Line[] }
@@ -34,7 +35,9 @@ export class DialogueSystem {
   private handlers: { subtitle: ((e: SubtitleEvent) => void)[]; subtitleEnd: ((e: SubtitleEndEvent) => void)[] } = { subtitle: [], subtitleEnd: [] };
   private overheard: { at: Vec3; radius: number; cancel: () => void; voice: Voice | null }[] = [];
   speakers: Record<string, Partial<SpeakerVoice>> = {};
-  stats = { lines: 0, cut: 0, placeholder: 0, barks: 0 };
+  stats = { lines: 0, cut: 0, placeholder: 0, rendered: 0, barks: 0 };
+  /** Rendered speech; null = placeholder voice only. */
+  lib: VoiceLibrary | null = null;
   /** false = never fetch content/ (hermetic tests); registered scripts still work. */
   contentEnabled = true;
 
@@ -55,22 +58,24 @@ export class DialogueSystem {
   }
 
   /** Build the voice for one line. Returns the voice, its duration and a way to cut it. */
-  private speak(line: Line, o: { at?: Vec3 | (() => Vec3); unkeyed: boolean; filter?: 'phone' | 'radio'; gain?: number; onDone: () => void }) {
+  private speak(line: Line, o: { at?: Vec3 | (() => Vec3); unkeyed: boolean; filter?: 'phone' | 'radio'; gain?: number; onDone: () => void }, buf: AudioBuffer | null = null) {
     const speaker = line.speaker ?? 'unknown'; const sv = speakerVoice(speaker, this.speakers);
-    const { script, duration } = syllableScript(line.text ?? '', line.emotion, sv);
-    this.stats.placeholder++;
+    const ph = syllableScript(line.text ?? '', line.emotion, sv); const script = ph.script;
+    const duration = buf ? buf.duration : ph.duration;
+    if (buf) this.stats.rendered++; else this.stats.placeholder++;
     const filter = o.filter; const env = this.env;
     const voice = env.vm.play({ name: `dlg.${line.id}`, bus: 'dialogue', category: 'voice', priority: o.unkeyed ? 6 : 9, duration: duration + 0.3, gain: o.gain ?? 1, at: o.at, occlude: !!o.at, unkeyed: o.unkeyed, pinned: !o.at,
       onEnd: o.onDone,
       build: (ctx) => {
+        if (buf) {
+          // Rendered speech (eSpeak NG, normalised to -20 LUFS offline); same speaker filters as the placeholder.
+          const src = ctx.createBufferSource(); src.buffer = buf; const out = ctx.createGain(); out.gain.value = 1.4; const nodes: AudioNode[] = [src, out];
+          let n: AudioNode = src; for (const x of speakerChain(ctx, filter, nodes)) { n.connect(x); n = x; } n.connect(out);
+          return { output: out, start: (w, off) => src.start(w, Math.min(off, buf.duration)), stop: (w) => { try { src.stop(w); } catch { /* */ } }, dispose: () => { try { src.stop(); } catch { /* */ } for (const x of nodes) try { x.disconnect(); } catch { /* */ } }, setPitch: (p) => { src.playbackRate.value = p; } };
+        }
         const w = new AudioWorkletNode(ctx, 't74-voice', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1], processorOptions: { seed: hash(speaker + line.id), f0: sv.f0, scale: sv.scale, range: sv.range } });
         const out = ctx.createGain(); out.gain.value = 1.8; const nodes: AudioNode[] = [w, out];
-        if (filter) {
-          const f = (type: BiquadFilterType, hz: number, q = 0.7, g = 0) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = hz; b.Q.value = q; b.gain.value = g; nodes.push(b); return b; };
-          const sh = ctx.createWaveShaper(); const c = new Float32Array(257); for (let i = 0; i < 257; i++) { const x = i / 128 - 1; c[i] = Math.tanh(x * 3) / Math.tanh(3); } sh.curve = c; nodes.push(sh);
-          const chain = filter === 'phone' ? [f('highpass', 320, 0.9), f('lowpass', 3300, 1.1), f('peaking', 1800, 1.4, 7), sh] : [f('highpass', 180), f('lowpass', 4500), f('peaking', 1200, 1, 4), sh];
-          let n: AudioNode = w; for (const x of chain) { n.connect(x); n = x; } n.connect(out);
-        } else w.connect(out);
+        { let n: AudioNode = w; for (const x of speakerChain(ctx, filter, nodes)) { n.connect(x); n = x; } n.connect(out); }
         const graph: SourceGraph = {
           output: out,
           start: (_when, offset) => { w.port.postMessage({ cmd: 'say', script: script.filter((s) => s.t >= offset).map((s) => ({ ...s, t: s.t - offset })) }); },
@@ -89,13 +94,15 @@ export class DialogueSystem {
     if (!line.text) return;
     this.stats.lines++;
     const id = `${scriptId}/${lineId}#${++lineSerial}`;
+    const buf = this.lib ? await this.lib.get(line.speaker ?? '', line.emotion, line.text, 2) : null;
+    if (s && this.lib) { const i = s.lines.indexOf(line as Line); if (i >= 0) this.lib.prefetch(s.lines.slice(i + 1, i + 4)); }
     return new Promise((resolve) => {
       const t0 = this.env.ctx.currentTime;
       const { duration } = this.speak(line, { at, unkeyed: false, filter: opts.filter, onDone: () => {
         const remain = readingTime(line.text!) - (this.env.ctx.currentTime - t0);
         const end = () => { this.fire('subtitleEnd', { id, cut: false }); resolve(); };
         if (remain > 0) void sleepAudio(this.env, remain).then(end); else end();
-      } });
+      } }, buf);
       this.fire('subtitle', { id, speaker: line.speaker ?? '', text: line.text!, duration: Math.max(duration, readingTime(line.text!)), channel: opts.channel ?? (opts.filter === 'phone' ? 'phone' : 'scene'), at });
     });
   }
@@ -107,6 +114,7 @@ export class DialogueSystem {
     this.overheard.push(entry);
     const run = async () => {
       const s = await this.script(o.script); if (!s) return;
+      this.lib?.prefetch(s.lines);
       do {
         for (const line of s.lines) {
           if (cancelled) return; if (!line.text) continue;
@@ -114,8 +122,10 @@ export class DialogueSystem {
           while (!cancelled && this.dist(o.at) > o.radius) await sleepAudio(env, 0.25);
           if (cancelled) return;
           const id = `${o.script}/${line.id}#${++lineSerial}`; currentId = id;
+          const buf = this.lib ? await this.lib.get(line.speaker ?? '', line.emotion, line.text, 1.5) : null;
+          if (cancelled) return;
           const done = new Promise<void>((res) => {
-            const { voice, duration } = this.speak(line, { at: o.at, unkeyed: true, gain: o.falloff === 'hard' ? 1.2 : 1, onDone: () => res() });
+            const { voice, duration } = this.speak(line, { at: o.at, unkeyed: true, gain: o.falloff === 'hard' ? 1.2 : 1, onDone: () => res() }, buf);
             current = voice; entry.voice = voice;
             this.fire('subtitle', { id, speaker: line.speaker ?? '', text: line.text!, duration: Math.max(duration, readingTime(line.text!)), channel: 'ambient', overheard: true, at: o.at });
           });
@@ -143,18 +153,19 @@ export class DialogueSystem {
     return p;
   }
   /** A random line of `context` from a bark pool, spoken at `at` (no-op if the pool or context is missing). */
-  async barkFrom(pool: string, context: string, at: Vec3 | (() => Vec3), speaker = pool, subtitle = true): Promise<boolean> {
+  async barkFrom(pool: string, context: string, at: Vec3 | (() => Vec3), speaker = `npc.${pool.replace(/^barks\./, '')}`, subtitle = true): Promise<boolean> {
     const p = await this.poolFetch(pool); const lines = p?.lines.filter((l) => l.context === context) ?? [];
     if (!lines.length) return false;
     const l = lines[(this.env.rng.next() * lines.length) | 0];
-    this.bark(l.text, at, speaker, subtitle, l.emotion); this.stats.barks++;
+    const buf = this.lib ? await this.lib.get(speaker, l.emotion, l.text, 0.8) : null; // a bark that comes late is worse than a placeholder
+    this.bark(l.text, at, speaker, subtitle, l.emotion, buf); this.stats.barks++;
     return true;
   }
 
   /** NPC bark: short positional line (archetype barks come from the narrative's barks files). */
-  bark(text: string, at: Vec3 | (() => Vec3), speaker = 'npc', subtitle = false, emotion = 'neutral') {
+  bark(text: string, at: Vec3 | (() => Vec3), speaker = 'npc', subtitle = false, emotion = 'neutral', buf: AudioBuffer | null = null) {
     const line: Line = { id: `bark${++lineSerial}`, speaker, text, emotion };
-    const { duration } = this.speak(line, { at, unkeyed: true, gain: 0.9, onDone: () => {} });
+    const { duration } = this.speak(line, { at, unkeyed: true, gain: 0.9, onDone: () => {} }, buf);
     if (subtitle) this.fire('subtitle', { id: line.id, speaker, text, duration: Math.max(duration, readingTime(text)), channel: 'ambient', overheard: true, at: typeof at === 'function' ? at() : at });
   }
 
@@ -168,3 +179,11 @@ export function sleepAudio(env: Env, s: number): Promise<void> {
 }
 const waiters: { until: number; res: () => void; ctx: BaseAudioContext }[] = [];
 export function runAudioSleepers(ctx: BaseAudioContext) { for (let i = waiters.length - 1; i >= 0; i--) if (waiters[i].ctx === ctx && ctx.currentTime >= waiters[i].until) { const w = waiters[i]; waiters.splice(i, 1); w.res(); } }
+
+/** Speaker treatment: none, a 1974 telephone (carbon mic, 300-3400 Hz, grit) or a radio speaker. */
+function speakerChain(ctx: BaseAudioContext, filter: 'phone' | 'radio' | undefined, nodes: AudioNode[]): AudioNode[] {
+  if (!filter) return [];
+  const f = (type: BiquadFilterType, hz: number, q = 0.7, g = 0) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = hz; b.Q.value = q; b.gain.value = g; nodes.push(b); return b; };
+  const sh = ctx.createWaveShaper(); const c = new Float32Array(257); for (let i = 0; i < 257; i++) { const x = i / 128 - 1; c[i] = Math.tanh(x * 3) / Math.tanh(3); } sh.curve = c; nodes.push(sh);
+  return filter === 'phone' ? [f('highpass', 320, 0.9), f('lowpass', 3300, 1.1), f('peaking', 1800, 1.4, 7), sh] : [f('highpass', 180), f('lowpass', 4500), f('peaking', 1200, 1, 4), sh];
+}

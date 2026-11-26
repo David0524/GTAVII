@@ -16,7 +16,8 @@
     "data:audit": "python3 tools/pipeline/audit_report.py",
     "audio:test": "tsx tools/audio/render.ts",
     "audio:bake": "tsx tools/audio/bake.ts",
-    "audio:stems": "tsx tools/audio/stems.ts"
+    "audio:stems": "tsx tools/audio/stems.ts",
+    "audio:voices": "tsx tools/audio/voices.ts"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.21.0",

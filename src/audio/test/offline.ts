@@ -114,8 +114,25 @@ export async function limiterTest(sr = 48000) {
   return { pcm: b64(inter.buffer), sr, clamps: st.clips };
 }
 
+/** One generated song straight from the music worklet (no radio speaker), for listening and CPU cost. */
+export async function renderMusic(style: number, seed: number, bpm: number, seconds = 20, sr = 48000) {
+  const ctx = new OfflineAudioContext(2, sr * seconds, sr);
+  const sys = new AudioSystem({ quality: 'high', context: ctx, content: false }); await sys.whenReady();
+  const n = new AudioWorkletNode(ctx, 't74-music', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+  n.connect(ctx.destination); n.port.postMessage({ cmd: 'track', seed, bpm, style, offset: 0, gain: 1, dur: 180 });
+  // Chrome doesn't deliver worklet port messages while an offline render runs flat out: pause at the
+  // first quantum so the 'track' message lands (real-time contexts deliver it immediately).
+  let pausedMs = 0;
+  void ctx.suspend(128 / sr).then(async () => { const t = performance.now(); await new Promise((r) => setTimeout(r, 50)); pausedMs = performance.now() - t; await ctx.resume(); });
+  const t0 = performance.now(); const out = await ctx.startRendering(); const ms = performance.now() - t0 - pausedMs;
+  n.port.postMessage({ cmd: 'dispose' }); n.disconnect(); sys.dispose(false);
+  const L = out.getChannelData(0), R = out.getChannelData(1); const inter = new Float32Array(L.length * 2); let nan = 0;
+  for (let i = 0; i < L.length; i++) { inter[i * 2] = L[i]; inter[i * 2 + 1] = R[i]; if (!Number.isFinite(L[i]) || !Number.isFinite(R[i])) nan++; }
+  return { pcm: b64(inter.buffer), sr, renderMs: ms, realtimeFactor: (seconds * 1000) / ms, nan };
+}
+
 export function startOffline() {
-  (window as unknown as { __T74AUDIO: unknown }).__T74AUDIO = { render, limiterTest, scenarios: SCENARIOS.map((s) => s.id), ready: true };
+  (window as unknown as { __T74AUDIO: unknown }).__T74AUDIO = { render, limiterTest, renderMusic, scenarios: SCENARIOS.map((s) => s.id), ready: true };
   document.getElementById('loading')?.remove();
   document.body.insertAdjacentHTML('beforeend', '<pre id="t74a" style="color:#ccc;padding:20px">audio offline harness ready</pre>');
 }

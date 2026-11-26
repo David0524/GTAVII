@@ -14,10 +14,11 @@
  *   t74-duck     sidechain ducker (input 0 program, input 1 key)
  *   t74-limiter  lookahead true-peak limiter (4x oversampled peak detection)
  *   t74-static   radio tuning static (AM crackle and heterodyne whistles, FM hiss)
- *   t74-music    PLACEHOLDER radio music beds (until the user chooses a music source)
+ *   t74-music    procedural period-style radio instrumentals (worklets/music.ts)
  */
 import { Rng, Pink, Brown, OnePole, Biquad, Mode, Delay, Allpass, Smooth, VOWELS, TAU, flush, clamp } from './dsp';
 import type { EngineProfile } from './engineProfile';
+import { MusicEngine } from './music';
 
 const SR = sampleRate;
 
@@ -656,68 +657,22 @@ class StaticProcessor extends AudioWorkletProcessor {
 }
 registerProcessor('t74-static', StaticProcessor);
 
-// ====================================================================================== PLACEHOLDER music
-/**
- * PLACEHOLDER radio music. Not content: a deliberately plain generative bed (chords, bass, kit)
- * so the station framework, tuning, ducking and speaker filters can be built and measured
- * before the user picks a music source. Deterministic in (seed, time) so a station can be
- * joined mid-song at the right place.
- */
-const SCALES: Record<string, number[]> = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10] };
+// ====================================================================================== radio music
+/** Procedural period-style instrumentals (worklets/music.ts); deterministic per (seed, time). */
 class MusicProcessor extends AudioWorkletProcessor {
-  private on = false; private t = 0; private bpm = 100; private root = 45; private scale = SCALES.minor; private prog = [0, 3, 4, 0]; private style = 0; private seed = 1;
-  private rng = new Rng(1); private padLp = [new OnePole(1400, SR), new OnePole(1400, SR)]; private bassLp = new OnePole(500, SR); private hatHp = new OnePole(6000, SR);
-  private ph = new Float64Array(8); private kickPh = 0; private kickE = 0; private snE = 0; private hatE = 0; private lastStep = -1; private gain = new Smooth(0, 60, SR); private g = 0;
-  private bpBass = 0; private bassE = 0; private bassNote = 45; private dead = false;
+  private eng = new MusicEngine(); private dead = false;
   constructor() {
     super();
     this.port.onmessage = (e) => {
-      const d = e.data as { cmd: string; seed: number; bpm: number; style: number; offset: number; gain: number };
-      if (d.cmd === 'track') {
-        this.seed = d.seed; this.bpm = d.bpm; this.style = d.style; this.t = d.offset; this.on = true; this.g = d.gain ?? 1; this.lastStep = -1;
-        const r = new Rng(d.seed); this.root = 40 + ((r.next() * 12) | 0); this.scale = r.pick([SCALES.minor, SCALES.major, SCALES.dorian]);
-        this.prog = [0, r.pick([3, 5, 2]), r.pick([4, 3, 6]), r.pick([0, 4, 5])];
-      } else if (d.cmd === 'stop') { this.g = 0; } else if (d.cmd === 'dispose') { this.dead = true; }
+      const d = e.data as { cmd: string; seed: number; bpm: number; style: number; offset: number; gain?: number; dur?: number };
+      if (d.cmd === 'track') this.eng.start(d.seed, d.bpm, d.style, d.offset, d.gain ?? 1, d.dur ?? 210);
+      else if (d.cmd === 'stop') this.eng.stop();
+      else if (d.cmd === 'dispose') this.dead = true;
     };
   }
-  private midi(n: number) { return 440 * Math.pow(2, (n - 69) / 12); }
-  private deg(d: number, oct = 0) { const s = this.scale; const o = Math.floor(d / s.length); return this.root + 12 * (oct + o) + s[((d % s.length) + s.length) % s.length]; }
   process(_in: Float32Array[][], outputs: Float32Array[][]) {
     const L = outputs[0][0], R = outputs[0][1] ?? L; if (!L) return !this.dead;
-    const spb = 60 / this.bpm, stepDur = spb / 4;
-    for (let i = 0; i < L.length; i++) {
-      const g = this.gain.step(this.on ? this.g : 0);
-      if (g < 1e-4 && !this.on) { L[i] = 0; R[i] = 0; continue; }
-      this.t += 1 / SR;
-      const step = Math.floor(this.t / stepDur), bar = Math.floor(step / 16), s16 = step % 16;
-      const chord = this.prog[bar % 4];
-      if (step !== this.lastStep) {
-        this.lastStep = step;
-        this.rng = new Rng((this.seed * 7919 + step * 104729) >>> 0);
-        const st = this.style;
-        if (st !== 2 ? s16 % 8 === 0 || (s16 === 10 && this.rng.next() < 0.5) : s16 % 4 === 0) { this.kickE = 1; this.kickPh = 0; }
-        if (s16 % 8 === 4) this.snE = st === 2 ? 0.35 : 0.8;
-        if (s16 % 2 === 0 || (st === 0 && this.rng.next() < 0.3)) this.hatE = 0.3 + 0.2 * this.rng.next();
-        if (s16 % 4 === 0 || (st === 0 && s16 % 4 === 3 && this.rng.next() < 0.6)) { this.bassNote = this.deg(chord + (this.rng.next() < 0.25 ? 4 : 0), 0); this.bassE = 1; }
-      }
-      // pad: triad of the chord, two detuned saws per voice
-      let pl = 0, pr = 0;
-      for (let v = 0; v < 3; v++) {
-        const f = this.midi(this.deg(chord + v * 2, 1));
-        for (let dd = 0; dd < 2; dd++) { const k = v * 2 + dd; this.ph[k] += f * (dd ? 1.003 : 0.997) / SR; if (this.ph[k] > 1) this.ph[k] -= 1; const s = 2 * this.ph[k] - 1; if (dd) pr += s; else pl += s; }
-      }
-      const padAmp = 0.06 * (0.8 + 0.2 * Math.sin(TAU * this.t / (spb * 2)));
-      pl = this.padLp[0].lp(pl) * padAmp; pr = this.padLp[1].lp(pr) * padAmp;
-      this.bpBass += this.midi(this.bassNote) / SR; if (this.bpBass > 1) this.bpBass -= 1;
-      this.bassE *= 0.99993;
-      const bass = this.bassLp.lp(Math.tanh(Math.sin(TAU * this.bpBass) * 2.2)) * 0.22 * this.bassE;
-      this.kickPh += (50 + 110 * this.kickE * this.kickE) / SR; this.kickE *= 0.9993;
-      const kick = Math.sin(TAU * this.kickPh) * this.kickE * 0.35;
-      this.snE *= 0.9985; const sn = (this.rng.bi() * 0.7 + Math.sin(TAU * 190 * this.t) * 0.3) * this.snE * 0.16;
-      this.hatE *= 0.997; const hat = this.hatHp.hp(this.rng.bi()) * this.hatE * 0.07;
-      const m = bass + kick + sn;
-      L[i] = (pl + m + hat * 0.8) * g; R[i] = (pr + m + hat) * g;
-    }
+    this.eng.render(L, R);
     return !this.dead;
   }
 }

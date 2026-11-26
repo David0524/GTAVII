@@ -16,10 +16,11 @@ import type { SourceGraph, Voice } from '../core/voices';
 import { PLACEHOLDER_STATIONS, type StationDef, type SpeechDef } from './stations';
 import { Rng } from '../worklets/dsp';
 import { syllableScript, speakerVoice } from '../dialogue/voice';
+import type { VoiceLibrary } from '../dialogue/voiceLibrary';
 
 interface Segment { kind: 'track' | 'link' | 'ad' | 'news'; dur: number; seed: number; style: number; bpm: number; speech?: SpeechDef; trackId?: string; file?: string }
 interface Cursor { idx: number; seg: Segment; t: number; rng: Rng; newsPending: boolean; lastHour: number; sinceAd: number }
-interface Feed { out: GainNode; music: AudioWorkletNode; voice: AudioWorkletNode; nodes: AudioNode[]; refs: number; idleT: number; segIdx: number }
+interface Feed { out: GainNode; music: AudioWorkletNode; voice: AudioWorkletNode; nodes: AudioNode[]; refs: number; idleT: number; segIdx: number; speech?: AudioBufferSourceNode | null }
 
 export class RadioSystem {
   stations: StationDef[];
@@ -66,16 +67,20 @@ export class RadioSystem {
     if (c.newsPending && s.news) {
       c.newsPending = false;
       const list = s.news.byDate?.[this.env.clock.date] ?? this.eligible(s.news.generic); const sp = list[(r.next() * list.length) | 0];
-      return { kind: 'news', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp };
+      return { kind: 'news', dur: this.speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp };
     }
     if (!s.tracks.length || (c.sinceAd > 3 && s.ads.length && r.next() < 0.5)) {
       const pool = s.tracks.length ? s.ads : [...this.eligible(s.links), ...s.ads]; const sp = pool[(r.next() * pool.length) | 0];
-      c.sinceAd = 0; return { kind: s.ads.includes(sp) ? 'ad' : 'link', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp };
+      c.sinceAd = 0; return { kind: s.ads.includes(sp) ? 'ad' : 'link', dur: this.speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp };
     }
-    if (s.links.length && r.next() < 0.3) { const el = this.eligible(s.links); const sp = el[(r.next() * el.length) | 0]; return { kind: 'link', dur: speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp }; }
+    if (s.links.length && r.next() < 0.3) { const el = this.eligible(s.links); const sp = el[(r.next() * el.length) | 0]; return { kind: 'link', dur: this.speechDur(sp), seed: r.u32(), style: 0, bpm: 0, speech: sp }; }
     const tr = s.tracks[(r.next() * s.tracks.length) | 0]; c.sinceAd++;
     return { kind: 'track', dur: tr.durationSec, seed: hashStr(tr.id), style: tr.style, bpm: tr.bpm, trackId: tr.id, file: tr.file };
   }
+
+  /** Rendered speech for DJ/news/ad lines (emotion 'radio' in the render). */
+  voices: VoiceLibrary | null = null;
+  private speechDur(sp: SpeechDef) { return (this.voices?.duration(sp.speaker, 'radio', sp.text) ?? syllableScript(sp.text, 'neutral', speakerVoice(sp.speaker)).duration) + 0.6; }
 
   /** In-car station (null = off). */
   setStation(id: string | null) {
@@ -143,11 +148,22 @@ export class RadioSystem {
   /** Point a feed at its station's current segment (joining mid-way when needed). */
   private cue(id: string, f: Feed) {
     const c = this.cursors.get(id)!; f.segIdx = c.idx; const s = c.seg;
-    if (s.kind === 'track') { f.music.port.postMessage({ cmd: 'track', seed: s.seed, bpm: s.bpm, style: s.style, offset: c.t, gain: 1 }); f.voice.port.postMessage({ cmd: 'stop' }); }
+    try { f.speech?.stop(); f.speech?.disconnect(); } catch { /* */ } f.speech = null;
+    if (s.kind === 'track') { f.music.port.postMessage({ cmd: 'track', seed: s.seed, bpm: s.bpm, style: s.style, offset: c.t, gain: 1, dur: s.dur }); f.voice.port.postMessage({ cmd: 'stop' }); }
     else {
       f.music.port.postMessage({ cmd: 'stop' });
-      const sp = s.speech!; const v = speakerVoice(sp.speaker); const { script, duration } = syllableScript(sp.text, s.kind === 'ad' ? 'happy' : 'neutral', v);
-      f.voice.port.postMessage({ cmd: 'say', script: script.filter((x) => x.t >= c.t).map((x) => ({ ...x, t: x.t - c.t })) });
+      const sp = s.speech!; const v = speakerVoice(sp.speaker); const { script, duration: pd } = syllableScript(sp.text, s.kind === 'ad' ? 'happy' : 'neutral', v);
+      const rendered = this.voices?.duration(sp.speaker, 'radio', sp.text); const duration = rendered ?? pd;
+      if (rendered !== undefined && this.voices) {
+        f.voice.port.postMessage({ cmd: 'stop' });
+        const startedAt = this.env.ctx.currentTime, seg = f.segIdx;
+        void this.voices.get(sp.speaker, 'radio', sp.text, 3).then((buf) => {
+          if (!buf || f.segIdx !== seg || !this.feeds.has(id)) return;
+          const src = this.env.ctx.createBufferSource(); src.buffer = buf; const g = this.env.ctx.createGain(); g.gain.value = 1.3; src.connect(g).connect(f.out);
+          src.onended = () => { try { src.disconnect(); g.disconnect(); } catch { /* */ } };
+          const off = c.t + (this.env.ctx.currentTime - startedAt); if (off < buf.duration) { src.start(0, off); f.speech = src; }
+        });
+      } else f.voice.port.postMessage({ cmd: 'say', script: script.filter((x) => x.t >= c.t).map((x) => ({ ...x, t: x.t - c.t })) });
       if (id === this.carStation && c.t < 0.5) this.onSubtitle?.({ speaker: sp.speaker, text: sp.text, duration: Math.max(1.2, duration - c.t), channel: 'radio', id: sp.id });
     }
   }
@@ -181,5 +197,5 @@ export class RadioSystem {
   }
 }
 
-function speechDur(sp: SpeechDef) { return syllableScript(sp.text, 'neutral', speakerVoice(sp.speaker)).duration + 0.6; }
+
 function hashStr(s: string) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }

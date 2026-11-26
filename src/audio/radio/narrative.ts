@@ -10,7 +10,7 @@ interface NarrativeStation { id: string; name: string; format?: string; dj?: { n
 
 function styleOf(format: string): { style: number; bpms: number[] } {
   const f = format.toLowerCase();
-  if (/salsa|latin|caribe|mambo|bolero/.test(f)) return { style: 0, bpms: [104, 112, 96, 120] };
+  if (/salsa|latin|caribe|mambo|bolero/.test(f)) return { style: 3, bpms: [94, 100, 90, 104] }; // the arranger's 16-step bar is one 2-3 clave half in cut time
   if (/soul|disco|funk|r&b/.test(f)) return { style: 0, bpms: [98, 112, 104, 120, 92] };
   if (/jazz|swing/.test(f)) return { style: 2, bpms: [84, 132, 96] };
   return { style: 1, bpms: [76, 88, 96, 72] }; // easy listening / pop

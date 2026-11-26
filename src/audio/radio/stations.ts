@@ -20,7 +20,7 @@ export interface StationDef {
 }
 
 const tracks = (prefix: string, style: number, bpms: number[]): TrackDef[] =>
-  bpms.map((bpm, i) => ({ id: `${prefix}.t${i}`, title: `Placeholder track ${i + 1}`, artist: 'placeholder', durationSec: 150 + ((i * 37) % 90), style, bpm }));
+  bpms.map((bpm, i) => ({ id: `${prefix}.t${i}`, title: `Untitled ${i + 1}`, artist: 'placeholder', durationSec: 150 + ((i * 37) % 90), style, bpm }));
 
 export const PLACEHOLDER_STATIONS: StationDef[] = [
   { id: 'station.placeholder_a', name: 'PLACEHOLDER A (FM soul)', band: 'FM', freq: '—', format: 'soul', placeholder: true, tracks: tracks('a', 0, [96, 104, 88, 112, 100, 92]),
