@@ -22,6 +22,7 @@ import { edgeDistance } from '../../src/shared/bounds.ts';
 import { pointInPolygon, projectOnPoly, sampleAt } from '../../src/sim/geom.ts';
 import { LinkKind } from '../../src/sim/laneFormat.ts';
 import { Sig } from '../../src/sim/network.ts';
+import { setTerrainData } from '../../src/shared/terrain.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const DATA = path.join(ROOT, 'public/data');
@@ -30,7 +31,7 @@ const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return
 const MINUTES = +arg('minutes', '10');
 const SEED = +arg('seed', '1974');
 
-const terrainUrl = 'data:application/octet-stream;base64,' + fs.readFileSync(path.join(DATA, 'terrain.bin')).toString('base64');
+{ const tb = fs.readFileSync(path.join(DATA, 'terrain.bin')); setTerrainData(tb.buffer.slice(tb.byteOffset, tb.byteOffset + tb.byteLength)); } // engine E-response to sim request 6
 const fetchBinary = async (p: string) => { const b = fs.readFileSync(path.join(DATA, p)); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength); };
 
 // ------------------------------------------------------------------ ground polygons
@@ -78,7 +79,7 @@ function hashState(sim: Simulation): string {
 }
 
 async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number; checks: boolean; label: string }) {
-  const sim = new Simulation({ seed: SEED, maxVehicles: opts.maxVehicles, maxPeds: opts.maxPeds, fetchBinary, terrainUrl });
+  const sim = new Simulation({ seed: SEED, maxVehicles: opts.maxVehicles, maxPeds: opts.maxPeds, fetchBinary });
   await sim.load();
   sim.setClock(17 * 60 + 30);
   const net = sim.network, g = net.g;

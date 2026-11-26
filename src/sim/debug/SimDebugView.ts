@@ -17,7 +17,7 @@ import { heightAt } from '../../shared/terrain';
 
 const CLASS_COLOR: Record<string, number> = { taxi: 0xe2b318, police: 0x22324f, bus: 0x3f7a55, box_truck: 0x7a5a3a, step_van: 0x9a8f7a, garbage: 0x4f5a3a };
 const CLASS_H: Record<string, number> = { sedan: 1.4, hardtop: 1.35, compact: 1.35, wagon: 1.45, taxi: 1.5, police: 1.5, bus: 3.1, box_truck: 3.0, step_van: 2.7, garbage: 3.2 };
-const DIMS: Record<string, [number, number]> = { sedan: [5.4, 2.0], hardtop: [5.3, 2.0], compact: [4.6, 1.8], wagon: [5.6, 2.0], taxi: [5.3, 2.0], police: [5.4, 2.0], bus: [12, 2.6], box_truck: [8, 2.5], step_van: [6.5, 2.3], garbage: [9, 2.5] };
+const DIMS: Record<string, [number, number]> = { sedan: [5.4, 2.0], hardtop: [5.3, 2.0], compact: [4.6, 1.8], wagon: [5.6, 2.0], taxi: [5.3, 2.0], police: [5.4, 2.0], bus: [12, 2.6], box_truck: [8, 2.5], step_van: [6.5, 2.3], garbage: [9, 2.5], ambulance: [5.8, 2.1], fire_engine: [10, 2.5], ladder_truck: [14, 2.5], mail_truck: [5.6, 2.2], ice_cream: [6, 2.2], motorcycle: [2.2, 0.8], police_motorcycle: [2.3, 0.9], bicycle: [1.8, 0.6] };
 const CAR_TINTS = [0x5b6770, 0x7d3b2f, 0x2f4b6b, 0x8a8170, 0x3e5a3a, 0x9a9a92, 0x4a3b5c, 0x6b5a2e];
 const ORANGE = new THREE.Color(0xff7a1a), RED = new THREE.Color(0xff2a2a);
 const SIG_COLOR = { green: 0x2fe07a, yellow: 0xffc21a, red: 0xff3b30, dark: 0x303030 };
