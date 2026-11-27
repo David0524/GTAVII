@@ -1,5 +1,7 @@
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '../shared/rapier';
+import { loadReport } from '../engine/debug/LoadReport';
 import type * as THREE from 'three/webgpu';
+import { GROUPS } from '../shared/physicsGroups';
 
 /**
  * Physics world (Rapier, WASM). Fixed 60 Hz step with an accumulator.
@@ -38,13 +40,16 @@ export class Physics {
   /** Create/destroy chunk colliders around the focus. Call a few times per second. */
   sync(x: number, z: number, chunkSize: number) {
     let built = 0; const t0 = performance.now();
-    for (const c of this.chunks.values()) {
+    // nearest first: the chunk under the player gets its colliders before anything else in range
+    const list = [...this.chunks.values()].map((c) => {
       const dx = Math.max(Math.abs(x - c.geo.ox) - chunkSize / 2, 0), dz = Math.max(Math.abs(z - c.geo.oz) - chunkSize / 2, 0);
-      const d = Math.hypot(dx, dz);
+      return { c, d: Math.hypot(dx, dz) };
+    }).sort((a, b) => a.d - b.d);
+    for (const { c, d } of list) {
       if (d <= this.radius && !c.colliders && built < 2) { c.colliders = this.build(c.geo); built++; }
       else if (d > this.radius + 120 && c.colliders) { this.drop(c.colliders); c.colliders = null; }
     }
-    if (built) this.stats.buildMs = performance.now() - t0;
+    if (built) { this.stats.buildMs = performance.now() - t0; loadReport.colliders(this.stats.buildMs); }
     let n = 0, k = 0; for (const c of this.chunks.values()) if (c.colliders) { n += c.colliders.length; k++; }
     this.stats.colliders = n; this.stats.chunksWithColliders = k;
   }
@@ -66,7 +71,7 @@ export class Physics {
       if (!idx || idx.length < 3) continue;
       const v = new Float32Array(pos.length);
       for (let i = 0; i < pos.length; i += 3) { v[i] = pos[i] + g.ox; v[i + 1] = pos[i + 1]; v[i + 2] = pos[i + 2] + g.oz; }
-      const desc = RAPIER.ColliderDesc.trimesh(v, new Uint32Array(idx)).setFriction(0.8);
+      const desc = RAPIER.ColliderDesc.trimesh(v, new Uint32Array(idx)).setFriction(0.8).setCollisionGroups(GROUPS.world);
       out.push(this.world.createCollider(desc));
     }
     return out;

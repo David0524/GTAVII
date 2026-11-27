@@ -1,0 +1,24 @@
+{
+  "id": "dlg.m02_movers_after",
+  "context": "M2 o4c. The 11th-floor corridor after Prentiss's two 'movers' have been thrown down the stairs.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.walter_hollis",
+      "emotion": "cheerful",
+      "text": "Shipmate! Two of 'em! Like the old days in Marseille!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "breathless",
+      "text": "They said they were moving your furniture, Mr. Hollis."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.walter_hollis",
+      "emotion": "cheerful",
+      "text": "My furniture is a chair and a radio. I'm keeping both."
+    }
+  ]
+}

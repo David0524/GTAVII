@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "shoe_repair #0  b6146 43 WEST 23 STREET  1894 use 5 style 2  8.5x15.0 m  tenderloin  West 24th Street\nbuild 48 ms (main thread, medium)  verts 5538 tris 4600 cells 2 slots 2 markers 4 colliders 31  [webgl2]",
+  "stats": {
+   "verts": 5538,
+   "tris": 4600,
+   "genMs": 8.8,
+   "bakeMs": 38.8,
+   "cells": 2
+  },
+  "ms": 47.59999999962747,
+  "slots": 2,
+  "markers": 4,
+  "colliders": 31,
+  "building": 6146,
+  "unit": "b6146u3"
+ }
+]

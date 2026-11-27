@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m28_walk_a",
+  "context": "M28 escort leg 1: Corwin to Broadway & W 32nd. Marchers fall in behind.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "I came up from Savannah in twenty-nine. Walked this street looking for work."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "Thirty years washing sheets at the Pennsylvania. Never once walked in the front door."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Today you're walking down the middle of Broadway, Mrs. Pruitt."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "Slowly, Mr. Arce. Slowly. Let them see the hat."
+    }
+  ]
+}

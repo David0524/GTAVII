@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_own_business",
+  "kind": "side",
+  "title": "Own a Business",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The sale terms",
+      "script": "dlg.side_own_business_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Look over Hanyang House, W 35th",
+      "to": "loc.korean_restaurant",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Sign for the share",
+      "script": "dlg.side_own_business_2"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "First week's books, W 34th & 9th",
+      "to": "W 34th St & 9th Ave",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$40–150 a week"
+  },
+  "where": "Businesses for sale (economy.json)",
+  "systems": [
+    "economy",
+    "combat",
+    "bribes"
+  ],
+  "mobile": "Trouble events are short and skippable (income dips).",
+  "rank": 22,
+  "slice": false
+}

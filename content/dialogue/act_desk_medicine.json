@@ -1,0 +1,18 @@
+{
+  "id": "dlg.act_desk_medicine",
+  "context": "Desk request: medicine run.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.sro_resident",
+      "emotion": "worried",
+      "text": "Mr. Arce, my pills ran out. The all-night place on Thirty-Fourth has them."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Write it down. I'll go on my break. Lock your door."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "dlg.side_the_lost_husband_1",
+  "context": "Mrs. Cho at the Velvet Moon's box office.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.albertine_cho",
+      "emotion": "certain",
+      "text": "Harold is alive. I saw him Tuesday. Third feature, second reel."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.albertine_cho",
+      "emotion": "proud",
+      "text": "He always said he'd be in pictures. Nobody believed him."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.albertine_cho",
+      "emotion": "steady",
+      "text": "I'm not crazy. I'm a widow. It's different."
+    }
+  ]
+}

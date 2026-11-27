@@ -1,0 +1,193 @@
+{
+  "id": "mission.surcharge",
+  "title": "Surcharge",
+  "number": 4,
+  "act": 1,
+  "chapter": 2,
+  "playAs": "char.teddy_arce",
+  "date": "1974-06-26",
+  "durationMin": 17,
+  "pillars": [
+    "P1",
+    "P3"
+  ],
+  "giver": "char.sam_feld",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "07:00",
+      "15:00"
+    ],
+    "weather": [
+      "clear",
+      "overcast"
+    ],
+    "dateRange": [
+      "1974-06-25",
+      "1974-07-04"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.sam_feld",
+    "at": "loc.feld_loft",
+    "note": "Carmen set it up: twenty dollars for a day's carrying."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "script": "dlg.m04_feld",
+      "text": "See Mr. Feld, W 37th St loft"
+    },
+    {
+      "id": "o2",
+      "type": "follow",
+      "target": "char.dwayne_little",
+      "keepWithinM": 40,
+      "text": "Follow Dwayne and the racks"
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "item": "item.feld_sample_racks",
+      "to": "W 35th St & 7th Ave",
+      "text": "Racks to the store dock, W 35th St",
+      "note": "Loading dock of the Herald Square department store (generic until N6 names it).",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "item": "item.feld_sample_bags",
+      "to": "loc.baek_wholesale",
+      "text": "Sample bags to W 29th St",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "script": "dlg.m04_baek_envelope",
+      "text": "Watch the truck at the Baeks'",
+      "note": "A Carriers' driver demands the surcharge from Baek. Choice: step in, or walk on."
+    },
+    {
+      "id": "o5b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.carrier_muscle",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Fight off the Carriers' men",
+      "weapons": [
+        "item.tire_iron"
+      ],
+      "note": "Only if Teddy chose 'Step in'; otherwise they leave and Baek pays (choice-gated, `if`). Cops among the targets are ordinary killable police (heat only).",
+      "if": "flag.teddy_stepped_in_baek"
+    },
+    {
+      "id": "o5c",
+      "type": "dialogue",
+      "script": "dlg.m04_brawl_after",
+      "text": "Help Mr. Baek up",
+      "if": "flag.teddy_stepped_in_baek",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o6",
+      "type": "goto",
+      "to": "W 37th St & 7th Ave",
+      "radius": 20,
+      "text": "Back to 37th & Seventh"
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "script": "dlg.m04_augie",
+      "text": "Augie Lomax wants a word"
+    }
+  ],
+  "fail": [
+    {
+      "type": "target_lost"
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3",
+    "o5",
+    "o5b",
+    "o6"
+  ],
+  "rewards": {
+    "money": 20,
+    "setFlags": [
+      "flag.saw_surcharge"
+    ],
+    "unlock": [
+      "mission.contact_sheet"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.dwayne_little": 1,
+      "char.teddy_arce/char.augie_lomax": -1
+    }
+  },
+  "npcs": [
+    "char.sam_feld",
+    "char.dwayne_little",
+    "char.jung_ho_baek",
+    "char.augie_lomax",
+    "char.hector_villalba",
+    "char.carmen_arce"
+  ],
+  "archetypes": [
+    "npc.garment_pushboy",
+    "npc.garment_cutter",
+    "npc.truck_driver"
+  ],
+  "vehicles": [
+    "vehicle_role.box_truck"
+  ],
+  "locations": [
+    "loc.feld_loft",
+    "W 35th St & 7th Ave",
+    "loc.baek_wholesale",
+    "W 37th St & 7th Ave"
+  ],
+  "mobile": "Following is generous (40 m) through rush-hour crowds, and losing Dwayne only fails after 30 s out of range with a 'Dwayne's at 36th & Seventh' hint. Pushing a rack is one held button. The step-in choice is untimed.",
+  "design": "The surcharge is shown, not explained: envelopes on dashboards, the Baeks' refusal, Augie's 'I remember you from the Christmas list'. The choice sets relationships only (Baek +1 and Augie −1 if Teddy steps in; Baek −1 if he walks on). Those are applied in the dialogue's setRelationships. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.augie_lomax",
+      "reason": "died"
+    },
+    {
+      "character": "char.dwayne_little",
+      "reason": "died"
+    },
+    {
+      "character": "char.jung_ho_baek",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

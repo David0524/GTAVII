@@ -1,0 +1,24 @@
+{
+  "id": "dlg.m06_after_fight",
+  "context": "M6 o5c. W 38th St. Lonnie's boys are on the pavement. Delphine counts the envelope.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "breathless",
+      "text": "Rule three: when they see you, you're already gone. Three and a half: unless they grab."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.tina_mercado",
+      "emotion": "awed",
+      "text": "Del. You cut his sleeve off. His whole sleeve."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Ninety-five dollars. All there. Walk with me to the Pennsylvania, Tina."
+    }
+  ]
+}

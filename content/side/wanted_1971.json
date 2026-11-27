@@ -1,0 +1,56 @@
+{
+  "id": "mission.side_wanted_1971",
+  "kind": "side",
+  "title": "The Posters of '71",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Teddy remembers '71",
+      "script": "dlg.side_wanted_1971_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Station-house corridor",
+      "to": "loc.station_house",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Read the first poster",
+      "script": "dlg.side_wanted_1971_2"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "The post office wall, W 33rd & 8th",
+      "to": "W 33rd St & 8th Ave",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Lore; a hidden line in M25"
+  },
+  "where": "Station-house corridors, post office walls",
+  "systems": [
+    "interiors",
+    "Teddy's past"
+  ],
+  "mobile": "Tap to read.",
+  "rank": 46,
+  "slice": false
+}

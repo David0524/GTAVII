@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_otb_tips_1",
+  "context": "A fare whispers a tip.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_fare_businessman",
+      "emotion": "low",
+      "text": "Fourth race at Belmar. Brass Token. Don't ask how I know. Don't tell your mother."
+    }
+  ]
+}

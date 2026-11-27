@@ -1,0 +1,67 @@
+{
+  "id": "mission.side_rizo_147",
+  "kind": "side",
+  "title": "RIZO 147",
+  "number": null,
+  "leads": [
+    "char.delphine_moore"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "RIZO's photo request",
+      "script": "dlg.side_rizo_147_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Down to the platform",
+      "marker": "interior.penn_ind_platform"
+    },
+    {
+      "id": "o3",
+      "type": "wait",
+      "text": "Time the train's arrival",
+      "seconds": 20
+    },
+    {
+      "id": "o4",
+      "type": "photo",
+      "text": "Photograph the whole-car piece",
+      "subject": "npc.subway_rider",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Show RIZO the print",
+      "script": "dlg.side_rizo_147_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "His piece on the Ticker's front page; a tag on a lead's home wall"
+  },
+  "where": "Subway cars, the passage, a rooftop",
+  "systems": [
+    "subway",
+    "photo mode",
+    "time of day"
+  ],
+  "mobile": "Train times on the HUD; auto-frame.",
+  "rank": 43,
+  "slice": false,
+  "parts": 3,
+  "laterParts": [
+    "Part 2: Guard the sketchbook from the rival crew.",
+    "Part 3: The print on the Ticker's front page."
+  ]
+}

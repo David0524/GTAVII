@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m08_rita",
+  "context": "M8 o6. Rita's bar. Delphine slides onto a stool, breathing hard. Brannock bursts in a beat later.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "calm",
+      "text": "Sugar, you've been on that stool an hour. Haven't you?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "breathless",
+      "text": "Hour and a half. Gin and tonic, no gin."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "angry",
+      "text": "Rita. A woman came in here. Tall. Red dress. Bag."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "Officer, every woman in here is tall in the right light. You drinking or leaving?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "flat",
+      "text": "I'll find the camera, Delphine. I'll find the film."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Film? Honey, I don't even own a radio."
+    },
+    {
+      "id": "l7",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Twenty years on that avenue. Knees like a trucker, memory like a cop. Show me later."
+    }
+  ]
+}

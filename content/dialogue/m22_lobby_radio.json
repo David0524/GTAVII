@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m22_lobby_radio",
+  "context": "M22 o1. Corwin lobby, 21:00. Every resident around Hollis's radio on the desk. Invented narration; no real voice or name.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.radio_crowd",
+      "emotion": "radio",
+      "text": "(Radio) …the President, speaking tonight from the White House, has announced…"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.radio_crowd",
+      "emotion": "radio",
+      "text": "(Radio) …that he will resign the office, effective at noon tomorrow…"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "quiet",
+      "text": "Well. I lived to see that. Walter would've had a speech about it."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "If a President can be read out of office, Mr. Arce, so can a lawyer."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.manny_soto",
+      "emotion": "nervous",
+      "text": "Teddy. Phone. It's Mayhew. He sounds like he's underwater."
+    }
+  ]
+}

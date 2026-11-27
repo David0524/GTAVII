@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m17_two_bankers",
+  "context": "M17 o4. Nick's penthouse office. Delphine across the desk. Two bankers, one table.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Miss Moore. My agent says you're persistent. My agent is right."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Twenty women. Five dollars a week. Seven years. Not one default."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "impressed",
+      "text": "Seven years without a default. My bank should hire you."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Your bank wouldn't let me in the door, Mr. Varelas. Neither would your agent."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "honest",
+      "text": "Then we have something in common. My bank won't let me in the door either."
+    }
+  ]
+}

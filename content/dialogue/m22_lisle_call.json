@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m22_lisle_call",
+  "context": "M22 o8. (Nick.) Varelas office, lights low. The phone. Lisle's voice, perfectly calm.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Nicholas. Historic night. People will make rash decisions. Don't."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Come to the Pennsylvania. We'll reassure our partners. Together."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "cold",
+      "text": "Reassure them of what, Howard?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "That your signature is still worth what they paid for it."
+    }
+  ]
+}

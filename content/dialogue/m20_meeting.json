@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m20_meeting",
+  "context": "M20 o3. Lisle's conference room. Augie, Villalba, Wurtz in a borrowed suit, Nick. Lisle at the head.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Gentlemen. Our arrangement is simple. Nobody touches cash. Everything is a fee."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.augie_lomax",
+      "emotion": "gruff",
+      "text": "Surcharge comes in, your cut goes out. Same as always. What's new?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "What's new is that it's legal. Nicholas's name is on every hotel. Very clean."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "startled",
+      "text": "Every hotel?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.dennis_wurtz",
+      "emotion": "amused",
+      "text": "The Commission was weather. Weather passes. Paperwork's climate. Right, counselor?"
+    },
+    {
+      "id": "l6",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Notwithstanding the lieutenant's metaphors. Yes. Every hotel."
+    }
+  ]
+}

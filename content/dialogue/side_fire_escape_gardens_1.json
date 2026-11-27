@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_fire_escape_gardens_1",
+  "context": "Moretti's wager about fire-escape tomatoes.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.anna_moretti",
+      "emotion": "loud",
+      "text": "Every fire escape on the West Side has a tomato plant. Photograph the best fifteen."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.anna_moretti",
+      "emotion": "proud",
+      "text": "Mine's on Twenty-Eighth. It's the best. Don't argue. Photograph it anyway."
+    }
+  ]
+}

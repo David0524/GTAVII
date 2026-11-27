@@ -1,0 +1,18 @@
+{
+  "id": "dlg.act_desk_phone",
+  "context": "Desk request: a payphone call for Odessa.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "formal",
+      "text": "My sister calls the payphone on Thirty-Second at eleven. My knees say no."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "I'll take the call and bring the message. Word for word."
+    }
+  ]
+}

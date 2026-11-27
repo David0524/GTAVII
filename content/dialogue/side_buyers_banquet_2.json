@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_buyers_banquet_2",
+  "context": "Seating the buyers (Nick).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.trade_dinner_guest",
+      "emotion": "pleased",
+      "text": "Varelas! A window seat. You remembered I like the view of the Garden."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "I remember everything about my buyers. Especially the size of their orders."
+    }
+  ]
+}

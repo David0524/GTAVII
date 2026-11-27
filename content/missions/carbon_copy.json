@@ -1,0 +1,201 @@
+{
+  "id": "mission.carbon_copy",
+  "title": "Carbon Copy",
+  "number": 21,
+  "act": 2,
+  "chapter": 7,
+  "playAs": "char.teddy_arce",
+  "date": "1974-08-06",
+  "durationMin": 18,
+  "pillars": [
+    "P1",
+    "P2"
+  ],
+  "giver": "char.bernard_ostrow",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "19:00",
+      "23:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-06",
+      "1974-08-06"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.bernard_ostrow",
+    "at": "loc.corwin_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Bernard has a plan. And a stopwatch.",
+      "script": "dlg.m21_plan"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Lisle's building, Fifth & 36th",
+      "to": "loc.lisle_office",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Marjorie, in the lobby, with keys",
+      "script": "dlg.m21_marjorie",
+      "if": "flag.branch_a_wire"
+    },
+    {
+      "id": "o3b",
+      "type": "dialogue",
+      "text": "Delroy knows the night man's habits",
+      "script": "dlg.m21_delroy",
+      "if": "flag.branch_a_burned"
+    },
+    {
+      "id": "o4",
+      "type": "switch_to",
+      "text": "(Nick)",
+      "character": "char.nick_varelas",
+      "cut": "transition"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Keep Lisle at dinner. Order dessert.",
+      "script": "dlg.m21_dinner"
+    },
+    {
+      "id": "o6",
+      "type": "switch_to",
+      "text": "(Teddy)",
+      "character": "char.teddy_arce",
+      "cut": "transition"
+    },
+    {
+      "id": "o7",
+      "type": "enter_interior",
+      "text": "Into Lisle's office, 11th floor",
+      "marker": "interior.lisle_office",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "Copy the ledger. Put it back.",
+      "script": "dlg.m21_copy",
+      "if": "flag.branch_a_wire"
+    },
+    {
+      "id": "o8b",
+      "type": "dialogue",
+      "text": "Take the ledger. All of it.",
+      "script": "dlg.m21_steal",
+      "if": "flag.branch_a_burned"
+    },
+    {
+      "id": "o9",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.night_watchman",
+          "count": 1
+        },
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lisle's security on the freight stairs",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "note": "The watchman is non-lethal; the driver's men are hired guns. Converted from the exit goto. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o10",
+      "type": "dialogue",
+      "text": "Bernard reads it on the lobby table",
+      "script": "dlg.m21_bernard",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "spotted",
+      "by": "npc.night_watchman",
+      "withinM": 5,
+      "note": "Proposed; fallback timer."
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o6",
+    "o9"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.act3_started"
+    ],
+    "unlock": [
+      "mission.the_address"
+    ],
+    "act": 3
+  },
+  "npcs": [
+    "char.bernard_ostrow",
+    "char.marjorie_kell",
+    "char.delroy_tate",
+    "char.howard_lisle",
+    "char.nick_varelas"
+  ],
+  "archetypes": [
+    "npc.night_watchman",
+    "npc.office_cleaner"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.corwin_hotel",
+    "loc.lisle_office",
+    "loc.steakhouse"
+  ],
+  "mobile": "The infiltration is about timing and doors (the watchman has a fixed loop shown on a radio clock), not stealth reflexes. Being spotted resets to the o7 checkpoint. Nick's dinner is a calm dialogue that the player can stretch with menu choices. Branch variants via `if` (ENGINE_REQUESTS 8).",
+  "design": "**End of Act 2.** Branch A pays off. With the wire, Marjorie lets Teddy in, he copies the ledger and returns it, and she hands over her carbons (flag.have_marjorie_carbons, set in dialogue). Burned, he steals it, and Lisle knows by morning. Either way the oldest page is Mayhew's. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "dusk",
+  "essential": [
+    {
+      "character": "char.bernard_ostrow",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

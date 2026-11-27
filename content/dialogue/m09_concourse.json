@@ -1,0 +1,87 @@
+{
+  "id": "dlg.m09_concourse",
+  "context": "M9 o10. Penn Station concourse, under the Garden. Fireworks thud far away. They catch their breath.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "breathless",
+      "text": "They came for the envelopes. Your fifty's in here."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "breathless",
+      "text": "Lonnie wants your job. Brannock wants you to look weak. Congratulations."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "I followed you. I wanted to see where my money sleeps."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "Now you know. Thirty-First and Eighth, in a sergeant's glove box."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Give her back her fifty.",
+          "goto": "l_give",
+          "setFlags": [
+            "flag.teddy_returned_tax"
+          ],
+          "setRelationships": {
+            "char.teddy_arce/char.delphine_moore": 2
+          }
+        },
+        {
+          "text": "Keep it. It's not mine to give.",
+          "goto": "l_keep"
+        }
+      ]
+    },
+    {
+      "id": "l_give",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Here. Tell Mayhew I lost it running. He'll believe it."
+    },
+    {
+      "id": "l_give2",
+      "speaker": "char.delphine_moore",
+      "emotion": "moved",
+      "text": "Rule six: nobody gives money back. You're breaking all my rules, Mr. Arce.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_keep",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "It's not mine. That's the whole job. It's never mine."
+    },
+    {
+      "id": "l_keep2",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Honest. In a way that doesn't help anybody. Okay.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Delphine. Since we've been shot at together. Well, almost."
+    },
+    {
+      "id": "l_end2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Teddy. Happy Fourth, Delphine."
+    }
+  ]
+}

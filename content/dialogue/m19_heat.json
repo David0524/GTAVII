@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m19_heat",
+  "context": "M19 o1. Corwin lobby, 98 degrees. Residents in chairs with wet towels. The elevator is dead.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "urgent",
+      "text": "Mr. Arce. The power's off from six to fourteen. Since this morning. Rewiring, they say."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.manny_soto",
+      "emotion": "ashamed",
+      "text": "Prentiss's order, Teddy. Gus threw the switch. I just hand out the notices."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.inez_rivera",
+      "emotion": "angry",
+      "text": "My kids are at camp, thank God. The old men upstairs aren't at camp."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "worried",
+      "text": "Mr. Hollis hasn't come down. He always comes down for the shipping news."
+    }
+  ]
+}

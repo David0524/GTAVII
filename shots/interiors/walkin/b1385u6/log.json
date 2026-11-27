@@ -1,0 +1,98 @@
+[
+ {
+  "d": 8,
+  "inside": null,
+  "live": 6,
+  "visCells": 4,
+  "draws": 62,
+  "extHidden": false
+ },
+ {
+  "d": 5,
+  "inside": null,
+  "live": 7,
+  "visCells": 6,
+  "draws": 65,
+  "extHidden": false
+ },
+ {
+  "d": 3,
+  "inside": null,
+  "live": 7,
+  "visCells": 6,
+  "draws": 62,
+  "extHidden": false
+ },
+ {
+  "d": 1.5,
+  "inside": null,
+  "live": 7,
+  "visCells": 6,
+  "draws": 61,
+  "extHidden": false
+ },
+ {
+  "d": 0.5,
+  "inside": null,
+  "live": 8,
+  "visCells": 5,
+  "draws": 59,
+  "extHidden": false
+ },
+ {
+  "d": -0.5,
+  "inside": {
+   "interiorId": "b1385u6",
+   "kind": "diner",
+   "roomVolume": 608,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 8,
+  "visCells": 5,
+  "draws": 59,
+  "extHidden": false
+ },
+ {
+  "d": -1.5,
+  "inside": {
+   "interiorId": "b1385u6",
+   "kind": "diner",
+   "roomVolume": 608,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 9,
+  "visCells": 6,
+  "draws": 66,
+  "extHidden": false
+ },
+ {
+  "d": -3,
+  "inside": {
+   "interiorId": "b1385u6",
+   "kind": "diner",
+   "roomVolume": 608,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 9,
+  "visCells": 6,
+  "draws": 61,
+  "extHidden": false
+ },
+ {
+  "d": -5,
+  "inside": {
+   "interiorId": "b1385u6",
+   "kind": "diner",
+   "roomVolume": 608,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 9,
+  "visCells": 4,
+  "draws": 53,
+  "extHidden": false
+ }
+]

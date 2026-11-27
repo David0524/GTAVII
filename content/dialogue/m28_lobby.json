@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m28_lobby",
+  "context": "M28 o1. Corwin lobby, 09:55. Odessa in a white church hat and gloves. A bedsheet banner. Carmen arrives with the operators.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "proud",
+      "text": "Mr. Arce. Hand me my cane. If they want us out, they can watch us walk."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.carmen_arce",
+      "emotion": "proud",
+      "text": "Mijo! The Local came. Feld owes us. Mei-lin brought the whole floor."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "I've prepared a statement. Short words only. Like 'no.'"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Broadway's closed till one. Let's use it."
+    }
+  ]
+}

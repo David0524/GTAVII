@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_pigeon_1",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ignatz_halloran",
+      "emotion": "conspiratorial",
+      "text": "Somebody's stealing my champions mid-race. Over these roofs. I need young legs."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ignatz_halloran",
+      "emotion": "proud",
+      "text": "That's Admiral Nelson. Blue bar, white band. Follow him. Don't lose him at the tanks."
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+[
+  {
+    "id": "int.corwin_notice_no_visitors",
+    "file": "int_corwin_notice_no_visitors.png",
+    "owner": "interiors",
+    "use": "Corwin lobby desk partition notice (0.30 × 0.22 m); ingest to art/interiors/corwin_notice_no_visitors.png",
+    "aspect": "1.36:1",
+    "size": "1360×1000",
+    "sizeFinal": true,
+    "prompt": "Create a hand-lettered hotel-desk notice: black marker capitals on a yellowed card, slightly crooked, two strips of old cellophane tape, a brown nicotine stain at one corner. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: \"NO VISITORS AFTER 11 P.M. — MGMT.\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.36:1.",
+    "text": "NO VISITORS AFTER 11 P.M. — MGMT.",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect and legible at 512 px",
+      "the card fills the frame",
+      "no real brand or logo",
+      "1974-plausible materials only"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "int.corwin_notice_rent",
+    "file": "int_corwin_notice_rent.png",
+    "owner": "interiors",
+    "use": "Corwin lobby notice (0.22 × 0.28 m); ingest to art/interiors/corwin_notice_rent.png",
+    "aspect": "0.79:1",
+    "size": "790×1000",
+    "sizeFinal": true,
+    "prompt": "Create a typed notice on thin onionskin paper, the typewriter ribbon fading unevenly, a single thumbtack hole near the top. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: \"RENT DUE MONDAYS IN ADVANCE. NO COOKING IN ROOMS.\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 0.79:1.",
+    "text": "RENT DUE MONDAYS IN ADVANCE. NO COOKING IN ROOMS.",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect and legible at 512 px",
+      "typewriter typeface, not a computer font",
+      "no real brand or logo",
+      "1974-plausible materials only"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "int.corwin_notice_elevator",
+    "file": "int_corwin_notice_elevator.png",
+    "owner": "interiors",
+    "use": "Corwin lobby elevator sign (0.25 × 0.32 m); ingest to art/interiors/corwin_notice_elevator.png",
+    "aspect": "0.78:1",
+    "size": "780×1000",
+    "sizeFinal": true,
+    "prompt": "Create a cardboard sign lettered in red and black marker, corners curled, a little water-stained. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: \"ELEVATOR OUT OF ORDER — USE STAIRS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 0.78:1.",
+    "text": "ELEVATOR OUT OF ORDER — USE STAIRS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect and legible at 512 px",
+      "red and black marker only",
+      "no real brand or logo",
+      "1974-plausible materials only"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "int.corwin_lobby_picture",
+    "file": "int_corwin_lobby_picture.png",
+    "owner": "interiors",
+    "use": "Corwin lobby wall print (0.68 × 0.58 m; the game draws the frame); ingest to art/interiors/corwin_lobby_picture.png",
+    "aspect": "1.17:1",
+    "size": "1170×1000",
+    "sizeFinal": true,
+    "prompt": "Create a faded 1930s hotel-lobby landscape print: a river valley in muted greens and dusty blues, sun-bleached toward one side, faint foxing. The print only, with no frame, no mat and no wall. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1.17:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "no frame or wall visible",
+      "no real brand or logo",
+      "1974-plausible materials only"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "int.teddy_academy_photo",
+    "file": "int_teddy_academy_photo.png",
+    "owner": "interiors",
+    "use": "Teddy's room, Corwin 9F: academy class photo (0.25 × 0.20 m; face down in act 1); ingest to art/interiors/teddy_academy_photo.png",
+    "aspect": "1.25:1",
+    "size": "1250×1000",
+    "sizeFinal": true,
+    "prompt": "Create a 1950s black-and-white police academy class photograph: three rows of young recruits in generic dark dress uniforms and caps, a plain stone building behind, the print creased across one corner and slightly yellowed. Invented people, no real department insignia or badges legible. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. People are allowed in this image. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1.25:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "no real insignia; badges and patches are blurred or generic",
+      "faces generic, resembling no real person",
+      "no real brand or logo",
+      "1974-plausible materials only"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.teddy_calendar",
+    "file": "int_teddy_calendar.png",
+    "owner": "interiors",
+    "use": "Teddy's room, Corwin 9F: wall calendar (0.30 × 0.45 m); ingest to art/interiors/teddy_calendar.png",
+    "aspect": "0.67:1",
+    "size": "670×1000",
+    "sizeFinal": true,
+    "prompt": "Create a 1974 giveaway wall calendar from a neighbourhood hardware store: the top two-thirds a modest painting of a working harbour with tugboats at dusk (no people, no pin-up), below it the store name in red block capitals and the month, and below that a plain EMPTY date grid (ruled boxes with no numbers; the game sets the dates). Slightly warped paper, a nail hole at the top. Manhattan, 1974. Photorealistic texture, photographed flat and frontal, evenly lit with no strong shadows, no perspective, filling the frame edge to edge. No people (unless stated), no logos, no real brands, no modern materials. EXACT TEXT: \"KRAUSE HARDWARE · JULY 1974\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 0.67:1.",
+    "text": "KRAUSE HARDWARE · JULY 1974",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect and legible at 512 px",
+      "date grid boxes empty (no numbers)",
+      "no real brand or logo",
+      "1974-plausible materials only"
+    ],
+    "priority": 2
+  }
+]

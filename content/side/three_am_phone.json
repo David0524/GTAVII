@@ -1,0 +1,70 @@
+{
+  "id": "mission.side_three_am_phone",
+  "kind": "side",
+  "title": "The Three A.M. Phone",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "The payphone, W 33rd & 8th",
+      "to": "W 33rd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "wait",
+      "text": "Wait for the three o'clock ring",
+      "seconds": 30
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "The caller's first tip",
+      "script": "dlg.side_three_am_phone_1"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Check the tip, W 36th & 9th",
+      "to": "W 36th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o5",
+      "type": "photo",
+      "text": "Photograph what the caller named",
+      "subject": "npc.carrier_muscle",
+      "minScreenFraction": 0.05
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Story intel; corroboration evidence route for Branch B"
+  },
+  "where": "Payphone at W 33rd St & 8th Ave",
+  "systems": [
+    "payphones",
+    "time of day",
+    "photo mode"
+  ],
+  "mobile": "Calls are subtitled; tips are marked on the minimap only after you check them.",
+  "rank": 32,
+  "slice": false,
+  "parts": 4,
+  "laterParts": [
+    "Part 2: A second tip, a meeting to watch.",
+    "Part 3: A third tip, a stash to find.",
+    "Part 4: The caller is revealed as Marjorie Kell."
+  ]
+}

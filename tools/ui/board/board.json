@@ -1,0 +1,194 @@
+[
+ {
+  "group": "Map",
+  "title": "The map: our city from above",
+  "note": "Direction A as the user picked it: an aerial render of our own city in lit tiles with smooth zoom, fog over ground you haven't walked, the route in amber, our own blip drawings with no discs, landmark silhouettes, and street and district names placed so nothing collides. Legend, tools and the data credit live in one slim panel.",
+  "ref": "GTA V/VI render the world from above and mute it so blips read; RDR2 fogs what you haven't seen. We do both. Short of GTA: no zoomed-out regional view yet (the playable sheet is the whole world).",
+  "desktop": "img/map_after_desktop.jpg",
+  "phone": "img/map_after_phone.jpg"
+ },
+ {
+  "group": "Map",
+  "title": "Map: a selected story place",
+  "note": "The card sits at the top of the panel, never over the map: an amber label, the name in Franklin, the time window as a quiet amber line, one primary action.",
+  "ref": "",
+  "desktop": "img/map_mission_card_desktop.jpg",
+  "phone": "img/map_mission_card_phone.jpg"
+ },
+ {
+  "group": "HUD",
+  "title": "HUD in play",
+  "note": "Type on the world, not plates: the objective set in Franklin under an amber rule, clock and cash top right, the place you enter wiped in big over an amber bar. The minimap is a square window onto the same aerial. Routine discoveries are silent.",
+  "ref": "GTA V/VI: radar bottom-left, minimal text. RDR2: meters that fade. Ours fades by setting; heat is radio text and cones, not stars.",
+  "desktop": "img/hud_flat_desktop.jpg",
+  "phone": "img/hud_flat_phone.jpg"
+ },
+ {
+  "group": "HUD",
+  "title": "Mission end: done",
+  "note": "A band wiped across the frame, the mission's name huge, the cut counting up in money green. Original wording and layout.",
+  "ref": "GTA's pass screen is a centred banner; ours is a left-weighted band so the world stays in frame.",
+  "desktop": "img/mission_pass_desktop.jpg",
+  "phone": "img/mission_pass_phone.jpg"
+ },
+ {
+  "group": "HUD",
+  "title": "Mission end: failed",
+  "note": "Same band, a red rule, one plain line for why.",
+  "ref": "",
+  "desktop": "img/mission_fail_desktop.jpg",
+  "phone": "img/mission_fail_phone.jpg"
+ },
+ {
+  "group": "Pause hub",
+  "title": "Pockets",
+  "note": "The hub header is the system: the screen name huge, where and when under it, icon tabs, money right. Pockets is one list grouped by where things sit on you (hidden, bulging, seen), and one hero: your cash, or the item you pick.",
+  "ref": "RDR2's satchel is a grid of items; ours keeps concealment as the organising idea, which is this game's rule.",
+  "desktop": "img/pockets_desktop.jpg",
+  "phone": "img/pockets_phone.jpg"
+ },
+ {
+  "group": "Pause hub",
+  "title": "Paper",
+  "note": "The newspaper is the object and the hero, straight on, print-correct. The UI rail beside it switches pages and counts the ads you can add to your map.",
+  "ref": "RDR2's newspaper is the closest reference; ours is playable (ads add places, results feed the numbers).",
+  "desktop": "img/paper_desktop.jpg",
+  "phone": "img/paper_phone.jpg"
+ },
+ {
+  "group": "Pause hub",
+  "title": "Paper: results and the number",
+  "note": "The runner's betting slip moved out of the paper into the UI rail: three digit wheels and the stakes.",
+  "ref": "",
+  "desktop": "img/paper_inside_desktop.jpg",
+  "phone": "img/paper_inside_phone.jpg"
+ },
+ {
+  "group": "Pause hub",
+  "title": "Business",
+  "note": "This week's take as the hero number over an eight-week band; trouble first, as actions; then the book as a ledger.",
+  "ref": "GTA V's property management is a list; ours leads with the number and the problems.",
+  "desktop": "img/business_desktop.jpg",
+  "phone": "img/business_phone.jpg"
+ },
+ {
+  "group": "Pause hub",
+  "title": "Cars",
+  "note": "The car that needs you is the hero: a New York plate, the car drawn in its paint, the boot, and the summonses as paper stubs with their own Pay buttons.",
+  "ref": "Short of GTA: drawn car profiles stand in for renders of the actual car.",
+  "desktop": "img/cars_desktop.jpg",
+  "phone": "img/cars_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Used-car lot: haggling",
+  "note": "Played as a sales scene: the salesman's line in big type, asking against his counter against your offer in big numbers, the stepper, the lot as a list.",
+  "ref": "",
+  "desktop": "img/carlot_haggle_desktop.jpg",
+  "phone": "img/carlot_haggle_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "The fence",
+  "note": "Dense rows (carry slot, illegal tag, price, what you're short); the keeper's line and your cash beside them.",
+  "ref": "",
+  "desktop": "img/shop_fence_desktop.jpg",
+  "phone": "img/shop_fence_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Switch to\u2026",
+  "note": "No fake portraits: three strips with each lead's colour, name, where they are and their cash; the chosen one widens.",
+  "ref": "GTA V's switch wheel uses portraits; ours waits for character renders and lets the type carry it.",
+  "desktop": "img/leads_desktop.jpg",
+  "phone": "img/leads_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Weapon selector",
+  "note": "A hairline ellipse over the live street, square nodes, concealment as coloured marks. The HUD steps back while it's open.",
+  "ref": "",
+  "desktop": "img/weapons_desktop.jpg",
+  "phone": "img/weapons_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Dialogue choices",
+  "note": "One left-of-centre list with number keys, lines set in Franklin; untimed unless the scene says so.",
+  "ref": "",
+  "desktop": "img/choices_desktop.jpg",
+  "phone": "img/choices_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Wait until",
+  "note": "A band whose hero is the time; the job on the left, the decision on the right.",
+  "ref": "",
+  "desktop": "img/wait_desktop.jpg",
+  "phone": "img/wait_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Sleep",
+  "note": "Wake-up times as a column of big times, an hour stepper, rest quality beside it.",
+  "ref": "",
+  "desktop": "img/sleep_desktop.jpg",
+  "phone": "img/sleep_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Parking summons",
+  "note": "Diegetic paper: a pink summons copy with typed fields, set right of centre; one small UI strip under it.",
+  "ref": "",
+  "desktop": "img/notice_desktop.jpg",
+  "phone": "img/notice_phone.jpg"
+ },
+ {
+  "group": "Scenes",
+  "title": "Home upgrades",
+  "note": "The super's estimate as a typed work order you pick from; his line and your cash beside it.",
+  "ref": "",
+  "desktop": "img/home_desktop.jpg",
+  "phone": "img/home_phone.jpg"
+ },
+ {
+  "group": "System",
+  "title": "Settings",
+  "note": "A section rail beside one group at a time, a big heading, dense ruled rows; unwired options say when they'll apply.",
+  "ref": "GTA V/RDR2 settings are long lists; ours groups them and says what isn't live yet.",
+  "desktop": "img/settings_desktop.jpg",
+  "phone": "img/settings_phone.jpg"
+ },
+ {
+  "group": "System",
+  "title": "Buttons and keys",
+  "note": "A remap table with square keycaps.",
+  "ref": "",
+  "desktop": "img/settings_remap_desktop.jpg",
+  "phone": "img/settings_remap_phone.jpg"
+ },
+ {
+  "group": "System",
+  "title": "Saves",
+  "note": "The profile you're playing is the hero; slots as dense ruled rows.",
+  "ref": "",
+  "desktop": "img/saves_desktop.jpg",
+  "phone": "img/saves_phone.jpg"
+ },
+ {
+  "group": "Front end",
+  "title": "Title",
+  "note": "Our wordmark over the live city; Continue is the biggest item and says where you left off.",
+  "ref": "",
+  "desktop": "img/title_desktop.jpg",
+  "phone": "img/title_phone.jpg"
+ },
+ {
+  "group": "Front end",
+  "title": "Loading",
+  "note": "A big percentage over an amber bar, over the city as it streams in.",
+  "ref": "",
+  "desktop": "img/title_loading_desktop.jpg",
+  "phone": "img/title_loading_phone.jpg"
+ }
+]

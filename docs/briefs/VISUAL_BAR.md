@@ -1,5 +1,7 @@
 # Visual bar (user decision, 2026-11-27)
 
+> Update (user): "I want the look to be GTA6 level. RDR2/GTA5 at worst, but this should be really good." Budget is $0: free assets only (FREE_ASSETS.md).
+
 > User: "I want this to be GTA level graphics. Ideally GTA VI but GTA V level at worst."
 
 **Floor:** a 2014 current-gen open-world crime game look (the GTA V PS4 remaster class), on an

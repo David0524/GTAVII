@@ -1,0 +1,56 @@
+{
+  "id": "mission.side_desk_requests",
+  "kind": "side",
+  "title": "Night Desk Requests",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The desk bell rings",
+      "script": "dlg.side_desk_requests_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Up from the Corwin lobby",
+      "marker": "interior.corwin_lobby"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "A two-block errand, W 28th & 8th",
+      "to": "W 28th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Deliver it to the resident",
+      "script": "dlg.side_desk_requests_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Relationship gates (M26)"
+  },
+  "where": "The Corwin",
+  "systems": [
+    "interiors",
+    "relationships"
+  ],
+  "mobile": "Short.",
+  "rank": 51,
+  "slice": false
+}

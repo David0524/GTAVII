@@ -1,0 +1,56 @@
+{
+  "id": "dlg.side_lost_tourists_1",
+  "context": "A family from Ohio with a folded map, Herald Square.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_fare_tourist",
+      "emotion": "lost",
+      "text": "Excuse me! The Empire Estate Building? The map says it's here. Here is very big."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Two blocks up, east side of Fifth.",
+          "goto": "l_r"
+        },
+        {
+          "text": "Look up.",
+          "goto": "l_u"
+        },
+        {
+          "text": "Take the subway. Any one.",
+          "goto": "l_w"
+        }
+      ]
+    },
+    {
+      "id": "l_r",
+      "speaker": "npc.cab_fare_tourist",
+      "emotion": "happy",
+      "text": "Two blocks up, east side of Fifth. Thank you! New Yorkers are nice!",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_u",
+      "speaker": "npc.cab_fare_tourist",
+      "emotion": "startled",
+      "text": "Oh! Oh, there it is. It's right there. I feel foolish. Thank you.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_w",
+      "speaker": "npc.cab_fare_tourist",
+      "emotion": "doubtful",
+      "text": "Any one? Okay… we'll write to the paper about this.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_e",
+      "speaker": "npc.cab_fare_tourist",
+      "emotion": "warm",
+      "text": "Kids, say thank you to the nice… person."
+    }
+  ]
+}

@@ -17,6 +17,12 @@ export async function loadTerrain(url?: string): Promise<void> {
   grid = decodeTerrain(await r.arrayBuffer());
 }
 
+/** Install terrain from bytes already in hand (Node tests, workers that share the buffer). Sim request 6. */
+export function setTerrainData(buf: ArrayBuffer): void {
+  if (!TERRAIN_ENABLED) return;
+  grid = decodeTerrain(buf);
+}
+
 export function decodeTerrain(buf: ArrayBuffer) {
   const dv = new DataView(buf);
   if (dv.getUint32(0, true) !== 0x48343754) throw new Error('bad terrain magic');

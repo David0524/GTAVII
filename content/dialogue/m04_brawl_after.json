@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m04_brawl_after",
+  "context": "M4 o5c. The Carriers' men are gone. Baek sits on a crate of wigs, his glasses cracked.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Thank you. Now two of us are bruised. Better than one."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.dwayne_little",
+      "emotion": "cocky",
+      "text": "Used-to-be! You hit like a cop! I mean that nice!"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "They'll be back with friends, Mr. Baek."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "calm",
+      "text": "Then I'll need more wigs to sit on."
+    }
+  ]
+}

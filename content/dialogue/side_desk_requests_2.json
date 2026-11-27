@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_desk_requests_2",
+  "context": "Back at the resident's door (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.sro_resident",
+      "emotion": "grateful",
+      "text": "You're a good boy. Your mother raised you. Tell her I said."
+    }
+  ]
+}

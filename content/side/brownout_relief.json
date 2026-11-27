@@ -1,0 +1,71 @@
+{
+  "id": "mission.side_brownout_relief",
+  "kind": "side",
+  "title": "Brownout Relief",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Ask the block's needs",
+      "script": "dlg.side_brownout_relief_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The ice house, W 26th & 8th",
+      "to": "W 26th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Ice and candles to the block",
+      "to": "W 27th St & 9th Ave",
+      "item": "item.ice_candles",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "combat",
+      "text": "Drive off the looters",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.brownout_looter",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "The block says thanks",
+      "script": "dlg.side_brownout_relief_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Local reputation"
+  },
+  "where": "Brownout blocks",
+  "systems": [
+    "brownout",
+    "combat",
+    "items"
+  ],
+  "mobile": "Lit landmarks on the minimap.",
+  "rank": 52,
+  "slice": false
+}

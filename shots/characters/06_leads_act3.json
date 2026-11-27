@@ -1,0 +1,126 @@
+{
+  "backend": "webgl2",
+  "scene": "leads",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "people": [
+    {
+      "seed": 1,
+      "hero": "char.teddy_arce",
+      "sex": 1,
+      "age": 34,
+      "hair": "sidePart",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 15746,
+      "draws": 2,
+      "buildMs": 124.1
+    },
+    {
+      "seed": 1,
+      "hero": "char.delphine_moore",
+      "sex": 0,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "handbag"
+      ],
+      "tris": 20395,
+      "draws": 2,
+      "buildMs": 99.3
+    },
+    {
+      "seed": 1,
+      "hero": "char.nick_varelas",
+      "sex": 1,
+      "age": 51,
+      "hair": "slick",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 24289,
+      "draws": 2,
+      "buildMs": 120.3
+    }
+  ],
+  "updateMs": [
+    0.1,
+    0.1,
+    0.1
+  ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.2541,
+        0.2224
+      ],
+      "neck": [
+        0.2572,
+        0.2503
+      ],
+      "hand": [
+        0.1976,
+        0.5283
+      ]
+    },
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": null,
+      "tone": "#5a3825",
+      "cheek": [
+        0.5098,
+        0.1949
+      ],
+      "neck": [
+        0.5068,
+        0.229
+      ],
+      "hand": [
+        0.4522,
+        0.5068
+      ]
+    },
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": "lead_nick",
+      "tone": "#c8a17e",
+      "cheek": [
+        0.7619,
+        0.2487
+      ],
+      "neck": [
+        0.7553,
+        0.2757
+      ],
+      "hand": [
+        0.6843,
+        0.5389
+      ]
+    }
+  ],
+  "renderMsSoftware": [
+    2.7000000001862645,
+    1.3999999994412065,
+    1.1000000005587935
+  ]
+}

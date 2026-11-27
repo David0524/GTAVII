@@ -1,0 +1,663 @@
+{
+  "_note": "Narrative place ids. 'at' is a real intersection the engine resolves; 'between' narrows to the block face. Invented names are provisional until the N6 trademark search. Interior markers (content/interiors.json) come in N4/N6. Avoid 143 and 210 W 29th St (real fur houses).",
+  "places": [
+    {
+      "id": "loc.flatiron_prow",
+      "name": "Flatiron Building, north prow",
+      "at": "Broadway & 5th Ave & E 23rd St",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.corwin_hotel",
+      "name": "Hotel Corwin (SRO)",
+      "at": "W 31st St",
+      "between": [
+        "Broadway",
+        "6th Ave"
+      ],
+      "side": "north",
+      "invented": true,
+      "kind": "sro",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.dusk_on_broadway"
+      }
+    },
+    {
+      "id": "loc.station_house",
+      "name": "Midtown Central station house",
+      "at": "W 31st St",
+      "between": [
+        "7th Ave",
+        "8th Ave"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "precinct",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.yes"
+      }
+    },
+    {
+      "id": "loc.cop_bar",
+      "name": "The Shamrock Rail (cop bar)",
+      "at": "W 31st St & 8th Ave",
+      "side": "se_corner",
+      "invented": true,
+      "kind": "bar",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.yes"
+      }
+    },
+    {
+      "id": "loc.penn_south",
+      "name": "Penn South co-op (Carmen's building)",
+      "at": "W 26th St & 8th Ave",
+      "side": "west",
+      "invented": false,
+      "kind": "residence",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.night_desk"
+      }
+    },
+    {
+      "id": "loc.lisle_office",
+      "name": "Lisle & Associates, 11th floor",
+      "at": "5th Ave & W 36th St",
+      "side": "west",
+      "invented": true,
+      "kind": "office",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.contact_sheet"
+      }
+    },
+    {
+      "id": "loc.lisle_luncheonette",
+      "name": "The Fifth Avenue Luncheonette",
+      "at": "W 36th St",
+      "between": [
+        "5th Ave",
+        "6th Ave"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "diner",
+      "discovery": {
+        "via": [
+          "tip"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "tipFrom": [
+          "char.bernard_ostrow"
+        ],
+        "note": "Bernard: 'Men like that always eat at twelve-forty' (M5)"
+      }
+    },
+    {
+      "id": "loc.carriers_garage",
+      "name": "Seventh Avenue Carriers' Association garage",
+      "at": "W 38th St & 9th Ave",
+      "side": "nw_corner",
+      "invented": true,
+      "kind": "garage",
+      "discovery": {
+        "via": [
+          "overheard"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "note": "Carriers' radio chatter on W 37th St (M4)"
+      }
+    },
+    {
+      "id": "loc.varelas_loft",
+      "name": "Varelas & Co. loft and cold-storage vaults",
+      "at": "W 30th St",
+      "between": [
+        "6th Ave",
+        "7th Ave"
+      ],
+      "side": "north",
+      "invented": true,
+      "kind": "loft",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign: VARELAS & CO. FURS"
+      }
+    },
+    {
+      "id": "loc.steakhouse",
+      "name": "The Iron Gate Chop House",
+      "at": "W 36th St & 7th Ave",
+      "side": "ne_corner",
+      "invented": true,
+      "kind": "restaurant",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign"
+      }
+    },
+    {
+      "id": "loc.kafeneio",
+      "name": "Kafeneio Kastoria (coffeehouse)",
+      "at": "W 29th St & 8th Ave",
+      "side": "nw_corner",
+      "invented": true,
+      "kind": "cafe",
+      "discovery": {
+        "via": [
+          "tip"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "tipFrom": [
+          "char.yiannis_doukas",
+          "char.carl_mayhew"
+        ],
+        "note": "Yiannis or Mayhew (M14)"
+      }
+    },
+    {
+      "id": "loc.hotel_pennsylvania",
+      "name": "Hotel Pennsylvanian (ballroom, lobby)",
+      "at": "7th Ave & W 33rd St",
+      "side": "east",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.herald_sq_store",
+      "name": "Lacy's, Herald Square (department store: lunch counter, fur salon)",
+      "at": "W 34th St & Broadway",
+      "invented": true,
+      "kind": "landmark",
+      "_brand": "Invented name replacing the real store at this location (N6 registry).",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.arden_hotel",
+      "name": "Hotel Arden (and its lobby bar)",
+      "at": "W 39th St & 8th Ave",
+      "side": "ne_corner",
+      "invented": true,
+      "kind": "sro",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.the_club"
+      }
+    },
+    {
+      "id": "loc.eighth_ave_cafeteria",
+      "name": "Royal Cafeteria",
+      "at": "8th Ave & W 40th St",
+      "side": "west",
+      "invented": true,
+      "kind": "diner",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign: ROYAL CAFETERIA, OPEN ALL NIGHT"
+      }
+    },
+    {
+      "id": "loc.beauty_shop",
+      "name": "Closed beauty shop (Nick's building)",
+      "at": "W 37th St",
+      "between": [
+        "7th Ave",
+        "8th Ave"
+      ],
+      "side": "north",
+      "invented": true,
+      "kind": "shop",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.the_club"
+      }
+    },
+    {
+      "id": "loc.bauer_arcade",
+      "name": "Lucky Quarter Amusements (Bauer's arcade and office)",
+      "at": "W 42nd St & 8th Ave",
+      "side": "se_corner",
+      "invented": true,
+      "kind": "shop",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Chasing bulbs on 42nd St"
+      }
+    },
+    {
+      "id": "loc.poole_shine",
+      "name": "Earl Poole's shoeshine stand",
+      "at": "W 42nd St & 7th Ave",
+      "side": "sw_corner",
+      "invented": true,
+      "kind": "stand",
+      "discovery": {
+        "via": [
+          "tip"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "tipFrom": [
+          "char.dwayne_little"
+        ],
+        "note": "Dwayne: 'Earl's the best on the street' (M4)"
+      }
+    },
+    {
+      "id": "loc.bryant_park",
+      "name": "Bryant Park",
+      "at": "6th Ave & W 41st St",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.feld_loft",
+      "name": "Feld Frocks, 9th floor loft",
+      "at": "W 37th St",
+      "between": [
+        "7th Ave",
+        "8th Ave"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "loft",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.surcharge"
+      }
+    },
+    {
+      "id": "loc.moretti_flowers",
+      "name": "Moretti & Sons Wholesale Florists",
+      "at": "W 28th St",
+      "between": [
+        "6th Ave",
+        "7th Ave"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "shop",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Palms on the W 28th St sidewalk at dawn"
+      }
+    },
+    {
+      "id": "loc.kallis_furs",
+      "name": "Kallis Fur Salon",
+      "at": "W 29th St & 7th Ave",
+      "side": "ne_corner",
+      "invented": true,
+      "kind": "shop",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign"
+      }
+    },
+    {
+      "id": "loc.baek_wholesale",
+      "name": "Seoul Star Imports (wigs, handbags)",
+      "at": "W 29th St",
+      "between": [
+        "5th Ave",
+        "Broadway"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "shop",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.surcharge"
+      }
+    },
+    {
+      "id": "loc.korean_restaurant",
+      "name": "Hanyang House (restaurant)",
+      "at": "W 32nd St",
+      "between": [
+        "5th Ave",
+        "Broadway"
+      ],
+      "side": "north",
+      "invented": true,
+      "kind": "restaurant",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Hangul sign on W 32nd St"
+      }
+    },
+    {
+      "id": "loc.penn_hack_stand",
+      "name": "Penn Station cab line, 7th Ave side",
+      "at": "7th Ave & W 32nd St",
+      "side": "west",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.bank_branch",
+      "name": "Ashgrove Trust, 34th St branch",
+      "at": "5th Ave & W 34th St",
+      "side": "east",
+      "invented": true,
+      "kind": "office",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign"
+      }
+    },
+    {
+      "id": "loc.madison_sq_park",
+      "name": "Madison Square Park",
+      "at": "Madison Ave & E 24th St",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.nypl_main",
+      "name": "Public Library, Fifth Ave main branch",
+      "at": "5th Ave & W 41st St",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false
+      }
+    },
+    {
+      "id": "loc.penn_station_lockers",
+      "name": "Penn Station coin lockers (concourse)",
+      "at": "8th Ave & W 33rd St",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.exposure"
+      }
+    },
+    {
+      "id": "loc.penn_south_delphine",
+      "name": "Delphine's building, Penn South",
+      "at": "W 27th St",
+      "between": [
+        "8th Ave",
+        "9th Ave"
+      ],
+      "side": "south",
+      "invented": false,
+      "kind": "residence",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.the_club"
+      }
+    },
+    {
+      "id": "loc.varelas_apartment",
+      "name": "The Varelas apartment building",
+      "at": "Madison Ave & E 37th St",
+      "side": "west",
+      "invented": true,
+      "kind": "residence",
+      "discovery": {
+        "via": [
+          "mission"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": true,
+        "mission": "mission.brownout"
+      }
+    },
+    {
+      "id": "loc.hospital",
+      "name": "Pennington General Hospital",
+      "at": "W 26th St & 9th Ave",
+      "side": "ne_corner",
+      "invented": true,
+      "kind": "hospital",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sign: PENNINGTON GENERAL, EMERGENCY"
+      }
+    },
+    {
+      "id": "loc.lawyer_office",
+      "name": "Maureen Kehoe, Esq. (2nd floor)",
+      "at": "W 33rd St & 7th Ave",
+      "side": "se_corner",
+      "invented": true,
+      "kind": "office",
+      "discovery": {
+        "via": [
+          "card"
+        ],
+        "shady": true,
+        "hiddenUntilIntroduced": true,
+        "note": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest"
+      }
+    },
+    {
+      "id": "loc.bail_bonds",
+      "name": "Abend Bail Bonds",
+      "at": "W 31st St & 8th Ave",
+      "side": "nw_corner",
+      "invented": true,
+      "kind": "shop",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail"
+      }
+    },
+    {
+      "id": "loc.galloway_lot",
+      "name": "Galloway Auto Exchange",
+      "at": "W 25th St & 9th Ave",
+      "side": "se_corner",
+      "invented": true,
+      "kind": "lot",
+      "discovery": {
+        "via": [
+          "newspaper"
+        ],
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Sunday classifieds in The Daily Ticker"
+      }
+    },
+    {
+      "id": "loc.precinct_madison_sq",
+      "name": "Madison Square station house",
+      "at": "W 24th St",
+      "between": [
+        "6th Ave",
+        "7th Ave"
+      ],
+      "side": "north",
+      "invented": true,
+      "kind": "precinct",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Green lamps outside"
+      }
+    },
+    {
+      "id": "loc.precinct_bryant_park",
+      "name": "Bryant Park station house",
+      "at": "W 40th St",
+      "between": [
+        "5th Ave",
+        "6th Ave"
+      ],
+      "side": "south",
+      "invented": true,
+      "kind": "precinct",
+      "discovery": {
+        "via": [
+          "sight"
+        ],
+        "sightM": 35,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Green lamps outside"
+      }
+    }
+  ],
+  "_discovery_note": "Format per the UI & cinematics chat: {via:[landmark|sight|tip|overheard|newspaper|card|mission], sightM, shady, tipFrom:[char ids], mission, hiddenUntilIntroduced, note}."
+}

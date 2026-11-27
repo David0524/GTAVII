@@ -1,0 +1,56 @@
+{
+  "id": "dlg.side_monte_1",
+  "context": "A cardboard box on 42nd St. A crowd. A dealer with fast hands.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "fast",
+      "text": "Find the lady, find the lady, red wins, black loses, find the lady!"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Play a dollar.",
+          "goto": "l_p"
+        },
+        {
+          "text": "Point out the shill.",
+          "goto": "l_s"
+        },
+        {
+          "text": "Walk away.",
+          "goto": "l_w"
+        }
+      ]
+    },
+    {
+      "id": "l_p",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "smug",
+      "text": "Ooh, so close! Again? Again's free. No it isn't.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_s",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "angry",
+      "text": "Hey! That guy works for him! The one in the hat! He wins every time!",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_w",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "dry",
+      "text": "Smart. Smartest one here today.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_e",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "fast",
+      "text": "Cops! Box up, box up, see you on Forty-First!"
+    }
+  ]
+}

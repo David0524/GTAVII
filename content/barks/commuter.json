@@ -1,0 +1,162 @@
+{
+  "id": "barks.commuter",
+  "core": true,
+  "note": "Penn Station and bus-terminal commuters, evening walkers, rain pedestrians.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "brisk",
+      "text": "Excuse me. Sorry. Excuse me. Train."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Evening."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Five-forty to Hicksville. If it runs. It never runs."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Penn Station used to have a roof you could see. Now we live under the Garden."
+    },
+    {
+      "context": "idle",
+      "emotion": "worried",
+      "text": "Gotta make the bus. Last one to Jersey's at midnight."
+    },
+    {
+      "context": "idle",
+      "emotion": "tired",
+      "text": "Two hours a day on a train. I could've learned French."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Train's late. Train's always late. Why do I run?"
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Thirty-five cents for that subway? They should pay us."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Graffiti on every car. Can't even see out the window."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain! No umbrella! No cab! No luck!"
+    },
+    {
+      "context": "rain",
+      "emotion": "brisk",
+      "text": "Under the awning, under the awning, run!"
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "Summer rain. Smells like hot sidewalk and cigarettes."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Subway platform's a hundred and ten. I measured with my shirt."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Honk all you want! Seventh Avenue doesn't care!"
+    },
+    {
+      "context": "horn",
+      "emotion": "startled",
+      "text": "Jesus! I'm walking! I'm walking!"
+    },
+    {
+      "context": "collision",
+      "emotion": "brisk",
+      "text": "Sorry! Sorry! Train!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Watch it! You made me spill my coffee!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "brisk",
+      "text": "Me too, buddy! Run! The five-forty waits for nobody!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running for the train? Wrong direction, pal."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "You trying to kill somebody? This is a sidewalk!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Trains stopped? If trains stopped I'm sleeping here."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Dark station, dark city. Welcome home."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Missed the last train. Hotel Pennsylvanian? On my salary?"
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Hot dog cart's open. Cart's always open."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "My company's moving to Connecticut. I'm moving to unemployment."
+    },
+    {
+      "context": "greet",
+      "emotion": "polite",
+      "text": "After you. No, after you. Okay, together."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Escalator's broken. Escalator's been broken since sixty-eight."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Fight at the Garden tonight. Whole station smells like beer."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Take half my newspaper. Cover your head."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Thirty years commuting. I know every crack in this floor."
+    },
+    {
+      "context": "night",
+      "emotion": "low",
+      "text": "Careful down the stairs. Lights are out on the left."
+    }
+  ]
+}

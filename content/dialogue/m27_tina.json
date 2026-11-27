@@ -1,0 +1,62 @@
+{
+  "id": "dlg.m27_tina",
+  "context": "M27 o10. Rita's bar, closing. Tina with a suitcase, or without one.",
+  "lines": [
+    {
+      "id": "l1s",
+      "speaker": "char.tina_mercado",
+      "emotion": "warm",
+      "text": "I'm staying, Del. I told Lonnie no. He laughed. Then he stopped laughing.",
+      "requires": {
+        "all": [
+          "flag.delphine_forgave_tina"
+        ]
+      },
+      "setFlags": [
+        "flag.tina_stays"
+      ]
+    },
+    {
+      "id": "l2s",
+      "speaker": "char.tina_mercado",
+      "emotion": "warm",
+      "text": "Save me the second chair. I'll learn hair at night school.",
+      "requires": {
+        "all": [
+          "flag.delphine_forgave_tina"
+        ]
+      }
+    },
+    {
+      "id": "l1g",
+      "speaker": "char.tina_mercado",
+      "emotion": "sad",
+      "text": "I'm going, Del. My aunt in Philly. Away from Lonnie. Away from me.",
+      "requires": {
+        "none": [
+          "flag.delphine_forgave_tina"
+        ]
+      },
+      "setFlags": [
+        "flag.tina_gone"
+      ]
+    },
+    {
+      "id": "l2g",
+      "speaker": "char.tina_mercado",
+      "emotion": "sad",
+      "text": "Rule twelve: there is no rule twelve. Send me a postcard of your shop.",
+      "requires": {
+        "none": [
+          "flag.delphine_forgave_tina"
+        ]
+      }
+    },
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Whatever you do, Tina, count it first."
+    }
+  ]
+}

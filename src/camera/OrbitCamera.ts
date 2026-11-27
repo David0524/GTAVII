@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import type { Input } from '../input/Input';
 import type { Physics } from '../physics/Physics';
 import { heightAt } from '../shared/terrain';
-import type RAPIER from '@dimforge/rapier3d-compat';
+import type RAPIER from '../shared/rapier';
 
 /**
  * On-foot third-person orbit camera: over-the-shoulder offset, smoothed follow, wheel/pinch zoom,
@@ -11,9 +11,9 @@ import type RAPIER from '@dimforge/rapier3d-compat';
  */
 export class OrbitCamera {
   yaw = 0;
-  pitch = -0.2;
-  distance = 4.6;
-  shoulder = 0.38;
+  pitch = -0.05; // near-level: horizon at eye height, street and skyline dominate the frame
+  distance = 5.6;
+  shoulder = 0.75; // character sits left of centre
   private target = new THREE.Vector3();
   private armLen = 4.2;
   private readonly euler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -21,7 +21,7 @@ export class OrbitCamera {
   constructor(public camera: THREE.PerspectiveCamera, private input: Input, private physics: Physics, private exclude?: RAPIER.Collider) {}
 
   snap(feet: { x: number; y: number; z: number }, yaw: number) {
-    this.yaw = yaw; this.target.set(feet.x, feet.y + 1.55, feet.z); this.armLen = this.distance;
+    this.yaw = yaw; this.target.set(feet.x, feet.y + 1.5, feet.z); this.armLen = this.distance;
   }
 
   update(dt: number, feet: { x: number; y: number; z: number }) {
@@ -35,14 +35,14 @@ export class OrbitCamera {
     const k = 1 - Math.exp(-dt * 16), kv = 1 - Math.exp(-dt * 10);
     this.target.x += (feet.x - this.target.x) * k;
     this.target.z += (feet.z - this.target.z) * k;
-    this.target.y += (feet.y + 1.55 - this.target.y) * kv;
+    this.target.y += (feet.y + 1.5 - this.target.y) * kv;
 
     // desired offset: behind (+back), right shoulder, pitched
     const cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
     const back = new THREE.Vector3(Math.sin(this.yaw) * cp, -sp, Math.cos(this.yaw) * cp);
     const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
-    const origin = this.target.clone().addScaledVector(right, this.shoulder * 0.6);
-    const dir = back.clone().addScaledVector(right, this.shoulder / this.distance).normalize();
+    const origin = this.target.clone().addScaledVector(right, this.shoulder);
+    const dir = back.clone();
     // spring arm: pull in instantly on hit, ease back out
     const hit = this.physics.ray(origin.x, origin.y, origin.z, dir.x, dir.y, dir.z, this.distance + 0.3, this.exclude);
     const want = hit === null ? this.distance : Math.max(0.35, hit - 0.3);

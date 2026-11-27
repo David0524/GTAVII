@@ -1,0 +1,185 @@
+{
+  "id": "barks.route_calls",
+  "core": false,
+  "note": "No-GPS route call-outs (goto.routeCalledBy). Every voice covers left/right x {street}/{avenue} (UI test tests/ui-route.test.ts). The HUD prints the computed turn; a voiced line plays only if its direction and slot match.",
+  "lines": [
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Left on {street}."
+    },
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Right on {street}, then straight."
+    },
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Hang a left on {avenue}."
+    },
+    {
+      "context": "fare",
+      "emotion": "brisk",
+      "text": "Right on {avenue}. Keep going."
+    },
+    {
+      "context": "fare",
+      "emotion": "relieved",
+      "text": "Here. Right here. Pull over."
+    },
+    {
+      "context": "fare",
+      "emotion": "annoyed",
+      "text": "You missed it! Go around the block. {street}'s one way."
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "nervous",
+      "text": "The map says left? On, um, {street}?"
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "nervous",
+      "text": "Right on {street}, I think. Is that a street or an avenue?"
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "unsure",
+      "text": "Left onto {avenue}? The book says it's very long."
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "excited",
+      "text": "Right on {avenue}! Look, honey, the big one!"
+    },
+    {
+      "context": "fare_tourist",
+      "emotion": "happy",
+      "text": "Oh! That's it! That's the building!"
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Hang a left on {street}, kid."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Right on {street}. Easy. Mind the hydrant."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Left on {avenue}. Faster than it looks."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Swing right on {avenue}. Ride the lights."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "wry",
+      "text": "Broadway does what it wants. Stay on {avenue}."
+    },
+    {
+      "context": "cabbie",
+      "emotion": "easy",
+      "text": "Pull up by the hydrant. Nobody tickets a hack at the hydrant."
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Left. On {street}. Hurry. Please hurry."
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Right on {street}! Right! Don't brake so hard!"
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Left on {avenue}. Breathe. Breathe and drive."
+    },
+    {
+      "context": "labour",
+      "emotion": "strained",
+      "text": "Right on {avenue}. Pennington's on Ninth. Go!"
+    },
+    {
+      "context": "odessa",
+      "emotion": "steady",
+      "text": "Slowly, Mr. Arce. Left at {street}. I'm in no hurry. You are."
+    },
+    {
+      "context": "odessa",
+      "emotion": "steady",
+      "text": "Right on {street}. Mind the old man on the corner. That's me in ten years."
+    },
+    {
+      "context": "odessa",
+      "emotion": "steady",
+      "text": "Left onto {avenue}, if you please."
+    },
+    {
+      "context": "odessa",
+      "emotion": "dry",
+      "text": "Right on {avenue}. Gently. I'm not a sack of laundry."
+    },
+    {
+      "context": "delphine",
+      "emotion": "brisk",
+      "text": "Left on {street}. Rule nine: never the obvious way."
+    },
+    {
+      "context": "delphine",
+      "emotion": "brisk",
+      "text": "Right on {street}. Quick, before the light."
+    },
+    {
+      "context": "delphine",
+      "emotion": "cool",
+      "text": "Left on {avenue}. Nobody watches the left."
+    },
+    {
+      "context": "delphine",
+      "emotion": "brisk",
+      "text": "Rule nine: never take {avenue} after midnight. Right on it anyway."
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Left on {street}! I own a building on this block, I should know."
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Right on {street}. My first shop was here. Smaller than this car."
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Left on {avenue}! No, here! Yes, here!"
+    },
+    {
+      "context": "nick",
+      "emotion": "expansive",
+      "text": "Right on {avenue}. Everybody gets paid on {avenue}."
+    }
+  ],
+  "voiceByPassenger": {
+    "npc.cab_fare_businessman": "fare",
+    "npc.cab_fare_night_worker": "fare",
+    "npc.cab_fare_tourist": "fare_tourist",
+    "npc.cab_driver": "cabbie",
+    "char.delroy_tate": "cabbie",
+    "char.odessa_pruitt": "odessa",
+    "char.delphine_moore": "delphine",
+    "char.nick_varelas": "nick",
+    "side.baby_cab": "labour",
+    "default": "fare"
+  },
+  "voiceNote": "Keyed by the passenger's cast id. 'side.baby_cab' overrides to 'labour' for that quest only. Leads riding as passengers in another lead's car use their own voice."
+}

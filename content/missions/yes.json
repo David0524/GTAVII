@@ -1,0 +1,170 @@
+{
+  "id": "mission.yes",
+  "title": "Yes",
+  "number": 7,
+  "act": 1,
+  "chapter": 3,
+  "playAs": "char.teddy_arce",
+  "date": "1974-07-01",
+  "durationMin": 14,
+  "pillars": [
+    "P4",
+    "P5"
+  ],
+  "giver": "char.carmen_arce",
+  "requires": {
+    "flags": [
+      "flag.corwin_sold"
+    ],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "16:00",
+      "21:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-01",
+      "1974-07-03"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.corwin_hotel",
+    "note": "Teddy wakes to vacate notices being slid under doors. Prentiss is in the corridor."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "script": "dlg.m07_notices",
+      "text": "Find out who's sliding the notices"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "to": "loc.penn_south",
+      "radius": 25,
+      "text": "Dinner at Ma's, Penn South"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "script": "dlg.m07_carmen",
+      "text": "Sit down. Eat. Talk to Ma"
+    },
+    {
+      "id": "o4",
+      "type": "enter_interior",
+      "marker": "interior.station_house_desk",
+      "text": "Find Mayhew: station house, W 31st"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "script": "dlg.m07_kearney",
+      "text": "Ask Kearney at the front desk"
+    },
+    {
+      "id": "o6",
+      "type": "enter_interior",
+      "marker": "interior.shamrock_rail",
+      "text": "The Shamrock Rail, 31st & Eighth"
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "script": "dlg.m07_yes",
+      "text": "Tell Mayhew yes"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "script": "dlg.m07_revolver",
+      "text": "Mayhew's gift: your old revolver"
+    },
+    {
+      "id": "o9",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.stickup_man",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Stick-up at the Rail's back door",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "tutorial": "shooting: soft lock, cover, reload; non-lethal disarm still possible",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o6",
+    "o9"
+  ],
+  "rewards": {
+    "money": 200,
+    "setFlags": [
+      "flag.vacate_notices",
+      "flag.teddy_collector"
+    ],
+    "unlock": [
+      "mission.back_stairs"
+    ],
+    "items": [
+      "item.ammo_38",
+      "item.collection_list_week1",
+      "item.revolver_service"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.carmen_arce": 1,
+      "char.teddy_arce/char.pat_kearney": 1
+    }
+  },
+  "npcs": [
+    "char.vic_prentiss",
+    "char.walter_hollis",
+    "char.carmen_arce",
+    "char.pat_kearney",
+    "char.carl_mayhew"
+  ],
+  "archetypes": [
+    "npc.sro_resident",
+    "npc.penn_south_neighbor",
+    "npc.off_duty_cop"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.corwin_hotel",
+    "loc.penn_south",
+    "loc.station_house",
+    "loc.cop_bar"
+  ],
+  "mobile": "Three walking legs of under two blocks each, with a checkpoint at each. The decisive choice is untimed. If the player has the M5 photo, it adds a fourth option ('Show him the photograph').",
+  "design": "Teddy says yes to buy the Corwin time, and Mayhew promises it stays open through Labor Day (a lie). Showing the photo sets flag.mayhew_saw_photo (applied in the dialogue). The $200 advance is the first week's pay, and P1 makes it feel heavy. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "day",
+  "essential": [],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

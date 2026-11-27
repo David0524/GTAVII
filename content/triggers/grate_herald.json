@@ -1,0 +1,28 @@
+{
+  "id": "trigger.grate_herald",
+  "volume": {
+    "at": "W 34th St & 6th Ave",
+    "radius": 10
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "07:00",
+      "02:00"
+    ],
+    "weather": [
+      "any"
+    ]
+  },
+  "once": false,
+  "cooldownMin": 240,
+  "do": [
+    {
+      "type": "overhear",
+      "script": "dlg.amb_grate_herald",
+      "at": "W 34th St & 6th Ave",
+      "radius": 10,
+      "falloff": "soft"
+    }
+  ]
+}

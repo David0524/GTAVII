@@ -1,0 +1,178 @@
+{
+  "id": "mission.dusk_on_broadway",
+  "title": "Dusk on Broadway",
+  "number": 1,
+  "act": 1,
+  "chapter": 1,
+  "playAs": "char.teddy_arce",
+  "date": "1974-06-21",
+  "durationMin": 15,
+  "pillars": [
+    "P2",
+    "P4"
+  ],
+  "giver": "char.carl_mayhew",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "20:15",
+      "21:45"
+    ],
+    "weather": [
+      "clear"
+    ],
+    "dateRange": [
+      "1974-06-21",
+      "1974-06-21"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "who": "char.carl_mayhew",
+    "at": "loc.flatiron_prow",
+    "spawn": "spawn.player_start",
+    "note": "New-game start. The player spawns at the prow facing up Broadway at dusk; Mayhew approaches from the Fifth Ave side."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "script": "dlg.m01_prow",
+      "text": "Meet Mayhew at the Flatiron"
+    },
+    {
+      "id": "o2",
+      "type": "escort",
+      "who": "char.carl_mayhew",
+      "pace": "match",
+      "waitRadius": 12,
+      "route": [
+        "loc.flatiron_prow",
+        "Broadway & W 26th St",
+        "Broadway & W 28th St",
+        "Broadway & W 30th St",
+        "Broadway & W 31st St"
+      ],
+      "dialogue": [
+        "dlg.m01_walk_a",
+        "dlg.m01_walk_b",
+        "dlg.m01_walk_c"
+      ],
+      "fallback": "Chain of goto objectives at each route point, each starting its leg's dialogue on arrival (ENGINE_REQUESTS 4)",
+      "text": "Walk up Broadway with Mayhew"
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "script": "dlg.m01_offer",
+      "text": "Hear him out, Broadway & 31st"
+    },
+    {
+      "id": "o4",
+      "type": "enter_interior",
+      "marker": "interior.corwin_lobby",
+      "text": "Get to the Corwin, W 31st St",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "script": "dlg.m01_lobby",
+      "text": "Talk to Mrs. Pruitt in the lobby"
+    },
+    {
+      "id": "o6",
+      "type": "wait",
+      "until": "23:00",
+      "at": "interior.corwin_lobby",
+      "text": "Take the night desk at 11 p.m."
+    },
+    {
+      "id": "o7",
+      "type": "combat",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.stickup_man",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Stop the stick-up at the desk",
+      "tutorial": "melee + disarm; a witness runs for the Broadway call box (police intro)",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "script": "dlg.m01_stickup_after",
+      "text": "Deal with the witness and the call box",
+      "requireNoHeat": true
+    }
+  ],
+  "triggers": [
+    "trigger.m01_gates_overheard"
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o4",
+    "o7"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.night_desk"
+    ],
+    "items": [
+      "item.corwin_master_keys"
+    ]
+  },
+  "npcs": [
+    "char.carl_mayhew",
+    "char.odessa_pruitt"
+  ],
+  "archetypes": [
+    "npc.wholesaler",
+    "npc.park_sleeper",
+    "npc.evening_commuter"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.flatiron_prow",
+    "Broadway & W 26th St",
+    "Broadway & W 28th St",
+    "Broadway & W 31st St",
+    "loc.corwin_hotel"
+  ],
+  "mobile": "No fail states. The escort matches the player's pace and waits, so there's no exact pacing on touch. Dialogue segments are gated by route leg. Objective text names real corners. One untimed choice (3 options). Long dusk light keeps the walk readable on small screens.",
+  "design": "Earns the spawn shot. The streetlights come on as the pair walk north (the engine dusk cycle at 20:31 sunset). Mayhew's 'Not anymore' about W 35th St seeds the 1971 secret. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

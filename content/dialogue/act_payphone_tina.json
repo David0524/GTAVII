@@ -1,0 +1,12 @@
+{
+  "id": "dlg.act_payphone_tina",
+  "context": "Payphone: Tina.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.tina_mercado",
+      "emotion": "funny",
+      "text": "Del, I'm at the Royal and I got no dime and no coffee. Rescue me."
+    }
+  ]
+}

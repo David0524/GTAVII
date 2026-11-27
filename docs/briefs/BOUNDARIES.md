@@ -4,6 +4,11 @@
 characters are listed at the end. Written by the oversight session at the user's request: *"a
 creative way to have the map boundaries not just be invisible walls."*
 
+> **Superseded bounds (user decision):** the design intent is *"small map, very interactive"*. The
+> playable area is the dense story core: mid-block 21st–22nd St to mid-block 43rd–44th St, Madison–Park
+> Ave to mid-block 9th–10th Ave (about 2.3 km²). Times Square and the rail yards sit beyond the edge as
+> layer-1 scenery. The layers below still apply; the Layer 0 expansion is replaced by this.
+
 ## The problem today
 The region is about **W 18th St to W 44th St, Third Ave to Eighth Ave** (`world.json`
 `region`). Past it is a dark plane with floating towers (PROGRESS: "wall then void"). Worse:
@@ -52,7 +57,7 @@ varied so it never looks like a pattern:
   - A trench with steel plates and sawhorses stencilled with an invented city agency.
   - The orange-and-white steam chimney venting.
   - A broke city's "work suspended" sign, a nod to the fiscal crisis.
-- **A water-main break:** a flooded block, a geyser and kids at an opened hydrant.
+- **A water-main break:** a flooded block, a geyser from an opened hydrant.
 - **A police barricade:** a cordoned street with a beat cop waving people off. In a chase it
   becomes a roadblock.
 - **A street fair or block party, at weekends:** tables and a bandstand across the street. It's

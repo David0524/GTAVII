@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m20_marjorie",
+  "context": "M20 o4. After the meeting. Marjorie leaves the ledger open on her desk and goes to get coffee. She looks back once.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "My name. Corwin. The Broadway hotels. The surcharge 'consultancy'. All me."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "And the first page. October 1971. 'Consideration, case 71-4402. C.M.'"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.marjorie_kell",
+      "emotion": "flat",
+      "text": "Mr. Lisle is in conference. Mr. Lisle is always in conference."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.marjorie_kell",
+      "emotion": "low",
+      "text": "I typed every word of it, Mr. Varelas. Nobody ever asks the typist."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "quiet",
+      "text": "Miss Kell. I'm asking."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.marjorie_kell",
+      "emotion": "low",
+      "text": "Carbons. Nothing in this office happens only once. Good afternoon."
+    }
+  ]
+}

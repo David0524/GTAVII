@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_skip_board_1",
+  "context": "Abend's wall of mugshots.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.bondsman_rizzo",
+      "emotion": "gruff",
+      "text": "Pick one. Each one's got a weakness. His mother's birthday. A pool habit. Pigeons."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.bondsman_rizzo",
+      "emotion": "gruff",
+      "text": "Bring 'em in breathing. Breathing pays full."
+    }
+  ]
+}

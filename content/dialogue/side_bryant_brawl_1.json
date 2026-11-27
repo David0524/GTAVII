@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_bryant_brawl_1",
+  "context": "Bryant Park benches at dusk; two men over one bench.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.park_sleeper",
+      "emotion": "angry",
+      "text": "That's my bench! Since nineteen sixty-nine!"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.park_sleeper",
+      "emotion": "angry",
+      "text": "Benches don't have owners! It's a park!"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "_note": "Shops and 1974 prices (narrative content; Gameplay builds the shop flow). Prices are plausible for mid-1974 New York.",
+  "shops": [
+    {
+      "id": "shop.royal_cafeteria",
+      "biz": "biz.royal_cafeteria",
+      "type": "diner",
+      "sells": [
+        "item.coffee",
+        "item.pie",
+        "item.diner_meal"
+      ]
+    },
+    {
+      "id": "shop.fifth_ave_luncheonette",
+      "biz": "biz.fifth_ave_luncheonette",
+      "type": "diner",
+      "sells": [
+        "item.coffee",
+        "item.diner_meal"
+      ],
+      "menu": [
+        "Tuna on rye 85¢",
+        "Egg cream 35¢"
+      ]
+    },
+    {
+      "id": "shop.penny_lantern",
+      "biz": "biz.penny_lantern",
+      "type": "diner",
+      "sells": [
+        "item.coffee",
+        "item.diner_meal"
+      ]
+    },
+    {
+      "id": "shop.baxter_lowe_menswear",
+      "biz": "biz.baxter_lowe",
+      "type": "clothing",
+      "sells": [
+        "suit $65",
+        "sport coat $38",
+        "shirt $8",
+        "slacks $14",
+        "shoes $25",
+        "hat $12",
+        "raincoat $30"
+      ],
+      "note": "Wardrobe changes defeat descriptions (CORE_SYSTEMS)."
+    },
+    {
+      "id": "shop.eighth_ave_outlet",
+      "name": "Eighth Avenue Clothing Outlet",
+      "at": "8th Ave & W 36th St",
+      "type": "clothing",
+      "sells": [
+        "windbreaker $9",
+        "jeans $11",
+        "T-shirt $3",
+        "sneakers $12",
+        "wig $15",
+        "sunglasses $5"
+      ],
+      "check": "generic/descriptive; low risk"
+    },
+    {
+      "id": "shop.eighth_ave_loan",
+      "biz": "biz.pawn_8th",
+      "type": "pawn",
+      "sells": [
+        "item.boone_22_parlor",
+        "watches",
+        "radios",
+        "item.film_pack"
+      ],
+      "buys": [
+        "watches",
+        "jewellery",
+        "radios",
+        "cameras"
+      ]
+    },
+    {
+      "id": "shop.krause_hardware",
+      "biz": "biz.krause",
+      "type": "hardware",
+      "sells": [
+        "item.crowbar",
+        "item.tire_iron",
+        "item.candles",
+        "flashlight $3",
+        "bolt cutters $9",
+        "fan $16"
+      ]
+    },
+    {
+      "id": "shop.newsstand_herald",
+      "name": "Herald Square newsstand",
+      "at": "W 34th St & Broadway",
+      "type": "newsstand",
+      "sells": [
+        "item.newspaper",
+        "item.cigarettes",
+        "item.subway_token",
+        "maps 50¢"
+      ],
+      "check": "generic/descriptive; low risk"
+    },
+    {
+      "id": "shop.drugstore_34",
+      "name": "All-night drugstore",
+      "at": "W 34th St & 7th Ave",
+      "type": "drugstore",
+      "sells": [
+        "item.first_aid",
+        "item.aspirin",
+        "item.film_pack"
+      ],
+      "check": "generic/descriptive; low risk"
+    },
+    {
+      "id": "shop.liquor_9th",
+      "name": "Ninth Avenue Wines & Liquors",
+      "at": "W 38th St & 9th Ave",
+      "type": "liquor",
+      "sells": [
+        "bottle of rye $4.50",
+        "bottle of wine $2.50",
+        "item.ice"
+      ],
+      "check": "generic/descriptive; low risk"
+    },
+    {
+      "id": "shop.gun_shop_38",
+      "name": "Wexler Sporting Arms (licensed)",
+      "at": "W 38th St & 8th Ave",
+      "type": "guns",
+      "sells": [
+        "item.revolver_service",
+        "item.ferrante_12_farmhand",
+        "item.hartwell_30_longshot",
+        "ammo"
+      ],
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship",
+      "note": "A licensed dealer; New York's strict permit law is flavour (a permit card is needed)."
+    }
+  ]
+}

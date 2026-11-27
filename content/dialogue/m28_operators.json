@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m28_operators",
+  "context": "M28 o4. (Delphine.) 34th & Seventh. The garment operators turn the corner with a union banner.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.mei_lin_chow",
+      "emotion": "flat",
+      "text": "Union lady said wait. Machines don't wait. We came."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.carmen_arce",
+      "emotion": "warm",
+      "text": "You're Teddy's friend. The one he gave the fifty back to. Ay, he told me nothing."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "He tells everyone nothing, Mrs. Arce. It's how I knew he was honest."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carmen_arce",
+      "emotion": "proud",
+      "text": "Walk with us. Women in front. Men carry the banner. Men are good at carrying."
+    }
+  ]
+}

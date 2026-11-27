@@ -1,0 +1,85 @@
+{
+  "id": "cut.m22_the_address",
+  "mission": "mission.the_address",
+  "before": "o1",
+  "time": "21:00",
+  "date": "1974-08-08",
+  "skippable": true,
+  "logline": "The Corwin lobby, every resident around a dead man's radio. History on a three-inch speaker. No real person seen or named.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "slow push in",
+      "framing": "The lobby in folding chairs, facing the desk; Hollis's radio as the altar",
+      "blocking": "Odessa centre front in her hat",
+      "beats": [
+        "The ACT 3 title card fades: RESIGNATION"
+      ],
+      "durationSec": 6,
+      "notes": "audio: the radio narration (invented, never a real voice) | lighting: warm lamps, a fan turning"
+    },
+    {
+      "id": "s2",
+      "type": "insert",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "The radio's dial glow",
+      "blocking": "",
+      "beats": [
+        "l1–l2 (Radio)"
+      ],
+      "durationSec": 7.4,
+      "dialogue": [
+        "dlg.m22_lobby_radio#l1",
+        "dlg.m22_lobby_radio#l2"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "medium close",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Odessa, still",
+      "blocking": "",
+      "beats": [
+        "l3"
+      ],
+      "durationSec": 4.6,
+      "dialogue": [
+        "dlg.m22_lobby_radio#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Bernard beside her, a newspaper on his knee",
+      "blocking": "",
+      "beats": [
+        "l4"
+      ],
+      "durationSec": 5.2,
+      "dialogue": [
+        "dlg.m22_lobby_radio#l4"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "two-shot",
+      "lensMm": 35,
+      "move": "handheld",
+      "framing": "Manny at the desk holding the phone out over the glass; Teddy",
+      "blocking": "",
+      "beats": [
+        "l5"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m22_lobby_radio#l5"
+      ]
+    }
+  ]
+}

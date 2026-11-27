@@ -1,0 +1,27 @@
+{
+  "id": "npc.brownout_looter",
+  "behaviour": "walker",
+  "palette": [
+    "#2F2F2F",
+    "#696969"
+  ],
+  "wardrobe": "Opportunists in the dark (adults): T-shirts, bandanas, crowbars.",
+  "props": [
+    "crowbar"
+  ],
+  "schedule": [
+    {
+      "from": "20:00",
+      "to": "03:00",
+      "area": "Brownout areas",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.street_tough",
+  "scripted": true,
+  "note": "M15 only."
+}

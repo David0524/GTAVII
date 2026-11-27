@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m27_brannock_key",
+  "context": "M27 o4. (Nick.) The loading dock. Brannock smoking. Nick holds out an envelope.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Detective. You keep a little something in your spare tyre, I hear."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "flat",
+      "text": "Who told you that?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Nobody. I'm in a generous mood. The lieutenant's locker key. Penn Station. Yes?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "flat",
+      "text": "…Four-eighteen. He checks it Fridays. Today's Thursday. Make it fast."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "dry",
+      "text": "I don't break laws, detective. I read them carefully. A lawyer taught me."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "dlg.amb_grate_garment",
+  "context": "Seventh Avenue grate, the garment shift change.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.garment_cutter",
+      "emotion": "weary",
+      "text": "Feld's gone south, Kaplan's going south. Who's left? The pigeons."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.garment_cutter",
+      "emotion": "low",
+      "text": "Pigeons don't pay dues."
+    }
+  ]
+}

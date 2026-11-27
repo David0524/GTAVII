@@ -1,0 +1,12 @@
+{
+  "id": "dlg.act_read_room_answer",
+  "context": "Read the Room wrap-up.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "warm",
+      "text": "Five dollars from the tip jar. Don't tell Bauer. Bauer can't count anyway."
+    }
+  ]
+}

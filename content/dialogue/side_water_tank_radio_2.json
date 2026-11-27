@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_water_tank_radio_2",
+  "context": "The man in the tank.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.park_sleeper",
+      "emotion": "serene",
+      "text": "Best view in Manhattan, and dry. Mostly. I watch the block. The block doesn't watch back."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.park_sleeper",
+      "emotion": "serene",
+      "text": "Want to know who goes in Lisle's back door at night? Sit. Have some tea. It's cold."
+    }
+  ]
+}

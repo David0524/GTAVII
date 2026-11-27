@@ -1,0 +1,18 @@
+{
+  "id": "dlg.m08_stairwell",
+  "context": "M8 o3b (barks during the stairwell fight).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.lonnie_gage",
+      "emotion": "smooth",
+      "text": "Del, baby. Give me the film and we're square."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Rule eleven: nobody's square with you, Lonnie."
+    }
+  ]
+}

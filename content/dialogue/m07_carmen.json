@@ -1,0 +1,54 @@
+{
+  "id": "dlg.m07_carmen",
+  "context": "M7 o3. Carmen's kitchen, Penn South. Rice, beans, the fan on high. She sees everything.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carmen_arce",
+      "emotion": "warm",
+      "text": "Mijo, you look like a man who hasn't eaten since the Korean War. Sit."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "They're putting notices under doors, Ma. Thirty days. Old men, Ma."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carmen_arce",
+      "emotion": "firm",
+      "text": "The union built this building. Nobody sells it while I live in it."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carmen_arce",
+      "emotion": "probing",
+      "text": "Your hotel has no union. So who are you going to ask? Carl?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Carl's offering work. Two hundred a week. Carrying."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.carmen_arce",
+      "emotion": "quiet",
+      "text": "Carrying what, Teodoro?"
+    },
+    {
+      "id": "l7",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Paper, Ma. Just paper."
+    },
+    {
+      "id": "l8",
+      "speaker": "char.carmen_arce",
+      "emotion": "sad",
+      "text": "In nineteen seventy-one you also told me paper. Eat. You'll do what you do."
+    }
+  ]
+}

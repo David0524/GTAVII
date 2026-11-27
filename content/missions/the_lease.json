@@ -1,0 +1,166 @@
+{
+  "id": "mission.the_lease",
+  "title": "The Lease",
+  "number": 17,
+  "act": 2,
+  "chapter": 6,
+  "playAs": "char.delphine_moore",
+  "switchPoints": [
+    "o5"
+  ],
+  "date": "1974-07-24",
+  "durationMin": 16,
+  "pillars": [
+    "P4",
+    "P1"
+  ],
+  "giver": "char.delphine_moore",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "10:00",
+      "19:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-24",
+      "1974-07-24"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "The empty shop, W 37th St",
+      "to": "loc.beauty_shop",
+      "radius": 15
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "The agent says no. Politely.",
+      "script": "dlg.m17_agent"
+    },
+    {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's boys are smashing the shop",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Go over his head: Varelas, W 30th St",
+      "marker": "interior.varelas_office",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Two bankers, one table",
+      "script": "dlg.m17_two_bankers",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o5",
+      "type": "switch_to",
+      "text": "(Nick)",
+      "character": "char.nick_varelas",
+      "cut": "transition"
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Eleni reads Miss Moore's numbers",
+      "script": "dlg.m17_eleni"
+    },
+    {
+      "id": "o7",
+      "type": "goto",
+      "text": "Drive her to W 37th St. Look at it.",
+      "to": "loc.beauty_shop",
+      "radius": 15
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "Stand in the empty shop together",
+      "script": "dlg.m17_shop"
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o2b",
+    "o4",
+    "o5",
+    "o7"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.cold_storage"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.nick_varelas": 1,
+      "char.nick_varelas/char.delphine_moore": 1
+    }
+  },
+  "npcs": [
+    "char.nick_varelas",
+    "char.eleni_varelas"
+  ],
+  "archetypes": [
+    "npc.rental_agent"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan"
+  ],
+  "locations": [
+    "loc.beauty_shop",
+    "loc.varelas_loft"
+  ],
+  "mobile": "Walk, talk and a short drive (three blocks). The midpoint mission is deliberately calm. No timers.",
+  "design": "**Midpoint: all three leads are playable.** Two people who bank for others meet. Eleni respects the club's books, while Nick is charmed and wary. The lease is promised 'after the season', which ties Delphine's resolution to Nick's survival (M31 gate). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.eleni_varelas",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

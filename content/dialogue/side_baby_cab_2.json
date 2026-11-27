@@ -1,0 +1,56 @@
+{
+  "id": "dlg.side_baby_cab_2",
+  "context": "At the hospital. She asks the driver to help name the baby.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_fare_night_worker",
+      "emotion": "exhausted",
+      "text": "A girl. She came out yelling. Like this city. Pick a name. You earned it."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Rosa.",
+          "goto": "l_r"
+        },
+        {
+          "text": "Grace.",
+          "goto": "l_g"
+        },
+        {
+          "text": "Something with a street in it.",
+          "goto": "l_s"
+        }
+      ]
+    },
+    {
+      "id": "l_r",
+      "speaker": "npc.cab_fare_night_worker",
+      "emotion": "warm",
+      "text": "Rosa. My mother's name. Good.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_g",
+      "speaker": "npc.cab_fare_night_worker",
+      "emotion": "warm",
+      "text": "Grace. God knows we'll need it.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_s",
+      "speaker": "npc.cab_fare_night_worker",
+      "emotion": "laughing",
+      "text": "Madison. Like the square. Fancy. Okay.",
+      "goto": "l_e"
+    },
+    {
+      "id": "l_e",
+      "speaker": "char.dr_osei",
+      "emotion": "dry",
+      "text": "Congratulations to whoever you are. Out of my hallway, please."
+    }
+  ]
+}

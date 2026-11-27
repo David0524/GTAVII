@@ -1,0 +1,67 @@
+{
+  "id": "barks.park",
+  "core": false,
+  "note": "Bryant Park and Madison Square Park: sleepers, readers, small dealers (no drug detail).",
+  "lines": [
+    {
+      "context": "idle",
+      "emotion": "tired",
+      "text": "Bench is mine till sunrise. Then it's the pigeons'."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Library's the only building that never asked me to leave."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Park's empty by nine. Everybody in it is buying or watching."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Chess, mister? Quarter a game. I win, you learn."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Cops rousted me twice tonight. Where'm I supposed to sleep?"
+    },
+    {
+      "context": "rain",
+      "emotion": "tired",
+      "text": "Rain. Under the trees. Trees leak."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Hot night. Grass is cooler than my room was."
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Hey! Watch the feet! These are all I got!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Run! Run! Nobody runs through the park for fun."
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Lights out. Stay where people can see you."
+    },
+    {
+      "context": "night",
+      "emotion": "low",
+      "text": "Keep walking, mister. Nothing here for you."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Pigeons know me. Pigeons are good people."
+    }
+  ]
+}

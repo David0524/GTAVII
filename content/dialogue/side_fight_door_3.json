@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_fight_door_3",
+  "context": "Ringside (Nick).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "excited",
+      "text": "Okoro to win in six. A poet with a left hook. Put me down for fifty."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.augustus_kitt",
+      "emotion": "rasping",
+      "text": "Mr. Varelas! Fifty on the poet! Now that's a man who reads."
+    }
+  ]
+}

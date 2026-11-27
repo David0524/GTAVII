@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m21_dinner",
+  "context": "M21 o5. (Nick.) The Iron Gate. Lisle checks his watch. Nick orders another course.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Howard, sit. The cheesecake here is a legal document. Binding."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Nicholas, I have a briefcase waiting. And principles about dessert."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Principles. Let me tell you about my first shop. Under a table. Nineteen forty-nine…"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.howard_lisle",
+      "emotion": "patient",
+      "text": "You've told me. Twice."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Then I'll tell it better. Waiter! Two coffees. Greek. It takes a long time."
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m02_hollis",
+  "context": "M2 o4. Room 1112. Hollis in his undershirt, a radio on his knee, the window jammed shut.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.walter_hollis",
+      "emotion": "cheerful",
+      "text": "Shipmate! Close the door, you're letting the heat in. Ha."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Window still stuck, Mr. Hollis?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.walter_hollis",
+      "emotion": "cheerful",
+      "text": "Fan's broke. Window's stuck. Otherwise it's a palace."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.walter_hollis",
+      "emotion": "serious",
+      "text": "Odessa says somebody bought the boat. That right?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "honest",
+      "text": "Somebody bought it. I don't know who's steering."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.walter_hollis",
+      "emotion": "cheerful",
+      "text": "Forty years at sea and I die in a hotel? Not this hotel, shipmate."
+    },
+    {
+      "id": "l7",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "I'll bring a fan up from the basement. Gus owes me."
+    }
+  ]
+}

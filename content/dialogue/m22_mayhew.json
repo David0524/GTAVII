@@ -1,0 +1,46 @@
+{
+  "id": "dlg.m22_mayhew",
+  "context": "M22 o3. The Shamrock Rail. Every cop at the bar staring at the TV. Mayhew grabs Teddy's sleeve.",
+  "lines": [
+    {
+      "id": "l1w",
+      "speaker": "char.carl_mayhew",
+      "emotion": "panicked",
+      "text": "You wore a wire. Wurtz's man at the DA's office saw your name. A wire, kid!",
+      "if": "flag.branch_a_wire"
+    },
+    {
+      "id": "l2w",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "You drove me to a meet in seventy-one, Carl. I'm just returning the favour.",
+      "if": "flag.branch_a_wire"
+    },
+    {
+      "id": "l1b",
+      "speaker": "char.carl_mayhew",
+      "emotion": "panicked",
+      "text": "The book's gone from Lisle's office. Everybody knows it's you. Everybody!",
+      "if": "flag.branch_a_burned"
+    },
+    {
+      "id": "l2b",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Then everybody knows who to be nice to.",
+      "if": "flag.branch_a_burned"
+    },
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "frightened",
+      "text": "He's going down tonight, the President. Everybody's going down. Who's next, kid?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Go home, Carl. Sleep. Tomorrow you decide who you are."
+    }
+  ]
+}

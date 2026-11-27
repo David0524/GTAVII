@@ -1,0 +1,25 @@
+{
+  "id": "npc.club_maid",
+  "behaviour": "loiterer",
+  "palette": [
+    "#808080",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Hotel chambermaid's grey uniform and apron; a cardigan after work.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "20:00",
+      "area": "Hotel Pennsylvanian",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": true,
+  "note": "Side-activity speaker (N5)."
+}

@@ -1,0 +1,83 @@
+{
+  "id": "dlg.m10_moretti",
+  "context": "M10 o2. W 28th St at 04:50. Moretti hoses palms on the sidewalk. Her truck sits on two flat tyres.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.anna_moretti",
+      "emotion": "loud",
+      "text": "Five a.m. I've got gladiolus, roses and a cop who wants twenty. One of those wilts."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I'm not a cop, Mrs. Moretti. I'm the guy they send instead."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.anna_moretti",
+      "emotion": "angry",
+      "text": "My father paid nobody in 1931. I'm not paying in 1974."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.anna_moretti",
+      "emotion": "angry",
+      "text": "And look at my truck. Two tyres, slashed. Third time since June. Who does that?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Press her. It's the job.",
+          "goto": "l_press",
+          "setRelationships": {
+            "char.teddy_arce/char.anna_moretti": -1,
+            "char.teddy_arce/char.carl_mayhew": 1
+          }
+        },
+        {
+          "text": "Let it slide this week.",
+          "goto": "l_slide",
+          "setRelationships": {
+            "char.teddy_arce/char.anna_moretti": 2,
+            "char.teddy_arce/char.carl_mayhew": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_press",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Twenty, Mrs. Moretti. Or next week they send somebody who isn't polite."
+    },
+    {
+      "id": "l_press2",
+      "speaker": "char.anna_moretti",
+      "emotion": "cold",
+      "text": "Take it. Choke on it. Mind the fronds on your way out.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_slide",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "I'll tell them you weren't open yet. Get your tyres fixed."
+    },
+    {
+      "id": "l_slide2",
+      "speaker": "char.anna_moretti",
+      "emotion": "surprised",
+      "text": "…Huh. You want to help? Grab a palm. Mind the fronds.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.anna_moretti",
+      "emotion": "low",
+      "text": "Ask the Carriers' boys about my tyres. Ask the one with the radio voice."
+    }
+  ]
+}

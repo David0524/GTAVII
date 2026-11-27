@@ -1,0 +1,27 @@
+{
+  "id": "npc.fare_runner",
+  "behaviour": "walker",
+  "palette": [
+    "#2F2F2F",
+    "#8B4513"
+  ],
+  "wardrobe": "A laid-off man in a short-sleeve shirt who bolts from the cab.",
+  "props": [
+    "cash box"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Scripted scenes only",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.street_tough",
+  "scripted": true,
+  "note": "M3 chase."
+}

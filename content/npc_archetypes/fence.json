@@ -1,0 +1,25 @@
+{
+  "id": "npc.fence",
+  "behaviour": "loiterer",
+  "palette": [
+    "#8B4513",
+    "#F5DEB3"
+  ],
+  "wardrobe": "Overcoat in July with pockets full of radios.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "18:00",
+      "area": "W 39th St & 9th Ave",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.deuce",
+  "scripted": true,
+  "note": "Photo Jobs subject; keeps a fixed routine."
+}

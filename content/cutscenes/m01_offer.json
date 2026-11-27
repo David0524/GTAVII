@@ -1,0 +1,103 @@
+{
+  "id": "cut.m01_offer",
+  "mission": "mission.dusk_on_broadway",
+  "before": "o3",
+  "time": "20:50",
+  "skippable": true,
+  "logline": "Under a wholesaler's dark awning at 31st & Broadway, the offer. The Empire Estate lit up over Mayhew's shoulder.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 32,
+      "move": "static",
+      "framing": "Broadway & W 31st, roll gates down, one awning; the Empire Estate lit up above the rooftops",
+      "blocking": "The two men stop under the awning; a wholesaler pulls his gate",
+      "beats": [
+        "Gate rattle"
+      ],
+      "durationSec": 5,
+      "notes": "audio: roll gate; a radio from the Corwin's lobby down the block"
+    },
+    {
+      "id": "s2",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "slow push in on Mayhew",
+      "framing": "Mayhew framed by the Empire Estate's lights",
+      "blocking": "He lowers his voice",
+      "beats": [
+        "l1–l2"
+      ],
+      "durationSec": 10.0,
+      "dialogue": [
+        "dlg.m01_offer#l1",
+        "dlg.m01_offer#l2"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy, unblinking",
+      "blocking": "",
+      "beats": [
+        "l3: 'A bagman.'"
+      ],
+      "durationSec": 3,
+      "dialogue": [
+        "dlg.m01_offer#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Profile two-shot; the awning edge cuts the frame",
+      "blocking": "Mayhew counts on his fingers for 'two hundred'",
+      "beats": [
+        "l4–l5"
+      ],
+      "durationSec": 9.4,
+      "dialogue": [
+        "dlg.m01_offer#l4",
+        "dlg.m01_offer#l5"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "choice hold",
+      "lensMm": 50,
+      "move": "slow drift",
+      "framing": "Teddy's face; Mayhew soft in the background",
+      "blocking": "Gameplay choice overlay (untimed)",
+      "beats": [
+        "Choice c1 (3 options) on large buttons"
+      ],
+      "dialogue": [
+        "dlg.m01_offer#c1"
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m01_offer#c1"
+    },
+    {
+      "id": "s6",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "crane up as Mayhew walks off downtown",
+      "framing": "The street, the Corwin's dead-lettered neon at the end of the block",
+      "blocking": "Mayhew gone; Teddy alone",
+      "beats": [
+        "l_end: 'I'll find you.'",
+        "Objective: 'Get to the Corwin, W 31st St'"
+      ],
+      "durationSec": 6,
+      "dialogue": [
+        "dlg.m01_offer#l_end"
+      ],
+      "notes": "film: grain; halation on the Corwin neon"
+    }
+  ]
+}

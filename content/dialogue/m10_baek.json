@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m10_baek",
+  "context": "M10 o4. Seoul Star Imports, W 29th. Mr. Baek at the counter, pocket calculator out. Mrs. Baek in back.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Again you. Last month a truck. This month a gentleman. Next month, what? A dog?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "My husband talks. I count. Today we counted wrong."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "calm",
+      "text": "Twenty dollars. I give you twenty dollars. I want a receipt."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "There's no receipt, Mr. Baek."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Then I make one. 'Twenty dollars, for nothing.' Sign here, please."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Protection from what? The only thing I fear is the landlord."
+    }
+  ]
+}

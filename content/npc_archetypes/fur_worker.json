@@ -1,0 +1,29 @@
+{
+  "id": "npc.fur_worker",
+  "behaviour": "worker",
+  "palette": [
+    "#F5F5F5",
+    "#8B7D6B",
+    "#2F4F4F"
+  ],
+  "wardrobe": "White work smock dusted with fur, flat cap, grey trousers. Older Greek-American and Jewish craftsmen, younger Greek arrivals.",
+  "props": [
+    "pelts over the shoulder",
+    "garment bag"
+  ],
+  "schedule": [
+    {
+      "from": "07:00",
+      "to": "15:30",
+      "area": "Fur District (W 27th–30th, 6th–8th Aves)",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.3,
+    "night": 0.02
+  },
+  "barks": "barks.garment",
+  "scripted": false,
+  "note": ""
+}

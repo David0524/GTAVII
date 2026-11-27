@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m25_kearney",
+  "context": "M25 o2. Midtown Central, front desk, near midnight. Kearney opens his bottom drawer.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.pat_kearney",
+      "emotion": "gruff",
+      "text": "Arce. Sit. Not there, that's evidence. There."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.pat_kearney",
+      "emotion": "quiet",
+      "text": "Christmas list. Sixty-nine, seventy, seventy-one. Who paid. Who collected."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.pat_kearney",
+      "emotion": "quiet",
+      "text": "Took a turkey every year. Never a dollar. Kept the list. Never knew why."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.pat_kearney",
+      "emotion": "gruff",
+      "text": "Now I know. Take it before I retire and somebody cleans this desk."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "moved",
+      "text": "Thank you, Sarge."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.pat_kearney",
+      "emotion": "gruff",
+      "text": "Don't thank me. Mayhew's car is on Thirty-Fifth. Go finish it."
+    }
+  ]
+}

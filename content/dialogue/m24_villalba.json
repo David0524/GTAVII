@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m24_villalba",
+  "context": "M24 o5. Villalba on the dispatch radio, too calm. Augie listening.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.hector_villalba",
+      "emotion": "radio",
+      "text": "Unit one, unit one. Mr. Lisle's office calling for Mr. Varelas. Urgent."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.augie_lomax",
+      "emotion": "stunned",
+      "text": "How does Lisle know you're here? Hector. Hector, how does he know?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.hector_villalba",
+      "emotion": "radio",
+      "text": "Augie thinks it's his. Lisle thinks it's his. The trucks know whose it is."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Your man sold you before you could sell yourself, Augie. Go home. See a doctor."
+    }
+  ]
+}

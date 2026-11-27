@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m07_kearney",
+  "context": "M7 o5. Midtown Central front desk. Sgt. Kearney behind the blotter.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.pat_kearney",
+      "emotion": "gruff",
+      "text": "Arce. Front desk is for complaints, son. Yours I've heard. Next."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Looking for Carl."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.pat_kearney",
+      "emotion": "contempt",
+      "text": "Mayhew sells his own furniture and calls it moving. He's at the Rail."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.pat_kearney",
+      "emotion": "gruff",
+      "text": "Took a turkey every Christmas for twenty years. Never a dollar. Write that."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.pat_kearney",
+      "emotion": "quiet",
+      "text": "Whatever he's selling you, son, check the bottom of the box."
+    }
+  ]
+}

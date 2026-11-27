@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_bulldog_scoop_2",
+  "context": "At the bureau after the run (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nora_finch",
+      "emotion": "rapid",
+      "text": "You beat the Dispatch truck to Herald Square? By how much?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "A cup of coffee and a red light."
+    }
+  ]
+}

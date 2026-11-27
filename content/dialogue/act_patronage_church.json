@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_patronage_church",
+  "context": "Patronage: the church roof fund.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.parish_priest",
+      "emotion": "hopeful",
+      "text": "The roof, Mr. Varelas. Rain comes in over the Sacred Heart. And the Greeks."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "My church is uptown, Father. But rain is ecumenical. Two hundred."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.parish_priest",
+      "emotion": "dry",
+      "text": "God bless you. Your name goes on the plaque. Small letters, if you prefer."
+    }
+  ]
+}

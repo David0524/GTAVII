@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_buyers_times",
+  "context": "Buyers' Tour: Times Square.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.trade_dinner_guest",
+      "emotion": "uneasy",
+      "text": "It's… livelier than the brochure."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "dry",
+      "text": "The brochure was printed in 1955. The neon is from 1974."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Sell them the city. The city's going broke. Sell it anyway. It's beautiful."
+    }
+  ]
+}

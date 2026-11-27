@@ -1,0 +1,30 @@
+{
+  "id": "npc.florist_wholesaler",
+  "behaviour": "vendor",
+  "palette": [
+    "#228B22",
+    "#FFFFFF",
+    "#000000"
+  ],
+  "wardrobe": "Rubber apron, rolled sleeves, rubber boots.",
+  "props": [
+    "pail",
+    "shears",
+    "potted palm"
+  ],
+  "schedule": [
+    {
+      "from": "04:30",
+      "to": "13:00",
+      "area": "W 28th St, 6th–7th Aves",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.4,
+    "night": 0.05
+  },
+  "barks": "barks.wholesaler",
+  "scripted": false,
+  "note": ""
+}

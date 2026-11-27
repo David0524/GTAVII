@@ -1,0 +1,162 @@
+{
+  "id": "barks.plainclothes",
+  "core": true,
+  "note": "The plainclothes 'conditions' unit and off-duty cops. Menace through politeness. No slurs.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "smug",
+      "text": "Evening. Lovely evening."
+    },
+    {
+      "context": "greet",
+      "emotion": "flat",
+      "text": "You look familiar. You look like somebody I'll see again."
+    },
+    {
+      "context": "idle",
+      "emotion": "smug",
+      "text": "Busy street. Lots of commerce. We love commerce."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Lieutenant says the avenue's lively tonight. We'll see."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "White sneakers? Comfortable. Nobody notices sneakers."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Collections are light this week. Somebody's not trying."
+    },
+    {
+      "context": "complain",
+      "emotion": "flat",
+      "text": "Special Prosecutor this, Special Prosecutor that. Special headache."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain. Everybody indoors. Bad for business."
+    },
+    {
+      "context": "rain",
+      "emotion": "flat",
+      "text": "Roll the window up. We can see fine from here."
+    },
+    {
+      "context": "heat",
+      "emotion": "smug",
+      "text": "Hot night. People get careless when it's hot."
+    },
+    {
+      "context": "horn",
+      "emotion": "flat",
+      "text": "Keep honking. I've got all night and a notebook."
+    },
+    {
+      "context": "collision",
+      "emotion": "cold",
+      "text": "You bumped me. That's assault, technically. Lucky I'm nice."
+    },
+    {
+      "context": "collision",
+      "emotion": "smug",
+      "text": "Easy, friend. Wouldn't want to drop anything."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alert",
+      "text": "Somebody's in a hurry. Follow him. No, walk."
+    },
+    {
+      "context": "player_running",
+      "emotion": "smug",
+      "text": "Run all you want. The avenue's only so long."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "cold",
+      "text": "Nice driving. I'll remember the plate."
+    },
+    {
+      "context": "brownout",
+      "emotion": "smug",
+      "text": "Lights out. Everybody's honest in the dark, right?"
+    },
+    {
+      "context": "night",
+      "emotion": "flat",
+      "text": "Two a.m. The real city's out now."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "If Bauer's nervous, somebody's talking. Find out who."
+    },
+    {
+      "context": "idle",
+      "emotion": "smug",
+      "text": "Fifty's a tax. Seventy-five is a tax with a smile."
+    },
+    {
+      "context": "greet",
+      "emotion": "flat",
+      "text": "Shine your shoes, Earl? No? Shame. They need it."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Ricky says the park's quiet. Ricky says a lot of things."
+    },
+    {
+      "context": "complain",
+      "emotion": "smug",
+      "text": "The Commission was weather. Weather passes."
+    },
+    {
+      "context": "idle",
+      "emotion": "cold",
+      "text": "Camera? Who's got a camera on this avenue? Find it."
+    },
+    {
+      "context": "greet",
+      "emotion": "smug",
+      "text": "Delphine. Always a pleasure. Always."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Write it up as a disorderly. Disorderly's always true."
+    },
+    {
+      "context": "night",
+      "emotion": "smug",
+      "text": "Coffee? We don't take coffee anymore. We take envelopes."
+    },
+    {
+      "context": "collision",
+      "emotion": "flat",
+      "text": "Watch the jacket. It's leather. In July. On purpose."
+    },
+    {
+      "context": "player_running",
+      "emotion": "flat",
+      "text": "He's running toward Penn Station. They always do."
+    },
+    {
+      "context": "rain",
+      "emotion": "smug",
+      "text": "Rain washes the avenue. Not clean. Just wet."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Lieutenant's boat needs a new motor. Collections go up."
+    }
+  ]
+}

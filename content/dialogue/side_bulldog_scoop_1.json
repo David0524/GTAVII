@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_bulldog_scoop_1",
+  "context": "Before dawn at the paper's loading dock (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.truck_driver",
+      "emotion": "gruff",
+      "text": "Bulldog edition. Six stands. The other paper's truck leaves the same minute."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "Then I leave the minute before."
+    }
+  ]
+}

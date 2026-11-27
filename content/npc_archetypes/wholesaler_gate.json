@@ -1,0 +1,27 @@
+{
+  "id": "npc.wholesaler_gate",
+  "behaviour": "vendor",
+  "palette": [
+    "#8B4513",
+    "#F5DEB3"
+  ],
+  "wardrobe": "Shirt sleeves and vest.",
+  "props": [
+    "roll-gate hook"
+  ],
+  "schedule": [
+    {
+      "from": "18:00",
+      "to": "20:00",
+      "area": "Broadway wholesale strip",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.2,
+    "night": 0.0
+  },
+  "barks": "barks.wholesaler",
+  "scripted": false,
+  "note": "Variant used by the M1 overheard trigger (closing gates)."
+}

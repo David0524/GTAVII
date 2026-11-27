@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_stuck_elevator_2",
+  "context": "Cranked down. The doors open.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.marjorie_kell",
+      "emotion": "shaken",
+      "text": "Two hours. Two hours with a man who sells insurance. Thank you. Who are you?"
+    }
+  ]
+}

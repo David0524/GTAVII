@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "apartment_lobby #0  b5110 13 WEST 24 STREET  1906 use 3 style 3  4.2x18.0 m  tenderloin  West 24th Street\nbuild 21 ms (main thread, medium)  verts 2269 tris 2132 cells 1 slots 1 markers 1 colliders 9  [webgl2]",
+  "stats": {
+   "verts": 2269,
+   "tris": 2132,
+   "genMs": 1.7,
+   "bakeMs": 18.9,
+   "cells": 1
+  },
+  "ms": 20.700000000186265,
+  "slots": 1,
+  "markers": 1,
+  "colliders": 9,
+  "building": 5110,
+  "unit": "b5110"
+ }
+]

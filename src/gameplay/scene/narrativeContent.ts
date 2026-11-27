@@ -14,10 +14,11 @@ export async function loadNarrativeContent(): Promise<{ content: GameplayContent
   const useReal = Object.keys(real).length > 0;
   const src = useReal ? real : snapshot;
   const files: NarrativeFiles = {};
-  for (const [path, load] of Object.entries(src)) {
+  // in parallel: one await per file costs a frame each on a slow device (84 s headless at 1.5 s/frame)
+  await Promise.all(Object.entries(src).map(async ([path, load]) => {
     const name = path.split('/').pop()!.replace('.json', '') as (typeof NAMES)[number];
     if ((NAMES as readonly string[]).includes(name)) (files as Record<string, unknown>)[name] = await load();
-  }
+  }));
   const warnings: string[] = [];
   const content: GameplayContent & { vendors?: unknown } = adaptNarrative(files, (m) => warnings.push(m));
   // vendor menus and prices are narrative's (content/vendors.json); gameplay reads them as they are

@@ -7,15 +7,13 @@
  * exist: the Penn Central rail cut / West Side Yard and the Lincoln Tunnel trench on the
  * west side.
  *
- * Planned bounds (pipeline v2, world metres, grid-aligned; see geo.ts for the frame):
- *   west  : mid-block between 10th and 11th Aves      x = -1580
- *   east  : mid-block between Lexington and 3rd Aves  x =   520
- *   north : mid-block between 47th and 48th Sts       z = -1990
- *   south : mid-block between 18th and 19th Sts       z =   320
- * Until pipeline v2 ships, the modelled city only covers geo.ts REGION (a subset), so
- * edgeDistance is already correct to code against even though the outer blocks are not yet built.
+ * Bounds (story core: user pillar "small map, very interactive"; supersedes the expanded bounds):
+ *   west  : mid-block between 9th and 10th Aves (Lincoln Tunnel approach trench as layer-0 edge)  x = -1292
+ *   east  : mid-block between Madison and Park Aves                                               x =   213
+ *   north : mid-block between 43rd and 44th Sts (42nd St playable; Times Square visible beyond)    z = -1674
+ *   south : mid-block between 21st and 22nd Sts (Madison Square Park and the Flatiron approach)    z =    92
  */
-export const PLAYABLE = { minX: -1580, maxX: 520, minZ: -1990, maxZ: 320 } as const;
+export const PLAYABLE = { minX: -1292, maxX: 213, minZ: -1674, maxZ: 92 } as const;
 
 /** Signed distance in metres to the playable edge: positive inside, negative outside. */
 export function edgeDistance(x: number, z: number): number {

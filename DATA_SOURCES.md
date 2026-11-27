@@ -15,7 +15,7 @@ same raw inputs always produce byte-identical chunks.
 
 | Dataset | Used for | Publisher | License |
 |---|---|---|---|
-| **OpenStreetMap** via the Overpass API (`maps.mail.ru` mirror; the `overpass-api.de` endpoint is tried first; if all Overpass endpoints fail, tiles come from the OSM API 0.6 `/map` endpoint) | Street centrelines and classes, one-way tags, `building:part` setbacks on towers, landmark names, parks, traffic signals, subway entrances | OpenStreetMap contributors | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/). Attribution: "© OpenStreetMap contributors". This is shown on screen at all times (bottom right). |
+| **OpenStreetMap** via the Overpass API (`maps.mail.ru` mirror; the `overpass-api.de` endpoint is tried first; if all Overpass endpoints fail, tiles come from the OSM API 0.6 `/map` endpoint) | Street centrelines and classes, one-way tags, `building:part` setbacks on towers, landmark names, parks, traffic signals, subway entrances | OpenStreetMap contributors | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/). Attribution: "© OpenStreetMap contributors". It appears on the title-screen footer, the full map screen and the Credits screen. Since 2026-11-27 (user request) it is not an always-on overlay during play and cutscenes. |
 | **NYC Building Footprints** (NYC Open Data `5zhs-2jue`) | Building outlines, roof height (`height_roof`, ft), `construction_year`, BIN/BBL keys. The heights come from the same LiDAR/photogrammetry source as the city's 3D building model. | NYC Office of Technology & Innovation (formerly DoITT) | NYC Open Data terms of use (public domain–style, no restrictions) |
 | **NYC PLUTO** (NYC Open Data `64uk-42ks`) | `yearbuilt` (primary source for the 1974 cutoff), land use, building class, floor count | NYC Department of City Planning | NYC Open Data terms of use |
 | **NYC 3D Building Model (2014, CityGML)** | *Not downloaded in Phase 1.* The footprint dataset's heights already come from it. We may pull it later to check individual hero roofs. | NYC DoITT | NYC Open Data terms of use |
@@ -114,3 +114,11 @@ by the `heroes` list in `world.json`.
 ## Invented content
 Any business names, signage and vehicle makes in later phases are invented. No real brands,
 logos or trademarks are used.
+
+## Where attribution lives (since 2026-11-27)
+The user asked to remove the always-on credits line. ODbL and NYC Open Data attribution stays easy to find:
+- **title screen:** a small footer line (`src/ui/TitleScreen.ts`, `.t74-legal`);
+- **full map screen:** a footer line (UI);
+- **Credits:** the full source list from this file (UI).
+
+No overlay is drawn during gameplay or cutscenes.

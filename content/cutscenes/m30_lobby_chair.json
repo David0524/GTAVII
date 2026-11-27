@@ -1,0 +1,161 @@
+{
+  "id": "cut.m30_lobby_chair",
+  "mission": "mission.closing",
+  "before": "o6",
+  "time": "14:00",
+  "date": "1974-08-30",
+  "skippable": true,
+  "logline": "The owner finally comes inside. Nick sits in the chair beside Odessa's and decides what the Corwin is for.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "slow push in",
+      "framing": "The Corwin lobby at midday: residents on the stairs, the radio on the desk, two armchairs by the window",
+      "blocking": "Nick in a good suit, crossing the lobby to the empty chair",
+      "beats": [
+        "Residents watching from the stairs: the jury"
+      ],
+      "durationSec": 6,
+      "notes": "audio: the radio, low; a fan; street noise | lighting: hot white daylight from the street"
+    },
+    {
+      "id": "s2",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Nick and Odessa side by side, facing the street, not each other",
+      "blocking": "",
+      "beats": [
+        "l1–l2"
+      ],
+      "durationSec": 7.8,
+      "dialogue": [
+        "dlg.m30_odessa#l1",
+        "dlg.m30_odessa#l2"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Nick",
+      "blocking": "",
+      "beats": [
+        "l3"
+      ],
+      "durationSec": 5.8,
+      "dialogue": [
+        "dlg.m30_odessa#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Odessa turns her head toward him for the first time",
+      "blocking": "",
+      "beats": [
+        "l4"
+      ],
+      "durationSec": 3,
+      "dialogue": [
+        "dlg.m30_odessa#l4"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "choice hold",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Nick's hands on his knees",
+      "blocking": "",
+      "beats": [
+        "c1 (untimed)"
+      ],
+      "dialogue": [
+        "dlg.m30_odessa#c1"
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m30_odessa#c1"
+    },
+    {
+      "id": "s6a",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Nick stands; Odessa doesn't",
+      "blocking": "",
+      "beats": [
+        "Branch: sell"
+      ],
+      "durationSec": 8.4,
+      "dialogue": [
+        "dlg.m30_odessa#l_sell",
+        "dlg.m30_odessa#l_sell2"
+      ],
+      "showIf": {
+        "choice": "dlg.m30_odessa#c1",
+        "option": 0
+      }
+    },
+    {
+      "id": "s6b",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Nick loosens his tie and stays seated",
+      "blocking": "",
+      "beats": [
+        "Branch: keep"
+      ],
+      "durationSec": 8.7,
+      "dialogue": [
+        "dlg.m30_odessa#l_keep",
+        "dlg.m30_odessa#l_keep2"
+      ],
+      "showIf": {
+        "choice": "dlg.m30_odessa#c1",
+        "option": 1
+      }
+    },
+    {
+      "id": "s6c",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Odessa puts her hand on his arm",
+      "blocking": "",
+      "beats": [
+        "Branch: give"
+      ],
+      "durationSec": 8,
+      "dialogue": [
+        "dlg.m30_odessa#l_give",
+        "dlg.m30_odessa#l_give2"
+      ],
+      "showIf": {
+        "choice": "dlg.m30_odessa#c1",
+        "option": 2
+      }
+    },
+    {
+      "id": "s7",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "slow crane up toward the stairs",
+      "framing": "The lobby from above: the two chairs, the residents",
+      "blocking": "",
+      "beats": [
+        "l_end (inner)"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m30_odessa#l_end"
+      ]
+    }
+  ]
+}

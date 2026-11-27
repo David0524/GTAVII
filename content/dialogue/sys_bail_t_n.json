@@ -1,0 +1,28 @@
+{
+  "id": "dlg.sys_bail_t_n",
+  "context": "Bail-out: char.teddy_arce bails out char.nick_varelas at a precinct desk (CORE_SYSTEMS arrest flow). Remembered: relationship +1 both ways.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Mr. Varelas. In a cell. In a suit."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "tired",
+      "text": "Everybody gets paid. Apparently today it's you."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "I'll put it on the Corwin's tab.",
+      "setRelationships": {
+        "char.teddy_arce/char.nick_varelas": 1,
+        "char.nick_varelas/char.teddy_arce": 1
+      }
+    }
+  ]
+}

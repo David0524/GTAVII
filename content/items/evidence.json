@@ -1,0 +1,80 @@
+{
+  "items": [
+    {
+      "id": "item.photo_lisle_counter",
+      "name": "Photo: Lisle at the counter"
+    },
+    {
+      "id": "item.photo_lisle_mayhew",
+      "name": "Photo: Lisle and Mayhew, Pennsylvania lobby"
+    },
+    {
+      "id": "item.print_brannock_1",
+      "name": "Print: Brannock takes an envelope"
+    },
+    {
+      "id": "item.print_brannock_2",
+      "name": "Print: Brannock at Earl's stand"
+    },
+    {
+      "id": "item.print_wurtz_ricky",
+      "name": "Print: Wurtz with Ricky"
+    },
+    {
+      "id": "item.print_wurtz_nick",
+      "name": "Print: Wurtz takes Nick's cut"
+    },
+    {
+      "id": "item.print_editor_lisle",
+      "name": "Print: the editor's brother-in-law with Lisle"
+    },
+    {
+      "id": "item.ledger",
+      "name": "The ledger (or its copy)"
+    },
+    {
+      "id": "item.marjorie_carbons",
+      "name": "Marjorie Kell's carbons"
+    },
+    {
+      "id": "item.kearney_list",
+      "name": "Kearney's Christmas list, 1969–71"
+    },
+    {
+      "id": "item.collection_list_week1",
+      "name": "Mayhew's collection list"
+    },
+    {
+      "id": "item.club_shoebox",
+      "name": "The club's shoebox"
+    },
+    {
+      "id": "item.club_cash",
+      "name": "Club dues (cash)"
+    },
+    {
+      "id": "item.feld_sample_racks",
+      "name": "Feld sample racks"
+    },
+    {
+      "id": "item.feld_sample_bags",
+      "name": "Feld sample bags"
+    },
+    {
+      "id": "item.fur_bales",
+      "name": "Bales of furs"
+    },
+    {
+      "id": "item.ice_order",
+      "name": "Ice order"
+    },
+    {
+      "id": "item.club_payout_claudette",
+      "name": "Claudette's payout"
+    },
+    {
+      "id": "item.hollis_postcard",
+      "name": "One of Walter Hollis's postcards (20 to find)"
+    }
+  ]
+}

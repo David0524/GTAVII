@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m19_gus",
+  "context": "M19 o3. Corwin basement, boiler room. Gus beside the main panel. A letterhead order taped to it.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.gus_wilkie",
+      "emotion": "defensive",
+      "text": "Orders come on letterhead. I don't argue with letterhead."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Turn it back on, Gus."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.gus_wilkie",
+      "emotion": "defensive",
+      "text": "Boiler's from 1911. I'm not a super, I'm a priest. I do last rites."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.gus_wilkie",
+      "emotion": "breaking",
+      "text": "Prentiss said two days. Upgrade. I turned the switch. That's all."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Then turn it the other way. Now."
+    }
+  ]
+}

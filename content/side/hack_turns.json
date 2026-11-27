@@ -1,0 +1,60 @@
+{
+  "id": "mission.side_hack_turns",
+  "kind": "side",
+  "title": "Hack: Call Your Turns",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_vehicle",
+      "text": "Into the cab at Penn Station",
+      "vehicle": "vehicle_role.cab"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Pick up the fare",
+      "to": "loc.hotel_pennsylvania",
+      "radius": 15
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Follow the fare's directions",
+      "to": "W 23rd St & 8th Ave",
+      "radius": 20,
+      "routeCalledBy": "passenger"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Collect the fare",
+      "script": "dlg.side_hack_fare"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "$3–7 a fare + tips (route-knowledge bonus); regulars pay double"
+  },
+  "where": "Penn Station cab line; anywhere in the core",
+  "systems": [
+    "driving",
+    "1974 one-ways",
+    "terrain (Murray Hill)",
+    "dialogue"
+  ],
+  "mobile": "Turns are called 6+ seconds early and repeated on the HUD as text. Wrong turns cost tips, never fail.",
+  "rank": 4,
+  "slice": true
+}

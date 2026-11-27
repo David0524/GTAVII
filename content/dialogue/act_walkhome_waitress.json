@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_walkhome_waitress",
+  "context": "Walk Her Home: to her building.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.club_waitress",
+      "emotion": "tired",
+      "text": "Car slowed down back there. Did you see?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "New Jersey plates, KXR, something. He saw me read it. He drove on."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Goodnight. Lock the door. Count your money in the morning."
+    }
+  ]
+}

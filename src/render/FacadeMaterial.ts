@@ -1,0 +1,182 @@
+/**
+ * Procedural period facade material (TSL node material, WebGPU + WebGL2 backends).
+ *
+ * Inputs per vertex (meshBuilder): uv = facade metres (u along the wall, v height above the building's
+ * ground), facade = (style, condition 0..4, floor height m, seed 0..1), color = style base albedo.
+ * Everything is procedural in real units, so window rhythm follows the real floor count of every building.
+ *
+ * Reads as (docs/STYLE_GUIDE.md):
+ *  - window grid by style: tenement 2.6 m bays with tall double-hung sash; lofts wide 3.2 m bays with big
+ *    glass; offices 2.4 m punched windows; postwar ribbon-ish 1.8 m
+ *  - ground floor: storefront glass between piers for commercial styles, stoop-level for tenements
+ *  - brick coursing (77 mm courses, running bond) faded out by pixel footprint (no moire at distance)
+ *  - soot: streaks below every sill/cornice band, heavier with worse condition, darker ground floors
+ *  - glass: window shades at random heights, some panes boarded on derelict buildings
+ *  - night: windows lit by a per-window hash against a time-of-day probability (incandescent / TV / office)
+ *  - interiors tier-C hook: `interiorNode` can later replace the lit-window colour with interior mapping
+ */
+import * as THREE from 'three/webgpu';
+import {
+  attribute, uv, vec2, vec3, float, fract, floor, step, smoothstep, mix, hash, mx_noise_float,
+  normalWorld, uniform, select, vertexColor, clamp, max, min, fwidth, abs, sin, positionWorld, cameraPosition, dot, normalize, length,
+} from 'three/tsl';
+
+export const facadeUniforms = {
+  /** 0 = full day, 1 = deep night (drives lit windows). */
+  night: uniform(0),
+  /** Real seconds, for subtle flicker (TVs). */
+  time: uniform(0),
+  /** Game clock minutes since midnight (interiors Tier C: room by hour). */
+  minutes: uniform(0),
+  /** Area power 0 (blackout) / 0.45 (brownout) / 1 (normal); per-area masks come with N2. */
+  areaPower: uniform(1),
+  /** Painted ground-floor storefront glow. 0 once facades are cut: plugs and interiors light the shops. */
+  storeScale: uniform(1),
+  /** Global scale on window emission (exposure tuning / debugging). */
+  litScale: uniform(0.5),
+  /** Radians per drawing-buffer pixel (2 tan(fov/2) / height): rotation-invariant window LOD. Set on resize. */
+  pixelAngle: uniform(0.0015),
+  /** Canyon occlusion strength (0 = off). */
+  aoStrength: uniform(0.5), // 0.8 left shaded canyon walls near-black from street level (iPhone noon report)
+};
+
+export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
+  const m = new THREE.MeshStandardNodeMaterial({ vertexColors: true });
+  const fac = attribute('facade', 'vec4');
+  // Per-building values arrive as interpolated vertex attributes. Interpolation of a constant is NOT exact
+  // (4.0 can arrive as 3.9999998 at some pixels, depending on the view), so integers are rounded and the
+  // seed is quantised before anything compares or hashes them. Unrounded, style.equal(4) and the hashed
+  // window id flipped per pixel as the camera moved: the "window lights bug out" report (2026-11-26).
+  const style = floor(fac.x.add(0.5)), cond = floor(fac.y.add(0.5)), floorH = fac.z;
+  const seedQ = floor(fac.w.mul(65521).add(0.5)); // exact integer 0..65521 per building
+  const seed = seedQ.div(65521); // for continuous noise offsets
+  const st = uv();
+  const u = st.x, v = st.y;
+  const isRoof = normalWorld.y.greaterThan(0.6);
+
+  // ---------------------------------------------------------------- window grid
+  const isTenement = style.equal(1), isCast = style.equal(2), isLoft = style.equal(3), isPostwar = style.equal(6), isLow = style.equal(7);
+  const isDeco = style.equal(9), isBeaux = style.equal(10), isChelsea = style.equal(11);
+  const bay = select(isDeco, float(1.55), select(isBeaux, float(1.8), select(isChelsea, float(2.4),
+    select(isTenement, float(2.6), select(isCast.or(isLoft), float(3.3), select(isPostwar, float(1.9), float(2.45)))))));
+  const winFrac = select(isDeco, float(0.42), select(isBeaux, float(0.58), select(isCast.or(isLoft), float(0.78), select(isPostwar, float(0.82), float(0.5)))));
+  const sill = select(isCast.or(isLoft), float(0.2), float(0.3));
+  const head = select(isCast.or(isLoft), float(0.86), float(0.84));
+  const fu = fract(u.div(bay)), fv = fract(v.div(floorH));
+  const floorIdx = floor(v.div(floorH)), bayIdx = floor(u.div(bay));
+  const aa = fwidth(u).add(fwidth(v)).mul(0.6).max(0.002);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const edge = (lo: any, x: any, w: any) => smoothstep(lo.sub(w), lo.add(w), x);
+  const halfW = winFrac.mul(0.5);
+  const inU = edge(float(0.5).sub(halfW), fu, aa.div(bay)).mul(float(1).sub(edge(float(0.5).add(halfW), fu, aa.div(bay))));
+  const inV = edge(sill, fv, aa.div(floorH)).mul(float(1).sub(edge(head, fv, aa.div(floorH))));
+  const groundFloor = v.lessThan(floorH.mul(1.15));
+  // storefronts: tall glass between narrow piers on commercial ground floors (not tenement stoops)
+  const storeU = edge(float(0.07), fu, aa.div(bay)).mul(float(1).sub(edge(float(0.93), fu, aa.div(bay))));
+  const storeV = edge(float(0.45), v, aa).mul(float(1).sub(edge(floorH.mul(0.82), v, aa)));
+  // Stable integer window id: building seed, floor and bay, combined in uint arithmetic (exact, wraps mod 2^32).
+  const idHash = (salt: number) => hash(seedQ.toUint().mul(2654435761).add(floorIdx.max(0).toUint().mul(40503)).add(bayIdx.max(0).toUint().mul(97)).add(salt));
+  const bayHash = hash(seedQ.toUint().mul(2654435761).add(bayIdx.max(0).toUint().mul(97)).add(911));
+  const hasStore = isTenement.not().or(bayHash.lessThan(0.35));
+  const storeMask = select(groundFloor.and(hasStore), storeU.mul(storeV), float(0));
+  const upperMask = select(groundFloor.and(hasStore), float(0), inU.mul(inV));
+  const winMaskSharp = clamp(storeMask.add(upperMask), 0, 1).mul(select(v.greaterThan(0.2), float(1), float(0)));
+  // Distance LOD: when a bay is only a few pixels wide the pattern aliases into speckle; fade to the
+  // average window coverage instead (also used to average lit windows).
+  // The footprint is computed from the distance to the window and the angle of view onto the wall, NOT
+  // from screen derivatives: fwidth() changes with where a facade sits on screen (perspective stretch at
+  // the edges), so turning the camera slid facades through the fade and the lit windows "bugged out"
+  // (user report 2026-11-26). This is invariant under camera rotation. The fade only starts once a bay
+  // is ~4 px wide, where individual windows are barely resolvable.
+  const toCam = cameraPosition.sub(positionWorld);
+  const grazing = abs(dot(normalize(toCam), normalWorld)).max(0.2);
+  const footprint = length(toCam).mul(facadeUniforms.pixelAngle).div(grazing); // metres per pixel along the wall
+  const bayPx = footprint.div(bay); // bays per pixel
+  const lodFade = smoothstep(0.25, 0.7, bayPx);
+  const coverage = winFrac.mul(head.sub(sill)).mul(0.85);
+  const winMask = mix(winMaskSharp, coverage, lodFade);
+
+  // ---------------------------------------------------------------- wall material
+  const brickStyle = isTenement.or(isLoft).or(isLow).or(style.equal(0)).or(isChelsea);
+  const course = fract(v.div(0.077));
+  const rowOff = floor(v.div(0.077)).mul(0.5);
+  const head2 = fract(u.div(0.205).add(rowOff));
+  const mortar = max(step(course, 0.13), step(head2, 0.05));
+  const mortarFade = smoothstep(0.012, 0.004, fwidth(v)); // fade coursing well before a course is < ~4 px (no speckle)
+  const mortarK = select(brickStyle, mortar.mul(mortarFade).mul(0.22), float(0));
+  const blotch = mx_noise_float(vec3(u.mul(0.11), v.mul(0.13), seed.mul(37))).mul(0.5).add(0.5);
+  // banding: sill / cornice lines at each floor (stone in offices, brick soldier courses in tenements)
+  const band = smoothstep(0.06, 0.0, fv).mul(select(isCast, float(0.35), float(0.18)));
+  // soot: streaks hang below every sill band; worse condition = heavier; ground floor grime
+  const dirt = float(4).sub(cond).div(4); // 0 pristine .. 1 derelict
+  const streak = mx_noise_float(vec3(u.mul(2.3), v.mul(0.06), seed.mul(13))).mul(0.5).add(0.5);
+  const underSill = smoothstep(0.55, 0.0, fv).mul(streak);
+  const soot = clamp(dirt.mul(0.55).mul(underSill.mul(0.7).add(0.3)).add(select(groundFloor, float(0.18), float(0))).add(dirt.mul(0.15)), 0, 0.8);
+  const wallBase = vertexColor().rgb.mul(blotch.mul(0.22).add(0.88));
+  // hero treatments: Beaux-Arts rusticated base (horizontal grooves on the lower floors) and strong cornice bands
+  const rustic = select(isBeaux.and(v.lessThan(floorH.mul(3))), step(fract(v.div(0.42)), 0.08).mul(0.3).mul(mortarFade.max(0.4)), float(0));
+  const heroBand = select(isBeaux, smoothstep(0.1, 0.0, fv).mul(0.18), float(0));
+  const wall = wallBase.mul(float(1).sub(mortarK)).mul(float(1).sub(band)).mul(float(1).sub(soot)).mul(float(1).sub(rustic)).mul(float(1).sub(heroBand));
+
+  // ---------------------------------------------------------------- glass, shades, boarded, lit
+  const rnd = idHash(1), rnd2 = idHash(17), rnd3 = idHash(41);
+  const shadeDown = rnd2.mul(0.8); // fraction of the window covered by a pulled shade
+  const shadeHere = fv.greaterThan(head.sub(head.sub(sill).mul(shadeDown))).and(groundFloor.not());
+  const glassDay = mix(vec3(0.05, 0.055, 0.06), vec3(0.11, 0.1, 0.09), rnd3);
+  // storefronts: dim warm interior behind the glass, a transom band above the door height
+  const transom = v.greaterThan(floorH.mul(0.66));
+  const storeCol = select(transom, vec3(0.16, 0.13, 0.1), mix(vec3(0.08, 0.06, 0.045), vec3(0.14, 0.1, 0.07), rnd));
+  const shadeCol = mix(vec3(0.62, 0.55, 0.42), vec3(0.4, 0.36, 0.3), rnd);
+  const boarded = cond.lessThan(0.5).and(rnd3.lessThan(0.45)).or(cond.lessThan(1.5).and(rnd3.lessThan(0.06)));
+  const boardCol = vec3(0.32, 0.27, 0.2).mul(mx_noise_float(vec3(u.mul(4), v.mul(0.5), seed)).mul(0.2).add(0.8));
+  const inStore = groundFloor.and(hasStore);
+  const glassCol = select(boarded, boardCol, select(inStore, storeCol, select(shadeHere, shadeCol, glassDay)));
+
+  // lit probability: residential evenings, offices emptier, derelict dark; storefronts lit at dusk/night
+  const resid = isTenement.or(isPostwar);
+  const litP = facadeUniforms.night.mul(select(resid, float(0.4), float(0.16))).mul(select(cond.lessThan(0.5), float(0.08), float(1)));
+  const isLit = rnd.lessThan(litP).and(boarded.not());
+  const office = style.equal(4).or(style.equal(5));
+  // colour temperature spread (oversight: windows read as identical saturated orange): incandescent
+  // (warm, the 1974 default at home), fluorescent tubes (green-white: most offices, some kitchens), TV blue
+  // (flickering), and warm-tinted curtains with folds over some lit apartment windows
+  const rnd4 = idHash(77);
+  const tv = rnd3.lessThan(0.12).and(resid);
+  const fluor = select(office, rnd4.lessThan(0.85), rnd4.lessThan(0.12));
+  const flicker = sin(facadeUniforms.time.mul(7.0).add(rnd.mul(40))).mul(0.15).add(0.85);
+  const curtain = resid.and(rnd4.greaterThan(0.6)).and(rnd4.lessThan(0.78));
+  const folds = abs(sin(fu.mul(28))).mul(0.4).add(0.6);
+  const lampCol = select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), select(fluor, vec3(0.8, 0.93, 0.8), select(curtain, vec3(1.0, 0.6, 0.36).mul(folds), vec3(1.0, 0.8, 0.55))));
+  const storeLit = groundFloor.and(hasStore).and(facadeUniforms.night.greaterThan(0.15)).and(rnd.lessThan(0.7));
+  // Emission is modest: the Phase 3 post stack (filmic tonemap + bloom/halation) supplies the glow.
+  // Lit windows are not flat panels: brightness varies per room (lamp wattage, distance), light falls off from
+  // the ceiling lamp toward the sill, a drawn shade glows dimmer and warmer, storefronts are dimmer behind displays.
+  const roomLevel = rnd2.mul(0.6).add(0.45);
+  const falloff = mix(float(0.55), float(1.0), smoothstep(0.0, 1.0, fv.sub(sill).div(head.sub(sill)).clamp(0, 1)));
+  const shadeGlow = select(shadeHere, float(0.55), float(1));
+  const emissiveSharp = select(isLit.or(storeLit), select(storeLit, vec3(1.0, 0.86, 0.66), lampCol).mul(select(storeLit, float(0.3).mul(roomLevel).mul(facadeUniforms.storeScale), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
+  const emissiveAvg = lampCol.mul(litP.mul(0.38));
+  const emissiveWin = mix(emissiveSharp, emissiveAvg, lodFade);
+
+  // ---------------------------------------------------------------- roofs
+  const tar = vec3(0.13, 0.12, 0.115).mul(mx_noise_float(vec3(u.mul(0.4), v.mul(0.4), seed.mul(5))).mul(0.25).add(0.85));
+
+  const spandrel = select(isDeco, inU.mul(float(1).sub(inV)).mul(float(1).sub(lodFade.mul(0.5))), float(0));
+  const aluminium = vec3(0.42, 0.42, 0.4);
+  const wallDeco = mix(wall, aluminium, spandrel);
+  const color = select(isRoof, tar, mix(wallDeco, glassCol, winMask));
+  m.colorNode = color;
+  m.roughnessNode = select(isRoof, float(0.95), mix(float(0.9), select(boarded.or(shadeHere), float(0.8), float(0.12)), winMask));
+  m.metalnessNode = spandrel.mul(0.6);
+  m.emissiveNode = select(isRoof, vec3(0), emissiveWin.mul(winMask).mul(facadeUniforms.litScale));
+  // ---------------------------------------------------------------- baked canyon occlusion (indirect light only)
+  // wallAO = (distance to the facing wall, its height). The facing skyline's elevation angle seen from this
+  // point blocks that share of the sky: deep side-street canyons go dim at the bottom, avenues stay open.
+  const wao = attribute('wallAO', 'vec2');
+  const rise = wao.y.sub(v).max(0).div(wao.x.max(1)); // tan(elevation)
+  const blocked = rise.div(rise.mul(rise).add(1).sqrt()); // sin(elevation)
+  const contact = mix(float(0.55), float(1), smoothstep(-0.3, 3.0, v)); // sidewalk contact darkening
+  m.aoNode = select(isRoof, float(1), float(1).sub(blocked.mul(facadeUniforms.aoStrength)).mul(contact));
+  void abs; void min; void vec2;
+  return m;
+}

@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m21_plan",
+  "context": "M21 o1. Corwin lobby table. Bernard with a stopwatch and a floor plan he drew from memory.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "precise",
+      "text": "Mr. Lisle dines at seven-fifteen. He returns for his briefcase at nine-forty. Always."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "That gives us two hours and twenty-five minutes. Comma. Then disaster. Period."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "And if he doesn't go to dinner?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "Then someone must take him to dinner. Someone he can't refuse."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Varelas."
+    }
+  ]
+}

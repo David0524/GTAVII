@@ -1,0 +1,78 @@
+{
+  "id": "mission.side_skip_board",
+  "kind": "side",
+  "title": "Abend's Board of Skips",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Abend Bail Bonds, W 31st & 8th",
+      "to": "loc.bail_bonds",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Pick a skip from the wall",
+      "script": "dlg.side_skip_board_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Ask around at the pool hall, W 41st",
+      "to": "W 41st St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Ask the skip's regulars",
+      "script": "dlg.side_skip_board_2"
+    },
+    {
+      "id": "o5",
+      "type": "combat",
+      "text": "Bring the skip in breathing",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.park_dealer",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true
+    },
+    {
+      "id": "o6",
+      "type": "goto",
+      "text": "Hand him in at Abend's",
+      "to": "loc.bail_bonds",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "10% of bail; regulars give tips"
+  },
+  "where": "Abend Bail Bonds, W 31st St & 8th Ave",
+  "systems": [
+    "witness system",
+    "interiors",
+    "combat (non-lethal)",
+    "dialogue"
+  ],
+  "mobile": "Investigation by talking; takedowns on soft lock.",
+  "rank": 13,
+  "slice": false
+}

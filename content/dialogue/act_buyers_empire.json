@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_buyers_empire",
+  "context": "Buyers' Tour: the Empire Estate.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.trade_dinner_guest",
+      "emotion": "awed",
+      "text": "That's the tallest building in the world?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Was. Downtown they built two taller. New York is never satisfied."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Sell them the city. The city's going broke. Sell it anyway. It's beautiful."
+    }
+  ]
+}

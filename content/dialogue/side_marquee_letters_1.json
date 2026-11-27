@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_marquee_letters_1",
+  "context": "The Velvet Moon box office.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.myrna_pelletier",
+      "emotion": "indignant",
+      "text": "Somebody stole my marquee letters. The whole alphabet."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.myrna_pelletier",
+      "emotion": "dry",
+      "text": "Find my letters and I'll put up whatever you want. Within reason. My reason."
+    }
+  ]
+}

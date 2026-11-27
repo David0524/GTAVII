@@ -1,0 +1,55 @@
+{
+  "id": "mission.side_practice_chair",
+  "kind": "side",
+  "title": "The Practice Chair",
+  "number": null,
+  "leads": [
+    "char.delphine_moore"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Tina's barber offer",
+      "script": "dlg.side_practice_chair_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The barbershop, W 38th & 8th",
+      "to": "W 38th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "wait",
+      "text": "Cut, wash and set, rhythm",
+      "seconds": 30
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "The regulars talk",
+      "script": "dlg.side_practice_chair_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Tina +1; the epilogue shop's first customers"
+  },
+  "where": "A barbershop on W 38th St (invented)",
+  "systems": [
+    "interiors",
+    "relationships"
+  ],
+  "mobile": "Tap rhythm; no fail.",
+  "rank": 36,
+  "slice": false
+}

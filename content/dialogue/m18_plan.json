@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m18_plan",
+  "context": "M18 o1. Nick's dark office, second brownout. Eleni, Yiannis and a lantern. Nick explains.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Power's out until three. The compressors stop. We had a failure. Terrible failure."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.eleni_varelas",
+      "emotion": "cold",
+      "text": "Half the pledged coats go out the dock. The claim says they spoiled."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "And the lieutenant's men watch the street. For a cut."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Everybody gets paid, Yiannis. That's payroll."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "blunt",
+      "text": "No. That's theft with a payroll. I'll load the truck. Don't ask me to count."
+    }
+  ]
+}

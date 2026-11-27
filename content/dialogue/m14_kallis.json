@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m14_kallis",
+  "context": "M14 o2. Kallis Fur Salon. White suit, panama hat on the desk. He pays in an envelope already sealed.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.stavros_kallis",
+      "emotion": "courtly",
+      "text": "Ah, the new collector. In a hot summer every furrier becomes a philosopher."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.stavros_kallis",
+      "emotion": "courtly",
+      "text": "Tell your sergeant Kallis pays early. Unlike some on Thirtieth Street."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Who's on Thirtieth?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.stavros_kallis",
+      "emotion": "cutting",
+      "text": "Varelas. A great man. Ask his bank how great. Good afternoon."
+    }
+  ]
+}

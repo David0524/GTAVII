@@ -1,0 +1,162 @@
+{
+  "id": "barks.office",
+  "core": true,
+  "note": "Office workers, lunch crowds, buyers, trade-dinner guests (Fifth Ave, Herald Sq, Madison Sq).",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "brisk",
+      "text": "Morning. Excuse me. Morning."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Hot enough for you? Ha. Everybody says that."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Forty-five minutes for lunch. I eat in twelve and stare for thirty-three."
+    },
+    {
+      "context": "idle",
+      "emotion": "worried",
+      "text": "They're talking layoffs on the eighth floor. Again."
+    },
+    {
+      "context": "idle",
+      "emotion": "smug",
+      "text": "Bought a calculator. Electric. Fits in my pocket. Ninety dollars!"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Insurance. We insure everything except the city."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "City can't pay its bills. I can't pay mine. Solidarity."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Subway stalled twenty minutes under Thirty-Fourth. In the dark."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Fare's thirty-five cents and the car smells like a gym."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "My boss wants me in at eight. The train wants me in at nine."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain, and I left my umbrella at the office. Which is where I am."
+    },
+    {
+      "context": "rain",
+      "emotion": "brisk",
+      "text": "Taxi! Taxi! Nobody stops for a man in rain."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Office air-conditioning broke. We're working in our socks."
+    },
+    {
+      "context": "heat",
+      "emotion": "wry",
+      "text": "Tie in August. The things we do for pensions."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Honking won't move Fifth Avenue, friend."
+    },
+    {
+      "context": "horn",
+      "emotion": "brisk",
+      "text": "Green light! It's green! Go!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Excuse me! Watch where you're going!"
+    },
+    {
+      "context": "collision",
+      "emotion": "brisk",
+      "text": "Sorry. Sorry. My fault. No, your fault. Sorry."
+    },
+    {
+      "context": "player_running",
+      "emotion": "startled",
+      "text": "Whoa! Late for a meeting?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running in a suit? Somebody's in trouble."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "alarmed",
+      "text": "Hey! That's a sidewalk! For walking!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Elevator's stuck between floors. With my boss in it. Hmm."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Power's out. Guess we're closing early. Shame."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Working late. The building sighs at night. You hear it?"
+    },
+    {
+      "context": "idle",
+      "emotion": "smug",
+      "text": "Lunch at the counter. Tuna on rye. Same as every day."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Did you see the Empire Estate lit up last night? Beautiful."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "My cousin's moving to Jersey. Says the city's finished."
+    },
+    {
+      "context": "greet",
+      "emotion": "formal",
+      "text": "Good afternoon. Lovely day for a deal."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Phone company says two weeks for a new line. Two weeks!"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Garment buyers in town. Every restaurant smells like cologne."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Share the awning? Plenty of room."
+    }
+  ]
+}

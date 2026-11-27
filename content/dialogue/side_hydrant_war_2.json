@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_hydrant_war_2",
+  "context": "Settled.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.beat_cop",
+      "emotion": "relenting",
+      "text": "Spray cap on, pressure's fine, everybody's happy. Even me. Barely."
+    }
+  ]
+}

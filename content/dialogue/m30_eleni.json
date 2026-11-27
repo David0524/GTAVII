@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m30_eleni",
+  "context": "M30 o1. Varelas office. Eleni's grey travelling suit. A suitcase by the door, or not.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.eleni_varelas",
+      "emotion": "dry",
+      "text": "Nikos. Kallis wants the firm. The Baeks want the building. Lisle wants your name."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.eleni_varelas",
+      "emotion": "cold",
+      "text": "I want to know what you'll do with the hotel with people in it."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "quiet",
+      "text": "I'm going to go inside it. For the first time."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.eleni_varelas",
+      "emotion": "softening",
+      "text": "…Then I'll unpack after. If you come back the right man."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m11_bauer",
+  "context": "M11 o5. Bauer's office above the arcade. Fluorescent hum. Bauer sweats.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ray_bauer",
+      "emotion": "nervous",
+      "text": "Del! Ha! Running from Lonnie? Everybody runs from Lonnie. Sit, sit."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ray_bauer",
+      "emotion": "nervous",
+      "text": "I sell quarters. What people watch for a quarter is between them and God."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "You're sweating, Ray. It's sixty degrees in here."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.ray_bauer",
+      "emotion": "low",
+      "text": "Somebody downtown keeps asking about Wurtz. Asking me. Why me?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Maybe because you answer, Ray."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.ray_bauer",
+      "emotion": "nervous",
+      "text": "Legit. That's the word. I'm gonna be so legit you'll be bored."
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '../../shared/rapier';
 import { createRenderer } from '../../engine/renderer';
 import { qualityFromUrl } from '../../engine/quality';
 import { World } from '../../world/World';

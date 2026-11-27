@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m03_navarro",
+  "context": "M3 o5. Herald Square. Ptl. Navarro steps off the curb and waves the cab down.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.luis_navarro",
+      "emotion": "surprised",
+      "text": "Teddy? In a cab? You can't drive a cab, you don't have a hack license."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "I'm parking it, Luis. Very slowly."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.luis_navarro",
+      "emotion": "earnest",
+      "text": "You taught me never take the coffee, Teddy. I don't even drink coffee now."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.luis_navarro",
+      "emotion": "earnest",
+      "text": "Paperwork is a weapon. Everybody forgets that but me."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "You'll make detective, kid. Wave me through before Sarge sees."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.luis_navarro",
+      "emotion": "earnest",
+      "text": "Go. And get a license. I'm serious. I'll check."
+    }
+  ]
+}

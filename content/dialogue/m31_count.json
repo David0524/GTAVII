@@ -1,0 +1,54 @@
+{
+  "id": "dlg.m31_count",
+  "context": "M31 o1. Sunday, the Arden's back table. Claudette with her arms folded. Twenty women.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.claudette_bijou",
+      "emotion": "formal",
+      "text": "Delphine. I trust your head. Today I want to count the shoebox."
+    },
+    {
+      "id": "l2a",
+      "speaker": "char.delphine_moore",
+      "emotion": "steady",
+      "text": "Count it. Every dollar is there. I put back what was missing. My own.",
+      "requires": {
+        "all": [
+          "flag.club_count_settled"
+        ]
+      }
+    },
+    {
+      "id": "l2b",
+      "speaker": "char.delphine_moore",
+      "emotion": "honest",
+      "text": "It's eleven hundred short. Tina's cousin. My mistake. I'll make it good.",
+      "requires": {
+        "none": [
+          "flag.club_count_settled"
+        ]
+      }
+    },
+    {
+      "id": "l3b",
+      "speaker": "char.tina_mercado",
+      "emotion": "brave",
+      "text": "My mistake, not Del's. I'll pay it back. Every week. You can count it.",
+      "requires": {
+        "all": [
+          "flag.tina_stays"
+        ],
+        "none": [
+          "flag.club_count_settled"
+        ]
+      }
+    },
+    {
+      "id": "l2",
+      "speaker": "char.rita_haines",
+      "emotion": "warm",
+      "text": "Sit down, sugar. Nobody makes a good decision standing up. Vote."
+    }
+  ]
+}

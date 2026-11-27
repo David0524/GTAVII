@@ -1,0 +1,24 @@
+{
+  "id": "dlg.m15_ice_house",
+  "context": "M15 o6. The ice house, W 37th St & Tenth. Steam off the blocks. A foreman with a ledger and a smile.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "My friend. I need all the ice you have. All of it."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Three hundred, cash, and your wife gets a fox stole in October. Wholesale."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Five minutes ago I was at a banquet. Now I'm buying ice. America."
+    }
+  ]
+}

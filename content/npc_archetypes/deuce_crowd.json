@@ -1,0 +1,30 @@
+{
+  "id": "npc.deuce_crowd",
+  "behaviour": "walker",
+  "palette": [
+    "#FF4500",
+    "#2F2F2F",
+    "#FFD700",
+    "#4B0082"
+  ],
+  "wardrobe": "The whole city in one block: sailors on leave, students, drifters, couples, hustlers (implied), office workers cutting through. Flares, denim, leisure suits.",
+  "props": [
+    "hot dog",
+    "movie ticket"
+  ],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "04:00",
+      "area": "W 42nd St (7th–8th Aves), Times Square",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.6,
+    "night": 0.6
+  },
+  "barks": "barks.deuce",
+  "scripted": false,
+  "note": ""
+}

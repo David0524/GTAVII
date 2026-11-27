@@ -1,0 +1,156 @@
+{
+  "id": "mission.closing",
+  "title": "Closing",
+  "number": 30,
+  "act": 3,
+  "chapter": 10,
+  "playAs": "char.nick_varelas",
+  "date": "1974-08-30",
+  "durationMin": 15,
+  "pillars": [
+    "P4",
+    "P5"
+  ],
+  "giver": "char.eleni_varelas",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "10:00",
+      "15:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-30",
+      "1974-08-30"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.eleni_varelas",
+    "at": "loc.varelas_loft"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Eleni, packed or not",
+      "script": "dlg.m30_eleni"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The Baeks' shop, W 29th St",
+      "to": "loc.baek_wholesale",
+      "radius": 15
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "The deed, if you'll sign it",
+      "script": "dlg.m30_baeks"
+    },
+    {
+      "id": "o3b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.carrier_muscle",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Kallis's men want the deed unsigned",
+      "protect": "char.jung_ho_baek",
+      "note": "Nick: hire muscle, pay them off, or fight badly. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "The Corwin, W 31st St",
+      "to": "loc.corwin_hotel",
+      "radius": 15
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "text": "Go inside. For once.",
+      "marker": "interior.corwin_lobby",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Odessa's lobby chair",
+      "script": "dlg.m30_odessa",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3b",
+    "o4",
+    "o5"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.labor_day"
+    ]
+  },
+  "npcs": [
+    "char.eleni_varelas",
+    "char.jung_ho_baek",
+    "char.mi_sook_baek",
+    "char.odessa_pruitt",
+    "char.bernard_ostrow",
+    "char.manny_soto",
+    "char.stavros_kallis",
+    "char.gordon_whitlock",
+    "char.yiannis_doukas"
+  ],
+  "archetypes": [
+    "npc.sro_resident"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan"
+  ],
+  "locations": [
+    "loc.varelas_loft",
+    "loc.baek_wholesale",
+    "loc.corwin_hotel"
+  ],
+  "mobile": "Two short drives and a lobby scene. The resolution choice is untimed. Gated options are greyed with a reason.",
+  "design": "Nick's resolution (N3 §3): sell on, keep, or give it to the council. Signing the Baeks' deed sets flag.baek_bought_building if it wasn't already set in M16. 'Nobody told me there were people in it' finally gets its answer from Odessa. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.jung_ho_baek",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

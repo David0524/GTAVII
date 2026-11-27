@@ -1,0 +1,29 @@
+{
+  "id": "npc.garment_pushboy",
+  "behaviour": "worker",
+  "palette": [
+    "#D2691E",
+    "#F5F5DC",
+    "#2F4F4F"
+  ],
+  "wardrobe": "T-shirt or short-sleeve work shirt, canvas apron, jeans or work trousers, high-tops or work boots, cap.",
+  "props": [
+    "garment rack",
+    "hand truck"
+  ],
+  "schedule": [
+    {
+      "from": "07:00",
+      "to": "18:00",
+      "area": "Garment District (W 35th–40th, 6th–9th Aves)",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.6,
+    "night": 0.05
+  },
+  "barks": "barks.garment",
+  "scripted": false,
+  "note": ""
+}

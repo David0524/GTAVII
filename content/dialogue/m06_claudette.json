@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m06_claudette",
+  "context": "M6 o3. Hotel Pennsylvanian staff entrance, W 33rd St. Claudette in her uniform.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.claudette_bijou",
+      "emotion": "formal",
+      "text": "Delphine. You walked all this way with my month in your bag?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Ninety-five dollars. Count it. I'd be insulted if you didn't."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.claudette_bijou",
+      "emotion": "formal",
+      "text": "I send forty dollars home each week. The club is how I keep the other ten."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.claudette_bijou",
+      "emotion": "formal",
+      "text": "Delphine, I trust your head. I don't trust your shoebox."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "Nobody trusts the shoebox. That's why it works."
+    }
+  ]
+}

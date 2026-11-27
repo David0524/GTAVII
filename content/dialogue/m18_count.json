@@ -1,0 +1,45 @@
+{
+  "id": "dlg.m18_count",
+  "context": "M18 o10. (Nick.) Back in the vault, 3 a.m. Yiannis holds a clipboard. The ice is melting.",
+  "lines": [
+    {
+      "id": "l1t",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "honest",
+      "text": "You want the true count, Niko? Four hundred and twelve. Not nine hundred. Never nine.",
+      "ifRelationship": {
+        "char.nick_varelas/char.yiannis_doukas": ">=3"
+      }
+    },
+    {
+      "id": "l2t",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "honest",
+      "text": "Pledged twice. Bank and lawyer. Now half are 'spoiled.' You're finished either way.",
+      "ifRelationship": {
+        "char.nick_varelas/char.yiannis_doukas": ">=3"
+      }
+    },
+    {
+      "id": "l1f",
+      "speaker": "char.yiannis_doukas",
+      "emotion": "flat",
+      "text": "Count is what you want it to be, boss. I didn't see anything.",
+      "ifRelationship": {
+        "char.nick_varelas/char.yiannis_doukas": "<3"
+      }
+    },
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "shaken",
+      "text": "A skin tells you where it was cut. So does a man. I know, Yiannis."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.eleni_varelas",
+      "emotion": "quiet",
+      "text": "Summer is when furriers go broke politely. We're not being polite anymore."
+    }
+  ]
+}

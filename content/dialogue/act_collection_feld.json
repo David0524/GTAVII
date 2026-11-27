@@ -1,0 +1,52 @@
+{
+  "id": "dlg.act_collection_feld",
+  "context": "Collections activity, feld. Untimed choice: press or let it slide.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.sam_feld",
+      "emotion": "weary",
+      "text": "Surcharge, tax, fee, envelope. My grandfather paid the czar less."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Collect.",
+          "goto": "l_press",
+          "setRelationships": {
+            "char.teddy_arce/char.sam_feld": -1,
+            "char.teddy_arce/char.carl_mayhew": 1
+          }
+        },
+        {
+          "text": "Let it slide this week.",
+          "goto": "l_slide",
+          "setRelationships": {
+            "char.teddy_arce/char.sam_feld": 1,
+            "char.teddy_arce/char.carl_mayhew": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_press",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Thanks. See you next week.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_slide",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Pay your cutters first, Mr. Feld. Mayhew can wait."
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Every envelope's a person. I keep forgetting that on purpose."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m01_walk_a",
+  "context": "M1 escort leg 1: Flatiron to Broadway & W 26th, Madison Square Park on the right.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "nostalgic",
+      "text": "Park's full of guys on benches. Ten years ago we'd have rousted 'em."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Ten years ago they had rooms."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "wry",
+      "text": "See, that's your problem. You think about where people sleep."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carl_mayhew",
+      "emotion": "nostalgic",
+      "text": "Remember the toy fellas on Fifth? Christmas, they'd fill the car with dolls."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "I remember what was under the dolls."
+    }
+  ]
+}
