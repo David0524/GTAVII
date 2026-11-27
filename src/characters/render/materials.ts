@@ -12,7 +12,7 @@ import * as THREE from 'three/webgpu';
 import { SkinNodeMaterial } from './skinLighting';
 import {
   attribute, positionGeometry, normalGeometry, texture, float, vec2, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
-  mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize, normalMap, normalView,
+  mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize, normalMap, normalView, fwidth, positionViewDirection,
 } from 'three/tsl';
 
 /** Global character look controls (heat drives sweat; set by the engine's weather/time). */
@@ -265,20 +265,27 @@ export function hairMaterial(rb?: HairFace): THREE.MeshPhysicalNodeMaterial {
   const f = freq.mul(mix(0.55, 0.3, smoothstep(0.5, 0.9, texture)));
   const straight = mx_noise_float(vec3(uvA.x.mul(f), uvA.y.mul(f).mul(0.07), h.mul(0.7)));
   const curly = mx_noise_float(vec3(uvA.x.mul(f), uvA.y.mul(f), h.mul(4)));
-  const n = mix(straight, curly, smoothstep(0.35, 0.8, texture)).mul(0.5).add(0.5);
+  // anti-aliasing: once a strand/clump period shrinks under ~1-2 px (crowds, distance) its noise
+  // blends to its average, or the alpha test turns it into scan-line noise
+  const footS = length(fwidth(uvA)).mul(f);
+  const n = mix(mix(straight, curly, smoothstep(0.35, 0.8, texture)).mul(0.5).add(0.5), float(0.5), smoothstep(0.7, 1.8, footS));
   const cornrow = m1.w.greaterThan(0.5).and(m1.w.lessThan(1.5)).select(smoothstep(0.25, 0.4, abs(fract(uvA.x.mul(45)).sub(0.5)).mul(-1).add(0.5)), float(1));
   // coily hair: clumps (Worley cells) that shrink outward, so the silhouette breaks into tufts
   const clumpD = mx_worley_noise_float(vec3(uvA.mul(freq.mul(0.045)), h.mul(1.7)));
-  const clump = m1.w.greaterThan(1.5).select(smoothstep(1.1, 0.45, clumpD.add(h.mul(0.15))).mul(mix(0.85, 1.15, n)), float(1));
+  const footC = length(fwidth(uvA)).mul(freq.mul(0.045));
+  const clump = m1.w.greaterThan(1.5).select(mix(smoothstep(1.1, 0.45, clumpD.add(h.mul(0.15))), float(0.75), smoothstep(0.6, 1.5, footC)).mul(mix(0.85, 1.15, n)), float(1));
   const alpha = Fn(() => {
     const a = m1.w.greaterThan(1.5).select(clump.mul(density), n.mul(density).mul(cornrow)).toVar();
     // shells thin out towards the tips; the innermost layer is solid scalp coverage
     const keep = smoothstep(h.mul(0.75).sub(0.06), h.mul(0.75).add(0.06), a);
-    return sub.equal(3).select(float(1), h.lessThan(0.02).select(density.mul(cornrow), keep));
+    // outer shells seen edge-on stretch into flat shards: fade them at grazing angles
+    const graze = mix(float(1), smoothstep(0.12, 0.45, abs(dot(normalView, positionViewDirection))), smoothstep(0.12, 0.45, h));
+    return sub.equal(3).select(float(1), h.lessThan(0.02).select(density.mul(cornrow), keep.mul(graze)));
   });
   // strand cards (sub 4): uv.x = card id + across (0..1), uv.y = root → tip
   const cu = fract(uvA.x), seed = floor(uvA.x), cv = uvA.y;
-  const strand = mx_noise_float(vec3(cu.mul(11).add(seed.mul(3.7)), cv.mul(1.2).add(seed.mul(0.37)), seed.mul(0.11))).mul(0.5).add(0.5);
+  const footK = fwidth(cu).mul(11);
+  const strand = mix(mx_noise_float(vec3(cu.mul(11).add(seed.mul(3.7)), cv.mul(1.2).add(seed.mul(0.37)), seed.mul(0.11))).mul(0.5).add(0.5), float(0.55), smoothstep(0.7, 1.8, footK));
   const strandEnd = mx_noise_float(vec3(cu.mul(40).add(seed), seed.mul(1.3), 2.0)).mul(0.5).add(0.5).mul(0.35).add(0.65);
   const cardAlpha = smoothstep(0.22, 0.6, strand)
     .mul(smoothstep(0.0, 0.22, cu).mul(smoothstep(1.0, 0.78, cu)))
@@ -286,8 +293,8 @@ export function hairMaterial(rb?: HairFace): THREE.MeshPhysicalNodeMaterial {
     .mul(smoothstep(0.0, 0.06, cv).mul(0.6).add(0.4))
     .mul(1.35);
   // grey strands: per strand on cards, fine salt-and-pepper on shells (independent of the shell's clump size)
-  const greyShell = step(0.5, mx_noise_float(vec3(uvA.mul(900), 3)).add(0.5));
-  const greyCard = step(0.5, mx_noise_float(vec3(cu.mul(11).add(seed.mul(5.3)), seed, 7)).add(0.5));
+  const greyShell = mix(step(0.5, mx_noise_float(vec3(uvA.mul(900), 3)).add(0.5)), float(0.5), smoothstep(0.35, 1.0, length(fwidth(uvA)).mul(900)));
+  const greyCard = mix(step(0.5, mx_noise_float(vec3(cu.mul(11).add(seed.mul(5.3)), seed, 7)).add(0.5)), float(0.5), smoothstep(0.7, 1.8, footK));
   const grey = m1.z.mul(sub.equal(4).select(greyCard, greyShell));
   m.opacityNode = sub.equal(4).select(cardAlpha, alpha());
   m.alphaTest = 0.3;

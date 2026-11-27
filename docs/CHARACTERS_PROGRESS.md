@@ -106,6 +106,23 @@ Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
 Wikimedia rate-limited this container, so sourcing is pending.
 
+## Street figures: hair (oversight item "spiky card hair")
+Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
+- **Grey and white card hair was scan-line noise.** Per-strand alpha and grey noise ran
+  finer than a pixel. Every strand, clump and grey noise in `hairMaterial` now blends to its
+  average once its period drops under 1–2 px (`fwidth` on the strand coordinates).
+- **Afro and curly shells read as slabs.** Outer shells fade at grazing angles, and the
+  coil clump size is now 7–10 mm instead of 2.5 cm (afro 2200, afroShort 2600, curlyMid
+  1500).
+- **Honest state:**
+  - The noise is gone, but card hair now reads as flat ribbons at head zoom, and big afros still
+    show a flat front plate with a centre line.
+  - The real fix is a strand texture with mips on redesigned cards: narrower cards,
+    more of them, clumped. That's a block of its own, after the vendors unless oversight
+    reorders.
+- **Also seen:** glasses on some pedestrians render as floating frame lines (figure 1) or opaque
+  grey lens wedges (figure 8). Logged, not fixed.
+
 ## Status (2026-11-26)
 | Area | State |
 |---|---|
