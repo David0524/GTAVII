@@ -16,6 +16,6 @@ const ring = rec ? Array.from(rec.rings[0], (v, k) => v + ((k % 2 ? pick.b.j : p
 const r = buildInterior({ unit: pick.u, building: pick.b, quality: 'low', ring, street: '' });
 for (const c of r.cells) {
   const cols = r.colliders.filter((q) => q.c[0] > c.box[0] && q.c[0] < c.box[3] && q.c[2] > c.box[2] && q.c[2] < c.box[5] && q.c[1] > c.box[1] - 0.1 && q.c[1] < c.box[4] && q.h[0] < 2 && q.h[2] < 2);
-  console.log(c.name.padEnd(22), 'floor', c.box[1].toFixed(2), 'furniture colliders', cols.length, cols.length ? 'min y ' + Math.min(...cols.map((q) => q.c[1] - q.h[1])).toFixed(2) : '');
+  console.log(c.name.padEnd(22), 'box', c.box.map((v) => v.toFixed(1)).join(','), 'floor', c.box[1].toFixed(2), 'furniture colliders', cols.length, cols.length ? 'min y ' + Math.min(...cols.map((q) => q.c[1] - q.h[1])).toFixed(2) : '');
 }
 console.log('models', r.models.map((m) => `${m.key}@${m.y.toFixed(2)} cell ${r.cells[m.cell].name}`));
