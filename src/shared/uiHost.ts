@@ -16,7 +16,8 @@ export interface StreetRec { n: string; c: string; w: number; o: number; p: numb
 export type LeadId = string; // char.*
 
 export interface PlayerView {
-  x: number; z: number; yaw: number; speed: number; inVehicle: boolean; lead: LeadId; interior?: string;
+  /** yaw = the CAMERA's yaw (map orientation); heading = which way the body faces (the arrow). Same convention: 0 faces -Z. */
+  x: number; z: number; yaw: number; heading?: number; speed: number; inVehicle: boolean; lead: LeadId; interior?: string;
   /** Who rides with the player (cast id), or the driver when the player is the passenger: picks the route-call voice. */
   companion?: string;
   /** Active side quest id, for quest-specific voices (route_calls.json voiceByPassenger, e.g. side.baby_cab). */

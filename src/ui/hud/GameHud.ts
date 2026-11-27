@@ -153,7 +153,7 @@ export class GameHud {
     // minimap
     const mmOn = this.vis('minimap', 'hudMinimap', !!this.model.waypoint);
     if (this.minimap.el.classList.contains('dim') === mmOn) this.minimap.el.classList.toggle('dim', !mmOn);
-    if (mmOn) this.minimap.draw({ x: p.x, z: p.z, yaw: uiSettings.get('minimapOrientation') === 'north' ? 0 : p.yaw, speed: p.speed, inVehicle: p.inVehicle, heat, objective: obj, t: this.t }, dt);
+    if (mmOn) this.minimap.draw({ x: p.x, z: p.z, yaw: uiSettings.get('minimapOrientation') === 'north' ? 0 : p.yaw, heading: p.heading ?? p.yaw, speed: p.speed, inVehicle: p.inVehicle, heat, objective: obj, t: this.t }, dt);
     this.model.discovery.tick(p.x, p.z);
     this.model.update(dt, p.x, p.z, p.inVehicle);
 

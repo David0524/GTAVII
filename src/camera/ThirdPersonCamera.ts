@@ -31,12 +31,14 @@ export interface CamLoco {
   handY?: number;
   ladder?: boolean;
   aiming?: boolean;
+  /** Which way the body faces (PlayerController.heading, 0 = -Z): the recentre target. LocoState already has it. */
+  heading?: number;
   /** Landing roll in progress: keep the fall framing until it ends. */
   rolling?: boolean;
 }
 
 /** Settings the host copies in (Settings: onFootFollow, cameraShake, reduceMotion; device: mobile). */
-export interface CamTune { follow: number; shake: number; reduceMotion: boolean; mobile: boolean }
+export interface CamTune { follow: number; shake: number; reduceMotion: boolean; mobile: boolean; /** ease back behind the body after ~1.75 s without camera input while moving */ recentre?: boolean }
 
 const DEG = Math.PI / 180;
 const RADIUS = 0.22, SIDE = 0.35, MIN_ARM = 0.6, FADE_ARM = 1.0;
@@ -55,6 +57,7 @@ const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2); /
 const easeOut = (t: number) => 1 - (1 - t) ** 3;
 const approach = (v: number, to: number, step: number) => (v < to ? Math.min(to, v + step) : Math.max(to, v - step));
 const k = (rate: number, dt: number) => 1 - Math.exp(-rate * dt);
+const fs0 = (t: CamTune) => Math.min(1, Math.max(0.1, t.follow)) / 0.6;
 
 export class ThirdPersonCamera {
   yaw = 0;
@@ -84,6 +87,7 @@ export class ThirdPersonCamera {
   private dip = 0; private dipAge = 1;
   private gaitArm = GAIT.jog; private sprint = 0;
   private pinnedT = 0;
+  private idleLookT = 0;
   private alleyK = 0;
   private fade = 1;
   private fovApplied = 0; private fovWritten = -1;
@@ -99,7 +103,7 @@ export class ThirdPersonCamera {
   snap(feet: { x: number; y: number; z: number }, yaw: number) {
     this.yaw = yaw; this.target.set(feet.x, feet.y + 1.5, feet.z); this.armLen = this.distance;
     this.behind = this.aim = this.climb = this.fall = this.ladder = this.dip = 0; this.air = 0; this.dropHold = 0; this.wasGrounded = true;
-    this.sideT = this.side; this.swapAge = 1; this.clearT = 0;
+    this.sideT = this.side; this.swapAge = 1; this.clearT = 0; this.idleLookT = 0;
   }
 
   /** Manual swap (R3 / C / two-finger tap). Also sets the preferred side, so an auto swap is undone only by this. */
@@ -114,6 +118,7 @@ export class ThirdPersonCamera {
     if (this.input) {
       const look = this.input.consumeLook();
       this.yaw += look.yaw;
+      this.idleLookT = look.yaw || look.pitch ? 0 : this.idleLookT + dt;
       this.pitch = THREE.MathUtils.clamp(this.pitch + look.pitch, -1.1, 0.75);
       const w = this.input.consumeWheel();
       if (w) this.distance = THREE.MathUtils.clamp(this.distance * (w > 0 ? 1.12 : 0.89), 1.6, 9);
@@ -152,6 +157,14 @@ export class ThirdPersonCamera {
     this.target.x += (feet.x - this.target.x) * kh;
     this.target.z += (feet.z - this.target.z) * kh;
     if (this.dropHold <= 0) this.target.y += (headY - this.target.y) * kv;
+
+    // ---- recentre (GTA-style): the camera orbits freely and never turns the body; after ~1.75 s with no camera input
+    // while moving away from it, it eases round behind the body. Not while aiming or looking back, and only when the body
+    // is within ~100° of camera-forward, so a sideways stick never sends the player running in circles.
+    if (tune.recentre !== false && loco?.heading !== undefined && speed > 1 && !aiming && this.behind === 0 && this.idleLookT > 1.75) {
+      let d = loco.heading - this.yaw; d = Math.atan2(Math.sin(d), Math.cos(d));
+      if (Math.abs(d) < 1.75) this.yaw += d * k(1.1 * fs0(tune), dt);
+    }
 
     // ---- frame
     const yaw = this.yaw + Math.PI * (tune.reduceMotion ? ease(this.behind) : easeOut(this.behind));

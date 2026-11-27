@@ -53,6 +53,17 @@
   - a roll on landing keeps the arm until the roll ends.
 - **Drops and hang-drops:** the camera holds height for 0.2 s, then follows. You see the drop before you take it.
 
+### 4b. Free orbit and recentre (user report, 2026-11-27: "In GTA, the camera circles the player, not turns it")
+- **The camera orbits freely**, independent of where the body faces: look input only turns the camera. The body turns toward its movement direction (the controller's job), and movement is camera-relative.
+- **The map arrow** shows the body's facing relative to the camera (`PlayerView.heading` next to `yaw`), so circling the camera visibly swings the arrow.
+- **Recentre:** after **1.75 s with no camera input while moving** (over 1 m/s), the camera eases round behind the body (rate 1.1/s, scaled by `onFootFollow`). It doesn't recentre:
+  - while aiming;
+  - during look-behind;
+  - while standing;
+  - when the body is more than ~100° off camera-forward, so a sideways stick never sends the player running in circles.
+- **Aiming:** strafe lock (the body faces camera-forward). Controller side; the camera already tightens to the aim pose.
+- **Touch:** a drag on the look area orbits (the touch layer feeds `Input.addLook`).
+
 ### 5. Gait and speed
 - **Arm length by speed:** walk 5.2 m, jog 5.6 m, sprint 6.4 m, with FOV +6° at sprint. Blended at 1.5/s.
 - **Mobile:** follow smoothing tightens by 15% (TOUCH_CONTROLS.md: touch must never feel sluggish).
@@ -71,6 +82,10 @@
   - arm length never changes by more than 0.6 m in a frame, except an instant pull-in;
   - the frame strip shows corners and fire-escape rails.
 - **Timings:** shoulder swap, look-behind and climb framing, each measured on the test course against the numbers above.
+- **Orbit:**
+  - 360° standing still: the camera yaw advances a full turn, the lens sweeps all four quadrants, the heading is unchanged, and it never recentres while standing;
+  - verified in the merged engine build too (heading 0.259 before and after a 180° orbit);
+  - recentre: it waits 1.75 s, eases toward the body, keeps its hands off while the player steers the camera, and never recentres while aiming or into circles.
 - **Phone:** the camera update stays ≤ 0.15 ms per frame on the mobile Low profile; the sphere cast plus 2 rays is cheaper than per-object checks.
 
 ## vs GTA V / VI / RDR2 (REFERENCE_GAMES.md)

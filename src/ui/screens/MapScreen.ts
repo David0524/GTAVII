@@ -44,7 +44,7 @@ export class MapScreen {
 
   open() {
     const p = this.host.player();
-    this.map.player = { x: p.x, z: p.z, yaw: p.yaw, lead: p.lead };
+    this.map.player = { x: p.x, z: p.z, yaw: p.heading ?? p.yaw, lead: p.lead };
     const leads = this.host.party();
     for (const pl of this.model.discovery.known()) if (pl.cat === 'home' && pl.lead) this.map.ownerNotes[pl.id] = `${leads.find((l) => l.id === pl.lead)?.short ?? ''}'s place`;
     this.map.owned = new Set(this.host.businesses().filter((b) => b.owner).map((b) => b.id.replace('biz.', 'ui.forsale.')));

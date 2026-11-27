@@ -21,7 +21,7 @@ import { PAPER, PAPER_SHADE, INK, TABLE, pencilLine, pencilCross } from './ink';
 const TILE_M = 256;
 const MARGIN = 60; // printed margin beyond the playable edge
 
-export interface MiniMapFrame { x: number; z: number; yaw: number; speed: number; inVehicle: boolean; heat: HeatView; objective: ObjectiveView | null; t: number }
+export interface MiniMapFrame { x: number; z: number; yaw: number; heading?: number; speed: number; inVehicle: boolean; heat: HeatView; objective: ObjectiveView | null; t: number }
 
 export class MiniMap {
   readonly el = document.createElement('div');
@@ -198,7 +198,8 @@ export class MiniMap {
     } else if (this.star.style.display !== 'none') this.star.style.display = 'none';
     const [nx, ny] = this.clampToCard(toScreen(f.x, f.z - 10000), W, H, 9);
     this.north.style.transform = `translate(${nx.toFixed(1)}px,${ny.toFixed(1)}px)`;
-    this.player.style.transform = `translate(${cx}px,${cy}px)`;
+    // the map turns with the camera; the arrow shows where the body faces, so circling the camera swings the arrow (GTA-style)
+    this.player.style.transform = `translate(${cx}px,${cy}px) rotate(${(f.yaw - (f.heading ?? f.yaw)).toFixed(4)}rad)`;
 
     const ms = performance.now() - t0;
     this.cost.draw = this.cost.draw ? this.cost.draw * 0.95 + ms * 0.05 : ms; this.cost.drawn++;
