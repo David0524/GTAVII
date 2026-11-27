@@ -333,16 +333,30 @@ export class Vehicle implements Lightable {
    */
   diagnose() {
     const ph = this.physics, world = ph.world;
-    const contacts: { handle: number; membership: string; filter: string; isVehicle: boolean; fixed: boolean; sensor: boolean }[] = [];
+    // real touching contacts only (contactPairsWith also lists pairs whose bounding boxes merely overlap,
+    // which a chunk-sized trimesh always does)
+    const contacts: { handle: number; membership: string; filter: string; isVehicle: boolean; fixed: boolean; points: number; depth: number; normal: number[]; y: number }[] = [];
     for (const c of ph.colliders) world.contactPairsWith(c, (o) => {
-      const g = o.collisionGroups();
-      contacts.push({ handle: o.handle, membership: '0x' + (g >>> 16).toString(16), filter: '0x' + (g & 0xffff).toString(16), isVehicle: !!vehicleOfCollider(o), fixed: o.parent()?.isFixed() ?? true, sensor: o.isSensor() });
+      world.contactPair(c, o, (m, flipped) => {
+        const n = m.numContacts();
+        if (!n) return;
+        let depth = 0, y = 0;
+        for (let i = 0; i < n; i++) { depth = Math.max(depth, -m.contactDist(i)); const p = m.localContactPoint1(i); if (p) y += p.y / n; }
+        const nn = m.normal();
+        const g = o.collisionGroups();
+        contacts.push({ handle: o.handle, membership: '0x' + (g >>> 16).toString(16), filter: '0x' + (g & 0xffff).toString(16), isVehicle: !!vehicleOfCollider(o), fixed: o.parent()?.isFixed() ?? true,
+          points: n, depth: +depth.toFixed(3), normal: [nn.x, nn.y, nn.z].map((x) => +((flipped ? -1 : 1) * x).toFixed(2)), y: +y.toFixed(2) });
+      });
     });
+    const t = ph.body.translation();
     return {
       id: this.id, model: this.modelId, mass: ph.mass, speed: ph.speed, rpm: ph.rpm, gear: ph.gear, reverse: ph.reverse, parked: ph.parked,
-      input: { ...ph.input }, power: ph.power, mods: { ...ph.mods },
+      bodyY: +t.y.toFixed(3), input: { ...ph.input }, power: ph.power, mods: { ...ph.mods },
       engine: { running: this.engine.running, power: this.engine.power, flooded: this.engine.flooded, temp: this.engine.temp, fuel: this.engine.fuel },
-      wheels: ph.wheels.map((w) => ({ contact: w.contact, len: +w.len.toFixed(3), load: Math.round(w.load), slip: +w.slip.toFixed(2), locked: w.locked, flat: w.flat })),
+      wheels: ph.wheels.map((w) => ({
+        contact: w.contact, len: +w.len.toFixed(3), load: Math.round(w.load), slip: +w.slip.toFixed(2), locked: w.locked, flat: w.flat,
+        hitY: +w.point.y.toFixed(3), hitNormal: [w.normal.x, w.normal.y, w.normal.z].map((x) => +x.toFixed(2)), hitCollider: w.ground?.handle ?? null,
+      })),
       chassisContacts: contacts,
     };
   }

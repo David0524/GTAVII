@@ -220,7 +220,7 @@ export class VehiclePhysics {
         const off = d * rr;
         this.ray.origin = { x: _hp.x + _f.x * off, y: _hp.y + _f.y * off, z: _hp.z + _f.z * off };
         this.ray.dir = { x: -_up.x, y: -_up.y, z: -_up.z };
-        const hit = this.world.castRayAndGetNormal(this.ray, maxT, true, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, WHEEL_RAY_GROUPS, undefined, body);
+        const hit = this.world.castRayAndGetNormal(this.ray, maxT, false, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, WHEEL_RAY_GROUPS, undefined, body);
         if (!hit) continue;
         const centerDist = hit.timeOfImpact - Math.sqrt(Math.max(0, rr * rr - off * off));
         if (centerDist < best) { best = centerDist; _n.set(hit.normal.x, hit.normal.y, hit.normal.z); w.ground = hit.collider; }
