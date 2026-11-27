@@ -122,7 +122,19 @@ the size pass.
        Without a renderer, or on failure, heads fall back to WebP.
      - Visually the same as WebP in the leads shot.
      - The normal map stays WebP (ETC1S is too lossy for normals; UASTC was 0.95 MB).
-     - Next: the Rocketbox leads, and a real phone load and VRAM test.
+     - Next: KTX2 for the Rocketbox leads.
+   - **Phone load** (`tools/characters/loadtime.ts`: Playwright Pixel 7 profile, CDP throttling at
+     12 Mbit/s with 70 ms RTT):
+
+     | Tier | Raw character bytes | Gzip (what a production server sends) | At 12 Mbit/s | At 30 Mbit/s |
+     |---|---|---|---|---|
+     | Low | 3.95 MB | 1.03 MB | ~1.1 s | ~0.7 s |
+     | High | 11.9 MB | 5.55 MB | ~4.1 s | ~1.9 s |
+
+     - The dev server doesn't gzip, which is why the raw column is so much bigger.
+     - The headless "ready" times (33 s Low, 46 s High) are dominated by SwiftShader shader compile
+       and unbundled dev modules. They're not phone numbers; a real-device run is still needed for
+       parse and compile time and VRAM.
    Earlier trims: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
    are cut in the bake. 25.7k → 20.5k vertices; the .bin goes from 391 to 317 KB gzip, and the
    whole head is about 0.66 MB. meshopt is still to do.
