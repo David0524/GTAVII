@@ -117,5 +117,7 @@ test('M1: performance pass validates, eye lines meet in s6, Mayhew hands off as 
   assert.ok(Object.keys(fM.visemes).length > 0 || Object.keys(tl.actorFrame('teddy', t)!.visemes).length > 0 || tl.lineAt(t) === null, 'whoever speaks has a moving mouth');
   // Mayhew ends the scene on set (the hand-off pose exists) and past the last key he holds still
   const end = tl.actor('mayhew', tl.duration)!;
+  assert.ok(tl.endSpeed('mayhew') > 1.5 && tl.endSpeed('mayhew') < 3.5, `Mayhew leaves mid-stride (${tl.endSpeed('mayhew')} m/s)`);
+  assert.equal(tl.endSpeed('teddy'), 0, 'Teddy stands');
   assert.ok(end && Number.isFinite(end.x) && keysOf(m01.shots[m01.shots.length - 1].actors!.mayhew).length > 0);
 });

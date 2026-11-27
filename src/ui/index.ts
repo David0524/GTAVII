@@ -11,7 +11,7 @@ import { GameHud } from './hud/GameHud';
 import { PauseHub, type Tab } from './screens/PauseHub';
 import { MapScreen } from './screens/MapScreen';
 import { applyGlobalUiSettings, uiSettings } from './settings/uiSettings';
-import { el } from './util';
+import { el, gameTime, campaignMinutes } from './util';
 import { Pockets } from './screens/Pockets';
 import { Newspaper } from './screens/Newspaper';
 import { Business } from './screens/Business';
@@ -30,6 +30,8 @@ import { uiSectionProvider } from './save/uiSection';
 import { iosEvictionRisk } from '../save/SaveManager';
 import { showInstallCard, installCardSnoozed } from './touch/installCard';
 import './ui.css';
+import './a.css';
+import './a-screens.css';
 import { CinematicPlayer, type PlayOptions } from '../cinematics/CinematicPlayer';
 import { hasCutscene } from '../cinematics/content';
 
@@ -62,7 +64,7 @@ export async function bootUi(host: UiHost, o: { title: boolean; startLeads?: str
   const model = await MapModel.load(host.baseUrl, host.streets);
   model.discovery.start(o.startLeads ?? [host.player().lead]);
   const ui = createUi(host, { model, heroes: host.heroes, title: o.title });
-  host.saves?.provideSection(uiSectionProvider(model, ui.extras));
+  host.saves?.provideSection(uiSectionProvider(model, ui.extras, () => { const p = host.player(); return { x: p.x, z: p.z }; }));
   return ui;
 }
 
@@ -72,6 +74,10 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const input = host.input;
   const hud = new GameHud(host, o.model);
   const hub = new PauseHub(input);
+  hub.status = () => {
+    const c = host.clock(), loc = host.location?.(), lead = host.party().find((l) => l.id === host.player().lead);
+    return { place: loc?.crossing || loc?.district || 'Manhattan', time: gameTime(campaignMinutes(c.date, c.minutes)), cash: lead ? lead.cash : null };
+  };
   const mapScreen = new MapScreen(host, o.model, o.heroes ?? host.heroes);
   const toast = (text: string) => {
     const t = el('div', 'u-toast'); t.textContent = text; document.body.appendChild(t);

@@ -15,13 +15,17 @@ import { PLAYABLE } from '../../shared/bounds';
 import type { StreetRec } from './grid';
 import type { MapModel } from './MapModel';
 import type { HeatView, ObjectiveView } from '../host/types';
-import { pictogram } from './pictograms';
-import { PAPER, PAPER_SHADE, INK, TABLE, pencilLine, pencilCross } from './ink';
+import { iconSprite, type IconName } from '../icons';
+import { loadAerial, drawAerial, onAerialTile, type AerialManifest } from './aerialTiles';
+import { PAPER, PAPER_SHADE, INK, TABLE } from './ink';
 
 const TILE_M = 256;
 const MARGIN = 60; // printed margin beyond the playable edge
 
-export interface MiniMapFrame { x: number; z: number; yaw: number; speed: number; inVehicle: boolean; heat: HeatView; objective: ObjectiveView | null; t: number }
+/** Meaning-only blip colour (DESIGN_A §5). */
+const MM_COLOUR: Partial<Record<string, string>> = { mission: '#e8a317', home: '#e8a317', safehouse: '#e8a317', property: '#e8a317', crime: '#ef7a64', callbox: '#ef7a64', police: '#9cc0ee', hospital: '#ef7a64' };
+
+export interface MiniMapFrame { x: number; z: number; yaw: number; heading?: number; speed: number; inVehicle: boolean; heat: HeatView; objective: ObjectiveView | null; t: number }
 
 export class MiniMap {
   readonly el = document.createElement('div');
@@ -37,6 +41,8 @@ export class MiniMap {
   private overlayT = 0;
   private w = 0; private h = 0; private dpr = 1;
   private tiles = new Map<string, HTMLCanvasElement>();
+  private aerial: { m: AerialManifest; base: string } | null = null;
+  private tilesPending = false;
   private tileOrder: string[] = [];
   private tilePx = 0;
   private pxPerM = 0;
@@ -52,10 +58,12 @@ export class MiniMap {
   private ro: ResizeObserver;
 
   constructor(private model: MapModel, private streets: StreetRec[]) {
+    void loadAerial(import.meta.env.BASE_URL).then((x) => { this.aerial = x; this.tiles.clear(); this.tileOrder = []; this.winKey = ''; });
+    onAerialTile(() => { if (this.tilesPending) { this.tilesPending = false; this.winKey = ''; } });
     this.el.className = 't74-minimap';
     this.win.className = 't74-mm-base'; this.canvas.className = 't74-mm-base';
     this.screen.className = 't74-mm-screen';
-    this.player.className = 't74-mm-player'; this.player.innerHTML = '<svg viewBox="-9 -10 18 20"><path d="M0-8L6 7 0 3.5-6 7z" fill="#b2302a" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    this.player.className = 't74-mm-player'; this.player.innerHTML = '<svg viewBox="-9 -10 18 20"><path d="M0-8L6 7 0 3.5-6 7z" fill="#f2ede3" stroke="#0a0a09" stroke-width="1.8" stroke-linejoin="miter"/></svg>';
     this.north.className = 't74-mm-n'; this.north.textContent = 'N';
     this.star.className = 't74-mm-star'; this.star.innerHTML = '<b></b><i></i>';
     this.screen.append(this.star, this.player, this.north);
@@ -127,6 +135,13 @@ export class MiniMap {
       }
     }
     g.restore();
+    // direction A: the same aerial as the pause map, over the vector fallback (an incomplete tile is redrawn when its images land)
+    if (this.aerial) {
+      const done = drawAerial(g, this.aerial, ox, oz, ox + TILE_M, oz + TILE_M, s);
+      g.fillStyle = 'rgba(8,8,7,.55)'; g.save(); g.beginPath(); g.rect(0, 0, c.width, c.height);
+      g.rect(X(PLAYABLE.minX), Z(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * s, (PLAYABLE.maxZ - PLAYABLE.minZ) * s); g.clip('evenodd'); g.fillRect(0, 0, c.width, c.height); g.restore();
+      if (!done) { this.tilesPending = true; this.cost.tiles = performance.now() - t0; return c; } // not cached: retried next pass
+    }
     this.tiles.set(key, c); this.tileOrder.push(key);
     if (this.tileOrder.length > 40) this.tiles.delete(this.tileOrder.shift()!);
     this.cost.tiles = performance.now() - t0;
@@ -177,7 +192,7 @@ export class MiniMap {
       let e = this.icons.get(p.id);
       if (!e) {
         e = document.createElement('div'); e.className = 't74-mm-icon';
-        const spr = pictogram(p.cat, 15, dpr); const c = document.createElement('canvas'); c.width = spr.width; c.height = spr.height; c.getContext('2d')!.drawImage(spr, 0, 0);
+        const spr = iconSprite(p.cat as IconName, 14, dpr, { colour: MM_COLOUR[p.cat] }); const c = document.createElement('canvas'); c.width = spr.width; c.height = spr.height; c.getContext('2d')!.drawImage(spr, 0, 0);
         c.style.width = `${spr.width / dpr}px`; e.appendChild(c); this.screen.insertBefore(e, this.star); this.icons.set(p.id, e);
       }
       const isNew = m.discovery.isNew(p.id);
@@ -198,7 +213,8 @@ export class MiniMap {
     } else if (this.star.style.display !== 'none') this.star.style.display = 'none';
     const [nx, ny] = this.clampToCard(toScreen(f.x, f.z - 10000), W, H, 9);
     this.north.style.transform = `translate(${nx.toFixed(1)}px,${ny.toFixed(1)}px)`;
-    this.player.style.transform = `translate(${cx}px,${cy}px)`;
+    // the map turns with the camera; the arrow shows where the body faces, so circling the camera swings the arrow (GTA-style)
+    this.player.style.transform = `translate(${cx}px,${cy}px) rotate(${(f.yaw - (f.heading ?? f.yaw)).toFixed(4)}rad)`;
 
     const ms = performance.now() - t0;
     this.cost.draw = this.cost.draw ? this.cost.draw * 0.95 + ms * 0.05 : ms; this.cost.drawn++;
@@ -225,6 +241,15 @@ export class MiniMap {
     const X = (x: number) => (x - ox0) * s, Z = (z: number) => (z - oz0) * s;
     g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const m = this.model, lim = TILE_M * 3;
+    // fog of war: unexplored ground hazed (same treatment as the pause map)
+    const ex = m.explored;
+    if (ex) {
+      const mk = ex.mask(ox0, oz0, ox0 + lim, oz0 + lim, 8);
+      const fc = document.createElement('canvas'); fc.width = mk.w; fc.height = mk.h;
+      const fg = fc.getContext('2d')!, id = fg.createImageData(mk.w, mk.h);
+      for (let i = 0; i < mk.w * mk.h; i++) { id.data[i * 4] = 44; id.data[i * 4 + 1] = 46; id.data[i * 4 + 2] = 50; id.data[i * 4 + 3] = Math.round((255 - mk.data[i]) * 0.82); }
+      fg.putImageData(id, 0, 0); g.imageSmoothingQuality = 'high'; g.drawImage(fc, 0, 0, lim * s, lim * s);
+    }
     if (heat.searchArea) {
       g.save(); g.setLineDash([5 * d, 5 * d]); g.strokeStyle = 'rgba(158,42,36,.75)'; g.lineWidth = 2.2 * d;
       g.beginPath(); g.arc(X(heat.searchArea.x), Z(heat.searchArea.z), heat.searchArea.r * s, 0, Math.PI * 2); g.stroke(); g.fillStyle = 'rgba(158,42,36,.08)'; g.fill(); g.restore();
@@ -245,9 +270,11 @@ export class MiniMap {
         if (x < -200 || z < -200 || x > lim + 200 || z > lim + 200) { if (pts.length >= 4) break; continue; }
         pts.push(X(m.route.pts[q]), Z(m.route.pts[q + 1]));
       }
-      pencilLine(g, pts, 2.8 * d, 3, 0.65);
+      // the route (DESIGN_A): amber on a dark casing, as on the pause map
+      const line = () => { g.beginPath(); for (let q = 0; q < pts.length; q += 2) (q ? g.lineTo : g.moveTo).call(g, pts[q], pts[q + 1]); };
+      g.lineCap = g.lineJoin = 'round'; g.strokeStyle = 'rgba(0,0,0,.7)'; g.lineWidth = 6 * d; line(); g.stroke(); g.strokeStyle = '#e8a317'; g.lineWidth = 3.2 * d; line(); g.stroke();
     }
-    if (m.waypoint) pencilCross(g, X(m.waypoint.x), Z(m.waypoint.z), 6 * d);
+    if (m.waypoint) { const sp = iconSprite('waypoint', 18, 1, { colour: '#e8a317' }); g.drawImage(sp, X(m.waypoint.x) - sp.width / 2 + 3 * d, Z(m.waypoint.z) - sp.height + 4 * d, sp.width * d, sp.height * d); }
   }
 
   private clampToCard(p: [number, number], W: number, H: number, inset: number): [number, number] {

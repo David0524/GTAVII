@@ -90,7 +90,7 @@ export const ROWS: Row[] = [
   { key: 'hudStamina', label: 'Breath (stamina)', kind: 'choice', options: M3 },
   { key: 'hudInjuries', label: 'Injury tags', kind: 'choice', options: M3 },
   { key: 'hudLocation', label: 'Neighbourhood names', kind: 'choice', options: M3 },
-  { key: 'hudDiscovery', label: '"Pencilled in" notes', kind: 'choice', options: M3 },
+  { key: 'hudDiscovery', label: '"Added to map" notes', help: 'Only for places worth coming back to; everything else appears on the map quietly', kind: 'choice', options: M3 },
   { key: 'hudTurns', label: 'Route call-outs', kind: 'choice', options: M3 },
   { key: 'hudPrompts', label: 'Button prompts', kind: 'choice', options: M3 },
   { group: 'Map', keys: ['minimapOrientation', 'minimapSize', 'mapIconSize', 'units', 'clock24'] },
@@ -134,7 +134,7 @@ export const SETTING_COUNT = ROWS.filter((r) => 'key' in r).length;
 const PAD_NAMES = ['A / ✕', 'B / ○', 'X / □', 'Y / △', 'LB / L1', 'RB / R1', 'LT / L2', 'RT / R2', 'View / Create', 'Menu / Options', 'L3', 'R3', 'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'Home'];
 const ACTION_NAMES: Partial<Record<ButtonAction, string>> = {
   sprint: 'Sprint', jump: 'Jump · climb', use: 'Use · enter · talk', photo: 'Free camera · photo', map: 'Map', pause: 'Pause', inventory: 'Pockets', weaponSelect: 'Weapon selector',
-  waypoint: 'Pencil a waypoint (map)', skip: 'Skip cutscene (hold)', rise: 'Free camera up', sink: 'Free camera down', hud: 'Developer overlay',
+  waypoint: 'Set a waypoint (map)', skip: 'Skip cutscene (hold)', rise: 'Free camera up', sink: 'Free camera down', hud: 'Developer overlay',
 };
 const keyName = (c: string) => c.replace(/^Key/, '').replace(/^Digit/, '').replace('Left', ' (left)').replace('Right', ' (right)').replace('Backquote', '`').replace('BracketLeft', '[').replace('BracketRight', ']');
 
@@ -142,13 +142,14 @@ export class SettingsTab implements Tab {
   id = 'settings'; label = 'SETTINGS';
   el = document.createElement('div');
   private view: 'options' | 'remap' = 'options';
+  private section = 'Controls';
   private listening: { action: ButtonAction; device: 'keys' | 'pad' } | null = null;
   private setNav: (i: NavItem[], keep?: boolean) => void = () => {};
   onToast?: (t: string) => void;
   extraButtons: [string, () => void][] = [];
 
   constructor(private input: Input) {
-    this.el.className = 'u-scroll u-settings';
+    this.el.className = 'u-scroll u-settings st-a';
     window.addEventListener('keydown', (e) => {
       if (!this.listening || this.listening.device !== 'keys') return;
       e.preventDefault(); e.stopPropagation();
@@ -180,21 +181,38 @@ export class SettingsTab implements Tab {
 
   private render() {
     const items: NavItem[] = [];
-    this.el.innerHTML = `<div class="np-pages"><button data-v="options" class="${this.view === 'options' ? 'on' : ''}">Options · ${SETTING_COUNT}</button><button data-v="remap" class="${this.view === 'remap' ? 'on' : ''}">Buttons and keys</button></div>`;
-    this.el.querySelectorAll<HTMLElement>('.np-pages button').forEach((b) => items.push({ el: b, activate: () => { this.view = b.dataset.v as 'options' | 'remap'; this.render(); } }));
-    const wrap = document.createElement('div'); wrap.className = 't74-rows st-rows'; this.el.appendChild(wrap);
-    if (this.view === 'options') this.options(wrap, items); else this.remap(wrap, items);
-    for (const [l, fn] of this.extraButtons) { const b = document.createElement('div'); b.className = 't74-row btn'; b.innerHTML = `<div class="k">${esc(l)}</div><div class="v">›</div>`; wrap.appendChild(b); items.push({ el: b, activate: fn }); }
+    // DESIGN_A: a section rail (views, then the groups with their counts) beside one group's rows at a time
+    const groups = ROWS.filter((r): r is Extract<Row, { group: string }> => 'group' in r);
+    const cur = groups.find((g) => g.group === this.section) ?? groups[0];
+    this.el.innerHTML = `<aside class="st-nav"><div class="np-pages st-views"><button data-v="options" class="${this.view === 'options' ? 'on' : ''}">Options</button><button data-v="remap" class="${this.view === 'remap' ? 'on' : ''}">Buttons &amp; keys</button></div>
+      ${this.view === 'options' ? `<nav class="st-groups">${groups.map((g) => `<button data-g="${esc(g.group)}" class="${g === cur ? 'on' : ''}"><span>${esc(g.group)}</span><i>${g.keys?.length ?? 0}</i></button>`).join('')}</nav>` : ''}
+      <div class="st-extra"></div></aside><section class="st-main"></section>`;
+    this.el.querySelectorAll<HTMLElement>('.st-views button').forEach((b) => items.push({ el: b, activate: () => { this.view = b.dataset.v as 'options' | 'remap'; this.render(); } }));
+    this.el.querySelectorAll<HTMLElement>('.st-groups button').forEach((b) => items.push({ el: b, activate: () => { this.section = b.dataset.g!; this.render(); } }));
+    const main = this.el.querySelector('.st-main') as HTMLElement;
+    const wrap = document.createElement('div'); wrap.className = 't74-rows st-rows';
+    if (this.view === 'options') {
+      const head = document.createElement('header'); head.className = 'st-head';
+      head.innerHTML = `<span class="a-label">Options · ${cur.keys?.length ?? 0} of ${SETTING_COUNT}</span><h3 class="a-voice">${esc(cur.group)}</h3>`;
+      if (cur.keys) { const b = document.createElement('button'); b.className = 'st-reset'; b.textContent = 'Restore defaults'; head.appendChild(b); items.push({ el: b, activate: () => { settings.reset(cur.keys); this.onToast?.(`${cur.group}: defaults restored`); this.render(); } }); }
+      main.append(head, wrap);
+      this.options(wrap, items, cur.group);
+    } else {
+      const head = document.createElement('header'); head.className = 'st-head';
+      head.innerHTML = `<span class="a-label">${REBINDABLE.length} actions</span><h3 class="a-voice">Buttons and keys</h3>`;
+      main.append(head, wrap);
+      this.remap(wrap, items);
+    }
+    const extra = this.el.querySelector('.st-extra')!;
+    for (const [l, fn] of this.extraButtons) { const b = document.createElement('div'); b.className = 't74-row btn'; b.innerHTML = `<div class="k">${esc(l)}</div><div class="v">›</div>`; extra.appendChild(b); items.push({ el: b, activate: fn }); }
     this.setNav(items, true);
   }
 
-  private options(wrap: HTMLElement, items: NavItem[]) {
+  private options(wrap: HTMLElement, items: NavItem[], only: string) {
+    let inGroup = false;
     for (const r of ROWS) {
-      if ('group' in r) {
-        const g = document.createElement('div'); g.className = 't74-group st-group'; g.innerHTML = `<span>${esc(r.group)}</span>`;
-        if (r.keys) { const b = document.createElement('button'); b.className = 'st-reset'; b.textContent = 'Restore defaults'; g.appendChild(b); items.push({ el: b, activate: () => { settings.reset(r.keys); this.onToast?.(`${r.group}: defaults restored`); this.render(); } }); }
-        wrap.appendChild(g); continue;
-      }
+      if ('group' in r) { inGroup = r.group === only; continue; }
+      if (!inGroup) continue;
       const el = document.createElement('div'); el.className = 't74-row';
       const live = WIRED.has(r.key);
       const consumer = CONSUMER[r.key] ?? 'ui';
@@ -235,7 +253,7 @@ export class SettingsTab implements Tab {
   private remap(wrap: HTMLElement, items: NavItem[]) {
     const b = settings.get('bindings');
     const preset = PAD_PRESETS[settings.get('controlPreset')];
-    wrap.insertAdjacentHTML('beforeend', '<p class="hint" style="margin:4px 0 10px">Choose a key or button, then press the new one. Esc cancels. Menu navigation (arrows, Enter, A/B) stays fixed so you can always get back here.</p>');
+    wrap.insertAdjacentHTML('beforeend', '<p class="st-note">Choose a key or button, then press the new one. Esc cancels. Menu navigation (arrows, Enter, A/B) stays fixed so you can always get back here.</p>');
     const head = document.createElement('div'); head.className = 'st-remap head'; head.innerHTML = '<span>Action</span><span>Keyboard</span><span>Controller</span><span></span>'; wrap.appendChild(head);
     for (const a of REBINDABLE) {
       const keys = b[a]?.keys.length ? b[a].keys : DEFAULT_KEYS[a] ?? [];
@@ -244,7 +262,7 @@ export class SettingsTab implements Tab {
       const lk = this.listening?.action === a && this.listening.device === 'keys', lp = this.listening?.action === a && this.listening.device === 'pad';
       row.innerHTML = `<span>${esc(ACTION_NAMES[a] ?? a)}${b[a] ? ' <i>changed</i>' : ''}</span>`;
       const kb = document.createElement('button'); kb.className = `st-bind${lk ? ' listen' : ''}`; kb.innerHTML = lk ? 'Press a key…' : keys.map((k) => `<span class="t74-key">${esc(keyName(k))}</span>`).join(' ') || '—';
-      const pb = document.createElement('button'); pb.className = `st-bind${lp ? ' listen' : ''}`; pb.textContent = lp ? 'Press a button…' : pads.map((p) => PAD_NAMES[p]).join(', ') || '—';
+      const pb = document.createElement('button'); pb.className = `st-bind${lp ? ' listen' : ''}`; pb.innerHTML = lp ? 'Press a button…' : pads.map((p) => `<span class="t74-key pad">${esc(PAD_NAMES[p])}</span>`).join(' ') || '—';
       const rs = document.createElement('button'); rs.className = 'st-reset'; rs.textContent = 'Default';
       row.append(kb, pb, rs); wrap.appendChild(row);
       items.push({ el: kb, activate: () => { this.listening = { action: a, device: 'keys' }; this.render(); } });

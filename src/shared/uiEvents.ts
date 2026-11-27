@@ -9,7 +9,9 @@ export interface UiEvents {
   subtitle: { speaker: string; text: string; channel: 'scene' | 'ambient'; seconds?: number };
   objective: ObjectiveView | null;
   /** A map place was introduced: tip, overheard line, newspaper ad, call, card or mission. */
-  discover: { placeId: string; via: 'tip' | 'overheard' | 'news' | 'call' | 'card' | 'mission' | 'enter'; from?: string };
+  /** `notify` overrides the place's own flag (side quests, strangers, sellers are tagged by their content: discoveryNotify);
+   *  `mission` marks it as part of that mission, so it may toast during it. Default: silent (user feedback, 2026-11-27). */
+  discover: { placeId: string; via: 'tip' | 'overheard' | 'news' | 'call' | 'card' | 'mission' | 'enter'; from?: string; notify?: 'silent' | 'toast'; mission?: string };
   notify: { kind: 'help' | 'toast' | 'saved'; text: string };
   heat: { phase: HeatView['phase']; radio?: string };
   damage: { amount: number; region?: string };
@@ -21,6 +23,8 @@ export interface UiEvents {
   /** A parking summons, a tow or a boot happened to one of the lead's cars. */
   notice: { kind: 'ticket' | 'tow' | 'boot'; car: string; text: string; amount?: number };
   choices: { prompt?: string; choices: DialogueChoice[]; resolve: (id: string) => void };
+  /** A mission ended: the end card (src/ui/hud/MissionCard.ts). `cash` = the player's cut; `lines` = extra label/value rows. */
+  missionEnd: { result: 'passed' | 'failed'; title: string; reason?: string; cash?: number; lines?: { label: string; value: string }[] };
 }
 
 

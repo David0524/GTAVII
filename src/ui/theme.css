@@ -220,3 +220,7 @@ body .ts-opt.is-focus span { color: rgba(255,255,255,.78); }body .t74-row.is-foc
 @media (min-width: 2500px) and (min-height: 1350px) { :root { --menu-zoom: 2; } }
 .u-hub .t74-tabs, .u-hub .t74-subtabs, .u-hub .t74-foot, .u-hubbody > :not(.t74-mapscreen),
 .t74-mapside, .t74-mapscreen .t74-card, .t74-legend, .t74-menu, .t74-tagline, .t74-press, .t74-leader { zoom: var(--menu-zoom); }
+
+/* icons (src/ui/icons.ts; DESIGN_A §5): one stroke, square caps */
+.ic { fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: square; stroke-linejoin: miter; flex: none; }
+.ic .f { fill: currentColor; }

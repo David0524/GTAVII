@@ -105,12 +105,12 @@ export class MockHost implements UiHost {
   obj: ObjectiveView | null = { text: 'Walk up Broadway with Mayhew', target: { x: 18, z: -240, label: 'Broadway & W 26 St' }, mission: 'Dusk on Broadway' };
   owned = new Set<string>(['biz.laundromat']);
   garageCars: CarView[] = [
-    { id: 'car.monarch', name: 'Monarch Brougham 4-dr', year: 1971, colour: 'Harvest gold', plate: '612 KTR', condition: 0.58, mileage: 64210,
+    { id: 'car.monarch', name: 'Monarch Brougham 4-dr', year: 1971, colour: 'Harvest gold', plate: '612-KTR', condition: 0.58, mileage: 64210,
       where: { kind: 'street', x: -205, z: -640, label: 'W 31 St near 8 Av, alternate-side Tue/Fri' },
       tickets: [{ id: 'tk.1', amount: 15, reason: 'Alternate-side parking', date: 'Jun 18' }, { id: 'tk.2', amount: 25, reason: 'Hydrant, within 15 ft', date: 'Jun 20' }, { id: 'tk.3', amount: 15, reason: 'Expired meter', date: 'Jun 21' }], booted: true, trunk: ['Tire iron', 'Road flares', 'Spare coat'] },
-    { id: 'car.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1969, colour: 'Avocado', plate: '9R 4471', condition: 0.81, mileage: 52900,
+    { id: 'car.kestrel', name: 'Kestrel Sprint 2-dr hardtop', year: 1969, colour: 'Avocado', plate: '47-RDN', condition: 0.81, mileage: 52900,
       where: { kind: 'garage', x: -640, z: -960, label: 'Midtown Park & Lock, level 2' }, tickets: [], booted: false, trunk: ['Crowbar', 'Gym bag'] },
-    { id: 'car.dunmore', name: 'Dunmore Villager wagon', year: 1967, colour: 'Maroon', plate: '38 BDN', condition: 0.35, mileage: 117800,
+    { id: 'car.dunmore', name: 'Dunmore Villager wagon', year: 1967, colour: 'Maroon', plate: '385-BDN', condition: 0.35, mileage: 117800,
       where: { kind: 'pound', x: -1180, z: -1010, label: 'Pier 74 city pound, W 38 St at 12 Av' }, tickets: [{ id: 'tk.4', amount: 15, reason: 'No standing, bus stop', date: 'Jun 19' }], booted: false, towed: { pound: 'Pier 74 pound', fee: 45 }, trunk: [] },
   ];
   homeOwned: Record<string, string[]> = {};
@@ -198,7 +198,7 @@ export class MockHost implements UiHost {
   newspaper(): NewsIssue {
     return {
       id: 'news.1974-06-22', date: 'Saturday, June 22, 1974', masthead: 'The Evening Courier', price: '20¢', edition: 'Late City Final',
-      headline: 'HEAT WAVE GRIPS CITY', deck: 'Con Ed asks for cutbacks as mercury hits 94; brownouts feared in Midtown',
+      headline: 'HEAT WAVE GRIPS CITY', deck: 'Power company asks for cutbacks as mercury hits 94; brownouts feared in Midtown',
       stories: [
         { head: 'Hotel tenants fight eviction', body: 'Residents of a West 31st Street hotel say a new owner wants them out by fall. "Where do we go?" asked one, 81.' },
         { head: 'Garment trucks hijacked', body: 'Police report the third truck taken on Ninth Avenue this month. No arrests.' },
@@ -343,7 +343,7 @@ export class MockHost implements UiHost {
       if (this.cash[lead] + this.savings[lead] < a.price) return { ok: false, text: `You need ${money$(a.price)} between cash and savings.` };
       const fromCash = Math.min(this.cash[lead], a.price); this.cash[lead] = +(this.cash[lead] - fromCash).toFixed(2); this.savings[lead] -= a.price - fromCash;
       this.sold.add(c.id);
-      this.garageCars.push({ id: `car.${c.id}`, name: c.name, year: c.year, colour: c.colour, plate: '4A 0912', condition: c.condition, mileage: c.mileage, where: { kind: 'street', x: this.pos.x, z: this.pos.z, label: 'Right outside' }, tickets: [], booted: false, trunk: [] });
+      this.garageCars.push({ id: `car.${c.id}`, name: c.name, year: c.year, colour: c.colour, plate: '409-AJM', condition: c.condition, mileage: c.mileage, where: { kind: 'street', x: this.pos.x, z: this.pos.z, label: 'Right outside' }, tickets: [], booted: false, trunk: [] });
       this.emit('money', { lead, delta: -a.price, cash: this.cash[lead], reason: c.name });
       return { ok: true, text: `Yours: ${c.name}. Plates and keys in the glovebox.` };
     }

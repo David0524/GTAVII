@@ -19,10 +19,11 @@ import { PLAYABLE, edgeDistance } from '../../src/shared/bounds';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const NARRATIVE = 'origin/claude/sharp-maxwell-jnb6hr';
+/** Narrative's branch is the source of truth for content/ (this branch's copy can be stale until merges); local file as fallback. */
 function content(rel: string): string | null {
+  try { return execSync(`git show ${NARRATIVE}:content/${rel}`, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 << 20 }); } catch { /* offline: use the local copy */ }
   const p = path.join(ROOT, 'content', rel);
-  if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
-  try { return execSync(`git show ${NARRATIVE}:content/${rel}`, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return null; }
+  return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
 }
 
 const streets = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/streets.json'), 'utf8')) as StreetRec[];
@@ -46,7 +47,7 @@ const tooClose = (x: number, z: number, m: number) => places.some((p) => Math.hy
 // ------------------------------------------------------------ 1. narrative
 /** narrative's per-place `discovery` field (content/places.json) -> catalogue reveal rules. Homes stay
  *  known from the start for their own lead (HOMES_AND_CARS) whatever the field says. */
-interface NarrDiscovery { via?: string[]; sightM?: number; shady?: boolean; hiddenUntilIntroduced?: boolean; tipFrom?: string[]; mission?: string; note?: string }
+interface NarrDiscovery { notify?: 'silent' | 'toast'; notifyWhy?: string; notifyLine?: string; via?: string[]; sightM?: number; shady?: boolean; hiddenUntilIntroduced?: boolean; tipFrom?: string[]; mission?: string; note?: string }
 function narrativeDiscovery(d: NarrDiscovery | undefined, fallback: Place['reveal']): Pick<Place, 'reveal' | 'sightM' | 'shady'> {
   if (!d?.via?.length || fallback.includes('start')) return { reveal: fallback, sightM: 35 };
   const map: Record<string, Place['reveal'][number]> = { landmark: 'sight', sight: 'sight', tip: 'tip', overheard: 'overheard', newspaper: 'news', news: 'news', card: 'card', mission: 'mission', call: 'call', enter: 'enter' };
@@ -81,6 +82,7 @@ if (np) {
       address: p.between ? `${shortStreet(normaliseStreet(p.at))}, ${shortStreet(normaliseStreet(p.between[0]))}–${shortStreet(normaliseStreet(p.between[1]))}` : p.at.split('&').map((s) => shortStreet(normaliseStreet(s))).join(' & '),
       ...narrativeDiscovery(p.discovery, lead ? ['start'] : cat === 'landmark' ? ['sight', 'mission'] : ['mission', 'tip', 'enter', 'sight']),
       lead: lead?.id, source: 'narrative',
+      ...(p.discovery?.notify === 'toast' ? { notify: 'toast' as const, ...(p.discovery.notifyLine ? { notifyLine: p.discovery.notifyLine } : {}) } : {}),
       blurb: lead ? `${lead.name.replace(/“.*?”\s*/, '')} lives here.` : undefined,
     });
   }

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Design A board</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  :root { --cream: #f2ede3; --dim: rgba(242,237,227,.62); --taxi: #e8a317; }
+  body { margin: 0; background: #0c0c0b; color: var(--cream); font: 13px/1.45 'T74 Heros', Helvetica, sans-serif; padding: 48px 56px 64px; width: 2200px; box-sizing: border-box; }
+  header { display: grid; grid-template-columns: 1fr 620px; gap: 40px; align-items: end; border-bottom: 1px solid rgba(242,237,227,.16); padding-bottom: 24px; margin-bottom: 30px; }
+  h1 { margin: 0; font: 900 64px/.9 'Libre Franklin', sans-serif; letter-spacing: -.03em; }
+  header p { margin: 10px 0 0; color: var(--dim); font-size: 15px; max-width: 70ch; }
+  .lbl { font: 700 11px 'T74 Heros Cn', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--taxi); }
+  .rules { font-size: 12.5px; color: var(--dim); } .rules b { color: var(--cream); }
+  section { display: grid; grid-template-columns: 300px 1fr 540px; gap: 28px; padding: 26px 0; border-bottom: 1px solid rgba(242,237,227,.1); align-items: start; }
+  section h2 { margin: 6px 0 8px; font: 800 28px/1 'Libre Franklin', sans-serif; letter-spacing: -.02em; }
+  section .note { color: var(--dim); font-size: 13px; } section .ref { margin-top: 10px; font-size: 12px; color: var(--dim); } section .ref b { color: var(--cream); font-weight: 700; }
+  img { display: block; width: 100%; height: auto; box-shadow: 0 0 0 1px rgba(242,237,227,.12); }
+  figure { margin: 0; } figcaption { margin-top: 6px; font: 700 10px 'T74 Heros Cn', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+</style></head>
+<body>
+<header><div><span class="lbl">Tenderloin '74 · UI, map and cinematics</span><h1>Design A, every screen</h1>
+<p>The user picked map direction A and asked for the whole UI to match: a late-2020s game UI that stays immersive to 1970s New York, and nothing that looks AI-made. Design language: docs/DESIGN_A.md. Desktop 1600×900 and phone landscape 844×390 @2x, from the lab rig.</p></div>
+<div class="rules"><span class="lbl">The rules every screen is checked against</span><br>
+<b>No</b> rounded-card dashboards, default sans voice, gradient blobs, glassmorphism, icons in identical circles, evenly spaced everything, beige on beige. <b>Yes</b> one hero per screen, deliberate asymmetry, real density and specific 1974 copy, square corners and hairlines, one amber accent, Libre Franklin voice with Heros Cn labels, our own icon drawings, period paper only where it's an object.</div></header>
+<main id="m"></main>
+<script type="module">
+const rows = await (await fetch('./board.json')).json();
+document.getElementById('m').innerHTML = rows.map((r) => `<section><div><span class="lbl">${r.group}</span><h2>${r.title}</h2><div class="note">${r.note}</div>${r.ref ? `<div class="ref"><b>vs GTA V / VI / RDR2:</b> ${r.ref}</div>` : ''}</div>
+  <figure><img src="${r.desktop}"><figcaption>Desktop</figcaption></figure><figure>${r.phone ? `<img src="${r.phone}"><figcaption>Phone landscape</figcaption>` : ''}</figure></section>`).join('');
+await Promise.all([...document.images].map((i) => i.decode().catch(() => {})));
+window.__MOCK_READY = true;
+</script></body></html>

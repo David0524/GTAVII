@@ -14,7 +14,8 @@ import type { UiHost, HeatView, ObjectiveView } from '../host/types';
 import type { MapModel } from '../map/MapModel';
 import { MiniMap } from '../map/MiniMap';
 import { CATEGORIES, type RevealVia } from '../map/places';
-import { pictogramURL } from '../map/pictograms';
+import { icon, type IconName } from '../icons';
+import { MissionCard } from './MissionCard';
 import { uiSettings, type Mode3, type UiSettingsData } from '../settings/uiSettings';
 import { radioLine } from './radio';
 import { callout, voicedCallout, routeVoice, type CallLine } from '../map/Route';
@@ -56,6 +57,23 @@ export class GameHud {
   visible = true;
   readonly cost = { frame: 0 };
 
+  private mcard = new MissionCard();
+  private discoverHints = new Map<string, { notify?: 'silent' | 'toast'; mission?: string }>();
+  private addQ: { name: string; cat: string; why?: string; how: string; mission?: string }[] = [];
+  private addT = 0;
+  /** One "Added to map" note at a time; a burst becomes one merged note; nothing off-mission while a mission runs. */
+  private flushAdded(dt: number) {
+    this.addT -= dt;
+    if (this.addT > 0 || !this.addQ.length) return;
+    const m = this.host.objective()?.mission;
+    const ready = m ? this.addQ.filter((q) => q.mission === m) : this.addQ.slice();
+    if (!ready.length) return;
+    this.addQ = this.addQ.filter((q) => !ready.includes(q));
+    if (ready.length === 1) { const q = ready[0]; this.note('ADDED TO MAP', `${icon(q.cat as IconName, 18)}<span class="nm">${esc(q.name)}</span><span class="how">${esc(q.why || q.how || (CATEGORIES as Record<string, { label: string }>)[q.cat]?.label || '')}</span>`, 4.5); }
+    else this.note('ADDED TO MAP', `${icon('pin', 18)}<span class="nm">${ready.length} places</span><span class="how">${esc(ready.slice(0, 3).map((q) => q.name).join(' · '))}${ready.length > 3 ? ' …' : ''}</span>`, 5);
+    this.addT = 5.5;
+  }
+
   constructor(private host: UiHost, private model: MapModel) {
     this.el.className = 'u-hud';
     this.el.innerHTML = `
@@ -85,13 +103,18 @@ export class GameHud {
     host.on('inventory', () => { this.dirtyPoll = true; this.ping('weapon', 6); });
     host.on('damage', () => { this.dirtyPoll = true; this.ping('injuries', 8); });
     host.on('heat', (e) => { if (e.radio) this.radio(e.radio); });
+    host.on('missionEnd', (e) => this.mcard.show(e));
     host.on('achievement', (e) => { const a = host.achievements().find((x) => x.id === e.id); if (a) this.note('ACHIEVEMENT', `<i>${esc(a.name)}</i> · ${esc(a.text)}`, 6); });
-    host.on('discover', (e) => { model.discovery.reveal(e.placeId, e.via); });
+    host.on('discover', (e) => { this.discoverHints.set(e.placeId, { notify: e.notify, mission: e.mission }); model.discovery.reveal(e.placeId, e.via); });
+    // Discoveries are SILENT by default (user, 2026-11-27: "I shouldn't be notified unless it's like a story/character that's
+    // worth coming back to"). Routine places just appear on the map; only content tagged notify:'toast' queues one
+    // "Added to map" note, merged when several land together, held during missions (unless it's that mission's) and cutscenes.
     model.discovery.on((e) => {
-      if (uiSettings.get('hudDiscovery') === 'off') return;
-      const how = VIA_SHORT[e.via];
-      this.note('PENCILLED IN', `<img alt="" src="${pictogramURL(e.place.cat, 16, 'disc')}">${esc(e.place.name)}${how ? ` <span style="opacity:.7">· ${how}</span>` : ''}`, 4.5);
-      this.ping('minimap', 8);
+      const h = this.discoverHints.get(e.place.id); this.discoverHints.delete(e.place.id);
+      this.ping('minimap', 4);
+      const wants = h?.notify ? h.notify === 'toast' : e.place.notify === 'toast' && e.via !== 'mission';
+      if (!wants || uiSettings.get('hudDiscovery') === 'off') return;
+      this.addQ.push({ name: e.place.name, cat: e.place.cat, why: e.place.notifyLine, how: VIA_SHORT[e.via] ?? '', mission: h?.mission });
     });
     uiSettings.subscribe((_s, k) => this.applySetting(k));
     for (const k of ['minimapSize', 'subtitleBackground', 'textScale'] as const) this.applySetting(k);
@@ -132,6 +155,8 @@ export class GameHud {
     if (!this.visible) return;
     const t0 = performance.now();
     this.trav(dt);
+    this.mcard.update(dt);
+    this.flushAdded(dt);
     this.t += dt;
     for (const [k, v] of this.shown) this.shown.set(k, v - dt);
     const h = this.host, p = h.player(), heat = h.heat(), obj = h.objective();
@@ -153,7 +178,7 @@ export class GameHud {
     // minimap
     const mmOn = this.vis('minimap', 'hudMinimap', !!this.model.waypoint);
     if (this.minimap.el.classList.contains('dim') === mmOn) this.minimap.el.classList.toggle('dim', !mmOn);
-    if (mmOn) this.minimap.draw({ x: p.x, z: p.z, yaw: uiSettings.get('minimapOrientation') === 'north' ? 0 : p.yaw, speed: p.speed, inVehicle: p.inVehicle, heat, objective: obj, t: this.t }, dt);
+    if (mmOn) this.minimap.draw({ x: p.x, z: p.z, yaw: uiSettings.get('minimapOrientation') === 'north' ? 0 : p.yaw, heading: p.heading ?? p.yaw, speed: p.speed, inVehicle: p.inVehicle, heat, objective: obj, t: this.t }, dt);
     this.model.discovery.tick(p.x, p.z);
     this.model.update(dt, p.x, p.z, p.inVehicle);
 
@@ -225,7 +250,7 @@ export class GameHud {
       if ((this.shown.get('loc') ?? 0) <= 0) this.q('.u-loc').classList.remove('show');
     }
 
-    // pencilled route: next turn
+    // the route: next turn
     this.turnCallout(p.x, p.z, p.inVehicle);
 
   }
@@ -251,7 +276,7 @@ export class GameHud {
         const dd = Math.hypot(next.x - x, next.z - z);
         if (dd < 160) {
           const pv = this.host.player(), voice = inVehicle ? routeVoice(VOICES, pv.companion, pv.quest) : null;
-          html = `<small>${voice === 'cabbie' ? 'THE CABBIE' : voice ? 'YOUR PASSENGER' : 'YOUR PENCIL MARKS'}</small>${esc(callout(next))} · ${distance(dd, uiSettings.get('units') === 'metric')}`;
+          html = `<small>${voice === 'cabbie' ? 'THE CABBIE' : voice ? 'YOUR PASSENGER' : 'YOUR ROUTE'}</small>${esc(callout(next))} · ${distance(dd, uiSettings.get('units') === 'metric')}`;
           // the companion voices it once per turn (audio stream speaks it; the HUD line above always shows it)
           const key = `${next.x | 0},${next.z | 0}`;
           if (voice && this.last.called !== key) {
