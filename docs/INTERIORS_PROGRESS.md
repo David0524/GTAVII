@@ -208,3 +208,21 @@ Reads as a modern kit or is wrong:
 - Done: `src/interiors/kit/wear.ts` (seat tape/tears, mismatched chairs, broken/fallen chairs, missing cushions, antimacassars, tablecloths/vases, ashtrays; `dressCells` post-pass adds grade clutter: cartons, bottles, trash bags, plywood, mattresses, papers at 0-1; rugs and plants at 3-4). Kit.wr is a separate wear RNG so layouts stay identical across grades. Stress: 0 failures.
 - Board: docs/interiors/grades_board_v3_furniture.jpg (rows: tenement apt cell, diner 3, bar 1; columns grade 0..4). Honest critique: bar reads best (g0 papers/debris and empty bulbs, g1-2 tape/mismatch, g4 tablecloths, vases, carpet). Diner: mismatched stools read at g0/g1; clutter is thin in big open shops. Tenement: the `cell:apt_` camera lands in a long apartment that reads as a corridor; potted plants still read as spidery shapes (need leaf blades, not tubes); derelict rows are too dark to read the clutter (lamp 0.55 + dying lamps) - add a daylight/window spill check before judging g0.
 - Next (was): capture `grades` boards (tenement `cell:apt_`, diner 3, bar 1) as JPEG beside references, critique, tune; then review the pass-2 reference helper output (tools/refs/collectInteriors2.ts, uncommitted until reviewed).
+
+## Gap list against docs/briefs/VISUAL_BAR.md (2026-11-27, judged on grades_board_v3_furniture.jpg)
+Honest verdict: interiors are **well below the GTA V floor** today. Layout, content density and grade storytelling are the strong part; rendering is the gap.
+
+| Bar item | Interiors today | Gap / plan |
+|---|---|---|
+| PBR photoscan/CC0 materials (albedo, normal, roughness, AO) | Unlit uber material, procedural patterns from vertex colour; no normal or roughness maps | **Major.** Move to lit PBR node material fed by the engine's shared CC0 library (texture arrays: plaster, tile, terrazzo, wood, vinyl, carpet, brick, tin, linoleum), procedural patterns kept as masks and wear layers |
+| Physically based lighting, HDR, filmic tonemap | Baked per-vertex lamp and window light, output unlit into the engine's tonemap | Bake to lightmaps (second UV) or per-cell irradiance probes instead of vertex colour; keep the bake as indirect, let a few real lights per room light the PBR material directly |
+| Light through windows following the sun | Window light baked as a constant term, portal-gated | Window sun patches as projected light (sun direction from engine) with shadowing through window frames; brightness by time of day already wired via the `window` uniform |
+| Contact shadows / AO in every corner | Baked corner AO plus hemisphere AO per vertex (coarse, tessellation-limited) | Use the engine's SSAO/GTAO in interiors; lightmap AO at texel density, not vertex density |
+| Dynamic shadows from characters and props | None (engine request 4 open) | Shadowed local lights (one or two per visible room) and character contact shadows; depends on engine 4 |
+| Reflections (glass, chrome, wet floors, mirrors) | Chrome and mirror are patterns only | Per-room reflection probe (box-projected cubemap captured at build time), SSR from the engine |
+| Furniture form | Box primitives plus tubes; plants read as spidery | Hero props as authored or CC0 meshes (chairs, stools, booths, registers, plants, beds), kit primitives only for architecture; bevels or normals on every box edge |
+| Decals: grime, wear, stains | Procedural wear in the shader, ceiling water stains | Decal layer (grime, scuffs, posters, graffiti at derelict) projected on walls and floors |
+| Readable derelict grade | Too dark to read (lamp 0.55 plus dying lamps) | Daylight through windows and grime-lit exposure, not a dimmer; tune once lighting is PBR |
+| Phone frame time | Unmeasured on device (SwiftShader only) | Measure on iPhone 17 Pro once the PBR path exists |
+
+The first three rows are an architecture change to the interior renderer (from unlit baked vertex light to lit PBR with lightmaps and probes, sharing engine materials). Raised with oversight before starting it, since it touches the engine's lighting pipeline and the material library.
