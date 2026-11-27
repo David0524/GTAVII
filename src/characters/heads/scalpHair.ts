@@ -24,9 +24,10 @@ export function scalpHairMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, app
     w: h.hair, layers: [6, 4, 3, 2][Math.min(lod, 3)],
     // ~1 cm for a close crop, growing with volume (an afro's crown rises most)
     thick: (up, w) => ((0.008 + 0.004 * up) + app.hair.volume * 0.05 * (0.5 + 0.5 * up)) * w,
-    density: (w) => Math.min(1, w ** 0.7) * (coily ? 1.1 : 1), freq: coily ? 3000 : 1800, clump: coily ? 2 : 0, brow: false,
+    density: (w) => Math.min(1, w ** 1.3) * (coily ? 1.1 : 1), freq: coily ? 3000 : 1800, clump: coily ? 2 : 0, brow: false,
   }];
-  // brows: ~1 mm of short straight strands (boundary triangles kept, density tapering to 0) lying along the arc (LOD 0-1 only)
+  // brows: ~1 mm of short straight strands
+  // (both: triangles touching the mask are kept, density tapers to 0 at its edge: no hard cut) lying along the arc (LOD 0-1 only)
   if (h.brow && lod <= 1) specs.push({ w: h.brow, layers: 2, thick: (_u, w) => 0.0012 * w, density: (w) => w ** 1.5 * 0.85, freq: 5200, clump: 0, brow: true });
   const col = lin(app.hair.color), tip = col.map((c) => Math.min(1, c * 1.25 + 0.02));
   const hc = lm.Head;
@@ -34,7 +35,7 @@ export function scalpHairMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, app
   for (const sp of specs) {
     const hw = sp.w;
     const tri: number[] = [];
-    for (let t = 0; t < h.meta.skinIdx; t += 3) { const a = h.idx[t], b = h.idx[t + 1], c = h.idx[t + 2]; if (!h.kind[a] && (sp.brow ? hw[a] || hw[b] || hw[c] : hw[a] && hw[b] && hw[c])) tri.push(a, b, c); }
+    for (let t = 0; t < h.meta.skinIdx; t += 3) { const a = h.idx[t], b = h.idx[t + 1], c = h.idx[t + 2]; if (!h.kind[a] && (hw[a] || hw[b] || hw[c])) tri.push(a, b, c); }
     if (!tri.length) continue;
     const used = [...new Set(tri)], at = new Map(used.map((v, i) => [v, i]));
     for (let L = 0; L < sp.layers; L++) {

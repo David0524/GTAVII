@@ -84,15 +84,22 @@ the size pass.
 - **Hair:** reads as a short natural crop from three-quarter view. In profile, the nape and
   hairline edges are hard and the coil texture is uniform. GTA V's short afros break the
   silhouette better.
-- **Seams:** a faint line remains where the head's neck meets the body in profile. The dress
-  collar spikes at the neck (a garment issue, also on her previous head) are still there.
+- **Seams:** the dress-collar shards at the front of the neck are gone: they came from cutting the
+  body along ICT's level neck ring, which ran through the shoulder slope. ICT's neck now ends
+  0.125 m under the eyes. In back and profile, a lighter band with a jagged top edge remains
+  where the body's neck flares into the trapezius under the head seam. Lowering the head's neck
+  would bring the shoulder shards back; the fix is a head-to-body weld (shared ring vertices),
+  which is open.
+- **Hair edges:** the nape is now a soft, slightly V-shaped line. Brows are ~1 mm strand shells
+  rather than paint.
 - **Verdict:** GTA V near-NPC level, not yet GTA V hero level. The main gap is albedo detail.
 
 **Next, in order:**
 1. Eyes: done for now (above).
-2. Albedo micro-variation (a tiling CC0 skin-detail layer like the body's), plus card brows.
-3. Nape and hairline softening, and the profile neck seam.
-4. Dress collar spikes.
+2. Albedo: pore pits, uneven pigmentation and macules added. A photographic layer still needs the
+   MakeHuman source skins, which aren't in this container. Brows are done (shells).
+3. Nape: done. Profile neck seam: needs the head-to-body weld (open).
+4. Dress collar spikes: fixed at the front.
 5. Size: decimate teeth and gums, meshopt.
 
 Close portrait references of Black women from 1973–74 are still missing from

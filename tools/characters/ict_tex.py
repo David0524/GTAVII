@@ -311,7 +311,9 @@ au_ = np.abs(vu - 0.5)
 hlv = np.where(au_ < 0.3, 0.912 - 0.028 * (au_ / 0.2) ** 2, 0.849 - (au_ - 0.3) * 1.35)
 earV = ss(0.12, 0.09, np.minimum(vu, 1 - vu)) * ss(0.44, 0.48, vv) * ss(0.71, 0.67, vv)
 hwF = ss(hlv - 0.002, hlv + 0.03, vv) * (1 - earV) * vF
-hwS = ss(eyeY - 0.074, eyeY - 0.05, pos[:, 1]) * vS
+# nape: a soft, slightly V-shaped line (lower at the middle), jittered, fading over ~3 cm
+napeY = eyeY - 0.07 - 0.012 * np.exp(-(pos[:, 0] / 0.03) ** 2) + 0.006 * (vnoise(pos * 180) - 0.5)
+hwS = ss(napeY, napeY + 0.03, pos[:, 1]) * vS
 hw = np.maximum(hwF, hwS)
 # brows (same arcs as the albedo, on vertices): short shells grow there at runtime
 def browV(side):

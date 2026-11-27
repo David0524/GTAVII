@@ -42,11 +42,11 @@ const P = Float32Array.from(neutral);
 
 let neckCutY = 0;
 // --- neck length: ICT's neck runs down past the collarbones, so our body would be cut open at the
-// chest. Skin below `neckCut` (metres under the eye line; spec.neckCut, default 0.14: the Rocketbox leads end ~2.3 interocular distances under the eyes, ICT ~3.1) is lifted
+// chest. Skin below `neckCut` (metres under the eye line; spec.neckCut, default 0.125: the Rocketbox leads end ~2.3 interocular distances under the eyes, ICT ~3.1) is lifted
 // onto the cut, which leaves a clean, level-ish bottom edge for the body to conform to.
 {
   let ey = 0, c = 0; for (let k = parts.eyeL[0]; k < parts.eyeR[1]; k++) { ey += P[k * 3 + 1]; c++; } ey /= c;
-  neckCutY = ey - (spec.neckCut ?? 0.14);
+  neckCutY = ey - (spec.neckCut ?? 0.125);
 }
 // skin triangles wholly below the cut are dropped (ICT's front neck flaps reach onto the chest);
 // the remaining vertices below it are lifted onto it after triangle selection
