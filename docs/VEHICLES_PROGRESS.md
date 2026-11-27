@@ -258,6 +258,16 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   panel as their own instanced part, coloured per instance (the variant's vinyl colour, or the
   body paint when that car has none). Vinyl share: hardtops 90%, sedans 42%, compacts 9%.
 
+- **Traffic fade-in and fade-out (engine request):** TrafficRenderer dithers a car in over
+  `fadeTime` (0.4 s) when its key first appears, and out where it was last seen when it leaves.
+  - The key is the sim view's `id` when present, else class + variant.
+  - It is a screen-door mask (interleaved gradient noise against a per-instance `instFade`
+    attribute) on every traffic material, including the contact shadow, so cars stay in the
+    opaque pass.
+  - The first `setInstances` call shows everything solid. `dt` per call is capped at 0.25 s, so a
+    hitch can't skip the fade.
+  - Ground light pools appear once a car is more than half faded in.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
