@@ -1,6 +1,6 @@
 /**
  * The map tab of the pause hub: the folding map, a printed legend that doubles as the filter list,
- * a taped-on info card for the selected place, and waypoint actions. Fully usable by touch alone.
+ * a dark info panel for the selected place, and waypoint actions. Fully usable by touch alone.
  */
 import { FoldingMap, type FoldingMapSelection } from '../map/FoldingMap';
 import type { MapModel } from '../map/MapModel';

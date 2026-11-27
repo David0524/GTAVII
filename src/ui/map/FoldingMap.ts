@@ -235,7 +235,6 @@ export class FoldingMap {
     g.strokeStyle = 'rgba(40,40,40,.16)'; g.lineWidth = 1;
     for (let i = 1; i < 4; i++) { const x = x0 + (x1 - x0) * i / 4; g.beginPath(); g.moveTo(x, z0); g.lineTo(x, z1); g.stroke(); }
     for (let i = 1; i < 3; i++) { const z = z0 + (z1 - z0) * i / 3; g.beginPath(); g.moveTo(x0, z); g.lineTo(x1, z); g.stroke(); }
-    // coffee ring on the lower-right panel (it has lived on a diner counter)
 
     // ---------------------------------------------------------------- symbols first (they reserve space), then type
     const L = new LabelPlacer(W, H);
