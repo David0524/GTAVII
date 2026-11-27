@@ -269,7 +269,6 @@ async function main() {
   let titleT = 0;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
-  const attributionEl = document.getElementById('attribution');
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -299,7 +298,7 @@ async function main() {
     }
     ui.update(dt);
     const playing = ui.state === 'play' && !ui.paused;
-    if (attributionEl) attributionEl.style.display = playing ? '' : 'none'; // the title prints its own credit line
+    // no data credit during play (user request): it lives on the title footer, the map screen and Credits › Data sources
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
     if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (playing && input.pressed('jump')) jumpLatch = true;

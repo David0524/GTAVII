@@ -29,7 +29,7 @@ export class TitleScreen {
     this.leader.className = 't74-leader';
     this.leader.innerHTML = '<span>Loading the city</span><div class="bar"><i></i></div>';
     const legal = document.createElement('div'); legal.className = 't74-legal';
-    legal.innerHTML = 'Map data © OpenStreetMap contributors · NYC Open Data · All businesses and brands are fictional';
+    legal.innerHTML = 'Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL · NYC Open Data · All businesses and brands are fictional';
     this.root.append(this.menu, this.leader, legal);
     document.body.appendChild(this.root);
   }

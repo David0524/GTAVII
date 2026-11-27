@@ -25,6 +25,7 @@ export class MapScreen {
   private btns = document.createElement('div');
   onToast?: (t: string) => void;
   /** Called with nav items whenever the focusable set changes (the hub owns MenuNav). */
+  private credit = document.createElement('div');
   onNav?: (items: NavItem[]) => void;
 
   constructor(private host: UiHost, private model: MapModel, heroes: { name: string; x: number; z: number }[]) {
@@ -33,7 +34,10 @@ export class MapScreen {
     this.side.className = 't74-mapside';
     this.card.className = 't74-card'; this.card.style.display = 'none';
     this.btns.className = 't74-mapbtns';
-    this.el.append(this.map.canvas, this.side, this.card, this.btns);
+    // ODbL: the map is drawn from OpenStreetMap data, so it carries the credit (an imprint line, like a printed guide's)
+    this.credit.className = 't74-mapcredit';
+    this.credit.innerHTML = 'Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL · NYC Open Data';
+    this.el.append(this.map.canvas, this.side, this.card, this.btns, this.credit);
     addEventListener('resize', () => { if (this.el.offsetParent) { this.measureOccluders(); this.map.draw(true); } });
     this.map.onSelect = (s) => this.select(s);
   }
@@ -55,7 +59,7 @@ export class MapScreen {
   /** Screen areas the map's own UI covers (measured on open and resize, never per frame). */
   measureOccluders() {
     const c = this.map.canvas.getBoundingClientRect();
-    this.map.occluders = [this.side, this.btns, this.card].filter((e) => e.offsetParent).map((e) => { const r = e.getBoundingClientRect(); return [r.left - c.left - 4, r.top - c.top - 4, r.right - c.left + 4, r.bottom - c.top + 4] as [number, number, number, number]; });
+    this.map.occluders = [this.side, this.btns, this.card, this.credit].filter((e) => e.offsetParent).map((e) => { const r = e.getBoundingClientRect(); return [r.left - c.left - 4, r.top - c.top - 4, r.right - c.left + 4, r.bottom - c.top + 4] as [number, number, number, number]; });
   }
 
   private renderSide() {

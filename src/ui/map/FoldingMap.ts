@@ -229,7 +229,13 @@ export class FoldingMap {
     if (Z < 0.7) {
       g.save(); g.font = `700 11px ${F_COND}`; g.fillStyle = 'rgba(17,17,17,.7)'; g.textAlign = 'center';
       const note = 'C O V E R A G E   O F   T H I S   S H E E T   E N D S   ·   A D J O I N I N G   S H E E T S   S O L D   S E P A R A T E L Y';
-      g.fillText(note, (px0 + px1) / 2, pz0 - 8); g.fillText(note, (px0 + px1) / 2, pz1 + 16); g.restore();
+      // each placement is skipped if it would run under a panel, the buttons or the data credit
+      const w = g.measureText(note).width, cx = (px0 + px1) / 2;
+      for (const y of [pz0 - 8, pz1 + 16]) {
+        const box = [cx - w / 2, y - 11, cx + w / 2, y + 3];
+        if (!this.occluders.some((o) => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) g.fillText(note, cx, y);
+      }
+      g.restore();
     }
     // crease lines
     g.strokeStyle = 'rgba(40,40,40,.16)'; g.lineWidth = 1;

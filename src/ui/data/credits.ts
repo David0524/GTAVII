@@ -11,7 +11,7 @@ export const CREDITS: CreditSection[] = [
     { text: 'An open-world story set in Manhattan\'s Tenderloin, summer 1974.' },
     { text: 'Every business, brand, vehicle make, newspaper and person in the game is invented. Real places appear as they stood in 1974.' },
   ] },
-  { title: 'The city', lines: [
+  { title: 'Data sources', lines: [
     { role: 'Streets, landmarks, subway entrances', text: 'Map data © OpenStreetMap contributors, available under the Open Database License (ODbL 1.0).', href: 'https://www.openstreetmap.org/copyright' },
     { role: 'Building footprints and heights', text: 'NYC Building Footprints, NYC Office of Technology & Innovation, NYC Open Data (terms of use).', href: 'https://opendata.cityofnewyork.us/overview/#termsofuse' },
     { role: 'Year built, land use', text: 'PLUTO, NYC Department of City Planning, NYC Open Data (terms of use).' },

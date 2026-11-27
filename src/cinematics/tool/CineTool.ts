@@ -35,7 +35,7 @@ const LANE_NAME: Record<Lane, string> = { clips: 'Clip', look: 'Look', ik: 'IK',
 const EXPR_FALLBACK = ['smile', 'smirk', 'frown', 'brow_raise', 'brow_furrow', 'squint', 'eyes_wide', 'sneer', 'jaw_clench', 'lip_press', 'pout', 'disgust', 'fear', 'sad'];
 const CLIP_FALLBACK = ['idle', 'walk', 'idle_talk_a', 'idle_talk_b', 'wave', 'point', 'shrug', 'nod', 'head_shake', 'sit', 'stand_up', 'smoke'];
 const JOINTS = ['Head', 'neck_01', 'spine_03', 'upperarm_l', 'upperarm_r', 'hand_l', 'hand_r', 'pelvis'];
-const SOCKETS = ['hand_r', 'hand_l', 'Head', 'spine_03', 'pelvis'];
+const SOCKETS = ['hand_r', 'hand_l', 'mouth', 'head'];
 
 export class CineTool {
   readonly root = document.createElement('div');

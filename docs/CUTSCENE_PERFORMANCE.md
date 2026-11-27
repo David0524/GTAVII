@@ -1,6 +1,6 @@
 # Cutscene performance tracks: the actor-track contract (UI & cinematics ⇄ characters)
 
-**Status:** proposed by UI & cinematics on 2026-11-27, for characters to agree. Oversight asked for it to cover:
+**Status:** **agreed** with characters on 2026-11-27 (their notes are folded in below). It was proposed by UI & cinematics. Oversight asked for it to cover:
 - clip ids and blends;
 - IK targets;
 - look-at;
@@ -41,19 +41,28 @@
 | Track | Meaning |
 |---|---|
 | `keys` | The root path, as today: `t, x, z, heading`, plus an optional `y`. Feet follow the ground unless `y` is given. |
-| `clips` | Clip ids from the characters library. A key starts the clip at `t`, cross-fading over `blend` seconds. `layer`: `full` (default), `upper` (spine and up, over the lower body) or `additive`. `speed` defaults to 1. `loop` defaults to the clip's own flag. **`cs.<scene>.<actor>_<name>`** are cutscene performance clips; with `"root": true` the clip's root motion drives the actor and `keys` only anchor its start. |
-| `look` | Look-at for the eyes, head and spine (characters' existing look-at chain). `at` takes `{ actor, joint? }` (default `Head`), `"camera"`, `[x, y, z]`, or `null` to release. `weight` 0–1. |
+| `clips` | Clip ids from the characters library. A key starts the clip at `t`, cross-fading over `blend` seconds. `layer`: `full` (default), `upper` (spine and up, over the lower body) or `additive` (the delta from the clip's first frame, added over the base). `speed` defaults to 1. `loop` defaults to the clip's own flag. **`cs.<scene>.<actor>_<name>`** are cutscene performance clips; with `"root": true` the clip's own root track drives the actor, and the layout's `keys` become an **offset** applied to that root motion (place and turn the whole performance; don't re-key the path). |
+| `look` | Look-at for the eyes, head and spine (characters' existing look-at chain). `at` takes `{ actor, joint? }` (default `Head`; any joint name `host.joint()` knows), `"camera"`, `[x, y, z]`, or `null` to release. `weight` 0–1. |
 | `ik` | `chain` is `hand_l`, `hand_r`, `foot_l` or `foot_r`. `at` is a point, `{ actor, joint }` or `{ prop }`; `null` releases. Hand contacts on another actor (a shoulder grab, a handshake) are authored once on one actor. |
 | `expr` | Named expression weights from characters' set. Each key holds until the next key for that name. Blink and saccade layers always run, unless `"blinks": false` is set on the track. |
 | `lips` | `"auto"`: visemes come from the lip-sync file of each dialogue line this actor speaks in the shot, timed by the shot's dialogue timing. Alternatively, a list `{ t, v, w }` to hand-key, or `"off"`. |
-| `props` | Attach `prop` to a socket (`hand_l`, `hand_r`, `Head`, `spine_03`, `pelvis`), or `null` to drop it in place. `offset` is in metres in the socket's frame; `rot` is in degrees. Prop ids are owned by characters (hand props) and gameplay (weapons and items). |
+| `props` | Attach `prop` to a socket (`hand_l`, `hand_r`, `mouth` for a cigarette, `head` for a hat; `host.props()` lists the props), or `null` to drop it in place. `offset` is in metres in the socket's frame; `rot` is in degrees. Prop ids are owned by characters (hand props) and gameplay (weapons and items). |
 
 **Cast hand-off** (in `cast` in the layout): `"after": "despawn" | "companion" | "ambient" | "player"`, default `despawn`. At cutscene end (played or skipped), `ActorHost.handOff(id, after, pose)` turns the cinematic body into the live entity in place, with no despawn. If the host has no `handOff`, cinematics fires the commit cue `actor.handoff { id, cast, after, pose }` so the engine or sim can spawn the live one at that exact pose. **This fixes "Mayhew vanishes at the blend"** (M1's cast has `mayhew: after: companion`).
 
 ## Viseme and expression sets (characters to confirm; the names are the contract)
 - **Visemes (15):** `sil PP FF TH DD kk CH SS nn RR aa E I O U`. This is the common industry set, so text-to-phoneme and audio aligners map onto it.
-- **Expressions (starter list):** `smile`, `smirk`, `frown`, `brow_raise`, `brow_furrow`, `squint`, `eyes_wide`, `sneer`, `jaw_clench`, `lip_press`, `pout`, `cheek_puff`, `disgust`, `fear`, `sad`, `blink_l`, `blink_r`. Characters may rename or extend the list. The tool reads the list from the host, so there are no hard-coded names on my side.
+- **Visemes, the lip-sync file shape and text-estimated timing are confirmed by characters.**
+- **Expressions (starter list; characters will confirm it once mapped to their expression targets and the Rocketbox facial bones):** `smile`, `smirk`, `frown`, `brow_raise`, `brow_furrow`, `squint`, `eyes_wide`, `sneer`, `jaw_clench`, `lip_press`, `pout`, `cheek_puff`, `disgust`, `fear`, `sad`, `blink_l`, `blink_r`. Characters may rename or extend the list. The tool reads the list from the host, so there are no hard-coded names on my side.
 - **Lip-sync files:** `content/lipsync/<dialogue line id>.json` = `{ "line": "dlg.m01.l5", "visemes": [[t, "aa", w], ...], "src": "aligner@version" }`, generated by characters from the voice audio. Until there is audio, characters can generate them from text with a timing estimate so scenes are never mute-mouthed.
+
+## Characters' side (agreed)
+- `perform(id, frame)` is stateless: a "performance" path in their Animator bypasses its state machine and samples the clips at the given times.
+- `handOff(id, after, pose)`: the live character takes over the same body in place.
+- The mocap source and faces are owned by characters:
+  - motion from CMU (licence-checked) plus procedural acting layers, with phone markerless mocap costed as an option;
+  - faces get blinks, saccades, an expression set and visemes, on their heads and the Rocketbox facial bones.
+- **Timing:** their `perform()` follows their current bodies-and-clothing fidelity block. Until then, the stand-ins show the look-at and the lips.
 
 ## Runtime: deterministic and scrubbable
 Each frame, cinematics resolves every track at the playhead `t` into an **ActorFrame** and calls `ActorHost.perform(id, frame)`. Nothing is event-driven, so scrubbing the tool backwards and forwards lands on the same pose every time.
