@@ -5,6 +5,7 @@
  * call setLocomotion() with the controller's velocity; the character turns to `heading`.
  */
 import * as THREE from 'three/webgpu';
+import { criticalSpring } from '../shared/spring';
 import type { BodyModel } from './body/BodyModel';
 import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
@@ -188,9 +189,9 @@ export class Character {
       }
     }
     this.lastRootY = rootY;
-    const w = 14;
-    this.stepVel += (-w * w * this.stepOff - 2 * w * this.stepVel) * dt;
-    this.stepOff += this.stepVel * dt;
+    // exact critically damped step (stable at any dt): the explicit form diverged once w*dt > 1, i.e.
+    // on any 70+ ms frame (load hitches, software rendering), flinging the skinned body ~1e11 m up
+    [this.stepOff, this.stepVel] = criticalSpring(this.stepOff, this.stepVel, 14, dt);
     this.stairT = Math.max(0, this.stairT - dt / 0.9);
     this.animator.stair = this.stairT * this.stairSign;
     this.animator.update(dt);
