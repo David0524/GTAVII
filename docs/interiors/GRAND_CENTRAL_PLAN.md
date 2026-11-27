@@ -86,3 +86,23 @@ Dimensions are approximate, from published figures, to be checked against the HA
 7. Passages and platforms handoff.
 8. Crowds with sim.
 9. Board vs references, vs RDR2 Saint Denis, and phone timing.
+
+
+## Tenants and content hooks (narrative, content/businesses.json)
+- **Name:** the terminal keeps its real name, "Grand Central Terminal" (a public place name, agreed with oversight and UI).
+- **Tenants (all invented):**
+  - The Concourse Oyster Room: the vaulted seafood restaurant. It has `dateVariants`: open but tired until 31 Jul 1974; from Aug–Sep shuttered, with dark vaults and the sign "CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT".
+  - Trackside News (concourse newsstand).
+  - Gate Thirty Shine (shoeshine by the upper gates).
+  - Eastbound Cigar & Pipe (Lexington passage).
+  - Last Train Liquors (lower level).
+  - Atlas Wire Telegrams (south side of the concourse).
+  - The Commuter's Counter (lunch counter on the dining concourse).
+  - Platform Flowers (kiosk).
+  - The Halcyon Color Window (balcony display).
+- **Content that uses the space:**
+  - M24: concourse clock and the whispering arches.
+  - Whispering Corner side quest: booth and arches, Thursdays 17:40.
+  - Pickpocket variant: slots tv.gc_clock_crowd, tv.gc_redcap_cart, tv.gc_ramp, tv.gc_shuttle_turnstiles.
+  - Archetypes: npc.gc_redcap, npc.gc_commuter.
+  - These ids become slots and markers in the build.
