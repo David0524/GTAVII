@@ -10,7 +10,29 @@
       ],
       "name": "Lacy's",
       "short": "Lacy's",
-      "sign": "LACY'S · HERALD SQUARE"
+      "sign": "LACY'S · HERALD SQUARE",
+      "signage": [
+        {
+          "slot": "roof",
+          "text": "LACY'S",
+          "note": "Giant red slab-serif rooftop letters with bulb outline (prompt sign.baxter_lowe.roof)."
+        },
+        {
+          "slot": "facade_banner",
+          "text": "LACY'S · A WHOLE CITY BLOCK OF EVERYTHING",
+          "note": "Long canvas banner over the 34th St entrances. Our wording, not the real store's slogan."
+        },
+        {
+          "slot": "canopy",
+          "text": "LACY'S · HERALD SQUARE",
+          "note": "Brass letters on the entrance canopies."
+        },
+        {
+          "slot": "emblem",
+          "text": null,
+          "note": "A red lace rosette (a round, scalloped doily shape with a small bow), never a star. It goes beside the name on bags, canopies and the banner."
+        }
+      ]
     },
     {
       "id": "lm.met_life",
@@ -21,7 +43,14 @@
         "Metropolitan Life Tower"
       ],
       "name": "Metropolitan Lifeline Tower",
-      "short": "Lifeline Tower"
+      "short": "Lifeline Tower",
+      "signage": [
+        {
+          "slot": "entrance",
+          "text": "METROPOLITAN LIFELINE",
+          "note": "Carved-look letters over the Madison Ave entrance. The clock faces stay plain."
+        }
+      ]
     },
     {
       "id": "lm.ny_life",
@@ -30,7 +59,14 @@
         "New York Life"
       ],
       "name": "New York Lifelong Building",
-      "short": "NY Lifelong Bldg"
+      "short": "NY Lifelong Bldg",
+      "signage": [
+        {
+          "slot": "entrance",
+          "text": "NEW YORK LIFELONG",
+          "note": "Bronze letters over the Madison Ave entrance."
+        }
+      ]
     },
     {
       "id": "lm.msg",
@@ -41,7 +77,19 @@
       ],
       "name": "Penn Square Garden",
       "short": "Penn Sq. Garden",
-      "sign": "PENN SQUARE GARDEN"
+      "sign": "PENN SQUARE GARDEN",
+      "signage": [
+        {
+          "slot": "marquee",
+          "text": "PENN SQUARE GARDEN",
+          "note": "Name band over a three-row changeable-letter board. The renderer sets the card: FRIDAY · 'IRON' EDDIE MALLORY vs. BENNY CRUZ · 10 RDS"
+        },
+        {
+          "slot": "emblem",
+          "text": null,
+          "note": "A round drum shape with a laurel ring. It nods to the round building and is no real arena mark."
+        }
+      ]
     },
     {
       "id": "lm.hotel_penn",
@@ -52,7 +100,19 @@
       ],
       "name": "Hotel Pennsylvanian",
       "short": "Hotel Pennsylvanian",
-      "sign": "HOTEL PENNSYLVANIAN"
+      "sign": "HOTEL PENNSYLVANIAN",
+      "signage": [
+        {
+          "slot": "roof",
+          "text": "HOTEL PENNSYLVANIAN",
+          "note": "Red neon rooftop letters on a steel frame facing Seventh Ave. Never the real hotel's famous phone exchange."
+        },
+        {
+          "slot": "canopy",
+          "text": "HOTEL PENNSYLVANIAN · 7TH AVENUE",
+          "note": "Bronze canopy letters."
+        }
+      ]
     },
     {
       "id": "lm.empire_state",
@@ -63,7 +123,19 @@
       ],
       "name": "Empire Estate Building",
       "short": "Empire Estate",
-      "sign": "EMPIRE ESTATE BUILDING"
+      "sign": "EMPIRE ESTATE BUILDING",
+      "signage": [
+        {
+          "slot": "entrance",
+          "text": "EMPIRE ESTATE BUILDING",
+          "note": "Stainless Art Deco letters over the Fifth Ave entrance. No rooftop name: the real tower has none either."
+        },
+        {
+          "slot": "observatory",
+          "text": "OBSERVATORY · 86TH FLOOR · OPEN TILL MIDNIGHT",
+          "note": "An enamel sign at the 34th St entrance."
+        }
+      ]
     },
     {
       "id": "lm.wtc",
@@ -84,7 +156,64 @@
       ],
       "name": "Hotel Kelsey",
       "short": "Hotel Kelsey",
-      "sign": "HOTEL KELSEY"
+      "sign": "HOTEL KELSEY",
+      "signage": [
+        {
+          "slot": "blade",
+          "text": "HOTEL KELSEY",
+          "note": "Vertical red neon on a black can, letters stacked, with a small neon crescent at the top. Over the W 23rd St entrance."
+        },
+        {
+          "slot": "plaque",
+          "text": null,
+          "note": "A bronze plaque frame by the door with no legible text (the renderer may set 'HOTEL KELSEY · EST. 1884')."
+        }
+      ]
+    },
+    {
+      "id": "lm.pan_am",
+      "real": "Pan Am Building",
+      "aliases": [
+        "MetLife Building",
+        "200 Park Avenue"
+      ],
+      "name": "Pan Amity Building",
+      "short": "Pan Amity Bldg",
+      "pending": "user pick between Pan Amity / Pan Global / Pan Atlantica (oversight)",
+      "signage": [
+        {
+          "slot": "roof",
+          "text": "PAN AMITY",
+          "note": "Giant rooftop letters on the north and south faces, lit at night, with the emblem beside them. Name pending the user's pick."
+        },
+        {
+          "slot": "emblem",
+          "text": null,
+          "note": "A globe made of crossed meridian bands with a single swept wing across it, in a deep sky blue. Distinct from the real airline's globe (no plain banded sphere)."
+        }
+      ]
+    },
+    {
+      "id": "lm.times_tower",
+      "real": "Allied Chemical Tower",
+      "aliases": [
+        "Times Tower",
+        "One Times Square"
+      ],
+      "name": "Amalgamated Chemical Tower",
+      "short": "Amalgamated Tower",
+      "signage": [
+        {
+          "slot": "zipper",
+          "text": null,
+          "note": "The moving news band wrapping the tower: the game runs headlines from content/newspapers.json (Daily Ticker items)."
+        },
+        {
+          "slot": "crown",
+          "text": "AMALGAMATED",
+          "note": "Plain white letters at the crown."
+        }
+      ]
     }
   ]
 }

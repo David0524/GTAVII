@@ -1,0 +1,230 @@
+[
+  {
+    "id": "lm.lacys_banner",
+    "file": "lm_lacys_banner.png",
+    "owner": "narrative",
+    "use": "Lacy's, W 34th St facade banner",
+    "aspect": "8:1",
+    "size": "4096×512",
+    "sizeFinal": false,
+    "prompt": "Create a long canvas banner stretched across a department-store facade, deep red with cream letters in a bold 1970s sans serif, slightly wind-rippled. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"LACY'S · A WHOLE CITY BLOCK OF EVERYTHING\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+    "text": "LACY'S · A WHOLE CITY BLOCK OF EVERYTHING",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "banner fills the frame"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "lm.lacys_emblem",
+    "file": "lm_lacys_emblem.png",
+    "owner": "narrative",
+    "use": "Lacy's emblem (canopies, bags, banner)",
+    "aspect": "1:1",
+    "size": "1024×1024",
+    "sizeFinal": false,
+    "prompt": "Create a flat emblem: a red lace rosette (a round, scalloped doily shape with fine lace holes) with a small red bow at the bottom, printed on cream card. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "not a star; no star shapes anywhere",
+      "isolated on a flat cream background"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "lm.lacys_canopy",
+    "file": "lm_lacys_canopy.png",
+    "owner": "narrative",
+    "use": "Lacy's entrance canopy letters",
+    "aspect": "6:1",
+    "size": "3072×512",
+    "sizeFinal": false,
+    "prompt": "Create brass block letters mounted on a dark green department-store entrance canopy edge. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"LACY'S · HERALD SQUARE\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.",
+    "text": "LACY'S · HERALD SQUARE",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit"
+    ],
+    "priority": 1
+  },
+  {
+    "id": "lm.airline_emblem",
+    "file": "lm_airline_emblem.png",
+    "owner": "narrative",
+    "use": "Airline tower emblem (rooftop, beside the name)",
+    "aspect": "1:1",
+    "size": "1024×1024",
+    "sizeFinal": false,
+    "prompt": "Create a flat airline emblem: a globe drawn as crossed curved meridian bands with a single swept wing crossing it diagonally, deep sky blue and white, 1970s jet-age style. It must not look like any real airline's logo (not a plain banded sphere). Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "clearly distinct from any real airline logo",
+      "isolated on a flat black background"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "lm.psg_marquee",
+    "file": "lm_psg_marquee.png",
+    "owner": "narrative",
+    "use": "Penn Square Garden, 8th Ave marquee",
+    "aspect": "4:1",
+    "size": "3072×768",
+    "sizeFinal": false,
+    "prompt": "Create an arena marquee front: a wide stainless-steel band with three EMPTY changeable-letter rows (white boards, black rails, no letters on them) under a name band, ringed by chaser bulbs. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"PENN SQUARE GARDEN\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 4:1.",
+    "text": "PENN SQUARE GARDEN",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "letter rows empty (the game sets the fight card)"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "lm.psg_emblem",
+    "file": "lm_psg_emblem.png",
+    "owner": "narrative",
+    "use": "Penn Square Garden emblem",
+    "aspect": "1:1",
+    "size": "1024×1024",
+    "sizeFinal": false,
+    "prompt": "Create a flat emblem: a round drum-shaped arena silhouette inside a laurel ring, navy and orange. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "no real arena or team logo",
+      "isolated on a flat black background"
+    ],
+    "priority": 3
+  },
+  {
+    "id": "lm.hotel_penn_roof",
+    "file": "lm_hotel_penn_roof.png",
+    "owner": "narrative",
+    "use": "Hotel Pennsylvanian rooftop sign",
+    "aspect": "8:1",
+    "size": "4096×512",
+    "sizeFinal": false,
+    "prompt": "Create giant red neon rooftop letters on a black steel lattice, art deco style. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"HOTEL PENNSYLVANIAN\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+    "text": "HOTEL PENNSYLVANIAN",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "clean black background"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "lm.hotel_kelsey_blade",
+    "file": "lm_hotel_kelsey_blade.png",
+    "owner": "narrative",
+    "use": "Hotel Kelsey vertical sign, W 23rd St",
+    "aspect": "1:4",
+    "size": "512×2048",
+    "sizeFinal": false,
+    "prompt": "Create a tall vertical neon sign on a black-painted can, red neon letters stacked one above another, a small neon crescent at the top, a few rust streaks. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"HOTEL KELSEY\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1:4.",
+    "text": "HOTEL KELSEY",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "letters stacked vertically",
+      "clean black background"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "lm.empire_estate_entrance",
+    "file": "lm_empire_estate_entrance.png",
+    "owner": "narrative",
+    "use": "Empire Estate Building, Fifth Ave entrance",
+    "aspect": "6:1",
+    "size": "3072×512",
+    "sizeFinal": false,
+    "prompt": "Create stainless-steel Art Deco letters over a limestone entrance lintel with stylised sunburst lines. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"EMPIRE ESTATE BUILDING\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.",
+    "text": "EMPIRE ESTATE BUILDING",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "lm.amalgamated_crown",
+    "file": "lm_amalgamated_crown.png",
+    "owner": "narrative",
+    "use": "Amalgamated Chemical Tower crown letters",
+    "aspect": "8:1",
+    "size": "4096×512",
+    "sizeFinal": false,
+    "prompt": "Create plain white illuminated letters at the crown of a narrow office tower, on a dark band. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"AMALGAMATED\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+    "text": "AMALGAMATED",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit",
+      "clean dark background"
+    ],
+    "priority": 3
+  },
+  {
+    "id": "lm.metlifeline_entrance",
+    "file": "lm_metlifeline_entrance.png",
+    "owner": "narrative",
+    "use": "Metropolitan Lifeline Tower entrance",
+    "aspect": "6:1",
+    "size": "3072×512",
+    "sizeFinal": false,
+    "prompt": "Create letters cut into a white marble entrance frieze, classical style. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"METROPOLITAN LIFELINE\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.",
+    "text": "METROPOLITAN LIFELINE",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit"
+    ],
+    "priority": 3
+  },
+  {
+    "id": "lm.nylifelong_entrance",
+    "file": "lm_nylifelong_entrance.png",
+    "owner": "narrative",
+    "use": "New York Lifelong Building entrance",
+    "aspect": "6:1",
+    "size": "3072×512",
+    "sizeFinal": false,
+    "prompt": "Create bronze letters over a grey limestone Gothic-revival entrance. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"NEW YORK LIFELONG\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.",
+    "text": "NEW YORK LIFELONG",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand",
+      "frontal and evenly lit"
+    ],
+    "priority": 3
+  }
+]

@@ -930,3 +930,11 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - Offscreen mentions in dialogue ("I got four kids") stay, as words only.
   - **Validator:** `content.py` now errors on any child entity id, any `ageRange` under 18, and on-screen child cues in text across archetypes, missions, dialogue, barks, triggers, spawns, side specs and activities.
 - **When radio un-pauses:** sweep `content/radio.json` for the no-child rule. One DJ line, "Hydrant's open on Twenty-Seventh. Kids are happy. Turn it up for the kids.", is words only and was left alone because radio is frozen (oversight, 27 Nov).
+- **Landmark signage (27 Nov 2026, user report via oversight):**
+  - Signage copy for every landmark in view is in `content/landmarks.json` → `signage`:
+    - Lacy's: rooftop letters, the banner "A WHOLE CITY BLOCK OF EVERYTHING", the canopy, and a red lace-rosette emblem (never a star);
+    - the Penn Square Garden marquee and a drum-and-laurel emblem;
+    - the Hotel Pennsylvanian rooftop neon, the Hotel Kelsey vertical neon, the Empire Estate entrance letters, and the Lifeline and Lifelong entrances.
+  - New landmarks: the airline tower (pending the user's pick: Pan Amity / Pan Global / Pan Atlantica) and the Amalgamated Chemical Tower (Times Square, with its news zipper).
+  - 12 sign and emblem prompts were added to the queue (61 entries; still NOT YET RUNNABLE). The airline's rooftop-letter prompt follows the pick.
+  - Pre-ship USPTO additions: the airline name, Amalgamated, and the Lacy's banner line.

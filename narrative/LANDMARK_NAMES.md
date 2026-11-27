@@ -99,3 +99,22 @@ Added after the UI chat found it among the world.json heroes. In 1974 it was the
 | **Hotel Shelley** | A poet pun for the writers' hotel, with the Chel/Shel sound. | **Collision:** an operating *Hotel Shelley* exists in Miami Beach (Art Deco, Collins Ave). Same service class, so not recommended. |
 
 Avoid *The Chelsean*, an operating hotel at 160 W 25th St.
+
+---
+
+## 9. The Pan Am Building (200 Park Ave, over Grand Central): the airline; proposal, the user picks
+The tower carries the airline's name on its roof, so the airline needs a sound-alike name. Grand Central stays a plain place name.
+
+| Option | Why | Search (exact phrase, Nov 2026) |
+|---|---|---|
+| ★ **Pan Amity** ("Pan Amity World Airways") | The same pattern as Lacy's: the real name's sound with an extra real word, and a jet-age goodwill pun ("amity"). Instantly evocative and clearly not the original. | Clear: no airline found. |
+| **Pan Global** | Plain and believable. | Clear for "Pan Global Airways/Airlines". Note that "Global Airlines" (UK, 2021) and "TransGlobal Airways" exist; that's a crowded word, so it's the weaker option. |
+| **Pan Atlantica** | Period glamour, and it suggests the transatlantic routes. | Clear: no airline found. |
+
+**Emblem brief:** a globe drawn as crossed curved meridian bands, with one swept wing crossing it diagonally, in deep sky blue and white. It's jet-age, and it's never a plain banded sphere like the real mark.
+
+## 10. The Times Square tower (1974: Allied Chemical Tower)
+**Amalgamated Chemical Tower**, with "AMALGAMATED" at the crown and the news zipper running Daily Ticker headlines. The search found no "Amalgamated Dye & Chemical" company. The name is evocative of the 1974 owner but distinct from it.
+
+## Signage copy
+All landmark signage is in `content/landmarks.json` → `signage` (slot, text, note). Image prompts are in `assets/prompts/sources/landmarks.json`. **Pre-ship USPTO list additions:** Pan Amity (or the pick), Amalgamated Chemical Tower, plus the banner line "A WHOLE CITY BLOCK OF EVERYTHING".
