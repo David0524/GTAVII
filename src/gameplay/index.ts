@@ -797,12 +797,13 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry'; label: string; target?: string } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry' | 'holdOn'; label: string; target?: string } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
     if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
     if (this.pc.vehicle) return { kind: 'exitVehicle', label: 'Get out' };
+    if (this.breakFree) return { kind: 'holdOn', label: 'Hold on!', target: this.breakFree.id };
     for (const q of this.chaseTargets.keys()) { const a = this.ai.agents.get(q); if (a?.knockedOut && !this.restrained.has(q) && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2) return { kind: 'restrain', label: 'Restrain', target: q }; }
     if ([...this.restrained.values()].some((r) => !r.car)) for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3.5) return { kind: 'loadQuarry', label: 'In the car', target: c.id };
     { const t = this.tackleTarget(); if (t?.quarry && !this.restrained.has(t.id) && this.canMove('tackle').ok) return { kind: 'tackle', label: 'Tackle', target: t.id }; }
@@ -844,6 +845,7 @@ export class Gameplay {
       case 'tackle': this.tackle(); break;
       case 'restrain': this.restrain(a.target); break;
       case 'loadQuarry': this.loadQuarry(a.target!); break;
+      case 'holdOn': this.holdOn(); break;
       case 'dropBody': this.dropBody(); break;
       case 'stowBody': this.stowBody(a.target!); break;
       case 'door': { const d = this.nearestDoor(this.player.position()[0], this.player.position()[2]); if (d && !d.locked) this.doors?.open?.(d.id); this.emit('notice', { kind: 'door', id: a.target, locked: d?.locked ?? false }); break; }
@@ -1486,6 +1488,21 @@ export class Gameplay {
   readonly restrained = new Map<string, { car: string | null }>();
   static RESTRAIN_SECONDS = 2.5;
   /**
+   * Breaking free (vs RDR2's prisoners): a restrained quarry on foot tries to bolt now and then, more often when the
+   * escort lags (> 4 m) or the player draws a gun or fights. The player has BREAK_WINDOW s to mash the one button
+   * (`holdOn`, BREAK_PRESSES presses; the same on touch). Fail and they're free and running: a chase target again.
+   */
+  static BREAK = { perSecond: 0.012, laggingMul: 4, distractedMul: 3, window: 1.5, presses: 4 } as const;
+  /** A bolt in progress: who, when it ends, presses so far. */
+  breakFree: { id: string; until: number; presses: number } | null = null;
+  /** Mash to keep hold of a bolting quarry. */
+  holdOn() {
+    const b = this.breakFree; if (!b) return false;
+    b.presses++;
+    if (b.presses >= Gameplay.BREAK.presses) { this.breakFree = null; this.emit('notice', { kind: 'heldOn', target: b.id }); }
+    return true;
+  }
+  /**
    * Restrain a tackled quarry within 2 m: they get up with their hands bound and walk beside you (escort) until
    * you put them in a car (`loadQuarry`). Only a downed chase quarry, never a bystander. Emits `notice {kind: 'restrained'}`.
    */
@@ -1514,6 +1531,13 @@ export class Gameplay {
   }
   private updateEscorts(dt: number) {
     if (!this.player) return;
+    const b = this.breakFree;
+    if (b && this.time >= b.until) {
+      // they're loose: running, and a chase target again (the tackle is back on the button)
+      this.breakFree = null; this.restrained.delete(b.id);
+      const a = this.ai.agents.get(b.id); if (a && a.alive) { a.state = 'flee'; a.knockedOut = false; }
+      this.emit('notice', { kind: 'brokeFree', target: b.id });
+    }
     const p = this.player.position();
     for (const [id, r] of this.restrained) {
       const a = this.ai.agents.get(id); if (!a || !a.alive) { this.restrained.delete(id); continue; }
@@ -1521,6 +1545,15 @@ export class Gameplay {
       if (r.car) { const c = this.cars.cars.get(r.car); if (c) { a.pos[0] = c.x; a.pos[2] = c.z; } continue; }
       // walks a pace behind at the player's side (1.2 m), never faster than a hurried walk
       const dx = p[0] - a.pos[0], dz = p[2] - a.pos[2], d = Math.hypot(dx, dz);
+      // trying their luck: lagging escort or a distracted captor (a gun out, a fight) makes it likelier
+      if (!this.breakFree) {
+        const lag = d > 4 ? Gameplay.BREAK.laggingMul : 1, distracted = this.pc.aiming || this.pc.firing || this.pc.weapon !== 'weapon.fists' ? Gameplay.BREAK.distractedMul : 1;
+        const nerve = 0.5 + 0.5 * a.bravery;
+        if (this.rng.chance(Gameplay.BREAK.perSecond * lag * distracted * nerve * dt)) {
+          this.breakFree = { id, until: this.time + Gameplay.BREAK.window, presses: 0 };
+          this.emit('notice', { kind: 'breakFree', target: id, window: Gameplay.BREAK.window, presses: Gameplay.BREAK.presses });
+        }
+      }
       if (d > 1.2) { const step = Math.min(d - 1.2, 2.2 * dt); a.pos[0] += (dx / d) * step; a.pos[2] += (dz / d) * step; }
     }
   }

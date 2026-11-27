@@ -175,3 +175,31 @@ test('restrain: after the tackle, one button binds the quarry, they walk with yo
   assert.equal(r.g.restrained.get('skip')!.car, 'bondsman_car');
   assert.ok(r.events.some((e) => e.type === 'notice' && e.e.kind === 'quarryLoaded'));
 });
+
+test('breaking free: a skip tries to bolt (more when the escort lags or a gun comes out); mash to hold on, or chase them again', () => {
+  const setup = () => {
+    const r = rig();
+    r.g.spawnCombatant({ id: 'skip', faction: 'hood', squad: 'q', pos: [0, 0, -1.5], weapon: null, hp: 40 });
+    r.g.setChaseTarget('skip', { lawful: true });
+    r.g.setContext({ speed: 6, sprinting: true });
+    for (let i = 0; i < 8 && !r.g.ai.agents.get('skip')!.knockedOut; i++) { r.g.tackle(); r.step(1); }
+    assert.ok(r.g.restrain('skip'));
+    return r;
+  };
+  // a lagging, armed escort: a bolt comes within a few minutes
+  const r = setup();
+  r.g.equip('weapon.service');
+  let bolt: any = null; r.g.on('notice', (e: any) => { if (e.kind === 'breakFree') bolt = e; });
+  for (let i = 0; i < 3000 && !bolt; i++) { r.pos[0] += 0.4; r.step(0.1, 0.1); }
+  assert.ok(bolt && bolt.window === 1.5 && bolt.presses === 4, 'a bolt with a mash window');
+  assert.equal(r.g.contextAction()?.kind, 'holdOn', 'the one button becomes "Hold on!"');
+  for (let i = 0; i < 4; i++) r.g.doContextAction();
+  assert.equal(r.g.breakFree, null); assert.ok(r.g.restrained.has('skip'), 'held');
+  // a failed hold: they're loose and the tackle is back on
+  const r2 = setup();
+  r2.g.breakFree = { id: 'skip', until: (r2.g as any).time + 0.2, presses: 0 };
+  r2.step(0.5, 0.1);
+  assert.ok(!r2.g.restrained.has('skip'));
+  assert.equal(r2.g.ai.agents.get('skip')!.state, 'flee');
+  assert.ok(r2.g.chaseTargets.has('skip'), 'a chase target again');
+});

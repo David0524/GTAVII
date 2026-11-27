@@ -239,6 +239,11 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
   - The quarry gets up with hands bound (`surrender`) and walks a pace behind you at up to 2.2 m/s.
   - Near a car, the button reads **In the car** (`loadQuarry`), and the quarry rides with it.
   - Events: `notice {kind: 'restrained' | 'quarryLoaded'}`.
+- **Breaking free:**
+  - A quarry on foot tries to bolt at about 1.2% a second, scaled by bravery. That's 4× when the escort lags (more than 4 m) and 3× with a gun out or a fight on.
+  - The one button becomes **Hold on!**: 4 presses within 1.5 s, the same on touch (a single mashed button, as narrative asked).
+  - If you fail, they're loose and running, and a chase target again, so the tackle is back on the button.
+  - Events: `notice {kind: 'breakFree' | 'heldOn' | 'brokeFree'}`.
 - **Test:** `movement.test.ts`.
 
 #### vs GTA V / VI / RDR2 (reference-games rule, 2026-11-27)
@@ -248,11 +253,11 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
   - GTA VI is expected to keep both.
 - **Where we match:** one press at reach ends the chase non-lethally. A miss has a cost (stumble and stamina). Touch gets auto-align. The legality is contextual: a lawful quarry is no crime, a bystander is assault, a cop is assault on an officer, decided by our witness system rather than a meter.
 - **Where we fall short:**
-  - The restrain follow-up exists (bind, escort, into the car), but the quarry can't yet break free or bolt from the escort, as RDR2's prisoners sometimes do.
+  - Restrain, escort and breaking free are in. A bolting prisoner is a short mash rather than RDR2's full struggle-and-chase scene; the chase that follows is ours.
   - The dive and ragdoll are characters' and the engine's work and not built yet.
   - The quarry's speed is estimated from AI state, not measured.
 - **Plan:**
-  - Give a restrained quarry a nerve-based chance to bolt when the escort is slow or the player is distracted.
+  - Tune the bolt rate in a touch playtest. Characters build the struggle animation from the `breakFree` events.
   - Measure quarry velocity from the sim when its motion is available.
   - Characters own the dive, the tumble and the stumble animations (events above).
 
