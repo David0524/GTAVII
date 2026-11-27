@@ -307,3 +307,20 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
 - luxury_apartment 10: panelled living room with grand piano, library, doorman lobbies (Essex House penthouse noted as a hotel).
 - Rights: five NYWTS items read "No known copyright restriction" (LoC's NYWTS staff-photographer statement), not "No known restrictions". They are kept as internal references only; nothing ships. Press photos of identifiable people are reference-only, never textures.
 - Gaps: sewing machines in homes, ER triage desk, gurneys, waiting benches, a property cage.
+- **Heroes: lead homes** (src/interiors/gen/heroes/homes.ts, shared `genHomeTower`):
+  - Shared plan: building lobby, fire stair open at the home's floor, corridor, then a one-bedroom flat fitted to the footprint (living room and bedroom on the facade with real bay windows; foyer, kitchenette and bath along the corridor).
+  - Resolver: now takes corner addresses ("Madison Ave & E 37th St"), and set-back towers with no street frontage (the tallest building between the avenues within 70 m of the street, entered from its longest wall).
+  - **Delphine**, Penn South: 345 8th Ave, 1960, 22 floors. Apartment 7C, grade kept.
+    - Co-op lobby: terrazzo, glazed tile, notices board, bench, globes, mailboxes, elevator.
+    - Flat: parquet. Sofa, rug and dinette; the sewing machine under the rust cover she made; the pressing iron on a shelf like a trophy; union card and mother's photo (art slots); the green notebook (decoy stash).
+    - Plants everywhere; bedroom with wardrobe and bed markers; string over the bath for the act 2 prints.
+  - **Nick**, Madison & E 37th: 1925, 16 floors. Apartment 11A, grade pristine.
+    - Marble and panelled lobby with the doorman's desk and Cas Wojcik's slot, mirror, chandelier.
+    - Flat: panelled living room with the grand piano (lofted case, three legs, bench), Eleni's reading chair, sofa, rug, chandelier, three photo art slots.
+    - Bedroom desk with the bills drawer (burglary marker) and the velvet case (Delacroix stash marker); dead geraniums at the balcony.
+  - Evidence: docs/interiors/homes_delphine_nick_v1.jpg.
+  - Critique:
+    - Nick's flat is too small for "grand", limited by a 7.3 m frontage. Spread it across two bays or a corner.
+    - The back strip rooms are deep (bath 2.2 × 5.3 m): split it with a closet.
+    - The rug medallions read as targets.
+    - The elevator is a prop until engine request 5; reaching floors 7 and 11 means climbing the stairs.

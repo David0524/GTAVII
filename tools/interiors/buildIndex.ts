@@ -435,30 +435,63 @@ const avenueXAt = (name: string, z: number) => {
 const byIdB = new Map<number, B>(); for (const q of blds) byIdB.set(q.id, q);
 for (const h of heroContent) {
   const place = HERO_PLACEMENT[h.id]; if (!place || h.parent) continue;
-  const m = /^(.+?),\s*(.+?)[–-](.+?),\s*(north|south|east|west) side/i.exec(h.address);
+  // forms: "W 31st St, 7th–8th Aves, south side" | "W 27th St, 8th–9th Aves (Penn South, 7th floor)" (either side) |
+  //        "Madison Ave & E 37th St (11th floor, doorman building)" (corner: the building fronting both)
+  let m = /^(.+?),\s*(.+?)[–-](.+?)(?:,\s*(north|south|east|west) side|\s*\(|$)/i.exec(h.address);
+  const corner = /^([^,&(]+?)\s*&\s*([^,(]+?)\s*(?:\(|$)/.exec(h.address);
+  if (!m && corner) {
+    const sa = streetNames.indexOf(normaliseStreet(corner[1].trim())), sb = streetNames.indexOf(normaliseStreet(corner[2].trim()));
+    const cand = out.filter((b) => b.frontage.some((e) => e[4] === sa) && b.frontage.some((e) => e[4] === sb) && b.year < 1975 && b.floors >= (place.minFloors ?? 0))
+      .sort((p, q) => q.floors - p.floors || p.year - q.year);
+    if (!cand.length) { heroLog.push(`${h.id}: no corner building at "${h.address}" (${sa}, ${sb})`); continue; }
+    // reuse the face-placement path below on the corner building's longer face along the first-named street
+    m = [h.address, corner[1].trim(), '', '', ''] as unknown as RegExpExecArray;
+    (h as { _corner?: BuildingIdx })._corner = cand[0];
+  }
   if (!m) { heroLog.push(`${h.id}: unsupported address form "${h.address}"`); continue; }
   const street = normaliseStreet(m[1]), sIdx = streetNames.indexOf(street);
   // "7th–8th Aves" / "Broadway–6th Ave": give a bare ordinal the avenue suffix and drop the plural
   const avName = (t: string) => { const q = t.trim().replace(/\bAves\b/i, 'Ave'); return /ave|broadway|square|place/i.test(q) ? q : `${q} Ave`; };
-  m[2] = avName(m[2]); m[3] = avName(m[3]);
-  const cand = out.filter((b) => b.frontage.some((e) => e[4] === sIdx)).map((b) => {
+  const cornerB = (h as { _corner?: BuildingIdx })._corner;
+  if (!cornerB) { m[2] = avName(m[2]); m[3] = avName(m[3]); }
+  const cand = out.filter((b) => (cornerB ? b === cornerB : true) && b.frontage.some((e) => e[4] === sIdx)).map((b) => {
+    if (cornerB) { const e = b.frontage.find((q) => q[4] === sIdx)!; return { b, e, ok: true }; }
     const e = b.frontage.find((q) => q[4] === sIdx)!; const mx = (e[0] + e[2]) / 2, mz = (e[1] + e[3]) / 2;
     const xa = avenueXAt(m[2], mz), xb = avenueXAt(m[3], mz);
     const between = mx > Math.min(xa, xb) && mx < Math.max(xa, xb);
-    const north = m[4].toLowerCase() === 'north' ? (b.units[0]?.nz ?? 0) < 0 : (b.units[0]?.nz ?? 0) > 0;
+    const north = !m[4] ? true : m[4].toLowerCase() === 'north' ? (b.units[0]?.nz ?? 0) < 0 : (b.units[0]?.nz ?? 0) > 0;
     const fl = Math.hypot(e[2] - e[0], e[3] - e[1]), src = byIdB.get(b.id), depth = src ? Math.min(src.maxX - src.minX, src.maxZ - src.minZ) : 0;
     const big = place.prefer !== 'lowrise' || (fl >= place.width && depth >= (place.minDepth ?? 0) && b.year < 1935);
     return { b, e, ok: between && north && big && b.year < 1975 && b.floors >= (place.minFloors ?? 0) };
   }).filter((q) => q.ok).sort(place.prefer === 'lowrise' ? (p, q) => Math.abs(p.b.floors - 4) - Math.abs(q.b.floors - 4) || p.b.year - q.b.year : (p, q) => q.b.floors - p.b.floors || p.b.year - q.b.year);
-  const pick = cand[0];
+  let pick: { b: BuildingIdx; e: (string | number)[] | number[]; inward?: [number, number] } | undefined = cand[0];
+  if (!pick && m[2] && !cornerB) {
+    // set-back towers (Penn South slabs, 1962) have no street frontage: take the tallest building whose centroid lies
+    // between the two avenues within 70 m of the street line, entered from its longest wall (facing the street)
+    const sl = segs.filter((g) => g.s === sIdx);
+    const near = (x: number, z: number) => Math.min(...sl.map((g) => { const dx = g.bx - g.ax, dz = g.bz - g.az, t = Math.max(0, Math.min(1, ((x - g.ax) * dx + (z - g.az) * dz) / (dx * dx + dz * dz || 1))); return Math.hypot(g.ax + dx * t - x, g.az + dz * t - z); }));
+    const pool = out.filter((q) => q.floors >= (place.minFloors ?? 0) && q.year < 1975).map((q) => {
+      const src = byIdB.get(q.id)!; const cx = (src.minX + src.maxX) / 2, cz = (src.minZ + src.maxZ) / 2;
+      const xa = avenueXAt(m![2], cz), xb = avenueXAt(m![3], cz);
+      return { q, src, cx, cz, ok: cx > Math.min(xa, xb) && cx < Math.max(xa, xb) && near(cx, cz) < 70 };
+    }).filter((t) => t.ok).sort((p2, q2) => q2.q.floors - p2.q.floors);
+    const t = pool[0];
+    if (t) {
+      const r = t.src.ring, n = r.length / 2, ccw = signedArea(r) > 0; let best = -1, bl = 0;
+      for (let i = 0; i < n; i++) { const j = (i + 1) % n, L2 = Math.hypot(r[2 * j] - r[2 * i], r[2 * j + 1] - r[2 * i + 1]); if (L2 > bl) { bl = L2; best = i; } }
+      const j = (best + 1) % n, ex = [r[2 * best], r[2 * best + 1], r[2 * j], r[2 * j + 1], sIdx];
+      const ux2 = (ex[2] - ex[0]) / bl, uz2 = (ex[3] - ex[1]) / bl;
+      pick = { b: t.q, e: ex, inward: ccw ? [-uz2, ux2] : [uz2, -ux2] };
+    }
+  }
   if (process.env.DBG_HERO === h.id) {
     const all = out.filter((b) => b.frontage.some((e) => e[4] === sIdx)).map((b) => { const e = b.frontage.find((q) => q[4] === sIdx)!; const mx = (e[0] + e[2]) / 2, mz = (e[1] + e[3]) / 2; return `${b.id} fl${b.floors} y${b.year} mx${mx.toFixed(0)} xa${avenueXAt(m[2], mz).toFixed(0)} xb${avenueXAt(m[3], mz).toFixed(0)} nz${(b.units[0]?.nz ?? 0).toFixed(2)}`; });
     console.log(h.id, street, sIdx, all.slice(0, 40));
   }
   if (!pick) { heroLog.push(`${h.id}: no building matches "${h.address}"`); continue; }
-  const b = pick.b, [ax, az, bx, bz] = pick.e, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
+  const b = pick.b, [ax, az, bx, bz] = pick.e as number[], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
   const w = Math.min(place.width, L - 0.6), t0 = (L - w) / 2;
-  const base = b.units.find((q) => q.street === sIdx) ?? b.units[0];
+  const base = pick.inward ? { nx: pick.inward[0], nz: pick.inward[1], d: 16 } : (b.units.find((q) => q.street === sIdx) ?? b.units[0]);
   const ox = ax + ux * t0, oz = az + uz * t0;
   // drop units that overlap the hero span on this frontage
   b.units = b.units.filter((q) => { if (q.street !== sIdx) return true; const s0 = (q.ox - ax) * ux + (q.oz - az) * uz, s1 = s0 + q.w * Math.sign(q.ux * ux + q.uz * uz); return Math.max(s0, s1) <= t0 || Math.min(s0, s1) >= t0 + w; });
