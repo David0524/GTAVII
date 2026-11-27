@@ -46,6 +46,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   if (o.only) { const keep = new RegExp(o.only); sys.debug.vm.mute = { test: (n: string) => !keep.test(n) } as RegExp; }
   if (o.solo) for (const b of ['radio', 'dialogue', 'sfx', 'ambience', 'ui'] as const) if (b !== o.solo) sys.setBusVolume(b, 0);
   sys.setClock(sc.clock.minutes, sc.clock.date); sys.setWeather(sc.weather);
+  if (sc.power) sys.setPower('all', sc.power);
   if (sc.weather === 'rain') { sys.debug.env.weather.rain = 1; sys.debug.env.weather.wet = 1; }
   const map = new CityMap(streets);
   const st = sc.start(map);
@@ -133,7 +134,7 @@ export async function renderMusic(style: number, seed: number, bpm: number, seco
 }
 
 export function startOffline() {
-  (window as unknown as { __T74AUDIO: unknown }).__T74AUDIO = { render, limiterTest, renderMusic, scenarios: SCENARIOS.map((s) => s.id), ready: true };
+  (window as unknown as { __T74AUDIO: unknown }).__T74AUDIO = { render, limiterTest, renderMusic, scenarios: SCENARIOS.filter((s) => !s.extra).map((s) => s.id), extras: SCENARIOS.filter((s) => s.extra).map((s) => s.id), ready: true };
   document.getElementById('loading')?.remove();
   document.body.insertAdjacentHTML('beforeend', '<pre id="t74a" style="color:#ccc;padding:20px">audio offline harness ready</pre>');
 }

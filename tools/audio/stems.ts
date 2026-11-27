@@ -20,7 +20,7 @@ async function main() {
   const server = await createServer({ server: { port: 5197, host: '127.0.0.1', hmr: false, watch: { ignored: ['**/*'] } }, logLevel: 'error' }); await server.listen();
   const b = await chromium.launch(); const p = await b.newPage(); await p.goto('http://127.0.0.1:5197/?audio=offline');
   await p.waitForFunction(() => (window as any).__T74AUDIO?.ready);
-  const ids: string[] = await p.evaluate(() => (window as any).__T74AUDIO.scenarios);
+  const ids: string[] = await p.evaluate(() => [...(window as any).__T74AUDIO.scenarios, ...(window as any).__T74AUDIO.extras]);
   const runs: { label: string; o: Record<string, unknown> }[] = args.includes('--buses')
     ? ['', 'ambience', 'sfx', 'dialogue', 'radio'].map((solo) => ({ label: solo || 'mix', o: solo ? { solo } : {} }))
     : (GROUPS.length ? GROUPS : DEFAULT_GROUPS).map((g) => ({ label: g, o: { only: g } }));

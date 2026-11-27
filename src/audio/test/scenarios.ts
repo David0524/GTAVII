@@ -13,6 +13,9 @@ export interface Scenario {
   start: (m: CityMap) => { x: number; z: number; dx: number; dz: number };
   walk: number;
   events?: { t: number; play: string; params?: Record<string, number>; offset?: [number, number] }[];
+  /** Diagnostic only (mix work, stems tool); not part of the pass/fail suite or the loudness session. */
+  extra?: boolean;
+  power?: 'dim' | 'off';
 }
 
 export const SCENARIOS: Scenario[] = [
@@ -22,4 +25,10 @@ export const SCENARIOS: Scenario[] = [
     start: (m) => ({ x: (m.x('7th Avenue') + m.x('8th Avenue')) / 2 - 40, z: m.z(29) + 8.5, dx: 1, dz: 0 }), walk: 1.1 },
   { id: 'eighth_rain', title: 'Eighth Ave at W 41st St, Friday 11:15 p.m., rain', clock: { minutes: 23 * 60 + 15, date: '1974-06-21' }, weather: 'rain', traffic: 0.6, peds: 0.4,
     start: (m) => ({ x: m.x('8th Avenue') + 12, z: m.z(41) + 30, dx: 0, dz: -1 }), walk: 1.2 },
+  { id: 'bryant_noon', title: 'Bryant Park, Tuesday noon', clock: { minutes: 12 * 60 + 5, date: '1974-06-25' }, weather: 'clear', traffic: 0.85, peds: 0.9, extra: true,
+    start: (m) => ({ x: (m.x('6th Avenue') + m.x('5th Avenue')) / 2 - 40, z: (m.z(40) + m.z(42)) / 2, dx: 1, dz: 0 }), walk: 1.1 },
+  { id: 'garment_10am', title: 'W 37th St between 7th and 8th, Wednesday 10 a.m.', clock: { minutes: 10 * 60, date: '1974-06-26' }, weather: 'clear', traffic: 0.8, peds: 0.8, extra: true,
+    start: (m) => ({ x: (m.x('7th Avenue') + m.x('8th Avenue')) / 2 - 50, z: m.z(37) + 8.5, dx: 1, dz: 0 }), walk: 1.2 },
+  { id: 'brownout_night', title: 'W 31st St near 7th, Saturday 10:30 p.m., brownout', clock: { minutes: 22 * 60 + 30, date: '1974-06-22' }, weather: 'clear', traffic: 0.5, peds: 0.4, extra: true, power: 'off',
+    start: (m) => ({ x: m.x('7th Avenue') - 60, z: m.z(31) + 8.5, dx: 1, dz: 0 }), walk: 1.1 },
 ];
