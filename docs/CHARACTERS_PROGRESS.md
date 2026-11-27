@@ -110,7 +110,10 @@ the size pass.
    - Bag strap: it's a ribbon seated on the clothed (draped) torso surface, from the bag over the
      shoulder, lying flat over the top of the shoulder. It no longer floats.
    - Relaxed idle in review shots: done.
-   - Ragged sleeve hems: still open.
+   - Ragged sleeve hems: fixed. Cut-edge loops get 16 Taubin passes (no shrink) instead of 6 plain
+     ones. The bodice's bottom edge over the skirt still shows a little raggedness.
+   - Neck band in back view: a thin lighter strip at the dress's back neckline. Logged with the
+     neck weld.
 
 Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;

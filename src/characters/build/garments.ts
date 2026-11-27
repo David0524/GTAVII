@@ -679,12 +679,15 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   {
     const nb = new Map<number, number[]>();
     for (const [a, b] of bEdges) { (nb.get(a) ?? nb.set(a, []).get(a)!).push(b); (nb.get(b) ?? nb.set(b, []).get(b)!).push(a); }
-    for (let it = 0; it < 6; it++) {
+    // Taubin (shrink/inflate alternating): 6 plain passes left visible zigzag on sleeve hems, and more
+    // plain passes would shrink the openings
+    for (let it = 0; it < 16; it++) {
       const moves: [number, number[]][] = [];
+      const f = it % 2 === 0 ? 0.5 : -0.53;
       for (const [v, ns] of nb) {
         if (ns.length !== 2) continue;
         const pv = mb.posAt(map[v]), pa = mb.posAt(map[ns[0]]), pb = mb.posAt(map[ns[1]]);
-        moves.push([v, [0, 1, 2].map((c) => (pa[c] + pb[c]) * 0.25 - pv[c] * 0.5)]);
+        moves.push([v, [0, 1, 2].map((c) => ((pa[c] + pb[c]) * 0.5 - pv[c]) * f)]);
       }
       for (const [v, d] of moves) {
         for (const vi of [map[v], inner.get(v)]) { if (vi === undefined) continue; const q = mb.posAt(vi); mb.setPos(vi, [q[0] + d[0], q[1] + d[1], q[2] + d[2]]); }
