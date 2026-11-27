@@ -88,7 +88,9 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
   // hero/near LODs draw strand cards over a single scalp shell; crowds keep the shell stack
   const cards = lod <= 1 && CARD_STYLES.has(app.hair.style);
   // under cards: a solid scalp, a mid and an outer volume shell (the cards carry the strands)
-  const layerCount = cards ? (lod === 0 ? 3 : 2) : Math.max(1, Math.round(st.layers * [1, 0.6, 0.35, 0.2][lod]));
+  // under cards a single scalp shell: stacked mid/outer shells showed as horizontal scan lines at
+  // grazing angles (their layer edges); the cards carry the volume
+  const layerCount = cards ? 1 : Math.max(1, Math.round(st.layers * [1, 0.6, 0.35, 0.2][lod]));
   const cardHL = cards ? cardHairline(ctx) : null;
   const col = lin(app.hair.color);
   const tip = col.map((c) => Math.min(1, c * 1.25 + 0.02)) as [number, number, number];
@@ -128,7 +130,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
     const js: number[] = [], ws: number[] = [];
     const vol = app.hair.volume;
     for (let L = 0; L < layerCount; L++) {
-      const h = layerCount === 1 ? 0.5 : L / (layerCount - 1);
+      const h = cards ? 0 : layerCount === 1 ? 0.5 : L / (layerCount - 1);
       const base = mb.count, i0 = mb.indexCount;
       const map = res.verts.map((v) => {
         const pos = [0, 0, 0], nrm = [0, 0, 0];

@@ -12,7 +12,7 @@ import * as THREE from 'three/webgpu';
 import { SkinNodeMaterial } from './skinLighting';
 import {
   attribute, positionGeometry, normalGeometry, texture, float, vec2, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
-  mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize, normalMap, normalView, fwidth, positionViewDirection,
+  mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize, normalMap, normalView, fwidth, positionViewDirection, log2,
 } from 'three/tsl';
 
 /** Global character look controls (heat drives sweat; set by the engine's weather/time). */
@@ -248,6 +248,18 @@ export function characterMaterial(): SkinNodeMaterial {
   return m;
 }
 
+let strandTex: THREE.Texture | null = null;
+/** The hair-card strand texture (loaded once into one Texture object, so materials built before it arrives pick it up). */
+function hairStrands(): THREE.Texture {
+  if (!strandTex) {
+    const base = typeof import.meta !== 'undefined' && (import.meta as any).env?.BASE_URL ? (import.meta as any).env.BASE_URL : '/';
+    strandTex = new THREE.TextureLoader().load(`${base}characters/hair_strands.png`);
+    strandTex.colorSpace = THREE.NoColorSpace; strandTex.anisotropy = 4;
+    strandTex.wrapS = THREE.ClampToEdgeWrapping; strandTex.wrapT = THREE.ClampToEdgeWrapping;
+    strandTex.minFilter = THREE.LinearMipmapLinearFilter; strandTex.generateMipmaps = true;
+  }
+  return strandTex;
+}
 let sharedHair: THREE.MeshPhysicalNodeMaterial | null = null;
 const tex2D = texture; // (hairMaterial shadows `texture` with the hair-texture attribute)
 /** rb: a Rocketbox face merged into this draw (leads keep our hair): vertices with sub 5 use its textures. */
@@ -285,13 +297,17 @@ export function hairMaterial(rb?: HairFace): THREE.MeshPhysicalNodeMaterial {
   // strand cards (sub 4): uv.x = card id + across (0..1), uv.y = root → tip
   const cu = fract(uvA.x), seed = floor(uvA.x), cv = uvA.y;
   const footK = fwidth(cu).mul(11);
-  const strand = mix(mx_noise_float(vec3(cu.mul(11).add(seed.mul(3.7)), cv.mul(1.2).add(seed.mul(0.37)), seed.mul(0.11))).mul(0.5).add(0.5), float(0.55), smoothstep(0.7, 1.8, footK));
-  const strandEnd = mx_noise_float(vec3(cu.mul(40).add(seed), seed.mul(1.3), 2.0)).mul(0.5).add(0.5).mul(0.35).add(0.65);
-  const cardAlpha = smoothstep(0.22, 0.6, strand)
-    .mul(smoothstep(0.0, 0.22, cu).mul(smoothstep(1.0, 0.78, cu)))
-    .mul(smoothstep(strandEnd, strandEnd.sub(0.12), cv))
-    .mul(smoothstep(0.0, 0.06, cv).mul(0.6).add(0.4))
-    .mul(1.35);
+  // strand texture (tools/characters/hair_strands.py): 4 variants side by side, root at the top.
+  // Mipmapped, so coverage averages at distance; the mip-level boost keeps far hair from thinning
+  // out, and the fwidth sharpening keeps strand edges crisp under alpha-to-coverage
+  const variant = floor(fract(seed.mul(0.618)).mul(4));
+  const uvT = vec2(variant.add(cu.mul(0.96).add(0.02)).div(4), float(1).sub(cv.clamp(0.005, 0.995)));
+  const st = tex2D(hairStrands(), uvT);
+  const mip = max(float(0), log2(max(fwidth(uvT.x), fwidth(uvT.y)).mul(512)));
+  const aRaw = st.a.mul(mip.mul(0.3).add(1));
+  const strand = st.r;
+  const cardAlpha = aRaw.sub(0.4).div(max(fwidth(aRaw), 1e-4)).mul(0.5).add(0.5).clamp(0, 1).mul(smoothstep(0.0, 0.04, cv).mul(0.5).add(0.5))
+    .mul(mix(float(1), aRaw.mul(1.6).clamp(0, 1), smoothstep(1.0, 2.5, mip)));
   // grey strands: per strand on cards, fine salt-and-pepper on shells (independent of the shell's clump size)
   const greyShell = mix(step(0.5, mx_noise_float(vec3(uvA.mul(900), 3)).add(0.5)), float(0.5), smoothstep(0.35, 1.0, length(fwidth(uvA)).mul(900)));
   const greyCard = mix(step(0.5, mx_noise_float(vec3(cu.mul(11).add(seed.mul(5.3)), seed, 7)).add(0.5)), float(0.5), smoothstep(0.7, 1.8, footK));
@@ -303,7 +319,7 @@ export function hairMaterial(rb?: HairFace): THREE.MeshPhysicalNodeMaterial {
   // inner layers darker (self-shadowing), tips lighter; grey strands mixed in by age
   const shellCol = mix(cA.mul(m1.w.greaterThan(1.5).select(float(0.82), float(0.55))), cB, h.mul(0.8).add(0.1)).mul(mix(0.8, 1.15, n));
   // cards: darker near the root and on inner layers, strand-to-strand variation, lighter tips
-  const cardCol = mix(cA.mul(0.62), cB, cv.mul(0.55).add(h.mul(0.25))).mul(mix(0.72, 1.18, strand));
+  const cardCol = mix(cA.mul(0.62), cB, cv.mul(0.55).add(h.mul(0.25))).mul(mix(0.62, 1.25, strand)).mul(st.g.mul(0.35).add(0.65));
   m.colorNode = mix(sub.equal(4).select(cardCol, shellCol), vec3(0.72, 0.7, 0.67), grey);
   if (rb) {
     // the face: texture × tint, neck fading into the body tone (m0.x = fade), normal-mapped, opaque

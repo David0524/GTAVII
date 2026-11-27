@@ -259,8 +259,10 @@ export function buildCards(ctx: CardCtx, mb: MeshBuilder, map: HeadMap): void {
   const c = map.c, r = ff.headRadius;
   const hatLine = outfit.hat ? ff.browY + 0.03 * (ff.eyeDist / 0.064) : Infinity;
   const thinCrown = app.hair.thinning > 0.6 && style !== 'combOver';
-  const count = Math.round(st.count * (lod === 0 ? 1 : 0.42) * (style === 'combOver' ? 1 : 1 - app.hair.thinning * 0.35));
-  const width = st.width * (lod === 0 ? 1 : 1.8);
+  // narrower, more numerous cards (each carries ~35 textured strands): wide cards read as flat
+  // ribbons; the same coverage from 0.62x width and 1.6x count breaks the mass into clumps
+  const count = Math.round(st.count * 1.6 * (lod === 0 ? 1 : 0.55) * (style === 'combOver' ? 1 : 1 - app.hair.thinning * 0.35));
+  const width = st.width * 0.62 * (lod === 0 ? 1 : 1.4);
   const segLen = lod === 0 ? 0.015 : 0.026;
   const col = lin(app.hair.color);
   const tip = col.map((x) => Math.min(1, x * 1.2 + 0.015)) as V3;
