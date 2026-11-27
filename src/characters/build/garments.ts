@@ -345,7 +345,17 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
       const w = Math.min(1, Math.max(0, (F.legS[k] - 1.66) / 0.14));
       const ww = w * w * (3 - 2 * w);
       const tt = Math.min(t, al + 0.03);
-      const rr = rl + (R0 - rl) * ww;
+      // cloth, not a rubber tube: a pressed crease front and back, soft uneven vertical folds,
+      // and the break (fabric bunching where the hem rests on the shoe)
+      const fx = -u[0] * u[2], fy = -u[1] * u[2], fz = 1 - u[2] * u[2], fl = Math.hypot(fx, fy, fz) || 1;
+      const fa = [fx / fl, fy / fl, fz / fl], sa = [u[1] * fa[2] - u[2] * fa[1], u[2] * fa[0] - u[0] * fa[2], u[0] * fa[1] - u[1] * fa[0]];
+      const phi = Math.atan2(dir[0] * sa[0] + dir[1] * sa[1] + dir[2] * sa[2], dir[0] * fa[0] + dir[1] * fa[1] + dir[2] * fa[2]);
+      const crease = 0.0035 * (Math.exp(-((phi / 0.13) ** 2)) + 0.7 * Math.exp(-(((Math.abs(phi) - Math.PI) / 0.15) ** 2)));
+      const seedF = side === 'l' ? 1.3 : 4.1;
+      const folds = 0.0028 * Math.sin(phi * 3 + seedF + tt * 9) * Math.sin(tt * 14 + seedF * 2) + 0.0018 * Math.sin(phi * 5 - tt * 21 + seedF);
+      const hemT = Math.max(0, Math.min(1, (tt - (al - 0.07)) / 0.07));
+      const brk = 0.006 * hemT * Math.max(0, Math.cos(phi)) * (0.5 + 0.5 * Math.sin(tt * 110 + seedF));
+      const rr = rl + (R0 + (crease + folds + brk) * Math.min(1, R0 / 0.05) - rl) * ww;
       const q: [number, number, number] = [A[0] + u[0] * tt + dir[0] * rr, A[1] + u[1] * tt + dir[1] * rr, A[2] + u[2] * tt + dir[2] * rr];
       // keep the original position where blending hasn't started
       pos.set(k, [P[k * 3] + (q[0] - P[k * 3]) * ww, P[k * 3 + 1] + (q[1] - P[k * 3 + 1]) * ww, P[k * 3 + 2] + (q[2] - P[k * 3 + 2]) * ww]);
