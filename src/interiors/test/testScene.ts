@@ -74,6 +74,9 @@ export async function runInteriorsTest() {
     const look: InteriorLook = { lampPower: 1, lampTint: new THREE.Color(1, 1, 1), window: new THREE.Color(0.95, 0.86, 0.72).multiplyScalar(1.6 * day + 0.2), ambient: 0.01, flicker: 0 };
     const pw = params.get('power'); if (pw === 'dim') { look.lampPower = 0.45; look.flicker = 1; } else if (pw === 'off') look.lampPower = 0;
     const holder = new THREE.Group(); scene.add(holder);
+    // ?woff=x,z renders the gallery interior at world-scale coordinates (game positions are hundreds to thousands of metres out)
+    const WO = (params.get('woff') ?? '0,0').split(',').map(Number); holder.position.set(WO[0], 0, WO[1]);
+    const fset = (x: number, y: number, z: number, yaw: number, pitch: number) => fly.set(x + WO[0], y, z + WO[1], yaw, pitch);
     const streetMat = new THREE.MeshStandardMaterial({ color: 0x3a2f2c, roughness: 1 }), oppMat = new THREE.MeshStandardMaterial({ color: 0x7a3b2c, roughness: 1 });
     const fly = new FlyCamera(camera, new Input(renderer.domElement));
     let label = '';
@@ -82,7 +85,8 @@ export async function runInteriorsTest() {
       const list: { b: BuildingIdx; u: UnitRec }[] = [];
       for (const { b, u } of interiors.allUnits()) if (u.kind === kind) list.push({ b, u });
       const step = Math.max(1, Math.floor(list.length / 30));
-      const pick = list[(n * step) % Math.max(1, list.length)];
+      const byId = params.get('unit'); let pick = list[(n * step) % Math.max(1, list.length)];
+      if (byId) for (const e of interiors.allUnits()) if (e.u.id === byId) pick = { b: e.b, u: e.u };
       holder.traverse((o) => { if ((o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry) (o as THREE.Mesh).geometry.dispose(); }); holder.clear();
       if (!pick) { label = `no units of kind ${kind}`; return null; }
       const cr = await fetch(`${base}chunks/${pick.b.i}_${pick.b.j}.bin`).then((r) => r.arrayBuffer()).then(readChunk);
@@ -96,7 +100,7 @@ export async function runInteriorsTest() {
       const cellMeshes: THREE.Object3D[] = [];
       for (const c of built.cells) for (const [m, mt] of [[c.opaque, mat], [c.glass, glass]] as [MeshArrays | null, THREE.Material][]) if (m) { const me = new THREE.Mesh(geom(m), mt); me.userData.interior = look; holder.add(me); tris += m.index.length / 3; if (mt === mat) cellMeshes.push(me); }
       if (!params.has('noModels') && built.models.length) { cellLights(built, cellMeshes); await placeModels(import.meta.env.BASE_URL ?? '/', built, cellMeshes); }
-      for (const d of built.doors) { if (d.street || Math.hypot(d.hinge[0] - pick.u.door.t, d.hinge[2] - 1.5) < 2.5) continue; const g = new THREE.Group(); g.position.set(...d.hinge); g.rotation.y = d.yaw + d.swing * 1.5; const me = new THREE.Mesh(geom(d.mesh), mat); me.userData.interior = look; g.add(me); holder.add(g); }
+      for (const d of built.doors) { if ((d.street && !params.has('streetDoors')) || Math.hypot(d.hinge[0] - pick.u.door.t, d.hinge[2] - 1.5) < 2.5) continue; const g = new THREE.Group(); g.position.set(...d.hinge); g.rotation.y = d.yaw + d.swing * 1.5; const me = new THREE.Mesh(geom(d.mesh), mat); me.userData.interior = look; g.add(me); holder.add(g); }
       const street = new THREE.Mesh(new THREE.PlaneGeometry(80, 30).rotateX(-Math.PI / 2), streetMat); street.position.set(pick.u.w / 2, -0.05, -15); holder.add(street);
       const opp = new THREE.Mesh(new THREE.BoxGeometry(80, 25, 2), oppMat); opp.position.set(pick.u.w / 2, 12, -22); holder.add(opp);
       const cp = params.get('cam')?.split(',').map(Number);
@@ -105,10 +109,10 @@ export async function runInteriorsTest() {
       if (vc) {
         // inside a named cell: stand in one corner at eye height, look across the diagonal
         const [x0, y0, z0, x1, , z1] = vc.box, ex = x0 + 0.35, ez = z0 + 0.35;
-        fly.set(ex, y0 + 1.6, ez, Math.atan2(-(x1 - ex), -(z1 - ez)), -0.16);
-      } else if (view === 'cam' && cp) fly.set(cp[0], cp[1], cp[2], THREE.MathUtils.degToRad(cp[3]), THREE.MathUtils.degToRad(cp[4] ?? 0));
-      else if (view === 'back') fly.set(Math.min(pick.u.w - 0.6, Math.max(0.6, pick.u.w * 0.75)), 1.65, pick.u.d - 1.0, 0.25 * (pick.u.w > 3 ? 1 : 0), -0.1);
-      else fly.set(pick.u.door.t, 1.6, Math.min(1.8, pick.u.d * 0.18), Math.PI, -0.12);
+        fset(ex, y0 + 1.6, ez, Math.atan2(-(x1 - ex), -(z1 - ez)), -0.16);
+      } else if (view === 'cam' && cp) fset(cp[0], cp[1], cp[2], THREE.MathUtils.degToRad(cp[3]), THREE.MathUtils.degToRad(cp[4] ?? 0));
+      else if (view === 'back') fset(Math.min(pick.u.w - 0.6, Math.max(0.6, pick.u.w * 0.75)), 1.65, pick.u.d - 1.0, 0.25 * (pick.u.w > 3 ? 1 : 0), -0.1);
+      else fset(pick.u.door.t, 1.6, Math.min(1.8, pick.u.d * 0.18), Math.PI, -0.12);
       label = `${kind} #${n}  b${pick.b.id} ${pick.b.address ?? ''}  ${pick.b.year} use ${pick.b.use} style ${pick.b.style}  ${pick.u.w.toFixed(1)}x${pick.u.d.toFixed(1)} m  ${pick.b.district}  ${interiors.index.streets[pick.u.street] ?? ''}\nbuild ${ms.toFixed(0)} ms (main thread, ${quality.name})  verts ${built.stats.verts} tris ${tris} cells ${built.cells.length} slots ${built.slots.length} markers ${built.markers.length} colliders ${built.colliders.length}  [${backend}]`;
       debug.gallery = { label, stats: built.stats, ms, slots: built.slots.length, markers: built.markers.length, colliders: built.colliders.length, building: pick.b.id, unit: pick.u.id };
       return debug.gallery;

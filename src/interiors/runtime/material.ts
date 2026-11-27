@@ -12,7 +12,7 @@
 import * as THREE from 'three/webgpu';
 import {
   Fn, attribute, uniform, vec2, vec3, vec4, float, floor, fract, sin, abs, mix, step, smoothstep, max, min, dot, If,
-  positionWorld, normalWorld, normalView, positionViewDirection, mod, time, clamp, length, select, fwidth,
+  positionWorld, normalWorld, normalView, positionViewDirection, mod, time, clamp, length, select, fwidth, cameraPosition, normalize, reflect,
 } from 'three/tsl';
 
 /** Per-object uniforms read from object.userData.interior (set by the streamer). */
@@ -21,7 +21,13 @@ export interface InteriorLook { lampPower: number; lampTint: THREE.Color; window
 // TSL node graphs are typed loosely here: the generic node types don't compose across Fn boundaries.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type N = any;
-const h21 = Fn(([p]: [N]) => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453)));
+// sin-free hash (Hoskins "hash12"): stays uniform for |p| up to ~1e4 in float32, where fract(sin(dot)) collapses into
+// per-pixel noise at Manhattan-scale world coordinates (engine report, 2026-11-27). Inputs are also wrapped with mod.
+const h21 = Fn(([p]: [N]) => {
+  const p3 = fract(vec3(p.x, p.y, p.x).mul(0.1031)).toVar();
+  p3.addAssign(dot(p3, vec3(p3.y, p3.z, p3.x).add(33.33)));
+  return fract(p3.x.add(p3.y).mul(p3.z));
+});
 const noise2 = Fn(([p]: [N]) => {
   const i: N = floor(p), f: N = fract(p), u: N = f.mul(f).mul(float(3).sub(f.mul(2)));
   const a = h21(i), b = h21(i.add(vec2(1, 0))), c = h21(i.add(vec2(0, 1))), d = h21(i.add(vec2(1, 1)));
@@ -40,7 +46,10 @@ function albedoNode() {
   const uvA = attribute('uv', 'vec2');
   const pat = attribute('pat', 'vec4');
   return Fn(() => {
-    const id = pat.x, prm = pat.y, variant = floor(prm), scl = fract(prm);
+    // the pattern id is a per-vertex float: interpolation leaves it a hair off the integer on some pixels (seen on
+    // SwiftShader/WebGL2), so id.equal(13) failed there and those pixels fell through to another pattern (the chrome
+    // door/jamb/stool speckle). Round it once. prm likewise: a hair under the integer would flip the variant.
+    const id = floor(pat.x.add(0.5)), prm = pat.y.add(0.0005), variant = floor(prm), scl = fract(prm);
     const c = base.toVar();
     const col = vec3(c).toVar();
     const uvv = uvA.toVar();
@@ -135,8 +144,11 @@ function albedoNode() {
     });
     // 13 chrome / brushed steel: fake environment from the view reflection
     If(id.equal(13), () => {
-      const r = positionViewDirection.negate().reflect(normalView);
-      const env = smoothstep(-0.3, 0.6, r.y).mul(0.85).add(0.15);
+      // world-space reflection (camera to surface, geometric world normal): no view-space normal, which the engine's
+      // pipeline may not supply for an unlit material (speckle on chrome door leaves and jambs, engine board)
+      const r = reflect(normalize(positionWorld.sub(cameraPosition)), normalize(normalWorld));
+      // floor bounce below the horizon, bright ceiling/fixtures above, a narrow dark horizon band (studio-chrome look)
+      const env = mix(float(0.5), float(1.05), smoothstep(-0.15, 0.55, r.y)).mul(float(1).sub(smoothstep(0.12, 0.0, abs(r.y.add(0.05))).mul(0.35)));
       col.assign(c.mul(select(variant.greaterThan(0.5), env.mul(0.5).add(0.5), env)));
     });
     // 14 vinyl upholstery: tufted diamond + sheen
@@ -237,7 +249,7 @@ export function createInteriorMaterial(): THREE.MeshBasicNodeMaterial {
   const lamp = light.xyz.mul(lampTint).mul(lampPower.mul(fl));
   const lit = albedo.mul(lamp.add(win.mul(light.w)).add(amb));
   const emissive = attribute('color', 'vec3').mul(pat.w).mul(lampPower.mul(fl));
-  mat.colorNode = select(pat.x.equal(16), emissive.add(albedo.mul(0.1)), lit);
+  mat.colorNode = select(floor(pat.x.add(0.5)).equal(16), emissive.add(albedo.mul(0.1)), lit);
   mat.side = THREE.FrontSide;
   return mat;
 }
