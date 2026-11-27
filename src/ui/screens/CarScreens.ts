@@ -162,13 +162,13 @@ export class MyCarsTab implements Tab {
         <div class="mc-car">${carProfile(c.name, paint(c.colour))}</div>
         <h3 class="a-voice">${esc(c.name)}</h3>
         <div class="mc-sub">${swatch(c.colour)}${c.year} · ${esc(c.colour)} · ${miles(c.mileage)}</div>
+        ${c.booted ? '<div class="mc-boot"><b>Booted</b><span>A Denver boot on the front wheel. Pay every summons on this car to have it removed.</span></div>' : ''}
+        ${c.tickets.length ? `<h4 class="t74-group">Summonses · ${c.tickets.length}</h4><div class="mc-tickets">${c.tickets.map((t) => `<div class="mc-tk" data-id="${esc(t.id)}"><div class="stub"><span>Parking violation</span><b>${money(t.amount, false)}</b><p>${esc(t.reason)}</p><i>${esc(t.date)}</i></div></div>`).join('')}</div>` : ''}
         <div class="mc-facts">
           <div class="mc-where"><span class="a-label">${WHERE[c.where.kind]}${c.towed ? ` · ${esc(c.towed.pound)}` : ''}</span><b>${esc(c.where.label)}</b></div>
           <div class="mc-cond"><span class="a-label">Condition</span>${conditionBar(c.condition)}</div>
           ${c.trunk ? `<div class="mc-trunk"><span class="a-label">Trunk</span><b>${c.trunk.length ? esc(c.trunk.join(' · ')) : 'Empty'}</b></div>` : ''}
         </div>
-        ${c.booted ? '<div class="mc-boot"><b>Booted</b><span>A Denver boot on the front wheel. Pay every summons on this car to have it removed.</span></div>' : ''}
-        ${c.tickets.length ? `<h4 class="t74-group">Summonses · ${c.tickets.length}</h4><div class="mc-tickets">${c.tickets.map((t) => `<div class="mc-tk" data-id="${esc(t.id)}"><div class="stub"><span>Parking violation</span><b>${money(t.amount, false)}</b><p>${esc(t.reason)}</p><i>${esc(t.date)}</i></div></div>`).join('')}</div>` : ''}
         <div class="mc-acts"></div>
       </section>
       <aside class="mc-list"><h4 class="t74-group">Your cars · ${cars.length}</h4><div class="mc-rows"></div>
