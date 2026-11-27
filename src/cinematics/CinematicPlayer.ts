@@ -132,7 +132,9 @@ export class CinematicPlayer {
       if (after !== 'despawn' && a) {
         const pose = { x: a.x, z: a.z, heading: a.heading, y: a.y ?? groundY(a.x, a.z) };
         if (A?.handOff) { A.handOff(id, after, pose); continue; }
-        this.host.commit?.('actor.handoff', { id, cast: c.cast, after, pose });
+        // sim.handOff contract (docs/requests/sim.md 11): flat x/z/yaw, plus speed when the scene ends mid-stride
+        const speed = tl.endSpeed(id);
+        this.host.commit?.('actor.handoff', { id, cast: c.cast, after, x: pose.x, z: pose.z, yaw: pose.heading, ...(speed > 0.05 ? { speed } : {}), pose });
       }
       A?.despawn(id);
     }

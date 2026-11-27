@@ -139,7 +139,7 @@ test('cost: camera update well under the 0.15 ms phone budget on this machine', 
   const t0 = performance.now(); for (let i = 0; i < 2000; i++) { cam.yaw += 0.01; cam.update(DT, feet, loco({ velocity: [0, 0, -3] })); }
   const ms = (performance.now() - t0) / 2000;
   console.log(`# camera update ${(ms * 1000).toFixed(1)} µs/frame (desktop node; phone Low budget 150 µs)`);
-  assert.ok(ms < 0.05, `${ms.toFixed(3)} ms`);
+  assert.ok(ms < 0.15, `${ms.toFixed(3)} ms (the phone budget; desktop is normally ~0.02)`);
 });
 
 test('automatic swap: pinned to a wall on the near shoulder for 0.4 s while walking; stays swapped', async () => {

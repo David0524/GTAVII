@@ -130,6 +130,14 @@ export class Timeline {
     return ks[ks.length - 1];
   }
 
+  /** Ground speed (m/s) an actor is moving at when the scene ends: the last key segment, if it runs to the end. */
+  endSpeed(id: string): number {
+    const ks = this.actorKeys.get(id); if (!ks || ks.length < 2) return 0;
+    const b = ks[ks.length - 1], a = ks[ks.length - 2];
+    if (this.duration - b.abs > 0.05) return 0; // stopped before the end
+    return Math.round(Math.hypot(b.x - a.x, b.z - a.z) / Math.max(1e-3, b.abs - a.abs) * 100) / 100;
+  }
+
   lineAt(t: number) { return this.lines.find((l) => t >= l.t0 && t < l.t1) ?? null; }
   /** Events with t in (t0, t1]. */
   eventsBetween(t0: number, t1: number) { return this.events.filter((e) => e.t > t0 && e.t <= t1); }
