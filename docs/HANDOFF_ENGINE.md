@@ -154,3 +154,94 @@ Phase 3 is done when all of these hold:
 
 Life (traffic and pedestrians), vehicles and characters reach the bar through the integration
 milestones, not Phase 3, but Phase 3 shots with cars come from the sim trial.
+
+## Shared rendering foundation, owned by the engine (oversight, 2026-11-27)
+Interiors (moving to lit PBR), vehicles and characters all use the same pieces, so everything sits in
+one world. They live in `src/render/shared/` and are owned by the engine; streams change them through
+ENGINE_REQUESTS.
+
+1. **Material library:** `src/render/shared/materials.ts`
+   - `getMaterial(id: MatId, opts?)` returns a `MeshStandardNodeMaterial` built on CC0 scans.
+     - Textures are KTX2 arrays, loaded lazily and cached, with a per-tier resolution: 512 on phone,
+       1k on desktop.
+     - Ids cover outdoor and indoor surfaces: brick-{red, buff, glazed}, brownstone, limestone,
+       terracotta, cast-iron, asphalt-worn, concrete-sidewalk, granite-curb, tar-roof, enamel-paint,
+       rust, plaster, linoleum, hex-tile, subway-tile, terrazzo, marble, wood-floor, wallpaper-*,
+       car-paint, chrome, glass, rubber, fabric-*.
+   - Common inputs per material:
+     - **condition 0..4**, which drives grime, wear and peeling;
+     - **wetness 0..1**, which darkens the albedo and lowers roughness;
+     - a triplanar or UV mode;
+     - a `tint`.
+   - Sources are logged in `docs/ART_SOURCES.md`, and the memory budget (Low ≤64 MB) is enforced by
+     the loader.
+2. **Lighting:** `src/render/shared/lighting.ts`
+   - `irradianceAt(x, y, z)`, plus a TSL node `probeIrradiance(positionWorld, normalWorld)`.
+     Outdoors this is a `LightProbeGrid` per chunk (4 m vertical × 8 m horizontal), relit from
+     sun/sky SH each time-of-day step.
+   - `registerProbeVolume(bounds, bake)` for interiors: a room registers a small probe volume, baked
+     once from its own lights and window light by time of day.
+   - Lightmaps stay optional for static hero rooms. Their UV2 contract is written when the first one
+     needs it.
+3. **SSAO:** GTAO in the post stack on High and desktop. Phone uses baked per-vertex AO; meshes
+   supply an `ao` attribute, and the engine provides `bakeVertexAO(geometry, occluders)` for
+   interiors and props.
+4. **Reflection probes:** `reflectionProbe(bounds, opts) → { texture, update() }`.
+   - Box-projected, captured at load at 128 px on phone and 256 px on desktop; the engine adds a
+     probe per street block.
+   - Interiors call it per room. Vehicles and characters sample the nearest probe through
+     `envAt(position)`.
+   - SSR is layered on top on desktop and High.
+5. **Clustered local lights:** `addLight({ pos, color, intensity, range, kind })` and `removeLight(id)`.
+   Engine-managed forward+ lists, capped at 64 per view on phone and 256 on desktop, used by street
+   lamps, storefronts, headlights and interior lamps.
+
+**Order:** the material library and loader, then reflection probes with `envAt`, then the probe GI
+grid, then GTAO, then clustered lights. Each one lands with a measured phone cost (`?bench=1` gains a
+case per piece) and a before/after board.
+
+## Movement and traversal (user brief, docs/briefs/MOVEMENT.md; the engine owns the controller side)
+**Base:** the kinematic controller (Rapier), autostep 0.40 m, snap to ground, 50° slopes, jump, and a
+0.45–1.9 m ledge climb from raycasts.
+
+**Order of work (quality over speed; each step gets automated no-snag/no-stuck runs of 1,000
+randomised attempts, plus a frame strip):**
+1. **Locomotion core:**
+   - momentum starts, stops and pivots: acceleration curves per gait, plant-turn, skid stop and
+     turn-in-place; touch gets a slightly tighter tune;
+   - analog-to-gait mapping, slope speed and lean, slides on steep slopes;
+   - stair detection for a stair gait, with a body dip on steps exposed for characters.
+2. **Detection layer:** a shared `TraversalProbe` that classifies what's ahead each fixed step:
+   vaultable 0.5–1.2 m, climbable 1.2–2.2 m, ledge-grab at a gap, fence, ladder, drop. Shapecasts
+   (capsule and box) against the city colliders and the markup below.
+3. **Vault and climb:** a root-motion-driven state machine (vault, climb, mantle) with hand-plant
+   points for IK. The capsule is moved along a curve; collisions are suspended only along the verified
+   path.
+4. **Drops and falls:** hang-drop, fall damage by height (gameplay owns the numbers), and a roll on
+   landing at moderate heights.
+5. **Markup-driven traversal:** chain-link fences, fire escapes (drop ladder, stairs, platforms,
+   windowsills, roof), ladders, scaffolds, subway stairs, the turnstile vault, and roof-gap jumps with
+   ledge grab.
+6. **Crowd contact:** shoulder-brush and push-through against sim peds (velocity-limited
+   capsule-capsule response), stumble events both ways, and hard knock-downs feeding the sim.
+7. **Ragdoll bodies:** Rapier multibody ragdolls blended with animation (characters provide the
+   skeleton and the blend). Triggers: car hits, shots, big falls and stumbles; get-up from front and
+   back.
+8. **Vehicle on-foot:** enter/exit alignment points per door side (vehicles provide them), the
+   carjack pull-out, jumping out of a moving car with a ragdoll roll, and climbing on car roofs and
+   hoods as vault targets.
+9. **Camera:** smooth collision in alleys (the spring arm exists), shoulder swap, look-behind, and
+   rise/pull-back on climbs and falls.
+
+**Contracts to raise now (ENGINE_RESPONSES, "Movement contracts"):**
+- **Traversal markup** (interiors, the engine pipeline, vehicles): `TraversalRec { id, kind:
+  'ladder'|'dropLadder'|'fireEscapeStair'|'platform'|'fence'|'scaffold'|'ledge'|'turnstile'|'roofEdge',
+  a: [x,y,z], b: [x,y,z], width, normal, flags }`. These are static line segments or quads in world
+  space, delivered per chunk alongside colliders. Fire escapes come from the engine props (they
+  already exist); interiors supply ladders, roof hatches and stairs; vehicles supply door points and
+  roof/hood vault boxes.
+- **Root motion and IK** (characters): the controller publishes
+  `{ state, phase 0..1, velocity, grounded, stepUp: height, handTargets?, footTargets? }` every fixed
+  step. Characters return the animation-driven root delta for the root-motion states (vault, climb,
+  mantle, get-up) through `consumeRootMotion(): { dPos, dYaw }`. Foot IK uses the shared
+  `groundAt(x, z)` (characters request 2).
