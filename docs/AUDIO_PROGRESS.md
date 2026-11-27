@@ -206,7 +206,7 @@ Self-made (baked synthesis, logged in AUDIO_SOURCES.md), preloaded as group `mov
   wood stoop, fire-escape iron, ladder rung, gravel roof tar.
 - Actions (`audio.foley(action, at, intensity)`): vault, climb, land, roll, ragdoll, cloth, fence
   (chain-link rattle). Intensity scales level and lowers pitch for heavy hits.
-- Check: `npx tsx tools/audio/foley-check.ts` (no NaN, peaks in range) writes `shots/audio/movement_foley.wav`.
+- Check: `npx tsx tools/audio/foley-check.ts` (no NaN, peaks in range) writes `shots/audio/movement_foley.ogg`.
 - Honest note: synthesised foley is credible for metal, stone and gravel; cloth and body thuds are the
   weakest (they read as "filtered noise" up close).
 

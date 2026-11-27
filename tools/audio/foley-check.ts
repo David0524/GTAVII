@@ -2,6 +2,11 @@
 import { BAKERS } from '../../src/audio/synth/bake';
 const MOVEMENT = Object.keys(BAKERS).filter((k) => /^(step\.(granite|subwaytile|stoop|iron|rung|gravel)|fence\.|foley\.)/.test(k));
 import { writeWav16 } from './wav';
+import ffmpegPath from 'ffmpeg-static';
+import { spawnSync } from 'node:child_process';
+import { rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 const sr = 44100, gap = Math.round(sr * 0.35); const parts: Float32Array[] = []; let bad = 0;
 for (const fam of MOVEMENT) {
   for (let v = 0; v < 2; v++) {
@@ -13,5 +18,7 @@ for (const fam of MOVEMENT) {
   }
 }
 const n = parts.reduce((a, b) => a + b.length, 0), m = new Float32Array(n); let o = 0; for (const p of parts) { m.set(p, o); o += p.length; }
-writeWav16('shots/audio/movement_foley.wav', m, m, sr);
+// Review previews stay small (<= 1 MB): render to a temp WAV, commit Opus.
+const tmp = join(tmpdir(), 't74-foley.wav'); writeWav16(tmp, m, m, sr);
+spawnSync(ffmpegPath as unknown as string, ['-hide_banner', '-loglevel', 'error', '-y', '-i', tmp, '-ac', '1', '-c:a', 'libopus', '-b:a', '96k', 'shots/audio/movement_foley.ogg']); rmSync(tmp);
 console.log(`${MOVEMENT.length} families, ${bad} bad; montage ${(n / sr).toFixed(1)} s`); if (bad) process.exit(1);
