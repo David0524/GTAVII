@@ -53,7 +53,10 @@ these systems their own character instead of copying other games.
   you in crowds. Foot chases are a centrepiece, not a fallback.
 - **Gunfire:** cops draw at a severity threshold, warn first, and shoot at an active threat. They
   stop firing when bystanders are in the line of fire (sim pedestrians). Shooting a cop pushes
-  you to the top tier immediately, citywide.
+  you to the top tier immediately, citywide. **User decision: cops are "Fully lethal everywhere"**
+  (missions and free roam). Killing one can't be bribed away and decays very slowly; missions treat
+  it as a fail state or a consequence branch; story characters are `essential` only while the plot
+  needs them.
 - **Mobile readability:** big audio and visual cues (sirens, radio, search cones). No precise
   inputs needed to escape; knowing the route wins.
 

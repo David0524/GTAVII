@@ -1,4 +1,4 @@
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '../shared/rapier';
 import type { Physics } from '../physics/Physics';
 import type { Input } from '../input/Input';
 import { heightAt } from '../shared/terrain';

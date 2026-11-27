@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import type { Input } from '../input/Input';
 import type { Physics } from '../physics/Physics';
 import { heightAt } from '../shared/terrain';
-import type RAPIER from '@dimforge/rapier3d-compat';
+import type RAPIER from '../shared/rapier';
 
 /**
  * On-foot third-person orbit camera: over-the-shoulder offset, smoothed follow, wheel/pinch zoom,

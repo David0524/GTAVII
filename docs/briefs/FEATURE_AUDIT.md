@@ -66,7 +66,7 @@ Status: ✅ designed/assigned · 🆕 newly assigned here · ❓ user decision.
 | Traffic, pedestrians, schedules | SIM_BRIEF | Sim | ✅ |
 | **Wildlife** | **Pigeons** (GPU flocks on ledges, sidewalks and coops; they scatter at running, cars and gunfire; old men feeding them in the parks), **rats** (subway tracks, alleys, garbage, they scatter from light), stray cats and dogs, the mounted police horse | Sim (behaviour) + Characters (bodies, animation) | 🆕 |
 | Random events | Street encounters (CORE/ECONOMY/N4b) | Gameplay + Narrative | ✅ |
-| Day and night, weather | Heat haze, thunderstorms, rain, fog, brownouts | Engine | ✅ |
+| Day and night, weather | **The full day/night cycle (TIME.md)**: missions with day or night windows skip time on start; sleep in your bed; heat haze, thunderstorms, rain, fog, brownouts | Engine + Gameplay + UI | 🆕 |
 | Hydrants, steam, garbage | Opened hydrants spraying the street, steam stacks, garbage piles; sanitation trucks | Sim + Engine + Gameplay | ✅ |
 | Graffiti | **1970s subway and wall graffiti** (original tags) that changes by act | Engine (decals) + Narrative (tags) | ✅ |
 
@@ -133,3 +133,18 @@ Status: ✅ designed/assigned · 🆕 newly assigned here · ❓ user decision.
 - Owners: **Interiors** (stations and tunnels), **Vehicles** (train cars), **Sim** (train
   schedule, platform crowds, rats), **Audio** (train screech, rumble through gratings),
   **Narrative** (missions), **Gameplay** (fare evasion, getaways, third-rail hazard).
+
+## Mission conventions (user: "Consider how GTA handles these things")
+Default to the genre's standard mission behaviour unless the story has a strong reason not to:
+- **Killing cops in a mission is allowed.** It feeds the police system (top-tier heat); it is never a
+  fail state or a story branch by itself.
+- **"Lose the police" gate:** if the player has heat when the mission needs them clear, the objective
+  becomes "lose the police" before the next step unlocks.
+- **Fail only for the standard reasons, always shown on screen:** an essential character died ("Mayhew
+  died"), a required vehicle was destroyed, the target escaped or the player left the area, the player
+  was wasted or busted, or the timer ran out. Then retry from the checkpoint, and offer a skip after
+  repeated failures.
+- **Essential characters** are protected only by being essential (mission failure), never made
+  invulnerable, and only while the plot needs them.
+- Mission markers, checkpoints, replay from the pause map, and a mission-passed screen with the
+  payout are all standard. The presentation is our own, in the film look.

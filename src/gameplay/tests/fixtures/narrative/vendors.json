@@ -1,0 +1,350 @@
+{
+  "_note": "Street vendors (STREET_VENDORS.md). Item names are keys for Gameplay (<menus key>.<slug of item>); tell Gameplay before renaming. Narrative: brands, cart/umbrella copy, menus and price boards in 1974 money, side content. All brands invented; adults only. Sim places them, Gameplay prices consumables from 'menus' (health/stamina from 'vendors').",
+  "brands": [
+    {
+      "id": "brand.big_cyrus",
+      "name": "Big Cyrus Franks",
+      "type": "hot_dog",
+      "umbrella": "BIG CYRUS · FRANKS · SODA",
+      "umbrellaLook": "yellow and red stripes",
+      "cart": "BIG CYRUS FRANKS · HOT · KRAUT · ONIONS",
+      "check": "cleared: exact-name search (Nov 2026), none found. Rejected 'Ferraro's Franks' (a real New Haven frank maker)."
+    },
+    {
+      "id": "brand.dominick_red_hots",
+      "name": "Dominick's Red Hots",
+      "type": "hot_dog",
+      "umbrella": "DOMINICK'S · RED HOTS",
+      "umbrellaLook": "blue and white stripes",
+      "cart": "DOMINICK'S RED HOTS · SINCE 1951",
+      "check": "batch name; not searched (weak); recheck pre-ship"
+    },
+    {
+      "id": "brand.peppys",
+      "name": "Peppy's Pretzels",
+      "type": "pretzel_knish",
+      "umbrella": "PEPPY'S · HOT PRETZELS · KNISHES",
+      "umbrellaLook": "green and cream",
+      "cart": "PEPPY'S · SALT OR NO SALT",
+      "check": "cleared: exact-name search (Nov 2026), none found"
+    },
+    {
+      "id": "brand.mama_lucchese",
+      "name": "Mama Lucchese Italian Ices",
+      "type": "italian_ice",
+      "umbrella": "MAMA LUCCHESE · ITALIAN ICES",
+      "umbrellaLook": "red, white and green",
+      "cart": "LEMON · CHERRY · RAINBOW · PAPER CUPS",
+      "check": "cleared: exact-name search (Nov 2026), none found"
+    },
+    {
+      "id": "brand.hot_nuts_harry",
+      "name": "Hot Nuts Harry",
+      "type": "nut_roaster",
+      "umbrella": null,
+      "umbrellaLook": null,
+      "cart": "HONEY ROASTED · CASHEWS · PEANUTS · ALMONDS",
+      "check": "descriptive nickname; not searched (weak)"
+    },
+    {
+      "id": "brand.sunrise_cart",
+      "name": "Sunrise Coffee & Roll",
+      "type": "coffee_cart",
+      "umbrella": "SUNRISE · COFFEE & ROLL",
+      "umbrellaLook": "orange",
+      "cart": "COFFEE 20¢ · BUTTERED ROLL 15¢ · DANISH 30¢",
+      "check": "generic descriptive; not searched (weak)"
+    }
+  ],
+  "menus": {
+    "hot_dog": [
+      {
+        "item": "Frank",
+        "price": "35¢"
+      },
+      {
+        "item": "Frank with kraut or onions",
+        "price": "40¢"
+      },
+      {
+        "item": "Soda",
+        "price": "25¢"
+      },
+      {
+        "item": "Knish",
+        "price": "40¢"
+      }
+    ],
+    "pretzel_knish": [
+      {
+        "item": "Hot pretzel",
+        "price": "25¢"
+      },
+      {
+        "item": "Two pretzels",
+        "price": "45¢"
+      },
+      {
+        "item": "Potato knish",
+        "price": "40¢"
+      },
+      {
+        "item": "Kasha knish",
+        "price": "45¢"
+      }
+    ],
+    "italian_ice": [
+      {
+        "item": "Small ice",
+        "price": "25¢"
+      },
+      {
+        "item": "Large ice",
+        "price": "40¢"
+      },
+      {
+        "item": "Rainbow (three flavours)",
+        "price": "50¢"
+      }
+    ],
+    "nut_roaster": [
+      {
+        "item": "Cashews, bag",
+        "price": "75¢"
+      },
+      {
+        "item": "Peanuts, bag",
+        "price": "50¢"
+      },
+      {
+        "item": "Almonds, bag",
+        "price": "75¢"
+      }
+    ],
+    "coffee_cart": [
+      {
+        "item": "Coffee",
+        "price": "20¢"
+      },
+      {
+        "item": "Buttered roll",
+        "price": "15¢"
+      },
+      {
+        "item": "Danish",
+        "price": "30¢"
+      },
+      {
+        "item": "Tea",
+        "price": "15¢"
+      }
+    ],
+    "fruit_stand": [
+      {
+        "item": "Apple",
+        "price": "15¢"
+      },
+      {
+        "item": "Peach",
+        "price": "20¢"
+      },
+      {
+        "item": "Banana",
+        "price": "10¢"
+      },
+      {
+        "item": "Bag of cherries",
+        "price": "60¢"
+      }
+    ],
+    "flower_stand": [
+      {
+        "item": "Carnation",
+        "price": "25¢"
+      },
+      {
+        "item": "Bunch of daisies",
+        "price": "$1.00"
+      },
+      {
+        "item": "A dozen roses",
+        "price": "$6.00"
+      }
+    ],
+    "newsstand": [
+      {
+        "item": "Daily Ticker",
+        "price": "15¢"
+      },
+      {
+        "item": "Manhattan Evening Dispatch",
+        "price": "15¢"
+      },
+      {
+        "item": "Cigarettes, pack",
+        "price": "60¢"
+      },
+      {
+        "item": "Candy bar",
+        "price": "15¢"
+      },
+      {
+        "item": "Gum",
+        "price": "10¢"
+      }
+    ],
+    "shoeshine": [
+      {
+        "item": "Shine",
+        "price": "50¢"
+      },
+      {
+        "item": "Shine and tip",
+        "price": "75¢"
+      }
+    ],
+    "peddler": [
+      {
+        "item": "Umbrella (rain only)",
+        "price": "$2.00",
+        "rainOnly": true
+      },
+      {
+        "item": "Sunglasses",
+        "price": "$3.00"
+      },
+      {
+        "item": "'Gold' watch",
+        "price": "$10.00"
+      },
+      {
+        "item": "8-track tape (no label)",
+        "price": "$2.00"
+      },
+      {
+        "item": "Souvenir pennant",
+        "price": "$1.00"
+      }
+    ]
+  },
+  "vendors": [
+    {
+      "type": "hot_dog",
+      "brands": [
+        "brand.big_cyrus",
+        "brand.dominick_red_hots"
+      ],
+      "where": "hotspot corners, park edges, Herald Sq, Penn, the Deuce",
+      "hours": [
+        "10:00",
+        "22:00"
+      ],
+      "health": 10
+    },
+    {
+      "type": "pretzel_knish",
+      "brands": [
+        "brand.peppys"
+      ],
+      "where": "subway mouths, Bryant Park edge, Grand Central entrances",
+      "hours": [
+        "09:00",
+        "20:00"
+      ],
+      "health": 8
+    },
+    {
+      "type": "italian_ice",
+      "brands": [
+        "brand.mama_lucchese"
+      ],
+      "where": "park edges, Chelsea, the hydrant streets (summer only)",
+      "hours": [
+        "12:00",
+        "21:00"
+      ],
+      "stamina": 10
+    },
+    {
+      "type": "nut_roaster",
+      "brands": [
+        "brand.hot_nuts_harry"
+      ],
+      "where": "Times Sq, 34th St, theatre corners",
+      "hours": [
+        "11:00",
+        "23:00"
+      ],
+      "health": 5
+    },
+    {
+      "type": "coffee_cart",
+      "brands": [
+        "brand.sunrise_cart"
+      ],
+      "where": "Garment District at dawn (7th Ave, 36th–39th St), Flower District",
+      "hours": [
+        "05:00",
+        "10:00"
+      ],
+      "stamina": 15
+    },
+    {
+      "type": "fruit_stand",
+      "brands": [],
+      "where": "corner grocers' sidewalk displays (9th Ave, Chelsea)",
+      "hours": [
+        "07:00",
+        "20:00"
+      ],
+      "health": 5
+    },
+    {
+      "type": "flower_stand",
+      "brands": [],
+      "where": "Grand Central concourse, Penn, Madison Sq; Moretti's corner in the Flower District",
+      "hours": [
+        "08:00",
+        "19:00"
+      ]
+    },
+    {
+      "type": "newsstand",
+      "brands": [],
+      "where": "subway mouths, every major corner; Grand Central and Penn kiosks",
+      "hours": [
+        "05:00",
+        "23:00"
+      ]
+    },
+    {
+      "type": "shoeshine",
+      "brands": [],
+      "where": "Penn, Grand Central, hotel lobbies; Earl's stand on the Deuce",
+      "hours": [
+        "07:00",
+        "20:00"
+      ]
+    },
+    {
+      "type": "peddler",
+      "brands": [],
+      "where": "Times Sq, 34th St, Penn; umbrellas appear only when it rains",
+      "hours": [
+        "10:00",
+        "22:00"
+      ],
+      "note": "Souvenirs use a period pennant slogan, 'NEW YORK · SEE IT TO BELIEVE IT'. The famous heart slogan is 1977 and real, so it's anachronistic and never used."
+    },
+    {
+      "type": "monte",
+      "brands": [],
+      "where": "the Deuce, Times Sq, 34th St near Lacy's",
+      "hours": [
+        "11:00",
+        "23:00"
+      ],
+      "note": "A crew: dealer, two shills and a lookout. They scatter when a cop appears (sim). Rigged unless the player catches the trick (gameplay). See side.monte."
+    }
+  ]
+}
