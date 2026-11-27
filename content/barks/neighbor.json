@@ -62,6 +62,35 @@
       "context": "night",
       "emotion": "warm",
       "text": "Late! Go to bed, you'll scare your mother."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "warm",
+      "text": "Ay, look who it is. You eat today? You look thin."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "warm",
+      "text": "You fixed Mrs. Ortiz's door. The whole building's talking.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "cold",
+      "text": "We know what you did on this block. Nobody forgets here.",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "annoyed",
+      "text": "Hey! This is a stoop, not a racetrack. Respect."
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Inside! Everybody inside! Lock the door, Carmen, lock it!",
+      "recall": "violence"
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

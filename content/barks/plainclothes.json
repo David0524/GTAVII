@@ -157,6 +157,41 @@
       "context": "idle",
       "emotion": "low",
       "text": "Lieutenant's boat needs a new motor. Collections go up."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "dry",
+      "text": "Small world. Smaller every time I see you."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "flat",
+      "text": "You did us a favour on Thirty-Fourth. Don't make it a habit.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "hard",
+      "text": "Your face is on a card in my pocket. Want to see it?",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "hard",
+      "text": "Keep walking. I'm not working. Yet."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "hard",
+      "text": "You shot up my sector. That's personal now.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "tense",
+      "text": "Don't. Don't even think it. There's two more of us across the street.",
+      "recall": "violence"
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

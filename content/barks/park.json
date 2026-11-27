@@ -62,6 +62,29 @@
       "context": "idle",
       "emotion": "friendly",
       "text": "Pigeons know me. Pigeons are good people."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "easy",
+      "text": "Hey, friend. You again. Bench is free, the pigeons aren't."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You chased those punks off my bench. I owe you a sandwich.",
+      "recall": "helped"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "grumbling",
+      "text": "Find your own bench. This one's spoken for since Eisenhower."
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Not here, not in the park! People sleep here!",
+      "recall": "violence"
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

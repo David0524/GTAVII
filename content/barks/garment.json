@@ -162,6 +162,46 @@
       "context": "greet",
       "emotion": "friendly",
       "text": "You seen Dwayne? Kid owes me a sketch."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "cocky",
+      "text": "Hey, it's the guy who keeps walking into my racks."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You pushed my rack all the way to Thirty-Eighth. You want a job?",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "angry",
+      "text": "You! You stole a whole rack of coats! Feld's docking me for it!",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "annoyed",
+      "text": "Watch it! These dresses cost more than your shoes!"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "cold",
+      "text": "After what you did on Seventh, nobody's pushing anything near you.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Take the rack! Take it! It's all yours, it's polyester!",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "I don't want trouble. I got a union card and two kids at home."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

@@ -157,6 +157,46 @@
       "context": "night",
       "emotion": "low",
       "text": "Trucks come at four. I'll sleep at five. Maybe."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "shrewd",
+      "text": "My friend! For you, wholesale. For everybody else, also wholesale."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You stopped the van thief. Pick a suitcase. Any suitcase.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "angry",
+      "text": "You! You walked off with a gross of zippers! A gross!",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "annoyed",
+      "text": "To the trade only! Are you the trade? You're not the trade."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "cold",
+      "text": "Since you shot up Broadway, insurance doubled. Thanks a lot.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Take what you want! It's all insured! Mostly insured!",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Please, please, it's a notions store. Buttons. Thread."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

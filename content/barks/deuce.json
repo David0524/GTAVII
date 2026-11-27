@@ -157,6 +157,46 @@
       "context": "idle",
       "emotion": "cocky",
       "text": "Radios, radios! Fell off a truck! The truck's fine!"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "slick",
+      "text": "Hey, my man's back. You buying or browsing?"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "warm",
+      "text": "You ran that creep off Forty-Second. You're good on this block.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "menacing",
+      "text": "You took from Ray's till. Ray remembers. Ray always remembers.",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "mocking",
+      "text": "Look at the hero. Go home, hero. This street eats heroes."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "menacing",
+      "text": "You shot up the Deuce, you don't come back to the Deuce.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Whoa! Whoa, I got nothing! I'm a businessman! Small business!",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Not me, man. I'm just standing here. Standing is legal."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

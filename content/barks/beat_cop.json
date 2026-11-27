@@ -157,6 +157,46 @@
       "context": "rain",
       "emotion": "friendly",
       "text": "Duck under the awning, folks. It'll pass."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "easy",
+      "text": "You again. Staying out of trouble? Don't answer that."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "warm",
+      "text": "Hey, you're the one who caught that purse thief. Coffee's on me.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "cold",
+      "text": "I know your face. I'm writing it down. Slowly.",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "hard",
+      "text": "Move along. I won't say it twice. I'll say it once, with the stick."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "hard",
+      "text": "You shot up this block and you walk back on it? You got nerve.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "tense",
+      "text": "Easy. Easy now. Hands where I can see 'em. Central, I need a car.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "tense",
+      "text": "Don't do nothing stupid, pal. I got a pension coming."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

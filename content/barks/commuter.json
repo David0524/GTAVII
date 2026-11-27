@@ -157,6 +157,46 @@
       "context": "night",
       "emotion": "low",
       "text": "Careful down the stairs. Lights are out on the left."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "tired",
+      "text": "Morning. Same train, same face. We should form a club."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You found my wallet on the platform. Every dollar. Who does that?",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "angry",
+      "text": "That's him! That's the one who took my briefcase!",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "annoyed",
+      "text": "Some of us have a train to catch. Out of the doorway."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "cold",
+      "text": "I saw what you did on Thirty-Fourth. I'm telling the transit cop.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Not again. Not on my train. I'll get off. I'll take the next one.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Take it, take the watch. It's not even gold."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

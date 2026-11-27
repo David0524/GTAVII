@@ -77,6 +77,34 @@
       "context": "idle",
       "emotion": "friendly",
       "text": "Keep the change. Buy yourself an air-conditioner."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "brisk",
+      "text": "Oh, it's you. You drove me last week. You took the long way."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "warm",
+      "text": "You got me to the hospital on time. My sister says God bless.",
+      "recall": "helped"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "annoyed",
+      "text": "I'm not paying for the scenic route. Left. Left!"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Let me out here. Right here. Keep the change. Keep all of it.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Is that a gun? Driver, please, I have a family in Queens."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

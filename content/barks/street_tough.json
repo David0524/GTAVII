@@ -42,6 +42,35 @@
       "context": "night",
       "emotion": "cold",
       "text": "Walk away, friend. Just walk."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "cocky",
+      "text": "Look who's back on our corner. You paying rent now?"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grudging",
+      "text": "You helped Manny out. Fine. You walk through. Once.",
+      "recall": "helped"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "menacing",
+      "text": "Wrong block, friend. Turn around while you still got legs."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "menacing",
+      "text": "You shot at my boys. You're a dead man on Ninth.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Whoa, whoa! No piece, no piece! We was just talking!",
+      "recall": "violence"
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

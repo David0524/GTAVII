@@ -157,6 +157,46 @@
       "context": "idle",
       "emotion": "wry",
       "text": "Fur in July, ice in July, everything backwards in July."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "gruff",
+      "text": "You again. You gonna help unload or just admire the truck?"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You got my truck out of the jam on Ninth. Beer's on me.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "furious",
+      "text": "You hijacked my load! Off my dock before I get the bar!",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "gruff",
+      "text": "Out of the loading zone! You ain't a truck!"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "hard",
+      "text": "I got a tire iron and a bad memory for faces. Except yours.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Take the truck! Keys are in it! I just drive it!",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Easy, pal. It's dresses back there. Just dresses."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

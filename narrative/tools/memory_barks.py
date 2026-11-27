@@ -1,0 +1,159 @@
+"""NPC memory barks (sim 39af2cb: pedGreets {pool, context, mood, recall, archetype}). Adds contexts greet_known, antagonize
+and fear to each archetype pool, with `recall` = helped | robbed | violence | (none = just a familiar face).
+1974 NYC voice, adults only. Re-applied after build_barks (idempotent). Written by the lead writer."""
+import json
+from pathlib import Path
+B = Path(__file__).resolve().parents[2] / "content" / "barks"
+
+# pool: [(context, recall, emotion, text)]
+M = {
+ "beat_cop": [
+  ("greet_known", None, "easy", "You again. Staying out of trouble? Don't answer that."),
+  ("greet_known", "helped", "warm", "Hey, you're the one who caught that purse thief. Coffee's on me."),
+  ("greet_known", "robbed", "cold", "I know your face. I'm writing it down. Slowly."),
+  ("antagonize", None, "hard", "Move along. I won't say it twice. I'll say it once, with the stick."),
+  ("antagonize", "violence", "hard", "You shot up this block and you walk back on it? You got nerve."),
+  ("fear", "violence", "tense", "Easy. Easy now. Hands where I can see 'em. Central, I need a car."),
+  ("fear", None, "tense", "Don't do nothing stupid, pal. I got a pension coming.")],
+ "cab_driver": [
+  ("greet_known", None, "easy", "Hey, Mac! Where to? Not Brooklyn, I'm begging you."),
+  ("greet_known", "helped", "warm", "You! You pushed my hack out of the intersection. Half fare, today only."),
+  ("greet_known", "robbed", "angry", "You! You stiffed me on Eighth! Get outta my cab!"),
+  ("antagonize", None, "angry", "Off my fender! What, you want to ride on the hood?"),
+  ("antagonize", "violence", "angry", "You're the maniac from the shooting. I seen you. Keep walking."),
+  ("fear", "violence", "scared", "Take the cab, take the cab! I got no meter money, I swear!"),
+  ("fear", None, "scared", "Whoa, whoa, easy! I'm just a hack! I don't see nothing!")],
+ "cab_fare": [
+  ("greet_known", None, "brisk", "Oh, it's you. You drove me last week. You took the long way."),
+  ("greet_known", "helped", "warm", "You got me to the hospital on time. My sister says God bless."),
+  ("antagonize", None, "annoyed", "I'm not paying for the scenic route. Left. Left!"),
+  ("fear", "violence", "scared", "Let me out here. Right here. Keep the change. Keep all of it."),
+  ("fear", None, "scared", "Is that a gun? Driver, please, I have a family in Queens.")],
+ "commuter": [
+  ("greet_known", None, "tired", "Morning. Same train, same face. We should form a club."),
+  ("greet_known", "helped", "grateful", "You found my wallet on the platform. Every dollar. Who does that?"),
+  ("greet_known", "robbed", "angry", "That's him! That's the one who took my briefcase!"),
+  ("antagonize", None, "annoyed", "Some of us have a train to catch. Out of the doorway."),
+  ("antagonize", "violence", "cold", "I saw what you did on Thirty-Fourth. I'm telling the transit cop."),
+  ("fear", "violence", "scared", "Not again. Not on my train. I'll get off. I'll take the next one."),
+  ("fear", None, "scared", "Take it, take the watch. It's not even gold.")],
+ "deuce": [
+  ("greet_known", None, "slick", "Hey, my man's back. You buying or browsing?"),
+  ("greet_known", "helped", "warm", "You ran that creep off Forty-Second. You're good on this block."),
+  ("greet_known", "robbed", "menacing", "You took from Ray's till. Ray remembers. Ray always remembers."),
+  ("antagonize", None, "mocking", "Look at the hero. Go home, hero. This street eats heroes."),
+  ("antagonize", "violence", "menacing", "You shot up the Deuce, you don't come back to the Deuce."),
+  ("fear", "violence", "scared", "Whoa! Whoa, I got nothing! I'm a businessman! Small business!"),
+  ("fear", None, "scared", "Not me, man. I'm just standing here. Standing is legal.")],
+ "garment": [
+  ("greet_known", None, "cocky", "Hey, it's the guy who keeps walking into my racks."),
+  ("greet_known", "helped", "grateful", "You pushed my rack all the way to Thirty-Eighth. You want a job?"),
+  ("greet_known", "robbed", "angry", "You! You stole a whole rack of coats! Feld's docking me for it!"),
+  ("antagonize", None, "annoyed", "Watch it! These dresses cost more than your shoes!"),
+  ("antagonize", "violence", "cold", "After what you did on Seventh, nobody's pushing anything near you."),
+  ("fear", "violence", "scared", "Take the rack! Take it! It's all yours, it's polyester!"),
+  ("fear", None, "scared", "I don't want trouble. I got a union card and two kids at home.")],
+ "marcher": [
+  ("greet_known", None, "warm", "Brother! You marched with us. Come on, the front's this way."),
+  ("greet_known", "helped", "warm", "You held the line at Herald Square. Everybody saw."),
+  ("antagonize", None, "defiant", "Go ahead, shove. We've been shoved by better."),
+  ("fear", "violence", "scared", "Everybody down! He's got a gun! Get the old people inside!")],
+ "neighbor": [
+  ("greet_known", None, "warm", "Ay, look who it is. You eat today? You look thin."),
+  ("greet_known", "helped", "warm", "You fixed Mrs. Ortiz's door. The whole building's talking."),
+  ("greet_known", "robbed", "cold", "We know what you did on this block. Nobody forgets here."),
+  ("antagonize", None, "annoyed", "Hey! This is a stoop, not a racetrack. Respect."),
+  ("fear", "violence", "scared", "Inside! Everybody inside! Lock the door, Carmen, lock it!")],
+ "office": [
+  ("greet_known", None, "polite", "Oh, hello again. You're always around here, aren't you?"),
+  ("greet_known", "helped", "grateful", "You caught the man who grabbed my purse. I wrote to the paper."),
+  ("greet_known", "robbed", "angry", "You! Security! That's the man from the elevator!"),
+  ("antagonize", None, "cold", "Excuse me. Some of us work in this building."),
+  ("antagonize", "violence", "cold", "I gave the police your description. Twice."),
+  ("fear", "violence", "scared", "Please. I have a typing pool waiting. Please just let me go."),
+  ("fear", None, "scared", "Here, take my purse, take it, just don't hurt me.")],
+ "park": [
+  ("greet_known", None, "easy", "Hey, friend. You again. Bench is free, the pigeons aren't."),
+  ("greet_known", "helped", "grateful", "You chased those punks off my bench. I owe you a sandwich."),
+  ("antagonize", None, "grumbling", "Find your own bench. This one's spoken for since Eisenhower."),
+  ("fear", "violence", "scared", "Not here, not in the park! People sleep here!")],
+ "plainclothes": [
+  ("greet_known", None, "dry", "Small world. Smaller every time I see you."),
+  ("greet_known", "helped", "flat", "You did us a favour on Thirty-Fourth. Don't make it a habit."),
+  ("greet_known", "robbed", "hard", "Your face is on a card in my pocket. Want to see it?"),
+  ("antagonize", None, "hard", "Keep walking. I'm not working. Yet."),
+  ("antagonize", "violence", "hard", "You shot up my sector. That's personal now."),
+  ("fear", "violence", "tense", "Don't. Don't even think it. There's two more of us across the street.")],
+ "service": [
+  ("greet_known", None, "friendly", "Morning, Mr. Regular. The usual? You don't have a usual."),
+  ("greet_known", "helped", "warm", "You carried my bags up four floors. Shine's free today."),
+  ("greet_known", "robbed", "cold", "Not you. Not in here. I'll call the manager."),
+  ("antagonize", None, "annoyed", "Line's back there. Like everybody else."),
+  ("fear", "violence", "scared", "Take the register! Take it! I'm just the help!")],
+ "shopper": [
+  ("greet_known", None, "chatty", "Oh, you're always on Thirty-Fourth. Do you live at Lacy's?"),
+  ("greet_known", "helped", "grateful", "You got my bags back! My husband didn't believe me!"),
+  ("greet_known", "robbed", "angry", "Thief! That's the thief! Somebody call a policeman!"),
+  ("antagonize", None, "indignant", "Do you mind? I was here first. I've been here since ten."),
+  ("antagonize", "violence", "cold", "Animal. They should lock you in the zoo with the others."),
+  ("fear", "violence", "scared", "Oh my God. Oh my God. Not here. I came for towels."),
+  ("fear", None, "scared", "Here, take my bag! There's nothing in it but receipts!")],
+ "sro": [
+  ("greet_known", None, "easy", "Evening, neighbour. Elevator's out again. Course it is."),
+  ("greet_known", "helped", "grateful", "You brought my pills up from the drugstore. God bless you."),
+  ("greet_known", "robbed", "cold", "Lock your door. That one's back. You know which one."),
+  ("antagonize", None, "grumbling", "Quiet in the hall! Some of us sleep days!"),
+  ("antagonize", "violence", "bitter", "You brought guns into this building. Where we live. Shame on you."),
+  ("fear", "violence", "scared", "Please, not the hallway. My door don't even lock right."),
+  ("fear", None, "scared", "I got nothing. Check. Nothing. Look, it's a hot plate.")],
+ "street_tough": [
+  ("greet_known", None, "cocky", "Look who's back on our corner. You paying rent now?"),
+  ("greet_known", "helped", "grudging", "You helped Manny out. Fine. You walk through. Once."),
+  ("antagonize", None, "menacing", "Wrong block, friend. Turn around while you still got legs."),
+  ("antagonize", "violence", "menacing", "You shot at my boys. You're a dead man on Ninth."),
+  ("fear", "violence", "scared", "Whoa, whoa! No piece, no piece! We was just talking!")],
+ "strip": [
+  ("greet_known", None, "dry", "You again, sugar. Looking or just looking?"),
+  ("greet_known", "helped", "warm", "You ran off that creep who hit Tina. Every girl on Eighth knows."),
+  ("greet_known", "robbed", "cold", "You took from one of us. Eighth Avenue don't forget a face."),
+  ("antagonize", None, "cold", "Walk on, mister. Nothing here for you tonight."),
+  ("antagonize", "violence", "bitter", "Guns on our corner. Like we didn't have enough trouble."),
+  ("fear", "violence", "scared", "Get behind the car! Everybody behind the car!"),
+  ("fear", None, "scared", "I got eleven dollars and a bus token. Take 'em.")],
+ "truck_driver": [
+  ("greet_known", None, "gruff", "You again. You gonna help unload or just admire the truck?"),
+  ("greet_known", "helped", "grateful", "You got my truck out of the jam on Ninth. Beer's on me."),
+  ("greet_known", "robbed", "furious", "You hijacked my load! Off my dock before I get the bar!"),
+  ("antagonize", None, "gruff", "Out of the loading zone! You ain't a truck!"),
+  ("antagonize", "violence", "hard", "I got a tire iron and a bad memory for faces. Except yours."),
+  ("fear", "violence", "scared", "Take the truck! Keys are in it! I just drive it!"),
+  ("fear", None, "scared", "Easy, pal. It's dresses back there. Just dresses.")],
+ "wholesaler": [
+  ("greet_known", None, "shrewd", "My friend! For you, wholesale. For everybody else, also wholesale."),
+  ("greet_known", "helped", "grateful", "You stopped the van thief. Pick a suitcase. Any suitcase."),
+  ("greet_known", "robbed", "angry", "You! You walked off with a gross of zippers! A gross!"),
+  ("antagonize", None, "annoyed", "To the trade only! Are you the trade? You're not the trade."),
+  ("antagonize", "violence", "cold", "Since you shot up Broadway, insurance doubled. Thanks a lot."),
+  ("fear", "violence", "scared", "Take what you want! It's all insured! Mostly insured!"),
+  ("fear", None, "scared", "Please, please, it's a notions store. Buttons. Thread.")],
+}
+
+
+def apply():
+    n = 0
+    for pool, lines in M.items():
+        f = B / f"{pool}.json"
+        d = json.loads(f.read_text())
+        d["lines"] = [l for l in d["lines"] if l["context"] not in ("greet_known", "antagonize", "fear")]
+        for c, rec, emo, txt in lines:
+            assert len(txt) <= 90, txt
+            l = {"context": c, "emotion": emo, "text": txt}
+            if rec: l["recall"] = rec
+            d["lines"].append(l); n += 1
+        d["memoryNote"] = "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
+        f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
+    print(n, "memory barks across", len(M), "pools")
+
+
+if __name__ == "__main__":
+    apply()

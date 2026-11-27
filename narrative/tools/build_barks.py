@@ -608,3 +608,7 @@ for p in P.values():
 core = [p for p in P.values() if p["core"]]
 print(len(P), "pools,", sum(len(p["lines"]) for p in P.values()), "lines;", len(core), "core, min",
       min(len(p["lines"]) for p in core))
+
+# NPC memory contexts (sim pedGreets); re-applied after every barks build
+import memory_barks  # noqa: E402
+memory_barks.apply()

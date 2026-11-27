@@ -157,6 +157,46 @@
       "context": "rain",
       "emotion": "friendly",
       "text": "Share the awning? Plenty of room."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "polite",
+      "text": "Oh, hello again. You're always around here, aren't you?"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You caught the man who grabbed my purse. I wrote to the paper.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "angry",
+      "text": "You! Security! That's the man from the elevator!",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "cold",
+      "text": "Excuse me. Some of us work in this building."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "cold",
+      "text": "I gave the police your description. Twice.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Please. I have a typing pool waiting. Please just let me go.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Here, take my purse, take it, just don't hurt me."
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

@@ -157,6 +157,46 @@
       "context": "idle",
       "emotion": "tourist",
       "text": "Are those the World Trading Towers down there? So tall!"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "chatty",
+      "text": "Oh, you're always on Thirty-Fourth. Do you live at Lacy's?"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "grateful",
+      "text": "You got my bags back! My husband didn't believe me!",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "angry",
+      "text": "Thief! That's the thief! Somebody call a policeman!",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "indignant",
+      "text": "Do you mind? I was here first. I've been here since ten."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "cold",
+      "text": "Animal. They should lock you in the zoo with the others.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Oh my God. Oh my God. Not here. I came for towels.",
+      "recall": "violence"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Here, take my bag! There's nothing in it but receipts!"
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }

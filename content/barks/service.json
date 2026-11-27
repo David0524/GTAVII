@@ -77,6 +77,35 @@
       "context": "idle",
       "emotion": "wry",
       "text": "Building's quiet at night. Too quiet. I sing."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "friendly",
+      "text": "Morning, Mr. Regular. The usual? You don't have a usual."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "warm",
+      "text": "You carried my bags up four floors. Shine's free today.",
+      "recall": "helped"
+    },
+    {
+      "context": "greet_known",
+      "emotion": "cold",
+      "text": "Not you. Not in here. I'll call the manager.",
+      "recall": "robbed"
+    },
+    {
+      "context": "antagonize",
+      "emotion": "annoyed",
+      "text": "Line's back there. Like everybody else."
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "Take the register! Take it! I'm just the help!",
+      "recall": "violence"
     }
-  ]
+  ],
+  "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
 }
