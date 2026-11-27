@@ -76,7 +76,8 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   /** Fire a raw sim event at an offset from the listener's start (bumps, litter, monte scatter). Strings in params: none needed. */
   const simEvent = (type: string, off: [number, number] = [0, 0], p: Record<string, number> = {}) => {
     const KINDS = ['brush', 'stumble', 'knockdown'], RESP = ['none', 'annoyed', 'angry', 'frightened'];
-    sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
+    const CTX = ['greet', 'greet_known', 'antagonize', 'fear', 'complain', 'player_running'];
+    sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', pool: 'barks.garment', context: CTX[p.context ?? 0], dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
   };
   // Combat events: 'gun:<tier>', 'hit:<material>', 'whiz' (a round passing ~1.5 m from the listener), 'gunfoley:<kind>'.
   const shots: (ShotReport & { t: number })[] = [];

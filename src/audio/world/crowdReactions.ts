@@ -24,7 +24,7 @@ export class CrowdReactions {
   private lastLine = -1e9;
   contentEnabled = true;
   ground: (x: number, z: number) => number = () => 0;
-  stats = { bumps: 0, lines: 0, gotUp: 0, litter: 0, scatters: 0 };
+  stats = { bumps: 0, lines: 0, gotUp: 0, litter: 0, scatters: 0, greets: 0 };
 
   constructor(private env: Env, private steps: () => Footsteps | null, private bark: BarkFn, private baseUrl: string) {}
 
@@ -32,6 +32,8 @@ export class CrowdReactions {
   bindSim(sim: { on(type: string, cb: (e: any) => void): void }) {
     if (this.sim === sim) return; this.sim = sim;
     sim.on('pedBumped', (e) => this.bumped(e));
+    // Pedestrians who remember the player (sim 39af2cb, memory.ts): a line from their own pool, by context.
+    sim.on('pedGreets', (e: { pool?: string; context?: string; x: number; z: number }) => this.greet(e));
     sim.on('pedGotUp', (e) => { if (!this.near(e, 25)) return; this.stats.gotUp++; const p = this.at(e, 0.6); this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.35, priority: 3 }); this.scuffs(p, 2, 0.5); });
     sim.on('litter', (e) => { if (!this.near(e, 12)) return; this.stats.litter++; this.env.oneShot('paper.crumple', { category: 'footstep', at: this.at(e, 0.3), gain: 0.3, rate: this.env.rng.range(0.9, 1.15), priority: 2 }); });
     sim.on('monteScatter', (e) => { if (!this.near(e, 40)) return; this.stats.scatters++; this.scatter(e.x, e.z); });
@@ -64,6 +66,21 @@ export class CrowdReactions {
       const ok = (await this.bark(pool, 'collision', () => head, emotions)) || (await this.bark(pool, 'collision', () => head));
       if (ok) this.stats.lines++;
     });
+  }
+
+  /**
+   * `pedGreets {pool, context}`: greet, greet_known, antagonize, fear, complain, player_running. Within 20 m, one line
+   * every 4 s at most (shares the bump gap). A missing context falls back (greet_known -> greet, antagonize -> complain).
+   */
+  private greet(e: { pool?: string; context?: string; x: number; z: number }) {
+    if (!e?.pool || !e.context || !this.near(e, 20)) return;
+    const now = this.env.ctx.currentTime; if (now - this.lastLine < 4) return; this.lastLine = now;
+    const pool = e.pool.replace(/^barks\./, ''), head: Vec3 = [e.x, this.ground(e.x, e.z) + 1.6, e.z];
+    const FALLBACK: Record<string, string> = { greet_known: 'greet', antagonize: 'complain', fear: 'collision' };
+    void (async () => {
+      const ok = (await this.bark(pool, e.context!, () => head)) || (FALLBACK[e.context!] ? await this.bark(pool, FALLBACK[e.context!], () => head) : false);
+      if (ok) this.stats.greets++;
+    })();
   }
 
   /** A few quick scuffing steps around p (a stumble or getting up). */

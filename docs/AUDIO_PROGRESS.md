@@ -344,6 +344,10 @@ All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2
     `collision`, matched to the response: angry → angry; annoyed → annoyed/brisk; frightened → startled/hurt/worried.
     It falls back to any collision line. At most one bump line every 3 s, half of brushes are silent, within 25 m.
     Bumps with `byPlayer: true` (confirmed by sim 554d254: every bump today is player contact) always speak, reach 35 m and wait only 1 s.
+  - pedGreets (sim 39af2cb): a line from the ped's own pool by context (greet, greet_known, antagonize, fear, complain,
+    player_running). Within 20 m, at most one every 4 s (shared with bump lines). Missing contexts fall back: greet_known → greet, antagonize → complain, fear → collision.
+  - Verified with content on (`render.ts --only vendor_corner --content`): 2 bump lines and 2 greetings were spoken with rendered voices, 0 misses, 9 rendered barks.
+    That closes the earlier gap where bump lines had only been checked hermetically.
   - pedGotUp: cloth and scuffs. litter: a new self-made `paper.crumple` (also the newsstand's page sound).
   - monteScatter: the lookout's shout, then four sets of running feet fanning out.
   - Signal chirps: not added, since 1974 NYC had no accessible pedestrian signals (agreeing with sim's note).
