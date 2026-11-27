@@ -1,0 +1,18 @@
+A_42nd_west_of_7th_1930.png: shadow #231311 mid #734738 high #eeceab | luma p2/p50/p98 7/32/232 | sat warm 1.0 cool 0.0
+    shadow:PASS mid:PASS high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:PASS warm>=0.70:PASS
+A_42nd_west_of_7th_2014.png: shadow #1b0f0e mid #744b3a high #dfc6a7 | luma p2/p50/p98 5/22/232 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:PASS high:PASS p2<=20:PASS p50 50..80:FAIL p98 200..235:PASS warm>=0.70:PASS
+A_42nd_west_of_7th_2300.png: shadow #0c0606 mid #8e6240 high #d4a776 | luma p2/p50/p98 3/5/148 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
+D_herald_square_1930.png: shadow #190d0c mid #625e5f high #abb0a8 | luma p2/p50/p98 5/12/141 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
+D_herald_square_2014.png: shadow #0f0808 mid #3d3f41 high #d8c5a4 | luma p2/p50/p98 5/8/66 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:PASS p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
+D_herald_square_2300.png: shadow #0e0808 mid #996b47 high #cfa275 | luma p2/p50/p98 3/7/149 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
+E_flatiron_from_madison_sq_1930.png: shadow #211710 mid #545153 high #adb0ab | luma p2/p50/p98 8/28/169 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
+E_flatiron_from_madison_sq_2014.png: shadow #140e0d mid #3d4140 high #d6caae | luma p2/p50/p98 5/14/66 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
+E_flatiron_from_madison_sq_2300.png: shadow #100908 mid #6a4f3d high #ceba9d | luma p2/p50/p98 4/9/107 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:PASS high:PASS p2<=20:PASS p50 50..80:FAIL p98 200..235:FAIL warm>=0.70:PASS
