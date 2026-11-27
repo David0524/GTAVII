@@ -52,6 +52,7 @@ export async function runCharactersTest() {
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
   else if (scene === 'move') tick = (await import('./MoveCourse')).moveCourse(world, camera, factory, report, qp);
+  else if (scene === 'ict') tick = await (await import('./IctTest')).ictScene(world, camera, report, qp);
   const simT = qp.has('t') ? num('t', 0) : -1;
   const frameMs: number[] = [];
   if (simT >= 0) {
