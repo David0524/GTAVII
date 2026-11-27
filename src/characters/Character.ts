@@ -251,7 +251,7 @@ export class Character {
     // lower the pelvis so the lower foot can reach (never raise above the animated height)
     const targetDrop = Math.max(-0.35, need);
     this.pelvisDrop += (targetDrop - this.pelvisDrop) * Math.min(1, dt * 10);
-    this.bones[JI.pelvis].position.y += this.pelvisDrop - (this.bones[JI.pelvis].position.y - this.animator.pose.pelvis[1]);
+    this.bones[JI.pelvis].position.y = this.animator.pose.pelvis[1] + this.pelvisDrop + this.stepOff;
     this.bones[JI.pelvis].updateMatrixWorld(true);
     for (const side of ['l', 'r'] as const) {
       const t = targets[side]; if (!t) continue;

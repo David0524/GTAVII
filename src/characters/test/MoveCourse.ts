@@ -86,7 +86,10 @@ export function moveCourse(world: THREE.Scene, camera: THREE.PerspectiveCamera, 
     camera.fov = 40; camera.updateProjectionMatrix();
     camera.position.set(s.x + 0.6, s.y + 1.3, d); camera.lookAt(s.x + 0.6, s.y + 0.8, 0);
     const py = ch.jointWorld('pelvis').y;
-    if (lastPelvis !== null && s.grounded && !s.traversal && dt > 0) { const vy = Math.abs(py - lastPelvis) / dt; maxVy = Math.max(maxVy, vy); sumVy += vy; nVy++; }
+    if (lastPelvis !== null && s.grounded && !s.traversal && dt > 0) {
+      const vy = Math.abs(py - lastPelvis) / dt; maxVy = Math.max(maxVy, vy); sumVy += vy; nVy++;
+      if (vy > 1.5) (report.spikes ??= []).push({ x: +s.x.toFixed(2), t: +s.t.toFixed(2), vy: +vy.toFixed(1), afterTraversal: lastEvents > 0 && sim.events[lastEvents - 1]?.type === 'traversalEnd' });
+    }
     lastPelvis = py;
     report.pelvis = { maxVerticalSpeed: +maxVy.toFixed(2), meanVerticalSpeed: +(sumVy / Math.max(1, nVy)).toFixed(3), note: 'grounded frames only; m/s' };
     report.state = { t: +s.t.toFixed(2), x: +s.x.toFixed(2), y: +s.y.toFixed(3), speed: +s.speed.toFixed(2), traversal: s.traversal, done: s.done };

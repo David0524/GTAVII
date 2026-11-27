@@ -396,6 +396,28 @@ the feel. That covers:
 First step: agree the root-motion and IK contract with the engine (ENGINE_REQUESTS), meaning who
 moves the capsule, how traversal detection hands targets to the animation, and ragdoll ownership.
 
+**Progress:**
+- **M1, the course** (`?characters=1&scene=move`, `src/characters/test/moveCourseSim.ts`):
+  - Every brief item at real 1970s sizes: kerb, railing, stoop, car hood, dumpster, chain-link
+    fence, subway stairs, turnstile, fire-escape drop ladder, roof gap, hang-drop, scaffold ladder,
+    skid stop and pivot.
+  - A stand-in controller speaks the contract (start, stop, skid, pivot, step and traversal
+    events). Root curves per traversal kind come from `src/characters/anim/Traversal.ts`.
+  - `npx tsx tools/characters/move-test.ts`: **1,000 randomised runs** (speed 0.8–1.15×, start
+    jitter, 30–120 Hz), **all clean**: no snags, no tunnelling, no skipped features. The first run
+    caught a frame-rate-dependent edge-drop bug, now fixed.
+  - Frame strip: `shots/characters/31_move_strip.jpg`. Traversal poses are placeholders (jump
+    loop, the library climb) until M4.
+- **M2, steps without a pop:**
+  - The autostep is absorbed by a critically damped pelvis spring (about 0.25 s) while foot IK
+    plants the feet on the true ground.
+  - The stair gait (swing-leg knee lift, lean) switches on from step cadence.
+  - Measured over the kerb, stoop and subway stairs at a run: **peak pelvis vertical speed
+    4.1 m/s, against 11.8 m/s without smoothing** (a 0.2 m jump in one frame).
+- **Gameplay hand-off:** `g.locomotion()` returns gait (normal, limp, drunk, carry_heavy, tired)
+  plus swayDeg, turnMul, stopMul and stumble, to drive the gait layers (M7). Carrying a body takes
+  both hands. A timed roll is under 6 m; ragdoll from 6 m.
+
 ## Known issues (honest)
 - **Faces** (our heads, distant crowds and Low): still mannequin-like close up; they're only seen
   at distance now. No blinks or lip-sync yet on any head (Rocketbox facial bones are there).
