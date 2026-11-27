@@ -1,0 +1,115 @@
+{
+  "id": "barks.player_greet",
+  "core": false,
+  "note": "Player greet/antagonize (gameplay a1d32ef). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
+  "lines": [
+    {
+      "context": "warm",
+      "lead": "teddy",
+      "emotion": "easy",
+      "text": "Evening. Keep your nose clean."
+    },
+    {
+      "context": "warm",
+      "lead": "teddy",
+      "emotion": "warm",
+      "text": "How's the family? Tell 'em Teddy says hello."
+    },
+    {
+      "context": "warm",
+      "lead": "teddy",
+      "emotion": "easy",
+      "text": "Good to see you. Stay off the avenue tonight."
+    },
+    {
+      "context": "plain",
+      "lead": "teddy",
+      "emotion": "flat",
+      "text": "Evening."
+    },
+    {
+      "context": "plain",
+      "lead": "teddy",
+      "emotion": "flat",
+      "text": "How ya doing."
+    },
+    {
+      "context": "plain",
+      "lead": "teddy",
+      "emotion": "dry",
+      "text": "Hot enough for you?"
+    },
+    {
+      "context": "warm",
+      "lead": "delphine",
+      "emotion": "warm",
+      "text": "Hey, baby. You eating? You look thin."
+    },
+    {
+      "context": "warm",
+      "lead": "delphine",
+      "emotion": "easy",
+      "text": "There you are. Tell your sister I said hi."
+    },
+    {
+      "context": "warm",
+      "lead": "delphine",
+      "emotion": "dry",
+      "text": "You still owe me a coffee. I'm counting."
+    },
+    {
+      "context": "plain",
+      "lead": "delphine",
+      "emotion": "cool",
+      "text": "Evening."
+    },
+    {
+      "context": "plain",
+      "lead": "delphine",
+      "emotion": "cool",
+      "text": "Mm-hm. How you doing."
+    },
+    {
+      "context": "plain",
+      "lead": "delphine",
+      "emotion": "dry",
+      "text": "Nice shoes. Keep 'em out of puddles."
+    },
+    {
+      "context": "warm",
+      "lead": "nick",
+      "emotion": "expansive",
+      "text": "My friend! How's business? Good? Good!"
+    },
+    {
+      "context": "warm",
+      "lead": "nick",
+      "emotion": "expansive",
+      "text": "You look well! Eat something, you look well but thin."
+    },
+    {
+      "context": "warm",
+      "lead": "nick",
+      "emotion": "warm",
+      "text": "Ah, the neighbourhood. Best people in the city."
+    },
+    {
+      "context": "plain",
+      "lead": "nick",
+      "emotion": "polite",
+      "text": "Good afternoon."
+    },
+    {
+      "context": "plain",
+      "lead": "nick",
+      "emotion": "expansive",
+      "text": "A beautiful day! Terrible heat, beautiful day."
+    },
+    {
+      "context": "plain",
+      "lead": "nick",
+      "emotion": "polite",
+      "text": "Hello, hello."
+    }
+  ]
+}

@@ -154,6 +154,40 @@ def apply():
         f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
     print(n, "memory barks across", len(M), "pools")
 
+# Player-side greet/antagonize (gameplay a1d32ef). context = warm|plain (greet), first|again (antagonize); lead = teddy|delphine|nick.
+PLAYER = {
+ "barks.player_greet": [
+  ("warm", "teddy", "easy", "Evening. Keep your nose clean."), ("warm", "teddy", "warm", "How's the family? Tell 'em Teddy says hello."),
+  ("warm", "teddy", "easy", "Good to see you. Stay off the avenue tonight."),
+  ("plain", "teddy", "flat", "Evening."), ("plain", "teddy", "flat", "How ya doing."), ("plain", "teddy", "dry", "Hot enough for you?"),
+  ("warm", "delphine", "warm", "Hey, baby. You eating? You look thin."), ("warm", "delphine", "easy", "There you are. Tell your sister I said hi."),
+  ("warm", "delphine", "dry", "You still owe me a coffee. I'm counting."),
+  ("plain", "delphine", "cool", "Evening."), ("plain", "delphine", "cool", "Mm-hm. How you doing."), ("plain", "delphine", "dry", "Nice shoes. Keep 'em out of puddles."),
+  ("warm", "nick", "expansive", "My friend! How's business? Good? Good!"), ("warm", "nick", "expansive", "You look well! Eat something, you look well but thin."),
+  ("warm", "nick", "warm", "Ah, the neighbourhood. Best people in the city."),
+  ("plain", "nick", "polite", "Good afternoon."), ("plain", "nick", "expansive", "A beautiful day! Terrible heat, beautiful day."), ("plain", "nick", "polite", "Hello, hello.")],
+ "barks.player_antagonize": [
+  ("first", "teddy", "hard", "You got a problem, pal? Because I'm listening."), ("first", "teddy", "dry", "Keep looking at me like that. See what happens."),
+  ("first", "teddy", "hard", "Move. I won't ask twice."),
+  ("again", "teddy", "hard", "I said move. You deaf or just stupid?"), ("again", "teddy", "cold", "Last chance. I used to be a cop. I remember how."),
+  ("first", "delphine", "cold", "Something you want to say to my face, sugar?"), ("first", "delphine", "cool", "Keep walking. Rule two: I don't repeat myself."),
+  ("first", "delphine", "cold", "You're in my way. That's a problem for one of us."),
+  ("again", "delphine", "cold", "Still here? Huh. Brave or dumb. Let's find out."), ("again", "delphine", "hard", "I've got a razor and a bad week. Pick."),
+  ("first", "nick", "haughty", "Do you know who I am? No? Good. Get out of my way."), ("first", "nick", "irritated", "You're blocking a man with a schedule."),
+  ("first", "nick", "haughty", "Watch the suit. This suit is worth your month."),
+  ("again", "nick", "furious", "Again? In Kastoria we'd settle this behind the church."), ("again", "nick", "furious", "I have lawyers. I have cousins. Which one do you want?")],
+}
+
+
+def apply_player():
+    for pid, rows in PLAYER.items():
+        for r in rows: assert len(r[3]) <= 90, r
+        (B / f"{pid.split('.', 1)[1]}.json").write_text(json.dumps({"id": pid, "core": False,
+            "note": "Player greet/antagonize (gameplay a1d32ef). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
+            "lines": [{"context": c, "lead": ld, "emotion": e, "text": t} for c, ld, e, t in rows]}, ensure_ascii=False, indent=2) + "\n")
+    print(sum(len(v) for v in PLAYER.values()), "player greet/antagonize lines")
+
 
 if __name__ == "__main__":
     apply()
+    apply_player()

@@ -1,0 +1,97 @@
+{
+  "id": "barks.player_antagonize",
+  "core": false,
+  "note": "Player greet/antagonize (gameplay a1d32ef). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
+  "lines": [
+    {
+      "context": "first",
+      "lead": "teddy",
+      "emotion": "hard",
+      "text": "You got a problem, pal? Because I'm listening."
+    },
+    {
+      "context": "first",
+      "lead": "teddy",
+      "emotion": "dry",
+      "text": "Keep looking at me like that. See what happens."
+    },
+    {
+      "context": "first",
+      "lead": "teddy",
+      "emotion": "hard",
+      "text": "Move. I won't ask twice."
+    },
+    {
+      "context": "again",
+      "lead": "teddy",
+      "emotion": "hard",
+      "text": "I said move. You deaf or just stupid?"
+    },
+    {
+      "context": "again",
+      "lead": "teddy",
+      "emotion": "cold",
+      "text": "Last chance. I used to be a cop. I remember how."
+    },
+    {
+      "context": "first",
+      "lead": "delphine",
+      "emotion": "cold",
+      "text": "Something you want to say to my face, sugar?"
+    },
+    {
+      "context": "first",
+      "lead": "delphine",
+      "emotion": "cool",
+      "text": "Keep walking. Rule two: I don't repeat myself."
+    },
+    {
+      "context": "first",
+      "lead": "delphine",
+      "emotion": "cold",
+      "text": "You're in my way. That's a problem for one of us."
+    },
+    {
+      "context": "again",
+      "lead": "delphine",
+      "emotion": "cold",
+      "text": "Still here? Huh. Brave or dumb. Let's find out."
+    },
+    {
+      "context": "again",
+      "lead": "delphine",
+      "emotion": "hard",
+      "text": "I've got a razor and a bad week. Pick."
+    },
+    {
+      "context": "first",
+      "lead": "nick",
+      "emotion": "haughty",
+      "text": "Do you know who I am? No? Good. Get out of my way."
+    },
+    {
+      "context": "first",
+      "lead": "nick",
+      "emotion": "irritated",
+      "text": "You're blocking a man with a schedule."
+    },
+    {
+      "context": "first",
+      "lead": "nick",
+      "emotion": "haughty",
+      "text": "Watch the suit. This suit is worth your month."
+    },
+    {
+      "context": "again",
+      "lead": "nick",
+      "emotion": "furious",
+      "text": "Again? In Kastoria we'd settle this behind the church."
+    },
+    {
+      "context": "again",
+      "lead": "nick",
+      "emotion": "furious",
+      "text": "I have lawyers. I have cousins. Which one do you want?"
+    }
+  ]
+}
