@@ -90,7 +90,7 @@ export const ROWS: Row[] = [
   { key: 'hudStamina', label: 'Breath (stamina)', kind: 'choice', options: M3 },
   { key: 'hudInjuries', label: 'Injury tags', kind: 'choice', options: M3 },
   { key: 'hudLocation', label: 'Neighbourhood names', kind: 'choice', options: M3 },
-  { key: 'hudDiscovery', label: '"Pencilled in" notes', kind: 'choice', options: M3 },
+  { key: 'hudDiscovery', label: '"Added to map" notes', kind: 'choice', options: M3 },
   { key: 'hudTurns', label: 'Route call-outs', kind: 'choice', options: M3 },
   { key: 'hudPrompts', label: 'Button prompts', kind: 'choice', options: M3 },
   { group: 'Map', keys: ['minimapOrientation', 'minimapSize', 'mapIconSize', 'units', 'clock24'] },
@@ -134,7 +134,7 @@ export const SETTING_COUNT = ROWS.filter((r) => 'key' in r).length;
 const PAD_NAMES = ['A / ✕', 'B / ○', 'X / □', 'Y / △', 'LB / L1', 'RB / R1', 'LT / L2', 'RT / R2', 'View / Create', 'Menu / Options', 'L3', 'R3', 'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'Home'];
 const ACTION_NAMES: Partial<Record<ButtonAction, string>> = {
   sprint: 'Sprint', jump: 'Jump · climb', use: 'Use · enter · talk', photo: 'Free camera · photo', map: 'Map', pause: 'Pause', inventory: 'Pockets', weaponSelect: 'Weapon selector',
-  waypoint: 'Pencil a waypoint (map)', skip: 'Skip cutscene (hold)', rise: 'Free camera up', sink: 'Free camera down', hud: 'Developer overlay',
+  waypoint: 'Set a waypoint (map)', skip: 'Skip cutscene (hold)', rise: 'Free camera up', sink: 'Free camera down', hud: 'Developer overlay',
 };
 const keyName = (c: string) => c.replace(/^Key/, '').replace(/^Digit/, '').replace('Left', ' (left)').replace('Right', ' (right)').replace('Backquote', '`').replace('BracketLeft', '[').replace('BracketRight', ']');
 

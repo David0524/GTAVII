@@ -9,7 +9,9 @@ export interface UiEvents {
   subtitle: { speaker: string; text: string; channel: 'scene' | 'ambient'; seconds?: number };
   objective: ObjectiveView | null;
   /** A map place was introduced: tip, overheard line, newspaper ad, call, card or mission. */
-  discover: { placeId: string; via: 'tip' | 'overheard' | 'news' | 'call' | 'card' | 'mission' | 'enter'; from?: string };
+  /** `notify` overrides the place's own flag (side quests, strangers, sellers are tagged by their content: discoveryNotify);
+   *  `mission` marks it as part of that mission, so it may toast during it. Default: silent (user feedback, 2026-11-27). */
+  discover: { placeId: string; via: 'tip' | 'overheard' | 'news' | 'call' | 'card' | 'mission' | 'enter'; from?: string; notify?: 'silent' | 'toast'; mission?: string };
   notify: { kind: 'help' | 'toast' | 'saved'; text: string };
   heat: { phase: HeatView['phase']; radio?: string };
   damage: { amount: number; region?: string };

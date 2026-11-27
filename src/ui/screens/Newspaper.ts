@@ -14,7 +14,7 @@ import { esc, money } from '../util';
 export class Newspaper implements Tab {
   id = 'paper'; label = 'PAPER';
   el = document.createElement('div');
-  hint = 'Tap an ad to pencil it on your map';
+  hint = 'Tap an ad to add it to your map';
   private page: 'front' | 'inside' | 'classifieds' = 'front';
   private setNav: (i: NavItem[], keep?: boolean) => void = () => {};
   onToast?: (t: string) => void;
@@ -41,7 +41,7 @@ export class Newspaper implements Tab {
           if (!a.placeId) return;
           const ok = this.model.discovery.reveal(a.placeId, 'news');
           const p = this.model.discovery.place(a.placeId);
-          this.onToast?.(ok ? `Pencilled in: ${p?.name ?? 'the address'}` : 'Already on your map');
+          this.onToast?.(ok ? `Added to map · ${p?.name ?? 'the address'}` : 'Already on your map');
           this.render();
         } });
       });
@@ -72,11 +72,11 @@ export class Newspaper implements Tab {
     this.setNav(items, true);
   }
 
-  /** Page three: the classified grid. Car ads say to call from a payphone; ads with a place pencil it on the map. */
+  /** Page three: the classified grid. Car ads say to call from a payphone; ads with a place add it to the map. */
   private classifieds(tabs: string, items: NavItem[]) {
     const ads = this.host.classifieds?.() ?? [];
     const cols: [ClassifiedAd['kind'], string][] = [['car', 'Cars'], ['room', 'Rooms'], ['job', 'Help wanted'], ['misc', 'Misc']];
-    this.el.innerHTML = `${tabs}<article class="np-sheet cl-sheet"><header class="cl-mast"><h2>CLASSIFIED</h2><span>Read it, call it, pencil it · 20 words or less</span></header>
+    this.el.innerHTML = `${tabs}<article class="np-sheet cl-sheet"><header class="cl-mast"><h2>CLASSIFIED</h2><span>Read it, call it, find it · 20 words or less</span></header>
       <div class="cl-grid">${cols.map(([k, h]) => `<section class="cl-col"><h3>${h}</h3>${ads.filter((a) => a.kind === k).map((a) => `<button class="cl-ad" data-id="${esc(a.id)}"><span class="tx">${esc(a.text)}</span> <b class="pr">${money(a.price, false)}${k === 'room' ? '/wk' : k === 'job' ? '/wk' : ''}</b> <span class="ph">${esc(a.phone)}</span>${a.placeId && this.model.discovery.isKnown(a.placeId) ? '<i>✓ on your map</i>' : ''}</button>`).join('') || '<p class="cl-none">No listings today.</p>'}</section>`).join('')}</div>
       <div class="cl-foot">All ads payable in advance. The Courier is not responsible for errors after first insertion.</div></article>`;
     this.el.querySelectorAll<HTMLElement>('.cl-ad').forEach((b) => {
@@ -86,7 +86,7 @@ export class Newspaper implements Tab {
         if (!a.placeId) return;
         const ok = this.model.discovery.reveal(a.placeId, 'news');
         const p = this.model.discovery.place(a.placeId);
-        if (a.kind !== 'car') this.onToast?.(ok ? `Pencilled in: ${p?.name ?? 'the address'}` : 'Already on your map');
+        if (a.kind !== 'car') this.onToast?.(ok ? `Added to map · ${p?.name ?? 'the address'}` : 'Already on your map');
         this.render();
       } });
     });

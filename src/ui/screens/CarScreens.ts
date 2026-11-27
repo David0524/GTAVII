@@ -117,7 +117,7 @@ function lotIdx(items: NavItem[], _what: 'offer') { const i = items.findIndex((i
 export class MyCarsTab implements Tab {
   id = 'cars'; label = 'CARS';
   el = document.createElement('div');
-  hint = 'Tap Pencil a route to mark a car on your map';
+  hint = 'Tap Set waypoint to find a car on your map';
   onToast?: (t: string) => void;
   /** The index wires this to the map's waypoint. */
   onRoute?: (x: number, z: number, car: CarView) => void;
@@ -155,8 +155,8 @@ export class MyCarsTab implements Tab {
         const b = document.createElement('button'); b.className = 'u-btn primary'; b.textContent = `Pay the pound ${money(c.towed.fee, false)}`; acts.appendChild(b);
         items.push({ el: b, activate: () => { const r = this.host.act({ kind: 'payPound', car: c.id }); this.onToast?.(r.text ?? ''); this.render(); } });
       }
-      const route = document.createElement('button'); route.className = 'u-btn'; route.textContent = 'Pencil a route'; acts.appendChild(route);
-      items.push({ el: route, activate: () => { this.onRoute?.(c.where.x, c.where.z, c); this.onToast?.(`Route pencilled to ${c.name}`); } });
+      const route = document.createElement('button'); route.className = 'u-btn'; route.textContent = 'Set waypoint'; acts.appendChild(route);
+      items.push({ el: route, activate: () => { this.onRoute?.(c.where.x, c.where.z, c); this.onToast?.(`Waypoint set · ${c.name}`); } });
     }
     this.setNav(items, keep);
     this.el.scrollTop = scroll;

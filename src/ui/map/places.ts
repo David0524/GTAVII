@@ -25,6 +25,10 @@ export interface Place {
   source: 'narrative' | 'chunks' | 'generated';
   /** true until interiors/narrative supply the real business at this spot (generated stand-in). */
   placeholder?: boolean;
+  /** 'toast' = worth coming back to (a story contact, side-quest giver, seller): one "Added to map" note.
+   *  Everything else appears on the map silently (narrative: places.json discovery.notify). */
+  notify?: 'toast';
+  notifyWhy?: string;
 }
 
 export interface PlacesFile { format: 't74-ui-places'; version: 1; generatedFrom: string[]; places: Place[] }

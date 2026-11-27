@@ -59,7 +59,7 @@ export class Business implements Tab {
         const i = +t.dataset.i!, acts = t.querySelector('.acts')!;
         const kind = b.trouble[i].kind;
         const opts: [string, () => void][] = kind === 'shakedown' || kind === 'protection'
-          ? [['Pay it', () => this.resolve(b, i, 'Paid. They\'ll be back next week.')], ['Refuse', () => this.resolve(b, i, 'Refused. Expect an inspection, or worse.')], ['Handle it yourself', () => this.resolve(b, i, 'Pencilled in: deal with it in person.')]]
+          ? [['Pay it', () => this.resolve(b, i, 'Paid. They\'ll be back next week.')], ['Refuse', () => this.resolve(b, i, 'Refused. Expect an inspection, or worse.')], ['Handle it yourself', () => this.resolve(b, i, 'Added to map: deal with it in person.')]]
           : [['Noted', () => this.resolve(b, i, 'Noted.')]];
         for (const [l, fn] of opts) { const el = document.createElement('button'); el.className = 'u-btn'; el.textContent = l; acts.appendChild(el); items.push({ el, activate: fn }); }
       });

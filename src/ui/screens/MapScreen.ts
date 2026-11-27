@@ -66,7 +66,7 @@ export class MapScreen {
     const known = this.model.discovery.known();
     const c = this.model.discovery.counts;
     const items: NavItem[] = [];
-    this.side.innerHTML = `<h4>LEGEND</h4><div class="count">${c.known} ${c.known === 1 ? 'place' : 'places'} pencilled in${c.fresh ? ` · <b style="color:#9e2a24">${c.fresh} new</b>` : ''}</div>`;
+    this.side.innerHTML = `<h4>LEGEND</h4><div class="count">${c.known} ${c.known === 1 ? 'place' : 'places'} on your map${c.fresh ? ` · <b style="color:#9e2a24">${c.fresh} new</b>` : ''}</div>`;
     for (const f of FILTER_GROUPS) {
       const n = known.filter((p) => CATEGORIES[p.cat].group === f.id).length;
       const b = document.createElement('button');
@@ -101,7 +101,7 @@ export class MapScreen {
       c.innerHTML = `<div class="cat"><img alt="" src="${pictogramURL('mission', 18, 'print')}">STORY</div><h3>${esc(ms.title)}</h3>
         ${ms.window ? `<div class="u-window">${esc(windowLabel(ms.window[0], ms.window[1]))}</div>` : ''}
         ${ms.blurb ? `<div style="margin-top:6px">${esc(ms.blurb)}</div>` : ''}<div class="acts"></div>`;
-      acts.push(['PENCIL A ROUTE', () => this.setWaypoint({ x: ms.x, z: ms.z })]);
+      acts.push(['SET WAYPOINT', () => this.setWaypoint({ x: ms.x, z: ms.z })]);
     } else if (s.place) {
       const p = s.place, e = this.model.discovery.entry(p.id);
       c.innerHTML = `<div class="cat"><img alt="" src="${pictogramURL(p.cat, 18, 'print')}">${esc(CATEGORIES[p.cat].label)}</div>
@@ -109,12 +109,12 @@ export class MapScreen {
         ${p.blurb ? `<div style="margin-top:6px">${esc(p.blurb)}</div>` : ''}
         ${e ? `<div class="found">${VIA[e.via]}${e.via === 'start' ? '' : ` · ${gameTime(e.at)}`}.</div>` : ''}
         ${p.placeholder ? '<div class="ph">Stand-in business: interiors and narrative will name the real one.</div>' : ''}<div class="acts"></div>`;
-      acts.push(['PENCIL A ROUTE', () => this.setWaypoint({ x: p.x, z: p.z })]);
+      acts.push(['SET WAYPOINT', () => this.setWaypoint({ x: p.x, z: p.z })]);
     } else if (s.at) {
       const at = s.at;
       const n = this.nearestCorner(at.x, at.z);
       c.innerHTML = `<div class="cat">A SPOT ON THE MAP</div><h3>${esc(n)}</h3><div class="acts"></div>`;
-      acts.push(['PENCIL A ROUTE', () => this.setWaypoint(at)]);
+      acts.push(['SET WAYPOINT', () => this.setWaypoint(at)]);
       acts.push(['CIRCLE IT', () => { this.model.annotations.push({ x: at.x, z: at.z, mark: 'circle' }); this.model.version++; c.style.display = 'none'; }]);
     }
     if (this.model.annotations.length) acts.push(['RUB OUT MY MARKS', () => { this.model.annotations = []; this.model.version++; c.style.display = 'none'; }]);
