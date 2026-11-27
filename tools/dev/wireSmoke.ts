@@ -29,6 +29,7 @@ try {
   await page.waitForTimeout(12_000); // a few headless frames of traffic
   const info = await page.evaluate(() => { const T = (window as any).__T74; return { cars: T.sim?.vehicles.length, peds: T.sim?.peds.length, simMs: T.sim?.lastUpdateMs, draws: T.renderer.info.render.drawCalls, mode: T.mode, screen: T.screen, cam: T.camera.position.toArray().map((v: number) => +v.toFixed(1)), player: [T.player.pos.x, T.player.pos.y, T.player.pos.z].map((v: number) => +v.toFixed(1)), active: T.player.active, body: T.body ? { vis: T.body.object.visible, pos: T.body.object.position.toArray().map((v: number) => +v.toFixed(1)), inScene: !!T.body.object.parent, kind: T.body.constructor.name } : null, marks: T.load.marks.map(([n, t]: [string, number]) => `${n} ${(t / 1000).toFixed(1)}`).join(' | ') }; });
   console.log(JSON.stringify(info));
+  if (process.env.PROBE) console.log('probe', await page.evaluate(process.env.PROBE)); // ad-hoc page expression
   await page.screenshot({ path: out, type: 'jpeg', quality: 85 });
 } finally { await browser.close(); stop(); }
 console.log(logs.slice(-20).join('\n'));
