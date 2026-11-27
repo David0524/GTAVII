@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "cinema_lobby #0  b6760   1940 use 5 style 7  7.6x22.0 m  times_square  West 48th Street\nbuild 56 ms (main thread, medium)  verts 8596 tris 7408 cells 2 slots 10 markers 3 colliders 25  [webgl2]",
+  "stats": {
+   "verts": 8596,
+   "tris": 7408,
+   "genMs": 6.4,
+   "bakeMs": 49.1,
+   "cells": 2
+  },
+  "ms": 55.5,
+  "slots": 10,
+  "markers": 3,
+  "colliders": 25,
+  "building": 6760,
+  "unit": "b6760u2"
+ }
+]

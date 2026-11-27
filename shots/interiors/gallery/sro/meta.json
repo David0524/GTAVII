@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "sro #0  b6241 186 5 AVENUE  1884 use 4 style 1  4.2x8.5 m  tenderloin  West 23rd Street\nbuild 51 ms (main thread, medium)  verts 13417 tris 11144 cells 9 slots 2 markers 8 colliders 132  [webgl2]",
+  "stats": {
+   "verts": 13417,
+   "tris": 11144,
+   "genMs": 8.2,
+   "bakeMs": 42.7,
+   "cells": 9
+  },
+  "ms": 51,
+  "slots": 2,
+  "markers": 8,
+  "colliders": 132,
+  "building": 6241,
+  "unit": "b6241"
+ }
+]

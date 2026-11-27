@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "union_hall #0  b8257 270 5 AVENUE  1851 use 8 style 8  12.0x18.0 m  tenderloin  West 29th Street\nbuild 374 ms (main thread, medium)  verts 45492 tris 24818 cells 1 slots 7 markers 2 colliders 221  [webgl2]",
+  "stats": {
+   "verts": 45492,
+   "tris": 24818,
+   "genMs": 23.7,
+   "bakeMs": 350,
+   "cells": 1
+  },
+  "ms": 373.79999999981374,
+  "slots": 7,
+  "markers": 2,
+  "colliders": 221,
+  "building": 8257,
+  "unit": "b8257"
+ }
+]

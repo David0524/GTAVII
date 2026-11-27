@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "fur_showroom #0  b5017 775 AVENUE OF THE AMERICAS  1904 use 3 style 1  7.2x15.0 m  fur  6th Avenue\nbuild 52 ms (main thread, medium)  verts 11719 tris 7994 cells 2 slots 2 markers 4 colliders 37  [webgl2]",
+  "stats": {
+   "verts": 11719,
+   "tris": 7994,
+   "genMs": 5.4,
+   "bakeMs": 46.3,
+   "cells": 2
+  },
+  "ms": 51.799999999813735,
+  "slots": 2,
+  "markers": 4,
+  "colliders": 37,
+  "building": 5017,
+  "unit": "b5017u1"
+ }
+]

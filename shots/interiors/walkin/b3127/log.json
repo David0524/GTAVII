@@ -1,0 +1,98 @@
+[
+ {
+  "d": 8,
+  "inside": null,
+  "live": 9,
+  "visCells": 7,
+  "draws": 84,
+  "extHidden": false
+ },
+ {
+  "d": 5,
+  "inside": null,
+  "live": 9,
+  "visCells": 16,
+  "draws": 128,
+  "extHidden": false
+ },
+ {
+  "d": 3,
+  "inside": null,
+  "live": 9,
+  "visCells": 11,
+  "draws": 119,
+  "extHidden": false
+ },
+ {
+  "d": 1.5,
+  "inside": null,
+  "live": 9,
+  "visCells": 11,
+  "draws": 113,
+  "extHidden": false
+ },
+ {
+  "d": 0.5,
+  "inside": null,
+  "live": 9,
+  "visCells": 11,
+  "draws": 112,
+  "extHidden": false
+ },
+ {
+  "d": -0.5,
+  "inside": {
+   "interiorId": "b3127",
+   "kind": "tenement",
+   "roomVolume": 137,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 10,
+  "visCells": 13,
+  "draws": 82,
+  "extHidden": false
+ },
+ {
+  "d": -1.5,
+  "inside": {
+   "interiorId": "b3127",
+   "kind": "tenement",
+   "roomVolume": 137,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 10,
+  "visCells": 8,
+  "draws": 67,
+  "extHidden": false
+ },
+ {
+  "d": -3,
+  "inside": {
+   "interiorId": "b3127",
+   "kind": "tenement",
+   "roomVolume": 137,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 10,
+  "visCells": 7,
+  "draws": 63,
+  "extHidden": false
+ },
+ {
+  "d": -5,
+  "inside": {
+   "interiorId": "b3127",
+   "kind": "tenement",
+   "roomVolume": 137,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 11,
+  "visCells": 7,
+  "draws": 70,
+  "extHidden": true
+ }
+]

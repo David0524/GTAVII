@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "barber #0  b1077 12 WEST 23 STREET  1859 use 5 style 2  6.6x13.5 m  tenderloin  West 23rd Street\nbuild 43 ms (main thread, medium)  verts 6145 tris 4440 cells 2 slots 6 markers 4 colliders 38  [webgl2]",
+  "stats": {
+   "verts": 6145,
+   "tris": 4440,
+   "genMs": 8.8,
+   "bakeMs": 34.1,
+   "cells": 2
+  },
+  "ms": 43,
+  "slots": 6,
+  "markers": 4,
+  "colliders": 38,
+  "building": 1077,
+  "unit": "b1077u1"
+ }
+]

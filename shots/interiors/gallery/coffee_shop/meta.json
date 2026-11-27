@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "coffee_shop #0  b4356 1115 BROADWAY  1914 use 5 style 4  12.0x12.0 m  tenderloin  West 24th Street\nbuild 77 ms (main thread, medium)  verts 10602 tris 8470 cells 2 slots 9 markers 6 colliders 74  [webgl2]",
+  "stats": {
+   "verts": 10602,
+   "tris": 8470,
+   "genMs": 4.9,
+   "bakeMs": 71.7,
+   "cells": 2
+  },
+  "ms": 76.6999999997206,
+  "slots": 9,
+  "markers": 6,
+  "colliders": 74,
+  "building": 4356,
+  "unit": "b4356u7"
+ }
+]

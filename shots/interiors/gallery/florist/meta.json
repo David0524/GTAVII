@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "florist #0  b5792   1891 use 4 style 1  6.1x15.0 m  tenderloin  West 24th Street\nbuild 50 ms (main thread, medium)  verts 8312 tris 7228 cells 2 slots 1 markers 4 colliders 35  [webgl2]",
+  "stats": {
+   "verts": 8312,
+   "tris": 7228,
+   "genMs": 5,
+   "bakeMs": 44.9,
+   "cells": 2
+  },
+  "ms": 49.89999999990687,
+  "slots": 1,
+  "markers": 4,
+  "colliders": 35,
+  "building": 5792,
+  "unit": "b5792u2"
+ }
+]

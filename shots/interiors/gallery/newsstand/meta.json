@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "newsstand #0  b2956 24 WEST 25 STREET  1911 use 5 style 4  3.7x14.0 m  tenderloin  West 25th Street\nbuild 35 ms (main thread, medium)  verts 7355 tris 4952 cells 2 slots 2 markers 4 colliders 28  [webgl2]",
+  "stats": {
+   "verts": 7355,
+   "tris": 4952,
+   "genMs": 3.6,
+   "bakeMs": 31.3,
+   "cells": 2
+  },
+  "ms": 34.90000000037253,
+  "slots": 2,
+  "markers": 4,
+  "colliders": 28,
+  "building": 2956,
+  "unit": "b2956u1"
+ }
+]

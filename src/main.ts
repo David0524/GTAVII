@@ -48,6 +48,7 @@ type Mode = 'onfoot' | 'photo';
 async function main() {
   if (new URLSearchParams(location.search).has('vehicles')) return void (await import('./vehicles/testlot/TestLot')).runTestLot(); // vehicles workstream test scene
   if (new URLSearchParams(location.search).has('characters')) { await (await import('./characters/test/CharactersTest')).runCharactersTest(); return; } // characters workstream test scene
+  if (new URLSearchParams(location.search).has('interiors')) return void (await import('./interiors/test/testScene')).runInteriorsTest(); // interiors workstream test scene
   loadReport.mark('main');
   if (new URLSearchParams(location.search).has('gameplay')) return void (await import('./gameplay/scene/GameplayScene')).runGameplayScene(); // gameplay test scene (?gameplay=1)
   const params = new URLSearchParams(location.search);

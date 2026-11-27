@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "garment_showroom #0  b1131 1372 BROADWAY  1922 use 5 style 4  5.7x8.0 m  garment  West 37th Street\nbuild 58 ms (main thread, medium)  verts 8402 tris 5338 cells 1 slots 1 markers 1 colliders 30  [webgl2]",
+  "stats": {
+   "verts": 8402,
+   "tris": 5338,
+   "genMs": 5.6,
+   "bakeMs": 52.6,
+   "cells": 1
+  },
+  "ms": 58.3000000002794,
+  "slots": 1,
+  "markers": 1,
+  "colliders": 30,
+  "building": 1131,
+  "unit": "b1131u7"
+ }
+]
