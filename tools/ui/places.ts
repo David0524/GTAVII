@@ -59,6 +59,7 @@ const KIND: Record<string, Category> = {
   landmark: 'landmark', sro: 'mission', precinct: 'police', bar: 'bar', residence: 'mission', office: 'mission', diner: 'food',
   garage: 'garage', loft: 'mission', restaurant: 'food', cafe: 'food', shop: 'shop', stand: 'service',
 };
+// kind 'interior' on its own (no place at its door) stays a mission-category pin that's found on entry
 const np = content('places.json');
 const leads = JSON.parse(content('cast/leads.json') ?? '[]') as { id: string; name: string; home: string }[];
 const homes = new Map(leads.map((l) => [l.home, l]));
@@ -67,6 +68,12 @@ if (np) {
     const at = idx.resolve(p.at, p.between, p.side);
     if (!at) { warn.push(`unresolved narrative place ${p.id} "${p.at}"`); continue; }
     const lead = homes.get(p.id);
+    // an interior at the same spot as a narrative place (Grand Central's concourse) is not a second pin:
+    // walking in becomes that place's 'enter' channel
+    if (p.kind === 'interior') {
+      const host = places.find((q) => q.source === 'narrative' && Math.hypot(q.x - at[0], q.z - at[1]) < 25);
+      if (host) { if (!host.reveal.includes('enter')) host.reveal.push('enter'); continue; }
+    }
     const cat: Category = lead ? 'home' : KIND[p.kind] ?? 'mission';
     const name = p.name.replace(/\s*\(.*?\)\s*/g, ' ').trim();
     places.push({
