@@ -114,6 +114,51 @@
       "note": "In the alley off W 31st; no fire is ever lit (content rule). Cops among the targets are ordinary killable police (heat only)."
     },
     {
+      "id": "o8c",
+      "type": "chase",
+      "target": "npc.hired_firebug",
+      "catchDistanceM": 3,
+      "text": "Catch the firebug on the W 31st roofs",
+      "finish": "tackle",
+      "barks": "barks.traversal",
+      "traversal": [
+        {
+          "move": "drop_ladder",
+          "at": "a dry-cleaner's rear fire escape off W 31st, ladder already down (he used it)",
+          "marker": "tv.w31_fe_ladder"
+        },
+        {
+          "move": "fire_escape",
+          "at": "five landings up, past a window where an old man is watching the ballgame",
+          "marker": "tv.w31_fe_stairs"
+        },
+        {
+          "move": "vault",
+          "at": "over a skylight frame on the roof (don't step on the glass)",
+          "marker": "tv.w31_skylight"
+        },
+        {
+          "move": "roof_jump",
+          "at": "across a 1.5 m gap to the next walk-up, the firebug's gas can bouncing ahead",
+          "marker": "tv.w31_gap",
+          "note": "He drops the can; it rolls, leaking. Don't fire near it."
+        },
+        {
+          "move": "ladder",
+          "at": "down a steel roof ladder to a lower setback roof",
+          "marker": "tv.w31_setback"
+        },
+        {
+          "move": "climb",
+          "at": "up onto a billboard catwalk, where he's cornered",
+          "marker": "tv.w31_billboard",
+          "note": "Nowhere left to run: the catch."
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "checkpointAfterMarker": "tv.w31_fe_stairs"
+    },
+    {
       "id": "o9",
       "type": "dialogue",
       "text": "Prentiss, in his car, with the money",

@@ -910,3 +910,8 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   2. Turn the purse-snatch route into a systemic random encounter that picks its beats from nearby `tv.*` markup.
   3. Add a rooftop chase to M26 Fire Watch (Prentiss's torch man).
   4. Add a `barks.chase_bystander` pool ("Hey! My cart!").
+- **Brannock:** the user's words, verbatim: "Keep Jimmy Brannock". "Brannock" is added to the pre-ship trademark check list (the Brannock Device).
+- **Chase pass 2:**
+  - **M26**: new o8c, a rooftop chase after the firebug (a dry-cleaner's fire escape, a skylight, a roof gap with a leaking gas can, a setback ladder, a billboard catwalk), finished with a tackle.
+  - **`barks.chase_bystander`**: 18 lines (carts, car hoods, windows, roofs, subway, lots, newsstands).
+  - **Systemic purse-snatch**: an encounter trigger, `trigger.enc_purse_snatch` (ENGINE_REQUESTS 16).

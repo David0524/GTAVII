@@ -62,6 +62,20 @@ ROUTES = {
    "barks": "barks.traversal"},
 }
 
+INSERTS = {
+ # M26: after the firefight the firebug bolts up a fire escape and over the W 31st St roofs.
+ ("mission.fire_watch", "o8b"): {"id": "o8c", "type": "chase", "target": "npc.hired_firebug", "catchDistanceM": 3,
+   "text": "Catch the firebug on the W 31st roofs", "finish": "tackle",
+   "route": [
+     b("drop_ladder", "a dry-cleaner's rear fire escape off W 31st, ladder already down (he used it)", "tv.w31_fe_ladder"),
+     b("fire_escape", "five landings up, past a window where an old man is watching the ballgame", "tv.w31_fe_stairs"),
+     b("vault", "over a skylight frame on the roof (don't step on the glass)", "tv.w31_skylight"),
+     b("roof_jump", "across a 1.5 m gap to the next walk-up, the firebug's gas can bouncing ahead", "tv.w31_gap", "He drops the can; it rolls, leaking. Don't fire near it."),
+     b("ladder", "down a steel roof ladder to a lower setback roof", "tv.w31_setback"),
+     b("climb", "up onto a billboard catwalk, where he's cornered", "tv.w31_billboard", "Nowhere left to run: the catch.")],
+   "checkpointAfter": "tv.w31_fe_stairs", "barks": "barks.traversal"},
+}
+
 SIDE = {
  # Purse snatch: a quick Herald Square chase over street furniture.
  ("mission.side_purse_snatch", "o2"): {
@@ -113,6 +127,13 @@ def _apply(spec, table):
 
 def apply_mission(m):
     _apply(m, ROUTES)
+    for (sid, after), r in INSERTS.items():
+        if m["id"] != sid or any(o["id"] == r["id"] for o in m["objectives"]):
+            continue
+        idx = next(i for i, o in enumerate(m["objectives"]) if o["id"] == after)
+        o = {k: v for k, v in r.items() if k not in ("route", "checkpointAfter")}
+        o["traversal"] = r["route"]; o["traversalMobile"] = MOBILE; o["checkpointAfterMarker"] = r["checkpointAfter"]
+        m["objectives"].insert(idx + 1, o)
 
 
 def apply_side(s):
@@ -121,7 +142,7 @@ def apply_side(s):
 
 def markers():
     out = []
-    for t in (ROUTES, SIDE):
+    for t in (ROUTES, SIDE, INSERTS):
         for (sid, oid), r in t.items():
             for x in r["route"]:
                 out.append((x["marker"], x["move"], x["at"], sid))

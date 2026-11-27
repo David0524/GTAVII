@@ -36,6 +36,26 @@ pool("barks.traversal", False, "Lead lines on climbs, vaults, roof jumps and dro
  ("any", "startled", "Pigeons! Every roof has pigeons!"),
  ("any", "winded", "Fence. Of course there's a fence."))
 
+pool("barks.chase_bystander", False, "Bystanders as a foot chase passes through (traversal beats, crowd_push, car_hood, vault). Plays near the beat's marker.",
+ ("cart", "outraged", "Hey! My cart! You pay for that mustard!"),
+ ("cart", "outraged", "That's a pretzel cart, not a racetrack!"),
+ ("hood", "furious", "Off my hood! I just had it waxed! In Jersey!"),
+ ("hood", "furious", "That's a dent! That's a dent you're making!"),
+ ("crowd", "startled", "Watch it, pal! There's people walking here!"),
+ ("crowd", "startled", "Hey! Hey! Somebody stop him! Or her! Somebody!"),
+ ("crowd", "wry", "Go get him, Clyde. I'll hold your coat."),
+ ("crowd", "excited", "Five bucks says he makes the fence."),
+ ("window", "irritated", "Some of us work in the morning! Run quieter!"),
+ ("window", "amused", "Ma! Ma! There's a guy on the fire escape again!"),
+ ("window", "irritated", "That's my laundry! You're running through my laundry!"),
+ ("roof", "alarmed", "My birds! You scared my birds!"),
+ ("roof", "startled", "Hey, this is a private tar beach! Members only!"),
+ ("roof", "amused", "Mind the gap, Romeo. Last guy didn't."),
+ ("subway", "irritated", "Hey, you gotta pay like everybody else!"),
+ ("subway", "wry", "Thirty-five cents. You're running from thirty-five cents?"),
+ ("lot", "warning", "That fence bites! Watch your pants!"),
+ ("newsstand", "outraged", "My papers! The evening edition's all over Eighth!"))
+
 pool("barks.garment", True, "Pushboys, cutters, pressers, fur workers. Garment and Fur Districts, daytime.",
  ("greet", "cocky", "Morning! Watch the rack, it bites."),
  ("greet", "friendly", "Hey, you new? You look new. Everybody looks new at seven."),

@@ -1,0 +1,50 @@
+{
+  "id": "trigger.enc_purse_snatch",
+  "volume": {
+    "at": "W 34th St & 6th Ave",
+    "radius": 120,
+    "alsoAt": [
+      "W 42nd St & 7th Ave",
+      "8th Ave & W 38th St",
+      "Broadway & W 28th St"
+    ]
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "10:00",
+      "23:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "notDuringMission": true,
+    "minActs": 1
+  },
+  "once": false,
+  "cooldownMin": 90,
+  "do": [
+    {
+      "type": "encounter",
+      "spec": "mission.side_purse_snatch",
+      "systemic": true,
+      "traversalFrom": {
+        "markupKinds": [
+          "vault",
+          "car_hood",
+          "stoop",
+          "crowd_push",
+          "fence_climb",
+          "cellar_doors",
+          "subway_stairs"
+        ],
+        "withinM": 150,
+        "beats": [
+          3,
+          5
+        ]
+      },
+      "note": "Systemic version of Snatch on Thirty-Fourth: a thief bolts past the player; the game builds a 3-5 beat route from nearby traversal markup (ENGINE_REQUESTS 16). Ignoring it is fine. Catch: return the purse (tip $20-60) or keep it (+1 heat if a witness saw). Bystanders use barks.chase_bystander."
+    }
+  ]
+}

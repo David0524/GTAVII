@@ -1,0 +1,97 @@
+{
+  "id": "barks.chase_bystander",
+  "core": false,
+  "note": "Bystanders as a foot chase passes through (traversal beats, crowd_push, car_hood, vault). Plays near the beat's marker.",
+  "lines": [
+    {
+      "context": "cart",
+      "emotion": "outraged",
+      "text": "Hey! My cart! You pay for that mustard!"
+    },
+    {
+      "context": "cart",
+      "emotion": "outraged",
+      "text": "That's a pretzel cart, not a racetrack!"
+    },
+    {
+      "context": "hood",
+      "emotion": "furious",
+      "text": "Off my hood! I just had it waxed! In Jersey!"
+    },
+    {
+      "context": "hood",
+      "emotion": "furious",
+      "text": "That's a dent! That's a dent you're making!"
+    },
+    {
+      "context": "crowd",
+      "emotion": "startled",
+      "text": "Watch it, pal! There's people walking here!"
+    },
+    {
+      "context": "crowd",
+      "emotion": "startled",
+      "text": "Hey! Hey! Somebody stop him! Or her! Somebody!"
+    },
+    {
+      "context": "crowd",
+      "emotion": "wry",
+      "text": "Go get him, Clyde. I'll hold your coat."
+    },
+    {
+      "context": "crowd",
+      "emotion": "excited",
+      "text": "Five bucks says he makes the fence."
+    },
+    {
+      "context": "window",
+      "emotion": "irritated",
+      "text": "Some of us work in the morning! Run quieter!"
+    },
+    {
+      "context": "window",
+      "emotion": "amused",
+      "text": "Ma! Ma! There's a guy on the fire escape again!"
+    },
+    {
+      "context": "window",
+      "emotion": "irritated",
+      "text": "That's my laundry! You're running through my laundry!"
+    },
+    {
+      "context": "roof",
+      "emotion": "alarmed",
+      "text": "My birds! You scared my birds!"
+    },
+    {
+      "context": "roof",
+      "emotion": "startled",
+      "text": "Hey, this is a private tar beach! Members only!"
+    },
+    {
+      "context": "roof",
+      "emotion": "amused",
+      "text": "Mind the gap, Romeo. Last guy didn't."
+    },
+    {
+      "context": "subway",
+      "emotion": "irritated",
+      "text": "Hey, you gotta pay like everybody else!"
+    },
+    {
+      "context": "subway",
+      "emotion": "wry",
+      "text": "Thirty-five cents. You're running from thirty-five cents?"
+    },
+    {
+      "context": "lot",
+      "emotion": "warning",
+      "text": "That fence bites! Watch your pants!"
+    },
+    {
+      "context": "newsstand",
+      "emotion": "outraged",
+      "text": "My papers! The evening edition's all over Eighth!"
+    }
+  ]
+}

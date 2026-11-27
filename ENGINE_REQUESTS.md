@@ -315,3 +315,6 @@ Chase and evade objectives now carry `traversal`: an ordered list of beats `{mov
 | `tv.w41_lot_fence` | fence_climb | a chain-link fence into a rubble lot off W 41st | mission.side_skip_board |
 | `tv.w41_lot_car` | vault | a burned-out car hulk in the lot | mission.side_skip_board |
 | `tv.w40_fence` | fence_climb | the lot's back fence, onto W 40th | mission.side_skip_board |
+
+## From narrative: 16. Systemic encounter triggers (`do.type: "encounter"`)
+`content/triggers/enc_purse_snatch.json` is the first systemic chase. While no mission is running, inside `volume` (its `at` plus `alsoAt`, radius 120 m) and with the cooldown elapsed, the game spawns the spec (`mission.side_purse_snatch`) as an ambient encounter. It builds a 3–5 beat `traversal` route from nearby markup of the listed kinds within 150 m, instead of the authored route. Ignoring the encounter is fine. Bystanders use `barks.chase_bystander` (context = beat kind: cart, hood, crowd, window, roof, subway, lot, newsstand). M26 also gains objective `o8c`, a rooftop chase with `finish: "tackle"`; the tackle API is pending from Gameplay. New tv.* markers are listed by `traversal.markers()`: tv.w31_fe_ladder, tv.w31_fe_stairs, tv.w31_skylight, tv.w31_gap, tv.w31_setback, tv.w31_billboard.
