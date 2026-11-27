@@ -66,7 +66,7 @@ function apartment(c: GenCtx, side: 'x0' | 'x1', zDoor: number, y0: number, fh: 
     const sh = r.range(0.1, 0.8);
     k.box(rc[0] + q.s0, q.y1 - (q.y1 - q.y0) * sh, rc[1] + 0.02, rc[0] + q.s1, q.y1, rc[1] + 0.03, r.pick([tint(M.paper, '#d9c99a'), tint(M.paper, '#a8a08a'), tint(M.fabricRust, '#9a5a3a')]), { occlude: false });
     k.box(rc[0] + q.s0, (q.y0 + q.y1) / 2 - 0.03, rc[1] - 0.03, rc[0] + q.s1, (q.y0 + q.y1) / 2 + 0.03, rc[1] + 0.02, M.enamelCream, { occlude: false });
-    if (r.chance(0.18)) k.box(rc[0] + q.s0 + 0.1, q.y0, rc[1] - 0.25, rc[0] + q.s1 - 0.1, q.y0 + 0.42, rc[1] + 0.35, M.enamelCream, { collide: true }); // window AC unit
+    if (r.chance(0.18)) G.windowAC(k, rc[0] + q.s0 + 0.1, rc[0] + q.s1 - 0.1, q.y0, rc[1]); // window AC unit (1960s, bevelled, louvred)
   }
   k.portalRect(hallCell, cell, wallX, zDoor - 0.45, wallX, zDoor + 0.45, y0, y0 + 2.05);
   // furnishing: kitchen corner near the door (tub with cover board, sink, stove, fridge), front room beyond

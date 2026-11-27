@@ -123,7 +123,8 @@ export function genCorwin(c: GenCtx) {
   k.use(lobby);
 }
 
-type Dress = (k: Kit, rc: [number, number, number, number], y0: number) => void;
+/** win: the room's window span in x and its sill y, and which wall it is on (z0 facade or z1 airshaft) */
+type Dress = (k: Kit, rc: [number, number, number, number], y0: number, win?: { x0: number; x1: number; sill: number; wall: 'z0' | 'z1' }) => void;
 /** SRO corridor on floor f off the stair door: rooms both sides, numbered; listed rooms open and dressed. */
 function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: number, f: number, floorLabel: string, open: { label: string; open: boolean; dress: Dress }[], bathAndView = false) {
   const { k, unit: u, r } = c;
@@ -152,7 +153,9 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
   if (back[3] - back[1] > 2.4) for (let x = bx0; x + 2.9 <= bx1; x += 3.0) rooms.push({ label: `${floorLabel}${String(n++).padStart(2, '0')}`, rc: [x + 0.06, cz1, x + 3.0 - 0.06, back[3]], front: false, door: x + 1.0 });
   // assign the story labels: requested labels replace the generic ones (9F is a letter on the 9th floor)
   for (let q = 0; q < open.length && q < rooms.length; q++) {
-    const want = open[q].label; const at = /\d{2}$/.test(want) ? Math.min(rooms.length - 1, Math.max(0, parseInt(want.slice(-2), 10) - 1)) : Math.min(rooms.length - 1, 5);
+    // numbered labels take their number's slot; letter rooms (9F) are the cheap airshaft rooms at the back when there are any
+    const firstBack = rooms.findIndex((rm) => !rm.front);
+    const want = open[q].label; const at = /\d{2}$/.test(want) ? Math.min(rooms.length - 1, Math.max(0, parseInt(want.slice(-2), 10) - 1)) : firstBack >= 0 ? firstBack : Math.min(rooms.length - 1, 5);
     const free = (i: number) => !open.slice(0, q).some((o) => o.label === rooms[i].label);
     let i = at; while (!free(i) && i > 0) i--;
     rooms[i].label = want;
@@ -243,7 +246,7 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
       const ops = q.front ? { z1: [{ ...roomOps, s0: q.rc[2] - (q.door + 0.45), s1: q.rc[2] - (q.door - 0.45) }], ...(atFacade ? { z0: [win] } : {}) } : { z0: [roomOps], z1: [{ s0: (q.rc[2] - q.rc[0]) - 2.0, s1: (q.rc[2] - q.rc[0]) - 1.0, y0: win.y0, y1: win.y1 }] };
       k.room(q.rc[0], q.rc[1], q.rc[2], q.rc[3], y0, y0 + H, { floor: tint(M.planksWorn, '#4a3424'), wall: r.pick([NICOTINE, tint(M.wallpaper, '#9a8460'), tint(M.plasterGreen, '#8a9070')]), ceiling: M.ceilingPlaster }, ops);
       if (atFacade) { k.portalRect(rcell, -1, q.rc[0] + win.s0, q.rc[1], q.rc[0] + win.s1, q.rc[1], win.y0, win.y1); k.box(q.rc[0] + win.s0, win.y0, q.rc[1] - 0.02, q.rc[0] + win.s1, win.y1, q.rc[1] - 0.01, M.glass, { glass: true, occlude: false }); }
-      story!.dress(k, q.rc, y0);
+      story!.dress(k, q.rc, y0, q.front ? (atFacade ? { x0: q.rc[0] + win.s0, x1: q.rc[0] + win.s1, sill: win.y0, wall: 'z0' } : undefined) : { x0: q.rc[2] - 2.0, x1: q.rc[2] - 1.0, sill: win.y0, wall: 'z1' });
     }
     // the bathroom gets a porcelain ceiling fixture and a mirror sconce (white tile reads cold and bright, not murky)
     if (q === bath) { P.globeLight(k, (q.rc[0] + q.rc[2]) / 2, (q.rc[1] + q.rc[3]) / 2, y0 + H, 2.4); k.light(q.rc[0] + 0.5, y0 + 1.9, q.rc[1] + 0.25, [1, 0.92, 0.8], 0.9, 'bulb'); }
@@ -279,7 +282,7 @@ function tenant(k: Kit, rc: [number, number, number, number], y0: number, who: s
 }
 
 /** Teddy Arce, room 9F (content/homes.json portrait; act 1 state). Eight by ten, window onto an airshaft. */
-function teddy(k: Kit, rc: [number, number, number, number], y0: number) {
+function teddy(k: Kit, rc: [number, number, number, number], y0: number, win?: { x0: number; x1: number; sill: number; wall: 'z0' | 'z1' }) {
   const [x0, z0, x1, z1] = rc;
   k.at(y0, () => P.bed(k, { x: x0 + 0.55, z: z0 + 0.25, yaw: 0 }, 0.95, Math.min(1.95, z1 - z0 - 1.3), tint(M.fabricOlive, '#5a5a3a')));
   // army footlocker as a table, with the nightstick inside (act 1)
@@ -297,8 +300,11 @@ function teddy(k: Kit, rc: [number, number, number, number], y0: number) {
   k.box(x1 - 0.045, y0 + 1.33, z1 - 1.12, x1 - 0.04, y0 + 1.43, z1 - 0.98, tint(M.paper, '#d8c86a'), { occlude: false });
   k.box(x0 + 0.02, y0 + 1.6, z0 + 1.2, x0 + 0.03, y0 + 1.66, z0 + 1.26, tint(M.chrome, '#b08a4a'), { occlude: false });
   // broken window AC with a towel in it, on the airshaft window sill
-  k.box(x1 - 2.0, y0 + 0.85, z1 - 0.3, x1 - 1.2, y0 + 1.25, z1 + 0.05, M.enamelCream, { collide: true });
-  k.box(x1 - 1.9, y0 + 1.1, z1 - 0.32, x1 - 1.3, y0 + 1.22, z1 - 0.28, tint(M.fabricRust, '#c9a24a'), { occlude: false });
+  if (win) {
+    const zw = win.wall === 'z0' ? z0 : z1, dir = win.wall === 'z0' ? 1 : -1, ax0 = win.x0 + 0.05, ax1 = Math.min(win.x1 - 0.05, ax0 + 0.8);
+    G.windowAC(k, ax0, ax1, win.sill, zw, M.enamelCream, dir);
+    const tz = zw + dir * 0.37; k.box(ax0 + 0.1, win.sill + 0.25, Math.min(tz, tz + dir * 0.03), ax1 - 0.1, win.sill + 0.37, Math.max(tz, tz + dir * 0.03), tint(M.fabricRust, '#c9a24a'), { occlude: false }); // the towel
+  }
   // shelf: Carmen's tupperware (washed, never returned), hot plate and one pan
   k.box(x1 - 0.9, y0 + 0.9, z0 + 0.05, x1 - 0.05, y0 + 0.93, z0 + 0.4, M.woodDark);
   k.box(x1 - 0.8, y0 + 0.93, z0 + 0.1, x1 - 0.55, y0 + 1.0, z0 + 0.3, tint(M.enamelWhite, '#d8d0b0'));

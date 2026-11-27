@@ -278,3 +278,8 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
     - The 6.7 m private passages are long and bare. Better: give the inner zone to a second "inside room" (cheaper, no window, period-true), with the passage as its vestibule.
     - Teddy's room is still dark.
     - The CC0 chair is over-lit (the interim lighting seam).
+- More gap builds:
+  - schoolhouse globe light: brass canopy, stem, fitter, and a lofted opal sphere (every `globeLight`);
+  - 1960s console TV: bevelled walnut cabinet on splayed legs, a domed CRT in a rounded bezel, speaker cloth, knobs (every `consoleTV`);
+  - window air conditioner: bevelled enamel case half outside, louvred grille, knobs, drip stain (tenement apartments and Teddy's room).
+- Teddy's 9F: the AC with its towel now sits in the room's real window (dressing gets the window span). Letter-labelled rooms prefer the back (airshaft) side when one exists; floor 9 has none, so 9F looks onto the street. The brief says airshaft, so that's flagged for narrative. Evidence: docs/interiors/corwin_teddy_9F_v2.png.

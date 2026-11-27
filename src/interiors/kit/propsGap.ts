@@ -104,3 +104,17 @@ export function wallPayphone(k: Kit, f: Frame, label = 'payphone') {
   bb(k, f, -0.25, 0.95, -0.28, 0.25, 0.98, 0.0, M.steel, 0.006);                                        // directory shelf
   const [wx, wz] = toWorld(f, 0, -0.3); k.marker('payphone', wx, 1.4, wz, label);
 }
+
+/** 1960s window air conditioner sitting in a sash window: bevelled enamel case half outside, a louvred grille and
+ *  control knobs facing the room. World-aligned: wall plane at z = zw, room toward +z, unit spans x0..x1 from sill y. */
+export function windowAC(k: Kit, x0: number, x1: number, y: number, zw: number, mat: Mat = M.enamelCream, dir: 1 | -1 = 1) {
+  // dir = +1: room toward +z (facade windows); -1: room toward -z (back/airshaft windows)
+  const cx = (x0 + x1) / 2, hw = Math.min(0.34, (x1 - x0) / 2), Z = (dz: number) => zw + dz * dir;
+  k.bbox(cx, y + 0.21, Z(0.05), hw, 0.21, 0.3, 0, mat, 0.02, { collide: true });
+  // louvred grille on the room face, a darker intake panel and two knobs
+  for (let q = 0; q < 7; q++) k.bbox(cx - hw * 0.25, y + 0.07 + q * 0.04, Z(0.355), hw * 0.65, 0.008, 0.006, 0, tint(mat, '#b8b09a'), 0.003);
+  k.bbox(cx + hw * 0.62, y + 0.21, Z(0.352), hw * 0.3, 0.17, 0.004, 0, tint(mat, '#8a8474'), 0.004);
+  for (const ky of [0.3, 0.2]) k.tube([cx + hw * 0.62, y + ky, Z(0.35)], [cx + hw * 0.62, y + ky, Z(0.38)], 0.018, M.chrome, 8);
+  // drip stain below the outside half
+  k.bbox(cx, y - 0.02, Z(-0.2), hw * 0.9, 0.01, 0.05, 0, tint(M.steel, '#5a5448'), 0.004);
+}

@@ -245,8 +245,16 @@ export function pendant(k: Kit, x: number, z: number, ceil: number, drop = 0.7, 
   k.light(x, ceil - drop - 0.08, z, [1.0, 0.78, 0.5], intensity, 'bulb');
 }
 export function globeLight(k: Kit, x: number, z: number, ceil: number, intensity = 2.0) {
-  k.cyl(x, ceil - 0.06, z, 0.12, 0.06, M.chrome, 10);
-  k.cyl(x, ceil - 0.36, z, 0.14, 0.3, M.bulb, 10, { r1: 0.12 });
+  // schoolhouse fixture: brass canopy, short stem, fitter collar and a smooth opal-glass globe (lofted sphere)
+  k.cyl(x, ceil - 0.03, z, 0.09, 0.03, tint(M.chrome, '#9a8458'), 12);
+  k.cyl(x, ceil - 0.16, z, 0.012, 0.13, tint(M.chrome, '#9a8458'), 6, { top: false });
+  k.cyl(x, ceil - 0.21, z, 0.07, 0.05, tint(M.chrome, '#9a8458'), 12, { r1: 0.06 });
+  const rings: V3[][] = [], cy = ceil - 0.36, R0 = 0.15, seg = k.low ? 10 : 16;
+  for (let i = 0; i <= 8; i++) {
+    const t = -Math.PI / 2 + (i / 8) * (Math.PI * 0.86), rr = Math.max(0.004, Math.cos(t) * R0), yy = cy + Math.sin(t) * R0;
+    const rg: V3[] = []; for (let j = 0; j < seg; j++) { const a = (j / seg) * Math.PI * 2; rg.push([x + Math.cos(a) * rr, yy, z - Math.sin(a) * rr]); } rings.push(rg);
+  }
+  k.loft(rings, M.bulb);
   k.light(x, ceil - 0.3, z, [1.0, 0.8, 0.55], intensity, 'bulb');
 }
 export function bareBulb(k: Kit, x: number, z: number, ceil: number, intensity = 1.2) {
@@ -348,10 +356,16 @@ export function coatRack(k: Kit, x: number, z: number) {
   if (k.rng.chance(0.6)) k.obox(x + 0.12, 1.2, z, 0.06, 0.45, 0.22, 0, k.rng.pick([M.fabricCamel, M.fabricBrown, M.fabricPlaid]));
 }
 export function consoleTV(k: Kit, f: Frame, on: boolean) {
-  pbox(k, f, -0.5, 0.08, -0.25, 0.5, 0.75, 0.25, M.wood, { collide: 'cover' });
-  for (const lx of [-0.45, 0.45]) pbox(k, f, lx - 0.02, 0, -0.2, lx + 0.02, 0.08, 0.2, M.woodDark, { occlude: false });
-  pbox(k, f, -0.3, 0.25, -0.26, 0.2, 0.68, -0.25, on ? M.tvGlow : tint(M.glass, '#2a3230'), { occlude: false });
-  pbox(k, f, 0.25, 0.3, -0.26, 0.42, 0.65, -0.25, M.fabricBrown, { occlude: false });
+  // 1960s console set: bevelled walnut cabinet on splayed legs, a bulging CRT behind a rounded bezel, speaker cloth, knobs
+  const B = (x0: number, y0: number, z0: number, x1: number, y1: number, z1: number, m: Mat, r: number, o: BoxOpts = {}) => { const [wx, wz] = toWorld(f, (x0 + x1) / 2, (z0 + z1) / 2); k.bbox(wx, (y0 + y1) / 2, wz, (x1 - x0) / 2, (y1 - y0) / 2, (z1 - z0) / 2, f.yaw, m, r, o); };
+  B(-0.52, 0.16, -0.25, 0.52, 0.8, 0.25, M.wood, 0.025, { collide: 'cover' });
+  for (const [lx, lz] of [[-0.44, -0.18], [0.44, -0.18], [-0.44, 0.18], [0.44, 0.18]]) { const [a, b] = toWorld(f, lx, lz), [c2, d2] = toWorld(f, lx * 1.06, lz * 1.15); k.tube([c2, 0, d2], [a, 0.17, b], 0.014, M.woodDark, 6); }
+  B(-0.36, 0.26, -0.262, 0.16, 0.72, -0.25, M.woodDark, 0.03);                                  // bezel
+  // CRT face: shallow dome lofted out of the bezel opening (rounded-rectangle rings)
+  const ringAt = (s: number, zf: number): V3[] => { const out: V3[] = []; const n = 16; for (let i = 0; i < n; i++) { const t = (i / n) * Math.PI * 2, c = Math.cos(t), si = Math.sin(t); const px = -0.1 + Math.sign(c) * Math.pow(Math.abs(c), 0.6) * 0.21 * s, py = 0.49 + Math.sign(si) * Math.pow(Math.abs(si), 0.6) * 0.18 * s; const [wx, wz] = toWorld(f, px, zf); out.push([wx, py, wz]); } return out; };
+  k.loft([ringAt(1, -0.263), ringAt(0.85, -0.278), ringAt(0.5, -0.288)], on ? M.tvGlow : tint(M.glass, '#2a3230'), { capEnd: true, flip: true });
+  B(0.2, 0.3, -0.262, 0.46, 0.68, -0.25, tint(M.fabricBrown, '#6a5a40'), 0.01);                // speaker cloth
+  for (const ky of [0.62, 0.52]) { const [ax, az] = toWorld(f, 0.33, -0.25), [bx, bz] = toWorld(f, 0.33, -0.285); k.tube([ax, ky, az], [bx, ky, bz], 0.022, M.chrome, 8); }
   if (on) { const [wx, wz] = toWorld(f, -0.05, -0.9); k.light(wx, 0.5, wz, [0.6, 0.75, 1.0], 0.35, 'neon', 2); }
 }
 export function bed(k: Kit, f: Frame, w = 1.35, len = 1.95, spread: Mat = M.fabricRust) {
