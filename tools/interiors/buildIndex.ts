@@ -427,6 +427,9 @@ for (const b of blds) {
 let heroContent: { id: string; address: string; parent?: string; hours?: [string, string] }[] = [];
 try { heroContent = JSON.parse(execSync('git show origin/claude/sharp-maxwell-jnb6hr:content/interiors.json', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).interiors; } catch { console.warn('narrative content not reachable; heroes skipped'); }
 const heroLog: string[] = [];
+// heroes the narrative content does not list yet (content barks name them): placed locally until content/interiors.json has them
+const LOCAL_HEROES = [{ id: 'interior.pennington_er', address: 'W 26th St, 9th–10th Aves (Pennington General ER)', hours: ['00:00', '24:00'] as [string, string] }];
+for (const lh of LOCAL_HEROES) if (!heroContent.some((h) => h.id === lh.id)) heroContent.push(lh);
 const avenueXAt = (name: string, z: number) => {
   const n = normaliseStreet(name); let best = Infinity, bx = NaN;
   for (const g of segs) if (streetNames[g.s] === n) { const t = Math.max(0, Math.min(1, (z - g.az) / ((g.bz - g.az) || 1e-9))); const x = g.ax + (g.bx - g.ax) * t; const zz = g.az + (g.bz - g.az) * t; const d = Math.abs(zz - z); if (d < best) { best = d; bx = x; } }
@@ -462,8 +465,9 @@ for (const h of heroContent) {
     const between = mx > Math.min(xa, xb) && mx < Math.max(xa, xb);
     const north = !m[4] ? true : m[4].toLowerCase() === 'north' ? (b.units[0]?.nz ?? 0) < 0 : (b.units[0]?.nz ?? 0) > 0;
     const fl = Math.hypot(e[2] - e[0], e[3] - e[1]), src = byIdB.get(b.id), depth = src ? Math.min(src.maxX - src.minX, src.maxZ - src.minZ) : 0;
-    const big = place.prefer !== 'lowrise' || (fl >= place.width && depth >= (place.minDepth ?? 0) && b.year < 1935);
-    return { b, e, ok: between && north && big && b.year < 1975 && b.floors >= (place.minFloors ?? 0) };
+    const big = place.prefer === 'lowrise' ? (fl >= place.width && depth >= (place.minDepth ?? 0) && b.year < 1935) : (fl >= (place.minFront ?? 0) && depth >= (place.minDepth ?? 0));
+    const useOk = !place.uses || place.uses.includes(b.use), free = !b.units.some((q) => q.kind === 'hero');
+    return { b, e, ok: between && north && big && useOk && free && b.year < 1975 && b.floors >= (place.minFloors ?? 0) };
   }).filter((q) => q.ok).sort(place.prefer === 'lowrise' ? (p, q) => Math.abs(p.b.floors - 4) - Math.abs(q.b.floors - 4) || p.b.year - q.b.year : (p, q) => q.b.floors - p.b.floors || p.b.year - q.b.year);
   let pick: { b: BuildingIdx; e: (string | number)[] | number[]; inward?: [number, number] } | undefined = cand[0];
   if (!pick && m[2] && !cornerB) {

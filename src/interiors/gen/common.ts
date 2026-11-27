@@ -32,7 +32,7 @@ export interface GenCtx {
   hero?: string;
 }
 /** Content overrides of the shared grade for heroes (homes.json grades: Teddy's Corwin worn; Delphine kept; Nick pristine). */
-export const HERO_COND: Record<string, number> = { 'interior.corwin_lobby': 1, 'interior.station_house_desk': 1, 'interior.penn_south_delphine': 3, 'interior.varelas_apartment': 4 };
+export const HERO_COND: Record<string, number> = { 'interior.corwin_lobby': 1, 'interior.station_house_desk': 1, 'interior.penn_south_delphine': 3, 'interior.varelas_apartment': 4, 'interior.pennington_er': 1 };
 export const WALL_T = 0.3; // facade wall thickness (engine facade quad at z=0)
 export const PARTY = 0.12; // party-wall inset
 

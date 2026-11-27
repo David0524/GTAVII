@@ -325,3 +325,14 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
     - The rug medallions read as targets.
     - The elevator is a prop until engine request 5; reaching floors 7 and 11 means climbing the stairs.
 - Nick re-placed (oversight): corner lots now need at least 15 m of frontage on the first-named street, so 11A moved to 220 Madison Ave (1941, 15 floors, 16 m frontage). The `grand` plan variant gives a 15.5 m flat, 3.2 m ceilings, a gallery-width entrance hall (4.6 m), and a 9 × 4.6 m living room with every facade bay as a tall window. Evidence: docs/interiors/varelas_grand_living_v2.png. Critique: the back strip is now a very large kitchen (8.5 × 8.8 m). Next pass: split it into a dining room plus a kitchen.
+- **Hero: Pennington General ER** (`interior.pennington_er`, src/interiors/gen/heroes/hospital.ts).
+  - Placement: a local hero entry until narrative lists it in content/interiors.json. It sits at 407 W 25th St (1962, 19 floors), 14 × 14 m. The resolver now excludes buildings that already hold a hero and can filter by land use; minimum frontage and depth now apply to every placement.
+  - Rooms:
+    - waiting room: tile dado, green paint, rows of chrome-and-vinyl seats, a TV on a bracket, triage window and desk, cashier window (register marker), payphone, and the respawn spawn ("You're out…");
+    - glazed double swing doors into the corridor, with a curved nurses' station;
+    - treatment bays: curtains on ceiling tracks (gathered panels), gurneys on casters, IV poles, bed markers, a hide spot;
+    - trauma room behind a half-glazed partition: big surgical lamp, gurney, instrument trolley, locked drug cabinet stash.
+  - Evidence: docs/interiors/pennington_er_v1.jpg.
+  - Critique:
+    - From the waiting room you see straight into the bays (the triage glass and the open swing doors in the gallery). Real ERs screen this; add a solid lower wall and frosted glass.
+    - There is no ambulance bay on the street side yet.
