@@ -288,7 +288,7 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 
 ## Decisions (and why)
 
-- **Children are never targets** (narrative content rule: no violence against minors). A sim pedestrian flagged `child` is never registered as a body in the world: no hitbox, no melee, no impact damage, no health record, no body, and never a witness who reports (`witnesses.ts`). Rounds pass by them; the sim is asked to steer children clear of traffic. Test: `bodies.test.ts`.
+- **No child characters anywhere** (user rule, relayed by oversight 2026-11-27). None exist or spawn: no sim ped, no stand-in ped, no content. Gameplay keeps a `child` guard purely as a safety net (dead code by design): a ped flagged `child` would get no hitbox, no melee, no impact damage, no body and no witness role. `bodies.test.ts` asserts no spawned ped is flagged `child`, and that the guard holds.
 
 - **Money scale, user decision of 2026-11-26, relayed by oversight, verbatim: "Yes, but in GTA VI you can really rack up money. Like 10s of thousands".** Oversight added these terms:
   - everyday 1974 prices stay real;

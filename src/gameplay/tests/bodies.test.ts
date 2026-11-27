@@ -70,7 +70,12 @@ test('bodies: put down somewhere quiet buys time; a hiding spot keeps it from pa
   assert.equal(r2.g.bodies.list.get('v3')!.discoverAt, Infinity);
 });
 
-test('content rule: a child is never a target (no hitbox, no melee, no impact damage, no body)', () => {
+test('user rule: no child characters exist or spawn; the defensive guard still holds if one ever did', () => {
+  // every ped the stand-in sim and the test scene's population spawn is an adult
+  const pop = rig();
+  for (let i = 0; i < 60; i++) (pop.sim as any).add(`p${i}`, i, 0);
+  assert.ok(pop.sim.peds.every((p: any) => !p.child && !String(p.archetype ?? '').includes('child')), 'no spawned ped is a child');
+  // the safety net (dead code by design)
   const r = rig();
   (r.sim as any).add('ped_kid', 0, -6, { child: true });
   (r.sim as any).add('ped_adult', 3, -6, {});

@@ -363,8 +363,8 @@ export class Gameplay {
   /** Register an ambient pedestrian body for hits (sim peds are registered automatically each frame). */
   private ensurePed(p: PedSnapshot) {
     if (this.actors.has(p.id)) return;
-    // content rule (narrative): no violence against minors. A child is never a target: no hitbox, no melee,
-    // no impact damage. Rounds pass by them and cars miss them (the sim steers children clear).
+    // User rule: there are no child characters anywhere in the game; none exist or spawn. This guard is a safety
+    // net only (dead code by design): should a ped ever arrive flagged `child`, it is never a target in any way.
     if (p.child) { this.childPeds.add(p.id); return; }
     this.healthSys.register(p.id, { maxHp: 70 });
     const port = this.port;
