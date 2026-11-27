@@ -15,12 +15,14 @@ import { DebugHud, FrameStats } from './engine/debug/DebugHud';
 import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
 import { loadTerrain, heightAt } from './shared/terrain';
-import { Input } from './input/Input';
+import { Input, type ButtonAction } from './input/Input';
 import { loadReport } from './engine/debug/LoadReport';
 import { AdaptiveResolution } from './engine/AdaptiveResolution';
 import { Parks } from './world/Parks';
 import { StreetFurniture } from './world/StreetFurniture';
 import { SignalHeads } from './world/SignalHeads';
+import { createGameplay, type GameplayGlue } from './engine/GameplayGlue';
+import { createAudio } from './engine/AudioGlue';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -121,6 +123,8 @@ async function main() {
   const traffic = vehicles?.createTrafficRenderer(quality.name === 'low' ? 48 : 160) ?? null;
   if (traffic) scene.add(traffic.object);
   const carLights = traffic && (quality.name === 'high' || quality.name === 'ultra') ? new CarLightPool(scene, quality.name, false) : null;
+  // ---------------------------------------------------------------- audio (wiring step 7); ?sound=0 leaves it out (?audio= is the audio test scene)
+  const audioGlue = params.get('sound') === '0' ? null : createAudio({ quality: quality.name, streets, sim });
   // Pedestrians: the characters crowd renderer, fed from sim.peds (created with the factory).
   let crowd: ReturnType<CharacterFactory['createCrowdRenderer']> | null = null;
   createCharacterFactory({ quality: quality.name }).then((f) => {
@@ -155,7 +159,9 @@ async function main() {
   const spawnLeadBody = () => {
     if (!chars) return;
     const old = body, vis = old.object.visible;
-    body = chars.spawn(scene, { seed: 74, hero: party.activeId });
+    const ch = chars.spawn(scene, { seed: 74, hero: party.activeId });
+    ch.on('footstep', (e) => audioGlue?.footstep(e));
+    body = ch;
     body.object.position.copy(old.object.position); body.object.visible = vis;
     old.object.removeFromParent(); old.dispose();
   };
@@ -208,6 +214,10 @@ async function main() {
       orbit.snap(a, a.heading);
     },
   });
+  // ---------------------------------------------------------------- gameplay core (wiring step 6)
+  let gp: GameplayGlue | null = null;
+  createGameplay({ quality: quality.name, physics, player, lead: () => party.activeId, camera, sim, saves })
+    .then((x) => { gp = x; loadReport.mark('gameplay'); }).catch((e) => console.warn('gameplay', e));
   const skipTitle = params.get('title') === '0' || params.has('cam') || params.has('at');
 
   // ---------------------------------------------------------------- HUD, minimap, report
@@ -295,7 +305,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get body() { return body; }, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -327,9 +337,9 @@ async function main() {
     player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, heading: mode === 'onfoot' ? player.heading : fly.yaw, speed: mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: false, lead: party.activeId }; },
     clock: () => ({ date: worldClock.date, minutes: worldClock.minutes, weather: worldClock.weather }),
     party: () => [...party.leads.values()].map((l) => ({ id: l.id, name: l.displayName, short: l.displayName, tagline: LEAD_STYLE[l.id]?.tagline ?? '', colour: LEAD_STYLE[l.id]?.colour ?? '#c79a3c', cash: l.money, where: l.id === party.activeId ? loc.crossing : 'Elsewhere in the city', available: true })),
-    health: () => ({ hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 }),
+    health: () => gp?.health() ?? { hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 },
     inventory: (lead = party.activeId) => { const l = party.leads.get(lead) ?? party.active; return { lead: l.id, cash: l.money, savings: 0, outfit: { name: 'Everyday clothes', hides: 'jacket', description: '' }, items: [] }; },
-    heat: () => ({ phase: 'none', cones: [], units: [] }),
+    heat: () => gp?.heat() ?? { phase: 'none', cones: [], units: [] },
     objective: () => objective,
     location: () => loc,
     shop: () => null, newspaper: () => null, businesses: () => [], completion: () => [], achievements: () => [],
@@ -351,7 +361,7 @@ async function main() {
       const d = data as { text?: string } | undefined;
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
-    prompts: () => (mode === 'onfoot' ? [['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']]),
+    prompts: () => (mode === 'onfoot' ? [...(gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']]),
     newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
     continueGame: async () => {
       loadReport.mark('continue');
@@ -369,6 +379,7 @@ async function main() {
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const simFwd = new THREE.Vector3();
+  let gpContext: string | null = null, ctxT = 0;
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -434,6 +445,11 @@ async function main() {
       orbit.lookBehind = input.isHeld('lookBehind');
       if (input.pressed('shoulderSwap')) orbit.swapShoulder();
       orbit.update(dt, rp, player.loco());
+      if (gp && playing && !frozen) {
+        gp.update(dt, { minutes: worldClock.minutes, raining: worldClock.weather === 'rain', sprinting: player.mode === 'sprint', device: input.isTouch ? 'touch' : input.activeDevice === 'kbm' ? 'mouse' : 'pad' });
+        if ((ctxT -= dt) <= 0) { ctxT = 0.2; gpContext = gp.context(); }
+        if (input.pressed('use') && gpContext) gp.doContext();
+      }
     } else if (ui.state === 'title') {
       physics.update(dt, () => { jumpLatch = false; });
     } else {
@@ -463,6 +479,7 @@ async function main() {
     // city behind it: same picture, a fraction of the GPU and battery (and the canvas keeps its last
     // presented frame). Render again on any resize, which clears the drawing buffer.
     const hold = ui.hub.open || (ui.state === 'play' && ui.paused) || (ui.state === 'cutscene' && ui.cinema.paused);
+    audioGlue?.update(dt, camera, worldClock, hold);
     const vw = view.width, vh = view.height;
     // Battery on phones (engine): the title drift renders at 24 fps on touch devices.
     const capTitle = ui.state === 'title' && input.isTouch && frameCount > 3 && t - lastRenderT < 1000 / 24;
@@ -492,7 +509,7 @@ async function main() {
         `chunks lod0 ${world.stats.lod0}  lod1 ${world.stats.lod1}  loading ${world.stats.loading}  phys ${physics.stats.chunksWithColliders}\n` +
         `pos ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}  ${lat.toFixed(5)}, ${lon.toFixed(5)}\n` +
         `${mode}${mode === 'onfoot' ? `  ${player.mode} ${Math.hypot(player.vel.x, player.vel.z).toFixed(1)} m/s ${player.grounded ? 'grounded' : 'air'}${player.climbing ? ' climbing' : ''}${player.active ? '' : ' (waiting for ground)'}` : ''}  ${party.active.displayName}\n` +
-        (sim ? `sim ${simReady ? `${sim.vehicles.length} cars ${sim.peds.length} peds ${sim.lastUpdateMs.toFixed(2)} ms` : 'loading'}\n` : '') +
+        (gp ? `gameplay ${gp.lastMs.toFixed(2)} ms  hp ${gp.g.hud()?.hp.toFixed(0) ?? '-'}  ctx ${gpContext ?? '-'}\n` : '') + (sim ? `sim ${simReady ? `${sim.vehicles.length} cars ${sim.peds.length} peds ${sim.lastUpdateMs.toFixed(2)} ms` : 'loading'}\n` : '') +
         `near ${loc.crossing}  ui ${ui.state}  hud ${ui.hud.cost.frame.toFixed(2)} ms  minimap ${ui.hud.minimap.cost.draw.toFixed(2)} ms\n` +
         `input ${input.activeDevice}${input.pad.connected ? ` (${input.pad.id.slice(0, 40)})` : ''}`,
       );
