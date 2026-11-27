@@ -1421,8 +1421,9 @@ export class Gameplay {
   // ------------------------------------------------------------------ the tackle (foot-chase finisher)
   /** Mission chase quarries: who can be tackled to finish a chase, from how close, and whether it's lawful
    *  (a purse snatcher or a bail skip: no crime; a bystander: assault). Set by the mission runtime. */
-  readonly chaseTargets = new Map<string, { catchDistanceM: number; lawful: boolean }>();
-  setChaseTarget(id: string, o: { catchDistanceM?: number; lawful?: boolean } = {}) { this.chaseTargets.set(id, { catchDistanceM: o.catchDistanceM ?? TACKLE.reach, lawful: o.lawful ?? true }); }
+  readonly chaseTargets = new Map<string, { catchDistanceM: number; lawful: boolean; noBolt: boolean }>();
+  /** `noBolt`: once restrained, never tries to break free (a story walk, e.g. M26 o8c). */
+  setChaseTarget(id: string, o: { catchDistanceM?: number; lawful?: boolean; noBolt?: boolean } = {}) { this.chaseTargets.set(id, { catchDistanceM: o.catchDistanceM ?? TACKLE.reach, lawful: o.lawful ?? true, noBolt: !!o.noBolt }); }
   clearChaseTarget(id: string) { this.chaseTargets.delete(id); }
   private stumbleUntil = -1;
   private tackleRecover: { id: string; at: number }[] = [];
@@ -1546,7 +1547,7 @@ export class Gameplay {
       // walks a pace behind at the player's side (1.2 m), never faster than a hurried walk
       const dx = p[0] - a.pos[0], dz = p[2] - a.pos[2], d = Math.hypot(dx, dz);
       // trying their luck: lagging escort or a distracted captor (a gun out, a fight) makes it likelier
-      if (!this.breakFree) {
+      if (!this.breakFree && !this.chaseTargets.get(id)?.noBolt) {
         const lag = d > 4 ? Gameplay.BREAK.laggingMul : 1, distracted = this.pc.aiming || this.pc.firing || this.pc.weapon !== 'weapon.fists' ? Gameplay.BREAK.distractedMul : 1;
         const nerve = 0.5 + 0.5 * a.bravery;
         if (this.rng.chance(Gameplay.BREAK.perSecond * lag * distracted * nerve * dt)) {

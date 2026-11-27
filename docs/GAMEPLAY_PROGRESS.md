@@ -243,7 +243,7 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
   - A quarry on foot tries to bolt at about 1.2% a second, scaled by bravery. That's 4× when the escort lags (more than 4 m) and 3× with a gun out or a fight on.
   - The one button becomes **Hold on!**: 4 presses within 1.5 s, the same on touch (a single mashed button, as narrative asked).
   - If you fail, they're loose and running, and a chase target again, so the tackle is back on the button.
-  - Events: `notice {kind: 'breakFree' | 'heldOn' | 'brokeFree'}`.
+  - Events: `notice {kind: 'breakFree' | 'heldOn' | 'brokeFree'}`. A quarry set with `noBolt` (a story walk) never tries.
 - **Test:** `movement.test.ts`.
 
 #### vs GTA V / VI / RDR2 (reference-games rule, 2026-11-27)

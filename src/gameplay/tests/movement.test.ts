@@ -202,4 +202,9 @@ test('breaking free: a skip tries to bolt (more when the escort lags or a gun co
   assert.ok(!r2.g.restrained.has('skip'));
   assert.equal(r2.g.ai.agents.get('skip')!.state, 'flee');
   assert.ok(r2.g.chaseTargets.has('skip'), 'a chase target again');
+  // a story walk marked noBolt never tries (M26 o8c)
+  const r3 = setup(); r3.g.setChaseTarget('skip', { lawful: true, noBolt: true }); r3.g.equip('weapon.service');
+  let tried = false; r3.g.on('notice', (e: any) => { if (e.kind === 'breakFree') tried = true; });
+  for (let i = 0; i < 3000; i++) { r3.pos[0] += 0.4; r3.step(0.1, 0.1); }
+  assert.ok(!tried, 'noBolt');
 });
