@@ -108,9 +108,15 @@ async function main() {
     seed: 1974, maxVehicles: quality.name === 'low' ? 40 : 150, maxPeds: quality.name === 'low' ? 120 : 400,
     baseUrl: base, archetypes: Object.values(import.meta.glob('/content/npc_archetypes/*.json', { eager: true, import: 'default' }) as Record<string, ArchetypeDef>),
   }) : null;
+  // Everything that brings new materials (signals, traffic, bodies, crowd) waits for the title: their shader
+  // compiles otherwise land on the title's critical path (load test 2026-11-27: title-ready 25 s, a 12 s
+  // first-frame hitch). They load and compile while the player reads the menu; with no title, at once.
+  let releaseAfterTitle!: () => void;
+  const afterTitle = new Promise<void>((r) => { releaseAfterTitle = r; });
   let simReady = false, simPaused = false;
   let signals: SignalHeads | null = null, sigBuf: Uint8Array = new Uint8Array(0);
-  sim?.load().then(() => {
+  sim?.load().then(() => afterTitle).then(() => {
+    if (!sim) return;
     // the sim's signal heads replace the OSM poles: every lit head is one the cars obey
     signals = new SignalHeads(sim.signalHeads()); scene.add(signals.root); furniture.signalGroup.visible = false;
     sim.setObstacles([...furniture.obstacles(false), ...signals.obstacles()]);
@@ -119,15 +125,17 @@ async function main() {
   // AI traffic: visual-only instanced cars fed from sim.vehicles. Real headlight spots only on High/Ultra:
   // every forward-lit material pays per light per fragment (the facades most of all); lower tiers keep the
   // emissive ground pools.
-  const vehicles = sim ? createVehicleFactory({ quality: quality.name }) : null;
-  const traffic = vehicles?.createTrafficRenderer(quality.name === 'low' ? 48 : 160) ?? null;
-  if (traffic) scene.add(traffic.object);
-  const carLights = traffic && (quality.name === 'high' || quality.name === 'ultra') ? new CarLightPool(scene, quality.name, false) : null;
+  let traffic: ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']> | null = null, carLights: CarLightPool | null = null;
+  if (sim) void afterTitle.then(() => {
+    traffic = createVehicleFactory({ quality: quality.name }).createTrafficRenderer(quality.name === 'low' ? 48 : 160);
+    scene.add(traffic.object);
+    if (quality.name === 'high' || quality.name === 'ultra') carLights = new CarLightPool(scene, quality.name, false);
+  });
   // ---------------------------------------------------------------- audio (wiring step 7); ?sound=0 leaves it out (?audio= is the audio test scene)
   const audioGlue = params.get('sound') === '0' ? null : createAudio({ quality: quality.name, streets, sim });
   // Pedestrians: the characters crowd renderer, fed from sim.peds (created with the factory).
   let crowd: ReturnType<CharacterFactory['createCrowdRenderer']> | null = null;
-  createCharacterFactory({ quality: quality.name }).then((f) => {
+  afterTitle.then(() => createCharacterFactory({ quality: quality.name })).then((f) => {
     chars = f;
     // feet and footstep surfaces: the real collision ground (kerbs, stoops), else the terrain
     f.setGround((x, z) => { const top = heightAt(x, z) + 2.5, d = physics.ray(x, top, z, 0, -1, 0, 4, player.collider); return { y: d === null ? heightAt(x, z) : top - d, surface: 'concrete' }; });
@@ -216,8 +224,8 @@ async function main() {
   });
   // ---------------------------------------------------------------- gameplay core (wiring step 6)
   let gp: GameplayGlue | null = null;
-  createGameplay({ quality: quality.name, physics, player, lead: () => party.activeId, camera, sim, saves })
-    .then((x) => { gp = x; loadReport.mark('gameplay'); }).catch((e) => console.warn('gameplay', e));
+  void afterTitle.then(() => createGameplay({ quality: quality.name, physics, player, lead: () => party.activeId, camera, sim, saves })
+    .then((x) => { gp = x; loadReport.mark('gameplay'); }).catch((e) => console.warn('gameplay', e)));
   const skipTitle = params.get('title') === '0' || params.has('cam') || params.has('at');
 
   // ---------------------------------------------------------------- HUD, minimap, report
@@ -280,7 +288,7 @@ async function main() {
     { name: 'no trees + park dressing', ...hideObj(parks.root) },
     { name: 'no street furniture', ...hideObj(furniture.root) },
     { name: 'no crowd', apply: () => { if (crowd) crowd.object.visible = false; }, revert: () => { if (crowd) crowd.object.visible = true; } },
-    ...(traffic ? [{ name: 'no traffic', ...hideObj(traffic.object) }] : []),
+    { name: 'no traffic', apply: () => { const t = traffic as { object: THREE.Object3D } | null; if (t) t.object.visible = false; }, revert: () => { const t = traffic as { object: THREE.Object3D } | null; if (t) t.object.visible = true; } },
     { name: 'sim paused', apply: () => { simPaused = true; }, revert: () => { simPaused = false; } },
     { name: 'baseline again', apply: () => {}, revert: () => {} },
   ]) : null;
@@ -371,6 +379,7 @@ async function main() {
     },
   };
   const ui = await bootUi(host, { title: !skipTitle }); uiRef.ui = ui;
+  if (skipTitle) releaseAfterTitle();
   if (!skipTitle) mode = 'photo';
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.id === 'lm.flatiron') ?? { x: 0, z: 0 };
@@ -405,7 +414,7 @@ async function main() {
           .catch(() => undefined).then(() => { shadersReady = true; loadReport.mark('shaders'); });
         setTimeout(() => { shadersReady = true; }, 8000); // never block the menu on a slow/failed warm-up
       }
-      if (near.ready === near.total && shadersReady && frameCount > 3 && !titleReady) { titleReady = true; loadReport.mark('title-ready'); console.info('[T74 load]\n' + loadReport.text()); void saves.latest().then((l) => ui.titleReady(l ? l.label : null)); }
+      if (near.ready === near.total && shadersReady && frameCount > 3 && !titleReady) { titleReady = true; loadReport.mark('title-ready'); releaseAfterTitle(); console.info('[T74 load]\n' + loadReport.text()); void saves.latest().then((l) => ui.titleReady(l ? l.label : null)); }
     }
     ui.update(dt);
     if (ui.state === 'cutscene') loadReport.mark('cutscene');
