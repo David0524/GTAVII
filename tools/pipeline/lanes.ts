@@ -614,6 +614,17 @@ for (const [a, b] of sideEdge) if (a >= 0 && b >= 0) { walkEdges[a].opposite = b
     for (let g = 0; g < G; g++) if (gAlive[g] && comp[g] !== big) { gAlive[g] = false; changed = true; }
     if (!changed) break;
   }
+  // entries from the city beyond the edge: a dropped group that starts at the playable edge and leads into the
+  // kept network is a source (the sim feeds traffic in there), e.g. 7th Avenue coming down from uptown
+  let entries = 0;
+  for (let g = 0; g < G; g++) {
+    if (gAlive[g]) continue;
+    const first = links[groupLanes[g][0]].pts;
+    if (edgeDistance(first[0], first[1]) > 25) continue;
+    if (!groupLanes[g].some((l) => links[l].next.some((c) => gAlive[tgtGroup(c)]))) continue;
+    gAlive[g] = true; entries++;
+  }
+  if (outer === 0) log(`edge entries revived: ${entries}`);
   // exits for every lane of a surviving group; a group where some lane can't get one is dropped and we re-prune
   let killed = 0;
   for (let g = 0; g < G; g++) if (gAlive[g]) for (const [i, l] of groupLanes[g].entries()) {

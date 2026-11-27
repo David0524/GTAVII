@@ -215,8 +215,16 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
     if (d > R) continue;
     if (!full && d < R * 0.55 && !outOfView(S, tmp[0], tmp[1])) continue;
+    if (!full && S.view && !outOfView(S, tmp[0], tmp[1]) && d < S.view.fade) continue; // in view: never inside the fade distance
     const b = Math.floor(d / BAND);
-    if (occ[b] >= F.laneM[b] * rho * viewWeight(S, tmp[0], tmp[1])) continue; // fuller where the camera looks
+    const vw = viewWeight(S, tmp[0], tmp[1]);
+    if (occ[b] >= F.laneM[b] * rho * vw * 2) continue; // (loose: the per-block cap below spreads them)
+    // and per block: a ring's share mustn't all go to one queued street while the next avenue stands empty
+    {
+      const lanes = net.groups.get(L.group) ?? [lane];
+      let n = 0, m = 0; for (const l of lanes) { n += S.occ[l].length; m += net.len[l]; }
+      if (n >= m * rho * vw * 1.1) continue;
+    }
     if (S.densityHook && S.rng.next() > S.densityHook(tmp[0], tmp[1], 'vehicle')) continue;
     const road = net.g.roads[L.owner];
     const arch = S.reg.pick((a) => a.behaviour === 'driver' && (a.vehicle !== 'bus' || (road.flags & RoadFlag.BusRoute) !== 0), tmp[0], tmp[1], S.minute, S.rng.next());
@@ -237,6 +245,43 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     if (!ok) continue;
     makeVehicle(S, kind, vclass, arch, lane, s); n++; budget--; occ[b]++;
     S.stats.spawnedV++;
+  }
+}
+
+/**
+ * Traffic entering the map: lanes that start at the playable edge are fed at a steady rate (cars come in
+ * from the city beyond), so blocks near the edge don't run empty when the ring around the focus is cut short.
+ */
+let edgeLanes: { net: unknown; lanes: number[] } | null = null;
+export function feedEdgeLanes(S: SimCore, dt: number) {
+  const net = S.net;
+  if (!edgeLanes || edgeLanes.net !== net) {
+    const lanes: number[] = [];
+    // a through route cut off by the map edge: near the edge, and nothing comes straight on into it
+    const straightIn = new Set<number>();
+    net.g.links.forEach((c) => { if (c.kind !== LinkKind.Lane && c.turn === Turn.Straight && c.next.length) straightIn.add(c.next[0]); });
+    for (const l of net.laneIds) { const p = net.g.links[l].pts; if (net.len[l] >= 20 && edgeDistance(p[0], p[1]) < 70 && !straightIn.has(l)) lanes.push(l); }
+    edgeLanes = { net, lanes };
+  }
+  const target = Math.round(S.maxVehicles * vehDensity(S.minute) * (S.weather === 'rain' ? 0.85 : 1));
+  if (S.vehicles.length >= target) return;
+  const R = S.ringV[1], rho = 0.065 * vehDensity(S.minute);
+  for (const l of edgeLanes.lanes) {
+    const L = net.g.links[l];
+    sampleAt(L.pts, net.cum[l], 8, tmp);
+    const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
+    if (d > R + 20 || !S.rng.chance(dt * 0.35)) continue;
+    if (S.view && !outOfView(S, tmp[0], tmp[1]) && d < S.view.fade) continue;
+    const lanes = net.groups.get(L.group) ?? [l];
+    let n = 0, m = 0; for (const q of lanes) { n += S.occ[q].length; m += net.len[q]; }
+    if (n >= m * rho * viewWeight(S, tmp[0], tmp[1]) * 1.1) continue;
+    if (S.occ[l].some((o) => o.s < 16) || S.vehicles.some((o) => Math.hypot(o.x - tmp[0], o.z - tmp[1]) < 14)) continue; // clear of anyone (incl. lane-changers)
+    const road = net.g.roads[L.owner];
+    const arch = S.reg.pick((a) => a.behaviour === 'driver' && (a.vehicle !== 'bus' || (road.flags & RoadFlag.BusRoute) !== 0), tmp[0], tmp[1], S.minute, S.rng.next());
+    if (!arch || (arch.vehicle === 'bus' && L.laneIndex !== 0 && L.laneCount > 2)) continue;
+    const vclass = pickClass(S, arch.vehicle!, arch);
+    makeVehicle(S, arch.vehicle!, vclass, arch, l, 8); S.stats.spawnedV++;
+    if (S.vehicles.length >= target) return;
   }
 }
 
@@ -537,7 +582,7 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     if (ws > v.s) { consider(ws - v.s - (w.len + v.len) / 2, w.v, 'queue'); out.hard = Math.min(out.hard, ws - (w.len + v.len) / 2 - 0.3); }
   }
   // out in the parking lane (pulled in to the kerb, gutter run): the parked cars there are in the way
-  if (L.kind === LinkKind.Lane && Math.abs(v.lat) > L.width / 2 && S.parked) {
+  if (L.kind === LinkKind.Lane && Math.abs(v.lat) + v.wid / 2 > L.width / 2 + 0.3 && S.parked) { // its body reaches into the parking lane
     const rear = S.parked.nextAhead(v.link, v.s - v.len / 2, v.lat > 0 ? 1 : -1);
     if (rear < Infinity) { consider(rear - v.s - v.len / 2 - 0.5, 0, 'parked'); out.hard = Math.min(out.hard, rear - v.len / 2 - 0.3); }
   }
@@ -906,7 +951,12 @@ export function stepVehicles(S: SimCore, dt: number) {
     if (Math.abs(v.latTarget) < Math.abs(v.lat) && Math.abs(v.lat) > 0.3) {
       for (const w of S.occ[v.link]) if (w !== v && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1 && Math.sign(w.lat - v.lat) === Math.sign(v.latTarget - v.lat)) { holdLat = true; break; }
     }
-    if (holdLat && L.kind === LinkKind.Lane && Math.abs(v.lat) > L.width / 2) v.v = Math.min(v.v, 0.3); // and don't carry on along the kerb into the parked cars
+    if (holdLat && L.kind === LinkKind.Lane && Math.abs(v.lat) + v.wid / 2 > L.width / 2 + 0.3) v.v = Math.min(v.v, 0.3);
+    // physically: where cars are parked alongside, nobody's body reaches into the parking lane
+    if (L.kind === LinkKind.Lane && S.parked && Math.abs(v.lat) + v.wid / 2 > L.width / 2 + 0.2) {
+      const side = v.lat > 0 ? 1 : -1, maxLat = Math.max(0, (L.width - v.wid) / 2 + 0.2);
+      if (S.parked.occupied(v.link, v.s - v.len / 2, v.s + v.len / 2, side)) { v.lat = side * Math.min(Math.abs(v.lat), maxLat); if (Math.abs(v.latTarget) > maxLat && Math.sign(v.latTarget) === side) v.latTarget = side * maxLat; }
+    } // and don't carry on along the kerb into the parked cars
     if (!holdLat) v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * (v.cop?.siren && L.kind !== LinkKind.Lane ? 3.5 : 1.4));
 
     if (v.cop) policeVehicleTick(S, v, dt);

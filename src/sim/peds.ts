@@ -127,6 +127,7 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
     const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
     if (d > R) continue;
     if (!full && d < R * 0.6 && !pedOutOfView(S, tmp[0], tmp[1])) continue;
+    if (!full && S.view && !pedOutOfView(S, tmp[0], tmp[1]) && d < S.view.fade) continue; // in view: never inside the fade distance
     const band = Math.floor(d / BAND_P);
     if (occ[band] >= F.walkM[band] * rho * viewWeight(S, tmp[0], tmp[1])) continue; // fuller where the camera looks
     occ[band]++;
