@@ -44,6 +44,14 @@ async function main() {
     for (const p of [...model.discovery.known()].slice(0, Math.floor(model.discovery.counts.known * 0.6))) model.discovery.markSeen([p.id]);
   }
   if (disc === 'all') for (const p of model.discovery.all) model.discovery.reveal(p.id, 'mission', true);
+  // fog of war for the lab: the ground a player who did the above would have walked (23rd St, up Broadway, Chelsea, Eighth Ave)
+  if (disc !== 'none' && model.explored) {
+    for (let x = 60; x > -1200; x -= 30) model.explored.mark(x, -10, 130);
+    for (let z = 0; z > -720; z -= 30) model.explored.mark(-20 + z * 0.33, z, 120);
+    for (let z = 0; z > -820; z -= 30) model.explored.mark(-880, z, 120);
+    model.explored.mark(130, -120, 170);
+  }
+  if (disc === 'all' && model.explored) for (let x = -1300; x < 220; x += 60) for (let z = -1680; z < 100; z += 60) model.explored.mark(x, z, 60);
   if (q.get('waypoint') !== '0') model.setWaypoint({ x: -205, z: -640 }, { x: host.pos.x, z: host.pos.z, inVehicle: false });
 
   let backdrop: Awaited<ReturnType<typeof import('./cityBackdrop').cityBackdrop>> | null = null;

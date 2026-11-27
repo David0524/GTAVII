@@ -12,3 +12,4 @@ dist-*/
 shots/ui/**/*.png
 shots/cine/**/*.png
 shots/map/
+public/map/aerial-dev/

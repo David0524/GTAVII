@@ -210,3 +210,44 @@ body.touch .t74-minimap { left: calc(16px + var(--safe-l)) !important; top: calc
 /* key prompts: square keycaps */
 .t74-key { border-radius: 2px !important; }
 .t74-sub .who { font: 700 13px var(--f-cond) !important; letter-spacing: .12em !important; }
+
+/* ------------------------------------------------------------------ the map screen (direction A): one slim dark panel over the aerial */
+.t74-mapside { position: absolute !important; left: 0 !important; top: 0 !important; bottom: 0 !important; width: 236px !important; max-height: none !important; box-sizing: border-box;
+  display: flex !important; flex-direction: column; gap: 2px; padding: 14px 14px 10px calc(16px + var(--safe-l)) !important; overflow: auto;
+  background: linear-gradient(90deg, rgba(10,10,9,.88) 75%, rgba(10,10,9,.72)) !important; color: var(--cream) !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; }
+.t74-mapside .ms-head { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 2px 6px; border-bottom: 1px solid var(--hair); }
+.t74-mapside .ms-head b { font: 700 11px var(--f-cond); letter-spacing: .14em; text-transform: uppercase; }
+.t74-mapside .ms-head span { font: 400 11px var(--f-ui); color: var(--dim); } .t74-mapside .ms-head em { font-style: normal; color: var(--taxi); }
+.t74-mapside .t74-filter { all: unset; cursor: pointer; display: grid !important; grid-template-columns: 18px 1fr auto; align-items: center; gap: 10px; min-height: 30px; padding: 0 8px 0 6px; border-bottom: 1px solid rgba(242,237,227,.07);
+  font: 400 13px var(--f-ui); color: var(--cream); background: none !important; width: auto !important; height: auto !important; }
+.t74-mapside .t74-filter .ic { width: 18px; height: 18px; color: var(--dim); }
+.t74-mapside .t74-filter .l { display: inline !important; } .t74-mapside .t74-filter .n { font: 700 12px var(--f-voice); color: var(--dim); font-variant-numeric: tabular-nums; }
+.t74-mapside .t74-filter.off { opacity: .4; } .t74-mapside .t74-filter.off .l { text-decoration: line-through; text-decoration-color: rgba(242,237,227,.5); }
+.t74-mapside .t74-filter:hover, body .t74-mapside .t74-filter.is-focus { background: linear-gradient(90deg, rgba(232,163,23,.2), transparent 75%) !important; box-shadow: inset 3px 0 0 var(--taxi); }
+.t74-mapside .ms-fog { display: flex; align-items: center; gap: 9px; margin-top: auto; padding: 10px 2px 6px; font: 400 11.5px var(--f-ui); color: var(--dim); }
+.t74-mapside .ms-fog i { width: 18px; height: 11px; background: repeating-linear-gradient(45deg, rgba(242,237,227,.18) 0 2px, transparent 2px 4px), #2c2e32; }
+.t74-mapside .t74-mapbtns { position: static !important; display: flex; gap: 6px; padding: 8px 0; border-top: 1px solid var(--hair); }
+.t74-mapside .t74-mapbtns button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px 0 9px; background: rgba(242,237,227,.08); font: 700 11px var(--f-cond); letter-spacing: .12em; text-transform: uppercase; color: var(--cream); }
+.t74-mapside .t74-mapbtns button:hover, body .t74-mapside .t74-mapbtns button.is-focus { background: var(--cream); color: #111; }
+.t74-mapside .t74-mapcredit { position: static !important; background: none !important; padding: 2px 0 0 !important; font: 400 9px/1.3 var(--f-ui) !important; color: var(--faint) !important; }
+.t74-mapside .t74-card { position: static !important; width: auto !important; margin: 0 0 8px !important; padding: 9px 10px 10px !important; background: rgba(242,237,227,.06) !important; box-shadow: inset 3px 0 0 var(--taxi) !important; border: 0 !important; }
+.t74-mapside .t74-card h3 { font: 800 17px/1.1 var(--f-voice) !important; margin: 4px 0 !important; }
+.t74-mapside .t74-card .cat { font: 700 10px var(--f-cond) !important; letter-spacing: .14em !important; color: var(--taxi) !important; }
+.t74-mapside .t74-card .cat img { display: none; }
+.t74-mapside .t74-card button { font: 700 11px var(--f-cond) !important; letter-spacing: .12em; min-height: 30px !important; }
+@media (max-height: 480px) {
+  .t74-mapside { width: 200px !important; padding: 8px 10px 6px calc(12px + var(--safe-l)) !important; }
+  .t74-mapside .t74-filter { min-height: 26px; font-size: 12px; } .t74-mapside .ms-head { padding: 4px 2px; } .t74-mapside .ms-fog { padding: 6px 2px 4px; }
+}
+.t74-mapside .t74-card p, .t74-mapside .t74-card .meta, .t74-mapside .t74-card small { font: 400 12.5px/1.4 var(--f-ui) !important; color: var(--dim) !important; margin: 4px 0 0 !important; }
+.t74-mapside .t74-card .u-window { display: inline-flex !important; align-items: center; gap: 6px; background: none !important; color: var(--taxi) !important; padding: 0 !important; margin: 2px 0 2px !important; font: 700 10.5px var(--f-cond) !important; letter-spacing: .12em; }
+.t74-mapside .t74-card .u-window::before { content: ''; width: 6px; height: 6px; background: var(--taxi); }
+.t74-mapside .t74-card .acts { display: flex !important; flex-wrap: wrap; gap: 6px !important; margin-top: 10px !important; }
+.t74-mapside .t74-card .acts button { all: unset; cursor: pointer; height: 30px; padding: 0 11px; background: rgba(242,237,227,.08) !important; box-shadow: none !important; color: var(--cream) !important; font: 700 11px var(--f-cond) !important; letter-spacing: .12em; text-transform: uppercase; display: inline-flex; align-items: center; }
+.t74-mapside .t74-card .acts button:first-child { background: var(--taxi) !important; color: #111 !important; }
+.t74-mapside .t74-card .acts button:hover, body .t74-mapside .t74-card .acts button.is-focus { background: var(--cream) !important; color: #111 !important; }
+/* phone: undo the old icon-rail rules; keep the labelled list, compact */
+body.touch .t74-mapside .t74-filter { width: auto !important; min-height: 36px !important; justify-content: initial; position: static !important; padding: 0 6px 0 4px !important; }
+body.touch .t74-mapside .t74-filter .n { position: static !important; font-size: 12px; }
+body.touch .t74-mapside .t74-filter .l { display: inline !important; }
+body.touch .t74-mapside { width: 200px !important; padding: 6px 10px 6px calc(12px + var(--safe-l)) !important; gap: 0 !important; }

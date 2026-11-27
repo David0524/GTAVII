@@ -2,6 +2,8 @@
  * The map tab of the pause hub: the folding map, a printed legend that doubles as the filter list,
  * a dark info panel for the selected place, and waypoint actions. Fully usable by touch alone.
  */
+import { AerialMap } from '../map/AerialMap';
+import { icon, type IconName } from '../icons';
 import { FoldingMap, type FoldingMapSelection } from '../map/FoldingMap';
 import type { MapModel } from '../map/MapModel';
 import { CATEGORIES, FILTER_GROUPS, type Place, type RevealVia } from '../map/places';
@@ -30,14 +32,15 @@ export class MapScreen {
 
   constructor(private host: UiHost, private model: MapModel, heroes: { name: string; x: number; z: number }[]) {
     this.el.className = 't74-mapscreen';
-    this.map = new FoldingMap(model, host.streets, heroes);
+    this.map = new AerialMap(model, host.streets, heroes); (this.map as AerialMap).baseUrl = host.baseUrl;
     this.side.className = 't74-mapside';
     this.card.className = 't74-card'; this.card.style.display = 'none';
     this.btns.className = 't74-mapbtns';
     // ODbL: the map is drawn from OpenStreetMap data, so it carries the credit (an imprint line, like a printed guide's)
     this.credit.className = 't74-mapcredit';
     this.credit.innerHTML = 'Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL · NYC Open Data';
-    this.el.append(this.map.canvas, this.side, this.card, this.btns, this.credit);
+    // DESIGN_A: one slim panel holds the selected place, the legend (filters), the tools and the data credit
+    this.el.append(this.map.canvas, this.side);
     addEventListener('resize', () => { if (this.el.offsetParent) { this.measureOccluders(); this.map.draw(true); } });
     this.map.onSelect = (s) => this.select(s);
   }
@@ -66,21 +69,25 @@ export class MapScreen {
     const known = this.model.discovery.known();
     const c = this.model.discovery.counts;
     const items: NavItem[] = [];
-    this.side.innerHTML = `<h4>LEGEND</h4><div class="count">${c.known} ${c.known === 1 ? 'place' : 'places'} on your map${c.fresh ? ` · <b style="color:#9e2a24">${c.fresh} new</b>` : ''}</div>`;
+    this.side.innerHTML = '';
+    this.side.appendChild(this.card);
+    this.side.insertAdjacentHTML('beforeend', `<header class="ms-head"><b>Legend</b><span>${c.known} known${c.fresh ? ` · <em>${c.fresh} new</em>` : ''}</span></header>`);
     for (const f of FILTER_GROUPS) {
       const n = known.filter((p) => CATEGORIES[p.cat].group === f.id).length;
       const b = document.createElement('button');
       b.className = `t74-filter${this.model.filters.has(f.id) ? '' : ' off'}`;
-      b.innerHTML = `<img alt="" src="${pictogramURL(GROUP_ICON[f.id], 18, 'print')}"><span class="l">${f.label}</span><span class="n">${n}</span>`;
+      b.innerHTML = `${icon(GROUP_ICON[f.id] as IconName, 18)}<span class="l">${f.label}</span><span class="n">${n}</span>`;
       b.title = f.label; b.setAttribute('aria-label', `${f.label}: ${n}`);
       b.setAttribute('aria-pressed', String(this.model.filters.has(f.id)));
       const act = () => { this.model.toggleFilter(f.id); this.renderSide(); };
       this.side.appendChild(b); items.push({ el: b, activate: act });
     }
-    this.btns.innerHTML = '';
-    const mk = (label: string, fn: () => void) => { const b = document.createElement('button'); b.textContent = label; this.btns.appendChild(b); items.push({ el: b, activate: fn }); return b; };
-    mk('ME', () => { const p = this.host.player(); this.map.centerOn(p.x, p.z, 0.6); });
-    if (this.model.waypoint) mk('ERASE ROUTE', () => { this.setWaypoint(null); });
+    this.side.insertAdjacentHTML('beforeend', `<div class="ms-fog"><i></i>Not yet explored</div>`);
+    this.btns.innerHTML = ''; this.side.appendChild(this.btns);
+    const mk = (ic: IconName, label: string, fn: () => void) => { const b = document.createElement('button'); b.innerHTML = `${icon(ic, 16)}<span>${label}</span>`; this.btns.appendChild(b); items.push({ el: b, activate: fn }); return b; };
+    mk('objective', 'Me', () => { const p = this.host.player(); this.map.centerOn(p.x, p.z, 0.6); });
+    if (this.model.waypoint) mk('close', 'Route', () => { this.setWaypoint(null); });
+    this.side.appendChild(this.credit);
     this.onNav?.(items);
   }
 

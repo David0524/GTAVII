@@ -36,12 +36,12 @@ export interface FoldingMapSelection { place?: Place; at?: { x: number; z: numbe
 
 export class FoldingMap {
   readonly canvas = document.createElement('canvas');
-  private g = this.canvas.getContext('2d')!;
+  protected g = this.canvas.getContext('2d')!;
   cx = -300; cz = -800; zoom = 0.34;
   private pointers = new Map<number, { x: number; y: number; x0: number; y0: number }>();
   private drag: { x: number; y: number; cx: number; cz: number } | null = null;
   private pinch: { d: number; zoom: number } | null = null;
-  private dirtyKey = '';
+  protected dirtyKey = '';
   private seenT = new Map<string, number>();
   player = { x: 0, z: 0, yaw: 0, lead: '' };
   owned = new Set<string>();
@@ -54,7 +54,7 @@ export class FoldingMap {
   onSelect?: (s: FoldingMapSelection) => void;
   readonly cost = { draw: 0 };
 
-  constructor(private model: MapModel, private streets: StreetRec[], private heroes: { name: string; x: number; z: number }[]) {
+  constructor(protected model: MapModel, protected streets: StreetRec[], protected heroes: { name: string; x: number; z: number }[]) {
     const c = this.canvas;
     c.className = 't74-foldmap';
     c.addEventListener('pointerdown', (e) => { c.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY }); this.begin(); });
@@ -72,7 +72,7 @@ export class FoldingMap {
 
   centerOn(x: number, z: number, zoom?: number) { this.cx = x; this.cz = z; if (zoom) this.zoom = zoom; this.clamp(); }
   /** Keep the sheet filling the view when it's bigger than the view (no bare table on one side). */
-  private clamp() {
+  protected clamp() {
     const W = this.canvas.clientWidth || 800, H = this.canvas.clientHeight || 600;
     const sw = PLAYABLE.maxX - PLAYABLE.minX + 2 * MARGIN, sh = PLAYABLE.maxZ - PLAYABLE.minZ + 2 * MARGIN;
     this.zoom = Math.min(2.4, Math.max(Math.max(W / sw, H / sh), this.zoom)); // full-bleed: never show bare table
@@ -81,7 +81,7 @@ export class FoldingMap {
     this.cx = Math.min(x1, Math.max(x0, this.cx));
     this.cz = Math.min(z1, Math.max(z0, this.cz));
   }
-  private zoomAt(f: number, sx: number, sy: number) {
+  protected zoomAt(f: number, sx: number, sy: number) {
     const W = this.canvas.clientWidth, H = this.canvas.clientHeight;
     const wx = this.cx + (sx - W / 2) / this.zoom, wz = this.cz + (sy - H / 2) / this.zoom;
     this.zoom *= f; this.clamp();
@@ -99,7 +99,7 @@ export class FoldingMap {
   }
 
   toWorld(sx: number, sy: number) { return { x: this.cx + (sx - this.canvas.clientWidth / 2) / this.zoom, z: this.cz + (sy - this.canvas.clientHeight / 2) / this.zoom }; }
-  private toScreen(x: number, z: number): [number, number] { return [this.canvas.clientWidth / 2 + (x - this.cx) * this.zoom, this.canvas.clientHeight / 2 + (z - this.cz) * this.zoom]; }
+  protected toScreen(x: number, z: number): [number, number] { return [this.canvas.clientWidth / 2 + (x - this.cx) * this.zoom, this.canvas.clientHeight / 2 + (z - this.cz) * this.zoom]; }
 
   /** Nearest visible place to a screen point (within 22 px). */
   pickMission(sx: number, sy: number) {
