@@ -834,7 +834,7 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry' | 'holdOn' | 'buy' | 'shine' | 'monte' | 'greet'; label: string; target?: string; alt?: { kind: 'antagonize'; label: string } } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry' | 'holdOn' | 'buy' | 'shine' | 'monte' | 'greet' | 'apologise'; label: string; target?: string; alt?: { kind: 'antagonize'; label: string } } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
@@ -861,6 +861,7 @@ export class Gameplay {
     if (d) return { kind: 'door', label: d.locked ? (this.doorOpenNow(d) ? 'Knock' : 'Locked') : 'Go in', target: d.id };
     { const v = this.vendorNear(p[0], p[2]); if (v && this.pc.carrying === 'none' && this.vendors.open(v, this.economy.nowH())) return v.kind === 'shoeshine' ? { kind: 'shine', label: `Shine ${this.shinePrice()}¢`, target: v.id } : v.kind === 'monte' ? { kind: 'monte', label: 'Find the lady', target: v.id } : { kind: 'buy', label: 'Buy', target: v.id }; }
     // on foot with nobody to fight and nothing else here: say hello to a passer-by (hold / alt: mouth off)
+    { const sorry = this.apologyTarget(); if (sorry) return { kind: 'apologise', label: 'Apologise', target: sorry, alt: { kind: 'antagonize', label: 'Mouth off' } }; }
     if ((!t || t.ped) && this.touchMode() === 'foot' && this.pc.carrying === 'none') { const q = this.nearestGreetable(); if (q) return { kind: 'greet', label: 'Say hello', target: `ped:${q.id}`, alt: { kind: 'antagonize', label: 'Mouth off' } }; }
     // touch in combat has its own Cover/Leave/Roll button (TouchLayout slot a): don't offer the same thing twice
     const coverButton = this.pc.device === 'touch' && this.touchMode() === 'combat';
@@ -887,6 +888,7 @@ export class Gameplay {
       case 'carryBody': this.pickUpBody(); break;
       case 'tackle': this.tackle(); break;
       case 'greet': this.greet(a.target); break;
+      case 'apologise': this.apologise(a.target); break;
       case 'restrain': this.restrain(a.target); break;
       case 'loadQuarry': this.loadQuarry(a.target!); break;
       case 'holdOn': this.holdOn(); break;
@@ -1700,7 +1702,7 @@ export class Gameplay {
     return best;
   }
   /** per ped: when the player last greeted / mouthed off at them (game s), and how many taunts in a row */
-  private rapport = new Map<number, { greetedAt: number; tauntedAt: number; taunts: number }>();
+  private rapport = new Map<number, { greetedAt: number; tauntedAt: number; taunts: number; shovedAt?: number }>();
   static TALK = { tauntWindow: 30, remembered: 600, toughNerve: 0.55, shoveAfter: 2, brawlAfter: 3, ignoreChance: 0.4 } as const;
   private talkTarget(id?: string) {
     if (!this.player) return null;
@@ -1730,7 +1732,7 @@ export class Gameplay {
     const r = this.rapport.get(q.id) ?? { greetedAt: -Infinity, tauntedAt: -Infinity, taunts: 0 };
     const rep = this.reputation(q.x, q.z).score, T = Gameplay.TALK, tough = q.nerve >= T.toughNerve;
     const p = this.player.position();
-    this.emit('bark', { id: this.player.id, bark: 'barks.player_greet', context: rep >= 2.5 || this.time - r.greetedAt < T.remembered ? 'warm' : 'plain', at: p, to: `ped:${q.id}` });
+    this.emit('bark', { id: this.player.id, lead: this.leadTag(), bark: 'barks.player_greet', context: rep >= 2.5 || this.time - r.greetedAt < T.remembered ? 'warm' : 'plain', at: p, to: `ped:${q.id}` });
     let out: { context: string; mood: string };
     if (this.time - r.tauntedAt < T.remembered) out = this.replyBark(q, tough ? 'antagonize' : 'fear', tough ? 'angry' : 'scared', 'antagonized');
     else if (rep <= -3) out = this.replyBark(q, tough ? 'complain' : 'fear', tough ? 'sour' : 'wary', null);
@@ -1753,7 +1755,7 @@ export class Gameplay {
     const T = Gameplay.TALK, tough = q.nerve >= T.toughNerve, p = this.player.position();
     const r = this.rapport.get(q.id) ?? { greetedAt: -Infinity, tauntedAt: -Infinity, taunts: 0 };
     r.taunts = this.time - r.tauntedAt < T.tauntWindow ? r.taunts + 1 : 1; r.tauntedAt = this.time; this.rapport.set(q.id, r);
-    this.emit('bark', { id: this.player.id, bark: 'barks.player_antagonize', context: r.taunts > 1 ? 'again' : 'first', at: p, to: `ped:${q.id}` });
+    this.emit('bark', { id: this.player.id, lead: this.leadTag(), bark: 'barks.player_antagonize', context: r.taunts > 1 ? 'again' : 'first', at: p, to: `ped:${q.id}` });
     const armed = this.pc.weapon !== 'weapon.fists';
     if (armed) this.crime('menacing', { victim: `ped:${q.id}`, at: [q.x, q.y, q.z], noise: 8 });
     else this.remember('bumped', [q.x, q.y, q.z], `ped:${q.id}`);
@@ -1767,11 +1769,51 @@ export class Gameplay {
     if (r.taunts >= T.shoveAfter) {
       this.simLike?.pedAct?.(q.id, 'shove', 0.9);
       this.stumbleUntil = Math.max(this.stumbleUntil, this.time + Gameplay.BUMP.shoveStumble);
+      r.shovedAt = this.time;
       this.emit('notice', { kind: 'shovedBack', by: `ped:${q.id}`, provoked: true });
       return { target: `ped:${q.id}`, ...out, escalated: 'shove' as const };
     }
     this.simLike?.pedAct?.(q.id, 'square_up', 1.5);
     return { target: `ped:${q.id}`, ...out, escalated: 'none' as const };
+  }
+  /** the lead as narrative tags lines: 'char.teddy_arce' -> 'teddy' */
+  private leadTag() { return (this.player?.lead ?? '').replace(/^char\./, '').split('_')[0]; }
+  static SORRY = { window: 8, brawlGrace: 5 } as const;
+  /** Someone who shoved you in the last 8 s, or a street fight in its first 5 s: the button offers an apology. */
+  private apologyTarget(): string | null {
+    if (!this.player) return null;
+    const p = this.player.position();
+    for (const [id, b] of this.brawls) {
+      const a = this.ai.agents.get(id);
+      if (a?.alive && b.until - this.time > Gameplay.BRAWL.seconds - Gameplay.SORRY.brawlGrace && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 3.5) return `ped:${b.pedId}`;
+    }
+    for (const [n, r] of this.rapport) if (r.shovedAt !== undefined && this.time - r.shovedAt < Gameplay.SORRY.window && this.talkTarget(`ped:${n}`)) return `ped:${n}`;
+    return null;
+  }
+  /**
+   * Back down. Accepted (more likely from the calmer, the fewer taunts, and on a block that doesn't resent you):
+   * the taunts are forgotten and a fight in its first seconds ends ('calmed'). Rejected: a parting shot and they
+   * walk off; a fight carries on. Player line `bark {bark: 'barks.player_apologise', lead}`; reply
+   * `accept_apology` | `reject_apology`. The street doesn't hold a climb-down against you.
+   */
+  apologise(id?: string) {
+    if (!this.player) return null;
+    const n = id ? simPedNumber(id) : undefined; if (n === undefined) return null;
+    const b = this.brawls.get(`brawl:${n}`), r = this.rapport.get(n) ?? { greetedAt: -Infinity, tauntedAt: -Infinity, taunts: 0 };
+    const peds = (this.simLike ?? (this.sim as unknown as SimLike | undefined))?.peds ?? [];
+    const q = peds.find((x) => x.id === n) ?? (b ? (() => { const a = this.ai.agents.get(`brawl:${n}`)!; return { id: n, archetype: 'npc.passerby', x: a.pos[0], y: a.pos[1], z: a.pos[2], nerve: 0.8 }; })() : null);
+    if (!q) return null;
+    const p = this.player.position();
+    this.emit('bark', { id: this.player.id, lead: this.leadTag(), bark: 'barks.player_apologise', context: b ? 'fight' : 'shove', at: p, to: `ped:${n}` });
+    const rep = this.reputation(q.x, q.z).score;
+    const chance = Math.max(0.1, Math.min(0.9, 0.85 - 0.35 * Math.max(0, q.nerve - 0.5) - 0.15 * Math.max(0, r.taunts - 1) - (rep <= -3 ? 0.25 : 0) - (b ? 0.15 : 0)));
+    const ok = this.rng.chance(chance);
+    const out = this.replyBark(q as any, ok ? 'accept_apology' : 'reject_apology', ok ? 'grudging' : 'contemptuous');
+    if (ok) {
+      r.taunts = 0; r.shovedAt = undefined; r.tauntedAt = -Infinity; this.rapport.set(n, r);
+      if (b) b.until = this.time; // updateBrawls hands them back to sim next frame ('calmed')
+    } else { r.shovedAt = undefined; this.rapport.set(n, r); if (!b) this.simLike?.setGoal?.(n, { kind: 'goto', x: q.x + (q.x - p[0]) * 3, z: q.z + (q.z - p[2]) * 3, speed: 1.6 }); }
+    return { target: `ped:${n}`, accepted: ok, chance, ...out };
   }
   /** The alternate on the context button (hold on touch, a second key elsewhere): mouth off instead of hello. */
   doAltContextAction() { const a = this.contextAction(); return a?.alt?.kind === 'antagonize' ? this.antagonize(a.target) : null; }

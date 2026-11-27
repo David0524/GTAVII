@@ -328,3 +328,39 @@ test('antagonize: a shy one backs off; with a gun out it is menacing and they hu
   // no greet offer with a gun drawn (combat mode)
   assert.notEqual(t2.g.contextAction()?.kind, 'greet');
 });
+
+test('apologise: after a shove the button offers an apology; calm people usually take it, it clears the grudge; a fight can be talked down early', () => {
+  let accepted = 0, rejected = 0;
+  for (let k = 0; k < 40; k++) {
+    const { g, barks } = talkRig(0.6);
+    (g as any).rng = new (Object.getPrototypeOf((g as any).rng).constructor)(1000 + k);
+    g.antagonize('ped:7'); const s = g.antagonize('ped:7')!; assert.equal(s.escalated, 'shove');
+    const c = g.contextAction()!; assert.equal(c.kind, 'apologise'); assert.equal(c.alt?.kind, 'antagonize');
+    const res: any = g.doContextAction();
+    void res;
+    const reply = barks.filter((b) => b.id === 'ped:7').at(-1).context;
+    assert.ok(barks.some((b) => b.bark === 'barks.player_apologise' && b.lead === 'teddy'));
+    if (reply === 'accept_apology') { accepted++; assert.notEqual(g.antagonize('ped:7')!.escalated, 'shove', 'grudge cleared: the next taunt starts over'); }
+    else { rejected++; assert.equal(reply, 'reject_apology'); }
+    assert.notEqual(g.contextAction()?.kind, 'apologise', 'offered once');
+  }
+  assert.ok(accepted > rejected && rejected > 0, `${accepted} accepted, ${rejected} rejected`);
+  // a fight in its first seconds
+  let calmed = 0;
+  for (let k = 0; k < 20; k++) {
+    const { g } = talkRig(0.7);
+    (g as any).rng = new (Object.getPrototypeOf((g as any).rng).constructor)(2000 + k);
+    g.antagonize('ped:7'); g.antagonize('ped:7'); assert.equal(g.antagonize('ped:7')!.escalated, 'brawl');
+    const c = g.contextAction(); assert.equal(c?.kind, 'apologise', JSON.stringify(c));
+    const r = g.apologise(c!.target)!;
+    g.update(0.1);
+    if (r.accepted) { calmed++; assert.ok(!g.brawls.size, 'handed back to sim'); }
+  }
+  assert.ok(calmed > 0 && calmed < 20, `${calmed}/20 fights talked down`);
+});
+
+test('player lines carry the lead for narrative\'s per-lead variants', () => {
+  const { g, barks } = talkRig(0.8);
+  g.greet('ped:7'); g.antagonize('ped:7');
+  assert.deepEqual(barks.filter((b) => b.id === 'player').map((b) => b.lead), ['teddy', 'teddy']);
+});
