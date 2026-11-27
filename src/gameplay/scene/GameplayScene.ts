@@ -8,7 +8,8 @@ import { Atmosphere } from '../../world/Atmosphere';
 import { OrbitCamera } from '../../camera/OrbitCamera';
 import { Input } from '../../input/Input';
 import { Btn } from '../../input/Gamepad';
-import { TouchControls } from '../../ui/TouchControls';
+import { TouchLayout } from '../../ui/touch/TouchLayout';
+import { gameplayTouch } from '../../ui/touch/adapters';
 import { Physics } from '../../physics/Physics';
 import { PlayerController } from '../../player/PlayerController';
 import { loadTerrain, heightAt, CURB_HEIGHT } from '../../shared/terrain';
@@ -61,7 +62,7 @@ export async function runGameplayScene() {
   loadSkyline(import.meta.env.BASE_URL + 'data/skyline.bin').then((s) => scene.add(s)).catch(() => {});
 
   const input = new Input(renderer.domElement);
-  if (input.isTouch || params.has('touch')) { input.isTouch = true; new TouchControls(input, [{ label: 'JUMP', action: 'jump', hold: true }, { label: 'RUN', action: 'sprint', hold: true }]); document.body.classList.add('touch'); }
+  if (input.isTouch || params.has('touch')) { input.isTouch = true; document.body.classList.add('touch'); }
 
   // ---------------------------------------------------------------- gameplay core
   // ?content=narrative runs on narrative's items, guns, shops and precincts (adapter); default is gameplay's placeholders
@@ -204,6 +205,7 @@ export async function runGameplayScene() {
 
   // ---------------------------------------------------------------- input → gameplay
   const touch = input.isTouch;
+  let touchLayout: TouchLayout | null = null;
   g.setContext({ device: touch ? 'touch' : 'mouse', assist: 'standard' });
   const isMelee = () => g.reg.weapon(g.pc.weapon).class === 'melee';
   let fireHeldAt = -1, aimHeld = false;
@@ -247,12 +249,15 @@ export async function runGameplayScene() {
       b.addEventListener('pointerup', u); b.addEventListener('pointercancel', u);
       hud.touch.appendChild(b); return b;
     };
-    tb('◀', () => g.cycleLock(-1)); tb('▶', () => g.cycleLock(1));
+    // the shipping layout (UI's TouchLayout through gameplayTouch): stick, look, Jump/Fire, context, Cover/Reload, Weapon
+    const v3 = new THREE.Vector3();
+    const project = (x: number, y: number, z: number) => { v3.set(x, y, z).project(camera); return v3.z > 1 ? null : { x: (v3.x + 1) / 2 * innerWidth, y: (1 - v3.y) / 2 * innerHeight }; };
+    touchLayout = new TouchLayout({ input, touch: gameplayTouch(g, project),
+      player: () => ({ x: player.pos.x, z: player.pos.z, yaw: orbit.yaw, speed: 0, inVehicle: false, lead: 'char.teddy_arce' }) } as any);
+    // test-scene extras the shipping layout doesn't carry yet (aim hold, guard/dodge, grab, blind fire, threat, limbs)
     tb('AIM', () => { if (isMelee()) { pressAim(); return; } if (g.aimer.locked) { g.aimer.release(); g.setAiming(false); } else { g.setAiming(true); g.lockOn(); } }, () => { if (isMelee()) releaseAim(); }, true);
-    tb('FIRE', pressFire, releaseFire, true);
-    tb('COVER', () => g.toggleCover(moveDir())); tb('RELOAD', () => g.reload());
     tb('GUARD', () => { pressAim(); guardAt = g.now; }, () => { releaseAim(); if (g.now - guardAt < 0.18) { const d = moveDir(); g.dodge(d[0] || d[1] ? d : [Math.cos(orbit.yaw), -Math.sin(orbit.yaw)]); } });
-    tb('GRAB', grab); tb('WPN', () => g.cycleWeapon(1)); tb('USE', interact); tb('BLIND', () => g.setBlindFire(true), () => g.setBlindFire(false)); tb('THREAT', intimidate);
+    tb('GRAB', grab); tb('BLIND', () => g.setBlindFire(true), () => g.setBlindFire(false)); tb('THREAT', intimidate);
     for (const l of ['head', 'torso', 'legs'] as const) { const b = el('button', '') as HTMLButtonElement; b.textContent = l === 'torso' ? 'BODY' : l.toUpperCase(); b.dataset.l = l; b.addEventListener('pointerdown', (e) => { e.stopPropagation(); g.setLimb(l); }); hud.limbs.appendChild(b); }
   }
   let guardAt = 0;
@@ -443,6 +448,7 @@ export async function runGameplayScene() {
     for (const p of sim.peds) { const push = g.props.geyserPush(p.x, p.z); if (push) { p.x += push[0] * dt; p.z += push[1] * dt; } }
     const gpt = performance.now();
     g.update(dt);
+    touchLayout?.update(dt);
     cabinet.update(dt);
     stats.gp.push(performance.now() - gpt); if (stats.gp.length > 600) stats.gp.shift();
     // melee pushes onto the player controller

@@ -2,8 +2,7 @@
 
 `src/gameplay/index.ts` exports `Gameplay`; everything below is a method or event on it. Gameplay never imports
 engine, sim, vehicles or UI code: it only sees what you bind and what you call. Money is integer cents everywhere.
-Headless suite: `npx tsx --test src/gameplay/tests/*.test.ts` (156 tests, about 4 s, exits 0 with a TAP summary).
-Please add it as `"test:gameplay"` in package.json (ENGINE_REQUESTS 12; gameplay can't edit the shared file).
+Headless suite: `npm run test:gameplay` (158 tests, about 3.5 s, exits 0 with a TAP summary).
 
 ## 0. Boot
 ```ts
@@ -52,7 +51,9 @@ Lock-on: `lockOn()`, `cycleLock(±1)` / `swipeLock(±1)`, `lockTarget(id)`, `loc
 Weapons: `equip(id)`, `holster()`, `drawWeapon()`, `swapWeapon(±1)`, `weaponList()`. Cover: `toggleCover(moveDir)`.
 Melee: `meleeAttack('light'|'heavy')`, `block(on)`, `dodge(dir)`, `grappleAction('shove'|'knee'|'throw', dir)`,
 `struggle()`, `takedown()`, `tackle()`. Other: `surrender(on)`, `throwMolotov(target)`.
-Touch helpers: `touchMode()`, `armed()`, `coverLabel()`, `coverOrRoll(moveDir)`, `setAssist(level)`.
+Touch helpers: `touchMode()`, `armed()`, `coverLabel()`, `coverOrRoll(moveDir)`, `setAssist(level)`. `moveDir` is
+`{x, z}` or `[x, z]`. The UI's `gameplayTouch(g, project)` (src/ui/touch/adapters.ts) accepts `Gameplay` as is.
+Heat for the UI: `g.policeSys.phase(playerId)` is the phase pursuit and the HUD use.
 
 ## 4. Movement rules (MOVEMENT.md)
 `canMove(action)` → `{ok, reason}` before a traversal; `traversed(action, metres)` after (stamina);

@@ -955,6 +955,7 @@ export class Gameplay {
     const p = this.player;
     // register sim peds as hittable bodies
     for (const q of this.port.peds()) if (q.alive) this.ensurePed(q);
+    this.sampleSpeeds(dt);
     // player gun timers and firing
     const ct0 = now();
     if (p) this.updatePlayer(dt, p);
@@ -1658,6 +1659,21 @@ export class Gameplay {
   // ------------------------------------------------------------------ the tackle (foot-chase finisher)
   /** Mission chase quarries: who can be tackled to finish a chase, from how close, and whether it's lawful
    *  (a purse snatcher or a bail skip: no crime; a bystander: assault). Set by the mission runtime. */
+  /** measured ground speed (m/s, smoothed over about 0.3 s) of AI agents within 30 m of the player: tackles read it */
+  private speeds = new Map<string, { x: number; z: number; v: number }>();
+  private sampleSpeeds(dt: number) {
+    if (dt <= 0 || !this.player) return;
+    const p = this.player.position(), k = Math.min(1, dt / 0.3);
+    for (const a of this.ai.agents.values()) {
+      if (Math.abs(a.pos[0] - p[0]) > 30 || Math.abs(a.pos[2] - p[2]) > 30) { this.speeds.delete(a.id); continue; }
+      const s = this.speeds.get(a.id);
+      if (!s) { this.speeds.set(a.id, { x: a.pos[0], z: a.pos[2], v: NaN }); continue; }
+      const inst = Math.hypot(a.pos[0] - s.x, a.pos[2] - s.z) / dt;
+      s.v = Number.isNaN(s.v) ? inst : s.v + (inst - s.v) * k; s.x = a.pos[0]; s.z = a.pos[2];
+    }
+  }
+  /** Measured speed of an agent near the player, or null before two samples. */
+  measuredSpeed(id: string) { const v = this.speeds.get(id)?.v; return v === undefined || Number.isNaN(v) ? null : v; }
   readonly chaseTargets = new Map<string, { catchDistanceM: number; lawful: boolean; noBolt: boolean }>();
   /** `noBolt`: once restrained, never tries to break free (a story walk, e.g. M26 o8c). */
   setChaseTarget(id: string, o: { catchDistanceM?: number; lawful?: boolean; noBolt?: boolean } = {}) { this.chaseTargets.set(id, { catchDistanceM: o.catchDistanceM ?? TACKLE.reach, lawful: o.lawful ?? true, noBolt: !!o.noBolt }); }
@@ -1699,7 +1715,7 @@ export class Gameplay {
     st.value = Math.max(0, st.value - STAMINA_COST.tackle); if (st.value <= 0) st.exhausted = true;
     if (!t) { this.stumbleUntil = this.time + TACKLE.stumble; this.emit('tackle', { target: null, hit: false, quarry: false }); return { hit: false, target: null, reason: 'nobody in reach' }; }
     const agent = this.ai.agents.get(t.id);
-    const quarrySpeed = agent ? (agent.state === 'flee' ? 5 : 1.5) : 4;
+    const quarrySpeed = this.measuredSpeed(t.id) ?? (agent ? (agent.state === 'flee' ? 5 : 1.5) : 4); // measured; the state guess only before two frames
     const chance = tackleChance({ sprinting: this.pc.sprinting, speed: this.pc.speed, quarrySpeed, strength: this.inv.ensure(this.player.lead).skills.strength ?? 50, s: this.moverState() });
     const hit = this.rng.chance(chance);
     const ct = this.chaseTargets.get(t.id), a = this.actors.get(t.id)!;

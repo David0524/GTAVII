@@ -229,7 +229,7 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Values:**
   - Reach 2.4 m in a 60° cone; on touch, auto-align gives 2.9 m and a 120° cone.
   - Costs 12 stamina, hit or miss.
-  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away; ±12% for strength; reduced by a limp, drink or exhaustion.
+  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away (its speed is measured frame to frame, smoothed over 0.3 s; `measuredSpeed(id)`); ±12% for strength; reduced by a limp, drink or exhaustion.
   - Non-lethal: 5 hp, never below 1. The quarry is down 4 s (pinned 3 s). A caught chase quarry stays down for the mission to resolve; anyone else gets up and runs.
   - A miss sprawls you for 0.9 s.
 - **Heat:** a lawful quarry (a purse snatcher, a bail skip) is a citizen's arrest, no crime. A bystander is assault; a cop is assault on an officer.
@@ -255,10 +255,8 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Where we fall short:**
   - Restrain, escort and breaking free are in. A bolting prisoner is a short mash rather than RDR2's full struggle-and-chase scene; the chase that follows is ours.
   - The dive and ragdoll are characters' and the engine's work and not built yet.
-  - The quarry's speed is estimated from AI state, not measured.
 - **Plan:**
   - Tune the bolt rate in a touch playtest. Characters build the struggle animation from the `breakFree` events.
-  - Measure quarry velocity from the sim when its motion is available.
   - Characters own the dive, the tumble and the stumble animations (events above).
 
 ### Sidewalk bumps (sim's `pedBumped`)
