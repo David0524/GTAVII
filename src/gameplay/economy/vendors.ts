@@ -6,35 +6,61 @@
  */
 import type { Rng } from '../core/rng';
 
+/** Narrative's vendor types (content/vendors.json `menus` keys; sim uses the same). */
 export type VendorKind =
-  | 'hotdog' | 'pretzel_knish' | 'ices' | 'nuts' | 'fruit' | 'flowers' | 'newsstand' | 'coffee_cart'
-  | 'shoeshine' | 'peddler_watches' | 'peddler_umbrellas' | 'peddler_trinkets' | 'peddler_records' | 'peddler_sunglasses'
-  | 'monte';
+  | 'hot_dog' | 'pretzel_knish' | 'italian_ice' | 'nut_roaster' | 'coffee_cart' | 'fruit_stand' | 'flower_stand'
+  | 'newsstand' | 'shoeshine' | 'peddler' | 'monte';
+export const VENDOR_KINDS: readonly VendorKind[] = ['hot_dog', 'pretzel_knish', 'italian_ice', 'nut_roaster', 'coffee_cart', 'fruit_stand', 'flower_stand', 'newsstand', 'shoeshine', 'peddler', 'monte'];
 
-/** What a sale does: eaten on the spot (hp, stamina, cools you in the heat) or carried (an inventory item). */
-export interface VendorGood { id: string; name: string; cents: number; heal?: number; stamina?: number; cool?: number; sober?: number; item?: string; eatSeconds?: number }
-const eat = (id: string, name: string, cents: number, o: Partial<VendorGood>): VendorGood => ({ id, name, cents, eatSeconds: 4, ...o });
-const carry = (id: string, name: string, cents: number, item: string): VendorGood => ({ id, name, cents, item });
+/** A sale: eaten on the spot (hp, stamina, cools you in the heat, sobers) or carried (an inventory item). */
+export interface VendorGood { id: string; name: string; cents: number; heal?: number; stamina?: number; cool?: number; sober?: number; item?: string; eatSeconds?: number; rainOnly?: boolean }
+export type VendorMenus = Record<VendorKind, VendorGood[]>;
 
-export const MENUS: Record<VendorKind, VendorGood[]> = {
-  hotdog: [eat('frank', 'Frank with onions', 35, { heal: 6 }), eat('frank2', 'Two franks', 65, { heal: 11, eatSeconds: 7 }), eat('soda', 'Soda (bottle)', 25, { stamina: 8, cool: 0.1 })],
-  pretzel_knish: [eat('pretzel', 'Hot pretzel', 25, { heal: 4 }), eat('knish', 'Potato knish', 40, { heal: 8, eatSeconds: 6 })],
-  ices: [eat('lemon_ice', 'Lemon ice', 20, { stamina: 15, cool: 0.35 }), eat('cherry_ice', 'Cherry ice', 20, { stamina: 15, cool: 0.35 })],
-  nuts: [eat('cashews', 'Hot cashews (bag)', 50, { heal: 3, stamina: 5 }), eat('peanuts', 'Roasted peanuts (bag)', 25, { heal: 2, stamina: 4 })],
-  fruit: [eat('apple', 'Apple', 15, { heal: 2, stamina: 4 }), eat('peach', 'Peach', 20, { heal: 2, stamina: 6, cool: 0.05 })],
-  flowers: [carry('carnation', 'A carnation', 50, 'item.flower'), carry('bunch', 'A bunch of flowers', 200, 'item.flowers')],
-  newsstand: [carry('paper', 'Evening paper', 15, 'item.newspaper'), carry('cigs', 'Cigarettes (pack)', 55, 'item.cigarettes'), eat('candy', 'Candy bar', 15, { heal: 1, stamina: 4, eatSeconds: 2 }), carry('magazine', 'Magazine', 75, 'item.magazine')],
-  coffee_cart: [eat('coffee', 'Coffee, regular', 25, { stamina: 12, sober: 0.08 }), eat('roll', 'Buttered roll', 20, { heal: 4 }), eat('danish', 'Danish', 35, { heal: 5 })],
-  shoeshine: [],
-  peddler_watches: [carry('watch', 'A "gold" watch from the coat', 1000, 'item.fake_watch')],
-  peddler_umbrellas: [carry('umbrella', 'Umbrella', 200, 'item.umbrella')],
-  peddler_trinkets: [carry('trinket', 'Big Town keychain', 100, 'item.trinket'), carry('pennant', 'Pennant', 150, 'item.pennant')],
-  peddler_records: [carry('lp', 'LP (scratched sleeve)', 200, 'item.lp'), carry('eight_track', '8-track', 250, 'item.eight_track')],
-  peddler_sunglasses: [carry('shades', 'Sunglasses', 300, 'item.sunglasses')],
-  monte: [],
+/**
+ * MENUS AND PRICES ARE NARRATIVE'S (content/vendors.json, the single source of truth). Gameplay only owns what a
+ * good DOES, keyed by its id: `<vendor type>.<slug of the item name>` (e.g. 'hot_dog.frank'). A good in the file
+ * with no row here gets its vendor type's default from the file's `vendors[].health / stamina`.
+ */
+export const EFFECTS: Record<string, Partial<VendorGood>> = {
+  'hot_dog.frank': { heal: 6 }, 'hot_dog.frank_with_kraut_or_onions': { heal: 7 }, 'hot_dog.soda': { stamina: 8, cool: 0.1, eatSeconds: 3 }, 'hot_dog.knish': { heal: 8, eatSeconds: 6 },
+  'pretzel_knish.hot_pretzel': { heal: 4 }, 'pretzel_knish.two_pretzels': { heal: 7, eatSeconds: 6 }, 'pretzel_knish.potato_knish': { heal: 8, eatSeconds: 6 }, 'pretzel_knish.kasha_knish': { heal: 8, eatSeconds: 6 },
+  'italian_ice.small_ice': { stamina: 12, cool: 0.3 }, 'italian_ice.large_ice': { stamina: 18, cool: 0.45 }, 'italian_ice.rainbow_three_flavours': { stamina: 18, cool: 0.5 },
+  'nut_roaster.cashews_bag': { heal: 3, stamina: 5 }, 'nut_roaster.peanuts_bag': { heal: 2, stamina: 4 }, 'nut_roaster.almonds_bag': { heal: 3, stamina: 5 },
+  'coffee_cart.coffee': { stamina: 12, sober: 0.08, eatSeconds: 3 }, 'coffee_cart.tea': { stamina: 8, sober: 0.04, eatSeconds: 3 }, 'coffee_cart.buttered_roll': { heal: 4 }, 'coffee_cart.danish': { heal: 5 },
+  'fruit_stand.apple': { heal: 2, stamina: 4 }, 'fruit_stand.peach': { heal: 2, stamina: 6, cool: 0.05 }, 'fruit_stand.banana': { heal: 2, stamina: 5 }, 'fruit_stand.bag_of_cherries': { heal: 3, stamina: 6, cool: 0.05 },
+  'flower_stand.carnation': { item: 'item.flower' }, 'flower_stand.bunch_of_daisies': { item: 'item.flowers' }, 'flower_stand.a_dozen_roses': { item: 'item.roses' },
+  'newsstand.daily_ticker': { item: 'item.newspaper' }, 'newsstand.manhattan_evening_dispatch': { item: 'item.newspaper' }, 'newsstand.cigarettes_pack': { item: 'item.cigarettes' },
+  'newsstand.candy_bar': { heal: 1, stamina: 4, eatSeconds: 2 }, 'newsstand.gum': { stamina: 2, eatSeconds: 1 },
+  'peddler.umbrella_rain_only': { item: 'item.umbrella', rainOnly: true }, 'peddler.sunglasses': { item: 'item.sunglasses' }, 'peddler.gold_watch': { item: 'item.fake_watch' },
+  'peddler.8_track_tape_no_label': { item: 'item.eight_track' }, 'peddler.souvenir_pennant': { item: 'item.pennant' },
+  // shoeshine goods are services (see shine below)
+  'shoeshine.shine': {}, 'shoeshine.shine_and_tip': {},
 };
-/** A shine: 50¢ and a tip; your shoes stay shined for the day (a grooming touch witnesses and NPCs notice). */
-export const SHINE = { cents: 50, tip: 25, seconds: 20 } as const;
+const slug = (x: string) => x.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+export const goodId = (kind: string, item: string) => `${kind}.${slug(item)}`;
+/** "35¢" -> 35, "$1.00" -> 100. */
+export function parsePrice(p: string): number {
+  const t = p.trim();
+  if (t.endsWith('¢')) return Math.round(parseFloat(t));
+  return Math.round(parseFloat(t.replace('$', '')) * 100);
+}
+/** Load narrative's vendors.json into menus. `warn` lists goods with no effects row (they get the type default). */
+export function loadVendorMenus(json: { menus?: Record<string, { item: string; price: string }[]>; vendors?: { type: string; health?: number; stamina?: number }[] }, warn: (m: string) => void = () => {}): VendorMenus {
+  const out = Object.fromEntries(VENDOR_KINDS.map((k) => [k, [] as VendorGood[]])) as VendorMenus;
+  const def = new Map((json.vendors ?? []).map((v) => [v.type, v]));
+  for (const [kind, items] of Object.entries(json.menus ?? {})) {
+    if (!(VENDOR_KINDS as readonly string[]).includes(kind)) { warn(`vendor type ${kind}: unknown to gameplay`); continue; }
+    for (const x of items) {
+      const id = goodId(kind, x.item), fx = EFFECTS[id];
+      if (!fx) warn(`${id}: no effects row; using the ${kind} default`);
+      const d = def.get(kind);
+      out[kind as VendorKind].push({ id, name: x.item, cents: parsePrice(x.price), eatSeconds: 4, ...(fx ?? { heal: d?.health ?? 0, stamina: d?.stamina ?? 0 }) });
+    }
+  }
+  return out;
+}
+/** A shine: the price comes from the file (the 'Shine' row); a quarter tip on top; shined shoes for the day. */
+export const SHINE = { tip: 25, seconds: 20 } as const;
 
 /**
  * The till: cash on hand by vendor kind (cents) when full, refilled by the takings over game hours. Peddlers and
@@ -42,8 +68,8 @@ export const SHINE = { cents: 50, tip: 25, seconds: 20 } as const;
  * dollars; it's never a score (that's the point: a street robbery for small change still draws heat).
  */
 export const TILL: Record<VendorKind, number> = {
-  hotdog: 1800, pretzel_knish: 1200, ices: 900, nuts: 900, fruit: 1500, flowers: 2200, newsstand: 3500, coffee_cart: 1400,
-  shoeshine: 600, peddler_watches: 6000, peddler_umbrellas: 1500, peddler_trinkets: 1200, peddler_records: 2000, peddler_sunglasses: 1800, monte: 8000,
+  hot_dog: 1800, pretzel_knish: 1200, italian_ice: 900, nut_roaster: 900, coffee_cart: 1400, fruit_stand: 1500, flower_stand: 2200,
+  newsstand: 3500, shoeshine: 600, peddler: 4000, monte: 8000,
 };
 export const TILL_REFILL_H = 6; // game hours from empty to full
 

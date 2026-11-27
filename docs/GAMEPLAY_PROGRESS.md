@@ -277,43 +277,15 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 ### Street vendors (STREET_VENDORS.md, user decision 2026-11-27; `economy/vendors.ts`, `vendors.test.ts`)
 Sim places and plays the vendors; gameplay owns the interaction. Adults only, invented brands, 1974 prices.
 
-- **Buying:**
-  - Food and drink:
-
-    | Good | Price | Effect |
-    |---|---|---|
-    | Frank with onions | 35¢ | +6 hp |
-    | Two franks | 65¢ | +11 hp |
-    | Soda | 25¢ | +8 stamina, cools |
-    | Pretzel | 25¢ | +4 hp |
-    | Knish | 40¢ | +8 hp |
-    | Lemon/cherry ice | 20¢ | +15 stamina, cools |
-    | Cashews | 50¢ | |
-    | Peanuts | 25¢ | |
-    | Apple | 15¢ | |
-    | Peach | 20¢ | |
-    | Coffee | 25¢ | +12 stamina, sobers 0.08 |
-    | Buttered roll | 20¢ | |
-    | Danish | 35¢ | |
-    | Candy bar | 15¢ | |
-  - Carried goods:
-
-    | Good | Price |
-    |---|---|
-    | Evening paper | 15¢ |
-    | Cigarettes | 55¢ |
-    | Magazine | 75¢ |
-    | Carnation | 50¢ |
-    | Bunch of flowers | $2 |
-    | Umbrella | $2 |
-    | Sunglasses | $3 |
-    | Keychain | $1 |
-    | Pennant | $1.50 |
-    | LP | $2 |
-    | 8-track | $2.50 |
-    | Fake "gold" watch | $10 (a mission prop, worth about $2 to a fence) |
-  - "Cools" means sprinting drains as at 80°F for a while on a heatwave day.
-- **Shoeshine:** 50¢ plus a 25¢ tip; shined shoes for the day (a grooming touch).
+- **Menus and prices are narrative's** (`content/vendors.json`, the single source; gameplay keeps no price list). `loadVendorContent(json)`, or the constructor's `content.vendors`, or the scene with `?content=narrative`. Gameplay owns only what a good does, keyed by `<vendor type>.<item slug>` (`EFFECTS` in `economy/vendors.ts`). `vendors.test.ts` asserts every effects row resolves to a vendors.json entry, and the reverse.
+- **Effects** (examples, at narrative's prices):
+  - frank 35¢: +6 hp;
+  - knish 40¢: +8 hp;
+  - small ice 25¢ / large ice 40¢: +12 / +18 stamina, and they cool you (sprint drains as at 80°F for a while on a heatwave day);
+  - coffee 20¢: +12 stamina, sobers 0.08; tea: +8 stamina, sobers 0.04;
+  - fruit: a little of both.
+- **Carried goods:** flowers, the two evening papers and cigarettes; from the peddler, an umbrella (only sold in the rain), sunglasses, the "gold" watch (a mission prop), an 8-track and a pennant.
+- **Shoeshine:** the file's 50¢ plus a 25¢ tip; shined shoes for the day (a grooming touch).
 - **Robbing a cart:** small change for real heat. A full till is $6–$80 by kind (a hot-dog cart $18), refilling over 6 game hours. It's theft, or `assault_weapon` with a gun out; the vendor flees or cowers.
 - **Carts knocked over:** at 3 m/s or more, by the player, a car or a chase. The cart spills (`notice cartOverturned` lists the goods) and is closed for 2 game hours. The player on foot commits vandalism; in a car, reckless.
 - **Three-card monte** ("Find the lady"): $2–$20 a hand, and rigged, because the dealer palms the queen on a real bet. Catch the tell, the bent corner of the queen visible for 0.21–0.49 s during the 4 s deal (wider with stealth skill, narrower drunk), and you follow it to an even-money win. After two wins the dealer folds the box.

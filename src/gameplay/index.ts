@@ -47,7 +47,7 @@ import { Stats } from './meta/stats';
 import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
 import type { SuspectMotion } from './police/pursuit';
 import { Bodies, discoveryDelay, type Body } from './police/bodies';
-import { MENUS, MONTE, Monte, SHINE, Vendors, type MonteDeal, type VendorKind } from './economy/vendors';
+import { loadVendorMenus, MONTE, Monte, SHINE, Vendors, VENDOR_KINDS, type MonteDeal, type VendorKind, type VendorMenus } from './economy/vendors';
 import { allowed as moveAllowed, locomotion as moveLocomotion, landing, bargeChance, tackleChance, TACKLE, BARGE_SECONDS, DOORS, LADDER_PER_M, STAMINA_COST, TURNSTILE, type Carrying, type DoorKind, type MoveAction, type MoverState } from './player/movement';
 import { Economy } from './economy';
 import { Arcade } from './arcade';
@@ -185,6 +185,7 @@ export class Gameplay {
       leads: (c.leads as GameplayContent['leads']) ?? DEFAULT_CONTENT.leads,
     };
     this.reg = new Registry(content);
+    if ((c as any).vendors) this.loadVendorContent((c as any).vendors);
     this.budget = COMBAT_BUDGET[opts.quality] ?? COMBAT_BUDGET.high;
     this.world = new BoxWorld();
     this.inv = new Inventory(this.reg);
@@ -828,7 +829,7 @@ export class Gameplay {
     if (t && !t.ped) return { kind: 'talk', label: `Talk`, target: t.id };
     const d = this.nearestDoor(p[0], p[2]);
     if (d) return { kind: 'door', label: d.locked ? (this.doorOpenNow(d) ? 'Knock' : 'Locked') : 'Go in', target: d.id };
-    { const v = this.vendorNear(p[0], p[2]); if (v && this.pc.carrying === 'none' && this.vendors.open(v, this.economy.nowH())) return v.kind === 'shoeshine' ? { kind: 'shine', label: 'Shine 50¢', target: v.id } : v.kind === 'monte' ? { kind: 'monte', label: 'Find the lady', target: v.id } : { kind: 'buy', label: 'Buy', target: v.id }; }
+    { const v = this.vendorNear(p[0], p[2]); if (v && this.pc.carrying === 'none' && this.vendors.open(v, this.economy.nowH())) return v.kind === 'shoeshine' ? { kind: 'shine', label: `Shine ${this.shinePrice()}¢`, target: v.id } : v.kind === 'monte' ? { kind: 'monte', label: 'Find the lady', target: v.id } : { kind: 'buy', label: 'Buy', target: v.id }; }
     if (this.pc.cover) return { kind: 'leaveCover', label: 'Leave cover' };
     if (this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
     if (t) return { kind: 'talk', label: 'Talk', target: t.id };
@@ -1429,13 +1430,17 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ street vendors (STREET_VENDORS.md)
   readonly vendors = new Vendors();
+  /** Menus and prices from narrative's content/vendors.json (the single source); empty until loaded. */
+  vendorMenus: VendorMenus = Object.fromEntries(VENDOR_KINDS.map((k) => [k, []])) as unknown as VendorMenus;
+  /** Load narrative's vendors.json. Returns the warnings (goods with no effects row). */
+  loadVendorContent(json: unknown) { const w: string[] = []; this.vendorMenus = loadVendorMenus(json as any, (m) => w.push(m)); return w; }
   private vendorPos = new Map<string, { x: number; z: number }>();
   private montes = new Map<string, Monte>();
   private monteDeals = new Map<number, { vendor: string; deal: MonteDeal }>();
   /** For the rest of this game time (s), a cold ice or a soda takes the edge off the heat: sprint drains as at 80°F. */
   private coolUntil = -1;
   registerVendor(id: string, kind: VendorKind, x: number, z: number) {
-    if (!MENUS[kind]) return false;
+    if (!(VENDOR_KINDS as readonly string[]).includes(kind)) return false;
     if (!this.vendors.list.has(id)) this.vendors.add(id, kind, this.economy.nowH());
     this.vendorPos.set(id, { x, z }); return true;
   }
@@ -1448,12 +1453,12 @@ export class Gameplay {
   vendorMenu(id: string) {
     const v = this.vendors.list.get(id); if (!v || !this.player) return null;
     const cash = this.inv.ensure(this.player.lead).money;
-    return { kind: v.kind, open: this.vendors.open(v, this.economy.nowH()), goods: MENUS[v.kind].map((g) => ({ ...g, affordable: cash >= g.cents })), shine: v.kind === 'shoeshine' ? SHINE : null };
+    return { kind: v.kind, open: this.vendors.open(v, this.economy.nowH()), goods: this.vendorMenus[v.kind].filter((g) => !g.rainOnly || this.pc.raining).map((g) => ({ ...g, affordable: cash >= g.cents })), shine: v.kind === 'shoeshine' ? { cents: this.shinePrice(), ...SHINE } : null };
   }
   /** Buy and eat or pocket. Food heals a little, drinks restore breath, an ice cools you in the heat, coffee sobers a touch. */
   buyFromVendor(id: string, goodId: string) {
     const v = this.vendors.list.get(id); if (!v || !this.player || !this.vendors.open(v, this.economy.nowH())) return false;
-    const g = MENUS[v.kind].find((x) => x.id === goodId); if (!g) return false;
+    const g = this.vendorMenus[v.kind].find((x) => x.id === goodId); if (!g || (g.rainOnly && !this.pc.raining)) return false;
     const lead = this.player.lead, li = this.inv.ensure(lead);
     if (!this.inv.spend(lead, g.cents, `vendor:${v.kind}`)) return false;
     if (g.item) this.inv.give(lead, g.item, 1);
@@ -1464,10 +1469,11 @@ export class Gameplay {
     this.emit('notice', { kind: 'vendorSale', vendor: id, good: g.id, cents: g.cents, eatSeconds: g.eatSeconds ?? 0 });
     return true;
   }
-  /** A shine: 50¢ and a quarter tip; shined shoes for the day (a grooming touch). */
+  private shinePrice() { return this.vendorMenus.shoeshine.find((g) => g.id === 'shoeshine.shine')?.cents ?? 50; }
+  /** A shine: the file's price (50¢) and a quarter tip; shined shoes for the day (a grooming touch). */
   shoeshine(id: string) {
     const v = this.vendors.list.get(id); if (!v || v.kind !== 'shoeshine' || !this.player) return false;
-    if (!this.inv.spend(this.player.lead, SHINE.cents + SHINE.tip, 'shoeshine')) return false;
+    if (!this.inv.spend(this.player.lead, this.shinePrice() + SHINE.tip, 'shoeshine')) return false;
     const li = this.inv.ensure(this.player.lead); li.grooming = li.grooming.includes('shined shoes') ? li.grooming : (li.grooming ? li.grooming + ', ' : '') + 'shined shoes';
     this.emit('notice', { kind: 'shined', vendor: id, seconds: SHINE.seconds });
     return true;
@@ -1491,7 +1497,7 @@ export class Gameplay {
   cartHit(id: string, o: { by: 'player' | 'car' | 'npc'; speed: number; driving?: boolean }) {
     const v = this.vendors.list.get(id); if (!v || o.speed < 3) return false;
     this.vendors.overturn(v, this.economy.nowH(), 2);
-    this.emit('notice', { kind: 'cartOverturned', vendor: id, by: o.by, spill: MENUS[v.kind].map((g) => g.id) });
+    this.emit('notice', { kind: 'cartOverturned', vendor: id, by: o.by, spill: this.vendorMenus[v.kind].map((g) => g.id) });
     if (o.by === 'player') { const at = this.vendorPos.get(id); this.crime(o.driving ? 'reckless' : 'vandalism', { victim: id, noise: 20, at: at && this.player ? [at.x, this.player.position()[1], at.z] : undefined }); }
     return true;
   }
