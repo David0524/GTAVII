@@ -275,7 +275,7 @@ All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2
   - vendorCall → a call (the sim times them; audio applies the 30 m range and 5 s gap);
   - vendorShout → an angry line; monteScatter → the lookout's alarmed line;
   - vendorServed / vendorAct serve → change; vendorAct right_cart → the knock-over;
-  - vendorCower / vendorFled → a scared line; vendorRecovered → reopen.
+  - vendorCower / vendorFled → a scared line; vendorRecovered → reopen; cartRighted (6–10 s after a tip) → a clank, then reopen.
   The test scene drives these through the mock sim's events, the same path as the real sim.
 - **Sidewalk reactions (sim 66e9453, `world/crowdReactions.ts`):**
   - pedBumped: body foley by kind (a coat brush; a stumble with scuffs; a knockdown onto the pavement).
