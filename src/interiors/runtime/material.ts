@@ -203,12 +203,13 @@ function albedoNode() {
     const fade = float(1).sub(smoothstep(feat.mul(0.3), feat.mul(1.1), fw));
     col.assign(mix(c.mul(0.84), col, fade));
     // wear/grime: low-frequency world-space blotches + darker toward the floor (pat.z = amount)
-    const wp = positionWorld.xz.add(positionWorld.y.mul(0.37));
+    // wrapped before hashing (h21's sin breaks down at Manhattan-scale coordinates in float32 → per-pixel speckle)
+    const wp = mod(positionWorld.xz.add(positionWorld.y.mul(0.37)), float(37));
     const grime = fbm(wp.mul(0.9)).mul(0.6).add(fbm(wp.mul(4.3)).mul(0.4));
     const wear = pat.z.mul(smoothstep(0.35, 0.85, grime)).mul(0.35);
     // water stains on ceilings and upper walls: tide-marked rings (dark edge, paler centre) that grow with wear (grade)
     const ceilingish = smoothstep(-0.4, -0.8, normalWorld.y);
-    const sp = positionWorld.xz.mul(0.55);
+    const sp = mod(positionWorld.xz, float(41)).mul(0.55);
     const blob = fbm(sp.add(vec2(13.1, 7.7)));
     const amt = smoothstep(0.55, 0.95, pat.z);           // only worn and derelict surfaces carry stains
     const ring = smoothstep(0.6, 0.64, blob).mul(float(1).sub(smoothstep(0.66, 0.72, blob)));
@@ -247,7 +248,9 @@ export function createGlassMaterial(): THREE.MeshBasicNodeMaterial {
   const light = attribute('light', 'vec4');
   const lampPower = uniform(1).onObjectUpdate(({ object }) => (object?.userData.interior as InteriorLook | undefined)?.lampPower ?? 1);
   const fres = float(1).sub(abs(dot(normalView, positionViewDirection))).pow(3);
-  const dirt = (Fn(() => fbm(positionWorld.xy.add(positionWorld.zy).mul(3)))());
+  // world position wrapped before hashing: the sin hash (h21) breaks down at |p| ~ 1e2..1e3 in float32 and turned
+  // the dirt into per-pixel noise on storefront glass (engine, 2026-11-27). 23 m wrap: seams never show on a pane
+  const dirt = (Fn(() => fbm(mod(positionWorld.xy.add(positionWorld.zy), float(23)).mul(3)))());
   mat.colorNode = vec3(0.55, 0.6, 0.58).mul(light.xyz.mul(lampPower).mul(0.4).add(light.w.mul(0.8)).add(0.05)).add(vec3(0.5, 0.48, 0.45).mul(fres.mul(0.5)));
   mat.opacityNode = clamp(fres.mul(0.55).add(0.12).add(dirt.mul(0.12)), 0, 0.8);
   mat.transparent = true; mat.depthWrite = false; mat.side = THREE.DoubleSide;
