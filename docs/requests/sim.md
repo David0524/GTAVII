@@ -48,6 +48,7 @@ headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
 - **What:** open `?sim=1` on a desktop GPU and a phone and read the HUD (`update … ms avg/p95`).
 - **Why:** this container is CPU-only; budget is ≤ 2 ms main thread.
 - **Fallback:** move the sim to a worker (it has no DOM/three.js dependency).
+- **Update:** worker-ready now: `RemoteSimulation` + `sim.worker.ts` (see SIM_PROGRESS "Running in a Web Worker").
 
 ## From sim: 8. Vehicle classes for tow trucks and street sweepers
 - **What:** add `tow_truck` and `street_sweeper` to `VEHICLE_CLASSES` in `src/shared/traffic.ts`.
