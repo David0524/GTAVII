@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/fonts/fonts.css"><link rel="stylesheet" href="/src/ui/theme.css">
+<style>body{margin:0;background:#0c0c0b;color:#f2ede3;font:12px var(--f-ui);padding:20px}h2{font:800 22px 'Libre Franklin';margin:4px 0 10px}
+.g{display:grid;grid-template-columns:repeat(12,1fr);gap:14px 10px}.c{display:grid;justify-items:center;gap:4px}.c span{font:700 9px var(--f-cond);letter-spacing:.08em;text-transform:uppercase;color:#f2ede39e}
+.big .ic{width:40px;height:40px}#blips{display:block;margin-top:14px}</style></head><body>
+<h2>Icons · 24 px</h2><div class="g" id="a"></div><h2 style="margin-top:18px">Map blips and landmarks over the aerial</h2><canvas id="blips"></canvas>
+<script type="module">
+import { ICONS, icon, iconSprite, spritePad } from '/src/ui/icons.ts';
+const names = Object.keys(ICONS);
+document.getElementById('a').innerHTML = names.map((n) => `<div class="c">${icon(n, 24)}<span>${n.replace('lm_', '')}</span></div>`).join('');
+const cv = document.getElementById('blips'), W = 1160, H = 230, dpr = devicePixelRatio; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+const g = cv.getContext('2d'); g.scale(dpr, dpr);
+const img = new Image(); img.src = '/shots/map/aerial.png'; await img.decode().catch(() => {});
+g.filter = 'saturate(.55) sepia(.2) brightness(2.6) contrast(1.05)'; g.drawImage(img, 1500, 900, 1160 * 1.4, 230 * 1.4, 0, 0, W, H); g.filter = 'none';
+const cats = ['food','bar','shop','clothes','garage','payphone','callbox','subway','service','police','hospital','crime','job','stranger','home','safehouse','mission','collectible','tip'];
+const col = { mission: '#e8a317', home: '#e8a317', safehouse: '#e8a317', police: '#8fb6e8', callbox: '#e0634a', crime: '#e0634a' };
+cats.forEach((n, i) => { const s = iconSprite(n, 18, dpr, { colour: col[n] }); const p = spritePad(); g.drawImage(s, 30 + i * 58 - p, 60 - p, s.width / dpr, s.height / dpr); });
+const lms = names.filter((n) => n.startsWith('lm_'));
+lms.forEach((n, i) => { const s = iconSprite(n, 30, dpr, { weight: 1.2 }); const p = spritePad(); g.drawImage(s, 30 + i * 110 - p, 140 - p, s.width / dpr, s.height / dpr); });
+window.__MOCK_READY = true;
+</script></body></html>
