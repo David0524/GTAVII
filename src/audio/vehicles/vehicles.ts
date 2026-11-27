@@ -117,15 +117,17 @@ export class VehicleAudio {
       });
     });
     // Road rage (shout | gesture | forceIn | leanOnHorn | shove): lines from narrative's road_rage pool when it exists, else the driver's own.
-    const rageLine = (p: Vec3, ctx: string, fallbackPool: string, fallbackCtx: string, delay = 0.3) => {
+    const rageLine = (p: Vec3, ctx: string, fallbackPool: string, fallbackCtx: string, delay = 0.3, who?: unknown) => {
       if (!near(p, 40)) return; const at: Vec3 = [p[0], gh(p[0], p[2]) + 1.4, p[2]];
-      this.env.emit('bark', { pool: 'road_rage', context: ctx, at, delay, fallback: { pool: fallbackPool, context: fallbackCtx } });
+      // Two drivers in one incident speak with two voices: odd ped ids take the pool's second voice.
+      const voice = typeof who === 'number' && who % 2 ? 'b' : undefined;
+      this.env.emit('bark', { pool: 'road_rage', context: ctx, at, delay, voice, fallback: { pool: fallbackPool, context: fallbackCtx } });
     };
     sim.on('roadRage', (e) => {
       this.stats.roadRage++; const p = pos(e), vc = vclassOf(e), act = String(e?.act ?? '');
       if (act === 'forceIn') { this.tyreChirp(p, 0.6); rageLine(p, 'forceIn', pool(vc), 'horn', 0.8); }
       else if (act === 'shout' || act === 'gesture') rageLine(p, act, pool(vc), 'horn');
-      else if (act === 'shove') { this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.5, priority: 5 }); this.env.oneShot('impact.light', { category: 'impact', at: p, gain: 0.25, rate: 1.4, priority: 5 }); rageLine(p, 'shove', 'street_tough', 'collision', 0.2); }
+      else if (act === 'shove') { this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.5, priority: 5 }); this.env.oneShot('impact.light', { category: 'impact', at: p, gain: 0.25, rate: 1.4, priority: 5 }); rageLine(p, 'shove', 'street_tough', 'collision', 0.2, e?.id); }
       else if (act === 'leanOnHorn' && this.rng.next() < 0.4) rageLine(p, 'horn', pool(vc), 'horn', 2.2);
     });
     // Fender-benders: the crunch, then the drivers get out and have it out on the kerb.
@@ -138,7 +140,7 @@ export class VehicleAudio {
     });
     sim.on('incidentAct', (e) => {
       const p = pos(e), act = String(e?.act ?? '');
-      if (act === 'argue' || act === 'exchangeDetails' || act === 'inspect') rageLine(p, act === 'argue' ? 'argue' : act === 'inspect' ? 'inspect' : 'details', 'commuter', act === 'argue' ? 'collision' : 'complain', this.rng.range(0.2, 1.5));
+      if (act === 'argue' || act === 'exchangeDetails' || act === 'inspect') rageLine(p, act === 'argue' ? 'argue' : act === 'inspect' ? 'inspect' : 'details', 'commuter', act === 'argue' ? 'collision' : 'complain', this.rng.range(0.2, 1.5), e?.id);
       else if (act === 'stagger') this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.4, priority: 4 });
       else if (act === 'enterCar') this.env.oneShot('door.slam', { category: 'impact', at: p, gain: 0.45, rate: this.rng.range(0.95, 1.05), priority: 4 });
     });

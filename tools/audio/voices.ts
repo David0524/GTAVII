@@ -63,6 +63,7 @@ const castOf = (speaker: string): VoiceCast => ({ ...castVoice(speaker, cast.get
 // ------------------------------------------------------------------ lines
 interface Job { speaker: string; emotion: string; text: string; key: string; refs: string[] }
 const jobs = new Map<string, Job>();
+const TWO_VOICE = new Set(['road_rage', 'fender_bender']);
 const add = (speaker: string, emotion: string | undefined, text: string, ref: string) => {
   if (!text?.trim()) return; const em = emotion ?? 'neutral'; const key = voiceKey(speaker, em, text);
   const j = jobs.get(key); if (j) j.refs.push(ref); else jobs.set(key, { speaker, emotion: em, text, key, refs: [ref] });
@@ -75,6 +76,8 @@ for (const f of readdirSync(join(CONTENT, 'barks')).filter((x) => x.endsWith('.j
   const d = JSON.parse(readFileSync(join(CONTENT, 'barks', f), 'utf8')); const pool = f.replace(/\.json$/, '');
   // Templated lines ({street}, {description}...) are dispatch radio: they're stitched from fragments below, never rendered whole.
   for (const l of d.lines ?? []) if (!/[{}]/.test(l.text ?? '')) add(`npc.${pool}`, l.emotion, l.text, `barks.${pool}:${l.context}`);
+  // Pools where two people trade lines (an argument between drivers) also get a second voice, `npc.<pool>.b`.
+  if (TWO_VOICE.has(pool)) for (const l of d.lines ?? []) if (!/[{}]/.test(l.text ?? '')) add(`npc.${pool}.b`, l.emotion, l.text, `barks.${pool}:${l.context}`);
 }
 // Police dispatch fragments (src/audio/dialogue/dispatchText.ts): Central in two registers, the radio cars in one.
 {

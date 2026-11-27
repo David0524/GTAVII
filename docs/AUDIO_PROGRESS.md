@@ -240,10 +240,12 @@ All wired in `vehicles.ts` from the bound sim. Sounds are self-made; the new `im
   - shove → cloth, a body knock and a line.
 - **`fenderBender`:** the crunch (sometimes a lamp lens tinkles), then two doors as the drivers get out.
   `incidentAct`: inspect, argue and exchangeDetails → lines; stagger → cloth; enterCar → the door.
-- **Lines:** narrative's `road_rage` pool (requested; contexts horn, shout, gesture, forceIn, shove, inspect, argue, details).
-  Until it exists, each falls back to the driver's own pool (horn) or commuter/street_tough (collision, complain). The bark event gained a `fallback` field for this.
+- **Lines:** narrative's `road_rage` pool (in; 36 lines, 12 of them `argue`). The two drivers in an incident speak with two voices:
+  road_rage and fender_bender are rendered twice (`npc.<pool>` m3 and `npc.<pool>.b` m6/f3 in casting.json), and odd ped ids take the second.
+  If a context is ever missing, the line falls back to the driver's own pool (the bark event's `fallback` field).
+  Verified: every line in the scene came from road_rage, with both voices trading in the argument, 0 misses.
 - **Check:** `render.ts --only incidents_7th --content` (7th Ave at W 36th, 5:15 p.m.) runs a chain of 3 plus the chorus, road rage, a fender-bender with the argument and the drivers leaving, all passing.
-  - Lines spoken via the fallbacks: 6 on High, 7 on Low; 0 misses.
+  - 6 lines on High, 7 on Low; 0 misses.
   - Integrated −12.8 LUFS: a deliberately busy rush-hour scene; it's a diagnostic, not in the session target.
   - Excerpt: `shots/audio/incidents_7th.ogg`.
 - **vs GTA V / VI / RDR2:** GTA's horn chains and road rage are a signature of its streets. We match the behaviours (chains, chorus, rage, fender-benders with arguments), driven by the sim's real incidents. The lines are eSpeak, and the horns are synthesised period horns.

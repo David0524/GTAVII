@@ -111,9 +111,10 @@ export class AudioSystem {
     radio.onSubtitle = (e) => env.emit('radioSubtitle', e);
     // Reaction barks from the narrative's bark pools (content/barks/*.json), positional, subtitled as overheard.
     // `fallback`: another pool/context to try when the first has no such line (yet).
-    (this.listeners.bark ??= []).push((e: { pool?: string; context?: string; at?: Vec3; delay?: number; fallback?: { pool: string; context: string } }) => {
+    // `voice: 'b'` picks a pool's second rendered voice (two drivers arguing).
+    (this.listeners.bark ??= []).push((e: { pool?: string; context?: string; at?: Vec3; delay?: number; voice?: 'b'; fallback?: { pool: string; context: string } }) => {
       if (!e.pool || !e.context || !e.at) return; const at = e.at;
-      setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true).then((ok) => { if (!ok && e.fallback) void dlg.barkFrom(e.fallback.pool, e.fallback.context, at, `npc.${e.fallback.pool}`, true); }); });
+      setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}${e.voice === 'b' ? '.b' : ''}`, true).then((ok) => { if (!ok && e.fallback) void dlg.barkFrom(e.fallback.pool, e.fallback.context, at, `npc.${e.fallback.pool}`, true); }); });
     });
     this.vendors = new Vendors(env, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions));
     this.crowd = new CrowdReactions(env, () => this.footsteps, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions), this.baseUrl); this.crowd.contentEnabled = this.useContent;

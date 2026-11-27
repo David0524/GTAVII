@@ -36,6 +36,30 @@
    "pitch": 26,
    "speed": 140,
    "gap": 1
+  },
+  "npc.road_rage": {
+   "variant": "m3",
+   "pitch": 40,
+   "speed": 175,
+   "gap": 0
+  },
+  "npc.road_rage.b": {
+   "variant": "m6",
+   "pitch": 58,
+   "speed": 182,
+   "gap": 0
+  },
+  "npc.fender_bender": {
+   "variant": "m3",
+   "pitch": 40,
+   "speed": 175,
+   "gap": 0
+  },
+  "npc.fender_bender.b": {
+   "variant": "f3",
+   "pitch": 62,
+   "speed": 178,
+   "gap": 0
   }
  }
 }

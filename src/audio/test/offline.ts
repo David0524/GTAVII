@@ -78,7 +78,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     const KINDS = ['brush', 'stumble', 'knockdown'], RESP = ['none', 'annoyed', 'angry', 'frightened'];
     const CTX = ['greet', 'greet_known', 'antagonize', 'fear', 'complain', 'player_running'];
     const ACTS = ['shout', 'gesture', 'forceIn', 'leanOnHorn', 'shove', 'argue', 'exchangeDetails', 'inspect', 'enterCar'];
-    sim.fire(type, { id: 'test', act: ACTS[p.act ?? 0], length: p.length ?? 3, chainDepth: p.depth ?? 0, reason: p.rage ? 'rage' : 'blocked', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', pool: 'barks.garment', context: CTX[p.context ?? 0], dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
+    sim.fire(type, { id: p.who ?? 2, act: ACTS[p.act ?? 0], length: p.length ?? 3, chainDepth: p.depth ?? 0, reason: p.rage ? 'rage' : 'blocked', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', pool: 'barks.garment', context: CTX[p.context ?? 0], dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
   };
   // Combat events: 'gun:<tier>', 'hit:<material>', 'whiz' (a round passing ~1.5 m from the listener), 'gunfoley:<kind>'.
   const shots: (ShotReport & { t: number })[] = [];
@@ -94,6 +94,8 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   const gp = (t: string, e: unknown) => { for (const cb of gpH.get(t) ?? []) cb(e); };
   const dispatchLog: { t: number; text: string; speaker: string; duration: number; urgent: boolean }[] = [];
   sys.on('dispatch', (e) => dispatchLog.push({ t: +ctx.currentTime.toFixed(2), ...e }));
+  const lineLog: { t: number; speaker: string; text: string }[] = [];
+  sys.dialogue.on('subtitle', (e) => lineLog.push({ t: +ctx.currentTime.toFixed(2), speaker: e.speaker, text: e.text }));
   const gpEvent = (name: string, at: [number, number]) => {
     const place = sys.placeName(at[0], at[1]);
     const desc = { sex: { v: 'male', c: 0.8 }, subject: { v: 'male, thirties, medium build', c: 0.6 }, clothes: [{ v: 'tan leisure suit', c: 0.7 }], vehicle: { id: 'car.9', vclass: { v: 'sedan', c: 0.7 }, colour: { v: 'green', c: 0.7 }, plate: { v: '4K', c: 0.6 } } };
@@ -141,7 +143,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     id, title: sc.title, quality, profile: o.profile ?? 'mobile', sr, seconds, renderMs, pcm: b64(inter.buffer),
     checks: { nan, subnormals: sub, samplePeak: peak, maxRealVoices: maxReal, voiceCap: preset.voices, maxTotalVoices: maxTotal, connectedBeforeUnload: connectedBefore, leakedNodes: leaked.length, leakedTypes: leaked.slice(0, 20), nodesCreated: created.n, limiter: stats.mixer },
     timing: { frames: timing.length, p50: pct(0.5), p95: pct(0.95), p99: pct(0.99), max: timing[timing.length - 1], mean: timing.reduce((a, b) => a + b, 0) / Math.max(1, timing.length) },
-    stats: { ...stats, voices: stats.voices, voiceLog }, shots, dispatchLog,
+    stats: { ...stats, voices: stats.voices, voiceLog }, shots, dispatchLog, lineLog,
   };
 }
 
