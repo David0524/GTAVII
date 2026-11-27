@@ -140,7 +140,12 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const lampCol = select(office, vec3(0.9, 0.88, 0.72), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
   const storeLit = groundFloor.and(hasStore).and(facadeUniforms.night.greaterThan(0.15)).and(rnd.lessThan(0.7));
   // Emission is modest: the Phase 3 post stack (filmic tonemap + bloom/halation) supplies the glow.
-  const emissiveSharp = select(isLit.or(storeLit), lampCol.mul(select(storeLit, float(0.55), float(0.38))), vec3(0));
+  // Lit windows are not flat panels: brightness varies per room (lamp wattage, distance), light falls off from
+  // the ceiling lamp toward the sill, a drawn shade glows dimmer and warmer, storefronts are dimmer behind displays.
+  const roomLevel = rnd2.mul(0.6).add(0.45);
+  const falloff = mix(float(0.55), float(1.0), smoothstep(0.0, 1.0, fv.sub(sill).div(head.sub(sill)).clamp(0, 1)));
+  const shadeGlow = select(shadeHere, float(0.55), float(1));
+  const emissiveSharp = select(isLit.or(storeLit), lampCol.mul(select(storeLit, float(0.32), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
   const emissiveAvg = lampCol.mul(litP.mul(0.38));
   const emissiveWin = mix(emissiveSharp, emissiveAvg, lodFade);
 

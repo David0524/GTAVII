@@ -59,11 +59,11 @@ export function buildStreetLights(streets: StreetRec[]): THREE.Group {
   lensMat.emissiveNode = lampColor.mul(on).mul(6.0);
   const lenses = new THREE.InstancedMesh(lensGeo, lensMat, pts.length);
   // ground pool: additive radial falloff under each head
-  const poolGeo = new THREE.PlaneGeometry(16, 16).rotateX(-Math.PI / 2).translate(0, 0.03, -2.35);
+  const poolGeo = new THREE.PlaneGeometry(24, 24).rotateX(-Math.PI / 2).translate(0, 0.03, -2.35);
   const poolMat = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
   const r = length(sub(uv(), vec2(0.5, 0.5))).mul(2);
   const fall = float(1).sub(smoothstep(0.0, 1.0, r)).pow(2.2);
-  poolMat.colorNode = vec3(lampColor).mul(fall).mul(on).mul(0.55);
+  poolMat.colorNode = vec3(lampColor).mul(fall).mul(on).mul(0.9); // night shots: pools were too small and faint
   const pools = new THREE.InstancedMesh(poolGeo, poolMat, pts.length);
 
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();

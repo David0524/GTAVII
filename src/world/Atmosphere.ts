@@ -92,9 +92,9 @@ export class Atmosphere {
     // sky / ground fill: blue skylight by day, sodium-lit city glow bouncing up at night
     // Midday fill: hazy summer skylight, less blue than a clean sky (1974 Midtown haze; refs read warm, not blue)
     lerpC(C(0.7, 0.68, 0.7), C(0.42, 0.4, 0.52), golden, this.tmp.a);
-    lerpC(this.tmp.a, C(0.09, 0.1, 0.17), night, this.hemi.color);
+    lerpC(this.tmp.a, C(0.16, 0.13, 0.13), night, this.hemi.color); // night: sodium-lit sky glow (1974 Midtown never went black)
     lerpC(C(0.42, 0.32, 0.24), C(0.3, 0.18, 0.09), night, this.hemi.groundColor); // warm street / brick bounce
-    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.55 * night + 0.2;
+    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.9 * night + 0.2;
     // sky dome
     // (Tried higher turbidity/mie for a hazier noon: this sky model turns a saturated deep blue instead. Kept.)
     this.sky.turbidity.value = 6 + 4 * golden;
@@ -105,7 +105,7 @@ export class Atmosphere {
     // late-night windows thin out between 1:00 and 5:30
     const m = worldClock.minutes, late = m > 60 && m < 330 ? 0.45 : 1;
     this.state.sunElevation = el; this.state.night = night * late; this.state.lightsOn = smooth(6, -1, el);
-    this.state.exposure = 0.6 + 0.3 * golden + 0.3 * night; // ~0.6 noon, ~0.9 golden, ~1.2 night
+    this.state.exposure = 0.6 + 0.5 * golden + 0.6 * night; // ~0.6 noon, ~1.1 golden, ~1.7 night (night shots: p50 5-9 vs band 12-40)
     return this.state;
   }
 
