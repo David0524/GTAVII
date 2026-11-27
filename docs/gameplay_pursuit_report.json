@@ -1,16 +1,17 @@
 {
  "summary": {
   "speedMs": 13,
-  "minutes": 1,
-  "runs": 1,
+  "minutes": 3,
+  "runs": 8,
   "carsPerRun": 4,
-  "pursuitStarted": "1/1",
-  "gotAway": "1/1",
-  "medianGetAwayS": 31.3,
-  "meanSeenShare": 0.09,
-  "totalIntercepts": 1,
-  "gpMsPerFrame": 0.53,
-  "limits": "player car is kinematic (ignores traffic, lights, collisions; never slows to turn); police cars drive the sim lane graph"
+  "pursuitStarted": "8/8",
+  "gotAway": "7/8",
+  "medianGetAwayS": 73.7,
+  "meanSeenShare": 0.31,
+  "totalIntercepts": 19,
+  "gpMsPerFrame": 0.62,
+  "pedsStruck": 17,
+  "limits": "player car is kinematic (ignores traffic, lights, collisions and pedestrians, so it runs some down and the chase escalates; never slows to turn); police cars drive the sim lane graph"
  },
  "results": [
   {
@@ -20,10 +21,219 @@
     -51
    ],
    "pursuitAt": 0,
-   "seenShare": 0.09,
+   "seenShare": 0.25,
+   "intercepts": 3,
+   "closest": 3,
+   "gotAwayAt": 149.6,
+   "finalPhase": "searching",
+   "phases": [
+    "pursuit",
+    "lost",
+    "searching",
+    "lost",
+    "searching",
+    "lost",
+    "pursuit",
+    "lost",
+    "searching"
+   ],
+   "maxUnits": 16,
+   "roles": {
+    "tail": 663,
+    "search": 1519,
+    "cutoff": 161
+   },
+   "gpMsPerFrame": 0.67,
+   "reports": 2,
+   "pedsStruck": 4
+  },
+  {
+   "run": 1,
+   "start": [
+    120,
+    -200
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.63,
+   "intercepts": 7,
+   "closest": 0,
+   "gotAwayAt": null,
+   "finalPhase": "pursuit",
+   "phases": [
+    "pursuit",
+    "searching",
+    "lost",
+    "pursuit"
+   ],
+   "maxUnits": 17,
+   "roles": {
+    "tail": 2034,
+    "search": 1261,
+    "cutoff": 2668,
+    "foot": 230
+   },
+   "gpMsPerFrame": 0.71,
+   "reports": 2,
+   "pedsStruck": 4
+  },
+  {
+   "run": 2,
+   "start": [
+    -150,
+    80
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.21,
    "intercepts": 1,
    "closest": 3,
-   "gotAwayAt": 31.3,
+   "gotAwayAt": 56,
+   "finalPhase": "searching",
+   "phases": [
+    "pursuit",
+    "lost",
+    "searching"
+   ],
+   "maxUnits": 16,
+   "roles": {
+    "tail": 630,
+    "cutoff": 33,
+    "search": 439
+   },
+   "gpMsPerFrame": 0.62,
+   "reports": 1,
+   "pedsStruck": 1
+  },
+  {
+   "run": 3,
+   "start": [
+    60,
+    150
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.21,
+   "intercepts": 1,
+   "closest": 0,
+   "gotAwayAt": 55.8,
+   "finalPhase": "none",
+   "phases": [
+    "pursuit",
+    "searching",
+    "none"
+   ],
+   "maxUnits": 10,
+   "roles": {
+    "tail": 628,
+    "search": 226
+   },
+   "gpMsPerFrame": 0.61,
+   "reports": 0,
+   "pedsStruck": 0
+  },
+  {
+   "run": 4,
+   "start": [
+    -260,
+    -120
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.15,
+   "intercepts": 1,
+   "closest": 12,
+   "gotAwayAt": 151.9,
+   "finalPhase": "lost",
+   "phases": [
+    "pursuit",
+    "lost",
+    "pursuit",
+    "lost",
+    "searching",
+    "spotted",
+    "lost",
+    "pursuit",
+    "lost"
+   ],
+   "maxUnits": 15,
+   "roles": {
+    "tail": 756,
+    "search": 2113,
+    "foot": 214,
+    "cutoff": 531
+   },
+   "gpMsPerFrame": 0.59,
+   "reports": 2,
+   "pedsStruck": 4
+  },
+  {
+   "run": 5,
+   "start": [
+    200,
+    40
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.19,
+   "intercepts": 1,
+   "closest": 3,
+   "gotAwayAt": 51.8,
+   "finalPhase": "none",
+   "phases": [
+    "pursuit",
+    "searching",
+    "none"
+   ],
+   "maxUnits": 10,
+   "roles": {
+    "tail": 546,
+    "search": 276
+   },
+   "gpMsPerFrame": 0.57,
+   "reports": 0,
+   "pedsStruck": 0
+  },
+  {
+   "run": 6,
+   "start": [
+    -20,
+    -51
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.57,
+   "intercepts": 4,
+   "closest": 0,
+   "gotAwayAt": 170.3,
+   "finalPhase": "lost",
+   "phases": [
+    "pursuit",
+    "lost",
+    "searching",
+    "lost",
+    "searching",
+    "lost",
+    "spotted",
+    "pursuit",
+    "lost"
+   ],
+   "maxUnits": 16,
+   "roles": {
+    "tail": 1416,
+    "search": 872,
+    "cutoff": 679,
+    "foot": 366
+   },
+   "gpMsPerFrame": 0.65,
+   "reports": 1,
+   "pedsStruck": 2
+  },
+  {
+   "run": 7,
+   "start": [
+    120,
+    -200
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.25,
+   "intercepts": 1,
+   "closest": 14,
+   "gotAwayAt": 73.7,
    "finalPhase": "searching",
    "phases": [
     "pursuit",
@@ -32,11 +242,13 @@
    ],
    "maxUnits": 8,
    "roles": {
-    "tail": 108,
-    "search": 313
+    "tail": 793,
+    "search": 439,
+    "cutoff": 96
    },
-   "gpMsPerFrame": 0.53,
-   "reports": 1
+   "gpMsPerFrame": 0.55,
+   "reports": 1,
+   "pedsStruck": 2
   }
  ]
 }

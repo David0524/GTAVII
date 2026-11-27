@@ -322,6 +322,42 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
 - **Where we fall short:** no eating or shine animations yet (characters). The vendor's reaction to a robbery is a flee or cower command, not a scenario with pleading or a fight back. Vendors as tipsters and protection beats are narrative's side content, not wired yet.
 - **Plan:** the vendor tipsters are in (regulars and heat hints); next, protection-racket beats on vendors for Nick. The vendor who fights back is in (brawler hand-off); give him the ladle once characters have a prop for it.
 
+### Pursuit on real streets (2026-11-27; `tools/gameplay/pursuitHeadless.ts`, `docs/gameplay_pursuit_report.json`)
+- **Bench:**
+  - Driving landed in the engine, so the chase now runs on the real map: the real sim and lane graph, with gameplay bound through the full SimLike path (police mirror, pursuit roles, chokepoints from real junctions).
+  - The player's car follows real lanes at 13 m/s (29 mph), turning at random (seeded). One radio car watches the carjack from 35 m behind on the same lane, and three more are posted at real junctions 150–450 m out.
+  - 8 chases × 3 game minutes, same seeds before and after.
+  - The browser probe (`tools/gameplay/pursuitProbe.ts`) ran at about 0.02× real time under SwiftShader, so it gives frames only (shots/gameplay/pursuit), not timing.
+- **Found and fixed:**
+  1. A cop who saw the crime himself never radioed it in, so posted cars never joined; one sat 6 m from the fleeing car on its post. He now radios it in, and his house's posts within 300 m join.
+  2. A car's 45 m sight suits picking out a face, not keeping a car in view down an avenue. Now 140 m when tailing, and 80 m to pick out a described car.
+  3. One second out of sight flipped every car from chasing to "search", which lost the suspect for good. Contact now survives 4 s (`CORNER_GRACE`).
+  4. Cars rolling in on the radio call drove to a stale point. They now get tail or cut-off roles.
+  5. A cop who saw a violent crime from a car driving away went into `combat` and stood still. It's now a chase; on foot it's still a gunfight.
+  6. An unknown precinct id crashed the frame; it now falls back.
+- **Before → after (medians over 8 runs):**
+
+  | | before | after |
+  |---|---|---|
+  | time a unit sees the car | 4.5% | 23% |
+  | runs using cut-offs | 1 of 8 (94 samples) | 6 of 8 (4,168 samples) |
+  | intercepts (a unit within 15 m ahead) | 15 | 19 |
+  | median time to get away | 62 s | 74 s |
+  | still in pursuit at 3 min | 1 of 8 | 1 of 8 |
+  | gameplay cost per frame | 0.70 ms | 0.62 ms |
+
+- **Limits, stated plainly:**
+  - The bench car is kinematic: it ignores traffic, red lights and pedestrians (17 struck across the runs, each escalating the chase) and never slows for a turn. A player in a physics car is slower through junctions, so these getaway times are an upper bound for skill-free driving.
+  - Sim's police cars obey the lane graph and traffic, run at 1.35× the limit with the siren, and can't go the wrong way down a one-way. That costs them most of the tail distance; the tail settles about 60 m back.
+- **vs GTA V / VI / RDR2:**
+  - **What the references do:** GTA V spawns police near you and they ram and box; losing them at 2–3 stars takes about 30–90 s of breaking line of sight, with the search cones shown. RDR2's lawmen ride you down with no cones, and witnesses matter. GTA VI is expected to add more grounded dispatch.
+  - **Where we match:** a 1–2.5 minute chase that ends in a search, with no stars or cones; police that radio and converge; cut-off cars at real junctions ahead.
+  - **Where we fall short:** nobody spawns in front of you. That's deliberate: units come from posts and the station, never out of thin air, so a skilled driver gets away 7 times in 8. It isn't playtested yet in the physics car with traffic.
+  - **Plan:**
+    - Rerun the bench with a sim-driven player car that stops at reds, as a lower bound.
+    - Tune VEHICLE_TRACK and CORNER_GRACE in a touch playtest.
+    - Ask sim whether a pursuing car may take a one-way the wrong way for a block. NYPD did; the sim lane graph can't.
+
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
 | Case | Avg | p95 | p99 | Max | Budget |
