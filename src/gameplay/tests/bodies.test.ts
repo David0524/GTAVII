@@ -75,7 +75,7 @@ test('content rule: a child is never a target (no hitbox, no melee, no impact da
   (r.sim as any).add('ped_kid', 0, -6, { child: true });
   (r.sim as any).add('ped_adult', 3, -6, {});
   r.step(0.5, 0.1);
-  const ids = r.g.hitboxes().map((h) => h.actorId ?? (h as any).id);
+  const ids = r.g.hitboxes().map((h) => h.id);
   assert.ok(!ids.includes('ped_kid'), 'no hitbox');
   assert.ok(ids.includes('ped_adult'), 'adults are bodies in the world');
   assert.ok(!r.g.melee.fighters.has('ped_kid'), 'no melee');

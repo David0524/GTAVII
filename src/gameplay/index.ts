@@ -47,7 +47,7 @@ import { Stats } from './meta/stats';
 import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
 import type { SuspectMotion } from './police/pursuit';
 import { Bodies, discoveryDelay, type Body } from './police/bodies';
-import { allowed as moveAllowed, locomotion as moveLocomotion, landing, bargeChance, BARGE_SECONDS, DOORS, LADDER_PER_M, STAMINA_COST, TURNSTILE, type Carrying, type DoorKind, type MoveAction, type MoverState } from './player/movement';
+import { allowed as moveAllowed, locomotion as moveLocomotion, landing, bargeChance, tackleChance, TACKLE, BARGE_SECONDS, DOORS, LADDER_PER_M, STAMINA_COST, TURNSTILE, type Carrying, type DoorKind, type MoveAction, type MoverState } from './player/movement';
 import { Economy } from './economy';
 import { Arcade } from './arcade';
 import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
@@ -55,7 +55,7 @@ import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 export type GameplayEventType = 'wasted' | 'arrested' | 'crimeWitnessed' | 'reportFiled' | 'shot' | 'hit' | 'propBroken'
   | 'impact' | 'bark' | 'radio' | 'witness' | 'police' | 'melee' | 'money' | 'pickup' | 'ring' | 'call' | 'wear' | 'geyser' | 'tyreShot' | 'notice'
-  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire' | 'context' | 'cab';
+  | 'copKilled' | 'essentialKilled' | 'cleared' | 'released' | 'fire' | 'context' | 'cab' | 'tackle';
 
 /** Per-quality budgets (brief: 12 combatants on High within 1.5 ms; 6 on mobile Low). */
 /** How much a drink goes to your head (0..1 scale; effects stay modest and wear off in a few minutes). */
@@ -797,12 +797,13 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody'; label: string; target?: string } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle'; label: string; target?: string } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
     if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
     if (this.pc.vehicle) return { kind: 'exitVehicle', label: 'Get out' };
+    { const t = this.tackleTarget(); if (t?.quarry && this.canMove('tackle').ok) return { kind: 'tackle', label: 'Tackle', target: t.id }; }
     if (this.pc.carrying === 'body') {
       for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3.5 && !this.bodies.inCar(c.id).length) return { kind: 'stowBody', label: 'Into the trunk', target: c.id };
       return { kind: 'dropBody', label: 'Put down' };
@@ -838,6 +839,7 @@ export class Gameplay {
       case 'openHydrant': this.openHydrant(); break;
       case 'cover': case 'leaveCover': this.toggleCover(moveDir); break;
       case 'carryBody': this.pickUpBody(); break;
+      case 'tackle': this.tackle(); break;
       case 'dropBody': this.dropBody(); break;
       case 'stowBody': this.stowBody(a.target!); break;
       case 'door': { const d = this.nearestDoor(this.player.position()[0], this.player.position()[2]); if (d && !d.locked) this.doors?.open?.(d.id); this.emit('notice', { kind: 'door', id: a.target, locked: d?.locked ?? false }); break; }
@@ -953,7 +955,7 @@ export class Gameplay {
       this.policeSys.file({ witness: 'radio', perp: d.perp, kinds: ['officer_down'], desc: { clothes: [] }, lastKnown: d.where, crimeAt: d.where, via: 'unit', time: this.time });
     }
     this.trackMotion(dt); this.mirror?.update();
-    this.updateBodies();
+    this.updateBodies(); this.updateTackles();
     const clear = this.heatClear();
     if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
     this.wasClear = clear;
@@ -1409,6 +1411,75 @@ export class Gameplay {
   }
   /** The engine reports a fall from height (m) for any actor. */
   fell(id: string, dropM: number) { const d = fallDamage(dropM); if (d > 0) this.applyDamage(id, { amount: d, type: 'fall' }); }
+
+  // ------------------------------------------------------------------ the tackle (foot-chase finisher)
+  /** Mission chase quarries: who can be tackled to finish a chase, from how close, and whether it's lawful
+   *  (a purse snatcher or a bail skip: no crime; a bystander: assault). Set by the mission runtime. */
+  readonly chaseTargets = new Map<string, { catchDistanceM: number; lawful: boolean }>();
+  setChaseTarget(id: string, o: { catchDistanceM?: number; lawful?: boolean } = {}) { this.chaseTargets.set(id, { catchDistanceM: o.catchDistanceM ?? TACKLE.reach, lawful: o.lawful ?? true }); }
+  clearChaseTarget(id: string) { this.chaseTargets.delete(id); }
+  private stumbleUntil = -1;
+  private tackleRecover: { id: string; at: number }[] = [];
+  /** Who a tackle would go for right now: a chase quarry first, else anyone in the cone (police heat applies). */
+  tackleTarget(): { id: string; dist: number; quarry: boolean } | null {
+    if (!this.player) return null;
+    const p = this.player.position(), yaw = yawOf(this.player.aim().dir), touch = this.pc.device === 'touch';
+    const reach = touch ? TACKLE.touchReach : TACKLE.reach, cone = ((touch ? TACKLE.touchConeDeg : TACKLE.coneDeg) / 2) * Math.PI / 180;
+    let best: { id: string; dist: number; quarry: boolean } | null = null;
+    for (const a of this.actors.values()) {
+      if (a.id === this.player.id || a.kind === 'player') continue;
+      const h = this.healthSys.state(a.id); if (!h || h.dead) continue;
+      if (this.ai.agents.get(a.id)?.knockedOut) continue;
+      const q = a.pos(), dx = q[0] - p[0], dz = q[2] - p[2], d = Math.hypot(dx, dz);
+      const ct = this.chaseTargets.get(a.id);
+      if (d > (ct ? Math.max(reach, ct.catchDistanceM) : reach)) continue;
+      // facing: forward is (-sin yaw, -cos yaw)
+      const ang = Math.acos(Math.max(-1, Math.min(1, (-Math.sin(yaw) * dx - Math.cos(yaw) * dz) / Math.max(1e-6, d))));
+      if (ang > cone && d > 0.8) continue;
+      const cand = { id: a.id, dist: d, quarry: !!ct };
+      if (!best || (cand.quarry && !best.quarry) || (cand.quarry === best.quarry && d < best.dist)) best = cand;
+    }
+    return best;
+  }
+  /**
+   * Dive at the legs. Non-lethal: 5 hp (never below 1), the quarry is down 4 s (pinned 3 s). A miss: you sprawl
+   * for 0.9 s. Tackling a bystander is an assault (a cop: assaulting an officer); a lawful chase quarry is a
+   * citizen's arrest, no crime. Emits `tackle {target, hit, quarry}`, the hook for narrative's `finish: "tackle"`.
+   */
+  tackle(): { hit: boolean; target: string | null; reason?: string } {
+    if (!this.player) return { hit: false, target: null, reason: 'no player' };
+    if (this.time < this.stumbleUntil) return { hit: false, target: null, reason: 'down' };
+    const v = this.canMove('tackle'); if (!v.ok) return { hit: false, target: null, reason: v.reason };
+    const t = this.tackleTarget();
+    const st = this.inv.ensure(this.player.lead).stamina;
+    st.value = Math.max(0, st.value - STAMINA_COST.tackle); if (st.value <= 0) st.exhausted = true;
+    if (!t) { this.stumbleUntil = this.time + TACKLE.stumble; this.emit('tackle', { target: null, hit: false, quarry: false }); return { hit: false, target: null, reason: 'nobody in reach' }; }
+    const agent = this.ai.agents.get(t.id);
+    const quarrySpeed = agent ? (agent.state === 'flee' ? 5 : 1.5) : 4;
+    const chance = tackleChance({ sprinting: this.pc.sprinting, speed: this.pc.speed, quarrySpeed, strength: this.inv.ensure(this.player.lead).skills.strength ?? 50, s: this.moverState() });
+    const hit = this.rng.chance(chance);
+    const ct = this.chaseTargets.get(t.id), a = this.actors.get(t.id)!;
+    // the act itself is seen whether it lands or not
+    if (!(ct?.lawful)) this.crime(a.kind === 'cop' || this.policeSys.units.has(t.id) ? 'assault_officer' : 'assault', { victim: t.id, noise: 8 });
+    if (!hit) { this.stumbleUntil = this.time + TACKLE.stumble; this.emit('tackle', { target: t.id, hit: false, quarry: !!ct, chance }); return { hit: false, target: t.id }; }
+    const hs = this.healthSys.state(t.id);
+    if (hs) this.applyDamage(t.id, { amount: Math.min(TACKLE.damage, Math.max(0, hs.hp - 1)), type: 'melee', source: this.player.id });
+    if (agent) { this.ai.knockOut(t.id); this.tackleRecover.push({ id: t.id, at: this.time + TACKLE.stun }); }
+    else this.port.command(t.id, { type: 'anim', name: 'tackled' });
+    this.emit('tackle', { target: t.id, hit: true, quarry: !!ct, chance, pin: TACKLE.pin, stun: TACKLE.stun });
+    if (ct) this.emit('notice', { kind: 'caught', target: t.id });
+    return { hit: true, target: t.id };
+  }
+  private updateTackles() {
+    for (const r of [...this.tackleRecover]) if (this.time >= r.at) {
+      this.tackleRecover.splice(this.tackleRecover.indexOf(r), 1);
+      const a = this.ai.agents.get(r.id);
+      // a chase quarry that was caught stays down for the mission to resolve; anyone else gets up and runs
+      if (a && a.alive && !this.chaseTargets.has(r.id)) { a.knockedOut = false; a.state = 'flee'; }
+    }
+  }
+  /** True while the player is sprawled after a missed tackle (the engine plays the stumble, input is ignored). */
+  get stumbling() { return this.time < this.stumbleUntil; }
 
   // ------------------------------------------------------------------ bodies
   /** How long until passers-by find a body here (crowd within 25 m, light, indoors). */

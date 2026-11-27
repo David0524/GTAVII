@@ -10,7 +10,7 @@ import { fallDamage } from '../health/Health';
 
 export type MoveAction =
   | 'sprint' | 'vault' | 'climb' | 'fenceClimb' | 'ladder' | 'dropLadder' | 'roofJump' | 'hangDrop'
-  | 'turnstileVault' | 'shoulderBarge' | 'roll' | 'cover' | 'aim' | 'fire' | 'melee' | 'enterVehicle' | 'crouch';
+  | 'turnstileVault' | 'shoulderBarge' | 'roll' | 'cover' | 'aim' | 'fire' | 'melee' | 'enterVehicle' | 'crouch' | 'tackle';
 export type Carrying = 'none' | 'bag' | 'crate' | 'body';
 
 /** Everything the rules look at. The facade builds it from health, stamina, intox and the player context. */
@@ -43,7 +43,7 @@ export const HEIGHTS = { step: 0.40, vaultMin: 0.5, vaultMax: 1.2, climbMax: 2.2
  */
 export const STAMINA_COST: Record<Exclude<MoveAction, 'sprint'>, number> = {
   vault: 6, climb: 14, fenceClimb: 18, ladder: 0, dropLadder: 4, roofJump: 12, hangDrop: 0, turnstileVault: 5,
-  shoulderBarge: 10, roll: 5, cover: 0, aim: 0, fire: 0, melee: 0, enterVehicle: 0, crouch: 0,
+  shoulderBarge: 10, roll: 5, cover: 0, aim: 0, fire: 0, melee: 0, enterVehicle: 0, crouch: 0, tackle: 12,
 };
 /** Ladders and fire-escape stairs: per metre climbed. */
 export const LADDER_PER_M = 1.6;
@@ -118,8 +118,30 @@ export function allowed(a: MoveAction, s: MoverState): Verdict {
     case 'enterVehicle':
       if (s.carrying === 'body') return no('put it in the trunk');
       return yes;
+    case 'tackle':
+      if (s.carrying !== 'none') return no(`carrying a ${s.carrying}`);
+      if (s.legCrippled) return no('bad leg');
+      if (s.intox >= DRUNK.legless) return no('too drunk');
+      if (s.inCover) return no('in cover');
+      return yes;
     case 'crouch': return yes;
   }
+}
+
+/**
+ * The tackle (a foot-chase finisher; narrative's `finish: "tackle"`). Close within reach of the quarry at a run and
+ * press: a dive at the legs. Non-lethal: a few points of damage and the quarry is down for STUN seconds (pinned for
+ * PIN while you hold them). A miss sends you sprawling (STUMBLE seconds without control) and costs the stamina anyway.
+ * Touch gets one button with auto-align: a longer reach and a wider cone.
+ */
+export const TACKLE = { reach: 2.4, touchReach: 2.9, coneDeg: 60, touchConeDeg: 120, minSpeed: 3, base: 0.85, walking: 0.45, damage: 5, stun: 4, pin: 3, stumble: 0.9 } as const;
+export function tackleChance(o: { sprinting: boolean; speed: number; quarrySpeed: number; strength: number; s: MoverState }) {
+  const d = o.s.intox, drunkK = d < DRUNK.tipsy ? 0 : Math.min(1, (d - DRUNK.tipsy) / (DRUNK.legless - DRUNK.tipsy));
+  let p = o.speed >= TACKLE.minSpeed ? TACKLE.base : TACKLE.walking;
+  if (o.quarrySpeed > o.speed + 1) p -= 0.25;          // diving at someone pulling away
+  p += 0.12 * (o.strength - 50) / 50;
+  p -= 0.4 * o.s.limp + 0.3 * drunkK + (o.s.exhausted ? 0.15 : 0);
+  return Math.max(0.05, Math.min(0.95, p));
 }
 
 /** Drink thresholds (intox 0..1, 1974 bar measures: a beer +0.12, a whiskey +0.2). */

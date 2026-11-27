@@ -97,3 +97,58 @@ test('facade: the rules hold in play (body in hands, landings, barging a door is
   for (let i = 0; i < 3; i++) r.g.bargeDoor({ id: 'door.4b', kind: 'apartment' });
   assert.ok(r.events.some((e) => e.type === 'notice' && e.e.kind === 'barge'));
 });
+
+// ---- the tackle (foot-chase finisher; narrative's `finish: "tackle"`)
+import { tackleChance, TACKLE } from '../player/movement';
+
+test('tackle: a sprinting dive usually lands; walking, drunk, limping or diving at someone pulling away is worse', () => {
+  const base = { sprinting: true, speed: 6, quarrySpeed: 5, strength: 50, s: IDLE_MOVER };
+  assert.equal(tackleChance(base), TACKLE.base);
+  assert.ok(tackleChance({ ...base, speed: 1.5, sprinting: false }) < 0.5);
+  assert.ok(tackleChance({ ...base, quarrySpeed: 8 }) < TACKLE.base);
+  assert.ok(tackleChance({ ...base, s: { ...IDLE_MOVER, intox: 0.7 } }) < TACKLE.base);
+  assert.ok(tackleChance({ ...base, s: { ...IDLE_MOVER, limp: 0.5 } }) < TACKLE.base);
+  assert.ok(tackleChance({ ...base, strength: 90 }) > TACKLE.base);
+  assert.equal(allowed('tackle', { ...IDLE_MOVER, carrying: 'bag' }).ok, false);
+});
+
+test('tackle: the context button finishes a foot chase on the quarry; non-lethal; a lawful quarry is no crime; a bystander is an assault', () => {
+  const r = rig();
+  r.g.setContext({ device: 'touch' });
+  r.g.spawnCombatant({ id: 'snatcher', faction: 'hood', squad: 'q', pos: [0, 0, -2], weapon: null, hp: 30 });
+  r.g.setChaseTarget('snatcher', { catchDistanceM: 2.5, lawful: true });
+  r.g.setContext({ speed: 6, sprinting: true });
+  assert.equal(r.g.contextAction()?.kind, 'tackle');
+  const got: any[] = []; r.g.on('tackle', (e) => got.push(e));
+  r.g.doContextAction();
+  // a dive can miss (15%): try again after the stumble, as a player would
+  for (let i = 0; i < 6 && !got.some((e) => e.hit); i++) { r.step(1); r.g.tackle(); }
+  assert.ok(got.some((e) => e.hit && e.target === 'snatcher' && e.quarry), JSON.stringify(got));
+  assert.ok(r.g.ai.agents.get('snatcher')!.alive, 'non-lethal');
+  assert.ok(r.g.ai.agents.get('snatcher')!.knockedOut, 'down and pinned');
+  assert.ok(!r.g.policeSys.reports.length, 'a citizen\'s arrest is no crime');
+  r.step(TACKLE.stun + 1);
+  assert.ok(r.g.ai.agents.get('snatcher')!.knockedOut, 'a caught quarry stays down for the mission to resolve');
+  // a bystander: assault, and they get up and run
+  const r2 = rig();
+  r2.g.addProp('box', 'call_box', 30, 0, -10);
+  (r2.sim as any).add('ped_witness', 6, -4, { nerve: 0.9 });
+  r2.g.spawnCombatant({ id: 'bystander', faction: 'hood', squad: 'b', pos: [0, 0, -1.5], weapon: null, hp: 40 });
+  r2.g.setContext({ speed: 6, sprinting: true });
+  const crimes: string[] = []; r2.g.on('crimeWitnessed', (e: any) => crimes.push(JSON.stringify(e)));
+  r2.g.tackle();
+  assert.ok(crimes.some((c) => c.includes('assault')), 'tackling a bystander is an assault');
+  r2.step(TACKLE.stun + 1);
+  assert.notEqual(r2.g.ai.agents.get('bystander')!.state, 'down', 'a bystander gets up and runs');
+});
+
+test('tackle: a miss sprawls you and still costs the breath', () => {
+  const r = rig();
+  r.g.setContext({ speed: 6, sprinting: true });
+  const s0 = r.g.stamina()!.value;
+  const res = r.g.tackle();
+  assert.equal(res.reason, 'nobody in reach');
+  assert.ok(r.g.stumbling);
+  assert.equal(Math.round(s0 - r.g.stamina()!.value), 12);
+  assert.equal(r.g.tackle().reason, 'down', 'no second dive while sprawled');
+});

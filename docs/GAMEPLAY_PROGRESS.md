@@ -221,6 +221,36 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 
 **Turnstile** (`vaultTurnstile`): fare evasion, noise 10 m. It's a crime only if seen: the clerk watches their own turnstiles (witness chance 0.9 within 15 m), and a transit cop makes it an immediate stop.
 
+### The tackle (a foot-chase finisher; narrative's `finish: "tackle"`)
+- **API:**
+  - The mission runtime calls `setChaseTarget(id, {catchDistanceM, lawful})` and `clearChaseTarget(id)`.
+  - Within reach of the quarry, the context button shows **Tackle** (top priority after a cop encounter); `tackle()` also works directly.
+  - Events: `tackle {target, hit, quarry, chance}` and `notice {kind: 'caught'}`.
+- **Values:**
+  - Reach 2.4 m in a 60° cone; on touch, auto-align gives 2.9 m and a 120° cone.
+  - Costs 12 stamina, hit or miss.
+  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away; ±12% for strength; reduced by a limp, drink or exhaustion.
+  - Non-lethal: 5 hp, never below 1. The quarry is down 4 s (pinned 3 s). A caught chase quarry stays down for the mission to resolve; anyone else gets up and runs.
+  - A miss sprawls you for 0.9 s.
+- **Heat:** a lawful quarry (a purse snatcher, a bail skip) is a citizen's arrest, no crime. A bystander is assault; a cop is assault on an officer.
+- **Allowed:** not while carrying anything, not with a broken leg, not legless, not in cover.
+- **Test:** `movement.test.ts`.
+
+#### vs GTA V / VI / RDR2 (reference-games rule, 2026-11-27)
+- **What the references do:**
+  - GTA V ends foot chases with a melee press or a tackle when close, with a ragdoll tumble.
+  - RDR2 has a dedicated tackle at a sprint and a hogtie or "subdue" follow-up, with a miss stumble, and it's lawful against bounties.
+  - GTA VI is expected to keep both.
+- **Where we match:** one press at reach ends the chase non-lethally. A miss has a cost (stumble and stamina). Touch gets auto-align. The legality is contextual: a lawful quarry is no crime, a bystander is assault, a cop is assault on an officer, decided by our witness system rather than a meter.
+- **Where we fall short:**
+  - No follow-up verb yet (cuffing a skip, sitting on a snatcher): the quarry just stays down for the mission.
+  - The dive and ragdoll are characters' and the engine's work and not built yet.
+  - The quarry's speed is estimated from AI state, not measured.
+- **Plan:**
+  - Add a `restrain` verb for bail skips (narrative's skip_board), so the mission can walk them to the car.
+  - Measure quarry velocity from the sim when its motion is available.
+  - Characters own the dive, the tumble and the stumble animations (events above).
+
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
 | Case | Avg | p95 | p99 | Max | Budget |
