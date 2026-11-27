@@ -82,7 +82,10 @@ export function highTankToilet(k: Kit, f: Frame) {
   const bowl = M.porcelain;
   k.loft([ring(f, 0, -0.05, 0.11, 0.14, 0, 16, 2), ring(f, 0, -0.07, 0.09, 0.12, 0.2, 16, 2), ring(f, 0, -0.08, 0.17, 0.23, 0.38, 16, 2.2)], bowl, { capEnd: false });
   k.loft([ring(f, 0, -0.08, 0.17, 0.23, 0.38, 16, 2.2), ring(f, 0, -0.08, 0.12, 0.17, 0.3, 16, 2.2)], bowl, { flip: true });
-  bb(k, f, -0.18, 0.38, -0.33, 0.18, 0.41, 0.17, M.woodDark, 0.012);                                  // seat
+  // oval wooden seat ring (open annulus with rounded section) and the lid raised against the tank pipe
+  const seat = tint(M.woodDark, '#4a3020');
+  k.loft([ring(f, 0, -0.1, 0.19, 0.24, 0.385, 18, 2.1), ring(f, 0, -0.1, 0.2, 0.25, 0.405, 18, 2.1), ring(f, 0, -0.1, 0.19, 0.24, 0.42, 18, 2.1), ring(f, 0, -0.1, 0.11, 0.15, 0.42, 18, 2.1), ring(f, 0, -0.1, 0.1, 0.14, 0.4, 18, 2.1)], seat);
+  bb(k, f, -0.17, 0.42, 0.12, 0.17, 0.86, 0.15, seat, 0.02);                                            // raised lid
   bb(k, f, -0.2, 1.9, 0.1, 0.2, 2.15, 0.27, tint(M.paintDarkGreen, '#3a3a32'), 0.02);                // high tank
   k.tube(W(f, 0, 1.9, 0.2), W(f, 0, 0.4, 0.13), 0.02, M.chrome, 8);                                    // flush pipe
   k.tube(W(f, 0.17, 1.9, 0.12), W(f, 0.17, 1.35, 0.1), 0.004, M.chrome, 4);                            // pull chain

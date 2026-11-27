@@ -273,3 +273,8 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
   - Also adopted the engine's mod-wrap of world position, replaced the sin hash with a sin-free hash12 (stable at Manhattan coordinates), and made the chrome reflection world-space with a floor-bounce level.
   - The gallery gained `?woff=x,z` (world-scale offset), `?unit=<id>` and `?streetDoors=1` to reproduce game conditions.
   - Earlier boards (grades v1–v3, walk-ins) carry this artefact on chrome and vinyl.
+- **Corwin rooms at SRO proportions.** On deep floors the front rooms now stop 3.8 m behind the facade (2.9 × 3.8 m: window, bed, footlocker, shelf), reached from the corridor door by a 1 m private passage (`passage_<label>` cell with portals). The probe shows rooms 9F, 1104, 1112 and BATH at 2.9 × 3.8 m. The bathroom has a porcelain ceiling globe plus a mirror sconce, and now reads as bright white tile. Toilets have oval wooden seat rings with the lid raised. Evidence: docs/interiors/corwin_bath_v2.jpg, docs/interiors/corwin_rooms_split_v1.jpg.
+  - Critique:
+    - The 6.7 m private passages are long and bare. Better: give the inner zone to a second "inside room" (cheaper, no window, period-true), with the passage as its vestibule.
+    - Teddy's room is still dark.
+    - The CC0 chair is over-lit (the interim lighting seam).

@@ -214,9 +214,23 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
     k.door(`${u.id}:room${q.label}`, hx, y0, hz, 0.9, 2.05, q.front ? Math.PI : 0, q.front ? -1 : -1, { locked: !isOpen, cellA: cell, cellB: -1, mat: tint(M.paintBrown, '#5a3a2a'), key: `key.corwin.${q.label}` });
     k.box(q.door - 0.1, y0 + 2.12, (q.front ? cz0 + 0.015 : cz1 - 0.015) - 0.005, q.door + 0.1, y0 + 2.22, (q.front ? cz0 + 0.015 : cz1 - 0.015) + 0.005, tint(M.chrome, '#b08a4a'), { occlude: false });
     if (!isOpen) continue;
-    const rcell = k.cell(`room_${q.label}`, [q.rc[0], y0, q.rc[1], q.rc[2], y0 + H, q.rc[3]], f);
-    const dz = q.front ? q.rc[3] : q.rc[1];
-    k.portalRect(cell, rcell, q.door - 0.45, dz, q.door + 0.45, dz, y0, y0 + 2.05);
+    // deep front strips (the Corwin's front zone runs ~10 m from facade to corridor): SRO rooms are about 3 x 3.8 m,
+    // so the room keeps the facade window and a 1 m private passage runs from the corridor door to it
+    let dz = q.front ? q.rc[3] : q.rc[1];
+    if (q.front && q.rc[3] - q.rc[1] > 4.6) {
+      const roomZ1 = q.rc[1] + 3.8, px0 = q.door - 0.5, px1 = q.door + 0.5;
+      const pcell = k.cell(`passage_${q.label}`, [px0, y0, roomZ1, px1, y0 + H, q.rc[3]], f);
+      k.room(px0, roomZ1, px1, q.rc[3], y0, y0 + H, { floor: tint(M.planksWorn, '#4a3424'), wall: NICOTINE, ceiling: M.ceilingPlaster }, {}, { skip: ['z0', 'z1'] });
+      k.portalRect(cell, pcell, q.door - 0.45, q.rc[3], q.door + 0.45, q.rc[3], y0, y0 + 2.05);
+      P.bareBulb(k, q.door, (roomZ1 + q.rc[3]) / 2, y0 + H, 0.5);
+      q.rc = [q.rc[0], q.rc[1], q.rc[2], roomZ1];
+      dz = roomZ1;
+      k.use(cell);
+      const rcell0 = k.cell(`room_${q.label}`, [q.rc[0], y0, q.rc[1], q.rc[2], y0 + H, q.rc[3]], f);
+      k.portalRect(pcell, rcell0, q.door - 0.45, dz, q.door + 0.45, dz, y0, y0 + 2.05);
+    }
+    const rcell = q.front && k.cells[k.cur]?.name === `room_${q.label}` ? k.cur : k.cell(`room_${q.label}`, [q.rc[0], y0, q.rc[1], q.rc[2], y0 + H, q.rc[3]], f);
+    if (dz === (q.front ? q.rc[3] : q.rc[1]) && !k.cells.some((cc) => cc.name === `passage_${q.label}`)) k.portalRect(cell, rcell, q.door - 0.45, dz, q.door + 0.45, dz, y0, y0 + 2.05);
     const roomOps = { s0: q.front ? q.door - 0.45 - q.rc[0] : q.rc[2] - (q.door + 0.45), s1: q.front ? q.door + 0.45 - q.rc[0] : q.rc[2] - (q.door - 0.45), y0, y1: y0 + 2.05 };
     const atFacade = q.front && q.rc[1] <= WALL_T + 0.3;
     const bw = bayWindowSpans(c, q.rc[0], q.rc[2])[0] ?? [q.rc[0] + 1.0, q.rc[0] + 2.0]; const [wy0, wy1] = floorWindowY(c, f);
@@ -231,7 +245,9 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
       if (atFacade) { k.portalRect(rcell, -1, q.rc[0] + win.s0, q.rc[1], q.rc[0] + win.s1, q.rc[1], win.y0, win.y1); k.box(q.rc[0] + win.s0, win.y0, q.rc[1] - 0.02, q.rc[0] + win.s1, win.y1, q.rc[1] - 0.01, M.glass, { glass: true, occlude: false }); }
       story!.dress(k, q.rc, y0);
     }
-    P.bareBulb(k, (q.rc[0] + q.rc[2]) / 2, (q.rc[1] + q.rc[3]) / 2, y0 + H, 1.0);
+    // the bathroom gets a porcelain ceiling fixture and a mirror sconce (white tile reads cold and bright, not murky)
+    if (q === bath) { P.globeLight(k, (q.rc[0] + q.rc[2]) / 2, (q.rc[1] + q.rc[3]) / 2, y0 + H, 2.4); k.light(q.rc[0] + 0.5, y0 + 1.9, q.rc[1] + 0.25, [1, 0.92, 0.8], 0.9, 'bulb'); }
+    else P.bareBulb(k, (q.rc[0] + q.rc[2]) / 2, (q.rc[1] + q.rc[3]) / 2, y0 + H, 1.35);
     k.use(cell);
   }
   k.use(stairCell);
