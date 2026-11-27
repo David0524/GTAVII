@@ -24,6 +24,7 @@
     "test:viewport": "vite build && tsx tools/tests/viewport.ts",
     "test:load": "vite build && tsx tools/tests/loadtime.ts",
     "test:windows": "vite build && tsx tools/tests/windows.ts",
+    "test:gameplay": "tsx --test src/gameplay/tests/*.test.ts",
     "typecheck": "tsc --noEmit",
     "//sim": "---- ambient sim workstream (keep this block last) ----",
     "data:lanes": "tsx tools/pipeline/lanes.ts",
