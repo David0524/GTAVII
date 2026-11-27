@@ -367,6 +367,38 @@ variety, and the RDR2 level of animation detail. We study behaviour and quality;
 | **Facial animation** | Blinks, saccades, full lip-sync and expressive cutscene faces; RDR2 ambient facial idles | None yet | Everything | Blinks and saccades now, visemes and expressions for cutscenes |
 | **Idles and animation detail** | RDR2: dozens of idle variants, contextual gestures, weight shifts, foot planting and hand contacts everywhere | Blend space with stride warp, foot IK with locking, look-at, hand IK, seat pose, ambient props; crowd near ring at full fidelity | Few idle variants, simple turn-in-place, no traversal or ragdoll yet | The movement brief block: traversal, momentum, ragdoll blend, stumbles, plus an idle-variety pass |
 
+## Fidelity block (oversight review: "characters are the furthest stream from the GTA V floor")
+**Done:**
+- **Male chest:** it shaded as a bust. The causes, in order:
+  - The pectoral and nipple modifiers were silently ignored: paired MakeHuman modifiers take their
+    positive name with a negative value.
+  - Hero shirts were cut from body LOD2, whose facets shaded as rounded blobs. Heroes now cut
+    garments from LOD1, with stronger drape smoothing.
+  - The drape could only move outward, so it couldn't shave small convex detail. It may now shave
+    up to 12 mm, on men only.
+  - A chest chord fill bridges the groove between the pectorals, and the hang from the apex is kept.
+- **Nick:** less inflated (weight 0.66, shoulder width 0.2, chest depth 0.25). **Review shots:**
+  each lead in their own idle (relaxed, hands behind, hands in pockets), captured at 2.5 s.
+- **Collar, lapels and tie:** slabs with real thickness and edge bands (a `ribbon` thickness
+  option). The tie has a four-in-hand knot. The collar band sits higher at the nape, and the fall
+  can't flatten out.
+- **Props held:** bag handles sit in the gripping fingers with straps. The shoulder bag has a strap
+  over the shoulder. Buttons and the placket sit on the cloth surface (the drape), not the body.
+- **Trousers:** a pressed crease, soft uneven folds, and a break at the shoe, instead of a rubber
+  tube.
+- **Our head:** the eyeballs are sized so the lids rest on them. Close-cropped natural hair is an
+  even tapered layer (no bowl) when volume is 0 (Delphine).
+
+**Still open:**
+- **Our head to Rocketbox level.** The dark rims are the inside of the eyelids, which need a
+  pinkish wet line. Features need sculpting and normal maps. Delphine's hair is still a shell
+  with a hard hairline edge, and needs card-based coils.
+- **Wrinkle and fold normals** (elbows, waist, armpits), **seam normals**, and fabric-specific
+  roughness and sheen.
+- **Card hair shading:** anisotropic, plus the TAA dependency.
+- **Review lighting:** the street shot (`24_street_eye`) is in the re-shoot set. A lead board
+  under time-of-day light comes next.
+
 ## Cutscene performance pipeline (plan; ordered after the bodies and clothing fidelity block)
 UI's cutscene runtime and tool are done but play capsule stand-ins. Characters owns the performance.
 1. **Body performance source.** Everything ships as files in a web build, so every source is
