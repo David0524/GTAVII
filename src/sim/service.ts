@@ -67,7 +67,7 @@ export function dispatchResponders(S: SimCore, role: 'ambulance' | 'fire', x: nu
   if (!arch) return ids;
   for (const vclass of ROLE_CLASS[role]) {
     {
-      const st = responderStart(S, x, z, vclass === 'ladder_truck' ? 32 : 24);
+      const st = responderStart(S, x, z, vclass === 'ladder_truck' ? 28 : 20);
       if (!st) continue;
       const near = { lane: st.lane }, s = st.s;
       const v = makeVehicle(S, 'emergency', vclass, arch, near.lane, s);

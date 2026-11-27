@@ -74,11 +74,11 @@ headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
 - **What:** pass `setView` every frame (item 1) and use at least High 150/400 and Low 40/120; the sim
   now spreads the budget at a target density around the focus (one vehicle per ~13 m of lane, a
   pedestrian per ~2 m of sidewalk at rush hour), so a smaller budget shrinks the populated disc rather
-  than thinning the street. Measured within 60 m (test `density`): rush hour at Herald Square, High 34
-  vehicles and 114 pedestrians, Low 13 and 53; midday Times Square, High 48 and 152.
+  than thinning the street. Measured within 60 m (test `density`): rush hour at Herald Square, High 30
+  vehicles and 97 pedestrians, Low 13 and 56; midday Times Square, High 47 and 151.
 - **Why:** before this, the same budget was spread over a fixed 260 m ring and only ~5 vehicles were
   within 60 m of the camera at rush hour.
 - **Ask:** if the phone frame budget allows, raise Low to 90/240: below ~90 vehicles the populated disc
-  hits its 110 m floor and the near field thins (13 vs 34 within 60 m). Far traffic beyond the disc
+  hits its 110 m floor and the near field thins (13 vs 30 within 60 m). Far traffic beyond the disc
   (long avenue views) needs impostors or LOD cars on your side; the sim can expose lane flow per avenue
   for that if useful.

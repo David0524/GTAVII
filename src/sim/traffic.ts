@@ -229,6 +229,8 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     let ok = true;
     for (const o of S.occ[lane]) if (Math.abs(o.s - s) < (o.len + vl) / 2 + 6) { ok = false; break; }
     if (ok) for (const o of S.vehicles) if (Math.hypot(o.x - tmp[0], o.z - tmp[1]) < (o.len + vl) / 2 + 3) { ok = false; break; }
+    // nobody in the roadway there (jaywalkers, people stepping to a cab)
+    if (ok) S.pGrid.query(tmp[0], tmp[1], vl / 2 + 4, (i) => { const p = S.peds[i]; if (p && p.alive && p.onRoad && Math.hypot(p.x - tmp[0], p.z - tmp[1]) < vl / 2 + 4) ok = false; });
     if (!ok) continue;
     makeVehicle(S, kind, vclass, arch, lane, s); n++; budget--; occ[b]++;
     S.stats.spawnedV++;
@@ -329,8 +331,8 @@ function sirenBlocked(S: SimCore, v: Vehicle): string {
 }
 
 /** A siren unit leaving the gutter swings back across the lane: not while someone is at the line beside it (its rear would sweep over them). */
-function gutterTurnBlocked(S: SimCore, v: Vehicle, _c: number): boolean {
-  if (Math.abs(v.lat) < 1) return false;
+function gutterTurnBlocked(S: SimCore, v: Vehicle, c: number): boolean {
+  if (Math.abs(v.lat) < 1 || S.net.g.links[c].turn === Turn.Straight) return false; // straight on keeps the gutter line past them
   const len = S.net.len[v.link];
   for (const w of S.occ[v.link]) if (w !== v && len - w.s < w.len / 2 + 3 && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1.5) return true;
   return false;
@@ -488,7 +490,7 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
       let slowAhead = gutter;
       for (const w of list) if (w !== v && w.s > v.s && w.s - v.s < 70 && w.v < 6 && Math.abs(w.lat - v.lat) < 1.5) slowAhead = true;
       if (slowAhead) v.latTarget = gl;
-    } else if (L.kind !== LinkKind.Lane) v.latTarget = 0;
+    } else if (L.kind !== LinkKind.Lane) v.latTarget = L.turn === Turn.Straight && v.s < v.len / 2 + 2 ? v.lat : 0; // straight on: keep the gutter line until the rear is past the queue head's nose
   } else if (passing < 0) v.latTarget = passing;
   else if (v.state === 'drive' && v.latTarget < 0) v.latTarget = 0;
   if (passSlow < Infinity && v.v > passSlow) consider(Math.max(4, v.v * 2), passSlow, 'passing');
@@ -524,6 +526,10 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     if (net.dark.has(L.endJ)) { // dead signal = all-way stop: come to a full stop at the line first
       if (dEnd - v.len / 2 < 3 && v.v < 0.3) v.atLine = true;
       if (!v.atLine) must = 'stopSign';
+    }
+    // a siren unit waiting to cross: civilians whose movement crosses it hold at the line (if they can still stop)
+    if (!must && !siren && v.next >= 0 && S.sirenWant.size && dEnd - v.len / 2 > (v.v * v.v) / (2 * 4.5) + 0.5) {
+      for (const cf of net.g.links[v.next].conflicts) if (S.sirenWant.has(cf.link)) { must = 'siren'; break; }
     }
     if (!must && dEnd < Math.max(18, (v.v * v.v) / (2 * v.bComf) + 10)) must = canEnter(S, v, t);
     if (must) {
@@ -588,6 +594,7 @@ function gapsOn(S: SimCore, lane: number, s: number, me: Vehicle): [number, numb
 function tryLaneChange(S: SimCore, v: Vehicle, toLane: number, aggressive: boolean): boolean {
   const net = S.net;
   const s2 = v.s * (net.len[toLane] / net.len[v.link]);
+  if (Math.abs(v.lat) > 0.2 || Math.abs(v.latTarget) > 0.35) return false; // mid pull-over / pass: finish it first
   const slowRouted = (v.dest || v.cop) && v.v < 2;
   if (s2 < 3 || s2 > net.len[toLane] - (slowRouted ? v.len / 2 + 0.5 : 6)) return false;
   for (const b of S.blocks) if (b.link === toLane && Math.abs(b.s - s2) < 10) return false;
@@ -606,7 +613,7 @@ function tryLaneChange(S: SimCore, v: Vehicle, toLane: number, aggressive: boole
   // near the line: someone just turning out of either lane still has their rear over it (long ones swing)
   if (s2 > net.len[toLane] - 14) for (const ln of [v.link, toLane]) for (const c of net.g.links[ln].next) for (const w of S.occ[c]) if (w.s < w.len / 2 + 3) return false;
   occRemove(S, v);
-  v.lcFrom = v.link; v.lcT = 0; v.link = toLane; v.s = s2; v.prevLink = -1;
+  v.lcFrom = v.link; v.lcT = 0; v.link = toLane; v.s = s2; v.prevLink = -1; v.latTarget = 0;
   occInsert(S, v);
   S.lcList.push(v);
   S.stats.laneChanges++;
@@ -841,6 +848,9 @@ const obs: Obs = { gap: Infinity, vl: 0, why: '', hard: Infinity };
 
 export function stepVehicles(S: SimCore, dt: number) {
   const net = S.net, t = S.t;
+  // movements siren units are about to take (within 40 m of their line): cross traffic yields to them
+  S.sirenWant.clear();
+  for (const w of S.vehicles) if (w.alive && w.cop?.siren && w.next >= 0 && S.net.g.links[w.link].kind === LinkKind.Lane && S.net.len[w.link] - w.s < 40) S.sirenWant.add(w.next);
   S.sirens = S.vehicles.filter((w) => w.alive && w.cop?.siren).map((w) => ({ id: w.id, x: w.x, z: w.z, vx: -Math.sin(w.yaw) * w.v, vz: -Math.cos(w.yaw) * w.v }));
   S.lcList = S.lcList.filter((w) => w.alive && w.lcT < 1 && w.lcFrom >= 0);
   const rainF = S.weather === 'rain' ? 0.85 : 1;
@@ -851,7 +861,12 @@ export function stepVehicles(S: SimCore, dt: number) {
     if (v.lcT < 1) v.lcT = Math.min(1, v.lcT + dt / 2.2);
     const L = net.g.links[v.link];
     // siren units snap back from the gutter quickly once in the junction
-    v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * (v.cop?.siren && L.kind !== LinkKind.Lane ? 3.5 : 1.4));
+    // nobody out at the kerb or in the gutter swings back into the lane while someone is alongside them
+    let holdLat = false;
+    if (Math.abs(v.latTarget) < Math.abs(v.lat) && Math.abs(v.lat) > 0.3) {
+      for (const w of S.occ[v.link]) if (w !== v && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1 && Math.sign(w.lat - v.lat) === Math.sign(v.latTarget - v.lat)) { holdLat = true; break; }
+    }
+    if (!holdLat) v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * (v.cop?.siren && L.kind !== LinkKind.Lane ? 3.5 : 1.4));
 
     if (v.cop) policeVehicleTick(S, v, dt);
     if (v.state === 'onScene' && Number.isFinite(v.dwell) && (v.dwell -= dt) <= 0) responderLeave(S, v);

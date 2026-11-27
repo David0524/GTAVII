@@ -233,7 +233,7 @@ function copNear(S: SimCore, x: number, z: number): boolean {
 function vehicleInWay(S: SimCore, x: number, z: number, fx: number, fz: number, look: number): boolean {
   let hit = false;
   const qx = x + fx * look, qz = z + fz * look;
-  S.vGrid.query(qx, qz, 8, (i) => {
+  S.vGrid.query(qx, qz, 16, (i) => {
     if (hit) return;
     const v = S.vehicles[i];
     if (!v.alive) return;
@@ -242,7 +242,8 @@ function vehicleInWay(S: SimCore, x: number, z: number, fx: number, fz: number, 
       const px = x + (qx - x) * f - v.x, pz = z + (qz - z) * f - v.z;
       // moving cars get a generous margin; a stopped car (often waiting for us) only blocks if we'd walk into it
       const m = v.v > 0.3 ? 0.6 : 0.2;
-      if (Math.abs(px * vx + pz * vz) < v.len / 2 + m + (v.v > 0.3 ? v.v * 0.6 : 0) && Math.abs(px * vz - pz * vx) < v.wid / 2 + m) { hit = true; return; }
+      const along = px * vx + pz * vz; // + = in front of the car: a moving car covers ~1.5 s ahead of it
+      if (along > -(v.len / 2 + m) && along < v.len / 2 + m + (v.v > 0.3 ? v.v * 1.5 : 0) && Math.abs(px * vz - pz * vx) < v.wid / 2 + m) { hit = true; return; }
     }
   });
   return hit;

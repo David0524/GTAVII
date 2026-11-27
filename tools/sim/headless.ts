@@ -233,7 +233,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       for (const v of vehicles) {
         const dx = p.x - v.x, dz = p.z - v.z; if (dx * dx + dz * dz > 49) continue;
         const fx = -Math.sin(v.yaw), fz = -Math.cos(v.yaw);
-        if (Math.abs(dx * fx + dz * fz) < v.len / 2 && Math.abs(dx * fz - dz * fx) < v.wid / 2 && v.v > 0.5) note('pedHitByVehicle', `ped #${p.id} (${p.state} e${p.edge}k${g.walkEdges[p.edge].kind} s${p.s.toFixed(1)} road${p.onRoad} t${sim.time.toFixed(1)}) veh ${v.kind} L${v.link}k${g.links[v.link].kind} s${v.s.toFixed(1)} v${v.v.toFixed(1)} ${v.blockedBy} & veh #${v.id} at ${p.x.toFixed(1)},${p.z.toFixed(1)}`);
+        if (Math.abs(dx * fx + dz * fz) < v.len / 2 && Math.abs(dx * fz - dz * fx) < v.wid / 2 && v.v > 0.5) note('pedHitByVehicle', `ped #${p.id} (${p.state}/${p.then}/jay${p.jaywalking}/${p.arch.def.id} e${p.edge}k${g.walkEdges[p.edge].kind} s${p.s.toFixed(1)} road${p.onRoad} t${sim.time.toFixed(1)}) veh ${v.kind} L${v.link}k${g.links[v.link].kind} s${v.s.toFixed(1)} v${v.v.toFixed(1)} ${v.blockedBy} & veh #${v.id} at ${p.x.toFixed(1)},${p.z.toFixed(1)}`);
       }
     }
     if (k % 30 === 0) {

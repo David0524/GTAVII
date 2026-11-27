@@ -22,7 +22,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Subway schedule and platform crowds | **Done (first pass)**: 15 stations (narrative's canonical 1974 list + PATH 33rd St), `complex` for Herald Sq / Times Sq; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
 | Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured; per-kind rates (`DOOR_RATES`, `setDoorRates`) |
 | Signal heads for the engine's props (Phase 3 block A) | `signalHeads()` (static: vehicle heads per signalised approach, WALK/DON'T WALK heads at crosswalk ends) + `signalStates(out)` (one byte per head per frame); ENGINE_REQUESTS sim 9 |
-| Visual bar "Life": density near the camera | Density-targeted spawning + `setView`; test asserts agents within 60 m (rush hour Herald Square: High 34 vehicles / 114 peds, Low 13 / 53) |
+| Visual bar "Life": density near the camera | Density-targeted spawning + `setView`; test asserts agents within 60 m (rush hour Herald Square: High 30 vehicles / 97 peds, Low 13 / 56) |
 | Movement brief (sim part) | Bump reactions (brush/stumble/knockdown, angry/frightened/annoyed), crowds part for a running player, `setObstacles` + hydrants, `PedView.onRoad`; adults only (test asserts no child archetype or pedestrian) |
 | Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
@@ -398,14 +398,20 @@ NPCs go and how they react.
   - NPC-on-NPC bumps in crushes (rush-hour corners): avoidance prevents overlap today; shoulder-brush
     animation between NPCs is a characters layer on `speed` + proximity.
 
+- Junction safety under density: every vehicle checks its turn path is physically clear (catches odd
+  junction geometry the build step's conflict zones miss); siren units keep their gutter line straight on
+  until their rear clears the queue head, wait to turn across it, and cross traffic holds at the line for
+  a waiting siren unit; nobody swings back from the kerb or gutter beside someone; cars never spawn on a
+  pedestrian in the roadway; jaywalkers read a moving car's next 1.5 s.
+
 ## vs GTA V / GTA VI / RDR2 (reference games; behaviour and quality only, nothing copied)
 | Area | What the reference does | Where we match | Where we fall short | Plan |
 |---|---|---|---|---|
-| Ambient density | Streets full in every shot; budgets concentrate near the camera; far traffic via LOD | Density-targeted spawning around the camera, out-of-view spawns; ~34 cars / ~114 people within 60 m at rush hour on High | No far-field traffic beyond ~150 m; parked cars missing; Low is thinner | `parkedCars()`; engine impostor traffic for long avenues; ask for Low 90/240 |
+| Ambient density | Streets full in every shot; budgets concentrate near the camera; far traffic via LOD | Density-targeted spawning around the camera, out-of-view spawns; ~30 cars / ~97 people within 60 m at rush hour on High | No far-field traffic beyond ~150 m; parked cars missing; Low is thinner | `parkedCars()`; engine impostor traffic for long avenues; ask for Low 90/240 |
 | Pedestrian life | Scenarios (smokers, phone calls, vendors, arguments), varied routines, reacting to weather | Commuters, shoppers, loiterers, vendors, pigeon feeders, hailing cabs, bus and subway riders, door traffic by shop type, jaywalking | Few scenario variations; no rain behaviour beyond density (umbrellas, shelter in doorways) | Scenario spots from content (stoop sitters, card games, street preachers); rain: shelter under awnings |
 | Reactions to the player | Bumps, insults, flee/fight, filming (VI), recognising repeat offences (RDR2 memory and greetings) | Bumps with brush/stumble/knockdown + angry/frightened/annoyed; witnesses, flee from gunfire, nerve | No memory of the player; no greetings; no escalating confrontations | Per-ped memory of recent incidents (who, what, where) for gameplay; greeting/insult barks on proximity by archetype |
 | Traffic behaviour | Lane discipline, honking, impatience, crashes, road rage, emergency vehicles | Period one-ways, green waves, no right on red, honking, cabs cutting in, double-parking, buses, siren priority with gutter runs | No crashes/fender-benders or road rage; no motorcycles weaving | Minor collisions between NPC cars with argue-at-the-curb scenario; road-rage escalation tied to aggression |
-| Police AI and pursuit | Units converge, box in, roadblocks, helicopters (V), search patterns | Pursue/boxIn/roadblock/search goals, cut-off at real intersections, subway stakeouts, response 10–55 s by traffic | No helicopters (period: fewer), no PIT, foot chases simple | Foot-chase tactics (corner, cut through), radio-car relay timing with gameplay |
+| Police AI and pursuit | Units converge, box in, roadblocks, helicopters (V), search patterns | Pursue/boxIn/roadblock/search goals, cut-off at real intersections, subway stakeouts, first unit 13–28 s in the test | No helicopters (period: fewer), no PIT, foot chases simple | Foot-chase tactics (corner, cut through), radio-car relay timing with gameplay |
 
 ## Visual bar ("Life") gaps
 VISUAL_BAR.md: dense traffic and pedestrians, parked cars on every kerb, a street must never look empty.
@@ -416,8 +422,9 @@ VISUAL_BAR.md: dense traffic and pedestrians, parked cars on every kerb, a stree
 - **Far field:** long avenue views beyond the populated disc (~150 m) are empty in the sim; that needs
   impostor/LOD traffic on the engine side.
 - **Night:** 3 a.m. is deliberately thin (period-true), floor raised to 40% of peak traffic.
-- **Cost:** denser near-field traffic slows siren travel at rush hour in the densest spots (Herald Square
-  first unit ~54 s in the test vs ~21 s before; cap 60 s).
+- **Cost:** denser near-field traffic made siren units wait at busy junctions; fixed by cross traffic
+  holding for a waiting siren unit and dispatch costing a stopped queue head. First unit on scene in the
+  test: 13–28 s on both seeds (caps 60 s rush hour / 40 s off-peak).
 
 ## Known issues / next
 - [ ] Police vehicle agents (pursuit, box-in, roadblocks), foot cops on the walk graph, car-owner

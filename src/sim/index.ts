@@ -128,7 +128,7 @@ export class Simulation {
     const core: SimCore = {
       net, rng: new Rng(this.opts.seed), reg, t: 0, minute: this.minute, weather: this.weather,
       vehicles: [], peds: [], occ: g.links.map(() => []), occDirty: [],
-      pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), obstacles: [], obsGrid: new AgentGrid(4), onWalk: new Map(), srcLane,
+      pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), obstacles: [], obsGrid: new AgentGrid(4), sirenWant: new Set(), onWalk: new Map(), srcLane,
       actors: [], blocks: [], threats: [], closedRoads: new Map(), hails: [], spotOwner: new Int32Array(g.spots.length).fill(-1),
       focus: { x: 0, z: 0 }, maxVehicles: this.opts.maxVehicles, maxPeds: this.opts.maxPeds,
       ringV: [rOutV * 0.6, rOutV], view: null, ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,

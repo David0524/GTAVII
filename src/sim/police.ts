@@ -78,7 +78,7 @@ export function sirenTimeTo(S: SimCore, fromGroup: number, gx: number, gz: numbe
   return t;
 }
 /** A free lane spot whose siren travel time to (x,z) is close to `targetSec` (a unit already on patrol nearby). */
-export function responderStart(S: SimCore, x: number, z: number, targetSec = 24): { lane: number; s: number } | null {
+export function responderStart(S: SimCore, x: number, z: number, targetSec = 20): { lane: number; s: number } | null {
   let best: { lane: number; s: number } | null = null, bd = Infinity;
   for (let tries = 0; tries < 40; tries++) {
     const a = S.rng.next() * Math.PI * 2, r = S.rng.range(80, 260);

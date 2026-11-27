@@ -105,6 +105,8 @@ export interface SimCore {
   vehicles: Vehicle[]; peds: Ped[];
   occ: Vehicle[][]; occDirty: number[];
   pGrid: AgentGrid; vGrid: AgentGrid;
+  /** connectors siren units are about to enter: cross traffic holds at the line */
+  sirenWant: Set<number>;
   /** static sidewalk obstacles peds step around (engine street furniture via setObstacles, plus hydrants) */
   obstacles: { x: number; z: number; r: number }[]; obsGrid: AgentGrid;
   /** peds currently on each crosswalk edge */
