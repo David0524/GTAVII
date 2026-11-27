@@ -73,6 +73,9 @@ export const COMBAT_BUDGET: Record<Quality, { combatants: number; witnesses: num
   low: { combatants: 6, witnesses: 4 }, medium: { combatants: 9, witnesses: 5 }, high: { combatants: 12, witnesses: 6 }, ultra: { combatants: 16, witnesses: 8 },
 };
 
+/** A move direction: [x, z] or {x, z} (UI's TouchHost uses the object form). */
+export type MoveDir = [number, number] | { x: number; z: number };
+const dirOf = (d: MoveDir | null | undefined): [number, number] | null => (!d ? null : Array.isArray(d) ? d : [d.x, d.z]);
 export interface PlayerBinding { id: string; lead: string; position(): [number, number, number]; aim(): { origin: [number, number, number]; dir: [number, number, number] } }
 /** Crimes that leave someone needing an ambulance once they're called in. */
 const HURT_KINDS: ReadonlySet<string> = new Set(['shooting', 'homicide', 'assault_weapon', 'officer_down', 'assault_officer', 'hit_and_run']);
@@ -397,7 +400,7 @@ export class Gameplay {
   }
   cycleLock(dir: 1 | -1) { if (!this.player) return null; const a = this.player.aim(); const L = Math.hypot(a.dir[0], a.dir[2]) || 1; return this.aimer.cycle(a.origin, [a.dir[0] / L, 0, a.dir[2] / L], this.aimTargets(), dir); }
   /** Tap an enemy on screen: lock exactly that one (the UI picks the id from its screen hit test). */
-  lockTarget(id: string) { const t = this.aimTargets().find((x) => x.id === id && x.alive && x.hostile); this.aimer.locked = t ? t.id : null; if (t) this.pc.aiming = true; return !!t; }
+  lockTarget(id: string | null) { if (id === null) { this.aimer.locked = null; return false; } const t = this.aimTargets().find((x) => x.id === id && x.alive && x.hostile); this.aimer.locked = t ? t.id : null; if (t) this.pc.aiming = true; return !!t; }
   /** For the UI's tap hit test: hostile targets with world points (the UI projects them). */
   lockables() { return this.aimTargets().filter((t) => t.hostile && t.visible).map((t) => ({ id: t.id, chest: t.chest, head: t.head, legs: t.legs, threat: t.threat })); }
   /** Assist strength setting (off | low | standard | strong); gyro aim forces it off. */
@@ -414,7 +417,8 @@ export class Gameplay {
   grappleAction(how: 'shove' | 'knee' | 'throw', dir?: [number, number]) { return this.player ? this.melee.grappleAction(this.player.id, how, dir) : false; }
   struggle() { return this.player ? this.melee.struggle(this.player.id) : false; }
   /** Toggle cover: enter the nearest point in the move direction, or leave. */
-  toggleCover(moveDir: [number, number] | null) {
+  toggleCover(dir: MoveDir | null = null) {
+    const moveDir = dirOf(dir);
     if (!this.player) return null;
     if (!this.pc.cover && !this.canMove('cover').ok) return null;
     if (this.pc.cover) { this.cover.release(this.player.id); this.pc.cover = null; this.pc.peek = false; return null; }
@@ -836,7 +840,8 @@ export class Gameplay {
     return null;
   }
   /** Do the context action (the bribe amount for payOff is the cop's expected price; the UI may offer more). */
-  doContextAction(moveDir: [number, number] | null = null) {
+  doContextAction(dir: MoveDir | null = null) {
+    const moveDir = dirOf(dir);
     const a = this.contextAction(); if (!a || !this.player) return null;
     switch (a.kind) {
       case 'surrender': this.surrender(true); break;
@@ -936,7 +941,8 @@ export class Gameplay {
     return 'Roll';
   }
   /** One button: take or leave cover when there is some, otherwise a dodge roll in moveDir (backwards if none). */
-  coverOrRoll(moveDir: [number, number] | null) {
+  coverOrRoll(dir: MoveDir | null = null) {
+    const moveDir = dirOf(dir);
     const l = this.coverLabel();
     if (l === 'Roll') return this.dodge(moveDir ?? [0, 1]) ? 'Roll' : null;
     this.toggleCover(moveDir); return l;
