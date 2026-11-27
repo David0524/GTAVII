@@ -427,9 +427,6 @@ for (const b of blds) {
 let heroContent: { id: string; address: string; parent?: string; hours?: [string, string] }[] = [];
 try { heroContent = JSON.parse(execSync('git show origin/claude/sharp-maxwell-jnb6hr:content/interiors.json', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })).interiors; } catch { console.warn('narrative content not reachable; heroes skipped'); }
 const heroLog: string[] = [];
-// heroes the narrative content does not list yet (content barks name them): placed locally until content/interiors.json has them
-const LOCAL_HEROES = [{ id: 'interior.pennington_er', address: 'W 26th St, 9th–10th Aves (Pennington General ER)', hours: ['00:00', '24:00'] as [string, string] }];
-for (const lh of LOCAL_HEROES) if (!heroContent.some((h) => h.id === lh.id)) heroContent.push(lh);
 const avenueXAt = (name: string, z: number) => {
   const n = normaliseStreet(name); let best = Infinity, bx = NaN;
   for (const g of segs) if (streetNames[g.s] === n) { const t = Math.max(0, Math.min(1, (z - g.az) / ((g.bz - g.az) || 1e-9))); const x = g.ax + (g.bx - g.ax) * t; const zz = g.az + (g.bz - g.az) * t; const d = Math.abs(zz - z); if (d < best) { best = d; bx = x; } }
