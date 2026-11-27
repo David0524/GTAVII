@@ -154,6 +154,8 @@ async function main() {
   const parkedAt = { x: 1e9, z: 1e9, q: -1 };
   // player driving (engine/Driving.ts): created with the vehicle factory after the title
   let driving: Driving | null = null;
+  /** mission companions walking with the player (MissionGlue companion) */
+  const companions: { ch: ReturnType<CharacterFactory['spawn']>; vx: number; vz: number }[] = [];
   let missions: MissionRuntime | null = null;
   if (sim) void afterTitle.then(() => {
     const vf = createVehicleFactory({ quality: quality.name });
@@ -475,10 +477,14 @@ async function main() {
       waitTo: (t) => setTime(t),
       audioPlay: (script, line) => audioGlue?.audio.dialogue?.play(script, line),
       gameplay: () => gp?.g ?? null,
+      // escort/follow: the real cast character (characters factory) walks at the player's shoulder; the sim's
+      // registry has no cast archetypes, so handOff would have sent a random walker
       companion: (castId) => {
-        if (!sim) return null;
-        const id = sim.handOff({ cast: castId, x: player.pos.x + 1.5, z: player.pos.z + 1.5, yaw: player.heading, after: 'companion', follow: 'player', waitRadius: 12 });
-        return id < 0 ? null : () => { sim.setGoal(id, null); }; // back to ambient life
+        if (!chars) return null;
+        const ch = chars.spawn(scene, { seed: 11, hero: castId });
+        ch.object.position.set(player.pos.x + 1.5, player.pos.y, player.pos.z + 1.5);
+        const c = { ch, vx: 0, vz: 0 }; companions.push(c);
+        return () => { companions.splice(companions.indexOf(c), 1); ch.object.removeFromParent(); ch.dispose(); };
       },
       spawnCast: (castId, x, y, z) => {
         if (!chars) return null;
@@ -614,6 +620,17 @@ async function main() {
       }
     }
     if (missions && playing && !frozen) missions.update(dt);
+    for (const c of companions) {
+      // keep 1.6 m off the player's right shoulder; walk to it (run if far), stop when there
+      const o = c.ch.object.position, h = player.heading, tx = player.pos.x + Math.cos(h) * 1.6, tz = player.pos.z - Math.sin(h) * 1.6;
+      const dx = tx - o.x, dz = tz - o.z, d = Math.hypot(dx, dz), sp = d < 0.4 ? 0 : Math.min(d > 6 ? 4.2 : 1.6, d * 2);
+      c.vx += ((d > 0 ? (dx / d) * sp : 0) - c.vx) * Math.min(1, dt * 4); c.vz += ((d > 0 ? (dz / d) * sp : 0) - c.vz) * Math.min(1, dt * 4);
+      if (d > 40) { o.set(tx, player.pos.y, tz); c.vx = c.vz = 0; } // left behind (cut, car): catch up
+      o.x += c.vx * dt; o.z += c.vz * dt; o.y = heightAt(o.x, o.z) + SIDEWALK_H;
+      const v = Math.hypot(c.vx, c.vz);
+      c.ch.setLocomotion({ velocity: [c.vx, 0, c.vz], grounded: true, heading: v > 0.2 ? Math.atan2(-c.vx, -c.vz) : h, mode: v > 3 ? 'run' : 'walk' });
+      c.ch.update(dt);
+    }
     if (signals && sim) { sigBuf = sim.signalStates(sigBuf); signals.update(dt, sigBuf); }
     if (parked && sim && simReady) {
       const f = mode === 'onfoot' ? player.pos : camera.position, quarter = Math.floor(worldClock.minutes / 15);
