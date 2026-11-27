@@ -6,37 +6,37 @@
     {
       "hero": "char.teddy_arce",
       "head": "lead_teddy",
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2
     },
     {
       "hero": "char.teddy_arce",
       "head": null,
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": "lead_delphine",
-      "tris": 17644,
+      "tris": 19490,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": null,
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": "lead_nick",
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": null,
-      "tris": 26140,
+      "tris": 33490,
       "draws": 2
     }
   ],
@@ -54,9 +54,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2,
-      "buildMs": 135
+      "buildMs": 182.7
     },
     {
       "seed": 1,
@@ -71,9 +71,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2,
-      "buildMs": 91.4
+      "buildMs": 147.2
     },
     {
       "seed": 1,
@@ -90,9 +90,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17644,
+      "tris": 19490,
       "draws": 2,
-      "buildMs": 53
+      "buildMs": 67.7
     },
     {
       "seed": 1,
@@ -109,9 +109,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2,
-      "buildMs": 54.9
+      "buildMs": 72.7
     },
     {
       "seed": 1,
@@ -126,9 +126,9 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2,
-      "buildMs": 90.8
+      "buildMs": 122.2
     },
     {
       "seed": 1,
@@ -143,16 +143,16 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 26140,
+      "tris": 33490,
       "draws": 2,
-      "buildMs": 73.5
+      "buildMs": 103.1
     }
   ],
   "updateMs": [
     0.1,
-    0.1,
     0,
     0.1,
+    0,
     0,
     0
   ],
@@ -163,22 +163,22 @@
       "rb": "lead_delphine",
       "tone": "#5a3825",
       "cheek": [
-        0.4333,
-        0.4687
+        0.4032,
+        0.4498
       ],
       "neck": [
-        0.485,
-        0.6533
+        0.4791,
+        0.6198
       ],
       "hand": [
-        0.0576,
-        2.1104
+        0.0446,
+        2.1122
       ]
     }
   ],
   "renderMsSoftware": [
-    3.1000000005587935,
-    1.2999999998137355,
-    1
+    4.2999999998137355,
+    1.5,
+    0.8999999999068677
   ]
 }

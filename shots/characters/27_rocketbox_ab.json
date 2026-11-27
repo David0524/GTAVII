@@ -6,37 +6,37 @@
     {
       "hero": "char.teddy_arce",
       "head": "lead_teddy",
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2
     },
     {
       "hero": "char.teddy_arce",
       "head": null,
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": "lead_delphine",
-      "tris": 17644,
+      "tris": 19490,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": null,
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": "lead_nick",
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": null,
-      "tris": 26140,
+      "tris": 33490,
       "draws": 2
     }
   ],
@@ -54,9 +54,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2,
-      "buildMs": 117.9
+      "buildMs": 153
     },
     {
       "seed": 1,
@@ -71,9 +71,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2,
-      "buildMs": 105.3
+      "buildMs": 146.8
     },
     {
       "seed": 1,
@@ -90,9 +90,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17644,
+      "tris": 19490,
       "draws": 2,
-      "buildMs": 50.7
+      "buildMs": 77.7
     },
     {
       "seed": 1,
@@ -109,9 +109,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2,
-      "buildMs": 55
+      "buildMs": 71.3
     },
     {
       "seed": 1,
@@ -126,9 +126,9 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2,
-      "buildMs": 149.9
+      "buildMs": 145.9
     },
     {
       "seed": 1,
@@ -143,18 +143,18 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 26140,
+      "tris": 33490,
       "draws": 2,
-      "buildMs": 67.6
+      "buildMs": 103.8
     }
   ],
   "updateMs": [
     0,
+    0.1,
     0,
     0.1,
     0,
-    0,
-    0.1
+    0
   ],
   "toneProbes": [
     {
@@ -163,16 +163,16 @@
       "rb": "lead_teddy",
       "tone": "#b98a67",
       "cheek": [
-        0.1371,
-        0.2922
+        0.1342,
+        0.293
       ],
       "neck": [
-        0.1403,
+        0.1387,
         0.3098
       ],
       "hand": [
-        0.0982,
-        0.5292
+        0.0948,
+        0.5277
       ]
     },
     {
@@ -181,16 +181,16 @@
       "rb": null,
       "tone": "#b98a67",
       "cheek": [
-        0.2821,
-        0.2923
+        0.2851,
+        0.2902
       ],
       "neck": [
-        0.285,
-        0.3096
+        0.2865,
+        0.3087
       ],
       "hand": [
-        0.2381,
-        0.5277
+        0.2407,
+        0.5282
       ]
     },
     {
@@ -199,16 +199,16 @@
       "rb": "lead_delphine",
       "tone": "#5a3825",
       "cheek": [
-        0.4333,
-        0.2696
+        0.4351,
+        0.2706
       ],
       "neck": [
-        0.4326,
-        0.2918
+        0.4334,
+        0.2927
       ],
       "hand": [
-        0.3923,
-        0.5104
+        0.3941,
+        0.5119
       ]
     },
     {
@@ -217,16 +217,16 @@
       "rb": null,
       "tone": "#5a3825",
       "cheek": [
-        0.5797,
-        0.2687
+        0.5788,
+        0.2712
       ],
       "neck": [
-        0.5779,
-        0.2914
+        0.5772,
+        0.2925
       ],
       "hand": [
-        0.5355,
-        0.5097
+        0.5335,
+        0.5099
       ]
     },
     {
@@ -235,16 +235,16 @@
       "rb": "lead_nick",
       "tone": "#c8a17e",
       "cheek": [
-        0.7253,
-        0.3125
+        0.7288,
+        0.3112
       ],
       "neck": [
-        0.7226,
-        0.3289
+        0.7247,
+        0.3285
       ],
       "hand": [
-        0.6649,
-        0.536
+        0.6721,
+        0.5381
       ]
     },
     {
@@ -253,22 +253,22 @@
       "rb": null,
       "tone": "#c8a17e",
       "cheek": [
-        0.8758,
-        0.3096
+        0.8748,
+        0.31
       ],
       "neck": [
-        0.8699,
-        0.3277
+        0.8697,
+        0.3276
       ],
       "hand": [
-        0.8136,
-        0.5369
+        0.8151,
+        0.5368
       ]
     }
   ],
   "renderMsSoftware": [
-    4.099999999991269,
-    1.5,
-    2
+    3,
+    2.2000000001862645,
+    2.7999999998137355
   ]
 }
