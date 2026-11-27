@@ -112,3 +112,15 @@ Shots are in `shots/wiring/`.
   - world position is wrapped before hashing (afa65de).
 - **Lesson** (same family as the earlier window flicker): never compare or hash interpolated
   attributes without rounding them first.
+
+**Driving board** (`drive_w37th_1930.jpg`): the stolen red sedan on W 37th at 19:30, with the chase camera,
+parked rows and the Garment District HUD. The seated lead can't be seen from behind; that's expected.
+
+**Combat smoke in the built game** (`combat_madison_sq_after_shot.jpg`, `?webgl=1&quality=low`):
+- **Test:** Teddy equips `weapon.revolver_service`, aims and holds fire.
+- **Result:** 1 `shot` (the revolver is semi-auto) → 1 `impact`, with no page errors. Audio 13 got a gunshot,
+  a bullet pass and an impact. The sim got `gunfire`, and the peds across Madison Sq cower.
+- **Gap:** the drawn weapon isn't visible on the body. The hand prop and aim pose aren't wired to the
+  character yet; that's next on the combat list.
+- **Slow load:** headless swiftshader loads gameplay at 45–52 s (gameplay-content follows characters).
+  Measure this on a real GPU before treating it as a regression.
