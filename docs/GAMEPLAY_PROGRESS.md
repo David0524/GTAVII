@@ -261,6 +261,19 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
   - Measure quarry velocity from the sim when its motion is available.
   - Characters own the dive, the tumble and the stumble animations (events above).
 
+### Sidewalk bumps (sim's `pedBumped`)
+- **Brush:** nothing.
+- **Angry pedestrian:** shoves back 35% of the time, a 0.5 s stumble for the player (`notice {kind: 'shovedBack'}`).
+- **Knockdown:** `reckless` (severity 0.6, a crime only if seen). The third knockdown inside 30 s is `assault`.
+- **Ownership:** the sim plays the reactions and the get-up.
+- **Test:** `simAdapter.test.ts`.
+
+#### vs GTA V / VI / RDR2
+- **References:** GTA V's shoulder-barge sends pedestrians stumbling and swearing, and repeated shoving starts fights. RDR2's jostling is weightier, NPCs remember you, and it can escalate to a brawl or a report.
+- **Where we match:** graded contact (brush, stumble, knockdown) with angry pushback, and heat only through witnesses, rising with repetition.
+- **Where we fall short:** an angry pedestrian never escalates to a fist fight (ambient peds have no combat AI), and nobody remembers you.
+- **Plan:** promote an angry pedestrian who was shoved twice into a brief melee brawler (the melee system already registers peds as fighters), and give bumps a short-term grudge per ped.
+
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
 | Case | Avg | p95 | p99 | Max | Budget |

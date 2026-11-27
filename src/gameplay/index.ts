@@ -668,6 +668,7 @@ export class Gameplay {
       sim.on('towDispatched', (e) => this.emit('notice', { kind: 'towDispatched', car: carOf(e) }));
       sim.on('vehicleTowed', (e) => this.ownership.tow(carOf(e), day()));
     }
+    sim.on('pedBumped', (e) => this.onPedBumped(e));
     for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
     sim.on('cabReady', (e) => { const c = this.cab; if (c && c.id === e.cabId) { c.state = 'ready'; c.kerb = [e.x, e.z]; this.emit('cab', { kind: 'ready', ...e }); } });
     sim.on('cabTurnAhead', (e) => { if (this.cab?.id === e.cabId) this.emit('cab', { kind: 'turn', ...e }); });
@@ -1417,6 +1418,30 @@ export class Gameplay {
   }
   /** The engine reports a fall from height (m) for any actor. */
   fell(id: string, dropM: number) { const d = fallDamage(dropM); if (d > 0) this.applyDamage(id, { amount: d, type: 'fall' }); }
+
+  // ------------------------------------------------------------------ sidewalk bumps (sim's pedBumped)
+  /**
+   * Barging through a 1974 sidewalk crowd (vs GTA V's shoulder-barge reactions, RDR2's jostle):
+   *  - an angry pedestrian shoves back 35% of the time: a 0.5 s stumble for the player;
+   *  - knocking someone down is `reckless` (mild, only if seen); three knockdowns inside 30 s is an `assault`.
+   * A brush costs nothing. The sim plays the reactions and the get-up.
+   */
+  static BUMP = { shoveBack: 0.35, shoveStumble: 0.5, assaultAfter: 3, window: 30 } as const;
+  private knockdowns: number[] = [];
+  onPedBumped(e: { id: string | number; kind: 'brush' | 'stumble' | 'knockdown'; response: 'angry' | 'frightened' | 'annoyed' | 'none'; x: number; z: number; by?: string }) {
+    if (!this.player || (e.by && e.by !== this.player.id && e.by !== 'player')) return;
+    const id = `${e.id}`;
+    if (this.childPeds.has(id)) return; // safety net (no children exist)
+    if (e.response === 'angry' && this.rng.chance(Gameplay.BUMP.shoveBack)) {
+      this.stumbleUntil = Math.max(this.stumbleUntil, this.time + Gameplay.BUMP.shoveStumble);
+      this.emit('notice', { kind: 'shovedBack', by: id });
+    }
+    if (e.kind === 'knockdown') {
+      this.knockdowns = this.knockdowns.filter((t) => this.time - t < Gameplay.BUMP.window); this.knockdowns.push(this.time);
+      const at: V3 = [e.x, this.player.position()[1], e.z];
+      this.crime(this.knockdowns.length >= Gameplay.BUMP.assaultAfter ? 'assault' : 'reckless', { victim: id, at, noise: 6 });
+    }
+  }
 
   // ------------------------------------------------------------------ the tackle (foot-chase finisher)
   /** Mission chase quarries: who can be tackled to finish a chase, from how close, and whether it's lawful

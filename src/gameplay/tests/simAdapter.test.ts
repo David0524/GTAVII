@@ -199,3 +199,17 @@ test('real intersections: pursuit corners and roadblocks come from the sim\'s la
   // the suspect is west of the junction: block the west arm (yaw pi/2 heads -x), 15 m out
   assert.ok(Math.abs(cps[0].x - 185) < 1e-6 && Math.abs(cps[0].z - -5) < 1e-6, `on the arm facing the suspect: ${JSON.stringify(cps[0])}`);
 });
+
+test('sidewalk bumps: an angry pedestrian sometimes shoves back; knockdowns are reckless, three in 30 s an assault', () => {
+  const { sim, g, pos } = serviceRig();
+  sim.peds.push({ id: 31, archetype: 'npc.commuter', x: 6, y: 0, z: -3, yaw: Math.PI / 2, speed: 0, state: 'walk', variant: 1, nerve: 0.9 });
+  g.addProp('box', 'call_box', 30, 0, -10);
+  let shoves = 0; g.on('notice', (e: any) => { if (e.kind === 'shovedBack') shoves++; });
+  for (let i = 0; i < 40; i++) { sim.fire('pedBumped', { id: 40 + i, kind: 'stumble', response: 'angry', x: 1, z: 0, dirX: 1, dirZ: 0, by: 'player' }); g.update(1); }
+  assert.ok(shoves >= 6 && shoves <= 24, `about a third shove back (${shoves}/40)`);
+  const kinds: string[] = []; g.on('crimeWitnessed', (e: any) => kinds.push(JSON.stringify(e)));
+  const crimesBefore = (g as any).crimeSeq ?? 0;
+  for (let i = 0; i < 3; i++) sim.fire('pedBumped', { id: 90 + i, kind: 'knockdown', response: 'frightened', x: pos[0] + 1, z: pos[2], dirX: 1, dirZ: 0, by: 'player' });
+  g.update(0.5);
+  assert.ok(kinds.some((k) => k.includes('reckless')) && kinds.some((k) => k.includes('assault')), `reckless, then assault: ${kinds.length} witnessed (${crimesBefore})`);
+});
