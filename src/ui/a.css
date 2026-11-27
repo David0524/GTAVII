@@ -171,6 +171,8 @@ body.touch .u-btn { min-height: 44px; }
 .u-objective .lbl::before { content: ''; width: 14px; height: 2px; background: var(--taxi); }
 .u-objective .txt { font: 800 21px/1.15 var(--f-voice) !important; letter-spacing: -.01em; margin-top: 5px !important; }
 .u-objective .dist { font: 400 12.5px var(--f-ui) !important; color: var(--dim) !important; margin-top: 3px !important; }
+body.touch .u-objective { transform: none !important; text-align: left !important; left: calc(16px + var(--safe-l) + clamp(130px, 22vh + 6vw, 190px) + 18px) !important; top: calc(14px + var(--safe-t)) !important; max-width: calc(100vw - 2 * (16px + var(--safe-l)) - clamp(130px, 22vh + 6vw, 190px) - 300px); }
+body.touch .u-objective .txt { font-size: 18px !important; }
 .t74-clock { right: calc(30px + var(--safe-r)) !important; top: calc(20px + var(--safe-t)) !important; }
 .u-clockel { background: none !important; }
 .t74-clock .time { font: 800 30px/1 var(--f-voice) !important; letter-spacing: -.015em; text-shadow: var(--hud-shade); }
