@@ -155,7 +155,8 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
   - Dispatch is stitched from build-time voice fragments.
   - Radio text that uses audio's place names stays inside the rendered vocabulary.
   - Anything outside the vocabulary is garbled on air, but stays readable in the subtitle.
-- **Build:** nothing new. The fragments render in `npm run audio:voices:build` (request 11). The deploy grows from 31 to 44 MB of fetched-on-demand speech, about 2,300 fragments.
+- **Build:** nothing new. The fragments render in `npm run audio:voices:build` (request 11). The deploy grows from 31 to 50 MB of fetched-on-demand speech, about 3,600 fragments.
+- **Heat:** audio reads the tier from `reportFiled.severity`. If gameplay adds an explicit `heat` event `{tier}`, call `audio.setHeat(tier)`.
 - **Fallback:**
   - Without the binding, no scanner plays.
   - Without renders, every word garbles, but the subtitles still work.

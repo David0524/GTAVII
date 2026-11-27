@@ -81,10 +81,18 @@ for (const f of readdirSync(join(CONTENT, 'barks')).filter((x) => x.endsWith('.j
   const streets = existsSync('public/data/streets.json') ? [...new Set((JSON.parse(readFileSync('public/data/streets.json', 'utf8')) as { n: string }[]).map((x) => x.n))] : [];
   const pf = join(CONTENT, 'police', 'precincts.json'); const precincts = existsSync(pf) ? (JSON.parse(readFileSync(pf, 'utf8')).precincts ?? []).map((x: { name: string }) => x.name) : [];
   const templates: string[] = [];
-  for (const f of ['police_radio', 'cop_killed']) { const bf = join(CONTENT, 'barks', `${f}.json`); if (existsSync(bf)) for (const l of JSON.parse(readFileSync(bf, 'utf8')).lines ?? []) if (f === 'police_radio' || l.context === 'radio') templates.push(l.text); }
-  const vocab = dispatchVocab({ streets, precincts, templates });
-  for (const v of vocab) { add('dispatch.central', 'flat', v, 'dispatch'); add('dispatch.central', 'urgent', v, 'dispatch'); add('dispatch.car', 'flat', v, 'dispatch'); }
-  console.log(`dispatch vocabulary: ${vocab.length} fragments x 3 voice registers`);
+  const slots: string[] = [];
+  for (const f of ['police_radio', 'cop_killed']) {
+    const bf = join(CONTENT, 'barks', `${f}.json`); if (!existsSync(bf)) continue;
+    const d = JSON.parse(readFileSync(bf, 'utf8'));
+    for (const l of d.lines ?? []) if (f === 'police_radio' || l.context === 'radio') templates.push(l.text);
+    // Narrative's slot vocabularies (audio.slots): lists are rendered as-is; prose descriptions are covered by the map/number vocab.
+    for (const v of Object.values(d.audio?.slots ?? {})) if (Array.isArray(v)) slots.push(...(v as string[]));
+  }
+  const vocab = dispatchVocab({ streets, precincts, templates, slots });
+  // Four registers: Central calm/urgent, the cars calm/urgent (urgent also serves 'breathless' foot pursuits).
+  for (const v of vocab) for (const [sp, em] of [['dispatch.central', 'flat'], ['dispatch.central', 'urgent'], ['dispatch.car', 'flat'], ['dispatch.car', 'urgent']]) add(sp, em, v, 'dispatch');
+  console.log(`dispatch vocabulary: ${vocab.length} fragments x 4 voice registers`);
 }
 if (existsSync(join(CONTENT, 'radio.json'))) {
   for (const s of JSON.parse(readFileSync(join(CONTENT, 'radio.json'), 'utf8')).stations ?? []) (s.patter ?? []).forEach((p: { text: string }, i: number) => add(`dj.${s.id}`, 'radio', p.text, `${s.id}.p${i}`));

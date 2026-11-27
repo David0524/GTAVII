@@ -94,7 +94,9 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   sys.on('dispatch', (e) => dispatchLog.push({ t: +ctx.currentTime.toFixed(2), ...e }));
   const gpEvent = (name: string, at: [number, number]) => {
     const place = sys.placeName(at[0], at[1]);
-    if (name === 'report') { gp('reportFiled', { id: 1 }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `Midtown Central, shots fired at ${place}. …Male, thirties, medium build, tan leisure suit, green sedan, plate starting 4K, may be armed…` }); }
+    const desc = { sex: { v: 'male', c: 0.8 }, subject: { v: 'male, thirties, medium build', c: 0.6 }, clothes: [{ v: 'tan leisure suit', c: 0.7 }], vehicle: { id: 'car.9', vclass: { v: 'sedan', c: 0.7 }, colour: { v: 'green', c: 0.7 }, plate: { v: '4K', c: 0.6 } } };
+    if (name === 'heat4') gp('reportFiled', { id: 1, severity: 4.0, description: desc, lastKnown: at, merged: true });
+    else if (name === 'report') { gp('reportFiled', { id: 1, severity: 2.0, description: desc, lastKnown: at, merged: false }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `Midtown Central, shots fired at ${place}. …Male, thirties, medium build, tan leisure suit, green sedan, plate starting 4K, may be armed…` }); }
     else if (name === 'dispatched') gp('police', { kind: 'dispatched', unit: 'unit.7', report: 1 });
     else if (name === 'pursuit') { gp('police', { kind: 'pursuit', unit: 'unit.7', suspect: 'player' }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `All units Midtown Central, in pursuit at ${place}. …Male, tan leisure suit…` }); }
     else if (name === 'lost') gp('police', { kind: 'lost', unit: 'unit.7', report: 1, at });

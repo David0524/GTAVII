@@ -16,12 +16,14 @@ import type { Env } from '../env';
 import type { Vec3 } from '../config';
 import type { VoiceLibrary } from '../dialogue/voiceLibrary';
 import type { SourceGraph } from '../core/voices';
-import { segment, normalise, numberWords } from '../dialogue/dispatchText';
+import { segment, normalise, numberWords, carWords } from '../dialogue/dispatchText';
 
 type Voice = 'central' | 'car';
 interface Line { text: string; voice: Voice; urgent: boolean; car?: number; queuedAt: number; priority: number; alert?: boolean }
 interface Item { buf: AudioBuffer; at: number; rate: number; gain: number; band?: boolean }
-interface Bark { context: string; emotion?: string; text: string }
+interface Bark { context: string; emotion?: string; text: string; voice?: 'dispatcher' | 'car' }
+/** Witness description as gameplay sends it on reportFiled (src/gameplay/police/description.ts). */
+interface Desc { subject?: { v: string }; sex?: { v: string }; clothes?: { v: string }[]; vehicle?: { vclass?: { v: string }; colour?: { v: string }; plate?: { v: string } } }
 
 const SPEAKER: Record<Voice, string> = { central: 'dispatch.central', car: 'dispatch.car' };
 const GAP = -0.045, PAUSE = 0.16, GARBLE = 0.24, STALE = 18;
@@ -54,6 +56,8 @@ export class Dispatch {
   private pools: Record<string, Bark[]> = {};
   private noise: AudioBuffer; private kerchunk: AudioBuffer; private tail: AudioBuffer; private alertTone: AudioBuffer;
   private hotUntil = 0; private openReports = new Set<number>(); private nextIdle = 0;
+  private slots: Record<string, string[]> = {}; private desc: Desc | null = null; private crime = ''; private lastAt: [number, number] | null = null;
+  private tier = 0; private lastShift = -1; private heard = new Map<string, number>();
   contentEnabled = true;
   /** Scanner level: measured -22 LUFS while talking against a -14 LUFS street on the heat_8th scene (stems tool). */
   level = 0.26;
@@ -72,7 +76,7 @@ export class Dispatch {
   async loadContent() {
     if (!this.contentEnabled) return;
     for (const f of ['police_radio', 'cop_killed']) {
-      try { const r = await fetch(`${this.baseUrl}content/barks/${f}.json`); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) this.pools[f] = (await r.json()).lines ?? []; } catch { /* offline */ }
+      try { const r = await fetch(`${this.baseUrl}content/barks/${f}.json`); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const d = await r.json(); this.pools[f] = d.lines ?? []; for (const [k, v] of Object.entries(d.audio?.slots ?? {})) if (Array.isArray(v)) this.slots[k] = v as string[]; } } catch { /* offline */ }
     }
   }
 
@@ -83,7 +87,7 @@ export class Dispatch {
     // "Central, car six…" or "Car 14, …" is a car calling in. A car that names itself keeps that number.
     const voice: Voice = o.voice ?? (/^(Central to|All )/i.test(text) ? 'central' : /^(Central,|Car )/i.test(text) ? 'car' : o.fallback ?? 'central');
     const named = text.match(/\bcar (\d+|[a-z]+(?:-[a-z]+)?)\b/i);
-    const namedNo = named ? (/^\d+$/.test(named[1]) ? +named[1] : WORD_NO[named[1].toLowerCase()]) : undefined;
+    const namedNo = named ? (/^\d+$/.test(named[1]) ? +named[1] : wordsToNo(named[1].toLowerCase())) : undefined;
     o = { ...o, voice, car: voice === 'car' ? (named ? namedNo : o.car ?? (this.env.rng.range(3, 40) | 0)) : undefined };
     const now = this.env.ctx.currentTime;
     this.queue.push({ text, voice, urgent: !!o.urgent || now < this.hotUntil, car: o.car, queuedAt: now, priority: o.priority ?? (o.urgent ? 2 : 1), alert: o.alert });
@@ -91,14 +95,38 @@ export class Dispatch {
     while (this.queue.length > 5) { this.queue.pop(); this.stats.dropped++; }
   }
 
-  /** A line from narrative's pool by context, with {street}/{avenue} filled; lines needing other fields are skipped. */
+  /**
+   * A line from narrative's pool by context with its {slots} filled: street/avenue from the map (`placeName`), crime from
+   * the open report, sex/build/clothes/car/plate from the witness description gameplay filed, direction from narrative's
+   * slot list. Lines needing a slot we can't fill truthfully are skipped. The line's `voice` says who speaks.
+   */
   sayPool(pool: string, context: string, at: [number, number] | null, o: { voice?: Voice; urgent?: boolean; car?: number; priority?: number; alert?: boolean } = {}) {
-    const [street, avenue] = (at ? this.place(at[0], at[1]) : '').split(' and ');
-    const ok = (this.pools[pool] ?? []).filter((l) => l.context === context && [...l.text.matchAll(/\{(\w+)\}/g)].every((m) => (m[1] === 'street' && street) || (m[1] === 'avenue' && avenue)));
-    if (!ok.length) return false;
-    const l = ok[(this.env.rng.next() * ok.length) | 0];
-    this.say(l.text.replace('{street}', street ?? '').replace('{avenue}', avenue ?? ''), { ...o, urgent: l.emotion === 'urgent' || o.urgent, voice: undefined, fallback: o.voice });
+    const fills = this.fills(at ?? this.lastAt);
+    const all = (this.pools[pool] ?? []).filter((l) => l.context === context && [...l.text.matchAll(/\{(\w+)\}/g)].every((m) => !!fills[m[1]]));
+    if (!all.length) return false;
+    // Don't repeat a line heard in the last 90 s while another would do.
+    const now = this.env.ctx.currentTime, fresh = all.filter((l) => now - (this.heard.get(l.text) ?? -1e9) > 90), ok = fresh.length ? fresh : all;
+    const l = ok[(this.env.rng.next() * ok.length) | 0]; this.heard.set(l.text, now);
+    const text = l.text.replace(/\{(\w+)\}/g, (_m, k: string) => fills[k]);
+    const voice: Voice | undefined = l.voice === 'dispatcher' ? 'central' : l.voice === 'car' ? 'car' : undefined;
+    this.say(text, { ...o, urgent: /urgent|breathless|alarmed/.test(l.emotion ?? '') || o.urgent, voice, fallback: o.voice });
     return true;
+  }
+
+  private fills(at: [number, number] | null): Record<string, string> {
+    const f: Record<string, string> = {}; const pick = (a?: string[]) => (a?.length ? a[(this.env.rng.next() * a.length) | 0] : '');
+    if (at) { const [st, av] = this.place(at[0], at[1]).split(' and '); if (st) f.street = st; if (av) f.avenue = av; }
+    f.direction = pick(this.slots.direction);
+    if (this.crime) f.crime = this.crime;
+    const d = this.desc;
+    if (d) {
+      const sex = d.sex?.v ?? d.subject?.v.split(',')[0]; if (sex && /^(male|female)$/.test(sex.trim())) f.sex = sex.trim();
+      const build = d.subject?.v.split(',').map((x) => x.trim()).find((x) => /build|heavy|thin|slim|tall|short|stocky/.test(x)); if (build) f.build = build;
+      const top = d.clothes?.[0]?.v.split(' '); if (top && top.length >= 2) { f.topColor = top[0]; f.top = top.slice(1).join(' '); }
+      if (d.vehicle?.colour?.v) f.carColor = d.vehicle.colour.v; if (d.vehicle?.vclass?.v) f.carType = d.vehicle.vclass.v;
+      if (d.vehicle?.plate?.v) f.plate = d.vehicle.plate.v.split('').join('-');
+    }
+    return f;
   }
 
   private sayPoolMatching(pool: string, context: string, re: RegExp, at: [number, number] | null, o: Parameters<Dispatch['sayPool']>[3]) {
@@ -116,26 +144,43 @@ export class Dispatch {
     const seq = (this.pools.cop_killed ?? []).filter((l) => l.context === 'radio');
     seq.slice(1).forEach((l, i) => setTimeout0(this.env, 6 + i * 9, () => this.say(l.text, { urgent: l.emotion !== 'grave', priority: 3 })));
     for (let k = 0; k < 3; k++) setTimeout0(this.env, 3 + k * 5 + this.env.rng.range(0, 3), () => this.siren());
-    for (let k = 0; k < 3; k++) setTimeout0(this.env, 9 + k * 7, () => { const car = this.env.rng.range(3, 40) | 0; this.say(`Car ${car}, on the way.`, { voice: 'car', car, urgent: true, priority: 3 }); });
+    for (let k = 0; k < 3; k++) setTimeout0(this.env, 9 + k * 7, () => { const car = this.env.rng.range(3, 40) | 0; if (!this.sayPool('police_radio', 'responding', this.lastAt, { voice: 'car', urgent: true, priority: 3 })) this.say(`Car ${carWords(car)}, on the way.`, { voice: 'car', car, urgent: true, priority: 3 }); });
   }
 
   /** Gameplay's events (src/gameplay/index.ts): radio, police, copKilled, reportFiled. */
   bindGameplay(gp: { on(type: string, cb: (e: any) => void): void }) {
-    gp.on('radio', (e: { text?: string; at?: [number, number] }) => { if (e?.text) this.say(e.text, { urgent: /officer down|shots fired|shooting|homicide|gunpoint|pursuit/i.test(e.text) }); });
+    gp.on('radio', (e: { text?: string; at?: [number, number] }) => { if (e?.at) this.lastAt = e.at; const cm = e?.text?.match(/, (.+?) at /); if (cm) this.crime = cm[1]; if (e?.text) this.say(e.text, { voice: 'central', priority: 2, urgent: /officer down|shots fired|shooting|homicide|gunpoint|pursuit/i.test(e.text) }); });
     gp.on('copKilled', (e: { at?: Vec3 | [number, number] }) => { const a = e?.at; if (a) this.officerDown(a.length === 3 ? [a[0], (a as Vec3)[2]] : [a[0], a[1]]); });
-    gp.on('reportFiled', (e: { id?: number }) => { if (typeof e?.id === 'number') this.openReports.add(e.id); });
+    gp.on('reportFiled', (e: { id?: number; severity?: number; description?: Desc; lastKnown?: [number, number] }) => {
+      if (typeof e?.id === 'number') this.openReports.add(e.id);
+      if (e?.description) this.desc = e.description; if (e?.lastKnown) this.lastAt = e.lastKnown;
+      if (typeof e?.severity === 'number') this.setHeat(tierOf(e.severity));
+    });
     gp.on('police', (e: { kind: string; unit?: string; at?: [number, number]; why?: string; report?: number; x?: number; z?: number }) => {
       const car = carNo(e.unit), r = this.env.rng;
       switch (e.kind) {
-        case 'dispatched': if (r.next() < 0.5) this.say(`Car ${car}, ${r.next() < 0.5 ? 'on the way' : 'ten-four'}.`, { voice: 'car', car }); break;
-        case 'pursuit': this.say(`Central, car ${car}, in pursuit.`, { voice: 'car', car, urgent: true, priority: 2 }); break;
+        case 'dispatched': if (r.next() < 0.6) this.sayPool('police_radio', r.next() < 0.6 ? 'responding' : 'ack', this.lastAt, { voice: 'car', car }); break;
+        case 'pursuit': this.sayPool('police_radio', this.desc?.vehicle ? 'pursuit_car' : 'pursuit_foot', this.lastAt, { voice: 'car', car, urgent: true, priority: 2 }) || this.say(`Central, car ${carWords(car)}, in pursuit.`, { voice: 'car', car, urgent: true, priority: 2 }); break;
         case 'lost': this.sayPool('police_radio', 'lost', e.at ?? null, { voice: 'car', car }); break;
         case 'investigate': if (r.next() < 0.4) this.sayPool('police_radio', 'search', e.at ?? null, { voice: 'car', car }); break;
-        case 'roadblock': this.say(`Central, car ${car}, roadblock at ${this.place(e.x ?? 0, e.z ?? 0)}.`, { voice: 'car', car }); break;
-        case 'cleared': if (typeof e.report === 'number') this.openReports.delete(e.report); this.sayPool('police_radio', e.why === 'bribe' ? 'bribe_heard' : 'cooldown', null, { voice: e.why === 'bribe' ? 'car' : 'central', car }); break;
+        case 'roadblock': this.say(`Central, car ${carWords(car)}, roadblock at ${this.place(e.x ?? 0, e.z ?? 0)}.`, { voice: 'car', car }); break;
+        case 'cleared':
+          if (typeof e.report === 'number') this.openReports.delete(e.report);
+          this.sayPool('police_radio', e.why === 'bribe' ? 'bribe_heard' : e.why === 'decay' ? (r.next() < 0.6 ? 'all_clear' : 'cooldown') : 'ack', null, { voice: 'car', car });
+          if (!this.openReports.size) this.tier = 0;
+          break;
       }
     });
   }
+
+  /** Heat tier 0-5 (gameplay's tierOf). Rising tiers put that tier's call on the air; the top tiers run the channel hot. */
+  setHeat(tier: number) {
+    if (tier > this.tier) { this.sayPool('police_radio', `heat${Math.min(5, tier)}`, this.lastAt, { voice: 'central', urgent: tier >= 3, priority: tier >= 4 ? 2 : 1 /* gameplay's own call (priority 2) goes out first */ }); if (tier >= 4) this.hotUntil = Math.max(this.hotUntil, this.env.ctx.currentTime + 60); }
+    this.tier = tier;
+  }
+
+  /** Tour changes on the band (8 a.m., 4 p.m., midnight), once each. */
+  clock(minutes: number) { const k = Math.floor(((minutes % 1440) + 1440) % 1440 / 480); if (this.lastShift >= 0 && k !== this.lastShift && (this.openReports.size || this.env.rng.next() < 0.5)) this.sayPool('police_radio', 'shift', null); this.lastShift = k; }
 
   /** The brownout call (once per outage). */
   brownout() { this.sayPool('police_radio', 'brownout', null, { urgent: true, priority: 2 }); }
@@ -152,7 +197,7 @@ export class Dispatch {
   }
 
   private async transmit(l: Line) {
-    const sp = SPEAKER[l.voice], em = l.voice === 'central' && l.urgent ? 'urgent' : 'flat';
+    const sp = SPEAKER[l.voice], em = l.urgent ? 'urgent' : 'flat';
     const segs = segment(l.text, (f) => this.lib.duration(sp, em, f) !== undefined);
     const bufs = await Promise.all(segs.map((s) => (s.frag === ',' || !s.known ? Promise.resolve(null) : this.lib.get(sp, em, s.frag, 1.5))));
     const rate = l.voice === 'car' ? 0.94 + ((l.car ?? 7) % 9) * 0.015 : 1; // each car's radio and voice sit a little differently
@@ -182,6 +227,11 @@ export class Dispatch {
 }
 
 const WORD_NO: Record<string, number> = Object.fromEntries(Array.from({ length: 100 }, (_, i) => [numberWords(i), i]));
+/** "fourteen" -> 14, "one-four" -> 14 (car numbers are said digit by digit). */
+function wordsToNo(w: string): number | undefined { if (w in WORD_NO) return WORD_NO[w]; const p = w.split('-'); if (p.every((q) => q in WORD_NO && WORD_NO[q] < 10)) return +p.map((q) => WORD_NO[q]).join(''); return undefined; }
+/** Gameplay's heat tiers (src/gameplay/police/police.ts TIER_HEAT). */
+const TIER_HEAT = [0.5, 1.8, 2.8, 3.8, 4.8];
+function tierOf(h: number) { let t = 0; for (const x of TIER_HEAT) if (h >= x) t++; return t; }
 /** Unit ids → a stable radio car number (3-39). */
 function carNo(id?: string) { let h = 0; for (const c of id ?? 'x') h = (h * 31 + c.charCodeAt(0)) >>> 0; return 3 + (h % 37); }
 import { setTimeoutAudio } from './ambience';

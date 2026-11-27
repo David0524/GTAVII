@@ -30,13 +30,16 @@ export const PHONETIC: Record<string, string> = { a: 'adam', b: 'boy', c: 'charl
 /** Lower-case spoken form: numbers and ordinals as words, plates spelled, abbreviations expanded, pauses as ','. */
 export function normalise(text: string): string {
   let s = ' ' + text.replace(/…/g, ' , ').replace(/[{}]/g, '') + ' ';
-  s = s.replace(/\bplate starting ([A-Z0-9]{1,8})\b/gi, (_m, p: string) => 'plate starting ' + p.split('').map((c) => (/\d/.test(c) ? ONES[+c] : PHONETIC[c.toLowerCase()] ?? '')).join(' '));
+  // Plates are spelled letter by letter, digits as words (narrative's convention: "K-L-four").
+  s = s.replace(/\b(plate starting|partial plate) ([A-Z0-9-]{1,10})\b/gi, (_m, w: string, p: string) => w + ' ' + p.replace(/-/g, '').split('').map((c) => (/\d/.test(c) ? ONES[+c] : c.toLowerCase())).join(' '));
   s = s.replace(/\b(\d+)(st|nd|rd|th)\b/gi, (_m, n: string) => ordinalWords(+n));
   s = s.replace(/\b\d+\b/g, (n) => numberWords(+n));
   s = s.replace(/\bW\.? (?=[a-z])/gi, 'west ').replace(/\bE\.? (?=[a-z])/gi, 'east ').replace(/\bSt\b\.?/g, 'street').replace(/\bAve\b\.?/g, 'avenue').replace(/&/g, ' and ');
   s = s.toLowerCase().replace(/['’]/g, '').replace(/[.;:!?]+/g, ' , ').replace(/,/g, ' , ').replace(/[^a-z\-, ]+/g, ' ');
   return s.replace(/\s+/g, ' ').replace(/( ,)+/g, ' ,').replace(/^[ ,]+|[ ,]+$/g, '');
 }
+/** Radio car numbers the way the band says them: digit by digit ('car one-four'). */
+export const carWords = (n: number) => String(n).split('').map((d) => ONES[+d]).join('-');
 export const tokens = (text: string) => normalise(text).split(' ').filter(Boolean);
 
 /**
@@ -49,7 +52,13 @@ export function segment(text: string, has: (frag: string) => boolean): { frag: s
     if (t[i] === ',') { out.push({ frag: ',', known: true }); i++; continue; }
     let took = 0;
     for (let n = Math.min(7, t.length - i); n >= 2; n--) { const sl = t.slice(i, i + n); if (sl.includes(',')) continue; const f = sl.join(' '); if (has(f)) { out.push({ frag: f, known: true }); took = n; break; } }
-    if (!took) { out.push({ frag: t[i], known: has(t[i]) }); took = 1; }
+    if (!took) {
+      // A hyphenated token the vocabulary lacks ("one-four", "heavy-set") is spoken part by part if every part is known.
+      const parts = t[i].split('-');
+      if (!has(t[i]) && parts.length > 1 && parts.every((q) => q && has(q))) for (const q of parts) out.push({ frag: q, known: true });
+      else out.push({ frag: t[i], known: has(t[i]) });
+      took = 1;
+    }
     i += took;
   }
   return out;
@@ -88,11 +97,11 @@ export function templateFragments(lines: string[]): string[] {
   return [...out];
 }
 /** Everything to render: phrases, plus every single word that appears in them (the stitcher's fallback). */
-export function dispatchVocab(o: { streets: string[]; precincts: string[]; templates: string[] }): string[] {
+export function dispatchVocab(o: { streets: string[]; precincts: string[]; templates: string[]; slots?: string[] }): string[] {
   const phrases = new Set<string>();
-  for (const p of [...GAMEPLAY_PHRASES, ...SUBJECT, ...COLOURS, ...GARMENTS, ...VEHICLES, ...DIRECTIONS, ...ITEMS, ...RADIO, ...placeVocab(o.streets), ...o.precincts.map(normalise), ...templateFragments(o.templates)]) { const f = normalise(p); if (f) phrases.add(f); }
+  for (const p of [...(o.slots ?? []), ...GAMEPLAY_PHRASES, ...SUBJECT, ...COLOURS, ...GARMENTS, ...VEHICLES, ...DIRECTIONS, ...ITEMS, ...RADIO, ...placeVocab(o.streets), ...o.precincts.map(normalise), ...templateFragments(o.templates)]) { const f = normalise(p); if (f) phrases.add(f); }
   for (let i = 0; i < 100; i++) phrases.add(numberWords(i));
-  for (const w of Object.values(PHONETIC)) phrases.add(w);
+  for (const c of 'abcdefghijklmnopqrstuvwxyz') phrases.add(c); // plate letters, spoken as letters
   const words = new Set<string>(); for (const p of phrases) for (const w of p.split(' ')) if (w && w !== ',') words.add(w);
   return [...new Set([...phrases, ...words])].filter((f) => !f.includes(' , '));
 }

@@ -217,6 +217,7 @@ export class AudioSystem {
   setIgnoreSilentSwitch(on: boolean) { this.runtime.setIgnoreSilentSwitch(on); }
 
   setClock(minutesSinceMidnight: number, date?: string) {
+    this.dispatch?.clock(minutesSinceMidnight);
     const c = this.env?.clock; if (!c) return;
     c.minutes = ((minutesSinceMidnight % 1440) + 1440) % 1440; c.hour = c.minutes / 60;
     if (date) { c.date = date; c.weekday = weekday(date); }
@@ -294,6 +295,8 @@ export class AudioSystem {
   bindGameplay(gp: { on(type: string, cb: (e: any) => void): void }) { this.dispatch.bindGameplay(gp); }
   dispatchSay(text: string, o: { voice?: 'central' | 'car'; urgent?: boolean; car?: number } = {}) { this.dispatch.say(text, o); }
   officerDown(at: [number, number]) { this.dispatch.officerDown(at); }
+  /** Heat tier 0-5 (gameplay's tierOf) if gameplay sends it explicitly; otherwise read from reportFiled. */
+  setHeat(tier: number) { this.dispatch.setHeat(tier); }
   /**
    * Spoken place name at x,z: the nearest intersection as dispatch says it ("West 31st and 8th"). Gameplay's
    * `policeSys.placeName` can use this so its radio text stays inside the rendered vocabulary.

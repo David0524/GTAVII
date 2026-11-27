@@ -55,7 +55,7 @@ export const SCENARIOS: Scenario[] = [
   { id: 'heat_8th', title: 'Eighth Ave at W 33rd St, Saturday 9:40 p.m., police heat (dispatch)', clock: { minutes: 21 * 60 + 40, date: '1974-06-22' }, weather: 'clear', traffic: 0.6, peds: 0.4, extra: true,
     start: (m) => ({ x: m.x('8th Avenue') + 12, z: m.z(33) - 20, dx: 0, dz: 1 }), walk: 1.4,
     events: [
-      { t: 2, play: 'gp:report', offset: [-30, 10] }, { t: 9, play: 'gp:dispatched' }, { t: 16, play: 'gp:pursuit', offset: [0, 20] }, { t: 30, play: 'gp:lost', offset: [0, 40] },
+      { t: 2, play: 'gp:report', offset: [-30, 10] }, { t: 9, play: 'gp:dispatched' }, { t: 16, play: 'gp:pursuit', offset: [0, 20] }, { t: 26, play: 'gp:heat4', offset: [0, 30] }, { t: 30, play: 'gp:lost', offset: [0, 40] },
       { t: 38, play: 'gp:copKilled', offset: [5, 25] }, { t: 58, play: 'gp:cleared' },
     ] },
 ];

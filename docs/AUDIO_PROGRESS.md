@@ -232,8 +232,8 @@ The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialog
 - **Why stitched:** whole lines can't be rendered ahead of time.
   - Gameplay's radio calls are free text built at runtime: precinct, crime, place, and the witness description.
   - Narrative's police_radio lines are templates (`{street}`, `{avenue}`…).
-  - So the build renders a vocabulary instead, with three registers (Central flat, Central urgent, the cars): 772 fragments each.
-    It covers gameplay's fixed phrases, crime words, narrative's template fragments, precinct names, every street on the map, subject, clothing, vehicle, direction and item words, numbers 0–99, and the APCO phonetic alphabet for plates.
+  - So the build renders a vocabulary instead, with four registers (Central calm and urgent, the cars calm and urgent/breathless): about 800 fragments each.
+    It covers gameplay's fixed phrases, crime words, narrative's template fragments and slot vocabularies (police_radio `audio.slots`), precinct names, every street on the map, subject, clothing, vehicle, direction and item words, numbers 0–99, and single letters for plates (narrative's convention: "K-L-four").
     Every word that appears in a phrase is also rendered on its own, as the fallback.
   - At runtime the text is normalised (numbers and ordinals to words, plates spelled), then segmented into the longest phrase available, else single words.
   - Anything outside the vocabulary becomes a burst of garble on air; the subtitle keeps the full text.
@@ -243,6 +243,23 @@ The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialog
   - A static bed runs under it, through a 320 Hz–3 kHz band with a presence bump and light clipping.
   - Each radio car's voice sits slightly differently.
   - Who speaks follows radio procedure: "Central to all cars…" is Central; "Central, car six…" is that car calling in.
+- **Narrative's dispatch set (6c8dcb1, 46 lines):**
+  - Each line's `voice` (dispatcher or car) picks the speaker. Emotions urgent, breathless and alarmed use the urgent register.
+  - Slots are filled truthfully:
+    - street/avenue from `placeName`;
+    - crime from the open report;
+    - sex, build, clothes, car and plate from the witness description gameplay files with `reportFiled`;
+    - direction from narrative's slot list.
+
+    A line needing a slot we can't fill is skipped.
+  - The same line isn't repeated within 90 s.
+  - Car numbers are spoken digit by digit ("car one-four"), and hyphenated tokens are spoken part by part.
+  - Heat tiers: `reportFiled.severity` → gameplay's `tierOf` → each rising tier puts a `heat1`–`heat5` call on the air. Tiers 4–5 make the channel hot.
+  - Context mapping:
+    - dispatched → `responding`/`ack`;
+    - pursuit → `pursuit_car` if the description has a vehicle, else `pursuit_foot`;
+    - cleared → `all_clear`/`cooldown`/`bribe_heard`;
+    - tour changes (8 a.m., 4 p.m., midnight) → `shift`.
 - **Events:**
   - gameplay `radio` → Central speaks it, in the urgent register for shots, shootings, homicides and pursuits;
   - `police` dispatched → a car acknowledges; pursuit → a car calls it in; lost, investigate and cleared → narrative's lines, with `{street}`/`{avenue}` filled from `placeName`; roadblock → a car reports it;
@@ -254,12 +271,12 @@ The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialog
   - then narrative's cop_killed radio sequence, with car voices for car lines;
   - three cars answering "on the way", and a surge of three sirens;
   - for 90 s the channel stays hot: urgent register and busier chatter. This is the "tone shift".
-- **Measured (`render.ts --only heat_8th --content`):** Eighth Ave at W 33rd St, 9:40 p.m. The scene runs report → dispatched → pursuit → lost → officer down → cleared.
-  - 10–11 transmissions; every fragment was found in the vocabulary (0 garbled, coverage 1.0); voice library 0 misses.
+- **Measured (`render.ts --only heat_8th --content`):** Eighth Ave at W 33rd St, 9:40 p.m. The scene runs report (tier 2) → dispatched → pursuit → heat tier 4 → lost → officer down → cleared.
+  - 11 transmissions; every fragment was found in the vocabulary (0 garbled, coverage 1.0); voice library 0 misses; Central's report goes out before the cars answer.
   - The scanner measures −21.2 LUFS while talking against a −15.2 LUFS street (stems tool), so it's clear without masking the world.
   - Excerpt: `shots/audio/heat_8th.ogg`.
-- **Cost:** about 2,300 extra fragments; the voice deploy grows from 31 to 44 MB (Opus + AAC), fetched per fragment on demand into the 6 MB decoded LRU.
-  The full render took 73 s on a cold cache for the new fragments; a warm cache takes about 1 s.
+- **Cost:** about 3,600 extra fragments (5,028 voice files in all); the voice deploy grows from 31 to 50 MB (Opus 20.7 + AAC 29.6), fetched per fragment on demand into the 6 MB decoded LRU.
+  The new fragments rendered in about 110 s on a cold cache; a warm cache takes about 1 s.
 - **Honest limits:**
   - Stitched eSpeak words sound clipped and robotic, more like a 1970s scanner than an actor, which partly suits the radio.
   - Descriptions need gameplay to use `audio.placeName`; until then its placeholder place names ("the lot on the East Side") still fall inside the vocabulary.
