@@ -109,6 +109,10 @@ export function generateAppearance(seed: number, opts: AppearanceOpts = {}): App
   // build details
   for (const k of ['measure/measure-waist-circ-incr', 'measure/measure-hips-circ-incr', 'measure/measure-shoulder-dist-incr', 'measure/measure-neck-circ-incr', 'measure/measure-upperarm-circ-incr', 'measure/measure-thigh-circ-incr', 'measure/measure-calf-circ-incr', 'torso/torso-vshape-incr']) L(k, 0.25, r.body);
   if (!male) { locals['measure/measure-bust-circ-incr'] = r.body.normal(0, 0.25, -0.8, 0.8); }
+  // men: flatten the pectoral shelf and nipple points (the base male mesh at average-plus weight
+  // shades as a bust under shirts); heavier men keep a little more chest
+  // (paired modifiers take their positive name; a negative value applies the opposite target)
+  else { locals['torso/torso-muscle-pectoral-incr'] = -Math.max(0, 0.6 - muscle * 0.4); locals['breast/breast-point-incr'] = -0.5; locals['breast/breast-volume-vert-up'] = 0.3; }
   if (clampAge > 55) { locals['head/head-age-incr'] = (clampAge - 55) / 35 * 0.8; locals['neck/neck-double-incr'] = weight > 0.55 ? r.body.range(0, 0.5) : 0; }
 
   // --- skin ---

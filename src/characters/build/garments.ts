@@ -120,11 +120,13 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   // Smoothing may only move cloth outwards (bridge hollows); convex shapes stay, so the shell
   // never sinks inside the body and skin can't show through.
   const drape = ctx.lod <= 2 ? (() => {
-    const sm = taubin(P, F.tris('body', Math.min(4, ctx.lod + 2)), (k) => F.part[k] === PART.torso || F.part[k] === PART.neck, 12, (k) => F.part[k] === PART.neck);
+    const sm = taubin(P, F.tris('body', garmentBodyLod(ctx.lod)), (k) => F.part[k] === PART.torso || F.part[k] === PART.neck, ctx.lod === 0 ? 40 : 12, (k) => F.part[k] === PART.neck);
     const Nb = F.normals.get('body')!;
     for (const [k, q] of sm) {
       const d = (q[0] - P[k * 3]) * Nb[k * 3] + (q[1] - P[k * 3 + 1]) * Nb[k * 3 + 1] + (q[2] - P[k * 3 + 2]) * Nb[k * 3 + 2];
-      const out = Math.max(0, d);
+      // mostly outwards (bridge hollows), but small convex details (nipples, muscle edges) may be
+      // shaved by up to 12 mm on the torso: the skin under a shirt is culled, so nothing pokes through
+      const out = Math.max(F.part[k] === PART.torso ? -0.012 : 0, d);
       sm.set(k, [P[k * 3] + Nb[k * 3] * out, P[k * 3 + 1] + Nb[k * 3 + 1] * out, P[k * 3 + 2] + Nb[k * 3 + 2] * out]);
     }
     // cloth hangs from the chest apex toward the waist instead of tucking under the pectorals
@@ -137,6 +139,34 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
       const b = binOf(q[0], q[2]), r = Math.hypot(q[0] - cx, q[2] - cz);
       if (q[1] > y.chest - 0.09 && q[1] < y.chest + 0.04 && r > apexR[b]) { apexR[b] = r; apexY[b] = q[1]; }
       if (Math.abs(q[1] - y.waist) < 0.02) waistR[b] = Math.max(waistR[b], r);
+    }
+    // across the chest the cloth spans the groove between the pectorals as a straight chord
+    // (per 2 cm row: the front arc's radius may not dip below the chord between its two peaks)
+    {
+      const rows = new Map<number, { k: number; a: number; r: number }[]>();
+      for (const [k, q] of sm) {
+        if (q[1] < y.chest - 0.12 || q[1] > y.chest + 0.08) continue;
+        const a = Math.atan2(q[0] - cx, q[2] - cz);
+        if (Math.abs(a) > 0.9) continue;
+        const row = Math.round(q[1] / 0.02);
+        (rows.get(row) ?? rows.set(row, []).get(row)!).push({ k, a, r: Math.hypot(q[0] - cx, q[2] - cz) });
+      }
+      for (const pts of rows.values()) {
+        let L: { a: number; r: number } | null = null, Rr: { a: number; r: number } | null = null;
+        for (const p of pts) { if (p.a < -0.08 && (!L || p.r > L.r)) L = p; if (p.a > 0.08 && (!Rr || p.r > Rr.r)) Rr = p; }
+        if (!L || !Rr) continue;
+        // chord between the two peaks in the horizontal plane: radius along azimuth a
+        const lx = Math.sin(L.a) * L.r, lz = Math.cos(L.a) * L.r, rx = Math.sin(Rr.a) * Rr.r, rz = Math.cos(Rr.a) * Rr.r;
+        for (const p of pts) {
+          if (p.a <= L.a || p.a >= Rr.a) continue;
+          const dx = Math.sin(p.a), dz = Math.cos(p.a);
+          // intersect the ray (dx, dz) with the segment L-R
+          const ex = rx - lx, ez = rz - lz, den = dx * ez - dz * ex;
+          if (Math.abs(den) < 1e-6) continue;
+          const tRay = (lx * ez - lz * ex) / den;
+          if (tRay > p.r) { const q = sm.get(p.k)!; const f = tRay / p.r; sm.set(p.k, [cx + (q[0] - cx) * f, q[1], cz + (q[2] - cz) * f]); }
+        }
+      }
     }
     for (const [k, q] of sm) {
       const b = binOf(q[0], q[2]);
@@ -402,7 +432,8 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
       const u = i / steps; // 0 = centre back … 1 = collar point
       // buttoned under a tie the stand closes at the throat; worn open the neckline drops at the front
       const a = side * (Math.PI - u * (Math.PI - (closed ? 0.04 : 0.1)));
-      const baseY = y.neck - 0.01 - (closed ? 0.008 : 0.035) * u * u;
+      // the back of the band sits up on the neck (it hides the nape); it drops toward the front
+      const baseY = y.neck + 0.012 * (1 - u) - 0.004 - (closed ? 0.008 : 0.035) * u * u;
       const foldY = baseY + 0.032 - 0.012 * u;               // stand height
       // fall depth 40 mm at the back; `point` is the whole point length at the tip (1970s: 70–125 mm)
       const leaf = 0.04 + 0.006 * u + (u > 0.6 ? ((u - 0.6) / 0.4) ** 1.4 * Math.max(0, point - 0.046) : 0);
@@ -420,7 +451,10 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
         // around the neck the fall only has to clear the stand; the points must clear the chest
         if (u <= 0.75) {
           const sc = nr.center;
-          if (Math.hypot(outer[0] - sc[0], outer[2] - sc[1]) >= Math.hypot(standBase[0] - sc[0], standBase[2] - sc[1]) + 0.005) break;
+          // clear the stand base, but never ask for more than the fall can reach (at the nape the
+          // neck flares into the trapezius faster than a 4 cm fall can follow: it would go flat)
+          const rf = Math.hypot(fold[0] - sc[0], fold[2] - sc[1]), rb = Math.hypot(standBase[0] - sc[0], standBase[2] - sc[1]);
+          if (Math.hypot(outer[0] - sc[0], outer[2] - sc[1]) >= Math.min(rb + 0.005, rf + leaf * 0.45) || flare > 0.45 + 0.75 * u) break;
         } else {
           const sc = tr.center, surf = tr.at(outer[1], Math.atan2(outer[0] - sc[0], outer[2] - sc[1]), off + 0.006);
           if (Math.hypot(outer[0] - sc[0], outer[2] - sc[1]) >= Math.hypot(surf[0] - sc[0], surf[2] - sc[1])) break;
@@ -516,6 +550,12 @@ function tie(ctx: GarmentCtx, mb: MeshBuilder, t: Fabric & { width: number }, of
   ribbon(ctx, mb, rows, m);
 }
 
+/**
+ * Body LOD that tight garments are cut from: heroes use LOD1 (15k) so shirts shade smoothly
+ * (LOD2's facets read as rounded blobs on the chest: the male "bust"); others one step coarser.
+ */
+export function garmentBodyLod(lod: number) { return lod === 0 ? 1 : Math.min(4, lod + 2); }
+
 /** Emits one clipped piece into the builder; returns the fields used for hiding body skin. */
 export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   const { model, shape, F } = ctx;
@@ -524,7 +564,7 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   const useBody = p.surface === 'helper-tights' && ctx.lod <= 2;
   const surface = useBody ? 'body' : p.surface;
   // body LODs: 0 full, 1 15k, 2 7k, 3 2.6k, 4 900 (character LOD n skins with body n+1)
-  const tris = F.tris(surface, useBody ? Math.min(4, ctx.lod + 2) : surface === 'body' ? Math.min(4, ctx.lod + 1) : ctx.lod);
+  const tris = F.tris(surface, useBody ? garmentBodyLod(ctx.lod) : surface === 'body' ? Math.min(4, ctx.lod + 1) : ctx.lod);
   const N = F.normals.get(surface)!;
   const res = clipSurface(tris, p.fields);
   const P = shape.pos;

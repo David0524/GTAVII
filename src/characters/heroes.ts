@@ -95,8 +95,8 @@ function delphine(): CharacterBuild {
 /** Nikos "Nick" Varelas, 51, 168 cm: short, barrel-chested, heavy shoulders, thickening waist. */
 function nick(): CharacterBuild {
   const appearance = withApp(1974_0003, 1, 51, (a) => {
-    Object.assign(a.body.macro, { weight: 0.72, muscle: 0.62, height: 0.3, proportions: 0.45, african: 0.04, asian: 0.03, caucasian: 0.93 });
-    a.body.locals = { ...a.body.locals, 'measure/measure-shoulder-dist-incr': 0.4, 'torso/torso-scale-depth-incr': 0.4, 'measure/measure-waist-circ-incr': 0.4, 'armslegs/lr-hand-scale-incr': 0.3, 'head/head-scale-horiz-incr': 0.3, 'eyebrows/eyebrows-trans-forward': 0.4 };
+    Object.assign(a.body.macro, { weight: 0.66, muscle: 0.6, height: 0.3, proportions: 0.45, african: 0.04, asian: 0.03, caucasian: 0.93 });
+    a.body.locals = { ...a.body.locals, 'measure/measure-shoulder-dist-incr': 0.2, 'torso/torso-scale-depth-incr': 0.25, 'measure/measure-waist-circ-incr': 0.4, 'armslegs/lr-hand-scale-incr': 0.3, 'head/head-scale-horiz-incr': 0.3, 'eyebrows/eyebrows-trans-forward': 0.4 };
     a.stature = 1.68;
     a.skin = { ...a.skin, tone: '#c8a17e', melanin: 0.28, redness: 0.45, ageSpots: 0.15, freckles: 0 };
     a.hair = { ...a.hair, style: 'slick', color: '#7a7570', texture: 0.35, grey: 0.6, recession: 0.25, thinning: 0, volume: 1.15 };
