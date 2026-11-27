@@ -245,3 +245,58 @@ randomised attempts, plus a frame strip):**
   step. Characters return the animation-driven root delta for the root-motion states (vault, climb,
   mantle, get-up) through `consumeRootMotion(): { dPos, dYaw }`. Foot IK uses the shared
   `groundAt(x, z)` (characters request 2).
+
+## Decisions and queue as of 2026-11-27 03:00 (oversight and user), in priority order
+0. **Every milestone report and board needs a "vs GTA V / VI / RDR2" section** (docs/briefs/REFERENCE_GAMES.md
+   on awesome-keller): what the reference does, where we match, where we fall short, and the plan.
+1. **Finish blue hour and D 19:30** (twilight dome, a899b96; re-measure in shots/phase3tune).
+2. **Small fixes, before the sprint:**
+   a. **Remove the always-on attribution overlay** (#attribution in index.html) from gameplay and
+      cutscenes. ODbL credit moves to the title footer (small, engine) and to the full map and Credits
+      screens (UI). Update DATA_SOURCES.md to say where it lives.
+   b. **Park Avenue bug** (user report): no sidewalks and odd light posts. Check the map edge
+      (Madison–Park) and the Park Ave South / Grand Central viaduct against sidewalk generation and
+      furniture placement. Add a test: every road segment has a sidewalk on both sides unless
+      flagged viaduct or ramp. Before and after shots.
+3. **Integration sprint:** merge ALL streams in order, sim → vehicles → characters → UI → gameplay →
+   interiors → audio. Each merge is verified:
+   - every stream's tests, integrated shots, frame time, and a regression note;
+   - a short note to oversight after each merge.
+
+   Ask each chat to help with its conflicts (main.ts, ENGINE_REQUESTS, package.json); main.ts and
+   engine-owned files stay authoritative. Then deploy for the user's phone.
+   Items that land inside the sprint:
+   - gameplay: TouchLayout, the shared Rapier import (`src/shared/rapier.ts`), talkables (req 15);
+   - UI: `ThirdPersonCamera.ts` (47b4242, a drop-in for OrbitCamera with 8 tests), to be reviewed and
+     wired (about 10 lines plus two ButtonActions). **Camera ruling: YES.** UI writes the file;
+     the engine reviews it and keeps ownership of src/camera. Answer UI in ENGINE_RESPONSES.
+4. **After the sprint, on the merged base:**
+   - **Blocks A and B.** A is started: furniture (a899b96) is in but unverified, and signals sync to
+     the sim's `signalStates()`. Then B, branching trees.
+   - **The PBR/probe foundation.** Answer interiors request 9 in ENGINE_RESPONSES: KTX2 array packing,
+     about 20 interior sets, per-cell lights (2 shadowed and 8 unshadowed), window-portal sun and sky.
+   - **Movement.** The single traversal contract merges my `TraversalRec` with interiors'
+     `TraversalMark` (req 10) in `src/shared/`. Fire-escape meshes are engine-owned and built from
+     the marks (interiors data: `public/data/interiors/traversal/<i>_<j>.json`, 991 fire escapes and
+     1,130 roof gaps).
+     - **Gameplay movement rules** (87c07eb): `g.canMove(action)`, `g.traversed(action, m)`,
+       `g.landed(h, rolled)`, `g.locomotion()` every frame.
+     - **UI:** the `traversal?()` and `project?()` hooks in uiHost.
+     - **Narrative request 15:** 31 `tv.*` markers for chase beats; place markup within about 30 m of
+       each, or report the ones that can't host the move.
+   - **Landmark signage sweep.** Copy is in narrative `content/landmarks.json → signage`.
+     - Pan Amity Building: "PAN AMITY" rooftop letters plus a winged meridian-globe emblem.
+     - Amalgamated Chemical Tower: crown letters plus a news zipper.
+     - Lacy's: rooftop letters, banner, canopy, rosette.
+     - Penn Square Garden marquee; Hotel Pennsylvanian rooftop neon; Hotel Kelsey vertical neon;
+       entrance letters for Empire Estate, Lifeline and Lifelong.
+     - Rooftop letters are extruded geometry, emissive at night. Emblems go through sign slots and the
+       prompt queue. Send narrative the sign-slot table.
+   - **Grand Central map extension (user decision), AFTER the sprint:**
+     - Push the east bound just enough for Grand Central (about x 292, z -1619; 42nd–44th, Vanderbilt
+       to Lexington), the Park Ave viaduct, Pershing Square and the Pan Amity base.
+     - Update bounds.ts, the chunks, BOUNDARIES.md and DATA_SOURCES, and post the new PLAYABLE in
+       ENGINE_RESPONSES. **Announce the planned numbers now.**
+     - Hero exterior: the 42nd St facade, viaduct and ramps.
+     - The engine owns the interior shell (Main Concourse, ramps, shuttle and Lexington connections),
+       its lighting volume and streaming; interiors own the content.
