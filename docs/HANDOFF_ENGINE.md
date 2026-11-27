@@ -95,3 +95,62 @@ Deliver shots of both beside references, measured, as JPEG.
 - **Don't rebuild `dist/` during a capture.** The rig serves `dist/` through `vite preview` on a fresh
   port.
 - **ENGINE_REQUESTS checks:** `tools/dev/requests.sh`; answer in ENGINE_RESPONSES.md.
+
+## Gap list against docs/briefs/VISUAL_BAR.md (user: "GTA V level at worst"), 2026-11-27
+Status: **done**, **partial** or **missing**. Phone cost is my estimate for an iPhone 17 Pro, Low/phone
+tier, at a 33 ms frame. Estimates are unmeasured until the bench (`?bench=1`) runs on the device.
+
+### Lighting and post
+| Item | Status | Plan | Phone cost |
+|---|---|---|---|
+| PBR lighting, time-of-day sky and sun, HDR, filmic tonemap, per-time grade | **partial**: real solar sky, ACES, 1974 grade, blue-hour/night switch; noon highlights and the sky colour still off | sky-only grade and haze, the SkyMesh cloud ellipse, per-time grade presets | ~0 |
+| Cascaded soft shadows | **partial**: one 160 m PCF map following the player, off on Low | 2–3 cascades (CSM) on High; Low gets one 1k cascade within 60 m | 1.5–3 ms |
+| Contact shadows / SSAO/GTAO everywhere | **partial**: baked canyon wall AO + sidewalk contact; no screen-space AO | GTAO half-res (High); Low: baked per-vertex AO extended to ground/props + car blob shadows | High 1–2 ms; Low ~0.2 ms |
+| Probe GI (irradiance probes per block, time of day) | **missing** (hemi + baked occlusion only) | LightProbeGrid per chunk, relit from sun/sky SH each time-of-day step (cheap, no bake of geometry); WebGL2 path checked | ~0.3 ms sample; update amortised |
+| SSR + reflection probes, wet streets, glass/car paint | **partial**: sky PMREM only (opt-in) | per-block box-projected reflection probes captured at load (low res), SSR on High/desktop, wet roads via roughness + probes on phone | probes ~0.2 ms; SSR 2–3 ms (desktop only) |
+| Volumetric light/fog dawn-dusk-night | **missing** | height fog + faked light shafts (screen-space radial, 1/4 res) at golden/dusk; lamp halos via sprites | 0.5–1 ms |
+| Bloom on practicals, subtle lens/grain | **done** (bloom/halation/grain High; night threshold) | bloom on Low with a 1/4-res single pass | 0.5 ms |
+| Night: hundreds of local lights (clustered / forward+), emissive signage, headlights casting light | **partial**: 3-draw instanced fake lamps + additive pools + storefront spill; no real local lights | clustered forward+ in TSL (≤256 lights per view, culled per tile) for lamps, storefronts, headlights; keep pools as cheap fallback on Low | 2–4 ms (phone: 64 lights) |
+| TAA so nothing shimmers | **missing** (FXAA only; window LOD fixes some shimmer) | TRAA node (three r18x) on High/desktop; phone: TAA at adaptive DPR if bench allows, else FXAA + pre-filtered shaders | 1–1.5 ms |
+
+### World geometry and materials
+| Item | Status | Plan | Phone cost |
+|---|---|---|---|
+| PBR photoscan/CC0 materials everywhere, wear/grime/wetness/decals | **missing** (procedural colour + noise; no textures) | ART_ASSETS step: CC0 brick/stone/terracotta/concrete/asphalt/granite sets as KTX2 arrays, triplanar under the procedural layout, condition-blended grime; decal instancing | memory ≤64 MB Low; ~1–2 ms shading |
+| Facade depth: recesses, sills, lintels, cornices, fire escapes, parallax shopfronts, awnings, signage, AC, pipes, scaffolding | **partial**: flat walls + painted windows; real fire escapes, AC units, awnings, doors | geometry pass in the worker: window reveal insets (displaced inner quads per bay, near LOD only), cornice/sill/lintel extrusions per style, parallax interior mapping for shopfronts (interiors Tier C covers upper floors) | +30–60k tris near on Low (detail-radius gated) |
+| Streets: kerb height, paint wear, manholes, patches, cracks, litter, puddles, steam | **partial**: kerbs, worn period paint, asphalt patches | decal instancing (manholes, cracks, litter, puddles), steam particles at vents | <0.5 ms |
+| Street furniture + trees (blocks A and B) | **missing/partial** (see above) | as written above | budget per block A/B |
+| Landmarks hand-detailed hero models | **missing** (hero styles in the shader only) | hero mesh pass: Flatiron, Empire Estate, Metropolitan Lifeline, Lacy's, Penn Sq Garden, Hotel Kelsey: modelled massing + cornice/crown geometry, built from public-domain drawings | +50k tris each, near only |
+
+### Life, characters, vehicles, interiors
+| Item | Status | Plan | Phone cost |
+|---|---|---|---|
+| Dense traffic and pedestrians, parked cars, pigeons/rats, moving steam/litter | **missing in the build** (the sim is ready, the merge is pending; the renderers come from the vehicles and characters streams) | sim merge, then vehicles (instanced traffic renderer) and characters (crowd) merges; parked cars from sim request 5 | sim 0.2 ms; renderers set by their streams' budgets |
+| Characters (heads, skin, hair, cloth, faces) | owned by the characters stream | integration only | their budget |
+| Vehicles (reflections, damage, interiors, lights casting light) | owned by the vehicles stream; engine supplies probes, clustered lights and env | integration + probes/lights above | their budget |
+| Interiors at the same standard | owned by the interiors stream; engine supplies facade cuts, probes, lights | integration | their budget |
+
+### Honest verdict
+The current build sits below the floor. It is close on time-of-day lighting and the 1974 grade, and far
+off on materials (no scans at all), facade depth, local lights, GI and reflections, and life (empty
+streets until the sim, vehicles and characters merge).
+The phone budget makes the full list hard at 30 fps. Clustered lights, GTAO, SSR and TAA together are
+about 6–10 ms on the phone, on top of the city. The plan is therefore tiered: phone gets probes, baked
+AO, decals, scans, facade depth, clustered lights capped at 64 and FXAA or TAA as the bench allows;
+desktop gets everything.
+
+### Phase 3 done-means (reworked against the bar)
+Phase 3 is done when all of these hold:
+1. The noon, golden, blue-hour and night boards for views A, D, E, G, H and I (plus wide A and D with
+   cars) pass lookmetrics in their time bands. Oversight's rejection list also has to be clear: no
+   flat-shaded street-level surface, no empty street, no missing contact shadow, no LOD pop.
+2. CC0 scan materials are on facades and ground; facades have depth (reveals, cornices) near the
+   camera; decals are in.
+3. Blocks A (furniture, signals, signs) and B (branching trees) are in.
+4. Probe GI and reflection probes are in. Clustered local lights are on at night.
+5. TAA is on desktop and High; the phone decision is made from the bench.
+6. The phone holds a stable 30 fps on the iPhone 17 Pro with Low Power Mode off, measured with
+   `?bench=1`. Desktop holds 60.
+
+Life (traffic and pedestrians), vehicles and characters reach the bar through the integration
+milestones, not Phase 3, but Phase 3 shots with cars come from the sim trial.
