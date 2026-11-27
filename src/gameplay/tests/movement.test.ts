@@ -152,3 +152,26 @@ test('tackle: a miss sprawls you and still costs the breath', () => {
   assert.equal(Math.round(s0 - r.g.stamina()!.value), 12);
   assert.equal(r.g.tackle().reason, 'down', 'no second dive while sprawled');
 });
+
+test('restrain: after the tackle, one button binds the quarry, they walk with you, and go in the car (skip_board)', () => {
+  const r = rig();
+  r.g.spawnCombatant({ id: 'skip', faction: 'hood', squad: 'q', pos: [0, 0, -1.5], weapon: null, hp: 40 });
+  r.g.setChaseTarget('skip', { lawful: true });
+  r.g.setContext({ speed: 6, sprinting: true });
+  for (let i = 0; i < 8 && !r.g.ai.agents.get('skip')!.knockedOut; i++) { r.g.tackle(); r.step(1); }
+  assert.ok(r.g.ai.agents.get('skip')!.knockedOut);
+  assert.equal(r.g.contextAction()?.kind, 'restrain');
+  r.g.doContextAction();
+  assert.ok(r.g.restrained.has('skip'));
+  assert.notEqual(r.g.contextAction()?.kind, 'tackle', 'a restrained skip is not tackled again');
+  // walk 20 m: the skip follows at your side
+  for (let i = 0; i < 40; i++) { r.pos[0] += 0.5; r.step(0.25, 0.05); }
+  const a = r.g.ai.agents.get('skip')!;
+  assert.ok(Math.hypot(a.pos[0] - r.pos[0], a.pos[2] - r.pos[2]) < 3, `escorted (${a.pos[0].toFixed(1)} vs ${r.pos[0]})`);
+  assert.equal(a.state, 'surrender');
+  r.g.cars.add({ id: 'bondsman_car', vclass: 'sedan', colour: 'black', x: r.pos[0] + 2, z: r.pos[2], owner: 'char.teddy_arce', locked: false, keysIn: true, driver: null });
+  assert.equal(r.g.contextAction()?.kind, 'loadQuarry');
+  r.g.doContextAction();
+  assert.equal(r.g.restrained.get('skip')!.car, 'bondsman_car');
+  assert.ok(r.events.some((e) => e.type === 'notice' && e.e.kind === 'quarryLoaded'));
+});

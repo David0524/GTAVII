@@ -797,13 +797,15 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle'; label: string; target?: string } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry'; label: string; target?: string } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
     if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
     if (this.pc.vehicle) return { kind: 'exitVehicle', label: 'Get out' };
-    { const t = this.tackleTarget(); if (t?.quarry && this.canMove('tackle').ok) return { kind: 'tackle', label: 'Tackle', target: t.id }; }
+    for (const q of this.chaseTargets.keys()) { const a = this.ai.agents.get(q); if (a?.knockedOut && !this.restrained.has(q) && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2) return { kind: 'restrain', label: 'Restrain', target: q }; }
+    if ([...this.restrained.values()].some((r) => !r.car)) for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3.5) return { kind: 'loadQuarry', label: 'In the car', target: c.id };
+    { const t = this.tackleTarget(); if (t?.quarry && !this.restrained.has(t.id) && this.canMove('tackle').ok) return { kind: 'tackle', label: 'Tackle', target: t.id }; }
     if (this.pc.carrying === 'body') {
       for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3.5 && !this.bodies.inCar(c.id).length) return { kind: 'stowBody', label: 'Into the trunk', target: c.id };
       return { kind: 'dropBody', label: 'Put down' };
@@ -840,6 +842,8 @@ export class Gameplay {
       case 'cover': case 'leaveCover': this.toggleCover(moveDir); break;
       case 'carryBody': this.pickUpBody(); break;
       case 'tackle': this.tackle(); break;
+      case 'restrain': this.restrain(a.target); break;
+      case 'loadQuarry': this.loadQuarry(a.target!); break;
       case 'dropBody': this.dropBody(); break;
       case 'stowBody': this.stowBody(a.target!); break;
       case 'door': { const d = this.nearestDoor(this.player.position()[0], this.player.position()[2]); if (d && !d.locked) this.doors?.open?.(d.id); this.emit('notice', { kind: 'door', id: a.target, locked: d?.locked ?? false }); break; }
@@ -955,7 +959,7 @@ export class Gameplay {
       this.policeSys.file({ witness: 'radio', perp: d.perp, kinds: ['officer_down'], desc: { clothes: [] }, lastKnown: d.where, crimeAt: d.where, via: 'unit', time: this.time });
     }
     this.trackMotion(dt); this.mirror?.update();
-    this.updateBodies(); this.updateTackles();
+    this.updateBodies(); this.updateTackles(); this.updateEscorts(dt);
     const clear = this.heatClear();
     if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
     this.wasClear = clear;
@@ -1429,7 +1433,7 @@ export class Gameplay {
     for (const a of this.actors.values()) {
       if (a.id === this.player.id || a.kind === 'player') continue;
       const h = this.healthSys.state(a.id); if (!h || h.dead) continue;
-      if (this.ai.agents.get(a.id)?.knockedOut) continue;
+      if (this.ai.agents.get(a.id)?.knockedOut || this.restrained.has(a.id)) continue;
       const q = a.pos(), dx = q[0] - p[0], dz = q[2] - p[2], d = Math.hypot(dx, dz);
       const ct = this.chaseTargets.get(a.id);
       if (d > (ct ? Math.max(reach, ct.catchDistanceM) : reach)) continue;
@@ -1476,6 +1480,48 @@ export class Gameplay {
       const a = this.ai.agents.get(r.id);
       // a chase quarry that was caught stays down for the mission to resolve; anyone else gets up and runs
       if (a && a.alive && !this.chaseTargets.has(r.id)) { a.knockedOut = false; a.state = 'flee'; }
+    }
+  }
+  /** Quarries restrained (cuffs for a cop, a belt or rope for anyone else) and walking with the player, or loaded in a car. */
+  readonly restrained = new Map<string, { car: string | null }>();
+  static RESTRAIN_SECONDS = 2.5;
+  /**
+   * Restrain a tackled quarry within 2 m: they get up with their hands bound and walk beside you (escort) until
+   * you put them in a car (`loadQuarry`). Only a downed chase quarry, never a bystander. Emits `notice {kind: 'restrained'}`.
+   */
+  restrain(id?: string) {
+    if (!this.player || this.pc.carrying !== 'none') return false;
+    const p = this.player.position();
+    const target = id ?? [...this.chaseTargets.keys()].find((q) => { const a = this.ai.agents.get(q); return !!a && a.knockedOut && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2; });
+    const a = target ? this.ai.agents.get(target) : undefined;
+    if (!target || !a || !a.alive || !a.knockedOut || !this.chaseTargets.has(target) || this.restrained.has(target)) return false;
+    if (Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) > 2) return false;
+    this.restrained.set(target, { car: null });
+    a.knockedOut = false; a.state = 'surrender'; a.firing = false;
+    this.emit('notice', { kind: 'restrained', target, seconds: Gameplay.RESTRAIN_SECONDS });
+    return true;
+  }
+  /** Put a restrained quarry in the back of a car within 3.5 m (the mission drives them in). */
+  loadQuarry(carId: string, id?: string) {
+    if (!this.player) return false;
+    const c = this.cars.cars.get(carId); const p = this.player.position();
+    if (!c || Math.hypot(c.x - p[0], c.z - p[2]) > 3.5) return false;
+    const q = id ?? [...this.restrained.entries()].find(([, r]) => !r.car)?.[0];
+    const r = q ? this.restrained.get(q) : undefined; if (!q || !r || r.car) return false;
+    r.car = carId;
+    this.emit('notice', { kind: 'quarryLoaded', target: q, car: carId });
+    return true;
+  }
+  private updateEscorts(dt: number) {
+    if (!this.player) return;
+    const p = this.player.position();
+    for (const [id, r] of this.restrained) {
+      const a = this.ai.agents.get(id); if (!a || !a.alive) { this.restrained.delete(id); continue; }
+      a.state = 'surrender'; a.firing = false;
+      if (r.car) { const c = this.cars.cars.get(r.car); if (c) { a.pos[0] = c.x; a.pos[2] = c.z; } continue; }
+      // walks a pace behind at the player's side (1.2 m), never faster than a hurried walk
+      const dx = p[0] - a.pos[0], dz = p[2] - a.pos[2], d = Math.hypot(dx, dz);
+      if (d > 1.2) { const step = Math.min(d - 1.2, 2.2 * dt); a.pos[0] += (dx / d) * step; a.pos[2] += (dz / d) * step; }
     }
   }
   /** True while the player is sprawled after a missed tackle (the engine plays the stumble, input is ignored). */

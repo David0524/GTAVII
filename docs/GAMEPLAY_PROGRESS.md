@@ -234,6 +234,11 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
   - A miss sprawls you for 0.9 s.
 - **Heat:** a lawful quarry (a purse snatcher, a bail skip) is a citizen's arrest, no crime. A bystander is assault; a cop is assault on an officer.
 - **Allowed:** not while carrying anything, not with a broken leg, not legless, not in cover.
+- **Restrain (the follow-up, for skip_board):**
+  - After a tackle, the context button reads **Restrain** within 2 m. It works on a downed chase quarry only, never a bystander.
+  - The quarry gets up with hands bound (`surrender`) and walks a pace behind you at up to 2.2 m/s.
+  - Near a car, the button reads **In the car** (`loadQuarry`), and the quarry rides with it.
+  - Events: `notice {kind: 'restrained' | 'quarryLoaded'}`.
 - **Test:** `movement.test.ts`.
 
 #### vs GTA V / VI / RDR2 (reference-games rule, 2026-11-27)
@@ -243,11 +248,11 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
   - GTA VI is expected to keep both.
 - **Where we match:** one press at reach ends the chase non-lethally. A miss has a cost (stumble and stamina). Touch gets auto-align. The legality is contextual: a lawful quarry is no crime, a bystander is assault, a cop is assault on an officer, decided by our witness system rather than a meter.
 - **Where we fall short:**
-  - No follow-up verb yet (cuffing a skip, sitting on a snatcher): the quarry just stays down for the mission.
+  - The restrain follow-up exists (bind, escort, into the car), but the quarry can't yet break free or bolt from the escort, as RDR2's prisoners sometimes do.
   - The dive and ragdoll are characters' and the engine's work and not built yet.
   - The quarry's speed is estimated from AI state, not measured.
 - **Plan:**
-  - Add a `restrain` verb for bail skips (narrative's skip_board), so the mission can walk them to the car.
+  - Give a restrained quarry a nerve-based chance to bolt when the escort is slow or the player is distracted.
   - Measure quarry velocity from the sim when its motion is available.
   - Characters own the dive, the tumble and the stumble animations (events above).
 
