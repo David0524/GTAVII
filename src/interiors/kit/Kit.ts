@@ -164,6 +164,16 @@ export class Kit {
     y0 += this.oy; y1 += this.oy;
     if (x1 < x0) [x0, x1] = [x1, x0]; if (y1 < y0) [y0, y1] = [y1, y0]; if (z1 < z0) [z0, z1] = [z1, z0];
     const mb = o.glass ? this.g : this.m, f = o.faces ?? F.ALL, dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
+    if (o.glass && Math.min(dx, dy, dz) < 0.05) {
+      // one pane on the box's mid-plane across its thinnest axis: the glass material is double-sided and transparent,
+      // so a thin box's six faces (or front/back faces a centimetre apart) mixed into a stable speckle (engine report)
+      const sh = o.shade ?? 1;
+      if (dz <= dx && dz <= dy) mb.quad([x0, y0, (z0 + z1) / 2], [dx, 0, 0], [0, dy, 0], [0, 0, 1], mat, 99, [x0, y0], sh);
+      else if (dx <= dy) mb.quad([(x0 + x1) / 2, y0, z0], [0, 0, dz], [0, dy, 0], [1, 0, 0], mat, 99, [z0, y0], sh);
+      else mb.quad([x0, (y0 + y1) / 2, z0], [dx, 0, 0], [0, 0, dz], [0, 1, 0], mat, 99, [x0, z0], sh);
+      if (o.collide) this.colliders.push({ c: [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2], h: [dx / 2, dy / 2, dz / 2], yaw: 0, cover: o.collide === 'cover', breakable: o.breakable });
+      return;
+    }
     const big = Math.max(dx, dy, dz) > this.tess * 1.5;
     const t = big ? this.tess : 99, sh = o.shade ?? 1;
     if (f & F.NX) mb.quad([x0, y0, z1], [0, 0, -dz], [0, dy, 0], [-1, 0, 0], mat, t, [z0, y0], sh);
@@ -180,7 +190,10 @@ export class Kit {
     cy += this.oy;
     const c = Math.cos(yaw), s = Math.sin(yaw);
     const R = (x: number, z: number): [number, number] => [cx + x * c + z * s, cz - x * s + z * c];
-    const mb = o.glass ? this.g : this.m, f = o.faces ?? F.ALL, sh = o.shade ?? 1;
+    const mb = o.glass ? this.g : this.m, sh = o.shade ?? 1;
+    let f = o.faces ?? F.ALL;
+    // thin glass: keep one face of the thinnest pair (the glass material is double-sided; twin faces speckle)
+    if (o.glass && Math.min(hx, hy, hz) < 0.025) f = hz <= hx && hz <= hy ? F.NZ : hx <= hy ? F.NX : F.NY;
     const ax: V3 = [c * 2 * hx, 0, -s * 2 * hx], az: V3 = [s * 2 * hz, 0, c * 2 * hz], ay: V3 = [0, 2 * hy, 0];
     const p000 = R(-hx, -hz), p100 = R(hx, -hz), p001 = R(-hx, hz);
     const y0 = cy - hy, y1 = cy + hy;
@@ -488,7 +501,7 @@ export class Kit {
     if (glazed) {
       const gb = new MeshB();
       gb.quad([0.1, h * 0.42, 0], [w - 0.2, 0, 0], [0, h * 0.58 - 0.12, 0], [0, 0, 1], M.glass, 99);
-      gb.quad([w - 0.1, h * 0.42, 0], [-(w - 0.2), 0, 0], [0, h * 0.58 - 0.12, 0], [0, 0, -1], M.glass, 99);
+      // one pane only: the glass material is double-sided (a back-facing twin at the same depth speckled)
       // merge glass into door mesh with emissive=-1 tag (runtime renders door glass with the glass material)
       const g = gb.finish(); for (let k = 0; k < g.pat.length; k += 4) g.pat[k] = -1;
       merge(out, g);
