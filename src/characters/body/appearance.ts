@@ -7,7 +7,7 @@
  */
 import { Rng } from '../util/rng';
 import type { BodyDesc } from './BodyModel';
-import { DEFAULT_MACRO } from './macro';
+import { MIN_ADULT_AGE, DEFAULT_MACRO } from './macro';
 
 export type HairStyle =
   | 'bald' | 'buzz' | 'short' | 'sidePart' | 'slick' | 'combOver' | 'pompadour' | 'shag' | 'earLength' | 'feathered' | 'curlyMid' | 'afro' | 'afroShort'
@@ -83,7 +83,8 @@ export function generateAppearance(seed: number, opts: AppearanceOpts = {}): App
   const r = { body: rng.fork(1), face: rng.fork(2), skin: rng.fork(3), hair: rng.fork(4) };
   const sex = opts.sex ?? (rng.chance(0.6) ? 1 : 0); // weekday avenue mix (doc §5.1)
   const age = opts.age ?? Math.round(rng.weighted<[number, number]>([[[18, 35], 40], [[36, 59], 40], [[60, 86], 20]]).reduce((a, b) => a + rng.next() * (b - a)));
-  const clampAge = Math.min(opts.maxAge ?? 90, Math.max(opts.minAge ?? 18, age));
+  // adults only: callers can narrow the range but never go below MIN_ADULT_AGE
+  const clampAge = Math.max(MIN_ADULT_AGE, Math.min(opts.maxAge ?? 90, Math.max(opts.minAge ?? MIN_ADULT_AGE, Number.isFinite(age) ? age : MIN_ADULT_AGE)));
   const bg = rng.weighted(BACKGROUNDS.map((b) => [b, b.w] as const));
   const male = sex >= 0.5;
 
@@ -154,11 +155,15 @@ export function generateAppearance(seed: number, opts: AppearanceOpts = {}): App
     const p = clampAge <= 50 ? 1 : 0.5;
     facialHair = r.hair.weighted<FacialHair>([['none', 40], ['moustache', 18 * p], ['moustacheSideburns', 12 * p], ['sideburns', 18 * p], ['horseshoe', 4 * p], ['beard', 5 * p], ['goatee', 2 * p], ['stubble', 10]]);
   }
-  return {
+  const out: Appearance = {
     seed, sex, age: clampAge, body: { macro, locals }, stature, skin, hair, facialHair,
     facialHairColor: mix(hair.color, '#2a1e16', 0.15), eyeColor: r.face.weighted(bg.eyes),
     slump: Math.min(1, Math.max(0, (clampAge - 50) / 40 + r.body.normal(0, 0.12))),
     gait: { stride: r.body.normal(1, 0.06, 0.85, 1.15) * (clampAge > 65 ? 0.85 : 1), swing: r.body.normal(1, 0.2, 0.5, 1.5), bounce: r.body.normal(1, 0.2, 0.6, 1.4), speed: r.body.normal(1, 0.08, 0.75, 1.2) * (clampAge > 65 ? 0.8 : 1) },
     ...opts.overrides,
   };
+  // overrides can't make anyone younger than an adult either (age and the body's macro age)
+  out.age = Math.max(MIN_ADULT_AGE, out.age);
+  out.body = { ...out.body, macro: { ...out.body.macro, age: Math.max(MIN_ADULT_AGE, out.body.macro.age) } };
+  return out;
 }

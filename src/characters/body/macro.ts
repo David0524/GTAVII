@@ -27,9 +27,11 @@ const tri = (v: number): [number, number, number] => {
   v = Math.min(1, Math.max(0, v));
   return v < 0.5 ? [1 - v * 2, v * 2, 0] : [0, 2 - v * 2, v * 2 - 1];
 };
-/** Age in years → [child, young, old] weights (11 → child, 25 → young, 90 → old). */
+/** Youngest age any body may be built at. The game has adults only (CHARACTERS_BRIEF): a hard floor. */
+export const MIN_ADULT_AGE = 18;
+/** Age in years → [child, young, old] weights (11 → child, 25 → young, 90 → old). Clamped to adults. */
 export function ageWeights(years: number): [number, number, number] {
-  const y = Math.min(90, Math.max(11, years));
+  const y = Math.min(90, Math.max(MIN_ADULT_AGE, Number.isFinite(years) ? years : MIN_ADULT_AGE));
   if (y <= 25) { const t = (y - 11) / 14; return [1 - t, t, 0]; }
   const t = (y - 25) / 65; return [0, 1 - t, t];
 }
