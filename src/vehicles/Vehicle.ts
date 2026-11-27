@@ -325,6 +325,27 @@ export class Vehicle implements Lightable {
 
   /** Park: no creep, wheels held (call when the driver gets out with the engine running). */
   setParked(p: boolean) { this.physics.parked = p; }
+  /**
+   * Integration check: what is acting on this car right now. Lists every collider touching the
+   * chassis (with its collision groups and whether it is a vehicle), the wheel states, and the
+   * drivetrain modifiers. A car that accelerates slowly is usually being held by something
+   * here (a character capsule left inside it, a kerb under the sills).
+   */
+  diagnose() {
+    const ph = this.physics, world = ph.world;
+    const contacts: { handle: number; membership: string; filter: string; isVehicle: boolean; fixed: boolean; sensor: boolean }[] = [];
+    for (const c of ph.colliders) world.contactPairsWith(c, (o) => {
+      const g = o.collisionGroups();
+      contacts.push({ handle: o.handle, membership: '0x' + (g >>> 16).toString(16), filter: '0x' + (g & 0xffff).toString(16), isVehicle: !!vehicleOfCollider(o), fixed: o.parent()?.isFixed() ?? true, sensor: o.isSensor() });
+    });
+    return {
+      id: this.id, model: this.modelId, mass: ph.mass, speed: ph.speed, rpm: ph.rpm, gear: ph.gear, reverse: ph.reverse, parked: ph.parked,
+      input: { ...ph.input }, power: ph.power, mods: { ...ph.mods },
+      engine: { running: this.engine.running, power: this.engine.power, flooded: this.engine.flooded, temp: this.engine.temp, fuel: this.engine.fuel },
+      wheels: ph.wheels.map((w) => ({ contact: w.contact, len: +w.len.toFixed(3), load: Math.round(w.load), slip: +w.slip.toFixed(2), locked: w.locked, flat: w.flat })),
+      chassisContacts: contacts,
+    };
+  }
   /** Steering geometry for the driver assist. */
   get handling() { return { wheelbase: this.asset.spec.wheelbase, maxSteer: this.physics.p.maxSteer }; }
 
