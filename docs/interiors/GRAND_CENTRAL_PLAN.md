@@ -35,3 +35,54 @@ Player-facing name: TBD by narrative under the landmark rename rules (as with "E
 - **What the reference does:** RDR2's Saint Denis station is a dense, lit, crowded hero interior with no loading at the door. Hand-dressed vendors and benches, light shafts, period signage and NPC routines make it feel lived in. GTA V has no comparable enterable landmark hall; its stations are closed or loading-screened. GTA VI trailers show dense crowd interiors (malls, clubs).
 - **Where we can match:** seamless entry from the street through real doors with no loading screen; period accuracy; crowd density from sim slots by hour.
 - **Risks and shortfalls:** a 38 m vault on a phone needs the engine's probe GI and volumetrics. A crowd of hundreds indoors needs sim LOD (impostors). The ceiling's soot and gold-leaf constellations need a dedicated material. Plan: get the engine's budget for the volume before modelling, and impostor crowds beyond 30 m.
+
+## Concourse build spec (ready for when the PBR foundation lands)
+Dimensions are approximate, from published figures, to be checked against the HABS survey drawings before blockout.
+
+**Cells (portal graph).** Each sub-space is a cell, so culling keeps the phone budget:
+| Cell | Size (m) | Notes |
+|---|---|---|
+| `concourse` | 84 × 37 × 38 | Engine shell; interiors place the content |
+| `balcony_e`, `balcony_w` | 37 × 12, at +6 m | East holds the backlit display (invented brand) |
+| `ramps_n`, `ramps_s` | | Down to `lower_concourse` (dining level) |
+| `waiting_room` | 62 × 21 | Benches, chandeliers |
+| `whisper_gallery` | | Guastavino vault outside the seafood restaurant |
+| `restaurant` | | Vaulted tile room |
+| `passage_lex` | | To the Lexington platforms |
+| `passage_shuttle` | | To the 42nd St shuttle |
+| `gates_n` | | Train gates along the north wall |
+
+**Content list (interiors).**
+- Information booth: octagonal brass and marble, clerks' windows, the four-faced opal clock (a lofted globe build with face art slots), spiral stair down.
+- About 28 ticket windows in bronze grilles with "NEXT WINDOW" cards (art slots).
+- Departure boards over the gates, with destinations as art slots, names invented where not geographic.
+- Gate signs with track numbers.
+- Newsstands, shoeshine stands, a cigar counter, telephone banks of 12 booths, lockers (stash and deposit markers), benches (waiting room).
+- Lost-and-found window, a police booth, liquor and drugstore fronts, the Western Union-style counter (invented name).
+
+**Markers and slots.**
+- Payphones in every booth.
+- Lockers as stash markers.
+- Benches as sleepers: wait and bed markers (adults only).
+- Commuter crowd slots by hour: rush 07:30–09:30 and 16:30–18:30 at the highest density.
+- Police patrol route.
+- Hide spots behind the booth and in the ramp alcoves.
+
+**Light.** Practicals as `LightOut`: chandeliers in the waiting room and ramps, the booth glow, board lamps, the display backlight. Sun shafts and probes are engine.
+
+**Budget target (phone, Low).**
+- Content draw calls at most 120 in view, with instanced benches, booths and lockers.
+- Content tris at most 400k in view.
+- Real local lights at most 16; the rest baked into probes.
+- Crowd impostors beyond 30 m.
+
+**Steps.**
+1. Reference pass, about 40 photos.
+2. Blockout from HABS.
+3. Booth and clock hero.
+4. Ticket windows and gates.
+5. Lower level, restaurant and whispering gallery.
+6. Waiting room.
+7. Passages and platforms handoff.
+8. Crowds with sim.
+9. Board vs references, vs RDR2 Saint Denis, and phone timing.

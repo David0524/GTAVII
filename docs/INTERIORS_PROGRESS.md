@@ -283,3 +283,5 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
   - 1960s console TV: bevelled walnut cabinet on splayed legs, a domed CRT in a rounded bezel, speaker cloth, knobs (every `consoleTV`);
   - window air conditioner: bevelled enamel case half outside, louvred grille, knobs, drip stain (tenement apartments and Teddy's room).
 - Teddy's 9F: the AC with its towel now sits in the room's real window (dressing gets the window span). Letter-labelled rooms prefer the back (airshaft) side when one exists; floor 9 has none, so 9F looks onto the street. The brief says airshaft, so that's flagged for narrative. Evidence: docs/interiors/corwin_teddy_9F_v2.png.
+- Poly Haven props in hero rooms: held at the one test chair until the PBR foundation lands. With the interim lights the models read as pasted-in (much brighter than the baked rooms), so placing more now would make the hero rooms look worse.
+- The Grand Central concourse build spec is added to docs/interiors/GRAND_CENTRAL_PLAN.md: cells, content list, markers and slots, practicals, phone budget, steps.
