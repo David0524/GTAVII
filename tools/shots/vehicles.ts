@@ -13,7 +13,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
-const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,vendors,systems,bikes,subway,traffic,metrics').split(','));
+const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,vendors,parts,systems,bikes,subway,traffic,metrics').split(','));
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
@@ -420,6 +420,32 @@ async function main() {
       report.vendors = { events: res.ev, goodsLive: res.goods, afterRight: righted };
       await sheet(page, vs, 2, 800, 450, 'vendors.jpg', vl);
       console.log('vendors', res);
+    }
+
+    // ------------------------------------------------------------------ detachable parts + glass shards
+    if (only.has('parts')) {
+      await open(page, 'mode=drive&quality=high');
+      const ps: Buffer[] = [], pl: string[] = [];
+      const r = await page.evaluate(() => {
+        const V = window.__VEH, ev: string[] = [];
+        V.setModel('bancroft', 3, { x: 36, z: 30, yaw: -Math.PI / 2 });
+        V.player.on('component', (e: any) => ev.push(`${e.kind}:${e.detail}`));
+        V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4);
+        V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.9);
+        V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: true }); V.simulate(2.0);
+        const p = V.player.object.position;
+        return { ev, detached: V.player.detachedParts, at: [+p.x.toFixed(1), +p.y.toFixed(2), +p.z.toFixed(1)] };
+      });
+      const side = () => page.evaluate(() => { const V = window.__VEH, p = V.player.object.position; V.setCamera(p.x - 4.5, 2.2, p.z - 4.2, p.x + 1.5, 0.6, p.z, 44); });
+      await side(); ps.push(await snap(page)); pl.push(`30 mph into the wall: ${r.detached.join(' + ') || 'nothing'} off, engine bay open`);
+      await page.evaluate(() => { const V = window.__VEH, p = V.player.object.position; V.setCamera(p.x - 3, 3.4, p.z - 6, p.x + 4, 0.3, p.z, 50); }); ps.push(await snap(page)); pl.push('the hood and bumper on the ground (physics debris)');
+      await page.evaluate(() => { const V = window.__VEH; V.player.breakWindow('right'); V.player.breakWindow('left'); V.simulate(2.5); });
+      await camRel(page, [2.6, 0.9, 0.4], 46, 0.15); ps.push(await snap(page)); pl.push('smashed side windows: tempered-glass cubes on the ground');
+      await page.evaluate(() => { const V = window.__VEH; V.player.repair(); V.simulate(0.3); });
+      await side(); ps.push(await snap(page)); pl.push('repair(): parts back on, glass in');
+      report.parts = r;
+      await sheet(page, ps, 2, 800, 450, 'damage_parts.jpg', pl);
+      console.log('parts', r);
     }
 
     // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements

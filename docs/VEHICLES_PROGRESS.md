@@ -225,6 +225,29 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - 3–5 s each under SwiftShader (software); expect tens of ms on a GPU. WebP is 5–11 KB.
   - Shot: `ui_thumbnails.jpg` (on a checkerboard).
 
+- **Detachable parts:**
+  - **Separate meshes:** LOD0 bumpers are their own meshes, with the damage morphs; they stay
+    merged at LOD1. The hood already was separate.
+  - **Damage progression:** a bumper sags with its zone's damage from 0.5 (one end drops, the bar
+    twists). It comes off at zone damage 0.82 or a hit of severity 0.55. The hood flies off at
+    front damage 0.9 or a hit of severity 0.7.
+  - `vehicle.detachPart('hood' | 'bumperF' | 'bumperR', push?, source?)` turns a part into a
+    physics debris body that keeps its dents and paint. Debris collides with the world and props
+    only (PROJECTILE membership), so wheels roll over it rather than perching on it. The plate
+    leaves with its bumper.
+  - Emits `component {kind: 'part', detail}`.
+  - Persisted in `components.detached` (optional in old saves; a restore hides the parts without
+    debris). `repair()` reattaches them. The hero swap updates the bumpers too.
+  - The 30 mph wall test now loses the front bumper and the hood.
+- **Engine bay:** passenger cars get a V8 under the hood: block, heads, valve covers in the
+  accent colour, exhaust manifolds, a chrome air cleaner, radiator, fan, hose, battery, bay floor
+  and fender walls. You see it once the hood is off.
+- **Glass shards:** when a pane shatters, chips burst out of it and fall. Tempered side glass
+  gives 70 cubes, a laminated windscreen 18 chips. They are ballistic (no physics bodies), bounce
+  once, settle on the ground under the car and fade after 25 s. One InstancedMesh per scene, up to
+  600 chips.
+- Shot: `damage_parts.jpg`. Rig section `parts`.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

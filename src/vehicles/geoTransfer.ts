@@ -9,8 +9,8 @@ export interface PackedGeometry {
   morph: Record<string, { array: Float32Array; itemSize: number }[]>;
   morphRelative: boolean;
 }
-type GeoKeys = 'body' | 'hood' | 'wheelR' | 'wheelL' | 'beacon';
-const GEO_KEYS: GeoKeys[] = ['body', 'hood', 'wheelR', 'wheelL', 'beacon'];
+type GeoKeys = 'body' | 'hood' | 'wheelR' | 'wheelL' | 'beacon' | 'bumperF' | 'bumperR';
+const GEO_KEYS: GeoKeys[] = ['body', 'hood', 'wheelR', 'wheelL', 'beacon', 'bumperF', 'bumperR'];
 export type PackedModel = Omit<GeneratedModel, GeoKeys> & Record<GeoKeys, PackedGeometry | null>;
 
 export function packGeometry(g: THREE.BufferGeometry, transfer: ArrayBufferLike[]): PackedGeometry {

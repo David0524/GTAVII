@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
-import type RAPIER from './rapier';
+import RAPIER from './rapier';
+import { G, groups } from '../shared/physicsGroups';
 import { heroModelIfReady, requestHeroModel, type ModelAsset, type Variant } from './assets';
 import type { GeneratedModel } from './gen/body';
 import { createMaterialSet, type MaterialSet, type Quality } from './gen/materials';
@@ -9,6 +10,7 @@ import { Emitter } from './effects';
 import { ZONES, type Zone } from './gen/morphs';
 import { SLOTS, angleWeightedNormals, pw } from './gen/builder';
 import { FadeLOD } from './fadeLod';
+import { shardsFor } from './shards';
 import { shadowBake, groundPlane, shadowMaterial, headPoolGeometry, groundLightMats, groundLightLevel, type LightCandidate, type Lightable } from './lighting';
 import { CLASS_MODELS, PROPOSED_CLASS_MODELS } from './registry';
 import {
@@ -31,7 +33,7 @@ export interface ImpactEvent {
   closingSpeed: number;
 }
 export interface DamageEvent { damage: number; stage: DamageStage; zones: Record<Zone, number>; source: string | null }
-export interface ComponentEvent { vehicleId: string; kind: 'glass' | 'tyre' | 'radiator' | 'engine' | 'fuelTank' | 'lamp'; detail: string; source: string | null; point?: THREE.Vector3 }
+export interface ComponentEvent { vehicleId: string; kind: 'glass' | 'tyre' | 'radiator' | 'engine' | 'fuelTank' | 'lamp' | 'part'; detail: string; source: string | null; point?: THREE.Vector3 }
 export interface TheftEvent { vehicleId: string; kind: 'unlock' | 'slimJim' | 'windowSmash' | 'hotwire' | 'lock'; loud: boolean; position: THREE.Vector3 }
 export interface EngineEvent { vehicleId: string; type: EngineEventType; temp: number }
 export type DamageStage = 'intact' | 'dented' | 'battered' | 'smoking' | 'burning' | 'destroyed';
@@ -59,7 +61,7 @@ export interface VehicleInit {
 /** LOD switch distances (m) per quality. */
 const LOD_DIST: Record<Quality, [number, number]> = { low: [14, 70], medium: [28, 120], high: [40, 160], ultra: [60, 220] };
 
-const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _n = new THREE.Vector3(), _q = new THREE.Quaternion(), _m = new THREE.Matrix4();
+const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _v4 = new THREE.Vector3(), _n = new THREE.Vector3(), _q = new THREE.Quaternion(), _m = new THREE.Matrix4();
 let nextId = 1;
 function vclassOf(modelId: string): string {
   for (const [c, opts] of [...Object.entries(CLASS_MODELS), ...Object.entries(PROPOSED_CLASS_MODELS)]) if (opts.some(([id]) => id === modelId)) return c;
@@ -204,7 +206,16 @@ export class Vehicle implements Lightable {
       hm.position.set(-g0.hoodPivot[0], -g0.hoodPivot[1], -g0.hoodPivot[2]);
       hm.castShadow = true; hm.updateMorphTargets();
       this.hoodPivot.add(hm);
+      this.parts.hood = { mesh: hm, holder: this.hoodPivot, body: null, sag: 0 };
       lod0.add(this.hoodPivot);
+    }
+    for (const [name, geo] of [['bumperF', g0.bumperF], ['bumperR', g0.bumperR]] as const) {
+      if (!geo) continue;
+      const holder = new THREE.Group();
+      const mesh = new THREE.Mesh(geo, this.mats.array);
+      mesh.castShadow = true; mesh.receiveShadow = true; mesh.updateMorphTargets();
+      holder.add(mesh); lod0.add(holder);
+      this.parts[name] = { mesh, holder, body: null, sag: 0 };
     }
     this.decals = buildDecals(g0.decals, variant.seed, spec.cls === 'bus' ? 'bus' : spec.cls === 'garbage' ? 'garbage' : 'other');
     lod0.add(this.decals.group);
@@ -489,6 +500,7 @@ export class Vehicle implements Lightable {
     const neighbours: Zone[] = zone === 'front' || zone === 'rear' ? ['left', 'right'] : ['front', 'rear'];
     for (const n of neighbours) this.zones[n] = Math.min(1, this.zones[n] + sev * 0.12);
     this.damage = Math.min(1, this.damage + sev * 0.45);
+    this.checkPartLoss(zone, sev, source);
     const c = this.components;
     if (zone === 'front') {
       this.hurt('radiator', sev * 1.1, source); this.hurt('engine', sev * 0.3, source);
@@ -603,6 +615,13 @@ export class Vehicle implements Lightable {
     if (state <= prev) return;
     // the crack pattern radiates from the first hit on the pane
     if (prev === 0) { const h = this.mats.panes[pane].hit.value as THREE.Vector3; if (localPoint) h.copy(localPoint); else this.paneCentre(pane, h); }
+    if (state === 2) {
+      // shattered: tempered side glass bursts into cubes, a laminated windscreen sheds a few chips
+      this.object.updateMatrixWorld();
+      const at = this.object.localToWorld(this.paneCentre(pane, new THREE.Vector3()));
+      const out = new THREE.Vector3(pane === 'left' ? -1 : pane === 'right' ? 1 : 0, 0, pane === 'front' ? -1 : pane === 'rear' ? 1 : 0).applyQuaternion(this.object.quaternion);
+      shardsFor(this.scene).burst(at, out, this.physics.body.linvel(), this.groundY, pane === 'left' || pane === 'right' ? 70 : 18);
+    }
     this.components.glass[pane] = state;
     this.mats.panes[pane].cracked.value = state >= 1 ? 1 : 0;
     this.mats.panes[pane].broken.value = state >= 2 ? 1 : 0;
@@ -628,6 +647,7 @@ export class Vehicle implements Lightable {
     }
     this.dentLog.length = 0;
     this.pendingDent = null;
+    this.reattachParts();
     this.refreshDamage();
   }
 
@@ -636,6 +656,7 @@ export class Vehicle implements Lightable {
     ZONES.forEach((z, i) => { infl[i] = this.zones[z]; });
     const hood = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
     if (hood?.morphTargetInfluences) ZONES.forEach((z, i) => { hood.morphTargetInfluences![i] = this.zones[z]; });
+    for (const name of ['bumperF', 'bumperR'] as const) { const m = this.parts[name]?.mesh; if (m?.morphTargetInfluences) ZONES.forEach((z, i) => { m.morphTargetInfluences![i] = this.zones[z]; }); }
     this.physics.wheels.forEach((w, i) => { w.flat = this.components.tyresFlat[i]; });
     const prev = this.stage;
     if (this.stage !== 'destroyed') {
@@ -723,6 +744,8 @@ export class Vehicle implements Lightable {
     this.sync();
     this.updateLightsAndFx(dt);
     this.updateGroundLights();
+    this.updateParts(dt);
+    shardsFor(this.scene).step(dt, this);
     this.stepMs = performance.now() - t0;
   }
 
@@ -932,6 +955,7 @@ export class Vehicle implements Lightable {
     this.bodyMesh.updateMorphTargets();
     const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
     if (hm && g.hood) { hm.geometry = g.hood; hm.updateMorphTargets(); }
+    for (const name of ['bumperF', 'bumperR'] as const) { const p = this.parts[name], ng = g[name]; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } }
     this.wheelObjs.forEach((o, i) => {
       const w = this.asset.lod0.wheels[i];
       const lvl = o.lod.levels[0].object;
@@ -944,6 +968,87 @@ export class Vehicle implements Lightable {
   /** Start building this car's hero mesh in the background (e.g. at spawn for the player). */
   prefetchHero() { return requestHeroModel(this.asset.spec, this.variant); }
   private dentLog: { x: number; y: number; z: number; amount: number; radius: number; seed: number }[] = [];
+
+  // ============================================================ detachable parts (hood, bumpers)
+  private parts: Partial<Record<'hood' | 'bumperF' | 'bumperR', { mesh: THREE.Mesh; holder: THREE.Object3D; body: RAPIER.RigidBody | null; sag: number }>> = {};
+  private partDebris: { mesh: THREE.Mesh; body: RAPIER.RigidBody }[] = [];
+  /** Parts currently off the car. */
+  get detachedParts(): string[] { return [...(this.components.detached ?? [])]; }
+  /**
+   * Knock a part off: it becomes a physics body (debris) that keeps the dents and paint it had.
+   * `push` (world, m/s) adds to the car's velocity. Returns false if already off or not present.
+   */
+  detachPart(name: 'hood' | 'bumperF' | 'bumperR', push?: { x: number; y: number; z: number }, source: string | null = null): boolean {
+    const part = this.parts[name];
+    const list = (this.components.detached ??= []);
+    if (!part || list.includes(name)) return false;
+    list.push(name);
+    this.object.updateMatrixWorld();
+    const mesh = part.mesh;
+    const geo = mesh.geometry;
+    geo.computeBoundingBox();
+    const bb = geo.boundingBox!;
+    const c = bb.getCenter(new THREE.Vector3()), half = bb.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+    // debris copy in world space (the car's own mesh just hides, so repair() is trivial)
+    const debris = new THREE.Mesh(geo, this.mats.array);
+    debris.morphTargetInfluences = mesh.morphTargetInfluences ? [...mesh.morphTargetInfluences] : undefined;
+    debris.castShadow = true;
+    mesh.matrixWorld.decompose(debris.position, debris.quaternion, debris.scale);
+    mesh.visible = false;
+    // the plate rides on its bumper
+    if (name !== 'hood') for (const pm of this.plateMeshes) if ((pm.position.z < 0) === (name === 'bumperF')) pm.visible = false;
+    this.scene.add(debris);
+    const lv = this.physics.body.linvel();
+    const p = push ?? { x: 0, y: 0, z: 0 };
+    const world = this.physics.world;
+    const body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
+      .setTranslation(debris.position.x, debris.position.y, debris.position.z)
+      .setRotation({ x: debris.quaternion.x, y: debris.quaternion.y, z: debris.quaternion.z, w: debris.quaternion.w })
+      .setLinvel(lv.x * 0.9 + p.x + (Math.random() - 0.5), lv.y + 1.5 + p.y + Math.random(), lv.z * 0.9 + p.z + (Math.random() - 0.5))
+      .setAngvel({ x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 4, z: (Math.random() - 0.5) * 6 })
+      .setLinearDamping(0.1).setAngularDamping(0.4).setCanSleep(true));
+    // debris hits the world and props, not cars (it starts inside this car's chassis collider).
+    // It joins the PROJECTILE membership so wheel rays (WORLD|VEHICLE|PROP) roll over it instead of
+    // perching the car on a flat hood.
+    world.createCollider(RAPIER.ColliderDesc.cuboid(Math.max(0.03, half.x), Math.max(0.025, half.y), Math.max(0.03, half.z)).setTranslation(c.x, c.y, c.z)
+      .setMass(name === 'hood' ? 22 : 14).setFriction(0.6).setRestitution(0.2).setCollisionGroups(groups(G.PROJECTILE, G.WORLD | G.PROP)), body);
+    this.partDebris.push({ mesh: debris, body });
+    this.emit('component', { vehicleId: this.id, kind: 'part', detail: name, source, point: debris.position.clone() } satisfies ComponentEvent);
+    return true;
+  }
+  /** Bumpers sag with their zone's damage, then come off; the hood flies on a hard front hit. */
+  private updateParts(dt: number) {
+    for (const [name, zone] of [['bumperF', 'front'], ['bumperR', 'rear']] as const) {
+      const part = this.parts[name];
+      if (!part || this.components.detached?.includes(name)) continue;
+      const z = this.zones[zone];
+      const target = Math.max(0, (z - 0.5) / 0.3);
+      part.sag += (target - part.sag) * Math.min(1, dt * 4);
+      // one end drops (the side that took it), the bar twists down
+      const side = Math.sign(this.zones.right - this.zones.left) || 1;
+      part.holder.rotation.set((zone === 'front' ? 1 : -1) * part.sag * 0.08, 0, side * part.sag * 0.1);
+      part.holder.position.y = -part.sag * 0.06;
+    }
+    for (const d of this.partDebris) {
+      const t = d.body.translation(), r = d.body.rotation();
+      d.mesh.position.set(t.x, t.y, t.z); d.mesh.quaternion.set(r.x, r.y, r.z, r.w);
+    }
+  }
+  private checkPartLoss(zone: Zone, sev: number, source: string | null) {
+    const fwd = _v4.set(0, 0, zone === 'front' ? -1 : 1).applyQuaternion(this.object.quaternion);
+    if (zone === 'front' || zone === 'rear') {
+      const name = zone === 'front' ? 'bumperF' : 'bumperR';
+      if (this.zones[zone] > 0.82 || sev > 0.55) this.detachPart(name, { x: fwd.x * 1.5, y: 0.5, z: fwd.z * 1.5 }, source);
+    }
+    if (zone === 'front' && (this.zones.front > 0.9 || sev > 0.7)) this.detachPart('hood', { x: fwd.x * 0.5, y: 3, z: fwd.z * 0.5 }, source);
+  }
+  private reattachParts() {
+    for (const d of this.partDebris) { this.physics.world.removeRigidBody(d.body); d.mesh.removeFromParent(); }
+    this.partDebris = [];
+    for (const pm of this.plateMeshes) pm.visible = true;
+    for (const p of Object.values(this.parts)) if (p) { p.mesh.visible = true; p.sag = 0; if (p.holder !== this.hoodPivot) { p.holder.rotation.set(0, 0, 0); p.holder.position.set(0, 0, 0); } }
+    if (this.components.detached) this.components.detached.length = 0;
+  }
 
   private updateLightsAndFx(dt: number) {
     const ph = this.physics;
@@ -1038,6 +1143,10 @@ export class Vehicle implements Lightable {
       this.mats.panes[pane].cracked.value = st >= 1 ? 1 : 0; this.mats.panes[pane].broken.value = st >= 2 ? 1 : 0;
       if (st) this.paneCentre(pane, this.mats.panes[pane].hit.value as THREE.Vector3);
     }
+    for (const name of s.components.detached ?? []) {
+      const p = this.parts[name as 'hood']; if (p) p.mesh.visible = false;
+      if (name !== 'hood') for (const pm of this.plateMeshes) if ((pm.position.z < 0) === (name === 'bumperF')) pm.visible = false;
+    }
     if (this.stage === 'destroyed') this.mats.u.burnt.value = 1; else if (this.stage === 'burning') this.mats.u.burnt.value = Math.min(1, this.burnT / 10);
     const b = this.physics.body;
     b.setTranslation({ x: s.pose.x, y: s.pose.y, z: s.pose.z }, true);
@@ -1048,6 +1157,8 @@ export class Vehicle implements Lightable {
     for (const c of this.physics.colliders) OWNER.delete(c.handle);
     this.object.removeFromParent();
     this.ground.removeFromParent();
+    shardsFor(this.scene).release(this);
+    for (const d of this.partDebris) { this.physics.world.removeRigidBody(d.body); d.mesh.removeFromParent(); }
     this.shadowMesh.geometry.dispose(); this.shadowMat.dispose();
     this.headPool.geometry.dispose(); this.rearPool.geometry.dispose();
     this.dentGeo?.body.dispose(); this.dentGeo?.hood?.dispose();

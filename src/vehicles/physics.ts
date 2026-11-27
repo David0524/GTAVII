@@ -67,7 +67,7 @@ export class VehiclePhysics {
   private ray: RAPIER.Ray;
   private zF: number; private zR: number;
 
-  constructor(private world: RAPIER.World, readonly spec: ModelSpec, gen: GeneratedModel, pose: { x: number; y: number; z: number; yaw: number }, public p: PhysicsSpec = spec.physics) {
+  constructor(readonly world: RAPIER.World, readonly spec: ModelSpec, gen: GeneratedModel, pose: { x: number; y: number; z: number; yaw: number }, public p: PhysicsSpec = spec.physics) {
     this.mass = p.mass;
     _q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), pose.yaw);
     const bd = RAPIER.RigidBodyDesc.dynamic()

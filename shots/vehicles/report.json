@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T08:59:47.514Z",
+  "date": "2026-11-27T09:39:05.203Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -10,7 +10,7 @@
       }
     ],
     "model": "bancroft",
-    "tris": 8780,
+    "tris": 9368,
     "speed": -0.379531287743848,
     "damage": 0.43694901490822813,
     "stage": "battered",
@@ -22,8 +22,8 @@
     },
     "gear": 1,
     "rpm": 778.1587838700437,
-    "physMs": 0.6115954984629816,
-    "stepMs": 0
+    "physMs": 0.682105039632521,
+    "stepMs": 0.09999999997671694
   },
   "traffic": {
     "high_150": {
@@ -482,5 +482,24 @@
     ],
     "goodsLive": 14,
     "afterRight": 14
+  },
+  "parts": {
+    "ev": [
+      "part:bumperF",
+      "part:hood",
+      "radiator:destroyed",
+      "engine:damaged",
+      "lamp:headlamps",
+      "glass:front:cracked"
+    ],
+    "detached": [
+      "bumperF",
+      "hood"
+    ],
+    "at": [
+      51.3,
+      0,
+      30
+    ]
   }
 }

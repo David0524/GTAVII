@@ -13,6 +13,9 @@ export interface BoxCollider { cx: number; cy: number; cz: number; hx: number; h
 export interface GeneratedModel {
   body: THREE.BufferGeometry;
   hood: THREE.BufferGeometry | null;
+  /** LOD0 only: bumpers as separate meshes (sag, detach); null at LOD1 (merged into the body). */
+  bumperF: THREE.BufferGeometry | null;
+  bumperR: THREE.BufferGeometry | null;
   /** Hood hinge (rear edge of the hood), local space. */
   hoodPivot: V3;
   wheelR: THREE.BufferGeometry; wheelL: THREE.BufferGeometry;
@@ -214,6 +217,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   // ---------------------------------------------------------------- greenhouse
   greenhouse(b, m, o, Z, halfW, lod);
   if (lod === 0 && PASSENGER.has(m.cls)) cabin(b, m, Z, halfW, !!o.hero);
+  if (lod === 0 && PASSENGER.has(m.cls) && m.hood) engineBay(b, m, Z, halfW, topY);
 
   // ---------------------------------------------------------------- cargo modules
   for (const c of m.cargo ?? []) cargo(b, c, Z, lod);
@@ -290,8 +294,11 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   }
   const bodies = (m.cargo ?? []).filter((c) => c.kind === 'box' || c.kind === 'packer');
   const lastCargo = bodies.length ? bodies[bodies.length - 1] : null;
-  bumper(b, m.bumper, 'front', m, Z, halfW, lod);
-  bumper(b, m.rearBumper ?? m.bumper, 'rear', m, Z, halfW, lod, lastCargo ? { s: lastCargo.s1, hw: lastCargo.hw } : undefined);
+  // LOD0 bumpers are their own meshes, so they can sag and come off; LOD1 keeps them in the body
+  const bumpFB = lod === 0 ? new GeoBuilder() : b, bumpRB = lod === 0 ? new GeoBuilder() : b;
+  if (o.hero) { bumpFB.sub = bumpRB.sub = 1; bumpFB.tubeSegs = bumpRB.tubeSegs = 6; }
+  bumper(bumpFB, m.bumper, 'front', m, Z, halfW, lod);
+  bumper(bumpRB, m.rearBumper ?? m.bumper, 'rear', m, Z, halfW, lod, lastCargo ? { s: lastCargo.s1, hw: lastCargo.hw } : undefined);
 
   // ---------------------------------------------------------------- rear lamps
   const tail: V3[] = [];
@@ -553,12 +560,40 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   let maxZ = Z(L) + rDepth;
   for (const c of m.cargo ?? []) maxZ = Math.max(maxZ, Z(c.s1));
   return {
-    body, hood, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
+    body, hood, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
     wheelR, wheelL, wheels, beacon, decals, colliders,
     lamps: { head, tail }, plates: plateMounts(m, Z, lastCargo),
     minZ: Z(0) - fDepth, maxZ, halfW: m.W / 2, height: Math.max(roofTop, ...(m.cargo ?? []).map((c) => c.y1)),
     tris: tris(body) + tris(hood) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
   };
+}
+
+// ======================================================================= engine bay
+/** A V8 under the hood (seen once the hood is off): block, valve covers, air cleaner, radiator, battery, hoses. */
+function engineBay(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s: number) => number, topY: (s: number) => number) {
+  const [h0, h1] = m.hood!;
+  const s0 = h0 + 0.22, s1 = h1 - 0.12, sc = (s0 + s1) / 2, len = s1 - s0;
+  const yTop = topY(sc) - 0.1, yBot = m.sillY + 0.08;
+  const hw = halfW(sc) * 0.8;
+  b.box('under', 0, yBot, Z(sc), hw * 2, 0.02, len + 0.2); // bay floor (dark)
+  for (const sx of [-1, 1]) b.box('under', sx * hw, (yTop + yBot) / 2, Z(sc), 0.02, yTop - yBot, len + 0.2); // inner fender walls
+  const blkW = Math.min(0.62, hw * 0.9), blkH = Math.min(0.42, yTop - yBot - 0.12), blkL = Math.min(0.75, len * 0.55);
+  const zc = Z(sc + 0.05), yb = yTop - blkH / 2 - 0.08;
+  b.box('trim', 0, yb, zc, blkW * 0.6, blkH, blkL);                     // block
+  for (const sx of [-1, 1]) {
+    b.box('trim', sx * blkW * 0.33, yb + blkH * 0.1, zc, blkW * 0.28, blkH * 0.6, blkL, 0, 0, sx * 0.5);   // heads (V)
+    b.box('paint2', sx * blkW * 0.42, yb + blkH * 0.42, zc, blkW * 0.18, 0.05, blkL * 0.92, 0, 0, sx * 0.5); // valve covers
+    b.tubePath('trim', [[sx * blkW * 0.5, yb + blkH * 0.2, zc - blkL * 0.45], [sx * blkW * 0.58, yb - blkH * 0.3, zc - blkL * 0.3], [sx * blkW * 0.6, yb - blkH * 0.5, zc + blkL * 0.4]], 0.025, 6); // exhaust manifold
+  }
+  b.add('chrome', new THREE.CylinderGeometry(0.23, 0.24, 0.08, 24), new THREE.Matrix4().makeTranslation(0, yb + blkH / 2 + 0.06, zc)); // air cleaner
+  b.add('trim', new THREE.CylinderGeometry(0.05, 0.05, 0.04, 12), new THREE.Matrix4().makeTranslation(0, yb + blkH / 2 + 0.12, zc));
+  const rz = Z(h0 + 0.1);
+  b.box('grille', 0, (yTop + yBot) / 2 + 0.02, rz, hw * 1.5, yTop - yBot - 0.08, 0.06);         // radiator core
+  b.box('trim', 0, yTop - 0.04, rz, hw * 1.5 + 0.04, 0.04, 0.08);                             // radiator tank
+  b.add('trim', new THREE.CylinderGeometry(0.2, 0.2, 0.02, 16).rotateX(Math.PI / 2), new THREE.Matrix4().makeTranslation(0, yb + 0.02, rz + 0.12)); // fan
+  b.tubePath('rubber', [[0.15, yTop - 0.06, rz + 0.05], [0.12, yb + blkH * 0.4, zc - blkL / 2 - 0.02]], 0.022, 8); // top hose
+  b.box('interior', -hw * 0.75, yTop - 0.12, Z(h1 - 0.35), 0.18, 0.2, 0.26);                  // battery
+  b.box('white', -hw * 0.75, yTop - 0.01, Z(h1 - 0.35), 0.16, 0.01, 0.06);
 }
 
 // ======================================================================= hero details

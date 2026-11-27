@@ -119,9 +119,11 @@ export interface Components {
   engine: number; // health 1..0
   fuelTank: number; // health 1..0 (< 1 leaks)
   headlamps: boolean; taillamps: boolean; // broken?
+  /** Body parts that came off (hood, bumperF, bumperR); repaired by repair(). Optional in old saves. */
+  detached?: string[];
 }
 export function newComponents(wheels: number): Components {
-  return { tyresFlat: Array(wheels).fill(false), glass: { front: 0, rear: 0, left: 0, right: 0 }, radiator: 1, engine: 1, fuelTank: 1, headlamps: false, taillamps: false };
+  return { tyresFlat: Array(wheels).fill(false), glass: { front: 0, rear: 0, left: 0, right: 0 }, radiator: 1, engine: 1, fuelTank: 1, headlamps: false, taillamps: false, detached: [] };
 }
 
 // ============================================================================ security, plates, trunk

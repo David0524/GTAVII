@@ -18,6 +18,7 @@ self.onmessage = (e: MessageEvent<{ key: string; specId: string; v: { vinyl: 'no
     const g = generate(spec, { lod: 0, hero: true, ...v });
     addDamageMorphs(g.body, g, strHash(spec.id) % 97);
     if (g.hood) addDamageMorphs(g.hood, g, strHash(spec.id) % 97);
+  for (const bg of [g.bumperF, g.bumperR]) if (bg) addDamageMorphs(bg, g, strHash(spec.id) % 97);
     const { packed, transfer } = packModel(g);
     self.postMessage({ key, packed, ms: performance.now() - t0 }, transfer as Transferable[]);
   } catch (err) {
