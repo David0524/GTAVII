@@ -245,3 +245,13 @@ Judged on grades_board_v3_furniture.jpg, the Corwin walk-ins and the coverage re
 
 ## Grand Central Terminal (user decision 2026-11-27)
 Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interiors split (ENGINE_REQUESTS 11), build order, vs RDR2 Saint Denis station. The build waits on the PBR foundation.
+
+## Free-asset scouting (FREE_ASSETS.md, $0)
+- docs/interiors/PROP_SET.md: the period prop list (priorities A/B/C). docs/interiors/PROP_CANDIDATES.md: about 85 candidates judged.
+  - A: 24 of 26 items have an acceptable free model. B: about 15 of 24.
+  - Best sources: Poly Haven (CC0) and Sketchfab CC0/CC-BY. Spot-checked: Poly Haven ids resolve via its API (caged_hanging_light 22.9k tris, ceiling_fan, desk_lamp_arm_01); Sketchfab "Bentwood chair" and "Diner Stool" are CC Attribution and downloadable.
+- Gaps, to be modelled procedurally with bevels and normals: dinette chair and table, clawfoot tub, high-tank toilet, console TV, wall payphone, opal globe, booth, tanker chair, display case, mailbox bank, cigarette machine, coin-op washer, window AC.
+- Blockers needing the user's free accounts:
+  - Sketchfab downloads require a logged-in account.
+  - Smithsonian Open Access needs a free api.data.gov key.
+- Before adoption: confirm the CC-BY version (4.0) on each Sketchfab model page, strip brand marks (listed in the candidates file), and log each in docs/licenses/ASSETS.md.
