@@ -246,7 +246,7 @@ export class Interiors {
       return { opaque, glass, visible: true };
     });
     const doors: LiveDoor[] = built.doors.map((d) => {
-      const obj = new THREE.Group(); obj.position.set(d.hinge[0], d.hinge[1], d.hinge[2]); obj.rotation.y = d.yaw;
+      const obj = new THREE.Group(); obj.name = `door_${d.id}`; obj.position.set(d.hinge[0], d.hinge[1], d.hinge[2]); obj.rotation.y = d.yaw;
       const [solid, glazing] = splitDoor(d.mesh);
       const dm = new THREE.Mesh(geom(solid), this.mat); dm.userData.interior = look; obj.add(dm);
       if (glazing) { const gm = new THREE.Mesh(geom(glazing), this.glass); gm.userData.interior = look; gm.renderOrder = 2; obj.add(gm); }
