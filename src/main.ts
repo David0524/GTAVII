@@ -173,7 +173,7 @@ async function main() {
   const audioGlue = params.get('sound') === '0' ? null : createAudio({ quality: quality.name, streets, sim });
   // Pedestrians: the characters crowd renderer, fed from sim.peds (created with the factory).
   let crowd: ReturnType<CharacterFactory['createCrowdRenderer']> | null = null;
-  afterTitle.then(() => createCharacterFactory({ quality: quality.name })).then((f) => {
+  afterTitle.then(() => createCharacterFactory({ quality: quality.name, renderer } as never)).then((f) => {
     chars = f;
     // feet and footstep surfaces: the real collision ground (kerbs, stoops), else the terrain
     f.setGround((x, z) => { const top = heightAt(x, z) + 2.5, d = physics.ray(x, top, z, 0, -1, 0, 4, player.collider); return { y: d === null ? heightAt(x, z) : top - d, surface: 'concrete' }; });
