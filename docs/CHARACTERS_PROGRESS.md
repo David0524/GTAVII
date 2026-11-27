@@ -4,9 +4,9 @@ Branch `claude/characters-74`; brief `docs/briefs/CHARACTERS_BRIEF.md`. Read thi
 last.
 
 ## Resume here (2026-11-27, WIP)
-- **Waiting on the user:** a head source for Delphine and Black women in the near ring
-  (`docs/research/HEAD_SOURCES.md`: ask Epic about MetaHuman web distribution, or buy 3D Scan
-  Store Retopologised heads). Until then Delphine stays on our head.
+- **Delphine is on ICT-FaceKit Light.** See "Delphine on ICT-FaceKit Light" below. To rebuild
+  her head, run `npx tsx tools/characters/build-ict.ts --src <ICT dir>` once, then
+  `npx tsx tools/characters/bake-ict.ts delphine`.
 - **In flight:** a tone-check re-run after retuning the probes (hand: toward the fingertip; neck:
   higher) and relaxing the pool gate to 1.45×. Re-run with
   `for f in 27_ 29_ 01_ 02_; do bash tools/characters/shots.sh $f; done`, then
@@ -17,6 +17,84 @@ last.
   - Then send the numbers and shots (27, 28, 29, 01/02/04 `_vs_refs`) to oversight.
 - **Then:** improve Delphine's own head (afroShort reads as a cap; soften it toward cropped natural
   hair), roll the collars, add blinks and lip-sync.
+
+## Delphine on ICT-FaceKit Light (oversight-approved prototype; synthesised identity only)
+Board: `shots/characters/40_delphine_ict_board.jpg` (front, three-quarter, profile, full figure,
+her previous MakeHuman head, two public-domain 1973 DOCUMERICA street photos for era styling).
+
+**Built (all pushed):**
+- `tools/characters/bake-ict.ts` bakes one hand-chosen coefficient vector (`ict_leads.json`)
+  into the head container the Rocketbox heads use, so fitting, the neck ring and the body
+  conform are shared.
+  - ICT's UDIM tiles are packed into one atlas.
+  - Skin weights are assigned by region: neck below the jaw line, jaw below the mouth line,
+    eyes, lower teeth and gums.
+  - The neck is cut to the Rocketbox leads' length: ICT's runs onto the chest (about 3.1
+    interocular distances below the eyes, against 2.3), which cut the body open.
+  - Lashes are alpha cards; the inner iris and the lacrimal, blend and occlusion films are
+    dropped.
+  - The basis stays dev-only; only the baked head ships.
+- `tools/characters/ict_tex.py` paints everything procedurally (ICT Light has no textures).
+  - Albedo: 3D-sampled mottling (so it runs across UV seams), eye surrounds, perioral tone,
+    vermilion with a wet inner lip, brows as strands, alar creases, ears, a close-crop hairline,
+    and the iris (fibres, collarette, limbal ring), pupil and sclera.
+  - Normal map: pores (denser on the nose and cheeks), lip lines and faint forehead lines.
+  - Packed data: roughness, cavity and skin weight.
+- **Skin lighting** (`src/characters/render/skinLighting.ts`, used by every head and the body
+  material, so head and neck shade alike):
+  - pre-integrated diffuse: per-channel wrap that grows with screen-space curvature, and
+    per-channel normals (red takes the smooth normal);
+  - dual-lobe GGX specular (85/15);
+  - the existing thin-part transmission.
+- **Hair grown from ICT's own scalp** (`src/characters/heads/scalpHair.ts`): coil shells along the
+  scalp normal, using the per-vertex hair weight from the bake. It costs one extra draw.
+- **Licence:** MIT notice in `public/characters/rb/LICENSE-ICT-FaceKit.md`; `docs/licenses/ASSETS.md`
+  now lists ICT under In use.
+
+**Measured:**
+
+| Check | Result |
+|---|---|
+| Tone, face–hand dC | Delphine 0.4, Teddy 4.7 (gate 8) |
+| Tone, face–neck dC | Delphine 16.0 (gate 20) |
+| Nick, face–hand | Fails, but his hand probe lands on his suit pocket (`idle_pockets`), so it measures the suit; probe fix pending |
+| Head size | 26k vertices, 47k triangles |
+| Head .bin | 873 KB raw, 391 KB gzip with delta filters |
+| Textures | 135 KB albedo, 115 KB normal, 112 KB packed/lash |
+| Head total, gzip | About 0.75 MB, against Nick's 0.17 MB |
+
+Teeth and gums are 28% of the vertices for a mouth that's mostly closed; they're the first cut in
+the size pass.
+
+**vs GTA V / RDR2 hero faces (honest):**
+- **Shape:** ICT's scan-derived statistical shape gives believable proportions, nasolabial
+  folds, lids and ears, at or above GTA V hero-head shape. The identity still reads young and
+  androgynous; it needs a sculpting pass on the coefficients, not a fit to anyone.
+- **Skin albedo:** below GTA V. Hero heads there use scanned albedo with hand-painted variation;
+  ours is procedural, so it reads clean and CG at close range (no real pore or colour
+  micro-variation, no freckles or uneven tone). RDR2 is far above.
+- **Skin shading:** now in the right family (pre-integrated SSS with a dual-lobe specular, as GTA
+  V-era deferred skin did).
+- **Eyes:** below GTA V. There's no eye occlusion or tear meniscus and no iris parallax or
+  refraction, so they stare.
+- **Hair:** reads as a short natural crop from three-quarter view. In profile, the nape and
+  hairline edges are hard and the coil texture is uniform. GTA V's short afros break the
+  silhouette better.
+- **Seams:** a faint line remains where the head's neck meets the body in profile. The dress
+  collar spikes at the neck (a garment issue, also on her previous head) are still there.
+- **Verdict:** GTA V near-NPC level, not yet GTA V hero level. The gaps are albedo detail and the
+  eyes.
+
+**Next, in order:**
+1. Eyes: occlusion film, meniscus, iris parallax.
+2. Albedo micro-variation (a tiling CC0 skin-detail layer like the body's), plus card brows.
+3. Nape and hairline softening, and the profile neck seam.
+4. Dress collar spikes.
+5. Size: decimate teeth and gums, meshopt.
+
+Close portrait references of Black women from 1973–74 are still missing from
+`references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
+Wikimedia rate-limited this container, so sourcing is pending.
 
 ## Status (2026-11-26)
 | Area | State |
