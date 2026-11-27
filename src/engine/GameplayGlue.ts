@@ -39,8 +39,18 @@ export interface GameplayGlue {
   lastMs: number;
 }
 
+/**
+ * Gameplay's content (module + narrative JSON) is network-only work: no GPU, a few small parses. Started at
+ * boot it loads during the title instead of queueing behind frames after it (headless: ~25 s of waits).
+ */
+let contentP: Promise<Awaited<ReturnType<typeof import('../gameplay/scene/narrativeContent')['loadNarrativeContent']>> | null> | null = null;
+export function prefetchGameplayContent() {
+  return contentP ??= import('../gameplay/scene/narrativeContent').then((m) => { loadReport.mark('gameplay-imported'); return m.loadNarrativeContent(); }).catch((e) => { console.warn('gameplay content', e); return null; });
+}
+
 export async function createGameplay(o: { quality: Quality; physics: Physics; player: PlayerController; lead: () => string; camera: THREE.Camera; sim: Simulation | null; saves: SaveManager }): Promise<GameplayGlue> {
-  const narrative = await import('../gameplay/scene/narrativeContent').then((m) => m.loadNarrativeContent()).catch((e) => { console.warn('gameplay content', e); return null; });
+  loadReport.mark('gameplay-start');
+  const narrative = await prefetchGameplayContent();
   loadReport.mark('gameplay-content');
   if (narrative?.warnings.length) console.info(`[gameplay] content from ${narrative.source}: ${narrative.warnings.length} warnings`);
   const g = new Gameplay({ quality: o.quality, content: narrative ? (narrative.content as never) : { items: null, shops: null, weapons: null } });

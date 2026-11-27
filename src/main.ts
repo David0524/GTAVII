@@ -21,7 +21,7 @@ import { AdaptiveResolution } from './engine/AdaptiveResolution';
 import { Parks } from './world/Parks';
 import { StreetFurniture } from './world/StreetFurniture';
 import { SignalHeads } from './world/SignalHeads';
-import { createGameplay, type GameplayGlue } from './engine/GameplayGlue';
+import { createGameplay, prefetchGameplayContent, type GameplayGlue } from './engine/GameplayGlue';
 import { createAudio } from './engine/AudioGlue';
 import { createInteriors, type Interiors } from './interiors';
 import { Driving } from './engine/Driving';
@@ -109,6 +109,7 @@ async function main() {
   await furniture.load(base + 'furniture.json').catch((e) => console.warn('furniture', e));
   scene.add(furniture.root);
   loadReport.mark('streets+lights');
+  void prefetchGameplayContent(); // network-only; resolves during the title (createGameplay awaits it after)
 
   // ---------------------------------------------------------------- ambient sim (traffic, pedestrians, wildlife)
   // Loads in the background: the title and first frame never wait for lanes.bin. ?sim=1 keeps the sim
@@ -185,9 +186,21 @@ async function main() {
     f.setGround((x, z) => { const top = heightAt(x, z) + 2.5, d = physics.ray(x, top, z, 0, -1, 0, 4, player.collider); return { y: d === null ? heightAt(x, z) : top - d, surface: 'concrete' }; });
     const climate = () => { const h = worldClock.minutes / 60; f.setClimate({ heat: h > 11 && h < 18 ? 0.7 : 0.35, wetness: worldClock.weather === 'rain' ? 1 : 0 }); };
     climate(); setInterval(climate, 10_000);
-    spawnLeadBody();
-    if (sim) { crowd = f.createCrowdRenderer(quality.name === 'low' ? 240 : 400); scene.add(crowd.object); }
-    loadReport.mark('characters');
+    // Warm the character and crowd shaders off-scene before their first draw: linking them inside a frame
+    // stalled one frame for ~20 s headless (getProgramParameter) and held every other loader behind it.
+    const warm = new THREE.Group();
+    const probe = f.spawn(warm, { seed: 74, hero: party.activeId });
+    if (sim) { crowd = f.createCrowdRenderer(quality.name === 'low' ? 240 : 400); warm.add(crowd.object); }
+    return Promise.race([
+      (renderer as unknown as { compileAsync(s: THREE.Object3D, c: THREE.Camera, t?: THREE.Scene): Promise<void> }).compileAsync(warm, camera, scene).catch(() => undefined),
+      new Promise((r) => setTimeout(r, 15_000)), // never hold the characters back on a slow or failed warm-up
+    ]).then(() => {
+      loadReport.mark('characters-shaders');
+      probe.object.removeFromParent(); probe.dispose();
+      spawnLeadBody();
+      if (crowd) scene.add(crowd.object);
+      loadReport.mark('characters');
+    });
   }).catch((e) => console.warn('characters', e));
   const simActors = [{ id: 'player', x: 0, z: 0, vx: 0, vz: 0, radius: 0.4, kind: 'player' as const }];
 

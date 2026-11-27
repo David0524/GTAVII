@@ -17,7 +17,7 @@ export const loadReport = {
   cpu: [] as number[], // JS time inside the frame callback (rest of the frame = GPU/compositor/other)
   mark(name: string) { if (!this.marks.some(([n]) => n === name)) { this.marks.push([name, performance.now()]); this.cur.marks.push(name); } },
   frame(ms: number) {
-    if (performance.now() < 30000 && this.frames.length < 4000) this.frames.push(ms);
+    if (performance.now() < 120000 && this.frames.length < 4000) this.frames.push(ms);
     if (ms > 250 && this.hitches.length < 20) this.hitches.push({ at: performance.now(), ms, chunks: this.cur.chunks, installMs: this.cur.installMs, collidersMs: this.cur.collidersMs, marks: [...this.cur.marks] });
     this.cur = { chunks: 0, installMs: 0, collidersMs: 0, marks: [] };
   },
