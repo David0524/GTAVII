@@ -229,8 +229,17 @@ Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
   - **Honest state:** strands now read on the cards, but the tops of heads still show flat layered
     card sheets. Headless renders exaggerate the stair-stepped alpha edges (SwiftShader has no
     MSAA, so alpha-to-coverage can't smooth them).
-  - **Afro:** the volume is capped at 4.5 cm. Shells grown off the helper-hair mesh stretch into
-    flat facets with a centre fold (a full taper made it worse: a paper-hat wedge).
+  - **Afro and curly volume: rebuilt** (`shots/characters/45_afro_volume.jpg`; top is before,
+    bottom is after).
+    - It's a latitude/longitude grid around a raised centre instead of shells grown off the
+      helper-hair mesh, which stretched into flat facets with a centre fold.
+    - Each grid direction takes its scalp radius, skin weights and hairline from the nearest
+      source vertex. Sources are the helper-hair scalp plus the back of our own head; the helper
+      stops above the nape, which had left a slab with bare scalp under it.
+    - The radius is smoothed but never pushed above the scalp. Thickness and density taper to
+      zero at the hairline and where coverage ends.
+    - The hairline arcs up at the temples, and the afro reaches the nape.
+    - Left: a small hole at one temple, and a forehead line that's still fairly straight.
   - **Next:**
     1. A dedicated afro and coil volume: a dense sphere-patch mesh around the head with clumped
        coil shells, as on Delphine's ICT scalp, which works.
