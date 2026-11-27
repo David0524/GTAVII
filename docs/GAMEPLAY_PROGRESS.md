@@ -295,13 +295,18 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
 - **Carts knocked over:** at 3 m/s or more, by the player, a car or a chase. The cart spills (`notice cartOverturned` lists the goods) and is closed for 2 game hours. The player on foot commits vandalism; in a car, reckless.
 - **Three-card monte** ("Find the lady"): $2–$20 a hand, and rigged, because the dealer palms the queen on a real bet. Catch the tell, the bent corner of the queen visible for 0.21–0.49 s during the 4 s deal (wider with stealth skill, narrower drunk), and you follow it to an even-money win. After two wins the dealer folds the box.
 - **Context button:** "Buy" (the UI gets `notice vendorMenu`), "Shine 50¢" or "Find the lady".
+- **Regulars and the sidewalk wire** (narrative's side.vendor_tipsters):
+  - Three purchases at a cart make you a regular there; narrative's `flag.sidewalk_wire` makes you one everywhere. `vendorMenu().regular` offers the question.
+  - `vendorTip(id)` gives the street's view within 600 m, once per vendor per game hour: beat posts, search cars, roadblocks and subway stakeouts as map hints `{at, kind, text}`.
+  - If a report matches how you look, the vendor warns you instead: "They're asking about a man in a white shirt… Sounds a lot like you."
+  - Tips, not money. Saved.
 - **Saved:** tills and overturned carts.
 
 #### vs GTA V / VI / RDR2
 - **References:** GTA V's vendors are mostly ambient (hot-dog stands you can't really use, a few snack machines), and its street scams are scenery. RDR2's camps, stalls and general stores have real menus with stat effects and eating animations, and robbing a store is a full scenario. GTA VI is expected to deepen ambient commerce.
 - **Where we match or exceed:** every cart is usable, with period menus and small, meaningful effects (heal, breath, cooling in the 1974 heatwave, sobering). A rigged hustle you can beat by skill is something neither reference has as a playable minigame. Robbing and knocking over carts go through the same witness heat as everything else.
 - **Where we fall short:** no eating or shine animations yet (characters). The vendor's reaction to a robbery is a flee or cower command, not a scenario with pleading or a fight back. Vendors as tipsters and protection beats are narrative's side content, not wired yet.
-- **Plan:** wire narrative's vendor tipsters into the context button (a "Talk" beat when a vendor has a tip). The vendor who fights back is in (brawler hand-off); give him the ladle once characters have a prop for it.
+- **Plan:** the vendor tipsters are in (regulars and heat hints); next, protection-racket beats on vendors for Nick. The vendor who fights back is in (brawler hand-off); give him the ladle once characters have a prop for it.
 
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):

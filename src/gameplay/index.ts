@@ -28,7 +28,7 @@ import { CombatAI, type Faction, type CombatTarget } from './combat/ai';
 import { Gun, NEUTRAL_MODS, type ShooterMods, type ShotRay } from './combat/weapons';
 import { humanoidHitbox, resolveShots, type ActorHitbox, type ShotResult, type TyreShape } from './combat/ballistics';
 import { Witnesses, type ReportPoint } from './police/witnesses';
-import { merge as mergeDesc } from './police/description';
+import { merge as mergeDesc, match, describeText } from './police/description';
 import { Police, expectedBribe as expectedBribeOf, type SuspectCtx, type UnitKind } from './police/police';
 import { radiusOf as radiusOfCrime, type Crime, type CrimeKind } from './police/crime';
 import type { Appearance } from './police/description';
@@ -1475,7 +1475,7 @@ export class Gameplay {
   vendorMenu(id: string) {
     const v = this.vendors.list.get(id); if (!v || !this.player) return null;
     const cash = this.inv.ensure(this.player.lead).money;
-    return { kind: v.kind, open: this.vendors.open(v, this.economy.nowH()), goods: this.vendorMenus[v.kind].filter((g) => !g.rainOnly || this.pc.raining).map((g) => ({ ...g, affordable: cash >= g.cents })), shine: v.kind === 'shoeshine' ? { cents: this.shinePrice(), ...SHINE } : null };
+    return { kind: v.kind, regular: this.isRegular(id), open: this.vendors.open(v, this.economy.nowH()), goods: this.vendorMenus[v.kind].filter((g) => !g.rainOnly || this.pc.raining).map((g) => ({ ...g, affordable: cash >= g.cents })), shine: v.kind === 'shoeshine' ? { cents: this.shinePrice(), ...SHINE } : null };
   }
   /** Buy and eat or pocket. Food heals a little, drinks restore breath, an ice cools you in the heat, coffee sobers a touch. */
   buyFromVendor(id: string, goodId: string) {
@@ -1488,6 +1488,7 @@ export class Gameplay {
     if (g.stamina) li.stamina.value = Math.min(li.stamina.max, li.stamina.value + g.stamina);
     if (g.sober) li.intox = Math.max(0, li.intox - g.sober);
     if (g.cool) this.coolUntil = Math.max(this.coolUntil, this.time) + g.cool * 1800;
+    { const k = `${lead}|${id}`; this.vendorVisits.set(k, (this.vendorVisits.get(k) ?? 0) + 1); }
     this.emit('notice', { kind: 'vendorSale', vendor: id, good: g.id, cents: g.cents, eatSeconds: g.eatSeconds ?? 0 });
     this.simLike?.vendorNotice?.({ kind: 'vendorSale', vendor: id, good: g.id });
     return true;
@@ -1501,6 +1502,41 @@ export class Gameplay {
     this.emit('notice', { kind: 'shined', vendor: id, seconds: SHINE.seconds });
     return true;
   }
+  // ---- regulars and the sidewalk wire (narrative's side.vendor_tipsters)
+  /** purchases per lead per vendor: three makes you a regular (or narrative's flag after The Sidewalk Wire) */
+  readonly vendorVisits = new Map<string, number>();
+  private lastTip = new Map<string, number>();
+  static REGULAR_AFTER = 3;
+  static TIP = { radius: 600, everyGameH: 1, flag: 'flag.sidewalk_wire' } as const;
+  isRegular(vendorId: string) {
+    if (!this.player) return false;
+    return this.flags.has(Gameplay.TIP.flag) || (this.vendorVisits.get(`${this.player.lead}|${vendorId}`) ?? 0) >= Gameplay.REGULAR_AFTER;
+  }
+  /**
+   * "What have you seen?" A regular gets the street's view of the police within 600 m: beat posts, cars
+   * searching, roadblocks and subway stakeouts (as map hints), and whether they're asking around about someone
+   * who looks like you. Once per vendor per game hour. Tips, not money; heat 0.
+   */
+  vendorTip(vendorId: string) {
+    const v = this.vendors.list.get(vendorId), at = this.vendorPos.get(vendorId);
+    if (!v || !at || !this.player || !this.isRegular(vendorId)) return null;
+    const nowH = this.economy.nowH(), last = this.lastTip.get(vendorId);
+    if (last !== undefined && nowH - last < Gameplay.TIP.everyGameH) return { hints: [], line: 'nothing new since you asked' };
+    this.lastTip.set(vendorId, nowH);
+    const hints: { at: [number, number]; kind: 'post' | 'search' | 'roadblock' | 'stakeout' | 'car'; text: string }[] = [];
+    for (const u of this.policeSys.units.values()) {
+      if (Math.hypot(u.x - at.x, u.z - at.z) > Gameplay.TIP.radius || u.state === 'down' || u.state === 'leave') continue;
+      const kind = u.watch ? 'stakeout' : u.state === 'roadblock' ? 'roadblock' : u.state === 'post' ? 'post' : u.state === 'search' || u.state === 'enroute' ? 'search' : 'car';
+      const what = { stakeout: 'a car sitting on the subway stairs', roadblock: 'a roadblock', post: u.kind === 'foot' ? 'the beat cop on his corner' : 'a radio car parked up', search: 'cops going door to door', car: 'a patrol car cruising' }[kind];
+      hints.push({ at: [u.x, u.z], kind, text: `${what}, ${this.placeNameAt(u.x, u.z)}` });
+    }
+    const rep = this.policeSys.reportFor(this.player.id);
+    const asking = rep && match(rep.description, this.appearance()) >= 0.45 ? `They're asking about ${describeText(rep.description, 0.4) || 'somebody'}. Sounds a lot like you.` : null;
+    const line = asking ?? (hints.length ? `Cops around: ${hints.slice(0, 3).map((h) => h.text).join('; ')}.` : 'Quiet today. Nobody\'s looking for nobody.');
+    this.emit('notice', { kind: 'vendorTip', vendor: vendorId, line, hints });
+    return { hints, line };
+  }
+  private placeNameAt(x: number, z: number) { return this.policeSys.placeName(x, z); }
   /** Take the till (or the peddler's roll). Small change for real heat: a theft, armed robbery with a gun out. */
   robVendor(id: string) {
     const v = this.vendors.list.get(id); if (!v || !this.player) return null;
@@ -1877,7 +1913,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), arcade: this.arcade.serialize(), vendors: this.vendors.serialize(), bodies: this.bodies.serialize().map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : Math.max(0, b.discoverAt - this.time), diedAt: 0 })), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), arcade: this.arcade.serialize(), vendors: this.vendors.serialize(), vendorVisits: Object.fromEntries(this.vendorVisits), bodies: this.bodies.serialize().map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : Math.max(0, b.discoverAt - this.time), diedAt: 0 })), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -1899,6 +1935,7 @@ export class Gameplay {
     if ((s as any).economy) this.economy.restore((s as any).economy);
     if ((s as any).arcade) this.arcade.restore((s as any).arcade);
     if ((s as any).vendors) this.vendors.restore((s as any).vendors);
+    if ((s as any).vendorVisits) for (const [k, n] of Object.entries((s as any).vendorVisits as Record<string, number>)) this.vendorVisits.set(k, n);
     if ((s as any).bodies) this.bodies.restore(((s as any).bodies as any[]).map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : this.time + b.discoverAt })));
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);

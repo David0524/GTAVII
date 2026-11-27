@@ -5,6 +5,7 @@ import path from 'node:path';
 import { rig } from './harness';
 import { EFFECTS, goodId, loadVendorMenus, Monte, MONTE, parsePrice, TILL } from '../economy/vendors';
 import { Rng } from '../core/rng';
+import { observe } from '../police/description';
 
 const T = 'char.teddy_arce';
 // narrative's content/vendors.json (claude/sharp-maxwell-jnb6hr): the single source of menus and prices
@@ -93,4 +94,26 @@ test('three-card monte is rigged: without the tell you never win; catch the bent
   assert.equal(r.g.inv.ensure(T).money, m0 - 1000);
   r.g.montePick(deal.dealId, 1, deal.tellAt + deal.tellWindow / 2);
   assert.equal(r.g.inv.ensure(T).money, m0 + 1000);
+});
+
+test('the sidewalk wire: a regular hears where the cops are and whether they are asking about you; once an hour', () => {
+  const r = vrig();
+  r.g.registerVendor('cyrus', 'hot_dog', 2, 0);
+  assert.equal(r.g.vendorTip('cyrus'), null, 'a stranger gets nothing');
+  for (let i = 0; i < 3; i++) r.g.buyFromVendor('cyrus', 'hot_dog.frank');
+  assert.ok(r.g.isRegular('cyrus') && r.g.vendorMenu('cyrus')!.regular, 'three franks and you are a regular');
+  r.g.registerPolice('foot', 'pct.gramercy', 120, -40, { corrupt: 0 });
+  let tip = r.g.vendorTip('cyrus')!;
+  assert.ok(tip.hints.some((h) => h.kind === 'post') && /beat cop/.test(tip.line), tip.line);
+  assert.equal(r.g.vendorTip('cyrus')!.hints.length, 0, 'nothing new inside the hour');
+  // a report describing you: he warns you
+  r.g.passTime(1.1, 'wait');
+  r.g.policeSys.file({ witness: 'w', perp: 'player', kinds: ['theft'], desc: observe(r.g.appearance(), 1, new Rng(3)), lastKnown: [0, 0], crimeAt: [0, 0], via: 'callbox', time: 0 } as any);
+  tip = r.g.vendorTip('cyrus')!;
+  assert.match(tip.line, /asking about .*like you/, tip.line);
+  // narrative's flag after The Sidewalk Wire makes every vendor talk
+  r.g.registerVendor('peppy', 'pretzel_knish', 40, 0);
+  assert.equal(r.g.vendorTip('peppy'), null);
+  r.g.setFlags(['flag.sidewalk_wire']);
+  assert.ok(r.g.vendorTip('peppy'));
 });
