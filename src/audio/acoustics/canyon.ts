@@ -33,14 +33,15 @@ export class CanyonAnalyzer {
   lastRays: { a: number; d: number; h: number }[] = [];
   constructor(private geo: AcousticGeometry, private rays: number) {}
 
-  analyze(x: number, z: number): CanyonState {
+  /** `rays` overrides the preset's count (gunfire analyses the shooter's canyon at full resolution on every preset). */
+  analyze(x: number, z: number, rays = this.rays): CanyonState {
     const g = this.geo;
     const ns = g.nearestStreet(x, z, 80);
     const ax = ns ? ns.dx : 0, az = ns ? ns.dz : 1;
     const side: { L: number[]; R: number[]; hL: number[]; hR: number[] } = { L: [], R: [], hL: [], hR: [] };
     let F = MAXD, B = MAXD, hF = 0, hB = 0, escaped = 0, sumH = 0, nh = 0;
     this.lastRays.length = 0;
-    const N = this.rays;
+    const N = rays;
     for (let k = 0; k < N; k++) {
       const a = (k / N) * Math.PI * 2;
       // rotate by street axis so ray 0 points along the street

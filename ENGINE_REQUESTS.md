@@ -134,3 +134,14 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
 - **Why:** audio can't see vendors otherwise. Cost: ≤3 looping voices near the listener; `vendor_corner` scene
   update p95 0.8 ms on High.
 - **Fallback:** without a bound sim, no vendor audio (nothing breaks).
+
+## From audio: 13. Forward gunfire from gameplay (combat)
+- **What:** the gameplay/combat code calls audio directly. One call per round:
+  - `audio.gunshot([x, y, z], tier)` at the muzzle. `tier` is 'cheap' | 'service' | 'magnum' | 'shotgun' | 'auto'. Pass `{ indoors: true }` when the shooter is inside.
+  - `audio.bulletPass(muzzle, hitPoint)` for each round's flight.
+  - `audio.bulletImpact(hitPoint, material)`, where material is 'brick' | 'concrete' | 'metal' | 'car' | 'wood' | 'glass' | 'dirt'.
+  - `audio.gunFoley('pump' | 'dry' | 'reload', at)` on those animations.
+- **Why:** audio can't see weapons. Travel time, canyon echoes, the HDR duck and the whiz test all run inside audio.
+- **Also, for sim:** forward the same shots to `sim.emit({ type: 'gunfire', x, z })` as today. Vendors and peds react through the sim, and audio voices those reactions from the sim's events.
+- **Cost:** a shot is 1 voice plus up to 8 echoes (High) or 4 (Low). Measured on the `shootout_8th` scene: p95 0.6 ms on High, voice cap held.
+- **Fallback:** no calls means no gunfire audio.

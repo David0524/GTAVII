@@ -91,11 +91,11 @@ for me to describe its audio reliably, so it isn't characterised below.
 |---|---|---|---|
 | Ambience layering by block and time | Dense, hand-authored beds per district and hour; constant small one-shots; weather and time shift everything | Beds and events driven by real district data, clock curves, weekday/date, weather and power; dozens of emitter types placed from the map | Sound design is synthesised, not recorded; far fewer unique one-shots. Plan: the mix pass under way, then more event families per district |
 | Footsteps by surface | Many surfaces, shoes, speeds; clean animation sync | 12 surfaces + traversal foley, kerb and grating auto-detected | Synthesised cloth/body foley is thin; no shoe types; sync waits on characters' events (request 9) |
-| Gunfire and canyon echo | Signature tails and slapback in city streets | The canyon reflection and FDN system that would give it exists and is measured | **Not built yet** (gameplay audio backlog); needs a gunfire category with a short HDR ducking window |
+| Gunfire and canyon echo | Signature tails and slapback in city streets | Built: per-shot image-source echoes from the real facades, travel time, HDR window; echo timing measured (26/26) | Synthesised shots are cleaner than recordings; few mechanical layers |
 | Vehicle engines | Recorded, multi-layer engines with loads, gears, backfires | Procedural per-cylinder engines with real firing orders, load, gears, Doppler, LOD to traffic beds | Cleaner and more "synthetic" than recordings, especially at steady mid revs. Plan: add mechanical noise layers and per-class variation |
 | Crowd walla | Recorded crowds with intelligible fragments and reactions | Density-driven formant walla on both sidewalks, kids in parks, narrative barks on horns/collisions | Formant babble is clearly synthetic up close; speech is eSpeak (placeholder tier) |
 | Police dispatch | Radio chatter as a key cue | Radio/phone filters and the bark/line system are ready | **Not built yet**: needs dispatch content (narrative) and the build-time voices |
-| Mix and ducking | Strong dynamic mixing; dialogue always clear; music ducks | Dialogue sidechain ducking, category mixing desk, loudness profiles, TP limiter, measured −16/−23 LUFS sessions | No HDR-style "loudest event wins" window yet. Plan: add it with gunfire |
+| Mix and ducking | Strong dynamic mixing; dialogue always clear; music ducks | Dialogue sidechain ducking, category mixing desk, loudness profiles, TP limiter, measured −16/−23 LUFS sessions, HDR window on gunfire | The HDR window covers gunfire only; explosions and crashes should use it too |
 | Score cues | Adaptive score and radio | Procedural period instrumentals exist | Radio stations paused by the user; no adaptive score yet |
 
 ## Honest critique of the renders (`shots/audio/*.wav`)
@@ -225,6 +225,48 @@ run only at build time and are absent from the production bundle. Licences are l
 Freesound (CC0 / CC-BY) and Sonniss GDC sounds are allowed through the gate. I'd only reach for them where synthesis
 is weakest (cloth and body foley, crowd close-ups, gunfire transients), reading each licence first and adding a row
 before any file lands. BBC Sound Effects is out (non-commercial).
+
+## Gunfire (combat backlog, 2026-11-27)
+`world/gunfire.ts`; API: `audio.gunshot(at, tier)`, `audio.bulletPass(from, to)`, `audio.bulletImpact(at, material)`,
+`audio.gunFoley('pump'|'dry'|'reload', at)`. All sounds self-made (AUDIO_SOURCES.md); the `combat` group is preloaded (~4 MB decoded).
+- **Tiers (invented period guns):**
+  - `cheap`: pocket .22/.25, thin and snappy, −5 dB;
+  - `service`: .38 revolver, the reference level;
+  - `magnum`: more body and sub, +2 dB;
+  - `shotgun`: 12-gauge pump, longest and widest blast, +3 dB;
+  - `auto`: each round of a burst.
+
+  Each shot is an N-wave crack, a falling-band gas burst, a damped "boom", the action's click and a gas tail.
+  After one balance pass, octave energy in the first 300 ms is broadband from 250 Hz to 8 kHz (within about 8 dB) with the tier's low body below that. The first bake was 15–20 dB short in the mids.
+- **Travel time:** the sound starts distance / 343 m/s after the trigger, so a shot at 450 m is heard 1.3 s after its flash.
+- **The canyon echo (signature):** image sources from the real facades around the shooter (the reverb's CanyonAnalyzer at 24 rays on every preset):
+  - first order off both facades and the block-end walls;
+  - higher orders between parallel facades (up to 4 where the canyon flutters);
+  - each echo is a positional voice at its image position, delayed by its extra path and attenuated by facade coverage and order;
+  - up to 8 echoes on High, 6 on Medium, 4 on Low; rapid fire keeps the strongest 3 per later round;
+  - each echo's path is line-of-sight checked on its first leg (shooter to first wall) and its last leg (last reflection point to listener), so shooters indoors or round a corner don't get street echoes;
+  - the FDN gets a high wet send for the long tail.
+- **HDR window:** ambience and radio dip 3–8 dB by the shot's loudness at the listener, hold 0.25 s, recover over about 1 s (`mixer.hdr`), timed to the shot's arrival.
+- **Engine fix found here:** voices can now start at a future time to the sample (`delay`), used for travel time and echoes.
+  Chromium's HRTF panner adds about 6 ms that equal-power panning doesn't, which skewed a direct sound against its echoes.
+  The latency is now measured at load (impulse through both panners, offline; 6.35 ms in Chromium), and delayed HRTF voices start that much early.
+- **Checks:**
+  - `npx tsx tools/audio/gun-check.ts` (timing, measured on the output): each shot is replaced by a 0.3 ms click.
+    - 26/26 separable predicted arrivals were found within −0.5/+1.5 ms across 5 shots at 16–150 m.
+    - In a control (the same test 7 ms off any arrival), the detector fired 2 times out of 21, so it isn't just finding peaks everywhere.
+    - Constant output latency is about 7.8 ms (limiter lookahead plus panner).
+  - `render.ts --only shootout_8th`: W 39th St east of 8th Ave at 11:20 p.m., all tiers at 13–450 m, a burst, whiz, impacts and foley (excerpt `shots/audio/shootout_8th.ogg`).
+    - High/mobile: −15.8 LUFS, max momentary −6.2, TP −1.50 dBTP, limiter peak reduction 0.8 dB, 50/64 voices, p95 0.6 ms.
+    - Home theatre: −22.8 LUFS, TP −3.6.
+    - Low: −18.5 LUFS, 24/24 voices.
+    - The main suite is unchanged (−16.28 / −23.05).
+  - `foley-check.ts combat`: 13 families, none bad (`shots/audio/combat.ogg`).
+- **vs GTA V / VI / RDR2:**
+  - The references' gunfire is recorded, layered by distance, with authored city tails; RDR2 is the benchmark for echo across terrain.
+  - We match the structure: travel time, distance layers via air absorption, and a per-shot ducking window.
+  - Our echoes come from the actual building geometry around the shooter, and their timing is measured.
+  - We fall short on the source sound: synthesised shots are cleaner and less "dirty" than recordings, and there are no per-gun mechanical layers beyond one click.
+  - Plan: add a supersonic crack for magnum rounds passing the listener, and casings and shell drops.
 
 ## Street vendors (STREET_VENDORS.md, 2026-11-27)
 All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2 MB decoded on every preset: variants capped per sound, loops one variant with rate jitter) loads when the first vendor registers.

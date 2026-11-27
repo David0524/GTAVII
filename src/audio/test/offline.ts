@@ -5,9 +5,9 @@
  * 62.5 fps frame; suspend points must sit on 128-sample render quanta) and returns the PCM plus
  * the checks the test asserts on.
  */
-import { AudioSystem } from '../index';
+import { AudioSystem, type GunTier, type Material, type ShotReport } from '../index';
 import { MockSim } from './mockSim';
-import { SCENARIOS } from './scenarios';
+import { SCENARIOS, type Scenario } from './scenarios';
 import { CityMap } from '../world/cityMap';
 import type { StreetRec } from '../acoustics/geometry';
 import type { QualityName, LoudnessProfile } from '../config';
@@ -32,8 +32,9 @@ function b64(buf: ArrayBuffer): string {
   return btoa(s);
 }
 
-export async function render(id: string, o: { quality?: QualityName; seconds?: number; profile?: LoudnessProfile; sr?: number; solo?: string; only?: string } = {}) {
-  const sc = SCENARIOS.find((s) => s.id === id)!; const seconds = o.seconds ?? 60, sr = o.sr ?? 48000, quality = o.quality ?? 'high';
+export async function render(id: string, o: { quality?: QualityName; seconds?: number; profile?: LoudnessProfile; sr?: number; solo?: string; only?: string; /** Replace the scenario's events. */ events?: Scenario['events']; /** Listener stands still. */ still?: boolean } = {}) {
+  const base = SCENARIOS.find((s) => s.id === id)!;
+  const sc: Scenario = { ...base, events: o.events ?? base.events, walk: o.still ? 0 : base.walk }; const seconds = o.seconds ?? 60, sr = o.sr ?? 48000, quality = o.quality ?? 'high';
   live.clear(); created.n = 0;
   const ctx = new OfflineAudioContext({ numberOfChannels: 2, length: Math.round(seconds * sr), sampleRate: sr });
   const sys = new AudioSystem({ quality, context: ctx, content: false }); // hermetic: no narrative content fetched
@@ -76,6 +77,15 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     const KINDS = ['brush', 'stumble', 'knockdown'], RESP = ['none', 'annoyed', 'angry', 'frightened'];
     sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
   };
+  // Combat events: 'gun:<tier>', 'hit:<material>', 'whiz' (a round passing ~1.5 m from the listener), 'gunfoley:<kind>'.
+  const shots: (ShotReport & { t: number })[] = [];
+  const combatEvent = (e: string, at: [number, number, number], t: number) => {
+    const [kind, arg] = e.split(':');
+    if (kind === 'gun') { const r = sys.gunshot(at, arg as GunTier, e.endsWith(':click') ? { family: 'test.click' } : {}); if (r) shots.push({ ...r, t }); }
+    else if (kind === 'hit') sys.bulletImpact(at, arg as Material);
+    else if (kind === 'gunfoley') sys.gunFoley(arg as 'pump', at);
+    else if (kind === 'whiz') sys.bulletPass(at, [x + 1.5 * st.dz, 1.6, z - 1.5 * st.dx]);
+  };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
   const listener = () => ({ position: [x, heightAt(x, z) + 1.8, z] as [number, number, number], forward: [st.dx, 0, st.dz] as [number, number, number], up: [0, 1, 0] as [number, number, number], velocity: [st.dx * sc.walk, 0, st.dz * sc.walk] as [number, number, number] });
@@ -90,7 +100,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   };
   for (let k = 1; k <= frames; k++) {
     const t = k * step;
-    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : e.play.startsWith('sim:') ? simEvent(e.play.slice(4), e.offset, e.params) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
+    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : e.play.startsWith('sim:') ? simEvent(e.play.slice(4), e.offset, e.params) : /^(gun|hit|whiz|gunfoley)/.test(e.play) ? combatEvent(e.play, [x + (e.offset?.[0] ?? 0), heightAt(x + (e.offset?.[0] ?? 0), z + (e.offset?.[1] ?? 0)) + 1.4, z + (e.offset?.[1] ?? 0)], t) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
   }
   sys.update(step, listener());
   const t0 = performance.now();
@@ -112,7 +122,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     id, title: sc.title, quality, profile: o.profile ?? 'mobile', sr, seconds, renderMs, pcm: b64(inter.buffer),
     checks: { nan, subnormals: sub, samplePeak: peak, maxRealVoices: maxReal, voiceCap: preset.voices, maxTotalVoices: maxTotal, connectedBeforeUnload: connectedBefore, leakedNodes: leaked.length, leakedTypes: leaked.slice(0, 20), nodesCreated: created.n, limiter: stats.mixer },
     timing: { frames: timing.length, p50: pct(0.5), p95: pct(0.95), p99: pct(0.99), max: timing[timing.length - 1], mean: timing.reduce((a, b) => a + b, 0) / Math.max(1, timing.length) },
-    stats: { ...stats, voices: stats.voices, voiceLog },
+    stats: { ...stats, voices: stats.voices, voiceLog }, shots,
   };
 }
 
