@@ -81,7 +81,9 @@ export class FoldingMap {
     this.cx = Math.min(x1, Math.max(x0, this.cx));
     this.cz = Math.min(z1, Math.max(z0, this.cz));
   }
-  protected zoomAt(f: number, sx: number, sy: number) {
+  protected zoomAt(f: number, sx: number, sy: number) { this.zoomBy(f, sx, sy); }
+  /** Zoom by f around a screen point, immediately. */
+  protected zoomBy(f: number, sx: number, sy: number) {
     const W = this.canvas.clientWidth, H = this.canvas.clientHeight;
     const wx = this.cx + (sx - W / 2) / this.zoom, wz = this.cz + (sy - H / 2) / this.zoom;
     this.zoom *= f; this.clamp();

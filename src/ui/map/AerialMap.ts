@@ -42,6 +42,20 @@ export class AerialMap extends FoldingMap {
     this.canvas.className = 't74-foldmap t74-aerialmap';
   }
   private loading = false;
+  private zT: number | null = null;
+  private anchor: [number, number] = [0, 0];
+
+  /** Smooth zoom (wheel, triggers, keys): ease to a target around the cursor; pinch stays direct under the fingers. */
+  protected override zoomAt(f: number, sx: number, sy: number) { this.zT = Math.min(2.4, Math.max(0.05, (this.zT ?? this.zoom) * f)); this.anchor = [sx, sy]; }
+  override update(dt: number, input: Parameters<FoldingMap['update']>[1]) {
+    if (this.zT !== null) {
+      const before = this.zoom, next = before + (this.zT - before) * (1 - Math.exp(-dt * 14));
+      this.zoomBy(next / before, this.anchor[0], this.anchor[1]);
+      // done when close, or when the clamp stopped us (full-bleed limit)
+      if (Math.abs(this.zoom - this.zT) / this.zT < 0.002 || Math.abs(this.zoom - before) < 1e-6) this.zT = null;
+    }
+    super.update(dt, input);
+  }
 
   private tile(L: number, c: number, r: number): HTMLImageElement | null {
     const k = `${L}/${c}_${r}`, t = this.tiles.get(k);
