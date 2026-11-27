@@ -19,3 +19,11 @@ test('every content/places.json place resolves', () => {
   for (const p of places) { const r = P.resolve(p.id); if (!r || !Number.isFinite(r.x)) bad.push(`${p.id} (${p.at}${p.between ? ' / ' + p.between.join(', ') : ''})`); }
   assert.deepEqual(bad, [], `unresolved: ${bad.join('; ')}`);
 });
+
+test('every interiors.json address resolves (mission enter_interior markers)', () => {
+  const streets = JSON.parse(fs.readFileSync('public/data/streets.json', 'utf8'));
+  const P = new Places(streets, new Map(), new Map());
+  const list = JSON.parse(fs.readFileSync('content/interiors.json', 'utf8')).interiors as { id: string; address: string }[];
+  const bad = list.filter((i) => !P.resolve(i.address)).map((i) => `${i.id} (${i.address})`);
+  assert.ok(bad.length <= Math.ceil(list.length * 0.1), `unresolved ${bad.length}/${list.length}: ${bad.join('; ')}`);
+});

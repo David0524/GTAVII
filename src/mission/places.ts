@@ -35,6 +35,25 @@ export class Places {
       const r = p.between ? this.midBlock(p.at, p.between, p.side) : this.intersection(p.at);
       return r ? { ...r, name: p.name } : this.miss(ref);
     }
+    // interiors.json addresses: "W 31st St, Broadway–6th Ave, north side", "W 31st St, 7th–8th Aves, south side (9th floor)",
+    // "8th Ave & W 39th St, NE corner (door on W 39th)", "Beneath W 33rd St, 6th–7th Aves"
+    const clean = ref.replace(/\([^)]*\)/g, '').replace(/^beneath\s+/i, '').trim().replace(/,\s*$/, '');
+    const corner = clean.match(/,\s*(NE|NW|SE|SW)\s+corner$/i)?.[1]?.toUpperCase();
+    const side = clean.match(/,\s*(north|south|east|west)\s+side$/i)?.[1]?.toLowerCase();
+    const body = clean.replace(/,\s*(NE|NW|SE|SW)\s+corner$/i, '').replace(/,\s*(north|south|east|west)\s+side$/i, '').trim();
+    const blk = body.match(/^([^,&]+),\s*([^,–-]+?)\s*[–-]\s*([^,]+?)$/);
+    if (blk) {
+      let [a, b] = [blk[2].trim(), blk[3].trim().replace(/\bAves\b/i, 'Ave')];
+      if (/^\d+(st|nd|rd|th)$/i.test(a) && / Ave$/i.test(b)) a += ' Ave'; // "7th–8th Aves"
+      const r = this.midBlock(blk[1].trim(), [a, b], side); return r ? { ...r, name: ref } : this.miss(ref);
+    }
+    if (body.includes('&')) {
+      const r = this.intersection(body); if (!r) return this.miss(ref);
+      // corner / side: 8 m into that quadrant (onto the sidewalk); the grid is near enough axis-aligned
+      const q = corner ?? (side ? { north: 'N', south: 'S', east: 'E', west: 'W' }[side] : '');
+      const ox = q?.includes('E') ? 8 : q?.includes('W') ? -8 : 0, oz = q?.includes('N') ? -8 : q?.includes('S') ? 8 : 0;
+      return { x: r.x + ox, z: r.z + oz, name: ref };
+    }
     if (ref.includes('&')) { const r = this.intersection(ref); return r ? { ...r, name: ref } : this.miss(ref); }
     const m = ref.match(/^\d+\s+(.*)$/); if (m) { const r = this.streetNear(m[1], 0, -800); return r ? { ...r, name: ref } : this.miss(ref); }
     return this.miss(ref);
