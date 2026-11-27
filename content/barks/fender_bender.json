@@ -1,0 +1,97 @@
+{
+  "id": "barks.fender_bender",
+  "core": false,
+  "note": "Traffic incident: a minor collision (sim f9148be). context: inspect, argue, details, bystander. Adults only; 1974 NYC.",
+  "lines": [
+    {
+      "context": "inspect",
+      "emotion": "groaning",
+      "text": "Look at that. Look at my bumper. It's a brand-new bumper."
+    },
+    {
+      "context": "inspect",
+      "emotion": "disgusted",
+      "text": "Oh, beautiful. That's a dent. That's a whole dent."
+    },
+    {
+      "context": "inspect",
+      "emotion": "worried",
+      "text": "My brother-in-law's gonna kill me. It's his car."
+    },
+    {
+      "context": "inspect",
+      "emotion": "dry",
+      "text": "You call that a dent? This whole car is a dent."
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You backed into me! I was parked! Parked is not moving!"
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You stopped short! Who stops short on Eighth Avenue?"
+    },
+    {
+      "context": "argue",
+      "emotion": "indignant",
+      "text": "The light was yellow! Yellow means go faster, everybody knows that!"
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "Don't you point at me! I've been driving since Truman!"
+    },
+    {
+      "context": "argue",
+      "emotion": "sarcastic",
+      "text": "Oh, it's my fault. Sure. I drove into my own car."
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You got a license? Show me the license! Who gave you a license?"
+    },
+    {
+      "context": "details",
+      "emotion": "grudging",
+      "text": "Alright, alright. Write down your insurance. Print, I can't read script."
+    },
+    {
+      "context": "details",
+      "emotion": "tired",
+      "text": "Let's just swap names and get out of the street before a cop comes."
+    },
+    {
+      "context": "details",
+      "emotion": "suspicious",
+      "text": "This your real name? 'John Smith'? You're kidding me."
+    },
+    {
+      "context": "details",
+      "emotion": "weary",
+      "text": "Forget the cops. Twenty bucks and we never met. Deal?"
+    },
+    {
+      "context": "bystander",
+      "emotion": "amused",
+      "text": "Ten bucks says the guy in the plaid hat wins."
+    },
+    {
+      "context": "bystander",
+      "emotion": "weary",
+      "text": "Every day on this corner. Every day."
+    },
+    {
+      "context": "bystander",
+      "emotion": "wry",
+      "text": "Somebody get these two a referee."
+    },
+    {
+      "context": "bystander",
+      "emotion": "annoyed",
+      "text": "Move the cars! You're blocking the whole avenue!"
+    }
+  ]
+}

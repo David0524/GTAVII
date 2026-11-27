@@ -1,0 +1,82 @@
+{
+  "id": "barks.road_rage",
+  "core": false,
+  "note": "Traffic incident: shouts at a double-parker, a cut-off or a slow car (sim f9148be). context: double_park, cut_off, slow, horn_chain, bystander. Adults only.",
+  "lines": [
+    {
+      "context": "double_park",
+      "emotion": "furious",
+      "text": "Hey! You double-parked! Move it or I move it for you!"
+    },
+    {
+      "context": "double_park",
+      "emotion": "furious",
+      "text": "You think you own the street? Two minutes, he says! It's been twenty!"
+    },
+    {
+      "context": "double_park",
+      "emotion": "sarcastic",
+      "text": "Take your time, pal! I'll just live here now!"
+    },
+    {
+      "context": "double_park",
+      "emotion": "furious",
+      "text": "Where's the meter maid when you need her? Never! That's where!"
+    },
+    {
+      "context": "cut_off",
+      "emotion": "furious",
+      "text": "You cut me off! Where'd you learn to drive, Jersey?"
+    },
+    {
+      "context": "cut_off",
+      "emotion": "furious",
+      "text": "Signal! It's the stick by your hand! Use it!"
+    },
+    {
+      "context": "cut_off",
+      "emotion": "furious",
+      "text": "Nice! Real nice! You almost put me in the hydrant!"
+    },
+    {
+      "context": "slow",
+      "emotion": "impatient",
+      "text": "It's green! Green! What are you waiting for, a letter?"
+    },
+    {
+      "context": "slow",
+      "emotion": "impatient",
+      "text": "Go! Go! Christmas is coming!"
+    },
+    {
+      "context": "slow",
+      "emotion": "sarcastic",
+      "text": "Sunday driver on a Tuesday. Wonderful."
+    },
+    {
+      "context": "horn_chain",
+      "emotion": "furious",
+      "text": "Lay off the horn! The horn don't make it move!"
+    },
+    {
+      "context": "horn_chain",
+      "emotion": "exasperated",
+      "text": "Everybody honk! That'll fix it! Brilliant!"
+    },
+    {
+      "context": "bystander",
+      "emotion": "wry",
+      "text": "Listen to 'em. Like a symphony, if the symphony hated each other."
+    },
+    {
+      "context": "bystander",
+      "emotion": "weary",
+      "text": "Every summer. Heat makes everybody crazy."
+    },
+    {
+      "context": "bystander",
+      "emotion": "amused",
+      "text": "Look at the cabbie. He's enjoying this."
+    }
+  ]
+}
