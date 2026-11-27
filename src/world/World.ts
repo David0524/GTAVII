@@ -28,7 +28,7 @@ type ChunkState = {
   status: 'idle' | 'loading' | 'ready';
   group?: THREE.Group; lod0?: THREE.Group; lod1?: THREE.Mesh; props?: THREE.Mesh; detail?: THREE.Mesh[];
   /** storefront plugs and each unit's quads (vertex starts) in them */
-  plugs?: { hide: THREE.BufferAttribute; units: Map<string, number[]> };
+  plugs?: { hide: THREE.BufferAttribute; pos: THREE.BufferAttribute; orig: Float32Array; units: Map<string, number[]> };
   lod: -1 | 0 | 1;
 };
 
@@ -95,10 +95,15 @@ export class World {
     const key = this.unitChunk.get(id); const c = key ? this.chunks.get(key) : undefined;
     if (c?.plugs) this.applyPlug(c.plugs, id, live);
   }
+  /** Hidden plugs are collapsed to zero area (not only discarded in the colour pass): a depth/normal prepass or
+   *  shadow pass with an override material ignores the discard and z-fought the live interior into a speckle. */
   private applyPlug(pl: NonNullable<ChunkState['plugs']>, id: string, live: boolean) {
-    const a = pl.hide.array as Float32Array;
-    for (const v0 of pl.units.get(id) ?? []) a.fill(live ? 1 : 0, v0, v0 + 4);
-    pl.hide.needsUpdate = true;
+    const a = pl.hide.array as Float32Array, P = pl.pos.array as Float32Array;
+    for (const v0 of pl.units.get(id) ?? []) {
+      a.fill(live ? 1 : 0, v0, v0 + 4);
+      for (let k = 0; k < 4; k++) for (let c = 0; c < 3; c++) P[(v0 + k) * 3 + c] = live ? pl.orig[v0 * 3 + c] : pl.orig[(v0 + k) * 3 + c];
+    }
+    pl.hide.needsUpdate = true; pl.pos.needsUpdate = true;
   }
   /** Debug/bench: mesh names to hide in every chunk ('buildings' | 'ground' | 'props' | 'lod1'). */
   readonly debugHide = new Set<string>();
@@ -249,7 +254,8 @@ export class World {
       const pm = new THREE.Mesh(pg, this.plugMat); pm.name = 'plugs'; pm.receiveShadow = true;
       const units = new Map<string, number[]>();
       for (const u of m.plugUnits) { (units.get(u.id) ?? units.set(u.id, []).get(u.id)!).push(u.v0); this.unitChunk.set(u.id, m.key); }
-      plugs = { hide, units };
+      const pos = pg.getAttribute('position') as THREE.BufferAttribute; pos.setUsage(THREE.DynamicDrawUsage);
+      plugs = { hide, pos, orig: (pos.array as Float32Array).slice(), units };
       for (const id of units.keys()) if (this.liveUnits.has(id)) this.applyPlug(plugs, id, true);
       lights.push(pm);
     }

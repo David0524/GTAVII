@@ -18,6 +18,7 @@ import { simplify } from './lib/simplify.ts';
 import { writeContainer } from '../../src/characters/format.ts';
 import { JOINTS, JOINT_INDEX, LANDMARKS, NUM_JOINTS, primaryChild } from '../../src/characters/rig.ts';
 import { macroTargetNames, macroTargetWeights, type MacroParams } from '../../src/characters/body/macro.ts';
+import { repack } from './meshopt.ts';
 
 const OUT = path.resolve(import.meta.dirname, '../../public/characters');
 fs.mkdirSync(OUT, { recursive: true });
@@ -349,5 +350,6 @@ const blobs: Record<string, ArrayBufferView> = {
 };
 const bin = writeContainer(meta, blobs);
 fs.writeFileSync(path.join(OUT, 'body.bin'), bin);
+await repack(path.join(OUT, 'body.bin')); // meshopt index coding
 log('wrote body.bin', (bin.length / 1048576).toFixed(2), 'MiB');
 for (const [k, v] of Object.entries(blobs)) if (v.byteLength > 200000) log('  ', k, (v.byteLength / 1048576).toFixed(2), 'MiB');

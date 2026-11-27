@@ -30,13 +30,13 @@ export interface Assembled {
 
 /** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
 /** opts.headCutY: drop our head (skin above this height, eyes, teeth, hair) for a substituted head (evaluation). */
-export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean } = {}): Assembled {
+export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean; headFace?: { browZ: number; hx: number; hz: number; cz: number } } = {}): Assembled {
   const t0 = performance.now();
   // heeled shoes stand the body on its heels (foot pitched in the bind pose)
   const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
   const F = computeFields(model, shape);
   const ff = faceFrame(shape, F);
-  const ctx: GarmentCtx = { model, shape, F, outfit, lod };
+  const ctx: GarmentCtx = { model, shape, F, outfit, lod, male: app.sex >= 0.5 };
   const mb = new MeshBuilder();
   const P = shape.pos;
   const { pieces, trims } = garmentPieces(ctx);
@@ -97,7 +97,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
         if (tr > 0.02) { const ww = w * w * (3 - 2 * w), nd = d + (tr - d) * ww; px = opts.headAxis[0] + (dx / d) * nd; pz = opts.headAxis[1] + (dz / d) * nd; }
       }
     }
-    v = mb.vertex([px, py, pz], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer] : undefined);
+    v = mb.vertex([px, py, pz], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer + 1] : undefined); // layer + 1: 0 means "no skin detail" (a mesh without uv1 stays clean)
     used[s] = v;
     return v;
   };
@@ -130,7 +130,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
 
   // --- hats, glasses, props ---
   mb.slot = 5;
-  buildAccessories({ ...ctx, face: ff, app }, mb);
+  buildAccessories({ ...ctx, face: ff, app, subHead: opts.headFace }, mb);
 
   const hair = lod <= 3 && (cutY === undefined || opts.keepHair) ? buildHair({ ...ctx, face: ff, app, covered }) : null;
 
@@ -161,14 +161,16 @@ function eyes(model: BodyModel, shape: BodyShape, app: Appearance, lod: number, 
   // Our own eyeballs (UV spheres) sized from MakeHuman's eye helpers; iris faces +Z at rest and
   // the eye joints rotate them (look-at). Sclera, iris, pupil and the wet highlight are shaded.
   const P = shape.pos, J = shape.joints;
-  const iris = lin(app.eyeColor);
-  const sclera = lin(app.age > 60 ? '#d8cdb8' : '#e4dccf');
+  // very dark irises read as a black disc against the pupil: keep the iris visibly brown
+  const iris = lin(app.eyeColor).map((c, i) => Math.max(c, lin('#4a2c18')[i] * 0.9)) as [number, number, number];
+  // sclera is never paper-white: a warm off-white, a little darker with age
+  const sclera = lin(app.age > 60 ? '#c4b8a4' : '#d2c8b8');
   const seg = lod === 0 ? 20 : 12, rings = lod === 0 ? 14 : 8;
   for (const [g, joint] of [['helper-l-eye', JI.eye_l], ['helper-r-eye', JI.eye_r]] as const) {
     const c = [J[joint * 3], J[joint * 3 + 1], J[joint * 3 + 2]];
     const idx = model.indices(g, 0);
     let r = 0; for (let i = 0; i < idx.length; i++) { const k = model.splitSrc[idx[i]]; r += Math.hypot(P[k * 3] - c[0], P[k * 3 + 1] - c[1], P[k * 3 + 2] - c[2]); }
-    r = (r / idx.length) * 0.98;
+    r = (r / idx.length) * 1.03; // slightly over the helper so the lids rest on the ball (no dark gap at the rims)
     const base = mb.count;
     for (let i = 0; i <= rings; i++) {
       const th = (i / rings) * Math.PI; // 0 = front (+Z)

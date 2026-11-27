@@ -26,7 +26,7 @@ registerSection<unknown>({ name: 'gameplay', version: 1, migrations: {}, empty: 
 export interface GameplayGlue {
   g: Gameplay;
   /** after physics, while playing */
-  update(dt: number, ctx: { minutes: number; raining: boolean; sprinting: boolean; device: 'touch' | 'pad' | 'mouse' }): void;
+  update(dt: number, ctx: { minutes: number; raining: boolean; sprinting: boolean; device: 'touch' | 'pad' | 'mouse'; inCar?: boolean }): void;
   health(): HealthView;
   heat(): HeatView;
   /** label for the context button, or null */
@@ -63,7 +63,8 @@ export async function createGameplay(o: { quality: Quality; physics: Physics; pl
       const t0 = performance.now();
       if (o.lead() !== boundLead) { boundLead = o.lead(); bind(); }
       g.setClock({ minutes: ctx.minutes });
-      g.setContext({ speed: Math.hypot(o.player.vel.x, o.player.vel.z), sprinting: ctx.sprinting, raining: ctx.raining, device: ctx.device });
+      // in a car, Driving sets speed/vehicle itself
+      g.setContext(ctx.inCar ? { raining: ctx.raining, device: ctx.device } : { speed: Math.hypot(o.player.vel.x, o.player.vel.z), sprinting: ctx.sprinting, raining: ctx.raining, device: ctx.device });
       g.update(dt);
       glue.lastMs = performance.now() - t0;
     },

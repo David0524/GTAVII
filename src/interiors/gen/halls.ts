@@ -227,12 +227,12 @@ export function genUpstairs(c: GenCtx, kind: 'pool_hall' | 'gym') {
     let n = 0;
     for (let x = rc[0] + 1.6; x < rc[2] - 1.4; x += 2.9) for (let z = rc[1] + 2.0; z < rc[3] - 1.6; z += 3.9) {
       if (x > x0 - 1.5 && x < x1 + 1.5 && z < top + 1.6) continue;
-      P.poolTable(k, { x, z, yaw: 0 }); P.pendant(k, x, z, y0 + H, 0.9, 1.6, M.enamelGreen); n++;
+      k.at(y0, () => P.poolTable(k, { x, z, yaw: 0 })); P.pendant(k, x, z, y0 + H, 0.9, 1.6, M.enamelGreen); n++;
       if (r.chance(0.5)) k.slot('pool_player', x + 0.9, y0, z, -Math.PI / 2);
     }
     k.box(rc[0] + 0.05, y0 + 0.9, rc[3] - 0.08, rc[0] + 1.6, y0 + 1.9, rc[3] - 0.03, M.woodDark, { occlude: false });
     for (let q = 0; q < 10; q++) k.box(rc[0] + 0.1 + q * 0.14, y0 + 0.9, rc[3] - 0.12, rc[0] + 0.12 + q * 0.14, y0 + 2.3, rc[3] - 0.1, M.woodLight, { occlude: false });
-    P.counter(k, { x: rc[2] - 0.8, z: rc[1] + 1.0, yaw: Math.PI / 2 }, Math.min(3, D - 2), { top: M.woodDark, front: M.paneling });
+    k.at(y0, () => P.counter(k, { x: rc[2] - 0.8, z: rc[1] + 1.0, yaw: Math.PI / 2 }, Math.min(3, D - 2), { top: M.woodDark, front: M.paneling }));
     k.slot('rack_man', rc[2] - 0.4, y0, rc[1] + 2, Math.PI / 2); k.marker('shop', rc[2] - 1.6, y0, rc[1] + 2, 'counter');
     P.register(k, { x: rc[2] - 0.5, z: rc[1] + 1.4, yaw: Math.PI / 2 }, y0 + 1.0);
     void n;
@@ -252,10 +252,10 @@ export function genUpstairs(c: GenCtx, kind: 'pool_hall' | 'gym') {
     }
     for (let q = 0; q < 4; q++) { const x = rc[0] + 1 + q * 1.4; if (x > rc[2] - 0.8) break; k.cyl(x, y0 + H - 0.5, rc[3] - 1.0, 0.012, 0.5, M.steel, 4, { top: false }); k.cyl(x, y0 + 0.9, rc[3] - 1.0, 0.18, 1.1, r.pick([M.vinylRed, M.vinylBrown, M.black]), 10, { collide: true }); }
     for (let q = 0; q < 6; q++) k.box(rc[2] - 0.5, y0, rc[1] + 0.5 + q * 0.42, rc[2] - 0.05, y0 + 1.8, rc[1] + 0.9 + q * 0.42, tint(M.paintGrey, '#5a6a5a'), { collide: q === 0 });
-    P.bench(k, { x: rc[0] + 0.5, z: rc[1] + 1.2, yaw: 0 }, 2.2, M.woodLight);
+    k.at(y0, () => P.bench(k, { x: rc[0] + 0.5, z: rc[1] + 1.2, yaw: 0 }, 2.2, M.woodLight));
     for (let x = rc[0] + 1.5; x < rc[2]; x += 3) for (let z = rc[1] + 1.5; z < rc[3]; z += 3) P.bareBulb(k, x, z, y0 + H, 1.6);
   }
-  P.payphone(k, { x: rc[0] + 0.02, z: (rc[1] + rc[3]) / 2, yaw: -Math.PI / 2 });
+  k.at(y0, () => P.payphone(k, { x: rc[0] + 0.02, z: (rc[1] + rc[3]) / 2, yaw: -Math.PI / 2 }));
   k.marker('hide', rc[2] - 0.6, y0, rc[3] - 0.6, kind === 'gym' ? 'locker room' : 'back corner');
   k.use(stairCell);
 }

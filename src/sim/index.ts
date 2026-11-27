@@ -14,8 +14,8 @@ export { SignalState, type SignalHead } from './signals';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
 import { bumpReactions } from './bump';
-import { cullBehindView } from './traffic';
-import { cullPedsBehindView, despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
+import { cullBehindView, feedEdgeLanes } from './traffic';
+import { cullPedsBehindView, separatePeds, despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
@@ -24,6 +24,7 @@ import { Parking, type ParkingRule } from './parking';
 import { Subway, type Station, type TrainCall } from './subway';
 import { Doors, type DoorRec, type DoorRate } from './doors';
 import { Vendors, type VendorView } from './vendors';
+import { Memory, type MemKind } from './memory';
 import { ParkedCars, type ParkedCar } from './parked';
 export type { DoorRec, DoorRate } from './doors';
 export { VENDOR_KINDS, type VendorView, type VendorKind } from './vendors';
@@ -152,6 +153,8 @@ export class Simulation {
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Connector) core.preds[l.next[0]].push(i); });
     this.core = core;
     this.parking = new Parking(core);
+    this.memory = new Memory(core, (x, z) => this.blockAt(x, z));
+    this.on('pedBumped', (e: any) => { if (e.byPlayer) this.memory.remember(e.kind === 'knockdown' ? 'knockdown' : 'bumped', e.x, e.z, { pedId: e.id }); });
     // hydrants are sidewalk obstacles too (the same positions the kerb rules use)
     this.hydrantObs = this.parking.hydrantsNear(-540, -790, 1100).map((h) => ({ x: h.x, z: h.z, r: 0.22 }));
     this.setObstacles([]);
@@ -213,12 +216,14 @@ export class Simulation {
     for (const p of S.peds) if (p.cop2 && p.alive) policePedTick(S, p);
     stepPeds(S, h);
     bumpReactions(S, h);
+    separatePeds(S, this.sepParity ^= 1);
     vehicleContacts(S, this.contactCd);
     this.wild.step(h);
     this.parking.step(h);
     this.subway.step(h);
     this.doors.step(h);
     this.vendors.step(h);
+    this.memory.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -238,7 +243,7 @@ export class Simulation {
       for (const [k, l] of S.onWalk) { const f = l.filter((p) => p.alive && p.edge === k); S.onWalk.set(k, f); }
     }
     if (this.contactCd.size > 500) for (const [k, t] of this.contactCd) if (t < S.t) this.contactCd.delete(k);
-    cullBehindView(S, h); cullPedsBehindView(S, h);
+    cullBehindView(S, h); cullPedsBehindView(S, h); feedEdgeLanes(S, h);
     spawnVehicles(S, 2, false);
     spawnPeds(S, 3, false);
     // now and then an ambulance runs through with its siren on (ambient; Gameplay dispatches the rest)
@@ -258,6 +263,7 @@ export class Simulation {
     }
   }
   private footSeen = new Set<number>();
+  private sepParity = 0;
 
   private clearFar() {
     const S = this.core;
@@ -343,6 +349,19 @@ export class Simulation {
 
   // ---------------------------------------------------------------- kerbside rules, enforcement, tows, street cleaning
   private parking!: Parking;
+  // ---------------------------------------------------------------- memory of the player (memory.ts)
+  private memory!: Memory;
+  /**
+   * Gameplay: something the player did at (x, z) that the street remembers: helped | tipped | bumped | knockdown |
+   * reckless | theft | robbed | assault | gunfire | killed. The block's reputation shifts (decays over ~15 min
+   * half-life) and witnesses within the kind's radius remember it personally (~10 min); `pedId` = the person it
+   * was done to/for. Player bumps, `kill(..., byPlayer)` and `emit({..., byPlayer})` are recorded automatically.
+   */
+  remember(kind: MemKind, x: number, z: number, opts: { witnessR?: number; pedId?: number } = {}) { this.memory.remember(kind, x, z, opts); }
+  /** The player's standing on the block at (x, z): `{score, last, ago}` (score < 0 = feared/resented). */
+  reputation(x: number, z: number) { return this.memory.reputation(x, z); }
+  /** Greetings emitted so far (`pedGreets` events). */
+  get greetings() { return this.memory.greetings; }
   /** Day of week for kerb rules (0 Sun .. 6 Sat; default Friday, 21 June 1974). */
   setDay(dow: number) { this.parking.dow = ((Math.floor(dow) % 7) + 7) % 7; }
   /** Can a car park at this kerb now (or at `minute`/`dow`)? Reasons, tow-away and fine tier. */
@@ -477,8 +496,9 @@ export class Simulation {
 
   // ---------------------------------------------------------------- violence and theft (gameplay)
   /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */
-  kill(pedId: number, bodySeconds = 120): boolean {
+  kill(pedId: number, bodySeconds = 120, byPlayer = false): boolean {
     const p = this.core.pedById.get(pedId); if (!p || !p.alive) return false;
+    if (byPlayer) this.memory.remember('killed', p.x, p.z);
     killPed(this.core, p, bodySeconds); return true;
   }
   /**
@@ -514,8 +534,9 @@ export class Simulation {
 
   setExternalActors(actors: Actor[]): void { if (this.core) this.core.actors = actors.slice(); }
 
-  emit(event: { type: 'threat' | 'blockLane' | 'closeStreet' | 'gunfire'; x: number; z: number; radius?: number; until?: number; loudness?: number }): void {
+  emit(event: { type: 'threat' | 'blockLane' | 'closeStreet' | 'gunfire'; x: number; z: number; radius?: number; until?: number; loudness?: number; byPlayer?: boolean }): void {
     const S = this.core, net = this.net;
+    if (event.byPlayer && (event.type === 'gunfire' || event.type === 'threat')) this.memory.remember(event.type === 'gunfire' ? 'gunfire' : 'assault', event.x, event.z, event.type === 'gunfire' ? { witnessR: Math.min(120, (event.loudness ?? event.radius ?? 120) * 0.6) } : {});
     const until = event.until ?? S.t + 60;
     if (event.type === 'gunfire') {
       const loud = event.loudness ?? event.radius ?? 120;
@@ -554,7 +575,10 @@ export class Simulation {
 
   on(type: SimEventType | string, cb: (e: any) => void): void { (this.listeners.get(type) ?? this.listeners.set(type, []).get(type)!).push(cb); }
   private fire(type: string, e: Record<string, unknown>) {
-    if (type === 'subwayEnter' && this.subway) this.subway.riderEntered(e.x as number, e.z as number); const l = this.listeners.get(type); if (l) { e.type = type; e.t = this.core.t; for (const cb of l) cb(e); } }
+    if (type === 'subwayEnter' && this.subway) this.subway.riderEntered(e.x as number, e.z as number);
+    const l = this.listeners.get(type), any = this.listeners.get('*');
+    if (l || any) { e.type = type; e.t = this.core.t; if (l) for (const cb of l) cb(e); if (any) for (const cb of any) cb(e); }
+  }
 
   // ---------------------------------------------------------------- gameplay / narrative hooks
   /**
@@ -630,7 +654,7 @@ export class Simulation {
    * by where the camera isn't looking, so the near field is full from the first frame after a turn-around.
    * forward is any horizontal direction; fovDeg the horizontal field of view.
    */
-  setView(x: number, z: number, fwdX: number, fwdZ: number, fovDeg = 75, fadeDist = 90) {
+  setView(x: number, z: number, fwdX: number, fwdZ: number, fovDeg = 75, fadeDist = 60) {
     const l = Math.hypot(fwdX, fwdZ) || 1;
     this.core.view = { x, z, dx: fwdX / l, dz: fwdZ / l, cosHalf: Math.cos((fovDeg / 2) * Math.PI / 180), fade: fadeDist };
   }
@@ -649,6 +673,18 @@ export class Simulation {
   setWeather(w: 'clear' | 'overcast' | 'rain'): void { this.weather = w; }
   /** Optional hook: spawn-probability multiplier (0..1) by place, e.g. per district. */
   setDensityHook(fn: ((x: number, z: number, kind: 'vehicle' | 'ped') => number) | null) { this.densityHook = fn; }
+  /**
+   * The same as setDensityHook as plain data (works across a worker boundary): accept probability by area,
+   * the last matching box wins, 1 outside all of them. `vehicle`/`ped` default to `both`.
+   */
+  setDensityAreas(areas: { minX: number; maxX: number; minZ: number; maxZ: number; both?: number; vehicle?: number; ped?: number }[] | null) {
+    if (!areas || !areas.length) { this.densityHook = null; return; }
+    const list = areas.slice();
+    this.densityHook = (x, z, kind) => {
+      for (let i = list.length - 1; i >= 0; i--) { const a = list[i]; if (x >= a.minX && x <= a.maxX && z >= a.minZ && z <= a.maxZ) return (kind === 'vehicle' ? a.vehicle : a.ped) ?? a.both ?? 1; }
+      return 1;
+    };
+  }
   /** Register more archetypes after load (content hot reload). */
   registerArchetypes(defs: ArchetypeDef[]) { if (this.core) this.core.reg.register(defs); else this.pendingArchetypes.push(...defs); }
 

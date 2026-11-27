@@ -3,9 +3,17 @@
   "group": "Map",
   "title": "The map: our city from above",
   "note": "Direction A as the user picked it: an aerial render of our own city in lit tiles with smooth zoom, fog over ground you haven't walked, the route in amber, our own blip drawings with no discs, landmark silhouettes, and street and district names placed so nothing collides. Legend, tools and the data credit live in one slim panel.",
-  "ref": "GTA V/VI render the world from above and mute it so blips read; RDR2 fogs what you haven't seen. We do both. Short of GTA: no zoomed-out regional view yet (the playable sheet is the whole world).",
+  "ref": "GTA V/VI render the world from above and mute it so blips read; RDR2 fogs what you haven't seen. We do both. Pulled back, the sheet sits framed in amber inside its city: Manhattan's shoreline and piers, the rivers, Jersey and Queens, named (next row). Short of GTA: the land beyond is a flat map, not a render.",
   "desktop": "img/map_after_desktop.jpg",
   "phone": "img/map_after_phone.jpg"
+ },
+ {
+  "group": "Map",
+  "title": "Map: pulled back to the region",
+  "note": "Zoom past the sheet and the city carries on: real 1974 shoreline (NYC Open Data, Census), the rivers in italic, boroughs in spaced caps, only the places you would plan a trip around. The playable sheet gets an amber frame.",
+  "ref": "GTA V/VI zoom out to the whole state; RDR2 to the whole map. Our world is small by design, so the zoom-out is context, not more ground.",
+  "desktop": "img/map_region_desktop.jpg",
+  "phone": "img/map_region_phone.jpg"
  },
  {
   "group": "Map",
@@ -114,8 +122,8 @@
  {
   "group": "Scenes",
   "title": "Dialogue choices",
-  "note": "One left-of-centre list with number keys, lines set in Franklin; untimed unless the scene says so.",
-  "ref": "",
+  "note": "The line just spoken is the hero: the speaker in amber caps, the line in Franklin, a stage direction under it. Options are type on a left scrim with number keys, not plates. A weighty choice carries a red mark and its consequence line, and takes a second press. The minimap steps out while you talk.",
+  "ref": "GTA V's rare choices are a help-box prompt; RDR2 shows the options without the line they answer. Ours keeps what was said on screen, so the choice reads in context.",
   "desktop": "img/choices_desktop.jpg",
   "phone": "img/choices_phone.jpg"
  },

@@ -15,8 +15,9 @@ import path from 'node:path';
 import * as THREE from 'three';
 import { readGlb, accessor, type Glb } from './lib/io.ts';
 import { RAW } from './sources.ts';
-import { writeContainer, readContainer } from '../../src/characters/format.ts';
+import { writeContainer, readContainer, formatReady } from '../../src/characters/format.ts';
 import { JOINTS, JOINT_INDEX, NUM_JOINTS, primaryChild } from '../../src/characters/rig.ts';
+await formatReady(); // meshopt-coded index blobs
 
 const OUT = path.resolve(import.meta.dirname, '../../public/characters');
 const FPS = 30;

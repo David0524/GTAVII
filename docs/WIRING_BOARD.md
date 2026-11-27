@@ -101,3 +101,14 @@ Shots are in `shots/wiring/`.
 - **Doorway collisions are open before an interior is live.** Interiors stream within 30 m, so in
   practice the interior is always there first. A plug collider for not-yet-live units is queued as
   a safety net.
+
+**Storefront speckle: FIXED** (oversight review of 9dea15f). `storefronts_cut_noon.jpg` is re-shot.
+- **Root cause (interiors 52b2fdd):** the uber material compared the interpolated per-vertex pattern id
+  with `equal()`, so some pixels fell through to another pattern. The fix rounds the id first.
+- **Also fixed on the way:**
+  - the chunk door surround is skipped on enterable doors (7836d41);
+  - hidden plugs are collapsed to zero area (a82a26e);
+  - thin glass is a single pane (2752057);
+  - world position is wrapped before hashing (afa65de).
+- **Lesson** (same family as the earlier window flicker): never compare or hash interpolated
+  attributes without rounding them first.

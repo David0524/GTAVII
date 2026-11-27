@@ -10,7 +10,8 @@ import type { BodyModel } from './body/BodyModel';
 import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
-import { fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
+import { scalpHairMesh } from './heads/scalpHair';
+import { neckProfile, headFaceExtents, fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
 import { Animator, type LocoInput } from './anim/Animator';
@@ -65,6 +66,7 @@ export class Character {
   /** CPU time of the last update (ms), for budgets. */
   lastUpdateMs = 0;
   private rbFit: ReturnType<typeof fitHead> | null = null;
+  private rbNeck: ReturnType<typeof neckProfile> | null = null;
   private prebuiltHead: { joints: Float32Array; neck: NeckData } | null = null;
   readonly stats = { tris: 0, hairTris: 0, draws: 0, buildMs: 0 };
 
@@ -107,7 +109,12 @@ export class Character {
       const shape = this.model.evaluate({ ...this.appearance.body, stature: this.appearance.stature });
       const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
       this.rbFit = rb ? fitHead(rb, shape.joints) : null;
-      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, headRing: this.rbFit.ringY, headRingR: this.rbFit.ringR, headAxis: this.rbFit.neckAxis, keepHair: !!this.desc.overrides?.ourHair } : {});
+      // ICT heads (packed): our body keeps its own neck and the head's neck is stitched onto it.
+      // Pulling our neck in to ICT's thinner neck left a lit ledge above the collar where the skin
+      // flared back out to the shoulders. Rocketbox heads keep the body-side conform.
+      const ict = !!(rb && (rb.meta as { packed?: boolean }).packed);
+      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, headRing: this.rbFit.ringY, ...(ict ? {} : { headRingR: this.rbFit.ringR, headAxis: this.rbFit.neckAxis }), keepHair: !!this.desc.overrides?.ourHair, headFace: headFaceExtents(rb!, this.rbFit) } : {});
+      this.rbNeck = ict && this.rbFit ? neckProfile(shape.pos, shape.joints, this.rbFit.neckBottom - 0.012, this.rbFit.neckBottom + 0.08) : null;
     }
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     const { bones, skeleton, root } = buildSkeleton(this.asm.joints);
@@ -116,10 +123,12 @@ export class Character {
     const merge = !!(rb && this.rbFit && this.desc.overrides?.ourHair && this.asm.hair);
     const { main, hair } = createSkinnedMeshes(this.asm.main, merge ? null : this.asm.hair, skeleton, root);
     this.meshes = hair ? [main, hair] : [main];
-    const hopts = { lift: this.asm.lift, tint: this.desc.overrides?.headTint as [number, number, number] | undefined, bodyTone: this.appearance.skin.tone, noCards: !!this.desc.overrides?.ourHair };
+    const hopts = { neck: this.rbNeck ?? undefined, lift: this.asm.lift, tint: this.desc.overrides?.headTint as [number, number, number] | undefined, bodyTone: this.appearance.skin.tone, noCards: !!this.desc.overrides?.ourHair };
     // leads: head + our hair in one draw; near ring: head (with its own hair cards) as the second draw
     if (merge) this.meshes.push(headWithHairMesh(rb!, this.rbFit!, this.asm.hair!, skeleton, main.bindMatrix, hopts));
     else if (rb && this.rbFit) this.meshes.push(headMesh(rb, this.rbFit, skeleton, main.bindMatrix, hopts));
+    // heads that carry their own scalp-hair weights (ICT) grow the hair from their own scalp
+    if (rb && this.rbFit && !merge && rb.hair) { const sh = scalpHairMesh(rb, this.rbFit, this.appearance, skeleton, main.bindMatrix, this.asm.lift, this.lod); if (sh) this.meshes.push(sh); }
     for (const m of this.meshes) this.object.add(m);
     const p = bones[JI.pelvis].position;
     this.restPelvis = [p.x, p.y, p.z];
@@ -145,10 +154,43 @@ export class Character {
   lookAt(target: THREE.Vector3 | null) { this.lookTarget = target ? target.clone() : null; }
   /** Hand IK target in world space; weight blends from the animated hand (0) to the target (1). */
   setHandTarget(side: 'l' | 'r', target: THREE.Vector3 | null, weight = 1) { this.handTargets[side] = target ? target.clone() : null; this.handW[side] = weight; }
-  /** Vehicle seat pose (vehicles' seatPose, world matrix). null = stand up. */
-  setSeat(pose: THREE.Matrix4 | null) {
+  /**
+   * Vehicle seat pose (world matrix). null = stand up.
+   * opts.hip: the pose is the seat point the hips rest on (forward = the car's forward); the root is
+   * then placed so the drive clip's pelvis (0.514 m up, 0.296 m back from the root at rest-pelvis
+   * height 0.873 m, scaled to this body) lands on it. Without it, the pose is the root itself (the
+   * engine's original contract: root dropped 0.38 m under the seat).
+   */
+  setSeat(pose: THREE.Matrix4 | null, opts: { hip?: boolean; clip?: string } = {}) {
     this.seat = pose ? pose.clone() : null;
-    if (pose) void this.play('drive', { loop: true }); else this.animator.stop('full');
+    this.seatHip = !!opts.hip;
+    if (pose) void this.play(opts.clip ?? 'drive', { loop: true }); else { this.animator.stop('full'); this.setWheel(null); }
+  }
+  private seatHip = false;
+  private wheel: { center: THREE.Vector3; axis: THREE.Vector3; up: THREE.Vector3; radius: number } | null = null;
+  private steer = 0;
+  /**
+   * Hands on a steering wheel (world space): centre, axis (the wheel's normal, pointing at the
+   * driver), up (12 o'clock) and rim radius. steer -1..1 (left..right) turns the grips around the
+   * rim by up to ±90°. Call every frame with the vehicle's steer (or once, and setSteer()). null = off.
+   */
+  setWheel(w: { center: THREE.Vector3; axis: THREE.Vector3; up: THREE.Vector3; radius: number } | null, steer = this.steer) {
+    this.wheel = w ? { center: w.center.clone(), axis: w.axis.clone().normalize(), up: w.up.clone().normalize(), radius: w.radius } : null;
+    this.steer = steer;
+    if (!w) { this.setHandTarget('l', null); this.setHandTarget('r', null); }
+  }
+  setSteer(steer: number) { this.steer = Math.max(-1, Math.min(1, steer)); }
+  private wheelHands() {
+    const w = this.wheel; if (!w) return;
+    const right = new THREE.Vector3().crossVectors(w.up, w.axis).normalize();
+    const up = new THREE.Vector3().crossVectors(w.axis, right).normalize();
+    // ten to two, turned with the wheel; the hand joint sits a little toward the driver of the grip
+    const turn = -this.steer * Math.PI / 2;
+    for (const [side, a0] of [['l', Math.PI * (150 / 180)], ['r', Math.PI * (30 / 180)]] as const) {
+      const a = a0 + turn;
+      const p = w.center.clone().addScaledVector(right, Math.cos(a) * w.radius).addScaledVector(up, Math.sin(a) * w.radius).addScaledVector(w.axis, 0.035);
+      this.handTargets[side] = p; this.handW[side] = 1;
+    }
   }
   setGround(fn: GroundFn | null) { this.ground = fn; }
   setWardrobe(set: string) {
@@ -165,6 +207,11 @@ export class Character {
     dt = Math.min(dt, 0.1);
     if (this.seat) {
       this.seat.decompose(this.object.position, this.object.quaternion, _v);
+      if (this.seatHip) {
+        // root under and in front of the seat point: the drive clip's pelvis offset, scaled to this body
+        const k = this.restPelvis[1] / (this.lib.restPelvisHeight || 0.873);
+        this.object.position.add(new THREE.Vector3(0, -0.514 * k, 0.296 * k).applyQuaternion(this.object.quaternion));
+      }
       this.yaw = new THREE.Euler().setFromQuaternion(this.object.quaternion, 'YXZ').y;
       this.animator.setLocomotion({ velocity: [0, 0, 0], grounded: true, heading: this.yaw, mode: 'walk' }, dt);
     } else {
@@ -202,6 +249,7 @@ export class Character {
     this.object.updateMatrixWorld(true);
     // procedural layers
     if (!this.seat) this.footIK(dt);
+    this.wheelHands();
     this.handIK();
     this.lookAtLayer(dt);
     // events

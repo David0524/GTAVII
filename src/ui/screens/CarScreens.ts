@@ -8,6 +8,7 @@
  *    the rest of the garage listed beside it.
  *  - NoticeCard: the in-world summons (diegetic paper) laid on screen when a ticket, tow or boot happens.
  */
+import { carArt, hydrateCarArt } from './carThumb';
 import type { UiHost, CarView, LotView } from '../host/types';
 import type { Input } from '../../input/Input';
 import type { NavItem } from '../MenuNav';
@@ -88,7 +89,7 @@ export class CarLot extends Modal {
       const said = this.counter != null ? `<div class="lot-ctr"><span class="a-label">He'll take</span><b class="a-num">${money(this.counter, false)}</b></div>`
         : this.accepted ? '<div class="lot-ctr"><span class="a-label">He says</span><b class="a-num">Deal</b></div>'
           : dead ? '<div class="lot-ctr dead"><span class="a-label">He says</span><b class="a-num">No sale</b></div>' : '';
-      hag.innerHTML = `<div class="lot-car">${carProfile(car.cls, paint(car.colour))}</div>
+      hag.innerHTML = `<div class="lot-car">${carArt(carProfile(car.cls, paint(car.colour)), car.model, 'three-quarter')}</div>
         <div class="car-pick lot-id"><b class="a-voice">${esc(car.name)}</b><span>${car.year} · ${esc(car.colour)} · ${esc(car.trim)} · ${miles(car.mileage)}</span>${conditionBar(car.condition)}</div>
         <div class="lot-deal"><div class="lot-ask"><span class="a-label">Asking</span><b class="a-num">${money(car.asking, false)}</b></div>${said}
           <div class="car-offer"><button data-d="-100">−100</button><button data-d="-25">−25</button><div class="amt"><span>Your offer</span><b class="a-num">${money(this.offer, false)}</b></div><button data-d="25">+25</button><button data-d="100">+100</button></div></div>
@@ -118,6 +119,7 @@ export class CarLot extends Modal {
     } else hag.innerHTML = `<div class="lot-line" aria-hidden="true">${lot.cars.slice(0, 4).map((c) => carProfile(c.cls, paint(c.colour))).join('')}</div><p class="car-tip">Pick a car off the lot to talk price.</p>`;
     items.push({ el: close, activate: () => this.hide() });
     this.setNav(items, keep);
+    hydrateCarArt(this.root, this.host);
     (this.root.querySelector('.car-grid') as HTMLElement).scrollTop = scroll[0];
     (this.root.querySelector('.car-side') as HTMLElement).scrollTop = scroll[1];
   }
@@ -160,7 +162,7 @@ export class MyCarsTab implements Tab {
     const [state, stCls] = carState(c);
     this.el.innerHTML = `<section class="mc-stage">
         <div class="mc-top">${plate(c.plate)}<span class="mc-state ${stCls}">${esc(state)}</span></div>
-        <div class="mc-car">${carProfile(c.name, paint(c.colour))}</div>
+        <div class="mc-car">${carArt(carProfile(c.name, paint(c.colour)), c.model, 'three-quarter')}</div>
         <h3 class="a-voice">${esc(c.name)}</h3>
         <div class="mc-sub">${swatch(c.colour)}${c.year} · ${esc(c.colour)} · ${miles(c.mileage)}</div>
         ${c.booted ? '<div class="mc-boot"><b>Booted</b><span>A Denver boot on the front wheel. Pay every summons on this car to have it removed.</span></div>' : ''}
@@ -194,6 +196,7 @@ export class MyCarsTab implements Tab {
     const route = document.createElement('button'); route.className = `u-btn${c.towed ? '' : ' primary'}`; route.textContent = 'Set a route'; acts.appendChild(route);
     items.push({ el: route, activate: () => { this.onRoute?.(c.where.x, c.where.z, c); this.onToast?.(`Route set to ${c.name}`); } });
     this.setNav(items, keep);
+    hydrateCarArt(this.el, this.host);
     this.el.scrollTop = scroll;
   }
 }

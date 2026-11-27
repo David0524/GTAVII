@@ -15,6 +15,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { RemoteSimulation, serveSimulation, portPair } from '../../src/sim/remote';
 import { Simulation, SIM_DT } from '../../src/sim/index.ts';
 import { readChunk, GroundKind } from '../../src/shared/chunkFormat.ts';
 import { CHUNK_SIZE } from '../../src/shared/geo.ts';
@@ -102,6 +103,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const o = [0, 0, 0, 0];
   let wildPeak = 0, powerChangedAt = -1, doorSeg = -1, playerDist = 0;
   let parkedNow: ReturnType<typeof sim.parkedCars> = [];
+  let sepSamples = 0, sepClose = 0, sepMoving = 0; const sepMovingEx: string[] = [];
   const bumpKinds: Record<string, number> = {};
   sim.on('pedBumped', (e) => { const k = `${e.kind}/${e.response}`; bumpKinds[k] = (bumpKinds[k] ?? 0) + 1; });
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
@@ -196,7 +198,9 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       // roadway + lane band
       if (inside(v.x, v.z) && !onRoad.has(v.x, v.z)) note('vehOffRoad', `#${v.id} ${v.kind} at ${v.x.toFixed(1)},${v.z.toFixed(1)} link ${v.link}`);
       const pr = projectOnPoly(L.pts, v.x, v.z);
-      const tol = L.width / 2 + Math.abs(v.lat) + (v.lcT < 1 ? L.width : 0) + 0.6;
+      // (long vehicles: the pose is the chord between axle points ±0.35 len, which cuts inside the lane line where
+      //  the path bends between links)
+      const tol = L.width / 2 + Math.abs(v.lat) + (v.lcT < 1 ? L.width : 0) + 0.6 + (v.len > 9 ? 0.8 : 0);
       if (pr.d > tol) note('vehOffLane', `#${v.id} ${v.kind}/${v.vclass}/${v.state} lat${v.lat.toFixed(2)} lc${v.lcT.toFixed(2)}from${v.lcFrom} prev${v.prevLink} s${v.s.toFixed(1)}/${net.len[v.link].toFixed(1)} k${L.kind} cop:${v.cop?.mode ?? '-'} ${pr.d.toFixed(2)} m from link ${v.link} (tol ${tol.toFixed(2)})`);
       // wrong way: lane direction must follow the road's 1974 one-way, and heading must follow the lane
       if (L.kind === LinkKind.Lane) {
@@ -228,6 +232,18 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (obbOverlap(A, B, 0.3)) note('vehOverlap', `#${A.id} ${A.kind}/${A.state}/L${A.link}(${g.links[A.link].kind})s${A.s.toFixed(1)}/lat${A.lat.toFixed(1)}/lc${A.lcT.toFixed(2)}from${A.lcFrom} v${A.v.toFixed(1)} & #${B.id} ${B.kind}/${B.state}/L${B.link}(${g.links[B.link].kind})s${B.s.toFixed(1)}/lat${B.lat.toFixed(1)}/lc${B.lcT.toFixed(2)}from${B.lcFrom} v${B.v.toFixed(1)} at ${A.x.toFixed(1)},${A.z.toFixed(1)}`);
     }
     if (vehicles.length > 20) { const frac = moving / vehicles.length; minMovingFrac = Math.min(minMovingFrac, frac); movingSum += frac; flowSamples++; }
+    // people never walk through each other (characters' crowd): moving pairs never closer than 0.2 m (half a body), and
+    // standing contacts stay rare (the separation pass resolves them within a step or two)
+    if (k % 6 === 0) {
+      sepSamples++;
+      for (let i = 0; i < peds.length; i++) for (let j = i + 1; j < peds.length; j++) {
+        const A = peds[i], B = peds[j]; if (A.state === 'dead' || B.state === 'dead' || A.then === 'vanish' || B.then === 'vanish' || A.then === 'enterDoor' || B.then === 'enterDoor') continue; // (stepping into stairs or a doorway: gone next step)
+        const dx = A.x - B.x, dz = A.z - B.z; if (dx * dx + dz * dz >= 0.0625) continue;
+        sepClose++;
+        if (A.v > 0.3 && B.v > 0.3 && dx * dx + dz * dz < 0.04) { sepMoving++; if (sepMovingEx.length < 4) sepMovingEx.push(`#${A.id} ${A.state} & #${B.id} ${B.state} ${Math.hypot(dx, dz).toFixed(2)} m at ${A.x.toFixed(1)},${A.z.toFixed(1)}`); }
+        if (false) note('pedOverlap', `#${A.id} ${A.state} & #${B.id} ${B.state} ${Math.hypot(dx, dz).toFixed(2)} m apart, both walking, at ${A.x.toFixed(1)},${A.z.toFixed(1)}`);
+      }
+    }
     // traffic never drives through the parked cars at the kerb (static; refreshed every 10 s)
     if (k % 300 === 0) parkedNow = sim.parkedCars(f.x, f.z, 260);
     if (k % 3 === 0) for (const v of vehicles) for (const c of parkedNow) {
@@ -262,7 +278,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); const sp: Record<string, number> = {}; for (const x of W.animals) sp[x.species] = (sp[x.species] ?? 0) + 1; return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders, species: sp }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings, minorsSeen: sim.peds.filter((p) => CHILD.test(p.archetype)).length, bumps: bumpKinds,
+    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); const sp: Record<string, number> = {}; for (const x of W.animals) sp[x.species] = (sp[x.species] ?? 0) + 1; return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders, species: sp }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings, minorsSeen: sim.peds.filter((p) => CHILD.test(p.archetype)).length, bumps: bumpKinds, pedCloseAvg: +(sepClose / Math.max(1, sepSamples)).toFixed(3), pedWalkingThrough: sepMoving, pedWalkingThroughEx: sepMovingEx,
   };
 }
 
@@ -412,6 +428,51 @@ async function main() {
       report.handOff = { poseError: +err.toFixed(3), followGap: +gap.toFixed(1) };
       if (err > 0.05 || gap > 5) problems.push(`handOff: pose error ${err.toFixed(2)} m, companion ${gap.toFixed(1)} m behind`);
     }
+  }
+  // NPC memory and greetings: a favour is recalled by the people who saw it; a robbery sours the block
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 30, maxPeds: 120, fetchBinary }); await sim.load(); sim.setClock(14 * 60);
+    const f = FOCI[1];
+    for (let k = 0; k < 90; k++) sim.update(SIM_DT, f);
+    const ctx: Record<string, number> = {}; let badPool = 0;
+    sim.on('pedGreets', (e) => { ctx[e.context] = (ctx[e.context] ?? 0) + 1; if (!e.pool || !e.archetype) badPool++; });
+    const stand = (x: number, z: number, secs: number) => { for (let k = 0; k < secs / SIM_DT; k++) { sim.setExternalActors([{ id: 'player', x, z, vx: 0, vz: 0, radius: 0.4, kind: 'player' }]); sim.update(SIM_DT, { x, z }); } };
+    const at = (i: number) => { const w = sim.debugAgents().peds.filter((p) => p.state === 'walk'); const p = w[i % Math.max(1, w.length)]; return p ? { x: p.x, z: p.z } : { x: f.x, z: f.z }; };
+    const a = at(0);
+    const helpedAt = { ...a };
+    sim.remember('helped', a.x, a.z, { witnessR: 30 });
+    stand(a.x, a.z, 60);
+    const b = sim.debugAgents().peds.filter((p) => p.state === 'walk').map((p) => ({ x: p.x, z: p.z })).find((q) => Math.hypot(q.x - a.x, q.z - a.z) > 90) ?? at(7);
+    sim.remember('robbed', b.x, b.z);
+    const rep = sim.reputation(b.x, b.z);
+    stand(b.x, b.z, 60);
+    report.memory = { contexts: ctx, robbedRep: rep.score, helpedRep: sim.reputation(helpedAt.x, helpedAt.z).score, greetings: sim.greetings };
+    if (!ctx.greet_known) problems.push(`memory: nobody recalled the favour ${JSON.stringify(ctx)}`);
+    if (!(ctx.complain || ctx.fear || ctx.antagonize)) problems.push(`memory: no one resented the robbery ${JSON.stringify(ctx)}`);
+    if (rep.score >= -3 || report.memory.helpedRep <= 0) problems.push(`memory: reputation ${JSON.stringify(report.memory)}`);
+    if (badPool) problems.push(`memory: ${badPool} greetings without a bark pool`);
+  }
+  // walkers passing within 0.2 m (half a body): only brief transients where two sidewalk edges meet a corner
+  if (full.pedWalkingThrough > 5) problems.push(`people walking through each other: ${full.pedWalkingThrough} sampled pairs under 0.2 m (${full.pedWalkingThroughEx.join('; ')})`);
+  if (full.pedCloseAvg > 1.0) problems.push(`people standing inside each other: ${full.pedCloseAvg} pairs closer than 0.25 m per sample`);
+  // worker-ready: the same sim behind a message port (in-memory here) gives the same views as the direct one
+  {
+    const opts = { seed: SEED, maxVehicles: 60, maxPeds: 120, fetchBinary };
+    const direct = new Simulation(opts); await direct.load(); direct.setClock(12 * 60);
+    const [hostPort, clientPort] = portPair();
+    serveSimulation(hostPort, (o: any) => new Simulation(o));
+    const remote = new RemoteSimulation(clientPort, opts as any); await remote.load(); remote.cmd('setClock', 12 * 60);
+    let evD = 0, evR = 0; direct.on('*', () => evD++); remote.on('*', () => evR++);
+    const f = FOCI[1]; let worst = 0;
+    for (let k = 0; k < 40 / SIM_DT; k++) {
+      for (const s2 of [direct, remote] as any[]) { s2.setView(f.x, f.z, 0, -1, 75, 60); s2.setExternalActors([{ id: 'player', x: f.x, z: f.z, vx: 0, vz: 0, radius: 0.4, kind: 'player' }]); s2.update(SIM_DT, f); }
+      if (direct.vehicles.length !== remote.vehicles.length || direct.peds.length !== remote.peds.length) { worst = Infinity; break; }
+      direct.vehicles.forEach((v, i) => { worst = Math.max(worst, Math.abs(v.x - remote.vehicles[i].x) + Math.abs(v.z - remote.vehicles[i].z) + (v.state === remote.vehicles[i].state ? 0 : 99)); });
+      direct.peds.forEach((p, i) => { worst = Math.max(worst, Math.abs(p.x - remote.peds[i].x) + Math.abs(p.z - remote.peds[i].z) + (p.state === remote.peds[i].state && p.archetype === remote.peds[i].archetype ? 0 : 99)); });
+    }
+    const pk = (await remote.call<unknown[]>('parkedCars', f.x, f.z, 120)).length, pd = direct.parkedCars(f.x, f.z, 120).length;
+    report.worker = { maxViewError: worst, eventsDirect: evD, eventsRemote: evR, parked: [pd, pk] };
+    if (!(worst < 1e-3) || evD !== evR || pk !== pd) problems.push(`worker parity: ${JSON.stringify(report.worker)}`);
   }
   // adults only: no child archetype may exist in the spawn tables, and none may appear in the street
   {

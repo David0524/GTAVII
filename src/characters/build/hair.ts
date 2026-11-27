@@ -14,6 +14,7 @@ import { lin } from './garments';
 import { KIND, MeshBuilder, mergeSkin, type GeoArrays } from './MeshBuilder';
 import { buildCards, CARD_STYLES, cardHairline, headMap } from './hairCards';
 
+type V3 = [number, number, number];
 const sm = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 interface StyleShape {
@@ -41,9 +42,9 @@ const STYLES: Record<HairStyle, StyleShape> = {
   shag: { length: -0.11, thick: (u, _f, s) => 0.014 + 0.016 * u + 0.008 * s, fringe: 0.012, density: 0.95, freq: 300, layers: 8 },
   earLength: { length: -0.07, thick: (u, _f, s) => 0.012 + 0.012 * u + 0.006 * s, fringe: 0.02, density: 1, freq: 320, layers: 7 },
   feathered: { length: -0.1, thick: (u, f, s) => 0.016 + 0.018 * u + 0.012 * s + 0.006 * f, fringe: 0.03, density: 0.95, freq: 300, layers: 8 },
-  curlyMid: { length: -0.05, thick: (u) => 0.015 + 0.01 * u, fringe: 0.04, density: 1, freq: 650, layers: 8, sphere: 0.04 },
-  afro: { length: -0.05, thick: () => 0.01, fringe: 0.04, density: 1, freq: 900, layers: 10, sphere: 0.075 },
-  afroShort: { length: -0.035, thick: () => 0.008, fringe: 0.045, density: 1, freq: 900, layers: 6, sphere: 0.025 },
+  curlyMid: { length: -0.05, thick: (u) => 0.015 + 0.01 * u, fringe: 0.04, density: 1, freq: 1500, layers: 8, sphere: 0.04 },
+  afro: { length: -0.105, thick: () => 0.01, fringe: 0.04, density: 1, freq: 2200, layers: 10, sphere: 0.07 },
+  afroShort: { length: -0.035, thick: () => 0.008, fringe: 0.045, density: 1, freq: 2600, layers: 6, sphere: 0.025 },
   longStraight: { length: -0.36, thick: (u, _f, s) => 0.008 + 0.006 * u + 0.006 * s, fringe: 0.05, density: 1, freq: 260, layers: 7 },
   bob: { length: -0.1, thick: (u, _f, s) => 0.012 + 0.012 * u + 0.012 * s, fringe: 0.02, density: 1, freq: 300, layers: 7 },
   ponytail: { length: -0.05, thick: (u) => 0.006 + 0.006 * u, fringe: 0.055, density: 1, freq: 360, layers: 5 },
@@ -88,7 +89,9 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
   // hero/near LODs draw strand cards over a single scalp shell; crowds keep the shell stack
   const cards = lod <= 1 && CARD_STYLES.has(app.hair.style);
   // under cards: a solid scalp, a mid and an outer volume shell (the cards carry the strands)
-  const layerCount = cards ? (lod === 0 ? 3 : 2) : Math.max(1, Math.round(st.layers * [1, 0.6, 0.35, 0.2][lod]));
+  // under cards a single scalp shell: stacked mid/outer shells showed as horizontal scan lines at
+  // grazing angles (their layer edges); the cards carry the volume
+  const layerCount = cards ? 1 : Math.max(1, Math.round(st.layers * [1, 0.6, 0.35, 0.2][lod]));
   const cardHL = cards ? cardHairline(ctx) : null;
   const col = lin(app.hair.color);
   const tip = col.map((c) => Math.min(1, c * 1.25 + 0.02)) as [number, number, number];
@@ -108,7 +111,8 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
     // hairline: forehead (front), temples (recession), around the ears, the nape/length cut
     const hairline: Field = cardHL ? (k) => P[k * 3 + 1] - cardHL(Math.atan2(P[k * 3] - hc[0], P[k * 3 + 2] - hc[2])) : (k) => {
       const yy = P[k * 3 + 1], fr = front(k), sd = side(k);
-      const fringeY = ff.browY + st.fringe * s + rec * 0.05 * s * (0.4 + sd);
+      // natural hair (afro, curls): the hairline arcs up at the temples rather than a straight fringe cut
+      const fringeY = ff.browY + st.fringe * s + rec * 0.05 * s * (0.4 + sd) + (st.sphere ? 0.03 * s * sd * sd : 0);
       const frontCut = fr > 0.35 ? yy - fringeY + (1 - fr) * 0.02 : 1;
       // ears: hair stays above/behind the ear unless the style is long
       const earCut = st.length > -0.06 && sd > 0.75 && fr > -0.1 && fr < 0.6 ? yy - (eyeY + 0.01 * s) : 1;
@@ -123,12 +127,77 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
     };
     const fields = [hairline, crown];
     if (hat) fields.push((k) => (P[k * 3 + 1] < hatLine + 0.01 ? 1 : -1));
+    const vol0 = app.hair.volume;
+    if (st.sphere && vol0 > 0.1 && !hat) {
+      // ---- afro / curly volume on its own dense grid ------------------------------------------
+      // Shells grown off the helper-hair mesh stretched its coarse triangles into flat facets (with
+      // a fold down the middle) once the volume passed a few cm. Here a latitude/longitude grid around
+      // a raised centre takes, per direction, the scalp radius, skin weights and hairline from the
+      // nearest helper vertex, and the layers grow radially into a smooth round mass with coil clumps.
+      const c: V3 = [hc[0], hc[1] + 0.03, hc[2] - 0.025];
+      // sources: the helper-hair scalp plus the back half of our own head (the helper stops above the
+      // nape, which left the afro ending in a slab with bare scalp under it)
+      const ids = [...new Set(Array.from(cap))];
+      for (let k = 0; k < F.n; k++) if (F.part[k] === PART.head && P[k * 3 + 2] < hc[2] - 0.01 && P[k * 3 + 1] < eyeY + 0.02) ids.push(k);
+      const dirOf = (k: number) => { const d = [P[k * 3] - c[0], P[k * 3 + 1] - c[1], P[k * 3 + 2] - c[2]]; const l = Math.hypot(d[0], d[1], d[2]) || 1; return { d: [d[0] / l, d[1] / l, d[2] / l], l }; };
+      const pre = ids.map((k) => ({ k, ...dirOf(k) }));
+      const NT = lod === 0 ? 40 : lod === 1 ? 26 : 16, NP = NT * 2;
+      const grid: { k: number; l: number; d: number[]; hl: number }[] = [];
+      for (let i = 0; i <= NT; i++) for (let j = 0; j < NP; j++) {
+        const th = (i / NT) * Math.PI * 0.88, ph = (j / NP) * Math.PI * 2; // from the crown down to ~140°
+        const d = [Math.sin(th) * Math.sin(ph), Math.cos(th), Math.sin(th) * Math.cos(ph)];
+        let best = pre[0], bd = -2;
+        for (const q of pre) { const dd = q.d[0] * d[0] + q.d[1] * d[1] + q.d[2] * d[2]; if (dd > bd) { bd = dd; best = q; } }
+        // directions the helper doesn't reach (face, below the hairline) get no hair
+        // where the helper's coverage ends (the nape, behind the ears) the hair thins out over the last
+        // few degrees instead of stopping as a wall (it read as a floating helmet brim)
+        const hlv = bd > 0.965 ? Math.min(hairline(best.k), crown(best.k), (bd - 0.965) * 1.5) : -1;
+        grid.push({ k: best.k, l: best.l, d, hl: hlv });
+      }
+      // smooth the scalp radius across the grid: nearest-vertex picks jump between neighbours, which
+      // stood out as flat sheets behind the ears
+      const raw = grid.map((g) => g.l);
+      for (let it = 0; it < 4; it++) {
+        const ls = grid.map((g) => g.l);
+        for (let i = 0; i <= NT; i++) for (let j = 0; j < NP; j++) {
+          const a = i * NP + j; let sum = ls[a] * 2, n = 2;
+          for (const [di, dj] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) { const ii = i + di; if (ii < 0 || ii > NT) continue; sum += ls[ii * NP + ((j + dj + NP) % NP)]; n++; }
+          grid[a].l = sum / n;
+        }
+      }
+      // never further out than the scalp itself (smoothing lifted the shells off the nape: a floating brim)
+      grid.forEach((g, i) => { g.l = Math.min(g.l, raw[i]); });
+      const R = ff.headRadius * 0.95 + st.sphere * vol0;
+      for (let L = 0; L < layerCount; L++) {
+        const h = layerCount === 1 ? 0.5 : L / (layerCount - 1);
+        const base = mb.count;
+        for (const g of grid) {
+          const up = Math.max(0, g.d[1]), fr = Math.max(0, g.d[2]) * (1 - up);
+          // outer radius: a rounded mass, fuller on top, pulled in over the face and at the hairline
+          const outer = Math.max(g.l + 0.006, R * (0.92 + 0.12 * up) * (1 - 0.18 * fr));
+          const taper = sm(0, 0.05, g.hl);
+          const r = g.l + (outer - g.l) * taper * (0.08 + 0.92 * h) + 0.002;
+          const pos: V3 = [c[0] + g.d[0] * r, c[1] + g.d[1] * r, c[2] + g.d[2] * r];
+          const js2: number[] = [], ws2: number[] = [];
+          for (let q = 0; q < 4; q++) { const ww = model.skinW[g.k * 4 + q]; if (ww) { js2.push(model.skinJ[g.k * 4 + q]); ws2.push(ww / 255); } }
+          const sj2 = [0, 0, 0, 0], sw2 = [0, 0, 0, 0]; mergeSkin(js2, ws2, sj2, sw2);
+          const u = Math.atan2(g.d[0], g.d[2]) * ff.headRadius, vv = Math.acos(Math.max(-1, Math.min(1, g.d[1]))) * ff.headRadius;
+          mb.vertex(pos, g.d as V3, sj2, sw2, { cA: col, cB: tip, m0: [h, st.density * taper ** 0.7, st.freq, app.hair.texture], m1: [KIND.hair, 0, app.hair.grey, 2] }, [u, vv]);
+        }
+        for (let i = 0; i < NT; i++) for (let j = 0; j < NP; j++) {
+          const a = i * NP + j, b = i * NP + (j + 1) % NP, cc = (i + 1) * NP + j, d = (i + 1) * NP + (j + 1) % NP;
+          if (grid[a].hl < 0 && grid[b].hl < 0 && grid[cc].hl < 0 && grid[d].hl < 0) continue;
+          if (Math.min(grid[a].hl, grid[b].hl, grid[cc].hl, grid[d].hl) < 0) continue; // nothing past the hairline (no brim over the forehead or cheeks)
+          mb.tri(base + a, base + cc, base + b); mb.tri(base + b, base + cc, base + d);
+        }
+      }
+    } else {
     const res = clipSurface(cap, fields);
     const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
     const js: number[] = [], ws: number[] = [];
     const vol = app.hair.volume;
     for (let L = 0; L < layerCount; L++) {
-      const h = layerCount === 1 ? 0.5 : L / (layerCount - 1);
+      const h = cards ? 0 : layerCount === 1 ? 0.5 : L / (layerCount - 1);
       const base = mb.count, i0 = mb.indexCount;
       const map = res.verts.map((v) => {
         const pos = [0, 0, 0], nrm = [0, 0, 0];
@@ -143,7 +212,11 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
             th *= 0.7 + 0.55 * Math.abs(Math.sin((uk / 0.034) * Math.PI) * Math.sin((vk / 0.03) * Math.PI + (Math.floor(vk / 0.03) % 2) * 1.5));
           }
           let dir = [Nh[k * 3], Nh[k * 3 + 1], Nh[k * 3 + 2]];
-          if (st.sphere) {
+          if (st.sphere && vol <= 0.1) {
+            // close-cropped natural hair (a teeny-weeny afro): an even ~1 cm layer on the scalp that
+            // tapers to nothing at the hairline: no bowl, no helmet edge
+            th = (0.009 + 0.004 * up(k)) * sm(0, 0.03, hairline(k));
+          } else if (st.sphere) {
             // afro: grow towards a rounded volume around the head centre
             // grown from a raised centre: up and out, not forward over the brow; rounded at the ears
             const d = [P[k * 3] - hc[0], P[k * 3 + 1] - (hc[1] + 0.035), P[k * 3 + 2] - (hc[2] - 0.02)];
@@ -179,6 +252,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
       for (let i = 0; i < res.tris.length; i += 3) mb.tri(map[res.tris[i]], map[res.tris[i + 1]], map[res.tris[i + 2]]);
       void base; void i0;
     }
+  }
   }
 
   if (cards) buildCards({ ...ctx, face: ff, app }, mb, headMap({ ...ctx, face: ff }));
@@ -240,7 +314,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
       const tri = [0, 1, 2].map((c) => {
         const sIdx = idx[i + c];
         let v = map.get(sIdx);
-        if (v === undefined) { const k = model.splitSrc[sIdx]; v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, { cA: lc, cB: lc, m0: [0.3, 1, 2000, 0], m1: [KIND.hair, 3, 0, 0] }, [model.splitUV[sIdx * 2], model.splitUV[sIdx * 2 + 1]]); map.set(sIdx, v); }
+        if (v === undefined) { const k = model.splitSrc[sIdx]; v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, { cA: lc, cB: lc, m0: [0.55, 0.62, 2600, 0], m1: [KIND.hair, 2, 0, 0] }, [model.splitUV[sIdx * 2], model.splitUV[sIdx * 2 + 1]]); map.set(sIdx, v); }
         return v;
       });
       mb.tri(tri[0], tri[1], tri[2]);

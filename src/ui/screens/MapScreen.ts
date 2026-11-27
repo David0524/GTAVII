@@ -38,7 +38,7 @@ export class MapScreen {
     this.btns.className = 't74-mapbtns';
     // ODbL: the map is drawn from OpenStreetMap data, so it carries the credit (an imprint line, like a printed guide's)
     this.credit.className = 't74-mapcredit';
-    this.credit.innerHTML = 'Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL · NYC Open Data';
+    this.credit.innerHTML = 'Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, ODbL · NYC Open Data · U.S. Census Bureau';
     // DESIGN_A: one slim panel holds the selected place, the legend (filters), the tools and the data credit
     this.el.append(this.map.canvas, this.side);
     addEventListener('resize', () => { if (this.el.offsetParent) { this.measureOccluders(); this.map.draw(true); } });

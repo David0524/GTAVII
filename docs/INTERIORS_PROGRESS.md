@@ -245,3 +245,31 @@ Judged on grades_board_v3_furniture.jpg, the Corwin walk-ins and the coverage re
 
 ## Grand Central Terminal (user decision 2026-11-27)
 Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interiors split (ENGINE_REQUESTS 11), build order, vs RDR2 Saint Denis station. The build waits on the PBR foundation.
+
+## Free-asset scouting (FREE_ASSETS.md, $0)
+- docs/interiors/PROP_SET.md: the period prop list (priorities A/B/C). docs/interiors/PROP_CANDIDATES.md: about 85 candidates judged.
+  - A: 24 of 26 items have an acceptable free model. B: about 15 of 24.
+  - Best sources: Poly Haven (CC0) and Sketchfab CC0/CC-BY. Spot-checked: Poly Haven ids resolve via its API (caged_hanging_light 22.9k tris, ceiling_fan, desk_lamp_arm_01); Sketchfab "Bentwood chair" and "Diner Stool" are CC Attribution and downloadable.
+- Gaps, to be modelled procedurally with bevels and normals: dinette chair and table, clawfoot tub, high-tank toilet, console TV, wall payphone, opal globe, booth, tanker chair, display case, mailbox bank, cigarette machine, coin-op washer, window AC.
+- Blockers needing the user's free accounts:
+  - Sketchfab downloads require a logged-in account.
+  - Smithsonian Open Access needs a free api.data.gov key.
+- Before adoption: confirm the CC-BY version (4.0) on each Sketchfab model page, strip brand marks (listed in the candidates file), and log each in docs/licenses/ASSETS.md.
+- **CC0 prop pipeline (Poly Haven, no account):** tools/interiors/fetchProps.ts downloads 18 models (the hero-room picks from PROP_CANDIDATES), downsizes textures to 512 px JPEG, and packs each into one GLB in public/models/interiors/ (6.0 MB total, 600-16k tris each). It writes src/interiors/props/manifest.json (bounds computed through the node TRS) and the ledger rows in docs/licenses/ASSETS.md (CC0 1.0, polyhaven.com/license, checked 2026-11-27).
+  - Generators place models with `Kit.model(key, x, y, z, yaw)`, carried in `BuiltInterior.models`. The runtime parents each model to its cell mesh, so portal culling hides it with the cell. `src/interiors/runtime/models.ts` is a small GLB reader on three/webgpu, because GLTFLoader would pull in a second copy of three.js.
+  - First use: a slat-back chair in Teddy's room 9F (docs/interiors/first_cc0_model_corwin_v1.png).
+  - Honest critique: the model reads as pasted in. Its lit PBR material is far brighter than the baked room around it, and the interim point lights from `cellLights` don't match the bake. This is the expected seam until the engine's PBR and probe foundation (request 9) lights the rooms and the props with the same lights.
+  - To verify: the facing offset per model, and scale (`kitchen_table` is 0.96 m high, so it needs about 0.8× scale; `suitcase` bounds are 1.6 m wide, so check its scale before use).
+- **Bug fixed: upper-floor furniture.** Frame-based props (bed, sofa, TV, dinette, radiator, payphone, sewing machines, cutting tables, pool tables, grade clutter) were built from y = 0, so on upper floors they sat at street level. Every apartment, Corwin room, loft floor and upstairs hall was affected. The fix is `Kit.at(y0, fn)`, a scoped floor offset applied in every primitive, collider, light, marker, slot and model, now used at all upper-floor call sites. Checked with `tools/interiors/probe.ts`: Corwin room 9F furniture now sits at 36.31 m and rooms 1104 and BATH at 45.38 m (their floors), tenement floors at 3.79, 7.58 and 11.38 m. Stress over all units: 0 failures.
+- **Gap builds (no free model):** `src/interiors/kit/propsGap.ts`, on two new kit primitives: `Kit.bbox` (bevelled box with chamfered edges and corners) and `Kit.loft` (smooth lofts through superellipse rings). Pieces:
+  - chrome tube-frame dinette chair and formica dinette table with a chrome edge band, now in every tenement apartment kitchen;
+  - cast-iron clawfoot tub (rolled rim, enamel bowl, claw feet, taps) and high-tank pull-chain toilet, both in the Corwin bathroom;
+  - single-slot wall payphone (keypad, armoured cord, directory shelf), in the Corwin lobby and hall phones.
+  - Remaining gaps: console TV, opal globe, booth seat mesh, tanker chair, display case, mailbox bank, cigarette machine, coin-op washer, window AC.
+- Speckle reported on the engine board: not reproducible in the interiors gallery. Fixed anyway: the bake's visibility cache is now keyed by surface direction at 0.125 m. Door objects are now named `door_<id>`. Asked the engine to pick the speckled object and report its name.
+- Evidence: docs/interiors/gap_builds_corwin_bath_v1.jpg (Corwin 11th-floor bathroom: clawfoot tub on claw feet; high-tank toilets with pipe and chain). Critique: the tub silhouette and rim read correctly. The toilet seats read as flat slabs. The room is too dark (worn grade, one bulb) to judge materials. The Corwin rooms are 2.9 × 10.5 m (they run from the facade to the corridor), far too deep for the brief's "eight by ten" SRO rooms: split each into a room plus a closet or a second room. Next pass.
+- **Speckle root cause found and fixed** (engine board: door leaves and jambs; also on every stool post, booth side and seat in my own boards). The material selected the pattern with `id.equal(13)` on the per-vertex float `pat.x`. Interpolation left it a hair off the integer on some pixels (SwiftShader/WebGL2), so those pixels fell through to another pattern's colour, giving a stable cm-scale speckle wherever the two patterns differ strongly (chrome above all). Now `id = floor(pat.x + 0.5)`, and the emissive select is rounded the same way.
+  - Bisected in the gallery: wear off still speckled, the fwidth fade off still speckled, chrome as plain colour clean, rounded id clean (docs/interiors/speckle_fix_before_after.png).
+  - Also adopted the engine's mod-wrap of world position, replaced the sin hash with a sin-free hash12 (stable at Manhattan coordinates), and made the chrome reflection world-space with a floor-bounce level.
+  - The gallery gained `?woff=x,z` (world-scale offset), `?unit=<id>` and `?streetDoors=1` to reproduce game conditions.
+  - Earlier boards (grades v1–v3, walk-ins) carry this artefact on chrome and vinyl.

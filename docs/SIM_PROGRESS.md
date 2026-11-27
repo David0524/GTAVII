@@ -124,7 +124,13 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
   bands, at the rim or anywhere beyond 20–30 m that the camera isn't looking (`setView`); despawn beyond
   the disc. Budget-neutral view bias: the fill target is ×1.4 inside the camera's cone, ×0.45 behind it, and
   with the pool full a car or person far behind the camera (out of sight) is recycled now and then so spawning
-  can put it in view; in view, nothing appears closer than the fade distance (`setView(..., fovDeg, fadeDist)`). gridlock fallback:
+  can put it in view; in view, nothing appears closer than the fade distance (`setView(..., fovDeg, fadeDist)`,
+  default 60 m: the engine should pass the distance its fade-in hides). Spawning is capped per block as well as
+  per ring, so one long queue can't take a ring's whole share while the next avenue stands empty. Through
+  routes cut off by the map edge (7th Avenue above 43rd, the crosstown ends) are fed as entries, and the
+  build keeps edge entry blocks the strong-connectivity prune used to drop (`edge entries revived`).
+  Measured at 42nd & 7th, noon, Low 90/240, cars 15–80 m in the view cone: looking north ~22, south ~22,
+  east ~9 (with a 60 m fade). gridlock fallback:
   a vehicle stationary > 60 s while not at a red (and > 70 m from the focus, or > 150 s anywhere)
   is despawned. Signals are a pure function of time (no state), so the sim is deterministic.
 
@@ -518,6 +524,49 @@ The east edge moves to include Grand Central Terminal. Plan (requests item 12): 
 ramps as their own lane level (streets with grade `g` ≠ 0 are left out of the ground graph today, so they
 can't make false junctions), taxi stands by the terminal, and rush-hour concourse crowds (adults only)
 on the timetable, once the engine posts the new PLAYABLE and the concourse walkable area.
+
+## Pedestrian separation (characters' crowd: no interpenetration)
+- People waiting to cross stand in slots on the sidewalk they arrived along: rows starting a step back from
+  the corner, up to four abreast (two shallow rows at the end of the crosswalk on a traffic island). On WALK
+  they walk up to the kerb and onto that crosswalk; they cross spread over its width, not in single file.
+- Walkers held up at the kerb join the waiting crowd instead of pressing in single file.
+- A separation pass after each step pushes any two people closer than 0.5 m apart (half the crowd each
+  step): walkers within their band (corner taper kept), others snapped to the nearest sidewalk band; stall
+  vendors, people in the road and reaction states hold their place.
+- Test: sampled pairs closer than 0.25 m average 0.4–0.6 per sample on High at rush hour (was ~150 at busy
+  corners); walkers passing within 0.2 m are brief transients at corner nodes (≤5 sampled per 10-min run).
+- Cost: High ~2.3–2.5 ms per step in this container (Low ~0.5 ms): over the 2 ms desktop budget, so the
+  sim should move to a worker on desktop (requests item 7; it has no DOM or three.js dependency).
+
+## Running in a Web Worker (`src/sim/remote.ts`, `src/sim/sim.worker.ts`)
+- `new RemoteSimulation(new Worker(new URL('./sim/sim.worker.ts', import.meta.url), { type: 'module' }), opts)`;
+  `await sim.load()`; per frame `setView`, `setExternalActors`, `update(dt, focus)`; read `vehicles`, `peds`,
+  `wildlife`, `police`, `vendorViews`, `signals` (the last snapshot: one frame behind) and `on(type, cb)`
+  for events. Setters: `cmd('setClock', m)`; queries: `await call('parkedCars', x, z, r)`.
+- Views travel as transferred typed arrays plus a string table; a busy worker drops a frame's post rather
+  than queueing them. `setDensityAreas(boxes)` replaces the function hook across the worker boundary.
+- Test: the same seed behind an in-memory port matches the direct sim (max view error 1e-4 m, same events).
+
+## NPC memory and greetings (`src/sim/memory.ts`; oversight gap list item 2)
+- **Block reputation:** each block (`blockAt`) keeps a decaying score of the player (half-life 15 sim minutes):
+  helped +3, tipped +1.5, bumped -0.4, knockdown -1.2, reckless -1, theft -2, robbed/assault -4, gunfire -3,
+  killed -6. Query with `sim.reputation(x, z)` -> `{score, last, ago}`.
+- **Witnesses:** peds within the kind's radius (8 m for a bump up to 70 m for gunfire) remember it personally
+  for 10 minutes; the worst thing they saw sticks.
+- **Sources:** player bumps (automatic), `kill(id, secs, byPlayer)`, `emit({type:'gunfire'|'threat', byPlayer})`,
+  and gameplay's `sim.remember(kind, x, z, {witnessR?, pedId?})` for everything else (helped, tipped, robbed...).
+- **Greetings:** as the player passes within 3.5 m, every 0.5 s, with a 45 s per-ped cooldown, people may react:
+  `greet_known` (recall a favour), `antagonize` (saw something bad, steady nerves) or `fear` (shaky nerves:
+  they hesitate), `complain`/`fear` on a block with a bad reputation, `player_running`, or a passing `greet`
+  (8%, more on a friendly block). Most New Yorkers say nothing.
+  Event `pedGreets {id, pool, context, mood, recall, archetype, x, z}`; `pool` is narrative's bark set
+  (`barks.<archetype>`), audio picks the line by `context`.
+- **Test:** a favour is recalled (greet_known), a robbery on another block draws complain/fear/antagonize, and
+  reputations have the right sign (seed 7: greet_known 8, fear 1; robbed -4, helped +2.7).
+- **vs RDR2 / GTA V / VI:** RDR2's per-town honour and greet/antagonise is the model; we key it to the city
+  block rather than a town, which suits Manhattan's density. GTA V NPCs only react in the moment. Not yet:
+  a player-initiated greet/antagonise button (gameplay input -> `remember`), and a reputation that spreads
+  between neighbouring blocks.
 
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St

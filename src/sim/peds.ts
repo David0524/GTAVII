@@ -34,6 +34,69 @@ function placeOnEdge(S: SimCore, p: Ped) {
   } else { p.onRoad = false; p.y = SIDEWALK_Y; }
 }
 
+// ------------------------------------------------------------------ separation
+/**
+ * Bodies never overlap: after each step, any two people closer than SEP push apart by half the overlap each
+ * (position-based, like a crowd solver), so a crowd at a kerb spreads instead of stacking. People on a
+ * sidewalk move within their walking band (lat/s), everyone else (waiting, queueing, watching, stepping)
+ * moves freely; stall vendors and crews hold their place (the other one yields).
+ */
+const SEP = 0.5;
+/** The nearest point on a sidewalk's walking band (people standing about never end up in the road or a wall). */
+const clampTmp = [0, 0, 0, 0];
+function onSidewalk(S: SimCore, x: number, z: number): [number, number] {
+  const net = S.net; let best = -1, bd = 6, bs = 0;
+  for (const e of net.sidewalksNear(x, z, 6, new Set())) { if (net.g.walkEdges[e].kind !== WalkKind.Sidewalk) continue; const pr = projectOnPoly(net.g.walkEdges[e].pts, x, z); if (pr.d < bd) { bd = pr.d; best = e; bs = pr.s; } }
+  if (best < 0) return [NaN, NaN]; // no sidewalk near: the caller keeps the old position
+  const E = net.g.walkEdges[best]; sampleAt(E.pts, net.walkCum[best], bs, clampTmp);
+  const nx = -clampTmp[3], nz = clampTmp[2]; // lat axis
+  const endRoom = Math.min(bs, net.walkLen[best] - bs); // corners: the band tapers to the path, like walkers'
+  const off = (x - clampTmp[0]) * nx + (z - clampTmp[1]) * nz, lim = Math.min(E.half, endRoom * 0.6);
+  const o = Math.max(-lim, Math.min(lim, off));
+  return [clampTmp[0] + nx * o, clampTmp[1] + nz * o];
+}
+const FIXED = new Set(['vendor', 'dead', 'external', 'act', 'hold', 'stumble', 'down', 'getUp', 'angry']);
+export function separatePeds(S: SimCore, parity = -1) {
+  const net = S.net;
+  const nudge = (p: Ped, mx: number, mz: number) => {
+    if (p.state === 'waitCross' && (p.slotS ?? -1) < 0) return; // no slot: hold the node
+    if (p.state === 'walk' || p.state === 'flee' || p.state === 'pause' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'waitCross') {
+      const E = net.g.walkEdges[p.edge];
+      if (!E) return;
+      sampleAt(E.pts, net.walkCum[p.edge], p.s, tmp);
+      const ds = mx * tmp[2] + mz * tmp[3], dr = mx * -tmp[3] + mz * tmp[2]; // along the edge, and across it (lat's own axis: (-dz, dx))
+      const len = net.walkLen[p.edge];
+      p.s = Math.max(0, Math.min(len, p.s + ds));
+      if (p.state === 'waitCross' && E.kind === WalkKind.Crosswalk) p.s = p.dir > 0 ? Math.max(p.s, len - 0.85) : Math.min(p.s, 0.85); // stay on the island, off the roadway
+      const endRoom = Math.min(p.s, len - p.s);
+      const half = E.kind === WalkKind.Sidewalk ? Math.min(E.half, Math.max(0.3, endRoom * 0.6)) : Math.min(E.half, 1.0); // corners taper, like walkers
+      p.lat = Math.max(-half, Math.min(half, p.lat + dr));
+      if (p.state === 'waitCross') { p.slotS = p.s; p.slotLat = p.lat; }
+      placeOnEdge(S, p);
+    } else {
+      const [x, z] = onSidewalk(S, p.x + mx, p.z + mz);
+      if (Number.isNaN(x)) return;
+      p.x = x; p.z = z;
+      if (p.state === 'free' && !p.jaywalking) { const [tx, tz] = onSidewalk(S, p.tx + mx, p.tz + mz); if (!Number.isNaN(tx)) { p.tx = tx; p.tz = tz; } } // two stepping to one point: give them two
+    }
+  };
+  for (let pi = 0; pi < S.peds.length; pi++) {
+    if (parity >= 0 && (pi & 1) !== parity) continue; // half the crowd each step (each person every other step)
+    const p = S.peds[pi];
+    if (!p.alive || FIXED.has(p.state) || p.cop2 || p.onRoad) continue; // (in the road: jaywalking, crossing — not pushed about)
+    S.pGrid.query(p.x, p.z, SEP, (i) => {
+      const q = S.peds[i];
+      if (!q || q === p || !q.alive || q.state === 'dead' || q.state === 'external' || (parity < 0 && q.id < p.id && !FIXED.has(q.state))) return;
+      let dx = p.x - q.x, dz = p.z - q.z, d = Math.hypot(dx, dz);
+      if (d >= SEP) return;
+      if (d < 1e-4) { const a = (p.id * 2.399) % (Math.PI * 2); dx = Math.cos(a); dz = Math.sin(a); d = 1e-4; } else { dx /= d; dz /= d; }
+      const over = SEP - d;
+      if (FIXED.has(q.state) || q.cop2 || q.onRoad) nudge(p, dx * over, dz * over);
+      else { nudge(p, dx * over * 0.5, dz * over * 0.5); nudge(q, -dx * over * 0.5, -dz * over * 0.5); }
+    });
+  }
+}
+
 // ------------------------------------------------------------------ spawning
 function newPed(S: SimCore, arch: ArchetypeRt, edge: number, s: number): Ped {
   const half = S.net.g.walkEdges[edge].half;
@@ -127,6 +190,7 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
     const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
     if (d > R) continue;
     if (!full && d < R * 0.6 && !pedOutOfView(S, tmp[0], tmp[1])) continue;
+    if (!full && S.view && !pedOutOfView(S, tmp[0], tmp[1]) && d < S.view.fade) continue; // in view: never inside the fade distance
     const band = Math.floor(d / BAND_P);
     if (occ[band] >= F.walkM[band] * rho * viewWeight(S, tmp[0], tmp[1])) continue; // fuller where the camera looks
     occ[band]++;
@@ -150,7 +214,7 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
       else {
         const spot = g.spots[sp];
         p.edge = spot.edge; p.s = Math.min(spot.s, net.walkLen[spot.edge]);
-        addPed(S, p); p.x = p.px = spot.x; p.z = p.pz = spot.z;
+        addPed(S, p); p.x = p.px = spot.x; p.z = p.pz = spot.z; // (the separation pass spreads people coming up together)
         const e = g.walkEdges[p.edge]; sampleAt(e.pts, net.walkCum[p.edge], p.s, tmp);
         p.toEdge = p.edge; p.toS = p.s; goFree(p, tmp[0], tmp[1], 'attach');
         S.emit('subwayExit', { id: p.id, x: spot.x, z: spot.z });
@@ -176,7 +240,10 @@ export function spawnPedAt(S: SimCore, x: number, z: number, reason: string) {
   if (best < 0) return;
   const arch = S.reg.pick((a) => a.behaviour === 'walker' || a.behaviour === 'commuter', x, z, S.minute, S.rng.next());
   if (!arch) return;
-  const p = newPed(S, arch, best, Math.max(0.1, Math.min(bs, S.net.walkLen[best] - 0.1)));
+  // people coming up the same stairs don't all stand on one point: spread along and across the band
+  const E = S.net.g.walkEdges[best];
+  const p = newPed(S, arch, best, Math.max(0.1, Math.min(bs + S.rng.range(-1.2, 1.2), S.net.walkLen[best] - 0.1)));
+  p.lat = S.rng.range(-1, 1) * Math.min(E.half, 0.9); p.latGoal = p.lat;
   addPed(S, p);
   S.emit(reason, { id: p.id, x: p.x, z: p.z });
 }
@@ -237,6 +304,30 @@ function copNear(S: SimCore, x: number, z: number): boolean {
 }
 
 /** Would stepping `look` metres along (fx,fz) put this ped against a vehicle body? Peds in the road stop rather than walk into cars. */
+/**
+ * A place to wait at the kerb for the crosswalk `cw`: on the sidewalk edge they arrived along, rows back from
+ * the corner and up to four abreast across the band (tapered near the corner, like walkers), the first one
+ * nobody else waiting there has taken. On a traffic island (arrived by crosswalk) they stand at the node.
+ */
+function waitSlot(S: SimCore, p: Ped, _cw: number, _node: number) {
+  const net = S.net, E = net.g.walkEdges[p.edge];
+  p.slotS = -1;
+  if (!E) return;
+  const island = E.kind === WalkKind.Crosswalk; // arrived by crosswalk onto a median: two shallow rows at its end
+  const len = net.walkLen[p.edge], atEnd = p.dir > 0 ? len : 0;
+  const taken: [number, number][] = [];
+  S.pGrid.query(p.x, p.z, 10, (i) => { const q = S.peds[i]; if (q && q !== p && q.alive && q.edge === p.edge && q.state === 'waitCross' && (q.slotS ?? -1) >= 0) taken.push([q.slotS!, q.slotLat ?? 0]); });
+  for (let k = 0; k < (island ? 8 : 48); k++) {
+    const back = (island ? 0.15 : 1.6) + Math.floor(k / 4) * (island ? 0.45 : 0.6), ss = atEnd - p.dir * back; // a step back from the corner, where the sidewalk is full width
+    if (ss < 0.1 || ss > len - 0.1) break;
+    const endRoom = Math.min(ss, len - ss), lim = island ? Math.min(E.half, 1.0) : Math.min(E.half, Math.max(0.3, endRoom * 0.6));
+    const lat = Math.max(-lim, Math.min(lim, ((k % 4) - 1.5) * 0.6));
+    if (taken.some(([ts, tl]) => Math.hypot(ts - ss, tl - lat) < 0.5)) continue;
+    p.slotS = ss; p.slotLat = lat; return;
+  }
+  p.slotS = p.s; p.slotLat = p.lat; // corner full: wait where they stand (the separation pass spreads them along the band)
+}
+
 function vehicleInWay(S: SimCore, x: number, z: number, fx: number, fz: number, look: number): boolean {
   let hit = false;
   const qx = x + fx * look, qz = z + fz * look;
@@ -295,7 +386,15 @@ function enterEdge(S: SimCore, p: Ped, e: number, fromNode: number) {
   p.s = p.dir > 0 ? 0 : S.net.walkLen[e];
   p.lat = Math.max(-E.half, Math.min(E.half, p.lat));
   if (E.kind === WalkKind.Sidewalk) S.footCount[E.owner]++;
-  if (E.kind === WalkKind.Crosswalk) { (S.onWalk.get(e) ?? S.onWalk.set(e, []).get(e)!).push(p); S.stats.crossings++; p.lat = 0; }
+  if (E.kind === WalkKind.Crosswalk) {
+    (S.onWalk.get(e) ?? S.onWalk.set(e, []).get(e)!).push(p); S.stats.crossings++;
+    // cross spread over the crosswalk's width (from where they waited), not in single file
+    const N = S.net.g.walkNodes[fromNode], o = S.net.g.walkNodes[E.a === fromNode ? E.b : E.a];
+    let dx = o.x - N.x, dz = o.z - N.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
+    const off = (p.x - N.x) * -dz + (p.z - N.z) * dx; // signed offset across the crosswalk (left of travel +)
+    const lim = Math.min(E.half, 1.0);
+    p.lat = Math.abs(off) > 0.05 ? Math.max(-lim, Math.min(lim, -off * p.dir)) : S.rng.range(-lim, lim) * 0.8;
+  }
 }
 function leaveCrosswalk(S: SimCore, p: Ped) {
   const l = S.onWalk.get(p.edge); if (l) { const i = l.indexOf(p); if (i >= 0) l.splice(i, 1); }
@@ -307,7 +406,8 @@ function arriveNode(S: SimCore, p: Ped) {
   const node = p.dir > 0 ? E.b : E.a;
   p.node = node;
   let next = -1;
-  if (p.goal) {
+  if ((p.crossNext ?? -1) >= 0 && net.walkAdj[node].some(([e]) => e === p.crossNext)) { next = p.crossNext!; p.crossNext = -1; } // walked up from the waiting crowd: straight onto that crosswalk
+  else if (p.goal) {
     if (p.path.length && !net.walkAdj[node].some(([e]) => e === p.path[0])) replan(S, p, node);
     if (p.path.length) next = p.path.shift()!;
     else { goalLegDone(S, p, node); if (!p.goal) next = chooseNext(S, p, node, p.edge); else if (p.path.length) next = p.path.shift()!; else { p.state = 'hold'; p.v = 0; return; } }
@@ -330,6 +430,7 @@ function arriveNode(S: SimCore, p: Ped) {
     if ((sig ? net.walkAllowed(N.owner, N.arm, S.t, crossT) || !!p.goal?.urgent : true) && trafficClearForCrosswalk(S, next)) { enterEdge(S, p, next, node); return; }
     if (E.kind === WalkKind.Crosswalk) leaveCrosswalk(S, p);
     p.state = 'waitCross'; p.toEdge = next; p.timer = 0; p.v = 0;
+    waitSlot(S, p, next, node);
     return;
   }
   // beat cop pauses at corners now and then
@@ -380,6 +481,11 @@ export function stepPeds(S: SimCore, dt: number) {
       }
       case 'waitCross': {
         p.timer += dt; p.v = 0;
+        if ((p.slotS ?? -1) >= 0) { // shuffle into the waiting slot along the sidewalk (a crowd at the kerb, not one stacked point)
+          const ds = p.slotS! - p.s, dl = (p.slotLat ?? 0) - p.lat, d = Math.hypot(ds, dl);
+          if (d > 0.02) { const st = Math.min(d, dt * 0.9); p.s += (ds / d) * st; p.lat += (dl / d) * st; }
+          placeOnEdge(S, p);
+        }
         const N = g.walkEdges[p.toEdge];
         const crossT = net.walkLen[p.toEdge] / Math.max(0.8, p.speed);
         const sig = (g.junctions[N.owner].flags & JuncFlag.Signal) !== 0;
@@ -389,7 +495,9 @@ export function stepPeds(S: SimCore, dt: number) {
           p.jayCd = 1;
           if (S.rng.chance(p.arch.jaywalk * 0.12 * (S.weather === 'rain' ? 1.5 : 1)) && !copNear(S, p.x, p.z)) { go = true; p.jaywalking = true; S.stats.jaywalks++; S.emit('jaywalk', { id: p.id, x: p.x, z: p.z }); }
         }
-        if (go) { const j = p.jaywalking; p.state = 'walk'; enterEdge(S, p, p.toEdge, p.node); p.jaywalking = j; }
+        const Ew = g.walkEdges[p.edge], toEnd = Ew && Ew.kind === WalkKind.Sidewalk ? (p.dir > 0 ? net.walkLen[p.edge] - p.s : p.s) : 0;
+        if (go && toEnd > 0.4 && !p.jaywalking) { p.state = 'walk'; p.crossNext = p.toEdge; p.v = p.speed * 0.6; } // step up to the kerb and over
+        else if (go) { const j = p.jaywalking; p.state = 'walk'; enterEdge(S, p, p.toEdge, p.node); p.jaywalking = j; }
         else if (p.timer > 120) { // give up: take any sidewalk instead
           const alt = S.net.walkAdj[p.node].find(([e]) => g.walkEdges[e].kind === WalkKind.Sidewalk && e !== p.toEdge);
           if (alt) { p.state = 'walk'; enterEdge(S, p, alt[0], p.node); } else p.timer = 0;
@@ -462,12 +570,15 @@ function walk(S: SimCore, p: Ped, dt: number) {
     const rx = q.x - p.x, rz = q.z - p.z;
     const ahead = rx * fx + rz * fz, side = rx * -fz + rz * fx; // + = to my right
     const d = Math.hypot(rx, rz);
-    if (d < 0.6 && d > 1e-3) myRight -= (side >= 0 ? 1 : -1) * (0.6 - d) * 0.5; // separation
+    if (d < 0.6) myRight -= (d > 1e-3 ? (side >= 0 ? 1 : -1) : (p.id > q.id ? 1 : -1)) * (0.6 - d) * 0.5; // separation (exactly on top of each other: split by id)
+    // on top of someone walking the same way (a narrow band can't split them sideways): one of them waits a beat
+
     if (ahead > 0 && ahead < 2.4 && Math.abs(side) < 0.75 + rad) {
       const qf = (q.x - q.px) * fx + (q.z - q.pz) * fz;
       if (qf < 0) goalR = Math.min(half, Math.max(goalR, side + 0.85)); // oncoming: sidestep right
       else if (q.v < 0.2) { goalR = side > 0 ? side - 0.85 : side + 0.85; speed = Math.min(speed, 0.6); } // standing person: step around, never queue behind
       else if (q.v < speed && ahead < 1.3) speed = Math.min(speed, Math.max(0, q.v)); // follow slower ped
+      if (ahead < 0.55 && Math.abs(side) < 0.5 && qf >= 0) speed = 0; // never walk into someone's back
     }
   });
   for (const a of S.actors) {
@@ -488,7 +599,7 @@ function walk(S: SimCore, p: Ped, dt: number) {
   goalR = Math.max(-half, Math.min(half, goalR));
   myRight += Math.sign(goalR - myRight) * Math.min(Math.abs(goalR - myRight), dt * 0.9);
   const endRoom = Math.min(p.s, net.walkLen[p.edge] - p.s); // corners: taper the band to the path
-  const halfHere = E.kind === WalkKind.Sidewalk ? Math.min(half, Math.max(0, endRoom * 0.6)) : half;
+  const halfHere = E.kind === WalkKind.Sidewalk ? Math.min(half, Math.max(0.3, endRoom * 0.6)) : half; // corners: narrow, but never a single file
   myRight = Math.max(-halfHere, Math.min(halfHere, myRight));
   p.lat = myRight * p.dir;
   if (p.onRoad && vehicleInWay(S, p.x, p.z, fx, fz, 0.6 + p.v * 0.6)) { speed = 0; p.v = 0; }
@@ -502,6 +613,19 @@ function walk(S: SimCore, p: Ped, dt: number) {
     return;
   }
   if (p.s >= len || p.s <= 0) { p.s = Math.max(0, Math.min(len, p.s)); placeOnEdge(S, p); arriveNode(S, p); placeOnEdge(S, p); return; }
+  // held up at the kerb behind people waiting to cross: decide at the corner from here and join them in a
+  // waiting slot, instead of pressing into the crowd in single file
+  const toEnd = p.dir > 0 ? len - p.s : p.s;
+  if (!flee && !p.goal && (p.crossNext ?? -1) < 0 && E.kind === WalkKind.Sidewalk && toEnd < 4 && p.v < 0.1) {
+    p.kerbT = (p.kerbT ?? 0) + dt;
+    if (p.kerbT > 0.5) {
+      p.kerbT = 0; const sKeep = p.s;
+      p.s = p.dir > 0 ? len : 0;
+      arriveNode(S, p);
+      if (p.state === 'waitCross') { p.s = sKeep; placeOnEdge(S, p); } else placeOnEdge(S, p); // shuffle into the slot from where they stood
+      return;
+    }
+  } else p.kerbT = 0;
   placeOnEdge(S, p);
   if (flee || E.kind !== WalkKind.Sidewalk || p.goal) return;
   // reached the goal spot?

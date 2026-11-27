@@ -3,7 +3,7 @@
  * (macro params + local modifiers) into vertex positions, joint positions and landmarks.
  * Pure data (no three.js), so it can run in a worker.
  */
-import { readContainer } from '../format';
+import { readContainer, formatReady } from '../format';
 import { macroTargetWeights, type MacroParams } from './macro';
 
 export interface BodyDesc {
@@ -58,9 +58,11 @@ export class BodyModel {
   static async load(url: string): Promise<BodyModel> {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`characters: ${url} ${r.status}`);
+    await formatReady();
     return new BodyModel(await r.arrayBuffer());
   }
 
+  /** Callers must have awaited formatReady() (load() does). */
   constructor(buf: ArrayBuffer) {
     const c = readContainer(buf);
     this.meta = c.meta; this.blobs = c.blobs;

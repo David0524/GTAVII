@@ -87,7 +87,7 @@ async function main() {
   for (const r of runs) {
     process.stdout.write(`render ${r.id} [${r.quality}/${r.profile}] ... `);
     const t0 = Date.now();
-    const res: Res = await page.evaluate(([id, o]) => (window as any).__T74AUDIO.render(id, o), [r.id, { seconds: SECONDS, profile: r.profile, quality: r.quality }] as const);
+    const res: Res = await page.evaluate(([id, o]) => (window as any).__T74AUDIO.render(id, o), [r.id, { seconds: SECONDS, profile: r.profile, quality: r.quality, content: flag('content') }] as const);
     const { L, R, sr } = decode(res.pcm, res.sr);
     const m: Loudness = measure(L, R, sr);
     const ff = ffmpeg(L, R, sr);

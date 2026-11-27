@@ -6,37 +6,37 @@
     {
       "hero": "char.teddy_arce",
       "head": "lead_teddy",
-      "tris": 16158,
+      "tris": 19958,
       "draws": 2
     },
     {
       "hero": "char.teddy_arce",
       "head": null,
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": "lead_delphine",
-      "tris": 17101,
+      "tris": 19492,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": null,
-      "tris": 20094,
+      "tris": 21942,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": "lead_nick",
-      "tris": 24268,
+      "tris": 31628,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": null,
-      "tris": 26140,
+      "tris": 33494,
       "draws": 2
     }
   ],
@@ -54,9 +54,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 16158,
+      "tris": 19958,
       "draws": 2,
-      "buildMs": 121.9
+      "buildMs": 152.1
     },
     {
       "seed": 1,
@@ -71,9 +71,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2,
-      "buildMs": 95.7
+      "buildMs": 107.5
     },
     {
       "seed": 1,
@@ -90,9 +90,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 19492,
       "draws": 2,
-      "buildMs": 53.3
+      "buildMs": 65.1
     },
     {
       "seed": 1,
@@ -109,9 +109,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 20094,
+      "tris": 21942,
       "draws": 2,
-      "buildMs": 67.2
+      "buildMs": 86.5
     },
     {
       "seed": 1,
@@ -126,9 +126,9 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 24268,
+      "tris": 31628,
       "draws": 2,
-      "buildMs": 104.8
+      "buildMs": 122.1
     },
     {
       "seed": 1,
@@ -143,22 +143,42 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 26140,
+      "tris": 33494,
       "draws": 2,
-      "buildMs": 81
+      "buildMs": 109.6
     }
   ],
   "updateMs": [
-    0.1,
     0,
     0,
     0.1,
+    0,
     0,
     0
   ],
+  "toneProbes": [
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": "lead_nick",
+      "tone": "#c8a17e",
+      "cheek": [
+        0.4117,
+        0.5452
+      ],
+      "neck": [
+        0.4803,
+        0.6724
+      ],
+      "hand": [
+        -0.0485,
+        2.0837
+      ]
+    }
+  ],
   "renderMsSoftware": [
-    3.2999999998137355,
-    1.2999999998137355,
-    1
+    3.3999999999068677,
+    1.3000000002793968,
+    1.1999999997206032
   ]
 }

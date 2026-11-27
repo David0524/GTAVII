@@ -12,7 +12,7 @@
 import * as THREE from 'three/webgpu';
 import {
   Fn, attribute, uniform, vec2, vec3, vec4, float, floor, fract, sin, abs, mix, step, smoothstep, max, min, dot, If,
-  positionWorld, normalWorld, normalView, positionViewDirection, mod, time, clamp, length, select, fwidth,
+  positionWorld, normalWorld, normalView, positionViewDirection, mod, time, clamp, length, select, fwidth, cameraPosition, normalize, reflect,
 } from 'three/tsl';
 
 /** Per-object uniforms read from object.userData.interior (set by the streamer). */
@@ -21,7 +21,13 @@ export interface InteriorLook { lampPower: number; lampTint: THREE.Color; window
 // TSL node graphs are typed loosely here: the generic node types don't compose across Fn boundaries.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type N = any;
-const h21 = Fn(([p]: [N]) => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453)));
+// sin-free hash (Hoskins "hash12"): stays uniform for |p| up to ~1e4 in float32, where fract(sin(dot)) collapses into
+// per-pixel noise at Manhattan-scale world coordinates (engine report, 2026-11-27). Inputs are also wrapped with mod.
+const h21 = Fn(([p]: [N]) => {
+  const p3 = fract(vec3(p.x, p.y, p.x).mul(0.1031)).toVar();
+  p3.addAssign(dot(p3, vec3(p3.y, p3.z, p3.x).add(33.33)));
+  return fract(p3.x.add(p3.y).mul(p3.z));
+});
 const noise2 = Fn(([p]: [N]) => {
   const i: N = floor(p), f: N = fract(p), u: N = f.mul(f).mul(float(3).sub(f.mul(2)));
   const a = h21(i), b = h21(i.add(vec2(1, 0))), c = h21(i.add(vec2(0, 1))), d = h21(i.add(vec2(1, 1)));
@@ -40,7 +46,10 @@ function albedoNode() {
   const uvA = attribute('uv', 'vec2');
   const pat = attribute('pat', 'vec4');
   return Fn(() => {
-    const id = pat.x, prm = pat.y, variant = floor(prm), scl = fract(prm);
+    // the pattern id is a per-vertex float: interpolation leaves it a hair off the integer on some pixels (seen on
+    // SwiftShader/WebGL2), so id.equal(13) failed there and those pixels fell through to another pattern (the chrome
+    // door/jamb/stool speckle). Round it once. prm likewise: a hair under the integer would flip the variant.
+    const id = floor(pat.x.add(0.5)), prm = pat.y.add(0.0005), variant = floor(prm), scl = fract(prm);
     const c = base.toVar();
     const col = vec3(c).toVar();
     const uvv = uvA.toVar();
@@ -135,8 +144,11 @@ function albedoNode() {
     });
     // 13 chrome / brushed steel: fake environment from the view reflection
     If(id.equal(13), () => {
-      const r = positionViewDirection.negate().reflect(normalView);
-      const env = smoothstep(-0.3, 0.6, r.y).mul(0.85).add(0.15);
+      // world-space reflection (camera to surface, geometric world normal): no view-space normal, which the engine's
+      // pipeline may not supply for an unlit material (speckle on chrome door leaves and jambs, engine board)
+      const r = reflect(normalize(positionWorld.sub(cameraPosition)), normalize(normalWorld));
+      // floor bounce below the horizon, bright ceiling/fixtures above, a narrow dark horizon band (studio-chrome look)
+      const env = mix(float(0.5), float(1.05), smoothstep(-0.15, 0.55, r.y)).mul(float(1).sub(smoothstep(0.12, 0.0, abs(r.y.add(0.05))).mul(0.35)));
       col.assign(c.mul(select(variant.greaterThan(0.5), env.mul(0.5).add(0.5), env)));
     });
     // 14 vinyl upholstery: tufted diamond + sheen
@@ -203,12 +215,13 @@ function albedoNode() {
     const fade = float(1).sub(smoothstep(feat.mul(0.3), feat.mul(1.1), fw));
     col.assign(mix(c.mul(0.84), col, fade));
     // wear/grime: low-frequency world-space blotches + darker toward the floor (pat.z = amount)
-    const wp = positionWorld.xz.add(positionWorld.y.mul(0.37));
+    // wrapped before hashing (h21's sin breaks down at Manhattan-scale coordinates in float32 → per-pixel speckle)
+    const wp = mod(positionWorld.xz.add(positionWorld.y.mul(0.37)), float(37));
     const grime = fbm(wp.mul(0.9)).mul(0.6).add(fbm(wp.mul(4.3)).mul(0.4));
     const wear = pat.z.mul(smoothstep(0.35, 0.85, grime)).mul(0.35);
     // water stains on ceilings and upper walls: tide-marked rings (dark edge, paler centre) that grow with wear (grade)
     const ceilingish = smoothstep(-0.4, -0.8, normalWorld.y);
-    const sp = positionWorld.xz.mul(0.55);
+    const sp = mod(positionWorld.xz, float(41)).mul(0.55);
     const blob = fbm(sp.add(vec2(13.1, 7.7)));
     const amt = smoothstep(0.55, 0.95, pat.z);           // only worn and derelict surfaces carry stains
     const ring = smoothstep(0.6, 0.64, blob).mul(float(1).sub(smoothstep(0.66, 0.72, blob)));
@@ -236,7 +249,7 @@ export function createInteriorMaterial(): THREE.MeshBasicNodeMaterial {
   const lamp = light.xyz.mul(lampTint).mul(lampPower.mul(fl));
   const lit = albedo.mul(lamp.add(win.mul(light.w)).add(amb));
   const emissive = attribute('color', 'vec3').mul(pat.w).mul(lampPower.mul(fl));
-  mat.colorNode = select(pat.x.equal(16), emissive.add(albedo.mul(0.1)), lit);
+  mat.colorNode = select(floor(pat.x.add(0.5)).equal(16), emissive.add(albedo.mul(0.1)), lit);
   mat.side = THREE.FrontSide;
   return mat;
 }
@@ -247,7 +260,9 @@ export function createGlassMaterial(): THREE.MeshBasicNodeMaterial {
   const light = attribute('light', 'vec4');
   const lampPower = uniform(1).onObjectUpdate(({ object }) => (object?.userData.interior as InteriorLook | undefined)?.lampPower ?? 1);
   const fres = float(1).sub(abs(dot(normalView, positionViewDirection))).pow(3);
-  const dirt = (Fn(() => fbm(positionWorld.xy.add(positionWorld.zy).mul(3)))());
+  // world position wrapped before hashing: the sin hash (h21) breaks down at |p| ~ 1e2..1e3 in float32 and turned
+  // the dirt into per-pixel noise on storefront glass (engine, 2026-11-27). 23 m wrap: seams never show on a pane
+  const dirt = (Fn(() => fbm(mod(positionWorld.xy.add(positionWorld.zy), float(23)).mul(3)))());
   mat.colorNode = vec3(0.55, 0.6, 0.58).mul(light.xyz.mul(lampPower).mul(0.4).add(light.w.mul(0.8)).add(0.05)).add(vec3(0.5, 0.48, 0.45).mul(fres.mul(0.5)));
   mat.opacityNode = clamp(fres.mul(0.55).add(0.12).add(dirt.mul(0.12)), 0, 0.8);
   mat.transparent = true; mat.depthWrite = false; mat.side = THREE.DoubleSide;

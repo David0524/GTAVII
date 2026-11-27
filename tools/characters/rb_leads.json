@@ -57,63 +57,6 @@
     "ownHair": true
   },
   {
-    "id": "lead_delphine",
-    "base": "Female_Party_02",
-    "skinTarget": "#50321f",
-    "hairTarget": "#141010",
-    "texSize": 1024,
-    "hairScale": 0.85,
-    "deform": [
-      {
-        "at": "LCheek",
-        "radius": 0.035,
-        "offset": [
-          0.0025,
-          0.003,
-          0.002
-        ],
-        "mirror": true
-      },
-      {
-        "at": "MNose",
-        "radius": 0.028,
-        "scale": [
-          1.16,
-          1.0,
-          0.95
-        ]
-      },
-      {
-        "at": "MUpperLip",
-        "radius": 0.018,
-        "scale": [
-          1.06,
-          1.12,
-          1.06
-        ]
-      },
-      {
-        "at": "MBottomLip",
-        "radius": 0.02,
-        "scale": [
-          1.06,
-          1.12,
-          1.06
-        ]
-      },
-      {
-        "at": "MJaw",
-        "radius": 0.06,
-        "scale": [
-          0.97,
-          1.03,
-          1.0
-        ]
-      }
-    ],
-    "ownHair": true
-  },
-  {
     "id": "lead_nick",
     "base": "Male_Adult_14",
     "skinTarget": "#c8a17e",

@@ -236,7 +236,7 @@ export function dressCells(k: Kit) {
     const style: DressStyle = /apt|room|teddy|tenant|home|bed|living|unit|sro|\d{3,4}/.test(nm) ? 'home' : /hall|corridor|lobby|landing|^floor/.test(nm) ? 'hall' : /back|store|office|work|loft/.test(nm) ? 'work' : 'shop';
     k.use(c.id);
     const g = k.grade, n = Math.max(1, Math.round(area / 14));
-    const put = (w: number, d: number, fn: (f: Frame) => void) => { const f = wallSpot(k, c.id, b, w, d); if (f) fn(f); };
+    const put = (w: number, d: number, fn: (f: Frame) => void) => { const f = wallSpot(k, c.id, b, w, d); if (f) k.at(b[1], () => fn(f)); }; // clutter is built from y = 0: lift onto this cell's floor
     if (g === 0) {
       for (let q = 0; q < n; q++) {
         const pick = k.wr.int(0, 5);
@@ -247,7 +247,7 @@ export function dressCells(k: Kit) {
         else if (pick === 4 && style === 'home') put(1.0, 2.0, (f) => mattress(k, f));
         else put(0.45, 0.35, (f) => paperStack(k, f));
       }
-      if (style !== 'hall' && k.wr.chance(0.6)) { const f = floorSpot(k, c.id, b, 0.6, 0.8); if (f) fallenChair(k, f, k.wr.pick([M.wood, M.woodDark, M.chrome])); }
+      if (style !== 'hall' && k.wr.chance(0.6)) { const f = floorSpot(k, c.id, b, 0.6, 0.8); if (f) { const m = k.wr.pick([M.wood, M.woodDark, M.chrome]); k.at(b[1], () => fallenChair(k, f, m)); } }
       papersScattered(k, b, Math.round(area / 5));
     } else if (g === 1) {
       for (let q = 0; q < n; q++) {

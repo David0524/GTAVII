@@ -80,6 +80,8 @@ export interface TraversalMark {
   /** 1 locked, 2 noisy (police notice), 4 one-way down */
   flags?: number;
 }
+/** A placed prop model (src/interiors/props/manifest.json key), interior-local. The runtime instances the GLB. */
+export interface ModelOut { key: string; x: number; y: number; z: number; yaw: number; s?: number; cell: number }
 export interface BuiltInterior {
   id: string;
   kind: string;
@@ -95,6 +97,7 @@ export interface BuiltInterior {
   movers: MoverOut[];
   art: ArtSlotOut[];
   traversal: TraversalMark[];
+  models: ModelOut[];
   /** interior volume (m^3) and reverb class for the audio stream */
   volume: number; reverb: string;
   /** local AABB of everything */

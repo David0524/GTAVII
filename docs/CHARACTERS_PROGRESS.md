@@ -4,9 +4,9 @@ Branch `claude/characters-74`; brief `docs/briefs/CHARACTERS_BRIEF.md`. Read thi
 last.
 
 ## Resume here (2026-11-27, WIP)
-- **Waiting on the user:** a head source for Delphine and Black women in the near ring
-  (`docs/research/HEAD_SOURCES.md`: ask Epic about MetaHuman web distribution, or buy 3D Scan
-  Store Retopologised heads). Until then Delphine stays on our head.
+- **Delphine is on ICT-FaceKit Light.** See "Delphine on ICT-FaceKit Light" below. To rebuild
+  her head, run `npx tsx tools/characters/build-ict.ts --src <ICT dir>` once, then
+  `npx tsx tools/characters/bake-ict.ts delphine`.
 - **In flight:** a tone-check re-run after retuning the probes (hand: toward the fingertip; neck:
   higher) and relaxing the pool gate to 1.45×. Re-run with
   `for f in 27_ 29_ 01_ 02_; do bash tools/characters/shots.sh $f; done`, then
@@ -17,6 +17,361 @@ last.
   - Then send the numbers and shots (27, 28, 29, 01/02/04 `_vs_refs`) to oversight.
 - **Then:** improve Delphine's own head (afroShort reads as a cap; soften it toward cropped natural
   hair), roll the collars, add blinks and lip-sync.
+
+## Delphine on ICT-FaceKit Light (oversight-approved prototype; synthesised identity only)
+Board: `shots/characters/40_delphine_ict_board.jpg` (front, three-quarter, profile, full figure,
+her previous MakeHuman head, two public-domain 1973 DOCUMERICA street photos for era styling).
+
+**Built (all pushed):**
+- `tools/characters/bake-ict.ts` bakes one hand-chosen coefficient vector (`ict_leads.json`)
+  into the head container the Rocketbox heads use, so fitting, the neck ring and the body
+  conform are shared.
+  - ICT's UDIM tiles are packed into one atlas.
+  - Skin weights are assigned by region: neck below the jaw line, jaw below the mouth line,
+    eyes, lower teeth and gums.
+  - The neck is cut to the Rocketbox leads' length: ICT's runs onto the chest (about 3.1
+    interocular distances below the eyes, against 2.3), which cut the body open.
+  - Lashes are alpha cards; the inner iris and the lacrimal, blend and occlusion films are
+    dropped.
+  - The basis stays dev-only; only the baked head ships.
+- `tools/characters/ict_tex.py` paints everything procedurally (ICT Light has no textures).
+  - Albedo: 3D-sampled mottling (so it runs across UV seams), eye surrounds, perioral tone,
+    vermilion with a wet inner lip, brows as strands, alar creases, ears, a close-crop hairline,
+    and the iris (fibres, collarette, limbal ring), pupil and sclera.
+  - Normal map: pores (denser on the nose and cheeks), lip lines and faint forehead lines.
+  - Packed data: roughness, cavity and skin weight.
+- **Skin lighting** (`src/characters/render/skinLighting.ts`, used by every head and the body
+  material, so head and neck shade alike):
+  - pre-integrated diffuse: per-channel wrap that grows with screen-space curvature, and
+    per-channel normals (red takes the smooth normal);
+  - dual-lobe GGX specular (85/15);
+  - the existing thin-part transmission.
+- **Hair grown from ICT's own scalp** (`src/characters/heads/scalpHair.ts`): coil shells along the
+  scalp normal, using the per-vertex hair weight from the bake. It costs one extra draw.
+- **Licence:** MIT notice in `public/characters/rb/LICENSE-ICT-FaceKit.md`; `docs/licenses/ASSETS.md`
+  now lists ICT under In use.
+
+**Measured:**
+
+| Check | Result |
+|---|---|
+| Tone, face–hand dC | Delphine 0.4, Teddy 4.7 (gate 8) |
+| Tone, face–neck dC | Delphine 16.0 (gate 20) |
+| Nick, face–hand | Not gated: hands in pockets set `handHidden`, so the probe no longer measures the suit |
+| Head size | 26k vertices, 47k triangles |
+| Head .bin | 873 KB raw, 391 KB gzip with delta filters |
+| Textures | 135 KB albedo, 115 KB normal, 112 KB packed/lash |
+| Head total, gzip | About 0.75 MB, against Nick's 0.17 MB |
+
+Teeth and gums are 28% of the vertices for a mouth that's mostly closed; they're the first cut in
+the size pass.
+
+**vs GTA V / RDR2 hero faces (honest):**
+- **Shape:** ICT's scan-derived statistical shape gives believable proportions, nasolabial
+  folds, lids and ears, at or above GTA V hero-head shape. The identity still reads young and
+  androgynous; it needs a sculpting pass on the coefficients, not a fit to anyone.
+- **Skin albedo:** below GTA V. Hero heads there use scanned albedo with hand-painted variation;
+  ours is procedural, so it reads clean and CG at close range (no real pore or colour
+  micro-variation, no freckles or uneven tone). RDR2 is far above.
+- **Skin shading:** now in the right family (pre-integrated SSS with a dual-lobe specular, as GTA
+  V-era deferred skin did).
+- **Eyes:** close to GTA V now. The lid-contact shadow is baked from ICT's lid contour; the iris
+  has parallax behind the corneal dome (tangents plus `parallaxUV`) and fibres, a collarette,
+  limbal ring and pupil; the cornea is wet (roughness 0.06). Still missing: a tear meniscus and
+  refraction. The upper lids are relaxed 1.3 mm in the bake (ICT's neutral holds the eyes wide
+  open, which made her stare). The baked lid shadow turns with the eye: fine for gaze shifts, wrong for big
+  rolls. Black lash-card specks show at the outer corners in three-quarter view.
+- **Hair:** reads as a short natural crop from three-quarter view. In profile, the nape and
+  hairline edges are hard and the coil texture is uniform. GTA V's short afros break the
+  silhouette better.
+- **Seams:** the dress-collar shards at the front of the neck are gone: they came from cutting the
+  body along ICT's level neck ring, which ran through the shoulder slope. ICT's neck now ends
+  0.125 m under the eyes. In back and profile, a lighter band with a jagged top edge remains
+  where the body's neck flares into the trapezius under the head seam. Lowering the head's neck
+  would bring the shoulder shards back; the fix is a head-to-body weld (shared ring vertices),
+  which is open.
+- **Hair edges:** the nape is now a soft, slightly V-shaped line. Brows are ~1 mm strand shells
+  rather than paint.
+- **Verdict:** GTA V near-NPC level, not yet GTA V hero level. The main gap is albedo detail.
+
+**Next, in order:**
+1. Eyes: done for now (above).
+2. Albedo: pore pits, uneven pigmentation and macules added. **Photographic micro-detail is now
+   in:** the CC0 MakeHuman `young_african_female` skin (fetched to `data/raw`, licence re-verified)
+   is high-passed and mapped onto the ICT face UV by a 3-landmark affine, with its hair and eye
+   openings masked. It goes into both the albedo and the normal map. The gain is subtle at review
+   distance. Brows are done (shells).
+3. Nape: done. Profile neck seam: needs the head-to-body weld (open).
+4. Dress collar spikes: fixed at the front.
+5. Size, meshopt: triangle index blobs are now coded with meshoptimizer's index codec (container
+   filter `meshopt-idx`, decoded by three's bundled `meshopt_decoder`; every loader awaits
+   `formatReady()`).
+   - `tools/characters/meshopt.ts` repacks in place, with a round-trip check (triangles compared
+     up to rotation). Every builder now repacks its output.
+   - All characters `.bin` files together went from 5.69 to 5.34 MB gzip: body 3.29 → 3.19 MB,
+     low body 428 → 420 KB, the Rocketbox heads about −20% each, Delphine 317 → 270 KB.
+   - The other blobs gained little over the delta filters, so they stay as they are.
+   - `meshoptimizer@1.1.1` is pinned as a dev dependency (the encoder is tools-only).
+   - **KTX2 (done for Delphine):**
+     - `tools/characters/ktx2.ts` encodes head maps to Basis ETC1S with mips, pre-flipped. On
+       the GPU that's ~3–6 MB per 2048 map instead of ~22 MB RGBA8.
+     - Delphine's c and o maps: 2048² ETC1S, 0.21 MB and 0.12 MB to download (the WebP versions
+       are 0.14 and 0.11 MB).
+     - Runtime: `createCharacterFactory({ renderer })` enables three's KTX2Loader, with the
+       transcoder in `public/characters/basis/` (585 KB, ~200 KB gzip, loaded only when used).
+       Without a renderer, or on failure, heads fall back to WebP.
+     - Visually the same as WebP in the leads shot.
+     - The normal map stays WebP (ETC1S is too lossy for normals; UASTC was 0.95 MB).
+     - Next: the Rocketbox leads, and a real phone load and VRAM test.
+   Earlier trims: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
+   are cut in the bake. 25.7k → 20.5k vertices; the .bin goes from 391 to 317 KB gzip, and the
+   whole head is about 0.66 MB. meshopt is still to do.
+6. Oversight's board notes:
+   - Bag strap: it's a ribbon seated on the clothed (draped) torso surface, from the bag over the
+     shoulder, lying flat over the top of the shoulder. It no longer floats.
+   - Relaxed idle in review shots: done.
+   - Ragged sleeve hems: fixed. Cut-edge loops get 16 Taubin passes (no shrink) instead of 6 plain
+     ones. The bodice's bottom edge over the skirt still shows a little raggedness.
+   - Neck band in back view: mostly fixed.
+     - Cause: the body's neck was conformed in to ICT's thinner neck, so the skin flared back out
+       to the shoulders as a lit ledge above the collar.
+     - Fix: ICT heads now reverse the join. The body keeps its own neck (only the skin cut
+       applies), and the head's bottom 25 mm is stitched onto our neck profile. Rocketbox heads
+       keep the body-side conform.
+     - Left: a faint strip at the back of the collar, and small spikes at the front neckline
+       corners.
+
+Close portrait references of Black women from 1973–74 are still missing from
+`references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
+Wikimedia rate-limited this container, so sourcing is pending.
+
+## Cars (engine request, player driving in the main game)
+- **Seat:** `Character.setSeat(pose, { hip: true })` takes the seat point and places the root so
+  the drive clip's pelvis lands on it. The drive pelvis sits 0.514 m up and 0.296 m back from the
+  root at rest-pelvis height 0.873 m, scaled to each body. Without `hip`, the old contract stays
+  (the pose is the root).
+- **Drive:** `drive` = Quaternius `Driving_Loop`.
+- **Steering:** `setWheel({center, axis, up, radius}, steer)` and `setSteer(-1..1)` IK the hands
+  onto the rim at ten-to-two, turned by up to ±90°. `setWheel(null)` releases them.
+- **Authored clips** (in place, relative to the seated root; the driver's door is on the
+  character's left):
+  - `car_enter_l` (1.2 s): starts standing ~0.45 m out, back to the seat, sits ducking, swings in,
+    ends in the drive pose.
+  - `car_exit_l`: the reverse.
+  - `pulled_out` (1.6 s): a carjack victim yanked out sideways, stumbles, ends standing hunched
+    ~1 m out.
+- **Not yet:** separate steering clips (the hand IK covers steering), right-door variants,
+  passenger seats.
+
+## Estimate: moving the cast onto ICT identities (oversight request)
+Measured today:
+
+| Head | Triangles | Download | Draws |
+|---|---|---|---|
+| Delphine, ICT (after trims) | 37.6k | ~0.71 MB (0.32 MB geometry gzip + 0.39 MB textures at 2048) | 1, plus 1 for scalp hair |
+| Rocketbox lead (Nick / Teddy) | 2.9–3.9k | 0.20–0.27 MB | 1 |
+| Rocketbox near-ring pool | ~4k each | 31 heads = 5.9 MB | 1 |
+
+**Leads (Teddy, Nick):** the same bake as Delphine.
+- Cost: +~1.0 MB download for the pair, about +70k triangles when all three leads are close, and
+  ~16 MB of GPU texture per lead once KTX2 lands (64 MB each uncompressed with mips at 2048, which
+  is too much).
+- Needs a decimated LOD (~8k triangles) beyond ~5 m.
+- Work, about 2–3 days each:
+  - Identity design on the coefficients. This changes faces the user has already seen, so it needs
+    sign-off first.
+  - Procedural male detail: stubble, and Nick's ageing lines.
+  - Card hair re-seated on the ICT scalp (today's cards are shaped for our helper skull).
+
+**Near-ring pool (~30 identities):** one shared decimated ICT topology.
+- Shared once: ~6k vertices / 10k triangles, with index, UV and weights at ~150 KB gzip.
+- Per identity: int16 position deltas (~25 KB gzip) plus 512² procedural textures (~60 KB),
+  about 85 KB each.
+- 30 identities ≈ 2.7 MB, about half today's Rocketbox pool. The textures can be generated from
+  tone parameters, so more identities would cost almost nothing.
+- Draws are unchanged (1 per head; hair stays in the merged head-and-hair draw).
+- Work, about 4–5 days:
+  - UV-preserving quadric decimation.
+  - The shared-topology container.
+  - Identity sets covering age, sex and ancestry, adults only.
+  - A runtime texture bake or parameter set.
+  - Hair seated on the ICT scalp.
+
+**Recommendation:**
+1. Finish Delphine to hero level first. Remaining: the neck weld and sleeve hems; KTX2 is in the
+   size pass.
+2. Then the pool, because it shrinks the download and makes the near ring consistent.
+3. Then Teddy and Nick, with user sign-off on the new faces. Rocketbox stays as the fallback until
+   each ICT version is accepted.
+
+## Street vendors (sim relay; `docs/SIM_PROGRESS.md` "Street vendors")
+**Wardrobes: done.** Shot: `shots/characters/41_vendors.jpg` (`?characters=1&scene=vendors`).
+- Each archetype id has a preset in `src/characters/wardrobe/outfit.ts` (`VENDOR_PRESETS`),
+  built from the sim's wardrobe notes:
+
+  | Archetype | Wardrobe |
+  |---|---|
+  | `cart_vendor` | White apron over rolled shirtsleeves; white cap standing in for a paper cap |
+  | `grocer` | Long apron |
+  | `flower_seller` | Cardigan |
+  | `news_vendor` | Cardigan; flat cap or newsboy; sometimes a cigarette |
+  | `shoeshine` | Waistcoat over rolled sleeves |
+  | `peddler` | Long open raincoat; sometimes a fedora |
+  | `monte_dealer` | Leisure jacket, open collar |
+  | `monte_shill` | Default office clothes (deliberately ordinary) |
+  | `monte_lookout` | Windbreaker, hands-in-pockets idle |
+
+- **Bug fixed on the way:** `cart_vendor` used to match the garment worker's `cart` keyword
+  (handcart and smock). Vendor presets are now matched on the id first.
+- Vendor outfits keep their own colours. The generic palette mapping would have turned the
+  white apron slate.
+- **Gaps:**
+  - The apron is the sleeveless smock (front and back), so it reads as a tunic. A front-only
+    tied apron is still to build.
+  - There's no paper-cap hat kind.
+  - The money belt, florist's scissors and lining of watches aren't built.
+  - The lineup's random seeds skew old; that's appearance, not the presets.
+
+**Animations: first pass, wired to the sim's triggers.** Shots: `shots/characters/43_vendor_clips.jpg`
+(`scene=vendors&anims=1`, one clip per figure) and `42_vendor_crowd.jpg`
+(`scene=crowd&vendors=1`: a near cluster and a mid cluster, with near characters and baked
+instances).
+- **Authored clips** (`authored.ts`, our own keys):
+  - vendors: `vendor_serve` (hand the item over, dig out change, count it into the hand),
+    `vendor_call` (hand cupped at the mouth), `vendor_shout` (fist shaken at a car),
+    `duck_cart`, `right_cart` (squat, grip, drive up, shove), `shine_shoes` (on the box,
+    rag snapped side to side), `deal_cards` (three-card monte over the box);
+  - customers: `queue_wait`, `pay`, `watch_lean`, `eat_walk` and `sip_walk` (upper body over the
+    walk).
+  - Push cart reuses Quaternius `Push_Loop`.
+- **Crowd:** customer clips are baked for every template. Vendor clips are baked for
+  vendor-family templates only (`CROWD_SET.only`), so ordinary pedestrians don't pay for them in
+  the atlas. Eating and sipping are baked as walk cycles with the upper-body overlay.
+- **One mapping for both draw paths** (`stateAction` in `CrowdRenderer.ts`):
+
+  | Sim input | Clip |
+  |---|---|
+  | vendor + `cower` | duck |
+  | vendor moving (`vendorSpawned {arriving}`, closing) | push |
+  | `monte_dealer` idle | deal |
+  | `queue` | queue |
+  | `watch` | watch |
+  | moving with `carry` food | walk_eat |
+  | moving with `carry` drink | walk_sip |
+
+  Near characters now get these as Animator actions; before, they got locomotion only.
+- **Sim events → `crowd.trigger(pedId, action)`:**
+
+  | Sim event | Action |
+  |---|---|
+  | `vendorServed` | `vendor_serve` |
+  | `vendorCall` | `vendor_call` |
+  | `vendorShout` | `vendor_shout` |
+  | `vendorAct {act: 'right_cart'}` | `right_cart` |
+  | a paying customer | `pay` |
+
+  `crowd.hold(pedId, 'shine_shoes' | null)` covers shining while a customer is queued at the
+  stall. The engine glue has to call these. Sim confirmed the contract (f8bf743) and added:
+
+  | Sim event | Call |
+  |---|---|
+  | `vendorServing {id, kind, pedId, customer, sec}` | `trigger(customer, 'pay')` |
+  | `vendorServing` at a shoeshine stall | `hold(pedId, 'shine_shoes')`, held for `sec` (60–110 s) until that stall's `vendorServed` |
+  | `pedBumped.kind` `stumble` | `trigger(id, 'stumble')` |
+  | `pedBumped.kind` `knockdown` | `trigger(id, 'fall_down')` |
+  | `pedBumped.kind` `brush` | nothing |
+
+  Crowd y already includes the kerb height on sidewalks.
+- **Fixed on the way:** `familyOf` sent `cart_vendor` to the handcart workers and the other
+  vendors to general pedestrians. Vendor ids are now matched first.
+- **Gaps:**
+  - Crowd vendor templates use the family's generic vendor outfit, not the per-archetype
+    presets; per-archetype crowd templates are still to do.
+  - `vendorAct {act: 'serve'}` maps to `vendor_serve` like `vendorServed`.
+  - **Bumps are now in** (authored `fall_down`, `down_lie`, `get_up`; existing `stumble` and
+    `argue`):
+
+    | Sim input | Result |
+    |---|---|
+    | `stumble` | stumble |
+    | `down` | lying (pelvis pitched −90°, about 0.1 m off the ground) |
+    | `getUp` | get up |
+    | `angry` | argue |
+    | `pedBumped` | `trigger(id, 'stumble' \| 'fall_down')` by response |
+
+    These states win over the vendor and customer mappings. They're baked for every template
+    (about 80 frames) and checked in `scene=crowd&vendors=1`.
+  - Kerb `onRoad`: near characters already foot-IK against the engine's ground function,
+    which includes kerbs, so nothing is needed unless that function lacks them. Instanced
+    figures take y from the sim.
+  - Clip quality is first-pass hand keys with no hand IK onto the cart, cards or shoe yet.
+
+## Street figures: hair (oversight item "spiky card hair")
+Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
+- **Grey and white card hair was scan-line noise.** Per-strand alpha and grey noise ran
+  finer than a pixel. Every strand, clump and grey noise in `hairMaterial` now blends to its
+  average once its period drops under 1–2 px (`fwidth` on the strand coordinates).
+- **Afro and curly shells read as slabs.** Outer shells fade at grazing angles, and the
+  coil clump size is now 7–10 mm instead of 2.5 cm (afro 2200, afroShort 2600, curlyMid
+  1500).
+- **Honest state:**
+  - The noise is gone, but card hair now reads as flat ribbons at head zoom, and big afros still
+    show a flat front plate with a centre line.
+  - The real fix is a strand texture with mips on redesigned cards: narrower cards,
+    more of them, clumped. That's a block of its own, after the vendors unless oversight
+    reorders.
+- **"Jagged brown coat edges" were briefcases.**
+  - Cause: hand-held items were built hanging along the bind pose's world down and skinned
+    rigidly to the hand. When the idle lowered the arms (~45°), they swung across the thighs as
+    flat brown slabs.
+  - Fix: briefcase, handbag, tote, shopping bag and umbrella are now built on an orthonormal
+    hand frame (height along the fingers), so they hang plumb at the side.
+  - Still visible on coats: round bulges at the hips and light shirt patches under the arms
+    (logged).
+- **Hair-card block, in progress** (oversight's order: hair is on every head in every shot):
+  - **Done:**
+    - A mipmapped strand texture (`tools/characters/hair_strands.py`, ours) on the cards, with a
+      mip-level coverage boost and alpha sharpening.
+    - One solid scalp shell under the cards (the stacked shells drew horizontal scan lines).
+    - Cards are narrower and more numerous (0.62× width, 1.6× count).
+  - **Honest state:** strands now read on the cards, but the tops of heads still show flat layered
+    card sheets. Headless renders exaggerate the stair-stepped alpha edges (SwiftShader has no
+    MSAA, so alpha-to-coverage can't smooth them).
+  - **Afro and curly volume: rebuilt** (`shots/characters/45_afro_volume.jpg`; top is before,
+    bottom is after).
+    - It's a latitude/longitude grid around a raised centre instead of shells grown off the
+      helper-hair mesh, which stretched into flat facets with a centre fold.
+    - Each grid direction takes its scalp radius, skin weights and hairline from the nearest
+      source vertex. Sources are the helper-hair scalp plus the back of our own head; the helper
+      stops above the nape, which had left a slab with bare scalp under it.
+    - The radius is smoothed but never pushed above the scalp. Thickness and density taper to
+      zero at the hairline and where coverage ends.
+    - The hairline arcs up at the temples, and the afro reaches the nape.
+    - Left: a small hole at one temple, and a forehead line that's still fairly straight.
+  - **Next:**
+    1. A dedicated afro and coil volume: a dense sphere-patch mesh around the head with clumped
+       coil shells, as on Delphine's ICT scalp, which works.
+    2. Card clumping and lift, so cards stop lying flat on the crown.
+    3. A crowd street board (oversight).
+- **Glasses and coats: fixed** (oversight priority: visible defects in the live crowd).
+  Shot: `shots/characters/44_coat_glasses_fix.jpg` (before coat, after coat, glasses on a
+  Rocketbox head).
+  - **Grey wedges:** glasses were fitted to our own face. On a substituted head
+    (Rocketbox/ICT) whose face sits further forward, the lenses cut into it. Each head's brow
+    depth and width are now measured at load (`meta.face`, which the near-ring build worker
+    gets too), and glasses sit in front of that face.
+  - **Floating frame lines:** rims are now closed sections with depth, not flat bands.
+  - Drawn lenses are opaque (one material), so they're now dark enough to read as sunglasses
+    rather than grey discs. Clear lenses stay rim-only.
+  - **Hip bulges:** jacket skirts built on the skirt helper split into two pillows around the
+    thighs. Only coats hanging well below the crotch get a skirt now; jackets end at the torso
+    piece.
+  - **Light patches under the arms:** shirt sleeves poked through the coat sleeve's inner elbow.
+    Under any long coat sleeve the shirt keeps only its cuff.
+  - Remaining: long coats worn open show the trousers between their front panels (correct). Their
+    skirt still follows each thigh when walking.
+- **Previously seen:** glasses on some pedestrians render as floating frame lines (figure 1) or opaque
+  grey lens wedges (figure 8). Logged, not fixed.
 
 ## Status (2026-11-26)
 | Area | State |
@@ -122,13 +477,20 @@ is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
 | 1.3 m/s | 110–165 mm/s | 8–17 mm/s |
 | 1.75 m/s | 160–210 mm/s | 17–28 mm/s |
 
-**Downloads** (re-measured after the faces block)
-- **High:** body 6.9 + anims 0.97 + fabric maps 0.26 + skin detail 0.15 = 8.28 MiB at start, plus
-  the two Rocketbox lead heads (Teddy and Nick), 0.44 MiB, preloaded = **8.73 MiB**. The near-ring
-  pool, 31 heads of 79–342 KiB, loads only on demand; if every one were fetched, the worst case
-  is **14.38 MiB** (budget 15).
-- **Mobile Low:** body_low 0.95 + anims 0.97 + fabric maps 0.07 + skin detail 0.02 = **2.01 MiB**
-  (budget 6; oversight's target was about 2 MiB). No Rocketbox heads on Low.
+**Downloads** (size pass, gzip as served; `tools/characters/pack-body.ts`, `pack-locals.ts`, `pack-anims.ts`)
+- **Mobile Low: 0.85 MB** (was 1.06): body_low 0.43 + anims 0.32 + fabric 0.07 + skin detail 0.02.
+  No Rocketbox heads.
+- **High at start: 4.5 MB** (was 5.7): body 3.30 + anims 0.32 + fabric 0.28 + skin detail 0.15,
+  plus the two Rocketbox lead heads, 0.44 preloaded. The near-ring pool, 31 heads of 79–342 KiB,
+  loads on demand.
+- **How:**
+  - The four leading PCA components stay int16; the rest are int8 with per-component scales
+    folded into basisScale. Max vertex error 0.46 mm, mean 0.08 mm, checked on 200 bodies.
+  - Container delta filters (per-axis vertex deltas, time deltas for rotation tracks, index
+    deltas), decoded at load and verified bit-exact.
+- **Not yet:** meshopt for LOD indices and UVs (about 0.3 MB), KTX2 heads for GPU memory, and a
+  real phone load time (needs the engine's throttled profile). At 10 Mbit/s, the transfer alone is
+  about 0.7 s for Low and 3.6 s for High.
 
 ## Critique of the lineup and leads (honest)
 Shots: `shots/characters/01_lineup_a_vs_refs.jpg` and `02_lineup_b_vs_refs.jpg` show 20 seeded
@@ -366,6 +728,54 @@ variety, and the RDR2 level of animation detail. We study behaviour and quality;
 | **Clothing and wardrobe** | Layered garments with folds, wrinkles, seams and secondary motion; huge variety; clothes fit every body | Large period-correct variety from 65 reference photos, parametric fit to every body, fabric relief, 11 shoe types | No folds or wrinkle normals, flat collars and lapels, no secondary motion | Wrinkle normal maps driven by joint angle, rolled collars and lapels, cloth secondary motion |
 | **Facial animation** | Blinks, saccades, full lip-sync and expressive cutscene faces; RDR2 ambient facial idles | None yet | Everything | Blinks and saccades now, visemes and expressions for cutscenes |
 | **Idles and animation detail** | RDR2: dozens of idle variants, contextual gestures, weight shifts, foot planting and hand contacts everywhere | Blend space with stride warp, foot IK with locking, look-at, hand IK, seat pose, ambient props; crowd near ring at full fidelity | Few idle variants, simple turn-in-place, no traversal or ragdoll yet | The movement brief block: traversal, momentum, ragdoll blend, stumbles, plus an idle-variety pass |
+
+## Fidelity block (oversight review: "characters are the furthest stream from the GTA V floor")
+**Done:**
+- **Male chest:** it shaded as a bust. The causes, in order:
+  - The pectoral and nipple modifiers were silently ignored: paired MakeHuman modifiers take their
+    positive name with a negative value.
+  - Hero shirts were cut from body LOD2, whose facets shaded as rounded blobs. Heroes now cut
+    garments from LOD1, with stronger drape smoothing.
+  - The drape could only move outward, so it couldn't shave small convex detail. It may now shave
+    up to 12 mm, on men only.
+  - A chest chord fill bridges the groove between the pectorals, and the hang from the apex is kept.
+- **Nick:** less inflated (weight 0.66, shoulder width 0.2, chest depth 0.25). **Review shots:**
+  each lead in their own idle (relaxed, hands behind, hands in pockets), captured at 2.5 s.
+- **Collar, lapels and tie:** slabs with real thickness and edge bands (a `ribbon` thickness
+  option). The tie has a four-in-hand knot. The collar band sits higher at the nape, and the fall
+  can't flatten out.
+- **Props held:** bag handles sit in the gripping fingers with straps. The shoulder bag has a strap
+  over the shoulder. Buttons and the placket sit on the cloth surface (the drape), not the body.
+- **Trousers:** a pressed crease, soft uneven folds, and a break at the shoe, instead of a rubber
+  tube.
+- **Our head:** the eyeballs are sized so the lids rest on them. Close-cropped natural hair is an
+  even tapered layer (no bowl) when volume is 0 (Delphine).
+
+**Round 2 (after oversight's second review):**
+- **Male chest fixed in the body base.** The shirtless check (`&baretop=1`) showed MakeHuman's
+  average-plus-weight male has a soft, low chest. For men the bust girth is now taken in and
+  lifted; the drape shaving and nipple inversion (which left dimples) are removed.
+- **Finished hems:** cut edges are relaxed along their own loops (hem band included), so they read
+  as seams instead of zigzags.
+- **Lapels and tie** sit on the cloth surface; lapels are lifted clear of the jacket. **Fold
+  creases** (elbows, backs of knees, waist) are in the cloth shader.
+- **Skin detail layer encoding:** the stored layer is +1, so a mesh without `uv1` gets no detail
+  instead of sampling an empty corner of the strip.
+- **"White arms" in the street shot: not fixed.** It isn't the skin-detail lookup, the crowd tone
+  shift or the subsurface term (each tested and ruled out). The two near figures are pale-toned
+  and render almost white under the engine's midday sun. Next: check the pale end of the tone
+  table against measured skin reflectance (light skin albedo peaks around 0.6 in red) and the
+  engine's exposure; add tone probes to the street scene.
+
+**Still open:**
+- **Our head to Rocketbox level.** The dark rims are the inside of the eyelids, which need a
+  pinkish wet line. Features need sculpting and normal maps. Delphine's hair is still a shell
+  with a hard hairline edge, and needs card-based coils.
+- **Wrinkle and fold normals** (elbows, waist, armpits), **seam normals**, and fabric-specific
+  roughness and sheen.
+- **Card hair shading:** anisotropic, plus the TAA dependency.
+- **Review lighting:** the street shot (`24_street_eye`) is in the re-shoot set. A lead board
+  under time-of-day light comes next.
 
 ## Cutscene performance pipeline (plan; ordered after the bodies and clothing fidelity block)
 UI's cutscene runtime and tool are done but play capsule stand-ins. Characters owns the performance.

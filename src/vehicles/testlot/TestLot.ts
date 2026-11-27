@@ -536,7 +536,7 @@ export async function runTestLot() {
     setNight, get night() { return night; }, carLights,
     /** Dent the player at a local point (metres of push), for damage close-ups. */
     dentAt(x: number, y: number, z: number, amount = 0.1, radius = 0.6) { player.object.updateMatrixWorld(); return player.dent(player.object.localToWorld(new THREE.Vector3(x, y, z)), amount, radius); },
-    vendors, vendorViews,
+    vendors, vendorViews, traffic, tcars, RAPIER,
     hill: { x: HILL_X, heightAt: (x: number, z: number) => roadHeight(x, z) },
     moveTraffic,
     stats() {
