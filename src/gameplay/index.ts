@@ -672,7 +672,7 @@ export class Gameplay {
     }
     sim.on('pedBumped', (e) => this.onPedBumped(e));
     // street vendors placed by the sim (STREET_VENDORS.md): spawned and gone as carts arrive and leave
-    sim.on('vendorSpawned', (e) => this.registerVendor(String(e.id), e.kind, e.x, e.z));
+    sim.on('vendorSpawned', (e) => { this.registerVendor(String(e.id), e.kind, e.x, e.z); if (e.pedId !== undefined) this.vendorPed.set(String(e.id), Number(e.pedId)); });
     sim.on('vendorGone', (e) => this.vendorPos.delete(String(e.id)));
     sim.on('cartHit', (e) => this.cartHit(String(e.id), { by: e.by === 'player' || e.by === this.player?.id ? 'player' : e.byVehicle ? 'car' : 'npc', speed: e.speed ?? 0, driving: !!e.byVehicle }));
     for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
@@ -971,7 +971,7 @@ export class Gameplay {
       this.policeSys.file({ witness: 'radio', perp: d.perp, kinds: ['officer_down'], desc: { clothes: [] }, lastKnown: d.where, crimeAt: d.where, via: 'unit', time: this.time });
     }
     this.trackMotion(dt); this.mirror?.update();
-    this.updateBodies(); this.updateTackles(); this.updateEscorts(dt);
+    this.updateBodies(); this.updateTackles(); this.updateEscorts(dt); this.updateBrawls();
     const clear = this.heatClear();
     if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
     this.wasClear = clear;
@@ -1435,6 +1435,8 @@ export class Gameplay {
   /** Load narrative's vendors.json. Returns the warnings (goods with no effects row). */
   loadVendorContent(json: unknown) { const w: string[] = []; this.vendorMenus = loadVendorMenus(json as any, (m) => w.push(m)); return w; }
   private vendorPos = new Map<string, { x: number; z: number }>();
+  /** the person at each cart (sim's pedId), for the brawler hand-off */
+  private vendorPed = new Map<string, number>();
   private montes = new Map<string, Monte>();
   private monteDeals = new Map<number, { vendor: string; deal: MonteDeal }>();
   /** For the rest of this game time (s), a cold ice or a soda takes the edge off the heat: sprint drains as at 80°F. */
@@ -1467,6 +1469,7 @@ export class Gameplay {
     if (g.sober) li.intox = Math.max(0, li.intox - g.sober);
     if (g.cool) this.coolUntil = Math.max(this.coolUntil, this.time) + g.cool * 1800;
     this.emit('notice', { kind: 'vendorSale', vendor: id, good: g.id, cents: g.cents, eatSeconds: g.eatSeconds ?? 0 });
+    this.simLike?.vendorNotice?.({ kind: 'vendorSale', vendor: id, good: g.id });
     return true;
   }
   private shinePrice() { return this.vendorMenus.shoeshine.find((g) => g.id === 'shoeshine.shine')?.cents ?? 50; }
@@ -1486,7 +1489,12 @@ export class Gameplay {
     if (cents > 0) this.inv.addMoney(this.player.lead, cents, 'vendor robbery');
     const at = this.vendorPos.get(id);
     this.crime(armed ? 'assault_weapon' : 'theft', { victim: id, noise: armed ? 18 : 12, at: at ? [at.x, this.player.position()[1], at.z] : undefined });
-    this.port.command(id, { type: armed ? 'cower' : 'flee', fromX: this.player.position()[0], fromZ: this.player.position()[2] } as any);
+    const pp = this.player.position();
+    // unarmed, a vendor with some nerve swings back (the hot-dog man; brawler hand-off); otherwise flee or cower
+    const ped = this.vendorPed.get(id);
+    if (!armed && ped !== undefined && this.rng.chance(Gameplay.FIGHT_BACK[v.kind] ?? 0) && this.startBrawl(ped, 'robbed')) { /* fighting */ }
+    else if (this.simLike?.vendorCommand) this.simLike.vendorCommand(id, { type: armed ? 'cower' : 'flee', x: pp[0], z: pp[2] });
+    else this.port.command(id, { type: armed ? 'cower' : 'flee', fromX: pp[0], fromZ: pp[2] } as any);
     this.emit('notice', { kind: 'vendorRobbed', vendor: id, cents, armed });
     return { cents, armed };
   }
@@ -1498,6 +1506,7 @@ export class Gameplay {
     const v = this.vendors.list.get(id); if (!v || o.speed < 3) return false;
     this.vendors.overturn(v, this.economy.nowH(), 2);
     this.emit('notice', { kind: 'cartOverturned', vendor: id, by: o.by, spill: this.vendorMenus[v.kind].map((g) => g.id) });
+    this.simLike?.vendorNotice?.({ kind: 'cartOverturned', vendor: id });
     if (o.by === 'player') { const at = this.vendorPos.get(id); this.crime(o.driving ? 'reckless' : 'vandalism', { victim: id, noise: 20, at: at && this.player ? [at.x, this.player.position()[1], at.z] : undefined }); }
     return true;
   }
@@ -1518,7 +1527,7 @@ export class Gameplay {
     this.monteDeals.delete(dealId);
     const res = this.montes.get(r.vendor)!.pick(r.deal, card, pressedAt);
     if (res.won) this.inv.addMoney(this.player.lead, r.deal.stake * 2, 'monte');
-    if (res.folded) this.emit('notice', { kind: 'monteFolded', vendor: r.vendor });
+    if (res.folded) { this.emit('notice', { kind: 'monteFolded', vendor: r.vendor }); this.simLike?.vendorNotice?.({ kind: 'monteFolded', vendor: r.vendor }); }
     return res;
   }
 
@@ -1530,6 +1539,41 @@ export class Gameplay {
    * A brush costs nothing. The sim plays the reactions and the get-up.
    */
   static BUMP = { shoveBack: 0.35, shoveStumble: 0.5, assaultAfter: 3, window: 30 } as const;
+  private shoves = new Map<string, number[]>();
+  // ------------------------------------------------------------------ brawlers (sim's releasePed hand-off)
+  /** Chance a vendor swings back when robbed unarmed (the hot-dog man; peddlers and the monte crew run). */
+  static FIGHT_BACK: Partial<Record<VendorKind, number>> = { hot_dog: 0.5, pretzel_knish: 0.3, newsstand: 0.35, fruit_stand: 0.3, coffee_cart: 0.25 };
+  /** A street fight lasts until someone's down, the brawler loses heart, the player walks off (25 m) or 30 s pass. */
+  static BRAWL = { seconds: 30, walkAway: 25, hp: 55 } as const;
+  readonly brawls = new Map<string, { pedId: number; until: number; reason: 'shoved' | 'robbed' }>();
+  /** Take a ped over from the sim as a fist fighter (non-lethal fists; the brawler started it, so no crime for the player). */
+  startBrawl(pedId: number, reason: 'shoved' | 'robbed') {
+    const sim = this.simLike; if (!sim?.releasePed || !this.player) return false;
+    const id = `brawl:${pedId}`; if (this.brawls.has(id)) return false;
+    const q = this.port.ped(String(pedId)) ?? this.port.ped(`ped:${pedId}`); if (!q || q.child) return false; // safety net: no children exist
+    if (!sim.releasePed(pedId)) return false;
+    if (!this.spawnCombatant({ id, faction: 'hood', squad: id, pos: [q.x, q.y, q.z], weapon: null, melee: 'weapon.fists', hp: Gameplay.BRAWL.hp })) { sim.reclaimPed?.(pedId); return false; }
+    const p = this.player.position(); this.ai.alert(id, [p[0], p[2]], 'player');
+    this.brawls.set(id, { pedId, until: this.time + Gameplay.BRAWL.seconds, reason });
+    this.emit('notice', { kind: 'brawl', id, pedId, reason });
+    return true;
+  }
+  private updateBrawls() {
+    const sim = this.simLike; if (!sim || !this.player) return;
+    const p = this.player.position();
+    for (const [id, b] of [...this.brawls]) {
+      const a = this.ai.agents.get(id);
+      if (!a || !a.alive) { this.brawls.delete(id); (sim as any).kill?.(b.pedId); continue; }
+      const far = Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) > Gameplay.BRAWL.walkAway;
+      const done = this.time >= b.until || far || a.state === 'flee' || a.state === 'surrender' || a.knockedOut;
+      if (done) {
+        this.brawls.delete(id); this.ai.remove(id); this.melee.remove(id); this.actors.delete(id);
+        sim.reclaimPed?.(b.pedId); this.emit('notice', { kind: 'brawlOver', id, pedId: b.pedId, how: a.knockedOut ? 'down' : far ? 'walkedOff' : a.state === 'flee' ? 'ran' : 'calmed' });
+        continue;
+      }
+      sim.moveReleasedPed?.(b.pedId, a.pos[0], a.pos[2], a.yaw ?? 0, Math.hypot(a.vel?.[0] ?? 0, a.vel?.[1] ?? 0));
+    }
+  }
   private knockdowns: number[] = [];
   onPedBumped(e: { id: string | number; kind: 'brush' | 'stumble' | 'knockdown'; response: 'angry' | 'frightened' | 'annoyed' | 'none'; x: number; z: number; by?: string }) {
     if (!this.player || (e.by && e.by !== this.player.id && e.by !== 'player')) return;
@@ -1538,6 +1582,8 @@ export class Gameplay {
     if (e.response === 'angry' && this.rng.chance(Gameplay.BUMP.shoveBack)) {
       this.stumbleUntil = Math.max(this.stumbleUntil, this.time + Gameplay.BUMP.shoveStumble);
       this.emit('notice', { kind: 'shovedBack', by: id });
+      const n = (this.shoves.get(id) ?? []).filter((t) => this.time - t < 60); n.push(this.time); this.shoves.set(id, n);
+      if (n.length >= 2 && !Number.isNaN(Number(id))) this.startBrawl(Number(id), 'shoved');
     }
     if (e.kind === 'knockdown') {
       this.knockdowns = this.knockdowns.filter((t) => this.time - t < Gameplay.BUMP.window); this.knockdowns.push(this.time);

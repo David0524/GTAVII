@@ -266,13 +266,18 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Angry pedestrian:** shoves back 35% of the time, a 0.5 s stumble for the player (`notice {kind: 'shovedBack'}`).
 - **Knockdown:** `reckless` (severity 0.6, a crime only if seen). The third knockdown inside 30 s is `assault`.
 - **Ownership:** the sim plays the reactions and the get-up.
+- **Brawlers** (sim's `releasePed` hand-off):
+  - An angry pedestrian who shoves back twice inside 60 s squares up. So does a robbed vendor with nerve when you're unarmed: hot dog 50%, newsstand 35%, pretzel and fruit 30%, coffee 25%; peddlers and the monte crew run.
+  - Gameplay takes the ped over as a 55 hp fist fighter and drives it each frame (`moveReleasedPed`).
+  - The brawl ends when someone's down, the brawler runs or gives up, the player walks off (25 m), or after 30 s. Then the ped goes back to the sim (`reclaimPed`), and a vendor returns to their cart.
+  - They started it, so fighting back isn't a crime.
 - **Test:** `simAdapter.test.ts`.
 
 #### vs GTA V / VI / RDR2
 - **References:** GTA V's shoulder-barge sends pedestrians stumbling and swearing, and repeated shoving starts fights. RDR2's jostling is weightier, NPCs remember you, and it can escalate to a brawl or a report.
 - **Where we match:** graded contact (brush, stumble, knockdown) with angry pushback, and heat only through witnesses, rising with repetition.
-- **Where we fall short:** an angry pedestrian never escalates to a fist fight (ambient peds have no combat AI), and nobody remembers you.
-- **Plan:** promote an angry pedestrian who was shoved twice into a brief melee brawler (the melee system already registers peds as fighters), and give bumps a short-term grudge per ped.
+- **Where we fall short:** escalation to a fist fight is in (shoved twice), but there's no longer memory: a ped forgets you after 60 s, and bystanders don't join in, as they can in GTA V.
+- **Plan:** a friend joining a brawl (a second release from the same group), and a per-block grudge that lasts the game day.
 
 ### Street vendors (STREET_VENDORS.md, user decision 2026-11-27; `economy/vendors.ts`, `vendors.test.ts`)
 Sim places and plays the vendors; gameplay owns the interaction. Adults only, invented brands, 1974 prices.
@@ -296,7 +301,7 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
 - **References:** GTA V's vendors are mostly ambient (hot-dog stands you can't really use, a few snack machines), and its street scams are scenery. RDR2's camps, stalls and general stores have real menus with stat effects and eating animations, and robbing a store is a full scenario. GTA VI is expected to deepen ambient commerce.
 - **Where we match or exceed:** every cart is usable, with period menus and small, meaningful effects (heal, breath, cooling in the 1974 heatwave, sobering). A rigged hustle you can beat by skill is something neither reference has as a playable minigame. Robbing and knocking over carts go through the same witness heat as everything else.
 - **Where we fall short:** no eating or shine animations yet (characters). The vendor's reaction to a robbery is a flee or cower command, not a scenario with pleading or a fight back. Vendors as tipsters and protection beats are narrative's side content, not wired yet.
-- **Plan:** wire narrative's vendor tipsters into the context button (a "Talk" beat when a vendor has a tip). Add a vendor who fights back (an angry hot-dog man with a ladle) once peds can become brawlers (asked of sim).
+- **Plan:** wire narrative's vendor tipsters into the context button (a "Talk" beat when a vendor has a tip). The vendor who fights back is in (brawler hand-off); give him the ladle once characters have a prop for it.
 
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
