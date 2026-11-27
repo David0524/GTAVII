@@ -60,3 +60,29 @@ second copy of three.js. Every stream must load models the same way. Either:
 
 Decide this before the first CC0 asset lands. Interiors' props also need the shared lighting
 foundation (interiors request 9) to stop looking pasted in.
+
+## Interiors hookup design (engine, started 2026-11-27)
+**Constraint:** interiors stream only units whose door is within 30 m (`STREAM_IN`; unload at 48 m).
+Cutting chunk walls everywhere would show the void behind every storefront beyond that.
+
+**Design:**
+1. **Cuts.** The chunk worker loads `public/data/interiors/index.json` once.
+   `buildChunk(…, openings?)` takes a per-edge hook that wraps interiors' `facadeOpenings` (the loop
+   from `shellOpenings` in testShell.ts). `extrude` splits outer-ring walls around the openings in the
+   LOD0 mesh only. Collision comes from the same mesh, so the door holes are walkable.
+2. **Plugs.** For each opening, the worker also emits a quad into a per-chunk "storefront plug"
+   mesh, set 0.25 m inside the facade line. It carries attributes: unit id hash, kind
+   (door / window / transom), lit flag.
+   - Day: the material is dark glass with a sky reflection term.
+   - Night: an uneven warm lit-room card (interior-mapping parallax on Medium and above) replaces
+     today's flat storefront glow. This fixes board item 2.
+   - When an interior goes live (`Interiors.onBuilt`), its plugs hide through a per-chunk visibility
+     bitmask (a uniform texture); they show again on unload.
+3. **Runtime.** `createInteriors({quality, content})` in main, after the title.
+   - Per frame: `update(dt, player, clock, camera)` and `colliders(physics.world)`.
+   - `exteriorHidden` skips LOD1 and chunks beyond 60 m.
+   - `gameplay.bindDoors({ doorsForChunk, open })`.
+   - `audio.setInterior(inside()?.kind ?? null, …)`.
+4. **Roof hatches** (interiors request 2) come later, with traversal (MOVEMENT).
+5. **Tests:** a chunk test proves openings cut the wall area and that plugs match the openings.
+   Shots: inside a diner and an SRO, and a street view at night.
