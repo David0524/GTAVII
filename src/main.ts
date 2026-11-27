@@ -24,6 +24,7 @@ import { SignalHeads } from './world/SignalHeads';
 import { createGameplay, type GameplayGlue } from './engine/GameplayGlue';
 import { createAudio } from './engine/AudioGlue';
 import { createInteriors, type Interiors } from './interiors';
+import { Driving } from './engine/Driving';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -149,8 +150,17 @@ async function main() {
   type TrafficR = ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']>;
   let parked: TrafficR | null = null as TrafficR | null, parkedList: { id: number; vclass: string; variant: number; x: number; y: number; z: number; yaw: number; lights: number }[] = [];
   const parkedAt = { x: 1e9, z: 1e9, q: -1 };
+  // player driving (engine/Driving.ts): created with the vehicle factory after the title
+  let driving: Driving | null = null;
   if (sim) void afterTitle.then(() => {
     const vf = createVehicleFactory({ quality: quality.name });
+    driving = new Driving({
+      quality: quality.name, physics, scene, input, player, camera: director.gameplay as THREE.PerspectiveCamera, factory: vf, sim,
+      gameplay: () => gp?.g ?? null, lead: () => party.activeId,
+      parked: () => parkedList,
+      attachAudio: (v, vclass) => audioGlue?.audio.attachVehicle({ id: v.id, rpm: () => v.rpm, load: () => v.load, speed: () => v.speed, position: () => { const p = v.object.position; return [p.x, p.y, p.z]; }, on: (t, cb) => v.on(t as never, cb) }, vclass),
+      seat: (m) => { (body as unknown as { setSeat?: (m: THREE.Matrix4 | null) => void }).setSeat?.(m); },
+    });
     traffic = vf.createTrafficRenderer(quality.name === 'low' ? 100 : 160);
     scene.add(traffic.object);
     const pr = vf.createTrafficRenderer(quality.name === 'low' ? 160 : 400);
@@ -263,6 +273,8 @@ async function main() {
     .then((x) => {
       gp = x; loadReport.mark('gameplay');
       // the one context button: "Go in" / "Knock" / "Locked" at interiors' doors (gameplay 15)
+      const bindVehicles = () => driving ? x.g.bindVehicles(driving.binding as never) : setTimeout(bindVehicles, 1000);
+      bindVehicles();
       const bindDoors = () => interiors ? x.g.bindDoors({ doorsForChunk: (i, j) => interiors!.doorsForChunk(i, j) as never, chunkSize: 200 }) : setTimeout(bindDoors, 1000);
       bindDoors();
     }).catch((e) => console.warn('gameplay', e)));
@@ -356,7 +368,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get driving() { return driving; }, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -385,7 +397,7 @@ async function main() {
   const placeAt = () => { const p = player.pos; player.active = false; orbit.snap(p, player.heading); mode = 'onfoot'; };
   const host: UiHost = {
     input, saves, streets, baseUrl: import.meta.env.BASE_URL, heroes: world.manifest.heroes,
-    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, heading: mode === 'onfoot' ? player.heading : fly.yaw, speed: mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: false, lead: party.activeId }; },
+    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, heading: mode === 'onfoot' ? player.heading : fly.yaw, speed: driving?.car ? driving.car.v.speed : mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: !!driving?.driving, lead: party.activeId }; },
     clock: () => ({ date: worldClock.date, minutes: worldClock.minutes, weather: worldClock.weather }),
     party: () => [...party.leads.values()].map((l) => ({ id: l.id, name: l.displayName, short: l.displayName, tagline: LEAD_STYLE[l.id]?.tagline ?? '', colour: LEAD_STYLE[l.id]?.colour ?? '#c79a3c', cash: l.money, where: l.id === party.activeId ? loc.crossing : 'Elsewhere in the city', available: true })),
     health: () => gp?.health() ?? { hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 },
@@ -412,7 +424,7 @@ async function main() {
       const d = data as { text?: string } | undefined;
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
-    prompts: () => (mode === 'onfoot' ? [...(gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
+    prompts: () => (driving?.driving ? [['use', 'Get out'], ['jump', 'Handbrake'], ['map', 'Map']] as [ButtonAction, string][] : mode === 'onfoot' ? [...(carPrompt ? [['use', carPrompt] as [ButtonAction, string]] : gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
     newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
     continueGame: async () => {
       loadReport.mark('continue');
@@ -433,7 +445,7 @@ async function main() {
   const simFwd = new THREE.Vector3();
   // in-view spawns stay beyond this (sim fe9ba45); traffic dithers in over 0.4 s (vehicles 028f6e3), so it can be close
   const simFade = 45;
-  let gpContext: string | null = null, ctxT = 0;
+  let gpContext: string | null = null, ctxT = 0, carPrompt: string | null = null;
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -491,18 +503,26 @@ async function main() {
     if (!playing && ui.state !== 'title' && ui.state !== 'cutscene') {
       // paused: world frozen, camera holds
     } else if (mode === 'onfoot') {
-      physics.update(dt, (h) => { if (!frozen) player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; });
+      const inCar = !!driving?.driving;
+      physics.update(dt, (h) => { if (!frozen && !inCar) player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; driving?.fixed(h); });
       const rp = player.renderPos(physics.alpha);
-      body.object.position.set(rp.x, rp.y, rp.z);
-      body.setLocomotion(player.loco());
+      if (!inCar) { body.object.position.set(rp.x, rp.y, rp.z); body.setLocomotion(player.loco()); }
+      driving?.update(dt, light.night, director.gameplay as THREE.PerspectiveCamera);
       body.update(dt);
-      orbit.lookBehind = input.isHeld('lookBehind');
-      if (input.pressed('shoulderSwap')) orbit.swapShoulder();
-      orbit.update(dt, rp, player.loco());
+      if (!inCar) {
+        orbit.lookBehind = input.isHeld('lookBehind');
+        if (input.pressed('shoulderSwap')) orbit.swapShoulder();
+        orbit.update(dt, rp, player.loco());
+      }
+      // the one context button: in a car → get out; next to a car → get in; else gameplay's context
+      if (playing && !frozen && input.pressed('use')) {
+        if (inCar) { if (driving!.tryExit()) { orbit.snap(player.pos, player.heading); } }
+        else if (driving?.nearestCar() && driving.tryEnter()) { /* now driving */ }
+        else if (gp && gpContext) gp.doContext();
+      }
       if (gp && playing && !frozen) {
-        gp.update(dt, { minutes: worldClock.minutes, raining: worldClock.weather === 'rain', sprinting: player.mode === 'sprint', device: input.isTouch ? 'touch' : input.activeDevice === 'kbm' ? 'mouse' : 'pad' });
-        if ((ctxT -= dt) <= 0) { ctxT = 0.2; gpContext = gp.context(); }
-        if (input.pressed('use') && gpContext) gp.doContext();
+        gp.update(dt, { minutes: worldClock.minutes, raining: worldClock.weather === 'rain', sprinting: player.mode === 'sprint', device: input.isTouch ? 'touch' : input.activeDevice === 'kbm' ? 'mouse' : 'pad', inCar });
+        if ((ctxT -= dt) <= 0) { ctxT = 0.2; gpContext = gp.context(); carPrompt = driving && !driving.driving ? driving.nearestCar()?.label ?? null : null; }
       }
     } else if (ui.state === 'title') {
       physics.update(dt, () => { jumpLatch = false; });
@@ -520,12 +540,13 @@ async function main() {
       sim.setClock(worldClock.minutes); sim.setWeather(worldClock.weather);
       camera.getWorldDirection(simFwd); sim.setView(camera.position.x, camera.position.z, simFwd.x, simFwd.z, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)), simFade);
       const a = simActors[0]; a.x = player.pos.x; a.z = player.pos.z; a.vx = player.vel.x; a.vz = player.vel.z;
-      sim.setExternalActors(mode === 'onfoot' ? simActors : []);
+      const carActor = driving?.actor();
+      sim.setExternalActors(carActor ? [carActor] : mode === 'onfoot' ? simActors : []);
       sim.update(dt, f);
     }
     if (traffic && sim && simReady) {
       setGroundLightLevel(light.lightsOn);
-      if (carLights) updateCarLights(carLights, [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
+      if (carLights) updateCarLights(carLights, driving?.cars.map((c) => c.v) ?? [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
       traffic.setInstances(sim.vehicles, camera.position, carLights ?? undefined);
     }
     if (interiors && (playing || ui.state === 'title')) {
@@ -546,7 +567,7 @@ async function main() {
         const R = quality.name === 'low' ? 160 : 260;
         parkedList = sim.parkedCars(f.x, f.z, R).map((c) => ({ id: Math.round(c.x * 10) * 100003 + Math.round(c.z * 10), vclass: c.vclass as string, variant: c.variant, x: c.x, y: heightAt(c.x, c.z), z: c.z, yaw: c.yaw, lights: 0 }));
       }
-      parked.setInstances(parkedList as never, camera.position);
+      parked.setInstances((driving?.takenParked.size ? parkedList.filter((c) => !driving!.takenParked.has(c.id)) : parkedList) as never, camera.position);
     }
     if (crowd && sim && simReady) { crowd.setAgents(sim.peds); crowd.update?.(dt, camera); }
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
