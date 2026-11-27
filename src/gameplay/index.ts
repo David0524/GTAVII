@@ -958,6 +958,7 @@ export class Gameplay {
     // register sim peds as hittable bodies
     for (const q of this.port.peds()) if (q.alive) this.ensurePed(q);
     this.sampleSpeeds(dt);
+    this.runOverCheck();
     // player gun timers and firing
     const ct0 = now();
     if (p) this.updatePlayer(dt, p);
@@ -1440,17 +1441,49 @@ export class Gameplay {
   // ------------------------------------------------------------------ external events
   private onVehicleImpact(e: { vehicleId?: string; speed?: number; dv?: number; ped?: string; occupant?: string; driver?: string; prop?: string; impulse?: number }) {
     // e.ped: a pedestrian struck at relative speed e.speed; e.occupant: someone inside a car that changed velocity by e.dv
-    if (e.ped && e.speed) {
+    if (e.ped && e.speed && (this.struck.get(e.ped) ?? -1) <= this.time) {
+      this.struck.set(e.ped, this.time + Gameplay.RUN_OVER.cooldown);
       const res = this.applyDamage(e.ped, { amount: pedestrianImpactDamage(e.speed), type: 'impact', source: e.driver });
       if (e.driver && e.driver === this.player?.id && res && res.dealt > 0) this.crime(res.killed ? 'homicide' : 'hit_and_run', { victim: e.ped });
     }
+    if (e.occupant && e.dv && e.vehicleId && !e.vehicleId.startsWith('sim:')) this.lastCarImpactAt = this.time;
     if (e.occupant && e.dv) this.applyDamage(e.occupant, { amount: occupantImpactDamage(e.dv), type: 'impact' });
     if (e.prop && e.speed) { const v = this.cartProp.get(e.prop); if (v) this.cartHit(v, { by: e.driver === this.player?.id ? 'player' : 'car', speed: e.speed, driving: true }); else this.damageProp(e.prop, e.speed * 25, 'impact', e.driver ?? null); }
   }
   private readonly childPeds = new Set<string>();
-  private onSimCollision(e: { a?: string; b?: string; speed?: number; ped?: string; x?: number; z?: number }) {
+  /** per-ped cooldown (game s) so one strike is one impact, whoever reports it (engine physics or this check) */
+  private struck = new Map<string, number>();
+  private lastCarImpactAt = -Infinity;
+  /** car footprint for the run-over check (m): a 1974 full-size sedan, about 5.4 × 2.0 */
+  static RUN_OVER = { halfLen: 2.7, halfWid: 1.0, pedRadius: 0.3, minSpeed: 2, cooldown: 2 } as const;
+  /**
+   * The player's car against sim pedestrians. Sim peds are kinematic, so the physics car never reports them; gameplay
+   * checks the footprint from the player position, `vehicleYaw` and `speed` (setContext) each frame.
+   */
+  private runOverCheck() {
+    const v = this.pc.vehicle, pl = this.player;
+    if (!v || !pl || this.pc.speed < Gameplay.RUN_OVER.minSpeed) return;
+    const p = pl.position(), yaw = this.pc.vehicleYaw ?? 0, fx = -Math.sin(yaw), fz = -Math.cos(yaw), R = Gameplay.RUN_OVER;
+    for (const q of this.port.peds()) {
+      if (!q.alive || q.child) continue;
+      const rx = q.x - p[0], rz = q.z - p[2];
+      if (Math.abs(rx) > 4 || Math.abs(rz) > 4) continue;
+      if (Math.abs(rx * fx + rz * fz) < R.halfLen + R.pedRadius && Math.abs(rx * fz - rz * fx) < R.halfWid + R.pedRadius)
+        this.onVehicleImpact({ vehicleId: v.id, ped: q.id, speed: this.pc.speed, driver: pl.id });
+    }
+  }
+  private onSimCollision(e: { a?: string; b?: string; speed?: number; ped?: string; x?: number; z?: number; vehicle?: string | number; actor?: string | number }) {
     if (e.ped && this.childPeds.has(`${e.ped}`)) return;
-    if (e.ped && e.speed) this.applyDamage(`${e.ped}`, { amount: pedestrianImpactDamage(e.speed), type: 'impact' });
+    if (e.ped && e.speed) { this.onVehicleImpact({ ped: `${e.ped}`, speed: e.speed, vehicleId: e.vehicle !== undefined ? `${e.vehicle}` : undefined }); return; }
+    // sim traffic.ts: a traffic car against an external actor {vehicle, actor, speed}; the engine names both the
+    // player on foot and the player's car 'player'. On foot: a pedestrian strike. In the car: sim traffic is kinematic,
+    // so this may be the only report of the crash; equal masses, so the occupant's change is about half the closing
+    // speed. Skipped when the physics car reported a crash in the last 0.3 s (the same contact).
+    const pl = this.player;
+    if (e.actor === undefined || !pl || `${e.actor}` !== pl.id || !e.speed || e.speed <= 1) return;
+    const vid = e.vehicle !== undefined ? `sim:${e.vehicle}` : undefined;
+    if (!this.pc.vehicle) this.onVehicleImpact({ ped: pl.id, speed: e.speed, vehicleId: vid });
+    else if (this.time - this.lastCarImpactAt > 0.3) { this.onVehicleImpact({ occupant: pl.id, dv: e.speed * 0.5, vehicleId: this.pc.vehicle.id }); this.emit('notice', { kind: 'trafficCrash', vehicle: vid, speed: e.speed }); }
   }
   /** The engine reports a fall from height (m) for any actor. */
   fell(id: string, dropM: number) { const d = fallDamage(dropM); if (d > 0) this.applyDamage(id, { amount: d, type: 'fall' }); }
