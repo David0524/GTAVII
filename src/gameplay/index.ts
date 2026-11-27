@@ -1828,6 +1828,27 @@ export class Gameplay {
     } else { r.shovedAt = undefined; this.rapport.set(n, r); if (!b) this.simLike?.setGoal?.(n, { kind: 'goto', x: q.x + (q.x - p[0]) * 3, z: q.z + (q.z - p[2]) * 3, speed: 1.6 }); }
     return { target: `ped:${n}`, accepted: ok, chance, ...out };
   }
+  // ---- the one use button on pad and keyboard, matching UI's touch: tap = main verb, hold 0.45 s = alternate
+  static HOLD_ALT = 0.45;
+  private useBtn = { down: false, t: 0, fired: false };
+  /**
+   * Call every frame with whether `use` (F / pad Y) is held. With no alternate on offer the main verb fires on the
+   * press (no added latency for "Get out"); with one, a release before 0.45 s fires the main verb and reaching
+   * 0.45 s fires the alternate at once, with nothing on release. Returns what fired this frame.
+   */
+  useButton(held: boolean, dt: number): 'main' | 'alt' | null {
+    const u = this.useBtn;
+    if (held && !u.down) { u.down = true; u.t = 0; u.fired = false; if (!this.contextAction()?.alt) { u.fired = true; this.doContextAction(this.moveDirHint()); return 'main'; } return null; }
+    if (held && u.down) { u.t += dt; if (!u.fired && u.t >= Gameplay.HOLD_ALT) { u.fired = true; this.doAltContextAction(); return 'alt'; } return null; }
+    if (!held && u.down) { u.down = false; if (!u.fired) { u.fired = true; this.doContextAction(this.moveDirHint()); return 'main'; } }
+    return null;
+  }
+  private moveDirHint(): [number, number] | null { return null; }
+  /** The prompt chip: "Say hello · Hold [F] Mouth off" ([Y] on pad); just the label when there's no alternate. */
+  contextPrompt(glyph = this.pc.device === 'pad' ? 'Y' : 'F') {
+    const c = this.contextAction(); if (!c) return null;
+    return c.alt ? `${c.label} · Hold [${glyph}] ${c.alt.label}` : c.label;
+  }
   /** The alternate on the context button (hold on touch, a second key elsewhere): mouth off instead of hello. */
   doAltContextAction() { const a = this.contextAction(); return a?.alt?.kind === 'antagonize' ? this.antagonize(a.target) : null; }
   static BUMP = { shoveBack: 0.35, shoveStumble: 0.5, assaultAfter: 3, window: 30 } as const;

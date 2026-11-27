@@ -54,7 +54,11 @@ itself and reads the block standing for vendors; nothing for the engine to wire.
 - Combatants for scripted fights: `g.spawnCombatant({ id, faction, squad, pos, weapon, melee?, hp?, ammo? })`.
 
 ## 3. Combat input (after)
-One context button: `g.contextAction()` → `{kind, label, target}` (or listen to `context`); `g.doContextAction(moveDir)`.
+One context button: `g.contextAction()` → `{kind, label, target, alt?}` (or listen to `context`); `g.doContextAction(moveDir)`.
+Pad and keyboard, matching UI's touch (tap = main, hold 0.45 s = alternate): call `g.useButton(held, dt)` every frame
+instead of `doContextAction` on press. It fires the main verb on the press when there's no `alt` (no latency), else on a
+release before 0.45 s, and the alternate at 0.45 s while still held (nothing on release). Prompt chip:
+`g.contextPrompt('F' | 'Y')` → "Say hello · Hold [F] Mouth off" (just the label when there's no alternate).
 Aim and fire: `setAiming(on)`, `setFiring(on)`, `setBlindFire(on)`, `reload()`, `clearJam()`, `setLimb('head'|'body'|'legs')`.
 Lock-on: `lockOn()`, `cycleLock(±1)` / `swipeLock(±1)`, `lockTarget(id)`, `lockables()` (world points to project).
 Weapons: `equip(id)`, `holster()`, `drawWeapon()`, `swapWeapon(±1)`, `weaponList()`. Cover: `toggleCover(moveDir)`.

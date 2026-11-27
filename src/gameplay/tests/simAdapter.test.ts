@@ -377,3 +377,26 @@ test('antagonize a beat cop: no shove, no fight, no running; a warning, then a s
   void kinds;
   assert.deepEqual((sim as any).mem.map((m: any) => m.kind), ['bumped', 'bumped', 'assault'], 'two warnings, then menacing (an assault to the street)');
 });
+
+test('use button on pad/keyboard: tap = main verb, hold 0.45 s = the alternate at the threshold, nothing on release', () => {
+  const { g, replies } = talkRig(0.9);
+  assert.equal(g.contextPrompt('F'), 'Say hello · Hold [F] Mouth off');
+  g.setContext({ device: 'pad' }); assert.equal(g.contextPrompt(), 'Say hello · Hold [Y] Mouth off');
+  // a tap
+  assert.equal(g.useButton(true, 1 / 60), null);
+  assert.equal(g.useButton(true, 0.2), null);
+  assert.equal(g.useButton(false, 1 / 60), 'main');
+  assert.ok(['greet', 'ignore'].includes(replies.at(-1).context));
+  // a hold
+  const n = replies.length;
+  g.useButton(true, 1 / 60); assert.equal(g.useButton(true, 0.3), null);
+  assert.equal(g.useButton(true, 0.2), 'alt', 'fires at the threshold, while still held');
+  assert.equal(replies.at(-1).context, 'antagonize'); assert.equal(replies.length, n + 1);
+  assert.equal(g.useButton(true, 0.5), null); assert.equal(g.useButton(false, 1 / 60), null, 'nothing on release');
+  // no alternate on offer (nobody near): fires on the press
+  const r2 = talkRig(0.5); r2.sim.peds.length = 0;
+  r2.g.addCar('car', 0, 0, -2.5, Math.PI / 2);
+  assert.equal(r2.g.contextPrompt('F'), r2.g.contextAction()!.label);
+  assert.equal(r2.g.useButton(true, 1 / 60), 'main');
+  assert.equal(r2.g.useButton(false, 1 / 60), null);
+});
