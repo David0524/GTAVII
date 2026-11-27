@@ -575,10 +575,11 @@ async function main() {
         orbit.update(dt, rp, player.loco());
       }
       // the one context button: in a car → get out; next to a car → get in; else gameplay's context
-      if (playing && !frozen && input.pressed('use')) {
-        if (inCar) { if (driving!.useInCar() === 'exited') { orbit.snap(player.pos, player.heading); } }
-        else if (driving?.nearestCar() && driving.tryEnter()) { /* now driving */ }
-        else if (gp && gpContext) gp.doContext();
+      // car actions fire on the press; gameplay's context runs every frame (tap = main verb, 0.45 s hold = alternate)
+      if (playing && !frozen) {
+        if (inCar) { if (input.pressed('use') && driving!.useInCar() === 'exited') orbit.snap(player.pos, player.heading); }
+        else if (carPrompt && input.pressed('use')) driving!.tryEnter();
+        else if (gp && !carPrompt) gp.g.useButton(input.isHeld('use'), dt);
       }
       if (gp && playing && !frozen) {
         gp.update(dt, { minutes: worldClock.minutes, raining: worldClock.weather === 'rain', sprinting: player.mode === 'sprint', device: input.isTouch ? 'touch' : input.activeDevice === 'kbm' ? 'mouse' : 'pad', inCar });

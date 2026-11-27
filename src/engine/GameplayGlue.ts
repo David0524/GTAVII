@@ -79,16 +79,17 @@ export async function createGameplay(o: { quality: Quality; physics: Physics; pl
       };
     },
     heat() {
+      // the phase pursuit and gameplay's HUD use (none / spotted / pursuit / lost / searching / cooling)
+      const phase = g.policeSys.phase('player') as HeatView['phase'];
       const units = [...g.policeSys.units.values()].filter((u) => u.state !== 'down' && u.state !== 'post');
-      const phase: HeatView['phase'] = units.some((u) => u.state === 'pursuit') ? 'pursuit' : units.some((u) => u.state === 'search') ? 'searching'
-        : units.some((u) => u.state === 'approach' || u.state === 'encounter' || u.state === 'suspicious') ? 'spotted' : 'none';
       return {
         phase,
         cones: phase === 'none' ? [] : units.map((u) => ({ x: u.x, z: u.z, dir: u.yaw, spread: u.fov, r: u.sight, seeing: u.lastSeen !== null && u.lostFor === 0 })),
         units: units.map((u) => ({ x: u.x, z: u.z, kind: u.kind === 'foot' ? 'foot' as const : 'car' as const, seeing: u.lostFor === 0 && u.lastSeen !== null })),
       };
     },
-    context() { const c = g.contextAction(); return c ? (c as { label?: string }).label ?? c.kind : null; },
+    // "Say hello · Hold [F] Mouth off" (glyph from the device gameplay was told about)
+    context() { return g.contextPrompt(); },
     doContext() { g.doContextAction(null); },
   };
   return glue;
