@@ -3,7 +3,10 @@
 ROWS = [
   ('map_after', 'Map', 'The map: our city from above',
    'Direction A as the user picked it: an aerial render of our own city in lit tiles with smooth zoom, fog over ground you haven\'t walked, the route in amber, our own blip drawings with no discs, landmark silhouettes, and street and district names placed so nothing collides. Legend, tools and the data credit live in one slim panel.',
-   'GTA V/VI render the world from above and mute it so blips read; RDR2 fogs what you haven\'t seen. We do both. Short of GTA: no zoomed-out regional view yet (the playable sheet is the whole world).'),
+   'GTA V/VI render the world from above and mute it so blips read; RDR2 fogs what you haven\'t seen. We do both. Pulled back, the sheet sits framed in amber inside its city: Manhattan's shoreline and piers, the rivers, Jersey and Queens, named (next row). Short of GTA: the land beyond is a flat map, not a render.'),
+  ('map_region', 'Map', 'Map: pulled back to the region',
+   'Zoom past the sheet and the city carries on: real 1974 shoreline (NYC Open Data, Census), the rivers in italic, boroughs in spaced caps, only the places you would plan a trip around. The playable sheet gets an amber frame.',
+   'GTA V/VI zoom out to the whole state; RDR2 to the whole map. Our world is small by design, so the zoom-out is context, not more ground.'),
   ('map_mission_card', 'Map', 'Map: a selected story place',
    'The card sits at the top of the panel, never over the map: an amber label, the name in Franklin, the time window as a quiet amber line, one primary action.', ''),
   ('hud_flat', 'HUD', 'HUD in play',

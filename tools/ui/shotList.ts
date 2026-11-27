@@ -3,6 +3,9 @@ import type { Shot } from './shots';
 export const SHOTS: Shot[] = [
   { name: 'map_before', q: 'screen=map&discover=none&waypoint=0' },
   { name: 'map_after', q: 'screen=map&discover=some' },
+  // regional zoom-out: pulled all the way back, and halfway (the sheet framed in its city)
+  { name: 'map_region', q: 'screen=map&discover=some', wait: 2500, act: async (p) => { await p.evaluate(() => { const m = (window as any).__UI.ui.mapScreen.map; m.centerOn(-300, -700, 0.01); }); } },
+  { name: 'map_region_mid', q: 'screen=map&discover=some', wait: 2500, act: async (p) => { await p.evaluate(() => { const m = (window as any).__UI.ui.mapScreen.map; m.centerOn(-500, -800, 0.17); }); } },
   { name: 'hud_flat', q: 'screen=hud&discover=some' },
   { name: 'pockets', q: 'screen=pockets' },
   { name: 'paper', q: 'screen=paper' },

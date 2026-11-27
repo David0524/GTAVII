@@ -15,6 +15,7 @@ export const CREDITS: CreditSection[] = [
     { role: 'Streets, landmarks, subway entrances', text: 'Map data © OpenStreetMap contributors, available under the Open Database License (ODbL 1.0).', href: 'https://www.openstreetmap.org/copyright' },
     { role: 'Building footprints and heights', text: 'NYC Building Footprints, NYC Office of Technology & Innovation, NYC Open Data (terms of use).', href: 'https://opendata.cityofnewyork.us/overview/#termsofuse' },
     { role: 'Year built, land use', text: 'PLUTO, NYC Department of City Planning, NYC Open Data (terms of use).' },
+    { role: 'Shorelines and boroughs (map zoom-out)', text: 'Borough Boundaries, NYC Department of City Planning, NYC Open Data (terms of use); New Jersey county outlines, U.S. Census Bureau cartographic boundary files (public domain).' },
     { role: 'Terrain', text: 'Derived from the footprint dataset\'s ground elevations (NAVD88).' },
     { role: '1974 corrections', text: 'Buildings dated against three sources; towers built after 1974 replaced by period stand-ins (docs/PERIOD_AUDIT.md).' },
   ] },
