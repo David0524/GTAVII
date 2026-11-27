@@ -143,7 +143,11 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
             th *= 0.7 + 0.55 * Math.abs(Math.sin((uk / 0.034) * Math.PI) * Math.sin((vk / 0.03) * Math.PI + (Math.floor(vk / 0.03) % 2) * 1.5));
           }
           let dir = [Nh[k * 3], Nh[k * 3 + 1], Nh[k * 3 + 2]];
-          if (st.sphere) {
+          if (st.sphere && vol <= 0.1) {
+            // close-cropped natural hair (a teeny-weeny afro): an even ~1 cm layer on the scalp that
+            // tapers to nothing at the hairline: no bowl, no helmet edge
+            th = (0.009 + 0.004 * up(k)) * sm(0, 0.03, hairline(k));
+          } else if (st.sphere) {
             // afro: grow towards a rounded volume around the head centre
             // grown from a raised centre: up and out, not forward over the brow; rounded at the ears
             const d = [P[k * 3] - hc[0], P[k * 3 + 1] - (hc[1] + 0.035), P[k * 3 + 2] - (hc[2] - 0.02)];

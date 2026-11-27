@@ -168,7 +168,7 @@ function eyes(model: BodyModel, shape: BodyShape, app: Appearance, lod: number, 
     const c = [J[joint * 3], J[joint * 3 + 1], J[joint * 3 + 2]];
     const idx = model.indices(g, 0);
     let r = 0; for (let i = 0; i < idx.length; i++) { const k = model.splitSrc[idx[i]]; r += Math.hypot(P[k * 3] - c[0], P[k * 3 + 1] - c[1], P[k * 3 + 2] - c[2]); }
-    r = (r / idx.length) * 0.98;
+    r = (r / idx.length) * 1.03; // slightly over the helper so the lids rest on the ball (no dark gap at the rims)
     const base = mb.count;
     for (let i = 0; i <= rings; i++) {
       const th = (i / rings) * Math.PI; // 0 = front (+Z)
