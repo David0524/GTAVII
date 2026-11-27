@@ -41,5 +41,5 @@ export const SCENARIOS: Scenario[] = [
     ],
     events: [{ t: 6, play: 'vendor:dogs:call' }, { t: 14, play: 'vendor:nuts:call' }, { t: 18, play: 'vendor:dogs:sale' }, { t: 22, play: 'vendor:dogs:call' }, { t: 23, play: 'vendor:shine:call' }, { t: 26, play: 'vendor:dogs:sale' }, { t: 34, play: 'vendor:nuts:move' }, { t: 41, play: 'vendor:dogs:knockOver', params: { impulse: 700 } }, { t: 52, play: 'vendor:nuts:stop' },
       { t: 10, play: 'sim:litter', offset: [12, 1] }, { t: 29, play: 'sim:pedBumped', offset: [31, 1], params: { kind: 2, response: 2 } }, { t: 32, play: 'sim:pedGotUp', offset: [33, 1] },
-      { t: 36, play: 'sim:pedBumped', offset: [37, 0.5], params: { kind: 1, response: 1 } }, { t: 47, play: 'sim:monteScatter', offset: [50, 3] }] },
+      { t: 36, play: 'sim:pedBumped', offset: [37, 0.5], params: { kind: 1, response: 1, byPlayer: 1 } }, { t: 47, play: 'sim:monteScatter', offset: [50, 3] }] },
 ];

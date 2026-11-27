@@ -74,7 +74,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   /** Fire a raw sim event at an offset from the listener's start (bumps, litter, monte scatter). Strings in params: none needed. */
   const simEvent = (type: string, off: [number, number] = [0, 0], p: Record<string, number> = {}) => {
     const KINDS = ['brush', 'stumble', 'knockdown'], RESP = ['none', 'annoyed', 'angry', 'frightened'];
-    sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', dirX: 1, dirZ: 0, by: 'ped' });
+    sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
   };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];

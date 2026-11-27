@@ -43,14 +43,19 @@ export class CrowdReactions {
   }
   private at(e: { x: number; z: number }, h: number): Vec3 { return [e.x, this.ground(e.x, e.z) + h, e.z]; }
 
-  private bumped(e: { kind?: string; response?: string; x: number; z: number; archetype?: string }) {
-    if (!this.near(e, 25)) return; this.stats.bumps++;
+  /**
+   * `byPlayer` (default false; agreed with oversight while sim confirms, `by === 'player'` also accepted): lines aimed
+   * at the player are never dropped for brushes, carry 35 m and only wait 1 s, not the 3 s ambient gap.
+   */
+  private bumped(e: { kind?: string; response?: string; x: number; z: number; archetype?: string; byPlayer?: boolean; by?: string }) {
+    const player = e.byPlayer === true || e.by === 'player';
+    if (!this.near(e, player ? 35 : 25)) return; this.stats.bumps++;
     const p = this.at(e, 1.0), r = this.env.rng;
     if (e.kind === 'knockdown') { this.env.oneShot('foley.land', { category: 'footstep', at: this.at(e, 0.2), gain: 0.55, rate: 0.95, priority: 5 }); this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.45, priority: 4 }); }
     else if (e.kind === 'stumble') { this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.35, priority: 4 }); this.scuffs(p, 3, 0.75); }
     else this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.22, rate: r.range(1.0, 1.2), priority: 3 });
     const emotions = BY_RESPONSE[e.response ?? 'none']; if (!emotions || !e.archetype) return;
-    const now = this.env.ctx.currentTime; if (now - this.lastLine < LINE_GAP || (e.kind === 'brush' && r.next() < 0.5)) return;
+    const now = this.env.ctx.currentTime; if (now - this.lastLine < (player ? 1 : LINE_GAP) || (!player && e.kind === 'brush' && r.next() < 0.5)) return;
     this.lastLine = now;
     const head: Vec3 = [e.x, this.ground(e.x, e.z) + (e.kind === 'knockdown' ? 0.5 : 1.6), e.z];
     void this.poolFor(e.archetype).then(async (pool) => {
