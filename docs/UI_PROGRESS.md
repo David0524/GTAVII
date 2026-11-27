@@ -132,6 +132,10 @@ Oversight **approved Design A to ship** after reviewing the board on 2026-11-27.
   - Type sits on the world: the objective in Franklin under an amber rule. On touch it sits beside the minimap.
   - The place you enter is wiped in big. Mission end is a left-weighted band with the cut counting up.
 - **Hub:** a big title, then place and time, icon tabs and cash. Every screen was redone to the rules: Pockets, Paper, Business, Cars, Record, Settings, Saves, scenes and front end.
+- **Since shipping:**
+  - Choices are built around the line just spoken, and weighty choices take a second press.
+  - The map has a regional zoom-out: the real shoreline, rivers and boroughs (`public/map/region.json`).
+  - M1's performance tracks use the characters clip library, and `tools/ui/cineClips.ts` plus a test check every layout's clips.
 - **Fixed after review:**
   - no real brand in copy (the lab paper's "Con Ed" is gone, and narrative is asked for an invented utility name);
   - the 1974 New York plate (blue on reflective orange, NEW YORK at the bottom, 123-ABC, matching vehicles 7a61f32);
@@ -141,8 +145,7 @@ Oversight **approved Design A to ship** after reviewing the board on 2026-11-27.
   - blotchy bake ground (engine ground material, then rebake);
   - missing tree height in the north half of the park (rebake with the same pass);
   - real car renders for Cars, the lot and Switch (asked vehicles for `renderThumbnail(model, paint, angle)`);
-  - the Choices screen is plain;
-  - no regional zoom-out;
+  - the cutscene gestures `cs.m01.teddy_check_watch` and `cs.m01.mayhew_wave` (asked of characters; stand-ins `Consume` and `hail_cab` for now);
   - the engine still needs to emit `discover` notify/mission and `missionEnd`, and post the wider PLAYABLE for Grand Central.
 
 ## Type direction and restyle (superseded by Design A above) (user decision, verbatim: **"Do A"**)
