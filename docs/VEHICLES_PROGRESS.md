@@ -4,6 +4,97 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 6: item 0, base model fidelity (oversight review of visual_dents)
+- **Hero LOD0** for the player car and the near ring (`updateHeroRing`, `HERO_RING`): low/phone
+  = player only, medium +1, high/ultra +3 within 30 m, with hysteresis at 38 m. At most one
+  promotion per frame.
+  - `generate(..., { hero: true })`: every surface grid is refined by a chord-scaled
+    Catmull-Rom spline in both directions (`GeoBuilder.sub`, `densify()`). Short spans keep
+    short tangents, so crisp character lines stay crisp and nothing overshoots.
+  - **Wheels:** 48 segments. The tyre is real geometry: rounded shoulders, two circumferential
+    grooves, 24 staggered tread blocks, a moulded bead ring and a blank raised lettering band.
+    Full covers have a 24-flute ring, a domed cap and a medallion; hubcaps get lug nuts.
+    Whitewalls are proud of the sidewall.
+  - **Panel gaps as geometry:** hood shut lines (both fender edges and the cowl), a deck-lid
+    rectangle on notchbacks, and door seams following the body (10 points).
+  - **Details:** door handles with a pull cup and lock barrel; invented relief badges (bevelled
+    chrome crest with a chevron on the hood and deck, three-bar fender emblems); a 3-spoke
+    steering wheel; a gauge cluster with chrome bezels, faces, ticks and needles; a centre
+    stack; a cabin shell (door cards, armrests, floor, transmission hump, firewall).
+  - `Vehicle.setHero(on)` swaps body, hood and wheel geometry and **replays the dents** (now
+    logged in body space).
+- **Budgets (triangles)** from the "hero frame" cost measurement:
+
+  | LOD | Use | Triangles |
+  | --- | --- | --- |
+  | Hero | player + near ring | cars 39–41k, trucks 29–37k, bus 43k |
+  | LOD0 | standard | 6–9k |
+  | LOD1 | | 1.5–2.7k |
+  | LOD2 | box | — |
+
+  - Hero generation: 65–205 ms per model (Node). First swap in the browser: 0.4–1.7 s under
+    SwiftShader, including the upload.
+  - **That is a hitch.** Plan: generate hero meshes in a worker or idle time at spawn
+    (`factory.preload`).
+  - In view, a hero car adds about 20–28k triangles to the frame.
+  - Phone: the player's car only, so +40k triangles on an iPhone 17 Pro tier — affordable
+    (scenes there run around 1–2M). Not benchmarked on a device: this container has no GPU.
+- **Glass:** cracks now radiate from the impact point, in the pane's own plane (per-pane `hit`
+  uniform).
+  - Laminated windscreen and back light: a spider web (about 17 spokes, rings, a crushed core).
+  - Tempered side glass: dice cracking that spreads from the hit.
+  - Bumped so the cracks catch light. Restored saves crack from the pane centre.
+  - "Refraction" is only the bump and highlight: the glass has no screen-space refraction.
+- **Dents near the arches are clamped.** There is no deformation inside the arch opening plus a
+  6 cm lip, with full deformation 20 cm beyond it. No tearing, and the wheel stays outside.
+  Shot: `hero_dent_arch.jpg`.
+- **MOVEMENT.md anchors:** `vehicle.movementAnchors()` returns, in world space:
+  - **doors** (per seat): stand point and yaw, handle, hinge, seat pose, carjack stand point,
+    throw direction, locked flag;
+  - **surfaces** (hood, roof, deck, cargo tops) as oriented boxes with their top height and
+    kind: `vault` (0.5–1.2 m), `climb` (1.2–2.2 m) or `none`.
+  - Example: the sedan's hood is 0.82 m (vault), its roof 1.36 m (climb) and its deck 0.87 m
+    (vault). Bus and box-truck roofs are `none`.
+- **Rig:** `renderer.info` was never reset with the loop paused, so triangle and draw counts
+  from `renderOnce()` were running totals. `renderOnce()` now resets it. **Earlier traffic
+  draw and triangle numbers in this file may be inflated.**
+- **Shots:**
+  - `hero_vs_standard.jpg`
+  - `hero_details.jpg`
+  - `hero_glass.jpg`
+  - `hero_dent_arch.jpg`
+  - `hero_classes_vs_period.jpg`: big sedan vs DOCUMERICA 549851, taxi vs 549869, box truck vs
+    554299, bus vs 549921, wheel and hubcap vs 555907 (shape only).
+
+### vs GTA V / VI / RDR2 (vehicles)
+- **What the references do:**
+  - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
+  - Damage is vertex deformation everywhere. Doors, hoods and bumpers hang and fall off.
+    Windows shatter into falling shards. Tyres burst and leave rims that spark.
+  - Paint carries dirt layers. The cars sit in the world's reflections.
+  - GTA VI (trailers) adds wet surfaces, ray-traced reflections and dense, varied traffic.
+  - RDR2's wagons model visible mechanics and accumulate mud.
+- **Where we match:** round wheels with tread and sidewall geometry, wheel covers and
+  whitewalls; local dents that hold at the arches; radial safety-glass cracks; contact
+  shadows; headlights that light the road; wet paint with beads; no LOD pops; dirt grime; burn
+  stages; a nearest-cars LOD policy like GTA's.
+- **Where we fall short:**
+  1. **Sheet-metal shape.** Next to the period photos our bodies read boxy and flat-sided. The
+     real cars have tumblehome, fender peaks, swept quarters, deep bumpers and heavy chrome
+     sections. This is the spec and loft design, not polygon count: hero smoothing can't add
+     curvature the spec doesn't describe.
+  2. **Interior.** A cramped layout (seat, wheel and dash spacing are wrong) and boxy forms.
+  3. **No detachable parts** (hood, door, bumper) and no glass shards.
+  4. **No real world reflections:** an env map only, until the engine's probes or SSR land.
+  5. **No tyre lettering, no rim sparks.**
+- **Plan, in order:**
+  1. A shape pass per class against the period photos: tumblehome profile, fender-peak and
+     belt crease, quarter sweep, bumper sections.
+  2. An interior rework: proper H-point layout, sculpted dash and door cards.
+  3. Detachable bumper, hood and doors with hinge physics.
+  4. Glass shard particles.
+  5. Wire paint, chrome and glass to the engine probes when they exist.
+
 ## Session 5b: visual bar 6, 7, 8 (surface detail, wet paint, LOD crossfade) + a shading bug
 - **The vertical shading bands on every car's sides were a real bug, now fixed:**
   - Loft stations are unevenly spaced (1 cm next to 40 cm around the arches and lamps).

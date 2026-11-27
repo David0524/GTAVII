@@ -29,7 +29,7 @@ import { loadDecalFonts } from './gen/decals';
 import type { Quality } from './gen/materials';
 
 export type { Vehicle, VehicleEventType, SkidEvent, ImpactEvent, DamageEvent, DamageStage, ComponentEvent, TheftEvent, EngineEvent, Hit, SeatId, VehicleInit } from './Vehicle';
-export { vehicleOfCollider } from './Vehicle';
+export { vehicleOfCollider, updateHeroRing, HERO_RING } from './Vehicle';
 export type { VehicleSave, TrimTier, Condition, Upgrade, TrunkItem, FailureKind } from './state';
 export { UPGRADES, TRIM } from './state';
 export type { TrafficInstance, VehicleClass } from '../shared/traffic';

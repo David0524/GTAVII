@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T03:09:41.961Z",
+  "date": "2026-11-27T03:32:13.789Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -10,7 +10,7 @@
       }
     ],
     "model": "bancroft",
-    "tris": 8476,
+    "tris": 8780,
     "speed": -0.379531287743848,
     "damage": 0.43694901490822813,
     "stage": "battered",
@@ -22,7 +22,7 @@
     },
     "gear": 1,
     "rpm": 778.1587838700437,
-    "physMs": 0.4444497874470457,
+    "physMs": 0.6115954984629816,
     "stepMs": 0
   },
   "traffic": {
@@ -452,8 +452,74 @@
     }
   },
   "dents": {
-    "vertices": 210,
-    "msPerDent": 1.7,
-    "bodyVertices": 5247
+    "vertices": 1338,
+    "msPerDent": 13.4,
+    "bodyVertices": 5535
+  },
+  "hero": {
+    "bancroft": {
+      "frameTrisStandard": 31585,
+      "frameTrisHero": 51243,
+      "firstSwapMs": 852.3
+    },
+    "tiverton": {
+      "frameTrisStandard": 21605,
+      "frameTrisHero": 49259,
+      "firstSwapMs": 1622.3
+    },
+    "ct40": {
+      "frameTrisStandard": 21501,
+      "frameTrisHero": 48307,
+      "firstSwapMs": 353.1
+    },
+    "courier": {
+      "frameTrisStandard": 19515,
+      "frameTrisHero": 41785,
+      "firstSwapMs": 603.3
+    }
+  },
+  "movementAnchors": {
+    "bancroft": {
+      "doors": [
+        "driver:left",
+        "passenger:right",
+        "rearLeft:left",
+        "rearRight:right"
+      ],
+      "surfaces": [
+        "hood 0.82 m vault",
+        "roof 1.36 m climb",
+        "deck 0.87 m vault"
+      ]
+    },
+    "ct40": {
+      "doors": [
+        "driver:left",
+        "passenger:right"
+      ],
+      "surfaces": [
+        "roof 3.02 m none"
+      ]
+    },
+    "b60": {
+      "doors": [
+        "driver:left",
+        "passenger:right"
+      ],
+      "surfaces": [
+        "roof 2.46 m none",
+        "cargo:box 3.55 m none"
+      ]
+    },
+    "walkin": {
+      "doors": [
+        "driver:left",
+        "passenger:right"
+      ],
+      "surfaces": [
+        "hood 1.14 m vault",
+        "roof 2.81 m none"
+      ]
+    }
   }
 }

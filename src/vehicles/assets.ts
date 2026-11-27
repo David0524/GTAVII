@@ -55,6 +55,19 @@ export function getAsset(spec: ModelSpec, v: Pick<Variant, 'vinyl' | 'whitewall'
   return a;
 }
 
+const heroCache = new Map<string, GeneratedModel>();
+/** Hero LOD0 (player car and the near ring), generated on first use and cached per trim key. */
+export function getHeroModel(spec: ModelSpec, v: Pick<Variant, 'vinyl' | 'whitewall' | 'wheelStyle'>): GeneratedModel {
+  const key = `${spec.id}|${v.vinyl}|${v.whitewall ? 1 : 0}|${v.wheelStyle}`;
+  let g = heroCache.get(key);
+  if (g) return g;
+  g = generate(spec, { lod: 0, hero: true, ...v });
+  addDamageMorphs(g.body, g, strHash(spec.id) % 97);
+  if (g.hood) addDamageMorphs(g.hood, g, strHash(spec.id) % 97);
+  heroCache.set(key, g);
+  return g;
+}
+
 function impostor(spec: ModelSpec, g: GeneratedModel): THREE.BufferGeometry {
   const b = new GeoBuilder();
   const zc = (z0: number, z1: number) => (z0 + z1) / 2;

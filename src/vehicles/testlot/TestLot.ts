@@ -6,7 +6,7 @@ import { qualityFromUrl } from '../../engine/quality';
 import { Input } from '../../input/Input';
 import { TouchControls } from '../../ui/TouchControls';
 import { DebugHud, FrameStats } from '../../engine/debug/DebugHud';
-import { createVehicleFactory, setVehicleViewCamera, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
+import { createVehicleFactory, setVehicleViewCamera, updateHeroRing, HERO_RING, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
 import { variantOf } from '../assets';
@@ -280,7 +280,11 @@ export async function runTestLot() {
   // ------------------------------------------------------------------ car lights: fixed pool of real lights for the nearest lamps
   const carLights = new CarLightPool(scene, qname, quality.shadows && (qname === 'high' || qname === 'ultra'));
   let lastTrafficCands: ReturnType<NonNullable<typeof traffic>['lightCandidates']> = [];
-  const prerender = () => updateCarLights(carLights, [player, ...parked], camera.position, lastTrafficCands);
+  let heroOn = !params.has('nohero');
+  const prerender = () => {
+    if (heroOn) updateHeroRing([player, ...parked], camera.position, HERO_RING[qname]);
+    updateCarLights(carLights, [player, ...parked], camera.position, lastTrafficCands);
+  };
   if (params.has('night')) setNight(Number(params.get('night')) || 1);
 
   // ------------------------------------------------------------------ traffic (visual-only instanced proxies)
@@ -452,7 +456,8 @@ export async function runTestLot() {
     setModel(id: string, v = 0, pose = { x: 0, z: 40, yaw: 0 }) { modelIdx = MODELS.findIndex((m) => m.id === id); variant = v; spawnPlayer(pose.x, pose.z, pose.yaw); },
     setCamera(x: number, y: number, z: number, lx: number, ly: number, lz: number, fov = 55) { freeCam = { p: new THREE.Vector3(x, y, z), l: new THREE.Vector3(lx, ly, lz), fov }; },
     clearCamera() { freeCam = null; camera.fov = 55; camera.updateProjectionMatrix(); },
-    renderOnce() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.render(scene, camera); },
+    /** Render one frame (info counters reset first: with the loop paused nothing else resets them). */
+    renderOnce() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.info.reset(); renderer.render(scene, camera); },
     /** Render now and return the canvas as a PNG data URL (read before the frame is composited). */
     capture() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
     /** Stop / restart the interactive loop (the shot rig drives frames itself). */
@@ -491,6 +496,8 @@ export async function runTestLot() {
     },
     /** Variant options (paint, metallic, vinyl...) of a model. */
     variantOf: (id: string, v: number) => variantOf(MODELS.find((m) => m.id === id)!, v),
+    /** Hero mesh ring on/off (off: every car back to the standard LOD0). */
+    setHeroRing(on: boolean) { heroOn = on; if (!on) for (const v of [player, ...parked]) v.setHero(false); },
     /** 0 = afternoon, 1 = night. */
     setNight, get night() { return night; }, carLights,
     /** Dent the player at a local point (metres of push), for damage close-ups. */

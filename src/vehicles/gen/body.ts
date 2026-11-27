@@ -34,6 +34,12 @@ export interface GenOptions {
   vinyl: 'none' | 'full' | 'landau';
   whitewall: boolean;
   wheelStyle: ModelSpec['wheelStyle'];
+  /**
+   * Hero detail (player car and the near ring): every surface grid refined with a smooth spline,
+   * 64-segment wheels with tread and sidewall geometry, finer trims, relief badges, gauges.
+   * Only meaningful with lod 0.
+   */
+  hero?: boolean;
 }
 
 /** Body cross-section run indices: right side, top, left side, underside. */
@@ -42,6 +48,7 @@ interface Section { s: number; side: V3[]; top: V3[]; under: [V3, V3] }
 export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   const b = new GeoBuilder();
   const hoodB = new GeoBuilder();
+  if (o.hero) { b.sub = hoodB.sub = 1; b.tubeSegs = hoodB.tubeSegs = 6; }
   const lod = o.lod;
   const mid = sMid(m);
   const Z = (s: number) => s - mid;
@@ -189,7 +196,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
 
   // ---------------------------------------------------------------- greenhouse
   greenhouse(b, m, o, Z, halfW, lod);
-  if (lod === 0 && PASSENGER.has(m.cls)) cabin(b, m, Z, halfW);
+  if (lod === 0 && PASSENGER.has(m.cls)) cabin(b, m, Z, halfW, !!o.hero);
 
   // ---------------------------------------------------------------- cargo modules
   for (const c of m.cargo ?? []) cargo(b, c, Z, lod);
@@ -341,13 +348,22 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       for (const sx of [1, -1]) {
         for (const sSeam of seams) {
           const pts: V3[] = [];
-          for (let k = 0; k <= 2; k++) { const y = lerp(Math.max(bottomY(sSeam), m.sillY) + 0.04, m.beltY - 0.012, k / 2); pts.push([sx * (sideX(sSeam, y) + 0.0015), y, Z(sSeam)]); }
-          b.tubePath('grille', pts, 0.0035, 3);
+          const nk = o.hero ? 10 : 2;
+          for (let k = 0; k <= nk; k++) { const y = lerp(Math.max(bottomY(sSeam), m.sillY) + 0.04, m.beltY - 0.012, k / nk); pts.push([sx * (sideX(sSeam, y) + 0.0015), y, Z(sSeam)]); }
+          b.tubePath('grille', pts, o.hero ? 0.0028 : 0.0035, 3);
         }
         // handles just ahead of each door's rear edge, below the belt
-        for (let i = 1; i < seams.length; i++) b.box('chrome', sx * (sideX(seams[i] - 0.16, m.beltY - 0.07) + 0.01), m.beltY - 0.07, Z(seams[i] - 0.16), 0.02, 0.028, 0.17);
+        for (let i = 1; i < seams.length; i++) {
+          const hs = seams[i] - 0.16, hx = sx * (sideX(hs, m.beltY - 0.07) + 0.01);
+          b.box('chrome', hx, m.beltY - 0.07, Z(hs), 0.02, 0.028, 0.17);
+          if (o.hero) { // recessed pull cup and the lock barrel
+            b.box('grille', hx - sx * 0.006, m.beltY - 0.084, Z(hs), 0.012, 0.012, 0.13);
+            b.add('chrome', new THREE.CylinderGeometry(0.009, 0.009, 0.012, 12).rotateZ(Math.PI / 2), new THREE.Matrix4().makeTranslation(hx + sx * 0.004, m.beltY - 0.07, Z(hs) + 0.11));
+          }
+        }
       }
     }
+    if (o.hero) heroDetails(b, m, Z, halfW, topY, stations, rearS, archR);
   }
 
   // ---------------------------------------------------------------- extras
@@ -488,9 +504,57 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   };
 }
 
+// ======================================================================= hero details
+/**
+ * Hood and deck-lid shut lines, invented relief badges (a hood crest, a deck-lid crest, fender
+ * emblems): chrome extrusions with a bevel. Shapes are made up for this game: no real marques.
+ */
+function heroDetails(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s: number) => number, topY: (s: number) => number, stations: number[], rearS: number, archR: number) {
+  const L = m.L;
+  const gap = (pts: V3[]) => { if (pts.length > 1) b.tubePath('grille', pts, 0.0026, 3); };
+  // hood shut lines: along both fender edges, and across the cowl
+  if (m.hood) {
+    const [h0, h1] = m.hood;
+    for (const sx of [1, -1]) gap(stations.filter((s) => s >= h0 && s <= h1).map((s) => [sx * halfW(s) * 0.952, topY(s) + 0.002, Z(s)] as V3));
+    const sc = h1;
+    gap([-1, -0.5, 0, 0.5, 1].map((f) => [f * halfW(sc) * 0.952, topY(sc) + m.crown * (1 - f * f) * 0.9 + 0.002, Z(sc)] as V3));
+  }
+  // deck lid: a rectangle on the rear deck of notchback cars
+  const deck0 = m.gh.sC0 + 0.12, deck1 = L - 0.1;
+  const isNotch = topY((deck0 + deck1) / 2) < m.gh.roofY - 0.3 && deck1 - deck0 > 0.6 && m.cls !== 'wagon' && !m.cargo;
+  if (isNotch) {
+    for (const sx of [1, -1]) gap(stations.filter((s) => s >= deck0 && s <= deck1).map((s) => [sx * halfW(s) * 0.9, topY(s) + 0.003, Z(s)] as V3));
+    for (const sc of [deck0, deck1]) gap([-1, -0.5, 0, 0.5, 1].map((f) => [f * halfW(sc) * 0.9, topY(sc) + m.crown * (1 - (f * 0.9) ** 2) * 0.85 + 0.003, Z(sc)] as V3));
+  }
+  // crest: a shield with a chevron (invented), bevelled chrome
+  const crest = new THREE.Shape();
+  crest.moveTo(-0.035, 0.03); crest.lineTo(0.035, 0.03); crest.lineTo(0.035, -0.005); crest.quadraticCurveTo(0.03, -0.03, 0, -0.04); crest.quadraticCurveTo(-0.03, -0.03, -0.035, -0.005); crest.closePath();
+  const crestGeo = () => new THREE.ExtrudeGeometry(crest, { depth: 0.004, bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.003, bevelSegments: 2, curveSegments: 6 });
+  const chevron = new THREE.Shape();
+  chevron.moveTo(-0.022, 0.008); chevron.lineTo(0, -0.012); chevron.lineTo(0.022, 0.008); chevron.lineTo(0.022, 0.016); chevron.lineTo(0, -0.004); chevron.lineTo(-0.022, 0.016); chevron.closePath();
+  const chevGeo = () => new THREE.ExtrudeGeometry(chevron, { depth: 0.006, bevelEnabled: false });
+  // hood front, lying on the hood (faces up, nose toward -z)
+  const sF = 0.22, yF = topY(sF) + m.crown * 0.9;
+  const onHood = new THREE.Matrix4().makeTranslation(0, yF + 0.002, Z(sF)).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  b.add('chrome', crestGeo(), onHood.clone());
+  b.add('grille', chevGeo(), onHood.clone().multiply(new THREE.Matrix4().makeTranslation(0, 0.004, 0.006)));
+  if (isNotch) {
+    const sR = L - 0.22, yR = topY(sR) + m.crown * 0.85;
+    const onDeck = new THREE.Matrix4().makeTranslation(0, yR + 0.002, Z(sR)).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)).multiply(new THREE.Matrix4().makeRotationZ(Math.PI));
+    b.add('chrome', crestGeo(), onDeck.clone());
+  }
+  // fender emblem: three stacked chrome bars behind the front arch (both sides)
+  const sE = m.sF + archR + 0.25, yE = lerp(m.sillY, m.beltY, 0.62);
+  for (const sx of [1, -1]) for (let k = 0; k < 3; k++) {
+    const len = 0.12 - k * 0.025;
+    b.box('chrome', sx * (halfW(sE) + 0.004), yE + k * 0.016, Z(sE + len / 2), 0.006, 0.008, len);
+  }
+  void rearS;
+}
+
 // ======================================================================= cabin (visible through the glass)
 const PASSENGER = new Set<ModelSpec['cls']>(['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi']);
-function cabin(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s: number) => number) {
+function cabin(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s: number) => number, hero = false) {
   const g = m.gh, belt = m.beltY;
   const hw = halfW((g.sA0 + g.sC0) / 2) - g.beltInset - 0.06;
   const d = m.seats.driver;
@@ -500,7 +564,41 @@ function cabin(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s:
   b.box('trim', 0, belt + 0.075, front + 0.3, hw * 2, 0.03, 0.32);
   // steering wheel on its column, tilted toward the driver
   const wz = front + 0.62, wy = belt + 0.1;
-  b.add('trim', new THREE.TorusGeometry(0.19, 0.016, 4, 12), new THREE.Matrix4().makeTranslation(d[0], wy, wz).multiply(new THREE.Matrix4().makeRotationX(-0.45)));
+  const wheelM = new THREE.Matrix4().makeTranslation(d[0], wy, wz).multiply(new THREE.Matrix4().makeRotationX(-0.45));
+  b.add('trim', new THREE.TorusGeometry(0.19, hero ? 0.017 : 0.016, hero ? 8 : 4, hero ? 32 : 12), wheelM.clone());
+  if (hero) {
+    // three-spoke wheel with a horn pad, and the instrument cluster: two big dials, two small, chrome bezels
+    for (const a of [Math.PI / 2, Math.PI / 2 + 2.3, Math.PI / 2 - 2.3]) b.add('trim', new THREE.BoxGeometry(0.17, 0.022, 0.012).translate(0.085, 0, 0).applyMatrix4(new THREE.Matrix4().makeRotationZ(a)), wheelM.clone());
+    b.add('chrome', new THREE.CylinderGeometry(0.045, 0.05, 0.03, 16).rotateX(Math.PI / 2), wheelM.clone());
+    const panelZ = front + 0.47, panelY = belt - 0.03; // on the dash's rear face, under the padded top
+    for (const [dx, r] of [[-0.11, 0.065], [0.06, 0.065], [0.19, 0.038], [-0.23, 0.038]] as [number, number][]) {
+      const x = d[0] + dx;
+      const face = new THREE.Matrix4().makeTranslation(x, panelY, panelZ).multiply(new THREE.Matrix4().makeRotationX(-0.25));
+      b.add('chrome', new THREE.TorusGeometry(r, 0.006, 6, 24), face.clone());
+      b.add('white', new THREE.CircleGeometry(r * 0.96, 24).translate(0, 0, 0.004), face.clone()); // faces the driver (+z)
+      // tick marks and a needle
+      for (let k = 0; k <= 8; k++) {
+        const t = -2.3 + (k / 8) * 4.6;
+        b.add('trim', new THREE.BoxGeometry(0.003, r * 0.18, 0.002).translate(0, r * 0.78, 0.006).applyMatrix4(new THREE.Matrix4().makeRotationZ(t)), face.clone());
+      }
+      b.add('reverse', new THREE.BoxGeometry(0.004, r * 0.8, 0.002).translate(0, r * 0.38, 0.008).applyMatrix4(new THREE.Matrix4().makeRotationZ(-1.1 + dx * 3)), face.clone());
+      // hood over the cluster
+      b.add('interior', new THREE.CylinderGeometry(r + 0.02, r + 0.02, 0.07, 16, 1, true, -Math.PI / 2, Math.PI).rotateX(Math.PI / 2), face.clone().multiply(new THREE.Matrix4().makeTranslation(0, 0, 0.025)));
+    }
+    // cabin shell: inner door cards with armrests, floor with a transmission hump, firewall
+    const sill = m.sillY + 0.06, len = rearLimit - front;
+    for (const sx of [-1, 1]) {
+      b.box('interior', sx * (hw + 0.035), (sill + belt) / 2, (front + rearLimit) / 2, 0.03, belt - sill, len);
+      b.box('seat', sx * (hw + 0.005), belt - 0.16, front + 0.95, 0.06, 0.05, 0.45); // armrest
+      b.box('chrome', sx * (hw + 0.018), belt - 0.07, front + 0.75, 0.01, 0.02, 0.09); // door pull
+    }
+    b.box('interior', 0, sill, (front + rearLimit) / 2, hw * 2 + 0.1, 0.03, len);
+    b.box('interior', 0, sill + 0.09, (front + rearLimit) / 2, 0.24, 0.16, len * 0.9);
+    b.box('interior', 0, (sill + belt) / 2, front + 0.04, hw * 2 + 0.1, belt - sill, 0.03);
+    // radio and heater slider panel in the centre stack (knobs, chrome face)
+    b.box('chrome', 0.05, belt - 0.06, front + 0.44, 0.18, 0.05, 0.01, 0, -0.25);
+    for (const dx of [-0.02, 0.12]) b.add('trim', new THREE.CylinderGeometry(0.012, 0.012, 0.02, 10).rotateX(Math.PI / 2), new THREE.Matrix4().makeTranslation(dx, belt - 0.06, front + 0.455));
+  }
   b.add('trim', new THREE.CylinderGeometry(0.025, 0.03, 0.45, 6), new THREE.Matrix4().makeTranslation(d[0], wy - 0.08, wz - 0.2).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2 - 0.45)));
   // bench seats with headrests (mandatory on new cars from 1969)
   const bench = (z: number, headrests: boolean) => {
@@ -726,7 +824,8 @@ function bumper(b: GeoBuilder, bp: NonNullable<ModelSpec['rearBumper']>, end: 'f
 function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry {
   const b = new GeoBuilder();
   const R = m.wheelR, w = m.tireW;
-  const segs = o.lod === 0 ? 18 : 10;
+  const segs = o.hero ? 48 : o.lod === 0 ? 18 : 10;
+  if (o.hero) return heroWheel(b, m, o, side, segs);
   const rim = R * (m.cls === 'bus' || m.cls === 'boxtruck' || m.cls === 'garbage' ? 0.56 : 0.62);
   const mir = side < 0;
   const tire: [number, number][] = o.lod === 0
@@ -753,6 +852,86 @@ function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry 
     b.latheX('chrome', [[cr, face + 0.012], [cr * 0.8, face + 0.03], [cr * 0.3, face + 0.04], [0.001, face + 0.041]], segs, [0, 0, 0], mir, -w);
   } else { // truck steel: deep dish with a hub
     b.latheX('trim', [[rim, face - 0.01], [rim * 0.85, face - 0.04], [rim * 0.5, face - 0.05], [rim * 0.35, face - 0.02], [rim * 0.2, face + 0.03], [0.001, face + 0.04]], segs, [0, 0, 0], mir, -w);
+  }
+  return b.build();
+}
+
+/**
+ * Hero wheel: 48 segments; the tyre is real geometry. Crown: two circumferential grooves and
+ * 24 staggered transverse blocks per shoulder (period bias-ply rib pattern). Shoulders rounded, sidewall with
+ * a moulded bead ring and a raised lettering band (blank: no real tyre brands).
+ */
+function heroWheel(b: GeoBuilder, m: ModelSpec, o: GenOptions, side: 1 | -1, segs: number): THREE.BufferGeometry {
+  const R = m.wheelR, w = m.tireW, mir = side < 0;
+  const rim = R * (m.cls === 'bus' || m.cls === 'boxtruck' || m.cls === 'garbage' ? 0.56 : 0.62);
+  const face = w / 2;
+  // profile across the tyre [radius, x]: bead, sidewall (lettering band), shoulder, crown with grooves
+  const xs = (t: number) => -w / 2 + t * w;
+  const prof: { r: number; x: number; crown: number }[] = [];
+  const P = (r: number, x: number, crown = 0) => prof.push({ r, x, crown });
+  P(rim * 0.985, -w / 2 + 0.004); P(rim + 0.012, -w / 2 - 0.004); P(rim + 0.03, -w / 2 - 0.008);
+  P(lerp(rim, R, 0.45), -w / 2 - 0.012); P(lerp(rim, R, 0.56), -w / 2 - 0.016); P(lerp(rim, R, 0.67), -w / 2 - 0.012);
+  P(R - 0.03, -w / 2 - 0.006); P(R - 0.012, -w / 2 + 0.008); P(R - 0.003, xs(0.12), 1);
+  // crown: grooves at 1/3 and 2/3
+  for (const [t, groove] of [[0.3, 0], [0.315, 1], [0.35, 1], [0.365, 0], [0.635, 0], [0.65, 1], [0.685, 1], [0.7, 0]] as [number, number][]) P(R - (groove ? 0.009 : 0), xs(t), groove ? 2 : 1);
+  P(R - 0.003, xs(0.88), 1); P(R - 0.012, w / 2 - 0.008); P(R - 0.03, w / 2 + 0.006);
+  P(lerp(rim, R, 0.67), w / 2 + 0.012); P(lerp(rim, R, 0.56), w / 2 + 0.016); P(lerp(rim, R, 0.45), w / 2 + 0.012);
+  P(rim + 0.03, w / 2 + 0.008); P(rim + 0.012, w / 2 + 0.004); P(rim * 0.985, w / 2 - 0.004);
+  // transverse blocks: crown rows (not the grooves) sink 4 mm in a staggered 48-pitch pattern
+  const pitch = segs / 2;
+  const rows: V3[][] = prof.map((pp) => {
+    const row: V3[] = [];
+    for (let k = 0; k < segs; k++) {
+      const t = (k / segs) * Math.PI * 2;
+      let r = pp.r;
+      if (pp.crown === 1) {
+        // one block per two segments, staggered between the shoulders and the centre rib
+        const cell = Math.floor((k / segs) * pitch * 2) + (pp.x > w * 0.2 ? 1 : pp.x < -w * 0.2 ? 0 : 1);
+        if (cell % 2 === 1) r -= 0.004;
+      }
+      row.push([mir ? -pp.x : pp.x, Math.cos(t) * r, Math.sin(t) * r]);
+    }
+    return row;
+  });
+  b.grid(rows, 'rubber', { closeJ: true, inside: [0, 0, 0], smooth: false });
+  if (m.sillY > 0.4) b.latheX('under', [[rim * 0.99, -w / 2 + 0.004], [0.001, -w / 2 + 0.004]], segs, [0, 0, 0], mir, w);
+  // rim lip (steel, visible inside the cover's edge)
+  b.latheX('trim', [[rim * 0.985, face - 0.004], [rim * 1.01, face + 0.004], [rim * 0.97, face + 0.008], [rim * 0.93, face]], segs, [0, 0, 0], mir, -w);
+  const style = o.wheelStyle;
+  if (o.whitewall) b.latheX('white', [[rim + 0.018, face + 0.0125], [lerp(rim, R, 0.45), face + 0.0155], [R - 0.05, face + 0.0145], [R - 0.044, face + 0.011]], segs, [0, 0, 0], mir, -w);
+  if (style === 'fullcover' || style === 'wire') {
+    // cover: rolled lip, fluted ring (24 flutes), recessed groove, domed cap with a centre medallion
+    const flutes = 24;
+    const ring: V3[][] = [];
+    const radii = [rim * 0.97, rim * 0.9, rim * 0.82, rim * 0.74];
+    for (let q = 0; q < radii.length; q++) {
+      const row: V3[] = [];
+      for (let k = 0; k < segs; k++) {
+        const t = (k / segs) * Math.PI * 2;
+        const fl = q === 1 || q === 2 ? 0.006 * Math.max(0, Math.cos(t * flutes)) : 0;
+        const x = face + [0.004, 0.02, 0.026, 0.014][q] + fl;
+        row.push([mir ? -x : x, Math.cos(t) * radii[q], Math.sin(t) * radii[q]]);
+      }
+      ring.push(row);
+    }
+    b.grid(ring, 'chrome', { closeJ: true, inside: [mir ? w : -w, 0, 0], smooth: false });
+    b.latheX('chrome', [[rim * 0.74, face + 0.014], [rim * 0.62, face + 0.03], [rim * 0.42, face + 0.042], [rim * 0.24, face + 0.054], [rim * 0.12, face + 0.06], [0.001, face + 0.062]], segs, [0, 0, 0], mir, -w);
+    b.latheX('trim', [[rim * 0.11, face + 0.0615], [0.001, face + 0.0625]], 24, [0, 0, 0], mir, -w); // medallion
+  } else if (style === 'hubcap' || style === 'dogdish') {
+    b.latheX('trim', [[rim * 0.93, face], [rim * 0.9, face + 0.004], [rim * 0.55, face + 0.012], [0.001, face + 0.012]], segs, [0, 0, 0], mir, -w);
+    const cr = style === 'dogdish' ? rim * 0.5 : rim * 0.72;
+    b.latheX('chrome', [[cr, face + 0.012], [cr * 0.92, face + 0.026], [cr * 0.8, face + 0.032], [cr * 0.5, face + 0.04], [cr * 0.3, face + 0.042], [0.001, face + 0.043]], segs, [0, 0, 0], mir, -w);
+    // lug nuts
+    for (let k = 0; k < 5; k++) {
+      const t = (k / 5) * Math.PI * 2, rr = rim * 0.38;
+      b.add('chrome', new THREE.CylinderGeometry(0.011, 0.013, 0.02, 6).rotateZ(Math.PI / 2), new THREE.Matrix4().makeTranslation(mir ? -(face + 0.016) : face + 0.016, Math.cos(t) * rr, Math.sin(t) * rr));
+    }
+  } else {
+    b.latheX('trim', [[rim * 0.93, face - 0.01], [rim * 0.85, face - 0.04], [rim * 0.5, face - 0.05], [rim * 0.35, face - 0.02], [rim * 0.2, face + 0.03], [0.001, face + 0.04]], segs, [0, 0, 0], mir, -w);
+    for (let k = 0; k < 8; k++) {
+      const t = (k / 8) * Math.PI * 2, rr = rim * 0.3;
+      b.add('chrome', new THREE.CylinderGeometry(0.014, 0.016, 0.03, 6).rotateZ(Math.PI / 2), new THREE.Matrix4().makeTranslation(mir ? -(face - 0.035) : face - 0.035, Math.cos(t) * rr, Math.sin(t) * rr));
+    }
   }
   return b.build();
 }

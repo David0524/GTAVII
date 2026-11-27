@@ -20,6 +20,14 @@ export class GeoBuilder {
   readonly pos: number[] = [];
   readonly uv: number[] = [];
   readonly idx = new Map<Slot, number[]>();
+  /**
+   * Hero detail: points inserted per span when a grid is smoothed (0 = off). Grids are refined
+   * with a chord-scaled Catmull-Rom (Hermite) spline in both directions; short spans (crisp
+   * character lines, chamfers) get short tangents, so they stay crisp and nothing overshoots.
+   */
+  sub = 0;
+  /** Segment count multiplier for round trims (tubes) at hero detail. */
+  tubeSegs = 5;
 
   get vcount() { return this.pos.length / 3; }
 
@@ -36,7 +44,21 @@ export class GeoBuilder {
    * Winding is fixed automatically so faces point away from `inside` (a point inside the solid),
    * or along `facing` when given (for open, flat-ish patches).
    */
-  grid(rows: V3[][], slot: Slot | ((i: number, j: number) => Slot | null), opt: { closeJ?: boolean; inside?: V3; facing?: V3 } = {}) {
+  grid(rows: V3[][], slot: Slot | ((i: number, j: number) => Slot | null), opt: { closeJ?: boolean; inside?: V3; facing?: V3; smooth?: false | 'i' | 'j' | 'ij' } = {}): number[][] {
+    const sm = opt.smooth === undefined ? 'ij' : opt.smooth;
+    if (this.sub > 0 && sm && rows.length >= 2 && rows[0].length >= 2) {
+      const kI = sm.includes('i') ? this.sub : 0, kJ = sm.includes('j') ? this.sub : 0;
+      let r2 = rows.map((r) => (kJ ? densify(r, kJ, !!opt.closeJ) : r));
+      if (kI) {
+        const nj2 = r2[0].length;
+        const cols: V3[][] = [];
+        for (let j = 0; j < nj2; j++) cols.push(densify(r2.map((r) => r[j]), kI, false));
+        r2 = cols[0].map((_, i) => cols.map((c) => c[i]));
+      }
+      const fi = kI + 1, fj = kJ + 1;
+      const sl = typeof slot === 'function' ? (i: number, j: number) => slot(Math.floor(i / fi), Math.floor(j / fj)) : slot;
+      return this.grid(r2, sl, { ...opt, smooth: false });
+    }
     const ni = rows.length, nj = rows[0].length;
     const ids: number[][] = rows.map((r, i) => r.map((p, j) => this.v(p, i / Math.max(1, ni - 1), j / Math.max(1, nj - 1))));
     const jm = opt.closeJ ? nj : nj - 1;
@@ -120,7 +142,7 @@ export class GeoBuilder {
       const a = new THREE.Vector3(...pts[i - 1]), c = new THREE.Vector3(...pts[i]);
       const len = a.distanceTo(c);
       if (len < 1e-4) continue;
-      const g = new THREE.CylinderGeometry(r, r, len + r * 1.5, segs, 1, true);
+      const g = new THREE.CylinderGeometry(r, r, len + r * 1.5, Math.max(segs, this.tubeSegs), 1, true);
       const m = new THREE.Matrix4().compose(a.clone().add(c).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), c.clone().sub(a).normalize()), new THREE.Vector3(1, 1, 1));
       this.add(slot, g, m);
     }
@@ -184,6 +206,44 @@ export function pw(pts: [number, number][], t: number): number {
   return pts[pts.length - 1][1];
 }
 export { rng } from './rng';
+
+/**
+ * Insert k points per span along a polyline with a chord-scaled Catmull-Rom (Hermite) curve.
+ * Tangents are scaled by the span length relative to its neighbours, so a short span next to a
+ * long one (a crease, a chamfer) neither bulges nor overshoots. Zero-length spans stay put.
+ */
+export function densify(p: V3[], k: number, closed: boolean): V3[] {
+  const n = p.length;
+  if (k <= 0 || n < 2) return p;
+  const at = (i: number): V3 => {
+    if (closed) return p[((i % n) + n) % n];
+    if (i < 0) return sub(scale(p[0], 2), p[1]) as V3;
+    if (i >= n) return sub(scale(p[n - 1], 2), p[n - 2]) as V3;
+    return p[i];
+  };
+  const out: V3[] = [];
+  const spans = closed ? n : n - 1;
+  for (let i = 0; i < spans; i++) {
+    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+    out.push(p1);
+    const d01 = dist(p0, p1), d12 = dist(p1, p2), d23 = dist(p2, p3);
+    if (d12 < 1e-6) { for (let t = 1; t <= k; t++) out.push(p1); continue; }
+    const m1 = scale(sub(p2, p0), d12 / Math.max(1e-6, d01 + d12));
+    const m2 = scale(sub(p3, p1), d12 / Math.max(1e-6, d12 + d23));
+    for (let t = 1; t <= k; t++) {
+      const u = t / (k + 1), u2 = u * u, u3 = u2 * u;
+      const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+      out.push([
+        h00 * p1[0] + h10 * m1[0] + h01 * p2[0] + h11 * m2[0],
+        h00 * p1[1] + h10 * m1[1] + h01 * p2[1] + h11 * m2[1],
+        h00 * p1[2] + h10 * m1[2] + h01 * p2[2] + h11 * m2[2],
+      ]);
+    }
+  }
+  if (!closed) out.push(p[n - 1]);
+  return out;
+}
+const dist = (a: V3, b: V3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
 /**
  * Vertex normals weighted by each triangle's corner angle (not its area). Loft stations are

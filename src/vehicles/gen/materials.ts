@@ -9,6 +9,7 @@ export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 // three.js release, so node expressions here are typed loosely.
 type N = any;
 const fu = (v: number) => uniform(v);
+const v3u = () => uniform(new THREE.Vector3());
 type FloatUniform = ReturnType<typeof fu>;
 
 /** Per-vehicle uniforms the damage and weather systems drive. */
@@ -27,7 +28,7 @@ export interface MaterialSet {
   bySlot: Record<Slot, THREE.Material>;
   u: MatUniforms;
   /** Per-pane glass state uniforms (0/1). */
-  panes: Record<'front' | 'rear' | 'left' | 'right', { cracked: FloatUniform; broken: FloatUniform }>;
+  panes: Record<'front' | 'rear' | 'left' | 'right', { cracked: FloatUniform; broken: FloatUniform; hit: ReturnType<typeof v3u> }>;
   setPaint(hex: number): void;
   dispose(): void;
 }
@@ -182,15 +183,42 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
 
   // Glass: dark, glossy; rain streaks when wet; crazed when cracked; per pane so a bullet or a
   // smashed window affects only that pane. 'broken' = shattered out: you see the dark cabin.
-  const makeGlass = (cracked: FloatUniform, broken: FloatUniform, seeThrough = false) => {
+  const makeGlass = (cracked: FloatUniform, broken: FloatUniform, seeThrough = false, impact?: { hit: N; laminated: boolean }) => {
     const glass = new THREE.MeshPhysicalNodeMaterial({ color: 0x0b0e10, metalness: 0.1, roughness: 0.05, clearcoat: physical ? 1 : 0, clearcoatRoughness: 0.02 });
     const p: N = positionLocal;
     const nz = (x: N): N => mx_noise_float(x);
     const wob: N = nz(p.mul(vec3(6, 0.8, 6))).mul(0.6);
     const streak: N = (smoothstep(float(0.82), float(0.98), fract(p.x.add(p.z).mul(23).add(wob).add(nz(p.mul(vec3(40, 2, 40))).mul(0.3)))) as N)
       .mul(smoothstep(float(0.2), float(0.9), fract(p.y.mul(3).add((time as N).mul(0.35)).add(p.x.mul(7)))));
-    const crack: N = (step(abs(nz(p.mul(11))), float(0.018)) as N).add(step(abs(nz(p.mul(4.5).add(3.1))), float(0.012)));
+    let crack: N = (step(abs(nz(p.mul(11))), float(0.018)) as N).add(step(abs(nz(p.mul(4.5).add(3.1))), float(0.012)));
+    if (impact) {
+      // cracks radiate from the impact point, in the pane's own plane
+      const d: N = p.sub(impact.hit);
+      const r: N = length(d);
+      const nl: N = normalLocal;
+      const t1: N = nl.cross(vec3(0, 1, 0)).normalize();
+      const t2: N = nl.cross(t1);
+      const a: N = atan(d.dot(t2), d.dot(t1));
+      const wob: N = nz(vec3(r.mul(7), a.mul(2), 0)).mul(0.22);
+      // spokes: ~17 main ones, thinner further out, reaching most of the pane
+      const spokeW: N = mix(float(0.06), float(0.012), smoothstep(float(0.0), float(0.5), r));
+      const spokes: N = (step(float(0.5).sub(spokeW), abs(fract(a.mul(17 / (2 * Math.PI)).add(wob)).sub(0.5))) as N).mul(smoothstep(float(0.95), float(0.35), r));
+      const fine: N = (step(float(0.485), abs(fract(a.mul(41 / (2 * Math.PI)).add(wob.mul(2.3)).add(0.37)).sub(0.5))) as N).mul(smoothstep(float(0.45), float(0.1), r));
+      let pattern: N;
+      if (impact.laminated) {
+        // laminated windscreen: a spider web (concentric rings between the spokes) and a crushed core
+        const rings: N = (step(float(0.44), abs(fract(r.mul(16).add(nz(vec3(a.mul(3), r.mul(3), 1)).mul(0.35))).sub(0.5))) as N).mul(smoothstep(float(0.32), float(0.05), r));
+        const core: N = smoothstep(float(0.045), float(0.015), r);
+        pattern = spokes.add(fine).add(rings).add(core);
+      } else {
+        // tempered side glass: a dice pattern that spreads out from the hit
+        const cells: N = step(abs(nz(p.mul(38))), float(0.028));
+        pattern = spokes.mul(0.6).add(cells.mul(smoothstep(float(0.38), float(0.04), r)).mul(0.8));
+      }
+      crack = pattern;
+    }
     const crazed: N = (clamp(crack, 0, 1) as N).mul(cracked as N);
+    if (physical) glass.normalNode = bumpMap(crazed.mul(0.0005));
     const wet: N = u.wet, burnt: N = u.burnt, br: N = broken;
     const lit: N = (mix(mix(color(0x0b0e10), color(0x5c6266), streak.mul(wet).mul(0.5)), color(0xa8aeb0), crazed.mul(0.75)) as N).mul(float(1).sub(burnt.mul(0.6)));
     glass.colorNode = mix(lit, color(0x050404), br);
@@ -207,13 +235,13 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
     return glass;
   };
   const panes = {
-    front: { cracked: fu(0), broken: fu(0) }, rear: { cracked: fu(0), broken: fu(0) },
-    left: { cracked: fu(0), broken: fu(0) }, right: { cracked: fu(0), broken: fu(0) },
+    front: { cracked: fu(0), broken: fu(0), hit: v3u() }, rear: { cracked: fu(0), broken: fu(0), hit: v3u() },
+    left: { cracked: fu(0), broken: fu(0), hit: v3u() }, right: { cracked: fu(0), broken: fu(0), hit: v3u() },
   };
   const glass = makeGlass(u.cracked, fu(0));
   const see = o.seeThroughGlass ?? false;
-  const glassF = makeGlass(panes.front.cracked, panes.front.broken, see), glassB = makeGlass(panes.rear.cracked, panes.rear.broken, see);
-  const glassL = makeGlass(panes.left.cracked, panes.left.broken, see), glassR = makeGlass(panes.right.cracked, panes.right.broken, see);
+  const glassF = makeGlass(panes.front.cracked, panes.front.broken, see, { hit: panes.front.hit, laminated: true }), glassB = makeGlass(panes.rear.cracked, panes.rear.broken, see, { hit: panes.rear.hit, laminated: true });
+  const glassL = makeGlass(panes.left.cracked, panes.left.broken, see, { hit: panes.left.hit, laminated: false }), glassR = makeGlass(panes.right.cracked, panes.right.broken, see, { hit: panes.right.hit, laminated: false });
   const lamp = (c: number, e: number) => { const m = withLodMask(new THREE.MeshStandardNodeMaterial({ color: c, roughness: 0.15, metalness: 0, emissive: e, emissiveIntensity: 0 })); owned.push(m); return m; };
   const seat = withLodMask(new THREE.MeshStandardNodeMaterial({ color: o.seat ?? 0x5a4632, roughness: 0.55, metalness: 0 })); // vinyl upholstery
   owned.push(seat);

@@ -1,12 +1,13 @@
 import * as THREE from 'three/webgpu';
 import type RAPIER from './rapier';
-import type { ModelAsset, Variant } from './assets';
+import { getHeroModel, type ModelAsset, type Variant } from './assets';
+import type { GeneratedModel } from './gen/body';
 import { createMaterialSet, type MaterialSet, type Quality } from './gen/materials';
 import { buildDecals, drawPlate } from './gen/decals';
 import { VehiclePhysics, type DriveInput } from './physics';
 import { Emitter } from './effects';
 import { ZONES, type Zone } from './gen/morphs';
-import { SLOTS, angleWeightedNormals } from './gen/builder';
+import { SLOTS, angleWeightedNormals, pw } from './gen/builder';
 import { FadeLOD } from './fadeLod';
 import { shadowBake, groundPlane, shadowMaterial, headPoolGeometry, groundLightMats, groundLightLevel, type LightCandidate, type Lightable } from './lighting';
 import { CLASS_MODELS, PROPOSED_CLASS_MODELS } from './registry';
@@ -69,6 +70,24 @@ const OWNER = new Map<number, Vehicle>();
 export function vehicleOfCollider(c: RAPIER.Collider | null | undefined): Vehicle | null { return c ? OWNER.get(c.handle) ?? null : null; }
 
 const MAX_HOLES = 48;
+const smoothstep01 = (t: number) => { const x = Math.min(1, Math.max(0, t)); return x * x * (3 - 2 * x); };
+
+/** How many cars besides the player get the hero mesh, per quality (phones: the player only). */
+export const HERO_RING: Record<Quality, number> = { low: 0, medium: 1, high: 3, ultra: 3 };
+/**
+ * Give the hero mesh to the player car (priority via isPlayer) and the nearest `n` others within
+ * 30 m, with hysteresis (a car leaves the ring past 38 m or when it drops two places).
+ */
+export function updateHeroRing(cars: readonly Vehicle[], cam: THREE.Vector3, n: number) {
+  // hero meshes are generated on first use (70–200 ms per model): promote at most one car per call
+  let budget = 1;
+  const ranked = cars.filter((c) => !c.isPlayer).map((c) => ({ c, d: c.object.position.distanceTo(cam) })).sort((a, b) => a.d - b.d);
+  for (const c of cars) if (c.isPlayer && !c.isHero && budget-- > 0) c.setHero(true);
+  ranked.forEach(({ c, d }, i) => {
+    if (c.isHero) { if (d > 38 || i >= n + 1) c.setHero(false); }
+    else if (d < 30 && i < n && budget-- > 0) c.setHero(true);
+  });
+}
 
 /**
  * One drivable vehicle: generated mesh + raycast physics + damage + per-instance state.
@@ -356,6 +375,53 @@ export class Vehicle implements Lightable {
     return { doors, dash: W(d.x * 0.6, d.y - 0.1, d.z - 0.55), trunk: W(0, this.asset.spec.beltY, g.maxZ + 0.5), hood: W(0, 1, g.minZ - 0.6) };
   }
 
+  /**
+   * Anchors for on-foot movement (docs/briefs/MOVEMENT.md), all in world space, refreshed per call:
+   *  - doors: per seat, where to stand to open the door (on the ground, facing the car), the
+   *    handle, the hinge edge, the seat, and where a carjacker stands to pull the occupant out
+   *    (and the direction the victim is thrown);
+   *  - surfaces: hood, roof, deck lid and cargo tops as oriented boxes with their top height and
+   *    the traversal they allow: 'vault' (0.5–1.2 m), 'climb' (1.2–2.2 m) or 'none' (too high).
+   *    Characters land on / vault over the box top; the physics collider is the car's own.
+   */
+  movementAnchors() {
+    this.object.updateMatrixWorld();
+    const M = this.object.matrixWorld;
+    const W = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z).applyMatrix4(M);
+    const q = new THREE.Quaternion().setFromRotationMatrix(M);
+    const sp = this.asset.spec, g = this.asset.lod0, gh = sp.gh, mid = sp.sF + sp.wheelbase / 2;
+    const ground = this.groundY; // mean wheel contact height (local y = 0 is the ground at rest)
+    const yawOf = (dx: number, dz: number) => Math.atan2(dx, dz);
+    const doors = this.seats.map((seat) => {
+      const st = this.seatLocal(seat), side = st.x < 0 ? -1 : 1;
+      const stand = W(side * (g.halfW + 0.45), 0, st.z + 0.15); stand.y = ground;
+      const jack = W(side * (g.halfW + 0.75), 0, st.z + 0.35); jack.y = ground;
+      const inward = new THREE.Vector3(-side, 0, 0).applyQuaternion(q);
+      return {
+        seat, side: side < 0 ? 'left' as const : 'right' as const,
+        stand, standYaw: yawOf(inward.x, inward.z),
+        handle: W(side * (g.halfW + 0.02), sp.beltY - 0.07, st.z + 0.45),
+        hinge: W(side * g.halfW, sp.beltY - 0.2, st.z - 0.55),
+        seatPose: this.seatPose(seat),
+        carjack: { stand: jack, throwDir: new THREE.Vector3(side, 0, 0.4).normalize().applyQuaternion(q) },
+        locked: this.security.locked,
+      };
+    });
+    const tops = (s: number) => pw(sp.top, s);
+    const kind = (h: number) => { return h < 0.5 ? 'step' as const : h <= 1.2 ? 'vault' as const : h <= 2.2 ? 'climb' as const : 'none' as const; };
+    const surfaces: { name: string; center: THREE.Vector3; halfExtents: THREE.Vector3; quaternion: THREE.Quaternion; top: number; kind: 'step' | 'vault' | 'climb' | 'none' }[] = [];
+    const add = (name: string, s0: number, s1: number, top: number, hw: number) => {
+      if (s1 - s0 < 0.25) return;
+      surfaces.push({ name, center: W(0, top - 0.05, (s0 + s1) / 2 - mid), halfExtents: new THREE.Vector3(hw, 0.05, (s1 - s0) / 2), quaternion: q.clone(), top: ground + top, kind: kind(top) });
+    };
+    const hw = g.halfW * 0.92;
+    if (!sp.cargo) add('hood', 0.1, gh.sA0 - 0.05, tops((0.1 + gh.sA0) / 2), hw);
+    add('roof', gh.sA1 + 0.05, gh.sC1 - 0.05, gh.roofY + gh.crown, gh.roofHalfW);
+    if (!sp.cargo && sp.cls !== 'wagon') add('deck', gh.sC0 + 0.1, sp.L - 0.08, tops((gh.sC0 + sp.L) / 2), hw);
+    for (const c of sp.cargo ?? []) if (!c.dressing) add(`cargo:${c.kind}`, c.s0, c.s1, c.y1, c.hw);
+    return { doors, surfaces };
+  }
+
   // ============================================================ theft & ignition
   unlock(method: 'key' | 'slimJim' = 'key') {
     if (!this.security.locked) return;
@@ -474,7 +540,7 @@ export class Vehicle implements Lightable {
       const pane: GlassPane = lp.z < ghF + 0.45 ? 'front' : lp.z > ghR - 0.35 ? 'rear' : lp.x < 0 ? 'left' : 'right';
       void zc;
       const st = this.components.glass[pane];
-      this.setGlass(pane, (st >= 1 ? 2 : 1) as 0 | 1 | 2, src);
+      this.setGlass(pane, (st >= 1 ? 2 : 1) as 0 | 1 | 2, src, lp);
       comp = `glass:${pane}`;
     }
     if (!comp) {
@@ -523,9 +589,19 @@ export class Vehicle implements Lightable {
     }
   }
 
-  private setGlass(pane: GlassPane, state: 0 | 1 | 2, source: string | null) {
+  /** Rough centre of each pane in body space (the crack origin when no impact point is known). */
+  private paneCentre(pane: GlassPane, out: THREE.Vector3) {
+    const sp = this.asset.spec, gh = sp.gh, mid = sp.sF + sp.wheelbase / 2;
+    const y = (sp.beltY + gh.roofY) / 2;
+    if (pane === 'front') return out.set(0, y, (gh.sA0 + gh.sA1) / 2 - mid);
+    if (pane === 'rear') return out.set(0, y, (gh.sC0 + gh.sC1) / 2 - mid);
+    return out.set((pane === 'left' ? -1 : 1) * (this.asset.lod0.halfW - 0.08), y, (gh.sA1 + gh.sC1) / 2 - mid);
+  }
+  private setGlass(pane: GlassPane, state: 0 | 1 | 2, source: string | null, localPoint?: THREE.Vector3) {
     const prev = this.components.glass[pane];
     if (state <= prev) return;
+    // the crack pattern radiates from the first hit on the pane
+    if (prev === 0) { const h = this.mats.panes[pane].hit.value as THREE.Vector3; if (localPoint) h.copy(localPoint); else this.paneCentre(pane, h); }
     this.components.glass[pane] = state;
     this.mats.panes[pane].cracked.value = state >= 1 ? 1 : 0;
     this.mats.panes[pane].broken.value = state >= 2 ? 1 : 0;
@@ -543,11 +619,13 @@ export class Vehicle implements Lightable {
     this.holes.count = 0; this.holeN = 0;
     if (this.dentGeo) {
       this.dentGeo.body.dispose(); this.dentGeo.hood?.dispose();
-      this.bodyMesh.geometry = this.asset.lod0.body;
+      const base = this.baseGeo();
+      this.bodyMesh.geometry = base.body;
       const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
-      if (hm && this.asset.lod0.hood) hm.geometry = this.asset.lod0.hood;
+      if (hm && base.hood) hm.geometry = base.hood;
       this.dentGeo = null;
     }
+    this.dentLog.length = 0;
     this.pendingDent = null;
     this.refreshDamage();
   }
@@ -764,45 +842,99 @@ export class Vehicle implements Lightable {
    * geometry is cloned on the first dent so other cars of the same model stay straight.
    */
   dent(point: { x: number; y: number; z: number }, amount: number, radius = 0.55) {
+    this.object.updateMatrixWorld();
+    const lp = this.object.worldToLocal(_v.set(point.x, point.y, point.z));
+    const d = { x: lp.x, y: lp.y, z: lp.z, amount, radius, seed: this.variant.seed * 13.1 + this.dentLog.length * 7.7 };
+    this.dentLog.push(d);
+    return this.applyDent(d);
+  }
+
+  /** Base (undented) body/hood geometry for the current detail level. */
+  private baseGeo() {
+    const h = this.hero;
+    return { body: h ? h.body : this.asset.lod0.body, hood: h ? h.hood : this.asset.lod0.hood };
+  }
+
+  private applyDent(dd: { x: number; y: number; z: number; amount: number; radius: number; seed: number }) {
     if (!this.dentGeo) {
-      const body = this.bodyMesh.geometry.clone();
+      const base = this.baseGeo();
+      const body = base.body.clone();
       this.bodyMesh.geometry = body;
       let hood: THREE.BufferGeometry | null = null;
       const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
-      if (hm) { hood = hm.geometry.clone(); hm.geometry = hood; }
+      if (hm && base.hood) { hood = base.hood.clone(); hm.geometry = hood; }
       this.dentGeo = { body, hood };
     }
-    const lp = this.object.worldToLocal(_v.set(point.x, point.y, point.z));
+    const { amount, radius, seed } = dd;
     const g = this.asset.lod0;
     // push toward the body's core (horizontal mostly: cars crumple, they don't flatten)
     const core = _v2.set(0, g.height * 0.45, (g.minZ + g.maxZ) / 2);
     const dirAt = (x: number, y: number, z: number, out: THREE.Vector3) => out.set(core.x - x, (core.y - y) * 0.35, core.z - z).normalize();
-    const seed = this.variant.seed * 13.1 + this.holeN;
-    const one = (geo: THREE.BufferGeometry, off: THREE.Vector3 | null) => {
+    // the wheel arches hold their shape (the wheels stay outside the dent): no deformation within
+    // the arch opening plus a 4 cm lip, full deformation 24 cm beyond it
+    const arches = g.wheels.map((w) => ({ z: w.z, y: w.y, r: w.r, side: w.side }));
+    const archHold = (x: number, y: number, z: number) => {
+      let k = 1;
+      for (const a of arches) {
+        if (x * a.side < 0.2) continue;
+        const dyz = Math.hypot(y - a.y, z - a.z);
+        k = Math.min(k, smoothstep01((dyz - (a.r + 0.06)) / 0.2));
+      }
+      return k;
+    };
+    const one = (geo: THREE.BufferGeometry) => {
       const pos = geo.getAttribute('position') as THREE.BufferAttribute;
       const r2 = radius * radius;
       const d = _v3;
       let moved = 0;
       for (let i = 0; i < pos.count; i++) {
-        let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-        if (off) { x += off.x; y += off.y; z += off.z; }
-        const dx = x - lp.x, dy = y - lp.y, dz = z - lp.z;
+        const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+        const dx = x - dd.x, dy = y - dd.y, dz = z - dd.z;
         const q = dx * dx + dy * dy + dz * dz;
         if (q > r2) continue;
         const f = 1 - Math.sqrt(q) / radius;
+        const hold = archHold(x, y, z);
+        if (hold <= 0) continue;
         const crumple = 0.75 + 0.5 * Math.sin(x * 23.7 + seed) * Math.sin(y * 19.3 - seed) * Math.sin(z * 17.9 + seed * 0.5);
         dirAt(x, y, z, d);
-        const k = amount * f * f * (3 - 2 * f) * crumple;
-        pos.setXYZ(i, pos.getX(i) + d.x * k, pos.getY(i) + d.y * k, pos.getZ(i) + d.z * k);
+        const k = amount * f * f * (3 - 2 * f) * crumple * hold;
+        pos.setXYZ(i, x + d.x * k, y + d.y * k, z + d.z * k);
         moved++;
       }
       if (moved) { pos.needsUpdate = true; angleWeightedNormals(geo); }
       return moved;
     };
-    let moved = one(this.dentGeo.body, null);
-    if (this.dentGeo.hood) moved += one(this.dentGeo.hood, null); // hood geometry is authored in body space
+    let moved = one(this.dentGeo.body);
+    if (this.dentGeo.hood) moved += one(this.dentGeo.hood); // hood geometry is authored in body space
     return moved;
   }
+
+  // ============================================================ hero detail (player + near ring)
+  private hero: GeneratedModel | null = null;
+  get isHero() { return !!this.hero; }
+  /**
+   * Swap LOD0 to the hero mesh (smooth curvature, 48-segment wheels with tread geometry, ~40k
+   * tris) or back. Dents are replayed on the new mesh. Use updateHeroRing() rather than calling
+   * this directly.
+   */
+  setHero(on: boolean) {
+    if (on === !!this.hero) return;
+    this.hero = on ? getHeroModel(this.asset.spec, this.variant) : null;
+    const g = this.hero ?? this.asset.lod0;
+    if (this.dentGeo) { this.dentGeo.body.dispose(); this.dentGeo.hood?.dispose(); this.dentGeo = null; }
+    this.bodyMesh.geometry = g.body;
+    this.bodyMesh.updateMorphTargets();
+    const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
+    if (hm && g.hood) { hm.geometry = g.hood; hm.updateMorphTargets(); }
+    this.wheelObjs.forEach((o, i) => {
+      const w = this.asset.lod0.wheels[i];
+      const lvl = o.lod.levels[0].object;
+      lvl.traverse((m) => { if ((m as THREE.Mesh).isMesh) (m as THREE.Mesh).geometry = w.side > 0 ? g.wheelR : g.wheelL; });
+    });
+    for (const d of this.dentLog) this.applyDent(d);
+    this.refreshDamage(true);
+  }
+  private dentLog: { x: number; y: number; z: number; amount: number; radius: number; seed: number }[] = [];
 
   private updateLightsAndFx(dt: number) {
     const ph = this.physics;
@@ -895,6 +1027,7 @@ export class Vehicle implements Lightable {
     for (const pane of ['front', 'rear', 'left', 'right'] as GlassPane[]) {
       const st = s.components.glass[pane];
       this.mats.panes[pane].cracked.value = st >= 1 ? 1 : 0; this.mats.panes[pane].broken.value = st >= 2 ? 1 : 0;
+      if (st) this.paneCentre(pane, this.mats.panes[pane].hit.value as THREE.Vector3);
     }
     if (this.stage === 'destroyed') this.mats.u.burnt.value = 1; else if (this.stage === 'burning') this.mats.u.burnt.value = Math.min(1, this.burnT / 10);
     const b = this.physics.body;
