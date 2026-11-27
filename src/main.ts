@@ -147,7 +147,7 @@ async function main() {
   // Parked cars on every kerb (sim 5): the sim places them by its kerb rules (hydrants, bus stops, corners,
   // no-standing hours, street cleaning); a second, static traffic renderer draws them.
   type TrafficR = ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']>;
-  let parked: TrafficR | null = null as TrafficR | null, parkedList: { vclass: string; variant: number; x: number; y: number; z: number; yaw: number; lights: number }[] = [];
+  let parked: TrafficR | null = null as TrafficR | null, parkedList: { id: number; vclass: string; variant: number; x: number; y: number; z: number; yaw: number; lights: number }[] = [];
   const parkedAt = { x: 1e9, z: 1e9, q: -1 };
   if (sim) void afterTitle.then(() => {
     const vf = createVehicleFactory({ quality: quality.name });
@@ -431,9 +431,8 @@ async function main() {
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const simFwd = new THREE.Vector3();
-  // in-view spawns stay beyond this (sim fe9ba45). Traffic has no fade yet, so it is where a pop is least
-  // visible: the box-impostor range on Low (vehicles lod2Distance 60 m); vehicles asked for a dithered fade-in
-  const simFade = quality.name === 'low' ? 60 : 80;
+  // in-view spawns stay beyond this (sim fe9ba45); traffic dithers in over 0.4 s (vehicles 028f6e3), so it can be close
+  const simFade = 45;
   let gpContext: string | null = null, ctxT = 0;
 
   // ---------------------------------------------------------------- loop
@@ -545,7 +544,7 @@ async function main() {
       if (Math.hypot(f.x - parkedAt.x, f.z - parkedAt.z) > 100 || quarter !== parkedAt.q) {
         Object.assign(parkedAt, { x: f.x, z: f.z, q: quarter });
         const R = quality.name === 'low' ? 160 : 260;
-        parkedList = sim.parkedCars(f.x, f.z, R).map((c) => ({ vclass: c.vclass as string, variant: c.variant, x: c.x, y: heightAt(c.x, c.z), z: c.z, yaw: c.yaw, lights: 0 }));
+        parkedList = sim.parkedCars(f.x, f.z, R).map((c) => ({ id: Math.round(c.x * 10) * 100003 + Math.round(c.z * 10), vclass: c.vclass as string, variant: c.variant, x: c.x, y: heightAt(c.x, c.z), z: c.z, yaw: c.yaw, lights: 0 }));
       }
       parked.setInstances(parkedList as never, camera.position);
     }
