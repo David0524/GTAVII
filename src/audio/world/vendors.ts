@@ -42,7 +42,7 @@ const TYPES: Record<VendorType, TypeSpec> = {
   coffee_cart: { call: 'coffee', callEvery: 30, cart: true, loops: [{ family: 'vendor.steam', gain: 0.12, rate: 1.15 }] },
   fruit_stand: { call: 'fruit', callEvery: 60, cart: false, loops: [] },
   flower_stand: { call: 'flowers', callEvery: 60, cart: false, loops: [] },
-  newsstand: { call: 'news', callEvery: 45, cart: false, loops: [], fx: { family: 'foley.cloth', every: 14, gain: 0.18 } },
+  newsstand: { call: 'news', callEvery: 45, cart: false, loops: [], fx: { family: 'paper.crumple', every: 12, gain: 0.2 } },
   shoeshine: { call: 'shine', callEvery: 55, cart: false, loops: [], fx: { family: 'vendor.rag', every: 9, gain: 0.3, burst: 4 } },
   peddler: { call: 'peddler', callEvery: 40, cart: false, loops: [] },
   monte: { call: 'monte', callEvery: 22, cart: false, loops: [] },

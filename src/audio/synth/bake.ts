@@ -163,6 +163,8 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number; v
     for (let t = 0.3; t < 2.2; t += r.range(0.03, 0.08)) modal(o, sr, r, t, [[r.range(2200, 3200), 0.01, 0.06 * (1 - t / 2.4)]], 0.0004); // a can rolling away
     return fadeOut(normalize(o, 0.85), sr);
   } },
+  /** Paper: a wrapper crumpled and dropped, or newsprint handled (dense crinkle clicks, 2-7 kHz). */
+  'paper.crumple': { dur: 0.6, bake: (s, sr) => { const r = new Rng(s), o = len(0.6, sr), bp = new Biquad().set('bp', 4200, 0.8, sr); const env = (t: number) => Math.exp(-Math.pow((t - 0.2) / 0.16, 2)); for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = bp.run(r.bi()) * 0.08 * env(t) + (r.next() < 0.004 * env(t) ? r.bi() * 0.9 : 0); } const hp = new OnePole(1800, sr); for (let i = 0; i < o.length; i++) o[i] = hp.hp(o[i]); return fadeOut(normalize(o, 0.55), sr); } },
   /** Shoeshine rag snap. */
   'vendor.rag': { variants: 3, dur: 0.25, bake: (s, sr) => { const r = new Rng(s), o = len(0.25, sr), bp = new Biquad().set('bp', 2600, 0.9, sr); for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = bp.run(r.bi()) * Math.exp(-Math.abs(t - 0.04) / 0.012); } return fadeOut(normalize(o, 0.6), sr); } },
   // ---------------------------------------------------------------- movement set (docs/briefs/MOVEMENT.md)

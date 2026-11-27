@@ -71,6 +71,11 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     else if (act === 'knockOver') { sim.fire('vendorAct', { id, pedId: -1, act: 'right_cart' }); const w = sim.vendorViews.find((q) => q.id === id); if (w) { w.open = false; w.state = 'righting'; } void p; }
     else if (act === 'move') pushing.add(id); else if (act === 'stop') pushing.delete(id);
   };
+  /** Fire a raw sim event at an offset from the listener's start (bumps, litter, monte scatter). Strings in params: none needed. */
+  const simEvent = (type: string, off: [number, number] = [0, 0], p: Record<string, number> = {}) => {
+    const KINDS = ['brush', 'stumble', 'knockdown'], RESP = ['none', 'annoyed', 'angry', 'frightened'];
+    sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', dirX: 1, dirZ: 0, by: 'ped' });
+  };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
   const listener = () => ({ position: [x, heightAt(x, z) + 1.8, z] as [number, number, number], forward: [st.dx, 0, st.dz] as [number, number, number], up: [0, 1, 0] as [number, number, number], velocity: [st.dx * sc.walk, 0, st.dz * sc.walk] as [number, number, number] });
@@ -85,7 +90,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   };
   for (let k = 1; k <= frames; k++) {
     const t = k * step;
-    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
+    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : e.play.startsWith('sim:') ? simEvent(e.play.slice(4), e.offset, e.params) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
   }
   sys.update(step, listener());
   const t0 = performance.now();

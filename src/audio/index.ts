@@ -22,6 +22,7 @@ import { CityMap, weekday } from './world/cityMap';
 import { Ambience, runAudioTimers, clearAudioTimers, setTimeoutAudio } from './world/ambience';
 import { VehicleAudio, type AttachedVehicle, type SimLike } from './vehicles/vehicles';
 import { Footsteps } from './world/footsteps';
+import { CrowdReactions } from './world/crowdReactions';
 import { Vendors, type VendorHandle, type VendorType } from './world/vendors';
 import { RadioSystem } from './radio/radio';
 import type { StationDef } from './radio/stations';
@@ -53,6 +54,7 @@ export class AudioSystem {
   private vehicles!: VehicleAudio;
   private footsteps: Footsteps | null = null;
   private vendors!: Vendors;
+  private crowd!: CrowdReactions;
   private sim: SimLike | null = null;
   private power = new Map<string, Power>();
   private canyonT = 0; private preloadT = 0;
@@ -108,6 +110,7 @@ export class AudioSystem {
       setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true); });
     });
     this.vendors = new Vendors(env, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions));
+    this.crowd = new CrowdReactions(env, () => this.footsteps, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions), this.baseUrl); this.crowd.contentEnabled = this.useContent;
     this.radio = { setStation: (id) => radio.setStation(id), get stations() { return radio.stations.map((s) => ({ id: s.id, name: s.name })); }, system: radio };
     this.dialogue = { play: (s, l, at, o) => dlg.play(s, l, at, o), on: (t, cb) => dlg.on(t, cb), overhear: (o) => dlg.overhear(o), registerScript: (s) => dlg.registerScript(s), bark: (t, at, sp, sub) => dlg.bark(t, at, sp, sub), system: dlg };
   }
@@ -142,7 +145,7 @@ export class AudioSystem {
     await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic'), this.bank.loadGroup('movement')]);
     this.ambience = new Ambience(this.env, REGION, this.radio.system);
     this.footsteps = new Footsteps(this.env, this.ambience.subway.gratings);
-    this.vendors.groundFn = heightAt;
+    this.vendors.groundFn = heightAt; this.crowd.ground = heightAt;
     this.roomTone = new RoomTone(this.env, this.radio.system);
     this.ambience.start(); this.vehicles.start();
     if (this.sim) this.vehicles.bindSim(this.sim);
@@ -251,7 +254,7 @@ export class AudioSystem {
   attachVehicle(v: AttachedVehicle, profile: string): () => void { return this.vehicles.attach(v, profile); }
 
   /** Sim feed: traffic/peds for vehicles and footsteps, and street-vendor events (sim src/sim/vendors.ts). */
-  bindSim(sim: SimLike) { this.sim = sim; this.vendors.bindSim(sim); if (this.loaded) this.vehicles.bindSim(sim); }
+  bindSim(sim: SimLike) { this.sim = sim; this.vendors.bindSim(sim); this.crowd.bindSim(sim); if (this.loaded) this.vehicles.bindSim(sim); }
 
   /**
    * Street vendor (docs/briefs/STREET_VENDORS.md): type from content/vendors.json ('hot_dog', 'nut_roaster',
@@ -314,7 +317,7 @@ export class AudioSystem {
   get stats() {
     return {
       state: this.runtime.state, voices: { ...this.vm?.stats }, mixer: { ...this.mixer?.stats }, bank: { ...this.bank?.stats, budget: this.bank?.budgetBytes, noiseBytes: this.noise ? noiseBytes(this.noise) : 0 },
-      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats },
+      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats }, crowd: { ...this.crowd?.stats },
       dialogue: this.dialogue?.system.stats, speech: this.voiceLib?.stats, radioFeeds: this.radio?.system.activeFeeds, geo: this.geo.stats, timing: { ...this.timing, samples: undefined }, load: this.loadStats,
       emitters: this.ambience?.emitterCounts(), outputLatency: (this.runtime.ctx as AudioContext).outputLatency ?? 0, baseLatency: (this.runtime.ctx as AudioContext).baseLatency ?? 0,
     };

@@ -127,6 +127,7 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
   - sales: vendorServed, vendorAct serve;
   - knock-overs: vendorAct right_cart, which is the sim's answer to the `cartOverturned` notice;
   - reactions: vendorCower, vendorFled, vendorRecovered.
+- Also from the bound sim: pedBumped, pedGotUp, litter (sidewalk reactions); nothing to wire.
 - **Two optional extras:**
   - Physics: when a cart tips, call `audio.vendor` handles' `knockOver(impulse)` for impulse-scaled crashes. A duplicate within 2 s of the sim's report is ignored.
   - Ice-cream truck: the sim doesn't own it. Use `const h = audio.vendor(id, 'ice_cream_truck', at)` with `h.move(at, speed)` and `h.remove()`.

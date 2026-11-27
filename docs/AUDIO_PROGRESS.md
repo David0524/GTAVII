@@ -235,6 +235,14 @@ All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2
   - vendorServed / vendorAct serve → change; vendorAct right_cart → the knock-over;
   - vendorCower / vendorFled → a scared line; vendorRecovered → reopen.
   The test scene drives these through the mock sim's events, the same path as the real sim.
+- **Sidewalk reactions (sim 66e9453, `world/crowdReactions.ts`):**
+  - pedBumped: body foley by kind (a coat brush; a stumble with scuffs; a knockdown onto the pavement).
+    It also plays a line from the pedestrian's own bark pool (archetype → `barks` in content/npc_archetypes), context
+    `collision`, matched to the response: angry → angry; annoyed → annoyed/brisk; frightened → startled/hurt/worried.
+    It falls back to any collision line. At most one bump line every 3 s, half of brushes are silent, within 25 m.
+  - pedGotUp: cloth and scuffs. litter: a new self-made `paper.crumple` (also the newsstand's page sound).
+  - monteScatter: the lookout's shout, then four sets of running feet fanning out.
+  - Signal chirps: not added, since 1974 NYC had no accessible pedestrian signals (agreeing with sim's note).
 - **API:** `audio.vendor(id, type, at)` returns a handle: `sale()`, `knockOver(impulse)`, `reopen()`, `move(at, speed)`,
   `react('danger'|'traffic')`, `remove()`. Wiring is ENGINE_REQUESTS "From audio: 12".
 - **Per type (from content/vendors.json):**
