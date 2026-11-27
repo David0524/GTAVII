@@ -6,6 +6,7 @@ import { qualityFromUrl } from '../../engine/quality';
 import { Input } from '../../input/Input';
 import { TouchControls } from '../../ui/TouchControls';
 import { DebugHud, FrameStats } from '../../engine/debug/DebugHud';
+import { renderThumbnailBlob } from '../thumbnail';
 import { createVehicleFactory, setVehicleViewCamera, updateHeroRing, HERO_RING, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
@@ -525,6 +526,11 @@ export async function runTestLot() {
       await Promise.all([player, ...parked].map((v) => v.prefetchHero().catch(() => undefined)));
       for (let k = 0; k < 8; k++) prerender();
       return heroGenTimes.slice();
+    },
+    /** UI thumbnail (renderThumbnailBlob) as a data URL, for the shot rig. */
+    async thumb(id: string, paint: number | null, angle: 'side' | 'three-quarter') {
+      const b = await renderThumbnailBlob(renderer, id, paint, angle);
+      return await new Promise<string>((res) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.readAsDataURL(b); });
     },
     /** 0 = afternoon, 1 = night. */
     setNight, get night() { return night; }, carLights,

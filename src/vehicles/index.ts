@@ -40,6 +40,7 @@ export { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS, type AssistSettings } from 
 export { VendorProps, type VendorView, type CartHitEvent, type CartTippedEvent, type CartMovedEvent } from './props/VendorProps';
 export { VENDOR_SPECS, type VendorPropId } from './props/vendorModels';
 export { brandFor, type VendorBrand } from './props/brands';
+export { renderThumbnail, renderThumbnailBlob, type ThumbAngle, type ThumbOptions } from './thumbnail';
 export { CarLightPool, updateCarLights, setGroundLightLevel, LIGHT_BUDGET, type LightCandidate, type Lightable } from './lighting';
 import type { LightCandidate } from './lighting';
 import { FadeLOD } from './fadeLod';

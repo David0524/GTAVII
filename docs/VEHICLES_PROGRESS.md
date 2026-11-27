@@ -214,6 +214,17 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - **For Sim:** a shoved cart that stays upright and settles more than 0.25 m away emits
     `cartMoved {id, prop, x, z, yaw}`, which feeds `sim.vendorCartMoved`.
 
+- **UI thumbnails (for workstream 9):** `renderThumbnail(renderer, modelId, paint | null, 'side' |
+  'three-quarter', { width = 640, height = 280, variant, quality })` returns a Promise of an
+  ImageBitmap; `renderThumbnailBlob(...)` returns a WebP Blob. Both are in `src/vehicles/thumbnail.ts`
+  and exported from `src/vehicles/index.ts`.
+  - Renders the real LOD0 mesh off-screen with the game's renderer (WebGPU or WebGL backend):
+    transparent background, neutral three-point light plus a small studio environment, framed
+    to the bounding box. Pixels are read back asynchronously.
+  - Cached per model / paint / angle / size.
+  - 3–5 s each under SwiftShader (software); expect tens of ms on a GPU. WebP is 5–11 KB.
+  - Shot: `ui_thumbnails.jpg` (on a checkerboard).
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
