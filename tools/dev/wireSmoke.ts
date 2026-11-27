@@ -22,7 +22,7 @@ try {
   page.setDefaultTimeout(240_000);
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') logs.push(`${m.type()}: ${m.text()}`); });
   page.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
-  await page.goto(`http://localhost:${PORT}/?webgl=1&quality=low&time=12:30&timescale=0&${view}${extra}`);
+  await page.goto(`http://localhost:${PORT}/?webgl=1&quality=low&timescale=0&${view}${extra.includes("time=") ? "" : "&time=12:30"}${extra}`);
   await page.waitForFunction(() => (window as any).__T74);
   await page.evaluate(() => (window as any).__T74.whenIdle());
   await page.waitForFunction(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'sim')); await page.waitForFunction(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'characters'));
