@@ -55,6 +55,12 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   sim.density = sc.traffic; sim.pedDensity = sc.peds;
   for (let k = 0; k < 900; k++) sim.update(0.1, { x: st.x, z: st.z }, sc.clock.minutes / 60); // warm up 90 s
   sys.bindSim(sim);
+  const vendors = new Map((sc.vendors ?? []).map((v) => [v.id, { h: sys.vendor(v.id, v.type, [st.x + v.offset[0], heightAt(st.x + v.offset[0], st.z + v.offset[1]), st.z + v.offset[1]]), v }]));
+  const vendorEvent = (e: string, p?: Record<string, number>) => {
+    const [, id, act] = e.split(':'); const v = vendors.get(id); if (!v) return;
+    const pos = (): [number, number, number] => [st.x + v.v.offset[0], 0, st.z + v.v.offset[1]];
+    if (act === 'sale') v.h.sale(); else if (act === 'knockOver') v.h.knockOver(p?.impulse); else if (act === 'move') v.h.move(pos(), 1.1); else if (act === 'stop') v.h.move(pos(), 0);
+  };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
   const listener = () => ({ position: [x, heightAt(x, z) + 1.8, z] as [number, number, number], forward: [st.dx, 0, st.dz] as [number, number, number], up: [0, 1, 0] as [number, number, number], velocity: [st.dx * sc.walk, 0, st.dz * sc.walk] as [number, number, number] });
@@ -68,7 +74,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   };
   for (let k = 1; k <= frames; k++) {
     const t = k * step;
-    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.abs(e.t - t) < step / 2) sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
+    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
   }
   sys.update(step, listener());
   const t0 = performance.now();

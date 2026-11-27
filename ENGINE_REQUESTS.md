@@ -118,3 +118,18 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
 - **Why:** keeps ~35 MB per narrative revision out of git, keeps GPL code out of the shipped game, and
   keeps preview deploys fast across branches.
 - **Fallback:** without renders, lines play the formant placeholder voice with correct subtitle timing.
+
+## From audio: 12. Street vendors: register carts and forward their events
+- **What:** when the sim places a vendor (types from `content/vendors.json`, plus `ice_cream_truck`), call
+  `const h = audio.vendor(id, type, [x, y, z])` and keep the handle. Forward these calls:
+  - `h.sale()` on a purchase (change on the counter);
+  - `h.knockOver(impulse)` when physics tips the cart (impulse in N·s: the crash, spilled goods, cooking stops, the vendor shouts);
+  - `h.reopen()` when the cart is righted;
+  - `h.move([x, y, z], speed)` while the cart is pushed or the truck drives (wheels rattle above 0.3 m/s);
+  - `h.react('danger' | 'traffic')` for gunfire or a near miss nearby;
+  - `h.remove()` at despawn or closing time.
+- **Why:** audio can't see sim vendors. Everything else (loops within 40 m, calls from narrative's
+  `barks/vendor_calls.json` with the build-time voices, bells, chimes) runs inside audio.
+- **Cost:** ≤3 looping voices near the listener, otherwise scheduled one-shots; measured on the
+  `vendor_corner` scene, update p95 0.8 ms on High.
+- **Fallback:** without the calls, no vendor audio plays (nothing breaks).

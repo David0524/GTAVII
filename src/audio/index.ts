@@ -22,6 +22,7 @@ import { CityMap, weekday } from './world/cityMap';
 import { Ambience, runAudioTimers, clearAudioTimers, setTimeoutAudio } from './world/ambience';
 import { VehicleAudio, type AttachedVehicle, type SimLike } from './vehicles/vehicles';
 import { Footsteps } from './world/footsteps';
+import { Vendors, type VendorHandle, type VendorType } from './world/vendors';
 import { RadioSystem } from './radio/radio';
 import type { StationDef } from './radio/stations';
 import { stationsFromNarrative } from './radio/narrative';
@@ -34,6 +35,7 @@ import { loadTerrain } from '../shared/terrain';
 import type { Env, OneShotOpts, Power, Weather } from './env';
 
 export type { Vec3, BusId, QualityName };
+export type { VendorHandle, VendorType } from "./world/vendors";
 
 const AMBIENT_CATS = new Set<Category>(['animal', 'emitter', 'subway', 'weather', 'bed']);
 
@@ -50,6 +52,7 @@ export class AudioSystem {
   private ambience: Ambience | null = null;
   private vehicles!: VehicleAudio;
   private footsteps: Footsteps | null = null;
+  private vendors!: Vendors;
   private sim: SimLike | null = null;
   private power = new Map<string, Power>();
   private canyonT = 0; private preloadT = 0;
@@ -104,6 +107,7 @@ export class AudioSystem {
       if (!e.pool || !e.context || !e.at) return; const at = e.at;
       setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true); });
     });
+    this.vendors = new Vendors(env, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions));
     this.radio = { setStation: (id) => radio.setStation(id), get stations() { return radio.stations.map((s) => ({ id: s.id, name: s.name })); }, system: radio };
     this.dialogue = { play: (s, l, at, o) => dlg.play(s, l, at, o), on: (t, cb) => dlg.on(t, cb), overhear: (o) => dlg.overhear(o), registerScript: (s) => dlg.registerScript(s), bark: (t, at, sp, sub) => dlg.bark(t, at, sp, sub), system: dlg };
   }
@@ -176,7 +180,7 @@ export class AudioSystem {
     this.radio.system.update(dt); lap('radio');
     this.ambience?.update(dt); lap('ambience');
     this.vehicles.update(dt); lap('vehicles');
-    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); lap('footsteps');
+    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); this.vendors.update(dt); lap('footsteps');
     this.vm.update(listener, dt); lap('voices');
     const ms = performance.now() - t0;
     this.timing.updateMs = ms; this.timing.updateMaxMs = Math.max(this.timing.updateMaxMs, ms); this.timing.frames++; this.timing.sumMs += ms;
@@ -247,6 +251,12 @@ export class AudioSystem {
 
   bindSim(sim: SimLike) { this.sim = sim; if (this.loaded) this.vehicles.bindSim(sim); }
 
+  /**
+   * Street vendor (docs/briefs/STREET_VENDORS.md): type from content/vendors.json ('hot_dog', 'nut_roaster',
+   * 'italian_ice', 'shoeshine'...) or 'ice_cream_truck'. Returns a handle for sale / knockOver / move / react / remove.
+   */
+  vendor(id: string, type: VendorType, at: Vec3): VendorHandle { return this.vendors.add(id, type, at); }
+
   /** Footstep from the characters' animation events (player or NPC). */
   footstep(e: Parameters<Footsteps['footstep']>[0]) { this.footsteps?.footstep(e); }
 
@@ -302,7 +312,7 @@ export class AudioSystem {
   get stats() {
     return {
       state: this.runtime.state, voices: { ...this.vm?.stats }, mixer: { ...this.mixer?.stats }, bank: { ...this.bank?.stats, budget: this.bank?.budgetBytes, noiseBytes: this.noise ? noiseBytes(this.noise) : 0 },
-      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats,
+      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats },
       dialogue: this.dialogue?.system.stats, speech: this.voiceLib?.stats, radioFeeds: this.radio?.system.activeFeeds, geo: this.geo.stats, timing: { ...this.timing, samples: undefined }, load: this.loadStats,
       emitters: this.ambience?.emitterCounts(), outputLatency: (this.runtime.ctx as AudioContext).outputLatency ?? 0, baseLatency: (this.runtime.ctx as AudioContext).baseLatency ?? 0,
     };
@@ -316,7 +326,7 @@ export class AudioSystem {
   /** Release every node and listener. After this the instance is dead. */
   dispose(closeContext = true) {
     this.loaded = false;
-    this.ambience?.dispose(); this.roomTone?.dispose(); this.vehicles?.dispose(); this.radio?.system.dispose(); this.dialogue?.system.dispose();
+    this.ambience?.dispose(); this.roomTone?.dispose(); this.vendors?.dispose(); this.vehicles?.dispose(); this.radio?.system.dispose(); this.dialogue?.system.dispose();
     this.vm?.disposeAll(); this.mixer?.dispose(); this.bank?.dispose();
     clearAudioTimers(this.runtime.ctx);
     if (closeContext) this.runtime.dispose();

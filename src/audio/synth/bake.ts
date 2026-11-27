@@ -28,7 +28,8 @@ function modal(out: Float32Array, sr: number, r: Rng, at: number, modes: [number
   }
 }
 
-export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number }> = {
+/** `variants`: cap on baked variants (memory) for sounds where repetition is natural or rate jitter covers it. */
+export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number; variants?: number }> = {
   /** Car door: heavy panel thump, latch clack, a little window-glass rattle. */
   'door.slam': { dur: 0.6, bake: (s, sr) => {
     const r = new Rng(s), o = len(0.6, sr), lp = new OnePole(260, sr), b = new Brown(r);
@@ -124,6 +125,46 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number }>
   'step.park': { dur: 0.25, bake: (s, sr) => step(s, sr, 2600, 0.02, 0.8, 2) },
   'step.wood': { dur: 0.25, bake: (s, sr) => step(s, sr, 700, 0.02, 0.2, 3) },
   'step.tile': { dur: 0.2, bake: (s, sr) => step(s, sr, 2000, 0.008, 0.2, 4) },
+  // ---------------------------------------------------------------- street vendors (docs/briefs/STREET_VENDORS.md)
+  /** Hot-dog cart: pot of franks at a simmer (bubbles) and steam hiss. Loopable. */
+  'vendor.steam': { variants: 1, dur: 3, bake: (s, sr) => {
+    const r = new Rng(s), o = len(3, sr), hp = new OnePole(1500, sr), lp = new OnePole(6000, sr);
+    for (let i = 0; i < o.length; i++) o[i] = lp.lp(hp.hp(r.bi())) * (0.12 + 0.05 * Math.sin(i / sr * 1.7));
+    for (let k = 0; k < 55; k++) { const f = r.range(250, 700); const m = new Mode(); m.start(f, r.range(0.02, 0.06), r.range(0.1, 0.35), sr, 4); const i0 = Math.floor(r.next() * (o.length - sr * 0.1)); for (let i = i0; i < o.length && m.alive; i++) o[i] += m.run(); }
+    return loopify(normalize(o, 0.6), sr);
+  } },
+  /** Onions on the griddle: dense fat crackle over a sizzle bed. Loopable. */
+  'vendor.sizzle': { variants: 1, dur: 3, bake: (s, sr) => {
+    const r = new Rng(s), o = len(3, sr), bp = new Biquad().set('bp', 5500, 0.7, sr);
+    for (let i = 0; i < o.length; i++) o[i] = bp.run(r.bi()) * 0.18 * (0.8 + 0.2 * r.next());
+    for (let k = 0; k < 600; k++) modal(o, sr, r, r.next() * 2.95, [[r.range(2500, 9000), r.range(0.0008, 0.003), r.range(0.05, 0.4)]], 0.0002);
+    return loopify(normalize(o, 0.6), sr);
+  } },
+  /** Nut roaster: tumbling drum and the charcoal tray. Loopable. */
+  'vendor.roaster': { variants: 1, dur: 3, bake: (s, sr) => {
+    const r = new Rng(s), o = len(3, sr); for (let t = 0; t < 2.9; t += r.range(0.02, 0.07)) modal(o, sr, r, t, [[r.range(1800, 4200), 0.006, r.range(0.05, 0.25)]], 0.0004);
+    const lp = new OnePole(900, sr); for (let i = 0; i < o.length; i++) o[i] += lp.lp(r.bi()) * 0.08 * (1 + Math.sin(2 * Math.PI * 1.2 * i / sr) * 0.3);
+    return loopify(normalize(o, 0.55), sr);
+  } },
+  /** Italian-ice / ice-cream hand bell: three shakes of a brass bell (generic bell modes). */
+  'vendor.bell': { variants: 2, dur: 1.6, bake: (s, sr) => { const r = new Rng(s), o = len(1.6, sr); const f = r.range(1150, 1400); for (let k = 0; k < 6; k++) modal(o, sr, r, k * r.range(0.09, 0.12), [[f, 0.5, 0.5], [f * 2.32, 0.25, 0.25], [f * 4.1, 0.1, 0.12]], 0.0006); return fadeOut(normalize(o, 0.7), sr); } },
+  /**
+   * Ice-cream truck chime: an ORIGINAL four-note motif on music-box tines (no existing jingle; the
+   * famous truck tunes are protected and recognisable). Intervals chosen here: 5-3-8-6 of a major scale.
+   */
+  'vendor.chime': { variants: 1, dur: 2.6, bake: (s, sr) => { const r = new Rng(s), o = len(2.6, sr); const root = 1046.5; const deg = [7, 4, 12, 9]; deg.forEach((d, k) => { const f = root * Math.pow(2, d / 12); modal(o, sr, r, k * 0.42, [[f, 0.9, 0.5], [f * 3.0, 0.3, 0.12], [f * 5.4, 0.1, 0.05]], 0.0005); }); return fadeOut(normalize(o, 0.65), sr); } },
+  /** Making change: coins onto a tin counter, a bill, the cash-box lid. */
+  'vendor.change': { variants: 3, dur: 0.9, bake: (s, sr) => { const r = new Rng(s), o = len(0.9, sr); for (let k = 0; k < 4; k++) modal(o, sr, r, 0.05 + k * r.range(0.05, 0.1), [[r.range(3800, 5200), 0.1, 0.35], [r.range(7000, 9000), 0.05, 0.15]], 0.0004); const hp = new OnePole(2500, sr); for (let i = Math.round(sr * 0.45); i < sr * 0.6; i++) o[i] += hp.hp(r.bi()) * 0.15; modal(o, sr, r, 0.72, [[r.range(600, 800), 0.05, 0.4], [r.range(1500, 1900), 0.03, 0.2]], 0.002); return fadeOut(normalize(o, 0.7), sr); } },
+  /** Cart knocked over: tray and lid clang, cans and bottles rolling, produce thudding. */
+  'vendor.spill': { variants: 3, dur: 2.4, bake: (s, sr) => {
+    const r = new Rng(s), o = len(2.4, sr);
+    modal(o, sr, r, 0, [[r.range(180, 240), 0.35, 1], [r.range(520, 640), 0.25, 0.6], [r.range(1300, 1600), 0.15, 0.35], [r.range(2900, 3400), 0.08, 0.2]], 0.003);
+    for (let k = 0; k < 14; k++) { const t0 = r.range(0.05, 1.8); if (r.next() < 0.5) modal(o, sr, r, t0, [[r.range(900, 2600), 0.08, r.range(0.1, 0.3)]], 0.0008); else body(o, sr, r, t0, r.range(0.1, 0.3)); }
+    for (let t = 0.3; t < 2.2; t += r.range(0.03, 0.08)) modal(o, sr, r, t, [[r.range(2200, 3200), 0.01, 0.06 * (1 - t / 2.4)]], 0.0004); // a can rolling away
+    return fadeOut(normalize(o, 0.85), sr);
+  } },
+  /** Shoeshine rag snap. */
+  'vendor.rag': { variants: 3, dur: 0.25, bake: (s, sr) => { const r = new Rng(s), o = len(0.25, sr), bp = new Biquad().set('bp', 2600, 0.9, sr); for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = bp.run(r.bi()) * Math.exp(-Math.abs(t - 0.04) / 0.012); } return fadeOut(normalize(o, 0.6), sr); } },
   // ---------------------------------------------------------------- movement set (docs/briefs/MOVEMENT.md)
   /** Granite kerb: hard, bright heel click with a short stone ring. */
   'step.granite': { dur: 0.2, bake: (s, sr) => { const o = step(s, sr, 2400, 0.006, 0.15, 0); const r = new Rng(s + 1); modal(o, sr, r, 0.001, [[r.range(3200, 4200), 0.008, 0.25], [r.range(1700, 2100), 0.012, 0.2]], 0.0004); return fadeOut(normalize(o, 0.7), sr); } },
@@ -289,6 +330,13 @@ function step(s: number, sr: number, f: number, dec: number, grit: number, kind:
   // low body thump of the heel
   const lp2 = new OnePole(180, sr); for (let i = 0; i < Math.min(o.length, sr * 0.04); i++) o[i] += lp2.lp(r.bi()) * (1 - i / (sr * 0.04)) * 0.8;
   return fadeOut(normalize(o, 0.7), sr);
+}
+
+/** Crossfade a sound's tail into its head so it loops seamlessly (length shrinks by `xf` seconds). */
+function loopify(x: Float32Array, sr: number, xf = 0.25): Float32Array {
+  const n = Math.round(xf * sr), m = x.length - n, y = x.slice(0, m);
+  for (let i = 0; i < n; i++) { const a = i / n; y[i] = x[i] * a + x[m + i] * (1 - a); }
+  return y;
 }
 
 /** Fabric rustle: bursts of band-passed noise with a slow swish envelope. */

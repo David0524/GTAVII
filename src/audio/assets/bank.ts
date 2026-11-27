@@ -12,6 +12,7 @@ import { Rng } from '../worklets/dsp';
 export const GROUPS: Record<string, string[]> = {
   boot: ['ui.move', 'ui.select', 'ui.back', 'ui.map', 'ui.switch', 'ui.pickup', 'ui.coins', 'step.concrete', 'step.asphalt', 'step.grating', 'step.park', 'door.slam', 'impact.light', 'signal.click', 'whistle.hail', 'brake.squeal', 'manhole.clank', 'drip'],
   traffic: ['impact.heavy', 'glass', 'bus.door'],
+  vendors: ['vendor.steam', 'vendor.sizzle', 'vendor.roaster', 'vendor.bell', 'vendor.chime', 'vendor.change', 'vendor.spill', 'vendor.rag', 'cart.rattle'],
   movement: ['step.granite', 'step.subwaytile', 'step.stoop', 'step.iron', 'step.rung', 'step.gravel', 'fence.rattle', 'foley.cloth', 'foley.vault', 'foley.climb', 'foley.land', 'foley.roll', 'foley.ragdoll'],
   interior: ['step.wood', 'step.tile', 'phone.ring'],
   garment: ['cart.rattle', 'dock.bang', 'jackhammer', 'truck.compactor'],
@@ -77,7 +78,7 @@ export class AssetBank {
     if (!buffers.length) {
       const b = BAKERS[family]; if (!b) return;
       const sr = HI_RATE.test(family) ? 44100 : 32000;
-      const n = b.dur > LONG ? Math.min(2, this.variants) : this.variants;
+      const n = Math.min(b.variants ?? Infinity, b.dur > LONG ? Math.min(2, this.variants) : this.variants);
       const datas = await Promise.all(Array.from({ length: n }, (_, k) => this.bake(family, 1000 + k * 7919 + family.length, sr)));
       for (const d of datas) { const ab = this.ctx.createBuffer(1, d.length, sr); ab.copyToChannel(d as Float32Array<ArrayBuffer>, 0); buffers.push(ab); }
       this.stats.baked += n;

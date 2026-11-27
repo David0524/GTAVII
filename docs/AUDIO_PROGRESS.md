@@ -219,6 +219,41 @@ Self-made (baked synthesis, logged in AUDIO_SOURCES.md), preloaded as group `mov
 - Honest note: synthesised foley is credible for metal, stone and gravel; cloth and body thuds are the
   weakest (they read as "filtered noise" up close).
 
+## Street vendors (STREET_VENDORS.md, 2026-11-27)
+All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2 MB decoded on every preset: variants capped per sound, loops one variant with rate jitter) loads when the first vendor registers.
+- **API:** `audio.vendor(id, type, at)` returns a handle: `sale()`, `knockOver(impulse)`, `reopen()`, `move(at, speed)`,
+  `react('danger'|'traffic')`, `remove()`. Wiring is ENGINE_REQUESTS "From audio: 12".
+- **Per type (from content/vendors.json):**
+  - hot dog: steam pot and onions on the griddle (two loops);
+  - nut roaster and pretzel/knish: roaster drum;
+  - coffee: steam;
+  - Italian ice: hand bell;
+  - newsstand: paper rustle;
+  - shoeshine: bursts of rag snaps;
+  - ice-cream truck: an original chime motif from the roof speaker. It is not any real truck tune.
+  - Pushed carts rattle on the pavement, faster with speed.
+  - A knock-over plays the crash, tray clang, rolling cans and thudding produce. The cooking loops stop, and the vendor shouts a furious or angry line.
+- **Calls:** narrative's `barks/vendor_calls.json` (commit 664cb18 on their branch), by vendor type. They go through
+  `barkFrom` (now with an emotion filter) and the build-time voices, and are subtitled as overheard.
+  Within 30 m only, with at most one vendor call city-wide every 5 s so corners don't become a shouting match.
+- **Check:** `npx tsx tools/audio/foley-check.ts vendors` checks for no NaN, peaks in range and loop seams ≤ 4× the average sample step (measured 0.25–2.9×). It writes `shots/audio/vendors.ogg` (0.8 MB, loops played three times so any seam is audible).
+  `npx tsx tools/audio/render.ts --only vendor_corner` (20 s excerpt: `shots/audio/vendor_corner.ogg`) runs the scene at W 34th and 7th Ave: six vendors, two sales, a pushed cart, and a knock-over at 41 s.
+  - High: −14.3 LUFS, TP −1.50, 39/64 voices, update p95 0.8 ms.
+  - Low: −15.7 LUFS, 24/24 voices, p95 0.7 ms.
+  - No NaN, no leaks.
+- **Mix (stems tool, 60 s walk past the carts, after one level pass):**
+  - The street mix is −14.3 LUFS (max momentary −4.7).
+  - The hot-dog cart's loops peak at −21.5 LUFS momentary as you pass it: audible under the avenue, as on a real corner.
+  - The roaster is −26.1 (it was −34, inaudible, before the pass).
+  - The cart crash and rattles peak at −15.2.
+  - The full main suite still passes, with sessions unchanged: −16.28 / −23.05 LUFS, TP −1.50.
+- **Fixed while testing:** the offline scenario event matcher skipped events at exact half-frame times. The knock-over at 41 s never fired. Events now land on exactly one frame.
+- **vs GTA V / VI / RDR2:** the references' vendors are mostly visual set dressing with generic crowd barks; RDR2's
+  camp and town vendors have recorded sizzle and chatter. We match the layering (cooking loop, signature sound,
+  call, sale, crash) and tie calls to the real vendor type. We fall short on the sounds themselves: synthesised
+  sizzle and steam are believable at a few metres, but the bell and coins are clean modal synthesis, cleaner than recordings.
+  The eSpeak calls are clearly placeholder-tier voices.
+
 ## Backlog relayed from the oversight session (2026-11-26; not in the original brief)
 Recorded as scope additions to plan for; the brief's "done means" came first.
 - **Combat (Gameplay stream):** period gunfire by invented model and tier (cheap guns sound cheap),

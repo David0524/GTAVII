@@ -68,7 +68,9 @@ async function main() {
     report_music.push({ style: name, bpm, lufs: lm.integrated, truePeak: lm.truePeak, nan: m.nan, realtimeFactor: m.realtimeFactor });
     console.log(`music ${name}: ${lm.integrated.toFixed(1)} LUFS, TP ${lm.truePeak.toFixed(1)}, ${m.realtimeFactor.toFixed(0)}x realtime (one feed, CPU-only)`);
   }
-  const ids: string[] = await page.evaluate(() => (window as any).__T74AUDIO.scenarios);
+  const all = await page.evaluate(() => ({ main: (window as any).__T74AUDIO.scenarios as string[], extras: (window as any).__T74AUDIO.extras as string[] }));
+  // --only may name a diagnostic extra (e.g. vendor_corner); the default run is the main suite.
+  const ids: string[] = ONLY && all.extras.includes(ONLY) ? [ONLY] : all.main;
   {
     const lt = await page.evaluate(() => (window as any).__T74AUDIO.limiterTest());
     const { L, R } = decode(lt.pcm, lt.sr); const m = measure(L, R, lt.sr);

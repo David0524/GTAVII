@@ -16,6 +16,8 @@ export interface Scenario {
   /** Diagnostic only (mix work, stems tool); not part of the pass/fail suite or the loudness session. */
   extra?: boolean;
   power?: 'dim' | 'off';
+  /** Street vendors placed relative to the start point (x, z offsets in m); events 'vendor:<id>:<sale|knockOver|move>'. */
+  vendors?: { id: string; type: import('../world/vendors').VendorType; offset: [number, number] }[];
 }
 
 export const SCENARIOS: Scenario[] = [
@@ -31,4 +33,11 @@ export const SCENARIOS: Scenario[] = [
     start: (m) => ({ x: (m.x('7th Avenue') + m.x('8th Avenue')) / 2 - 50, z: m.z(37) + 8.5, dx: 1, dz: 0 }), walk: 1.2 },
   { id: 'brownout_night', title: 'W 31st St near 7th, Saturday 10:30 p.m., brownout', clock: { minutes: 22 * 60 + 30, date: '1974-06-22' }, weather: 'clear', traffic: 0.5, peds: 0.4, extra: true, power: 'off',
     start: (m) => ({ x: m.x('7th Avenue') - 60, z: m.z(31) + 8.5, dx: 1, dz: 0 }), walk: 1.1 },
+  { id: 'vendor_corner', title: 'W 34th St at 7th Ave, Thursday 12:30 p.m., vendors', clock: { minutes: 12 * 60 + 30, date: '1974-06-27' }, weather: 'clear', traffic: 0.8, peds: 0.8, extra: true,
+    start: (m) => ({ x: m.x('7th Avenue') - 45, z: m.z(34) + 9, dx: 1, dz: 0 }), walk: 1.0,
+    vendors: [
+      { id: 'dogs', type: 'hot_dog', offset: [22, 1.5] }, { id: 'nuts', type: 'nut_roaster', offset: [38, 2] }, { id: 'shine', type: 'shoeshine', offset: [12, 3] },
+      { id: 'ice', type: 'italian_ice', offset: [55, 1.5] }, { id: 'news', type: 'newsstand', offset: [30, 3.5] }, { id: 'truck', type: 'ice_cream_truck', offset: [70, -9] },
+    ],
+    events: [{ t: 18, play: 'vendor:dogs:sale' }, { t: 26, play: 'vendor:dogs:sale' }, { t: 34, play: 'vendor:nuts:move' }, { t: 41, play: 'vendor:dogs:knockOver', params: { impulse: 700 } }, { t: 52, play: 'vendor:nuts:stop' }] },
 ];

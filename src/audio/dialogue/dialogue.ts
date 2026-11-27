@@ -153,8 +153,8 @@ export class DialogueSystem {
     return p;
   }
   /** A random line of `context` from a bark pool, spoken at `at` (no-op if the pool or context is missing). */
-  async barkFrom(pool: string, context: string, at: Vec3 | (() => Vec3), speaker = `npc.${pool.replace(/^barks\./, '')}`, subtitle = true): Promise<boolean> {
-    const p = await this.poolFetch(pool); const lines = p?.lines.filter((l) => l.context === context) ?? [];
+  async barkFrom(pool: string, context: string, at: Vec3 | (() => Vec3), speaker = `npc.${pool.replace(/^barks\./, '')}`, subtitle = true, emotions?: readonly string[]): Promise<boolean> {
+    const p = await this.poolFetch(pool); const lines = p?.lines.filter((l) => l.context === context && (!emotions || emotions.includes(l.emotion ?? ""))) ?? [];
     if (!lines.length) return false;
     const l = lines[(this.env.rng.next() * lines.length) | 0];
     const buf = this.lib ? await this.lib.get(speaker, l.emotion, l.text, 0.8) : null; // a bark that comes late is worse than a placeholder
