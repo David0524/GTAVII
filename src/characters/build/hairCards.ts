@@ -332,6 +332,9 @@ export function buildCards(ctx: CardCtx, mb: MeshBuilder, map: HeadMap): void {
     const nseg = Math.max(2, Math.min(total, lod === 0 ? 9 : 4, Math.round((total * ds) / segLen)));
     const rows: number[][] = [];
     const tLen = pts[total].t || 1;
+    // each card twisted about its strand axis (±~30°, more toward the tip) and lifted by its raised
+    // edge: cards lying tangent to the scalp read as flat layered sheets on the crown
+    const twist = (rng.next() - 0.5) * 1.05;
     for (let i = 0; i <= nseg; i++) {
       const f = (i / nseg) * total, i0 = Math.min(total - 1, Math.floor(f)), u = f - i0;
       const p: V3 = [0, 1, 2].map((k) => pts[i0].p[k] + (pts[i0 + 1].p[k] - pts[i0].p[k]) * u) as V3;
@@ -344,8 +347,11 @@ export function buildCards(ctx: CardCtx, mb: MeshBuilder, map: HeadMap): void {
       const w = width * (1 - 0.55 * tt) * (0.8 + 0.4 * rng.next());
       const wv = st.wave * Math.sin(wavePh + (tt * len) / waveL * Math.PI * 2) * sm(0, 0.2, tt);
       const row: number[] = [];
+      const tw = twist * (0.6 + 0.4 * tt), ct = Math.cos(tw), stw = Math.sin(tw);
+      const bt: V3 = [bn[0] * ct + n[0] * stw, bn[1] * ct + n[1] * stw, bn[2] * ct + n[2] * stw];
+      const lift = Math.abs(stw) * w * 0.5;
       for (const side of [-0.5, 0.5]) {
-        const q: V3 = [p[0] + bn[0] * (w * side + wv), p[1] + bn[1] * (w * side + wv), p[2] + bn[2] * (w * side + wv)];
+        const q: V3 = [p[0] + bt[0] * (w * side + wv) + n[0] * lift, p[1] + bt[1] * (w * side + wv) + n[1] * lift, p[2] + bt[2] * (w * side + wv) + n[2] * lift];
         skin(q[1], sj, sw);
         // shading normal: the hair volume's (radial), tilted a little along the card
         const nn = norm([n[0] * 0.85 + bn[0] * side * 0.3, n[1] * 0.85 + bn[1] * side * 0.3, n[2] * 0.85 + bn[2] * side * 0.3]);
