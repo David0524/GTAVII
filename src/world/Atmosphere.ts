@@ -100,10 +100,13 @@ export class Atmosphere {
     this.hemi.color.lerp(C(0.22, 0.3, 0.55), blue * 0.85);
     lerpC(C(0.42, 0.32, 0.24), C(0.3, 0.18, 0.09), night, this.hemi.groundColor); // warm street / brick bounce
     this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.9 * night + 0.2;
+    // blue hour: the twilight sky is still a big, bright, blue light source; golden hour: low sun, but the
+    // whole midsummer sky still lights the canyons (D at 19:30 measured p50 25 against 50..80)
+    this.hemi.intensity += 1.1 * blue + 0.8 * golden * day;
     // sky dome
     // (Tried higher turbidity/mie for a hazier noon: this sky model turns a saturated deep blue instead. Kept.)
     this.sky.turbidity.value = 6 + 4 * golden;
-    this.sky.rayleigh.value = 1.6 + 1.2 * golden;
+    this.sky.rayleigh.value = 1.6 + 1.2 * golden + 2.8 * blue; // luminous deep-blue twilight dome
     // haze colour follows the sky: bleached day, rose dusk, sodium-brown night
     lerpC(C(0.66, 0.63, 0.6), C(0.52, 0.42, 0.42), golden, this.tmp.b);
     lerpC(this.tmp.b, C(0.09, 0.075, 0.07), night, (this.scene.fog as THREE.Fog).color);
