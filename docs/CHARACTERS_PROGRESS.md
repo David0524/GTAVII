@@ -57,7 +57,7 @@ her previous MakeHuman head, two public-domain 1973 DOCUMERICA street photos for
 |---|---|
 | Tone, face–hand dC | Delphine 0.4, Teddy 4.7 (gate 8) |
 | Tone, face–neck dC | Delphine 16.0 (gate 20) |
-| Nick, face–hand | Fails, but his hand probe lands on his suit pocket (`idle_pockets`), so it measures the suit; probe fix pending |
+| Nick, face–hand | Not gated: hands in pockets set `handHidden`, so the probe no longer measures the suit |
 | Head size | 26k vertices, 47k triangles |
 | Head .bin | 873 KB raw, 391 KB gzip with delta filters |
 | Textures | 135 KB albedo, 115 KB normal, 112 KB packed/lash |
@@ -75,18 +75,21 @@ the size pass.
   micro-variation, no freckles or uneven tone). RDR2 is far above.
 - **Skin shading:** now in the right family (pre-integrated SSS with a dual-lobe specular, as GTA
   V-era deferred skin did).
-- **Eyes:** below GTA V. There's no eye occlusion or tear meniscus and no iris parallax or
-  refraction, so they stare.
+- **Eyes:** close to GTA V now. The lid-contact shadow is baked from ICT's lid contour; the iris
+  has parallax behind the corneal dome (tangents plus `parallaxUV`) and fibres, a collarette,
+  limbal ring and pupil; the cornea is wet (roughness 0.06). Still missing: a tear meniscus and
+  refraction. The upper lids are relaxed 1.3 mm in the bake (ICT's neutral holds the eyes wide
+  open, which made her stare). The baked lid shadow turns with the eye: fine for gaze shifts, wrong for big
+  rolls. Black lash-card specks show at the outer corners in three-quarter view.
 - **Hair:** reads as a short natural crop from three-quarter view. In profile, the nape and
   hairline edges are hard and the coil texture is uniform. GTA V's short afros break the
   silhouette better.
 - **Seams:** a faint line remains where the head's neck meets the body in profile. The dress
   collar spikes at the neck (a garment issue, also on her previous head) are still there.
-- **Verdict:** GTA V near-NPC level, not yet GTA V hero level. The gaps are albedo detail and the
-  eyes.
+- **Verdict:** GTA V near-NPC level, not yet GTA V hero level. The main gap is albedo detail.
 
 **Next, in order:**
-1. Eyes: occlusion film, meniscus, iris parallax.
+1. Eyes: done for now (above).
 2. Albedo micro-variation (a tiling CC0 skin-detail layer like the body's), plus card brows.
 3. Nape and hairline softening, and the profile neck seam.
 4. Dress collar spikes.

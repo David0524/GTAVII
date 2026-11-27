@@ -91,9 +91,10 @@ for base in sys.argv[1:]:
         for a, b in (('cheek', 'neck'), ('cheek', 'hand')):
             la, lb = lab[a], lab[b]
             res[b] = (de00(la, lb), math.hypot(la[1] - lb[1], la[2] - lb[2]), lb[0] - la[0])
-        bad = res['neck'][1] > 20 or res['hand'][1] > 8
+        hid = bool(pr.get('handHidden'))
+        bad = res['neck'][1] > 20 or (res['hand'][1] > 8 and not hid)
         fail |= bad
         who = pr.get('hero') or f"seed {pr.get('seed')}"
-        print(f"  {who:<22} head={pr.get('rb') or 'ours':<16} tone={pr.get('tone')}  face-neck dE00 {res['neck'][0]:5.1f} dC {res['neck'][1]:4.1f} dL {res['neck'][2]:+5.1f} | face-hand dE00 {res['hand'][0]:5.1f} dC {res['hand'][1]:4.1f} dL {res['hand'][2]:+5.1f}  {'FAIL' if bad else 'ok'}")
+        print(f"  {who:<22} head={pr.get('rb') or 'ours':<16} tone={pr.get('tone')}  face-neck dE00 {res['neck'][0]:5.1f} dC {res['neck'][1]:4.1f} dL {res['neck'][2]:+5.1f} | face-hand dE00 {res['hand'][0]:5.1f} dC {res['hand'][1]:4.1f} dL {res['hand'][2]:+5.1f}{' (hand hidden: not gated)' if hid else ''}  {'FAIL' if bad else 'ok'}")
     out.save(base + '_tone.jpg', quality=85)
 sys.exit(1 if fail else 0)

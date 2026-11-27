@@ -172,7 +172,7 @@ k = np.nonzero(r == EYE)[0]
 if len(k):
     eu, ev = o[k, 0] - 0.5, o[k, 1] - 0.5
     rr = np.hypot(eu, ev); ang = np.arctan2(ev, eu)
-    scl = lin('#c9bdac')[None] * np.ones((len(k), 1))
+    scl = lin('#bcae9b')[None] * np.ones((len(k), 1))
     red = ss(0.15, 0.3, rr)
     scl *= (1 - red[:, None] * (1 - np.array([0.96, 0.84, 0.8])[None]))
     vein = vnoise(np.stack([ang * 9, rr * 40, np.zeros_like(rr)], 1))
@@ -181,12 +181,33 @@ if len(k):
     fib = vnoise(np.stack([ang * 38, rr * 18, np.zeros_like(rr)], 1)) - 0.5
     fib2 = vnoise(np.stack([ang * 90, rr * 6 + 3, np.zeros_like(rr)], 1)) - 0.5
     iris *= (1 + 0.55 * fib + 0.3 * fib2)[:, None]
-    iris *= (1 + 0.35 * np.exp(-((rr - 0.06) / 0.012) ** 2))[:, None]  # lighter collarette
-    iris *= (1 - 0.6 * ss(0.118, 0.142, rr))[:, None]  # limbal ring
-    pupil = 1 - ss(0.03, 0.036, rr)
+    iris *= (1 + 0.45 * np.exp(-((rr - 0.052) / 0.011) ** 2))[:, None]  # lighter collarette
+    iris *= (1 - 0.65 * ss(0.108, 0.132, rr))[:, None]  # limbal ring
+    pupil = 1 - ss(0.028, 0.034, rr)
     iris = iris * (1 - pupil[:, None]) + np.array([0.006, 0.005, 0.005])[None] * pupil[:, None]
-    wI = 1 - ss(0.139, 0.147, rr)
+    wI = 1 - ss(0.129, 0.138, rr)
     col[k] = scl * (1 - wI[:, None]) + iris * wI[:, None]
+    # lid contact shadow (what ICT's occlusion film does): darken the eye under the upper lid
+    # margin (~3 mm) and, less, above the lower one; lid heights by x from the lid contour
+    ek = p[k]
+    shade = np.ones(len(k))
+    for side, ec in (('L', job['eyes']['L']), ('R', job['eyes']['R'])):
+        pts = np.array(job['lids'][side])
+        if not len(pts): continue
+        sel = (np.abs(ek[:, 0] - ec[0]) < 0.02) & (ek[:, 2] > ec[2])
+        up = pts[pts[:, 1] > ec[1] - 0.002]; lo = pts[pts[:, 1] <= ec[1] - 0.002]
+        def lidY(src, x, pick):
+            o = np.argsort(src[:, 0]); return np.interp(x, src[o, 0], src[o, 1])
+        x = ek[sel, 0]
+        uY = lidY(up, x, max) if len(up) > 1 else np.full(len(x), ec[1] + 0.01)
+        lY = lidY(lo, x, min) if len(lo) > 1 else np.full(len(x), ec[1] - 0.01)
+        y = ek[sel, 1]
+        sh = 1 - 0.72 * ss(0.0045, 0.0, uY - y) - 0.35 * ss(0.0028, 0.0, y - lY)
+        # corners: the canthi sit in shadow
+        span = np.maximum(1e-4, (np.max(pts[:, 0]) - np.min(pts[:, 0])) / 2); cx = (np.max(pts[:, 0]) + np.min(pts[:, 0])) / 2
+        sh *= 1 - 0.35 * ss(0.7, 1.0, np.abs(x - cx) / span)
+        shade[np.nonzero(sel)[0]] = np.clip(sh, 0.25, 1)
+    col[k] *= shade[:, None]
 
 # --- height field -> normals -----------------------------------------------------------------
 H = np.zeros(N)

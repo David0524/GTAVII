@@ -9,7 +9,7 @@
  * 2 draws: main (body, clothes) + head.
  */
 import * as THREE from 'three/webgpu';
-import { texture, uv, attribute, float, vec3, uniform, normalMap, normalView, mix, dot, smoothstep } from 'three/tsl';
+import { texture, uv, attribute, float, vec2, vec3, uniform, normalMap, normalView, mix, dot, smoothstep, parallaxUV } from 'three/tsl';
 import { SkinNodeMaterial } from '../render/skinLighting';
 import { readContainer } from '../format';
 import type { GeoArrays } from '../build/MeshBuilder';
@@ -247,6 +247,8 @@ export function headMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, skeleton
   geo.setAttribute('skinWeight', new THREE.BufferAttribute(h.sw, 4));
   geo.setAttribute('hkind', new THREE.BufferAttribute(h.kind, 1));
   geo.setIndex(new THREE.BufferAttribute(o.noCards ? h.idx.slice(0, h.meta.skinIdx) : h.idx, 1));
+  // packed (ICT) heads: tangents for the iris parallax (and a stable tangent frame for the normal map)
+  if ((h.meta as { packed?: boolean }).packed) geo.computeTangents();
   geo.computeBoundingSphere();
   const bt = o.bodyTone ? hexRGB(o.bodyTone).map(toLin) : null;
   const m = new THREE.SkinnedMesh(geo, headMaterial(h, o.tint ?? [1, 1, 1], bt as [number, number, number] | null));
@@ -263,7 +265,13 @@ function headMaterial(h: HeadAsset, tint: [number, number, number], bodyLin: [nu
   const packed = !!(h.meta as { packed?: boolean }).packed;
   const kind = attribute('hkind', 'float');
   const isCard = kind.greaterThan(0.5);
-  const tc = texture(h.color, uv()), tn = texture(h.normal, uv());
+  // ICT eyes: the iris sits ~2.5 mm behind the cornea; parallax shifts it against the corneal
+  // dome as the view turns (eye texels: packed roughness < 0.1; the eye atlas cell is centred at
+  // (0.125, 0.375) with the iris inside a radius of ~0.031)
+  const packedH = !!(h.meta as { packed?: boolean }).packed;
+  const irisW = packedH ? texture(h.opacity ?? h.color, uv()).r.lessThan(0.1).select(smoothstep(0.038, 0.031, uv().distance(vec2(0.125, 0.375))), float(0)) : float(0);
+  const uvC: any = packedH ? (mix as any)(uv(), parallaxUV(uv(), float(0.011)), irisW) : uv();
+  const tc = texture(h.color, uvC), tn = texture(h.normal, uv());
   const to = texture(h.opacity ?? h.color, uv());
   const tintU = uniform(new THREE.Color(tint[0], tint[1], tint[2]));
   const neckU = uniform(bodyLin ? new THREE.Vector3(bodyLin[0], bodyLin[1], bodyLin[2]) : new THREE.Vector3());

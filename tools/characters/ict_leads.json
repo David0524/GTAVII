@@ -1,4 +1,18 @@
 {
   "note": "Synthesised ICT-FaceKit Light identities (coefficients on the unit-variance identity modes, designed by hand in ?characters=1&scene=ict; never fitted to photographs). Mode 0: masculine/broad (-) to feminine/fine (+); mode 2: (+) longer, older; mode 3: (+) broader, softer face, wider nose.",
-  "delphine": { "c": [2.4, 0.5, -0.8, 2.2, 0.6, 0, 0, 0.8], "tone": "#5a3825", "status": "starting identity (candidate D); to refine with skin, eyes and hair" }
+  "delphine": {
+    "c": [
+      2.4,
+      0.5,
+      -0.8,
+      2.2,
+      0.6,
+      0,
+      0,
+      0.8
+    ],
+    "tone": "#5a3825",
+    "status": "starting identity (candidate D); to refine with skin, eyes and hair",
+    "iris": "#4a2a16"
+  }
 }

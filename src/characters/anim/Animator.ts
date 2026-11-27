@@ -118,7 +118,8 @@ export class Animator {
   }
   setRestJoints(j: Float32Array) { this.restJoints = j; this.buildHandPose(); }
 
-  setIdle(name: string) { const i = this.lib.byName.get(name); if (i !== undefined) this.idleClip = i; }
+  idleName = '';
+  setIdle(name: string) { const i = this.lib.byName.get(name); if (i !== undefined) { this.idleClip = i; this.idleName = name; } }
 
   setLocomotion(s: LocoInput, dt: number) {
     const ch = Math.cos(s.heading), sh = Math.sin(s.heading);

@@ -54,7 +54,7 @@ const belowCut = (k: number) => k < parts.headNeck[1] && P[k * 3 + 1] < neckCutY
 
 // --- parts ---------------------------------------------------------------------------------
 const inP = (k: number, p: string) => k >= parts[p][0] && k < parts[p][1];
-type Region = 'face' | 'scalp' | 'eye' | 'teeth' | 'gums' | 'lash' | 'mouth' | 'socket' | null;
+type Region = 'face' | 'scalp' | 'eye' | 'teeth' | 'gums' | 'lash' | 'mouth' | 'socket' | 'occl' | null;
 // eye shells: the first 770 vertices of each eye range are the outer shell (sclera + cornea)
 const outerEye = (k: number) => (k >= parts.eyeL[0] && k < parts.irisL[0]) || (k >= parts.eyeR[0] && k < parts.irisR[0]);
 function regionOf(k: number, tileU: number): Region {
@@ -65,12 +65,14 @@ function regionOf(k: number, tileU: number): Region {
   if (inP(k, 'teeth')) return 'teeth';
   if (outerEye(k)) return 'eye';
   if (inP(k, 'lashesL') || inP(k, 'lashesR')) return 'lash';
+  // (the eye-occlusion film is not drawn: alpha-tested it would be a hard band; the lid shadow is
+  // painted into the sclera from the lid contour instead, see ict_tex.py)
   return null;
 }
-const REGION_CODE: Record<Exclude<Region, null>, number> = { face: 0, scalp: 1, eye: 2, teeth: 3, gums: 4, lash: 5, mouth: 6, socket: 7 };
+const REGION_CODE: Record<Exclude<Region, null>, number> = { face: 0, scalp: 1, eye: 2, teeth: 3, gums: 4, lash: 5, mouth: 6, socket: 7, occl: 8 };
 // atlas cells [u0, v0, size] (v up); local [0,1] coordinates are inset so cells never bleed
-const CELL: Record<string, [number, number, number]> = { face: [0, 0.5, 0.5], scalp: [0.5, 0.5, 0.5], mouth: [0.5, 0.5, 0.5], socket: [0.5, 0.5, 0.5], eye: [0, 0.25, 0.25], teeth: [0.25, 0.25, 0.25], gums: [0.5, 0.25, 0.25], lash: [0.75, 0.25, 0.25] };
-const TILE_OF: Record<string, number> = { face: 0, scalp: 1, mouth: 1, socket: 1, eye: 0, teeth: 3, gums: 2, lash: 6 };
+const CELL: Record<string, [number, number, number]> = { face: [0, 0.5, 0.5], scalp: [0.5, 0.5, 0.5], mouth: [0.5, 0.5, 0.5], socket: [0.5, 0.5, 0.5], eye: [0, 0.25, 0.25], teeth: [0.25, 0.25, 0.25], gums: [0.5, 0.25, 0.25], lash: [0.75, 0.25, 0.25], occl: [0.75, 0, 0.25] };
+const TILE_OF: Record<string, number> = { face: 0, scalp: 1, mouth: 1, socket: 1, eye: 0, teeth: 3, gums: 2, lash: 6, occl: 0 };
 
 // --- triangles, atlas vertices ---------------------------------------------------------------
 const vkey = new Map<string, number>();
@@ -102,14 +104,45 @@ for (let t = 0; t < idxIn.length; t += 3) {
 }
 const n = vSplit.length;
 for (const k of new Set(vSplit.map((i) => splitSrc[i]))) if (belowCut(k)) P[k * 3 + 1] = neckCutY;
+// relaxed upper lids: ICT's neutral holds the eyes wide open (sclera above the iris). The upper lid
+// margin and the skin above it (falloff over ~9 mm) and the upper lashes drop by spec.lidDrop
+// (default 1.3 mm), so the lid rests on the top of the iris as in a relaxed gaze.
+{
+  const drop = spec.lidDrop ?? 0.0013;
+  const faceEdge = new Map<number, number>();
+  for (let t = 0; t < tris.length; t += 3) {
+    if (vRegion[tris[t]] !== REGION_CODE.face) continue;
+    for (let e = 0; e < 3; e++) { const a = splitSrc[vSplit[tris[t + e]]], b = splitSrc[vSplit[tris[t + (e + 1) % 3]]]; const k = Math.min(a, b) * nv + Math.max(a, b); faceEdge.set(k, (faceEdge.get(k) ?? 0) + 1); }
+  }
+  for (const [e0, e1] of [[parts.eyeL[0], parts.irisL[0]], [parts.eyeR[0], parts.irisR[0]]]) {
+    let mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
+    for (let k = e0; k < e1; k++) for (let a = 0; a < 3; a++) { mn[a] = Math.min(mn[a], P[k * 3 + a]); mx[a] = Math.max(mx[a], P[k * 3 + a]); }
+    const c = [0, 1, 2].map((a) => (mn[a] + mx[a]) / 2);
+    const margin: number[][] = [];
+    for (const [k, cnt] of faceEdge) if (cnt === 1) for (const q of [Math.floor(k / nv), k % nv]) if (Math.hypot(P[q * 3] - c[0], P[q * 3 + 1] - c[1]) < 0.02 && P[q * 3 + 1] > c[1] + 0.001 && P[q * 3 + 2] > c[2]) margin.push([P[q * 3], P[q * 3 + 1], P[q * 3 + 2]]);
+    if (!margin.length) continue;
+    const span = Math.max(...margin.map((m) => m[0])) - Math.min(...margin.map((m) => m[0])), cx = (Math.max(...margin.map((m) => m[0])) + Math.min(...margin.map((m) => m[0]))) / 2;
+    const moved = new Set<number>();
+    for (const i of vSplit) {
+      const k = splitSrc[i];
+      if (moved.has(k) || !(inP(k, 'face') || inP(k, 'lashesL') || inP(k, 'lashesR'))) continue;
+      const x = P[k * 3], y = P[k * 3 + 1], z = P[k * 3 + 2];
+      if (y < c[1] || z < c[2] - 0.004 || Math.abs(x - c[0]) > 0.022) continue;
+      let d = Infinity; for (const m of margin) d = Math.min(d, Math.hypot(x - m[0], y - m[1], z - m[2]));
+      const along = 1 - Math.min(1, Math.abs(x - cx) / (span / 2)) ** 2; // most at the middle of the lid
+      const w = (1 - Math.min(1, d / 0.009)) ** 2 * along;
+      if (w > 0) { P[k * 3 + 1] -= drop * w; moved.add(k); }
+    }
+  }
+}
 // lash triangles go last: they are alpha cards (kind 1, the head material's card branch)
 {
   const skin: number[] = [], cards: number[] = [];
-  for (let t = 0; t < tris.length; t += 3) (vRegion[tris[t]] === REGION_CODE.lash ? cards : skin).push(tris[t], tris[t + 1], tris[t + 2]);
+  for (let t = 0; t < tris.length; t += 3) (vRegion[tris[t]] === REGION_CODE.lash || vRegion[tris[t]] === REGION_CODE.occl ? cards : skin).push(tris[t], tris[t + 1], tris[t + 2]);
   tris.length = 0; for (const x of skin) tris.push(x); for (const x of cards) tris.push(x);
   var nSkinIdx = skin.length;
 }
-const kind = Uint8Array.from(vRegion, (r) => (r === REGION_CODE.lash ? 1 : 0));
+const kind = Uint8Array.from(vRegion, (r) => (r === REGION_CODE.lash || r === REGION_CODE.occl ? 1 : 0));
 const pos = new Float32Array(n * 3);
 for (let v = 0; v < n; v++) { const k = splitSrc[vSplit[v]]; for (let a = 0; a < 3; a++) pos[v * 3 + a] = P[k * 3 + a]; }
 
@@ -163,6 +196,12 @@ const fillRing = (s: Float64Array) => {
   return r.map((y, a) => (r[(a + RING - 1) % RING] + 2 * y + r[(a + 1) % RING]) / 4);
 };
 const neckRing = [...fillRing(ringY), ...fillRing(ringR)];
+// eye openings: boundary vertices of the face skin within 2 cm of each eye centre (the lid margins)
+const lids: { L: number[][]; R: number[][] } = { L: [], R: [] };
+for (const [k, c] of edgeCount) if (c === 1) for (const q of [Math.floor(k / nv), k % nv]) {
+  if (!inP(q, 'face')) continue;
+  for (const [side, e] of [['L', LEye], ['R', REye]] as const) if (Math.hypot(P[q * 3] - e[0], P[q * 3 + 1] - e[1]) < 0.02 && Math.abs(P[q * 3 + 2] - e[2]) < 0.03) lids[side].push([P[q * 3], P[q * 3 + 1], P[q * 3 + 2]]);
+}
 
 // --- skin weights (no rig in ICT Light: by region) ------------------------------------------
 const ss = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -173,7 +212,7 @@ for (let v = 0; v < n; v++) {
   const w: Record<number, number> = {};
   if (r === REGION_CODE.eye) w[x > 0 ? JI.eye_l : JI.eye_r] = 1;
   else if (r === REGION_CODE.teeth || r === REGION_CODE.gums || r === REGION_CODE.mouth) w[y < mouthY ? JI.jaw : JI.Head] = 1;
-  else if (r === REGION_CODE.lash || r === REGION_CODE.socket) w[JI.Head] = 1;
+  else if (r === REGION_CODE.lash || r === REGION_CODE.socket || r === REGION_CODE.occl) w[JI.Head] = 1;
   else {
     // neck below the jaw line (front: under the chin; back: below the occiput)
     const front = ss(earZ - 0.02, earZ + 0.04, z);
@@ -211,7 +250,7 @@ const meta = {
 const job = {
   size: spec.texSize ?? 2048, out: path.join(OUT, id), tone: spec.tone, brow: spec.brow ?? '#141010', iris: spec.iris ?? '#2a1a10', lip: spec.lip ?? null, seed: spec.seed ?? 7,
   uv: vUV, orig: vOrig, region: vRegion, pos: Array.from(pos), tris,
-  eyes: { L: LEye, R: REye, lpole: null }, eyeY, mouthY,
+  eyes: { L: LEye, R: REye }, lids, eyeY, mouthY,
 };
 const jf = path.join(TMP, `${id}.json`);
 fs.writeFileSync(jf, JSON.stringify(job));
