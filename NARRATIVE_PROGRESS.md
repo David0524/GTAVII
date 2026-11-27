@@ -949,3 +949,23 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - **The photo display** is the **Halcyon Color Window** ("HALCYON COLOR · CAPTURE THE CITY"). An exact-name search found nothing; Lumachrome was rejected (too close to LomoChrome). The real brand and the "-rama" suffix are never used. Two prompts were queued (69 entries in total).
   - **Pending:** the boundaries.json update once the engine posts the new PLAYABLE numbers.
   - Pre-ship USPTO list additions: Halcyon Color.
+- **Street vendors (27 Nov 2026, user decision via oversight):** `narrative/tools/build_vendors.py` writes `content/vendors.json`, which has three parts:
+  - 6 invented brands with umbrella and cart copy:
+    - Big Cyrus Franks (cleared; Ferraro's was rejected as a real frank maker);
+    - Dominick's Red Hots;
+    - Peppy's Pretzels (cleared);
+    - Mama Lucchese Italian Ices (cleared);
+    - Hot Nuts Harry;
+    - Sunrise Coffee & Roll.
+  - Menus and price boards in 1974 money for 10 vendor types (frank 35¢, pretzel 25¢, ice 25¢, coffee 20¢, cigarettes 60¢, shine 50¢, "gold" watch $10).
+  - 11 vendor placements and hours, including the monte crew.
+  - **Barks:** `barks.vendor_calls`, 31 lines.
+  - **Archetype:** npc.cart_vendor, adults only.
+  - **Side quests:**
+    - The Sidewalk Wire (vendor tipsters);
+    - Ten a Week (an Eighth Ave cart protection racket);
+    - Whose Corner Is It? (a permit fight).
+  - The existing Three-Card Monte covers the monte crew.
+  - **Period fix:** the famous heart slogan is 1977 and real, so souvenir pennants read "NEW YORK · SEE IT TO BELIEVE IT".
+  - **Image prompts:** 13 umbrella, cart, price-board and pennant prompts (82 in the queue; NOT YET RUNNABLE).
+  - **Pre-ship:** USPTO checks on the 6 brands and the pennant line. Dominick's and Hot Nuts Harry are weak (unsearched).

@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_cart_racket_2",
+  "context": "Eighth Ave, after.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cart_vendor",
+      "emotion": "grateful",
+      "text": "Free? Nobody's free on Eighth. But this week, a rainbow ice on me."
+    }
+  ]
+}

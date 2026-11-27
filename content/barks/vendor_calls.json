@@ -1,0 +1,162 @@
+{
+  "id": "barks.vendor_calls",
+  "core": false,
+  "note": "Vendor calls and reactions (context = vendor type, or 'any'). Adults only. 1974 prices match content/vendors.json.",
+  "lines": [
+    {
+      "context": "hot_dog",
+      "emotion": "calling",
+      "text": "Hot dogs! Hot dogs here! Red hot and still warm!"
+    },
+    {
+      "context": "hot_dog",
+      "emotion": "calling",
+      "text": "Franks! Kraut, onions, the works! Thirty-five cents!"
+    },
+    {
+      "context": "hot_dog",
+      "emotion": "wry",
+      "text": "Mustard's free. Advice is a nickel."
+    },
+    {
+      "context": "hot_dog",
+      "emotion": "annoyed",
+      "text": "Don't lean on the umbrella, it's older than you."
+    },
+    {
+      "context": "pretzel",
+      "emotion": "calling",
+      "text": "Pretzels! Hot pretzels! Salt or no salt!"
+    },
+    {
+      "context": "pretzel",
+      "emotion": "calling",
+      "text": "Knishes! Potato, kasha! Hot like your mother made!"
+    },
+    {
+      "context": "pretzel",
+      "emotion": "wry",
+      "text": "A pretzel's a meal if you believe in yourself."
+    },
+    {
+      "context": "ice",
+      "emotion": "calling",
+      "text": "Ices! Lemon ice! Cherry! Cold, cold, cold!"
+    },
+    {
+      "context": "ice",
+      "emotion": "cheerful",
+      "text": "Rainbow's fifty cents. Three flavours, one heat wave."
+    },
+    {
+      "context": "nuts",
+      "emotion": "calling",
+      "text": "Hot nuts! Honey roasted! Smell that? That's free!"
+    },
+    {
+      "context": "nuts",
+      "emotion": "wry",
+      "text": "Cashews, seventy-five. Peanuts, fifty. The smell, on the house."
+    },
+    {
+      "context": "coffee",
+      "emotion": "brisk",
+      "text": "Coffee, regular! Roll and butter! Keep it moving!"
+    },
+    {
+      "context": "coffee",
+      "emotion": "brisk",
+      "text": "Regular means milk and sugar, pal. This is New York."
+    },
+    {
+      "context": "fruit",
+      "emotion": "calling",
+      "text": "Peaches! Jersey peaches! Sweet as a lie!"
+    },
+    {
+      "context": "flowers",
+      "emotion": "gentle",
+      "text": "Carnation for your lapel, sir? Twenty-five cents for a better day."
+    },
+    {
+      "context": "news",
+      "emotion": "calling",
+      "text": "Ticker! Dispatch! Get your Ticker! It's all in there!"
+    },
+    {
+      "context": "news",
+      "emotion": "wry",
+      "text": "Read it here, you buy it. This ain't the library."
+    },
+    {
+      "context": "shine",
+      "emotion": "calling",
+      "text": "Shine, mister? Fifty cents. Walk out new."
+    },
+    {
+      "context": "peddler",
+      "emotion": "low",
+      "text": "Watches. Gold. Practically gold. Twenty-two karat for ten bucks."
+    },
+    {
+      "context": "peddler",
+      "emotion": "calling",
+      "text": "Umbrellas! Two dollars! It's raining, you need me!"
+    },
+    {
+      "context": "peddler",
+      "emotion": "low",
+      "text": "Sunglasses, three bucks. Look like a movie star. A cheap one."
+    },
+    {
+      "context": "monte",
+      "emotion": "patter",
+      "text": "Find the lady, find the lady! Follow the red, win the bread!"
+    },
+    {
+      "context": "monte",
+      "emotion": "patter",
+      "text": "Easy money! Watch close! Who's got a sharp eye today?"
+    },
+    {
+      "context": "monte",
+      "emotion": "alarmed",
+      "text": "Cops! Fold it! Fold it, go, go!"
+    },
+    {
+      "context": "any",
+      "emotion": "furious",
+      "text": "Hey! You hit my cart! That's my whole day on the street!"
+    },
+    {
+      "context": "any",
+      "emotion": "scared",
+      "text": "Get down! Get behind the cart! Get down!"
+    },
+    {
+      "context": "any",
+      "emotion": "angry",
+      "text": "Watch where you're driving, you maniac! I got a permit!"
+    },
+    {
+      "context": "any",
+      "emotion": "weary",
+      "text": "Permit's on the cart, officer. Same permit as yesterday."
+    },
+    {
+      "context": "any",
+      "emotion": "wry",
+      "text": "Business is like the weather. It's terrible and I'm still out here."
+    },
+    {
+      "context": "any",
+      "emotion": "grumbling",
+      "text": "Somebody's selling on my corner again. Thirty years, my corner."
+    },
+    {
+      "context": "any",
+      "emotion": "low",
+      "text": "Ten a week, they want now. Ten a week to stand on a sidewalk."
+    }
+  ]
+}

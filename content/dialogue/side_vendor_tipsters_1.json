@@ -1,0 +1,24 @@
+{
+  "id": "dlg.side_vendor_tipsters_1",
+  "context": "Big Cyrus's cart, 34th & Seventh. Steam, onions.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cart_vendor",
+      "emotion": "easy",
+      "text": "Thirty-five cents. For a dollar, I'll tell you what I saw this morning."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.cart_vendor",
+      "emotion": "low",
+      "text": "Two plainclothes on the Lacy's corner since nine. They're not shopping."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.cart_vendor",
+      "emotion": "wry",
+      "text": "Come back next week. I see everything from behind this umbrella."
+    }
+  ]
+}

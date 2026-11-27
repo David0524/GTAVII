@@ -1,0 +1,30 @@
+{
+  "id": "npc.cart_vendor",
+  "behaviour": "vendor",
+  "palette": [
+    "#FFFFFF",
+    "#8B0000",
+    "#2F4F4F"
+  ],
+  "wardrobe": "White apron over shirtsleeves, paper cap or flat cap, a money belt, forearms like hams. Adults only.",
+  "props": [
+    "vendor_cart",
+    "tongs",
+    "change dispenser"
+  ],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "22:00",
+      "area": "Hotspot corners, park edges, subway mouths (see content/vendors.json)",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.5,
+    "night": 0.2
+  },
+  "barks": "barks.vendor_calls",
+  "scripted": false,
+  "note": ""
+}

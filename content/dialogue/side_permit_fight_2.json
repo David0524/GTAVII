@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_permit_fight_2",
+  "context": "The corner, settled.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cart_vendor",
+      "emotion": "satisfied",
+      "text": "Corner's mine. Frank's on me. Kraut too, I'm feeling generous."
+    }
+  ]
+}

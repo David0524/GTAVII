@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_vendor_tipsters_2",
+  "context": "Peppy's cart, the Bryant Park edge of 42nd St.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cart_vendor",
+      "emotion": "brisk",
+      "text": "Salt or no salt? Tip's free if you carry my propane up from Sixth."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.cart_vendor",
+      "emotion": "low",
+      "text": "There's a door on Forty-First nobody locks. Roof, water tank, the works."
+    }
+  ]
+}

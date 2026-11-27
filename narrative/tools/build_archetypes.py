@@ -61,6 +61,8 @@ a("npc.gc_redcap", "worker", ["#B22222", "#1C1C1C"], "Red cap, porter's jacket, 
   s(("06:00", "23:00", "Grand Central, Main Concourse and track gates", "work")), 0.25, 0.1, "barks.grand_central")
 a("npc.gc_commuter", "walker", ["#2F4F4F", "#F5F5DC", "#696969"], "Suits, briefcases, folded evening papers, hats. Adults only.", ["briefcase", "folded newspaper"],
   s(("07:00", "10:00", "Grand Central, Main Concourse", "commute"), ("16:30", "19:30", "Grand Central, Main Concourse", "commute")), 0.9, 0.2, "barks.grand_central")
+a("npc.cart_vendor", "vendor", ["#FFFFFF", "#8B0000", "#2F4F4F"], "White apron over shirtsleeves, paper cap or flat cap, a money belt, forearms like hams. Adults only.", ["vendor_cart", "tongs", "change dispenser"],
+  s(("09:00", "22:00", "Hotspot corners, park edges, subway mouths (see content/vendors.json)", "work")), 0.5, 0.2, "barks.vendor_calls")
 a("npc.shopper", "walker", ["#FF6347", "#FFFACD", "#4682B4"], "Summer dresses, shopping bags, sun hats, tourists' cameras.", ["shopping bags"],
   s(("10:00", "19:00", "Herald Square, 34th St", "errand")), 0.7, 0.05, "barks.shopper")
 a("npc.holiday_stroller", "walker", ["#FF0000", "#FFFFFF", "#0000CD"], "Holiday casual: short sleeves, sunglasses.", ["paper flag", "ice-cream cone"],

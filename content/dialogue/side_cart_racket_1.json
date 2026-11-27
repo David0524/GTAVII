@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_cart_racket_1",
+  "context": "Mama Lucchese's ice cart, 23rd & Eighth.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cart_vendor",
+      "emotion": "tired",
+      "text": "Ten a week, they want now. Last year five. Next year my cart."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.cart_vendor",
+      "emotion": "low",
+      "text": "Thursday. A man in a short-sleeve shirt. He works down Eighth, cart by cart."
+    }
+  ]
+}

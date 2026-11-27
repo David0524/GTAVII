@@ -1,0 +1,62 @@
+{
+  "id": "mission.side_permit_fight",
+  "kind": "side",
+  "title": "Whose Corner Is It?",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Herald Sq: two carts, one corner",
+      "to": "W 34th St & 6th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Settle it: permit, seniority or cash",
+      "script": "dlg.side_permit_fight_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Licence office clerk, 31st & Eighth",
+      "to": "W 31st St & 8th Ave",
+      "radius": 20,
+      "note": "Only if the player chose the licence office (dlg.side_permit_fight_1 l_permit)."
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "The corner's settled",
+      "script": "dlg.side_permit_fight_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Whoever you back gives you free food; the other sulks",
+    "money": 50,
+    "payNote": "The winner's thanks; free franks."
+  },
+  "where": "Herald Square, 34th & Sixth",
+  "systems": [
+    "dialogue choice",
+    "relationships"
+  ],
+  "mobile": "No timers.",
+  "rank": 58,
+  "slice": false,
+  "durationMin": 10,
+  "heat": 0
+}

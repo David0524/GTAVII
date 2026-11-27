@@ -1,0 +1,63 @@
+{
+  "id": "dlg.side_permit_fight_1",
+  "context": "Herald Square: two hot-dog carts nose to nose on one corner.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cart_vendor",
+      "emotion": "furious",
+      "text": "My permit says this corner! Thirty years this corner!"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.cart_vendor",
+      "emotion": "furious",
+      "text": "Your permit says Thirty-Fifth! Learn to read, Dominick!"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Check the permit at the licence office.",
+          "goto": "l_permit"
+        },
+        {
+          "text": "Seniority wins. Thirty years is thirty.",
+          "goto": "l_old"
+        },
+        {
+          "text": "Whoever pays me five bucks.",
+          "goto": "l_cash"
+        }
+      ]
+    },
+    {
+      "id": "l_permit",
+      "speaker": "npc.cart_vendor",
+      "emotion": "grudging",
+      "text": "Fine. The clerk. He's a crook, but he's our crook.",
+      "goto": "l_end",
+      "setFlags": []
+    },
+    {
+      "id": "l_old",
+      "speaker": "npc.cart_vendor",
+      "emotion": "triumphant",
+      "text": "Thirty years! You hear that? Respect!",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_cash",
+      "speaker": "npc.cart_vendor",
+      "emotion": "disgusted",
+      "text": "Five bucks. You're worse than the cops.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "npc.cart_vendor",
+      "emotion": "wry",
+      "text": "Business is like the weather. Terrible, and here we are."
+    }
+  ]
+}

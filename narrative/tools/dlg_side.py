@@ -110,7 +110,7 @@ s("dlg.side_last_train_1", "A tipsy office worker on the platform at 1 a.m.", ("
 s("dlg.side_last_train_2", "Her stop.", ("npc.subway_rider", "grateful", "Twenty-Third! Thank you. Here's my card. I'm a secretary. I know everybody's secrets."))
 s("dlg.side_locksmith_1", "Krause Hardware (Teddy).", (OTT, "gentle", "Lady on Thirty-Fourth locked out. Dead husband's place. Be gentle."), (T, "quiet", "I'm always gentle with doors."))
 s("dlg.side_locksmith_2", "Inside the flat (Teddy).", (T, "inner", "Three locks inside the bedroom door. Not to keep people out. To keep something in."), (T, "inner", "A box of letters. Not mine to read. Hers."))
-s("dlg.side_lost_tourists_1", "A family from Ohio with a folded map, Herald Square.", ("npc.cab_fare_tourist", "lost", "Excuse me! The Empire Estate Building? The map says it's here. Here is very big."),
+s("dlg.side_lost_tourists_1", "A couple from Ohio with a folded map, Herald Square.", ("npc.cab_fare_tourist", "lost", "Excuse me! The Empire Estate Building? The map says it's here. Here is very big."),
   ch(("Two blocks up, east side of Fifth.", "l_r"), ("Look up.", "l_u"), ("Take the subway. Any one.", "l_w")),
   {"id": "l_r", "speaker": "npc.cab_fare_tourist", "emotion": "happy", "text": "Two blocks up, east side of Fifth. Thank you! New Yorkers are nice!", "goto": "l_e"},
   {"id": "l_u", "speaker": "npc.cab_fare_tourist", "emotion": "startled", "text": "Oh! Oh, there it is. It's right there. I feel foolish. Thank you.", "goto": "l_e"},
@@ -178,6 +178,30 @@ s("dlg.side_whispering_corner_3", "Thursday, 17:40, the whispering arches. The p
   (WF, "whisper", "That's not Ida. Did she send you? Tell me she's all right."),
   (WF, "whisper", "An ankle. Not the age. Of course she'd say that."),
   (WF, "whisper", "Good night, Ida. Tell her the five fifty-two still runs. Tell her I'll wait."))
+
+VC = VP = VL = VN = "npc.cart_vendor"
+s("dlg.side_vendor_tipsters_1", "Big Cyrus's cart, 34th & Seventh. Steam, onions.",
+  (VC, "easy", "Thirty-five cents. For a dollar, I'll tell you what I saw this morning."),
+  (VC, "low", "Two plainclothes on the Lacy's corner since nine. They're not shopping."),
+  (VC, "wry", "Come back next week. I see everything from behind this umbrella."))
+s("dlg.side_vendor_tipsters_2", "Peppy's cart, the Bryant Park edge of 42nd St.",
+  (VP, "brisk", "Salt or no salt? Tip's free if you carry my propane up from Sixth."),
+  (VP, "low", "There's a door on Forty-First nobody locks. Roof, water tank, the works."))
+s("dlg.side_cart_racket_1", "Mama Lucchese's ice cart, 23rd & Eighth.",
+  (VL, "tired", "Ten a week, they want now. Last year five. Next year my cart."),
+  (VL, "low", "Thursday. A man in a short-sleeve shirt. He works down Eighth, cart by cart."))
+s("dlg.side_cart_racket_2", "Eighth Ave, after.",
+  (VL, "grateful", "Free? Nobody's free on Eighth. But this week, a rainbow ice on me."))
+s("dlg.side_permit_fight_1", "Herald Square: two hot-dog carts nose to nose on one corner.",
+  (VN, "furious", "My permit says this corner! Thirty years this corner!"),
+  (VN, "furious", "Your permit says Thirty-Fifth! Learn to read, Dominick!"),
+  ch(("Check the permit at the licence office.", "l_permit"), ("Seniority wins. Thirty years is thirty.", "l_old"), ("Whoever pays me five bucks.", "l_cash")),
+  {"id": "l_permit", "speaker": VN, "emotion": "grudging", "text": "Fine. The clerk. He's a crook, but he's our crook.", "goto": "l_end", "setFlags": []},
+  {"id": "l_old", "speaker": VN, "emotion": "triumphant", "text": "Thirty years! You hear that? Respect!", "goto": "l_end"},
+  {"id": "l_cash", "speaker": VN, "emotion": "disgusted", "text": "Five bucks. You're worse than the cops.", "goto": "l_end"},
+  {"id": "l_end", "speaker": VN, "emotion": "wry", "text": "Business is like the weather. Terrible, and here we are."})
+s("dlg.side_permit_fight_2", "The corner, settled.",
+  (VN, "satisfied", "Corner's mine. Frank's on me. Kraut too, I'm feeling generous."))
 
 for sid, d in S.items():
     (C / "dialogue" / f"{sid.split('.', 1)[1]}.json").write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")

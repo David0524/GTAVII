@@ -1,0 +1,62 @@
+{
+  "id": "mission.side_vendor_tipsters",
+  "kind": "side",
+  "title": "The Sidewalk Wire",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Big Cyrus's cart, 34th & Seventh",
+      "to": "W 34th St & 7th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Buy a frank. Ask what he's seen.",
+      "script": "dlg.side_vendor_tipsters_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Peppy's cart, Bryant Park, 42nd St",
+      "to": "W 42nd St & 6th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Peppy trades a tip for a favour",
+      "script": "dlg.side_vendor_tipsters_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Tips: vendors reveal hidden places and tell you which corners are hot (heat hints on the minimap)",
+    "money": 0,
+    "payNote": "Tips, not money."
+  },
+  "where": "Hot-dog and pretzel carts across Midtown",
+  "systems": [
+    "dialogue",
+    "minimap hints",
+    "relationships"
+  ],
+  "mobile": "No timers; tips refresh weekly.",
+  "rank": 56,
+  "slice": false,
+  "durationMin": 12,
+  "heat": 0
+}

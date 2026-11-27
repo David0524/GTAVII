@@ -1,0 +1,235 @@
+[
+  {
+    "id": "vendor.big_cyrus.umbrella",
+    "file": "vendor_big_cyrus_umbrella.png",
+    "owner": "narrative",
+    "use": "Big Cyrus Franks: cart umbrella panel (tiled around the umbrella)",
+    "aspect": "2:1",
+    "size": "2048×1024",
+    "sizeFinal": false,
+    "prompt": "Create one flat panel of a street-vendor cart umbrella in yellow and red stripes canvas stripes, unrolled flat, with lettering along the scalloped edge. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"BIG CYRUS · FRANKS · SODA\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 2:1.",
+    "text": "BIG CYRUS · FRANKS · SODA",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "flat panel, no umbrella frame"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.big_cyrus.cart",
+    "file": "vendor_big_cyrus_cart.png",
+    "owner": "narrative",
+    "use": "Big Cyrus Franks: cart side panel",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create the flat side panel of a 1970s stainless-steel New York street-food cart with hand-painted sign-writer lettering, a little dented and greasy. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"BIG CYRUS FRANKS · HOT · KRAUT · ONIONS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "BIG CYRUS FRANKS · HOT · KRAUT · ONIONS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "frontal"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.dominick_red_hots.umbrella",
+    "file": "vendor_dominick_red_hots_umbrella.png",
+    "owner": "narrative",
+    "use": "Dominick's Red Hots: cart umbrella panel (tiled around the umbrella)",
+    "aspect": "2:1",
+    "size": "2048×1024",
+    "sizeFinal": false,
+    "prompt": "Create one flat panel of a street-vendor cart umbrella in blue and white stripes canvas stripes, unrolled flat, with lettering along the scalloped edge. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"DOMINICK'S · RED HOTS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 2:1.",
+    "text": "DOMINICK'S · RED HOTS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "flat panel, no umbrella frame"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.dominick_red_hots.cart",
+    "file": "vendor_dominick_red_hots_cart.png",
+    "owner": "narrative",
+    "use": "Dominick's Red Hots: cart side panel",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create the flat side panel of a 1970s stainless-steel New York street-food cart with hand-painted sign-writer lettering, a little dented and greasy. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"DOMINICK'S RED HOTS · SINCE 1951\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "DOMINICK'S RED HOTS · SINCE 1951",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "frontal"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.peppys.umbrella",
+    "file": "vendor_peppys_umbrella.png",
+    "owner": "narrative",
+    "use": "Peppy's Pretzels: cart umbrella panel (tiled around the umbrella)",
+    "aspect": "2:1",
+    "size": "2048×1024",
+    "sizeFinal": false,
+    "prompt": "Create one flat panel of a street-vendor cart umbrella in green and cream canvas stripes, unrolled flat, with lettering along the scalloped edge. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"PEPPY'S · HOT PRETZELS · KNISHES\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 2:1.",
+    "text": "PEPPY'S · HOT PRETZELS · KNISHES",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "flat panel, no umbrella frame"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.peppys.cart",
+    "file": "vendor_peppys_cart.png",
+    "owner": "narrative",
+    "use": "Peppy's Pretzels: cart side panel",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create the flat side panel of a 1970s stainless-steel New York street-food cart with hand-painted sign-writer lettering, a little dented and greasy. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"PEPPY'S · SALT OR NO SALT\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "PEPPY'S · SALT OR NO SALT",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "frontal"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.mama_lucchese.umbrella",
+    "file": "vendor_mama_lucchese_umbrella.png",
+    "owner": "narrative",
+    "use": "Mama Lucchese Italian Ices: cart umbrella panel (tiled around the umbrella)",
+    "aspect": "2:1",
+    "size": "2048×1024",
+    "sizeFinal": false,
+    "prompt": "Create one flat panel of a street-vendor cart umbrella in red, white and green canvas stripes, unrolled flat, with lettering along the scalloped edge. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"MAMA LUCCHESE · ITALIAN ICES\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 2:1.",
+    "text": "MAMA LUCCHESE · ITALIAN ICES",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "flat panel, no umbrella frame"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.mama_lucchese.cart",
+    "file": "vendor_mama_lucchese_cart.png",
+    "owner": "narrative",
+    "use": "Mama Lucchese Italian Ices: cart side panel",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create the flat side panel of a 1970s stainless-steel New York street-food cart with hand-painted sign-writer lettering, a little dented and greasy. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"LEMON · CHERRY · RAINBOW · PAPER CUPS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "LEMON · CHERRY · RAINBOW · PAPER CUPS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "frontal"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.hot_nuts_harry.cart",
+    "file": "vendor_hot_nuts_harry_cart.png",
+    "owner": "narrative",
+    "use": "Hot Nuts Harry: cart side panel",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create the flat side panel of a 1970s stainless-steel New York street-food cart with hand-painted sign-writer lettering, a little dented and greasy. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"HONEY ROASTED · CASHEWS · PEANUTS · ALMONDS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "HONEY ROASTED · CASHEWS · PEANUTS · ALMONDS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "frontal"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.sunrise_cart.umbrella",
+    "file": "vendor_sunrise_cart_umbrella.png",
+    "owner": "narrative",
+    "use": "Sunrise Coffee & Roll: cart umbrella panel (tiled around the umbrella)",
+    "aspect": "2:1",
+    "size": "2048×1024",
+    "sizeFinal": false,
+    "prompt": "Create one flat panel of a street-vendor cart umbrella in orange canvas stripes, unrolled flat, with lettering along the scalloped edge. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"SUNRISE · COFFEE & ROLL\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 2:1.",
+    "text": "SUNRISE · COFFEE & ROLL",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "flat panel, no umbrella frame"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.sunrise_cart.cart",
+    "file": "vendor_sunrise_cart_cart.png",
+    "owner": "narrative",
+    "use": "Sunrise Coffee & Roll: cart side panel",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create the flat side panel of a 1970s stainless-steel New York street-food cart with hand-painted sign-writer lettering, a little dented and greasy. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"COFFEE 20¢ · BUTTERED ROLL 15¢ · DANISH 30¢\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "COFFEE 20¢ · BUTTERED ROLL 15¢ · DANISH 30¢",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand",
+      "frontal"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.price_board",
+    "file": "vendor_price_board.png",
+    "owner": "narrative",
+    "use": "Generic cart price board (the renderer sets the prices from vendors.json)",
+    "aspect": "3:4",
+    "size": "768×1024",
+    "sizeFinal": false,
+    "prompt": "Create a small black-painted price board with a white chalk-line border and EMPTY rows for prices, hung from a street cart. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 3:4.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text",
+      "rows empty"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "vendor.pennant",
+    "file": "vendor_pennant.png",
+    "owner": "narrative",
+    "use": "Peddler's souvenir pennant (period slogan, not the 1977 heart slogan)",
+    "aspect": "3:1",
+    "size": "1536×512",
+    "sizeFinal": false,
+    "prompt": "Create a flat felt souvenir pennant, triangular, red with white felt letters and a simple skyline silhouette (no real building logos). Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos other than the exact text given, no modern materials. Muted, slightly sun-faded 1970s colour. EXACT TEXT: \"NEW YORK · SEE IT TO BELIEVE IT\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3:1.",
+    "text": "NEW YORK · SEE IT TO BELIEVE IT",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no heart symbol",
+      "no real logo"
+    ],
+    "priority": 3
+  }
+]

@@ -1,0 +1,76 @@
+{
+  "id": "mission.side_cart_racket",
+  "kind": "side",
+  "title": "Ten a Week",
+  "number": null,
+  "leads": [
+    "char.teddy_arce",
+    "char.delphine_moore"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Mama Lucchese's cart, 23rd & Eighth",
+      "to": "W 23rd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "She pays ten a week. To whom?",
+      "script": "dlg.side_cart_racket_1"
+    },
+    {
+      "id": "o3",
+      "type": "follow",
+      "text": "Follow the collector down Eighth",
+      "target": "npc.stickup_man",
+      "keepWithinM": 60
+    },
+    {
+      "id": "o4",
+      "type": "combat",
+      "mode": "takedown",
+      "text": "Stop the shakedown, 26th & Eighth",
+      "targets": [
+        {
+          "archetype": "npc.stickup_man",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Tell the carts they're free. For now.",
+      "script": "dlg.side_cart_racket_2",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "The carts on Eighth stop paying; free food from the vendors there",
+    "money": 300,
+    "payNote": "The carts on Eighth chip in; free food there afterwards."
+  },
+  "where": "Eighth Ave, 23rd–30th St",
+  "systems": [
+    "follow",
+    "combat (takedown)",
+    "witness system"
+  ],
+  "mobile": "Takedown is non-lethal-friendly; no precise aim.",
+  "rank": 57,
+  "slice": false,
+  "durationMin": 18,
+  "heat": 2
+}
