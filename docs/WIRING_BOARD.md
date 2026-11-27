@@ -81,3 +81,23 @@ Shots are in `shots/wiring/`.
   - `missionEnd`, using gameplay's `missionBegin`/`missionLines`.
 - **E17:** the Grand Central PLAYABLE annex.
 - **The touch-only combined run on a phone.**
+
+## Update 2026-11-27 (later): interiors hookup and parked cars
+| Shot | What it shows |
+|---|---|
+| `C_37th_parked_noon.jpg` | W 37th St in the Garment District at noon. Both kerbs are parked solid (sim `parkedCars`: 163 within 160 m), with a step van and moving traffic between them. |
+| `storefronts_cut_noon.jpg` | A storefront row with the facade cut. Real interiors (a bodega, coffee shops) show through the display windows and the open doorways. |
+| `bodega_inside_noon.jpg` | Inside the bodega, looking out: the street, traffic and pedestrians through the cut windows. |
+| `storefronts_row_2300.jpg` | The same row at 23:00. Near units are live interiors; farther units are plugs with uneven per-shop light, and some are dark. The old flat beige glow is gone. |
+
+**Critique:**
+- **Board item 2 (flat night storefronts) is largely fixed.** The far plugs still read a little pale
+  and cool: tune the colour mix toward incandescent and lower the levels.
+- **Board item 3 (density) is better on side streets.** Avenues and major crosstowns are correctly
+  empty of parked cars by day (no-standing hours). Moving traffic in view still depends on sim
+  throughput at junctions; the sim is working on 42nd & 7th.
+- **Parked cars skew white and cream.** This is a vehicles paint-distribution issue; raise it with
+  vehicles.
+- **Doorway collisions are open before an interior is live.** Interiors stream within 30 m, so in
+  practice the interior is always there first. A plug collider for not-yet-live units is queued as
+  a safety net.
