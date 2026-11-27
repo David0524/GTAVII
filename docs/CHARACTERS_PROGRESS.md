@@ -354,6 +354,19 @@ real problems, and the cause went deeper than tuning:
 - **Framing:** `04_leads_act1_vs_refs` now shows the leads head to toe. The lineups (`01`, `02`)
   now show the Medium+ near ring with matched Rocketbox heads, which is what players see close up.
 
+## vs GTA V / VI / RDR2 (required on every milestone; `docs/briefs/REFERENCE_GAMES.md`)
+Benchmarks for this stream: faces, skin, hair, clothing, wardrobe variety, facial animation, idle
+variety, and the RDR2 level of animation detail. We study behaviour and quality; we copy nothing.
+
+| Area | What the references do | Where we match | Where we fall short | Plan |
+|---|---|---|---|---|
+| **Faces** | Scanned, individually authored heads for every lead and a large pool of varied, believable pedestrian faces; RDR2 adds visible ageing, weathering and dirt | Teddy and Nick, and matched near-ring pedestrians: photographic textures, real eyes, believable ageing | Delphine and Black women nearby are on our parametric head (no suitable source yet); repeats in a 31-head pool; distant faces are mannequin-like | Head-source decision (MetaHuman or a scan pack), then a pool of 60+ heads covering the district |
+| **Skin** | Subsurface scattering, dual specular, pores and micro-detail, sweat and dirt that respond to weather | Tone fidelity check; sweat, heat and wetness hooks; CC0 skin detail | No diffusion profile or micro-normal; flat under hard sun | Pre-integrated skin plus a micro-normal; screen-space SSS on desktop |
+| **Hair** | Dense anisotropic cards, hair that reads at every distance, TAA-resolved | Card styles from the 1974 references; Rocketbox cards on Rocketbox heads | Speckle without TAA, no anisotropic shading, flat strands; Delphine's cropped natural hair isn't done | Anisotropic two-lobe shader, strand atlas, engine TAA |
+| **Clothing and wardrobe** | Layered garments with folds, wrinkles, seams and secondary motion; huge variety; clothes fit every body | Large period-correct variety from 65 reference photos, parametric fit to every body, fabric relief, 11 shoe types | No folds or wrinkle normals, flat collars and lapels, no secondary motion | Wrinkle normal maps driven by joint angle, rolled collars and lapels, cloth secondary motion |
+| **Facial animation** | Blinks, saccades, full lip-sync and expressive cutscene faces; RDR2 ambient facial idles | None yet | Everything | Blinks and saccades now, visemes and expressions for cutscenes |
+| **Idles and animation detail** | RDR2: dozens of idle variants, contextual gestures, weight shifts, foot planting and hand contacts everywhere | Blend space with stride warp, foot IK with locking, look-at, hand IK, seat pose, ambient props; crowd near ring at full fidelity | Few idle variants, simple turn-in-place, no traversal or ragdoll yet | The movement brief block: traversal, momentum, ragdoll blend, stumbles, plus an idle-variety pass |
+
 ## Gaps against the visual bar (`docs/briefs/VISUAL_BAR.md`: "GTA V level at worst")
 The Characters bar asks for photoreal heads, skin with subsurface scattering, hair cards, cloth
 with normal detail, and blinks, lip-sync and facial animation in cutscenes. Where we stand:
