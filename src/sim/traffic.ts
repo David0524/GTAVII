@@ -151,19 +151,69 @@ function chooseRoute(S: SimCore, v: Vehicle) {
 }
 
 // ------------------------------------------------------------------ spawning
+/**
+ * Density-targeted placement (VISUAL_BAR "Life"). The budget is spread at a target density per metre of
+ * lane around the focus, not over a fixed ring: the radius R is where the lane-metres within it hold the
+ * budget at FILL, so a dense part of town (Herald Square has 2.5 km of lane within 120 m) gets a smaller,
+ * fuller disc and a smaller budget (phones) shrinks the disc, not the street. Spawns go into 20 m bands
+ * that are below target: at the rim (0.55 R–R) where they can't be seen arriving, and anywhere beyond 30 m
+ * that the camera isn't looking (`setView`), so the near field doesn't wait for traffic to drive in.
+ */
+const FILL = 0.075; // vehicles per lane-metre at full density (about one per 13 m of every lane)
+const BAND = 20;
+interface Field { x: number; z: number; R: number; lanes: number[]; laneM: Float32Array }
+let field: Field | null = null;
+function vehicleField(S: SimCore): Field {
+  const f = S.focus;
+  if (field && field.lanes.length && Math.hypot(field.x - f.x, field.z - f.z) < 12 && (field as any).net === S.net && (field as any).max === S.maxVehicles) return field;
+  const net = S.net, RMAX = 320;
+  const lanes = [...net.lanesNear(f.x, f.z, RMAX, new Set())].filter((l) => net.g.links[l].kind === LinkKind.Lane);
+  const nb = Math.ceil(RMAX / BAND), laneM = new Float32Array(nb);
+  for (const l of lanes) {
+    const p = net.g.links[l].pts;
+    for (let k = 0; k + 3 < p.length; k += 2) {
+      const mx = (p[k] + p[k + 2]) / 2, mz = (p[k + 1] + p[k + 3]) / 2, b = Math.floor(Math.hypot(mx - f.x, mz - f.z) / BAND);
+      if (b < nb) laneM[b] += Math.hypot(p[k + 2] - p[k], p[k + 3] - p[k + 1]);
+    }
+  }
+  let cum = 0, R = RMAX;
+  for (let b = 0; b < nb; b++) { cum += laneM[b]; if (cum * FILL >= S.maxVehicles) { R = (b + 1) * BAND; break; } }
+  R = Math.max(110, Math.min(RMAX, R));
+  field = { x: f.x, z: f.z, R, lanes, laneM };
+  (field as any).net = S.net; (field as any).max = S.maxVehicles;
+  return field;
+}
+/** Is (x,z) outside the camera's view cone (or no view given → false)? */
+function outOfView(S: SimCore, x: number, z: number): boolean {
+  const v = S.view; if (!v) return false;
+  const dx = x - v.x, dz = z - v.z, d = Math.hypot(dx, dz);
+  if (d < 30) return false;
+  return (dx * v.dx + dz * v.dz) / d < v.cosHalf - 0.15;
+}
+
 export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
   const { net } = S;
-  const target = Math.round(S.maxVehicles * vehDensity(S.minute) * (S.weather === 'rain' ? 0.85 : 1));
+  const F = vehicleField(S), R = F.R;
+  S.ringV[0] = R * 0.55; S.ringV[1] = R;
+  const dens = vehDensity(S.minute) * (S.weather === 'rain' ? 0.85 : 1);
+  const target = Math.round(S.maxVehicles * dens);
   let n = S.vehicles.length;
-  const [rIn, rOut] = S.ringV;
+  if (n >= target || !F.lanes.length) return;
+  // current occupancy per band
+  const nb = F.laneM.length, occ = new Float32Array(nb);
+  for (const v of S.vehicles) { const b = Math.floor(Math.hypot(v.x - S.focus.x, v.z - S.focus.z) / BAND); if (b < nb) occ[b]++; }
+  const rho = FILL * dens;
   for (let tries = 0; n < target && tries < budget * 6 && budget > 0; tries++) {
-    const lane = net.laneIds[S.rng.int(net.laneIds.length)];
+    const lane = F.lanes[S.rng.int(F.lanes.length)];
     const L = net.g.links[lane], len = net.len[lane];
     if (len < 16) continue;
     const s = S.rng.range(6, len - 9);
     sampleAt(L.pts, net.cum[lane], s, tmp);
     const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
-    if (d > rOut || (!full && d < rIn)) continue;
+    if (d > R) continue;
+    if (!full && d < R * 0.55 && !outOfView(S, tmp[0], tmp[1])) continue;
+    const b = Math.floor(d / BAND);
+    if (occ[b] >= F.laneM[b] * rho) continue;
     if (S.densityHook && S.rng.next() > S.densityHook(tmp[0], tmp[1], 'vehicle')) continue;
     const road = net.g.roads[L.owner];
     const arch = S.reg.pick((a) => a.behaviour === 'driver' && (a.vehicle !== 'bus' || (road.flags & RoadFlag.BusRoute) !== 0), tmp[0], tmp[1], S.minute, S.rng.next());
@@ -180,7 +230,7 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     for (const o of S.occ[lane]) if (Math.abs(o.s - s) < (o.len + vl) / 2 + 6) { ok = false; break; }
     if (ok) for (const o of S.vehicles) if (Math.hypot(o.x - tmp[0], o.z - tmp[1]) < (o.len + vl) / 2 + 3) { ok = false; break; }
     if (!ok) continue;
-    makeVehicle(S, kind, vclass, arch, lane, s); n++; budget--;
+    makeVehicle(S, kind, vclass, arch, lane, s); n++; budget--; occ[b]++;
     S.stats.spawnedV++;
   }
 }
@@ -267,12 +317,48 @@ function sirenBlocked(S: SimCore, v: Vehicle): string {
       if (w !== v && w.state === 'drive' && net.len[side] - w.s < 8 && (w.len <= LONG || w.id < v.id)) return 'conflict';
     }
   }
+  // physically clear: a siren unit doesn't wait for permission, so make sure no body is on its path (a car
+  // whose nose is already over a stop line, someone queued at the line where the gutter swing passes)
+  if (pathObstructed(S, v, c) || gutterTurnBlocked(S, v, c)) return 'box';
   for (const cf of C.conflicts) { // vehicles about to enter on green: let them clear first
     const src = S.srcLane[cf.link];
     for (const w of S.occ[src]) if (w.next === cf.link && net.len[src] - w.s < 12 && w.v > 2) return 'yield';
   }
   for (const cr of C.crossings) { const peds = S.onWalk.get(cr.walkEdge); if (peds?.length) { sampleAt(C.pts, net.cum[c], cr.s, tmp); for (const p of peds) if (Math.hypot(p.x - tmp[0], p.z - tmp[1]) < 4.5) return 'peds'; } }
   return '';
+}
+
+/** A siren unit turning out of the gutter swings back across the lane: not while someone is at the line beside it. */
+function gutterTurnBlocked(S: SimCore, v: Vehicle, c: number): boolean {
+  const turn = S.net.g.links[c].turn;
+  if (Math.abs(v.lat) < 1 || turn === Turn.Straight) return false;
+  // only turns away from the gutter cross the queue (gutter on the left: right turns, and vice versa)
+  if ((v.lat < 0 && turn === Turn.Left) || (v.lat > 0 && turn === Turn.Right)) return false;
+  const len = S.net.len[v.link];
+  for (const w of S.occ[v.link]) if (w !== v && len - w.s < w.len / 2 + 3 && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1.5) return true;
+  return false;
+}
+
+/** Any other vehicle's body within the swept path of connector c over its first 18 m (from the gutter offset)? */
+function pathObstructed(S: SimCore, v: Vehicle, c: number): boolean {
+  const net = S.net, len = Math.min(18, net.len[c]), exit = net.g.links[c].next[0];
+  let hit = false;
+  for (let s = 0; s <= len && !hit; s += 2) {
+    sampleAt(net.g.links[c].pts, net.cum[c], s, tmp);
+    // the offset decays over the first few metres of the connector
+    const k = Math.max(0, 1 - s / 6), lat = v.lat * k;
+    let px = tmp[0], pz = tmp[1];
+    if (lat !== 0) { const dx = tmp[2], dz = tmp[3]; px += -dz * lat; pz += dx * lat; }
+    S.vGrid.query(px, pz, 9, (i) => {
+      const w = S.vehicles[i]; if (hit || !w || w === v || !w.alive || w.link === c || (w.link === v.link && Math.abs(v.lat) < 1) || w.link === exit) return; // in the gutter, the lane's queue is being passed, not followed
+      // distance from the sample point to w's axis segment
+      const fx = -Math.sin(w.yaw), fz = -Math.cos(w.yaw), h = w.len / 2;
+      const rx = px - w.x, rz = pz - w.z, along = Math.max(-h, Math.min(h, rx * fx + rz * fz));
+      const d = Math.hypot(rx - fx * along, rz - fz * along);
+      if (d < (w.wid + v.wid) / 2 + 0.3) hit = true;
+    });
+  }
+  return hit;
 }
 
 /**
@@ -306,6 +392,8 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
   if (c < 0) return '';
   const C = net.g.links[c], out = C.next[0];
   if (v.cop?.siren) { const gw = gutterBlocked(S, v); if (gw) return gw; }
+  // safety net for junctions whose geometry the build step's conflict zones miss: a body on my path
+  if (pathObstructed(S, v, c) || gutterTurnBlocked(S, v, c)) return 'box';
   // don't block the box: room on the exit lane (siren units go: traffic makes way for them)
   if (!v.force && !v.cop?.siren) {
     let room = roomFrom(S, out, t);
@@ -314,6 +402,16 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
   }
   // conflicting movements already in the junction
   for (const cf of C.conflicts) if (vehiclesBeforePoint(S, cf.link, cf.sOther, v.wid + 1.0)) return 'conflict';
+  // long vehicles swing wide: keep the neighbouring turn paths clear (either one long), and don't start a
+  // turn with someone at the line in the next lane (the rear swings over them; lower id goes first)
+  const long = v.len > LONG;
+  for (const o of wideOf(S, c)) for (const w of S.occ[o]) if (long || w.len > LONG) return 'conflict';
+  if (long && C.turn !== 0) {
+    const L = net.g.links[v.link];
+    for (const side of [L.left, L.right]) if (side >= 0) for (const w of S.occ[side]) {
+      if (w !== v && w.state === 'drive' && net.len[side] - w.s < 8 && (w.len <= LONG || w.id < v.id)) return 'conflict';
+    }
+  }
   // pedestrians on crosswalks this connector crosses
   for (const cr of C.crossings) {
     const peds = S.onWalk.get(cr.walkEdge);
@@ -393,7 +491,7 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
       let slowAhead = gutter;
       for (const w of list) if (w !== v && w.s > v.s && w.s - v.s < 70 && w.v < 6 && Math.abs(w.lat - v.lat) < 1.5) slowAhead = true;
       if (slowAhead) v.latTarget = gl;
-    } else if (L.kind !== LinkKind.Lane) v.latTarget = 0;
+    } else if (L.kind !== LinkKind.Lane) v.latTarget = (L.turn === Turn.Straight ? v.s < v.len / 2 + 2 : L.turn !== (v.lat < 0 ? Turn.Right : Turn.Left) && v.s < v.len / 2) ? v.lat : 0; // keep the gutter line until the rear is past the queue head's nose (straight on: until it clears the line; turning to the gutter side: a shorter hold, the inside corner is close)
   } else if (passing < 0) v.latTarget = passing;
   else if (v.state === 'drive' && v.latTarget < 0) v.latTarget = 0;
   if (passSlow < Infinity && v.v > passSlow) consider(Math.max(4, v.v * 2), passSlow, 'passing');

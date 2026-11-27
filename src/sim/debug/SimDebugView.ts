@@ -68,7 +68,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
     const maxV = 200, maxP = 450;
     const vMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 }), maxV);
     const pMesh = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.24, 1.15, 3, 8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), maxP);
-    const sigs = sim.signalStates();
+    const sigs = sim.debugStopLines();
     const sMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshBasicMaterial({ color: 0xffffff }), sigs.length);
     const maxW = 260;
     const wMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), maxW);
@@ -123,7 +123,7 @@ export function attachSimDebug(scene: THREE.Scene, camera: THREE.Camera) {
         M.compose(P, Q, S); wMesh.setMatrixAt(i, M);
         wMesh.setColorAt(i, C.set(bird ? (a.variant % 5 === 0 ? 0xb8b0a8 : 0x7d8088) : 0x2b2622));
       }
-      sim.signalStates(sigs).forEach((s, i) => sMesh.setColorAt(i, C.set(SIG_COLOR[s.state])));
+      sim.debugStopLines(sigs).forEach((s, i) => sMesh.setColorAt(i, C.set(SIG_COLOR[s.state])));
       for (const m of [vMesh, pMesh, sMesh, wMesh]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
       if ((hudT -= dt) <= 0) {
         hudT = 0.25;

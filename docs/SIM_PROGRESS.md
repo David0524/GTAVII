@@ -21,6 +21,8 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Parking enforcement, tows, street cleaning | **Done (first pass)**: `parkingRule(x,z,minute?,dow?)`, `hydrantsNear`, `setDay`, `registerParkedCar`/`unregisterParkedCar`; traffic agents ticket (`ticketIssued`), tow trucks tow (`towDispatched`, `vehicleTowed`), street sweepers run alternate-side windows (`sweeperOut`) |
 | Subway schedule and platform crowds | **Done (first pass)**: 15 stations (narrative's canonical 1974 list + PATH 33rd St), `complex` for Herald Sq / Times Sq; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
 | Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured; per-kind rates (`DOOR_RATES`, `setDoorRates`) |
+| Signal heads for the engine's props (Phase 3 block A) | `signalHeads()` (static: vehicle heads per signalised approach, WALK/DON'T WALK heads at crosswalk ends) + `signalStates(out)` (one byte per head per frame); ENGINE_REQUESTS sim 9 |
+| Visual bar "Life": density near the camera | Density-targeted spawning + `setView`; test asserts agents within 60 m (rush hour Herald Square: High 34 vehicles / 114 peds, Low 13 / 53) |
 | Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
@@ -109,8 +111,13 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
 - Long vehicles (buses, trucks over 7 m) swing wide on tight turns: they treat neighbouring turn paths
   through the same junction (within 4.8 m) as conflicts and don't start a turn with someone at the line
   in the next lane; nobody changes lanes into the last 14 m beside a vehicle still turning out.
-- Spawning in a ring around the focus (High: 0.6–2.6 × 10² m; Low: 0.6–1.6 × 10² m), density by
-  time of day × weather × optional `setDensityHook`; despawn beyond the ring; gridlock fallback:
+- Density-targeted spawning (VISUAL_BAR "Life"): the budget is spread at a target density around the
+  focus, one vehicle per ~13 m of lane and a pedestrian per ~2 m of sidewalk at full density (× time of
+  day × weather × optional `setDensityHook`). The populated radius is where the lane/sidewalk metres hold
+  the budget (Herald Square on High: ~150 m for traffic, ~120 m for people; floors 110 m / 75 m), so a
+  smaller budget shrinks the disc instead of thinning the street. Spawns go into under-filled 15–20 m
+  bands, at the rim or anywhere beyond 20–30 m that the camera isn't looking (`setView`); despawn beyond
+  the disc; gridlock fallback:
   a vehicle stationary > 60 s while not at a red (and > 70 m from the focus, or > 150 s anywhere)
   is despawned. Signals are a pure function of time (no state), so the sim is deterministic.
 
@@ -360,6 +367,18 @@ What doesn't (yet):
 - **Region edge**: streets are clipped at the REGION boundary, so edge blocks have fewer exits.
 - Permissive left turns only; no turn-arrow phases. Side streets are not coordinated, only avenues.
 - Street-level shot shows a truck right at the camera: the camera rig stands in the roadway.
+
+## Visual bar ("Life") gaps
+VISUAL_BAR.md: dense traffic and pedestrians, parked cars on every kerb, a street must never look empty.
+- **Near field:** met on High (see the density test). Low (40/120) is thinner (13 vehicles within 60 m
+  at rush hour vs 34); asked the engine for 90/240 on phones if the frame budget allows.
+- **Parked cars:** not yet. The kerb lanes are empty; the sim offers `parkedCars(x, z, r)` (rule-aware
+  static instances) and will then move kerb uses (cab pickups, siren gutter runs) into the gaps.
+- **Far field:** long avenue views beyond the populated disc (~150 m) are empty in the sim; that needs
+  impostor/LOD traffic on the engine side.
+- **Night:** 3 a.m. is deliberately thin (period-true), floor raised to 40% of peak traffic.
+- **Cost:** denser near-field traffic slows siren travel at rush hour in the densest spots (Herald Square
+  first unit ~54 s in the test vs ~21 s before; cap 60 s).
 
 ## Known issues / next
 - [ ] Police vehicle agents (pursuit, box-in, roadblocks), foot cops on the walk graph, car-owner

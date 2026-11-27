@@ -9,6 +9,8 @@ import { Rng, sampleAt, projectOnPoly } from './geom';
 import type { TrafficVehicleView } from '../shared/traffic';
 import { heightAt, CURB_HEIGHT, loadTerrain, terrainLoaded } from '../shared/terrain';
 import { edgeDistance } from '../shared/bounds';
+import { buildSignalHeads, writeSignalStates, type SignalHead } from './signals';
+export { SignalState, type SignalHead } from './signals';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
 import { despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
@@ -118,7 +120,7 @@ export class Simulation {
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Lane) for (const c of l.next) srcLane[c] = i; });
     const crossConns = new Map<number, number[]>();
     g.links.forEach((l, i) => { for (const c of l.crossings) (crossConns.get(c.walkEdge) ?? crossConns.set(c.walkEdge, []).get(c.walkEdge)!).push(i); });
-    const rOutV = Math.max(150, Math.min(300, 120 + this.opts.maxVehicles * 0.95));
+    const rOutV = Math.max(150, Math.min(300, 120 + this.opts.maxVehicles * 0.95)); // initial; spawnVehicles sizes it from the lane-metres around the focus
     const rOutP = Math.max(80, Math.min(150, 60 + this.opts.maxPeds * 0.2));
     const core: SimCore = {
       net, rng: new Rng(this.opts.seed), reg, t: 0, minute: this.minute, weather: this.weather,
@@ -126,7 +128,7 @@ export class Simulation {
       pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), onWalk: new Map(), srcLane,
       actors: [], blocks: [], threats: [], closedRoads: new Map(), hails: [], spotOwner: new Int32Array(g.spots.length).fill(-1),
       focus: { x: 0, z: 0 }, maxVehicles: this.opts.maxVehicles, maxPeds: this.opts.maxPeds,
-      ringV: [rOutV * 0.6, rOutV], ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,
+      ringV: [rOutV * 0.6, rOutV], view: null, ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,
       emit: (type, e) => this.fire(type, e), stats: newStats(), nextId: 1, pedById: new Map(),
       busStopOf: new Map(g.busStops.map((b) => [b.link, b])), crossConns, lcList: [], sirens: [], preds: g.links.map(() => []),
       footCount: new Float32Array(g.roads.length), footAvg: new Float32Array(g.roads.length),
@@ -330,6 +332,20 @@ export class Simulation {
   registerParkedCar(id: string, x: number, z: number) { this.parking.register(id, x, z); }
   unregisterParkedCar(id: string) { this.parking.unregister(id); }
 
+  // ---------------------------------------------------------------- traffic-signal heads (engine props)
+  private heads: SignalHead[] | null = null;
+  /**
+   * Static list of signal heads to place (call after load): one vehicle head per signalised approach and a
+   * pedestrian WALK/DON'T WALK head at each crosswalk end. Use this, not the OSM POIs: it includes the
+   * junctions the sim signalises itself, so every lit head is one the cars obey.
+   */
+  signalHeads(): readonly SignalHead[] { return (this.heads ??= buildSignalHeads(this.core.net)); }
+  /** Per-frame states, one byte per head (SignalState: 0 dark, 1 red, 2 yellow, 3 green, 4 DON'T WALK, 5 flashing, 6 WALK). */
+  signalStates(out?: Uint8Array): Uint8Array {
+    const h = this.signalHeads(); const o = out && out.length >= h.length ? out : new Uint8Array(h.length);
+    writeSignalStates(this.core.net, h as SignalHead[], this.core.t, o); return o;
+  }
+
   // ---------------------------------------------------------------- street graph queries
   /**
    * Real intersections (lane-graph junctions where 2+ named streets meet) within `radius` of a point,
@@ -503,6 +519,15 @@ export class Simulation {
     this.net.g.junctions.forEach((j, i) => { if (Math.hypot(j.x - area.x, j.z - area.z) <= area.radius) { if (powered) this.net.dark.delete(i); else this.net.dark.add(i); } });
   }
 
+  /**
+   * Camera for spawn placement (optional, per frame or when it turns): with it, traffic also spawns close
+   * by where the camera isn't looking, so the near field is full from the first frame after a turn-around.
+   * forward is any horizontal direction; fovDeg the horizontal field of view.
+   */
+  setView(x: number, z: number, fwdX: number, fwdZ: number, fovDeg = 75) {
+    const l = Math.hypot(fwdX, fwdZ) || 1;
+    this.core.view = { x, z, dx: fwdX / l, dz: fwdZ / l, cosHalf: Math.cos((fovDeg / 2) * Math.PI / 180) };
+  }
   setClock(minutesSinceMidnight: number): void { this.minute = ((minutesSinceMidnight % 1440) + 1440) % 1440; }
   setWeather(w: 'clear' | 'overcast' | 'rain'): void { this.weather = w; }
   /** Optional hook: spawn-probability multiplier (0..1) by place, e.g. per district. */
@@ -511,7 +536,7 @@ export class Simulation {
   registerArchetypes(defs: ArchetypeDef[]) { if (this.core) this.core.reg.register(defs); else this.pendingArchetypes.push(...defs); }
 
   /** Stop lines of signalized approaches with their current state (debug view). */
-  signalStates(out: { x: number; z: number; state: 'green' | 'yellow' | 'red' | 'dark' }[] = []) {
+  debugStopLines(out: { x: number; z: number; state: 'green' | 'yellow' | 'red' | 'dark' }[] = []) {
     out.length = 0;
     for (const s of this.stopLines) {
       const st = this.net.laneSignal(s.lane, this.core.t);

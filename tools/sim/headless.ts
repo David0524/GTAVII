@@ -252,6 +252,23 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
 }
 
 /** Response time: siren units dispatched to a scene; seconds until the first one is on scene. */
+/** Near-camera density (VISUAL_BAR "Life": a street must never look empty): agents within 60 m, camera turning slowly. */
+async function densityRun(clock: number, where: { x: number; z: number }, preset: [number, number], label: string) {
+  const sim = new Simulation({ seed: SEED, maxVehicles: preset[0], maxPeds: preset[1], fetchBinary });
+  await sim.load(); sim.setClock(clock);
+  let nv = 0, np = 0, minV = 1e9, minP = 1e9, n = 0;
+  for (let k = 0; k < 150 / SIM_DT; k++) {
+    sim.setView(where.x, where.z, Math.sin(k * 0.002), -Math.cos(k * 0.002));
+    sim.update(SIM_DT, where);
+    if (k > 60 / SIM_DT && k % 30 === 0) {
+      const a = sim.vehicles.filter((v) => Math.hypot(v.x - where.x, v.z - where.z) < 60).length;
+      const b = sim.peds.filter((p) => Math.hypot(p.x - where.x, p.z - where.z) < 60).length;
+      nv += a; np += b; minV = Math.min(minV, a); minP = Math.min(minP, b); n++;
+    }
+  }
+  return { label, preset, clock, vehiclesAvg: +(nv / n).toFixed(1), vehiclesMin: minV, pedsAvg: +(np / n).toFixed(1), pedsMin: minP };
+}
+
 async function responseRun(clock: number, where: { x: number; z: number }, label: string) {
   const sim = new Simulation({ seed: SEED, maxVehicles: 150, maxPeds: 400, fetchBinary });
   await sim.load(); sim.setClock(clock);
@@ -301,6 +318,12 @@ async function main() {
     await responseRun(11 * 60, FOCI[0], 'off-peak, Flatiron'),
   ];
   report.response = resp;
+  const dens = [
+    await densityRun(17 * 60 + 30, FOCI[1], [150, 400], 'High, rush hour, Herald Square'),
+    await densityRun(13 * 60, FOCI[2], [150, 400], 'High, midday, Times Square'),
+    await densityRun(17 * 60 + 30, FOCI[1], [40, 120], 'Low, rush hour, Herald Square'),
+  ];
+  report.density = dens;
   const h1 = (await run({ seconds: 60, maxVehicles: 150, maxPeds: 400, checks: false, label: 'determinism A' })).hash;
   const h2 = (await run({ seconds: 60, maxVehicles: 150, maxPeds: 400, checks: false, label: 'determinism B' })).hash;
   report.determinism = { a: h1, b: h2, equal: h1 === h2 };
@@ -322,6 +345,17 @@ async function main() {
     if (ix.length < 3 || !ix.every((q) => q.streets.length >= 2)) problems.push(`nearestIntersections: ${JSON.stringify(ix.slice(0, 3))}`);
     const st = sim.subwayStations();
     if (st.filter((q) => q.complex === 'herald_sq').length !== 2 || st.filter((q) => q.complex === 'times_sq').length !== 2 || !st.some((q) => q.line === 'path') || st.some((q) => !q.contentId)) problems.push(`subway canon: ${st.map((q) => `${q.line}/${q.name}`).join(', ')}`);
+  }
+  for (const d of dens) {
+    const [needV, needP] = d.preset[0] >= 150 ? [20, 60] : [8, 35];
+    if (d.vehiclesAvg < needV || d.pedsAvg < needP) problems.push(`street too empty (${d.label}): ${d.vehiclesAvg} vehicles, ${d.pedsAvg} peds within 60 m (need ${needV}/${needP})`);
+  }
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 10, maxPeds: 10, fetchBinary }); await sim.load();
+    const H = sim.signalHeads(); const st = sim.signalStates();
+    const veh = H.filter((h) => h.kind === 'vehicle').length, ped = H.length - veh;
+    if (veh < 200 || ped < 400 || st.length !== H.length || ![...st].some((x) => x === 3) || ![...st].some((x) => x === 6)) problems.push(`signal heads: ${veh} vehicle, ${ped} ped`);
+    report.signalHeads = { vehicle: veh, ped, junctions: new Set(H.map((h) => h.junction)).size };
   }
   if (!full.doors.entered || !full.doors.exited) problems.push(`door traffic inactive: ${JSON.stringify(full.doors)}`);
   if (!full.subway.stations || !full.events.trainArriving) problems.push(`subway inactive: ${JSON.stringify(full.subway)}`);

@@ -66,6 +66,8 @@ export class Network {
   /** Junctions whose signals are unpowered (brownout): treated as all-way stops. */
   readonly dark = new Set<number>();
   isSignal(j: number) { return j >= 0 && (this.g.junctions[j].flags & JuncFlag.Signal) !== 0 && !this.dark.has(j); }
+  /** Has signal hardware (even if currently dark from a brownout). */
+  isSignalled(j: number) { return j >= 0 && (this.g.junctions[j].flags & JuncFlag.Signal) !== 0; }
 
   /** Signal state for a phase at time t (s). */
   phaseState(j: number, phase: number, t: number): Sig {

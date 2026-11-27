@@ -68,19 +68,60 @@ function freeSpot(S: SimCore, x: number, z: number, r: number, kinds: number[]):
 
 function goFree(p: Ped, x: number, z: number, then: string) { p.state = 'free'; p.tx = x; p.tz = z; p.then = then; }
 
+/**
+ * Same density-targeted placement as traffic (see spawnVehicles): the ped budget is spread at FILL_P per
+ * metre of sidewalk band around the focus, so the disc shrinks with the budget instead of the crowd
+ * thinning, and spawns go into under-filled 15 m bands at the rim or out of the camera's view.
+ */
+const FILL_P = 0.45, BAND_P = 15; // peds per sidewalk-band metre at full density (rush-hour Midtown: one every ~2 m each side)
+interface PField { x: number; z: number; R: number; edges: number[]; walkM: Float32Array; max: number; net: unknown }
+let pfield: PField | null = null;
+function pedField(S: SimCore): PField {
+  const f = S.focus, net = S.net, RMAX = 180;
+  if (pfield && pfield.net === net && pfield.max === S.maxPeds && Math.hypot(pfield.x - f.x, pfield.z - f.z) < 10) return pfield;
+  const edges = [...net.sidewalksNear(f.x, f.z, RMAX, new Set())].filter((e) => net.g.walkEdges[e].kind === WalkKind.Sidewalk);
+  const nb = Math.ceil(RMAX / BAND_P), walkM = new Float32Array(nb);
+  for (const e of edges) {
+    const p = net.g.walkEdges[e].pts;
+    for (let k = 0; k + 3 < p.length; k += 2) {
+      const b = Math.floor(Math.hypot((p[k] + p[k + 2]) / 2 - f.x, (p[k + 1] + p[k + 3]) / 2 - f.z) / BAND_P);
+      if (b < nb) walkM[b] += Math.hypot(p[k + 2] - p[k], p[k + 3] - p[k + 1]);
+    }
+  }
+  let cum = 0, R = RMAX;
+  for (let b = 0; b < nb; b++) { cum += walkM[b]; if (cum * FILL_P >= S.maxPeds) { R = (b + 1) * BAND_P; break; } }
+  R = Math.max(75, Math.min(RMAX, R));
+  return (pfield = { x: f.x, z: f.z, R, edges, walkM, max: S.maxPeds, net });
+}
+function pedOutOfView(S: SimCore, x: number, z: number): boolean {
+  const v = S.view; if (!v) return false;
+  const dx = x - v.x, dz = z - v.z, d = Math.hypot(dx, dz);
+  return d >= 20 && (dx * v.dx + dz * v.dz) / d < v.cosHalf - 0.15;
+}
+
 export function spawnPeds(S: SimCore, budget: number, full: boolean) {
   const net = S.net, g = net.g;
-  const target = Math.round(S.maxPeds * pedDensity(S.minute) * (S.weather === 'rain' ? 0.6 : 1));
-  const [rIn, rOut] = S.ringP;
+  const F = pedField(S), R = F.R;
+  S.ringP[0] = R * 0.6; S.ringP[1] = R;
+  const dens = pedDensity(S.minute) * (S.weather === 'rain' ? 0.6 : 1);
+  const target = Math.round(S.maxPeds * dens);
   let n = S.peds.length;
+  if (n >= target || !F.edges.length) return;
+  const nb = F.walkM.length, occ = new Float32Array(nb);
+  for (const p of S.peds) { const b = Math.floor(Math.hypot(p.x - S.focus.x, p.z - S.focus.z) / BAND_P); if (b < nb) occ[b]++; }
+  const rho = FILL_P * dens;
   for (let tries = 0; n < target && tries < budget * 6 && budget > 0; tries++) {
-    const edge = net.sidewalkIds[S.rng.int(net.sidewalkIds.length)];
+    const edge = F.edges[S.rng.int(F.edges.length)];
     const len = net.walkLen[edge];
     if (len < 4) continue;
     const s = S.rng.range(1, len - 1);
     sampleAt(g.walkEdges[edge].pts, net.walkCum[edge], s, tmp);
     const d = Math.hypot(tmp[0] - S.focus.x, tmp[1] - S.focus.z);
-    if (d > rOut || (!full && d < rIn)) continue;
+    if (d > R) continue;
+    if (!full && d < R * 0.6 && !pedOutOfView(S, tmp[0], tmp[1])) continue;
+    const band = Math.floor(d / BAND_P);
+    if (occ[band] >= F.walkM[band] * rho) continue;
+    occ[band]++;
     if (S.densityHook && S.rng.next() > S.densityHook(tmp[0], tmp[1], 'ped')) continue;
     // crowds thicken toward the playable edge (BOUNDARIES layer 3)
     const ramp = Math.max(0, Math.min(1, 1 - edgeDistance(tmp[0], tmp[1]) / EDGE.RAMP));

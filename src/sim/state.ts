@@ -110,6 +110,8 @@ export interface SimCore {
   focus: { x: number; z: number };
   maxVehicles: number; maxPeds: number;
   ringV: [number, number]; ringP: [number, number];
+  /** Camera (engine `setView`): position, unit forward on the ground and cos of half the horizontal FOV. */
+  view: { x: number; z: number; dx: number; dz: number; cosHalf: number } | null;
   densityHook: ((x: number, z: number, kind: 'vehicle' | 'ped') => number) | null;
   emit(type: string, e: Record<string, unknown>): void;
   stats: Stats; nextId: number;
@@ -142,5 +144,5 @@ export function pedDensity(minute: number) {
 }
 export function vehDensity(minute: number) {
   const h = minute / 60;
-  if (h < 5) return 0.3; if (h < 6.5) return 0.5; if (h < 10) return 1.0; if (h < 16) return 0.85; if (h < 19.5) return 1.0; if (h < 23) return 0.7; return 0.45;
+  if (h < 5) return 0.4; if (h < 6.5) return 0.55; if (h < 10) return 1.0; if (h < 16) return 0.85; if (h < 19.5) return 1.0; if (h < 23) return 0.7; return 0.45;
 }
