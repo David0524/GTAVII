@@ -16,9 +16,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2,
-      "buildMs": 129
+      "buildMs": 215.6
     },
     {
       "seed": 1,
@@ -35,9 +35,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2,
-      "buildMs": 61.8
+      "buildMs": 82.6
     },
     {
       "seed": 1,
@@ -52,9 +52,9 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2,
-      "buildMs": 143.2
+      "buildMs": 344.9
     }
   ],
   "updateMs": [
@@ -69,22 +69,22 @@
       "rb": "lead_teddy",
       "tone": "#b98a67",
       "cheek": [
-        0.557,
-        0.2641
+        0.5389,
+        0.2592
       ],
       "neck": [
-        0.54,
-        0.3421
+        0.5347,
+        0.3303
       ],
       "hand": [
-        0.2322,
-        1.1191
+        0.2183,
+        1.1279
       ]
     }
   ],
   "renderMsSoftware": [
-    2,
-    1.099999999627471,
+    4,
+    1.3000000002793968,
     0.7999999998137355
   ]
 }
