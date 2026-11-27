@@ -29,6 +29,8 @@ export class Discovery {
   private last = { x: NaN, z: NaN };
   /** Bumped on every membership change (reveal, quiet or not; load). */
   revision = 0;
+  /** Called when a place is revealed by sight (the map uses it to lift fog around the place). */
+  onSight: ((p: Place) => void) | null = null;
 
   constructor(places: Place[]) { for (const p of places) this.add(p); }
 
@@ -64,6 +66,7 @@ export class Discovery {
     if (via !== 'mission' && !p.reveal.includes(via)) return false;
     if (via === 'sight' && p.shady) return false;
     this.state[id] = { at: this.now, via, seen: quiet }; this.revision++;
+    if (via === 'sight') this.onSight?.(p);
     if (!quiet) for (const l of this.listeners) l({ place: p, via });
     return true;
   }

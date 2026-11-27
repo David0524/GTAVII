@@ -7,15 +7,23 @@ import { Discovery, type DiscoveryState } from './Discovery';
 import { RouteGraph, turns, type Turn, type RouteMode } from './Route';
 import { CATEGORIES, FILTER_GROUPS, type FilterGroup, type Place, type PlacesFile } from './places';
 import type { StreetRec } from './grid';
+import { Explored } from './Explored';
 
 export interface Annotation { x: number; z: number; mark: 'circle' | 'cross' | 'note'; text?: string }
-export interface MapSave { discovery: DiscoveryState; waypoint: { x: number; z: number } | null; annotations: Annotation[] }
+export interface MapSave { discovery: DiscoveryState; explored?: string | null; waypoint: { x: number; z: number } | null; annotations: Annotation[] }
 
+/** Fog-lift radii in metres. */
+export const EXPLORE_FOOT_M = 70, EXPLORE_VEHICLE_M = 110, SIGHT_PLACE_M = 40;
 const FILTER_KEY = 't74.ui.mapFilters';
 
 export class MapModel {
   readonly discovery: Discovery;
   readonly graph: RouteGraph;
+  /** Fog of war: ground the player has covered. Replaced by a fresh grid on load, so read it each frame. */
+  explored = new Explored();
+  private exploreT = 0;
+  /** Last position the model saw (seeds the fog when an old save is migrated). */
+  lastPos: { x: number; z: number } | null = null;
   waypoint: { x: number; z: number } | null = null;
   route: { pts: number[]; streets: number[]; length: number; mode: RouteMode } | null = null;
   turns: Turn[] = [];
@@ -30,6 +38,7 @@ export class MapModel {
     this.discovery = new Discovery(places);
     this.graph = new RouteGraph(streets);
     this.discovery.on(() => this.version++);
+    this.discovery.onSight = (p) => { if (this.explored.mark(p.x, p.z, SIGHT_PLACE_M)) this.version++; };
     try { const f = JSON.parse(localStorage.getItem(FILTER_KEY) ?? 'null'); if (Array.isArray(f)) this.filters = new Set(f); } catch { /* defaults */ }
   }
 
@@ -69,6 +78,8 @@ export class MapModel {
 
   /** Recompute the route from the player when they stray more than 35 m from it (at most twice a second). */
   update(dt: number, x: number, z: number, inVehicle: boolean) {
+    this.lastPos = { x, z };
+    if ((this.exploreT -= dt) <= 0) { this.exploreT = 0.5; if (this.explored.mark(x, z, inVehicle ? EXPLORE_VEHICLE_M : EXPLORE_FOOT_M)) this.version++; }
     if (!this.waypoint) return;
     if (Math.hypot(x - this.waypoint.x, z - this.waypoint.z) < 18) { this.setWaypoint(null); return; }
     this.routeT -= dt;
@@ -87,12 +98,27 @@ export class MapModel {
     this.routeFrom = { x, z }; this.routeT = 0.5; this.version++;
   }
 
-  serialize(): MapSave { return { discovery: this.discovery.serialize(), waypoint: this.waypoint, annotations: this.annotations.map((a) => ({ ...a })) }; }
+  serialize(): MapSave { return { discovery: this.discovery.serialize(), explored: this.explored.serialize(), waypoint: this.waypoint, annotations: this.annotations.map((a) => ({ ...a })) }; }
   deserialize(s: Partial<MapSave> | undefined) {
     this.discovery.deserialize(s?.discovery);
+    this.explored = restoreExplored(s?.explored, this.discovery, this.lastPos);
     this.waypoint = s?.waypoint ?? null; this.route = null; this.annotations = s?.annotations ? [...s.annotations] : [];
     this.version++;
   }
+}
+
+/**
+ * The grid from a save. `null` = a migrated v1 save: seed from what the player already knew (cells within
+ * 90 m of every discovered place, 150 m of `at`) so old saves are not fully fogged. Absent or damaged = empty.
+ */
+export function restoreExplored(raw: string | null | undefined, discovery: Discovery, at: { x: number; z: number } | null): Explored {
+  if (typeof raw === 'string') { try { return Explored.deserialize(raw); } catch { return new Explored(); } }
+  const g = new Explored();
+  if (raw === null) {
+    for (const p of discovery.known()) g.mark(p.x, p.z, 90);
+    if (at && Number.isFinite(at.x) && Number.isFinite(at.z)) g.mark(at.x, at.z, 150);
+  }
+  return g;
 }
 
 export function distToPolyline(p: number[], x: number, z: number) {
