@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Browser open-world engine and city: Manhattan's Tenderloin, summer 1974.",
   "scripts": {
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && tsx tools/dev/copyContent.ts && npm run audio:voices:build && vite build",
+    "build:fast": "tsc --noEmit && tsx tools/dev/copyContent.ts && vite build",
     "data": "npm run data:fetch && npm run data:build && npm run data:audit",
     "data:audit": "python3 tools/pipeline/audit_report.py",
     "shots:vehicles": "tsx tools/shots/vehicles.ts",
