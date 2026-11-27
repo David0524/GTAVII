@@ -9,7 +9,7 @@
  * Doors (interiors doorsForChunk), vehicles (player driving) and talkables (mission runtime) bind when
  * those land in the main game; gameplay's own fallbacks cover them until then.
  */
-import type * as THREE from 'three/webgpu';
+import * as THREE from 'three/webgpu';
 import { Gameplay, type Quality } from '../gameplay';
 import { RapierWorldQuery } from '../gameplay/scene/RapierWorldQuery';
 import { registerSection } from '../save/schema';
@@ -46,7 +46,7 @@ export async function createGameplay(o: { quality: Quality; physics: Physics; pl
   rq.excluded.add(o.player.collider.handle);
   g.bindWorld(rq);
   if (o.sim) g.bindSim(o.sim as never);
-  const dir = new (await import('three/webgpu')).Vector3();
+  const dir = new THREE.Vector3();
   const bind = () => g.bindPlayer({
     id: 'player', lead: o.lead(),
     position: () => [o.player.pos.x, o.player.pos.y, o.player.pos.z],
