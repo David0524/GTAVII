@@ -132,7 +132,8 @@
         ],
         "note": "Bernard: 'Men like that always eat at twelve-forty' (M5)",
         "notify": "toast",
-        "notifyWhy": "story contact (Calloway's lunch spot)"
+        "notifyWhy": "story contact (Calloway's lunch spot)",
+        "notifyLine": "The parked-car lady eats here"
       }
     },
     {
@@ -339,7 +340,8 @@
         ],
         "note": "Dwayne: 'Earl's the best on the street' (M4)",
         "notify": "toast",
-        "notifyWhy": "mission giver (Earl Poole)"
+        "notifyWhy": "mission giver (Earl Poole)",
+        "notifyLine": "Earl hears everything on the Deuce"
       }
     },
     {
@@ -616,7 +618,8 @@
         "hiddenUntilIntroduced": true,
         "note": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest",
         "notify": "toast",
-        "notifyWhy": "story contact (bail lawyer)"
+        "notifyWhy": "story contact (bail lawyer)",
+        "notifyLine": "Call him before you need him"
       }
     },
     {
@@ -635,7 +638,8 @@
         "hiddenUntilIntroduced": false,
         "note": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail",
         "notify": "toast",
-        "notifyWhy": "side-quest giver (Abend's Board of Skips)"
+        "notifyWhy": "side-quest giver (Abend's Board of Skips)",
+        "notifyLine": "Abend posts bail, and pays for skips"
       }
     },
     {
@@ -653,7 +657,8 @@
         "hiddenUntilIntroduced": false,
         "note": "Sunday classifieds in The Daily Ticker",
         "notify": "toast",
-        "notifyWhy": "cars for sale"
+        "notifyWhy": "cars for sale",
+        "notifyLine": "Used cars, cash talks"
       }
     },
     {
