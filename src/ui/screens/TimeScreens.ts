@@ -42,12 +42,12 @@ export class WaitPrompt extends Modal {
     this.show();
     const now = this.host.clock().minutes, until = toMinutes(e.windowStart);
     const wait = (until - now + 1440) % 1440;
-    this.root.innerHTML = `<div class="ts-center"><div class="ts-card">
-        <div class="ts-eyebrow">Not yet</div>
-        <h2>Wait until ${esc(clock12(e.windowStart, true))}?</h2>
-        <div class="ts-mission"><span>Job</span><b>${esc(e.title)}</b></div>
-        <div class="ts-window">${esc(windowLabel(e.windowStart, e.windowEnd))}</div>
-        <p class="ts-line">It is ${esc(clock12(toHHMM(now), true))} now. That is ${esc(duration(wait))} to kill.</p>
+    const at = clock12(e.windowStart, true).split(' ');
+    // DESIGN_A: a band across the held frame; the hero is the hour you'd wait for
+    this.root.innerHTML = `<div class="ts-center ts-a"><div class="ts-card">
+        <div class="ts-job"><div class="ts-eyebrow">Not yet</div><div class="ts-mission"><span>Job</span><b>${esc(e.title)}</b></div><div class="ts-window">${esc(windowLabel(e.windowStart, e.windowEnd))}</div></div>
+        <div class="ts-hero"><span class="a-label">Wait until</span><h2 class="a-num">${esc(at[0])}<small>${esc(at[1] ?? '')}</small></h2>
+          <p class="ts-line">${esc(duration(wait))} to kill. It's ${esc(clock12(toHHMM(now), true))} now.</p></div>
         <div class="ts-btns"></div>
       </div></div>`;
     const items: NavItem[] = [];
@@ -85,20 +85,20 @@ export class SleepMenu extends Modal {
     const can = info.canSleep;
     const away = (t: string) => duration((toMinutes(t) - now + 1440) % 1440 || 1440);
     this.root.innerHTML = `<div class="u-head"><h2>${info.bed ? 'Turn in' : 'Kill some time'}</h2><span class="sub">${esc(clock12(toHHMM(now), true))} now</span><span class="close"></span></div>
-      <div class="ts-sleepbody"><div class="ts-opts"></div><aside class="ts-notes"></aside></div><div class="u-foot">${this.footer()}</div>`;
-    const close = document.createElement('button'); close.className = 'u-btn'; close.textContent = 'Cancel ✕'; this.root.querySelector('.close')!.appendChild(close);
+      <div class="ts-sleepbody ts-a">${info.bed ? '<h4 class="t74-group">Wake up</h4>' : ''}<div class="ts-opts"></div><aside class="ts-notes"></aside></div><div class="u-foot">${this.footer()}</div>`;
+    const close = document.createElement('button'); close.className = 'u-btn'; close.textContent = 'Cancel'; this.root.querySelector('.close')!.appendChild(close);
     const opts = this.root.querySelector('.ts-opts')!, notes = this.root.querySelector('.ts-notes')!;
-    const opt = (title: string, sub: string, fn: () => void) => {
-      const b = document.createElement('button'); b.className = 'ts-opt'; b.innerHTML = `<b>${esc(title)}</b><span>${esc(sub)}</span>`;
+    const opt = (title: string, at: string, sub: string, fn: () => void) => {
+      const b = document.createElement('button'); b.className = 'ts-opt'; b.innerHTML = `<span class="lbl"><b>${esc(title)}</b><span>${esc(sub)}</span></span><em class="a-num">${esc(at)}</em>`;
       if (!can) b.setAttribute('aria-disabled', 'true');
       opts.appendChild(b); items.push({ el: b, activate: () => { if (can) fn(); } });
     };
     if (info.bed) {
-      opt('Until morning', `7:00 AM · ${away('07:00')}`, () => this.go('sleep', '07:00'));
-      opt('Until evening', `6:00 PM · ${away('18:00')}`, () => this.go('sleep', '18:00'));
+      opt('Until morning', '7:00 AM', away('07:00'), () => this.go('sleep', '07:00'));
+      opt('Until evening', '6:00 PM', away('18:00'), () => this.go('sleep', '18:00'));
       const until = toHHMM(this.hour * 60);
       const row = document.createElement('div'); row.className = 'ts-opt ts-step';
-      row.innerHTML = `<div class="lbl"><b>Until…</b><span>${esc(away(until))}</span></div><button class="ts-arrow" aria-label="An hour earlier">‹</button><div class="ts-time">${esc(clock12(until, true))}</div><button class="ts-arrow" aria-label="An hour later">›</button><button class="u-btn primary ts-go">Sleep</button>`;
+      row.innerHTML = `<div class="lbl"><b>Until…</b><span>${esc(away(until))}</span></div><button class="ts-arrow" aria-label="An hour earlier">−1 h</button><div class="ts-time a-num">${esc(clock12(until, true))}</div><button class="ts-arrow" aria-label="An hour later">+1 h</button><button class="u-btn primary ts-go">Sleep</button>`;
       opts.appendChild(row);
       const [dec, inc, goBtn] = [row.querySelectorAll('.ts-arrow')[0], row.querySelectorAll('.ts-arrow')[1], row.querySelector('.ts-go')] as HTMLElement[];
       const step = (d: number) => { this.hour = (this.hour + d + 24) % 24; this.render(); this.nav.focus(3); };
@@ -109,12 +109,12 @@ export class SleepMenu extends Modal {
     } else {
       for (const hrs of [1, 2]) {
         const t = toHHMM(now + hrs * 60);
-        opt(hrs === 1 ? 'Wait an hour' : 'Wait two hours', `${clock12(t, true)} · stand around`, () => this.go('wait', t));
+        opt(hrs === 1 ? 'Wait an hour' : 'Wait two hours', clock12(t, true), 'Stand around', () => this.go('wait', t));
       }
     }
     // Rest quality and what's next.
     const quality = info.restQuality === 'good' ? 'Good rest' : 'Poor rest';
-    notes.innerHTML = `${info.bed ? `<div class="ts-rest ${info.restQuality}"><span>${quality}</span><i></i></div>` : ''}
+    notes.innerHTML = `${info.bed ? `<div class="ts-rest ${info.restQuality}"><span class="a-label">Tonight</span><b>${quality}</b></div>` : ''}
       ${!can && info.reason ? `<p class="ts-reason">${esc(info.reason)}</p>` : ''}
       ${info.note ? `<p class="ts-note">${esc(info.note)}</p>` : ''}
       ${info.nextPinnedDate ? `<div class="ts-pin"><span>The story continues on</span><b>${esc(info.nextPinnedDate)}</b></div>` : ''}`;

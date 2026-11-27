@@ -41,4 +41,11 @@ export const SHOTS: Shot[] = [
   { name: 'map_mission_card', q: 'screen=map&discover=some', act: async (p) => { await p.evaluate(() => { const w = window as any; const m = w.__UI.ui.mapScreen; const ms = m.map.missions[0]; m.map.centerOn(ms.x, ms.z, 0.7); m.map.onSelect({ mission: ms }); }); } },
   { name: 'hud_city_before', q: 'screen=hud&city=1&quality=low&discover=none&waypoint=0', wait: 2500 },
   { name: 'hud_city_after', q: 'screen=hud&city=1&quality=low&discover=some', wait: 2500 },
+  { name: 'saves', q: 'screen=saves&saves=1' },
+  { name: 'settings', q: 'screen=settings' },
+  { name: 'settings_remap', q: 'screen=settings', act: async (p) => { await p.click('[data-v=remap]'); } },
+  { name: 'credits', q: 'screen=credits' },
+  { name: 'title', q: 'screen=title' },
+  { name: 'title_loading', q: 'screen=title&load=0.64' },
+  { name: 'business_forsale', q: 'screen=business', act: async (p) => { await p.click('.bz-item >> nth=-1'); } },
 ];

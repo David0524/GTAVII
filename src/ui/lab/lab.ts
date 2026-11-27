@@ -34,7 +34,10 @@ async function main() {
   host.pos = { x: Number(q.get('x') ?? 4), z: Number(q.get('z') ?? -52), yaw: Number(q.get('yaw') ?? 0.21) };
 
   const model = await MapModel.load(base, streets);
-  const ui: UiRoot = createUi(host, { model, heroes: world.heroes, lab: true });
+  // ?saves=1: a believable profile with a few slots, so the Saves screen can be judged in the lab
+  if (q.get('saves') === '1') (host as unknown as { saves: unknown }).saves = labSaves();
+  const titleMode = q.get('screen') === 'title';
+  const ui: UiRoot = createUi(host, { model, heroes: world.heroes, lab: true, title: titleMode });
   const disc = q.get('discover') ?? 'some';
   model.discovery.start(['char.teddy_arce']);
   if (disc === 'some' || disc === 'all') {
@@ -67,7 +70,8 @@ async function main() {
   if (mEnd) setTimeout(() => host.emit('missionEnd', mEnd === 'fail'
     ? { result: 'failed', title: 'Walk with Me', reason: 'Mayhew got into a cab without you.' }
     : { result: 'passed', title: 'Walk with Me', cash: 120, lines: [{ label: 'Time', value: '14:22' }, { label: 'Witnesses', value: 'None' }] }), 300);
-  ui.show(screen, Object.fromEntries(q));
+  if (titleMode) { if (q.get('load')) ui.titleProgress(Number(q.get('load'))); else ui.titleReady('Fri Jun 21, 8:41 PM · Broadway & W 23 St'); }
+  else ui.show(screen, Object.fromEntries(q));
 
   let last = performance.now(), walk = q.get('walk') === '1';
   const samples: number[] = []; const spin = q.get('spin') === '1';
@@ -87,4 +91,23 @@ async function main() {
   requestAnimationFrame(loop);
   (window as unknown as Record<string, unknown>).__UI = { ui, host, model, input, backdrop, ready: backdrop ? backdrop.whenIdle() : Promise.resolve(), samples };
 }
+/** Lab-only stand-in for SaveManager: two profiles, a few dated slots. */
+function labSaves() {
+  const at = (d: string) => new Date(`1974-06-${d}`).toISOString();
+  const profiles = [{ id: 'p1', name: 'Teddy\'s run', createdAt: at('18T09:00'), lastPlayedAt: at('21T20:41') }, { id: 'p2', name: 'Second try', createdAt: at('19T10:00'), lastPlayedAt: at('20T23:05') }];
+  const slots = [
+    { slot: 'manual-1', label: 'Hotel Corwin · night desk', savedAt: at('21T20:12'), playtimeSec: 15120, version: 1, bytes: 1 },
+    { slot: 'manual-2', label: 'Ozone Downs · after the fifth', savedAt: at('20T16:40'), playtimeSec: 11460, version: 1, bytes: 1 },
+    { slot: 'manual-4', label: 'Pier 74 pound · W 38 St', savedAt: at('19T11:05'), playtimeSec: 6420, version: 1, bytes: 1 },
+    { slot: 'quick', label: 'Broadway & W 23 St', savedAt: at('21T20:38'), playtimeSec: 15250, version: 1, bytes: 1 },
+    { slot: 'auto-1', label: 'Madison Square', savedAt: at('21T20:40'), playtimeSec: 15260, version: 1, bytes: 1 },
+    { slot: 'auto-2', label: 'Eighth Avenue', savedAt: at('21T20:31'), playtimeSec: 14710, version: 1, bytes: 1 },
+  ];
+  const ok = async () => {};
+  return {
+    store: { kind: 'indexeddb', listProfiles: async () => profiles, listSlots: async () => slots, createProfile: async (name: string) => ({ ...profiles[0], id: 'p3', name }), renameProfile: ok, deleteProfile: ok, touchProfile: ok },
+    profile: profiles[0], onSaved: new Set(), switchProfile: ok, save: ok, load: ok, exportSlot: async () => null, importToSlot: ok,
+  };
+}
+
 main().catch((e) => { console.error(e); document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f88;position:fixed;top:0">${String(e?.stack ?? e)}</pre>`); });
