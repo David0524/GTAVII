@@ -6,6 +6,7 @@
  */
 import { M, type Mat, tint } from '../kit/materials';
 import * as P from '../kit/props';
+import * as G from '../kit/propsGap';
 import { type GenCtx, WALL_T, fitRect, revealBox, bayWindowSpans, floorWindowY } from './common';
 import { coreLayout, shopRoofHatch, type CoreLayout } from '../layout';
 import { facadeOpenings } from '../facade';
@@ -76,16 +77,21 @@ function apartment(c: GenCtx, side: 'x0' | 'x1', zDoor: number, y0: number, fh: 
   k.box(kx - 0.36, y0 + 0.9, kz, kx + 0.36, y0 + 0.93, kz + 0.65, M.black, { occlude: false });
   if (r.chance(0.6)) { k.box(rc[0] + 0.2, y0, rc[3] - 0.8, rc[0] + 1.75, y0 + 0.62, rc[3] - 0.1, M.porcelain, { collide: 'cover' }); k.box(rc[0] + 0.18, y0 + 0.62, rc[3] - 0.82, rc[0] + 1.77, y0 + 0.66, rc[3] - 0.08, M.planks); } // tub with cover board
   k.box(rc[2] - 0.8, y0, rc[3] - 0.75, rc[2] - 0.1, y0 + 1.55, rc[3] - 0.1, M.enamelWhite, { collide: 'cover' }); // fridge
-  P.table(k, { x: (rc[0] + rc[2]) / 2, z: rc[3] - 1.6, yaw: 0 }, 0.9, 0.7, r.pick([M.formicaCream, M.formicaTeal, M.formicaRed]), 0.75, M.chrome);
-  P.chromeChair(k, { x: (rc[0] + rc[2]) / 2 - 0.6, z: rc[3] - 1.6, yaw: Math.PI / 2 }, M.vinylRed);
-  if (d > 5) {
+  // furniture is built from y = 0 in its own frame: k.at(y0) lifts it onto this floor
+  const dTop = r.pick([M.formicaCream, M.formicaTeal, M.formicaRed]), dSeat = r.pick([M.vinylRed, M.vinylGreen, M.vinylOrange]), cx = (rc[0] + rc[2]) / 2;
+  k.at(y0, () => {
+    G.dinetteTable(k, { x: cx, z: rc[3] - 1.6, yaw: 0 }, 0.9, 0.7, dTop);
+    G.dinetteChair(k, { x: cx - 0.62, z: rc[3] - 1.6, yaw: -Math.PI / 2 }, dSeat);
+    G.dinetteChair(k, { x: cx + 0.62, z: rc[3] - 1.6, yaw: Math.PI / 2 }, dSeat);
+  });
+  if (d > 5) k.at(y0, () => {
     const tvOn = r.chance(0.6);
     P.sofa(k, { x: (rc[0] + rc[2]) / 2, z: rc[1] + 1.0, yaw: Math.PI }, Math.min(2, w - 0.8), r.pick([M.fabricPlaid, M.fabricOlive, M.fabricBrown, M.vinylBrown]));
     P.consoleTV(k, { x: (rc[0] + rc[2]) / 2, z: rc[1] + 3.0, yaw: Math.PI }, tvOn);
     if (w > 3.5) P.armchair(k, { x: rc[0] + 0.7, z: rc[1] + 2.2, yaw: -Math.PI / 2 }, M.fabricRust);
-    k.box(rc[0] + 0.6, y0 + 0.003, rc[1] + 1.6, rc[2] - 0.6, y0 + 0.012, rc[1] + 3.6, r.pick([M.carpetRed, M.carpetGreen]), { occlude: false });
-  }
-  P.radiator(k, { x: rc[0] + 0.3, z: rc[1] + (atFacade ? 0.1 : 1.5), yaw: 0 }, 0.8);
+    k.box(rc[0] + 0.6, 0.003, rc[1] + 1.6, rc[2] - 0.6, 0.012, rc[1] + 3.6, r.pick([M.carpetRed, M.carpetGreen]), { occlude: false });
+  });
+  k.at(y0, () => P.radiator(k, { x: rc[0] + 0.3, z: rc[1] + (atFacade ? 0.1 : 1.5), yaw: 0 }, 0.8));
   P.bareBulb(k, (rc[0] + rc[2]) / 2, (rc[1] + rc[3]) / 2, y0 + H, 1.3);
   k.slot('resident', (rc[0] + rc[2]) / 2, y0, rc[3] - 2.3, Math.PI);
   k.marker('hide', rc[0] + 0.5, y0, rc[3] - 0.5, 'closet');
@@ -248,8 +254,8 @@ export function genTenement(c: GenCtx, sro = false, mode: 'tenement' | 'loft' = 
     k.box(L.x0 + fw - 0.06, ya, zFront + L.landing - 0.06, L.x0 + fw + 0.06, ya + 1.1, zFront + L.landing + 0.06, st.rail, { collide: true });
     P.bareBulb(k, (L.x0 + L.x1) / 2, (WALL_T + L.zs) / 2 + 0.5, y0 + L.fh - 0.25, st.bulbI * (r.chance(0.12) ? 0.25 : 1));
     if (r.chance(0.7)) P.bareBulb(k, (L.x0 + L.x1) / 2, (zBackL + L.ze) / 2, yb + 2.4 > yc + 1 ? yc : yb + 2.3, st.bulbI * 0.7);
-    P.radiator(k, { x: L.x0 + 0.02, z: L.zs - 1.2, yaw: -Math.PI / 2 }, 0.6);
-    if (f > 0 && r.chance(0.3)) P.trashCan(k, L.x1 - 0.35, L.zs - 0.4);
+    k.at(y0, () => P.radiator(k, { x: L.x0 + 0.02, z: L.zs - 1.2, yaw: -Math.PI / 2 }, 0.6));
+    if (f > 0 && r.chance(0.3)) k.at(y0, () => P.trashCan(k, L.x1 - 0.35, L.zs - 0.4));
     if (prevCell >= 0) k.portalFloor(prevCell, cell, L.x0, L.zs + L.landing, L.x1, L.ze, y0);
     k.marker('hide', L.x1 - 0.4, y0, L.ze - 0.4, `under stair ${f}`);
     if (f === 0) k.marker('stash', L.x1 - 0.3, 0, L.ze - 0.3, 'behind the stair radiator');
@@ -304,13 +310,13 @@ function loftFloor(c: GenCtx, rc: [number, number, number, number], y0: number, 
     // sewing machines face the windows; local frame +z -> table depth
     const ss = { x, z, yaw: Math.PI };
     k.box(x - 0.55, y0, z - 0.3, x + 0.55, y0 + 0.74, z + 0.3, M.woodLight, { collide: 'cover', faces: 0b111000 | 0b000011, occlude: false });
-    void ss; P.sewingMachine(k, { x, z, yaw: Math.PI });
+    void ss; k.at(y0, () => P.sewingMachine(k, { x, z, yaw: Math.PI }));
     if (r.chance(0.35)) k.slot('garment_worker', x, y0, z + 0.65, 0);
     k.light(x, y0 + 1.15, z, [1, 0.85, 0.65], 0.25, 'bulb');
   }
-  if (mode !== 'sewing') { const len = Math.min(D - 3, 9); P.cuttingTable(k, { x: rc[0] + W * (mode === 'mixed' ? 0.62 : 0.3), z: rc[1] + 1.5, yaw: -Math.PI / 2 }, len); k.slot('cutter', rc[0] + W * 0.62 + 1.0, y0, rc[1] + 3, Math.PI / 2); }
-  for (let q = 0; q < r.int(2, 6); q++) P.rollingRack(k, { x: rc[0] + r.range(1, W - 2.5), z: rc[3] - r.range(0.8, 2.5), yaw: r.pick([0, Math.PI / 2]) }, 1.5);
-  P.payphone(k, { x: wallX + (side === 'x0' ? -0.02 : 0.02), z: dz + 1.6, yaw: side === 'x0' ? Math.PI / 2 : -Math.PI / 2 });
+  if (mode !== 'sewing') { const len = Math.min(D - 3, 9); k.at(y0, () => P.cuttingTable(k, { x: rc[0] + W * (mode === 'mixed' ? 0.62 : 0.3), z: rc[1] + 1.5, yaw: -Math.PI / 2 }, len)); k.slot('cutter', rc[0] + W * 0.62 + 1.0, y0, rc[1] + 3, Math.PI / 2); }
+  for (let q = 0; q < r.int(2, 6); q++) { const f2 = { x: rc[0] + r.range(1, W - 2.5), z: rc[3] - r.range(0.8, 2.5), yaw: r.pick([0, Math.PI / 2]) }; k.at(y0, () => P.rollingRack(k, f2, 1.5)); }
+  k.at(y0, () => P.payphone(k, { x: wallX + (side === 'x0' ? -0.02 : 0.02), z: dz + 1.6, yaw: side === 'x0' ? Math.PI / 2 : -Math.PI / 2 }));
   // freight elevator gate (decorative) and a time clock by the door
   k.box(rc[0] + 0.2, y0, rc[3] - 0.08, rc[0] + 2.2, y0 + 2.3, rc[3] - 0.03, tint(M.steel, '#4a4a42'), { occlude: false });
   k.light(rc[0] + 1.2, y0 + 2.6, rc[3] - 0.6, [1, 0.8, 0.5], 0.6, 'bulb');

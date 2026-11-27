@@ -10,6 +10,7 @@
  */
 import { M, tint, type Mat } from '../../kit/materials';
 import * as P from '../../kit/props';
+import * as G from '../../kit/propsGap';
 import type { Kit } from '../../kit/Kit';
 import { type GenCtx, WALL_T, PARTY, fitRect, bayWindowSpans, floorWindowY } from '../common';
 import { coreFacade, stairTower } from '../vertical';
@@ -111,7 +112,7 @@ export function genCorwin(c: GenCtx) {
   const px = x0 + 0.5, pz = WALL_T + 0.7;
   k.cyl(px, 0, pz, 0.24, 0.45, tint(M.steel, '#6a5a44'), 10, { collide: true, r1: 0.28 });
   for (let q = 0; q < 6; q++) { const a2 = q * 1.05 + r.range(-0.2, 0.2); k.tube([px, 0.45, pz], [px + Math.cos(a2) * 0.45, r.range(0.55, 0.9), pz + Math.sin(a2) * 0.45], 0.012, tint(M.paper, '#6a5030'), 4); }
-  P.payphone(k, { x: x0 + 0.02, z: zl - 1.9, yaw: -Math.PI / 2 }, 'lobby payphone');
+  G.wallPayphone(k, { x: x0 + 0.02, z: zl - 1.9, yaw: -Math.PI / 2 }, 'lobby payphone');
   P.radiator(k, { x: cx - 0.17, z: zl - 0.9, yaw: Math.PI / 2 }, 0.9);
   k.marker('spawn', u.door.t, 0, WALL_T + 1.4, 'Corwin lobby');
   // --- the stair to every floor; floors 9 (index 8) and 11 (index 10) are open
@@ -188,7 +189,7 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
     k.box(bayX0 + 0.15, y0 + 0.75, pz1 + 0.12, bayX1 - 0.15, y0 + 2.45, pz1 + 0.13, M.glass, { glass: true, occlude: false });
     k.box(bayX0 + 0.1, y0 + 0.72, pz1 - 0.2, bayX1 - 0.1, y0 + 0.76, pz1 + 0.1, M.woodDark, { occlude: false });
     k.box((bayX0 + bayX1) / 2 - 0.02, y0 + 0.75, pz1 + 0.1, (bayX0 + bayX1) / 2 + 0.02, y0 + 2.45, pz1 + 0.14, M.enamelCream, { occlude: false });
-    P.radiator(k, { x: bayX0 + 0.3, z: pz1 - 0.2, yaw: 0 }, 0.9);
+    k.at(y0, () => P.radiator(k, { x: bayX0 + 0.3, z: pz1 - 0.2, yaw: 0 }, 0.9));
     P.bareBulb(k, (bayX0 + bayX1) / 2, (cz1 + pz1) / 2, y0 + H, 0.8);
     k.marker('prop', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'window to the Empire Estate Building');
     k.marker('wait', (bayX0 + bayX1) / 2, y0, pz1 - 0.5, 'the window at the end of the hall');
@@ -202,7 +203,7 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
     k.marker('wait', wx + sgn * 0.6, y0, cz0 + 0.8, 'the window at the end of the hall');
   }
   for (let x = cx0 + 1.5; x < L.x1; x += 4) P.bareBulb(k, x, (cz0 + cz1) / 2, y0 + H, r.chance(0.2) ? 0.3 : 1.0);
-  P.payphone(k, { x: L.x1 - 0.02, z: (cz0 + cz1) / 2, yaw: Math.PI / 2 }, `hall phone, floor ${floorLabel}`);
+  k.at(y0, () => G.wallPayphone(k, { x: L.x1 - 0.02, z: (cz0 + cz1) / 2, yaw: Math.PI / 2 }, `hall phone, floor ${floorLabel}`));
   k.marker('hide', cx0 + 0.4, y0, cz1 - 0.3, 'linen closet');
   k.marker('stash', cx0 + 0.3, y0 + 2.6, cz0 + 0.3, 'loose ceiling tile');
   // doors and rooms
@@ -238,9 +239,9 @@ function corridor(c: GenCtx, L: ReturnType<typeof towerLayout>, stairCell: numbe
 
 function bathroom(k: Kit, rc: [number, number, number, number], y0: number) {
   const [x0, z0, x1, z1] = rc;
-  k.box(x0 + 0.1, y0, z1 - 0.8, x0 + 1.75, y0 + 0.6, z1 - 0.1, M.porcelain, { collide: 'cover' }); // clawfoot-era tub as a box
-  for (let q = 0; q < 2; q++) { const x = x1 - 0.5 - q * 0.9; k.box(x - 0.42, y0, z0 + 0.1, x - 0.4, y0 + 1.9, z0 + 1.3, M.paintGrey, { occlude: false }); k.box(x - 0.2, y0, z0 + 0.15, x + 0.2, y0 + 0.42, z0 + 0.6, M.porcelain, { collide: true }); }
-  P.sink(k, { x: x0 + 0.5, z: z0 + 0.35, yaw: Math.PI });
+  k.at(y0, () => G.clawfootTub(k, { x: x0 + 0.95, z: z1 - 0.45, yaw: 0 }));
+  for (let q = 0; q < 2; q++) { const x = x1 - 0.5 - q * 0.9; k.box(x - 0.42, y0, z0 + 0.1, x - 0.4, y0 + 1.9, z0 + 1.3, M.paintGrey, { occlude: false }); k.at(y0, () => G.highTankToilet(k, { x, z: z0 + 0.4, yaw: Math.PI })); }
+  k.at(y0, () => P.sink(k, { x: x0 + 0.5, z: z0 + 0.35, yaw: Math.PI }));
   P.mirror(k, { x: x0 + 0.5, z: z0 + 0.02, yaw: Math.PI }, 0.45, 0.6, y0 + 1.2);
   k.marker('hide', x1 - 0.5, y0, z0 + 0.6, 'toilet stall');
 }
@@ -248,10 +249,13 @@ function bathroom(k: Kit, rc: [number, number, number, number], y0: number) {
 /** A tenant's room: iron bed, sink, dresser, chair, hot plate; named for markers. */
 function tenant(k: Kit, rc: [number, number, number, number], y0: number, who: string) {
   const [x0, z0, x1, z1] = rc, r = k.rng;
-  P.bed(k, { x: x0 + 0.55, z: z0 + 0.3, yaw: 0 }, 0.95, Math.min(1.95, z1 - z0 - 1.4), r.pick([M.fabricRust, M.fabricOlive, tint(M.fabricCamel, '#9a8a6a')]));
-  P.sink(k, { x: x1 - 0.35, z: z1 - 0.9, yaw: Math.PI / 2 });
-  P.dresser(k, { x: x1 - 0.55, z: z0 + 0.35, yaw: Math.PI }, 0.9);
-  P.chair(k, { x: x0 + 1.8, z: z1 - 1.2, yaw: 0 });
+  const spread = r.pick([M.fabricRust, M.fabricOlive, tint(M.fabricCamel, '#9a8a6a')]);
+  k.at(y0, () => {
+    P.bed(k, { x: x0 + 0.55, z: z0 + 0.3, yaw: 0 }, 0.95, Math.min(1.95, z1 - z0 - 1.4), spread);
+    P.sink(k, { x: x1 - 0.35, z: z1 - 0.9, yaw: Math.PI / 2 });
+    P.dresser(k, { x: x1 - 0.55, z: z0 + 0.35, yaw: Math.PI }, 0.9);
+    P.chair(k, { x: x0 + 1.8, z: z1 - 1.2, yaw: 0 });
+  });
   k.marker('prop', (x0 + x1) / 2, y0, (z0 + z1) / 2, `${who}'s room`);
   k.marker('burglary', x1 - 0.55, y0, z0 + 0.6, `${who}'s dresser`);
   k.slot(`resident_${who.toLowerCase()}`, x0 + 1.8, y0, z1 - 1.2, Math.PI);
@@ -261,7 +265,7 @@ function tenant(k: Kit, rc: [number, number, number, number], y0: number, who: s
 /** Teddy Arce, room 9F (content/homes.json portrait; act 1 state). Eight by ten, window onto an airshaft. */
 function teddy(k: Kit, rc: [number, number, number, number], y0: number) {
   const [x0, z0, x1, z1] = rc;
-  P.bed(k, { x: x0 + 0.55, z: z0 + 0.25, yaw: 0 }, 0.95, Math.min(1.95, z1 - z0 - 1.3), tint(M.fabricOlive, '#5a5a3a'));
+  k.at(y0, () => P.bed(k, { x: x0 + 0.55, z: z0 + 0.25, yaw: 0 }, 0.95, Math.min(1.95, z1 - z0 - 1.3), tint(M.fabricOlive, '#5a5a3a')));
   // army footlocker as a table, with the nightstick inside (act 1)
   const fx = x0 + 1.6, fz = z1 - 0.9;
   k.box(fx - 0.45, y0, fz - 0.25, fx + 0.45, y0 + 0.42, fz + 0.25, tint(M.paintDarkGreen, '#3a4a32'), { collide: 'cover' });

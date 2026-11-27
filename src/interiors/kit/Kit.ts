@@ -106,10 +106,13 @@ export class Kit {
   readonly traversal: TraversalMark[] = [];
   readonly models: ModelOut[] = [];
   /** Place a free prop model (CC0 GLB). Callers keep emitting the box version as the fallback/collision unless `replace`. */
-  model(key: string, x: number, y: number, z: number, yaw: number, s?: number) { this.models.push({ key, x, y, z, yaw, s, cell: this.cur }); }
+  model(key: string, x: number, y: number, z: number, yaw: number, s?: number) { this.models.push({ key, x, y: y + this.oy, z, yaw, s, cell: this.cur }); }
   /** occluder boxes for baking shadows/AO (local AABBs) */
   readonly occluders: [number, number, number, number, number, number][] = [];
   cur = 0;
+  /** floor offset added to every primitive's y while inside at(): lets frame-based props (built from y = 0) sit on upper floors */
+  oy = 0;
+  at<T>(y: number, fn: () => T): T { const prev = this.oy; this.oy = prev + y; try { return fn(); } finally { this.oy = prev; } }
   /** condition grade 0..4 for everything emitted after setCondition */
   grade = 2;
   setCondition(g: number) { this.grade = Math.max(0, Math.min(4, Math.round(g))); for (const c of this.cells) c.opaque.grade = c.glass.grade = this.grade; }
@@ -146,6 +149,7 @@ export class Kit {
 
   // ------------------------------------------------------------ primitives
   quad(p: V3, a: V3, b: V3, n: V3, mat: Mat, opts?: { glass?: boolean; tess?: number; uv0?: [number, number]; shade?: number }) {
+    if (this.oy) p = [p[0], p[1] + this.oy, p[2]];
     (opts?.glass ? this.g : this.m).quad(p, a, b, n, mat, opts?.tess ?? this.tess, opts?.uv0, opts?.shade);
   }
   floor(x0: number, z0: number, x1: number, z1: number, y: number, mat: Mat) {
@@ -157,6 +161,7 @@ export class Kit {
 
   /** Axis-aligned box. Large faces are tessellated so baked light reads across them. */
   box(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number, mat: Mat, o: BoxOpts = {}) {
+    y0 += this.oy; y1 += this.oy;
     if (x1 < x0) [x0, x1] = [x1, x0]; if (y1 < y0) [y0, y1] = [y1, y0]; if (z1 < z0) [z0, z1] = [z1, z0];
     const mb = o.glass ? this.g : this.m, f = o.faces ?? F.ALL, dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
     const big = Math.max(dx, dy, dz) > this.tess * 1.5;
@@ -172,6 +177,7 @@ export class Kit {
   }
   /** Box rotated by yaw about its centre (props). Not tessellated. */
   obox(cx: number, cy: number, cz: number, hx: number, hy: number, hz: number, yaw: number, mat: Mat, o: BoxOpts = {}) {
+    cy += this.oy;
     const c = Math.cos(yaw), s = Math.sin(yaw);
     const R = (x: number, z: number): [number, number] => [cx + x * c + z * s, cz - x * s + z * c];
     const mb = o.glass ? this.g : this.m, f = o.faces ?? F.ALL, sh = o.shade ?? 1;
@@ -188,8 +194,83 @@ export class Kit {
     if (o.collide) this.colliders.push({ c: [cx, cy, cz], h: [hx, hy, hz], yaw, cover: o.collide === 'cover', breakable: o.breakable });
     if (o.occlude) { const r = Math.abs(hx * c) + Math.abs(hz * s), q = Math.abs(hx * s) + Math.abs(hz * c); this.occluders.push([cx - r, y0, cz - q, cx + r, y1, cz + q]); }
   }
+  /**
+   * Bevelled box rotated by yaw about its centre: six inset faces, twelve 45-degree edge chamfers and eight corner
+   * triangles, so edges catch light like a real manufactured piece instead of a knife-edge primitive.
+   * r = chamfer size (clamped to a third of the smallest half-extent).
+   */
+  bbox(cx: number, cy: number, cz: number, hx: number, hy: number, hz: number, yaw: number, mat: Mat, r = 0.012, o: BoxOpts = {}) {
+    cy += this.oy;
+    r = Math.min(r, hx / 3, hy / 3, hz / 3);
+    const c = Math.cos(yaw), s = Math.sin(yaw), mb = o.glass ? this.g : this.m, sh = o.shade ?? 1;
+    const W = (x: number, y: number, z: number): V3 => [cx + x * c + z * s, cy + y, cz - x * s + z * c];
+    const N = (x: number, y: number, z: number): V3 => { const l = Math.hypot(x, y, z); return [(x * c + z * s) / l, y / l, (-x * s + z * c) / l]; };
+    const tri = (a: [number, number, number], b: [number, number, number], d: [number, number, number], n: V3) => {
+      const v0 = mb.vcount;
+      for (const p of [a, b, d]) { const w = W(p[0], p[1], p[2]); mb.v(w[0], w[1], w[2], n[0], n[1], n[2], p[0] + p[2], p[1], mat, sh); }
+      // wind to face n
+      const pa = W(...a), pb = W(...b), pd = W(...d);
+      const ux = pb[0] - pa[0], uy = pb[1] - pa[1], uz = pb[2] - pa[2], vx = pd[0] - pa[0], vy = pd[1] - pa[1], vz = pd[2] - pa[2];
+      const fx = uy * vz - uz * vy, fy = uz * vx - ux * vz, fz = ux * vy - uy * vx;
+      if (fx * n[0] + fy * n[1] + fz * n[2] >= 0) mb.tri(v0, v0 + 1, v0 + 2); else mb.tri(v0, v0 + 2, v0 + 1);
+    };
+    const quad = (a: [number, number, number], b: [number, number, number], d: [number, number, number], e: [number, number, number], n: V3) => { tri(a, b, d, n); tri(a, d, e, n); };
+    const X = hx, Y = hy, Z = hz, x = hx - r, y = hy - r, z = hz - r;
+    const f = o.faces ?? F.ALL;
+    // faces
+    if (f & F.PX) quad([X, -y, -z], [X, y, -z], [X, y, z], [X, -y, z], N(1, 0, 0));
+    if (f & F.NX) quad([-X, -y, -z], [-X, -y, z], [-X, y, z], [-X, y, -z], N(-1, 0, 0));
+    if (f & F.PY) quad([-x, Y, -z], [-x, Y, z], [x, Y, z], [x, Y, -z], N(0, 1, 0));
+    if (f & F.NY) quad([-x, -Y, -z], [x, -Y, -z], [x, -Y, z], [-x, -Y, z], N(0, -1, 0));
+    if (f & F.PZ) quad([-x, -y, Z], [x, -y, Z], [x, y, Z], [-x, y, Z], N(0, 0, 1));
+    if (f & F.NZ) quad([-x, -y, -Z], [-x, y, -Z], [x, y, -Z], [x, -y, -Z], N(0, 0, -1));
+    // edge chamfers (x-parallel, y-parallel, z-parallel)
+    for (const sy of [-1, 1]) for (const sz of [-1, 1]) quad([-x, sy * Y, sz * z], [x, sy * Y, sz * z], [x, sy * y, sz * Z], [-x, sy * y, sz * Z], N(0, sy, sz));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) quad([sx * X, -y, sz * z], [sx * X, y, sz * z], [sx * x, y, sz * Z], [sx * x, -y, sz * Z], N(sx, 0, sz));
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) quad([sx * X, sy * y, -z], [sx * X, sy * y, z], [sx * x, sy * Y, z], [sx * x, sy * Y, -z], N(sx, sy, 0));
+    // corners
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) tri([sx * X, sy * y, sz * z], [sx * x, sy * Y, sz * z], [sx * x, sy * y, sz * Z], N(sx, sy, sz));
+    if (o.collide) this.colliders.push({ c: [cx, cy, cz], h: [hx, hy, hz], yaw, cover: o.collide === 'cover', breakable: o.breakable });
+    if (o.occlude) { const rr = Math.abs(hx * c) + Math.abs(hz * s), q = Math.abs(hx * s) + Math.abs(hz * c); this.occluders.push([cx - rr, cy - hy, cz - q, cx + rr, cy + hy, cz + q]); }
+  }
+  /**
+   * Smooth loft through closed rings of equal length (each ring a loop of points, rings stacked in order). Normals are
+   * averaged per vertex from the neighbouring faces, so turned and moulded shapes (tub, bowl, globe) shade smoothly.
+   * capEnd closes the last ring with a fan (flat). Winding: rings counter-clockwise seen from +y give outward faces.
+   */
+  loft(rings: V3[][], mat: Mat, o: { capEnd?: boolean; capStart?: boolean; flip?: boolean } = {}) {
+    if (this.oy) rings = rings.map((rg) => rg.map((p) => [p[0], p[1] + this.oy, p[2]] as V3));
+    const mb = this.m, R = rings.length, S = rings[0].length;
+    const nrm: V3[][] = rings.map((ring) => ring.map(() => [0, 0, 0] as V3));
+    const add = (i: number, j: number, n: V3) => { const q = nrm[i][j]; q[0] += n[0]; q[1] += n[1]; q[2] += n[2]; };
+    for (let i = 0; i < R - 1; i++) for (let j = 0; j < S; j++) {
+      const a = rings[i][j], b = rings[i][(j + 1) % S], c2 = rings[i + 1][j];
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c2[0] - a[0], c2[1] - a[1], c2[2] - a[2]];
+      let n: V3 = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      if (o.flip) n = [-n[0], -n[1], -n[2]];
+      add(i, j, n); add(i, (j + 1) % S, n); add(i + 1, j, n); add(i + 1, (j + 1) % S, n);
+    }
+    const v0 = mb.vcount;
+    for (let i = 0; i < R; i++) for (let j = 0; j <= S; j++) {
+      const p = rings[i][j % S], n = nrm[i][j % S], l = Math.hypot(n[0], n[1], n[2]) || 1;
+      mb.v(p[0], p[1], p[2], n[0] / l, n[1] / l, n[2] / l, j / S, i / R, mat);
+    }
+    for (let i = 0; i < R - 1; i++) for (let j = 0; j < S; j++) {
+      const a = v0 + i * (S + 1) + j, b = a + 1, c2 = a + S + 1, d = c2 + 1;
+      if (o.flip) { mb.tri(a, c2, b); mb.tri(b, c2, d); } else { mb.tri(a, b, c2); mb.tri(b, d, c2); }
+    }
+    const cap = (ring: V3[], up: boolean) => {
+      let cx = 0, cy = 0, cz = 0; for (const p of ring) { cx += p[0]; cy += p[1]; cz += p[2]; } cx /= S; cy /= S; cz /= S;
+      const ny = up ? 1 : -1, c0 = mb.vcount; mb.v(cx, cy, cz, 0, ny, 0, 0, 0, mat);
+      for (const p of ring) mb.v(p[0], p[1], p[2], 0, ny, 0, p[0], p[2], mat);
+      for (let j = 0; j < S; j++) { const a = c0 + 1 + j, b = c0 + 1 + ((j + 1) % S); if (up !== !!o.flip) mb.tri(c0, b, a); else mb.tri(c0, a, b); }
+    };
+    if (o.capEnd) cap(rings[R - 1], true);
+    if (o.capStart) cap(rings[0], false);
+  }
   /** Cylinder between two points (rolled sofa arms, piping, rails, pipes), capped. */
   tube(a: V3, b: V3, r: number, mat: Mat, seg = 10) {
+    if (this.oy) { a = [a[0], a[1] + this.oy, a[2]]; b = [b[0], b[1] + this.oy, b[2]]; }
     if (this.low) seg = Math.max(5, Math.round(seg * 0.6));
     const mb = this.m, d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], L = Math.hypot(d[0], d[1], d[2]); if (L < 1e-4) return;
     const w = [d[0] / L, d[1] / L, d[2] / L], up = Math.abs(w[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
@@ -211,6 +292,7 @@ export class Kit {
   }
   /** Vertical cylinder (stools, poles, columns, bottles). */
   cyl(cx: number, y0: number, cz: number, r: number, h: number, mat: Mat, seg = 10, o: BoxOpts & { top?: boolean; r1?: number } = {}) {
+    y0 += this.oy;
     if (this.low) seg = Math.max(4, Math.round(seg * 0.5));
     const mb = o.glass ? this.g : this.m, r1 = o.r1 ?? r, v0 = mb.vcount, sh = o.shade ?? 1;
     for (let k = 0; k <= seg; k++) {
@@ -359,21 +441,21 @@ export class Kit {
   }
 
   /** Colliders only (invisible blockers, e.g. behind counters). */
-  collider(c: ColliderOut) { this.colliders.push(c); }
+  collider(c: ColliderOut) { this.colliders.push(this.oy ? { ...c, c: [c.c[0], c.c[1] + this.oy, c.c[2]] } : c); }
 
   light(x: number, y: number, z: number, color: [number, number, number], intensity: number, kind: LightOut['kind'] = 'bulb', flicker?: number) {
-    const g = GRADE[this.grade];
+    const g = GRADE[this.grade]; y += this.oy;
     const dying = kind !== 'neon' && kind !== 'window' && this.wr.chance(g.dying);
     this.lights.push({ x, y, z, color, intensity: intensity * g.lamp * (dying ? 0.35 : 1), kind, cell: this.cur, flicker: dying ? 1 : flicker });
   }
   artSlot(use: ArtSlotOut['use'], x: number, y: number, z: number, w: number, h: number, nx: number, nz: number) {
-    this.art.push({ id: `${this.id}:art:${use}:${this.art.filter((a) => a.use === use).length}`, use, w, h, x, y, z, nx, nz });
+    this.art.push({ id: `${this.id}:art:${use}:${this.art.filter((a) => a.use === use).length}`, use, w, h, x, y: y + this.oy, z, nx, nz });
   }
   slot(role: string, x: number, y: number, z: number, yaw: number, hours?: [string, string]) {
-    this.slots.push({ id: `${this.id}:${role}:${this.slots.filter((s) => s.role === role).length}`, role, x, y, z, yaw, hours });
+    this.slots.push({ id: `${this.id}:${role}:${this.slots.filter((s) => s.role === role).length}`, role, x, y: y + this.oy, z, yaw, hours });
   }
   marker(type: MarkerType, x: number, y: number, z: number, name?: string) {
-    this.markers.push({ id: `${this.id}:${type}:${this.markers.filter((s) => s.type === type).length}`, type, x, y, z, name });
+    this.markers.push({ id: `${this.id}:${type}:${this.markers.filter((s) => s.type === type).length}`, type, x, y: y + this.oy, z, name });
   }
 
   /**
