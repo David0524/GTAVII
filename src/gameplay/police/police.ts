@@ -185,7 +185,8 @@ export class Police extends Emitter<PoliceEvents> {
     const r = this.file({ witness: best.id, perp: s.id, kinds: [kind], desc: observe(s.appearance, 0.95, this.rng), lastKnown: [s.pos[0], s.pos[2]], crimeAt: [at[0], at[2]], via: 'unit', unit: best.id, time: this.time });
     this.assign(best, r, [s.pos[0], s.pos[2]]);
     best.ownDesc = observe(s.appearance, 1, this.rng);
-    this.setState(best, SEVERITY[kind] >= 3.5 ? 'combat' : 'pursuit');
+    // a violent crime is a gunfight on foot; a suspect driving away is a chase (a cop on the sidewalk can't shoot it out with a car doing 30)
+    this.setState(best, SEVERITY[kind] >= 3.5 && !(s.inVehicle && s.speed > 3) ? 'combat' : 'pursuit');
     if (best.state === 'combat') this.emit('engage', { unit: best.id, suspect: s.id }); else this.emit('pursuit', { unit: best.id, suspect: s.id });
     // he radios it in: the house's posts in earshot and units on the report converge (relayDelay later)
     if (best.state === 'pursuit') this.radioConverge(r, s, best.id);

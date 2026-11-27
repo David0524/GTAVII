@@ -444,3 +444,18 @@ test('pursuit on real streets: losing sight round a corner for a couple of secon
   pos[0] = 5; g.update(1 / 30); u.state = 'pursuit'; u.lostFor = 2; g.update(1 / 30);
   assert.equal(g.mirror!.roles.get(u.id)?.role, 'tail', '2 s out of sight: still tailing');
 });
+
+test('a cop who sees a violent crime from a car driving away gives chase rather than standing in a gunfight', () => {
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  const u = g.registerPolice('radio_car', 'pct.gramercy', 0, 30, { corrupt: 0 }); u.yaw = 0;
+  g.setContext({ vehicle: { id: 'stolen', vclass: 'sedan', colour: '#5a3a22' }, speed: 12 });
+  g.crime('homicide');
+  assert.equal(u.state, 'pursuit');
+  const g2 = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  g2.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  const u2 = g2.registerPolice('radio_car', 'pct.gramercy', 0, 30, { corrupt: 0 }); u2.yaw = 0;
+  g2.crime('homicide');
+  assert.equal(u2.state, 'combat', 'on foot it is still a gunfight');
+});

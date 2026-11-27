@@ -43,8 +43,8 @@ async function run(k: number) {
   // the lane link nearest the start
   const [sx, sz] = STARTS[k % STARTS.length];
   let carL = -1, bd = Infinity;
-  for (let i = 0; i < g.links.length; i++) { const L = g.links[i]; if (L.kind !== LinkKind.Lane) continue; const m = L.pts.length >> 1; const d = Math.hypot(L.pts[m * 2 - 2] - sx, L.pts[m * 2 - 1] - sz); if (d < bd) { bd = d; carL = i; } }
-  let carS = 0; const o = [0, 0, 0, 0];
+  for (let i = 0; i < g.links.length; i++) { const L = g.links[i]; if (L.kind !== LinkKind.Lane || net.len[i] < 90) continue; /* room for the watcher behind on the same lane */ const m = L.pts.length >> 1; const d = Math.hypot(L.pts[m * 2 - 2] - sx, L.pts[m * 2 - 1] - sz); if (d < bd) { bd = d; carL = i; } }
+  let carS = 50; const o = [0, 0, 0, 0];
   const place = () => sampleAt(g.links[carL].pts, net.cum[carL], carS, o);
   place();
   const pos: [number, number, number] = [o[0], 0, o[1]];
@@ -54,13 +54,15 @@ async function run(k: number) {
   // warm the street up a little first
   for (let i = 0; i < 10 / SIM_DT; i++) { sim.setExternalActors([{ id: 'player', x: pos[0], z: pos[2], vx: 0, vz: 0, radius: 2.6, kind: 'vehicle' } as any]); sim.update(SIM_DT, { x: pos[0], z: pos[2] }); }
   // the watcher: a radio car 35 m behind on the same lane; the rest at real junctions 150-450 m out
-  const back = Math.max(0, carS - 35); const ob = [0, 0, 0, 0]; sampleAt(g.links[carL].pts, net.cum[carL], back, ob);
-  const watcher = gp.registerPolice('radio_car', 'pct.midtown_central', carS < 35 ? o[0] - o[2] * 35 : ob[0], carS < 35 ? o[1] - o[3] * 35 : ob[1], { corrupt: 0 });
+  // the warm-up let traffic run; the car waited at carS. The watcher: 35 m behind on the same lane, same direction
+  const ob = [0, 0, 0, 0]; sampleAt(g.links[carL].pts, net.cum[carL], carS - 35, ob);
+  const watcher = gp.registerPolice('radio_car', 'pct.midtown_central', ob[0], ob[1], { corrupt: 0 });
   watcher.yaw = Math.atan2(-o[2], -o[3]);
   const junctions = (sim as any).nearestIntersections(pos[0], pos[2], 450, 40).filter((j: any) => j.dist > 150);
   for (let i = 0; i < CARS - 1 && i < junctions.length; i++) { const j = junctions[Math.floor(i * junctions.length / (CARS - 1))]; gp.registerPolice('radio_car', 'pct.midtown_central', j.x, j.z, { corrupt: 0 }); }
   gp.setContext({ vehicle: { id: 'stolen', vclass: 'sedan', colour: '#5a3a22' }, speed: 0, vehicleYaw: 0 });
   gp.crime('carjack', { noise: 20 });
+  let pedsStruck = 0; gp.on('crimeWitnessed', (e: any) => { if (e.crime.kind === 'hit_and_run' || e.crime.kind === 'homicide') pedsStruck++; });
 
   const N = Math.round(MINUTES * 60 / SIM_DT);
   let pursuitAt: number | null = null, seen = 0, intercepts = 0, closest = Infinity, lostAt: number | null = null, maxUnits = 0, gpMs = 0;
@@ -77,7 +79,7 @@ async function run(k: number) {
     gp.setContext({ speed: SPEED, vehicleYaw: yaw });
     const t0 = performance.now(); gp.update(SIM_DT); gpMs += performance.now() - t0;
     if (i % 3) continue; // sample at 10 Hz
-    if (VERBOSE && i % 60 === 0) console.log(`t=${t.toFixed(0).padStart(3)} ${gp.policeSys.phase('player').padEnd(9)} car@${Math.round(o[0])},${Math.round(o[1])} ` + [...gp.policeSys.units.values()].map((u) => `${u.kind[0]}:${u.state}:${gp.mirror?.roles?.get(u.id)?.role ?? '-'}@${Math.round(Math.hypot(u.x - o[0], u.z - o[1]))}${u.lostFor === 0 && u.lastSeen ? '*' : ''}`).join(' '));
+    if (VERBOSE && i % 60 === 0) console.log(`t=${t.toFixed(0).padStart(3)} ${gp.policeSys.phase('player').padEnd(9)} car@${Math.round(o[0])},${Math.round(o[1])} ` + [...gp.policeSys.units.values()].map((u) => `${u.kind[0]}:${u.state}:${gp.mirror?.roles?.get(u.id)?.role ?? '-'}@${Math.round(Math.hypot(u.x - o[0], u.z - o[1]))}v${Math.round(u.speed ?? 0)}${u.lostFor === 0 && u.lastSeen ? "*" : ""}`).join(' '));
     const ph = gp.policeSys.phase('player'); if (phases.at(-1) !== ph) phases.push(ph);
     if (ph === 'pursuit' && pursuitAt === null) pursuitAt = t;
     if (pursuitAt !== null && lostAt === null && ph !== 'pursuit' && ph !== 'spotted') lostAt = t;
@@ -93,11 +95,12 @@ async function run(k: number) {
   }
   return { run: k, start: [Math.round(sx), Math.round(sz)], pursuitAt: pursuitAt === null ? null : +pursuitAt.toFixed(1), seenShare: +(seen / (MINUTES * 60)).toFixed(2), intercepts,
     closest: Math.round(closest), gotAwayAt: lostAt === null ? null : +lostAt.toFixed(1), finalPhase: gp.policeSys.phase('player'), phases, maxUnits, roles,
-    gpMsPerFrame: +(gpMs / N).toFixed(2), reports: gp.policeSys.reports.length };
+    gpMsPerFrame: +(gpMs / N).toFixed(2), reports: gp.policeSys.reports.length, pedsStruck };
 }
 
 const results = [] as Awaited<ReturnType<typeof run>>[];
-for (let k = 0; k < RUNS; k++) { const r = await run(k); results.push(r); console.log(JSON.stringify(r)); }
+const ONLY = arg('only', '');
+for (let k = 0; k < RUNS; k++) { if (ONLY && !ONLY.split(',').includes(String(k))) continue; const r = await run(k); results.push(r); console.log(JSON.stringify(r)); }
 const ok = results.filter((r) => r.pursuitAt !== null);
 const summary = {
   speedMs: SPEED, minutes: MINUTES, runs: RUNS, carsPerRun: CARS,
@@ -105,7 +108,8 @@ const summary = {
   medianGetAwayS: (() => { const a = results.map((r) => r.gotAwayAt).filter((x): x is number => x !== null).sort((x, y) => x - y); return a.length ? a[a.length >> 1] : null; })(),
   meanSeenShare: +(results.reduce((s, r) => s + r.seenShare, 0) / RUNS).toFixed(2), totalIntercepts: results.reduce((s, r) => s + r.intercepts, 0),
   gpMsPerFrame: +(results.reduce((s, r) => s + r.gpMsPerFrame, 0) / RUNS).toFixed(2),
-  limits: 'player car is kinematic (ignores traffic, lights, collisions; never slows to turn); police cars drive the sim lane graph',
+  pedsStruck: results.reduce((s, r) => s + r.pedsStruck, 0),
+  limits: 'player car is kinematic (ignores traffic, lights, collisions and pedestrians, so it runs some down and the chase escalates; never slows to turn); police cars drive the sim lane graph',
 };
 console.log(JSON.stringify(summary, null, 1));
 fs.writeFileSync(path.join(ROOT, 'docs/gameplay_pursuit_report.json'), JSON.stringify({ summary, results }, null, 1));
