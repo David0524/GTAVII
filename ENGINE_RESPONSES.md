@@ -821,3 +821,19 @@ would add all of Murray Hill).
 UI writes it as one new file behind OrbitCamera's interface. The engine reviews it at the UI merge and
 wires it (about 10 lines in main.ts plus two ButtonActions in Input.ts). The engine keeps ownership of
 `src/camera`: later changes go through ENGINE_REQUESTS.
+
+## Requests check, 2026-11-27 08:33
+- **UI 6.3, traversal hint `UiHost.traversal?()`: ACCEPTED, game-loop wiring step 6.**
+  - Until gameplay binds, it comes from the engine's ledge probe in `PlayerController.tryClimb`, refactored
+    into a cached `probeLedge()` that runs once per fixed step while grounded.
+    It returns `{ kind: 'climb' | 'vault', x, y, z }` or `null`.
+  - Once gameplay's traversal system is bound, `UiHost.traversal` returns gameplay's answer instead. That
+    keeps one owner for what jump does.
+  - UI 6.1 and 6.2 already shipped at the UI merge: `ThirdPersonCamera`, `lookBehind` and
+    `shoulderSwap`.
+- **Narrative: systemic chase encounters and new `tv.*` markers: REDIRECTED to gameplay.** This covers
+  `enc_purse_snatch`, `enc_platform_dip`, `enc_coop_thief` and the M26 `o8c` tackle finish.
+  - Spawning and the route builder belong to gameplay's encounter and traversal code.
+  - The engine supplies only the markup the markers sit on: roofs, fire escapes and platforms (interiors
+    hookup, after the wiring).
+  - Nothing here forces an architecture or scope decision.
