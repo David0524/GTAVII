@@ -317,9 +317,12 @@ real problems, and the cause went deeper than tuning:
   - **Decision taken for now:** Delphine wears our parametric head (African macro, sheet tone,
     MakeHuman skin detail, our afroShort hair). The candidate stays in `scene=rocketbox` for
     comparison only.
-  - **Options for the user:** (a) commission or source a suitable CC0/MIT head; (b) invest in our
-    own head for Delphine (face texture, hair rebuilt as cropped natural); (c) accept
-    Female_Party_02 with heavy edits (not recommended).
+  - **User decision (via oversight): "Find more sources first."** We don't ship an uneven quality
+    bar. A search for further redistributable realistic heads (CC0/CC-BY/MIT; adults; no
+    identifiable real person without a release) is under way. If no adequate free source exists,
+    a costed buy/commission option goes to the user.
+- **Known gap to close, not an accepted state:** until then, Delphine and Black women in the near
+  ring have weaker faces (our parametric head) than pedestrians a Rocketbox head matches.
 - **The truncated crown** came from the hair compression pulling the crown inside the forehead
   shell. It's moot for Delphine now, and the compression is excluded from the face.
 - **Pool fidelity:** tags were re-checked against the previews (Female_Adult_11 back in the pool,

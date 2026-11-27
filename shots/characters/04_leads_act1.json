@@ -18,7 +18,7 @@
       "props": [],
       "tris": 16158,
       "draws": 2,
-      "buildMs": 131.8
+      "buildMs": 200.6
     },
     {
       "seed": 1,
@@ -35,9 +35,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 20094,
       "draws": 2,
-      "buildMs": 49
+      "buildMs": 71.4
     },
     {
       "seed": 1,
@@ -54,17 +54,73 @@
       "props": [],
       "tris": 24268,
       "draws": 2,
-      "buildMs": 137.5
+      "buildMs": 133.3
     }
   ],
   "updateMs": [
-    0.2,
     0.1,
-    0.1
+    0.1,
+    0
+  ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.2522,
+        0.225
+      ],
+      "neck": [
+        0.256,
+        0.2514
+      ],
+      "hand": [
+        0.1959,
+        0.5283
+      ]
+    },
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": null,
+      "tone": "#5a3825",
+      "cheek": [
+        0.5114,
+        0.197
+      ],
+      "neck": [
+        0.5077,
+        0.23
+      ],
+      "hand": [
+        0.4543,
+        0.5085
+      ]
+    },
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": "lead_nick",
+      "tone": "#c8a17e",
+      "cheek": [
+        0.7582,
+        0.2529
+      ],
+      "neck": [
+        0.7534,
+        0.2775
+      ],
+      "hand": [
+        0.6794,
+        0.5381
+      ]
+    }
   ],
   "renderMsSoftware": [
-    3.2999999998137355,
-    1.7000000001862645,
-    1.5
+    8.099999999627471,
+    1.599999999627471,
+    1.300000000745058
   ]
 }
