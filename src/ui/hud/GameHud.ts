@@ -15,6 +15,7 @@ import type { MapModel } from '../map/MapModel';
 import { MiniMap } from '../map/MiniMap';
 import { CATEGORIES, type RevealVia } from '../map/places';
 import { icon, type IconName } from '../icons';
+import { MissionCard } from './MissionCard';
 import { uiSettings, type Mode3, type UiSettingsData } from '../settings/uiSettings';
 import { radioLine } from './radio';
 import { callout, voicedCallout, routeVoice, type CallLine } from '../map/Route';
@@ -56,6 +57,7 @@ export class GameHud {
   visible = true;
   readonly cost = { frame: 0 };
 
+  private mcard = new MissionCard();
   private discoverHints = new Map<string, { notify?: 'silent' | 'toast'; mission?: string }>();
   private addQ: { name: string; cat: string; why?: string; how: string; mission?: string }[] = [];
   private addT = 0;
@@ -101,6 +103,7 @@ export class GameHud {
     host.on('inventory', () => { this.dirtyPoll = true; this.ping('weapon', 6); });
     host.on('damage', () => { this.dirtyPoll = true; this.ping('injuries', 8); });
     host.on('heat', (e) => { if (e.radio) this.radio(e.radio); });
+    host.on('missionEnd', (e) => this.mcard.show(e));
     host.on('achievement', (e) => { const a = host.achievements().find((x) => x.id === e.id); if (a) this.note('ACHIEVEMENT', `<i>${esc(a.name)}</i> · ${esc(a.text)}`, 6); });
     host.on('discover', (e) => { this.discoverHints.set(e.placeId, { notify: e.notify, mission: e.mission }); model.discovery.reveal(e.placeId, e.via); });
     // Discoveries are SILENT by default (user, 2026-11-27: "I shouldn't be notified unless it's like a story/character that's
@@ -152,6 +155,7 @@ export class GameHud {
     if (!this.visible) return;
     const t0 = performance.now();
     this.trav(dt);
+    this.mcard.update(dt);
     this.flushAdded(dt);
     this.t += dt;
     for (const [k, v] of this.shown) this.shown.set(k, v - dt);

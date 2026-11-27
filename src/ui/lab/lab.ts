@@ -63,6 +63,10 @@ async function main() {
   // ?bg=frame: a clean captured game frame (tools/ui/frameCapture.ts) behind everything, to judge menus over the real world
   if (q.get('bg') === 'frame') { const b = document.getElementById('backdrop'); if (b) b.style.background = `#111 url(/shots/ui/frame_${innerWidth < 1000 ? 'phone' : 'desktop'}.png) center / cover`; }
   const screen = q.get('screen') ?? 'hud';
+  const mEnd = q.get('mission');
+  if (mEnd) setTimeout(() => host.emit('missionEnd', mEnd === 'fail'
+    ? { result: 'failed', title: 'Walk with Me', reason: 'Mayhew got into a cab without you.' }
+    : { result: 'passed', title: 'Walk with Me', cash: 120, lines: [{ label: 'Time', value: '14:22' }, { label: 'Witnesses', value: 'None' }] }), 300);
   ui.show(screen, Object.fromEntries(q));
 
   let last = performance.now(), walk = q.get('walk') === '1';

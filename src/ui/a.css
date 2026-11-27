@@ -256,3 +256,22 @@ body.touch .t74-mapside { width: 200px !important; padding: 6px 10px 6px calc(12
 .t74-mm-star::before { content: '' !important; }
 .t74-mm-star b::after { border-left-color: #e8a317 !important; }
 .t74-mm-n { font: 700 10px var(--f-cond) !important; letter-spacing: .08em; }
+
+/* ------------------------------------------------------------------ mission end card: a band wiped across the frame */
+.u-mcard { position: fixed; inset: 0; z-index: 70; display: grid; align-items: center; pointer-events: auto; }
+.u-mcard .band { position: relative; background: rgba(8,8,7,.9); clip-path: inset(0 100% 0 0); transition: clip-path .42s var(--ease-out); padding: 30px 0 32px; }
+.u-mcard .band::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--taxi); transform: scaleX(0); transform-origin: left; transition: transform .6s .1s var(--ease-out); }
+.u-mcard.fail .band::before { background: var(--red); }
+.u-mcard.on .band { clip-path: inset(0 0 0 0); } .u-mcard.on .band::before { transform: scaleX(1); }
+.u-mcard.off .band { clip-path: inset(0 0 0 100%); transition-duration: .32s; }
+.u-mcard .in { margin-left: calc(14vw + var(--safe-l)); max-width: 70vw; display: grid; gap: 6px; }
+.u-mcard .lbl { font: 700 12px var(--f-cond); letter-spacing: .22em; text-transform: uppercase; color: var(--taxi); opacity: 0; transform: translateY(6px); transition: all .3s .25s; }
+.u-mcard.fail .lbl { color: #ef7a64; }
+.u-mcard h2 { margin: 0; font: 900 clamp(40px, 6.4vw, 96px)/.92 var(--f-voice); letter-spacing: -.03em; color: var(--cream); opacity: 0; transform: translateX(-18px); transition: opacity .35s .3s, transform .5s .3s var(--ease-out); }
+.u-mcard .why { margin: 6px 0 0; font: 400 15px var(--f-ui); color: var(--dim); opacity: 0; transition: opacity .3s .55s; }
+.u-mcard .rows { display: grid; grid-auto-flow: column; justify-content: start; gap: 40px; margin-top: 14px; opacity: 0; transition: opacity .3s .6s; }
+.u-mcard .row { display: grid; gap: 3px; } .u-mcard .row span { font: 700 10.5px var(--f-cond); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+.u-mcard .row b { font: 800 24px var(--f-voice); font-variant-numeric: tabular-nums; color: var(--cream); } .u-mcard .row.money b { color: #8fd0a2; }
+.u-mcard.on .lbl, .u-mcard.on h2, .u-mcard.on .why, .u-mcard.on .rows { opacity: 1; transform: none; }
+:root[data-motion="reduce"] .u-mcard .band, :root[data-motion="reduce"] .u-mcard h2 { transition: opacity .2s !important; clip-path: none !important; transform: none !important; }
+@media (max-height: 480px) { .u-mcard .band { padding: 18px 0 20px; } .u-mcard .in { margin-left: calc(9vw + var(--safe-l)); } .u-mcard h2 { font-size: 46px; } .u-mcard .row b { font-size: 19px; } }
