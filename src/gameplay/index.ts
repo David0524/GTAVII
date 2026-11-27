@@ -834,8 +834,10 @@ export class Gameplay {
     const d = this.nearestDoor(p[0], p[2]);
     if (d) return { kind: 'door', label: d.locked ? (this.doorOpenNow(d) ? 'Knock' : 'Locked') : 'Go in', target: d.id };
     { const v = this.vendorNear(p[0], p[2]); if (v && this.pc.carrying === 'none' && this.vendors.open(v, this.economy.nowH())) return v.kind === 'shoeshine' ? { kind: 'shine', label: `Shine ${this.shinePrice()}¢`, target: v.id } : v.kind === 'monte' ? { kind: 'monte', label: 'Find the lady', target: v.id } : { kind: 'buy', label: 'Buy', target: v.id }; }
-    if (this.pc.cover) return { kind: 'leaveCover', label: 'Leave cover' };
-    if (this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
+    // touch in combat has its own Cover/Leave/Roll button (TouchLayout slot a): don't offer the same thing twice
+    const coverButton = this.pc.device === 'touch' && this.touchMode() === 'combat';
+    if (this.pc.cover && !coverButton) return { kind: 'leaveCover', label: 'Leave cover' };
+    if (!coverButton && this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
     if (t) return { kind: 'talk', label: 'Talk', target: t.id };
     return null;
   }
