@@ -63,8 +63,11 @@ export class HeadLibrary {
       const ancGap = Math.abs(anc[0] - t.anc[0]) + Math.abs(anc[1] - t.anc[1]) + Math.abs(anc[2] - t.anc[2]);
       const hl = h.skinRGB.map(toLin);
       const toneRatio = Math.max(...[0, 1, 2].map((i) => Math.abs(Math.log((tone[i] + 0.01) / (hl[i] + 0.01)))));
-      // tight gates: the tint is clamped to ±25%, so anything further apart would leave a tone break
-      if (ancGap > 0.6 || toneRatio > Math.log(1.45) || ageGap > 15) continue;
+      // gate on what the player will see: the head's skin after the clamped tint vs the body's
+      // tone, in CIELAB (an RGB ratio let hue/chroma breaks through on darker heads)
+      const tint = tintFor(h, app.skin.tone), tinted = hl.map((c, i) => c * tint[i]);
+      const dE = labDist(tinted, tone);
+      if (ancGap > 0.6 || dE > 7 || ageGap > 15) continue;
       const hairGap = hairCat(app.hair.style) === t.hair ? 0 : 0.3;
       const score = ancGap * 2 + toneRatio * 2 + ageGap / 10 + hairGap;
       if (score < bestScore) { bestScore = score; best = h.id; }
@@ -74,6 +77,16 @@ export class HeadLibrary {
 }
 
 const hexRGB = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+/** CIE76 distance between two linear-sRGB colours (0..1). */
+function labDist(a: number[], b: number[]) {
+  const lab = (c: number[]) => {
+    const x = (0.4124 * c[0] + 0.3576 * c[1] + 0.1805 * c[2]) / 0.95047, y = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2], z = (0.0193 * c[0] + 0.1192 * c[1] + 0.9505 * c[2]) / 1.08883;
+    const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+    return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
+  };
+  const p = lab(a), q = lab(b);
+  return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+}
 function hairCat(style: string): HeadTag['hair'] {
   if (style === 'bald' || style === 'buzz') return 'bald';
   if (/afro|curly|setCurls/.test(style)) return 'curly';

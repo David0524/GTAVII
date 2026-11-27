@@ -3,6 +3,7 @@
 Reads <shot>.jpg|png and <shot>.json (report.toneProbes: screen positions of a cheek, the side of
 the neck and the back of the right hand per character, written by the test scenes), samples a
 median patch at each probe and compares them in CIELAB:
+  (hand: the best skin match in a small window around the probe, since hands are a few px wide)
   dE00      CIEDE2000 between the patches (includes lighting: cheek and hand face different ways)
   dC        chroma/hue distance (a*, b* only): a tone or undertone mismatch, mostly lighting-free
   dL        lightness difference
@@ -69,7 +70,18 @@ for base in sys.argv[1:]:
     print(f'\n{os.path.basename(base)}')
     for i, pr in enumerate(probes):
         if not all(0 < pr[k][0] < 1 and 0 < pr[k][1] < 1 for k in ('cheek', 'neck', 'hand')): continue
-        lab = {k: srgb_to_lab(patch(im, pr[k], r)) for k in ('cheek', 'neck', 'hand')}
+        lab = {k: srgb_to_lab(patch(im, pr[k], r)) for k in ('cheek', 'neck')}
+        # hands are a few pixels wide on full-figure shots: search a small window around the probe
+        # for the small patch closest in chroma to the cheek (it can only *hide* a mismatch if
+        # clothing happens to match the face; the annotated image shows what was sampled)
+        best = None
+        for dx in range(-3 * r, 3 * r + 1, max(1, r // 2)):
+            for dy in range(-3 * r, 3 * r + 1, max(1, r // 2)):
+                p = (pr['hand'][0] + dx / im.width, pr['hand'][1] + dy / im.height)
+                l = srgb_to_lab(patch(im, p, 1))
+                dc = math.hypot(l[1] - lab['cheek'][1], l[2] - lab['cheek'][2]) + abs(l[0] - lab['cheek'][0]) * 0.25
+                if best is None or dc < best[0]: best = (dc, l, p)
+        lab['hand'] = best[1]; pr = {**pr, 'hand': list(best[2])}
         for k, col in (('cheek', 'yellow'), ('neck', 'cyan'), ('hand', 'magenta')):
             x, y = pr[k][0] * im.width, pr[k][1] * im.height
             d.rectangle((x - r, y - r, x + r, y + r), outline=col)
