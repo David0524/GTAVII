@@ -228,6 +228,13 @@ before any file lands. BBC Sound Effects is out (non-commercial).
 
 ## Street vendors (STREET_VENDORS.md, 2026-11-27)
 All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2 MB decoded on every preset: variants capped per sound, loops one variant with rate jitter) loads when the first vendor registers.
+- **Sim-driven (sim fb337dc):** `bindSim` maps the sim's vendor events onto the handles:
+  - vendorSpawned / vendorOpened / vendorGone, and cart positions from `vendorViews` (cooking starts once the cart is set up; pushed carts rattle);
+  - vendorCall → a call (the sim times them; audio applies the 30 m range and 5 s gap);
+  - vendorShout → an angry line; monteScatter → the lookout's alarmed line;
+  - vendorServed / vendorAct serve → change; vendorAct right_cart → the knock-over;
+  - vendorCower / vendorFled → a scared line; vendorRecovered → reopen.
+  The test scene drives these through the mock sim's events, the same path as the real sim.
 - **API:** `audio.vendor(id, type, at)` returns a handle: `sale()`, `knockOver(impulse)`, `reopen()`, `move(at, speed)`,
   `react('danger'|'traffic')`, `remove()`. Wiring is ENGINE_REQUESTS "From audio: 12".
 - **Per type (from content/vendors.json):**

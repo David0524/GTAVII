@@ -119,17 +119,17 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
   keeps preview deploys fast across branches.
 - **Fallback:** without renders, lines play the formant placeholder voice with correct subtitle timing.
 
-## From audio: 12. Street vendors: register carts and forward their events
-- **What:** when the sim places a vendor (types from `content/vendors.json`, plus `ice_cream_truck`), call
-  `const h = audio.vendor(id, type, [x, y, z])` and keep the handle. Forward these calls:
-  - `h.sale()` on a purchase (change on the counter);
-  - `h.knockOver(impulse)` when physics tips the cart (impulse in N·s: the crash, spilled goods, cooking stops, the vendor shouts);
-  - `h.reopen()` when the cart is righted;
-  - `h.move([x, y, z], speed)` while the cart is pushed or the truck drives (wheels rattle above 0.3 m/s);
-  - `h.react('danger' | 'traffic')` for gunfire or a near miss nearby;
-  - `h.remove()` at despawn or closing time.
-- **Why:** audio can't see sim vendors. Everything else (loops within 40 m, calls from narrative's
-  `barks/vendor_calls.json` with the build-time voices, bells, chimes) runs inside audio.
-- **Cost:** ≤3 looping voices near the listener, otherwise scheduled one-shots; measured on the
-  `vendor_corner` scene, update p95 0.8 ms on High.
-- **Fallback:** without the calls, no vendor audio plays (nothing breaks).
+## From audio: 12. Street vendors: just bind the sim (updated after sim fb337dc)
+- **What:** nothing vendor-specific for most vendors. `audio.bindSim(sim)` (request 1) now also listens to the
+  sim's vendor events and reads `sim.vendorViews`:
+  - lifecycle and position: vendorSpawned, vendorOpened, vendorGone, and pushed carts from the views;
+  - calls: vendorCall, vendorShout, monteScatter;
+  - sales: vendorServed, vendorAct serve;
+  - knock-overs: vendorAct right_cart, which is the sim's answer to the `cartOverturned` notice;
+  - reactions: vendorCower, vendorFled, vendorRecovered.
+- **Two optional extras:**
+  - Physics: when a cart tips, call `audio.vendor` handles' `knockOver(impulse)` for impulse-scaled crashes. A duplicate within 2 s of the sim's report is ignored.
+  - Ice-cream truck: the sim doesn't own it. Use `const h = audio.vendor(id, 'ice_cream_truck', at)` with `h.move(at, speed)` and `h.remove()`.
+- **Why:** audio can't see vendors otherwise. Cost: ≤3 looping voices near the listener; `vendor_corner` scene
+  update p95 0.8 ms on High.
+- **Fallback:** without a bound sim, no vendor audio (nothing breaks).

@@ -39,5 +39,5 @@ export const SCENARIOS: Scenario[] = [
       { id: 'dogs', type: 'hot_dog', offset: [22, 1.5] }, { id: 'nuts', type: 'nut_roaster', offset: [38, 2] }, { id: 'shine', type: 'shoeshine', offset: [12, 3] },
       { id: 'ice', type: 'italian_ice', offset: [55, 1.5] }, { id: 'news', type: 'newsstand', offset: [30, 3.5] }, { id: 'truck', type: 'ice_cream_truck', offset: [70, -9] },
     ],
-    events: [{ t: 18, play: 'vendor:dogs:sale' }, { t: 26, play: 'vendor:dogs:sale' }, { t: 34, play: 'vendor:nuts:move' }, { t: 41, play: 'vendor:dogs:knockOver', params: { impulse: 700 } }, { t: 52, play: 'vendor:nuts:stop' }] },
+    events: [{ t: 6, play: 'vendor:dogs:call' }, { t: 14, play: 'vendor:nuts:call' }, { t: 18, play: 'vendor:dogs:sale' }, { t: 22, play: 'vendor:dogs:call' }, { t: 23, play: 'vendor:shine:call' }, { t: 26, play: 'vendor:dogs:sale' }, { t: 34, play: 'vendor:nuts:move' }, { t: 41, play: 'vendor:dogs:knockOver', params: { impulse: 700 } }, { t: 52, play: 'vendor:nuts:stop' }] },
 ];

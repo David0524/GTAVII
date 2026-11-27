@@ -31,7 +31,7 @@ import { VoiceLibrary } from './dialogue/voiceLibrary';
 import { Rng } from './worklets/dsp';
 import { readChunk, type ChunkData } from '../shared/chunkFormat';
 import { REGION } from '../shared/geo';
-import { loadTerrain } from '../shared/terrain';
+import { loadTerrain, heightAt } from '../shared/terrain';
 import type { Env, OneShotOpts, Power, Weather } from './env';
 
 export type { Vec3, BusId, QualityName };
@@ -142,6 +142,7 @@ export class AudioSystem {
     await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic'), this.bank.loadGroup('movement')]);
     this.ambience = new Ambience(this.env, REGION, this.radio.system);
     this.footsteps = new Footsteps(this.env, this.ambience.subway.gratings);
+    this.vendors.groundFn = heightAt;
     this.roomTone = new RoomTone(this.env, this.radio.system);
     this.ambience.start(); this.vehicles.start();
     if (this.sim) this.vehicles.bindSim(this.sim);
@@ -249,7 +250,8 @@ export class AudioSystem {
 
   attachVehicle(v: AttachedVehicle, profile: string): () => void { return this.vehicles.attach(v, profile); }
 
-  bindSim(sim: SimLike) { this.sim = sim; if (this.loaded) this.vehicles.bindSim(sim); }
+  /** Sim feed: traffic/peds for vehicles and footsteps, and street-vendor events (sim src/sim/vendors.ts). */
+  bindSim(sim: SimLike) { this.sim = sim; this.vendors.bindSim(sim); if (this.loaded) this.vehicles.bindSim(sim); }
 
   /**
    * Street vendor (docs/briefs/STREET_VENDORS.md): type from content/vendors.json ('hot_dog', 'nut_roaster',

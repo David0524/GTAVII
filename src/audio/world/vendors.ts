@@ -5,8 +5,12 @@
  * pavement and the crash when a cart goes over. Calls are narrative's `barks/vendor_calls` pool
  * (context = vendor type) spoken with the build-time voices.
  *
- * The sim/engine owns placement and life: `audio.vendor(id, type, at)` registers a vendor and
- * returns a handle for sale / knock-over / move / remove (ENGINE_REQUESTS "From audio: 12").
+ * Sim-driven (sim fb337dc, src/sim/vendors.ts): `bindSim` listens to vendorSpawned / vendorOpened / vendorGone,
+ * vendorCall (barks.vendor_calls), vendorShout, monteScatter, vendorServed, vendorCower / vendorFled,
+ * vendorAct (right_cart = the cart just went over; serve = a player sale) and vendorRecovered, and reads cart
+ * positions and open state from `sim.vendorViews` every frame (pushed carts rattle). When the sim drives,
+ * call timing is the sim's. `audio.vendor(id, type, at)` stays for things the sim doesn't own (the ice-cream
+ * truck, scripted scenes); its handle also takes a physics impulse for a knock-over.
  * Cost: at most a few looping voices within 45 m; everything else is scheduled one-shots.
  */
 import type { Env } from '../env';
@@ -62,13 +66,20 @@ export interface VendorHandle {
   remove(): void;
 }
 
-interface Vendor { id: string; type: VendorType; spec: TypeSpec; at: Vec3; speed: number; open: boolean; loops: Voice[]; nextCall: number; nextFx: number; burst: number; rattleT: number }
+interface Vendor { simDriven?: boolean; id: string; type: VendorType; spec: TypeSpec; at: Vec3; speed: number; open: boolean; loops: Voice[]; nextCall: number; nextFx: number; burst: number; rattleT: number }
+
+/** The parts of the sim's VendorView audio reads. */
+export interface VendorViewLike { id: string; kind: string; state: string; cartX: number; cartZ: number; open: boolean }
+export interface VendorSim { on(type: string, cb: (e: any) => void): void; vendorViews?: readonly VendorViewLike[] }
 
 export type Bark = (pool: string, context: string, at: () => Vec3, emotions?: readonly string[]) => Promise<boolean>;
 
 export class Vendors {
   private list = new Map<string, Vendor>();
   private lastCall = -1e9;
+  private handles = new Map<string, VendorHandle>();
+  private sim: VendorSim | null = null;
+  private lastSpill = new Map<string, number>();
   stats = { vendors: 0, loops: 0, calls: 0, sales: 0, spills: 0 };
 
   constructor(private env: Env, private bark: Bark) {}
@@ -80,9 +91,10 @@ export class Vendors {
     this.list.set(id, v); this.stats.vendors = this.list.size;
     if (!this.env.bank.groupsLoaded.has('vendors')) void this.env.bank.loadGroup('vendors');
     const pos = () => v.at;
-    return {
+    const h: VendorHandle = {
       sale: () => { this.stats.sales++; this.env.oneShot('vendor.change', { category: 'emitter', at: [v.at[0], v.at[1] + 0.9, v.at[2]], gain: 0.5, rate: r.range(0.95, 1.05), priority: 5 }); },
       knockOver: (impulse = 400) => {
+        const t = this.env.ctx.currentTime; if (t - (this.lastSpill.get(id) ?? -1e9) < 2) return; this.lastSpill.set(id, t); // physics and the sim notice may both report it
         const k = Math.max(0.3, Math.min(1, impulse / 800)); this.stats.spills++;
         this.env.oneShot('vendor.spill', { category: 'impact', at: [v.at[0], v.at[1] + 0.4, v.at[2]], gain: 0.4 + 0.6 * k, rate: 1.05 - 0.1 * k, priority: 7 });
         if (v.spec.cart) this.env.oneShot('cart.rattle', { category: 'impact', at: pos, gain: 0.5 * k, rate: 1.2, priority: 5 });
@@ -95,14 +107,65 @@ export class Vendors {
       react: (kind) => { if (this.env.ctx.currentTime - this.lastCall < 1.5) return; this.lastCall = this.env.ctx.currentTime; void this.bark('vendor_calls', 'any', pos, kind === 'danger' ? ['scared'] : ['angry']); },
       remove: () => this.remove(id),
     };
+    this.handles.set(id, h);
+    return h;
   }
 
-  remove(id: string) { const v = this.list.get(id); if (!v) return; this.stopLoops(v); this.list.delete(id); this.stats.vendors = this.list.size; }
+  remove(id: string) { const v = this.list.get(id); if (!v) return; this.stopLoops(v); this.list.delete(id); this.handles.delete(id); this.lastSpill.delete(id); this.stats.vendors = this.list.size; }
 
   private stopLoops(v: Vendor) { for (const l of v.loops) l.stop(0.4); v.loops = []; }
 
+  /** Listen to the sim's vendor events (see the header). Idempotent per sim. */
+  bindSim(sim: VendorSim) {
+    if (this.sim === sim) return; this.sim = sim;
+    const y = (x: number, z: number) => this.ground(x, z);
+    const h = (e: { id?: string }) => (e?.id ? this.handles.get(e.id) : undefined);
+    sim.on('vendorSpawned', (e: { id: string; kind: VendorType; x: number; z: number; cart: { x: number; z: number } | null; arriving?: boolean }) => {
+      const cx = e.cart?.x ?? e.x, cz = e.cart?.z ?? e.z; this.add(e.id, e.kind, [cx, y(cx, cz), cz]);
+      const v = this.list.get(e.id)!; v.simDriven = true; if (e.arriving) v.open = false; // cooking starts when the cart is set up
+    });
+    sim.on('vendorOpened', (e) => { const v = this.list.get(e?.id); if (v) v.open = true; });
+    sim.on('vendorGone', (e) => this.remove(e?.id));
+    sim.on('vendorCall', (e: { id: string; kind: string }) => this.call(e.id));
+    sim.on('vendorShout', (e) => h(e)?.react('traffic'));
+    sim.on('vendorCower', (e) => h(e)?.react('danger'));
+    sim.on('vendorFled', (e) => h(e)?.react('danger'));
+    sim.on('vendorServed', (e) => h(e)?.sale());
+    sim.on('vendorAct', (e: { id: string; act: string }) => { if (e.act === 'right_cart') h(e)?.knockOver(); else if (e.act === 'serve') h(e)?.sale(); });
+    sim.on('vendorRecovered', (e) => h(e)?.reopen());
+    // The lookout's warning, then the crew scatters (the monte box has no handle once the crew is gone).
+    sim.on('monteScatter', (e: { id: string; x: number; z: number }) => {
+      const at: Vec3 = [e.x, y(e.x, e.z) + 1.6, e.z]; this.lastCall = this.env.ctx.currentTime; this.stats.calls++;
+      void this.bark('vendor_calls', 'monte', () => at, ['alarmed']);
+    });
+  }
+  private ground(x: number, z: number) { return this.groundFn ? this.groundFn(x, z) : 0; }
+  /** Terrain height (set by the facade once terrain is loaded). */
+  groundFn: ((x: number, z: number) => number) | null = null;
+
+  /** A sim-timed call: same 30 m range and city-wide gap as self-timed calls. */
+  private call(id: string) {
+    const v = this.list.get(id); if (!v || !v.spec.call || !v.open) return;
+    const now = this.env.ctx.currentTime, [lx, , lz] = this.env.vm.listener.position;
+    if (Math.hypot(v.at[0] - lx, v.at[2] - lz) > CALL_RANGE || now - this.lastCall < CALL_GAP) return;
+    this.lastCall = now; this.stats.calls++; void this.bark('vendor_calls', v.spec.call, () => [v.at[0], v.at[1] + 1.6, v.at[2]]);
+  }
+
+  /** Cart positions and open state from the sim's views (pushed carts move; speed from the frame delta). */
+  private syncViews(dt: number) {
+    const views = this.sim?.vendorViews; if (!views) return;
+    for (const w of views) {
+      const v = this.list.get(w.id); if (!v || !v.simDriven) continue;
+      const d = Math.hypot(w.cartX - v.at[0], w.cartZ - v.at[2]);
+      v.speed = dt > 0 && d < 5 ? v.speed * 0.8 + 0.2 * (d / dt) : 0;
+      v.at[0] = w.cartX; v.at[2] = w.cartZ; if (d > 0.01) v.at[1] = this.ground(w.cartX, w.cartZ);
+      v.open = w.open;
+    }
+  }
+
   update(dt: number) {
     if (!this.env.live) return;
+    this.syncViews(dt);
     const now = this.env.ctx.currentTime, r = this.env.rng; const [lx, , lz] = this.env.vm.listener.position;
     let loops = 0;
     for (const v of this.list.values()) {
@@ -121,7 +184,7 @@ export class Vendors {
         if (fx.burst && v.burst <= 0) v.burst = fx.burst - 1;
         if (v.burst > 0) { v.burst--; v.nextFx = now + r.range(0.25, 0.4); } else v.nextFx = now + fx.every * r.range(0.6, 1.4);
       }
-      if (v.spec.call && now >= v.nextCall) {
+      if (v.spec.call && !v.simDriven && now >= v.nextCall) {
         v.nextCall = now + v.spec.callEvery * r.range(0.6, 1.5);
         if (d < CALL_RANGE && now - this.lastCall > CALL_GAP) { this.lastCall = now; this.stats.calls++; void this.bark('vendor_calls', v.spec.call, () => [v.at[0], v.at[1] + 1.6, v.at[2]]); }
       }

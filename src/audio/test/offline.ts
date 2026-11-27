@@ -55,11 +55,21 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   sim.density = sc.traffic; sim.pedDensity = sc.peds;
   for (let k = 0; k < 900; k++) sim.update(0.1, { x: st.x, z: st.z }, sc.clock.minutes / 60); // warm up 90 s
   sys.bindSim(sim);
-  const vendors = new Map((sc.vendors ?? []).map((v) => [v.id, { h: sys.vendor(v.id, v.type, [st.x + v.offset[0], heightAt(st.x + v.offset[0], st.z + v.offset[1]), st.z + v.offset[1]]), v }]));
+  // Vendors: sim-owned types arrive through the mock sim's events and views (the same path as the real sim,
+  // src/sim/vendors.ts); the ice-cream truck, which the sim doesn't own, through the direct handle.
+  const truck = new Map<string, ReturnType<typeof sys.vendor>>(); const pushing = new Set<string>();
+  for (const v of sc.vendors ?? []) {
+    const vx = st.x + v.offset[0], vz = st.z + v.offset[1];
+    if (v.type === 'ice_cream_truck') { truck.set(v.id, sys.vendor(v.id, v.type, [vx, heightAt(vx, vz), vz])); continue; }
+    sim.vendorViews.push({ id: v.id, kind: v.type, state: 'open', cartX: vx, cartZ: vz, open: true });
+    sim.fire('vendorSpawned', { id: v.id, kind: v.type, pedId: -1, x: vx, z: vz - 0.8, cart: { prop: 'cart', x: vx, z: vz, yaw: 0 }, arriving: false });
+  }
   const vendorEvent = (e: string, p?: Record<string, number>) => {
-    const [, id, act] = e.split(':'); const v = vendors.get(id); if (!v) return;
-    const pos = (): [number, number, number] => [st.x + v.v.offset[0], 0, st.z + v.v.offset[1]];
-    if (act === 'sale') v.h.sale(); else if (act === 'knockOver') v.h.knockOver(p?.impulse); else if (act === 'move') v.h.move(pos(), 1.1); else if (act === 'stop') v.h.move(pos(), 0);
+    const [, id, act] = e.split(':'); if (truck.has(id)) return;
+    if (act === 'sale') sim.fire('vendorServed', { id, kind: '', pedId: -1, good: '' });
+    else if (act === 'call') sim.fire('vendorCall', { id, kind: '', pedId: -1, x: 0, z: 0, bark: 'barks.vendor_calls' });
+    else if (act === 'knockOver') { sim.fire('vendorAct', { id, pedId: -1, act: 'right_cart' }); const w = sim.vendorViews.find((q) => q.id === id); if (w) { w.open = false; w.state = 'righting'; } void p; }
+    else if (act === 'move') pushing.add(id); else if (act === 'stop') pushing.delete(id);
   };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
@@ -68,6 +78,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   const tick = () => {
     x += st.dx * sc.walk * step; z += st.dz * sc.walk * step; minutes += step / 60;
     sim.update(step, { x, z }, minutes / 60);
+    for (const w of sim.vendorViews) if (pushing.has(w.id)) w.cartX += 1.1 * step;
     sys.setClock(minutes, sc.clock.date);
     sys.update(step, listener());
     const v = sys.stats.voices; maxReal = Math.max(maxReal, v.real ?? 0); maxTotal = Math.max(maxTotal, v.total ?? 0);
