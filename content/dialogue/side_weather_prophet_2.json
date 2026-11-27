@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_weather_prophet_2",
+  "context": "Reporting the first reading.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.obadiah_vane",
+      "emotion": "satisfied",
+      "text": "Twenty-nine point six. Brownout Thursday, west of Sixth. Write it down. Science, friend."
+    }
+  ]
+}

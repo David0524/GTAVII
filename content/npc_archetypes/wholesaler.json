@@ -1,0 +1,29 @@
+{
+  "id": "npc.wholesaler",
+  "behaviour": "vendor",
+  "palette": [
+    "#8B4513",
+    "#F5F5DC",
+    "#2F4F4F"
+  ],
+  "wardrobe": "Shirt sleeves, vest, cigar, keys on a chain.",
+  "props": [
+    "roll-gate hook",
+    "hand truck"
+  ],
+  "schedule": [
+    {
+      "from": "07:00",
+      "to": "18:00",
+      "area": "Broadway wholesale strip (24th–31st St)",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.3,
+    "night": 0.02
+  },
+  "barks": "barks.wholesaler",
+  "scripted": false,
+  "note": ""
+}

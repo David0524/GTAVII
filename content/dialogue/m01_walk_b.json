@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m01_walk_b",
+  "context": "M1 escort leg 2: W 26th to W 28th. Wholesale gates rattling down; the Flower District is dark to the west.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "wry",
+      "text": "Smell that? Flower guys hose the street all morning. Funeral smell till dark."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Florists west of Sixth. Furs past Seventh. I know the map, Carl."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "Sure you do. Question is who owns the map now. The Commission blew it up."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "Somebody's redrawing it. Quiet. With a nice pen."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Not me."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_garment_rush_1",
+  "context": "37th & Seventh, morning gridlock.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.dwayne_little",
+      "emotion": "cocky",
+      "text": "Racks to the dock on Thirty-Fifth. Gridlock's yours to solve. Side streets, genius."
+    }
+  ]
+}

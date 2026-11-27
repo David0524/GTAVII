@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_insomnia_drives_2",
+  "context": "Nick finds the place (Nick).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Still here. Different sign, same door. The doorman's son is the doorman now. Good."
+    }
+  ]
+}

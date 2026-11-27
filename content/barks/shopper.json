@@ -1,0 +1,162 @@
+{
+  "id": "barks.shopper",
+  "core": true,
+  "note": "Herald Square shoppers, tourists, holiday strollers.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Hello! Isn't it wonderful? I've never seen so many people."
+    },
+    {
+      "context": "greet",
+      "emotion": "brisk",
+      "text": "Excuse me, is this the line for the store?"
+    },
+    {
+      "context": "idle",
+      "emotion": "excited",
+      "text": "There's a sale on the fourth floor. Everyone's running."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "I came for a toaster. I'm leaving with a toaster and a lamp."
+    },
+    {
+      "context": "idle",
+      "emotion": "tourist",
+      "text": "Which way is the Empire Estate Building? Oh. Up. Of course."
+    },
+    {
+      "context": "idle",
+      "emotion": "worried",
+      "text": "Hold your purse. My cousin says hold your purse."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "First time in New York. My feet are already sorry."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Prices! Everything's gone up. Even the pretzels."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Escalator's packed. I'll take the stairs. Nine floors."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain! And these are suede!"
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Duck inside the store! It's air-conditioned!"
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "It's hotter here than Florida. And Florida's hot."
+    },
+    {
+      "context": "horn",
+      "emotion": "startled",
+      "text": "Goodness! These drivers!"
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "We're crossing! We have the light!"
+    },
+    {
+      "context": "collision",
+      "emotion": "startled",
+      "text": "Oh! Pardon me. My bags!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Excuse you! Some manners!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "worried",
+      "text": "Was that a thief? Did he take something?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "excited",
+      "text": "He's running for the sale! Let's go!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "alarmed",
+      "text": "Help! That car's on the sidewalk!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "The store went dark! Where's the exit?"
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Lights out. Well, no more shopping. Thank God."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Square's empty after nine. Kind of spooky."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Look at the parade of windows. Like a movie."
+    },
+    {
+      "context": "idle",
+      "emotion": "excited",
+      "text": "I saw a man on a ladder hanging a sign as big as a house!"
+    },
+    {
+      "context": "greet",
+      "emotion": "tourist",
+      "text": "Could you take our picture? No, the camera's simple. Just push."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "My husband's at the hardware counter. Since noon."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Shopping in a city that's going broke. Somebody has to."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Hot pretzel? Best thing on Thirty-Fourth Street."
+    },
+    {
+      "context": "rain",
+      "emotion": "tourist",
+      "text": "Is it always this wet? It looked dry in the brochure."
+    },
+    {
+      "context": "collision",
+      "emotion": "friendly",
+      "text": "Sorry, dear. Crowded. Everyone's crowded."
+    },
+    {
+      "context": "idle",
+      "emotion": "tourist",
+      "text": "Are those the World Trading Towers down there? So tall!"
+    }
+  ]
+}

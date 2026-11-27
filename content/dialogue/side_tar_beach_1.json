@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_tar_beach_1",
+  "context": "A tar-beach roof. A sunbather in a folding chair.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.hotel_bar_regular",
+      "emotion": "outraged",
+      "text": "My radio! Off the ledge while my eyes were shut! He went over the planks to Thirty-Fifth!"
+    }
+  ]
+}

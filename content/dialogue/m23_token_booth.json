@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m23_token_booth",
+  "context": "M23 o4. Herald Square station mezzanine. Delphine at the token booth with the shoebox in a shopping bag.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "One token. And a minute of your time, if anyone asks."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.token_clerk",
+      "emotion": "flat",
+      "text": "Thirty-five cents, lady. My time's not for sale. Neither's the minute."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Brannock at the top of the stairs. White sneakers. Rule three."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "shouting",
+      "text": "Delphine! Hold it right there!"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "The old passage to Penn Station. Half the lights dead. Marcus says the rats own it."
+    }
+  ]
+}

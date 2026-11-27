@@ -1,0 +1,56 @@
+{
+  "id": "mission.side_insomnia_drives",
+  "kind": "side",
+  "title": "Nick Can't Sleep",
+  "number": null,
+  "leads": [
+    "char.nick_varelas"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_vehicle",
+      "text": "Into Nick's car at night",
+      "vehicle": "vehicle_role.sedan"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Nick starts a memory",
+      "script": "dlg.side_insomnia_drives_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Drive to the first hidden place",
+      "to": "W 36th St & 9th Ave",
+      "radius": 25
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Nick finishes the story",
+      "script": "dlg.side_insomnia_drives_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Hidden places unlocked on the minimap"
+  },
+  "where": "Night drives anywhere",
+  "systems": [
+    "map discovery",
+    "driving",
+    "time of day"
+  ],
+  "mobile": "Just drive; nothing to fail.",
+  "rank": 39,
+  "slice": false
+}

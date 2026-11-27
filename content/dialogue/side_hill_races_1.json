@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_hill_races_1",
+  "context": "The cabbies' bet at the Iron Gate's back door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_driver",
+      "emotion": "cocky",
+      "text": "Your fancy sedan against my hack. Madison and Thirtieth. Uphill. Twenty bucks."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.cab_driver",
+      "emotion": "easy",
+      "text": "Wrong way on a one-way, you lose. That's the only rule. That's the whole city."
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "barks.surrender",
+  "core": false,
+  "note": "Surrender and arrest lines (player-side and NPC-side).",
+  "lines": [
+    {
+      "context": "npc_surrender",
+      "emotion": "panicked",
+      "text": "Okay! Okay! I give up! Don't shoot!"
+    },
+    {
+      "context": "npc_surrender",
+      "emotion": "tired",
+      "text": "Fine. You win. Can I keep my hat?"
+    },
+    {
+      "context": "npc_surrender",
+      "emotion": "scared",
+      "text": "I got kids! I got kids in Queens!"
+    },
+    {
+      "context": "npc_surrender",
+      "emotion": "bitter",
+      "text": "Go ahead. Call the cops. They work for Wurtz anyway."
+    },
+    {
+      "context": "player_arrest_teddy",
+      "emotion": "tired",
+      "text": "I know the drill, officer. Hands on the car."
+    },
+    {
+      "context": "player_arrest_teddy",
+      "emotion": "dry",
+      "text": "Tell Kearney I said hello."
+    },
+    {
+      "context": "player_arrest_delphine",
+      "emotion": "cold",
+      "text": "Cuff me gentle. These wrists earn a living."
+    },
+    {
+      "context": "player_arrest_delphine",
+      "emotion": "dry",
+      "text": "Brannock's badge says married. Yours?"
+    },
+    {
+      "context": "player_arrest_nick",
+      "emotion": "indignant",
+      "text": "Do you know who I am? …That's a no. Call my lawyer."
+    },
+    {
+      "context": "player_arrest_nick",
+      "emotion": "tired",
+      "text": "Everybody gets paid, officer. Name your number."
+    },
+    {
+      "context": "cop_arrest",
+      "emotion": "flat",
+      "text": "Hands where I can see them!"
+    },
+    {
+      "context": "cop_arrest",
+      "emotion": "flat",
+      "text": "You're under arrest. Don't make it worse."
+    }
+  ]
+}

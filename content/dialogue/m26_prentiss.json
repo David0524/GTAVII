@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m26_prentiss",
+  "context": "M26 o9. A parked car on W 31st & Fifth. Prentiss counting cash for the firebug. Teddy opens the passenger door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.vic_prentiss",
+      "emotion": "startled",
+      "text": "Teddy! Ha! What a night! False alarms. Terrible thing. Nobody's fault."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Your man's two cans are in my lobby. My friend's photograph is in her camera."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.vic_prentiss",
+      "emotion": "sweating",
+      "text": "Teddy, Teddy. I'm in the moving business. Moving's healthy. You can't prove—"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "I don't need to prove it, Vic. I need you to never come back to Thirty-First."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.vic_prentiss",
+      "emotion": "broken",
+      "text": "…Can I call you Teddy? No. Okay. Okay."
+    }
+  ]
+}

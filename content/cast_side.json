@@ -1,0 +1,195 @@
+{
+  "_note": "Recurring side-quest givers (N4b). Service-tier sheets. Names checked only for famous namesakes.",
+  "characters": [
+    {
+      "id": "char.albertine_cho",
+      "tier": "service",
+      "name": "Albertine Cho",
+      "age": 68,
+      "role": "Widow who sees her late husband on 42nd St screens",
+      "at": "A walk-up on W 39th St",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Harold is alive. I saw him Tuesday. Third feature, second reel.",
+          "He always said he'd be in pictures. Nobody believed him.",
+          "I'm not crazy. I'm a widow. It's different."
+        ]
+      },
+      "visual": "Small, neat, a good coat in July, a handbag held like a shield",
+      "edges": [],
+      "note": "Chinese-American, born in Brooklyn 1906; arc: The Lost Husband."
+    },
+    {
+      "id": "char.obadiah_vane",
+      "tier": "service",
+      "name": "Obadiah Vane",
+      "age": 59,
+      "role": "Street weather prophet with a barometer, Herald Square",
+      "at": "Herald Square, by the newsstand",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "The glass is falling, friend. The glass never lies. People lie.",
+          "Brownout Thursday, west of Sixth. Write it down.",
+          "Science, my friend. Science and a good nose."
+        ]
+      },
+      "visual": "Sandwich board ('THE WEATHER, 10¢'), a brass barometer on a strap, a bowler hat",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.rizo_147",
+      "tier": "service",
+      "name": "Ramón “RIZO 147” Ortiz",
+      "age": 20,
+      "role": "Graffiti writer (adult); wants his best piece photographed before it's buffed",
+      "at": "W 147th St (off map); paints in midtown yards and the passage",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "It's not vandalism. It's a gallery that moves.",
+          "My piece runs on the downtown local till they buff it. Two days, maybe.",
+          "Shoot it from the platform. Whole car. Nobody does whole cars."
+        ]
+      },
+      "visual": "Paint-flecked sneakers, a canvas bag of cans, a sketchbook he guards",
+      "edges": [],
+      "note": "Adult (20). Art, not glamour; no instructions for anything."
+    },
+    {
+      "id": "char.marty_fence",
+      "tier": "service",
+      "name": "Marty Glass",
+      "age": 55,
+      "role": "Fence with a weekly want list",
+      "at": "Back room behind a radio-repair shop, W 39th St & 9th Ave",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "This week I want a radio, a camera, and a fur. Don't ask about the fur.",
+          "Thirty percent. Forty if it's clean. Nothing's clean.",
+          "I don't buy from cops, kids, or people who cry."
+        ]
+      },
+      "visual": "Cardigan, jeweller's loupe on a cord, a radio always half-assembled on the counter",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.lou_ferraro",
+      "tier": "service",
+      "name": "Lou Ferraro",
+      "age": 66,
+      "role": "Projectionist on the Deuce; lost the reels of a 1940s picture",
+      "at": "The Velvet Moon projection booth",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Twelve reels. Nineteen forty-seven. Shot on these streets. I lost them.",
+          "Every grindhouse on the Deuce has had one. Some still do.",
+          "Bring me a reel, I'll show you a city that's gone."
+        ]
+      },
+      "visual": "Thick glasses, a cardigan with burn holes, smells of acetate",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.janos_tibor",
+      "tier": "service",
+      "name": "János and Laci Tibor",
+      "age": 47,
+      "role": "Piano-moving brothers (Hungarian, 1956 refugees)",
+      "at": "Their truck on W 35th St",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Four pianos, two brothers, one rope. You see the problem.",
+          "Up five flights. The piano doesn't care. Neither should you.",
+          "Laci, the corner! The corner! Ah, the corner."
+        ]
+      },
+      "visual": "Two broad men in matching grey work shirts, a coil of rope, leather shoulder straps",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.myrna_pelletier",
+      "tier": "service",
+      "name": "Myrna Pelletier",
+      "age": 61,
+      "role": "Owner of the Velvet Moon",
+      "at": "The Velvet Moon box office",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Somebody stole my marquee letters. The whole alphabet.",
+          "Thirty years I've run this house. I've seen worse. Not much.",
+          "Find my letters and I'll put up whatever you want. Within reason."
+        ]
+      },
+      "visual": "Platinum wig, cat-eye glasses, a cash-box key on a chain",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.augustus_kitt",
+      "tier": "service",
+      "name": "Augustus “Gus” Kitt",
+      "age": 58,
+      "role": "Fight promoter at the Garden (invented cards)",
+      "at": "The Garden's back corridor",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Fight night. I need a door man who knows a fake ticket and a real drunk.",
+          "Mallory's a bum. Okoro's a poet. Bet the poet.",
+          "Ten bucks and a ringside folding chair. Don't sit on it."
+        ]
+      },
+      "visual": "Camel coat over a sweat-stained shirt, a cigar the size of a candle",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.ezekiel_barber",
+      "tier": "service",
+      "name": "Ezekiel “Zeke” Moss",
+      "age": 72,
+      "role": "Barber on W 38th St; lets Tina practise after hours",
+      "at": "Moss Barbers, W 38th St & 8th Ave",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Chair's yours after eight. Don't cut anybody I like.",
+          "Forty years of heads. Every one tells you something.",
+          "Hair's patient, young lady. People ain't."
+        ]
+      },
+      "visual": "White smock, half-glasses, scissors in his breast pocket like a pen",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.otto_krause",
+      "tier": "service",
+      "name": "Otto Krause",
+      "age": 64,
+      "role": "Hardware store owner; sends Teddy on lock call-outs",
+      "at": "Krause Hardware, 6th Ave & W 31st St",
+      "schedule": "per side-quest spec",
+      "speech": {
+        "samples": [
+          "Lady on Thirty-Fourth locked out. Dead husband's place. Be gentle.",
+          "You want a key made or a door opened? Opening's extra.",
+          "Fans in stock. Sold out by noon. Every day."
+        ]
+      },
+      "visual": "Brown shop coat, a pencil, a ring of key blanks on his belt",
+      "edges": [],
+      "note": ""
+    }
+  ]
+}

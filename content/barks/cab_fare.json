@@ -1,0 +1,82 @@
+{
+  "id": "barks.cab_fare",
+  "core": false,
+  "note": "Passengers in the Hack activity. Some lines hint at the next story beat.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "brisk",
+      "text": "Twenty-Third and Eighth. And hurry, I'm late for my own birthday."
+    },
+    {
+      "context": "greet",
+      "emotion": "tourist",
+      "text": "Herald Square, please! Is that far? Is everything far?"
+    },
+    {
+      "context": "idle",
+      "emotion": "chatty",
+      "text": "My brother-in-law says somebody's buying all the hotels on Broadway."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Heard the fur vaults on Thirtieth lose power when it's hot. Imagine the bill."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Driver, you know the Deuce? Course you do. Everybody knows the Deuce."
+    },
+    {
+      "context": "idle",
+      "emotion": "chatty",
+      "text": "I'm a nurse at Bellevue. Twelve hours. Don't talk, just drive. Please."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Wrong way! Seventh goes down, everybody knows that!"
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "You going around the block to run the meter? I'm from here!"
+    },
+    {
+      "context": "idle",
+      "emotion": "grateful",
+      "text": "Good driver. You took Sixth. Smart. Here's a quarter extra."
+    },
+    {
+      "context": "idle",
+      "emotion": "chatty",
+      "text": "There's a lawyer eats at the same counter every day at twelve-forty. Like a clock."
+    },
+    {
+      "context": "rain",
+      "emotion": "relieved",
+      "text": "Oh thank God, a cab. In the rain! A miracle!"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "City's broke, they say. My cab fare's not broke."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Brownout last night. My building looked like a tomb."
+    },
+    {
+      "context": "idle",
+      "emotion": "chatty",
+      "text": "My cousin works the Pennsylvania. Says there's a convention of morticians."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Keep the change. Buy yourself an air-conditioner."
+    }
+  ]
+}

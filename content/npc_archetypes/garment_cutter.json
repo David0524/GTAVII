@@ -1,0 +1,35 @@
+{
+  "id": "npc.garment_cutter",
+  "behaviour": "worker",
+  "palette": [
+    "#FFFFFF",
+    "#708090",
+    "#8B4513"
+  ],
+  "wardrobe": "White short-sleeve shirt, grey trousers, tape measure round the neck, sleeve garters on older men.",
+  "props": [
+    "tape measure",
+    "paper pattern roll"
+  ],
+  "schedule": [
+    {
+      "from": "07:30",
+      "to": "16:30",
+      "area": "Garment District (W 35th–40th, 6th–9th Aves)",
+      "activity": "work"
+    },
+    {
+      "from": "12:00",
+      "to": "12:45",
+      "area": "7th Ave lunch counters",
+      "activity": "eat"
+    }
+  ],
+  "density": {
+    "day": 0.3,
+    "night": 0.02
+  },
+  "barks": "barks.garment",
+  "scripted": false,
+  "note": ""
+}

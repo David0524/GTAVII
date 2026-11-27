@@ -1,0 +1,147 @@
+{
+  "id": "cut.m07_yes",
+  "mission": "mission.yes",
+  "before": "o7",
+  "time": "20:30",
+  "date": "1974-07-01",
+  "skippable": true,
+  "logline": "The Shamrock Rail. Mayhew has been waiting with a beer and a racing form. Teddy says yes; the only question is what he says it for.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 28,
+      "move": "static",
+      "framing": "A long narrow bar, a TV with the ballgame, Mayhew alone at the far end",
+      "blocking": "Teddy walks the length of the bar toward him",
+      "beats": [
+        "The walk is the decision; nobody looks up"
+      ],
+      "durationSec": 5,
+      "notes": "audio: ballgame on TV; glasses; a fan | lighting: neon beer signs, green and red"
+    },
+    {
+      "id": "s2",
+      "type": "over-the-shoulder",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Over Teddy's shoulder: Mayhew, not surprised",
+      "blocking": "",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 3.6,
+      "dialogue": [
+        "dlg.m07_yes#l1"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Side by side at the bar, both facing the mirror",
+      "blocking": "They talk to each other's reflections",
+      "beats": [
+        "l2–l3"
+      ],
+      "durationSec": 8.1,
+      "dialogue": [
+        "dlg.m07_yes#l2",
+        "dlg.m07_yes#l3"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "choice hold",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy in the bar mirror",
+      "blocking": "",
+      "beats": [
+        "c1 (untimed)"
+      ],
+      "dialogue": [
+        "dlg.m07_yes#c1"
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m07_yes#c1"
+    },
+    {
+      "id": "s5a",
+      "type": "insert",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "The photograph slid along the bar under Teddy's palm",
+      "blocking": "Mayhew's hand covers it fast",
+      "beats": [
+        "Branch: the photograph"
+      ],
+      "durationSec": 13.8,
+      "dialogue": [
+        "dlg.m07_yes#l_photo",
+        "dlg.m07_yes#l_photo2",
+        "dlg.m07_yes#l_photo3",
+        "dlg.m07_yes#l_photo4"
+      ],
+      "showIf": {
+        "choice": "dlg.m07_yes#c1",
+        "option": 2
+      }
+    },
+    {
+      "id": "s5b",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy, to the mirror",
+      "blocking": "",
+      "beats": [
+        "Branch: the Corwin"
+      ],
+      "durationSec": 3,
+      "dialogue": [
+        "dlg.m07_yes#l_yes"
+      ],
+      "showIf": {
+        "choice": "dlg.m07_yes#c1",
+        "option": 0
+      }
+    },
+    {
+      "id": "s5c",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy, to Mayhew's face this time",
+      "blocking": "",
+      "beats": [
+        "Branch: the money"
+      ],
+      "durationSec": 3,
+      "dialogue": [
+        "dlg.m07_yes#l_money"
+      ],
+      "showIf": {
+        "choice": "dlg.m07_yes#c1",
+        "option": 1
+      }
+    },
+    {
+      "id": "s6",
+      "type": "insert",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "An envelope and a folded list on the bar between two beers",
+      "blocking": "",
+      "beats": [
+        "l_end"
+      ],
+      "durationSec": 5.2,
+      "dialogue": [
+        "dlg.m07_yes#l_end"
+      ],
+      "notes": "film: hold on the envelope; cut to black"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "barks.marcher",
+  "core": false,
+  "note": "23 Aug march from the Corwin to Herald Square: tenants, garment operators, florists, merchants.",
+  "lines": [
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "We live here! We stay here!"
+    },
+    {
+      "context": "idle",
+      "emotion": "warm",
+      "text": "Mrs. Pruitt's in front. Keep up with Mrs. Pruitt."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Operators! Local's here! Feld owes us!"
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Flowers for the marchers! Moretti says take one!"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "My first march since the war. The other war."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Hot. Very hot. Righteous, but hot."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Who owns the Tenderloin? We do!"
+    },
+    {
+      "context": "collision",
+      "emotion": "friendly",
+      "text": "Sorry, sorry. Big crowd. Good crowd."
+    },
+    {
+      "context": "player_running",
+      "emotion": "warm",
+      "text": "Don't run! Walk with us!"
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Somebody from the paper's taking pictures. Smile like a tenant."
+    }
+  ]
+}

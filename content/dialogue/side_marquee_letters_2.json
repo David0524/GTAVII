@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_marquee_letters_2",
+  "context": "Handing back the first letters.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.myrna_pelletier",
+      "emotion": "pleased",
+      "text": "An R, an O and a K. You could spell 'ROCK'. You could spell 'KORO'. I'll take them."
+    }
+  ]
+}

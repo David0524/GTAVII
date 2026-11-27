@@ -1,0 +1,27 @@
+{
+  "id": "npc.hotel_bar_regular",
+  "behaviour": "loiterer",
+  "palette": [
+    "#800000",
+    "#F5F5DC"
+  ],
+  "wardrobe": "Business shirts gone limp; a few women in going-out dresses.",
+  "props": [
+    "highball glass"
+  ],
+  "schedule": [
+    {
+      "from": "17:00",
+      "to": "02:00",
+      "area": "Hotel bars (the Arden, the Pennsylvania)",
+      "activity": "drink"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.3
+  },
+  "barks": "barks.deuce",
+  "scripted": false,
+  "note": ""
+}

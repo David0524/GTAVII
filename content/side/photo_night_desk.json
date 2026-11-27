@@ -1,0 +1,59 @@
+{
+  "id": "mission.side_photo_night_desk",
+  "kind": "side",
+  "title": "The Night Desk at the Ticker",
+  "number": null,
+  "leads": [
+    "char.delphine_moore"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The night editor's rates",
+      "script": "dlg.side_ticker_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Beat the press car to the scene",
+      "to": "W 34th St & 7th Ave",
+      "radius": 25
+    },
+    {
+      "id": "o3",
+      "type": "photo",
+      "text": "Get the shot before the tape goes up",
+      "subject": "npc.beat_cop",
+      "minScreenFraction": 0.05
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Prints to the Ticker, W 26th St",
+      "to": "W 26th St & 7th Ave",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "$10–75 a print; first-on-scene bonus; a press-pass outfit that lowers witness heat at scenes"
+  },
+  "where": "The Daily Ticker midtown bureau, W 26th St & 7th Ave",
+  "systems": [
+    "police radio",
+    "photo mode",
+    "fast on foot / cabs",
+    "heat (cops shoo you)"
+  ],
+  "mobile": "Auto-framing; the 'first' timer is generous and shown on the HUD. Missing it pays less, never fails.",
+  "rank": 3,
+  "slice": true
+}

@@ -1,0 +1,114 @@
+{
+  "id": "cut.m20_the_meeting",
+  "mission": "mission.partners_meeting",
+  "before": "o3",
+  "time": "11:00",
+  "date": "1974-08-01",
+  "skippable": true,
+  "logline": "Lisle's conference room. Nick learns what his name is for.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "slow push down the table",
+      "framing": "A long walnut table: Augie, Villalba, Wurtz in a borrowed suit, Nick; Lisle at the head; Marjorie at a side desk",
+      "blocking": "Nobody has a drink; everybody has a folder",
+      "beats": [
+        "Respectability as menace"
+      ],
+      "durationSec": 6,
+      "notes": "audio: air conditioner; a fountain pen | lighting: cool office light, drawn blinds"
+    },
+    {
+      "id": "s2",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Lisle, hands folded",
+      "blocking": "",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 4.2,
+      "dialogue": [
+        "dlg.m20_meeting#l1"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Augie, sleeves rolled, the only one sweating",
+      "blocking": "",
+      "beats": [
+        "l2"
+      ],
+      "durationSec": 4.2,
+      "dialogue": [
+        "dlg.m20_meeting#l2"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "medium close",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Lisle",
+      "blocking": "",
+      "beats": [
+        "l3"
+      ],
+      "durationSec": 4.9,
+      "dialogue": [
+        "dlg.m20_meeting#l3"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "close",
+      "lensMm": 85,
+      "move": "slow push",
+      "framing": "Nick",
+      "blocking": "",
+      "beats": [
+        "l4"
+      ],
+      "durationSec": 2,
+      "dialogue": [
+        "dlg.m20_meeting#l4"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "medium",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Wurtz, tie loosened, enjoying himself",
+      "blocking": "",
+      "beats": [
+        "l5"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m20_meeting#l5"
+      ]
+    },
+    {
+      "id": "s7",
+      "type": "two-shot",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Lisle and, behind him, Marjorie looking straight at Nick",
+      "blocking": "",
+      "beats": [
+        "l6; Marjorie's look sets up o4"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m20_meeting#l6"
+      ]
+    }
+  ]
+}

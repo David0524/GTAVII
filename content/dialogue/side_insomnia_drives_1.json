@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_insomnia_drives_1",
+  "context": "Nick, alone in the sedan at 2 a.m. (Nick).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "There was a club on Thirty-Ninth. Nineteen fifty-two. I danced with Eleni there once."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Left here. Is it still there? Everything closes. Some things just change their name."
+    }
+  ]
+}

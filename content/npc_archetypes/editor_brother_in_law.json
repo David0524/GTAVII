@@ -1,0 +1,27 @@
+{
+  "id": "npc.editor_brother_in_law",
+  "behaviour": "loiterer",
+  "palette": [
+    "#000080",
+    "#FFFFFF"
+  ],
+  "wardrobe": "An expensive blazer and a club tie.",
+  "props": [
+    "cocktail glass"
+  ],
+  "schedule": [
+    {
+      "from": "20:00",
+      "to": "23:00",
+      "area": "Hotel Pennsylvanian bar (M27 only)",
+      "activity": "drink"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": true,
+  "note": ""
+}

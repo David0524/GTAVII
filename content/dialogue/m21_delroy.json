@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m21_delroy",
+  "context": "M21 o3b (burned branch). Delroy's cab idling on W 37th.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "Night man's a drinker. Nine-oh-five he goes to the deli for 'coffee.' Twenty minutes."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "Freight stairs come out on Thirty-Seventh. I'll be here. Meter off."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "How do you know his habits?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delroy_tate",
+      "emotion": "wry",
+      "text": "I drive Lisle on weekends. Car service. Man tips like a tax collector."
+    }
+  ]
+}

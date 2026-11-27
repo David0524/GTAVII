@@ -1,0 +1,82 @@
+{
+  "id": "barks.service",
+  "core": false,
+  "note": "Hotel porters, bellhops, maids, waitresses, cleaners, night watchmen, bank tellers.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "formal",
+      "text": "Good evening. Can I help you?"
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Evening, sir. Ma'am."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Double shift. Feet's on fire."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Convention in the ballroom. Thousand guests, ten tips."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "They're cutting staff. Again. Last in, first out."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Somebody stole the towels from fourteen. All of them."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Umbrellas by the door. Take one, bring it back."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Laundry room's a hundred and twenty."
+    },
+    {
+      "context": "collision",
+      "emotion": "startled",
+      "text": "Oh! Pardon me, sir."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alarmed",
+      "text": "Sir! No running in the lobby!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Elevators out! Stairs only, folks! Stairs only!"
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Night shift. Just me and the radiator."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Thirty years. I know every guest by their shoes."
+    },
+    {
+      "context": "greet",
+      "emotion": "formal",
+      "text": "Next window, please."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Building's quiet at night. Too quiet. I sing."
+    }
+  ]
+}

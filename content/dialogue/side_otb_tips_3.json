@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_otb_tips_3",
+  "context": "Where the tip came from.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.hotel_bar_regular",
+      "emotion": "low",
+      "text": "Brass Token was fixed, friend. The lieutenant needs a boat motor. Everybody knew but you."
+    }
+  ]
+}

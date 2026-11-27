@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_last_train_1",
+  "context": "A tipsy office worker on the platform at 1 a.m.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.subway_rider",
+      "emotion": "tipsy",
+      "text": "Is this the last train? To Twenty-Third? I can't miss it. My cat has opinions."
+    }
+  ]
+}

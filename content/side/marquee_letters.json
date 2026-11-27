@@ -1,0 +1,56 @@
+{
+  "id": "mission.side_marquee_letters",
+  "kind": "side",
+  "title": "Marquee Letters",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The Velvet Moon owner's loss",
+      "script": "dlg.side_marquee_letters_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Check the marquee lobby",
+      "marker": "interior.velvet_moon_lobby"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "A glint in the alley, W 42nd",
+      "to": "W 42nd St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Hand over the first letters",
+      "script": "dlg.side_marquee_letters_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "A marquee message of your choice"
+  },
+  "where": "Around the Deuce",
+  "systems": [
+    "street text",
+    "the Deuce"
+  ],
+  "mobile": "Letters glint.",
+  "rank": 47,
+  "slice": false
+}

@@ -1,0 +1,162 @@
+{
+  "id": "barks.deuce",
+  "core": true,
+  "note": "42nd St crowds, arcade patrons, hotel-bar regulars, hustlers (implied).",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "wry",
+      "text": "Hey, man. Hey. You want to see a movie? Three features, one dollar."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Evening, chief."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Kung fu, kung fu, horror, kung fu. That's the whole marquee."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Sleep in the movies. Cheapest hotel in town."
+    },
+    {
+      "context": "idle",
+      "emotion": "cocky",
+      "text": "Got a watch. Real gold. Real-ish. Real enough."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Pinball's rigged. Everything's rigged. Still, a quarter's a quarter."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Cops sweep at midnight. Be somewhere else at midnight."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Projector broke halfway. No refunds. This is America."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Hot dog was ninety cents. Ninety! For a hot dog!"
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "Rain on the Deuce. Even the neon looks sad."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Duck in the arcade, man. Rain's free, shelter's a quarter."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "It's cooler in the movies. Even the bad ones."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Honk at the Deuce? Nobody here's going anywhere!"
+    },
+    {
+      "context": "horn",
+      "emotion": "cocky",
+      "text": "Yeah, honk! We love music on Forty-Second!"
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "Watch it! You almost made me drop my hot dog!"
+    },
+    {
+      "context": "collision",
+      "emotion": "wry",
+      "text": "Easy. Wallet's still here. Yours? Check yours."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alert",
+      "text": "Run, man! Who's behind you? Don't tell me."
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running on Forty-Second? Either a cop or the reason for one."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Get that car off the curb, you lunatic!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "alarmed",
+      "text": "Marquees went dark! The whole Deuce went dark!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Lights out on Forty-Second. Finally looks honest."
+    },
+    {
+      "context": "night",
+      "emotion": "weary",
+      "text": "Three a.m. and the Deuce is still awake. Always awake."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Earl's number today? Seven-four-one, I heard."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Shine your shoes, mister? Earl's the best on the street."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Bauer's arcade. Ten games, nine broken, one fixed. Guess which."
+    },
+    {
+      "context": "greet",
+      "emotion": "dry",
+      "text": "You look like you need a seat in the dark for six hours."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Usher woke me up. Paid a dollar to get woke up."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Times Square used to have class. Now it has character."
+    },
+    {
+      "context": "night",
+      "emotion": "low",
+      "text": "Bus station's warm. Bus station's always warm."
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Hey! Ever heard of a sidewalk? This is one."
+    },
+    {
+      "context": "idle",
+      "emotion": "cocky",
+      "text": "Radios, radios! Fell off a truck! The truck's fine!"
+    }
+  ]
+}

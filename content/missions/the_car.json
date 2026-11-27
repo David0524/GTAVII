@@ -1,0 +1,148 @@
+{
+  "id": "mission.the_car",
+  "title": "The Car",
+  "number": 25,
+  "act": 3,
+  "chapter": 8,
+  "playAs": "char.teddy_arce",
+  "date": "1974-08-16",
+  "durationMin": 17,
+  "pillars": [
+    "P4",
+    "P2"
+  ],
+  "giver": "char.pat_kearney",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "22:00",
+      "01:00"
+    ],
+    "weather": [
+      "rain"
+    ],
+    "dateRange": [
+      "1974-08-16",
+      "1974-08-16"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.pat_kearney",
+    "at": "loc.station_house"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "Kearney's desk, W 31st St",
+      "marker": "interior.station_house_desk"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Kearney opens his desk drawer",
+      "script": "dlg.m25_kearney"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Mayhew's car, 35th St off Eighth",
+      "to": "W 35th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Get in the car. Same seat as 1971.",
+      "script": "dlg.m25_the_car"
+    },
+    {
+      "id": "o4b",
+      "type": "combat",
+      "mode": "firefight",
+      "targets": [
+        {
+          "archetype": "npc.lisle_driver",
+          "count": 3
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lisle sent men to clean up Mayhew",
+      "protect": "char.carl_mayhew",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "cover": [
+        "parked cars",
+        "the stoop"
+      ],
+      "note": "Rain, W 35th St. Teddy protects the man he came to confront. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Walk back to the Corwin in the rain",
+      "to": "loc.corwin_hotel",
+      "radius": 20
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3",
+    "o4",
+    "o4b"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.have_kearney_list"
+    ],
+    "unlock": [
+      "mission.fire_watch"
+    ],
+    "relationships": {
+      "char.teddy_arce/char.pat_kearney": 2
+    }
+  },
+  "npcs": [
+    "char.pat_kearney",
+    "char.carl_mayhew",
+    "char.luis_navarro"
+  ],
+  "archetypes": [
+    "npc.rain_pedestrian"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.station_house",
+    "W 35th St & 8th Ave",
+    "loc.corwin_hotel"
+  ],
+  "mobile": "The emotional peak is a dialogue in a parked car. The final walk home in the rain is optional pacing (it can be skipped by fast travel to the desk). No timers.",
+  "design": "Kearney gives Teddy the 1969–71 Christmas list (always, so it's a critical-path corroboration). In the car, Mayhew tells the truth: the 1971 meet was Lisle buying a case, and Teddy was the alibi. The final choice is to let him go or take him to Calloway (flag.teddy_spared_mayhew, in dialogue). COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.carl_mayhew",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

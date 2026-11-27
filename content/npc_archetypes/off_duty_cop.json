@@ -1,0 +1,28 @@
+{
+  "id": "npc.off_duty_cop",
+  "behaviour": "loiterer",
+  "palette": [
+    "#556B2F",
+    "#F5F5DC",
+    "#2B2B2B"
+  ],
+  "wardrobe": "Sport shirt, slacks, crepe-soled shoes, a short haircut that says cop.",
+  "props": [
+    "beer glass"
+  ],
+  "schedule": [
+    {
+      "from": "16:00",
+      "to": "02:00",
+      "area": "The Shamrock Rail and nearby bars",
+      "activity": "drink"
+    }
+  ],
+  "density": {
+    "day": 0.05,
+    "night": 0.1
+  },
+  "barks": "barks.plainclothes",
+  "scripted": false,
+  "note": ""
+}

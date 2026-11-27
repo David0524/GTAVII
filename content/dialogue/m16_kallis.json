@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m16_kallis",
+  "context": "M16 o4. Kallis Fur Salon. Kallis pours two coffees. Neither drinks.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.stavros_kallis",
+      "emotion": "courtly",
+      "text": "Niko. I offer you a fair price. Fair for July."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "proud",
+      "text": "You want my firm for the price of a winter coat."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.stavros_kallis",
+      "emotion": "cutting",
+      "text": "I want your crew. Yiannis especially. The firm comes with them, sadly."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "cold",
+      "text": "I nailed skins for your uncle in forty-eight. I remember your prices."
+    }
+  ]
+}

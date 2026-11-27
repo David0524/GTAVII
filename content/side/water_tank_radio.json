@@ -1,0 +1,56 @@
+{
+  "id": "mission.side_water_tank_radio",
+  "kind": "side",
+  "title": "The Water-Tank Voice",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Rooftop block near W 36th & 9th",
+      "to": "W 36th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Hear the voice and the first clue",
+      "script": "dlg.side_water_tank_radio_1"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Up to the roof",
+      "marker": "interior.pigeon_roof"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Meet the man in the tank",
+      "script": "dlg.side_water_tank_radio_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "A hidden rooftop place unlocked on the minimap"
+  },
+  "where": "A rooftop water tank near W 36th St",
+  "systems": [
+    "radio",
+    "rooftops",
+    "driving"
+  ],
+  "mobile": "Signal meter on the HUD.",
+  "rank": 44,
+  "slice": false
+}

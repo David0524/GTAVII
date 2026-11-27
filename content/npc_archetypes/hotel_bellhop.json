@@ -1,0 +1,27 @@
+{
+  "id": "npc.hotel_bellhop",
+  "behaviour": "worker",
+  "palette": [
+    "#800000",
+    "#DAA520"
+  ],
+  "wardrobe": "Bellhop jacket with brass buttons, pillbox cap.",
+  "props": [
+    "luggage cart"
+  ],
+  "schedule": [
+    {
+      "from": "07:00",
+      "to": "23:00",
+      "area": "Hotel Pennsylvanian lobby",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.2,
+    "night": 0.1
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": ""
+}

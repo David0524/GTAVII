@@ -1,0 +1,27 @@
+{
+  "id": "npc.token_clerk",
+  "behaviour": "worker",
+  "palette": [
+    "#1C2541",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Transit clerk in a booth behind scratched glass.",
+  "props": [
+    "token tray"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Token booths",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.1
+  },
+  "barks": "barks.service",
+  "scripted": false,
+  "note": ""
+}

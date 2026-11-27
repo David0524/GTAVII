@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m02_notice",
+  "context": "M2 o1. Corwin lobby, Saturday evening. Bernard reads the notice taped over the mailboxes.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "Mr. Arce. Come, hear literature. 'Notice to all residents of the Corwin Hotel.'"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "'The premises have been acquired by Corwin Residential Associates.' Capital A."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "wry",
+      "text": "'Inquiries to H. Lisle, counsel.' Counsel. A lawyer who signs with an initial."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "worried",
+      "text": "What does it mean, Mr. Ostrow? In words a person uses."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "grave",
+      "text": "It means somebody bought us, Mrs. Pruitt. And they haven't said what for."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Lisle. Who's Lisle?"
+    },
+    {
+      "id": "l7",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "dry",
+      "text": "A man who writes 'notwithstanding.' I'll know more when I've seen him type."
+    }
+  ]
+}

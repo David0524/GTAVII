@@ -1,0 +1,56 @@
+{
+  "id": "mission.side_hydrant_war",
+  "kind": "side",
+  "title": "Hydrant War",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "The open hydrant, W 28th & 9th",
+      "to": "W 28th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Hear the cop and the block",
+      "script": "dlg.side_hydrant_war_1"
+    },
+    {
+      "id": "o3",
+      "type": "wait",
+      "text": "Fit the spray cap, or not",
+      "seconds": 15
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Settle it with the cop",
+      "script": "dlg.side_hydrant_war_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1"
+  ],
+  "rewards": {
+    "text": "Relationship and reputation on the block"
+  },
+  "where": "Any hot afternoon, side streets near 9th Ave",
+  "systems": [
+    "heat",
+    "bribes",
+    "police"
+  ],
+  "mobile": "A one-choice scene.",
+  "rank": 23,
+  "slice": false
+}

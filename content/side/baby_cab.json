@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_baby_cab",
+  "kind": "side",
+  "title": "Pennington, Fast",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_vehicle",
+      "text": "Into the cab",
+      "vehicle": "vehicle_role.cab"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "The woman flags you down",
+      "script": "dlg.side_baby_cab_1"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Hospital run, her calling turns",
+      "to": "loc.hospital",
+      "radius": 25
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Choose the baby's name",
+      "script": "dlg.side_baby_cab_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1"
+  ],
+  "rewards": {
+    "text": "A name you choose for the baby (it appears in the epilogue paper's birth notices)"
+  },
+  "where": "Anywhere; ends at Pennington General",
+  "systems": [
+    "driving",
+    "one-ways",
+    "hospital"
+  ],
+  "mobile": "Soft timer, never fails.",
+  "rank": 26,
+  "slice": false
+}

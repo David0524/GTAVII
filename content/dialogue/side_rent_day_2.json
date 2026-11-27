@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_rent_day_2",
+  "context": "The burst pipe (Nick).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.sro_resident",
+      "emotion": "angry",
+      "text": "Water in my bedroom, Mr. Owner! My bed is a boat!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "humble",
+      "text": "Then tonight you sleep at my expense, at the Pennsylvania. Tomorrow, a plumber."
+    }
+  ]
+}

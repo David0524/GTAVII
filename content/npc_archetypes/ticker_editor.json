@@ -1,0 +1,27 @@
+{
+  "id": "npc.ticker_editor",
+  "behaviour": "worker",
+  "palette": [
+    "#FFFFFF",
+    "#696969"
+  ],
+  "wardrobe": "Tabloid night photo editor: rolled sleeves, green eyeshade, a phone in each hand.",
+  "props": [
+    "phone"
+  ],
+  "schedule": [
+    {
+      "from": "20:00",
+      "to": "06:00",
+      "area": "The Daily Ticker bureau, W 26th St",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": null,
+  "scripted": true,
+  "note": ""
+}

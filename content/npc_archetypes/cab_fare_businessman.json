@@ -1,0 +1,27 @@
+{
+  "id": "npc.cab_fare_businessman",
+  "behaviour": "commuter",
+  "palette": [
+    "#2F4F4F",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Suit, briefcase.",
+  "props": [
+    "briefcase"
+  ],
+  "schedule": [
+    {
+      "from": "18:00",
+      "to": "04:00",
+      "area": "Cab pickups",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.cab_fare",
+  "scripted": true,
+  "note": ""
+}

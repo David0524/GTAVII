@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_club_ious_1",
+  "context": "Delphine finds the IOUs of women who left the city.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Six IOUs. Six women who went home, or somewhere. They paid in. Nobody paid out."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Money orders, then. Philadelphia, Wilmington, San Juan. Rule twenty-two: finish the count."
+    }
+  ]
+}

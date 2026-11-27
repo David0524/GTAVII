@@ -1,0 +1,19 @@
+{
+  "id": "dlg.amb_grate_park",
+  "context": "Bryant Park side grate.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.night_reader",
+      "emotion": "quiet",
+      "text": "Library closes at nine. Then the park changes."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.night_reader",
+      "emotion": "quiet",
+      "text": "Read faster."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "dlg.act_payphone_delroy",
+  "context": "Payphone: Delroy.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "Cab line's forty deep and I need a coffee. Watch my place? Ten minutes."
+    }
+  ]
+}

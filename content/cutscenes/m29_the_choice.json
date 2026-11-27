@@ -1,0 +1,147 @@
+{
+  "id": "cut.m29_the_choice",
+  "mission": "mission.the_ledger",
+  "before": "o2",
+  "time": "20:15",
+  "date": "1974-08-28",
+  "skippable": false,
+  "logline": "Branch B. The Corwin boiler room. One ledger, four hands that want it, and a man who has to choose whose.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "static",
+      "framing": "The boiler room: the cold boiler, a work table, the ledger under a hanging bulb",
+      "blocking": "Bernard in a chair by the boiler door; Teddy standing over the table",
+      "beats": [
+        "The boiler door is visible in every shot"
+      ],
+      "durationSec": 5,
+      "notes": "audio: pipes ticking; the building above | lighting: one bulb; the boiler a dark mass"
+    },
+    {
+      "id": "s2",
+      "type": "close",
+      "lensMm": 85,
+      "move": "slow push",
+      "framing": "Teddy, looking at the ledger",
+      "blocking": "",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 5,
+      "dialogue": [
+        "dlg.m29_choice#l1"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "choice hold",
+      "lensMm": 100,
+      "move": "static",
+      "framing": "The ledger under the bulb",
+      "blocking": "",
+      "beats": [
+        "c1 (untimed; locked options greyed with reasons)"
+      ],
+      "dialogue": [
+        "dlg.m29_choice#c1"
+      ],
+      "waitFor": "choice",
+      "choices": "dlg.m29_choice#c1"
+    },
+    {
+      "id": "s4a",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy closes the ledger",
+      "blocking": "",
+      "beats": [
+        "Branch: Testimony"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m29_choice#l_b1"
+      ],
+      "showIf": {
+        "choice": "dlg.m29_choice#c1",
+        "option": 0
+      }
+    },
+    {
+      "id": "s4b",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy tucks the ledger under his arm",
+      "blocking": "",
+      "beats": [
+        "Branch: Ledger Goes Public"
+      ],
+      "durationSec": 4.2,
+      "dialogue": [
+        "dlg.m29_choice#l_b2"
+      ],
+      "showIf": {
+        "choice": "dlg.m29_choice#c1",
+        "option": 1
+      }
+    },
+    {
+      "id": "s4c",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Teddy weighs it in one hand",
+      "blocking": "",
+      "beats": [
+        "Branch: New Pad"
+      ],
+      "durationSec": 4.6,
+      "dialogue": [
+        "dlg.m29_choice#l_b3"
+      ],
+      "showIf": {
+        "choice": "dlg.m29_choice#c1",
+        "option": 2
+      }
+    },
+    {
+      "id": "s4d",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Bernard opens the boiler door; orange light on both faces",
+      "blocking": "",
+      "beats": [
+        "Branch: Ashes"
+      ],
+      "durationSec": 6,
+      "dialogue": [
+        "dlg.m29_choice#l_b4",
+        "dlg.m29_choice#l_b4b"
+      ],
+      "showIf": {
+        "choice": "dlg.m29_choice#c1",
+        "option": 3
+      }
+    },
+    {
+      "id": "s5",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Bernard, from his chair",
+      "blocking": "",
+      "beats": [
+        "l_end"
+      ],
+      "durationSec": 3,
+      "dialogue": [
+        "dlg.m29_choice#l_end"
+      ]
+    }
+  ]
+}

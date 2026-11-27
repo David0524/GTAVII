@@ -1,0 +1,215 @@
+{
+  "id": "mission.shoebox",
+  "title": "Below Thirty-Fourth",
+  "number": 23,
+  "act": 3,
+  "chapter": 8,
+  "playAs": "char.delphine_moore",
+  "date": "1974-08-12",
+  "durationMin": 18,
+  "pillars": [
+    "P1",
+    "P4"
+  ],
+  "giver": "char.marcus_teague",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "21:00",
+      "02:00"
+    ],
+    "weather": [
+      "rain"
+    ],
+    "dateRange": [
+      "1974-08-12",
+      "1974-08-12"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "The Arden boiler room. Get the box.",
+      "marker": "interior.arden_back_stairs",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Marcus: Ricky talked. They know.",
+      "script": "dlg.m23_marcus"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Down into Herald Square station",
+      "marker": "interior.herald_sq_station"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "A token, a turnstile, and Brannock",
+      "script": "dlg.m23_token_booth"
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "text": "Into the old 33rd Street passage",
+      "marker": "interior.passage_33rd"
+    },
+    {
+      "id": "o6",
+      "type": "evade",
+      "text": "Lose them in the dark passage",
+      "from": [
+        "char.jimmy_brannock",
+        "npc.plainclothes"
+      ],
+      "breakDistanceM": 60,
+      "safeZones": [
+        "interior.penn_ind_platform"
+      ],
+      "hazards": [
+        "rats (swarm, startle)",
+        "flooded section",
+        "dead lights"
+      ],
+      "fallback": "goto interior.penn_ind_platform with timeLimitSec 150"
+    },
+    {
+      "id": "o7",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "character": "char.jimmy_brannock"
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Brannock catches up on the platform",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "hazards": [
+        "platform edge",
+        "an arriving train (timed, telegraphed)"
+      ],
+      "note": "Content rule: no instructional detail about the third rail; it's a visible 'do not' hazard only. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o8",
+      "type": "goto",
+      "text": "Take the downtown local to 23rd St",
+      "to": "W 23rd St & 8th Ave",
+      "radius": 20,
+      "note": "Ride one stop; the train is a moving set (sway, flickering lights, graffiti cars)."
+    },
+    {
+      "id": "o9",
+      "type": "deliver",
+      "text": "Box to Hanyang House, W 32nd St",
+      "item": "item.club_shoebox",
+      "to": "interior.hanyang_house",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o10",
+      "type": "dialogue",
+      "text": "Mi-sook opens the back room",
+      "script": "dlg.m23_mi_sook",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o11",
+      "type": "enter_interior",
+      "text": "Back to the Arden. Tina's waiting.",
+      "marker": "interior.arden_lobby",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o12",
+      "type": "dialogue",
+      "text": "Tina tells you everything",
+      "script": "dlg.m23_tina"
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o3",
+    "o5",
+    "o7",
+    "o9"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.fire_watch"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.mi_sook_baek": 1,
+      "char.delphine_moore/char.marcus_teague": 1
+    }
+  },
+  "npcs": [
+    "char.marcus_teague",
+    "char.jimmy_brannock",
+    "char.ricky_vail",
+    "char.mi_sook_baek",
+    "char.tina_mercado",
+    "char.claudette_bijou"
+  ],
+  "archetypes": [
+    "npc.penn_porter",
+    "npc.rain_pedestrian",
+    "npc.rat_swarm",
+    "npc.subway_rider",
+    "npc.token_clerk"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "W 34th St & 6th Ave",
+    "8th Ave & W 33rd St",
+    "W 23rd St & 8th Ave",
+    "loc.korean_restaurant"
+  ],
+  "mobile": "The underground is navigated by lit signs and the passage's single track of bulbs; route knowledge (the passage links Herald Square to Penn Station) is the solution. Rats are a startle, not damage. The train arrival is telegraphed 6+ seconds ahead. Melee on soft lock.",
+  "design": "**The subway story mission** (user: 'Maybe a mission in the subways'). Uses what only the subway has: a token booth and turnstiles, a half-abandoned pedestrian passage from Herald Square toward Penn Station (real; sources differ on when it closed, 1970s or c.1990), rats, a platform fight with a train coming, and a one-stop ride on a graffiti-covered local. Content rule: the third rail is a visible hazard with no instructional detail. Then the kye hand-off and Tina's confession, as before.",
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.jimmy_brannock",
+      "reason": "died"
+    },
+    {
+      "character": "char.mi_sook_baek",
+      "reason": "died"
+    },
+    {
+      "character": "char.tina_mercado",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

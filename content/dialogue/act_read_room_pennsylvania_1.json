@@ -1,0 +1,56 @@
+{
+  "id": "dlg.act_read_room_pennsylvania_1",
+  "context": "Read the Room at the Pennsylvania bar. Tap patrons for their tell lines first (engine), then choose.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Somebody in here is a cop. Which one, sugar?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "The convention man in the fez",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The bellhop on his break",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The man reading yesterday's paper",
+          "goto": "l_right",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 1
+          }
+        },
+        {
+          "text": "The widow with the sherry",
+          "goto": "l_wrong"
+        }
+      ]
+    },
+    {
+      "id": "l_right",
+      "speaker": "char.rita_haines",
+      "emotion": "pleased",
+      "text": "Yesterday's paper, same page for an hour. He's not reading. He's listening.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_wrong",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "No, sugar. Yesterday's paper, same page for an hour. He's not reading. He's listening.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule nineteen: the cop is the one who isn't enjoying himself."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "npc.lunch_counter_regular",
+  "behaviour": "loiterer",
+  "palette": [
+    "#FFFFFF",
+    "#000080"
+  ],
+  "wardrobe": "Office clothes, a hat on the next stool.",
+  "props": [
+    "coffee cup"
+  ],
+  "schedule": [
+    {
+      "from": "11:30",
+      "to": "14:30",
+      "area": "Lunch counters (Herald Sq store, Fifth Ave)",
+      "activity": "eat"
+    }
+  ],
+  "density": {
+    "day": 0.3,
+    "night": 0.0
+  },
+  "barks": "barks.office",
+  "scripted": false,
+  "note": ""
+}

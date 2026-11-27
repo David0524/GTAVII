@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m13_ricky",
+  "context": "M13 o5. Bryant Park, west terrace, rain on the leaves. Ricky shakes.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ricky_vail",
+      "emotion": "jittery",
+      "text": "Fifteen to life, man. For a bag. So yeah, I talk to cops. You would too."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "gentle",
+      "text": "Who do you talk to, Ricky?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.ricky_vail",
+      "emotion": "jittery",
+      "text": "The big one. Sneakers. He wants to know where the women keep their money."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "And you told him?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.ricky_vail",
+      "emotion": "ashamed",
+      "text": "Not yet. I'm not a rat. I'm a guy with a calendar. He's coming now. Hide."
+    }
+  ]
+}

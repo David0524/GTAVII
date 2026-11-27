@@ -1,0 +1,58 @@
+{
+  "id": "mission.side_old_beat",
+  "kind": "side",
+  "title": "Old Beat Favours",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Kearney's off-book ask",
+      "script": "dlg.side_old_beat_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The old foot post, W 30th & 8th",
+      "to": "W 30th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Hear the favour's story",
+      "script": "dlg.side_old_beat_2"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Back to Kearney at Midtown Central",
+      "to": "loc.station_house",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Relationship with Kearney (unlocks report downgrades)"
+  },
+  "where": "Midtown Central; the old foot posts",
+  "systems": [
+    "Teddy's specials",
+    "relationships",
+    "police system"
+  ],
+  "mobile": "Short walks and talks.",
+  "rank": 33,
+  "slice": false
+}

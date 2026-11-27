@@ -1,0 +1,45 @@
+{
+  "id": "mission.side_hollis_postcards",
+  "kind": "side",
+  "title": "Hollis's Postcards",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "deliver",
+      "text": "Bring Mrs. Pruitt the postcards",
+      "item": "item.hollis_postcard",
+      "to": "interior.corwin_lobby"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Read them together",
+      "script": "dlg.side_postcards"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "A memorial in the Corwin lobby; Odessa +1 per five cards; the last card unlocks Hollis's radio station preset"
+  },
+  "where": "Pawnshops, fences, the Corwin, Earl's stand, the Royal (20 hidden across the core)",
+  "systems": [
+    "pawnshops and fences",
+    "interiors",
+    "relationships (Odessa)"
+  ],
+  "mobile": "Cards glint at close range; an 'ask around' prompt points to the right block.",
+  "rank": 5,
+  "slice": true
+}

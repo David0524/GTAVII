@@ -1,0 +1,150 @@
+{
+  "id": "mission.lunch_counter",
+  "title": "Lunch Counter",
+  "number": 12,
+  "act": 2,
+  "chapter": 4,
+  "playAs": "char.teddy_arce",
+  "switchPoints": [
+    "o3"
+  ],
+  "date": "1974-07-15",
+  "durationMin": 16,
+  "pillars": [
+    "P4",
+    "P2"
+  ],
+  "giver": "char.ruth_calloway",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "12:20",
+      "14:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-07-15",
+      "1974-07-15"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.ruth_calloway",
+    "at": "loc.herald_sq_store",
+    "note": "A note at the Corwin desk: 'Lunch counter. 12:30. Bring an appetite. R.C.'"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "enter_interior",
+      "text": "Herald Square store, lunch counter",
+      "marker": "interior.herald_lunch_counter"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "The woman from the parked car",
+      "script": "dlg.m12_calloway"
+    },
+    {
+      "id": "o3",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o4",
+      "type": "photo",
+      "text": "Photograph who Teddy's talking to",
+      "subject": "char.ruth_calloway",
+      "minScreenFraction": 0.06
+    },
+    {
+      "id": "o5",
+      "type": "follow",
+      "text": "Follow her to her car, Fifth Ave",
+      "target": "char.ruth_calloway",
+      "keepWithinM": 60
+    },
+    {
+      "id": "o5b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Two of Wurtz's men jump Calloway",
+      "protect": "char.ruth_calloway",
+      "note": "Plainclothes cops: ordinary killable police (heat only). Calloway is essential. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Ask her what she wants with him",
+      "script": "dlg.m12_delphine_calloway",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "target_lost"
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o3",
+    "o5",
+    "o5b"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.contact_prints"
+    ]
+  },
+  "npcs": [
+    "char.ruth_calloway",
+    "char.luis_navarro"
+  ],
+  "archetypes": [
+    "npc.lunch_counter_regular",
+    "npc.shopper"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.herald_sq_store",
+    "5th Ave & W 36th St"
+  ],
+  "mobile": "**Branch A** is an untimed two-option choice with a confirm step ('Are you sure?'), because it persists. Delphine's tail goes down Broadway and Sixth through lunch crowds, so it's generous.",
+  "design": "**Branch A.** Calloway offers the wire. Choices in dlg.m12_calloway set flag.branch_a_wire or flag.branch_a_burned and the N3 §3 relationship changes. Delphine, two stools down because she followed her fifty dollars, learns who Calloway is, which gives her leverage in P4. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.ruth_calloway",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

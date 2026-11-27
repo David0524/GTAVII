@@ -1,0 +1,42 @@
+/* ?cine=1 authoring tool: a compact dark editor around the live viewport. Desktop-first (it's a tool). */
+body.cine-tool .u-hud, body.cine-tool .t74-touch { display: none !important; }
+.ct { position: fixed; inset: 0; z-index: 70; pointer-events: none; font: 12px/1.35 var(--f-ui); color: var(--cream); }
+.ct button, .ct select, .ct input { pointer-events: auto; font: 600 11px var(--f-ui); color: var(--cream); background: #24191a; border: 1px solid #ffffff2a; padding: 3px 7px; border-radius: 2px; }
+.ct button:hover { border-color: var(--taxi); } .ct button.primary { background: var(--taxi); color: #1a0f0c; border-color: var(--taxi); } .ct button.on { border-color: var(--taxi); color: var(--taxi); }
+.ct-side { position: absolute; left: 0; top: 0; bottom: 92px; width: 270px; background: rgba(14,9,10,.92); overflow: auto; pointer-events: auto; padding: 8px; box-sizing: border-box; border-right: 1px solid #ffffff1a; }
+.ct-side header { display: flex; justify-content: space-between; align-items: center; gap: 6px; } .ct-side header b { font: 400 14px var(--f-head); letter-spacing: .2em; }
+.ct-log { font: italic 12px var(--f-display); color: var(--dim); margin: 6px 0; }
+.ct-shots { list-style: none; margin: 0; padding: 0; } .ct-shots li { padding: 4px 6px; cursor: pointer; border-left: 3px solid transparent; }
+.ct-shots li span { float: right; color: var(--dim); } .ct-shots li.on { border-color: var(--taxi); background: rgba(227,169,42,.1); }
+.ct-script { margin-top: 8px; padding: 6px; background: #efe3c4; color: #1b1210; font: 11.5px/1.4 var(--f-type); }
+.ct-script h4 { margin: 0 0 4px; font: 400 13px var(--f-head); letter-spacing: .18em; color: #6b2a24; } .ct-script p { margin: 2px 0; } .ct-script i { color: #6b2a24; } .ct-script .n { color: #5a4a3a; font-size: 10.5px; }
+.ct-errs { margin-top: 8px; color: #ff8a7a; } .ct-errs .ok { color: #a9c79a; }
+.ct-insp { position: absolute; right: 0; top: 0; width: 330px; background: rgba(14,9,10,.92); pointer-events: auto; padding: 8px; box-sizing: border-box; border-left: 1px solid #ffffff1a; }
+.ct-insp .row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 5px 0; } .ct-insp label { color: var(--dim); } .ct-insp input[type=range] { width: 110px; } .ct-insp input[type=number] { width: 54px; }
+.ct-insp .hint, .ct-insp .row.hint { color: var(--dim); font-size: 10.5px; }
+.ct-tl { position: absolute; left: 0; right: 0; bottom: 0; height: 92px; background: rgba(10,6,7,.95); pointer-events: auto; border-top: 1px solid #ffffff1a; }
+.ct-ruler { position: relative; height: 16px; margin: 0 10px; } .ct-ruler span { position: absolute; top: 2px; font-size: 10px; color: var(--dim); transform: translateX(-50%); }
+.ct-track { position: absolute; left: 10px; right: 10px; top: 18px; bottom: 8px; cursor: ew-resize; }
+.ct-track .blk { position: absolute; top: 0; height: 34px; box-sizing: border-box; border: 1px solid #ffffff33; background: #2a1d1e; overflow: hidden; } .ct-track .blk.on { background: #3a2a1e; border-color: var(--taxi); }
+.ct-track .blk b { position: absolute; left: 4px; top: 2px; font: 400 12px var(--f-head); letter-spacing: .1em; }
+.ct-track .k { position: absolute; bottom: 4px; width: 8px; height: 8px; margin-left: -4px; background: #ff6a3a; transform: rotate(45deg); }
+.ct-track .ln { position: absolute; top: 40px; height: 10px; background: rgba(239,227,196,.55); border-radius: 2px; }
+.ct-track .ev { position: absolute; top: 54px; width: 2px; height: 12px; background: #7fa7e6; } .ct-track .ev.card { background: var(--taxi); } .ct-track .ev.cue { background: #d9473b; }
+.ct-head { position: absolute; top: 14px; bottom: 4px; width: 2px; background: #fff; margin-left: 10px; pointer-events: none; transform: translateX(-1px); }
+.ct-head::after { content: attr(data-t); position: absolute; top: -14px; left: 4px; white-space: nowrap; font-size: 10px; color: #fff; }
+.ct-safe { position: absolute; left: 270px; right: 330px; top: 0; bottom: 92px; pointer-events: none; }
+.ct-safe i { position: absolute; border: 0 solid rgba(239,227,196,.25); }
+.ct-safe i:nth-child(1) { left: 33.33%; top: 0; bottom: 0; border-left-width: 1px; } .ct-safe i:nth-child(2) { left: 66.66%; top: 0; bottom: 0; border-left-width: 1px; }
+.ct-safe i:nth-child(3) { top: 33.33%; left: 0; right: 0; border-top-width: 1px; } .ct-safe i:nth-child(4) { top: 66.66%; left: 0; right: 0; border-top-width: 1px; }
+body.cine-tool .cine-fx { z-index: 60; }
+
+/* performance lanes (docs/CUTSCENE_PERFORMANCE.md) */
+.ct-tl.perf { height: 152px; }
+.ct-track .pl { position: absolute; left: 0; right: 0; height: 8px; border-top: 1px solid #ffffff12; }
+.ct-track .pl em { position: absolute; left: 0; top: -1px; z-index: 1; padding: 0 4px 0 0; background: rgba(10,6,7,.95); font: 600 8px/9px var(--f-ui); color: var(--dim); font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
+.ct-track .pl i { position: absolute; top: 1px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--taxi); }
+.ct-perf { border-top: 1px solid #ffffff1a; margin-top: 6px; padding-top: 4px; }
+.ct-perf .tabs button.on, .ct-perf .pf-lips.on, .ct-perf .pf-pick.on { background: var(--taxi); color: #111; }
+.ct-perf select, .ct-perf input:not([type=checkbox]) { max-width: 120px; }
+.pf-keys { margin: 4px 0 0; padding: 0 0 0 16px; max-height: 120px; overflow: auto; font-size: 11px; }
+.pf-keys span { cursor: pointer; color: var(--taxi); } .pf-keys button { padding: 0 6px; min-height: 0; }

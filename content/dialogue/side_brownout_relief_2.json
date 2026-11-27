@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_brownout_relief_2",
+  "context": "The block thanks the helper.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.brownout_crowd",
+      "emotion": "warm",
+      "text": "You're all right. Sit. Somebody's got a cold soda left. Somebody always does."
+    }
+  ]
+}

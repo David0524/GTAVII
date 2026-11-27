@@ -1,0 +1,28 @@
+{
+  "id": "dlg.sys_bail_n_t",
+  "context": "Bail-out: char.nick_varelas bails out char.teddy_arce at a precinct desk (CORE_SYSTEMS arrest flow). Remembered: relationship +1 both ways.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Teodoro! I paid the sergeant. He was very reasonable. Too reasonable."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "That's the problem with you, Nick. Everybody's reasonable."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "dry",
+      "text": "You're welcome.",
+      "setRelationships": {
+        "char.nick_varelas/char.teddy_arce": 1,
+        "char.teddy_arce/char.nick_varelas": 1
+      }
+    }
+  ]
+}

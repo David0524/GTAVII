@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_hack_fare",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_fare_businessman",
+      "emotion": "brisk",
+      "text": "Left on Thirty-Fourth. Down Eighth. Here. Keep the change, you know the streets."
+    }
+  ]
+}

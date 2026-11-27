@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_garden_runaway_1",
+  "context": "Seventh Ave. A horse trots past a stalled bus.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.ice_house_worker",
+      "emotion": "panicked",
+      "text": "That's Duchess! From the horse show! Don't chase her, she runs faster when you chase!"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.ice_house_worker",
+      "emotion": "panicked",
+      "text": "Get ahead of her. Sugar. She'll do anything for sugar. Like my brother."
+    }
+  ]
+}

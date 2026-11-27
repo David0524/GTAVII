@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_last_train_2",
+  "context": "Her stop.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.subway_rider",
+      "emotion": "grateful",
+      "text": "Twenty-Third! Thank you. Here's my card. I'm a secretary. I know everybody's secrets."
+    }
+  ]
+}

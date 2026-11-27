@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m17_shop",
+  "context": "M17 o8. The empty shop, W 37th. Dust, two old chairs, light through the paper.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "quiet",
+      "text": "Two chairs. Tina on one. Me on the other. Women on Eighth getting their hair done."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "My first shop on Twenty-Ninth was smaller. I slept under the table."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "You slept under a table and now you own the street."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "honest",
+      "text": "I own paper. Paper owns me. Get your shop, Miss Moore. Own something real."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule eleven: don't like the landlord. Too late."
+    }
+  ]
+}

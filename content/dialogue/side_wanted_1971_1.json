@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_wanted_1971_1",
+  "context": "A faded poster in a station-house corridor (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Nineteen seventy-one. I remember these faces. I remember the week they went up."
+    }
+  ]
+}

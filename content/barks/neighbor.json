@@ -1,0 +1,67 @@
+{
+  "id": "barks.neighbor",
+  "core": false,
+  "note": "Penn South and Chelsea residents: stoops, domino tables, co-op meetings.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "warm",
+      "text": "Buenas! Carmen's boy! Look at you!"
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Hot one. Sit, sit, have a soda."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Union built these towers. Ten of 'em. Ours."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Dominoes at six. Bring your losing face."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "My sister's building on Twenty-Ninth got sold. Everybody's buying."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Co-op meeting ran three hours. Over a dog."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Rain! Bring the chairs in! The domino table too!"
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Hydrant's open on Twenty-Seventh. Kids are happy."
+    },
+    {
+      "context": "collision",
+      "emotion": "friendly",
+      "text": "Oops! Easy, mijo."
+    },
+    {
+      "context": "player_running",
+      "emotion": "worried",
+      "text": "Where's he running? Somebody sick?"
+    },
+    {
+      "context": "brownout",
+      "emotion": "warm",
+      "text": "Lights out. Get the candles. Get the radio."
+    },
+    {
+      "context": "night",
+      "emotion": "warm",
+      "text": "Late! Go to bed, you'll scare your mother."
+    }
+  ]
+}

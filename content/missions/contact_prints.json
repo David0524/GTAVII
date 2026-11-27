@@ -1,0 +1,183 @@
+{
+  "id": "mission.contact_prints",
+  "title": "Contact Prints",
+  "number": 13,
+  "act": 2,
+  "chapter": 5,
+  "playAs": "char.delphine_moore",
+  "date": "1974-07-17",
+  "durationMin": 15,
+  "pillars": [
+    "P1",
+    "P2"
+  ],
+  "giver": "char.earl_poole",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "22:00",
+      "03:00"
+    ],
+    "weather": [
+      "overcast",
+      "rain"
+    ],
+    "dateRange": [
+      "1974-07-17",
+      "1974-07-17"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.earl_poole",
+    "at": "loc.poole_shine"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Earl's stand, 42nd & Seventh",
+      "to": "loc.poole_shine",
+      "radius": 15
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Earl keeps books too",
+      "script": "dlg.m13_earl"
+    },
+    {
+      "id": "o3",
+      "type": "photo",
+      "text": "Photograph Brannock at Earl's stand",
+      "subject": "char.jimmy_brannock",
+      "minScreenFraction": 0.06,
+      "optional": true,
+      "onComplete": {
+        "items": [
+          "item.print_brannock_2"
+        ]
+      }
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Find Ricky, Bryant Park west terrace",
+      "to": "loc.bryant_park",
+      "radius": 30
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Ricky wants to talk. Nervously.",
+      "script": "dlg.m13_ricky"
+    },
+    {
+      "id": "o6",
+      "type": "photo",
+      "text": "Photograph Wurtz with Ricky",
+      "subject": "char.dennis_wurtz",
+      "with": "char.ricky_vail",
+      "minScreenFraction": 0.06,
+      "onComplete": {
+        "items": [
+          "item.print_wurtz_ricky"
+        ]
+      }
+    },
+    {
+      "id": "o6b",
+      "type": "combat",
+      "mode": "takedown",
+      "targets": [
+        {
+          "archetype": "npc.plainclothes",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Brannock's partner grabs your camera",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o7",
+      "type": "enter_interior",
+      "text": "Back to Rita's bar, the Arden",
+      "marker": "interior.arden_lobby",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "Lay the prints out for Rita",
+      "script": "dlg.m13_rita_prints",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "spotted",
+      "by": "char.dennis_wurtz",
+      "withinM": 8,
+      "note": "Proposed; fallback target_lost."
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o5",
+    "o6b",
+    "o7"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.photo_file_3"
+    ],
+    "unlock": [
+      "mission.cold_room"
+    ]
+  },
+  "npcs": [
+    "char.earl_poole",
+    "char.jimmy_brannock",
+    "char.ricky_vail",
+    "char.dennis_wurtz",
+    "char.rita_haines",
+    "char.ray_bauer"
+  ],
+  "archetypes": [
+    "npc.park_dealer",
+    "npc.night_reader",
+    "npc.deuce_crowd"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.poole_shine",
+    "loc.bryant_park",
+    "loc.arden_hotel"
+  ],
+  "mobile": "Rain and darkness: photo targets get a subtle rim light (engine photo mode), and the size threshold is generous. Bryant Park's trees and benches give cover. Being spotted is warned twice.",
+  "design": "Delphine's file reaches three prints (Brannock from M8, Wurtz and Ricky now, and Brannock at Earl's stand if taken), which sets flag.photo_file_3, one corroboration for B2. Ricky is drawn with dignity: scared, and counting days. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night",
+  "essential": [
+    {
+      "character": "char.rita_haines",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

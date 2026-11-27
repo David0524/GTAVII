@@ -1,0 +1,58 @@
+{
+  "id": "mission.side_last_train",
+  "kind": "side",
+  "title": "Last Train Home",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The worker asks for a lift home",
+      "script": "dlg.side_last_train_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Down to the platform",
+      "marker": "interior.penn_ind_platform"
+    },
+    {
+      "id": "o3",
+      "type": "escort",
+      "text": "Get her through the transfer",
+      "who": "npc.evening_commuter",
+      "to": "W 34th St & 6th Ave",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "The right stop, and goodbye",
+      "script": "dlg.side_last_train_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Her thanks and a business card (a future job)"
+  },
+  "where": "Subway platforms (subway.json)",
+  "systems": [
+    "subway",
+    "escort",
+    "time of day"
+  ],
+  "mobile": "Pace-matched escort.",
+  "rank": 42,
+  "slice": false
+}

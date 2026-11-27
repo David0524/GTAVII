@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_buyers_flatiron",
+  "context": "Buyers' Tour: the Flatiron.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.trade_dinner_guest",
+      "emotion": "charmed",
+      "text": "It's so thin! How do people work in the point?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "Very carefully. Like furriers in summer."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Sell them the city. The city's going broke. Sell it anyway. It's beautiful."
+    }
+  ]
+}

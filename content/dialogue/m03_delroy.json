@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m03_delroy",
+  "context": "M3 o1. Penn Station cab line, Seventh Ave side. Delroy leans on his cab.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "There he is. The man with no license and all the streets in his head."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "License lapsed, Delroy. The streets didn't."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "I got a date with a plate of ribs. Three hours. You drive, you split the meter."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delroy_tate",
+      "emotion": "teaching",
+      "text": "Rules. Sixth goes up, Seventh comes down, Broadway does what it wants."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delroy_tate",
+      "emotion": "teaching",
+      "text": "Twenty-Third, Thirty-Fourth, Forty-Second, two-way. Everything else, read the arrows."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.delroy_tate",
+      "emotion": "easy",
+      "text": "Wrong way, the fare yells and the tip dies. Right way, you're a genius."
+    },
+    {
+      "id": "l7",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Go eat, Delroy. I'll bring her back without a scratch."
+    }
+  ]
+}

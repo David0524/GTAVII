@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_club_ious",
+  "kind": "side",
+  "title": "The Club's Last IOUs",
+  "number": null,
+  "leads": [
+    "char.delphine_moore"
+  ],
+  "acts": [
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Delphine finds the club's IOUs",
+      "script": "dlg.side_club_ious_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The bus terminal lockers",
+      "to": "loc.penn_station_lockers",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "The first woman's last address",
+      "to": "W 36th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Mail the money order",
+      "to": "W 33rd St & 8th Ave",
+      "item": "item.money_order",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Club trust; epilogue postcards"
+  },
+  "where": "Bus terminal lockers, a church, a train station",
+  "systems": [
+    "items",
+    "post office"
+  ],
+  "mobile": "Short walks.",
+  "rank": 48,
+  "slice": false
+}

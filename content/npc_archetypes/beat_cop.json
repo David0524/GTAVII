@@ -1,0 +1,30 @@
+{
+  "id": "npc.beat_cop",
+  "behaviour": "beat_cop",
+  "palette": [
+    "#1C2541",
+    "#FFFFFF",
+    "#000000"
+  ],
+  "wardrobe": "NYPD-style summer patrol uniform, short sleeves, eight-point cap, nightstick, whistle (generic insignia, no real patches).",
+  "props": [
+    "nightstick",
+    "memo book",
+    "whistle"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Fixed posts: Herald Sq, Penn Station, Times Square, Madison Sq",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.15,
+    "night": 0.1
+  },
+  "barks": "barks.beat_cop",
+  "scripted": false,
+  "note": ""
+}

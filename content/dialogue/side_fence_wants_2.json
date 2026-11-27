@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_fence_wants_2",
+  "context": "Paying out.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.marty_fence",
+      "emotion": "flat",
+      "text": "Thirty percent. Forty if it's clean. It isn't. Thirty."
+    }
+  ]
+}

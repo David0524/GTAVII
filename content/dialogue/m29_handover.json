@@ -1,0 +1,94 @@
+{
+  "id": "dlg.m29_handover",
+  "context": "M29 o4. The hand-over, with lines keyed to the Branch B flag.",
+  "lines": [
+    {
+      "id": "l1a",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Mr. Arce. You came. I can work with this. You'll have to take the stand.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_prosecutor"
+        ]
+      }
+    },
+    {
+      "id": "l2a",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I've been in a car long enough. I'll take a chair.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_prosecutor"
+        ]
+      }
+    },
+    {
+      "id": "l1b",
+      "speaker": "char.nora_finch",
+      "emotion": "rapid",
+      "text": "Two sources, a dead seaman, a lawyer and a lieutenant's boat. That's a Sunday paper.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_press"
+        ]
+      }
+    },
+    {
+      "id": "l2b",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "Print page nine first, Miss Finch. That's us.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_press"
+        ]
+      }
+    },
+    {
+      "id": "l1c",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Mr. Arce. I'd heard you were sensible. Sit. What would you like to be called?",
+      "requires": {
+        "all": [
+          "flag.ledger_kept"
+        ]
+      }
+    },
+    {
+      "id": "l2c",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Arce. And the Corwin stays open. Forever, counsel. Notwithstanding.",
+      "requires": {
+        "all": [
+          "flag.ledger_kept"
+        ]
+      }
+    },
+    {
+      "id": "l1d",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Forty pages in the Corwin's 1911 boiler. Lisle's voice, going up the chimney.",
+      "requires": {
+        "all": [
+          "flag.ledger_burned"
+        ]
+      }
+    },
+    {
+      "id": "l2d",
+      "speaker": "char.gus_wilkie",
+      "emotion": "quiet",
+      "text": "Boiler's from 1911. I'm a priest. I do last rites.",
+      "requires": {
+        "all": [
+          "flag.ledger_burned"
+        ]
+      }
+    }
+  ]
+}

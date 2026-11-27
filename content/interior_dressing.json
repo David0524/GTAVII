@@ -1,0 +1,273 @@
+{
+  "_note": "Dressing and ambient text for enterable interiors, per act. 'tells' are the per-NPC lines for the Read the Room activity. The engine owns the geometry; narrative owns contents and text.",
+  "acts": {
+    "1": [
+      {
+        "interior": "interior.corwin_lobby",
+        "props": [
+          "bulletproof glass desk",
+          "room-key board with brass tags",
+          "18 mailboxes",
+          "lobby chairs (Odessa's by the radiator)",
+          "a dead rubber plant",
+          "pay phone"
+        ],
+        "text": [
+          "NO VISITORS AFTER 11 P.M. — MGMT",
+          "RENT DUE FRIDAYS",
+          "NOTICE — CORWIN RESIDENTIAL ASSOCIATES (from M2)"
+        ],
+        "people": [
+          "char.odessa_pruitt",
+          "char.walter_hollis",
+          "char.bernard_ostrow",
+          "npc.sro_resident"
+        ],
+        "sound": "Fan ticking, radio shipping news, the elevator's cable groan"
+      },
+      {
+        "interior": "interior.royal_cafeteria",
+        "props": [
+          "tray rails",
+          "steam table",
+          "pie case with a turning light",
+          "mirror wall",
+          "coat hooks"
+        ],
+        "text": [
+          "PIE 30¢ · COFFEE 20¢",
+          "NO LOITERING (ignored)",
+          "MANAGEMENT NOT RESPONSIBLE FOR HATS"
+        ],
+        "people": [
+          "npc.strip_worker",
+          "npc.bus_terminal_crowd",
+          "npc.club_waitress"
+        ],
+        "sound": "Cutlery, a cashier's bell, rain on the plate glass"
+      },
+      {
+        "interior": "interior.station_house_desk",
+        "props": [
+          "high front desk",
+          "blotter",
+          "wanted board",
+          "radiator with a coffee pot on it",
+          "bench for complainants"
+        ],
+        "text": [
+          "ALL VISITORS REPORT TO DESK",
+          "PATROLMEN'S BENEVOLENT — DANCE (generic flyer)",
+          "WANTED (faded sketches)"
+        ],
+        "people": [
+          "char.pat_kearney",
+          "npc.beat_cop"
+        ],
+        "sound": "Teletype, radio crackle, a typewriter two rooms away"
+      },
+      {
+        "interior": "interior.shamrock_rail",
+        "props": [
+          "long rail",
+          "TV on a bracket",
+          "framed badges and a hurling stick",
+          "jukebox (invented songs only)"
+        ],
+        "text": [
+          "CASH ONLY",
+          "NO BOOKMAKING (handwritten, ironic)"
+        ],
+        "people": [
+          "npc.off_duty_cop",
+          "char.carl_mayhew"
+        ],
+        "tells": [
+          {
+            "who": "npc.off_duty_cop",
+            "text": "Everyone's a cop here. The bartender's tell is pity."
+          }
+        ],
+        "sound": "Ballgame on TV, ice, men laughing too loud"
+      }
+    ],
+    "2": [
+      {
+        "interior": "interior.varelas_vault",
+        "props": [
+          "vault door with a wheel",
+          "garment bags in rows",
+          "thermometer on a nail",
+          "compressor housing",
+          "ice blocks (after M15)"
+        ],
+        "text": [
+          "BONDED STORAGE — NO ADMITTANCE",
+          "TEMP: 38°F (chalk, crossed out on brownout nights)"
+        ],
+        "people": [
+          "char.yiannis_doukas",
+          "npc.fur_worker"
+        ],
+        "sound": "Compressor hum (silent during brownouts), dripping ice"
+      },
+      {
+        "interior": "interior.arden_lobby",
+        "props": [
+          "horseshoe bar",
+          "two booths",
+          "porter's stool",
+          "service door to the back stairs",
+          "tip jar"
+        ],
+        "text": [
+          "ARDEN BAR · COCKTAILS",
+          "NO CREDIT — RITA"
+        ],
+        "people": [
+          "char.rita_haines",
+          "char.marcus_teague",
+          "npc.hotel_bar_regular",
+          "npc.strip_worker"
+        ],
+        "tells": [
+          {
+            "who": "npc.hotel_bar_regular",
+            "text": "White sneakers. Nobody wears white sneakers to a bar."
+          },
+          {
+            "who": "npc.hotel_bar_regular",
+            "text": "Club soda, a wedding-ring tan, and he never looks at the door."
+          },
+          {
+            "who": "npc.hotel_bar_regular",
+            "text": "Sailor's tattoo, sailor's laugh. Just a sailor."
+          }
+        ],
+        "sound": "Jukebox (Night Owl Radio playlist), a fan, Rita's towel"
+      },
+      {
+        "interior": "interior.feld_loft",
+        "props": [
+          "rows of sewing machines",
+          "cutting tables",
+          "racks",
+          "a time clock",
+          "Carmen's machine with a saint card"
+        ],
+        "text": [
+          "NO SMOKING — FIRE LAW",
+          "PIECE RATES POSTED MONDAY"
+        ],
+        "people": [
+          "char.carmen_arce",
+          "char.mei_lin_chow",
+          "char.sam_feld",
+          "npc.garment_cutter"
+        ],
+        "afterFlag": {
+          "flag.feld_left": "Empty loft: unplugged machines, bare tables, a postcard from Ponce tacked to the time clock"
+        },
+        "sound": "Fifty machines, a radio on Radio Caribe, the freight elevator bell"
+      },
+      {
+        "interior": "interior.velvet_moon_lobby",
+        "props": [
+          "ticket booth",
+          "faded red carpet",
+          "popcorn machine (broken)",
+          "a sleeping man by the radiator",
+          "one-sheets in cracked frames"
+        ],
+        "text": [
+          "3 FEATURES · CONTINUOUS · $1",
+          "NO RE-ENTRY",
+          "POSITIVELY NO SLEEPING (ignored)"
+        ],
+        "people": [
+          "npc.deuce_crowd",
+          "npc.park_sleeper"
+        ],
+        "sound": "Muffled kung-fu sound effects through the doors, the projector's whir"
+      }
+    ],
+    "3": [
+      {
+        "interior": "interior.corwin_lobby",
+        "props": [
+          "folding chairs in rows (committee)",
+          "Hollis's radio on the desk",
+          "a bedsheet banner being painted",
+          "petition clipboards"
+        ],
+        "text": [
+          "WE LIVE HERE",
+          "TENANTS' COMMITTEE — MEETING TONIGHT",
+          "WALTER HOLLIS 1900–1974 (if flag.hollis_dead)"
+        ],
+        "people": [
+          "char.odessa_pruitt",
+          "char.bernard_ostrow",
+          "char.inez_rivera",
+          "npc.sro_resident"
+        ],
+        "sound": "The radio never off; chairs scraping; Odessa's cane tap"
+      },
+      {
+        "interior": "interior.hanyang_house",
+        "props": [
+          "low tables",
+          "kimchi crocks along the back wall",
+          "steel cabinet (the kye pot)",
+          "calendar from a Seoul bank"
+        ],
+        "text": [
+          "한양집 HANYANG HOUSE",
+          "KYE MEETING — SUNDAY (Korean and English)"
+        ],
+        "people": [
+          "char.mi_sook_baek",
+          "char.jung_ho_baek"
+        ],
+        "sound": "Sizzling, Korean radio, a calculator's beep"
+      },
+      {
+        "interior": "interior.lisle_office",
+        "props": [
+          "walnut desk",
+          "ledger cabinet",
+          "Marjorie's typewriter and carbon trays",
+          "a view of the Corwin's water tank"
+        ],
+        "text": [
+          "LISLE & ASSOCIATES",
+          "(If B1) SEALED — BY ORDER OF THE SPECIAL PROSECUTOR"
+        ],
+        "people": [
+          "char.howard_lisle",
+          "char.marjorie_kell"
+        ],
+        "sound": "A ticking clock, the typewriter, then silence"
+      },
+      {
+        "interior": "interior.herald_lunch_counter",
+        "props": [
+          "U-shaped counter",
+          "chrome stools",
+          "pie stands",
+          "the fur salon sign upstairs"
+        ],
+        "text": [
+          "LACY'S — LUNCH COUNTER",
+          "TODAY: TUNA MELT 95¢"
+        ],
+        "people": [
+          "char.ruth_calloway",
+          "npc.lunch_counter_regular",
+          "npc.shopper"
+        ],
+        "sound": "Store announcements, cash registers, a milkshake mixer"
+      }
+    ]
+  }
+}

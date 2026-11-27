@@ -1,0 +1,69 @@
+{
+  "id": "mission.side_telegrams",
+  "kind": "side",
+  "title": "The Last Telegrams",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The telegraph office's rush order",
+      "script": "dlg.side_telegrams_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Get to the office, W 34th & 8th",
+      "to": "W 34th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Telegram to W 28th & 7th",
+      "to": "W 28th St & 7th Ave",
+      "item": "item.telegram",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Telegram to W 39th & 9th",
+      "to": "W 39th St & 9th Ave",
+      "item": "item.telegram",
+      "radius": 15
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Back before six, W 34th St",
+      "to": "W 34th St & 8th Ave",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$2–4 a telegram + tips; a 'messenger' outfit that makes you invisible to witnesses"
+  },
+  "where": "A telegraph office on W 34th St (invented); deliveries across the core",
+  "systems": [
+    "on foot",
+    "bike",
+    "interiors",
+    "time of day"
+  ],
+  "mobile": "No timers except a soft 'before 6 p.m.'.",
+  "rank": 9,
+  "slice": false
+}

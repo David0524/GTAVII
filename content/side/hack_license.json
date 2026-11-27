@@ -1,0 +1,63 @@
+{
+  "id": "mission.side_hack_license",
+  "kind": "side",
+  "title": "Getting Licensed",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Seven forms, says the clerk",
+      "script": "dlg.side_hack_license_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Taxi bureau, W 31st & 7th",
+      "to": "W 31st St & 7th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "The doctor's office, W 35th",
+      "to": "W 35th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "The photo booth, W 34th & Herald",
+      "to": "W 34th St & 6th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "File the forms with Kehoe",
+      "script": "dlg.side_hack_license_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Licensed hack (+50% fares)"
+  },
+  "where": "Taxi bureau (invented), Kehoe's office, a doctor, a photo booth",
+  "systems": [
+    "bribes",
+    "interiors",
+    "the clock (office hours)"
+  ],
+  "mobile": "Each step is a short walk.",
+  "rank": 34,
+  "slice": false
+}

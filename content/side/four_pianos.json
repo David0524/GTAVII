@@ -1,0 +1,69 @@
+{
+  "id": "mission.side_four_pianos",
+  "kind": "side",
+  "title": "Four Pianos",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The brothers' one-man-short offer",
+      "script": "dlg.side_four_pianos_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Walk-up at W 29th & 9th",
+      "to": "W 29th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Haul the first piano up the stairs",
+      "marker": "interior.arden_back_stairs"
+    },
+    {
+      "id": "o4",
+      "type": "wait",
+      "text": "Hold the rope at the landing",
+      "seconds": 15
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Collect the first piano's pay",
+      "script": "dlg.side_four_pianos_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "$25 a piano; the brothers become muscle Nick can hire"
+  },
+  "where": "Walk-ups across the core; the Varelas apartment",
+  "systems": [
+    "interiors (stairwells)",
+    "physics props",
+    "Nick's arc"
+  ],
+  "mobile": "One held button with a rhythm prompt; generous timing.",
+  "rank": 8,
+  "slice": false,
+  "parts": 4,
+  "laterParts": [
+    "Part 2: A heavier piano and a window landing; the rope is old.",
+    "Part 3: Pianos across the core, timing the swing past a window.",
+    "Part 4: The fourth piano is Nick's, sold in his Act 3 decline (if he sells)."
+  ]
+}

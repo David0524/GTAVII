@@ -1,0 +1,18 @@
+{
+  "id": "dlg.act_payphone_carmen",
+  "context": "Payphone: Carmen.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carmen_arce",
+      "emotion": "scolding",
+      "text": "Mijo! My prescription. The botanica on Twenty-Fifth. You know which."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.carmen_arce",
+      "emotion": "warm",
+      "text": "And eat something. You sound thin on the phone."
+    }
+  ]
+}

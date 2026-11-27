@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_stunt_1",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.film_ad",
+      "emotion": "bullhorn",
+      "text": "You! You drive? Our stunt man quit. Hundred-dollar day, fifty a take."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.film_ad",
+      "emotion": "bullhorn",
+      "text": "Hit the mark, skid on cue, miss the camera car. That's the whole job. Picture's up!"
+    }
+  ]
+}

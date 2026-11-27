@@ -1,0 +1,111 @@
+{
+  "id": "dlg.m29_choice",
+  "context": "M29 o2. **Branch B.** Untimed. Locked options are shown greyed out with their reason.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Calloway wants a witness. Finch wants two sources. Lisle wants it back. I want…"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Calloway. Make it a case.",
+          "goto": "l_b1",
+          "confirm": "This decides the ending.",
+          "setFlags": [
+            "flag.ledger_to_prosecutor"
+          ],
+          "requires": {
+            "any": [
+              "flag.branch_a_wire",
+              "flag.nick_flipped"
+            ]
+          },
+          "disabledText": "Needs a witness who'll testify."
+        },
+        {
+          "text": "The tenants and the paper.",
+          "goto": "l_b2",
+          "confirm": "This decides the ending.",
+          "setFlags": [
+            "flag.ledger_to_press"
+          ],
+          "requires": {
+            "atLeast": {
+              "n": 2,
+              "of": [
+                "flag.have_marjorie_carbons",
+                "flag.have_kearney_list",
+                "flag.have_wurtz_locker",
+                "flag.photo_file_3"
+              ]
+            },
+            "all": [
+              "flag.editor_neutralised"
+            ]
+          },
+          "disabledText": "Needs two sources and a clean editor."
+        },
+        {
+          "text": "Keep it. Run it fairly.",
+          "goto": "l_b3",
+          "confirm": "This decides the ending.",
+          "setFlags": [
+            "flag.ledger_kept"
+          ]
+        },
+        {
+          "text": "Burn it. End it here.",
+          "goto": "l_b4",
+          "confirm": "This decides the ending.",
+          "setFlags": [
+            "flag.ledger_burned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l_b1",
+      "speaker": "char.teddy_arce",
+      "emotion": "decided",
+      "text": "Calloway. Courtrooms are slow. Slow is better than never.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_b2",
+      "speaker": "char.teddy_arce",
+      "emotion": "decided",
+      "text": "Mrs. Pruitt and Miss Finch. Let the whole city read page nine.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_b3",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Somebody's going to run the pad. Better a man who knows the names.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_b4",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Nobody gets it. Not them, not me. Bernard, open the boiler."
+    },
+    {
+      "id": "l_b4b",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "grave",
+      "text": "Notwithstanding everything. Very well.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.bernard_ostrow",
+      "emotion": "quiet",
+      "text": "Then go. Before you're sensible."
+    }
+  ]
+}

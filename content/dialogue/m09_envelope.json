@@ -1,0 +1,75 @@
+{
+  "id": "dlg.m09_envelope",
+  "context": "M9 o4. Royal Cafeteria, Eighth & 40th. The woman in the oxblood dress, coffee and pie, waiting.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "You're new. The old collector smelled like aftershave and debt."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I'm told you have something for Mayhew."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "I have something for whoever Mayhew sends. Tonight, apparently, a gentleman."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Fifty. In an envelope I'd like back. Rule four: never give them the envelope."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Count it in front of her.",
+          "goto": "l_count",
+          "setRelationships": {
+            "char.teddy_arce/char.delphine_moore": -1
+          }
+        },
+        {
+          "text": "Take it without counting.",
+          "goto": "l_trust",
+          "setRelationships": {
+            "char.teddy_arce/char.delphine_moore": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_count",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Go ahead. Count. I'll time you.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_trust",
+      "speaker": "char.delphine_moore",
+      "emotion": "surprised",
+      "text": "You didn't count. Either you're stupid or you're something else.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Happy Fourth of July, Miss…"
+    },
+    {
+      "id": "l_end2",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Moore. Delphine Moore. Go on. Your sergeant's waiting."
+    }
+  ]
+}

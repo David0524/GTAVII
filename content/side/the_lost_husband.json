@@ -1,0 +1,69 @@
+{
+  "id": "mission.side_the_lost_husband",
+  "kind": "side",
+  "title": "Mrs. Cho's Late Husband",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Hear Mrs. Cho out",
+      "script": "dlg.side_the_lost_husband_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Check the Deuce marquees, W 42nd",
+      "to": "W 42nd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "text": "Into the Velvet Moon lobby",
+      "marker": "interior.velvet_moon_lobby"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Ask the projectionist about the reel",
+      "script": "dlg.side_the_lost_husband_2"
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Back to Mrs. Cho, W 38th & 9th",
+      "to": "W 38th St & 9th Ave",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Her late husband's watch (sell or keep); the Velvet Moon midnight screening unlocked"
+  },
+  "where": "The Velvet Moon and the Deuce's 24-hour cinemas",
+  "systems": [
+    "interiors (cinemas)",
+    "marquee text",
+    "dialogue"
+  ],
+  "mobile": "No timers; marquees are readable from the sidewalk.",
+  "rank": 6,
+  "slice": false,
+  "parts": 3,
+  "laterParts": [
+    "Part 2: Match marquees to reels across the Deuce cinemas and persuade the projectionist to run the scene.",
+    "Part 3: Give Mrs. Cho one more evening watching him on screen; the Velvet Moon midnight screening opens."
+  ]
+}

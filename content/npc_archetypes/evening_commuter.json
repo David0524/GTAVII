@@ -1,0 +1,28 @@
+{
+  "id": "npc.evening_commuter",
+  "behaviour": "commuter",
+  "palette": [
+    "#2F4F4F",
+    "#C0C0C0"
+  ],
+  "wardrobe": "Office clothes, jacket over the shoulder, folded paper.",
+  "props": [
+    "newspaper",
+    "briefcase"
+  ],
+  "schedule": [
+    {
+      "from": "16:30",
+      "to": "20:00",
+      "area": "Broadway, 7th Ave, Penn Station approaches",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.5,
+    "night": 0.2
+  },
+  "barks": "barks.commuter",
+  "scripted": false,
+  "note": ""
+}

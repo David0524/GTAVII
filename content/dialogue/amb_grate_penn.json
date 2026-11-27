@@ -1,0 +1,19 @@
+{
+  "id": "dlg.amb_grate_penn",
+  "context": "Penn Station grate. Porters on a break below.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.penn_porter",
+      "emotion": "low",
+      "text": "Garden's got a fight Friday. Tips go up on fight nights."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.penn_porter",
+      "emotion": "wry",
+      "text": "Tips go up. Bags go up. My back goes up."
+    }
+  ]
+}

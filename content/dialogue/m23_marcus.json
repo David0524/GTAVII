@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m23_marcus",
+  "context": "M23 o2. The Arden's boiler room, rain drumming on the street grate above.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "Miss Moore. Ricky talked. Brannock knows the box isn't in your room."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "He doesn't know it's here. Yet. Ricky's still thinking."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "decisive",
+      "text": "Then we move it tonight. To the only other bank on the West Side that's ours."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "Back stairs are open, Miss Moore. They're always open for you."
+    }
+  ]
+}

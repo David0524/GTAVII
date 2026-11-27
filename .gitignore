@@ -5,4 +5,9 @@ data/raw*/
 .DS_Store
 shots/tmp/
 dist-test/
+.claude/worktrees/
+__pycache__/
+tools/ui/tmp/
 dist-*/
+shots/ui/**/*.png
+shots/cine/**/*.png

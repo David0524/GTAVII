@@ -1,0 +1,29 @@
+{
+  "id": "npc.plainclothes",
+  "behaviour": "loiterer",
+  "palette": [
+    "#7F1D1D",
+    "#D9C9A3",
+    "#FFFFFF"
+  ],
+  "wardrobe": "Knit polos or open-collar shirts, windbreakers or leather car coats, slacks, white sneakers (the giveaway), aviator sunglasses at night.",
+  "props": [
+    "unmarked sedan keys",
+    "rolled newspaper"
+  ],
+  "schedule": [
+    {
+      "from": "19:00",
+      "to": "03:00",
+      "area": "8th Ave, the Deuce, Bryant Park",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.08
+  },
+  "barks": "barks.plainclothes",
+  "scripted": false,
+  "note": "Act 2 density +50% (N3 §7)."
+}

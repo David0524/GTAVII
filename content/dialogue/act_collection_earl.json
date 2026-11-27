@@ -1,0 +1,52 @@
+{
+  "id": "dlg.act_collection_earl",
+  "context": "Collections activity, earl. Untimed choice: press or let it slide.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.earl_poole",
+      "emotion": "slow",
+      "text": "Shine's a dollar. Envelope's what it is. Number today's two-oh-six."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Collect.",
+          "goto": "l_press",
+          "setRelationships": {
+            "char.teddy_arce/char.earl_poole": -1,
+            "char.teddy_arce/char.carl_mayhew": 1
+          }
+        },
+        {
+          "text": "Let it slide this week.",
+          "goto": "l_slide",
+          "setRelationships": {
+            "char.teddy_arce/char.earl_poole": 1,
+            "char.teddy_arce/char.carl_mayhew": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_press",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Thanks. See you next week.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_slide",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Hold it, Earl. Pay your runners first this week."
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Every envelope's a person. I keep forgetting that on purpose."
+    }
+  ]
+}

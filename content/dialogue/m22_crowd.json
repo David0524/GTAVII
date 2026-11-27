@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m22_crowd",
+  "context": "M22 o6. (Delphine.) W 45th & Seventh. A crowd around a cab with the radio up. Tina at a payphone nearby.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "quiet",
+      "text": "Never thought I'd see Times Square this quiet. Listen to that."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "noticing",
+      "text": "Tina's on the payphone. Whispering. With her back to us."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.tina_mercado",
+      "emotion": "low",
+      "text": "…I told you, Lonnie, Sunday nights. Leave me alone now. Please."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Sunday nights. The club. Rule twelve, Tina. There is no rule twelve."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.rita_haines",
+      "emotion": "grave",
+      "text": "If a President can go down, sugar, anybody can. Anybody."
+    }
+  ]
+}

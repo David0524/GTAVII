@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_fire_escape_gardens_2",
+  "context": "Judging the shots.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.anna_moretti",
+      "emotion": "grudging",
+      "text": "Hm. Number nine's better than mine. Whose is it? …Carmen Arce. Of course it is."
+    }
+  ]
+}

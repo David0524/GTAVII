@@ -1,0 +1,117 @@
+{
+  "id": "barks.police_radio",
+  "core": false,
+  "note": "Dispatch ('Central') and car chatter: the main heat cue (CORE_SYSTEMS). Plain-English period style; no real call signs. {placeholders} are filled by Gameplay from the witness description.",
+  "lines": [
+    {
+      "context": "report",
+      "emotion": "flat",
+      "text": "Central to Midtown Central cars: a report of shots fired, {street} and {avenue}."
+    },
+    {
+      "context": "report",
+      "emotion": "flat",
+      "text": "Central to Madison Square cars: assault in progress, {street} near {avenue}."
+    },
+    {
+      "context": "report",
+      "emotion": "flat",
+      "text": "Central to Bryant Park cars: a car theft, {street} and {avenue}. Check it out."
+    },
+    {
+      "context": "description",
+      "emotion": "flat",
+      "text": "Suspect: {sex}, {build}, {topColor} {top}, last seen {direction} on {street}."
+    },
+    {
+      "context": "description",
+      "emotion": "flat",
+      "text": "Vehicle: {carColor} {carType}, partial plate {plate}, {direction} on {avenue}."
+    },
+    {
+      "context": "description",
+      "emotion": "flat",
+      "text": "Witness: {sex}, {topColor} {top}, carrying a {item}. Use caution."
+    },
+    {
+      "context": "description_vague",
+      "emotion": "flat",
+      "text": "Description's vague, Central. A woman, dark coat. That's all we've got."
+    },
+    {
+      "context": "description_vague",
+      "emotion": "wry",
+      "text": "Witness says 'a guy'. Just 'a guy'. Thanks, Central."
+    },
+    {
+      "context": "description_teddy",
+      "emotion": "flat",
+      "text": "Witness says he looked like a cop. Walked like a cop. Says he's no cop."
+    },
+    {
+      "context": "description_nick",
+      "emotion": "flat",
+      "text": "Heavy-set male, expensive suit, grey hair, big black sedan. Real memorable."
+    },
+    {
+      "context": "escalate",
+      "emotion": "urgent",
+      "text": "Central to all cars: officer down, {street} and {avenue}. All units respond."
+    },
+    {
+      "context": "escalate",
+      "emotion": "urgent",
+      "text": "Central, we need a second car. Suspect is armed."
+    },
+    {
+      "context": "search",
+      "emotion": "flat",
+      "text": "Car one-four, canvass the block. Check the doorways and the subway."
+    },
+    {
+      "context": "search",
+      "emotion": "flat",
+      "text": "Nothing on Eighth, Central. Lot of people. Lot of coats."
+    },
+    {
+      "context": "lost",
+      "emotion": "weary",
+      "text": "Central, we lost him at the station. Too many exits."
+    },
+    {
+      "context": "lost",
+      "emotion": "flat",
+      "text": "Suspect is gone, Central. Resuming patrol."
+    },
+    {
+      "context": "cooldown",
+      "emotion": "flat",
+      "text": "Central, cancel that. Complainant isn't sure what she saw."
+    },
+    {
+      "context": "bribe_heard",
+      "emotion": "low",
+      "text": "Car eight, never mind that report. Sergeant says it's handled."
+    },
+    {
+      "context": "brownout",
+      "emotion": "urgent",
+      "text": "Central to all cars: signals dark from Twenty-Sixth to Thirty-Fourth. Watch the crossings."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Central, car six, out of service for coffee. Ten minutes."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Central, any word on overtime? …Never mind."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Central to Midtown Central: hydrant open again, Thirty-Seventh and Ninth."
+    }
+  ]
+}

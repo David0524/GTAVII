@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_four_pianos_1",
+  "context": "The Tibor brothers' truck on W 35th St.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.janos_tibor",
+      "emotion": "practical",
+      "text": "Four pianos, two brothers, one rope. You see the problem."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.janos_tibor",
+      "emotion": "practical",
+      "text": "Up five flights. The piano doesn't care. Neither should you. Lift on 'three'."
+    }
+  ]
+}

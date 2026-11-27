@@ -1,0 +1,74 @@
+{
+  "id": "dlg.m30_baeks",
+  "context": "M30 o3. Seoul Star Imports. The deed on the counter. Mrs. Baek with a fountain pen.",
+  "lines": [
+    {
+      "id": "l1a",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Mr. Varelas. You sold us the building in July. Today you visit as a guest.",
+      "requires": {
+        "all": [
+          "flag.baek_bought_building"
+        ]
+      }
+    },
+    {
+      "id": "l1b",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "August. You said August. It's August. Sign or don't.",
+      "requires": {
+        "none": [
+          "flag.baek_bought_building"
+        ]
+      }
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Sign the deed.",
+          "goto": "l_sign",
+          "setFlags": [
+            "flag.baek_bought_building"
+          ],
+          "setRelationships": {
+            "char.nick_varelas/char.jung_ho_baek": 1,
+            "char.nick_varelas/char.mi_sook_baek": 1
+          },
+          "requires": {
+            "none": [
+              "flag.baek_bought_building"
+            ]
+          },
+          "disabledText": "Already sold in July."
+        },
+        {
+          "text": "Not today.",
+          "goto": "l_no"
+        }
+      ]
+    },
+    {
+      "id": "l_sign",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "Sold. To the optimists. Now the only landlord you fear is you.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_no",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Then we stay tenants. Optimistic tenants.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "dry",
+      "text": "Go see your hotel, Mr. Varelas. Bring cookies. Old people like cookies."
+    }
+  ]
+}

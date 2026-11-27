@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_postcards",
+  "context": "N4b slice side content.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "quiet",
+      "text": "'Marseille, 1947. Shipmate: the sea is fine. The coffee is a crime.' That's Walter."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "moved",
+      "text": "Put it on the wall, Mr. Arce. Next to the radio. He'd like the company."
+    }
+  ]
+}

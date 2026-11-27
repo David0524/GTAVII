@@ -1,0 +1,63 @@
+{
+  "id": "dlg.m06_the_tax",
+  "context": "M6 o5. 8th Ave & W 38th St. Brannock's car at the curb, Lonnie leaning on it.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.lonnie_gage",
+      "emotion": "smooth",
+      "text": "Del, baby. Sunday best. Jimmy wants a word about the new rates."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "flat",
+      "text": "Tax is due, sweetheart. City's broke, didn't you hear?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "flat",
+      "text": "Fifty a week, each girl. Not twenty-five. Inflation. Read the papers."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Pay the fifty.",
+          "goto": "l_pay"
+        },
+        {
+          "text": "Pay. And read his badge.",
+          "goto": "l_read"
+        }
+      ]
+    },
+    {
+      "id": "l_pay",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Here. Count it. I know you can count to fifty.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_read",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "Here. Your badge says Brannock and your ring says married. I read both, honey."
+    },
+    {
+      "id": "l_read2",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "amused",
+      "text": "Smile for the camera? Lady, I am the camera.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.lonnie_gage",
+      "emotion": "smooth",
+      "text": "Everybody on this avenue works for somebody. You just don't know who."
+    }
+  ]
+}

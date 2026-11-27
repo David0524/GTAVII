@@ -1,0 +1,29 @@
+{
+  "id": "npc.firefighter",
+  "behaviour": "worker",
+  "palette": [
+    "#000000",
+    "#FFD700",
+    "#B22222"
+  ],
+  "wardrobe": "Turnout coat, helmet (generic, no real insignia).",
+  "props": [
+    "axe",
+    "hose"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Scripted scenes only",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.emergency",
+  "scripted": true,
+  "note": ""
+}

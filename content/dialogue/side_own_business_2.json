@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_own_business_2",
+  "context": "Signing.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.jung_ho_baek",
+      "emotion": "dry",
+      "text": "Partners. Now two of us are optimists. Statistically very rare."
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "id": "barks.garment",
+  "core": true,
+  "note": "Pushboys, cutters, pressers, fur workers. Garment and Fur Districts, daytime.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "cocky",
+      "text": "Morning! Watch the rack, it bites."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Hey, you new? You look new. Everybody looks new at seven."
+    },
+    {
+      "context": "greet",
+      "emotion": "tired",
+      "text": "Six racks before coffee. Don't talk to me yet."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Thirty-Seventh Street. The only place a dress gets more exercise than me."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Cut forty pieces this morning. Perfect. Nobody claps."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Boss says the shop's moving south. South where? South of my rent?"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "In summer the furriers stand around like it's a wake. It is."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Truck's double-parked again. Every day, the same truck."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Piece rate went down. Pieces went up. That's math, they tell me."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Somebody's envelope is fatter than my paycheck."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Loft's a hundred degrees. Fans just move the hot around."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain! Cover the racks! Cover the racks!"
+    },
+    {
+      "context": "rain",
+      "emotion": "weary",
+      "text": "Wet chiffon. My boss is gonna cry real tears."
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "Rain's the only thing that clears Seventh Avenue."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Ninety-five in the shade, and there's no shade."
+    },
+    {
+      "context": "heat",
+      "emotion": "wry",
+      "text": "Fur in July. Like selling snow shovels at Coney Island."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Yeah, yeah! Rack's got the right of way!"
+    },
+    {
+      "context": "horn",
+      "emotion": "cocky",
+      "text": "Honk all you want, I'm not a car!"
+    },
+    {
+      "context": "horn",
+      "emotion": "angry",
+      "text": "You see a forty-foot rack and you honk? Genius!"
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "Hey! You knocked the hems! Those are hems!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Watch it, pal, that's somebody's wedding dress."
+    },
+    {
+      "context": "collision",
+      "emotion": "hurt",
+      "text": "Ow! My foot! My good foot!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "cocky",
+      "text": "Where's the fire? Lady's coat sale?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "annoyed",
+      "text": "Slow down! This ain't the Garment Olympics!"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running in this heat? You'll melt like a mannequin."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Get that heap off the sidewalk!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "annoyed",
+      "text": "You want to park? Park in Jersey!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Lights out on the cutting floor. Nobody move the knives."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Power's out. Finally a reason to stop."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Twelve hours. Twelve. My machine knows me better than my wife."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Union meeting Thursday. Bring your questions. Leave your boss."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "You seen Dwayne? Kid owes me a sketch."
+    }
+  ]
+}

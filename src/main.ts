@@ -1,21 +1,21 @@
 import * as THREE from 'three/webgpu';
 import './ui/theme.css';
+import { bootUi } from './ui';
+import type { UiHost, StreetRec } from './shared/uiHost';
+import { Emitter, type UiEvents } from './shared/uiEvents';
 import { createRenderer } from './engine/renderer';
 import { qualityFromUrl } from './engine/quality';
 import { World } from './world/World';
 import { loadSkyline } from './world/Skyline';
 import { Atmosphere } from './world/Atmosphere';
 import { FlyCamera } from './camera/FlyCamera';
-import { OrbitCamera } from './camera/OrbitCamera';
+import { ThirdPersonCamera } from './camera/ThirdPersonCamera'; // UI-written, engine-reviewed and owned (CAMERA_SPEC); replaces OrbitCamera
 import { CameraDirector } from './camera/CameraDirector';
 import { DebugHud, FrameStats } from './engine/debug/DebugHud';
-import { Minimap, type StreetRec } from './ui/Minimap';
 import { unproject } from './shared/geo';
 import { SIDEWALK_H } from './world/meshBuilder';
 import { loadTerrain, heightAt } from './shared/terrain';
 import { Input } from './input/Input';
-import { TouchControls } from './ui/TouchControls';
-import { promptStrip, PROMPT_CSS } from './ui/Prompts';
 import { loadReport } from './engine/debug/LoadReport';
 import { AdaptiveResolution } from './engine/AdaptiveResolution';
 import { Parks } from './world/Parks';
@@ -27,13 +27,10 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { PlayerController } from './player/PlayerController';
 import { StandInBody, type PlayerBody } from './player/StandInBody';
 import { Party } from './player/Party';
-import { SaveManager, iosEvictionRisk } from './save/SaveManager';
+import { SaveManager } from './save/SaveManager';
 import type { SaveData } from './save/schema';
 import { worldClock, clockLabel, tickClock, setTime } from './world/Clock';
 import { buildStreetLights, streetLightUniforms } from './world/StreetLights';
-import { Hud } from './ui/Hud';
-import { PauseMenu } from './ui/PauseMenu';
-import { TitleScreen } from './ui/TitleScreen';
 import { Locator } from './world/Districts';
 import { settings } from './settings/Settings';
 import { facadeUniforms } from './render/FacadeMaterial';
@@ -47,7 +44,6 @@ import { PostFX, postUniforms } from './render/PostFX';
  *   title=0                          skip the title screen (implied by cam= and at=)
  */
 type Mode = 'onfoot' | 'photo';
-type Screen = 'title' | 'play' | 'paused';
 
 async function main() {
   if (new URLSearchParams(location.search).has('vehicles')) return void (await import('./vehicles/testlot/TestLot')).runTestLot(); // vehicles workstream test scene
@@ -96,17 +92,8 @@ async function main() {
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
-  let touch: TouchControls | null = null;
-  if (input.isTouch || params.has('touch')) {
-    input.isTouch = true;
-    touch = new TouchControls(input, [
-      { label: 'JUMP', action: 'jump', hold: true },
-      { label: 'RUN', action: 'sprint', hold: true },
-      { label: 'CAM', action: 'photo', hold: false },
-      { label: 'MENU', action: 'pause', hold: false },
-    ]);
-    document.body.classList.add('touch');
-  }
+  // touch: the UI's TouchLayout (src/ui/touch) is built by createUi when input.isTouch
+  if (input.isTouch || params.has('touch')) { input.isTouch = true; document.body.classList.add('touch'); }
 
   // ---------------------------------------------------------------- player + cameras
   const { spawn } = world.manifest;
@@ -119,7 +106,9 @@ async function main() {
   scene.add(body.object);
   // Gameplay cameras write into director.gameplay; the director owns the real camera (cutscene hand-off).
   const director = new CameraDirector(camera);
-  const orbit = new OrbitCamera(director.gameplay, input, physics, player.collider);
+  const orbit = new ThirdPersonCamera(director.gameplay, input, physics, player.collider);
+  const camTune = () => Object.assign(orbit.tune, { follow: settings.get('onFootFollow'), shake: settings.get('cameraShake'), reduceMotion: settings.get('reduceMotion'), mobile: document.body.classList.contains('touch') });
+  camTune(); settings.subscribe(() => camTune());
   orbit.snap({ x: start.x, y: startY, z: start.z }, start.heading);
   const fly = new FlyCamera(director.gameplay, input);
   let mode: Mode = 'onfoot';
@@ -134,7 +123,7 @@ async function main() {
     if (m === mode) return;
     if (m === 'photo') { const e = new THREE.Euler().setFromQuaternion(director.gameplay.quaternion, 'YXZ'); fly.set(director.gameplay.position.x, director.gameplay.position.y, director.gameplay.position.z, e.y, e.x); }
     else orbit.snap(player.pos, orbit.yaw);
-    mode = m; renderHint();
+    mode = m;
   };
   let jumpLatch = false;
 
@@ -165,14 +154,12 @@ async function main() {
     },
   });
   const skipTitle = params.get('title') === '0' || params.has('cam') || params.has('at');
-  let screen: Screen = skipTitle ? 'play' : 'title';
 
   // ---------------------------------------------------------------- HUD, minimap, report
   const hud = new DebugHud(document.body);
   // ?hud=1 forces the debug HUD on (phone testing), ?hud=0 forces it off; default: on for desktop, off for touch.
   // Debug HUD is a developer overlay: off unless ?hud=1 (F3 / D-pad up toggles it in play).
   if (params.get('hud') !== '1') hud.toggle(false);
-  const minimap = params.get('minimap') === '0' ? null : new Minimap(document.body, streets, world.manifest.region, world.manifest.heroes);
 
   // Viewport sync. The canvas fills #app via CSS; every frame we compare its real client size (and the
   // device pixel ratio) with what the renderer was last sized to, and resize on any change. Resize events
@@ -247,12 +234,13 @@ async function main() {
   const postfx = params.get('post') === '0' ? null : new PostFX(renderer, scene, camera, quality);
   const frames = new FrameStats();
   const clock = new THREE.Timer();
-  let hudT = 0, streetName = '', streetT = 0, frameCount = 0, syncT = 0, titleReady = false;
+  let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
+  const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, load: loadReport, renderer, scene, camera, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
-    get mode() { return mode; }, setMode, get screen() { return screen; }, get hudUi() { return gameHud; }, get pause() { return pause; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
+    get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
-    whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || screen === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
+    whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
     setCamera: (x: number, y: number, z: number, yawDeg: number, pitchDeg = 0) => { setMode('photo'); fly.set(x, y, z, THREE.MathUtils.degToRad(yawDeg), THREE.MathUtils.degToRad(pitchDeg)); },
   };
   (window as unknown as { __T74: typeof debug }).__T74 = debug;
@@ -264,125 +252,99 @@ async function main() {
   report.show(hud.visible);
   document.getElementById('loading')?.remove();
 
-  // Game UI: HUD (clock, location reveals, subtitles, prompts), pause menu, title screen.
-  const style = document.createElement('style'); style.textContent = PROMPT_CSS; document.head.appendChild(style);
-  const gameHud = new Hud();
+  // ---------------------------------------------------------------- UI (UI & Cinematics stream: one host, one update)
+  // The UI reads the game only through this UiHost (src/shared/uiHost.ts). Gameplay, sim and narrative
+  // replace the placeholder answers below as they merge (health, inventory, heat, objectives, shops...).
   const locator = new Locator(streets);
-  let district = '', crossing = '', locT = 0;
-  function renderHint() {
-    const d = input.activeDevice;
-    gameHud.prompts.style.display = d === 'touch' || screen !== 'play' ? 'none' : '';
-    const items: Parameters<typeof promptStrip>[1] = mode === 'onfoot'
-      ? [['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['pause', 'Pause']]
-      : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']];
-    gameHud.prompts.innerHTML = promptStrip(input, items);
-  }
-  const toast = (msg: string) => {
-    const t = document.createElement('div'); t.textContent = msg;
-    Object.assign(t.style, { position: 'fixed', top: '14px', left: '50%', transform: 'translateX(-50%)', padding: '8px 14px', background: '#0d0b09dd', color: '#efe6d0', borderLeft: '3px solid #e8b92e', font: '600 13px Archivo, sans-serif', letterSpacing: '.04em', zIndex: '30', transition: 'opacity .4s' });
-    document.body.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 450); }, 2600);
+  let loc = { district: '', crossing: '' }, locT = 0, frozen = false;
+  let objective: { text: string } | null = null;
+  const uiEvents = new Emitter<UiEvents>();
+  const LEAD_STYLE: Record<string, { colour: string; tagline: string }> = {
+    'char.teddy_arce': { colour: '#c79a3c', tagline: 'Night desk, Hotel Corwin' }, 'char.delphine_moore': { colour: '#b2302a', tagline: 'Eighth Avenue' }, 'char.nick_varelas': { colour: '#2e4a6b', tagline: 'Varelas & Co., furs' },
   };
-  window.addEventListener('gamepadconnected', () => { toast(`Controller connected · ${input.pad.family === 'playstation' ? 'PlayStation' : input.pad.family === 'xbox' ? 'Xbox' : 'Gamepad'} layout`); input.rumble(0.4, 0.6, 180); });
-  window.addEventListener('gamepaddisconnected', () => toast('Controller disconnected'));
-
-  const pause = new PauseMenu(input, streets, world.manifest.heroes, saves);
-  pause.onToast = toast;
-  pause.onLoaded = () => { mode = 'onfoot'; };
-  const title = skipTitle ? null : new TitleScreen(input, async (c) => {
-    if (c.kind === 'settings') { pause.show('settings'); return; }
-    if (c.kind === 'credits') { pause.show('credits'); return; }
-    if (c.kind === 'continue') {
+  const placeAt = () => { const p = player.pos; player.active = false; orbit.snap(p, player.heading); mode = 'onfoot'; };
+  const host: UiHost = {
+    input, saves, streets, baseUrl: import.meta.env.BASE_URL, heroes: world.manifest.heroes,
+    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, speed: mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: false, lead: party.activeId }; },
+    clock: () => ({ date: worldClock.date, minutes: worldClock.minutes, weather: worldClock.weather }),
+    party: () => [...party.leads.values()].map((l) => ({ id: l.id, name: l.displayName, short: l.displayName, tagline: LEAD_STYLE[l.id]?.tagline ?? '', colour: LEAD_STYLE[l.id]?.colour ?? '#c79a3c', cash: l.money, where: l.id === party.activeId ? loc.crossing : 'Elsewhere in the city', available: true })),
+    health: () => ({ hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 }),
+    inventory: (lead = party.activeId) => { const l = party.leads.get(lead) ?? party.active; return { lead: l.id, cash: l.money, savings: 0, outfit: { name: 'Everyday clothes', hides: 'jacket', description: '' }, items: [] }; },
+    heat: () => ({ phase: 'none', cones: [], units: [] }),
+    objective: () => objective,
+    location: () => loc,
+    shop: () => null, newspaper: () => null, businesses: () => [], completion: () => [], achievements: () => [],
+    stats: () => [{ group: 'Time', label: 'Play time', value: `${Math.floor(performance.now() / 60000)} min this session` }],
+    act: (a) => {
+      if (a.kind === 'switchLead') {
+        storeActiveLead(); if (!party.switchTo(a.lead)) return { ok: false, text: 'Not available' };
+        const t = party.active.at; player.teleport(t.x, t.y, t.z, t.heading); placeAt(); uiEvents.emit('lead', { id: a.lead }); return { ok: true };
+      }
+      if (a.kind === 'waypoint') return { ok: true };
+      return { ok: false, text: 'Not in the game yet' };
+    },
+    on: (k, cb) => uiEvents.on(k, cb),
+    camera: director, scene,
+    freezePlayer: (f) => { frozen = f; },
+    playerVisible: (v) => { body.object.visible = v; },
+    commit: (cue, data) => {
+      // Phase 7's mission runtime takes these over; until then the objective cue sets the HUD line.
+      const d = data as { text?: string } | undefined;
+      if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
+    },
+    prompts: () => (mode === 'onfoot' ? [['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']]),
+    newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
+    continueGame: async () => {
       loadReport.mark('continue');
       const last = await saves.latest().catch(() => null);
-      if (last) { try { await saves.load(last.slot); } catch (e) { toast(`Could not load: ${(e as Error).message}`); return; } }
-    } else {
-      loadReport.mark('new-game');
-      const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H;
-      player.teleport(spawn.x, y, spawn.z, spawn.heading); player.active = false; orbit.snap(player.pos, spawn.heading);
-    }
-    mode = 'onfoot'; title!.close(); screen = 'play'; district = ''; renderHint();
-    gameHud.setVisible(true);
-  });
-  if (title) { gameHud.setVisible(false); mode = 'photo'; }
-  pause.onClose = () => { if (screen === 'paused') { screen = 'play'; renderHint(); } };
-  const setScreenForPause = () => { screen = 'paused'; renderHint(); };
-  // Desktop: Esc releases the mouse before any key event reaches the page, so losing pointer lock
-  // during play is the pause signal (standard PC behaviour).
-  document.addEventListener('pointerlockchange', () => {
-    if (!document.pointerLockElement && screen === 'play' && !pause.open && input.activeDevice === 'kbm') {
-      pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: orbit.yaw }; pause.show(); setScreenForPause();
-    }
-  });
-  renderHint();
+      if (!last) { host.newGame!(); return true; }
+      try { await saves.load(last.slot); mode = 'onfoot'; return true; } catch { return false; }
+    },
+  };
+  const ui = await bootUi(host, { title: !skipTitle }); uiRef.ui = ui;
+  if (!skipTitle) mode = 'photo';
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.id === 'lm.flatiron') ?? { x: 0, z: 0 };
   let titleT = 0;
-  let lastRenderT = -1e9, pausedFrameDrawn = false, heldW = 0, heldH = 0;
+  let lastRenderT = -1e9;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
-  const fsEl = document.querySelector('.t74-fs') as HTMLElement | null;
-
-  // Quick save / load until the pause menu lands (UI pass): F5 / F9.
-  window.addEventListener('keydown', async (e) => {
-    if (e.code === 'F5') { e.preventDefault(); const m = await saves.save('quick'); toast(`Saved · ${m.label}`); }
-    if (e.code === 'F9') { e.preventDefault(); const d = await saves.load('quick').catch((err) => { toast(String(err.message ?? err)); return null; }); if (d) toast(`Loaded · ${d.label}`); }
-  });
-  // iOS deletes site storage after ~7 days unvisited unless installed: gentle, dismissible, in-world note.
-  const ios = iosEvictionRisk();
-  if (ios.atRisk) {
-    let snoozed = false; try { snoozed = Date.now() - Date.parse(localStorage.getItem('t74.iosNoteSnooze') ?? '0') < 3 * 86400000; } catch { /* ignore */ }
-    const long = (ios.daysSinceLastVisit ?? 0) > 4;
-    if (!snoozed || long) saves.onSaved.add(function once() {
-      saves.onSaved.delete(once);
-      const n = document.createElement('div');
-      n.innerHTML = `<b style="font:600 13px 'League Gothic',sans-serif;letter-spacing:.12em">${long ? 'WELCOME BACK. KEEP YOUR SAVES SAFE' : 'A NOTE ABOUT SAVES'}</b><br>On iPhone and iPad, saves can be cleared after a week away.<br>Share → <i>Add to Home Screen</i> keeps them for good. <u style="cursor:pointer">Got it</u>`;
-      Object.assign(n.style, { position: 'fixed', left: '50%', bottom: 'calc(18px + env(safe-area-inset-bottom))', transform: 'translateX(-50%) rotate(-1.2deg)', maxWidth: '360px', padding: '12px 14px', background: '#efe3c4', color: '#2e171d', font: "12px/1.45 'Courier Prime', monospace", boxShadow: '0 6px 18px #000a', zIndex: '40' });
-      n.querySelector('u')!.addEventListener('click', () => { n.remove(); try { localStorage.setItem('t74.iosNoteSnooze', new Date().toISOString()); } catch { /* ignore */ } });
-      document.body.appendChild(n);
-    });
-  }
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
     const cpu0 = performance.now();
     clock.update(t);
     const rawDt = clock.getDelta(); loadReport.frame(rawDt * 1000); if (frameCount > 0) perfSamples.interval.push(rawDt * 1000);
-    if (adaptive && !(bench && !bench.done) && frameCount > 0 && (screen === 'play' || titleReady) && world.idle) adaptive.update(rawDt * 1000, rawDt);
+    if (adaptive && !(bench && !bench.done) && frameCount > 0 && (ui.state === 'play' || titleReady) && world.idle) adaptive.update(rawDt * 1000, rawDt);
     const dt = Math.min(rawDt, 0.1);
     frames.push(dt * 1000);
     facadeUniforms.time.value += dt;
     input.poll(dt);
-    if (screen === 'title') {
+    if (ui.state === 'title') {
       titleT += dt;
       const a = -0.35 + titleT * 0.018, r = 150;
       fly.set(flat.x + Math.sin(a) * r, 26 + Math.sin(titleT * 0.05) * 4, flat.z - 40 - Math.cos(a) * r, 0, 0);
       director.gameplay.lookAt(flat.x, 34, flat.z);
       // Gate the title on the first view only (chunks around the Flatiron + compiled shaders); the rest of
-      // the city keeps streaming behind the menu and play (load bug 2026-11-26: it waited for ~114 chunks).
+      // the city keeps streaming behind the menu and play (engine adb6373: load bug 2026-11-26).
       const near = world.progressNear(flat.x, flat.z - 40, TITLE_RADIUS);
-      title!.progress(near.total ? (near.ready / near.total) * (shadersReady ? 1 : 0.92) : 0);
+      ui.titleProgress(near.total ? (near.ready / near.total) * (shadersReady ? 1 : 0.92) : 0);
       if (!shaderWarm && near.ready > 0) {
         shaderWarm = (renderer as unknown as { compileAsync(s: THREE.Object3D, c: THREE.Camera): Promise<void> }).compileAsync(scene, camera)
           .catch(() => undefined).then(() => { shadersReady = true; loadReport.mark('shaders'); });
         setTimeout(() => { shadersReady = true; }, 8000); // never block the menu on a slow/failed warm-up
       }
-      if (near.ready === near.total && shadersReady && frameCount > 3) { if (!titleReady) { titleReady = true; loadReport.mark('title-ready'); console.info('[T74 load]\n' + loadReport.text()); void saves.latest().then((l) => title!.setReady(l ? l.label : null)); } }
-      if (pause.open) pause.update(dt); else title!.update(dt);
-    } else if (screen === 'paused' || pause.open) {
-      pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw };
-      pause.update(dt);
-    } else {
-      if (input.pressed('pause')) { pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: orbit.yaw }; pause.show(); setScreenForPause(); }
-      else if (input.pressed('map')) { pause.map.player = { x: player.pos.x, z: player.pos.z, yaw: orbit.yaw }; pause.show('map'); setScreenForPause(); }
+      if (near.ready === near.total && shadersReady && frameCount > 3 && !titleReady) { titleReady = true; loadReport.mark('title-ready'); console.info('[T74 load]\n' + loadReport.text()); void saves.latest().then((l) => ui.titleReady(l ? l.label : null)); }
     }
-    const playing = screen === 'play' && !pause.open;
-    gameHud.setVisible(playing);
-    if (fsEl) fsEl.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
-    if (touch) touch.root.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
+    ui.update(dt);
+    if (ui.state === 'cutscene') loadReport.mark('cutscene');
+    const playing = ui.state === 'play' && !ui.paused;
+    // no data credit during play (user request): it lives on the title footer, the map screen and Credits › Data sources
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
     if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (playing && input.pressed('jump')) jumpLatch = true;
     if (playing && mode === 'onfoot' && player.active) saves.tick(dt);
+    if (frozen) jumpLatch = false;
     if (playing) tickClock(dt); // the clock pauses in menus, the title and cutscenes
     const light = atmosphere.update();
     atmosphere.updateEnvironment(renderer);
@@ -398,18 +360,21 @@ async function main() {
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }
-    if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) { player.active = true; if (screen === 'play') { loadReport.mark('playable'); } }
+    if (!player.active && physics.readyAround(player.pos.x, player.pos.z, world.manifest.chunkSize)) { player.active = true; }
+    if (player.active && ui.state === 'play') loadReport.mark('playable'); // first frame with control (after any intro cutscene)
 
-    if (!playing && screen !== 'title') {
+    if (!playing && ui.state !== 'title' && ui.state !== 'cutscene') {
       // paused: world frozen, camera holds
     } else if (mode === 'onfoot') {
-      physics.update(dt, (h) => { player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; });
+      physics.update(dt, (h) => { if (!frozen) player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; });
       const rp = player.renderPos(physics.alpha);
       body.object.position.set(rp.x, rp.y, rp.z);
       body.setLocomotion(player.loco());
       body.update(dt);
-      orbit.update(dt, rp);
-    } else if (screen === 'title') {
+      orbit.lookBehind = input.isHeld('lookBehind');
+      if (input.pressed('shoulderSwap')) orbit.swapShoulder();
+      orbit.update(dt, rp, player.loco());
+    } else if (ui.state === 'title') {
       physics.update(dt, () => { jumpLatch = false; });
     } else {
       physics.update(dt, () => { jumpLatch = false; });
@@ -419,19 +384,18 @@ async function main() {
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
-    // Battery and heat on phones (oversight relay): the title drift renders at 24 fps on touch devices, and
-    // an open pause menu holds the last frame instead of re-rendering the city behind it. Hidden tabs
-    // already stop: the loop runs on requestAnimationFrame, which browsers suspend in the background.
-    const capTitle = screen === 'title' && input.isTouch && frameCount > 3 && t - lastRenderT < 1000 / 24;
-    // (a resize clears the canvas, so a held frame is only kept while the drawing buffer size is unchanged)
-    const holdPaused = (screen === 'paused' || pause.open) && screen !== 'title' && pausedFrameDrawn && view.width === heldW && view.height === heldH;
-    if (!capTitle && !holdPaused) {
-      if (postfx && !benchFlags.noPost) postfx.render(); else renderer.render(scene, camera);
-      lastRenderT = t; pausedFrameDrawn = screen === 'paused' || pause.open; heldW = view.width; heldH = view.height;
-    }
+    // A menu over the game (pause hub, shop, any modal) holds the last frame instead of re-rendering the
+    // city behind it: same picture, a fraction of the GPU and battery (and the canvas keeps its last
+    // presented frame). Render again on any resize, which clears the drawing buffer.
+    const hold = ui.hub.open || (ui.state === 'play' && ui.paused) || (ui.state === 'cutscene' && ui.cinema.paused);
+    const vw = view.width, vh = view.height;
+    // Battery on phones (engine): the title drift renders at 24 fps on touch devices.
+    const capTitle = ui.state === 'title' && input.isTouch && frameCount > 3 && t - lastRenderT < 1000 / 24;
+    if (!capTitle && (!hold || heldFrames < 2 || vw !== heldW || vh !== heldH)) { if (postfx && !benchFlags.noPost) postfx.render(); else renderer.render(scene, camera); lastRenderT = t; }
+    heldFrames = hold ? heldFrames + 1 : 0; heldW = vw; heldH = vh;
     if (frameCount === 0) loadReport.mark('first-frame');
     loadReport.frameCpu(performance.now() - cpu0); perfSamples.cpu.push(performance.now() - cpu0);
-    if (bench && frameCount > 0 && (screen === 'play' || mode === 'photo') && world.idle && (player.active || mode === 'photo')) bench.update(dt, rawDt * 1000, performance.now() - cpu0, lastGpuMs);
+    if (bench && frameCount > 0 && (ui.state === 'play' || mode === 'photo') && world.idle && (player.active || mode === 'photo')) bench.update(dt, rawDt * 1000, performance.now() - cpu0, lastGpuMs);
     if (trackGpu && !benchFlags.noResolve && frameCount % 6 === 0) {
       const be = renderer.backend as unknown as { trackTimestamp?: boolean };
       perfSamples.gpuAvailable = !!be.trackTimestamp;
@@ -440,11 +404,7 @@ async function main() {
     frameCount++;
 
     const p = mode === 'onfoot' ? body.object.position : camera.position;
-    const yaw = mode === 'onfoot' ? orbit.yaw : fly.yaw;
-    if ((streetT -= dt) <= 0 && minimap) { streetName = minimap.nearestStreet(p.x, p.z); streetT = 0.5; }
-    if ((locT -= dt) <= 0) { locT = 0.5; district = locator.district(p.x, p.z); crossing = locator.intersection(p.x, p.z); streetLabel = crossing; }
-    if (screen === 'play') gameHud.update(dt, district, crossing);
-    if (minimap && !benchFlags.noDom) { minimap.canvas.style.display = screen === 'play' && settings.get('hud') ? '' : 'none'; minimap.draw(p.x, p.z, yaw); }
+    if ((locT -= dt) <= 0) { locT = 0.5; loc = { district: locator.district(p.x, p.z), crossing: locator.intersection(p.x, p.z) }; streetLabel = loc.crossing; }
     if ((hudT -= dt) <= 0) {
       hudT = 0.25;
       const s = frames.summary();
@@ -457,7 +417,7 @@ async function main() {
         `chunks lod0 ${world.stats.lod0}  lod1 ${world.stats.lod1}  loading ${world.stats.loading}  phys ${physics.stats.chunksWithColliders}\n` +
         `pos ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}  ${lat.toFixed(5)}, ${lon.toFixed(5)}\n` +
         `${mode}${mode === 'onfoot' ? `  ${player.mode} ${Math.hypot(player.vel.x, player.vel.z).toFixed(1)} m/s ${player.grounded ? 'grounded' : 'air'}${player.climbing ? ' climbing' : ''}${player.active ? '' : ' (waiting for ground)'}` : ''}  ${party.active.displayName}\n` +
-        `near ${streetName}\n` +
+        `near ${loc.crossing}  ui ${ui.state}  hud ${ui.hud.cost.frame.toFixed(2)} ms  minimap ${ui.hud.minimap.cost.draw.toFixed(2)} ms\n` +
         `input ${input.activeDevice}${input.pad.connected ? ` (${input.pad.id.slice(0, 40)})` : ''}`,
       );
     }

@@ -1,0 +1,181 @@
+{
+  "id": "mission.the_club",
+  "title": "The Club",
+  "number": 6,
+  "act": 1,
+  "chapter": 2,
+  "playAs": "char.delphine_moore",
+  "date": "1974-06-30",
+  "durationMin": 15,
+  "pillars": [
+    "P1",
+    "P3",
+    "P4"
+  ],
+  "giver": "char.rita_haines",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "18:00",
+      "22:30"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-06-30",
+      "1974-06-30"
+    ],
+    "weekday": [
+      "sun"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.arden_hotel",
+    "cut": "transition",
+    "note": "Delphine's introduction: the first reel-change cut (ENGINE N5). Title card: DELPHINE MOORE · EIGHTH AVENUE."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "script": "dlg.m06_payout_table",
+      "text": "Run the club meeting, Rita's bar"
+    },
+    {
+      "id": "o2",
+      "type": "deliver",
+      "item": "item.club_payout_claudette",
+      "to": "loc.hotel_pennsylvania",
+      "text": "Pay Claudette, Hotel Pennsylvanian",
+      "note": "Staff entrance on W 33rd St. On foot down Eighth Ave.",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "script": "dlg.m06_claudette",
+      "text": "Hand Claudette her month"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "to": "8th Ave & W 38th St",
+      "radius": 20,
+      "text": "Back up Eighth to 38th St"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "script": "dlg.m06_the_tax",
+      "text": "Brannock's waiting at 38th St"
+    },
+    {
+      "id": "o5b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 2
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's boys want the payout",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "tutorial": "Delphine: fast strikes, dodges, the razor; break away into the crowd",
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o5c",
+      "type": "dialogue",
+      "script": "dlg.m06_after_fight",
+      "text": "Count the money. Still all there.",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o6",
+      "type": "enter_interior",
+      "marker": "interior.arden_lobby",
+      "text": "Get back to the Arden, W 39th St",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "script": "dlg.m06_marcus_stairs",
+      "text": "Marcus has something to show you"
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o5",
+    "o5b"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.tax_raised"
+    ],
+    "unlock": [
+      "mission.yes"
+    ],
+    "relationships": {
+      "char.delphine_moore/char.claudette_bijou": 1,
+      "char.delphine_moore/char.jimmy_brannock": -1,
+      "char.delphine_moore/char.marcus_teague": 1
+    }
+  },
+  "npcs": [
+    "char.rita_haines",
+    "char.tina_mercado",
+    "char.claudette_bijou",
+    "char.jimmy_brannock",
+    "char.lonnie_gage",
+    "char.marcus_teague"
+  ],
+  "archetypes": [
+    "npc.strip_worker",
+    "npc.bus_terminal_crowd",
+    "npc.hotel_bar_regular"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "loc.hotel_pennsylvania",
+    "8th Ave & W 38th St"
+  ],
+  "mobile": "Walking only, with no timers. The Brannock scene's choice ('Pay the fifty' or 'Pay, and read his badge') is untimed and both options pay. It teaches that Delphine's power is noticing. Large USE prompt for the handover.",
+  "design": "Shows the women's club as an institution: a table, a book in her head, a Sunday ritual. Sex work is present as context (where the money comes from; the corner) with nothing sexual on screen. Tina's bruise is visible and unexplained. Marcus shows the back stairs, which teaches M8's escape route. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "dusk",
+  "essential": [
+    {
+      "character": "char.marcus_teague",
+      "reason": "died"
+    },
+    {
+      "character": "char.tina_mercado",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

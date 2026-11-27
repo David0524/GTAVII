@@ -1,0 +1,61 @@
+{
+  "id": "mission.side_collections_marked",
+  "kind": "side",
+  "title": "Marked Money",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    2
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Calloway marks the bills",
+      "script": "dlg.side_collections_marked_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "First collection stop, W 35th",
+      "to": "W 35th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "The stop's quiet scene",
+      "script": "dlg.side_collections_marked_2"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "Second stop, W 39th & 9th",
+      "to": "W 39th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Report to Calloway",
+      "script": "dlg.side_collections_marked_3"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Weekly pay; Branch-B corroboration"
+  },
+  "where": "Collection stops (activity.collections)",
+  "systems": [
+    "the wire branch",
+    "relationships"
+  ],
+  "mobile": "Menus.",
+  "rank": 50,
+  "slice": false
+}

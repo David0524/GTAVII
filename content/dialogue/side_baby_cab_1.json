@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_baby_cab_1",
+  "context": "Encounter: a woman in labour flags you down.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_fare_night_worker",
+      "emotion": "strained",
+      "text": "Pennington General. Now. Not in a minute. Now."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.cab_fare_night_worker",
+      "emotion": "strained",
+      "text": "Ninth Avenue. Twenty-Sixth. I'll tell you the turns. Breathe with me. Or don't."
+    }
+  ]
+}

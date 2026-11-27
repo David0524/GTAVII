@@ -18,7 +18,7 @@ import net from 'node:net';
 const ROOT = path.resolve(import.meta.dirname, '../..');
 // a fresh free port every run: a leftover server from an earlier run must never answer for this one
 const PORT = await new Promise<number>((res) => { const srv = net.createServer(); srv.listen(0, () => { const p = (srv.address() as net.AddressInfo).port; srv.close(() => res(p)); }); });
-const BUDGET = { titleReady: 15_000, newGameToPlayable: 3_000 }; // ms, headless proxy
+const BUDGET = { titleReady: 15_000, newGameToFirstFrame: 3_000 }; // ms, headless proxy (first frame = cutscene or play)
 
 async function main() {
   // own process group + --bypass-lock: a leftover preview from an earlier run must not block this one
@@ -36,12 +36,21 @@ async function main() {
     await page.goto(`http://localhost:${PORT}/?webgl=1&quality=low&fresh=1`);
     await page.waitForFunction(() => (window as any).__T74?.load.marks.some(([n]: [string]) => n === 'title-ready'));
     // click via the DOM: Playwright's actionability wait (stable across 2 frames) costs ~15 s at 1.5 s/frame
-    await page.evaluate(() => [...document.querySelectorAll<HTMLButtonElement>('.t74-menu button')].find((b) => b.textContent?.startsWith('New game'))!.click());
+    await page.evaluate(() => [...document.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.trim().startsWith('New game'))!.click());
+    // New Game opens the M1 opening cutscene (UI); its first frame is the responsiveness budget. Then hold
+    // Enter to skip it (UI: hold-to-skip) and require play to start.
+    await page.waitForFunction(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'playable' || n === 'cutscene'));
+    if (await page.evaluate(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'cutscene'))) {
+      // the skip is only accepted once the cutscene is running (its first frames load content): hold in bursts
+      for (let k = 0; k < 15 && !(await page.evaluate(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'playable'))); k++) {
+        await page.keyboard.down('Enter'); await page.waitForTimeout(4000); await page.keyboard.up('Enter'); await page.waitForTimeout(500);
+      }
+    }
     await page.waitForFunction(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'playable'));
     const r = await page.evaluate(() => { const l = (window as any).__T74.load; return { marks: Object.fromEntries(l.marks), text: l.text() }; });
     console.log(r.text);
     for (const [k, lim] of Object.entries(BUDGET)) {
-      const t = k === 'titleReady' ? r.marks['title-ready'] : r.marks['playable'] - r.marks['new-game'];
+      const t = k === 'titleReady' ? r.marks['title-ready'] : (r.marks['cutscene'] ?? r.marks['playable']) - r.marks['new-game'];
       const ok = t <= lim; if (!ok) fail++;
       console.log(`${ok ? 'PASS' : 'FAIL'} ${k} ${(t / 1000).toFixed(1)} s (budget ${(lim / 1000).toFixed(0)} s headless proxy)`);
     }

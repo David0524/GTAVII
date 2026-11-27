@@ -1,0 +1,8 @@
+✓ performance panel opens for the selected actor
+✓ timeline shows six lanes
+✓ a look key added from the panel shows on the Look lane (4 → 5)
+✓ the keys landed in the layout data at the playhead
+✓ still valid after authoring
+✓ stand-in head turns toward its look target (-0.44 rad)
+✓ Mayhew hands off as the companion at his last mark (actor.handoff cue) ({"x":-5.2,"z":-31,"heading":0.3,"y":0.05216000000000129})
+all passed
