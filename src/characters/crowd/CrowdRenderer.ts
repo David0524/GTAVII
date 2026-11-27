@@ -61,6 +61,18 @@ function stateAction(kind: string, a: AgentView): { crowd: string; near: string 
   if (/stumble/.test(s)) return { crowd: 'stumble', near: 'stumble' };
   if (/angry/.test(s)) return { crowd: 'argue', near: 'angry' };
   if (/queue/.test(s)) return { crowd: 'queue', near: 'queue' };
+  // sim acts (PedView state 'act:<name>'): fender-bender drivers and ambient scenarios
+  if (s.startsWith('act:')) {
+    const act = s.slice(4);
+    const ACT: Record<string, { crowd: string; near: string }> = {
+      inspect: { crowd: 'inspect', near: 'inspect' }, argue: { crowd: 'argue', near: 'argue' }, shove: { crowd: 'shove', near: 'shove' },
+      stagger: { crowd: 'stumble', near: 'stumble' }, exchangedetails: { crowd: 'details', near: 'exchange_details' },
+      sitstoop: { crowd: 'sit', near: 'sit_stoop' }, playcards: { crowd: 'cards', near: 'play_cards' }, watch: { crowd: 'watch', near: 'watch' },
+      cooloff: { crowd: 'cooloff', near: 'cooloff' }, slumped: { crowd: 'slumped', near: 'slumped' }, sweep: { crowd: 'sweep', near: 'sweep' },
+    };
+    if (ACT[act]) return ACT[act];
+  }
+  if (s === 'drunk' && moving) return { crowd: 'walk_drunk', near: '' };
   if (/^watch/.test(s) || /monte/.test(s)) return { crowd: 'watch', near: 'watch' };
   if (moving && a.speed < 2.0 && a.carry) {
     if (EAT.test(a.carry)) return { crowd: 'walk_eat', near: 'eat_walk' };
@@ -332,7 +344,9 @@ export class CrowdRenderer {
             if (st.nearAction) st.near.animator.stop();
             if (want) void st.near.animator.play(want, { loop: true, blendIn: 0.3 }).catch(() => {});
             st.nearAction = want;
+            st.near.holdProp(want === 'sweep' ? 'broom' : want === 'play_cards' ? 'cards' : want === 'exchange_details' ? 'notepad' : null);
           }
+          st.near.setDrunk(a.state === 'drunk' ? 1 : 0);
           if (visible) st.near.update(dt);
           st.near.object.visible = visible;
           near++;

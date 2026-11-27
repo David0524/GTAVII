@@ -786,6 +786,46 @@ Board: `shots/characters/47_ict_pool.jpg`, from `?characters=1&scene=rocketbox&p
 - No distance switch between Delphine's full and light meshes.
 - Only 10 identities.
 
+## Sim acts: fender-bender drivers, ambient scenarios, drunk walkers; M1 cutscene gestures
+
+Board: `shots/characters/50_sim_acts.jpg` (`?characters=1&scene=vendors&anims=1&clips=inspect,argue,shove,exchange_details,play_cards,cooloff,slumped,sweep,drunk_sway`).
+
+**Sim states mapped.** `PedView.state 'act:<name>'` goes through `stateAction` in `CrowdRenderer`, to a baked crowd clip and a near-character action:
+
+| Sim state | Clip |
+|---|---|
+| `inspect` | new: bent at the hips, hands on the knees, head scanning the bumper |
+| `argue` | existing |
+| `shove` | new: a two-handed shove every 1.8 s |
+| `stagger` | existing `stumble` |
+| `exchangeDetails` | new: writing on a pad held at the chest |
+| `sitStoop` | existing `sit_stoop` |
+| `playCards` | new: seated, cards held low, a card played |
+| `watch` | existing |
+| `cooloff` | new: arms up in the hydrant spray, bouncing |
+| `slumped` | new: sitting on the pavement against a wall, head down |
+| `sweep` | new, with a broom (below) |
+
+**Other cases.**
+- `enterCar`: the sim despawns the driver at once, so it's not mapped. `car_enter_l` exists if it ever lingers.
+- Drunk walkers (`state 'drunk'`): the crowd draws a slow walk with the `drunk_sway` overlay. Near characters get `setDrunk(1)`: the heading wobbles, the lower spine rolls, and the upper body sways loose.
+
+**Props for near characters** (`Character.holdProp`, also chosen automatically by `CrowdRenderer`):
+- A broom, aimed each frame from the right fist to the pavement, with the left hand IK'd onto the stick.
+- A hand of cards, and a notepad.
+- Distant crowd figures carry no prop (the baked crowd has no hand props) — a known gap.
+
+**M1 cutscene gestures** (UI & cinematics). Both are upper body and non-looping; alias in brackets:
+- `cs.m01.teddy_check_watch` (1.6 s; alias `check_watch`): the left wrist comes up to the chest and the head bows to it.
+- `cs.m01.mayhew_wave` (1.5 s; alias `wave`): the forearm goes up to head height and the hand rocks.
+
+**How the poses were tuned.** The test scene's `armprobe` reports the shoulder, elbow and wrist positions of each figure, so arm poses were picked from measured grids rather than by eye.
+
+**vs GTA V / VI / RDR2.**
+- GTA V's ambient scenarios use mocapped clips with props on every distance tier. These are hand-keyed: they read at street distance and are stiffer up close.
+- Distant figures carry no props.
+- RDR2-level ambient richness (props on every tier, scenario variants) is ahead.
+
 ## Firearms: weapon in hand, draw/holster, aim, recoil, crouch and cover (oversight priority)
 
 Board: `shots/characters/49_weapons_aim.jpg` (`?characters=1&scene=weapons&t=1.4&yaw=90`; `&w=i,j` picks setups).

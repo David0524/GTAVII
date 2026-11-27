@@ -17,7 +17,7 @@ interface Action { clip: number; t: number; w: number; target: number; loop: boo
 
 /** Public action names → clips and layers. UAL clip names are accepted directly as well. */
 export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; loop?: boolean }> = {
-  hail_cab: { clip: 'hail_cab', layer: 'upper' }, check_watch: { clip: 'cs.m01.teddy_check_watch', layer: 'upper' }, wave: { clip: 'cs.m01.mayhew_wave', layer: 'upper' }, reload: { clip: 'Pistol_Reload', layer: 'upper' }, shoot: { clip: 'Pistol_Shoot', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
+  hail_cab: { clip: 'hail_cab', layer: 'upper' }, inspect: { clip: 'inspect', layer: 'full', loop: true }, shove: { clip: 'shove', layer: 'upper', loop: true }, exchange_details: { clip: 'exchange_details', layer: 'upper', loop: true }, play_cards: { clip: 'play_cards', layer: 'full', loop: true }, cooloff: { clip: 'cooloff', layer: 'full', loop: true }, slumped: { clip: 'slumped', layer: 'full', loop: true }, sweep: { clip: 'sweep', layer: 'full', loop: true }, drunk_sway: { clip: 'drunk_sway', layer: 'upper', loop: true }, check_watch: { clip: 'cs.m01.teddy_check_watch', layer: 'upper' }, wave: { clip: 'cs.m01.mayhew_wave', layer: 'upper' }, reload: { clip: 'Pistol_Reload', layer: 'upper' }, shoot: { clip: 'Pistol_Shoot', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
   vault: { clip: 'vault', layer: 'full' }, vault_turnstile: { clip: 'vault', layer: 'full' }, climb: { clip: 'climb', layer: 'full' }, fence: { clip: 'fence', layer: 'full' },
   ladder: { clip: 'ladder', layer: 'full', loop: true }, ladder_pull: { clip: 'ladder_pull', layer: 'full' }, hang: { clip: 'hang', layer: 'full', loop: true },
   drop_land: { clip: 'drop_land', layer: 'full' }, drop_roll: { clip: 'Roll', layer: 'full' }, roof_jump: { clip: 'roof_jump', layer: 'full' },
@@ -112,6 +112,8 @@ export class Animator {
   }
   /** Lean (radians) applied by the procedural layer, exposed for IK/debug. */
   lean = { pitch: 0, roll: 0 };
+  /** 0..1: drunk (Character.setDrunk): a slow lateral roll and stagger on top of the lean */
+  drunk = 0;
   /** Stair gait (-1 down .. +1 up, set by the character from step cadence): higher knee lift on the swing leg, a forward lean going up. */
   stair = 0;
   /** Contact state per foot (true = planted) for foot locking. */
@@ -296,7 +298,8 @@ export class Animator {
     const targetRoll = Math.max(-0.25, Math.min(0.25, -this.lateralAcc * 0.03));
     this.lean.pitch += (targetPitch - this.lean.pitch) * Math.min(1, dt * 6);
     this.lean.roll += (targetRoll - this.lean.roll) * Math.min(1, dt * 6);
-    rotLocal(out, JI.spine_01, this.lean.pitch * 0.5 + slump * 0.3, 0, this.lean.roll * 0.5);
+    const dr = this.drunk ? this.drunk * (Math.sin(this.time * 2.1) * 0.14 + Math.sin(this.time * 0.73) * 0.08) : 0;
+    rotLocal(out, JI.spine_01, this.lean.pitch * 0.5 + slump * 0.3 + this.drunk * 0.06, 0, this.lean.roll * 0.5 + dr);
     rotLocal(out, JI.spine_02, this.lean.pitch * 0.3 + slump * 0.3, 0, this.lean.roll * 0.3);
     rotLocal(out, JI.spine_03, breathe + slump * 0.3, 0, 0);
     rotLocal(out, JI.neck_01, slump * 0.4 - this.lean.pitch * 0.4, 0, -this.lean.roll * 0.3);

@@ -45,6 +45,15 @@ export const CROWD_SET: { name: string; kind: 'idle' | 'move' | 'action'; speed?
   { name: 'fall', kind: 'action', action: 'fall_down', seconds: 0.9, fps: 15 },
   { name: 'down', kind: 'action', action: 'down', seconds: 3, fps: 6 },
   { name: 'get_up', kind: 'action', action: 'get_up', seconds: 2.4, fps: 12 },
+  // sim incidents (fender-bender acts) and ambient scenarios (act:<name>), drunk walkers
+  { name: 'inspect', kind: 'action', action: 'inspect', seconds: 4, fps: 8 },
+  { name: 'shove', kind: 'action', action: 'shove', seconds: 1.8, fps: 15 },
+  { name: 'details', kind: 'action', action: 'exchange_details', seconds: 4.5, fps: 8 },
+  { name: 'cards', kind: 'action', action: 'play_cards', seconds: 6, fps: 8 },
+  { name: 'cooloff', kind: 'action', action: 'cooloff', seconds: 2.4, fps: 15 },
+  { name: 'slumped', kind: 'action', action: 'slumped', seconds: 6, fps: 6 },
+  { name: 'sweep', kind: 'action', action: 'sweep', seconds: 2.2, fps: 12 },
+  { name: 'walk_drunk', kind: 'move', speed: 0.9, fps: 20, overlay: 'drunk_sway' },
   // street vendors' work (vendor templates only)
   { name: 'serve', kind: 'action', action: 'vendor_serve', seconds: 3, fps: 12, only: ['vendor'] },
   { name: 'call', kind: 'action', action: 'vendor_call', seconds: 2.4, fps: 12, only: ['vendor'] },

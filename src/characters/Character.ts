@@ -17,7 +17,7 @@ import { Animator, type LocoInput } from './anim/Animator';
 import type { AnimLibrary } from './anim/AnimLibrary';
 import { twoBoneIK, lookAt as ikLookAt, alignToNormal, worldPos } from './anim/IK';
 import { JOINT_INDEX as JI } from './rig';
-import { WeaponRig, type CoverState, type WeaponState } from './weaponRig';
+import { WeaponRig, handProp, aimBroom, type CoverState, type WeaponState } from './weaponRig';
 import type { WeaponKind } from './build/weapons';
 
 export interface CharacterDesc { seed: number; archetype?: string; hero?: string; act?: number; overrides?: Record<string, unknown> }
@@ -177,6 +177,24 @@ export class Character {
   /** In cover (low: crouched until aiming; high: leans out to `side` when aiming), or null. */
   setCover(c: CoverState | null) { this.rig().cover = c; }
   get weaponState(): WeaponState { return this.wrig?.state ?? 'none'; }
+
+  // --- hand props for actions (near characters): a broom (sweep), a hand of cards, a notepad ----
+  private prop: { kind: string; mesh: THREE.Object3D } | null = null;
+  holdProp(kind: 'broom' | 'cards' | 'notepad' | null) {
+    if ((this.prop?.kind ?? null) === kind) return;
+    this.prop?.mesh.removeFromParent(); this.prop = null;
+    if (!kind) return;
+    const mesh = handProp(kind, this.bones);
+    if (kind === 'broom') this.object.add(mesh);
+    this.prop = { kind, mesh };
+  }
+  /** Drunk (0..1): heading wobble, a lateral roll and the loose upper body (drunk_sway). */
+  setDrunk(amount: number) {
+    const was = this.animator.drunk > 0;
+    this.animator.drunk = amount;
+    if (amount > 0 && !was) void this.animator.play('drunk_sway', { loop: true, blendIn: 0.4 }).catch(() => {});
+    if (amount <= 0 && was) this.animator.stop('upper');
+  }
   /** test metrics (scene=weapons) */
   weaponDebug() { return this.wrig?.debug() ?? null; }
   play(action: string, opts?: { loop?: boolean; blendIn?: number; speed?: number }): Promise<void> { return this.animator.play(action, opts); }
@@ -246,7 +264,8 @@ export class Character {
       this.animator.setLocomotion({ velocity: [0, 0, 0], grounded: true, heading: this.yaw, mode: 'walk' }, dt);
     } else {
       // turn towards the requested heading (smoothed; fast when running)
-      let d = this.loco.heading - this.yaw; d = Math.atan2(Math.sin(d), Math.cos(d));
+      const wob = this.animator.drunk ? this.animator.drunk * (Math.sin(this.clock * 1.3) * 0.28 + Math.sin(this.clock * 0.41) * 0.18) : 0;
+      let d = this.loco.heading + wob - this.yaw; d = Math.atan2(Math.sin(d), Math.cos(d));
       this.yaw += d * Math.min(1, dt * 12);
       this.object.rotation.set(0, this.yaw, 0);
       // low cover: crouched behind it until aiming (then up over it)
@@ -282,6 +301,7 @@ export class Character {
     // procedural layers
     if (!this.seat) this.footIK(dt);
     this.wrig?.update(dt);
+    if (this.prop?.kind === 'broom') aimBroom(this.prop.mesh, this.bones, this.object);
     this.wheelHands();
     this.handIK();
     this.lookAtLayer(dt);
@@ -365,7 +385,7 @@ export class Character {
   jointWorld(name: string, out = new THREE.Vector3()) { return worldPos(this.bones[JI[name]], out); }
 
   dispose() {
-    this.wrig?.dispose();
+    this.wrig?.dispose(); this.prop?.mesh.removeFromParent();
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     this.skeleton.dispose();
     this.object.removeFromParent();

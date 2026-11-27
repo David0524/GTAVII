@@ -231,6 +231,97 @@ export function authoredClips(): ClipDef[] {
       { t: 3, j: {} },
     ],
   });
+  // --- sim incidents (fender-bender `incidentAct`) and ambient scenarios (PedView `act:<name>`) -----
+  const SIT_STOOP = { thigh_l: [-95, 0, -8], thigh_r: [-95, 0, 8], calf_l: [100, 0, 0], calf_r: [100, 0, 0], foot_l: [-5, 0, 0], foot_r: [-5, 0, 0], spine_01: [10, 0, 0], spine_02: [10, 0, 0], spine_03: [8, 0, 0] } as Record<string, Euler>;
+  defs.push({ // inspect: bent at the hips over the crumpled bumper, hands on the knees, head scanning the damage
+    name: 'inspect', duration: 4, loop: true,
+    base: merge(R, { thigh_l: [-38, 0, -4], thigh_r: [-38, 0, 4], calf_l: [52, 0, 0], calf_r: [52, 0, 0], foot_l: [-14, 0, 0], foot_r: [-14, 0, 0],
+      spine_01: [17, 0, 0], spine_02: [10, 0, 0], spine_03: [4, 0, 0], neck_01: [16, 0, 0],
+      upperarm_l: [-38, 12, -6], upperarm_r: [-38, -12, 6], lowerarm_l: [0, -22, 0], lowerarm_r: [0, 22, 0] }),
+    keys: [
+      { t: 0, j: { neck_01: [14, 18, 0] }, pelvis: [0, -0.1, -0.06] },
+      { t: 1.6, j: { neck_01: [18, -6, 0], Head: [6, -8, 0] }, pelvis: [0, -0.1, -0.06] },
+      { t: 2.8, j: { neck_01: [10, -22, 0], spine_02: [16, -6, 0] }, pelvis: [0, -0.1, -0.06] },
+      { t: 4, j: { neck_01: [14, 18, 0] }, pelvis: [0, -0.1, -0.06] },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // shove: both hands into the other driver's chest (loops while the act lasts: a shove every 1.8 s)
+    name: 'shove', duration: 1.8, loop: true, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: { upperarm_l: [-45, 10, -10], upperarm_r: [-45, -10, 10], lowerarm_l: [0, -105, 0], lowerarm_r: [0, 105, 0], ...fingers('l', 20), ...fingers('r', 20), spine_02: [-4, 0, 0], neck_01: [-4, 0, 0] } },
+      { t: 0.35, j: { upperarm_l: [-50, 14, -14], upperarm_r: [-50, -14, 14], lowerarm_l: [0, -120, 0], lowerarm_r: [0, 120, 0], ...fingers('l', 10), ...fingers('r', 10), spine_02: [-8, 0, 0], spine_03: [-4, 0, 0] } },
+      { t: 0.55, j: { upperarm_l: [-82, 6, -4], upperarm_r: [-82, -6, 4], lowerarm_l: [0, -12, 0], lowerarm_r: [0, 12, 0], ...fingers('l', -10), ...fingers('r', -10), spine_02: [12, 0, 0], spine_03: [8, 0, 0], neck_01: [-6, 0, 0], jaw: [10, 0, 0] } },
+      { t: 0.9, j: { upperarm_l: [-70, 8, -6], upperarm_r: [-70, -8, 6], lowerarm_l: [0, -30, 0], lowerarm_r: [0, 30, 0], spine_02: [6, 0, 0], spine_03: [4, 0, 0] } },
+      { t: 1.8, j: { upperarm_l: [-45, 10, -10], upperarm_r: [-45, -10, 10], lowerarm_l: [0, -105, 0], lowerarm_r: [0, 105, 0], ...fingers('l', 20), ...fingers('r', 20), spine_02: [-4, 0, 0], neck_01: [-4, 0, 0] } },
+    ],
+  });
+  defs.push({ // exchangeDetails: a pad held at the chest in the left hand, the right hand writing; a glance up
+    name: 'exchange_details', duration: 4.5, loop: true, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: { upperarm_l: [-60, 0, 20], lowerarm_l: [0, -104, 0], hand_l: [0, 0, 18], ...fingers('l', 30), upperarm_r: [-58, 10, -14], lowerarm_r: [0, 102, 0], ...fingers('r', 55), hand_r: [0, 0, -8], neck_01: [20, 4, 0] } },
+      { t: 1.0, j: { upperarm_l: [-60, 0, 20], lowerarm_l: [0, -104, 0], hand_l: [0, 0, 18], ...fingers('l', 30), upperarm_r: [-60, 10, -14], lowerarm_r: [0, 104, 0], ...fingers('r', 55), hand_r: [0, 0, 10], neck_01: [22, 4, 0] } },
+      { t: 2.0, j: { upperarm_l: [-60, 0, 20], lowerarm_l: [0, -104, 0], hand_l: [0, 0, 18], ...fingers('l', 30), upperarm_r: [-58, 10, -14], lowerarm_r: [0, 102, 0], ...fingers('r', 55), hand_r: [0, 0, -8], neck_01: [20, 4, 0] } },
+      { t: 3.0, j: { upperarm_l: [-56, 0, 20], lowerarm_l: [0, -98, 0], hand_l: [0, 0, 18], ...fingers('l', 30), upperarm_r: [-36, 0, -10], lowerarm_r: [0, 80, 0], ...fingers('r', 55), neck_01: [-2, -8, 0] } },
+      { t: 4.5, j: { upperarm_l: [-60, 0, 20], lowerarm_l: [0, -104, 0], hand_l: [0, 0, 18], ...fingers('l', 30), upperarm_r: [-58, 10, -14], lowerarm_r: [0, 102, 0], ...fingers('r', 55), hand_r: [0, 0, -8], neck_01: [20, 4, 0] } },
+    ],
+  });
+  defs.push({ // playCards: seated on a crate or a step round a crate: a hand of cards at the chest, a card played
+    name: 'play_cards', duration: 6, loop: true,
+    base: merge(R, SIT_STOOP, { upperarm_l: [-46, -25, -8], lowerarm_l: [0, -84, 0], hand_l: [0, 0, 20], ...fingers('l', 35), upperarm_r: [-46, 25, 8], lowerarm_r: [0, 80, 0], ...fingers('r', 30), neck_01: [16, 0, 0] }),
+    keys: [
+      { t: 0, j: {}, pelvis: [0, -0.48, -0.08] },
+      { t: 2.6, j: { neck_01: [18, -6, 0] }, pelvis: [0, -0.48, -0.08] },
+      { t: 3.1, j: { upperarm_r: [-62, -8, 4], lowerarm_r: [0, 40, 0], ...fingers('r', 10), spine_02: [16, 0, 0], neck_01: [20, 0, 0] }, pelvis: [0, -0.48, -0.08] },
+      { t: 3.6, j: {}, pelvis: [0, -0.48, -0.08] },
+      { t: 4.8, j: { neck_01: [6, 14, 0] }, pelvis: [0, -0.48, -0.08] },
+      { t: 6, j: {}, pelvis: [0, -0.48, -0.08] },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // cooloff: in an opened hydrant's spray: arms up, turning in it, knees bouncing
+    name: 'cooloff', duration: 2.4, loop: true,
+    base: R,
+    keys: [
+      { t: 0, j: { upperarm_l: [-30, 10, 132], upperarm_r: [-30, -10, -132], lowerarm_l: [-20, -20, 0], lowerarm_r: [-20, 20, 0], ...fingers('l', -10), ...fingers('r', -10), neck_01: [-14, 0, 0], spine_02: [-4, 12, 0], thigh_l: [-8, 0, 0], thigh_r: [-8, 0, 0], calf_l: [14, 0, 0], calf_r: [14, 0, 0] }, pelvis: [0, -0.02, 0] },
+      { t: 0.6, j: { upperarm_l: [-40, 10, 100], upperarm_r: [-40, -10, -100], lowerarm_l: [0, -50, 0], lowerarm_r: [0, 50, 0], neck_01: [-6, 0, 0], spine_02: [-2, 0, 0], thigh_l: [-18, 0, 0], thigh_r: [-18, 0, 0], calf_l: [32, 0, 0], calf_r: [32, 0, 0] }, pelvis: [0, -0.07, 0] },
+      { t: 1.2, j: { upperarm_l: [-30, 10, 140], upperarm_r: [-30, -10, -126], lowerarm_l: [-15, -15, 0], lowerarm_r: [-25, 25, 0], ...fingers('l', -10), ...fingers('r', -10), neck_01: [-18, -8, 0], spine_02: [-4, -14, 0], thigh_l: [-8, 0, 0], thigh_r: [-8, 0, 0], calf_l: [14, 0, 0], calf_r: [14, 0, 0] }, pelvis: [0, -0.02, 0] },
+      { t: 1.8, j: { upperarm_l: [-40, 10, 100], upperarm_r: [-40, -10, -100], lowerarm_l: [0, -50, 0], lowerarm_r: [0, 50, 0], neck_01: [-6, 0, 0], thigh_l: [-18, 0, 0], thigh_r: [-18, 0, 0], calf_l: [32, 0, 0], calf_r: [32, 0, 0] }, pelvis: [0, -0.07, 0] },
+      { t: 2.4, j: { upperarm_l: [-30, 10, 132], upperarm_r: [-30, -10, -132], lowerarm_l: [-20, -20, 0], lowerarm_r: [-20, 20, 0], ...fingers('l', -10), ...fingers('r', -10), neck_01: [-14, 0, 0], spine_02: [-4, 12, 0], thigh_l: [-8, 0, 0], thigh_r: [-8, 0, 0], calf_l: [14, 0, 0], calf_r: [14, 0, 0] }, pelvis: [0, -0.02, 0] },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // slumped: sitting on the pavement against a wall, legs out, head on the chest (a drunk sleeping it off)
+    name: 'slumped', duration: 6, loop: true,
+    base: merge(R, { thigh_l: [-84, 0, -10], thigh_r: [-80, 0, 12], calf_l: [14, 0, 0], calf_r: [28, 0, 0], foot_l: [8, 0, 10], foot_r: [6, 0, -12],
+      spine_01: [-6, 0, 4], spine_02: [8, 0, 3], spine_03: [12, 0, 0], neck_01: [34, 8, 6], Head: [10, 0, 0],
+      upperarm_l: [-18, 12, 18], upperarm_r: [-14, -12, -20], lowerarm_l: [0, -30, 0], lowerarm_r: [0, 26, 0], ...fingers('l', 30), ...fingers('r', 30) }),
+    keys: [
+      { t: 0, j: {}, pelvis: [0, -0.76, -0.12] },
+      { t: 3, j: { spine_03: [14, 0, 0], neck_01: [36, 8, 6] }, pelvis: [0, -0.765, -0.12] },
+      { t: 6, j: {}, pelvis: [0, -0.76, -0.12] },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // sweep: a storekeeper sweeping the pavement in front of the shop (broom in both hands, Character prop)
+    name: 'sweep', duration: 2.2, loop: true,
+    base: merge(R, { thigh_l: [-10, 0, -4], thigh_r: [-6, 0, 4], calf_l: [14, 0, 0], calf_r: [10, 0, 0], spine_01: [14, 0, 0], neck_01: [16, 0, 0],
+      upperarm_l: [-40, 30, -4], lowerarm_l: [0, -84, 0], ...fingers('l', 70), upperarm_r: [-18, -12, 12], lowerarm_r: [0, 46, 0], ...fingers('r', 70) }),
+    keys: [
+      { t: 0, j: { spine_02: [6, 16, 0], spine_03: [4, 6, 0] } },
+      { t: 1.1, j: { spine_02: [8, -14, 0], spine_03: [4, -6, 0], upperarm_r: [-26, -12, 6] } },
+      { t: 2.2, j: { spine_02: [6, 16, 0], spine_03: [4, 6, 0] } },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // drunk: loose upper body over the walk (roll and head lolling; the stagger is Character.setDrunk)
+    name: 'drunk_sway', duration: 2.2, loop: true, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: { spine_02: [6, 0, 7], spine_03: [4, 0, 4], neck_01: [14, 6, 10], upperarm_l: [0, 0, 14], upperarm_r: [0, 0, -10] } },
+      { t: 1.1, j: { spine_02: [8, 0, -8], spine_03: [4, 0, -5], neck_01: [18, -6, -12], upperarm_l: [0, 0, 8], upperarm_r: [0, 0, -16] } },
+      { t: 2.2, j: { spine_02: [6, 0, 7], spine_03: [4, 0, 4], neck_01: [14, 6, 10], upperarm_l: [0, 0, 14], upperarm_r: [0, 0, -10] } },
+    ],
+  });
   // --- cutscene gestures (UI & cinematics: docs/CHARACTERS_PROGRESS.md "Cutscene clips") ---------
   defs.push({ // Teddy lifts his left wrist and glances at his watch (M1), ~1.6 s, upper body
     name: 'cs.m01.teddy_check_watch', duration: 1.6, loop: false, mask: MASKS.upper, base: R,

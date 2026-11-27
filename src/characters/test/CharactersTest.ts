@@ -187,6 +187,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       const c = factory.spawn(world, { seed: num('seed', 7) * 101 + i * 13, archetype: `npc.${id}` });
       if (id === 'monte_lookout') c.animator.setIdle('idle_pockets');
       if (qp.has('anims') && clips[i]) void c.animator.play(clips[i], { loop: true, blendIn: 0.01 }).catch(() => {});
+      if (qp.has('anims') && clips[i]) c.holdProp(clips[i] === 'sweep' ? 'broom' : clips[i] === 'play_cards' ? 'cards' : clips[i] === 'exchange_details' ? 'notepad' : null);
       chars.push(c);
     });
     if (qp.has('anims')) report.vendorClips = clips;

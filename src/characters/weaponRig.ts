@@ -332,3 +332,62 @@ export class WeaponRig {
     this.dbgL = { wrist: worldPos(handL, new THREE.Vector3()).distanceTo(lWrist), rot: THREE.MathUtils.radToDeg(handL.getWorldQuaternion(new THREE.Quaternion()).angleTo(lq)), reach: worldPos(upL, new THREE.Vector3()).distanceTo(lWrist) };
   }
 }
+
+/** Knuckle frame of a hand in its own local space: f along the metacarpals, a across toward the index. */
+export function handAxes(bones: THREE.Bone[], side: 'l' | 'r') {
+  const h = bones[JI[`hand_${side}`]]; h.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(h.matrixWorld).invert();
+  const p = (n: string) => worldPos(bones[JI[`${n}_${side}`]], new THREE.Vector3()).applyMatrix4(inv);
+  const a = p('index_01').sub(p('pinky_01')).normalize(), f = p('middle_01');
+  f.addScaledVector(a, -f.dot(a)).normalize();
+  const n = f.clone().cross(a).normalize();
+  // n out of the palm: the thumb's middle joint sits on the palm side
+  if (p('thumb_02').dot(n) < 0) n.negate();
+  return { f, a, n };
+}
+const PROP_MATS: Record<string, THREE.Material> = {};
+const pm = (k: string, c: number, r = 0.7) => (PROP_MATS[k] ??= new THREE.MeshStandardNodeMaterial({ color: c, roughness: r }));
+/** A prop held in the hand (child of the hand bone): broom (right hand, the handle across the fist),
+ * a hand of cards (left), a notepad (left palm). */
+export function handProp(kind: 'broom' | 'cards' | 'notepad', bones: THREE.Bone[]): THREE.Object3D {
+  const side = kind === 'broom' ? 'r' : 'l';
+  const { f, n } = handAxes(bones, side);
+  const g = new THREE.Group(); g.matrixAutoUpdate = false;
+  // frame: x = a (across the fist), y = n (palm normal), z = f (along the fingers); origin at the grip
+  const x = n.clone().cross(f).normalize(); // right-handed with y = n, z = f (x ~ a)
+  g.matrix.makeBasis(x, n, f).setPosition(f.clone().multiplyScalar(0.07));
+  const add = (geo: THREE.BufferGeometry, m: THREE.Material) => { const o = new THREE.Mesh(geo, m); o.castShadow = true; g.add(o); return o; };
+  if (kind === 'broom') {
+    // aimed each frame from the fist to the pavement (aimBroom): the stick along -y of its own group
+    const b = new THREE.Group(); b.name = 'broom';
+    const stick = new THREE.CylinderGeometry(0.013, 0.013, 1.32, 8); stick.translate(0, -0.36, 0);
+    b.add(new THREE.Mesh(stick, pm('wood', 0x8a6a44)));
+    const head = new THREE.BoxGeometry(0.3, 0.07, 0.06); head.translate(0, -1.02, 0); b.add(new THREE.Mesh(head, pm('bristle', 0x9a8250, 0.95)));
+    b.traverse((o) => { (o as THREE.Mesh).castShadow = true; });
+    return b; // parented by the caller (the character root), not the hand
+  } else if (kind === 'cards') {
+    for (let i = 0; i < 5; i++) { const c = new THREE.BoxGeometry(0.062, 0.0008, 0.088); c.translate(0, 0, 0.03); c.rotateY((i - 2) * 0.18); c.translate(0, 0.022 + i * 0.001, 0.01); add(c, pm('card', 0xeee8dc, 0.5)); }
+  } else {
+    const pad = new THREE.BoxGeometry(0.08, 0.01, 0.12); pad.translate(0, 0.024, -0.01); add(pad, pm('pad', 0xd8d0b4, 0.8));
+  }
+  bones[JI[`hand_${side}`]].add(g);
+  return g;
+}
+
+/** Broom: from the right fist down to the pavement ahead and to the right (the brush follows the swing). */
+export function aimBroom(broom: THREE.Object3D, bones: THREE.Bone[], root: THREE.Object3D) {
+  const hand = worldPos(bones[JI.hand_r], new THREE.Vector3()), q = root.getWorldQuaternion(new THREE.Quaternion());
+  const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(q), right = new THREE.Vector3(-1, 0, 0).applyQuaternion(q);
+  const ground = root.getWorldPosition(new THREE.Vector3()).addScaledVector(fwd, 0.55).addScaledVector(right, 0.12);
+  ground.x += (hand.x - root.getWorldPosition(new THREE.Vector3()).x) * 0.6; ground.z += (hand.z - root.getWorldPosition(new THREE.Vector3()).z) * 0.6;
+  ground.y += 0.035;
+  const dir = ground.sub(hand).normalize(); // stick runs down (-y) toward the brush
+  broom.position.copy(root.worldToLocal(hand.clone()));
+  const wq = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir);
+  broom.quaternion.copy(q.clone().invert().multiply(wq));
+  // left hand on the stick, 0.42 m up from the right fist
+  const grip = hand.clone().addScaledVector(dir, -0.42);
+  const lo = bones[JI.lowerarm_l];
+  const pole = worldPos(lo, new THREE.Vector3()).addScaledVector(right, -0.4).addScaledVector(new THREE.Vector3(0, 1, 0), -0.3);
+  twoBoneIK(bones[JI.upperarm_l], lo, bones[JI.hand_l], grip, pole, 1);
+}
