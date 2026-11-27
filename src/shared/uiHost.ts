@@ -230,7 +230,8 @@ export type TouchMode = 'foot' | 'combat' | 'drive';
 export type TraversalKind = 'vault' | 'climb' | 'fence' | 'ladder' | 'drop' | 'gap';
 /** Verbs shown for each traversal (touch button label, HUD chip). */
 export const TRAVERSAL_VERB: Record<TraversalKind, string> = { vault: 'Vault', climb: 'Climb', fence: 'Over', ladder: 'Up', drop: 'Drop', gap: 'Jump' };
-export interface TouchContext { kind: string; label: string }
+/** alt: a second verb on the same button (gameplay's greet/antagonize: "Say hello" / alt "Mouth off"); touch = long-press, pad/keys = hold `use`. */
+export interface TouchContext { kind: string; label: string; alt?: { kind: string; label: string } }
 export interface TouchHost {
   /** Which control state to show. Combat = a weapon drawn or under fire. */
   mode(): TouchMode;
@@ -240,6 +241,8 @@ export interface TouchHost {
   context(): TouchContext | null;
   /** gameplay.doContextAction(moveDir?). */
   doContext(moveDir?: { x: number; z: number }): void;
+  /** gameplay.doAltContextAction(): the context's alt verb (shown when context().alt is set). */
+  doAltContext?(): void;
   /** gameplay.lockables(): world points the UI projects and hit-tests for tap-to-lock. */
   lockables?(): { id: string; x: number; y: number; z: number; threat?: number }[];
   locked?(): string | null;
