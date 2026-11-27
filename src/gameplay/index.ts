@@ -1582,6 +1582,7 @@ export class Gameplay {
     if (e.response === 'angry' && this.rng.chance(Gameplay.BUMP.shoveBack)) {
       this.stumbleUntil = Math.max(this.stumbleUntil, this.time + Gameplay.BUMP.shoveStumble);
       this.emit('notice', { kind: 'shovedBack', by: id });
+      if (!Number.isNaN(Number(id))) this.simLike?.pedAct?.(Number(id), 'shove', 0.9);
       const n = (this.shoves.get(id) ?? []).filter((t) => this.time - t < 60); n.push(this.time); this.shoves.set(id, n);
       if (n.length >= 2 && !Number.isNaN(Number(id))) this.startBrawl(Number(id), 'shoved');
     }

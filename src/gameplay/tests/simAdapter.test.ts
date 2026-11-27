@@ -215,8 +215,9 @@ test('sidewalk bumps: an angry pedestrian sometimes shoves back; knockdowns are 
 });
 
 class HandoffSim extends ServiceSim {
-  released = new Set<number>(); moves: any[] = []; reclaimed: number[] = []; vcmds: any[] = []; vnotes: any[] = [];
+  released = new Set<number>(); acts: any[] = []; moves: any[] = []; reclaimed: number[] = []; vcmds: any[] = []; vnotes: any[] = [];
   releasePed(id: number) { this.released.add(id); return true; }
+  pedAct(id: number, act: string) { this.acts.push({ id, act }); return true; }
   moveReleasedPed(id: number, x: number, z: number) { this.moves.push({ id, x, z }); }
   reclaimPed(id: number) { this.released.delete(id); this.reclaimed.push(id); }
   vendorCommand(id: string, c: any) { this.vcmds.push({ id, ...c }); }
@@ -237,6 +238,7 @@ test('brawler hand-off: shoved twice, a pedestrian squares up; gameplay drives t
   let n = 0;
   while (!g.brawls.size && n < 200) { sim.fire('pedBumped', { id: 51, kind: 'stumble', response: 'angry', x: 1.2, z: 0, dirX: 1, dirZ: 0, by: 'player' }); g.update(1); n++; }
   assert.ok(g.brawls.has('brawl:51') && sim.released.has(51), 'released to gameplay as a brawler');
+  assert.ok(sim.acts.some((a) => a.id === 51 && a.act === 'shove'), 'the first shove is animated by the sim');
   g.update(0.1); g.update(0.1);
   assert.ok(sim.moves.some((m) => m.id === 51), 'gameplay moves the released ped each frame');
   pos[0] = 60; for (let i = 0; i < 20; i++) g.update(0.2);
