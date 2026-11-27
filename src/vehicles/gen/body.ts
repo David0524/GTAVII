@@ -190,7 +190,10 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   const topRows = secs.map((c) => c.top);
   const nTop = topRows[0].length;
   const isHood = (i: number, j: number) => lod === 0 && !!m.hood && sCell(i) > m.hood[0] && sCell(i) < m.hood[1] && j >= 1 && j < nTop - 2;
-  b.grid(topRows, (i, j) => (isHood(i, j) ? null : m.twoTone?.(sCell(i), 9) ? 'paint2' : 'paint'), { inside });
+  // passenger cars with a modelled cabin: no painted deck across the cabin at the belt (it hid the
+  // seats and dash from outside the glass); the cabin shell and floor close it instead
+  const openCabin = (i: number, j: number) => lod === 0 && PASSENGER.has(m.cls) && sCell(i) > m.gh.sA0 + 0.01 && sCell(i) < m.gh.sC0 - 0.01 && j >= 1 && j < nTop - 2;
+  b.grid(topRows, (i, j) => (isHood(i, j) || openCabin(i, j) ? null : m.twoTone?.(sCell(i), 9) ? 'paint2' : 'paint'), { inside });
   if (m.hood) hoodB.grid(topRows, (i, j) => (isHood(i, j) ? (m.twoTone?.(sCell(i), 9) ? 'paint2' : 'paint') : null), { inside });
   // Underside
   b.grid(secs.map((c) => c.under), 'under', { facing: [0, -1, 0] });
@@ -585,66 +588,82 @@ function cabin(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s:
   const g = m.gh, belt = m.beltY;
   const hw = halfW((g.sA0 + g.sC0) / 2) - g.beltInset - 0.06;
   const d = m.seats.driver;
+  // layout from the driver's H-point (z = d[2]): wheel 0.42 m ahead, dash face 0.6 m ahead,
+  // seat back just behind the hip; the rear bench one row (0.95 m) back, under the roof
   const front = Z(g.sA0), rearLimit = Z(g.sC0) - 0.2;
-  // dash and its padded top
-  b.box('interior', 0, belt - 0.03, front + 0.25, hw * 2, 0.2, 0.4);
-  b.box('trim', 0, belt + 0.075, front + 0.3, hw * 2, 0.03, 0.32);
+  const hip = d[2], dashFace = hip - 0.6;
+  const dashD = Math.max(0.2, dashFace - (front + 0.02));
+  // dash: lower body, padded top with a rolled lip over the instruments, a glovebox line
+  b.box('interior', 0, belt - 0.07, dashFace - dashD / 2, hw * 2, 0.26, dashD);
+  b.box('trim', 0, belt + 0.075, dashFace - dashD / 2 + 0.04, hw * 2, 0.04, dashD + 0.02);
+  b.box('trim', 0, belt + 0.05, dashFace + 0.015, hw * 2, 0.05, 0.05); // padded lip
+  if (hero) b.box('grille', -d[0] * 0.95, belt - 0.12, dashFace + 0.002, 0.36, 0.004, 0.004); // glovebox shut line
   // steering wheel on its column, tilted toward the driver
-  const wz = front + 0.62, wy = belt + 0.1;
+  const wz = hip - 0.42, wy = belt + 0.08;
   const wheelM = new THREE.Matrix4().makeTranslation(d[0], wy, wz).multiply(new THREE.Matrix4().makeRotationX(-0.45));
   b.add('trim', new THREE.TorusGeometry(0.19, hero ? 0.017 : 0.016, hero ? 8 : 4, hero ? 32 : 12), wheelM.clone());
+  const colLen = Math.hypot(wz - dashFace, 0.12) + 0.05;
+  b.add('trim', new THREE.CylinderGeometry(0.025, 0.03, colLen, 6), new THREE.Matrix4().makeTranslation(d[0], wy - 0.06, (wz + dashFace) / 2).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2 - 0.45)));
   if (hero) {
     // three-spoke wheel with a horn pad, and the instrument cluster: two big dials, two small, chrome bezels
     for (const a of [Math.PI / 2, Math.PI / 2 + 2.3, Math.PI / 2 - 2.3]) b.add('trim', new THREE.BoxGeometry(0.17, 0.022, 0.012).translate(0.085, 0, 0).applyMatrix4(new THREE.Matrix4().makeRotationZ(a)), wheelM.clone());
     b.add('chrome', new THREE.CylinderGeometry(0.045, 0.05, 0.03, 16).rotateX(Math.PI / 2), wheelM.clone());
-    const panelZ = front + 0.47, panelY = belt - 0.03; // on the dash's rear face, under the padded top
-    for (const [dx, r] of [[-0.11, 0.065], [0.06, 0.065], [0.19, 0.038], [-0.23, 0.038]] as [number, number][]) {
+    const panelZ = dashFace + 0.004, panelY = belt - 0.02;
+    for (const [dx, r] of [[-0.1, 0.06], [0.06, 0.06], [0.19, 0.036], [-0.23, 0.036]] as [number, number][]) {
       const x = d[0] + dx;
-      const face = new THREE.Matrix4().makeTranslation(x, panelY, panelZ).multiply(new THREE.Matrix4().makeRotationX(-0.25));
+      const face = new THREE.Matrix4().makeTranslation(x, panelY, panelZ).multiply(new THREE.Matrix4().makeRotationX(-0.12));
       b.add('chrome', new THREE.TorusGeometry(r, 0.006, 6, 24), face.clone());
-      b.add('white', new THREE.CircleGeometry(r * 0.96, 24).translate(0, 0, 0.004), face.clone()); // faces the driver (+z)
-      // tick marks and a needle
+      b.add('white', new THREE.CircleGeometry(r * 0.96, 24).translate(0, 0, -0.002), face.clone()); // faces the driver (+z)
       for (let k = 0; k <= 8; k++) {
         const t = -2.3 + (k / 8) * 4.6;
-        b.add('trim', new THREE.BoxGeometry(0.003, r * 0.18, 0.002).translate(0, r * 0.78, 0.006).applyMatrix4(new THREE.Matrix4().makeRotationZ(t)), face.clone());
+        b.add('trim', new THREE.BoxGeometry(0.003, r * 0.18, 0.002).translate(0, r * 0.78, 0.001).applyMatrix4(new THREE.Matrix4().makeRotationZ(t)), face.clone());
       }
-      b.add('reverse', new THREE.BoxGeometry(0.004, r * 0.8, 0.002).translate(0, r * 0.38, 0.008).applyMatrix4(new THREE.Matrix4().makeRotationZ(-1.1 + dx * 3)), face.clone());
-      // hood over the cluster
-      b.add('interior', new THREE.CylinderGeometry(r + 0.02, r + 0.02, 0.07, 16, 1, true, -Math.PI / 2, Math.PI).rotateX(Math.PI / 2), face.clone().multiply(new THREE.Matrix4().makeTranslation(0, 0, 0.025)));
+      b.add('reverse', new THREE.BoxGeometry(0.004, r * 0.8, 0.002).translate(0, r * 0.38, 0.003).applyMatrix4(new THREE.Matrix4().makeRotationZ(-1.1 + dx * 3)), face.clone());
     }
-    // cabin shell: inner door cards with armrests, floor with a transmission hump, firewall
-    const sill = m.sillY + 0.06, len = rearLimit - front;
-    for (const sx of [-1, 1]) {
-      b.box('interior', sx * (hw + 0.035), (sill + belt) / 2, (front + rearLimit) / 2, 0.03, belt - sill, len);
-      b.box('seat', sx * (hw + 0.005), belt - 0.16, front + 0.95, 0.06, 0.05, 0.45); // armrest
-      b.box('chrome', sx * (hw + 0.018), belt - 0.07, front + 0.75, 0.01, 0.02, 0.09); // door pull
-    }
-    b.box('interior', 0, sill, (front + rearLimit) / 2, hw * 2 + 0.1, 0.03, len);
-    b.box('interior', 0, sill + 0.09, (front + rearLimit) / 2, 0.24, 0.16, len * 0.9);
-    b.box('interior', 0, (sill + belt) / 2, front + 0.04, hw * 2 + 0.1, belt - sill, 0.03);
-    // radio and heater slider panel in the centre stack (knobs, chrome face)
-    b.box('chrome', 0.05, belt - 0.06, front + 0.44, 0.18, 0.05, 0.01, 0, -0.25);
-    for (const dx of [-0.02, 0.12]) b.add('trim', new THREE.CylinderGeometry(0.012, 0.012, 0.02, 10).rotateX(Math.PI / 2), new THREE.Matrix4().makeTranslation(dx, belt - 0.06, front + 0.455));
+    // centre stack: radio with a chrome face and two knobs, heater slider panel below
+    b.box('chrome', 0.05, belt - 0.06, dashFace + 0.006, 0.18, 0.05, 0.01);
+    for (const dx of [-0.02, 0.12]) b.add('trim', new THREE.CylinderGeometry(0.012, 0.012, 0.02, 10).rotateX(Math.PI / 2), new THREE.Matrix4().makeTranslation(dx, belt - 0.06, dashFace + 0.02));
+    b.box('trim', 0.05, belt - 0.13, dashFace + 0.006, 0.2, 0.035, 0.01);
+    // pedals and the column-shift lever
+    for (const dx of [-0.08, 0.06]) b.box('rubber', d[0] + dx, m.sillY + 0.18, dashFace + 0.12, 0.08, 0.1, 0.02, 0, 0.5);
+    b.add('chrome', new THREE.CylinderGeometry(0.006, 0.006, 0.22, 6).rotateZ(Math.PI / 2 - 0.3), new THREE.Matrix4().makeTranslation(d[0] + 0.14, wy - 0.07, wz + 0.1));
   }
-  b.add('trim', new THREE.CylinderGeometry(0.025, 0.03, 0.45, 6), new THREE.Matrix4().makeTranslation(d[0], wy - 0.08, wz - 0.2).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2 - 0.45)));
-  // bench seats with headrests (mandatory on new cars from 1969)
-  const bench = (z: number, headrests: boolean) => {
-    b.box('seat', 0, belt - 0.22, z - 0.25, hw * 2, 0.16, 0.5); // cushion (mostly below the belt)
-    b.add('seat', new THREE.BoxGeometry(hw * 2, 0.56, 0.14), new THREE.Matrix4().makeTranslation(0, belt + 0.05, z).multiply(new THREE.Matrix4().makeRotationX(-0.17)));
-    if (headrests) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt + 0.4, z + 0.06, 0.26, 0.2, 0.1, 0, -0.17);
+  // bench seats with headrests (mandatory on new cars from 1969); the back leans 12°
+  const bench = (back: number, headrests: boolean) => {
+    b.box('seat', 0, belt - 0.24, back - 0.27, hw * 2, 0.15, 0.52); // cushion (mostly below the belt)
+    if (hero) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt - 0.16, back - 0.27, 0.5, 0.02, 0.46); // pleated top panels
+    b.add('seat', new THREE.BoxGeometry(hw * 2, 0.58, 0.13), new THREE.Matrix4().makeTranslation(0, belt + 0.04, back).multiply(new THREE.Matrix4().makeRotationX(-0.21)));
+    if (headrests) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt + 0.4, back + 0.07, 0.26, 0.2, 0.1, 0, -0.21);
   };
-  const frontZ = d[2] + 0.32;
-  bench(frontZ, true);
-  const rearZ = Math.min(d[2] + 1.3, rearLimit);
-  if (rearZ - frontZ > 0.6) bench(rearZ, false);
+  const frontBack = hip + 0.22;
+  bench(frontBack, true);
+  const rearBack = Math.min(hip + 0.95 + 0.22, rearLimit);
+  if (rearBack - frontBack > 0.6) bench(rearBack, false);
   // parcel shelf behind the rear seat and the headliner
-  if (m.cls !== 'wagon' && rearLimit - rearZ > 0.1) b.box('interior', 0, belt + 0.03, (rearZ + rearLimit) / 2 + 0.08, hw * 2, 0.03, rearLimit - rearZ + 0.1);
+  if (m.cls !== 'wagon' && rearLimit - rearBack > 0.05) b.box('interior', 0, belt + 0.03, (rearBack + rearLimit) / 2 + 0.08, hw * 2, 0.03, rearLimit - rearBack + 0.1);
   const rows: V3[][] = [];
   for (const u of [0, 0.5, 1]) {
     const s = lerp(g.sA1 + 0.05, g.sC1 - 0.05, u);
     rows.push([-1, -0.5, 0, 0.5, 1].map((xf) => [xf * (g.roofHalfW - 0.04), g.roofY - 0.025 + g.crown * (1 - xf * xf) * 0.8, Z(s)] as V3));
   }
   b.grid(rows, 'white', { facing: [0, -1, 0] });
+  if (hero) {
+    // cabin shell: inner door cards with armrests and pulls, floor with the transmission hump, firewall
+    const sill = m.sillY + 0.06, len = rearLimit - front;
+    for (const sx of [-1, 1]) {
+      b.box('interior', sx * (hw + 0.035), (sill + belt) / 2, (front + rearLimit) / 2, 0.03, belt - sill, len);
+      for (const zz of [hip - 0.1, hip + 0.85]) {
+        b.box('seat', sx * (hw + 0.005), belt - 0.16, zz, 0.06, 0.05, 0.4); // armrest
+        b.box('chrome', sx * (hw + 0.018), belt - 0.07, zz - 0.25, 0.01, 0.02, 0.09); // door pull
+      }
+      b.box('chrome', sx * (hw + 0.02), belt - 0.03, hip - 0.25, 0.012, 0.008, 0.14); // window crank
+    }
+    b.box('interior', 0, sill, (front + rearLimit) / 2, hw * 2 + 0.1, 0.03, len);
+    b.box('interior', 0, sill + 0.09, (front + rearLimit) / 2, 0.24, 0.16, len * 0.9);
+    b.box('interior', 0, (sill + belt) / 2, front + 0.04, hw * 2 + 0.1, belt - sill, 0.03);
+    // rear-view mirror on the windshield header
+    b.box('chrome', 0, g.roofY - 0.09, Z(g.sA1) + 0.12, 0.24, 0.06, 0.02);
+  }
 }
 
 // ======================================================================= greenhouse

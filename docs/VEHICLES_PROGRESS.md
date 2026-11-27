@@ -127,6 +127,25 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - Positions come from `sim.vendorViews`; a hit sends gameplay `cartHit`.
   - The engine side is docs/requests/sim.md item 13.
 
+- **Interior rework:**
+  - **Layout.** The cabin is now laid out from the driver's H-point. Seats moved back to about
+    0.95 m behind the windshield base (they were 0.4–0.6 m), so `seatPose` changed for the
+    Bancroft family, the Tiverton, the Ferris and the Fareway. The steering wheel sits 0.42 m
+    ahead of the hip, the dash face 0.6 m ahead, the seat back just behind, and the rear bench
+    one row (0.95 m) back.
+  - **The painted belt deck over the cabin is gone.** It hid the seats and dash from outside the
+    glass.
+  - **Hero cabin:** dash with a padded lip and a glovebox line; gauges on the dash face; a radio
+    and heater panel; pedals and a column shift; pleated bench tops; door cards with armrests,
+    pulls and window cranks; floor and transmission hump; firewall; rear-view mirror.
+  - Shot: `hero_interior.jpg` (over the shoulder, and through the side glass).
+- **Vendor-cart notes from Sim** (63099eb):
+  - `cart_coffee` is a pushcart (0.8 × 1.4, urn and roll tray). A van would be a separate
+    `van_coffee` id, parked in the kerb lane.
+  - Righting: Sim emits `cartRighted {id}` 6–10 s after `cartOverturned`; that's the cue for
+    `props.right(id)`. The cart then goes to `leaving` (kinematic).
+  - Sim uses the footprints above for pedestrian avoidance (kiosk 1.15 m, monte box 0.3 m).
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

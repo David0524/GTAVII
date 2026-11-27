@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T04:05:56.357Z",
+  "date": "2026-11-27T04:12:36.072Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -243,10 +243,85 @@
     }
   },
   "triangles": {
+    "bancroft": {
+      "lod0": 9364,
+      "lod1": 1846,
+      "lod2": 72
+    },
+    "bancroft_patrol": {
+      "lod0": 8864,
+      "lod1": 1886,
+      "lod2": 72
+    },
+    "bancroft_cab": {
+      "lod0": 8628,
+      "lod1": 1790,
+      "lod2": 72
+    },
+    "tiverton": {
+      "lod0": 8616,
+      "lod1": 1712,
+      "lod2": 72
+    },
+    "ferris": {
+      "lod0": 8042,
+      "lod1": 1526,
+      "lod2": 72
+    },
+    "homestead": {
+      "lod0": 8956,
+      "lod1": 1694,
+      "lod2": 72
+    },
+    "fareway": {
+      "lod0": 8050,
+      "lod1": 1688,
+      "lod2": 72
+    },
     "ct40": {
       "lod0": 9652,
       "lod1": 3084,
       "lod2": 72
+    },
+    "b60": {
+      "lod0": 7360,
+      "lod1": 1922,
+      "lod2": 84
+    },
+    "walkin": {
+      "lod0": 6502,
+      "lod1": 1596,
+      "lod2": 72
+    },
+    "b80": {
+      "lod0": 7366,
+      "lod1": 1916,
+      "lod2": 84
+    },
+    "medic": {
+      "lod0": 7528,
+      "lod1": 2192,
+      "lod2": 84
+    },
+    "pumper": {
+      "lod0": 7882,
+      "lod1": 2076,
+      "lod2": 84
+    },
+    "ladder": {
+      "lod0": 8016,
+      "lod1": 2144,
+      "lod2": 84
+    },
+    "courier": {
+      "lod0": 6272,
+      "lod1": 1470,
+      "lod2": 72
+    },
+    "scoop": {
+      "lod0": 6444,
+      "lod1": 1662,
+      "lod2": 84
     }
   },
   "systems": {
@@ -382,46 +457,46 @@
     "bodyVertices": 5535
   },
   "hero": {
-    "bancroft_heroSteadyDrawMs": 2,
+    "bancroft_heroSteadyDrawMs": 1.7,
     "bancroft": {
-      "frameTrisStandard": 22821,
-      "frameTrisHero": 53459,
-      "swapAndDrawMs": 878.3,
-      "standardDrawMs": 2.1,
+      "frameTrisStandard": 22557,
+      "frameTrisHero": 52479,
+      "swapAndDrawMs": 835.6,
+      "standardDrawMs": 1.9,
       "hero": true
     },
-    "tiverton_heroSteadyDrawMs": 2.8,
+    "tiverton_heroSteadyDrawMs": 4.2,
     "tiverton": {
-      "frameTrisStandard": 22133,
-      "frameTrisHero": 51347,
-      "swapAndDrawMs": 1352.3,
-      "standardDrawMs": 2.2,
+      "frameTrisStandard": 21881,
+      "frameTrisHero": 50415,
+      "swapAndDrawMs": 1116.3,
+      "standardDrawMs": 1.6,
       "hero": true
     },
-    "ct40_heroSteadyDrawMs": 1.6,
+    "ct40_heroSteadyDrawMs": 5.6,
     "ct40": {
       "frameTrisStandard": 22453,
       "frameTrisHero": 50939,
-      "swapAndDrawMs": 364.4,
-      "standardDrawMs": 6.2,
+      "swapAndDrawMs": 313.5,
+      "standardDrawMs": 1.5,
       "hero": true
     },
-    "courier_heroSteadyDrawMs": 3.6,
+    "courier_heroSteadyDrawMs": 1.6,
     "courier": {
       "frameTrisStandard": 20011,
       "frameTrisHero": 43673,
-      "swapAndDrawMs": 501.7,
-      "standardDrawMs": 2.2,
+      "swapAndDrawMs": 478.7,
+      "standardDrawMs": 1.9,
       "hero": true
     },
     "workerGenMs": [
-      155,
-      86,
-      70,
-      65,
-      56,
-      98,
-      95
+      128,
+      94,
+      67,
+      75,
+      47,
+      83,
+      74
     ]
   },
   "movementAnchors": {

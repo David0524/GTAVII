@@ -314,11 +314,15 @@ async function main() {
       await setCar('tiverton', 2); await hero(true);
       await camLocal([0.75, 0.12, -0.75], [0, 0, 0], 32, 'w'); dt.push(await snap(page));
       const drv = await page.evaluate(() => { const s = window.__VEH.player.asset.spec; return { d: s.seats.driver, belt: s.beltY, front: s.gh.sA0 - (s.sF + s.wheelbase / 2) }; });
-      void drv;
       await camLocal([-0.9, 1.75, 4.6], [0, 0.85, 2.4], 32); dt.push(await snap(page));
       await camLocal([0.9, 1.5, -3.6], [0, 0.85, -2.3], 30); dt.push(await snap(page));
       await camLocal([2.1, 1.0, -1.0], [0.9, 0.75, -1.2], 34); dt.push(await snap(page));
       await sheet(page, dt, 2, 800, 450, 'hero_details.jpg', ['48-segment wheel: tyre tread + sidewall geometry, fluted cover', 'deck lid: shut lines + crest (invented)', 'hood crest (invented), hood shut lines', 'fender emblem, door handle with lock barrel, shut line']);
+      // 2b. interior: over the driver's shoulder, and through the side glass from outside
+      const it: Buffer[] = [];
+      await camLocal([drv.d[0] + 0.12, drv.belt + 0.42, drv.d[2] + 0.12], [drv.d[0] + 0.08, drv.belt - 0.04, drv.d[2] - 0.6], 60, 'o'); it.push(await snap(page));
+      await camLocal([-2.4, 1.45, drv.d[2] + 0.4], [0, 0.85, drv.d[2]], 40, 'o'); it.push(await snap(page));
+      await sheet(page, it, 2, 800, 450, 'hero_interior.jpg', ['over the shoulder: gauges, 3-spoke wheel, radio, column shift', 'through the side glass: bench seats, door cards, dash']);
       // 3. glass: bullet into the windscreen (laminated web) and a side window (tempered dice)
       const gl: Buffer[] = [];
       const geo = await page.evaluate(() => { const s = window.__VEH.player.asset.spec, m = s.sF + s.wheelbase / 2; return { zF: (s.gh.sA0 + s.gh.sA1) / 2 - m, yF: (s.beltY + s.gh.roofY) / 2, zS: (s.gh.sA1 + s.gh.sC1) / 2 - m, hw: window.__VEH.player.asset.lod0.halfW }; });
