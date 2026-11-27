@@ -642,3 +642,6 @@ body .cr-a .cr-roll a.is-focus { background: none; box-shadow: inset 0 -2px 0 va
   .u-weapons .ws-opt b, .u-weapons .ws-opt em { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .u-weapons .ws-t .lb, .u-weapons .ws-b .lb { left: 0 !important; transform: translateX(-50%); }
 }
+/* real car renders (vehicles' renderThumbnail) replace the drawn profile in place, same footprint */
+.car-art { display: block; }
+.car-art .car-render { display: block; width: 100%; height: auto; aspect-ratio: 640 / 280; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); }

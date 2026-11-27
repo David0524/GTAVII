@@ -198,7 +198,7 @@ export class MockHost implements UiHost {
   newspaper(): NewsIssue {
     return {
       id: 'news.1974-06-22', date: 'Saturday, June 22, 1974', masthead: 'The Evening Courier', price: '20¢', edition: 'Late City Final',
-      headline: 'HEAT WAVE GRIPS CITY', deck: 'Power company asks for cutbacks as mercury hits 94; brownouts feared in Midtown',
+      headline: 'HEAT WAVE GRIPS CITY', deck: 'Hudson Union asks for cutbacks as mercury hits 94; brownouts feared in Midtown',
       stories: [
         { head: 'Hotel tenants fight eviction', body: 'Residents of a West 31st Street hotel say a new owner wants them out by fall. "Where do we go?" asked one, 81.' },
         { head: 'Garment trucks hijacked', body: 'Police report the third truck taken on Ninth Avenue this month. No arrests.' },

@@ -87,11 +87,15 @@ export interface CarView {
   booted: boolean;
   towed?: { pound: string; fee: number };
   trunk?: string[];
+  /** The generated model behind this car (vehicles: save.modelId / save.paint / save.variant), for carThumb. */
+  model?: CarModelRef;
 }
+/** A vehicles-generator model reference: paint is sRGB hex, null = the model's palette colour for `variant`. */
+export interface CarModelRef { id: string; paint?: number | null; variant?: number }
 /** A used-car lot or a showroom. */
 export interface LotView {
   id: string; name: string; kind: 'lot' | 'showroom'; salesman: string; patter: string;
-  cars: { id: string; name: string; year: number; colour: string; cls: string; trim: string; condition: number; mileage: number; asking: number; notes?: string }[];
+  cars: { id: string; name: string; year: number; colour: string; cls: string; trim: string; condition: number; mileage: number; asking: number; notes?: string; model?: CarModelRef }[];
 }
 export interface ClassifiedAd { id: string; text: string; price: number; phone: string; kind: 'car' | 'room' | 'job' | 'misc'; placeId?: string }
 export interface HomeView { id: string; lead: LeadId; name: string; address: string; upgrades: { id: string; name: string; cost: number; owned: boolean; effect: string }[] }
@@ -152,6 +156,11 @@ export type UiAction =
 export type ActionResult = { ok: true; text?: string; counter?: number; accepted?: boolean } | { ok: false; text: string };
 
 export interface UiHost {
+  /**
+   * Optional: a real render of a car (vehicles' renderThumbnailBlob(renderer, id, paint, angle, { variant }), image/webp,
+   * transparent, ~640×280). Screens show the drawn profile until it resolves, and keep it if this is absent or fails.
+   */
+  carThumb?(model: CarModelRef, angle: 'side' | 'three-quarter'): Promise<Blob>;
   readonly input: Input;
   readonly saves: SaveManager | null;
   readonly streets: StreetRec[];
