@@ -1,4 +1,9 @@
 # Game-loop wiring after the integration sprint (engine), started 2026-11-27
+
+**Status 2026-11-27: steps 1–7 WIRED and pushed.** The board, critique and "vs GTA" notes are in
+docs/WIRING_BOARD.md. Load test passes. The deploy build serves content/ and renders speech.
+Remaining items are listed under "Not wired yet" in the board. Park Ave South median: data pass
+(board item 3).
 All 7 streams are merged (sim 0fcb5ce). Wire them into main.ts in this order. Each step is its own commit
 with typecheck, npm test, and a headless smoke shot.
 1. **Camera report** (oversight and UI): UiHost `player()` gets
