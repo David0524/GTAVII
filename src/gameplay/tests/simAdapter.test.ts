@@ -213,3 +213,54 @@ test('sidewalk bumps: an angry pedestrian sometimes shoves back; knockdowns are 
   g.update(0.5);
   assert.ok(kinds.some((k) => k.includes('reckless')) && kinds.some((k) => k.includes('assault')), `reckless, then assault: ${kinds.length} witnessed (${crimesBefore})`);
 });
+
+class HandoffSim extends ServiceSim {
+  released = new Set<number>(); acts: any[] = []; moves: any[] = []; reclaimed: number[] = []; vcmds: any[] = []; vnotes: any[] = [];
+  releasePed(id: number) { this.released.add(id); return true; }
+  pedAct(id: number, act: string) { this.acts.push({ id, act }); return true; }
+  moveReleasedPed(id: number, x: number, z: number) { this.moves.push({ id, x, z }); }
+  reclaimPed(id: number) { this.released.delete(id); this.reclaimed.push(id); }
+  vendorCommand(id: string, c: any) { this.vcmds.push({ id, ...c }); }
+  vendorNotice(n: any) { this.vnotes.push(n); }
+}
+function handoffRig() {
+  const sim = new HandoffSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  return { sim, g, pos };
+}
+
+test('brawler hand-off: shoved twice, a pedestrian squares up; gameplay drives them, then hands them back when it ends', () => {
+  const { sim, g, pos } = handoffRig();
+  sim.peds.push({ id: 51, archetype: 'npc.dockworker', x: 1.2, y: 0, z: 0, yaw: 0, speed: 0, state: 'angry', variant: 1, nerve: 0.9 });
+  let n = 0;
+  while (!g.brawls.size && n < 200) { sim.fire('pedBumped', { id: 51, kind: 'stumble', response: 'angry', x: 1.2, z: 0, dirX: 1, dirZ: 0, by: 'player' }); g.update(1); n++; }
+  assert.ok(g.brawls.has('brawl:51') && sim.released.has(51), 'released to gameplay as a brawler');
+  assert.ok(sim.acts.some((a) => a.id === 51 && a.act === 'shove'), 'the first shove is animated by the sim');
+  g.update(0.1); g.update(0.1);
+  assert.ok(sim.moves.some((m) => m.id === 51), 'gameplay moves the released ped each frame');
+  pos[0] = 60; for (let i = 0; i < 20; i++) g.update(0.2);
+  assert.ok(!g.brawls.size && sim.reclaimed.includes(51), 'walk off and the sim gets them back');
+});
+
+test('vendors through the sim: sales and overturned carts are animated there; an unarmed robbery sometimes gets the hot-dog man swinging', () => {
+  let swung = 0, fled = 0;
+  for (let seed = 0; seed < 12; seed++) {
+    const { sim, g } = handoffRig();
+    (g as any).rng.state = 1000 + seed;
+    g.loadVendorContent({ menus: { hot_dog: [{ item: 'Frank', price: '35¢' }] } });
+    sim.peds.push({ id: 70, archetype: 'npc.vendor', x: 1, y: 0, z: 0, yaw: 0, speed: 0, state: 'work', variant: 1, nerve: 0.8 });
+    sim.fire('vendorSpawned', { id: 'vendor:7th_31', kind: 'hot_dog', pedId: 70, crew: [], x: 1, z: 0, cart: null, licensed: true, goods: [], variant: 0, arriving: false });
+    if (seed === 0) {
+      assert.ok(g.buyFromVendor('vendor:7th_31', 'hot_dog.frank'));
+      assert.deepEqual(sim.vnotes[0], { kind: 'vendorSale', vendor: 'vendor:7th_31', good: 'hot_dog.frank' });
+      g.cartHit('vendor:7th_31', { by: 'car', speed: 8 });
+      assert.equal(sim.vnotes.at(-1).kind, 'cartOverturned');
+    }
+    g.robVendor('vendor:7th_31');
+    if (g.brawls.has('brawl:70')) swung++; else if (sim.vcmds.some((c) => c.type === 'flee')) fled++;
+  }
+  assert.ok(swung >= 2 && fled >= 2, `the hot-dog man fights back about half the time (${swung} swung, ${fled} fled)`);
+});

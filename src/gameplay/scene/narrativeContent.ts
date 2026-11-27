@@ -15,9 +15,10 @@ export async function loadNarrativeContent(): Promise<{ content: GameplayContent
   const src = useReal ? real : snapshot;
   const files: NarrativeFiles = {};
   // in parallel: one await per file costs a frame each on a slow device (84 s headless at 1.5 s/frame)
-  await Promise.all(Object.entries(src).map(async ([path, load]) => {
-    const name = path.split('/').pop()!.replace('.json', '') as (typeof NAMES)[number];
-    if ((NAMES as readonly string[]).includes(name)) (files as Record<string, unknown>)[name] = await load();
+  const nameOf = (path: string) => path.split('/').pop()!.replace('.json', '');
+  // only the files the adapter reads (the snapshot folder also holds missions and side content for the tests)
+  await Promise.all(Object.entries(src).filter(([path]) => (NAMES as readonly string[]).includes(nameOf(path))).map(async ([path, load]) => {
+    (files as Record<string, unknown>)[nameOf(path)] = await load();
   }));
   const warnings: string[] = [];
   const content: GameplayContent & { vendors?: unknown } = adaptNarrative(files, (m) => warnings.push(m));

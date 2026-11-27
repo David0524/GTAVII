@@ -167,7 +167,7 @@ const SCENARIOS: Record<string, { url: string; viewport?: { width: number; heigh
       await wait(5);
       await ev(`(() => { const G = __GP; G.g.setAiming(true); G.g.lockOn(); G.g.setLimb('legs'); })()`);
       await wait(1);
-      await shot('17_touch_lockon', 'Phone landscape (844×390): touch layout. AIM locks the best target, ◀ ▶ cycle, HEAD/BODY/LEGS pick a limb, hold FIRE for assisted fire. No precise free aim needed.');
+      await shot('17_touch_lockon', 'Phone landscape (844×390): the shipping TouchLayout driven by gameplayTouch(g). Lock marks over targets (tap to lock, swipe to cycle), Fire, Cover/Reload, context button; the small strip is test-only extras (aim hold, guard, grab, blind fire, limbs).');
     },
   },
 };

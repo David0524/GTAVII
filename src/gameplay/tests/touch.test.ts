@@ -173,3 +173,32 @@ test('touch: UiHost.touch helpers: mode, armed, draw/swap, cover-or-roll, short 
   r.g.ai.agents.get('d')!.alive = false;
   const c = r.g.contextAction()!; assert.equal(c.kind, 'pickUp'); assert.ok(c.label.length <= 14, c.label);
 });
+
+// the UI's real adapter (src/ui/touch/adapters.ts): Gameplay must satisfy GameplayTouchLike as is
+import { gameplayTouch } from '../../ui/touch/adapters';
+test('UI TouchHost adapter: Gameplay plugs straight into gameplayTouch ({x, z} directions, lockTarget(null))', () => {
+  const r = touchRig();
+  const t = gameplayTouch(r.g, () => ({ x: 10, y: 20 }));
+  r.g.addCar('car', 0, 0, -2.5, Math.PI / 2); r.pos[2] = -0.6; r.step(0.1);
+  assert.equal(t.context()?.kind, 'cover');
+  t.doContext({ x: 0, z: -1 }); assert.ok(r.g.pc.cover, 'the object-form direction works');
+  t.coverOrRoll!({ x: 0, z: 1 }); assert.ok(!r.g.pc.cover);
+  t.lockTarget!(null); assert.equal(t.locked!(), null);
+  t.configure!({ fireMode: 'tap', aimAssist: 'strong', gyro: 'aim', steerAssist: true, steerAssistStrength: 0.5, autoAccelerate: false });
+  assert.equal(r.g.pc.fireMode, 'tap'); assert.equal(r.g.pc.assist, 'off', 'gyro aim turns assist off');
+});
+
+test('touch combat: cover lives on its own button, so the context button does not offer it twice', () => {
+  const r = touchRig();
+  r.g.addCar('car', 0, 0, -2.5, Math.PI / 2); r.pos[2] = -0.6;
+  r.g.equip('weapon.service');
+  assert.equal(r.g.touchMode(), 'combat');
+  assert.notEqual(r.g.contextAction()?.kind, 'cover');
+  assert.equal(r.g.coverLabel(), 'Cover');
+  r.g.coverOrRoll([0, -1]); assert.ok(r.g.pc.cover);
+  assert.notEqual(r.g.contextAction()?.kind, 'leaveCover');
+  assert.equal(r.g.coverLabel(), 'Leave');
+  // a mouse player still gets it on the context key
+  r.g.setContext({ device: 'mouse' });
+  assert.equal(r.g.contextAction()?.kind, 'leaveCover');
+});

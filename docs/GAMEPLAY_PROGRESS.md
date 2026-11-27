@@ -229,7 +229,7 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Values:**
   - Reach 2.4 m in a 60° cone; on touch, auto-align gives 2.9 m and a 120° cone.
   - Costs 12 stamina, hit or miss.
-  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away; ±12% for strength; reduced by a limp, drink or exhaustion.
+  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away (its speed is measured frame to frame, smoothed over 0.3 s; `measuredSpeed(id)`); ±12% for strength; reduced by a limp, drink or exhaustion.
   - Non-lethal: 5 hp, never below 1. The quarry is down 4 s (pinned 3 s). A caught chase quarry stays down for the mission to resolve; anyone else gets up and runs.
   - A miss sprawls you for 0.9 s.
 - **Heat:** a lawful quarry (a purse snatcher, a bail skip) is a citizen's arrest, no crime. A bystander is assault; a cop is assault on an officer.
@@ -255,10 +255,8 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Where we fall short:**
   - Restrain, escort and breaking free are in. A bolting prisoner is a short mash rather than RDR2's full struggle-and-chase scene; the chase that follows is ours.
   - The dive and ragdoll are characters' and the engine's work and not built yet.
-  - The quarry's speed is estimated from AI state, not measured.
 - **Plan:**
   - Tune the bolt rate in a touch playtest. Characters build the struggle animation from the `breakFree` events.
-  - Measure quarry velocity from the sim when its motion is available.
   - Characters own the dive, the tumble and the stumble animations (events above).
 
 ### Sidewalk bumps (sim's `pedBumped`)
@@ -266,13 +264,18 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Angry pedestrian:** shoves back 35% of the time, a 0.5 s stumble for the player (`notice {kind: 'shovedBack'}`).
 - **Knockdown:** `reckless` (severity 0.6, a crime only if seen). The third knockdown inside 30 s is `assault`.
 - **Ownership:** the sim plays the reactions and the get-up.
+- **Brawlers** (sim's `releasePed` hand-off):
+  - An angry pedestrian who shoves back twice inside 60 s squares up. So does a robbed vendor with nerve when you're unarmed: hot dog 50%, newsstand 35%, pretzel and fruit 30%, coffee 25%; peddlers and the monte crew run.
+  - Gameplay takes the ped over as a 55 hp fist fighter and drives it each frame (`moveReleasedPed`).
+  - The brawl ends when someone's down, the brawler runs or gives up, the player walks off (25 m), or after 30 s. Then the ped goes back to the sim (`reclaimPed`), and a vendor returns to their cart.
+  - They started it, so fighting back isn't a crime.
 - **Test:** `simAdapter.test.ts`.
 
 #### vs GTA V / VI / RDR2
 - **References:** GTA V's shoulder-barge sends pedestrians stumbling and swearing, and repeated shoving starts fights. RDR2's jostling is weightier, NPCs remember you, and it can escalate to a brawl or a report.
 - **Where we match:** graded contact (brush, stumble, knockdown) with angry pushback, and heat only through witnesses, rising with repetition.
-- **Where we fall short:** an angry pedestrian never escalates to a fist fight (ambient peds have no combat AI), and nobody remembers you.
-- **Plan:** promote an angry pedestrian who was shoved twice into a brief melee brawler (the melee system already registers peds as fighters), and give bumps a short-term grudge per ped.
+- **Where we fall short:** escalation to a fist fight is in (shoved twice), but there's no longer memory: a ped forgets you after 60 s, and bystanders don't join in, as they can in GTA V.
+- **Plan:** a friend joining a brawl (a second release from the same group), and a per-block grudge that lasts the game day.
 
 ### Street vendors (STREET_VENDORS.md, user decision 2026-11-27; `economy/vendors.ts`, `vendors.test.ts`)
 Sim places and plays the vendors; gameplay owns the interaction. Adults only, invented brands, 1974 prices.
@@ -290,13 +293,19 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
 - **Carts knocked over:** at 3 m/s or more, by the player, a car or a chase. The cart spills (`notice cartOverturned` lists the goods) and is closed for 2 game hours. The player on foot commits vandalism; in a car, reckless.
 - **Three-card monte** ("Find the lady"): $2–$20 a hand, and rigged, because the dealer palms the queen on a real bet. Catch the tell, the bent corner of the queen visible for 0.21–0.49 s during the 4 s deal (wider with stealth skill, narrower drunk), and you follow it to an even-money win. After two wins the dealer folds the box.
 - **Context button:** "Buy" (the UI gets `notice vendorMenu`), "Shine 50¢" or "Find the lady".
+- **Regulars and the sidewalk wire** (narrative's side.vendor_tipsters):
+  - Three purchases at a cart make you a regular there; narrative's `flag.sidewalk_wire` makes you one everywhere. `vendorMenu().regular` offers the question.
+  - `vendorTip(id)` gives the street's view within 600 m, once per vendor per game hour: beat posts, search cars, roadblocks and subway stakeouts as map hints `{at, kind, text}`.
+  - If a report matches how you look, the vendor warns you instead: "They're asking about a man in a white shirt… Sounds a lot like you."
+  - Spoken through narrative's barks: a `bark {id, bark, context, vars, at}` event with `barks.vendor_tip_warning {description}`, `barks.vendor_tip_cops` (context = hint kind, `{where}` = the nearest hint's corner) or `barks.vendor_tip_quiet`. Hints are sorted nearest first; the rest stay map hints. `line` is a plain-text fallback.
+  - Tips, not money. Saved.
 - **Saved:** tills and overturned carts.
 
 #### vs GTA V / VI / RDR2
 - **References:** GTA V's vendors are mostly ambient (hot-dog stands you can't really use, a few snack machines), and its street scams are scenery. RDR2's camps, stalls and general stores have real menus with stat effects and eating animations, and robbing a store is a full scenario. GTA VI is expected to deepen ambient commerce.
 - **Where we match or exceed:** every cart is usable, with period menus and small, meaningful effects (heal, breath, cooling in the 1974 heatwave, sobering). A rigged hustle you can beat by skill is something neither reference has as a playable minigame. Robbing and knocking over carts go through the same witness heat as everything else.
 - **Where we fall short:** no eating or shine animations yet (characters). The vendor's reaction to a robbery is a flee or cower command, not a scenario with pleading or a fight back. Vendors as tipsters and protection beats are narrative's side content, not wired yet.
-- **Plan:** wire narrative's vendor tipsters into the context button (a "Talk" beat when a vendor has a tip). Add a vendor who fights back (an angry hot-dog man with a ladle) once peds can become brawlers (asked of sim).
+- **Plan:** the vendor tipsters are in (regulars and heat hints); next, protection-racket beats on vendors for Nick. The vendor who fights back is in (brawler hand-off); give him the ladle once characters have a prop for it.
 
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):

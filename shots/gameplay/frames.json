@@ -581,9 +581,9 @@
   },
   {
     "file": "17_touch_lockon.png",
-    "note": "Phone landscape (844×390): touch layout. AIM locks the best target, ◀ ▶ cycle, HEAD/BODY/LEGS pick a limb, hold FIRE for assisted fire. No precise free aim needed.",
+    "note": "Phone landscape (844×390): the shipping TouchLayout driven by gameplayTouch(g). Lock marks over targets (tap to lock, swipe to cycle), Fire, Cover/Reload, context button; the small strip is test-only extras (aim hold, guard, grab, blind fire, limbs).",
     "state": {
-      "hp": 76,
+      "hp": 100,
       "money": 4000,
       "reports": [],
       "units": [
@@ -591,21 +591,21 @@
         "radio_car:post"
       ],
       "ai": [
+        "gang:suppress",
         "gang:inCover",
-        "gang:peek",
         "gang:flank",
         "gang:inCover"
       ],
       "witnesses": [],
       "timings": {
-        "gameplayAvg": 0.7276923076822781,
-        "gameplayP95": 2.8000000002793968,
-        "frameAvg": 15.601538461518402,
-        "frameP95": 40.1999999997206,
+        "gameplayAvg": 0.9719999999987582,
+        "gameplayP95": 2.5999999998603016,
+        "frameAvg": 10.698666666671635,
+        "frameP95": 19.800000000046566,
         "combat": {
-          "combatMs": 0.19999999972060323,
+          "combatMs": 0.6000000000931323,
           "policeMs": 0,
-          "totalMs": 0.19999999972060323,
+          "totalMs": 0.6999999999534339,
           "ballisticsMs": 0
         }
       }

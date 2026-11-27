@@ -52,11 +52,11 @@ const CSS = `
 .gp-nav .gp-btn.on { background: #e3a92a; color: #0d0b09; }
 .gp-prompt { position: absolute; left: 50%; top: 62%; transform: translateX(-50%); font: 600 13px Archivo; letter-spacing: .05em; background: #0d0b09cc; padding: 5px 10px; display: none; }
 .gp-vig { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 0 #6a0a0a; transition: box-shadow .25s; }
-.gp-touch { position: absolute; right: calc(10px + env(safe-area-inset-right)); bottom: calc(88px + env(safe-area-inset-bottom)); /* above the engine's JUMP / RUN */ display: grid; grid-template-columns: repeat(4, 54px); gap: 6px; pointer-events: auto; z-index: 9; }
-.gp-touch button { width: 54px; height: 54px; border-radius: 50%; border: 2px solid #efe3c466; background: #0d0b0999; color: #efe3c4; font: 700 10px Archivo; letter-spacing: .05em; touch-action: none; }
+.gp-touch { position: absolute; left: calc(10px + env(safe-area-inset-left)); top: calc(56px + env(safe-area-inset-top)); /* test-only extras: top left, clear of the shipping TouchLayout (right thumb) and the status panel */ display: grid; grid-template-columns: repeat(2, 46px); gap: 6px; pointer-events: auto; z-index: 9; }
+.gp-touch button { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #efe3c466; background: #0d0b0999; color: #efe3c4; font: 700 10px Archivo; letter-spacing: .05em; touch-action: none; }
 .gp-touch button.big { border-color: #e3a92a; color: #e3a92a; }
 .gp-touch button.on { background: #e3a92a55; }
-.gp-limbs { position: absolute; right: calc(290px + env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); display: none; flex-direction: column; gap: 6px; pointer-events: auto; z-index: 9; }
+.gp-limbs { position: absolute; left: 50%; transform: translateX(-50%); top: calc(52px + env(safe-area-inset-top)); display: none; flex-direction: row; gap: 6px; pointer-events: auto; z-index: 9; }
 .gp-limbs button { width: 64px; height: 44px; border-radius: 8px; border: 2px solid #e3a92a88; background: #0d0b09aa; color: #e3a92a; font: 700 11px Archivo; }
 .gp-limbs button.on { background: #e3a92a; color: #0d0b09; }
 `;

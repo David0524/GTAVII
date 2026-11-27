@@ -35,6 +35,15 @@ export interface SimLike {
   setSiren?(id: number, on: boolean): void;
   despawnPolice?(id: number): boolean;
   takeVehicle?(vehicleId: number): { ownerPedId: number; vclass: string; variant: number; x: number; z: number; yaw: number } | null;
+  /** Street vendors (sim fb337dc): commands to the vendor's people, and notices the sim animates. */
+  vendorCommand?(id: string, c: { type: 'flee' | 'cower'; x?: number; z?: number }): void;
+  vendorNotice?(n: { kind: 'cartOverturned' | 'vendorSale' | 'monteFolded'; vendor: string; good?: string }): void;
+  /** Ped hand-off: released peds are gameplay's (moved each frame) until reclaimed (then `pedCalmed`). */
+  releasePed?(pedId: number): boolean;
+  moveReleasedPed?(pedId: number, x: number, z: number, yaw: number, speed: number): void;
+  reclaimPed?(pedId: number): void;
+  /** A short act on a ped (e.g. 'shove'); false for dead or released peds. */
+  pedAct?(pedId: number, act: string, duration?: number): boolean;
   /** Real lane-graph junctions (2+ named streets), nearest first; armYaw = each approach road's yaw pointing away. */
   nearestIntersections?(x: number, z: number, radius: number, max?: number): { id: string; x: number; z: number; dist: number; signal: boolean; streets: string[]; armYaw: number[] }[];
   /** Parking (sim): the rule at a kerb now, and registering a parked car for enforcement (ticketIssued / towDispatched / vehicleTowed). */
