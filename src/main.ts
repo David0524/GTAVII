@@ -318,7 +318,6 @@ async function main() {
   let lastRenderT = -1e9, pausedFrameDrawn = false, heldW = 0, heldH = 0;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
-  const attributionEl = document.getElementById('attribution');
   const fsEl = document.querySelector('.t74-fs') as HTMLElement | null;
 
   // Quick save / load until the pause menu lands (UI pass): F5 / F9.
@@ -376,7 +375,6 @@ async function main() {
     }
     const playing = screen === 'play' && !pause.open;
     gameHud.setVisible(playing);
-    if (attributionEl) attributionEl.style.display = screen === 'title' || playing ? '' : 'none';
     if (fsEl) fsEl.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
     if (touch) touch.root.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
