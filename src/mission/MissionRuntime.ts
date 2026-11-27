@@ -25,7 +25,7 @@ export interface MissionDef {
   rewards?: { money?: number; setFlags?: string[]; unlock?: string[] };
   locations?: string[];
 }
-export interface Objective { id: string; type: string; text?: string; to?: string; at?: string; radius?: number; script?: string; marker?: string; until?: string; target?: string; who?: string }
+export interface Objective { id: string; type: string; text?: string; to?: string; at?: string; radius?: number; script?: string; marker?: string; until?: string; target?: string; who?: string; character?: string; if?: string; route?: string[]; dialogue?: string[] }
 export interface DialogueLine { id: string; speaker?: string; emotion?: string; text?: string; if?: string; choices?: { text: string; goto?: string; setFlags?: string[]; confirm?: string }[] }
 export type Status = 'locked' | 'available' | 'active' | 'done' | 'failed';
 export interface NarrativeState { act: number; flags: Record<string, boolean>; missions: Record<string, Status | string>; relationships: Record<string, number> }
@@ -50,6 +50,8 @@ export interface MissionHost {
   askWait?(title: string, from: string, to: string): Promise<boolean>;
   missionBegin?(id: string): void;
   missionLines?(): { label: string; value: string }[];
+  /** a cast character walking with the player (escort/follow); returns a release */
+  companion?(castId: string): () => void;
   /** giver standing at a place, talkable; returns a remover */
   placeGiver?(castId: string, x: number, z: number): () => void;
 }
@@ -59,10 +61,11 @@ const inWindow = (min: number, w: [string, string]) => { const a = hm(w[0]), b =
 const PLACEHOLDER = new Set(['combat', 'photo']);
 
 export class MissionRuntime {
-  active: { def: MissionDef; idx: number; t: number; busy: boolean; skipped: number; asked?: boolean } | null = null;
+  active: { def: MissionDef; idx: number; t: number; busy: boolean; skipped: number; asked?: boolean; leg?: number } | null = null;
   private givers = new Map<string, { remove: () => void; x: number; z: number }>();
   private interiorsById: Map<string, { address: string; kind?: string }>;
   checkT = 0;
+  private releaseCompanion: (() => void) | null = null;
 
   constructor(private host: MissionHost, private places: Places, readonly missions: Map<string, MissionDef>, interiors: { id: string; address: string; kind?: string }[], private placeRecs: Map<string, PlaceRec>) {
     this.interiorsById = new Map(interiors.map((i) => [i.id, i]));
@@ -135,8 +138,13 @@ export class MissionRuntime {
   private enter() {
     const a = this.active!, o = this.current();
     if (!o) { this.finish(true); return; }
-    a.t = 0; a.asked = false;
-    const tgt = this.where(o.to ?? o.at ?? o.marker);
+    // conditional objectives: only when the flag is set
+    if (o.if && !this.host.state().flags[o.if]) { a.idx++; this.enter(); return; }
+    a.t = 0; a.asked = false; a.leg = 0;
+    this.releaseCompanion?.(); this.releaseCompanion = null;
+    const who = (o.type === 'escort' || o.type === 'follow') ? (o.who ?? o.target ?? o.character) : undefined;
+    if (who?.startsWith('char.') && this.host.companion) this.releaseCompanion = this.host.companion(who);
+    const tgt = this.where(o.route?.length ? o.route[0] : o.to ?? o.at ?? o.marker);
     this.host.objective({ text: o.text ?? '', target: tgt ? { x: tgt.x, z: tgt.z, label: tgt.name } : undefined, mission: a.def.id });
     if (o.type === 'dialogue' && o.script) { a.busy = true; void this.runDialogue(o.script).then(() => { a.busy = false; this.next(); }); }
     if (PLACEHOLDER.has(o.type) && !tgt) this.host.notify(`(${o.type} scene not playable yet: skipped)`);
@@ -147,6 +155,18 @@ export class MissionRuntime {
   private tick(dt: number, p: ReturnType<MissionHost['player']>) {
     const a = this.active!, o = this.current(); if (!o || a.busy) return;
     a.t += dt;
+    // routes (escort/follow content: "a chain of goto objectives at each route point, each starting its leg's dialogue")
+    if (o.route?.length) {
+      const leg = a.leg ?? 0, pt = this.where(o.route[leg]);
+      if (!pt || Math.hypot(pt.x - p.x, pt.z - p.z) < (o.radius ?? 18)) {
+        const dlg = o.dialogue?.[leg - 1]; if (leg > 0 && dlg) void this.runDialogue(dlg); // talk while walking
+        a.leg = leg + 1;
+        if (a.leg >= o.route.length) { this.next(); return; }
+        const nx = this.where(o.route[a.leg]);
+        this.host.objective({ text: o.text ?? '', target: nx ? { x: nx.x, z: nx.z, label: nx.name } : undefined, mission: a.def.id });
+      }
+      return;
+    }
     const tgt = this.where(o.to ?? o.at ?? o.marker), near = (r: number) => !!tgt && Math.hypot(tgt.x - p.x, tgt.z - p.z) < r;
     let done = false;
     switch (o.type) {
@@ -160,7 +180,7 @@ export class MissionRuntime {
           else this.host.waitTo(o.until);
         }
         done = !o.until || inWindow(this.host.clock().minutes, [o.until, o.until.replace(/:(\d\d)$/, (_m, mm) => `:${String(Math.min(59, +mm + 30)).padStart(2, '0')}`)]); break;
-      case 'switch_to': done = !o.target || p.lead === o.target; break;
+      case 'switch_to': { const who = o.character ?? o.target; done = !who || p.lead === who; break; }
       case 'enter_vehicle': done = p.inCar; break;
       case 'deliver': case 'follow': case 'escort': case 'chase': case 'evade': done = tgt ? near(o.radius ?? 20) : a.t > 3; break;
       default:
@@ -203,6 +223,7 @@ export class MissionRuntime {
   resumeAt: { id: string; idx: number } | null = null;
 
   private finish(passed: boolean) {
+    this.releaseCompanion?.(); this.releaseCompanion = null;
     const a = this.active!, r = a.def.rewards ?? {}, st = this.host.state();
     st.missions[a.def.id] = 'done';
     for (const f of r.setFlags ?? []) st.flags[f] = true;

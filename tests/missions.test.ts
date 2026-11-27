@@ -34,7 +34,7 @@ function play(m: MissionDef) {
     if (target) { p.x = target.x; p.z = target.z; }
     p.interior = o.type === 'enter_interior' ? 'x' : null;
     p.inCar = o.type === 'enter_vehicle';
-    if (o.type === 'switch_to' && o.target) p.lead = o.target;
+    if (o.type === 'switch_to' && (o.character ?? o.target)) p.lead = (o.character ?? o.target)!;
     await new Promise((r) => setTimeout(r, 0)); // dialogue promises
     rt.update(1); rt.update(5);
   } };

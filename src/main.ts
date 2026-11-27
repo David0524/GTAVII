@@ -465,6 +465,11 @@ async function main() {
       waitTo: (t) => setTime(t),
       audioPlay: (script, line) => audioGlue?.audio.dialogue?.play(script, line),
       gameplay: () => gp?.g ?? null,
+      companion: (castId) => {
+        if (!sim) return null;
+        const id = sim.handOff({ cast: castId, x: player.pos.x + 1.5, z: player.pos.z + 1.5, yaw: player.heading, after: 'companion', follow: 'player', waitRadius: 12 });
+        return id < 0 ? null : () => { sim.setGoal(id, null); }; // back to ambient life
+      },
       spawnCast: (castId, x, y, z) => {
         if (!chars) return null;
         const ch = chars.spawn(scene, { seed: 7, hero: castId }); ch.object.position.set(x, y, z);

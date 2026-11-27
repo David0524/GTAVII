@@ -29,6 +29,8 @@ export interface MissionGlueDeps {
   waitTo: (hhmm: string) => void;
   audioPlay?: (script: string, lineId: string) => Promise<void> | undefined;
   gameplay: () => { missionBegin(id: string): void; missionLines(): { label: string; value: string }[] } | null;
+  /** sim handOff: a cast character as the player's companion; returns a release */
+  companion?: (castId: string) => (() => void) | null;
   /** spawn a cast character standing at x,z facing the street; returns a remover */
   spawnCast?: (castId: string, x: number, y: number, z: number) => (() => void) | null;
 }
@@ -57,6 +59,7 @@ export function createMissions(d: MissionGlueDeps): MissionRuntime {
     addMoney: d.addMoney, waitTo: d.waitTo,
     missionBegin: (id) => d.gameplay()?.missionBegin(id),
     missionLines: () => d.gameplay()?.missionLines() ?? [],
+    companion: d.companion ? (castId) => d.companion!(castId) ?? (() => {}) : undefined,
     placeGiver: d.spawnCast ? (castId, x, z) => d.spawnCast!(castId, x, heightAt(x, z) + 0.15, z) ?? (() => {}) : undefined,
   };
   const rt = new MissionRuntime(host, P, missions, interiors, placeRecs);
