@@ -4,7 +4,7 @@
  * three.js. Everything is generated, nothing is shipped.
  */
 import { type Mat, M } from './materials';
-import type { ArtSlotOut, CellOut, ColliderOut, DoorOut, LightOut, MarkerOut, MarkerType, MeshArrays, MoverOut, PortalOut, SlotOut } from '../spec';
+import type { ArtSlotOut, TraversalMark, CellOut, ColliderOut, DoorOut, LightOut, MarkerOut, MarkerType, MeshArrays, MoverOut, PortalOut, SlotOut } from '../spec';
 
 export type V3 = [number, number, number];
 
@@ -103,6 +103,7 @@ export class Kit {
   readonly doors: DoorOut[] = [];
   readonly movers: MoverOut[] = [];
   readonly art: ArtSlotOut[] = [];
+  readonly traversal: TraversalMark[] = [];
   /** occluder boxes for baking shadows/AO (local AABBs) */
   readonly occluders: [number, number, number, number, number, number][] = [];
   cur = 0;

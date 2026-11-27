@@ -13,11 +13,11 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import type { RefEntry } from './collect.ts';
 
-const ROOT = path.resolve(import.meta.dirname, '../..');
-const OUT = path.join(ROOT, 'references');
-const IMG = path.join(OUT, 'img');
-const CATALOG = path.join(OUT, 'catalog.json');
-const UA = 'Tenderloin74ReferenceResearch/0.1 (game art reference; one request per ~1.5 s)';
+export const ROOT = path.resolve(import.meta.dirname, '../..');
+export const OUT = path.join(ROOT, 'references');
+export const IMG = path.join(OUT, 'img');
+export const CATALOG = path.join(OUT, 'catalog.json');
+export const UA = 'Tenderloin74ReferenceResearch/0.1 (game art reference; one request per ~1.5 s)';
 const GAP_MS = 1600; // minimum spacing between request starts (>= 1.5 s)
 const CAP = 106; // stop once this many interior entries exist (120 candidates reviewed, 14 rejected)
 const YEAR_MIN = 1900;
@@ -30,9 +30,9 @@ const SKIP_IDS = new Set<string>([
   'loc_gs_2018725843', 'loc_gs_2018735725',
 ]);
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let lastStart = 0;
-async function get(url: string, tries = 4): Promise<Response> {
+export async function get(url: string, tries = 4): Promise<Response> {
   for (let k = 0; k < tries; k++) {
     const wait = lastStart + GAP_MS - Date.now();
     if (wait > 0) await sleep(wait);
@@ -44,14 +44,14 @@ async function get(url: string, tries = 4): Promise<Response> {
   }
   throw new Error(`failed ${url}`);
 }
-const decode = (s: string) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 70);
-const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
+export const decode = (s: string) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+export const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 70);
+export const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
 const yearOf = (s: string) => parseInt(s.match(/\b(1[89]\d\d)\b/)?.[1] ?? '0');
-const inRange = (date: string) => { const y = yearOf(date); return y >= YEAR_MIN && y <= YEAR_MAX; };
+export const inRange = (date: string) => { const y = yearOf(date); return y >= YEAR_MIN && y <= YEAR_MAX; };
 
 /** Topic labels. A candidate is kept only if at least one label matches its title (plus subjects where given). */
-const TOPICS: Record<string, RegExp> = {
+export const TOPICS: Record<string, RegExp> = {
   hotel_lobby: /hotel|hostelry|\binn\b/i,
   office_lobby: /office|lobby|elevator|corporate|company|exchange|board ?room|skyscraper|building interior/i,
   tenement_hall: /tenement|walk-?up|stair|hallway|hall\b|corridor|landing/i,
@@ -67,27 +67,27 @@ const TOPICS: Record<string, RegExp> = {
   apartment: /apartment|\bflat\b|living room|parlou?r|kitchen|\bhome\b|residen|dwelling|bedroom/i,
   bank: /banking hall|\bbank\b|teller|vault/i,
 };
-const topicsFor = (t: string) => Object.entries(TOPICS).filter(([, re]) => re.test(t)).map(([k]) => k);
+export const topicsFor = (t: string) => Object.entries(TOPICS).filter(([, re]) => re.test(t)).map(([k]) => k);
 
 /** HABS/HAER and Gottscho titles: interior words, and not exterior/plan/drawing words. */
 const LOC_INTERIOR = /interior|lobby|room|hall\b|stair|lounge|\bbar\b|dining|kitchen|ballroom|auditorium|theat|foyer|vestibule|ceiling|mezzanine|corridor|elevator|sanctuary|nave|apartment|loft|parlou?r|store|shop|banking|saloon|tavern|cafe|diner|counter|booth|balcony|chapel|church|hotel|tenement|hallway|restaurant|cinema|lunch|office|\bbank\b|staircase|gallery|boardroom|cafeteria|subway|platform|station|showroom|barber|bakery|drug/i;
-const LOC_EXTERIOR = /exterior|fa[cç]ade|elevation|perspective|streetscape|street view|sidewalk|aerial|roof|\bplan\b|section|drawing|sketch|\bsheet\b|site plan|\bmap\b|landscape|overall view|general view|from (the )?street|cornice|steeple|tower|signage|storefront|store front|garden|grounds/i;
-const NYC_LOC = /New York County|Manhattan|New York, N\.?\s?Y|New York City|New York \(State\)--New York|--New York\b/i;
-const NOT_NYC = /Queens|Brooklyn|Kings County|Bronx|Richmond|Staten|Long Island|Westchester|Nassau|Bayside|Yonkers|Buffalo|Rochester|Albany|Syracuse|Cumberland|New Jersey|Hudson County/i;
+export const LOC_EXTERIOR = /exterior|fa[cç]ade|elevation|perspective|streetscape|street view|sidewalk|aerial|roof|\bplan\b|section|drawing|sketch|\bsheet\b|site plan|\bmap\b|landscape|overall view|general view|from (the )?street|cornice|steeple|tower|signage|storefront|store front|garden|grounds/i;
+export const NYC_LOC = /New York County|Manhattan|New York, N\.?\s?Y|New York City|New York \(State\)--New York|--New York\b/i;
+export const NOT_NYC = /Queens|Brooklyn|Kings County|Bronx|Richmond|Staten|Long Island|Westchester|Nassau|Bayside|Yonkers|Buffalo|Rochester|Albany|Syracuse|Cumberland|New Jersey|Hudson County/i;
 
 /** DOCUMERICA titles: interior-type subjects; street/outdoor words excluded (contact sheet checked by hand). */
 const DOC_INTERIOR = /apartment|\bflat\b|kitchen|living room|bedroom|\bshop|\bstore\b|diner|restaurant|cafeteria|subway|turnstile|token|\bbar\b|tavern|saloon|office|hallway|hall\b|lobby|stair|tenement|interior|inside|barber|bakery|counter|theat|church|factory|loft|\broom\b|laundromat|grocery|newsstand|elevator|\bbank\b|classroom|lunch|salon|hospital|booth|station|\bcafe\b|pool hall|bowling|nursery|school/i;
 const DOC_EXCLUDE = /sidewalk|storefront|store ?front|outside|exterior|aerial|bridge|harbor|ferry|boat|\bpark\b|pier|traffic|street scene|in front of|elevated|\bbus\b|\bcars?\b|truck|skyline|parade|rally|demonstrat|STATEN|BROOKLYN|QUEENS|BRONX|LONG ISLAND|JERSEY|VERRAZANO|\(cropped\)|\(restored\)|\(\d{8,}\)/i;
 
-const IMG_FAIL: string[] = [];
+export const IMG_FAIL: string[] = [];
 
-interface Candidate {
+export interface Candidate {
   id: string; title: string; date: string; author: string; place: string; topics: string[];
   source: string; archive: string; rights: string; imgUrl: string;
 }
 
 /** Downscale to <= 960 px JPEG with ImageMagick; the raw download is removed afterwards. */
-async function saveImage(imgUrl: string, id: string): Promise<boolean> {
+export async function saveImage(imgUrl: string, id: string): Promise<boolean> {
   const raw = path.join(IMG, `.raw_${id}`);
   const dest = path.join(IMG, `${id}.jpg`);
   try {
@@ -104,7 +104,7 @@ async function saveImage(imgUrl: string, id: string): Promise<boolean> {
   }
 }
 
-function loadCatalog(): RefEntry[] {
+export function loadCatalog(): RefEntry[] {
   return fs.existsSync(CATALOG) ? JSON.parse(fs.readFileSync(CATALOG, 'utf8')) : [];
 }
 
@@ -126,9 +126,9 @@ const interiorCount = (catalog: RefEntry[]) => catalog.filter((e) => e.kind === 
 
 // ---------- 1 + 3) Library of Congress (HABS/HAER/HALS "hh", Gottscho-Schleisner "gsc") ----------
 
-interface LocHit { pk: string; title: string; created: string; creator: string; subjects: string[]; itemUrl: string; imgUrl: string; medium: string }
+export interface LocHit { pk: string; title: string; created: string; creator: string; subjects: string[]; itemUrl: string; imgUrl: string; medium: string }
 
-async function locSearch(co: string, q: string, pages = 2): Promise<LocHit[]> {
+export async function locSearch(co: string, q: string, pages = 2): Promise<LocHit[]> {
   const out: LocHit[] = [];
   for (let p = 1; p <= pages; p++) {
     const url = `https://www.loc.gov/pictures/search/?q=${encodeURIComponent(q)}&co=${co}&fo=json&c=100&sp=${p}`;
@@ -150,7 +150,7 @@ async function locSearch(co: string, q: string, pages = 2): Promise<LocHit[]> {
 }
 
 /** Item JSON: rights_information and unrestricted flag, place and creator. Null if not "no known restrictions". */
-async function locItem(itemUrl: string) {
+export async function locItem(itemUrl: string) {
   const d = (await (await get(`${itemUrl.replace(/\/?$/, '/')}?fo=json`)).json()) as any;
   const it = d.item ?? {};
   const rights = clean(String(it.rights_information ?? ''));
@@ -227,7 +227,7 @@ async function gottschoSource(catalog: RefEntry[], have: Set<string>) {
 
 // ---------- 2) DOCUMERICA via Wikimedia Commons ----------
 
-async function commonsCategory(cat: string, maxPages = 5): Promise<string[]> {
+export async function commonsCategory(cat: string, maxPages = 5): Promise<string[]> {
   const files = new Set<string>();
   let url = `https://commons.wikimedia.org/wiki/Category:${cat}`;
   for (let p = 0; p < maxPages && url; p++) {
@@ -240,7 +240,7 @@ async function commonsCategory(cat: string, maxPages = 5): Promise<string[]> {
 }
 
 /** Author and date from a Commons file page (information template rendered as label/value lines). */
-function parseCommonsMeta(html: string) {
+export function parseCommonsMeta(html: string) {
   const text = decode(html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, '\n')).replace(/&#160;|&#8211;/g, ' ');
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
   const after = (label: string) => { const i = lines.indexOf(label); return i >= 0 ? lines[i + 1] ?? '' : ''; };
@@ -288,4 +288,4 @@ async function main() {
   console.log(`added ${interiorCount(catalog) - before}; catalog: ${catalog.length} references (${interiorCount(catalog)} interior)`);
   if (IMG_FAIL.length) console.log('image failures:', IMG_FAIL.join(', '));
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => { console.error(e); process.exit(1); });

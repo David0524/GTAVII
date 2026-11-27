@@ -68,6 +68,18 @@ export interface MoverOut {
   mesh: MeshArrays;
 }
 
+/**
+ * Traversal markup (ENGINE_REQUESTS "From interiors: 10", proposed contract, MOVEMENT.md). Mirrors the proposed shared
+ * type until the engine places it in src/shared; coordinates here are interior-local (the runtime maps them to world).
+ */
+export type TraversalKind = 'drop_ladder' | 'ladder' | 'fe_platform' | 'fe_stair' | 'sill' | 'ledge' | 'roof_gap' | 'hatch' | 'vault' | 'fence';
+export interface TraversalMark {
+  kind: TraversalKind;
+  a: [number, number, number]; b: [number, number, number];
+  n?: [number, number]; w?: number; h?: number;
+  /** 1 locked, 2 noisy (police notice), 4 one-way down */
+  flags?: number;
+}
 export interface BuiltInterior {
   id: string;
   kind: string;
@@ -82,6 +94,7 @@ export interface BuiltInterior {
   lights: LightOut[];
   movers: MoverOut[];
   art: ArtSlotOut[];
+  traversal: TraversalMark[];
   /** interior volume (m^3) and reverb class for the audio stream */
   volume: number; reverb: string;
   /** local AABB of everything */

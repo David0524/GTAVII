@@ -8,6 +8,7 @@ import path from 'node:path';
 import { readChunk } from '../../src/shared/chunkFormat';
 import { decodeIndex, type WireIndex } from '../../src/interiors/indexFormat';
 import { buildInterior } from '../../src/interiors/build';
+const TRAV: Record<string, number> = {};
 import { KINDS } from '../../src/interiors/catalog';
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const q = (process.argv[2] ?? 'low') as 'low' | 'high'; const limit = +(process.argv[3] ?? 1e9);
@@ -26,11 +27,11 @@ for (const b of idx.buildings) for (const u of b.units) {
   try {
     const t0 = performance.now();
     const r = buildInterior({ unit: u, building: b, quality: q, ring: ringOf(b.i, b.j, b.id), street: '' });
-    s.ms.push(performance.now() - t0); s.tris.push(r.stats.tris); s.cells.push(r.cells.length); s.slots += r.slots.length; s.markers += r.markers.length; s.n++;
+    s.ms.push(performance.now() - t0); s.tris.push(r.stats.tris); s.cells.push(r.cells.length); s.slots += r.slots.length; s.markers += r.markers.length; s.n++; for (const t of r.traversal) TRAV[t.kind] = (TRAV[t.kind] ?? 0) + 1;
   } catch (e) { s.fail++; if (fails.length < 20) fails.push(`${u.id} ${u.kind}: ${(e as Error).message}`); }
 }
 const pct = (a: number[], p: number) => { const x = [...a].sort((m, k) => m - k); return x[Math.min(x.length - 1, Math.floor(p * x.length))] ?? 0; };
 const rows = Object.entries(per).sort((a, b) => b[1].n - a[1].n).map(([k, s]) => ({ kind: k, n: s.n, fail: s.fail, msP50: +pct(s.ms, 0.5).toFixed(1), msP95: +pct(s.ms, 0.95).toFixed(1), msMax: +pct(s.ms, 1).toFixed(1), trisP50: pct(s.tris, 0.5), trisP95: pct(s.tris, 0.95), cellsP50: pct(s.cells, 0.5), slotsAvg: +(s.slots / Math.max(1, s.n)).toFixed(1), markersAvg: +(s.markers / Math.max(1, s.n)).toFixed(1) }));
-console.table(rows); console.log('failures:', fails);
+console.table(rows); console.log('failures:', fails); console.log('traversal marks:', JSON.stringify(TRAV));
 fs.mkdirSync(path.join(ROOT, 'docs/interiors'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, `docs/interiors/stress_${q}.json`), JSON.stringify({ quality: q, note: 'Node single thread, desktop container CPU; not phone numbers', rows, fails }, null, 1));

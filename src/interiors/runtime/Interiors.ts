@@ -162,6 +162,12 @@ export class Interiors {
     const f = L.built.frame;
     return L.built.art.map((a) => { const v = new THREE.Vector3(a.x, a.y, a.z).applyMatrix4(L.matrix); return { ...a, x: v.x, y: v.y, z: v.z, nx: f.ux * a.nx + f.nx * a.nz, nz: f.uz * a.nx + f.nz * a.nz }; });
   }
+  /** Traversal marks (roof hatches, roof-edge ledges; MOVEMENT.md, ENGINE_REQUESTS 10) in world space. */
+  traversal(interiorId: string) {
+    const L = this.live.get(interiorId); if (!L) return [];
+    const f = L.built.frame, w = (p: [number, number, number]): [number, number, number] => { const v = new THREE.Vector3(...p).applyMatrix4(L.matrix); return [v.x, v.y, v.z]; };
+    return (L.built.traversal ?? []).map((t) => ({ ...t, a: w(t.a), b: w(t.b), n: t.n ? [f.ux * t.n[0] + f.nx * t.n[1], f.uz * t.n[0] + f.nz * t.n[1]] as [number, number] : undefined }));
+  }
   /** Ensure an interior is built (missions, previews); resolves when resident. */
   ensure(id: string): Promise<BuiltInterior> {
     const L = this.live.get(id); if (L) return Promise.resolve(L.built);

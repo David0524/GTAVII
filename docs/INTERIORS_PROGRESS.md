@@ -226,3 +226,9 @@ Honest verdict: interiors are **well below the GTA V floor** today. Layout, cont
 | Phone frame time | Unmeasured on device (SwiftShader only) | Measure on iPhone 17 Pro once the PBR path exists |
 
 The first three rows are an architecture change to the interior renderer (from unlit baked vertex light to lit PBR with lightmaps and probes, sharing engine materials). Raised with oversight before starting it, since it touches the engine's lighting pipeline and the material library.
+
+## Reference pass 2 (2026-11-27)
+44 entries added (catalog 211 -> 255), all viewed by the helper and contact sheets reviewed by me (references/contact/pass2_*.jpg): sro_room 9, tenement_hall 5, diner 15, loft 13, plus 2 tenement rooms. All LoC "No known restrictions", stored verbatim. Mostly 1908-1940 (Hine/NCLC homework rooms, FSA 1938 stair halls, Gottscho cafeterias incl. the Garden Cafeteria at 50th and 8th). Gaps that remain: grade 0 has one exemplar (266 Elizabeth St collapsed hall); no 1970s SRO or welfare-hotel rooms; DOCUMERICA on Commons is nearly all exterior, NARA API returned HTML only; HABS 97 Orchard St items are 1980+.
+
+## Traversal markup (MOVEMENT.md, ENGINE_REQUESTS 10)
+BuiltInterior.traversal now carries roof hatches (bulkhead doors, locked flag) and roof-edge ledges along every reachable roof's footprint edge (outward normals); `Interiors.traversal(id)` returns them in world space. Stress over all units: 2,101 hatches, 17,703 ledges, 0 failures. Next: fire-escape placement and roof gaps in the index builder once the engine confirms the type and mesh ownership.

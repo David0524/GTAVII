@@ -3301,5 +3301,764 @@
   "kind": "interior",
   "condition": 3,
   "reviewed": "interiors stream 2026-11-26: topic + condition hand-checked on contact sheet"
+ },
+ {
+  "id": "loc_2003665483",
+  "file": "img/loc_2003665483.jpg",
+  "title": "New York City. Reading room in 10-cent lodging house on the Bowery",
+  "date": "[between 1908 and 1909]",
+  "author": "",
+  "place": "New York, N.Y.",
+  "topics": [
+   "sro_room"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2003665483/",
+  "rights": "No known restrictions on publication.",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Bowery 10-cent lodging house reading room: plank walls, tall sash windows, bentwood chairs, spittoons, bare worn floor, flat daylight",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2014681796",
+  "file": "img/loc_2014681796.jpg",
+  "title": "N.Y. Municipal Lodging House: dormitory",
+  "date": "[between 1909 and 1920]",
+  "author": "Bain News Service",
+  "place": "New York, N.Y.",
+  "topics": [
+   "sro_room"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2014681796/",
+  "rights": "No known restrictions on publication. For more information, see George Grantham Bain Collection - Rights and Restrictions Information https://www.loc.gov/rr/print/res/274_bain.html",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Municipal Lodging House dormitory: rows of steel double bunks, exposed beams, round columns, grey blankets, ranked windows",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2018677051",
+  "file": "img/loc_2018677051.jpg",
+  "title": "Making hair-goods in a tiny hall-bedroom. Mrs. Chassin, 385 E. 3rd St., N.Y. top floor. The whole tenement is in a most dilapidated and disreputable state. Hair lying on the bed, trunk and bureau. Mrs. Chassin used to keep a shop herself but now works for a Delancy St. firm. Says she makes about $12 a week. Location: New York, New York (State)",
+  "date": "1912 February.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018677051/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; tiny hall bedroom used as workroom: bed, sewing machine at window, wall-hung clothes, low raking window light",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018674266",
+  "file": "img/loc_2018674266.jpg",
+  "title": "Embroidering chiffon waists in crowded bed-room, East Side. (For complete details see Miss E.C. Watson's report.) Location: New York, New York (State)",
+  "date": "1912 November.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018674266/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; crowded bedroom: iron bedstead, patterned wallpaper, tiled-pattern floor, window light, laundry hung",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018677321",
+  "file": "img/loc_2018677321.jpg",
+  "title": "Family cutting cut embroidery in tiny crowded bed-room. (For complete details see Miss E.C. Watson's report.) Location: New York, New York (State)",
+  "date": "1912 November.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018677321/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; tiny bed-room: brass bed with bedclothes piled, dark wood doors, plain walls, cramped furniture",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018675191",
+  "file": "img/loc_2018675191.jpg",
+  "title": "Mr. Rothenberg stitching neckties in small inner bed-room. See photo and label 2877. Location: New York, New York (State)",
+  "date": "1912 February.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018675191/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; small inner bedroom: iron bed, window, sagging walls, hanging clothes, single worktable",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018673622",
+  "file": "img/loc_2018673622.jpg",
+  "title": "Late at night. Sewing tapes on gloves. The boy helps. Family of five sleep in room where the work is done. Location: New York, New York (State)",
+  "date": "1908 February.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018673622/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; one-room family quarters: kerosene lamp, patterned tablecloth, calendar and holy pictures on stained walls, clothes hung on pipe",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018677056",
+  "file": "img/loc_2018677056.jpg",
+  "title": "Averzano family, Room 24, 2-4 Prince St., N.Y. Photo taken at 1:30 P.M. Mar. 6th, a school day, and Josephine said she wasn't going to school this week on account of the work. \"I like to work, and I like to go to school too.\" Our investigator reports her as 13 yrs. old, and a truant. The 8 yr. old sister can speak no English and has never been to school. The work was strewn all over the dirty floor. Location: New York, New York (State)",
+  "date": "1912 March 6.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018677056/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Prince St tenement room: stained plaster, tile-pattern floor, window, bed and chairs, grimy surfaces",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018732720",
+  "file": "img/loc_2018732720.jpg",
+  "title": "Howard Johnson's motor lodge, 8th Ave. at 51 St., New York City. Room 426, double room",
+  "date": "1962 July 1.",
+  "author": "Gottscho, Samuel H. (Samuel Herman), 1875-1971",
+  "place": "New York (State)--New York",
+  "topics": [
+   "sro_room"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2018732720/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1962 midtown motor-lodge double room: twin beds, wall sconces, built-in desk with TV, striped curtains; bland postwar baseline",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2016812575",
+  "file": "img/loc_2016812575.jpg",
+  "title": "[Stairway and hall, tenement, New York City]",
+  "date": "[between 1900 and 1910]",
+  "author": "Detroit Publishing Co.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "tenement_hall"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2016812575/",
+  "rights": "No known restrictions on publication.",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; tenement stair and hall: iron balusters, steep flight, worn bare floor, exposed pipe, painted plaster, raking light",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2017790423",
+  "file": "img/loc_2017790423.jpg",
+  "title": "[Untitled photo, possibly related to: New York, New York. 1938(?). A hallway at 340 East 63rd Street]",
+  "date": "1938?",
+  "author": "Dick, Sheldon",
+  "place": "New York (State)--New York",
+  "topics": [
+   "tenement_hall"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2017790423/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1938 hallway 340 E 63rd: tiled floor with stains, turned newel, wainscot, steep dark stair, bare hanging bulb",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2017790427",
+  "file": "img/loc_2017790427.jpg",
+  "title": "New York, New York. 1938(?). A hallway at 340 East 63rd Street",
+  "date": "1938?",
+  "author": "Dick, Sheldon",
+  "place": "New York (State)--New York",
+  "topics": [
+   "tenement_hall"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2017790427/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1938 hallway/stair 340 E 63rd: mosaic tile floor, scarred wainscot, dark stair run, wall light fixture",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2018675561",
+  "file": "img/loc_2018675561.jpg",
+  "title": "3:30 P.M. Group in tenement hallway. Ages, 14 months, 2, 5, and 7 years. Mother in shop sewing. Father out of work, bartender. Family, Novi, 189 Chrystie Street. Location: New York, New York (State)",
+  "date": "1910 February.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "tenement_hall"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018675561/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1910 tenement hallway: tongue-and-groove paneled door and wall, dark, children grouped; wood grain and wear",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018677010",
+  "file": "img/loc_2018677010.jpg",
+  "title": "This is the condition in which I found the lower hall at 266 Elizabeth St., N.Y. 3:00 P.M., February 2, 1912. It is a licensed tenement and finishing of clothes was going on in the homes. Location: New York, New York (State)",
+  "date": "1912 February 2.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "tenement_hall"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018677010/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 0,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1912 lower hall 266 Elizabeth St: collapsed ceiling lath exposed, mud floor, peeling wainscot; derelict exemplar",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2016795745",
+  "file": "img/loc_2016795745.jpg",
+  "title": "[New York City, interior of tenement house]",
+  "date": "[between 1900 and 1910]",
+  "author": "Detroit Publishing Co.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2016795745/",
+  "rights": "No known restrictions on publication.",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; tenement living-kitchen: cast-iron stove, patterned cloth, wall pictures, doorway to bedroom; coal-stove era lived-in room",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2016812553",
+  "file": "img/loc_2016812553.jpg",
+  "title": "[Interior of tenement house, New York City]",
+  "date": "[between 1900 and 1910]",
+  "author": "Detroit Publishing Co.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2016812553/",
+  "rights": "No known restrictions on publication.",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; tenement kitchen-room: steam radiator, window with lace curtain, dresser, framed photos; tidy but worn",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2018736584",
+  "file": "img/loc_2018736584.jpg",
+  "title": "136 E. 44th St., New York City. Cafeteria counter",
+  "date": "1939 Nov. 7.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018736584/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1939 cafeteria counter: chrome-and-leather swivel stools, curved formica counter, indirect cove lighting, long perspective",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018747798",
+  "file": "img/loc_2018747798.jpg",
+  "title": "Garden Cafeteria, 50th St. and 8th Ave., New York City. Interior I",
+  "date": "1948 May 29.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018747798/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Garden Cafeteria 50th/8th 1948: curved serving counter, glazed tile floor, indirect light",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018747799",
+  "file": "img/loc_2018747799.jpg",
+  "title": "Garden Cafeteria, 50th St. and 8th Ave., New York City. Interior II",
+  "date": "1948 May 29.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018747799/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Garden Cafeteria: hot-dish steam counter, tile floor grid, hanging sign",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018747800",
+  "file": "img/loc_2018747800.jpg",
+  "title": "Garden Cafeteria, 50th St. and 8th Ave., New York City. Interior III",
+  "date": "1948 May 29.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018747800/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Garden Cafeteria: wide hall, tiered seating, ceiling grid",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018747801",
+  "file": "img/loc_2018747801.jpg",
+  "title": "Garden Cafeteria, 50th St. and 8th Ave., New York City. Interior IV",
+  "date": "1948 May 29.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018747801/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; Garden Cafeteria: dining hall with mural, black tables and bentwood chairs",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2017835429",
+  "file": "img/loc_2017835429.jpg",
+  "title": "New York, New York. Italian-American cafe espresso shop on MacDougal Street where coffee and soft drinks are sold. The coffee machine cost one thousand dollars",
+  "date": "1942 Aug.?",
+  "author": "Collins, Marjory, 1912-1985",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017835429/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1942 MacDougal St espresso cafe: bentwood chairs, tin ceiling, glass-front cabinets, trailing cords, worn tile",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2017835431",
+  "file": "img/loc_2017835431.jpg",
+  "title": "New York, New York. Italian-American cafe espresso shop on MacDougal Street where coffee and soft drinks are sold. Cards are drying out after a drink has been spilled on them",
+  "date": "1942 Aug.?",
+  "author": "Collins, Marjory, 1912-1985",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017835431/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; espresso machine and urn on counter: chromed taps, jars of candy, shelving behind; fixture detail",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2018725281",
+  "file": "img/loc_2018725281.jpg",
+  "title": "B/G restaurant, business at 16 W. 48th St., New York. Counter I",
+  "date": "1952 June 22.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner",
+   "restaurant"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018725281/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1952 B/G restaurant counter W 48th: long counter, stools, back-bar, fluorescent strip; postwar luncheonette",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018741548",
+  "file": "img/loc_2018741548.jpg",
+  "title": "Schrafft's, Broadway and 43rd St., New York City. Counter",
+  "date": "1942 Sept. 23.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018741548/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1942 Schrafft's Broadway/43rd: long counter with stools, cash register, checker tile floor, uniformed counter staff",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018738375",
+  "file": "img/loc_2018738375.jpg",
+  "title": "Schrafft's, 2285 Broadway, New York City. Fountain counter",
+  "date": "1940 Nov. 6.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018738375/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1940 Schrafft's fountain counter Broadway: fountain, stools, wall cabinets, checker tile",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018747091",
+  "file": "img/loc_2018747091.jpg",
+  "title": "William R. Warner Co., 18th St. and 6th Ave., New York City. Cafeteria counter I",
+  "date": "1947 Oct. 30.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018747091/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1947 cafeteria counter: tray rail, glass display, pendant spotlights, institutional steel",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018738648",
+  "file": "img/loc_2018738648.jpg",
+  "title": "Aberdeen Hotel, 17 W. 32nd St., New York City. Coffee shop I",
+  "date": "1941 Jan. 24.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner",
+   "restaurant"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018738648/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1941 Aberdeen Hotel coffee shop W 32nd: booths, murals, ceiling cornice, dark wood and carpet",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018738649",
+  "file": "img/loc_2018738649.jpg",
+  "title": "Aberdeen Hotel, 17 W. 32nd St., New York City. Coffee shop II",
+  "date": "1941 Jan. 24.",
+  "author": "Gottscho-Schleisner, Inc.",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner",
+   "restaurant"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/gsc/item/2018738649/",
+  "rights": "No known restrictions on publication. For information, see: \"Gottscho-Schleisner Collection\" https://hdl.loc.gov/loc.pnp/res.104.gott",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1941 Aberdeen Hotel coffee shop: booth run and mural, pendant bowl lights",
+  "archive": "Library of Congress, Prints and Photographs Division (collection gsc)"
+ },
+ {
+  "id": "loc_2018675695",
+  "file": "img/loc_2018675695.jpg",
+  "title": "Lunch counter at Postal Tel. Office, B'[road]way. Location: New York, New York (State)",
+  "date": "1910 July.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2018675695/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1910 lunch counter, Postal Telegraph basement: urn, exposed steam pipes, ad posters, queue of messenger boys, dim bulb light",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2017645591",
+  "file": "img/loc_2017645591.jpg",
+  "title": "[People gathered at soda fountain, New York, New York]",
+  "date": "[1958]",
+  "author": "Rizzuto, Angelo, 1906-1967",
+  "place": "New York (State)--New York",
+  "topics": [
+   "diner"
+  ],
+  "source": "https://www.loc.gov/pictures/item/2017645591/",
+  "rights": "No known restrictions on publication. For information see \"Anthony Angel Collection...\" https://www.loc.gov/rr/print/res/730_ange.html",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1958 hot dog stand counter: menu board prices, Coca-Cola signs, pastel tile counter, neon edge",
+  "archive": "Library of Congress, Prints and Photographs Division (collection all)"
+ },
+ {
+  "id": "loc_2017734929",
+  "file": "img/loc_2017734929.jpg",
+  "title": "Proprietor of tailor shop at steam presser, University Place near 11th Street, New York City",
+  "date": "1936 Nov.",
+  "author": "Lee, Russell, 1903-1986",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017734929/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1936 University Place tailor shop: steam press, hanging garments, cluttered back wall, bare bulbs",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2017734930",
+  "file": "img/loc_2017734930.jpg",
+  "title": "Woman at sewing machine in New York City tailor shop on University Place near 11th Street",
+  "date": "1936 Nov.",
+  "author": "Lee, Russell, 1903-1986",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017734930/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; tailor shop sewing machine: treadle Singer on bare floor, cracked plaster, wiring on wall, desk lamp",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2017841935",
+  "file": "img/loc_2017841935.jpg",
+  "title": "New York, New York. Italian-American garment worker in the N.M. dress shop, which is now making blouses for the Women's Army Auxiliary Corps (WAAC). Workers in this shop are members of the International Ladies Garment Workers' Union",
+  "date": "1943 Jan.",
+  "author": "Collins, Marjory, 1912-1985",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017841935/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1943 dress shop sewing machine closeup: industrial machine head, cutting table; machine detail",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2017841951",
+  "file": "img/loc_2017841951.jpg",
+  "title": "New York, New York. Pressers in the N.M. dress shop which is now making blouses for the Women's Army Auxiliary Corps (WAAC). They are members of local 89 of the International Ladies Garment Workers' Union, predominantly Italian",
+  "date": "1943 Jan.",
+  "author": "Collins, Marjory, 1912-1985",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017841951/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1943 pressers: suspended press arms, steam overhead, steam-table, cluttered shop floor",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2017841956",
+  "file": "img/loc_2017841956.jpg",
+  "title": "New York, New York. Garment workers in the N.M. dress shop which is now making uniforms for the Women's Army Auxiliary Corps (WAAC). They are members of local 89 of the International Ladies Garment Worker's Union, predominantly Italian",
+  "date": "1943 Jan.",
+  "author": "Collins, Marjory, 1912-1985",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017841956/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 3,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1943 garment loft floor: dense rows of sewing machines under factory skylights, overhead belt shafts, flags, long tables",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2017843457",
+  "file": "img/loc_2017843457.jpg",
+  "title": "New York, New York. Italian-American garment worker in the N.M. Press Company, 307 West Thirty Eighth Street",
+  "date": "1943 Feb.",
+  "author": "Collins, Marjory, 1912-1985",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/fsa/item/2017843457/",
+  "rights": "No known restrictions. For information, see U.S. Farm Security Administration/Office of War Information Black & White Photographs http://www.loc.gov/rr/print/res/071_fsab.html",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1943 W 38th St press company: seamstress at machine, window bank behind, hanging dresses, bare floor",
+  "archive": "Library of Congress, Prints and Photographs Division (collection fsa)"
+ },
+ {
+  "id": "loc_2018673654",
+  "file": "img/loc_2018673654.jpg",
+  "title": "A group of sweatshop workers. Mr. Silberman, 30 Suffolk St. Photo taken after 3 P.M. February 21st, 1908, Witness Mrs. Lillian Hosford. Location: New York, New York (State)",
+  "date": "1908 February 21.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018673654/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1908 Suffolk St sweatshop: long bench, brick wall, small window, hanging coats, dim",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018673658",
+  "file": "img/loc_2018673658.jpg",
+  "title": "Sweatshop of Mr. Goldstein 30 Suffolk St. Witness Mrs. L. Hosford. Location: New York, New York (State)",
+  "date": "1908 February.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018673658/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1908 sweatshop: bench work table, window, dress form, crowded workers",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018673661",
+  "file": "img/loc_2018673661.jpg",
+  "title": "Group in Sweatshop. Mr. Schneider, 87 Ridge Street Shop located in the second inner court. Group just finishing week's work. Witness Mrs. Lillian Hosford. Location: New York, New York (State)",
+  "date": "1908 February 21.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018673661/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1908 Ridge St sweatshop in inner court: brick wall, fireplace, dark, hanging clothes; poor condition",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018673663",
+  "file": "img/loc_2018673663.jpg",
+  "title": "Group of women in sweatshop of Mr. Sentrei, 87 Ridge Street, second inner court. Small girl is Mamie Gerhino, 202 Elizabeth Street. She might have been 14 years old. Photo 5 P.M., February 21, 1908. Witness Mrs. Lillian Hosford. Location: New York, New York (State)",
+  "date": "1908 February 21.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018673663/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1908 sweatshop: pipes, bare brick, treadle machines, dim",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018674042",
+  "file": "img/loc_2018674042.jpg",
+  "title": "Room in Martini's factory (beading slippers, etc.), 249 Hud[son]. Women are calling for home-work, also delivering it, and learning to do it. Location: New York, New York (State)",
+  "date": "1911 December.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018674042/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 2,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1911 Martini factory room Hudson St: tin ceiling, shelving of boxes, rows of workers at benches with lamps",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018676689",
+  "file": "img/loc_2018676689.jpg",
+  "title": "1 P.M. Family of Onofrio Cottone, 7 Extra Pl., N.Y., finishing garments in a terribly run down tenement. The father works on the street. The three oldest children help the mother on garments. Joseph, 14, Andrew, 10, Rosie, 7, and all together they make about $2 a week when work is plenty. There are two babies. Location: [New York, New York (State)]",
+  "date": "1913 January.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018676689/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1913 tenement room used for home finishing: stove, laundry hung, bed pushed against wall, worn floor",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
+ },
+ {
+  "id": "loc_2018676690",
+  "file": "img/loc_2018676690.jpg",
+  "title": "11:30 A.M. Jennie Rizzandi, 9 year old girl, helping mother and father finish garments in a dilapidated tenement, 5 Extra Pl., N.Y.C. They all work until 9 P.M. when busy, and make about $2 to $2.50 a week. Father works on street, when he has work. Jennie was a truant, \"I staid home 'cause a lady was comin'.-\". Location: [New York, New York (State)].",
+  "date": "1913 January.",
+  "author": "Hine, Lewis Wickes, 1874-1940",
+  "place": "New York (State)--New York",
+  "topics": [
+   "loft",
+   "apartment"
+  ],
+  "source": "https://www.loc.gov/pictures/collection/nclc/item/2018676690/",
+  "rights": "No known restrictions on publication. For information see: \"National Child Labor Committee (Lewis Hine photographs),\" https://hdl.loc.gov/loc.pnp/res.097.hine",
+  "kind": "interior",
+  "condition": 1,
+  "reviewed": "interiors pass2 2026-11-27: viewed; 1913 dilapidated tenement room: iron stove, mantel, window, family at work",
+  "archive": "Library of Congress, Prints and Photographs Division (collection nclc)"
  }
 ]

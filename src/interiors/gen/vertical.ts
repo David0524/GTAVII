@@ -116,6 +116,21 @@ function roofTop(c: GenCtx, L: CoreLayout, stairCell: number) {
   // the bulkhead exterior box's front face covers the door opening: cut it by drawing the front wall separately
   k.wall(L.x1 + t, L.zs - t, L.x0 - t, L.zs - t, y - 0.05, y + bh + 0.1, ext, 1, [{ s0: L.x1 + t - (dx + doorW), s1: L.x1 + t - dx, y0: y, y1: y + 2.05 }], { collide: false });
   k.marker('spawn', (L.x0 + L.x1) / 2, y, L.zs - 1.2, 'roof');
+  // traversal: the bulkhead door is the roof hatch; every roof edge of the footprint is a grabbable ledge (MOVEMENT.md)
+  const locked = k.doors[k.doors.length - 1]?.locked ? 1 : 0;
+  k.traversal.push({ kind: 'hatch', a: [dx + doorW / 2, y, L.zs + 0.3], b: [dx + doorW / 2, y, L.zs - 0.6], w: doorW, h: 2.05, n: [0, -1], flags: locked });
+  if (c.ring) {
+    const rg = c.ring, top = c.b.top - c.unit.y, nr = rg.length / 2;
+    let area = 0; for (let i = 0; i < nr; i++) { const j = (i + 1) % nr; area += rg[2 * i] * rg[2 * j + 1] - rg[2 * j] * rg[2 * i + 1]; }
+    const sgn = area > 0 ? 1 : -1;
+    for (let i = 0; i < nr; i++) {
+      const j = (i + 1) % nr, ax = rg[2 * i], az = rg[2 * i + 1], bx = rg[2 * j], bz = rg[2 * j + 1], Ln = Math.hypot(bx - ax, bz - az);
+      if (Ln < 0.8) continue;
+      // outward normal: right of a->b for a counter-clockwise ring (x/z, y up)
+      const nx = ((bz - az) / Ln) * sgn, nz = (-(bx - ax) / Ln) * sgn;
+      k.traversal.push({ kind: 'ledge', a: [ax, top, az], b: [bx, top, bz], n: [nx, nz] });
+    }
+  }
   k.marker('stash', L.x0 - 0.4, y, L.ze - 0.4, 'loose flashing by the bulkhead');
   const fr = k.rng;
   // dressing on the tar: chimney stack, TV antennas, vent pipes, a pigeon coop, beach chairs, clothesline, water tank
