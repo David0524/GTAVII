@@ -178,6 +178,15 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - **Not done yet:** `van_coffee`; instancing of parked carts (each cart is about 6 draws);
     vendor-cart lights at night.
 
+- **Bus details:**
+  - A chrome front bumper with a deeper wrap.
+  - Chrome bands across the headlamp line and under the windscreen.
+  - Transit-style mirrors on long chrome arms from the front corners, reaching out and forward
+    to a head at about 2.2 m.
+- **Windscreen wipers on every vehicle** (LOD0): two arms parked along the base, with rubber
+  blades and pivots. Bus and truck arms are longer.
+- LOD0 triangles: bus 10.3k, cars 8.4–9.5k.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

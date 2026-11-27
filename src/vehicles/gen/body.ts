@@ -425,6 +425,15 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     } else if (e === 'roofRack' && lod === 0) {
       for (const sx of [-1, 1]) b.sweep('chrome', [[sx * (gh.roofHalfW - 0.08), roofTop - 0.005, Z(gh.sA1 + 0.35)], [sx * (gh.roofHalfW - 0.08), roofTop + 0.04, Z(gh.sA1 + 0.45)], [sx * (gh.roofHalfW - 0.08), roofTop + 0.04, Z(gh.sC1 - 0.1)], [sx * (gh.roofHalfW - 0.08), roofTop - 0.02, Z(gh.sC1)]], [[-0.012, -0.012], [0.012, -0.012], [0.012, 0.012], [-0.012, 0.012]]);
       for (let k = 0; k < 3; k++) b.box('chrome', 0, roofTop + 0.045, Z(lerp(gh.sA1 + 0.6, gh.sC1 - 0.25, k / 2)), gh.roofHalfW * 2 - 0.16, 0.015, 0.03);
+    } else if (e === 'mirrorsBoth' && lod === 0 && m.cls === 'bus') {
+      // transit-coach mirrors on long chrome arms from the front corners, out and forward
+      for (const sx of [-1, 1]) {
+        const x0 = sx * (halfW(0.35) - 0.02), yTop = gh.roofY - 0.28, z0 = Z(0.35);
+        const hx = sx * (halfW(0.35) + 0.32), hy = m.beltY + 0.95, hz = Z(-0.32);
+        b.tubePath('chrome', [[x0, yTop, z0], [x0 + sx * 0.12, yTop + 0.04, z0 - 0.25], [hx, yTop - 0.02, hz + 0.08], [hx, hy + 0.2, hz]], 0.016, 6);
+        b.box('trim', hx, hy, hz, 0.06, 0.38, 0.22, sx * 0.25);
+        b.box('glass', hx - sx * 0.032, hy, hz, 0.005, 0.34, 0.18, sx * 0.25);
+      }
     } else if ((e === 'mirrorL' || e === 'mirrorsBoth') && lod === 0) {
       const big = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(m.cls);
       for (const sx of e === 'mirrorsBoth' ? [-1, 1] : [-1]) {
@@ -470,6 +479,24 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     }
   }
   if (bb.pos.length) beacon = bb.build();
+  // windscreen wipers, parked along the base of the glass (two arms; split screens get one each)
+  if (lod === 0 && gh.sA0 > 0.01) {
+    const big = m.cls === 'bus' || !PASSENGER.has(m.cls);
+    const baseHw = halfW(gh.sA0) - gh.beltInset;
+    const len = big ? baseHw * 0.78 : baseHw * 0.62;
+    const yb = m.beltY + (big ? 0.06 : 0.025), zb = Z(gh.sA0) + (big ? 0.04 : 0.03);
+    for (const [px, dir] of (big ? [[-baseHw * 0.08, -1], [baseHw * 0.9, -1]] : [[-baseHw * 0.55, 1], [baseHw * 0.05, 1]]) as [number, number][]) {
+      b.box('trim', px + (dir * len) / 2, yb, zb, len, 0.012, 0.012);         // arm + blade
+      b.box('rubber', px + (dir * len) / 2, yb + 0.006, zb + 0.008, len * 0.92, 0.008, 0.008);
+      b.add('trim', new THREE.CylinderGeometry(0.014, 0.016, 0.03, 8), new THREE.Matrix4().makeTranslation(px, yb - 0.01, zb)); // pivot
+    }
+  }
+  // coach front: a chrome band across the headlamp line, and a chrome nose strip
+  if (m.cls === 'bus' && lod === 0) {
+    const fz = Z(0) - 0.004, hw2 = halfW(0.02);
+    b.box('chrome', 0, m.headlamps.y + m.headlamps.size * 0.75, fz, hw2 * 1.9, 0.03, 0.012);
+    b.box('chrome', 0, m.beltY - 0.04, fz - 0.002, hw2 * 1.9, 0.025, 0.012);
+  }
   const sideOf = (c: { hw: number }) => c.hw + 0.012;
   const box0 = m.cargo?.find((k) => k.kind === 'box');
   if (m.cls === 'ambulance' && box0) {
