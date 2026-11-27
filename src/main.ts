@@ -269,7 +269,7 @@ async function main() {
   const placeAt = () => { const p = player.pos; player.active = false; orbit.snap(p, player.heading); mode = 'onfoot'; };
   const host: UiHost = {
     input, saves, streets, baseUrl: import.meta.env.BASE_URL, heroes: world.manifest.heroes,
-    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, speed: mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: false, lead: party.activeId }; },
+    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, heading: mode === 'onfoot' ? player.heading : fly.yaw, speed: mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: false, lead: party.activeId }; },
     clock: () => ({ date: worldClock.date, minutes: worldClock.minutes, weather: worldClock.weather }),
     party: () => [...party.leads.values()].map((l) => ({ id: l.id, name: l.displayName, short: l.displayName, tagline: LEAD_STYLE[l.id]?.tagline ?? '', colour: LEAD_STYLE[l.id]?.colour ?? '#c79a3c', cash: l.money, where: l.id === party.activeId ? loc.crossing : 'Elsewhere in the city', available: true })),
     health: () => ({ hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 }),
