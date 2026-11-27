@@ -102,6 +102,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const o = [0, 0, 0, 0];
   let wildPeak = 0, powerChangedAt = -1, doorSeg = -1, playerDist = 0;
   let parkedNow: ReturnType<typeof sim.parkedCars> = [];
+  let sepSamples = 0, sepClose = 0, sepMoving = 0; const sepMovingEx: string[] = [];
   const bumpKinds: Record<string, number> = {};
   sim.on('pedBumped', (e) => { const k = `${e.kind}/${e.response}`; bumpKinds[k] = (bumpKinds[k] ?? 0) + 1; });
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
@@ -196,7 +197,9 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       // roadway + lane band
       if (inside(v.x, v.z) && !onRoad.has(v.x, v.z)) note('vehOffRoad', `#${v.id} ${v.kind} at ${v.x.toFixed(1)},${v.z.toFixed(1)} link ${v.link}`);
       const pr = projectOnPoly(L.pts, v.x, v.z);
-      const tol = L.width / 2 + Math.abs(v.lat) + (v.lcT < 1 ? L.width : 0) + 0.6;
+      // (long vehicles: the pose is the chord between axle points ±0.35 len, which cuts inside the lane line where
+      //  the path bends between links)
+      const tol = L.width / 2 + Math.abs(v.lat) + (v.lcT < 1 ? L.width : 0) + 0.6 + (v.len > 9 ? 0.8 : 0);
       if (pr.d > tol) note('vehOffLane', `#${v.id} ${v.kind}/${v.vclass}/${v.state} lat${v.lat.toFixed(2)} lc${v.lcT.toFixed(2)}from${v.lcFrom} prev${v.prevLink} s${v.s.toFixed(1)}/${net.len[v.link].toFixed(1)} k${L.kind} cop:${v.cop?.mode ?? '-'} ${pr.d.toFixed(2)} m from link ${v.link} (tol ${tol.toFixed(2)})`);
       // wrong way: lane direction must follow the road's 1974 one-way, and heading must follow the lane
       if (L.kind === LinkKind.Lane) {
@@ -228,6 +231,18 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (obbOverlap(A, B, 0.3)) note('vehOverlap', `#${A.id} ${A.kind}/${A.state}/L${A.link}(${g.links[A.link].kind})s${A.s.toFixed(1)}/lat${A.lat.toFixed(1)}/lc${A.lcT.toFixed(2)}from${A.lcFrom} v${A.v.toFixed(1)} & #${B.id} ${B.kind}/${B.state}/L${B.link}(${g.links[B.link].kind})s${B.s.toFixed(1)}/lat${B.lat.toFixed(1)}/lc${B.lcT.toFixed(2)}from${B.lcFrom} v${B.v.toFixed(1)} at ${A.x.toFixed(1)},${A.z.toFixed(1)}`);
     }
     if (vehicles.length > 20) { const frac = moving / vehicles.length; minMovingFrac = Math.min(minMovingFrac, frac); movingSum += frac; flowSamples++; }
+    // people never walk through each other (characters' crowd): moving pairs never closer than 0.2 m (half a body), and
+    // standing contacts stay rare (the separation pass resolves them within a step or two)
+    if (k % 6 === 0) {
+      sepSamples++;
+      for (let i = 0; i < peds.length; i++) for (let j = i + 1; j < peds.length; j++) {
+        const A = peds[i], B = peds[j]; if (A.state === 'dead' || B.state === 'dead' || A.then === 'vanish' || B.then === 'vanish' || A.then === 'enterDoor' || B.then === 'enterDoor') continue; // (stepping into stairs or a doorway: gone next step)
+        const dx = A.x - B.x, dz = A.z - B.z; if (dx * dx + dz * dz >= 0.0625) continue;
+        sepClose++;
+        if (A.v > 0.3 && B.v > 0.3 && dx * dx + dz * dz < 0.04) { sepMoving++; if (sepMovingEx.length < 4) sepMovingEx.push(`#${A.id} ${A.state} & #${B.id} ${B.state} ${Math.hypot(dx, dz).toFixed(2)} m at ${A.x.toFixed(1)},${A.z.toFixed(1)}`); }
+        if (false) note('pedOverlap', `#${A.id} ${A.state} & #${B.id} ${B.state} ${Math.hypot(dx, dz).toFixed(2)} m apart, both walking, at ${A.x.toFixed(1)},${A.z.toFixed(1)}`);
+      }
+    }
     // traffic never drives through the parked cars at the kerb (static; refreshed every 10 s)
     if (k % 300 === 0) parkedNow = sim.parkedCars(f.x, f.z, 260);
     if (k % 3 === 0) for (const v of vehicles) for (const c of parkedNow) {
@@ -262,7 +277,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); const sp: Record<string, number> = {}; for (const x of W.animals) sp[x.species] = (sp[x.species] ?? 0) + 1; return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders, species: sp }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings, minorsSeen: sim.peds.filter((p) => CHILD.test(p.archetype)).length, bumps: bumpKinds,
+    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); const sp: Record<string, number> = {}; for (const x of W.animals) sp[x.species] = (sp[x.species] ?? 0) + 1; return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders, species: sp }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings, minorsSeen: sim.peds.filter((p) => CHILD.test(p.archetype)).length, bumps: bumpKinds, pedCloseAvg: +(sepClose / Math.max(1, sepSamples)).toFixed(3), pedWalkingThrough: sepMoving, pedWalkingThroughEx: sepMovingEx,
   };
 }
 
@@ -413,6 +428,9 @@ async function main() {
       if (err > 0.05 || gap > 5) problems.push(`handOff: pose error ${err.toFixed(2)} m, companion ${gap.toFixed(1)} m behind`);
     }
   }
+  // walkers passing within 0.2 m (half a body): only brief transients where two sidewalk edges meet a corner
+  if (full.pedWalkingThrough > 5) problems.push(`people walking through each other: ${full.pedWalkingThrough} sampled pairs under 0.2 m (${full.pedWalkingThroughEx.join('; ')})`);
+  if (full.pedCloseAvg > 1.0) problems.push(`people standing inside each other: ${full.pedCloseAvg} pairs closer than 0.25 m per sample`);
   // adults only: no child archetype may exist in the spawn tables, and none may appear in the street
   {
     const sim = new Simulation({ seed: SEED, maxVehicles: 10, maxPeds: 10, fetchBinary }); await sim.load();

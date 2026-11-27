@@ -15,7 +15,7 @@ import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
 import { bumpReactions } from './bump';
 import { cullBehindView, feedEdgeLanes } from './traffic';
-import { cullPedsBehindView, despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
+import { cullPedsBehindView, separatePeds, despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
@@ -213,6 +213,7 @@ export class Simulation {
     for (const p of S.peds) if (p.cop2 && p.alive) policePedTick(S, p);
     stepPeds(S, h);
     bumpReactions(S, h);
+    separatePeds(S, this.sepParity ^= 1);
     vehicleContacts(S, this.contactCd);
     this.wild.step(h);
     this.parking.step(h);
@@ -258,6 +259,7 @@ export class Simulation {
     }
   }
   private footSeen = new Set<number>();
+  private sepParity = 0;
 
   private clearFar() {
     const S = this.core;

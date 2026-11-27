@@ -58,6 +58,12 @@ export interface Ped {
   bumpCd?: number; bumpPrev?: string; bumpResponse?: string;
   /** street vendors (vendors.ts): the stall this ped works / queues at / watches; what they bought */
   vendor?: string; carry?: string; carryUntil?: number; buyCd?: number;
+  /** seconds held up near the kerb (joins the crossing crowd) */
+  kerbT?: number;
+  /** waiting slot at the kerb (edge s and lat; -1: none, e.g. on a traffic island) */
+  slotS?: number; slotLat?: number;
+  /** walking up from the waiting crowd to this crosswalk (taken at the corner) */
+  crossNext?: number;
 }
 
 export interface Hail { ped: number; road: number; side: number; x: number; z: number; claimedBy: number; t: number }
@@ -66,6 +72,8 @@ export interface Actor { id: string; x: number; z: number; vx: number; vz: numbe
 export interface CopState {
   /** arrival radius (m): widened when the scene is on a side street parked solid and the unit stops on a corridor */
   arriveR?: number;
+  /** closest it has come to the goal so far (drive-by detection) */
+  minD?: number;
   id: number; kind: 'foot' | 'car'; role?: 'police' | 'ambulance' | 'fire' | 'tow'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
   x: number; z: number; cx: number; cz: number; radius: number; yaw: number; target: string | null; urgent: boolean; siren: boolean; maxSpeed: number;
   route: number[]; arrived: boolean; stuckT: number; blockIds: number;

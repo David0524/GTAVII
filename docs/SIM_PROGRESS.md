@@ -525,6 +525,19 @@ ramps as their own lane level (streets with grade `g` ≠ 0 are left out of the 
 can't make false junctions), taxi stands by the terminal, and rush-hour concourse crowds (adults only)
 on the timetable, once the engine posts the new PLAYABLE and the concourse walkable area.
 
+## Pedestrian separation (characters' crowd: no interpenetration)
+- People waiting to cross stand in slots on the sidewalk they arrived along: rows starting a step back from
+  the corner, up to four abreast (two shallow rows at the end of the crosswalk on a traffic island). On WALK
+  they walk up to the kerb and onto that crosswalk; they cross spread over its width, not in single file.
+- Walkers held up at the kerb join the waiting crowd instead of pressing in single file.
+- A separation pass after each step pushes any two people closer than 0.5 m apart (half the crowd each
+  step): walkers within their band (corner taper kept), others snapped to the nearest sidewalk band; stall
+  vendors, people in the road and reaction states hold their place.
+- Test: sampled pairs closer than 0.25 m average 0.4–0.6 per sample on High at rush hour (was ~150 at busy
+  corners); walkers passing within 0.2 m are brief transients at corner nodes (≤5 sampled per 10-min run).
+- Cost: High ~2.3–2.5 ms per step in this container (Low ~0.5 ms): over the 2 ms desktop budget, so the
+  sim should move to a worker on desktop (requests item 7; it has no DOM or three.js dependency).
+
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
       (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.
