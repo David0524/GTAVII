@@ -164,6 +164,40 @@ col *= (1 + 0.05 * np.maximum(blob(u, v, 0.36, 0.6, 0.05, 0.04), blob(u, v, 0.64
 mac = ss(0.86, 0.9, vnoise(p * 260 + 11.3)) * ss(0.5, 0.7, vnoise(p * 40 + 2.1)) * isF * (1 - lipM) * (1 - hairM)
 col *= (1 - 0.3 * mac)[:, None]
 
+# photographic micro-detail from a CC0 MakeHuman skin (job['detail']: the diffuse PNG and three
+# landmarks of its face after rotating upright). Only the high-pass luminance ratio is used (pores,
+# fine creases, uneven tone at the mm scale); our tone and regional colour stay. The MakeHuman map's
+# hair and eye openings are masked out. ICT face UV -> MakeHuman pixel by a 3-point affine.
+det = job.get('detail')
+if det:
+    from PIL import ImageFilter
+    src = Image.open(det['png']).convert('RGB')
+    cx0, cy0, cw, ch = det['crop']                     # crop box in the source (before rotating upright)
+    face = src.crop((cx0, cy0, cx0 + cw, cy0 + ch)).rotate(det.get('rotate', -90), expand=True)
+    fa = np.asarray(face).astype(np.float64)
+    lum = fa @ np.array([0.3, 0.59, 0.11])
+    blur = np.asarray(Image.fromarray(np.clip(lum, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(det.get('sigma', 6)))).astype(np.float64)
+    ratio = np.clip((lum + 2) / (blur + 2), 0.6, 1.4)
+    med = np.median(blur)
+    okm = np.clip((blur - 0.55 * med) / (0.2 * med), 0, 1)     # hair (dark) excluded
+    for ex, ey in det['eyes']:
+        yy, xx = np.mgrid[0:ratio.shape[0], 0:ratio.shape[1]]
+        okm *= np.clip((np.hypot((xx - ex) / 1.6, yy - ey) - 14) / 8, 0, 1)   # eye openings excluded
+    # affine: ICT face (u, v) -> upright crop pixel, from eyes and the mouth line
+    (e1x, e1y), (e2x, e2y) = det['eyes']; mx, my = det['mouth']
+    A = np.array([[0.35, 0.7175, 1], [0.65, 0.7175, 1], [0.5, 0.4313, 1]])
+    cxv = np.linalg.solve(A, [e1x, e2x, mx]); cyv = np.linalg.solve(A, [e1y, e2y, my])
+    fx = cxv[0] * u + cxv[1] * v + cxv[2]; fy = cyv[0] * u + cyv[1] * v + cyv[2]
+    inside = (fx >= 0) & (fx < ratio.shape[1] - 1) & (fy >= 0) & (fy < ratio.shape[0] - 1) & isF
+    xi = np.clip(fx.astype(int), 0, ratio.shape[1] - 1); yi = np.clip(fy.astype(int), 0, ratio.shape[0] - 1)
+    r_s = ratio[yi, xi]; m_s = okm[yi, xi] * inside * (1 - hairM)
+    strength = det.get('strength', 0.85)
+    col *= (1 + (r_s - 1) * strength * m_s)[:, None]
+    H_detail = (r_s - 1) * m_s
+    print('photo detail texels', int(inside.sum()))
+else:
+    H_detail = np.zeros(N)
+
 # other regions
 def setc(mask, c, var=0.08, f=300):
     global col
@@ -229,6 +263,7 @@ lipLines = np.sin(2 * np.pi * (u - 0.5) / 0.0022 + 3 * vnoise(p * 600)) * lipM *
 H += 0.12 * lipLines
 H += 0.05 * np.sin(2 * np.pi * v / 0.011 + 2 * vnoise(p * 150)) * ss(0.8, 0.83, v) * (1 - ss(0.87, 0.9, v)) * isF
 H += 0.15 * (stip - 0.5) * hairM
+H += 0.9 * H_detail  # the photo detail's pores also as relief
 Himg = np.zeros((W, W)); Himg[ii] = H
 # gradients only between filled texels (cells never see each other)
 gx = np.zeros((W, W)); gy = np.zeros((W, W))

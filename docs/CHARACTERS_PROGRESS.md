@@ -96,8 +96,11 @@ the size pass.
 
 **Next, in order:**
 1. Eyes: done for now (above).
-2. Albedo: pore pits, uneven pigmentation and macules added. A photographic layer still needs the
-   MakeHuman source skins, which aren't in this container. Brows are done (shells).
+2. Albedo: pore pits, uneven pigmentation and macules added. **Photographic micro-detail is now
+   in:** the CC0 MakeHuman `young_african_female` skin (fetched to `data/raw`, licence re-verified)
+   is high-passed and mapped onto the ICT face UV by a 3-landmark affine, with its hair and eye
+   openings masked. It goes into both the albedo and the normal map. The gain is subtle at review
+   distance. Brows are done (shells).
 3. Nape: done. Profile neck seam: needs the head-to-body weld (open).
 4. Dress collar spikes: fixed at the front.
 5. Size: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
@@ -105,7 +108,7 @@ the size pass.
    whole head is about 0.66 MB. meshopt is still to do.
 6. Oversight's board notes:
    - Bag strap: it's a ribbon seated on the clothed (draped) torso surface, from the bag over the
-     shoulder, so it no longer floats. There's a small kink at the top of the shoulder.
+     shoulder, lying flat over the top of the shoulder. It no longer floats.
    - Relaxed idle in review shots: done.
    - Ragged sleeve hems: still open.
 

@@ -260,6 +260,8 @@ const job = {
   size: spec.texSize ?? 2048, out: path.join(OUT, id), tone: spec.tone, brow: spec.brow ?? '#141010', iris: spec.iris ?? '#2a1a10', lip: spec.lip ?? null, seed: spec.seed ?? 7,
   uv: vUV, orig: vOrig, region: vRegion, pos: Array.from(pos), tris,
   eyes: { L: LEye, R: REye }, lids, eyeY, mouthY,
+  // CC0 MakeHuman skin for photographic micro-detail (data/raw, gitignored; licence in the .mhmat)
+  detail: spec.detail && fs.existsSync(path.resolve(import.meta.dirname, '../..', spec.detail.png)) ? { ...spec.detail, png: path.resolve(import.meta.dirname, '../..', spec.detail.png) } : null,
 };
 const jf = path.join(TMP, `${id}.json`);
 fs.writeFileSync(jf, JSON.stringify(job));

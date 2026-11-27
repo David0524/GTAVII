@@ -261,13 +261,17 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
         const az = Math.atan2(p[0] - tr.center[0], p[2] - tr.center[1]);
         const q = tr.at(p[1], az, clothOff);
         // on the torso band the surface wins; the bag end eases into the bag top
-        const w = Math.min(1, i / 3);
+        // ...and the shoulder end is left on its own path (the torso map there runs into the neck)
+        const w = Math.min(1, i / 3) * Math.min(1, Math.max(0, (ua[1] + 0.02 - p[1]) / 0.05));
         path.push([p[0] + (q[0] - p[0]) * w, p[1], p[2] + (q[2] - p[2]) * w]);
       }
       const base = mb.count, i0b = mb.indexCount, half = 0.016;
       for (let i = 0; i <= N; i++) {
         const p = path[i], a = path[Math.max(0, i - 1)], b = path[Math.min(N, i + 1)];
-        const tg = nrm(sub(b, a)), out = nrm([p[0] - tr.center[0], 0, p[2] - tr.center[1]]);
+        // the strap's face normal: radial on the chest, turning upward where it crosses the top of the shoulder
+        const up01 = Math.min(1, Math.max(0, (p[1] - (ua[1] - 0.03)) / 0.08));
+        const rad = nrm([p[0] - tr.center[0], 0, p[2] - tr.center[1]]);
+        const tg = nrm(sub(b, a)), out = nrm([rad[0] * (1 - up01), up01, rad[2] * (1 - up01)]);
         const across = nrm(cross(tg, out)), up = nrm(cross(across, tg));
         const j = p[1] < ctx.F.y.waist ? JI.pelvis : JI.spine_03;
         for (const sd of [-1, 1]) for (const th of [0, 0.003]) mb.vertex([p[0] + across[0] * half * sd + up[0] * th, p[1] + across[1] * half * sd + up[1] * th, p[2] + across[2] * half * sd + up[2] * th], null, [j, 0, 0, 0], [1, 0, 0, 0], leather('#2a1e16'));

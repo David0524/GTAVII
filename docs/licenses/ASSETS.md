@@ -14,7 +14,7 @@ Full records with edits are in `docs/CHARACTER_SOURCES.md`; the head-source rese
 
 | Asset | Licence | Key clause (source) | Used for |
 |---|---|---|---|
-| MakeHuman system assets (base mesh, targets, rig, weights, 18 default skins, eyes and teeth) | CC0 1.0 | each .mhmat: "explicitly released as CC0 in september 2020"; makehumancommunity.org asset pages list CC0 | every body; skin detail for all tiers |
+| MakeHuman system assets (base mesh, targets, rig, weights, 18 default skins, eyes and teeth) | CC0 1.0 | each .mhmat: "explicitly released as CC0 in september 2020"; makehumancommunity.org asset pages list CC0 | every body; skin detail for all tiers; Delphine's face micro-detail (the high-pass of `skins/young_african_female`, mapped onto her ICT head by 3 landmarks; licence re-verified 2026-11-27 in the .mhmat: "explicitly released as CC0 in september 2020") |
 | Quaternius Universal Animation Library 1 and 2 | CC0 1.0 | quaternius.com: "CC0" | locomotion and action clips |
 | Poly Haven fabric scans (6) | CC0 1.0 | polyhaven.com/license: "CC0" | cloth relief maps |
 | ICT-FaceKit "Light" (USC ICT) | MIT | github.com/ICT-VGL/ICT-FaceKit LICENSE: "Permission is hereby granted, free of charge... to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"; notice shipped in `public/characters/rb/LICENSE-ICT-FaceKit.md` | Delphine's head (`lead_delphine`): one synthesised identity baked by `tools/characters/bake-ict.ts`; the basis is dev-only and never ships; textures are procedural (ours). Synthesised identities only, never fitted to photos of real people. The separately licensed "Full ICT Face Model" is not used. |
