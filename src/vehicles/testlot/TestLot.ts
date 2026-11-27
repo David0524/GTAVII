@@ -15,6 +15,7 @@ import { SubwayTrain } from '../subway/SubwayTrain';
 import { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS } from '../assist';
 import { ZONES } from '../gen/morphs';
 import { VehicleLights, type VehicleClass } from '../../shared/traffic';
+import { CarLightPool, updateCarLights, setGroundLightLevel } from '../lighting';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type N = any;
@@ -84,7 +85,22 @@ export async function runTestLot() {
   sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 200 });
   sun.shadow.bias = -0.0004;
-  scene.add(sun, sun.target, new THREE.HemisphereLight(0xbcc4d8, 0x4a3e34, 1.1));
+  const hemi = new THREE.HemisphereLight(0xbcc4d8, 0x4a3e34, 1.1);
+  scene.add(sun, sun.target, hemi);
+  // time of day for light tests: 0 = afternoon, 1 = night (moonlight + sodium-ish sky glow)
+  let night = 0;
+  const DAY = { bg: new THREE.Color(0xb8ad9c), fog: new THREE.Color(0xb0a494), sun: new THREE.Color(0xffe2bc) };
+  const NIGHT = { bg: new THREE.Color(0x0d1018), fog: new THREE.Color(0x10121a), sun: new THREE.Color(0x8ea4d8) };
+  const setNight = (f: number) => {
+    night = f;
+    (scene.background as THREE.Color).copy(DAY.bg).lerp(NIGHT.bg, f);
+    (scene.fog as THREE.Fog).color.copy(DAY.fog).lerp(NIGHT.fog, f);
+    sun.color.copy(DAY.sun).lerp(NIGHT.sun, f);
+    sun.intensity = THREE.MathUtils.lerp(2.4, 0.12, f);
+    hemi.intensity = THREE.MathUtils.lerp(1.1, 0.14, f);
+    scene.environmentIntensity = THREE.MathUtils.lerp(0.9, 0.1, f);
+    setGroundLightLevel(f);
+  };
 
   // ------------------------------------------------------------------ world
   const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
@@ -223,6 +239,7 @@ export async function runTestLot() {
     player = factory.spawn(world, scene, MODELS[modelIdx].id, { x, y: 0.1, z, yaw }, variant);
     player.security.keysIn = true; player.security.locked = false; // the tester owns this car
     player.setLights({ head: true });
+    player.isPlayer = true;
     wire(player, 'player');
   };
 
@@ -258,6 +275,12 @@ export async function runTestLot() {
     spawnPlayer();
   }
 
+  // ------------------------------------------------------------------ car lights: fixed pool of real lights for the nearest lamps
+  const carLights = new CarLightPool(scene, qname, quality.shadows && (qname === 'high' || qname === 'ultra'));
+  let lastTrafficCands: ReturnType<NonNullable<typeof traffic>['lightCandidates']> = [];
+  const prerender = () => updateCarLights(carLights, [player, ...parked], camera.position, lastTrafficCands);
+  if (params.has('night')) setNight(Number(params.get('night')) || 1);
+
   // ------------------------------------------------------------------ traffic (visual-only instanced proxies)
   const nTraffic = mode === 'traffic' ? Number(params.get('n') ?? (qname === 'low' ? 40 : 150)) : 0;
   const traffic = nTraffic ? factory.createTrafficRenderer(nTraffic) : null;
@@ -284,7 +307,8 @@ export async function runTestLot() {
       c.lights = VehicleLights.Head | (brake ? VehicleLights.Brake : 0) | (c.vclass === 'taxi' && c.variant % 3 === 0 ? VehicleLights.RoofLight : 0)
         | (c.vclass === 'police' && c.variant % 2 === 0 ? VehicleLights.Siren : 0) | (c.variant % 17 === 0 ? VehicleLights.Hazard : 0);
     }
-    traffic.setInstances(tcars, camera.position);
+    lastTrafficCands = traffic.lightCandidates(tcars, camera.position);
+    traffic.setInstances(tcars, camera.position, carLights);
   };
 
   // ------------------------------------------------------------------ subway (mode=subway): straight track south of the lot
@@ -426,9 +450,9 @@ export async function runTestLot() {
     setModel(id: string, v = 0, pose = { x: 0, z: 40, yaw: 0 }) { modelIdx = MODELS.findIndex((m) => m.id === id); variant = v; spawnPlayer(pose.x, pose.z, pose.yaw); },
     setCamera(x: number, y: number, z: number, lx: number, ly: number, lz: number, fov = 55) { freeCam = { p: new THREE.Vector3(x, y, z), l: new THREE.Vector3(lx, ly, lz), fov }; },
     clearCamera() { freeCam = null; camera.fov = 55; camera.updateProjectionMatrix(); },
-    renderOnce() { if (freeCam) applyFree(); renderer.render(scene, camera); },
+    renderOnce() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.render(scene, camera); },
     /** Render now and return the canvas as a PNG data URL (read before the frame is composited). */
-    capture() { if (freeCam) applyFree(); renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
+    capture() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
     /** Stop / restart the interactive loop (the shot rig drives frames itself). */
     pause() { renderer.setAnimationLoop(null); },
     resume() { renderer.setAnimationLoop(loop); },
@@ -463,6 +487,10 @@ export async function runTestLot() {
       const n = camera.position.clone().sub(target).normalize();
       return player.applyHit({ point: target, normal: n, type: 'bullet', source: 'tester' });
     },
+    /** 0 = afternoon, 1 = night. */
+    setNight, get night() { return night; }, carLights,
+    /** Dent the player at a local point (metres of push), for damage close-ups. */
+    dentAt(x: number, y: number, z: number, amount = 0.1, radius = 0.6) { player.object.updateMatrixWorld(); return player.dent(player.object.localToWorld(new THREE.Vector3(x, y, z)), amount, radius); },
     hill: { x: HILL_X, heightAt: (x: number, z: number) => roadHeight(x, z) },
     moveTraffic,
     stats() {
@@ -492,6 +520,7 @@ export async function runTestLot() {
     if (freeCam) applyFree(); else updateCamera(dt);
     moveTraffic(dt);
     sun.target.position.copy(player.object.position); sun.position.copy(player.object.position).add(new THREE.Vector3(-40, 60, 25));
+    prerender();
     renderer.render(scene, camera);
     const s = frames.summary();
     const ph = player.physics;

@@ -36,6 +36,8 @@ export type { TrafficInstance, VehicleClass } from '../shared/traffic';
 export { CLASS_MODELS } from './registry';
 export { MODELS } from './models';
 export { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS, type AssistSettings } from './assist';
+export { CarLightPool, updateCarLights, setGroundLightLevel, LIGHT_BUDGET, type LightCandidate, type Lightable } from './lighting';
+import type { LightCandidate } from './lighting';
 
 export interface VehicleFactory {
   models: readonly { id: string; class: string; displayName: string }[];
@@ -45,7 +47,13 @@ export interface VehicleFactory {
   /** Rebuild a saved car exactly (vehicle.serialize() -> save -> restore). */
   restore(world: RAPIER.World, scene: THREE.Object3D, save: VehicleSave): Vehicle;
   /** Visual-only instanced proxies for AI traffic far from the player (no physics body). */
-  createTrafficRenderer(maxInstances: number): { setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3): void; object: THREE.Object3D; dispose(): void; lastMs: number };
+  createTrafficRenderer(maxInstances: number): {
+    /** lit: the CarLightPool after assign(), so cars holding a real light skip their ground pools. */
+    setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3, lit?: { litHead: Set<string>; litRear: Set<string> }): void;
+    /** Real-light requests for nearby traffic (feed to updateCarLights' extra list). */
+    lightCandidates(list: readonly TrafficInstance[], camera: THREE.Vector3, radius?: number): LightCandidate[];
+    object: THREE.Object3D; dispose(): void; lastMs: number;
+  };
   /** Registry: every VehicleClass resolves to >= 1 model; the variant seeds model choice, paint, dirt, dents. */
   resolve(vclass: VehicleClass, variant: number): { modelId: string; paint: string };
   /** Motorcycles, bicycles, the carrier trike (same driving contract; emits 'crash' for the rider ragdoll). */

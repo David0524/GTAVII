@@ -4,6 +4,60 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 5: visual bar (VISUAL_BAR.md): contact shadows, lights that light, local dents
+Gap list sent to oversight: 1 reflections (partial), 2 damage deformation (partial), 3 interiors
+(done, basic), 4 lights cast light (missing), 5 contact shadows (missing), 6 normal detail
+(partial), 7 wetness (partial), 8 LOD pops (at risk), 9 parked cars (sim/engine). This session
+closes **5, 4 and 2**. 6, 7 and 8 are next.
+
+- **Contact shadows (5)** are in `src/vehicles/lighting.ts`:
+  - Each model bakes a footprint texture once: a soft rounded rectangle under the body plus a
+    tight dark patch under every tyre (dual rears count wider).
+  - The quad lies on the plane through the wheel contacts (mean point and normal), turned to the
+    heading. It fades with height when airborne and when the car rolls over.
+  - Every simulated car and bike gets one, and every traffic instance (one instanced quad per
+    model batch). Cost: one transparent draw per car, or per model for traffic.
+  - Shot: `visual_contact_shadows.jpg` (off/on).
+- **Lights that cast light (4):**
+  - `CarLightPool` is a fixed pool of SpotLights (headlights) and PointLights (brake/tail glow).
+    Unused lights sit at intensity 0, so the light count and the shaders never change.
+  - `updateCarLights(pool, cars, camera, extraCandidates)` hands the lights to the player first,
+    then to the nearest cars with lamps on, traffic included via
+    `traffic.lightCandidates()`.
+  - Budget (`LIGHT_BUDGET`): low (phone) 1 spot and 1 glow; medium 3/2; high 6/4; ultra 8/6. The
+    first spot casts a 512² shadow on high and ultra only.
+  - Every other car with lamps on draws cheap **additive ground pools**: a low-beam wedge, and a
+    brake or tail glow. Cars that hold a real light skip their pools.
+  - `setGroundLightLevel(night)` sets the time of day and scales the pools and the real lights.
+    The scene's sun is not physically scaled, so at noon the car lights are off (they would
+    otherwise paint visible pools on sunlit concrete). **The engine's time of day should call it.**
+  - Test lot: `&night=1` or `__VEH.setNight(f)`.
+  - Shots: `visual_night_lights.jpg` (chase view with the real beam vs emissive only, oncoming
+    beam, brake glow) and `visual_night_traffic.jpg` (150 cars).
+- **Local dents (2):** `vehicle.dent(worldPoint, metres, radius)`.
+  - It works on a copy-on-write clone of the shared body (and hood) geometry, on top of the four
+    zone morphs. The crater falls off smoothly and has crumple noise, pushing toward the body
+    core with the vertical damped, so cars crumple rather than flatten.
+  - Wall and car contacts queue dents along the impact episode, applied at most every 80 ms, not
+    on low quality. `applyHit({type:'impact'})` dents at the hit point. `repair()` restores the
+    shared geometry.
+  - Cost: **3.4 ms per dent** on the CPU (5.2k vertices, mostly computeVertexNormals). Rate-limited
+    so it can't run every frame; on phones it is off. Next: renormalise only the touched faces.
+  - Shot: `visual_dents.jpg`.
+- **Fixed a shot-rig bug:** the crumple close-up launched the car 6 m short of the wall, so earlier
+  close-ups showed an undamaged car. `damage_crumple_closeup.jpg` now shows the real crumple.
+
+**Critique, honest:**
+- The headlight beam is a single spot per car, aimed as a low beam (hitting the road about 9–14 m
+  out). It reads well head-on, but the chase view only shows a short pool. No volumetric haze and
+  no lens flare yet; that belongs to the engine's post stack.
+- At night the test lot has no street lights, so the frames are darker than any real 1974 street;
+  the city's lamps will carry the ambient.
+- The traffic ground pools are flat additive decals: they don't wrap kerbs or light walls.
+  Acceptable past about 45 m, where they are used.
+- Frame-time cost of 6–8 forward lights can't be measured here (SwiftShader). The budget table is
+  the guard. On phones: one spot and one glow.
+
 ## Session 4: after the usage reset (engine-independent gaps)
 - **Merged** the engine at adb6373. The engine accepted request 7, so the registry now resolves
   every shared class: the emergency vehicles, mail, ice cream, motorcycle, police motorcycle

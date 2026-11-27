@@ -5,6 +5,7 @@ import { drawPlate } from '../gen/decals';
 import { rng } from '../gen/rng';
 import type { DriveInput } from '../physics';
 import { buildBike, type BikeSpec, type BikeGeometry } from './bikes';
+import { shadowBake, groundPlane, shadowMaterial } from '../lighting';
 import { GROUPS } from '../../shared/physicsGroups';
 import { WHEEL_RAY_GROUPS } from '../physics';
 
@@ -43,6 +44,7 @@ function geometry(s: BikeSpec): [BikeGeometry, BikeGeometry] {
 export class TwoWheeler {
   readonly id: string;
   readonly object = new THREE.Group();
+  private shadowMat: THREE.MeshBasicNodeMaterial;
   readonly body: RAPIER.RigidBody;
   readonly collider: RAPIER.Collider;
   readonly mats: MaterialSet;
@@ -113,6 +115,14 @@ export class TwoWheeler {
       this.visual.add(pm);
     }
     this.object.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
+    // contact shadow (the body stays upright, so it can ride along at ground level)
+    {
+      const bake = shadowBake('bike:' + spec.id, { halfW: g0.halfW * 0.55, minZ: g0.minZ, maxZ: g0.maxZ, wheels: g0.wheels.map((w) => ({ x: w.x, z: w.z, r: spec.wheelR, w: spec.tireW + 0.04 })) });
+      this.shadowMat = shadowMaterial(bake.tex);
+      const sm = new THREE.Mesh(groundPlane(bake.w, bake.l, bake.cz), this.shadowMat);
+      sm.position.y = 0.012; sm.renderOrder = -1;
+      this.object.add(sm);
+    }
 
     // ---- physics: upright body (roll & pitch locked), box collider, rider mass included
     _q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), pose.yaw);
@@ -278,6 +288,7 @@ export class TwoWheeler {
     const tr = this.body.translation(), r = this.body.rotation();
     this.object.position.set(tr.x, tr.y, tr.z);
     this.object.quaternion.set(r.x, r.y, r.z, r.w);
+    this.shadowMat.opacity = this.crashed ? 0.35 : 1;
     // lean about the ground line (rotate around z through y = 0)
     this.visual.rotation.set(0, 0, this.crashed ? 0 : -this.lean);
     // steer about the head axis
@@ -312,7 +323,7 @@ export class TwoWheeler {
 
   dispose() {
     this.object.removeFromParent();
-    this.mats.dispose(); this.beaconMat?.dispose(); this.plateTex?.dispose();
+    this.mats.dispose(); this.beaconMat?.dispose(); this.plateTex?.dispose(); this.shadowMat.dispose();
     this.world.removeRigidBody(this.body);
     this.listeners.clear();
   }

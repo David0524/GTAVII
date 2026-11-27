@@ -13,7 +13,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
-const only = new Set(arg('only', 'turntable,lineup,drive,damage,systems,bikes,subway,traffic,metrics').split(','));
+const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,systems,bikes,subway,traffic,metrics').split(','));
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
@@ -183,12 +183,61 @@ async function main() {
       await shotAt(`burnt out (${await page.evaluate(() => window.__VEH.player.stage)})`);
       await sheet(page, frames, 3, 640, 360, 'damage_stages.jpg', labels);
       // close-up of the crumple from the front three-quarter
-      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 1, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4); V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.0); V.player.setPose({ x: 30, y: 0.2, z: 30, yaw: Math.PI / 2 }); V.simulate(0.6); });
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('fareway', 1, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4); V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.9); V.player.setPose({ x: 30, y: 0.2, z: 30, yaw: Math.PI / 2 }); V.simulate(0.6); });
       const close: Buffer[] = [];
       await camRel(page, [3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
       await camRel(page, [-3.8, 1.5, -5.5], 40, 0.35); close.push(await snap(page));
       await sheet(page, close, 2, 640, 360, 'damage_crumple_closeup.jpg', ['taxi after a 30 mph wall hit', 'other side']);
       console.log('damage');
+    }
+
+    // ------------------------------------------------------------------ visual bar: contact shadows, lights that light, local dents
+    if (only.has('visual')) {
+      const toggleShadows = (on: boolean) => page.evaluate((on: boolean) => { window.__VEH.scene.traverse((o: any) => { if (o.name === 'contact-shadow') o.visible = on; }); }, on);
+      // 1. contact shadows, off vs on, in flat afternoon light (the case the sun shadow alone fails)
+      await open(page, 'mode=lineup&quality=high');
+      const cs: Buffer[] = [];
+      await page.evaluate(() => window.__VEH.setCamera(-1.5, 1.15, -50, 5, 0.5, -60, 42));
+      await toggleShadows(false); cs.push(await snap(page));
+      await toggleShadows(true); cs.push(await snap(page));
+      await page.evaluate(() => window.__VEH.setCamera(-2.5, 0.9, -32, 4.5, 0.35, -28, 40));
+      await toggleShadows(false); cs.push(await snap(page));
+      await toggleShadows(true); cs.push(await snap(page));
+      await sheet(page, cs, 2, 800, 450, 'visual_contact_shadows.jpg', ['contact shadow OFF', 'contact shadow ON', 'OFF (low, tyres)', 'ON (low, tyres)']);
+      // 2. night: headlights and brake lamps that light the road
+      await open(page, 'mode=drive&quality=high&night=1');
+      const nt: Buffer[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 3, { x: 0, z: -10, yaw: 0 }); V.player.setLights({ head: true }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: true }); V.simulate(1); });
+      const chase = () => page.evaluate(() => { const V = window.__VEH, o = V.player.object; const c = o.localToWorld(new o.position.constructor(0.9, 3.4, 6.5)), t = o.localToWorld(new o.position.constructor(0, 0, -14)); V.setCamera(c.x, c.y, c.z, t.x, t.y, t.z, 55); });
+      await chase(); nt.push(await snap(page));
+      await camRel(page, [-4.5, 1.1, -9], 46, 0.25); nt.push(await snap(page));
+      await page.evaluate(() => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: false }); V.simulate(0.3); });
+      await camRel(page, [2.2, 1.2, 6], 46, 0.3); nt.push(await snap(page));
+      await page.evaluate(() => { const V = window.__VEH; V.carLights.headIntensity = 0; });
+      await page.evaluate(() => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: true }); V.simulate(0.3); });
+      await chase(); nt.push(await snap(page));
+      await page.evaluate(() => { const V = window.__VEH; V.carLights.headIntensity = 220; });
+      await sheet(page, nt, 2, 800, 450, 'visual_night_lights.jpg', ['night: low beams light the road and the block', 'oncoming view', 'braking: tail lamps glow on the asphalt', 'same car, real headlight disabled (emissive only)']);
+      // traffic at night: real lights on the nearest, cheap pools on the rest
+      await open(page, 'mode=traffic&quality=high&n=150&night=1');
+      const tr = await page.evaluate(() => { const V = window.__VEH; V.moveTraffic(1 / 60); V.setCamera(-20, 9, -20, 10, 0, -70, 55); return V.carLights.budget; });
+      const tshot = await snap(page);
+      report.lights = { budget: { low: { spots: 1, glows: 1 }, medium: { spots: 3, glows: 2 }, high: tr, ultra: { spots: 8, glows: 6 } } };
+      await sheet(page, [tshot], 1, 800, 450, 'visual_night_traffic.jpg', ['150 traffic cars at night: nearest get real lights, the rest ground pools']);
+      // 3. local dents: wall crash, door hit, scripted dents
+      await open(page, 'mode=drive&quality=high');
+      const dn: Buffer[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('tiverton', 2, { x: 36, z: 30, yaw: -Math.PI / 2 }); V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4); V.player.body.setLinvel({ x: 11, y: 0, z: 0 }, true); V.simulate(2.2); V.player.setPose({ x: 30, y: 0.2, z: 30, yaw: Math.PI / 2 }); V.simulate(0.6); });
+      await camRel(page, [3.2, 1.3, -5.2], 40, 0.35); dn.push(await snap(page));
+      await page.evaluate(() => { const V = window.__VEH; const o = V.player.object, g = V.player.asset.lod0; o.updateMatrixWorld(); const zc = (g.minZ + g.maxZ) / 2; V.player.applyHit({ type: 'impact', point: o.localToWorld(new o.position.constructor(g.halfW, 0.7, zc - 0.3)), impulse: V.player.physics.mass * 9, source: 'tester' }); V.simulate(0.3); });
+      await camRel(page, [5.5, 1.4, 0.5], 40, 0.4); dn.push(await snap(page));
+      const moved = await page.evaluate(() => { const V = window.__VEH; const g = V.player.asset.lod0; const t0 = performance.now(); const n = V.dentAt(-g.halfW, 0.85, g.maxZ - 0.6, 0.18, 0.55); const t1 = performance.now(); return { vertices: n + V.dentAt(-0.3, g.height * 0.62, g.minZ + 0.7, 0.08, 0.55), msPerDent: +(t1 - t0).toFixed(2), bodyVertices: V.player.asset.lod0.body.getAttribute('position').count }; });
+      await camRel(page, [-4.5, 1.8, 3.5], 40, 0.4); dn.push(await snap(page));
+      await page.evaluate(() => { const V = window.__VEH; V.player.repair(); V.simulate(0.2); });
+      await camRel(page, [-4.5, 1.8, 3.5], 40, 0.4); dn.push(await snap(page));
+      report.dents = moved;
+      await sheet(page, dn, 2, 800, 450, 'visual_dents.jpg', ['25 mph wall hit: zone crumple + local dent', 'door hit (applyHit impact)', 'scripted dents: quarter panel, hood', 'repair() restores the shared geometry']);
+      console.log('visual');
     }
 
     // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements

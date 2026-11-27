@@ -7,6 +7,7 @@ import { MODEL_BY_ID } from './models';
 import { BIKE_BY_ID, buildBike, type BikeSpec } from './twowheel/bikes';
 import { resolve } from './registry';
 import { VehicleLights, type TrafficInstance } from '../shared/traffic';
+import { shadowBake, groundPlane, shadowMaterial, headPoolGeometry, groundLightMats, groundLightLevel, type Footprint, type LightCandidate } from './lighting';
 
 /**
  * Split a grouped vehicle geometry into three draw-call-friendly parts:
@@ -108,7 +109,13 @@ function mergeGrouped(gs: THREE.BufferGeometry[]): THREE.BufferGeometry {
   return out;
 }
 
-interface ModelBatch { paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; tail: THREE.InstancedMesh; head: THREE.InstancedMesh; sign: THREE.InstancedMesh | null; meshes: THREE.InstancedMesh[]; n: number }
+interface ModelBatch {
+  paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; tail: THREE.InstancedMesh; head: THREE.InstancedMesh; sign: THREE.InstancedMesh | null;
+  /** Contact shadow (one quad per car); ground light pools (own counts: only cars with lamps lit). */
+  shadow: THREE.InstancedMesh; pool: THREE.InstancedMesh; brake: THREE.InstancedMesh; tailGlow: THREE.InstancedMesh;
+  meshes: THREE.InstancedMesh[]; n: number; np: number; nb: number; nt: number;
+}
+interface ModelDims { minZ: number; maxZ: number; halfW: number; headY: number }
 
 /**
  * Visual-only traffic: per model and LOD, three InstancedMeshes. No physics bodies.
@@ -117,6 +124,8 @@ interface ModelBatch { paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; t
 export class TrafficRenderer {
   readonly object = new THREE.Group();
   private batches = new Map<string, [ModelBatch, ModelBatch]>();
+  private dims = new Map<string, ModelDims>();
+  private shadowMats: THREE.Material[] = [];
   private resolveCache = new Map<string, { modelId: string; paint: THREE.Color }>();
   private lampCols = {
     brake: new THREE.Color(0xff2a10).multiplyScalar(2.2), tailRun: new THREE.Color(0xc01808), tailOff: new THREE.Color(0x4a0806),
@@ -147,6 +156,24 @@ export class TrafficRenderer {
       const spec = MODEL_BY_ID.get(modelId);
       const bike = BIKE_BY_ID.get(modelId);
       if (!spec && !bike) throw new Error(`unknown vehicle model ${modelId}`);
+      let fp: Footprint, headY = 0.7;
+      if (spec) {
+        const a = getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle }).lod0;
+        fp = { halfW: a.halfW, minZ: a.minZ, maxZ: a.maxZ, wheels: a.wheels.map((w) => ({ x: w.x, z: w.z, r: w.r, w: w.dual ? spec.tireW * 2 + 0.04 : spec.tireW })) };
+        if (a.lamps.head.length) headY = a.lamps.head.reduce((s, p) => s + p[1], 0) / a.lamps.head.length;
+      } else {
+        const g = buildBike(bike!, 1);
+        fp = { halfW: g.halfW * 0.55, minZ: g.minZ, maxZ: g.maxZ, wheels: g.wheels.map((w) => ({ x: w.x, z: w.z, r: bike!.wheelR, w: bike!.tireW + 0.04 })) };
+        headY = 0.85;
+      }
+      this.dims.set(modelId, { minZ: fp.minZ, maxZ: fp.maxZ, halfW: fp.halfW, headY });
+      const bake = shadowBake('traffic:' + modelId, fp);
+      const smat = shadowMaterial(bake.tex);
+      this.shadowMats.push(smat);
+      const shadowGeo = groundPlane(bake.w, bake.l, bake.cz);
+      const poolGeo = headPoolGeometry(fp.minZ, fp.halfW);
+      const glowGeo = groundPlane(fp.halfW * 2 + 1.6, 2.6, fp.maxZ + 0.6);
+      const gm = groundLightMats();
       const mk = (lodLevel: 1 | 2): ModelBatch => {
         const parts = spec
           ? splitForInstancing({ paint2: spec.paint2, roofColor: spec.roofColor, signWhite: spec.cls !== 'icecream' && (spec.cls === 'taxi' || !!getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle }).lod1.beacon) }, withWheels(spec, lodLevel))
@@ -163,7 +190,10 @@ export class TrafficRenderer {
         paint.name = 'traffic-paint';
         const tail = im(parts.tail, this.mats.lamp, true), head = im(parts.head, this.mats.lamp, true);
         const sign = parts.sign.getAttribute('position').count ? im(parts.sign, this.mats.lamp, true) : null;
-        return { paint, fixed, tail, head, sign, meshes: [paint, fixed, tail, head, ...(sign ? [sign] : [])], n: 0 };
+        const flat = (geo: THREE.BufferGeometry, mat: THREE.Material) => { const m = im(geo, mat, false); m.castShadow = false; m.renderOrder = -1; return m; };
+        const shadow = flat(shadowGeo, smat);
+        const pool = flat(poolGeo, gm.head), brake = flat(glowGeo, gm.brake), tailGlow = flat(glowGeo, gm.tail);
+        return { paint, fixed, tail, head, sign, shadow, pool, brake, tailGlow, meshes: [paint, fixed, tail, head, shadow, ...(sign ? [sign] : [])], n: 0, np: 0, nb: 0, nt: 0 };
       };
       b = [mk(1), mk(2)];
       this.batches.set(modelId, b);
@@ -179,13 +209,16 @@ export class TrafficRenderer {
   }
 
   /** Instances follow the shared contract (src/shared/traffic.ts); light bits drive the lamp parts. */
-  setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3) {
+  setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3, lit?: { litHead: Set<string>; litRear: Set<string> }) {
     const t0 = performance.now();
-    for (const pair of this.batches.values()) for (const b of pair) b.n = 0;
+    for (const pair of this.batches.values()) for (const b of pair) { b.n = 0; b.np = 0; b.nb = 0; b.nt = 0; }
+    const pools = groundLightLevel() > 0.02;
+    let idx = -1;
     const d2 = this.lod2Distance * this.lod2Distance;
     const blink = Math.floor(t0 / 380) % 2 === 0;
     const L = this.lampCols;
     for (const it of list) {
+      idx++;
       const r = this.resolved(it.vclass, it.variant);
       const far = camera ? (it.x - camera.x) ** 2 + (it.z - camera.z) ** 2 > d2 : false;
       const b = this.batch(r.modelId, far ? 1 : 0);
@@ -196,6 +229,14 @@ export class TrafficRenderer {
       for (const m of b.meshes) m.setMatrixAt(i, this._m);
       b.paint.setColorAt(i, r.paint);
       const lt = it.lights;
+      if (pools) {
+        const key = 'traffic:' + idx;
+        if (lt & VehicleLights.Head && !lit?.litHead.has(key)) b.pool.setMatrixAt(b.np++, this._m);
+        if (!lit?.litRear.has(key)) {
+          if (lt & VehicleLights.Brake) b.brake.setMatrixAt(b.nb++, this._m);
+          else if (lt & VehicleLights.Head) b.tailGlow.setMatrixAt(b.nt++, this._m);
+        }
+      }
       const flash = blink && (lt & (VehicleLights.Hazard | VehicleLights.IndicatorLeft | VehicleLights.IndicatorRight)) !== 0;
       b.tail.setColorAt(i, flash ? L.amber : lt & VehicleLights.Brake ? L.brake : lt & VehicleLights.Reverse ? L.reverse : lt & VehicleLights.Head ? L.tailRun : L.tailOff);
       b.head.setColorAt(i, lt & VehicleLights.Head ? L.headOn : L.headOff);
@@ -210,12 +251,43 @@ export class TrafficRenderer {
         if (b.n) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
         m.visible = b.n > 0;
       }
+      for (const [m, n] of [[b.pool, b.np], [b.brake, b.nb], [b.tailGlow, b.nt]] as [THREE.InstancedMesh, number][]) {
+        m.count = n; m.visible = n > 0;
+        if (n) m.instanceMatrix.needsUpdate = true;
+      }
     }
     this.lastMs = performance.now() - t0;
   }
 
+  /**
+   * Real-light requests for traffic near the camera (headlamps on, or braking), for CarLightPool.
+   * Keys are 'traffic:<index in list>'; pass the pool back to setInstances to hide their ground pools.
+   */
+  lightCandidates(list: readonly TrafficInstance[], camera: THREE.Vector3, radius = 45): LightCandidate[] {
+    const out: LightCandidate[] = [];
+    const r2 = radius * radius;
+    list.forEach((it, i) => {
+      const lt = it.lights;
+      if (!(lt & (VehicleLights.Head | VehicleLights.Brake))) return;
+      const d2 = (it.x - camera.x) ** 2 + (it.z - camera.z) ** 2;
+      if (d2 > r2) return;
+      const r = this.resolved(it.vclass, it.variant);
+      this.batch(r.modelId, 0);
+      const d = this.dims.get(r.modelId)!;
+      const s = Math.sin(it.yaw), c = Math.cos(it.yaw);
+      const at = (z: number, y: number) => new THREE.Vector3(it.x + s * z, it.y + y, it.z + c * z);
+      out.push({
+        key: 'traffic:' + i, dist2: d2,
+        head: lt & VehicleLights.Head ? { pos: at(d.minZ - 0.05, d.headY), target: at(d.minZ - 14, d.headY - 1.0) } : null,
+        rear: { pos: at(d.maxZ + 0.35, 0.55), brake: !!(lt & VehicleLights.Brake) },
+      });
+    });
+    return out;
+  }
+
   dispose() {
-    for (const pair of this.batches.values()) for (const b of pair) for (const m of b.meshes) { m.geometry.dispose(); m.dispose(); }
+    for (const pair of this.batches.values()) for (const b of pair) for (const m of [...b.meshes, b.pool, b.brake, b.tailGlow]) { m.geometry.dispose(); m.dispose(); }
+    for (const m of this.shadowMats) m.dispose();
     Object.values(this.mats).forEach((m) => m.dispose());
     this.object.removeFromParent();
   }

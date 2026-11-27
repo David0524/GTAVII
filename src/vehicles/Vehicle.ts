@@ -7,6 +7,7 @@ import { VehiclePhysics, type DriveInput } from './physics';
 import { Emitter } from './effects';
 import { ZONES, type Zone } from './gen/morphs';
 import { SLOTS } from './gen/builder';
+import { shadowBake, groundPlane, shadowMaterial, headPoolGeometry, groundLightMats, groundLightLevel, type LightCandidate, type Lightable } from './lighting';
 import { CLASS_MODELS, PROPOSED_CLASS_MODELS } from './registry';
 import {
   type TrimTier, type Condition, type Upgrade, type Components, type Security, type Trunk, type TrunkItem, type GlassPane,
@@ -56,7 +57,7 @@ export interface VehicleInit {
 /** LOD switch distances (m) per quality. */
 const LOD_DIST: Record<Quality, [number, number]> = { low: [14, 70], medium: [28, 120], high: [40, 160], ultra: [60, 220] };
 
-const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _q = new THREE.Quaternion();
+const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3(), _n = new THREE.Vector3(), _q = new THREE.Quaternion(), _m = new THREE.Matrix4();
 let nextId = 1;
 function vclassOf(modelId: string): string {
   for (const [c, opts] of [...Object.entries(CLASS_MODELS), ...Object.entries(PROPOSED_CLASS_MODELS)]) if (opts.some(([id]) => id === modelId)) return c;
@@ -73,7 +74,7 @@ const MAX_HOLES = 48;
  * Implements the engine contract in docs/briefs/VEHICLES_BRIEF.md and the vehicles parts of
  * CORE_SYSTEMS §5–6 and HOMES_AND_CARS §2 (gameplay branch).
  */
-export class Vehicle {
+export class Vehicle implements Lightable {
   readonly id: string;
   readonly object = new THREE.Group();
   readonly physics: VehiclePhysics;
@@ -126,6 +127,21 @@ export class Vehicle {
   private weather = { wet: 0, rainMinutes: 999 };
   private crankCooldown = 0;
   private lastSource: string | null = null;
+  // ---- ground: contact shadow + cheap light pools, laid on the road under the wheels
+  private ground = new THREE.Group();
+  private shadowMesh: THREE.Mesh;
+  private shadowMat: THREE.MeshBasicNodeMaterial;
+  private headPool: THREE.Mesh;
+  private rearPool: THREE.Mesh;
+  private groundY = 0; private rideH = -1;
+  private real = { head: false, rear: false };
+  private cand: LightCandidate = { key: '', head: null, rear: null, dist2: 0 };
+  private candHead = { pos: new THREE.Vector3(), target: new THREE.Vector3() };
+  private candRear = { pos: new THREE.Vector3(), brake: false };
+  // ---- local dents (copy-on-write clone of the shared body geometry)
+  private dentGeo: { body: THREE.BufferGeometry; hood: THREE.BufferGeometry | null } | null = null;
+  private dentCooldown = 0;
+  private pendingDent: { p: THREE.Vector3; amount: number } | null = null;
 
   constructor(world: RAPIER.World, readonly scene: THREE.Object3D, readonly asset: ModelAsset, readonly variant: Variant, pose: { x: number; y: number; z: number; yaw: number }, readonly quality: Quality, init: VehicleInit = {}) {
     const spec = asset.spec;
@@ -203,6 +219,23 @@ export class Vehicle {
     this.lod = new THREE.LOD();
     this.lod.addLevel(lod0, 0); this.lod.addLevel(lod1, d1); this.lod.addLevel(lod2, d2);
     this.object.add(this.lod);
+
+    // ---- ground contact shadow + light pools
+    {
+      const fp = { halfW: g0.halfW, minZ: g0.minZ, maxZ: g0.maxZ, wheels: g0.wheels.map((w) => ({ x: w.x, z: w.z, r: w.r, w: w.dual ? spec.tireW * 2 + 0.04 : spec.tireW })) };
+      const bake = shadowBake(spec.id, fp);
+      this.shadowMat = shadowMaterial(bake.tex);
+      this.shadowMesh = new THREE.Mesh(groundPlane(bake.w, bake.l, bake.cz), this.shadowMat);
+      this.shadowMesh.renderOrder = -1; this.shadowMesh.name = 'contact-shadow';
+      const gm = groundLightMats();
+      this.headPool = new THREE.Mesh(headPoolGeometry(g0.minZ, g0.halfW), gm.head);
+      this.rearPool = new THREE.Mesh(groundPlane(g0.halfW * 2 + 1.6, 2.6, g0.maxZ + 0.6), gm.tail);
+      this.headPool.visible = this.rearPool.visible = false;
+      this.ground.name = 'vehicle-ground';
+      this.ground.add(this.shadowMesh, this.headPool, this.rearPool);
+      scene.add(this.ground);
+      this.cand.key = this.id;
+    }
 
     // ---- physics (before wheels: wheel pivots follow the suspension state)
     this.physics = new VehiclePhysics(world, spec, g0, pose, effectivePhysics(spec.physics, this.trim, this.condition, this.upgrades));
@@ -414,6 +447,7 @@ export class Vehicle {
     if (hit.type === 'impact') {
       const sev = Math.max(0, (hit.impulse ?? 0) / this.physics.mass - 1.6) / 12;
       this.applyDamage(this.zoneOf(hit.point as THREE.Vector3), sev, src);
+      if (sev > 0.01) this.dent(hit.point, Math.min(0.2, sev * 0.55), 0.45 + Math.min(0.45, sev * 3));
       return { component: 'body' };
     }
     if (hit.type === 'fire') {
@@ -506,6 +540,14 @@ export class Vehicle {
     this.engine.coolant = 1;
     this.mats.u.burnt.value = 0; this.mats.u.cracked.value = 0;
     this.holes.count = 0; this.holeN = 0;
+    if (this.dentGeo) {
+      this.dentGeo.body.dispose(); this.dentGeo.hood?.dispose();
+      this.bodyMesh.geometry = this.asset.lod0.body;
+      const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
+      if (hm && this.asset.lod0.hood) hm.geometry = this.asset.lod0.hood;
+      this.dentGeo = null;
+    }
+    this.pendingDent = null;
     this.refreshDamage();
   }
 
@@ -544,12 +586,21 @@ export class Vehicle {
         const other = vehicleOfCollider(this.contact.other);
         const blame = this.blame(other);
         if (this.stage !== 'destroyed') this.applyDamage(zone, delta, blame.attackerDriverId ?? blame.attackerId);
+        // local dent at the contact (accumulated over the episode, applied at most every 80 ms)
+        const amt = Math.min(0.16, delta * 0.55);
+        if (this.pendingDent) { this.pendingDent.amount += amt; this.pendingDent.p.lerp(this.contact.point, 0.3); }
+        else this.pendingDent = { p: this.contact.point.clone(), amount: amt };
         if (!this.episode.emitted && this.episode.dv > 2) {
           this.episode.emitted = true;
           this.emit('impact', { vehicleId: this.id, speedChange: this.episode.dv, impulse: this.contact.impulse, point: this.contact.point.clone(), normal: this.contact.normal.clone(), zone, damage: this.damage, other: this.contact.other, otherVehicleId: other?.id ?? null, ...blame } satisfies ImpactEvent);
         }
       }
     } else this.episode.quiet += dt;
+    this.dentCooldown -= dt;
+    if (this.pendingDent && this.dentCooldown <= 0 && this.quality !== 'low') {
+      const d = this.pendingDent; this.pendingDent = null;
+      if (d.amount > 0.004) { this.dent(d.p, Math.min(0.2, d.amount), 0.45 + Math.min(0.45, d.amount * 3)); this.dentCooldown = 0.08; }
+    }
 
     // ---------------------------------------------------- engine systems
     const inp = ph.input;
@@ -591,6 +642,7 @@ export class Vehicle {
 
     this.sync();
     this.updateLightsAndFx(dt);
+    this.updateGroundLights();
     this.stepMs = performance.now() - t0;
   }
 
@@ -627,6 +679,128 @@ export class Vehicle {
       o.pivot.scale.y = w.flat ? 0.8 : 1;
       o.spin.rotation.x = -w.spin;
     });
+    this.syncGround();
+  }
+
+  /** Lay the contact shadow and light pools on the road: mean wheel contact plane, body heading. */
+  private syncGround() {
+    const ws = this.physics.wheels;
+    const b = this.physics.body;
+    const t = b.translation();
+    let n = 0, gy = 0;
+    _n.set(0, 0, 0);
+    for (const w of ws) if (w.contact) { n++; gy += w.point.y; _n.add(w.normal); }
+    if (n) {
+      gy /= n; _n.normalize();
+      this.groundY = gy;
+      const h = t.y - gy;
+      this.rideH = this.rideH < 0 ? h : this.rideH + (h - this.rideH) * 0.05;
+    } else _n.set(0, 1, 0);
+    // airborne / rolled: fade with height above the last ground seen
+    const lift = Math.max(0, t.y - this.groundY - Math.max(0, this.rideH));
+    const up = _v2.set(0, 1, 0).applyQuaternion(this.object.quaternion);
+    const upright = THREE.MathUtils.clamp((up.y - 0.3) / 0.5, 0, 1);
+    this.shadowMat.opacity = Math.max(0, 1 - lift / 2.2) * (0.35 + 0.65 * upright);
+    // basis: up = ground normal, forward = body -Z projected onto the ground
+    const f = _v.set(0, 0, -1).applyQuaternion(this.object.quaternion);
+    f.addScaledVector(_n, -f.dot(_n));
+    if (f.lengthSq() < 1e-4) f.set(0, 0, -1);
+    f.normalize();
+    const r = _v3.crossVectors(f, _n).normalize();
+    _m.makeBasis(r, _n, f.negate());
+    this.ground.quaternion.setFromRotationMatrix(_m);
+    // under the body origin, on the plane through the contacts
+    const gyHere = n ? gy : this.groundY;
+    this.ground.position.set(t.x, gyHere + 0.012, t.z);
+  }
+
+  // ============================================================ lights (see lighting.ts)
+  /** Real-light request for the CarLightPool: headlamp centre + aim, rear glow. */
+  lightCandidate(cam: THREE.Vector3): LightCandidate | null {
+    const alive = this.stage !== 'destroyed';
+    const headOn = alive && this.lights.head && !this.components.headlamps;
+    const brake = alive && this.brakeLight && !this.components.taillamps;
+    const tail = alive && this.lights.head && !this.components.taillamps;
+    if (!headOn && !brake && !tail) return null;
+    const g = this.asset.lod0;
+    const c = this.cand;
+    if (headOn) {
+      const hs = g.lamps.head;
+      let y = 0.7;
+      if (hs.length) y = hs.reduce((a, p) => a + p[1], 0) / hs.length;
+      this.object.localToWorld(this.candHead.pos.set(0, y, g.minZ - 0.05));
+      this.object.localToWorld(this.candHead.target.set(0, y - 1.0, g.minZ - 14));
+      c.head = this.candHead;
+    } else c.head = null;
+    if (brake || tail) {
+      this.object.localToWorld(this.candRear.pos.set(0, 0.55, g.maxZ + 0.35));
+      this.candRear.brake = brake;
+      c.rear = this.candRear;
+    } else c.rear = null;
+    c.dist2 = this.object.position.distanceToSquared(cam);
+    c.priority = this.driverId === 'player' || this.isPlayer ? 1 : 0;
+    return c;
+  }
+  /** Set by gameplay / the test lot so the player's car always gets real light first. */
+  isPlayer = false;
+  setRealLights(head: boolean, rear: boolean) { this.real.head = head; this.real.rear = rear; this.updateGroundLights(); }
+  private updateGroundLights() {
+    const night = groundLightLevel();
+    const alive = this.stage !== 'destroyed';
+    const headOn = alive && this.lights.head && !this.components.headlamps;
+    const brake = alive && this.brakeLight && !this.components.taillamps;
+    const tail = alive && this.lights.head && !this.components.taillamps;
+    this.headPool.visible = night > 0.02 && headOn && !this.real.head;
+    this.rearPool.visible = night > 0.02 && (brake || tail) && !this.real.rear;
+    const gm = groundLightMats();
+    this.rearPool.material = brake ? gm.brake : gm.tail;
+  }
+
+  // ============================================================ local dents
+  /**
+   * Push the body in around a world-space point (on top of the zone morphs): a crater of
+   * `amount` metres falling off over `radius`, with a little crumple noise. The shared asset
+   * geometry is cloned on the first dent so other cars of the same model stay straight.
+   */
+  dent(point: { x: number; y: number; z: number }, amount: number, radius = 0.55) {
+    if (!this.dentGeo) {
+      const body = this.bodyMesh.geometry.clone();
+      this.bodyMesh.geometry = body;
+      let hood: THREE.BufferGeometry | null = null;
+      const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
+      if (hm) { hood = hm.geometry.clone(); hm.geometry = hood; }
+      this.dentGeo = { body, hood };
+    }
+    const lp = this.object.worldToLocal(_v.set(point.x, point.y, point.z));
+    const g = this.asset.lod0;
+    // push toward the body's core (horizontal mostly: cars crumple, they don't flatten)
+    const core = _v2.set(0, g.height * 0.45, (g.minZ + g.maxZ) / 2);
+    const dirAt = (x: number, y: number, z: number, out: THREE.Vector3) => out.set(core.x - x, (core.y - y) * 0.35, core.z - z).normalize();
+    const seed = this.variant.seed * 13.1 + this.holeN;
+    const one = (geo: THREE.BufferGeometry, off: THREE.Vector3 | null) => {
+      const pos = geo.getAttribute('position') as THREE.BufferAttribute;
+      const r2 = radius * radius;
+      const d = _v3;
+      let moved = 0;
+      for (let i = 0; i < pos.count; i++) {
+        let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+        if (off) { x += off.x; y += off.y; z += off.z; }
+        const dx = x - lp.x, dy = y - lp.y, dz = z - lp.z;
+        const q = dx * dx + dy * dy + dz * dz;
+        if (q > r2) continue;
+        const f = 1 - Math.sqrt(q) / radius;
+        const crumple = 0.75 + 0.5 * Math.sin(x * 23.7 + seed) * Math.sin(y * 19.3 - seed) * Math.sin(z * 17.9 + seed * 0.5);
+        dirAt(x, y, z, d);
+        const k = amount * f * f * (3 - 2 * f) * crumple;
+        pos.setXYZ(i, pos.getX(i) + d.x * k, pos.getY(i) + d.y * k, pos.getZ(i) + d.z * k);
+        moved++;
+      }
+      if (moved) { pos.needsUpdate = true; geo.computeVertexNormals(); }
+      return moved;
+    };
+    let moved = one(this.dentGeo.body, null);
+    if (this.dentGeo.hood) moved += one(this.dentGeo.hood, null); // hood geometry is authored in body space
+    return moved;
   }
 
   private updateLightsAndFx(dt: number) {
@@ -730,6 +904,10 @@ export class Vehicle {
   dispose() {
     for (const c of this.physics.colliders) OWNER.delete(c.handle);
     this.object.removeFromParent();
+    this.ground.removeFromParent();
+    this.shadowMesh.geometry.dispose(); this.shadowMat.dispose();
+    this.headPool.geometry.dispose(); this.rearPool.geometry.dispose();
+    this.dentGeo?.body.dispose(); this.dentGeo?.hood?.dispose();
     this.smoke.dispose(); this.fire.dispose();
     this.decals.dispose();
     this.mats.dispose();
