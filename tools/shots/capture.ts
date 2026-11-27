@@ -75,7 +75,7 @@ const VIEWS: { name: string; cam?: string; at?: string }[] = [
 
 async function main() {
   const port = await new Promise<number>((res) => { const srv = net.createServer(); srv.listen(0, () => { const p = (srv.address() as net.AddressInfo).port; srv.close(() => res(p)); }); });
-  const p3 = phase === 'phase3';
+  const p3 = phase.startsWith('phase3');
   const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'ignore', detached: true });
   for (let k = 0; k < 120; k++) { try { if ((await fetch(`http://localhost:${port}/`)).ok) break; } catch { /* not up */ } await new Promise((r) => setTimeout(r, 500)); }
   const browser = await chromium.launch({
