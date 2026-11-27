@@ -585,6 +585,23 @@ on the timetable, once the engine posts the new PLAYABLE and the concourse walka
   - a cop stopping by an accident;
   - visible damage on the cars (vehicles stream).
 
+## Ambient scenarios (`src/sim/scenarios.ts`; oversight gap list item 4)
+Small vignettes are placed out of sight 35–160 m from the focus, by time of day and weather. They end on their own and the people walk off. Out of sight and far away, they are cleared.
+
+| Scenario | When | Who and what | Prop |
+|---|---|---|---|
+| stoop | 11:00–22:30, dry | 1–3 neighbours, `act:sitStoop` (up to 5 on warm evenings) | – |
+| cards | 13:00–22:00, dry | 3–4 players round a crate, `act:playCards`, plus a watcher `act:watch` | `card_crate` |
+| hydrant | 11:30–20:00, clear, ≥ 85 °F (`setTemperature(f)`) | 2–4 adults `act:cooloff` plus a watcher, on the sidewalk in the spray | `hydrant_spray`, aimed at the street |
+| drunk | 22:00–04:00 | a walker weaves slowly home (PedView state `drunk`), or someone slumps in a doorway (`act:slumped`) | – |
+| sweep | 06:30–10:00 | a shop owner sweeps back and forth in front of the store, `act:sweep` | `broom` |
+
+- **Adults only:** the spawn tables have no child archetypes, and the test checks that no child appears.
+- **Views and events:** `scenarioViews {id, kind, x, z, heading, prop, peds}` (also in the worker snapshot) and `scenarioStart` / `scenarioEnd`.
+- **Test:** runs at 08:00, at 15:30 / 92 °F and at 23:30. Every kind must start, props must be visible, and nobody may be inside a building.
+- **vs RDR2 / GTA V:** RDR2's ambient vignettes (porch sitters, card tables, drunks) are the bar. GTA V's scenario points are the mechanism. Ours are 1974 Manhattan's own: stoops, the summer hydrant, the morning shop broom.
+- **Not yet:** domino tables, radio-on-the-stoop music (audio), and kids are out by design.
+
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
       (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.

@@ -442,7 +442,8 @@ async function main() {
     const helpedAt = { ...a };
     sim.remember('helped', a.x, a.z, { witnessR: 30 });
     stand(a.x, a.z, 60);
-    const b = sim.debugAgents().peds.filter((p) => p.state === 'walk').map((p) => ({ x: p.x, z: p.z })).find((q) => Math.hypot(q.x - a.x, q.z - a.z) > 90) ?? at(7);
+    const blkA = sim.blockAt(a.x, a.z), cand = sim.debugAgents().peds.filter((p) => p.state === 'walk' && sim.blockAt(p.x, p.z) !== blkA).map((p) => ({ x: p.x, z: p.z }));
+    const b = cand.find((q) => Math.hypot(q.x - a.x, q.z - a.z) > 90) ?? cand[0] ?? at(7);
     sim.remember('robbed', b.x, b.z);
     const rep = sim.reputation(b.x, b.z);
     stand(b.x, b.z, 60);
@@ -470,6 +471,27 @@ async function main() {
     if (!ev.fenderBender || drivers < 2 * ev.fenderBender - 1 || !acts.argue || !ev.fenderBenderEnd || !acts.enterCar || !movedAfter) problems.push(`incidents: fender-bender didn't play out ${JSON.stringify(report.incidents)}`);
     if (!ev.hornChain) problems.push(`incidents: no horn chain ${JSON.stringify(report.incidents)}`);
     if (!ev.roadRage) problems.push(`incidents: no road rage ${JSON.stringify(report.incidents)}`);
+  }
+  // ambient scenarios by time of day: morning sweepers; stoops, cards and an open hydrant on a hot afternoon; drunks at night
+  {
+    const seen: Record<string, number> = {}; let inBld = 0, onRoadAct = 0, childSeen = 0, propsSeen = 0; const inBldEx: string[] = [];
+    for (const [minute, temp] of [[8 * 60, 70], [15 * 60 + 30, 92], [23 * 60 + 30, 70]] as const) {
+      const sim = new Simulation({ seed: SEED, maxVehicles: 60, maxPeds: 200, fetchBinary }); await sim.load(); sim.setClock(minute); sim.setTemperature(temp);
+      const f = FOCI[1];
+      for (let k = 0; k < 90 / SIM_DT; k++) {
+        sim.setView(f.x, f.z, 0, -1, 75, 60); sim.update(SIM_DT, f);
+        if (k % 60 === 0) for (const p of sim.peds) if (p.state.startsWith('act:') || p.state === 'drunk') {
+          if (inBuilding.has(p.x, p.z)) { inBld++; if (inBldEx.length < 3) inBldEx.push(`${p.state} ${p.x.toFixed(1)},${p.z.toFixed(1)}`); }
+          if (p.state !== 'drunk' && p.onRoad && !p.state.startsWith('act:inspect') && !p.state.startsWith('act:argue')) onRoadAct++;
+          if (CHILD.test(p.archetype)) childSeen++;
+        }
+        if (k % 60 === 0) propsSeen = Math.max(propsSeen, sim.scenarioViews.filter((v) => v.prop).length);
+      }
+      for (const [k, n] of Object.entries(sim.scenarioStats)) seen[k] = (seen[k] ?? 0) + n;
+    }
+    report.scenarios = { started: seen, propsSeen, inBuilding: inBld, inBuildingEx: inBldEx, onRoad: onRoadAct };
+    for (const k of ['stoop', 'cards', 'hydrant', 'drunk', 'sweep']) if (!seen[k]) problems.push(`scenarios: no ${k} ${JSON.stringify(report.scenarios)}`);
+    if (inBld > 2 || childSeen) problems.push(`scenarios: ${inBld} people inside buildings, ${childSeen} children ${JSON.stringify(inBldEx)}`);
   }
   // walkers passing within 0.2 m (half a body): only brief transients where two sidewalk edges meet a corner
   if (full.pedWalkingThrough > 5) problems.push(`people walking through each other: ${full.pedWalkingThrough} sampled pairs under 0.2 m (${full.pedWalkingThroughEx.join('; ')})`);

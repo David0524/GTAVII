@@ -884,3 +884,11 @@ export function killPed(S: SimCore, p: Ped, bodySeconds: number) {
   if (p.spot >= 0 && S.spotOwner[p.spot] === p.id) S.spotOwner[p.spot] = -1;
   p.goal = null; p.path = []; p.state = 'dead'; p.v = 0; p.timer = bodySeconds; p.jaywalking = false;
 }
+
+/** A ped standing off its path (scenario, incident) walks back onto its sidewalk and carries on. */
+export function rejoinSidewalk(S: SimCore, p: Ped) {
+  if (!p.alive || p.state === 'dead') return;
+  p.goal = null; p.path = []; p.actName = '';
+  const e = S.net.g.walkEdges[p.edge]; sampleAt(e.pts, S.net.walkCum[p.edge], p.s, tmp);
+  p.toEdge = p.edge; p.toS = p.s; goFree(p, tmp[0], tmp[1], 'attach');
+}

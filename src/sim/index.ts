@@ -26,6 +26,7 @@ import { Doors, type DoorRec, type DoorRate } from './doors';
 import { Vendors, type VendorView } from './vendors';
 import { Memory, type MemKind } from './memory';
 import { Incidents } from './incidents';
+import { Scenarios, type ScenarioView } from './scenarios';
 import { ParkedCars, type ParkedCar } from './parked';
 export type { DoorRec, DoorRate } from './doors';
 export { VENDOR_KINDS, type VendorView, type VendorKind } from './vendors';
@@ -156,6 +157,7 @@ export class Simulation {
     this.parking = new Parking(core);
     this.memory = new Memory(core, (x, z) => this.blockAt(x, z));
     this.incidents = new Incidents(core);
+    this.scenarios = new Scenarios(core, (x, z, r) => this.parking.hydrantsNear(x, z, r));
     core.hornHook = (v, reason) => this.incidents.onHonk(v, reason);
     this.on('pedBumped', (e: any) => { if (e.byPlayer) this.memory.remember(e.kind === 'knockdown' ? 'knockdown' : 'bumped', e.x, e.z, { pedId: e.id }); });
     // hydrants are sidewalk obstacles too (the same positions the kerb rules use)
@@ -228,6 +230,7 @@ export class Simulation {
     this.vendors.step(h);
     this.memory.step(h);
     this.incidents.step(h);
+    this.scenarios.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -303,7 +306,7 @@ export class Simulation {
       // sidewalk top = road surface + kerb (src/shared/terrain.ts); in the roadway = road surface
       o.y = heightAt(o.x, o.z) + (p.y > 0 ? CURB_HEIGHT : 0);
       o.yaw = lerpYaw(p.pyaw, p.yaw); o.speed = p.v; o.variant = p.variant;
-      o.state = p.state === 'act' ? `act:${p.actName}` : p.state === 'free' ? (p.jaywalking ? 'jaywalking' : p.then === 'flee' ? 'flee' : 'stepping') : p.onRoad ? (p.jaywalking ? 'jaywalking' : 'crossing') : p.state;
+      o.state = p.state === 'act' ? `act:${p.actName}` : p.state === 'walk' && this.scenarios.isDrunk(p.id) ? 'drunk' : p.state === 'free' ? (p.jaywalking ? 'jaywalking' : p.then === 'flee' ? 'flee' : 'stepping') : p.onRoad ? (p.jaywalking ? 'jaywalking' : 'crossing') : p.state;
     });
   }
 
@@ -353,6 +356,14 @@ export class Simulation {
 
   // ---------------------------------------------------------------- kerbside rules, enforcement, tows, street cleaning
   private parking!: Parking;
+  // ---------------------------------------------------------------- ambient scenarios (scenarios.ts)
+  private scenarios!: Scenarios;
+  /** Scenario sets near the focus (stoop, cards, hydrant, drunk, sweep) with their props for the renderer. */
+  get scenarioViews(): readonly ScenarioView[] { return this.scenarios.views; }
+  /** Scenarios started so far, by kind. */
+  get scenarioStats() { return { ...this.scenarios.started }; }
+  /** Air temperature (F) from gameplay/weather: open hydrants on hot afternoons (>= 85 F), more stoop sitting when warm. */
+  setTemperature(f: number) { this.scenarios.tempF = f; }
   // ---------------------------------------------------------------- traffic incidents (incidents.ts)
   private incidents!: Incidents;
   /** Fender-benders in progress (cars, drivers, where, until). */

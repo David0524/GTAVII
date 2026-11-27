@@ -140,7 +140,7 @@ export class Incidents {
       if (!arch) continue;
       const p = spawnPedNear(S, px, pz, arch, 25); if (!p) continue;
       setPedGoal(S, p, { kind: 'act', name: 'inspect', duration: Infinity });
-      p.x = px + tmp[2] * along; p.z = pz + tmp[3] * along; p.px = p.x; p.pz = p.z; p.onRoad = true;
+      p.x = px + tmp[2] * along; p.z = pz + tmp[3] * along; p.px = p.x; p.pz = p.z; p.onRoad = true; p.y = 0;
       p.yaw = Math.atan2(-tmp[2] * along, -tmp[3] * along) + Math.PI; p.pyaw = p.yaw;
       (p as any).incidentCar = v.id;
       inc.drivers.push(p);

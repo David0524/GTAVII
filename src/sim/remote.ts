@@ -15,6 +15,7 @@ import type { TrafficVehicleView, VehicleClass } from '../shared/traffic';
 import type { WildlifeView } from './wildlife';
 import type { PoliceView } from './police';
 import type { VendorView } from './vendors';
+import type { ScenarioView } from './scenarios';
 import type { PedView, SimOptions } from './index';
 
 export interface Port { postMessage(msg: unknown, transfer?: Transferable[]): void; onmessage: ((ev: { data: any }) => void) | null }
@@ -53,7 +54,7 @@ export function serveSimulation(port: Port, make: (opts: SimOptions) => Promise<
         const sigCopy = new Uint8Array(sig);
         const msg = {
           t: 'views', time: sim.time, strings: table.slice(sent), vi, vf, pi, pf, wi, wf, sig: sigCopy,
-          police: sim.police, vendors: sim.vendorViews, events,
+          police: sim.police, vendors: sim.vendorViews, scenarios: sim.scenarioViews, events,
         };
         sent = table.length; events = [];
         port.postMessage(msg, [vi.buffer, vf.buffer, pi.buffer, pf.buffer, wi.buffer, wf.buffer, sigCopy.buffer]);
@@ -77,6 +78,7 @@ export class RemoteSimulation {
   readonly wildlife: WildlifeView[] = [];
   police: readonly PoliceView[] = [];
   vendorViews: readonly VendorView[] = [];
+  scenarioViews: readonly ScenarioView[] = [];
   /** signal states (SignalState per head), the last snapshot */
   signals = new Uint8Array(0);
   signalHeads: readonly unknown[] = [];
@@ -145,7 +147,7 @@ export class RemoteSimulation {
     while (W.length < wn) W.push({ id: 0, species: 'pigeon', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
     W.length = wn;
     for (let k = 0; k < wn; k++) { const o = W[k], a = k * WI, b = k * WF; o.id = m.wi[a]; o.species = T[m.wi[a + 1]] as WildlifeView['species']; o.state = T[m.wi[a + 2]]; o.variant = m.wi[a + 3]; o.x = m.wf[b]; o.y = m.wf[b + 1]; o.z = m.wf[b + 2]; o.yaw = m.wf[b + 3]; o.speed = m.wf[b + 4]; }
-    this.signals = m.sig; this.police = m.police; this.vendorViews = m.vendors;
+    this.signals = m.sig; this.police = m.police; this.vendorViews = m.vendors; this.scenarioViews = m.scenarios ?? [];
     for (const e of m.events) this.emitLocal((e as any).type, e);
   }
 }
