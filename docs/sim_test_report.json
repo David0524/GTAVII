@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T04:01:25.311Z",
+  "generated": "2026-11-27T04:06:31.884Z",
   "note": "Headless Node timings, CPU only (container, no GPU); single thread.",
   "seed": 1974,
   "high": {
@@ -12,9 +12,9 @@
       "peds": 400
     },
     "stepMs": {
-      "avg": 1.326,
-      "p95": 1.689,
-      "max": 39.309
+      "avg": 1.336,
+      "p95": 1.733,
+      "max": 41.918
     },
     "failures": {
       "vehOffRoad": 0,
@@ -209,9 +209,9 @@
       "peds": 120
     },
     "stepMs": {
-      "avg": 0.366,
-      "p95": 0.578,
-      "max": 12.77
+      "avg": 0.354,
+      "p95": 0.558,
+      "max": 11.288
     },
     "failures": {
       "vehOffRoad": 0,
