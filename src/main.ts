@@ -25,6 +25,8 @@ import { createGameplay, type GameplayGlue } from './engine/GameplayGlue';
 import { createAudio } from './engine/AudioGlue';
 import { createInteriors, type Interiors } from './interiors';
 import { Driving } from './engine/Driving';
+import { createMissions } from './engine/MissionGlue';
+import type { MissionRuntime } from './mission/MissionRuntime';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -152,6 +154,7 @@ async function main() {
   const parkedAt = { x: 1e9, z: 1e9, q: -1 };
   // player driving (engine/Driving.ts): created with the vehicle factory after the title
   let driving: Driving | null = null;
+  let missions: MissionRuntime | null = null;
   if (sim) void afterTitle.then(() => {
     const vf = createVehicleFactory({ quality: quality.name });
     driving = new Driving({
@@ -277,6 +280,14 @@ async function main() {
       // the one context button: "Go in" / "Knock" / "Locked" at interiors' doors (gameplay 15)
       const bindVehicles = () => driving ? x.g.bindVehicles(driving.binding as never) : setTimeout(bindVehicles, 1000);
       bindVehicles();
+      // the mission runtime: givers on the context button, fail on wasted/arrested
+      const bindMissions = () => {
+        if (!missions) return void setTimeout(bindMissions, 1000);
+        const M = missions;
+        x.g.bindTalk({ nearestTalkable: (px, pz, r) => M.nearestTalkable(px, pz, r), talk: (id) => M.talk(id) });
+        x.g.on('wasted', () => M.fail('Wasted')); x.g.on('arrested', () => M.fail('Arrested'));
+      };
+      bindMissions();
       const bindDoors = () => interiors ? x.g.bindDoors({ doorsForChunk: (i, j) => interiors!.doorsForChunk(i, j) as never, chunkSize: 200 }) : setTimeout(bindDoors, 1000);
       bindDoors();
     }).catch((e) => console.warn('gameplay', e)));
@@ -370,7 +381,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get driving() { return driving; }, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get missions() { return missions; }, get driving() { return driving; }, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -391,7 +402,7 @@ async function main() {
   // replace the placeholder answers below as they merge (health, inventory, heat, objectives, shops...).
   const locator = new Locator(streets);
   let loc = { district: '', crossing: '' }, locT = 0, frozen = false;
-  let objective: { text: string } | null = null;
+  let objective: { text: string; target?: { x: number; z: number; label?: string }; mission?: string } | null = null;
   const uiEvents = new Emitter<UiEvents>();
   const LEAD_STYLE: Record<string, { colour: string; tagline: string }> = {
     'char.teddy_arce': { colour: '#c79a3c', tagline: 'Night desk, Hotel Corwin' }, 'char.delphine_moore': { colour: '#b2302a', tagline: 'Eighth Avenue' }, 'char.nick_varelas': { colour: '#2e4a6b', tagline: 'Varelas & Co., furs' },
@@ -437,6 +448,27 @@ async function main() {
   };
   const ui = await bootUi(host, { title: !skipTitle }); uiRef.ui = ui;
   if (skipTitle) releaseAfterTitle();
+  // ---------------------------------------------------------------- mission runtime (Phase 7; engine/MissionGlue.ts)
+  void afterTitle.then(() => {
+    missions = createMissions({
+      streets, heroes: world.manifest.heroes, ui: uiEvents,
+      player: () => ({ x: player.pos.x, z: player.pos.z, lead: party.activeId, inCar: !!driving?.driving, interior: insideKind }),
+      clock: () => ({ minutes: worldClock.minutes, date: worldClock.date }),
+      state: () => narrativeState as never,
+      setObjective: (o) => { objective = o; },
+      addMoney: (cents) => { party.active.money += cents / 100; },
+      waitTo: (t) => setTime(t),
+      audioPlay: (script, line) => audioGlue?.audio.dialogue?.play(script, line),
+      gameplay: () => gp?.g ?? null,
+      spawnCast: (castId, x, y, z) => {
+        if (!chars) return null;
+        const ch = chars.spawn(scene, { seed: 7, hero: castId }); ch.object.position.set(x, y, z);
+        const tick = setInterval(() => ch.update(0.1), 100);
+        return () => { clearInterval(tick); ch.object.removeFromParent(); ch.dispose(); };
+      },
+    });
+    loadReport.mark('missions');
+  });
   if (!skipTitle) mode = 'photo';
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.id === 'lm.flatiron') ?? { x: 0, z: 0 };
@@ -561,6 +593,7 @@ async function main() {
         if (k !== insideKind) { insideKind = k; audioGlue?.interior(k, ins?.roomVolume); }
       }
     }
+    if (missions && playing && !frozen) missions.update(dt);
     if (signals && sim) { sigBuf = sim.signalStates(sigBuf); signals.update(dt, sigBuf); }
     if (parked && sim && simReady) {
       const f = mode === 'onfoot' ? player.pos : camera.position, quarter = Math.floor(worldClock.minutes / 15);
