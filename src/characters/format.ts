@@ -9,7 +9,7 @@ export type BlobType = 'f32' | 'i16' | 'u16' | 'i8' | 'u8' | 'u32' | 'i32';
  * (stride 3), restarting every `seg` elements (one morph/PCA component), integer wrap-around so
  * decoding is exact. It makes vertex-ordered geometry data compress far better under gzip.
  */
-export interface BlobFilter { kind: 'delta3'; seg: number }
+export interface BlobFilter { kind: 'delta3' | 'delta'; seg: number; /** delta: element stride (delta3 = 3) */ stride?: number }
 export interface BlobDesc { name: string; type: BlobType; offset: number; length: number; filter?: BlobFilter }
 export interface Container { meta: any; blobs: Map<string, ArrayBufferView> }
 
@@ -25,12 +25,14 @@ const typeOf = (a: ArrayBufferView): BlobType => {
 export function encodeFilter(a: ArrayBufferView, f: BlobFilter): ArrayBufferView {
   const src = a as unknown as { length: number; [i: number]: number }, Ctor = (a as any).constructor;
   const out = new Ctor(src.length);
-  for (let s0 = 0; s0 < src.length; s0 += f.seg) for (let i = 0; i < f.seg && s0 + i < src.length; i++) out[s0 + i] = i >= 3 ? src[s0 + i] - src[s0 + i - 3] : src[s0 + i];
+  const st = f.stride ?? 3;
+  for (let s0 = 0; s0 < src.length; s0 += f.seg) for (let i = 0; i < f.seg && s0 + i < src.length; i++) out[s0 + i] = i >= st ? src[s0 + i] - src[s0 + i - st] : src[s0 + i];
   return out;
 }
 function decodeFilter(a: ArrayBufferView, f: BlobFilter) {
   const v = a as unknown as { length: number; [i: number]: number };
-  for (let s0 = 0; s0 < v.length; s0 += f.seg) for (let i = 3; i < f.seg && s0 + i < v.length; i++) v[s0 + i] = v[s0 + i] + v[s0 + i - 3];
+  const st = f.stride ?? 3;
+  for (let s0 = 0; s0 < v.length; s0 += f.seg) for (let i = st; i < f.seg && s0 + i < v.length; i++) v[s0 + i] = v[s0 + i] + v[s0 + i - st];
 }
 
 export function writeContainer(meta: any, blobs: Record<string, ArrayBufferView>, filters: Record<string, BlobFilter> = {}): Uint8Array {
