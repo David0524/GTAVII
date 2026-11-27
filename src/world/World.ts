@@ -8,6 +8,7 @@ import { createGroundMaterial } from '../render/GroundMaterial';
 import { loadReport } from '../engine/debug/LoadReport';
 import { streetLightUniforms } from './StreetLights';
 import { facadeUniforms } from '../render/FacadeMaterial';
+import { createPlugMaterial } from '../render/PlugMaterial';
 import { uv, vec2, vec3, float, length, sub, smoothstep, fract, floor, vertexColor } from 'three/tsl';
 
 export interface WorldManifest {
@@ -26,6 +27,8 @@ type ChunkState = {
   key: string; cx: number; cz: number; info: WorldManifest['chunks'][number];
   status: 'idle' | 'loading' | 'ready';
   group?: THREE.Group; lod0?: THREE.Group; lod1?: THREE.Mesh; props?: THREE.Mesh; detail?: THREE.Mesh[];
+  /** storefront plugs and each unit's quads (vertex starts) in them */
+  plugs?: { hide: THREE.BufferAttribute; units: Map<string, number[]> };
   lod: -1 | 0 | 1;
 };
 
@@ -80,6 +83,23 @@ export class World {
     m.colorNode = vec3(0.06, 0.05, 0.04).add(vertexColor().mul(bulb).mul(on).mul(float(1.4).add(chase.mul(1.2))));
     return m;
   })();
+  /** Interiors hookup: cut facades at doors and storefronts (set before the first update). */
+  interiorCuts = false;
+  readonly plugMat = createPlugMaterial();
+  /** Units whose interior is streamed in: their plugs are hidden (kept across chunk reloads). */
+  private liveUnits = new Set<string>();
+  private unitChunk = new Map<string, string>();
+  /** Interiors' runtime reports a unit built (live) or unloaded. */
+  setInteriorLive(id: string, live: boolean) {
+    if (live) this.liveUnits.add(id); else this.liveUnits.delete(id);
+    const key = this.unitChunk.get(id); const c = key ? this.chunks.get(key) : undefined;
+    if (c?.plugs) this.applyPlug(c.plugs, id, live);
+  }
+  private applyPlug(pl: NonNullable<ChunkState['plugs']>, id: string, live: boolean) {
+    const a = pl.hide.array as Float32Array;
+    for (const v0 of pl.units.get(id) ?? []) a.fill(live ? 1 : 0, v0, v0 + 4);
+    pl.hide.needsUpdate = true;
+  }
   /** Debug/bench: mesh names to hide in every chunk ('buildings' | 'ground' | 'props' | 'lod1'). */
   readonly debugHide = new Set<string>();
   stats = { ready: 0, lod0: 0, lod1: 0, loading: 0, parseMsTotal: 0, failed: 0 };
@@ -192,7 +212,7 @@ export class World {
       const key = this.queue.shift()!;
       this.busy[k]++; this.pendingCount++;
       const c = this.chunks.get(key)!;
-      const req: ChunkRequest = { key, url: new URL(`${this.base}chunks/${key}.bin`, location.href).href, terrainUrl: new URL(`${this.base}terrain.bin`, location.href).href, chunkSize: this.manifest.chunkSize, i: c.info.i, j: c.info.j };
+      const req: ChunkRequest = { key, url: new URL(`${this.base}chunks/${key}.bin`, location.href).href, terrainUrl: new URL(`${this.base}terrain.bin`, location.href).href, chunkSize: this.manifest.chunkSize, i: c.info.i, j: c.info.j, interiorsUrl: this.interiorCuts ? new URL(`${this.base}interiors/index.json`, location.href).href : undefined };
       this.workers[k].postMessage(req);
     }
   }
@@ -221,11 +241,23 @@ export class World {
     const lights: THREE.Mesh[] = [];
     if (m.spill.index.length) { const sm = new THREE.Mesh(toGeometry(m.spill), this.spillMat); sm.name = 'spill'; sm.renderOrder = 2; lights.push(sm); }
     if (m.marquee.index.length) { const mm = new THREE.Mesh(toGeometry(m.marquee), this.marqueeMat); mm.name = 'marquee'; lights.push(mm); }
+    let plugs: ChunkState['plugs'];
+    if (m.plugs.index.length) {
+      const pg = toGeometry(m.plugs);
+      const hide = new THREE.BufferAttribute(new Float32Array(m.plugs.position.length / 3), 1); hide.setUsage(THREE.DynamicDrawUsage);
+      pg.setAttribute('plugHide', hide);
+      const pm = new THREE.Mesh(pg, this.plugMat); pm.name = 'plugs'; pm.receiveShadow = true;
+      const units = new Map<string, number[]>();
+      for (const u of m.plugUnits) { (units.get(u.id) ?? units.set(u.id, []).get(u.id)!).push(u.v0); this.unitChunk.set(u.id, m.key); }
+      plugs = { hide, units };
+      for (const id of units.keys()) if (this.liveUnits.has(id)) this.applyPlug(plugs, id, true);
+      lights.push(pm);
+    }
     lod0.add(b, g, pr, ...detail, ...lights);
     const lod1 = new THREE.Mesh(toGeometry(m.buildingsLod1), this.buildingMat); lod1.name = 'lod1';
     group.add(lod0, lod1);
     lod0.visible = false; lod1.visible = false;
-    Object.assign(c, { group, lod0, lod1, props: pr, detail, status: 'ready', lod: -1 });
+    Object.assign(c, { group, lod0, lod1, props: pr, detail, plugs, status: 'ready', lod: -1 });
     group.userData = { chunk: m.key, stats: m.stats };
     this.root.add(group);
     this.stats.ready++;
@@ -243,7 +275,7 @@ export class World {
     if (!c.group) return;
     c.group.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose(); });
     this.root.remove(c.group);
-    Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, props: undefined, detail: undefined, status: 'idle', lod: -1 });
+    Object.assign(c, { group: undefined, lod0: undefined, lod1: undefined, props: undefined, detail: undefined, plugs: undefined, status: 'idle', lod: -1 });
     this.stats.ready--;
     for (const cb of this.onChunkUnload) cb(c.key);
   }

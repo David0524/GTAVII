@@ -51,6 +51,8 @@ export class Interiors {
   /** true when the camera is inside an interior and no street portal is in view (engine may cull the exterior) */
   exteriorHidden = false;
   readonly onBuilt = new Set<(id: string, b: BuiltInterior) => void>();
+  /** engine hookup: a live interior was unloaded (its storefront plug shows again) */
+  readonly onUnloaded = new Set<(id: string) => void>();
 
   constructor(readonly opts: InteriorsOpts) {
     this.object.name = 'interiors';
@@ -264,6 +266,7 @@ export class Interiors {
     L.group.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose(); });
     this.object.remove(L.group);
     this.live.delete(L.id);
+    for (const cb of this.onUnloaded) cb(L.id);
   }
   private insideBox(L: Live, p: { x: number; y: number; z: number }) {
     const v = new THREE.Vector3(p.x, p.y + 0.5, p.z).applyMatrix4(L.inv); const b = L.built.box;

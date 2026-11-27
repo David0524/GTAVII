@@ -14,6 +14,8 @@ import type { Simulation } from '../sim';
 export interface AudioGlue {
   audio: AudioSystem;
   update(dt: number, camera: THREE.Camera, world: { minutes: number; date: string; weather: 'clear' | 'overcast' | 'rain' }, held: boolean): void;
+  /** interior the listener is in (interiors' inside().kind), or null outdoors; call on change */
+  interior(kind: string | null, roomVolume?: number): void;
   /** characters' footstep event (player body) */
   footstep(e: { position: THREE.Vector3; surface: string; speed: number }): void;
 }
@@ -51,6 +53,7 @@ export function createAudio(o: { quality: QualityName; streets: unknown; sim: Si
       prev.copy(p); first = false;
       audio.update(dt, { position: [p.x, p.y, p.z], forward: [fwd.x, fwd.y, fwd.z], up: [up.x, up.y, up.z], velocity: v as [number, number, number] });
     },
+    interior(kind, roomVolume) { if (loaded) audio.setInterior(kind, roomVolume ? { roomVolume } : {}); },
     footstep(e) { if (loaded) audio.footstep({ position: [e.position.x, e.position.y, e.position.z], surface: e.surface, run: e.speed > 3, who: 'player' }); },
   };
 }

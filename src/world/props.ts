@@ -83,7 +83,7 @@ class UVGeo {
   finish(): MeshArrays { return { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx), uv: new Float32Array(this.uv) }; }
 }
 
-export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; detail: MeshArrays[]; spill: MeshArrays; marquee: MeshArrays } {
+export function buildProps(data: ChunkData, hf: HeightFn, cuts = false): { props: MeshArrays; detail: MeshArrays[]; spill: MeshArrays; marquee: MeshArrays } {
   const g = new Geo();
   const dq = [new Geo(), new Geo(), new Geo(), new Geo()];
   const D = (x: number, z: number, cat: string) => { const q = dq[(x >= 0 ? 1 : 0) + (z >= 0 ? 2 : 0)]; q.cat = cat; return q; };
@@ -174,7 +174,7 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
     }
   }
   const spill = new UVGeo(), marquee = new UVGeo();
-  buildDoors(data, hf, g, spill, marquee);
+  buildDoors(data, hf, g, spill, marquee, cuts);
   for (const geo of [g, ...dq]) for (const [k, v] of Object.entries(geo.tris)) propTris[k] = (propTris[k] ?? 0) + v;
   return { props: g.finish(), detail: dq.map((q) => q.finish()), spill: spill.finish(), marquee: marquee.finish() };
 }
@@ -186,7 +186,7 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
  */
 const WOOD: RGB = [0.11, 0.065, 0.04], GLASS: RGB = [0.045, 0.05, 0.055], BRONZE: RGB = [0.2, 0.15, 0.08], STONE: RGB = [0.26, 0.2, 0.16];
 const BROWNSTONE: RGB = [0.22, 0.13, 0.1], STEEL_GREEN: RGB = [0.13, 0.15, 0.12], GATE: RGB = [0.1, 0.1, 0.1];
-function buildDoors(data: ChunkData, hf: HeightFn, g: Geo, spill: UVGeo, marquee: UVGeo) {
+function buildDoors(data: ChunkData, hf: HeightFn, g: Geo, spill: UVGeo, marquee: UVGeo, cuts = false) {
   g.cat = 'door';
   for (const d of data.doors) {
     if (d.style === 'internal') continue;
@@ -201,11 +201,13 @@ function buildDoors(data: ChunkData, hf: HeightFn, g: Geo, spill: UVGeo, marquee
     { const [px, pz] = at(0, 0.07); g.box(px, base + H + 0.14, pz, hw + 0.22, 0.12, 0.08, ux, uz, sur, true); }
     // transom light over shop / vestibule / church doors
     if (d.style !== 'freight' && d.style !== 'revolving') { const [px, pz] = at(0, 0.02); g.box(px, base + H + 0.36, pz, hw, 0.18, 0.02, ux, uz, GLASS, true); }
-    // leaf
+    // leaf (with facade cuts, an enterable door's opening is open: interiors draw and animate the real leaves,
+    // and a leaf here would also put a collider across the doorway)
+    const openLeaf = cuts && d.enterable;
     const leaf: RGB = d.style === 'freight' ? STEEL_GREEN : d.style === 'shop' || d.style === 'shop_recessed' || d.style === 'brass_double' ? GLASS : WOOD;
     const recess = d.style === 'shop_recessed' || d.style === 'vestibule' ? -0.0 : 0.02;
-    { const [px, pz] = at(0, recess + 0.02); g.box(px, base + H / 2, pz, hw, H / 2, 0.02, ux, uz, leaf, true); }
-    if (leaf === GLASS) { // bronze stiles and kick plate on glazed doors
+    if (!openLeaf) { const [px, pz] = at(0, recess + 0.02); g.box(px, base + H / 2, pz, hw, H / 2, 0.02, ux, uz, leaf, true); }
+    if (leaf === GLASS && !openLeaf) { // bronze stiles and kick plate on glazed doors
       for (const side of [-1, 0, 1]) { if (side === 0 && d.width < 1.5) continue; const [px, pz] = at(side * (hw - 0.05), 0.05); g.box(px, base + H / 2, pz, 0.05, H / 2, 0.02, ux, uz, BRONZE, true); }
       const [px, pz] = at(0, 0.05); g.box(px, base + 0.15, pz, hw, 0.15, 0.02, ux, uz, BRONZE, true);
     }

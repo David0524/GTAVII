@@ -23,6 +23,7 @@ import { StreetFurniture } from './world/StreetFurniture';
 import { SignalHeads } from './world/SignalHeads';
 import { createGameplay, type GameplayGlue } from './engine/GameplayGlue';
 import { createAudio } from './engine/AudioGlue';
+import { createInteriors, type Interiors } from './interiors';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -80,6 +81,8 @@ async function main() {
   const [physics] = await Promise.all([Physics.create(), loadTerrain()]);
   loadReport.mark('physics+terrain');
   const world = new World(quality);
+  // interiors hookup: facades cut at doors and storefronts, plugs fill them until an interior streams in; ?cuts=0 off
+  world.interiorCuts = params.get('cuts') !== '0';
   await world.load();
   loadReport.mark('manifest');
   scene.add(world.root);
@@ -237,8 +240,22 @@ async function main() {
   });
   // ---------------------------------------------------------------- gameplay core (wiring step 6)
   let gp: GameplayGlue | null = null;
+  // ---------------------------------------------------------------- interiors (streamed within ~30 m of the player)
+  let interiors: Interiors | null = null, insideKind: string | null = null, insideT = 0;
+  if (world.interiorCuts) void afterTitle.then(async () => {
+    const it = createInteriors({ quality: quality.name, content: { interiors: null, places: null } });
+    it.onBuilt.add((id) => world.setInteriorLive(id, true));
+    it.onUnloaded.add((id) => world.setInteriorLive(id, false));
+    await it.ready;
+    scene.add(it.object); interiors = it; loadReport.mark('interiors');
+  }).catch((e) => console.warn('interiors', e));
   void afterTitle.then(() => createGameplay({ quality: quality.name, physics, player, lead: () => party.activeId, camera, sim, saves })
-    .then((x) => { gp = x; loadReport.mark('gameplay'); }).catch((e) => console.warn('gameplay', e)));
+    .then((x) => {
+      gp = x; loadReport.mark('gameplay');
+      // the one context button: "Go in" / "Knock" / "Locked" at interiors' doors (gameplay 15)
+      const bindDoors = () => interiors ? x.g.bindDoors({ doorsForChunk: (i, j) => interiors!.doorsForChunk(i, j) as never, chunkSize: 200 }) : setTimeout(bindDoors, 1000);
+      bindDoors();
+    }).catch((e) => console.warn('gameplay', e)));
   // the free camera is a developer tool (photo rig): its toggle and key hints only with ?debug=1 (oversight 2026-11-27)
   const devTools = params.get('debug') === '1';
   const skipTitle = params.get('title') === '0' || params.has('cam') || params.has('at');
@@ -328,7 +345,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -497,6 +514,16 @@ async function main() {
       setGroundLightLevel(light.lightsOn);
       if (carLights) updateCarLights(carLights, [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
       traffic.setInstances(sim.vehicles, camera.position, carLights ?? undefined);
+    }
+    if (interiors && (playing || ui.state === 'title')) {
+      const f = mode === 'onfoot' ? player.pos : camera.position;
+      interiors.update(dt, f, worldClock, camera);
+      interiors.colliders(physics.world);
+      if ((insideT -= dt) <= 0) {
+        insideT = 0.2;
+        const ins = interiors.inside(f.x, f.y, f.z), k = ins?.kind ?? null;
+        if (k !== insideKind) { insideKind = k; audioGlue?.interior(k, ins?.roomVolume); }
+      }
     }
     if (signals && sim) { sigBuf = sim.signalStates(sigBuf); signals.update(dt, sigBuf); }
     if (crowd && sim && simReady) { crowd.setAgents(sim.peds); crowd.update?.(dt, camera); }
