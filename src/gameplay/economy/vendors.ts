@@ -31,7 +31,8 @@ export const EFFECTS: Record<string, Partial<VendorGood>> = {
   'flower_stand.carnation': { item: 'item.flower' }, 'flower_stand.bunch_of_daisies': { item: 'item.flowers' }, 'flower_stand.a_dozen_roses': { item: 'item.roses' },
   'newsstand.daily_ticker': { item: 'item.newspaper' }, 'newsstand.manhattan_evening_dispatch': { item: 'item.newspaper' }, 'newsstand.cigarettes_pack': { item: 'item.cigarettes' },
   'newsstand.candy_bar': { heal: 1, stamina: 4, eatSeconds: 2 }, 'newsstand.gum': { stamina: 2, eatSeconds: 1 },
-  'peddler.umbrella_rain_only': { item: 'item.umbrella' }, // rain-only comes from the file's `rainOnly` 'peddler.sunglasses': { item: 'item.sunglasses' }, 'peddler.gold_watch': { item: 'item.fake_watch' },
+  // the umbrella is rain-only by the file's `rainOnly` flag
+  'peddler.umbrella_rain_only': { item: 'item.umbrella' }, 'peddler.sunglasses': { item: 'item.sunglasses' }, 'peddler.gold_watch': { item: 'item.fake_watch' },
   'peddler.8_track_tape_no_label': { item: 'item.eight_track' }, 'peddler.souvenir_pennant': { item: 'item.pennant' },
   // shoeshine goods are services (see shine below)
   'shoeshine.shine': {}, 'shoeshine.shine_and_tip': {},
