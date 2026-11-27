@@ -44,7 +44,10 @@
     "o2"
   ],
   "rewards": {
-    "text": "Tips: vendors reveal hidden places and tell you which corners are hot (heat hints on the minimap)",
+    "text": "Tips: vendors reveal hidden places and tell you which corners are hot (heat hints on the minimap). Sets flag.sidewalk_wire.",
+    "setFlags": [
+      "flag.sidewalk_wire"
+    ],
     "money": 0,
     "payNote": "Tips, not money."
   },

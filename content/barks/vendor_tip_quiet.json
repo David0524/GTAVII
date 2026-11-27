@@ -1,0 +1,27 @@
+{
+  "id": "barks.vendor_tip_quiet",
+  "core": false,
+  "note": "Vendor tip: nothing nearby. Adults only. Gameplay emits the key with the text (b69b367).",
+  "lines": [
+    {
+      "context": "any",
+      "emotion": "easy",
+      "text": "Quiet today. Nobody's looking for nobody."
+    },
+    {
+      "context": "any",
+      "emotion": "wry",
+      "text": "No cops. Even the pigeons are relaxed."
+    },
+    {
+      "context": "any",
+      "emotion": "easy",
+      "text": "Clean as a whistle. Buy a frank, celebrate."
+    },
+    {
+      "context": "any",
+      "emotion": "wry",
+      "text": "Dead quiet. Too quiet, my wife would say. She says it about everything."
+    }
+  ]
+}

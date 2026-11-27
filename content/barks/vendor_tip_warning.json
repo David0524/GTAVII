@@ -1,0 +1,27 @@
+{
+  "id": "barks.vendor_tip_warning",
+  "core": false,
+  "note": "Vendor tip: an open report matches the player. {description} comes from the report. Adults only. Gameplay emits the key with the text (b69b367).",
+  "lines": [
+    {
+      "context": "any",
+      "emotion": "low",
+      "text": "They're asking about {description}. Sounds a lot like you."
+    },
+    {
+      "context": "any",
+      "emotion": "urgent",
+      "text": "Hey. Cop came by asking for {description}. I said I'm blind. Go."
+    },
+    {
+      "context": "any",
+      "emotion": "low",
+      "text": "Word is they want {description}. Maybe change your hat."
+    },
+    {
+      "context": "any",
+      "emotion": "urgent",
+      "text": "Two cops showed a sketch. {description}. Walk, don't run."
+    }
+  ]
+}

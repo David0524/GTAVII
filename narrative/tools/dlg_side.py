@@ -186,7 +186,8 @@ s("dlg.side_vendor_tipsters_1", "Big Cyrus's cart, 34th & Seventh. Steam, onions
   (VC, "wry", "Come back next week. I see everything from behind this umbrella."))
 s("dlg.side_vendor_tipsters_2", "Peppy's cart, the Bryant Park edge of 42nd St.",
   (VP, "brisk", "Salt or no salt? Tip's free if you carry my propane up from Sixth."),
-  (VP, "low", "There's a door on Forty-First nobody locks. Roof, water tank, the works."))
+  {"id": "l2", "speaker": VP, "emotion": "low", "text": "There's a door on Forty-First nobody locks. Roof, water tank, the works."},
+  {"id": "l3", "speaker": VP, "emotion": "easy", "text": "Tell the other carts Peppy says you're okay. Now we all watch for you.", "setFlags": ["flag.sidewalk_wire"]})
 s("dlg.side_cart_racket_1", "Mama Lucchese's ice cart, 23rd & Eighth.",
   (VL, "tired", "Ten a week, they want now. Last year five. Next year my cart."),
   (VL, "low", "Thursday. A man in a short-sleeve shirt. He works down Eighth, cart by cart."))

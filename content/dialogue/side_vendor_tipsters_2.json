@@ -13,6 +13,15 @@
       "speaker": "npc.cart_vendor",
       "emotion": "low",
       "text": "There's a door on Forty-First nobody locks. Roof, water tank, the works."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.cart_vendor",
+      "emotion": "easy",
+      "text": "Tell the other carts Peppy says you're okay. Now we all watch for you.",
+      "setFlags": [
+        "flag.sidewalk_wire"
+      ]
     }
   ]
 }

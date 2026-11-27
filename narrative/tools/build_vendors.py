@@ -94,7 +94,7 @@ SIDE = [
    {"id": "o2", "type": "dialogue", "text": "Buy a frank. Ask what he's seen.", "script": "dlg.side_vendor_tipsters_1"},
    {"id": "o3", "type": "goto", "text": "Peppy's cart, Bryant Park, 42nd St", "to": "W 42nd St & 6th Ave", "radius": 20},
    {"id": "o4", "type": "dialogue", "text": "Peppy trades a tip for a favour", "script": "dlg.side_vendor_tipsters_2"}],
-  "Tips: vendors reveal hidden places and tell you which corners are hot (heat hints on the minimap)", 0, 12, 0,
+  "Tips: vendors reveal hidden places and tell you which corners are hot (heat hints on the minimap). Sets flag.sidewalk_wire.", 0, 12, 0,
   "Hot-dog and pretzel carts across Midtown", ["dialogue", "minimap hints", "relationships"], "No timers; tips refresh weekly.", 56),
  ("cart_racket", "Ten a Week", ["char.teddy_arce", "char.delphine_moore"], [2, 3], [
    {"id": "o1", "type": "goto", "text": "Mama Lucchese's cart, 23rd & Eighth", "to": "W 23rd St & 8th Ave", "radius": 20},
@@ -114,6 +114,31 @@ SIDE = [
 ]
 
 
+TIP_POOLS = {
+ "barks.vendor_tip_cops": ("Vendor tip: police nearby (context = hint kind: post, search, roadblock, stakeout, car). {where} = a street or corner.", [
+   ("post", "low", "Two blues on the {where} corner. Been there since lunch."),
+   ("post", "low", "Cop on {where}. He buys a frank every day and watches everybody."),
+   ("search", "low", "They're stopping people on {where}. Patting down, asking names."),
+   ("search", "wry", "Plainclothes on {where}. Shoes too shiny for this block."),
+   ("roadblock", "low", "Sawhorses on {where}. Every car gets a look."),
+   ("roadblock", "wry", "They closed {where}. Said it's a water main. Water mains don't carry shotguns."),
+   ("stakeout", "low", "Car parked on {where} three hours. Two men, no newspaper. That's cops."),
+   ("stakeout", "low", "Somebody's watching {where} from a window. Curtains don't move like that."),
+   ("car", "low", "Radio car cruising {where}. Slow. Real slow."),
+   ("car", "wry", "Unmarked sedan, {where}. Antenna on the trunk. Who are they kidding?")]),
+ "barks.vendor_tip_quiet": ("Vendor tip: nothing nearby.", [
+   ("any", "easy", "Quiet today. Nobody's looking for nobody."),
+   ("any", "wry", "No cops. Even the pigeons are relaxed."),
+   ("any", "easy", "Clean as a whistle. Buy a frank, celebrate."),
+   ("any", "wry", "Dead quiet. Too quiet, my wife would say. She says it about everything.")]),
+ "barks.vendor_tip_warning": ("Vendor tip: an open report matches the player. {description} comes from the report.", [
+   ("any", "low", "They're asking about {description}. Sounds a lot like you."),
+   ("any", "urgent", "Hey. Cop came by asking for {description}. I said I'm blind. Go."),
+   ("any", "low", "Word is they want {description}. Maybe change your hat."),
+   ("any", "urgent", "Two cops showed a sketch. {description}. Walk, don't run.")]),
+}
+
+
 def write():
     (C / "vendors.json").write_text(json.dumps({
         "_note": "Street vendors (STREET_VENDORS.md). Item names are keys for Gameplay (<menus key>.<slug of item>); tell Gameplay before renaming. Narrative: brands, cart/umbrella copy, menus and price boards in 1974 money, side content. All brands invented; adults only. Sim places them, Gameplay prices consumables from 'menus' (health/stamina from 'vendors').",
@@ -121,10 +146,14 @@ def write():
     (C / "barks" / "vendor_calls.json").write_text(json.dumps({"id": "barks.vendor_calls", "core": False,
         "note": "Vendor calls and reactions (context = vendor type, or 'any'). Adults only. 1974 prices match content/vendors.json.",
         "lines": [{"context": c, "emotion": e, "text": t} for c, e, t in pool_lines]}, ensure_ascii=False, indent=2) + "\n")
+    for pid, (note, lines) in TIP_POOLS.items():
+        (C / "barks" / f"{pid.split('.', 1)[1]}.json").write_text(json.dumps({"id": pid, "core": False, "note": note + " Adults only. Gameplay emits the key with the text (b69b367).",
+            "lines": [{"context": c, "emotion": e, "text": t} for c, e, t in lines]}, ensure_ascii=False, indent=2) + "\n")
     for sid, title, leads, acts, objs, rtxt, money, dur, heat, where, systems, mobile, rank in SIDE:
         sp = {"id": f"mission.side_{sid}", "kind": "side", "title": title, "number": None, "leads": leads, "acts": acts, "objectives": objs,
               "fail": [], "checkpoints": [objs[1]["id"]], "rewards": {"text": rtxt}, "where": where, "systems": systems, "mobile": mobile,
               "rank": rank, "slice": False}
+        if sid == "vendor_tipsters": sp["rewards"]["setFlags"] = ["flag.sidewalk_wire"]
         (C / "side" / f"{sid}.json").write_text(json.dumps(sp, ensure_ascii=False, indent=2) + "\n")
     # image prompts
     R = ("Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. "

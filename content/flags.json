@@ -479,6 +479,18 @@
       ],
       "world": "None. Gates the Carriers' brawl in M4.",
       "notes": "Set by the 'Step in' choice in dlg.m04_baek_envelope."
+    },
+    {
+      "id": "flag.sidewalk_wire",
+      "setBy": [
+        "mission.side_vendor_tipsters"
+      ],
+      "readBy": [
+        "gameplay (g.vendorTip)",
+        "barks.vendor_tip_*"
+      ],
+      "world": "Every street vendor becomes a contact: once per vendor per game hour they give police hints (posts, searches, roadblocks, stakeouts, cars) within 600 m, or a warning if a report matches the player.",
+      "notes": "Gameplay b69b367."
     }
   ]
 }

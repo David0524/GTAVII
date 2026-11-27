@@ -46,3 +46,4 @@
 | `flag.arson_stopped` | mission.fire_watch | ambient, mission.the_march | Corwin tenants sit outside on folding chairs at night; a bedsheet banner reads 'WE STAYED UP'. | Always set: M26 can't end in a fire. |
 | `flag.teddy_spared_mayhew` | mission.the_car | mission.labor_day, epilogue | None. | Choice in M25: let Mayhew go or bring him to Calloway. |
 | `flag.teddy_stepped_in_baek` | mission.surcharge | mission.surcharge | None. Gates the Carriers' brawl in M4. | Set by the 'Step in' choice in dlg.m04_baek_envelope. |
+| `flag.sidewalk_wire` | mission.side_vendor_tipsters | gameplay (g.vendorTip), barks.vendor_tip_* | Every street vendor becomes a contact: once per vendor per game hour they give police hints (posts, searches, roadblocks, stakeouts, cars) within 600 m, or a warning if a report matches the player. | Gameplay b69b367. |

@@ -1,0 +1,57 @@
+{
+  "id": "barks.vendor_tip_cops",
+  "core": false,
+  "note": "Vendor tip: police nearby (context = hint kind: post, search, roadblock, stakeout, car). {where} = a street or corner. Adults only. Gameplay emits the key with the text (b69b367).",
+  "lines": [
+    {
+      "context": "post",
+      "emotion": "low",
+      "text": "Two blues on the {where} corner. Been there since lunch."
+    },
+    {
+      "context": "post",
+      "emotion": "low",
+      "text": "Cop on {where}. He buys a frank every day and watches everybody."
+    },
+    {
+      "context": "search",
+      "emotion": "low",
+      "text": "They're stopping people on {where}. Patting down, asking names."
+    },
+    {
+      "context": "search",
+      "emotion": "wry",
+      "text": "Plainclothes on {where}. Shoes too shiny for this block."
+    },
+    {
+      "context": "roadblock",
+      "emotion": "low",
+      "text": "Sawhorses on {where}. Every car gets a look."
+    },
+    {
+      "context": "roadblock",
+      "emotion": "wry",
+      "text": "They closed {where}. Said it's a water main. Water mains don't carry shotguns."
+    },
+    {
+      "context": "stakeout",
+      "emotion": "low",
+      "text": "Car parked on {where} three hours. Two men, no newspaper. That's cops."
+    },
+    {
+      "context": "stakeout",
+      "emotion": "low",
+      "text": "Somebody's watching {where} from a window. Curtains don't move like that."
+    },
+    {
+      "context": "car",
+      "emotion": "low",
+      "text": "Radio car cruising {where}. Slow. Real slow."
+    },
+    {
+      "context": "car",
+      "emotion": "wry",
+      "text": "Unmarked sedan, {where}. Antenna on the trunk. Who are they kidding?"
+    }
+  ]
+}
