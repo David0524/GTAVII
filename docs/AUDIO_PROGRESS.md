@@ -219,6 +219,13 @@ Self-made (baked synthesis, logged in AUDIO_SOURCES.md), preloaded as group `mov
 - Honest note: synthesised foley is credible for metal, stone and gravel; cloth and body thuds are the
   weakest (they read as "filtered noise" up close).
 
+## $0 budget / free-assets licence gate (user decision relayed by oversight, 2026-11-27)
+Audio already meets it: every shipped sound is self-made, and the GPL tools (eSpeak NG WASM, ffmpeg-static)
+run only at build time and are absent from the production bundle. Licences are logged in docs/licenses/ASSETS.md.
+Freesound (CC0 / CC-BY) and Sonniss GDC sounds are allowed through the gate. I'd only reach for them where synthesis
+is weakest (cloth and body foley, crowd close-ups, gunfire transients), reading each licence first and adding a row
+before any file lands. BBC Sound Effects is out (non-commercial).
+
 ## Street vendors (STREET_VENDORS.md, 2026-11-27)
 All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2 MB decoded on every preset: variants capped per sound, loops one variant with rate jitter) loads when the first vendor registers.
 - **API:** `audio.vendor(id, type, at)` returns a handle: `sale()`, `knockOver(impulse)`, `reopen()`, `move(at, speed)`,
