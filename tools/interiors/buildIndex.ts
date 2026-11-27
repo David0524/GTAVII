@@ -460,6 +460,87 @@ for (const h of heroContent) {
 }
 console.log('heroes:', heroLog);
 
+// ---------------------------------------------------------------- traversal markup (MOVEMENT.md, ENGINE_REQUESTS 10)
+// Fire-escape placement and roof-to-roof gaps. The engine builds the fire-escape meshes from these marks (oversight ruling),
+// so collision and visuals agree. Shape mirrors TraversalMark (src/interiors/spec.ts) until the shared contract lands.
+type TMark = { kind: string; a: [number, number, number]; b: [number, number, number]; n?: [number, number]; w?: number; h?: number; building: number; flags?: number };
+const trav = new Map<string, TMark[]>();
+const pushT = (b: { i: number; j: number }, m: TMark) => { const key = `${b.i}_${b.j}`; let l = trav.get(key); if (!l) trav.set(key, (l = [])); l.push(m); };
+const r2 = (v: number) => +v.toFixed(2);
+const byId = new Map<number, B>(); for (const b of blds) byId.set(b.id, b);
+const idxById = new Map<number, BuildingIdx>(); for (const b of out) idxById.set(b.id, b);
+let feCount = 0, gapCount = 0;
+for (const bi of out) {
+  const b = byId.get(bi.id); if (!b) continue;
+  // 1974 rule of thumb: walk-up tenements and lofts of 4-8 storeys built 1867-1940 carry a street-front fire escape
+  // (Tenement House Acts 1867/1879/1901; loft fire escapes after the 1911 Triangle fire).
+  const residential = b.use <= 4 || b.style === Style.Tenement;
+  const loft = b.style === Style.CastIronLoft || b.style === Style.MasonryLoft;
+  if (!(residential || loft) || b.floors < 4 || b.floors > 8 || b.year > 1940 || b.year < 1867) continue;
+  if (!bi.frontage.length) continue;
+  // longest frontage edge
+  let best = bi.frontage[0], bl = 0;
+  for (const e of bi.frontage) { const L = Math.hypot(e[2] - e[0], e[3] - e[1]); if (L > bl) { bl = L; best = e; } }
+  if (bl < 5) continue;
+  const ux = (best[2] - best[0]) / bl, uz = (best[3] - best[1]) / bl, ccw = signedArea(b.ring) > 0;
+  const ox = ccw ? uz : -uz, oz = ccw ? -ux : ux; // outward
+  if (hash(b.id, 77) > 0.85) continue; // some fronts were cleared or never had one (fire tower, rear-only)
+  const span = Math.min(8, bl * 0.55), t0 = (bl - span) / 2 + (hash(b.id, 78) - 0.5) * Math.max(0, bl - span - 1);
+  const ax = best[0] + ux * t0, az = best[1] + uz * t0, bx = ax + ux * span, bz = az + uz * span, dep = 1.05;
+  const g = bi.gAvg, fh = bi.fh;
+  const ground = heightAt(ax + ox * 0.6, az + oz * 0.6) + SIDEWALK_H;
+  for (let f = 1; f < b.floors; f++) {
+    const y = g + f * fh;
+    pushT(bi, { kind: 'fe_platform', a: [r2(ax), r2(y), r2(az)], b: [r2(bx + ox * dep), r2(y), r2(bz + oz * dep)], n: [r2(ox), r2(oz)], w: dep, h: 0.9, building: b.id });
+    pushT(bi, { kind: 'sill', a: [r2(ax + ux * 0.6), r2(y + fh * 0.3), r2(az + uz * 0.6)], b: [r2(bx - ux * 0.6), r2(y + fh * 0.3), r2(bz - uz * 0.6)], n: [r2(ox), r2(oz)], building: b.id });
+    if (f + 1 < b.floors) {
+      // stair flight inside the platform, alternating direction per storey
+      const fwd = f % 2 === 1, s0 = fwd ? 0.4 : span - 0.4, s1 = fwd ? span - 0.4 : 0.4, mid = dep * 0.55;
+      pushT(bi, { kind: 'fe_stair', a: [r2(ax + ux * s0 + ox * mid), r2(y), r2(az + uz * s0 + oz * mid)], b: [r2(ax + ux * s1 + ox * mid), r2(y + fh), r2(az + uz * s1 + oz * mid)], w: 0.5, building: b.id });
+    }
+  }
+  // top platform to roof: gooseneck ladder over the parapet
+  const yTop = g + (b.floors - 1) * fh, ex = bx - ux * 0.35 + ox * 0.5, ez = bz - uz * 0.35 + oz * 0.5;
+  pushT(bi, { kind: 'ladder', a: [r2(ex), r2(yTop), r2(ez)], b: [r2(ex - ox * 0.6), r2(bi.top + 0.1), r2(ez - oz * 0.6)], n: [r2(-ox), r2(-oz)], w: 0.45, building: b.id });
+  // counterweighted drop ladder from the lowest platform to the sidewalk (raised by default: jump and pull, MOVEMENT.md)
+  const lx = ax + ux * 0.5 + ox * 0.6, lz = az + uz * 0.5 + oz * 0.6;
+  pushT(bi, { kind: 'drop_ladder', a: [r2(lx), r2(ground), r2(lz)], b: [r2(lx), r2(g + fh), r2(lz)], n: [r2(-ox), r2(-oz)], w: 0.45, h: r2(g + fh - ground), building: b.id, flags: 2 });
+  feCount++;
+}
+// roof-to-roof gaps: from every roof edge, look outward up to 4 m for a neighbouring roof no higher than +0.6 m and no
+// more than 6 m below. Abutting roofs (< 0.5 m) are steps or climbs, handled by the controller's ledge detection.
+for (const bi of out) {
+  const b = byId.get(bi.id); if (!b || b.floors < 2) continue;
+  const r = b.ring, n = r.length / 2, ccw = signedArea(r) > 0, seen = new Set<string>();
+  for (let k = 0; k < n; k++) {
+    const j = (k + 1) % n, ax = r[2 * k], az = r[2 * k + 1], bx = r[2 * j], bz = r[2 * j + 1], L = Math.hypot(bx - ax, bz - az);
+    if (L < 2) continue;
+    const ux = (bx - ax) / L, uz = (bz - az) / L, ox = ccw ? uz : -uz, oz = ccw ? -ux : ux;
+    for (let t = 1; t < L - 0.5; t += 3) {
+      const px = ax + ux * t, pz = az + uz * t;
+      if (buildingAt(px + ox * 0.3, pz + oz * 0.3) >= 0) continue; // abutting
+      for (let d = 0.5; d <= 4.0; d += 0.25) {
+        const k2 = buildingAt(px + ox * d, pz + oz * d); if (k2 < 0) continue;
+        const nb = blds[k2], ni = idxById.get(nb.id); if (!ni || nb.id === b.id) break;
+        const drop = bi.top - ni.top;
+        if (drop >= -0.6 && drop <= 6 && d >= 0.6) {
+          const key = `${nb.id}:${Math.floor(t / 6)}:${k}`;
+          if (!seen.has(key)) {
+            seen.add(key); gapCount++;
+            pushT(bi, { kind: 'roof_gap', a: [r2(px), r2(bi.top), r2(pz)], b: [r2(px + ox * (d + 0.6)), r2(ni.top), r2(pz + oz * (d + 0.6))], n: [r2(ox), r2(oz)], w: r2(d), h: r2(drop), building: b.id });
+          }
+        }
+        break;
+      }
+    }
+  }
+}
+fs.rmSync(path.join(DATA, 'interiors/traversal'), { recursive: true, force: true });
+fs.mkdirSync(path.join(DATA, 'interiors/traversal'), { recursive: true });
+for (const [key, l] of trav) fs.writeFileSync(path.join(DATA, `interiors/traversal/${key}.json`), JSON.stringify(l));
+console.log(`traversal: ${feCount} fire escapes, ${gapCount} roof gaps, ${trav.size} chunk files`);
+cov.fireEscapes = feCount; cov.roofGaps = gapCount;
+
 const doorShare = cov.withDoor / cov.groundBuildings;
 if (doorShare < 0.9999) throw new Error(`door coverage assertion failed: ${cov.withDoor}/${cov.groundBuildings} ground buildings have a door`);
 const coverage = {

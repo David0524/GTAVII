@@ -15,6 +15,8 @@
     "units": 6544,
     "shopUnits": 4572,
     "cores": 1972,
+    "fireEscapes": 991,
+    "roofGaps": 1130,
     "doorShareOfGroundBuildings": 1,
     "enterableShareOfGroundBuildings": 0.7544,
     "roofShareOfGroundBuildings": 0.5471,
