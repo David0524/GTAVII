@@ -431,6 +431,9 @@ async function main() {
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
   const simFwd = new THREE.Vector3();
+  // in-view spawns stay beyond this (sim fe9ba45). Traffic has no fade yet, so it is where a pop is least
+  // visible: the box-impostor range on Low (vehicles lod2Distance 60 m); vehicles asked for a dithered fade-in
+  const simFade = quality.name === 'low' ? 60 : 80;
   let gpContext: string | null = null, ctxT = 0;
 
   // ---------------------------------------------------------------- loop
@@ -516,7 +519,7 @@ async function main() {
     if (sim && simReady && !simPaused && (playing || ui.state === 'title')) {
       const f = mode === 'onfoot' ? body.object.position : camera.position;
       sim.setClock(worldClock.minutes); sim.setWeather(worldClock.weather);
-      camera.getWorldDirection(simFwd); sim.setView(camera.position.x, camera.position.z, simFwd.x, simFwd.z, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)));
+      camera.getWorldDirection(simFwd); sim.setView(camera.position.x, camera.position.z, simFwd.x, simFwd.z, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)), simFade);
       const a = simActors[0]; a.x = player.pos.x; a.z = player.pos.z; a.vx = player.vel.x; a.vz = player.vel.z;
       sim.setExternalActors(mode === 'onfoot' ? simActors : []);
       sim.update(dt, f);
