@@ -116,6 +116,47 @@ Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
 Wikimedia rate-limited this container, so sourcing is pending.
 
+## Estimate: moving the cast onto ICT identities (oversight request)
+Measured today:
+
+| Head | Triangles | Download | Draws |
+|---|---|---|---|
+| Delphine, ICT (after trims) | 37.6k | ~0.71 MB (0.32 MB geometry gzip + 0.39 MB textures at 2048) | 1, plus 1 for scalp hair |
+| Rocketbox lead (Nick / Teddy) | 2.9–3.9k | 0.20–0.27 MB | 1 |
+| Rocketbox near-ring pool | ~4k each | 31 heads = 5.9 MB | 1 |
+
+**Leads (Teddy, Nick):** the same bake as Delphine.
+- Cost: +~1.0 MB download for the pair, about +70k triangles when all three leads are close, and
+  ~16 MB of GPU texture per lead once KTX2 lands (64 MB each uncompressed with mips at 2048, which
+  is too much).
+- Needs a decimated LOD (~8k triangles) beyond ~5 m.
+- Work, about 2–3 days each:
+  - Identity design on the coefficients. This changes faces the user has already seen, so it needs
+    sign-off first.
+  - Procedural male detail: stubble, and Nick's ageing lines.
+  - Card hair re-seated on the ICT scalp (today's cards are shaped for our helper skull).
+
+**Near-ring pool (~30 identities):** one shared decimated ICT topology.
+- Shared once: ~6k vertices / 10k triangles, with index, UV and weights at ~150 KB gzip.
+- Per identity: int16 position deltas (~25 KB gzip) plus 512² procedural textures (~60 KB),
+  about 85 KB each.
+- 30 identities ≈ 2.7 MB, about half today's Rocketbox pool. The textures can be generated from
+  tone parameters, so more identities would cost almost nothing.
+- Draws are unchanged (1 per head; hair stays in the merged head-and-hair draw).
+- Work, about 4–5 days:
+  - UV-preserving quadric decimation.
+  - The shared-topology container.
+  - Identity sets covering age, sex and ancestry, adults only.
+  - A runtime texture bake or parameter set.
+  - Hair seated on the ICT scalp.
+
+**Recommendation:**
+1. Finish Delphine to hero level first. Remaining: the neck weld and sleeve hems; KTX2 is in the
+   size pass.
+2. Then the pool, because it shrinks the download and makes the near ring consistent.
+3. Then Teddy and Nick, with user sign-off on the new faces. Rocketbox stays as the fallback until
+   each ICT version is accepted.
+
 ## Street vendors (sim relay; `docs/SIM_PROGRESS.md` "Street vendors")
 **Wardrobes: done.** Shot: `shots/characters/41_vendors.jpg` (`?characters=1&scene=vendors`).
 - Each archetype id has a preset in `src/characters/wardrobe/outfit.ts` (`VENDOR_PRESETS`),
