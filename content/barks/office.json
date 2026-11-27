@@ -196,6 +196,16 @@
       "context": "fear",
       "emotion": "scared",
       "text": "Here, take my purse, take it, just don't hurt me."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Apology accepted. Please just go."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "I'm reporting this to building security."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

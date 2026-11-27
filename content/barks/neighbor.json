@@ -90,6 +90,16 @@
       "emotion": "scared",
       "text": "Inside! Everybody inside! Lock the door, Carmen, lock it!",
       "recall": "violence"
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Okay, okay. Go eat something."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry. On my stoop. Unbelievable."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

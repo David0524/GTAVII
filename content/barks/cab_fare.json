@@ -104,6 +104,16 @@
       "context": "fear",
       "emotion": "scared",
       "text": "Is that a gun? Driver, please, I have a family in Queens."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Fine. Just let me get my cab."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Save it. I'm calling a policeman."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

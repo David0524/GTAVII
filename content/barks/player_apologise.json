@@ -1,0 +1,61 @@
+{
+  "id": "barks.player_apologise",
+  "core": false,
+  "note": "Player greet/antagonize/apologise (gameplay 8c27467, 0a9c708). context: warm|plain (greet), first|again (antagonize), shove|fight (apologise); 'lead' picks the voice. Adults only.",
+  "lines": [
+    {
+      "context": "shove",
+      "lead": "teddy",
+      "emotion": "tired",
+      "text": "Okay. Okay. My fault. Long night."
+    },
+    {
+      "context": "shove",
+      "lead": "teddy",
+      "emotion": "flat",
+      "text": "Forget it, pal. I'm out of line."
+    },
+    {
+      "context": "fight",
+      "lead": "teddy",
+      "emotion": "breathless",
+      "text": "Hold it, hold it. I'm done. We're done."
+    },
+    {
+      "context": "shove",
+      "lead": "delphine",
+      "emotion": "cool",
+      "text": "Fine. My mistake. Rule six: know when to walk."
+    },
+    {
+      "context": "shove",
+      "lead": "delphine",
+      "emotion": "dry",
+      "text": "Alright. I'm sorry. Don't make it a speech."
+    },
+    {
+      "context": "fight",
+      "lead": "delphine",
+      "emotion": "breathless",
+      "text": "Enough. I'm not doing this on Eighth Avenue. Sorry."
+    },
+    {
+      "context": "shove",
+      "lead": "nick",
+      "emotion": "stiff",
+      "text": "I apologise. Sincerely. I am a gentleman, mostly."
+    },
+    {
+      "context": "shove",
+      "lead": "nick",
+      "emotion": "tired",
+      "text": "Forgive me. It's the heat. And the bank."
+    },
+    {
+      "context": "fight",
+      "lead": "nick",
+      "emotion": "breathless",
+      "text": "Stop! Stop. I'm sorry. My heart. My suit. I'm sorry."
+    }
+  ]
+}

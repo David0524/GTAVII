@@ -196,6 +196,16 @@
       "context": "fear",
       "emotion": "scared",
       "text": "Easy, pal. It's dresses back there. Just dresses."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Forget it. Just stay off my dock."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry? You'll be sorry. Get out of here."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

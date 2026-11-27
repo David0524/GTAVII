@@ -613,3 +613,4 @@ print(len(P), "pools,", sum(len(p["lines"]) for p in P.values()), "lines;", len(
 import memory_barks  # noqa: E402
 memory_barks.apply()
 memory_barks.apply_player()
+memory_barks.apply_apology()

@@ -183,11 +183,64 @@ def apply_player():
     for pid, rows in PLAYER.items():
         for r in rows: assert len(r[3]) <= 90, r
         (B / f"{pid.split('.', 1)[1]}.json").write_text(json.dumps({"id": pid, "core": False,
-            "note": "Player greet/antagonize (gameplay 8c27467). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
+            "note": "Player greet/antagonize/apologise (gameplay 8c27467, 0a9c708). context: warm|plain (greet), first|again (antagonize), shove|fight (apologise); 'lead' picks the voice. Adults only.",
             "lines": [{"context": c, "lead": ld, "emotion": e, "text": t} for c, ld, e, t in rows]}, ensure_ascii=False, indent=2) + "\n")
     print(sum(len(v) for v in PLAYER.values()), "player greet/antagonize lines")
+
+# Apology beat (gameplay 0a9c708): player context shove|fight; ped accept_apology (grudging) / reject_apology (contemptuous).
+PLAYER["barks.player_apologise"] = [
+ ("shove", "teddy", "tired", "Okay. Okay. My fault. Long night."), ("shove", "teddy", "flat", "Forget it, pal. I'm out of line."),
+ ("fight", "teddy", "breathless", "Hold it, hold it. I'm done. We're done."),
+ ("shove", "delphine", "cool", "Fine. My mistake. Rule six: know when to walk."), ("shove", "delphine", "dry", "Alright. I'm sorry. Don't make it a speech."),
+ ("fight", "delphine", "breathless", "Enough. I'm not doing this on Eighth Avenue. Sorry."),
+ ("shove", "nick", "stiff", "I apologise. Sincerely. I am a gentleman, mostly."), ("shove", "nick", "tired", "Forgive me. It's the heat. And the bank."),
+ ("fight", "nick", "breathless", "Stop! Stop. I'm sorry. My heart. My suit. I'm sorry.")]
+APOLOGY = {
+ "beat_cop": ("Alright. Go home and cool off.", "Sorry don't cover it. Next time it's the wagon."),
+ "cab_driver": ("Forget it. Everybody's crazy in July.", "Sorry? Tell it to my fender."),
+ "cab_fare": ("Fine. Just let me get my cab.", "Save it. I'm calling a policeman."),
+ "commuter": ("Fine. I've got a train anyway.", "Sorry. Sure. Get out of my way."),
+ "deuce": ("Cool, cool. No harm done. This time.", "Sorry's for church, man. Beat it."),
+ "garment": ("Yeah, yeah. Go push your own rack.", "Sorry? You owe me a dress. Two dresses."),
+ "marcher": ("Alright. We're all tired. Walk with us.", "Sorry doesn't build anything. Move."),
+ "neighbor": ("Okay, okay. Go eat something.", "Sorry. On my stoop. Unbelievable."),
+ "office": ("Apology accepted. Please just go.", "I'm reporting this to building security."),
+ "park": ("Sit down, friend. The bench forgives.", "Go apologise to the pigeons."),
+ "plainclothes": ("Smart. Stay smart.", "You'll be sorry. That's a promise."),
+ "service": ("No problem. Have a nice day. I mean it, mostly.", "Sorry. Right. Next customer, please."),
+ "shopper": ("Well. Alright. Manners cost nothing, you know.", "Hmph. Your mother would be ashamed."),
+ "sro": ("Alright. We all got our troubles.", "Sorry. Like I ain't heard sorry before."),
+ "street_tough": ("Smart move. Walk on.", "Too late for sorry, chief."),
+ "strip": ("Sure, honey. Walk it off.", "Save your sorry for somebody who's buying."),
+ "truck_driver": ("Forget it. Just stay off my dock.", "Sorry? You'll be sorry. Get out of here."),
+ "wholesaler": ("Fine, fine. No charge for the apology.", "Sorry? Sorry I'm not paying for."),
+}
+PASSERBY = {"id": "barks.passerby", "core": False,
+ "note": "Fallback pool for peds gameplay owns mid-fight (sim no longer lists them). Generic adult Midtown passer-by, 1974.",
+ "lines": [
+  {"context": "accept_apology", "emotion": "grudging", "text": "Alright. Forget it. It's too hot to fight."},
+  {"context": "accept_apology", "emotion": "grudging", "text": "Yeah, okay. Just watch where you're going."},
+  {"context": "reject_apology", "emotion": "contemptuous", "text": "Sorry? Get lost before I call a cop."},
+  {"context": "reject_apology", "emotion": "contemptuous", "text": "Save it. I know your type."},
+  {"context": "antagonize", "emotion": "angry", "text": "What's your problem, huh? What's your problem?"},
+  {"context": "fear", "emotion": "scared", "text": "I don't want trouble! Please, I don't want trouble!"},
+  {"context": "greet", "emotion": "neutral", "text": "Evening."},
+  {"context": "greet_known", "emotion": "easy", "text": "Hey, you again. How's it going?"}]}
+
+
+def apply_apology():
+    for pool, (acc, rej) in APOLOGY.items():
+        f = B / f"{pool}.json"; d = json.loads(f.read_text())
+        d["lines"] = [l for l in d["lines"] if l["context"] not in ("accept_apology", "reject_apology")]
+        for c, e, t in (("accept_apology", "grudging", acc), ("reject_apology", "contemptuous", rej)):
+            assert len(t) <= 90, t
+            d["lines"].append({"context": c, "emotion": e, "text": t})
+        f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
+    (B / "passerby.json").write_text(json.dumps(PASSERBY, ensure_ascii=False, indent=2) + "\n")
+    print(len(APOLOGY) * 2 + len(PASSERBY["lines"]), "apology/passerby lines")
 
 
 if __name__ == "__main__":
     apply()
     apply_player()
+    apply_apology()

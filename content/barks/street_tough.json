@@ -70,6 +70,16 @@
       "emotion": "scared",
       "text": "Whoa, whoa! No piece, no piece! We was just talking!",
       "recall": "violence"
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Smart move. Walk on."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Too late for sorry, chief."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

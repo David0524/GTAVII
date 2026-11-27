@@ -196,6 +196,16 @@
       "context": "fear",
       "emotion": "scared",
       "text": "Please, please, it's a notions store. Buttons. Thread."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Fine, fine. No charge for the apology."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry? Sorry I'm not paying for."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

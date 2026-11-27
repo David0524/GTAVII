@@ -1,7 +1,7 @@
 {
   "id": "barks.player_greet",
   "core": false,
-  "note": "Player greet/antagonize (gameplay 8c27467). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
+  "note": "Player greet/antagonize/apologise (gameplay 8c27467, 0a9c708). context: warm|plain (greet), first|again (antagonize), shove|fight (apologise); 'lead' picks the voice. Adults only.",
   "lines": [
     {
       "context": "warm",

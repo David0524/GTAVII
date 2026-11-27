@@ -84,6 +84,16 @@
       "emotion": "scared",
       "text": "Not here, not in the park! People sleep here!",
       "recall": "violence"
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Sit down, friend. The bench forgives."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Go apologise to the pigeons."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

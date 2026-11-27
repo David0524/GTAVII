@@ -1,0 +1,47 @@
+{
+  "id": "barks.passerby",
+  "core": false,
+  "note": "Fallback pool for peds gameplay owns mid-fight (sim no longer lists them). Generic adult Midtown passer-by, 1974.",
+  "lines": [
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Alright. Forget it. It's too hot to fight."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Yeah, okay. Just watch where you're going."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry? Get lost before I call a cop."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Save it. I know your type."
+    },
+    {
+      "context": "antagonize",
+      "emotion": "angry",
+      "text": "What's your problem, huh? What's your problem?"
+    },
+    {
+      "context": "fear",
+      "emotion": "scared",
+      "text": "I don't want trouble! Please, I don't want trouble!"
+    },
+    {
+      "context": "greet",
+      "emotion": "neutral",
+      "text": "Evening."
+    },
+    {
+      "context": "greet_known",
+      "emotion": "easy",
+      "text": "Hey, you again. How's it going?"
+    }
+  ]
+}

@@ -74,6 +74,16 @@
       "emotion": "scared",
       "text": "Everybody down! He's got a gun! Get the old people inside!",
       "recall": "violence"
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Alright. We're all tired. Walk with us."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry doesn't build anything. Move."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

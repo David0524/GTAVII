@@ -196,6 +196,16 @@
       "context": "fear",
       "emotion": "tense",
       "text": "Don't do nothing stupid, pal. I got a pension coming."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Alright. Go home and cool off."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry don't cover it. Next time it's the wagon."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

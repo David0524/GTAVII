@@ -196,6 +196,16 @@
       "context": "fear",
       "emotion": "scared",
       "text": "Here, take my bag! There's nothing in it but receipts!"
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Well. Alright. Manners cost nothing, you know."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Hmph. Your mother would be ashamed."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."

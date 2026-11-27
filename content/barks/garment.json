@@ -201,6 +201,16 @@
       "context": "fear",
       "emotion": "scared",
       "text": "I don't want trouble. I got a union card and two kids at home."
+    },
+    {
+      "context": "accept_apology",
+      "emotion": "grudging",
+      "text": "Yeah, yeah. Go push your own rack."
+    },
+    {
+      "context": "reject_apology",
+      "emotion": "contemptuous",
+      "text": "Sorry? You owe me a dress. Two dresses."
     }
   ],
   "memoryNote": "greet_known/antagonize/fear (sim pedGreets 39af2cb). 'recall' = helped | robbed | violence; untagged lines are a familiar face."
