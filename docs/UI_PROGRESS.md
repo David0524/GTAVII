@@ -115,7 +115,37 @@ canvas). `tools/ui/perf.ts`, timer resolution 0.1 ms.
   the title was drawn under it).
 - [x] Honest critique: below.
 
-## Type direction and restyle (user decision, verbatim: **"Do A"**)
+## Design A redesign (current; user: "Let's go with A … make sure the rest of the UI is designed similarly … It shouldn't feel AI.")
+Oversight **approved Design A to ship** after reviewing the board on 2026-11-27. The design language is in docs/DESIGN_A.md. The board of every screen, at desktop 1600×900 and phone 844×390 @2x with reference notes, is `docs/research/design_a/board_1..5.jpg`, built from `tools/ui/board/` (`python3 tools/ui/board/build.py`, then render board.html).
+- **Type and colour:**
+  - Libre Franklin 800–900 is the voice, T74 Heros Cn the caps labels, T74 Heros the text.
+  - One amber accent (#e8a317); red only for danger, green only for money.
+  - Square corners and hairlines, and one hero per screen.
+- **Map:**
+  - A lit aerial of our own city: the engine bake v2 is in `public/map/aerial`, 2.24 MB of WebP across 4 levels at 0.5–4 m/px.
+  - Smooth zoom; fog of war (20 m explored grid, save v2).
+  - An amber route on a dark casing, our own blip drawings with no discs, landmark silhouettes.
+  - Collision-free street and district names.
+  - The minimap is a square window onto the same tiles.
+- **Discovery:** silent by default. "Added to map" only shows for places marked `notify:'toast'`, with bursts merged and held during missions.
+- **HUD:**
+  - Type sits on the world: the objective in Franklin under an amber rule. On touch it sits beside the minimap.
+  - The place you enter is wiped in big. Mission end is a left-weighted band with the cut counting up.
+- **Hub:** a big title, then place and time, icon tabs and cash. Every screen was redone to the rules: Pockets, Paper, Business, Cars, Record, Settings, Saves, scenes and front end.
+- **Fixed after review:**
+  - no real brand in copy (the lab paper's "Con Ed" is gone, and narrative is asked for an invented utility name);
+  - the 1974 New York plate (blue on reflective orange, NEW YORK at the bottom, 123-ABC, matching vehicles 7a61f32);
+  - weapon names fit on one line on phone;
+  - choosing a Settings group moves focus into its rows.
+- **Open:**
+  - blotchy bake ground (engine ground material, then rebake);
+  - missing tree height in the north half of the park (rebake with the same pass);
+  - real car renders for Cars, the lot and Switch (asked vehicles for `renderThumbnail(model, paint, angle)`);
+  - the Choices screen is plain;
+  - no regional zoom-out;
+  - the engine still needs to emit `discover` notify/mission and `missionEnd`, and post the wider PLAYABLE for Grand Central.
+
+## Type direction and restyle (superseded by Design A above) (user decision, verbatim: **"Do A"**)
 The user chose type direction **A, Transit Authority**, relayed by the oversight session on 2026-11-26.
 - **Fonts:** T74 Heros and T74 Heros Cn (TeX Gyre, renamed under GUST) carry the HUD, menus, map and plates. T74 Schola carries reading text, Libre Franklin the newspaper heads, and T74 Cursor only typed forms. The title is the constructed wordmark. Fraunces, League Gothic, Archivo and Courier Prime are removed. Licences are in `public/fonts/LICENSES.md`.
 - **Restyle,** per the user's "this looks very AI generated" and the rules in docs/research/UI_REFERENCES.md:
@@ -201,11 +231,11 @@ GTA VI is judged from public trailers and footage only. We study behaviour and q
 | Area | What the reference does | Where we match | Where we fall short, and the plan |
 |---|---|---|---|
 | **HUD** | GTA V: radar bottom-left, with health and armour as rim bars; cash and wanted stars top-right, fading when idle. RDR2: a minimal radar with cores, and everything can fade in quiet moments | Every element is On, Dynamic or Off. The minimap hides when you stand still. Heat is radio text and cones on the map instead of stars, and health is an edge vignette | RDR2's meters breathe with the scene and ours just fade. Plan: tie fades to combat and heat events once gameplay's real state lands |
-| **Minimap and discovery** | GTA V: a GPS line and every blip is known. RDR2: fog of war is lifted by travel, with places found by sight | Discovery is stricter than either (sight, tips, overheard, papers), and the route is pencilled instead of a GPS line, which suits 1974 | Ours is a 2D print with no terrain or height cue. RDR2 shades elevation. Plan: hatch the elevated lines and bridges (low cost) |
-| **Pause and map flow** | GTA V: tabs over a darkened frame, the map as the first tab. RDR2: a desaturated live frame, a single band and a quick map key | A held, graded frame behind translucent panels; the map opens first and is opaque; tabs and sub-tabs cycle on the shoulder buttons | GTA's map zoom is smoother. Ours redraws vectors on the first draw. Plan: tile cache, measured on a low-end phone |
+| **Map, minimap and discovery** | GTA V/VI: the world rendered from above and muted so blips read, with a GPS line. RDR2: fog of war lifted by travel, places found by sight | A lit aerial of our own city with height, shadow and AO. Fog lifted by walking, an amber route, discovery stricter than either (sight, tips, overheard, papers) and silent by default | No regional zoom-out, because the playable sheet is the whole world. Bake ground is blotchy until the engine's ground material is fixed |
+| **Pause and map flow** | GTA V: tabs over a darkened frame, the map as the first tab. RDR2: a desaturated live frame, a single band and a quick map key | A big title, then place and time, icon tabs and cash over the held frame. The map opens first; tabs cycle on the shoulder buttons. Tiled aerial with eased zoom | Measure zoom on a low-end phone |
 | **Menus over the world** | RDR2 catalogues: the period artefact stays inside the object, and the controls are clean sans on dark | Same rule (UI_REFERENCES rule 2): newspaper, ledger and plates are artefacts, and the chrome is one sans face | RDR2 holds the book in 3D hands. Ours is flat. Plan: a "held" camera pose for paper screens once characters lands hands (needs engine and characters) |
 | **Interaction prompts and traversal** | GTA V: a button glyph in the corner help box. RDR2: a bottom-right prompt stack with hold rings. GTA VI footage: context prompts sit next to the object | The chip sits on the edge itself ("SPACE Vault"), and on touch the jump button relabels instead of adding a button | No hold rings yet. Plan: a ring fill on the chip for hold actions when gameplay exposes hold timing |
-| **Camera** (spec only) | GTA V and RDR2: sphere-cast collision, shoulder swap, look-behind, a camera that lifts on climbs, and fall lag | docs/CAMERA_SPEC.md covers all five, with numbers and acceptance tests | Not built. It waits for the engine's ownership answer (ENGINE_REQUESTS "From ui: 6") |
+| **Camera** | GTA V and RDR2: sphere-cast collision, shoulder swap, look-behind, a camera that lifts on climbs, and fall lag | docs/CAMERA_SPEC.md covers all five, with numbers and acceptance tests | Built (src/camera/ThirdPersonCamera.ts) and wired by the engine (24a3439). It orbits 360° standing still and recentres on the move; tests are in tests/camera.test.ts |
 | **Cutscenes** | GTA V and RDR2: hand-animated performance capture, shallow DoF, cuts on action, seamless hand-back to play | Seamless hand-back with no black frame, period lens language (35 mm geometry, zooms, rack-focus data) and 2.39 letterbox | Capsule stand-ins, no faces, no DoF. This is the biggest gap and won't close until the characters stream and the engine's post stack land. Honest call: on phones, DoF will be a cheap two-layer blur |
 | **Title and loading** | GTA V: painted key-art panels. RDR2: quiet loading slides with a tip | A film-look title with the wordmark, and title gating on the load report | No key art: it routes through narrative's image prompts. Plan: loading tips as period newspaper briefs |
 | **Touch** (no reference: none of the three games is on phones) | — | Context button, pedals, the layout editor, and the rig at 30 of 30 checks plus 2 new ones | Judged against the phone, not the references |
