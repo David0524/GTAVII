@@ -452,6 +452,25 @@ async function main() {
     if (rep.score >= -3 || report.memory.helpedRep <= 0) problems.push(`memory: reputation ${JSON.stringify(report.memory)}`);
     if (badPool) problems.push(`memory: ${badPool} greetings without a bark pool`);
   }
+  // ambient traffic incidents: a fender-bender plays out (drivers out, argue, back in, cars drive on), horn chains, road rage
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 150, maxPeds: 150, fetchBinary }); await sim.load(); sim.setClock(17 * 60 + 30);
+    const f = FOCI[1];
+    sim.setIncidentRate(25);
+    const ev: Record<string, number> = {}; const acts: Record<string, number> = {}; let drivers = 0; let pair: number[] = [];
+    for (const t of ['fenderBender', 'fenderBenderEnd', 'hornChain', 'roadRage']) sim.on(t, () => { ev[t] = (ev[t] ?? 0) + 1; });
+    sim.on('fenderBender', (e) => { drivers += e.drivers.length; if (!pair.length) pair = [e.a, e.b]; });
+    sim.on('incidentAct', (e) => { acts[e.act] = (acts[e.act] ?? 0) + 1; });
+    let movedAfter = false;
+    for (let k = 0; k < 240 / SIM_DT; k++) {
+      sim.setView(f.x, f.z, 0, -1, 75, 60); sim.update(SIM_DT, f);
+      if (ev.fenderBenderEnd && pair.length && k % 30 === 0) movedAfter ||= sim.vehicles.some((v) => pair.includes(v.id) && v.speed > 1) || !sim.vehicles.some((v) => pair.includes(v.id));
+    }
+    report.incidents = { events: ev, acts, drivers, movedAfter, stats: sim.incidentStats };
+    if (!ev.fenderBender || drivers < 2 * ev.fenderBender - 1 || !acts.argue || !ev.fenderBenderEnd || !acts.enterCar || !movedAfter) problems.push(`incidents: fender-bender didn't play out ${JSON.stringify(report.incidents)}`);
+    if (!ev.hornChain) problems.push(`incidents: no horn chain ${JSON.stringify(report.incidents)}`);
+    if (!ev.roadRage) problems.push(`incidents: no road rage ${JSON.stringify(report.incidents)}`);
+  }
   // walkers passing within 0.2 m (half a body): only brief transients where two sidewalk edges meet a corner
   if (full.pedWalkingThrough > 5) problems.push(`people walking through each other: ${full.pedWalkingThrough} sampled pairs under 0.2 m (${full.pedWalkingThroughEx.join('; ')})`);
   if (full.pedCloseAvg > 1.0) problems.push(`people standing inside each other: ${full.pedCloseAvg} pairs closer than 0.25 m per sample`);

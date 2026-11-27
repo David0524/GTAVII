@@ -753,7 +753,8 @@ export function honk(S: SimCore, v: Vehicle, reason: string, intensity: number) 
   if (v.honkCd > 0) return;
   v.honkCd = 4 + S.rng.next() * 6 * (1 - v.arch.aggression * 0.6);
   S.stats.honks++;
-  S.emit('honk', { id: v.id, x: v.x, z: v.z, kind: v.kind, archetype: v.arch.def.id, reason, intensity });
+  const ch = S.hornHook?.(v, reason);
+  S.emit('honk', { id: v.id, x: v.x, z: v.z, kind: v.kind, archetype: v.arch.def.id, reason, intensity, chain: ch?.chain ?? 0, chainDepth: ch?.depth ?? 0 });
 }
 
 // ------------------------------------------------------------------ period behaviours
@@ -912,7 +913,7 @@ function updateLights(S: SimCore, v: Vehicle) {
   const net = S.net, L = net.g.links[v.link];
   let m = 0;
   if (S.minute < 6.5 * 60 || S.minute > 19.5 * 60 || S.weather !== 'clear') m |= L_HEAD;
-  if (v.state === 'doubleParked') m |= L_HAZARD;
+  if (v.state === 'doubleParked' || v.state === 'incident') m |= L_HAZARD;
   else if (v.state === 'curb' || v.state === 'busStop') m |= v.dwell <= 1 ? (v.kerb < 0 ? L_IND_R : L_IND_L) : v.kind === 'cab' || v.kind === 'service' ? L_HAZARD : v.kerb < 0 ? L_IND_L : L_IND_R;
   else {
     if (v.acc < -0.6 || v.v < 0.2) m |= L_BRAKE;
@@ -962,7 +963,7 @@ export function stepVehicles(S: SimCore, dt: number) {
     if (v.cop) policeVehicleTick(S, v, dt);
     if (v.state === 'onScene' && Number.isFinite(v.dwell) && (v.dwell -= dt) <= 0) responderLeave(S, v);
     if (v.state === 'roadblock' || v.state === 'onScene' || v.state === 'boxIn') { v.v = 0; v.acc = 0; v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * 1.4); placeVehicle(S, v); updateLights(S, v); continue; }
-    if (v.state === 'doubleParked' || v.state === 'curb' || v.state === 'busStop') {
+    if (v.state === 'doubleParked' || v.state === 'curb' || v.state === 'busStop' || v.state === 'incident') {
       v.dwell -= dt; v.v = 0; v.acc = 0;
       if (v.dwell <= 0 && Math.abs(v.lat - v.latTarget) < 0.05) {
         // pull out only when nobody is alongside or closing in from behind in this lane

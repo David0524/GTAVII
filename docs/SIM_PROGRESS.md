@@ -568,6 +568,23 @@ on the timetable, once the engine posts the new PLAYABLE and the concourse walka
   a player-initiated greet/antagonise button (gameplay input -> `remember`), and a reputation that spreads
   between neighbouring blocks.
 
+## Ambient traffic incidents (`src/sim/incidents.ts`; oversight gap list item 3)
+- **Fender-benders:**
+  - In stop-and-go traffic a follower taps the car ahead, in the kerb lane of a multi-lane street, 35–140 m from the focus. It happens between 07:00 and 22:00, about every 150 s near the player (`setIncidentRate(s)`, 0 = off; `stageFenderBender(x, z)` for missions).
+  - Both cars stop with hazards on (vehicle state `incident`, not passable). Traffic queues and lane-changes past.
+  - The two drivers get out and stand between the bumpers on the kerb side: `inspect`, then `argue`, then sometimes `shove`/`stagger` with hot heads, then `argue`/`exchangeDetails`. After 40–75 s they `enterCar` and the cars drive on, the leader first.
+  - Events: `fenderBender {incident, a, b, x, z, drivers, until}`, `incidentAct {incident, id, act}` and `fenderBenderEnd`. Drivers are ordinary peds in `act:<name>`.
+- **Road rage:** an aggressive driver (aggression ≥ 0.55) stuck 9 s or more behind a double-parker, an accident, a kerb stop or a lane block reacts. He leans on the horn, shouts, gestures, or forces into the next lane. Event `roadRage {id, x, z, act, target}`.
+- **Horn chains:**
+  - A start: a honk at a green light, at a block, in rage, or after 12 s or more in a queue.
+  - Joining in: waiting drivers up to 26 m behind in the same street join, a beat apart (up to 6 deep).
+  - Every `honk` now carries `chain` and `chainDepth`. `hornChain {chain, x, z, length}` fires once 3 have joined, so audio can play one chorus.
+- **Double-parked delivery trucks:** already in traffic.ts. They block the kerb lane (narrow streets fully) and now feed road rage and horn chains.
+- **Test:** at 17:30 with the rate at 25 s, fender-benders play out completely (drivers out, argue, back in, cars move again), with at least one horn chain and at least one road rage. Seed 1974: 5 benders, 10 chains, 3 rages in 4 minutes.
+- **vs GTA V / VI / RDR2:** GTA V has scripted fender-benders where drivers get out and fight. We add the 1970s Manhattan texture: horn choruses behind a double-parker, and arguments that end in exchanging details. Not yet:
+  - a cop stopping by an accident;
+  - visible damage on the cars (vehicles stream).
+
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
       (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.

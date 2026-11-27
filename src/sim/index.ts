@@ -25,6 +25,7 @@ import { Subway, type Station, type TrainCall } from './subway';
 import { Doors, type DoorRec, type DoorRate } from './doors';
 import { Vendors, type VendorView } from './vendors';
 import { Memory, type MemKind } from './memory';
+import { Incidents } from './incidents';
 import { ParkedCars, type ParkedCar } from './parked';
 export type { DoorRec, DoorRate } from './doors';
 export { VENDOR_KINDS, type VendorView, type VendorKind } from './vendors';
@@ -154,6 +155,8 @@ export class Simulation {
     this.core = core;
     this.parking = new Parking(core);
     this.memory = new Memory(core, (x, z) => this.blockAt(x, z));
+    this.incidents = new Incidents(core);
+    core.hornHook = (v, reason) => this.incidents.onHonk(v, reason);
     this.on('pedBumped', (e: any) => { if (e.byPlayer) this.memory.remember(e.kind === 'knockdown' ? 'knockdown' : 'bumped', e.x, e.z, { pedId: e.id }); });
     // hydrants are sidewalk obstacles too (the same positions the kerb rules use)
     this.hydrantObs = this.parking.hydrantsNear(-540, -790, 1100).map((h) => ({ x: h.x, z: h.z, r: 0.22 }));
@@ -224,6 +227,7 @@ export class Simulation {
     this.doors.step(h);
     this.vendors.step(h);
     this.memory.step(h);
+    this.incidents.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -349,6 +353,16 @@ export class Simulation {
 
   // ---------------------------------------------------------------- kerbside rules, enforcement, tows, street cleaning
   private parking!: Parking;
+  // ---------------------------------------------------------------- traffic incidents (incidents.ts)
+  private incidents!: Incidents;
+  /** Fender-benders in progress (cars, drivers, where, until). */
+  get trafficIncidents() { return this.incidents.active; }
+  /** Counts: fenderBenders, roadRage, hornChains, chainHonks. */
+  get incidentStats() { return { ...this.incidents.stats }; }
+  /** Mean seconds between ambient fender-benders near the focus (default 150; 0 turns them off, e.g. in missions). */
+  setIncidentRate(meanSeconds: number) { this.incidents.benderEvery = meanSeconds; }
+  /** Stage a fender-bender now near (x, z) if traffic there allows; returns its id or 0. */
+  stageFenderBender(x?: number, z?: number): number { return this.incidents.stage(x, z); }
   // ---------------------------------------------------------------- memory of the player (memory.ts)
   private memory!: Memory;
   /**
