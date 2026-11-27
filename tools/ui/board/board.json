@@ -114,8 +114,8 @@
  {
   "group": "Scenes",
   "title": "Dialogue choices",
-  "note": "One left-of-centre list with number keys, lines set in Franklin; untimed unless the scene says so.",
-  "ref": "",
+  "note": "The line just spoken is the hero: the speaker in amber caps, the line in Franklin, a stage direction under it. Options are type on a left scrim with number keys, not plates. A weighty choice carries a red mark and its consequence line, and takes a second press. The minimap steps out while you talk.",
+  "ref": "GTA V's rare choices are a help-box prompt; RDR2 shows the options without the line they answer. Ours keeps what was said on screen, so the choice reads in context.",
   "desktop": "img/choices_desktop.jpg",
   "phone": "img/choices_phone.jpg"
  },

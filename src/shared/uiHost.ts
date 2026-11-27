@@ -105,7 +105,8 @@ export interface StatRow { group: string; label: string; value: string }
 export interface CompletionRow { group: string; label: string; done: number; total: number }
 export interface Achievement { id: string; name: string; text: string; unlocked?: string; hidden?: boolean }
 
-export interface DialogueChoice { id: string; text: string; disabled?: string }
+/** confirm: a weighty choice (content's `confirm`, e.g. "This choice can't be undone."); the UI marks it and asks for a second press. */
+export interface DialogueChoice { id: string; text: string; disabled?: string; confirm?: string }
 
 export interface CameraHost {
   /** Matches src/camera/CameraDirector (shipped): take the real camera; gameplay cameras keep updating a proxy. */

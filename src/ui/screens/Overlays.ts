@@ -130,28 +130,50 @@ export class WeaponSelect extends Modal {
 export class Choices extends Modal {
   private resolve: ((id: string) => void) | null = null;
   private timer = 0; private total = 0; private defaultId = '';
+  private armed = ''; // a weighty choice waiting for its second press
   constructor(input: Input) { super(input, 'u-choices'); }
-  ask(choices: DialogueChoice[], resolve: (id: string) => void, opts: { prompt?: string; seconds?: number; defaultId?: string } = {}) {
+  /**
+   * DESIGN_A dialogue choices: the line just spoken is the hero (speaker in amber caps, the line in Franklin), the
+   * options sit under it as type on a scrim, numbered. Weighty choices (content `confirm`) carry a red mark and take a
+   * second press, showing their consequence line in between.
+   */
+  ask(choices: DialogueChoice[], resolve: (id: string) => void, opts: { prompt?: string; speaker?: string; line?: string; seconds?: number; defaultId?: string } = {}) {
     if (choices.length > 4) console.warn('More than four choices (narrative rule): truncating');
     const cs = choices.slice(0, 4);
-    this.resolve = resolve; this.total = this.timer = opts.seconds && !settings.get('skipTimers') ? Math.max(6, opts.seconds) : 0; this.defaultId = opts.defaultId ?? cs[cs.length - 1].id;
+    this.resolve = resolve; this.armed = '';
+    this.total = this.timer = opts.seconds && !settings.get('skipTimers') ? Math.max(6, opts.seconds) : 0;
+    this.defaultId = opts.defaultId ?? cs[cs.length - 1].id;
     this.show();
-    this.root.innerHTML = `<div class="ch-wrap">${opts.prompt ? `<div class="ch-prompt">${esc(opts.prompt)}</div>` : ''}<div class="ch-list"></div>${this.total ? '<div class="ch-fuse"><i></i></div>' : ''}</div>`;
+    const said = opts.line ? `<blockquote class="ch-said">${opts.speaker ? `<span class="a-label">${esc(opts.speaker)}</span>` : ''}<p class="a-voice">${esc(opts.line)}</p></blockquote>` : '';
+    this.root.innerHTML = `<div class="ch-wrap">${said}${opts.prompt ? `<div class="ch-prompt">${esc(opts.prompt)}</div>` : ''}<div class="ch-list"></div>${this.total ? '<div class="ch-fuse"><i></i></div>' : ''}</div>`;
     const list = this.root.querySelector('.ch-list')!, items: NavItem[] = [];
+    const choose = (c: DialogueChoice, b: HTMLElement) => {
+      if (c.disabled) return;
+      if (c.confirm && this.armed !== c.id) {
+        this.armed = c.id;
+        list.querySelectorAll('.ch-btn.armed').forEach((x) => x.classList.remove('armed'));
+        b.classList.add('armed');
+        return;
+      }
+      this.pick(c.id);
+    };
     cs.forEach((c, i) => {
-      const b = document.createElement('button'); b.className = 'ch-btn';
-      b.innerHTML = `<span class="k">${i + 1}</span><span class="t">${esc(c.text.length > 44 ? `${c.text.slice(0, 43)}…` : c.text)}${c.disabled ? `<small>${esc(c.disabled)}</small>` : ''}</span>`;
+      const b = document.createElement('button'); b.className = `ch-btn${c.confirm ? ' weighty' : ''}`;
+      const sub = c.disabled ? `<small>${esc(c.disabled)}</small>` : c.confirm ? `<small class="cf"><em>${esc(c.confirm)}</em> <span>Press again to commit</span></small>` : '';
+      b.innerHTML = `<span class="k">${i + 1}</span><span class="t">${esc(c.text.length > 60 ? `${c.text.slice(0, 59)}…` : c.text)}${sub}</span>`;
       if (c.disabled) b.setAttribute('aria-disabled', 'true');
-      list.appendChild(b); items.push({ el: b, activate: () => { if (!c.disabled) this.pick(c.id); } });
+      list.appendChild(b); items.push({ el: b, activate: () => choose(c, b) });
     });
     this.setNav(items);
-    const keys = (e: KeyboardEvent) => { const n = +e.key; if (n >= 1 && n <= cs.length && this.open && !cs[n - 1].disabled) this.pick(cs[n - 1].id); };
+    const keys = (e: KeyboardEvent) => { const n = +e.key; if (n >= 1 && n <= cs.length && this.open) { this.nav.focus(n - 1); choose(cs[n - 1], items[n - 1].el); } };
     window.addEventListener('keydown', keys); this.onClose = () => window.removeEventListener('keydown', keys);
   }
   private pick(id: string) { const r = this.resolve; this.resolve = null; this.hide(); r?.(id); }
   update(dt: number) {
     if (!this.open) return;
     if (this.total) { this.timer -= dt; (this.root.querySelector('.ch-fuse i') as HTMLElement).style.width = `${Math.max(0, this.timer / this.total) * 100}%`; if (this.timer <= 0) { this.pick(this.defaultId); return; } }
+    const before = this.nav.index;
     this.nav.update(dt); // back does nothing: a choice must be made (untimed ones wait forever)
+    if (this.nav.index !== before && this.armed) { this.armed = ''; this.root.querySelectorAll('.ch-btn.armed').forEach((x) => x.classList.remove('armed')); }
   }
 }
