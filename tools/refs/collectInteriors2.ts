@@ -6,6 +6,7 @@
  *   npx tsx tools/refs/collectInteriors2.ts stage <cands.json> <ids.txt> <dir>   downloads the chosen ids (rights checked) into <dir> for viewing
  *   npx tsx tools/refs/collectInteriors2.ts commit <cands.json> <decisions.json> <stageDir>
  *        decisions: { id: { topics: string[], condition: 0-4, reviewed: string } }; appends to catalog.json, copies jpgs to references/img/
+ *   npx tsx tools/refs/collectInteriors2.ts search3 <out.json>           pass 3: precinct / hospital / coop_apartment / luxury_apartment, 1955-1977, LoC cph (NYWTS), gsc, hh
  * Append only: existing catalog entries are never touched.
  */
 import fs from 'node:fs';
@@ -61,6 +62,36 @@ async function search(outFile: string) {
   console.log('candidates', seen.size);
 }
 
+// ---------- pass 3 ----------
+const P3_QUERIES: Record<string, string[]> = {
+  precinct: ['police station interior', 'police station desk sergeant', 'police station New York', 'precinct station house', 'police booking fingerprinting', 'police fingerprinting suspect', 'police lineup', 'mug shot camera police', 'police squad room detectives', 'detective bureau New York police', 'police headquarters New York interior', 'police station cell', 'jail cell New York', 'police property clerk', 'police roll call', 'police muster New York', 'police station house New York', 'police blotter desk', 'NYWTS police station', 'NYWTS police headquarters', 'NYWTS detectives squad room', 'NYWTS fingerprint', 'NYWTS jail'],
+  hospital: ['hospital emergency room New York', 'hospital emergency ward', 'emergency room patients', 'hospital ward New York', 'hospital waiting room', 'nurses station hospital', 'hospital corridor gurney', 'Bellevue Hospital', 'Harlem Hospital', 'hospital interior New York', 'hospital clinic waiting', 'emergency room nurse doctor', 'NYWTS hospital emergency', 'NYWTS Bellevue', 'NYWTS hospital ward', 'NYWTS hospital nurses', 'hospital admitting desk', 'ambulance entrance hospital', 'city hospital ward beds'],
+  coop_apartment: ['Penn South apartment', 'Penn Station South cooperative', 'cooperative apartment New York', 'union cooperative housing New York', 'ILGWU cooperative', 'Amalgamated housing cooperative', 'housing project apartment interior New York', 'public housing apartment interior', 'apartment living room family New York', 'apartment kitchen New York', 'working woman apartment', 'woman sewing machine apartment', 'apartment bedroom woman', 'NYWTS apartment living room', 'NYWTS cooperative apartment', 'NYWTS housing project apartment', 'NYWTS kitchen', 'DOCUMERICA New York apartment', 'Chelsea apartment', 'Mitchell-Lama apartment'],
+  luxury_apartment: ['Park Avenue apartment interior', 'Fifth Avenue apartment interior', 'Madison Avenue apartment', 'penthouse apartment New York', 'luxury apartment living room', 'apartment grand piano', 'apartment library study', 'apartment doorman lobby', 'apartment house lobby doorman', 'Manhattan apartment drawing room', 'apartment living room New York', 'Gottscho Schleisner apartment', 'Gottscho Schleisner living room', 'NYWTS apartment penthouse', 'NYWTS apartment living room', 'NYWTS doorman', 'NYWTS piano', 'duplex apartment New York', 'cooperative apartment lobby', 'apartment foyer New York'],
+};
+async function search3(outFile: string) {
+  const seen = new Map<string, Cand>(fs.existsSync(outFile) ? (JSON.parse(fs.readFileSync(outFile, 'utf8')) as Cand[]).map((c) => [c.id, c]) : []);
+  const yr = (s: string) => parseInt(s.match(/\b(19\d\d)\b/)?.[1] ?? '0');
+  for (const [gap, qs] of Object.entries(P3_QUERIES)) for (const q of qs) for (const co of ['cph', 'gsc', 'hh', '']) {
+    const hits = await locSearch(co, q.replace(/^NYWTS /, ''), 1).catch(() => []);
+    for (const h of hits) {
+      const y = yr(h.created); if (y < 1955 || y > 1977 || /drawing|sketch/i.test(h.medium)) continue;
+      const id = `loc_${h.pk.replace(/[^\w]/g, '_')}`;
+      if (!seen.has(id)) seen.set(id, { id, kind: 'loc', title: h.title, date: h.created, creator: h.creator, item: h.itemUrl, img: h.imgUrl, gap, co: co || 'all' });
+    }
+    console.log(`${gap} "${q}" [${co || 'all'}]: ${hits.length} hits, ${seen.size} kept`);
+  }
+  fs.writeFileSync(outFile, JSON.stringify([...seen.values()], null, 1));
+  console.log('candidates', seen.size);
+}
+
+/** LoC "digital file" thumbnails (_150px) have a ~800 px sibling named <n>v.jpg; fall back to the listed URL. */
+async function bigger(img: string): Promise<string> {
+  const v = img.replace(/_(150px|75x75px)\.jpg$/, 'v.jpg');
+  if (v === img) return img;
+  try { const r = await get(v, 1); return r.ok ? v : img; } catch { return img; }
+}
+
 /** Rights/place check, then download to the staging dir (named <id>.jpg) and write <id>.json metadata for commit. */
 async function stage(candFile: string, idsFile: string, dir: string) {
   fs.mkdirSync(dir, { recursive: true });
@@ -84,7 +115,7 @@ async function stage(candFile: string, idsFile: string, dir: string) {
     }
     try {
       const raw = path.join(dir, `.raw_${id}`);
-      fs.writeFileSync(raw, Buffer.from(await (await get(c.img)).arrayBuffer()));
+      fs.writeFileSync(raw, Buffer.from(await (await get(await bigger(c.img))).arrayBuffer()));
       execFileSync('convert', [raw, '-auto-orient', '-resize', '960x960>', '-strip', '-quality', '85', path.join(dir, `${id}.jpg`)], { stdio: 'ignore' });
       fs.unlinkSync(raw);
       fs.writeFileSync(path.join(dir, `${id}.json`), JSON.stringify(meta));
@@ -115,6 +146,7 @@ function commit(candFile: string, decFile: string, dir: string) {
 
 const [mode, a, b, c] = process.argv.slice(2);
 if (mode === 'search') await search(a);
+else if (mode === 'search3') await search3(a);
 else if (mode === 'stage') await stage(a, b, c);
 else if (mode === 'commit') commit(a, b, c);
 else console.log('usage: search <out.json> | stage <cands> <ids.txt> <dir> | commit <cands> <decisions.json> <dir>');

@@ -66,6 +66,11 @@ export const TOPICS: Record<string, RegExp> = {
   subway: /subway|turnstile|token booth|station|platform|\bIRT\b|\bBMT\b/i,
   apartment: /apartment|\bflat\b|living room|parlou?r|kitchen|\bhome\b|residen|dwelling|bedroom/i,
   bank: /banking hall|\bbank\b|teller|vault/i,
+  // pass 3 (precinct / hospital / co-op / luxury apartment hero interiors)
+  precinct: /police|precinct|station house|squad room|detective|booking|fingerprint|mug ?shot|jail|\bcell\b|lock-?up|patrol|sergeant/i,
+  hospital: /hospital|emergency room|\bward\b|nurse|nurses|gurney|stretcher|clinic|triage|bellevue|infirmary|patient|medical center|operating room/i,
+  coop_apartment: /co-?op|cooperative|penn south|housing project|public housing|housing development|sewing machine|kitchenette|working woman|union/i,
+  luxury_apartment: /penthouse|doorman|luxury|park avenue|madison avenue|fifth avenue|grand piano|\blibrary\b|\bstudy\b|drawing room|living room|duplex|town ?house/i,
 };
 export const topicsFor = (t: string) => Object.entries(TOPICS).filter(([, re]) => re.test(t)).map(([k]) => k);
 
