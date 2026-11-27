@@ -418,6 +418,8 @@ export class Simulation {
   vendorCommand(vendorId: string, cmd: { type: 'flee' | 'cower'; x?: number; z?: number }): boolean { return this.vendors.command(vendorId, cmd); }
   /** Gameplay notices: `cartOverturned` (right it, close 2 h), `vendorSale` (serve + make change), `monteFolded` (crew walks off). */
   vendorNotice(n: { kind: 'cartOverturned' | 'vendorSale' | 'monteFolded'; vendor: string; good?: string }): boolean { return this.vendors.notice(n); }
+  /** Vehicles' cart physics: a cart came to rest somewhere else after a shove (call once it settles). */
+  vendorCartMoved(vendorId: string, x: number, z: number, yaw: number): boolean { return this.vendors.cartMoved(vendorId, x, z, yaw); }
   debugVendors() { return { count: this.vendors.count, byKind: this.vendors.byKind(), sales: this.vendors.sales, scatters: this.vendors.scatters, movedOn: this.vendors.movedOn, calls: this.vendors.calls }; }
 
   // ---------------------------------------------------------------- handing a ped to gameplay (brawls)

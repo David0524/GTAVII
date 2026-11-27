@@ -490,6 +490,11 @@ export class Vendors {
     }
     return false;
   }
+  /** Physics moved a cart (shoved, not tipped): queue and avoidance follow it. */
+  cartMoved(id: string, x: number, z: number, yaw: number): boolean {
+    const v = this.list.get(id); if (!v) return false;
+    v.cx = x; v.cz = z; v.cyaw = yaw; this.obsDirty = true; return true;
+  }
   /** A vendor ped handed to gameplay (brawl) / given back. */
   setReleased(pedId: number, released: boolean) {
     for (const v of this.list.values()) if (v.ped?.id === pedId) { v.state = released ? 'released' : 'open'; if (!released) { v.ped.state = 'vendor'; v.ped.x = v.x; v.ped.z = v.z; v.ped.vendor = v.id; } }
