@@ -62,7 +62,7 @@ export async function bootUi(host: UiHost, o: { title: boolean; startLeads?: str
   const model = await MapModel.load(host.baseUrl, host.streets);
   model.discovery.start(o.startLeads ?? [host.player().lead]);
   const ui = createUi(host, { model, heroes: host.heroes, title: o.title });
-  host.saves?.provideSection(uiSectionProvider(model, ui.extras));
+  host.saves?.provideSection(uiSectionProvider(model, ui.extras, () => { const p = host.player(); return { x: p.x, z: p.z }; }));
   return ui;
 }
 
