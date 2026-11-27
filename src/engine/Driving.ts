@@ -35,6 +35,8 @@ export interface DrivingDeps {
   attachAudio?: (v: Vehicle, vclass: string) => (() => void) | undefined;
   /** seat the lead (Character.setSeat) or stand it up (null) */
   seat: (m: THREE.Matrix4 | null) => void;
+  /** hands on the wheel (Character.setWheel), world space; null releases */
+  wheel?: (w: { center: THREE.Vector3; axis: THREE.Vector3; up: THREE.Vector3; radius: number } | null, steer: number) => void;
 }
 
 const ENTER_R = 3.2, GET_OUT_SPEED = 3;
@@ -126,6 +128,7 @@ export class Driving {
     o.v.setInput({ throttle: 0, brake: 1, steer: 0, handbrake: true }); o.v.ignition(false); o.v.setParked(true);
     o.v.isPlayer = false;
     this.car = null;
+    this.d.wheel?.(null, 0);
     this.d.seat(null);
     const y = heightAt(door.x, door.z) + 0.2;
     this.d.player.collider.setEnabled(true);
@@ -151,7 +154,16 @@ export class Driving {
     const o = this.car;
     if (o) {
       const p = o.v.object.position;
-      this.d.seat(o.v.seatPose('driver'));
+      const seat = o.v.seatPose('driver');
+      this.d.seat(seat);
+      // steering wheel: approximated from the seat until vehicles exposes it (0.45 m ahead, 0.33 m up, tilted 25°)
+      if (this.d.wheel) {
+        const q = new THREE.Quaternion().setFromRotationMatrix(seat), f = new THREE.Vector3(0, 0, -1).applyQuaternion(q), u = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+        const center = new THREE.Vector3().setFromMatrixPosition(seat).addScaledVector(f, 0.45).addScaledVector(u, 0.33);
+        const tilt = 25 * Math.PI / 180, axis = f.clone().negate().multiplyScalar(Math.cos(tilt)).addScaledVector(u, Math.sin(tilt)).normalize();
+        const up = u.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(f, Math.sin(tilt)).normalize();
+        this.d.wheel({ center, axis, up, radius: 0.2 }, Math.max(-1, Math.min(1, this.d.input.move.x)));
+      }
       // the player stays with the car (streaming, physics colliders, the UI and sim focus read player.pos)
       this.d.player.teleport(p.x, p.y, p.z, o.v.object.rotation.y);
       o.v.setLights({ head: night > 0.25 });
