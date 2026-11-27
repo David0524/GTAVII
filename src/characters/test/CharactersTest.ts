@@ -146,7 +146,15 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   } else if (scene === 'vendors') {
     // street vendors (sim archetypes): one of each, wardrobe presets from src/characters/wardrobe/outfit.ts
     const ids = ['cart_vendor', 'grocer', 'flower_seller', 'news_vendor', 'shoeshine', 'peddler', 'monte_dealer', 'monte_shill', 'monte_lookout'];
-    ids.forEach((id, i) => { const c = factory.spawn(world, { seed: num('seed', 7) * 101 + i * 13, archetype: `npc.${id}` }); if (id === 'monte_lookout') c.animator.setIdle('idle_pockets'); chars.push(c); });
+    // &anims=1: one work/customer clip per figure (posing check), looped; &t= picks the moment
+    const clips = ['vendor_serve', 'vendor_call', 'duck_cart', 'right_cart', 'shine_shoes', 'deal_cards', 'queue', 'watch', 'eat_walk'];
+    ids.forEach((id, i) => {
+      const c = factory.spawn(world, { seed: num('seed', 7) * 101 + i * 13, archetype: `npc.${id}` });
+      if (id === 'monte_lookout') c.animator.setIdle('idle_pockets');
+      if (qp.has('anims')) void c.animator.play(clips[i], { loop: true, blendIn: 0.01 }).catch(() => {});
+      chars.push(c);
+    });
+    if (qp.has('anims')) report.vendorClips = clips;
   } else if (scene === 'leads') {
     const act = num('act', 1);
     // review shots: each lead in their own idle (relaxed weight shift, hands behind, hands in pockets)
@@ -329,6 +337,22 @@ function crowd(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Cha
     const dir = h(3) < 0.5 ? 1 : -1;
     const archetype = h(4) < 0.06 ? 'beat_cop' : h(4) < 0.16 ? 'worker_handcart' : h(4) < 0.2 ? 'vendor' : h(4) < 0.6 ? 'commuter' : 'shopper';
     agents.push({ id: i + 1, archetype, variant: hash2(i, 99), x: (lane - 2.5) * 9 + (h(5) - 0.5) * 3, y: 0, z: (h(6) - 0.5) * 220, yaw: dir > 0 ? 0 : Math.PI, speed: moving ? 0.8 + h(7) * 1.1 : 0, state });
+  }
+  if (qp.has('vendors')) {
+    // &vendors=1: a stall cluster in front of the camera (near ring + baked mid ring): a monte dealer
+    // with a crowd leaning in, a cart vendor with a queue, a vendor ducking, eaters walking past
+    const put = (i: number, archetype: string, x: number, z: number, yaw: number, state: string, speed = 0, carry = '') => Object.assign(agents[i], { archetype, x, z, yaw, state, speed, carry, y: 0 });
+    let i = 0;
+    for (const zc of [12, -6]) { // one cluster near (in the full-character ring), one at mid range (baked clips)
+      put(i++, 'npc.monte_dealer', -2, zc, 0, 'vendor');
+      for (let k = 0; k < 4; k++) put(i++, 'commuter', -2 + Math.cos(k * 1.3 + 0.4) * 0.9, zc + 0.9 + Math.sin(k * 1.3 + 0.4) * 0.5, Math.PI, 'watch');
+      put(i++, 'npc.cart_vendor', 3, zc, Math.PI / 2, 'vendor');
+      for (let k = 0; k < 3; k++) put(i++, 'shopper', 4.2 + k * 0.75, zc + 0.2, -Math.PI / 2, 'queue');
+      put(i++, 'npc.grocer', 6.5, zc - 2, 0, 'cower');
+      put(i++, 'commuter', 0.5, zc + 3, 0, 'walk', 1.1, 'frank');
+      put(i++, 'shopper', 1.5, zc + 4, Math.PI, 'walk', 1.0, 'coffee');
+    }
+    report.vendorAgents = i;
   }
   camera.fov = 40; camera.updateProjectionMatrix();
   camera.position.set(num('cx', 3), num('cy', 3.2), num('cz', 24)); camera.lookAt(0, 1.2, -10);

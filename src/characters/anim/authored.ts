@@ -217,6 +217,143 @@ export function authoredClips(): ClipDef[] {
       { t: 3.0, j: { spine_01: [12, 0, 0], spine_02: [12, 0, 0], upperarm_r: [-60, -5, 0], lowerarm_r: [0, 25, 0], neck_01: [16, 0, 0] } },
     ],
   });
+  // --- street vendors and their customers (sim: docs/SIM_PROGRESS.md "Street vendors") ------------
+  defs.push({ // vendorServed: hand the item over, dig change out of the apron, count it into the hand
+    name: 'vendor_serve', duration: 3, loop: false, mask: MASKS.upper, base: R,
+    events: [{ t: 0.6, type: 'handoff', data: { hand: 'r' } }, { t: 2.4, type: 'handoff', data: { hand: 'r', what: 'change' } }],
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.6, j: { upperarm_r: [-55, -5, 8], lowerarm_r: [0, 40, 0], ...fingers('r', 35), spine_03: [6, 0, 0], neck_01: [8, 0, 0] } },
+      { t: 1.2, j: { upperarm_r: [-20, 0, 15], lowerarm_r: [0, 60, 0] } },
+      { t: 1.7, j: { upperarm_l: [8, 5, 2], lowerarm_l: [0, -45, 0], hand_l: [0, 0, -15], ...fingers('l', 50), neck_01: [14, 6, 0], spine_03: [4, 0, 0] } },
+      { t: 2.1, j: { upperarm_l: [-30, 12, -6], lowerarm_l: [0, -75, 0], upperarm_r: [-30, -12, 6], lowerarm_r: [0, 75, 0], ...fingers('l', 45), neck_01: [16, 0, 0] } },
+      { t: 2.4, j: { upperarm_r: [-50, -5, 8], lowerarm_r: [0, 45, 0], upperarm_l: [-25, 10, -4], lowerarm_l: [0, -70, 0], neck_01: [8, 0, 0], spine_03: [5, 0, 0] } },
+      { t: 3, j: {} },
+    ],
+  });
+  defs.push({ // vendorCall: hand cupped at the mouth, head up, calling the wares down the block
+    name: 'vendor_call', duration: 2.4, loop: false, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.4, j: { upperarm_r: [-42, -12, 10], lowerarm_r: [0, 128, 0], hand_r: [10, 0, 30], ...fingers('r', 25), neck_01: [-10, -12, 0], spine_03: [-3, 0, 0], jaw: [12, 0, 0] } },
+      { t: 1.2, j: { upperarm_r: [-42, -12, 10], lowerarm_r: [0, 130, 0], hand_r: [10, 0, 30], ...fingers('r', 25), neck_01: [-12, 10, 0], spine_03: [-4, 0, 0], jaw: [6, 0, 0] } },
+      { t: 1.8, j: { upperarm_r: [-42, -12, 10], lowerarm_r: [0, 128, 0], hand_r: [10, 0, 30], ...fingers('r', 25), neck_01: [-10, 0, 0], jaw: [14, 0, 0] } },
+      { t: 2.4, j: {} },
+    ],
+  });
+  defs.push({ // vendorShout: at a car that cut too close: fist up and shaking, body turned to it
+    name: 'vendor_shout', duration: 2, loop: false, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.3, j: { upperarm_r: [-40, -10, -95], lowerarm_r: [-30, 20, 0], ...fingers('r', 85), spine_02: [0, -12, 0], neck_01: [-6, -20, 0], jaw: [14, 0, 0] } },
+      { t: 0.6, j: { upperarm_r: [-40, -10, -105], lowerarm_r: [-10, 20, 0], ...fingers('r', 85), spine_02: [0, -12, 0], neck_01: [-6, -20, 0], jaw: [8, 0, 0] } },
+      { t: 0.9, j: { upperarm_r: [-40, -10, -95], lowerarm_r: [-30, 20, 0], ...fingers('r', 85), spine_02: [0, -12, 0], neck_01: [-6, -20, 0], jaw: [14, 0, 0] } },
+      { t: 1.3, j: { upperarm_r: [-40, -10, -100], lowerarm_r: [-20, 20, 0], ...fingers('r', 85), spine_02: [0, -10, 0], neck_01: [-4, -18, 0], jaw: [6, 0, 0] } },
+      { t: 2, j: {} },
+    ],
+  });
+  defs.push({ // cower (vendor): crouched behind the cart, hands on its edge, peering over
+    name: 'duck_cart', duration: 2, loop: true, base: R,
+    keys: [
+      { t: 0, j: { thigh_l: [-65, 0, -10], thigh_r: [-65, 0, 10], calf_l: [115, 0, 0], calf_r: [115, 0, 0], foot_l: [-30, 0, 0], foot_r: [-30, 0, 0], spine_01: [18, 0, 0], spine_02: [12, 0, 0], spine_03: [6, 0, 0], neck_01: [-12, 0, 0],
+        upperarm_l: [-70, 15, -5], upperarm_r: [-70, -15, 5], lowerarm_l: [0, -40, 0], lowerarm_r: [0, 40, 0], ...fingers('l', 50), ...fingers('r', 50) }, pelvis: [0, -0.44, -0.08] },
+      { t: 1, j: { thigh_l: [-65, 0, -10], thigh_r: [-65, 0, 10], calf_l: [115, 0, 0], calf_r: [115, 0, 0], foot_l: [-30, 0, 0], foot_r: [-30, 0, 0], spine_01: [18, 0, 0], spine_02: [12, 0, 0], spine_03: [6, 0, 0], neck_01: [-16, 10, 0],
+        upperarm_l: [-70, 15, -5], upperarm_r: [-70, -15, 5], lowerarm_l: [0, -40, 0], lowerarm_r: [0, 40, 0], ...fingers('l', 50), ...fingers('r', 50) }, pelvis: [0, -0.45, -0.08] },
+    ],
+  });
+  defs.push({ // vendorAct right_cart: squat, grip the low edge, drive up through the legs and shove it upright
+    name: 'right_cart', duration: 3, loop: false, base: R,
+    events: [{ t: 1.0, type: 'contact', data: { hand: 'both', what: 'cart' } }, { t: 2.2, type: 'release', data: { hand: 'both' } }],
+    keys: [
+      { t: 0, j: {} },
+      { t: 1.0, j: { thigh_l: [-70, 0, -12], thigh_r: [-70, 0, 12], calf_l: [100, 0, 0], calf_r: [100, 0, 0], foot_l: [-20, 0, 0], foot_r: [-20, 0, 0], spine_01: [30, 0, 0], spine_02: [15, 0, 0], neck_01: [-10, 0, 0],
+        upperarm_l: [-60, 10, 0], upperarm_r: [-60, -10, 0], lowerarm_l: [0, -15, 0], lowerarm_r: [0, 15, 0], ...fingers('l', 70), ...fingers('r', 70) }, pelvis: [0, -0.38, -0.12] },
+      { t: 1.7, j: { thigh_l: [-30, 0, -8], thigh_r: [-30, 0, 8], calf_l: [45, 0, 0], calf_r: [45, 0, 0], foot_l: [-10, 0, 0], foot_r: [-10, 0, 0], spine_01: [20, 0, 0], spine_02: [8, 0, 0], neck_01: [-6, 0, 0],
+        upperarm_l: [-85, 10, 0], upperarm_r: [-85, -10, 0], lowerarm_l: [0, -20, 0], lowerarm_r: [0, 20, 0], ...fingers('l', 70), ...fingers('r', 70) }, pelvis: [0, -0.15, -0.05] },
+      { t: 2.2, j: { spine_01: [6, 0, 0], upperarm_l: [-80, 10, 0], upperarm_r: [-80, -10, 0], lowerarm_l: [0, -10, 0], lowerarm_r: [0, 10, 0], thigh_r: [-15, 0, 0], calf_r: [20, 0, 0] }, pelvis: [0, -0.03, 0.04] },
+      { t: 3, j: {} },
+    ],
+  });
+  defs.push({ // shoeshine: on a low box at the customer's foot, rag snapped side to side across the toe
+    name: 'shine_shoes', duration: 1.2, loop: true,
+    base: merge(R, { thigh_l: [-95, 0, -14], thigh_r: [-95, 0, 14], calf_l: [120, 0, 0], calf_r: [120, 0, 0], foot_l: [-10, 0, 0], foot_r: [-10, 0, 0], spine_01: [28, 0, 0], spine_02: [16, 0, 0], spine_03: [8, 0, 0], neck_01: [10, 0, 0],
+      ...fingers('l', 60), ...fingers('r', 60) }),
+    keys: [
+      { t: 0, j: { upperarm_l: [-55, 30, -10], upperarm_r: [-55, -10, 18], lowerarm_l: [0, -45, 0], lowerarm_r: [0, 45, 0], spine_02: [16, 8, 0] }, pelvis: [0, -0.58, -0.1] },
+      { t: 0.3, j: { upperarm_l: [-55, 10, -18], upperarm_r: [-55, -30, 10], lowerarm_l: [0, -45, 0], lowerarm_r: [0, 45, 0], spine_02: [16, -8, 0] }, pelvis: [0, -0.58, -0.1] },
+      { t: 0.6, j: { upperarm_l: [-55, 30, -10], upperarm_r: [-55, -10, 18], lowerarm_l: [0, -45, 0], lowerarm_r: [0, 45, 0], spine_02: [16, 8, 0] }, pelvis: [0, -0.58, -0.1] },
+      { t: 0.9, j: { upperarm_l: [-55, 10, -18], upperarm_r: [-55, -30, 10], lowerarm_l: [0, -45, 0], lowerarm_r: [0, 45, 0], spine_02: [16, -8, 0] }, pelvis: [0, -0.58, -0.1] },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // three-card monte: bent over the cardboard box, quick hands moving the three cards about
+    name: 'deal_cards', duration: 1.6, loop: true,
+    base: merge(R, { thigh_l: [-30, 0, -10], thigh_r: [-30, 0, 10], calf_l: [50, 0, 0], calf_r: [50, 0, 0], spine_01: [14, 0, 0], spine_02: [10, 0, 0], spine_03: [5, 0, 0], neck_01: [18, 0, 0],
+      lowerarm_l: [0, -55, 0], lowerarm_r: [0, 55, 0], ...fingers('l', 30), ...fingers('r', 30) }),
+    keys: [
+      { t: 0, j: { upperarm_l: [-55, 20, -5], upperarm_r: [-50, -10, 10], hand_l: [0, 0, 10] }, pelvis: [0, -0.1, -0.04] },
+      { t: 0.25, j: { upperarm_l: [-48, 8, 8], upperarm_r: [-58, -24, -6], hand_r: [0, 0, -12] }, pelvis: [0, -0.1, -0.04] },
+      { t: 0.5, j: { upperarm_l: [-58, 24, -8], upperarm_r: [-48, -6, 12] }, pelvis: [0, -0.1, -0.04] },
+      { t: 0.8, j: { upperarm_l: [-50, 12, 4], upperarm_r: [-55, -18, 2], neck_01: [18, 8, 0] }, pelvis: [0, -0.1, -0.04] },
+      { t: 1.05, j: { upperarm_l: [-56, 22, -6], upperarm_r: [-50, -8, 10], neck_01: [14, -10, 0] }, pelvis: [0, -0.1, -0.04] },
+      { t: 1.3, j: { upperarm_l: [-48, 10, 6], upperarm_r: [-58, -22, -4] }, pelvis: [0, -0.1, -0.04] },
+    ],
+    contacts: { l: [[0, 1]], r: [[0, 1]] },
+  });
+  defs.push({ // customer in a queue: weight shifts, a look past the person ahead, a glance at the watch
+    name: 'queue_wait', duration: 7, loop: true, base: R,
+    keys: [
+      { t: 0, j: { spine_03: [0.6, 0, 0] }, pelvis: [0, 0, 0] },
+      { t: 1.8, j: { spine_02: [0, 2, 2], neck_01: [-2, 12, 0], thigh_l: [0, 0, 2], calf_r: [5, 0, 0] }, pelvis: [0.014, -0.005, 0] },
+      { t: 3.2, j: { spine_03: [0.6, 0, 0], neck_01: [0, 0, 0] }, pelvis: [0, 0, 0] },
+      { t: 4.4, j: { upperarm_l: [-30, 20, -10], lowerarm_l: [0, -110, 20], hand_l: [0, -40, 0], neck_01: [22, 6, 0] }, pelvis: [-0.01, -0.003, 0] },
+      { t: 5.4, j: { neck_01: [4, -6, 0] }, pelvis: [-0.012, -0.004, 0] },
+    ],
+  });
+  defs.push({ // pay at the stall: reach out with the money, take the item back
+    name: 'pay', duration: 2, loop: false, mask: MASKS.upper, base: R,
+    events: [{ t: 0.7, type: 'handoff', data: { hand: 'r', what: 'money' } }, { t: 1.4, type: 'handoff', data: { hand: 'r', what: 'item' } }],
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.7, j: { upperarm_r: [-50, -5, 8], lowerarm_r: [0, 40, 0], ...fingers('r', 30), neck_01: [8, 0, 0], spine_03: [4, 0, 0] } },
+      { t: 1.1, j: { upperarm_r: [-30, 0, 12], lowerarm_r: [0, 60, 0] } },
+      { t: 1.4, j: { upperarm_r: [-48, -5, 8], lowerarm_r: [0, 45, 0], ...fingers('r', 60) } },
+      { t: 2, j: { upperarm_r: [-12, 0, 25], lowerarm_r: [0, 85, 0], ...fingers('r', 60) } },
+    ],
+  });
+  defs.push({ // monte crowd: leaning in, hands on the thighs, head following the cards
+    name: 'watch_lean', duration: 4, loop: true,
+    base: merge(R, { spine_01: [7, 0, 0], spine_02: [5, 0, 0], spine_03: [3, 0, 0], neck_01: [12, 0, 0], thigh_l: [-12, 0, -4], thigh_r: [-12, 0, 4], calf_l: [18, 0, 0], calf_r: [18, 0, 0],
+      upperarm_l: [-22, 10, 4], upperarm_r: [-22, -10, -4], lowerarm_l: [0, -25, 0], lowerarm_r: [0, 25, 0] }),
+    keys: [
+      { t: 0, j: { Head: [0, -8, 0] }, pelvis: [0, -0.04, -0.04] },
+      { t: 0.8, j: { Head: [2, 6, 0] }, pelvis: [0, -0.04, -0.04] },
+      { t: 1.5, j: { Head: [0, -4, 0] }, pelvis: [0, -0.04, -0.04] },
+      { t: 2.6, j: { Head: [3, 8, 0], neck_01: [16, 0, 0] }, pelvis: [0, -0.045, -0.05] },
+      { t: 3.4, j: { Head: [0, 0, 0] }, pelvis: [0, -0.04, -0.04] },
+    ],
+  });
+  defs.push({ // eating on the go (PedView.carry frank/pretzel): bite every few steps, layered on the walk
+    name: 'eat_walk', duration: 4, loop: true, mask: MASKS.upper,
+    base: merge(R, { upperarm_r: [-12, 0, 22], lowerarm_r: [0, 85, 0], hand_r: [0, 0, 15], ...fingers('r', 55) }),
+    events: [{ t: 1.4, type: 'contact', data: { hand: 'r', what: 'mouth' } }],
+    keys: [
+      { t: 0, j: {} },
+      { t: 1.0, j: { upperarm_r: [-38, -10, 12], lowerarm_r: [0, 125, 0], hand_r: [10, 0, 25], neck_01: [6, 0, 0] } },
+      { t: 1.6, j: { upperarm_r: [-38, -10, 12], lowerarm_r: [0, 125, 0], hand_r: [10, 0, 25], neck_01: [8, 0, 0], jaw: [6, 0, 0] } },
+      { t: 2.2, j: {} },
+    ],
+  });
+  defs.push({ // drinking on the go (coffee): cup held up at chest height, a sip
+    name: 'sip_walk', duration: 5, loop: true, mask: MASKS.upper,
+    base: merge(R, { upperarm_r: [-20, 0, 18], lowerarm_r: [0, 95, 0], hand_r: [0, 0, 0], ...fingers('r', 50) }),
+    keys: [
+      { t: 0, j: {} },
+      { t: 1.4, j: { upperarm_r: [-40, -12, 10], lowerarm_r: [0, 128, 0], hand_r: [-15, 0, 10], neck_01: [-8, 0, 0] } },
+      { t: 2.2, j: { upperarm_r: [-40, -12, 10], lowerarm_r: [0, 128, 0], hand_r: [-20, 0, 10], neck_01: [-10, 0, 0] } },
+      { t: 3.0, j: {} },
+    ],
+  });
   // --- talking gestures by emotion (layered over idles; amplitude scales with intensity) --------
   const talk = (name: string, amp: number, dur: number, lean: number, headNod: number) => defs.push({
     name, duration: dur, loop: true, mask: MASKS.upper, base: R,

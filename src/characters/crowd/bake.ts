@@ -15,7 +15,8 @@ export const NB = CROWD_JOINTS.length;
 
 export interface BakeClip { name: string; frames: number; fps: number; loop: boolean; speed: number; cycle: number }
 /** The crowd animation set. speed = ground speed the cycle was baked at (m/s); cycle = seconds per loop. */
-export const CROWD_SET: { name: string; kind: 'idle' | 'move' | 'action'; speed?: number; action?: string; seconds?: number; fps?: number }[] = [
+/** only: bake for these template kinds only (vendor work clips stay out of everyone else's atlas). overlay: an upper-body action layered on a move cycle. */
+export const CROWD_SET: { name: string; kind: 'idle' | 'move' | 'action'; speed?: number; action?: string; seconds?: number; fps?: number; only?: string[]; overlay?: string }[] = [
   { name: 'idle', kind: 'idle', seconds: 6, fps: 12 },
   { name: 'idle_heat', kind: 'action', action: 'idle_heat', seconds: 5, fps: 12 },
   { name: 'walk_slow', kind: 'move', speed: 0.8, fps: 24 },
@@ -34,6 +35,19 @@ export const CROWD_SET: { name: string; kind: 'idle' | 'move' | 'action'; speed?
   { name: 'rubberneck', kind: 'action', action: 'rubberneck', seconds: 4, fps: 10 },
   { name: 'push', kind: 'action', action: 'push_cart', seconds: 2.67, fps: 20 },
   { name: 'wave_off', kind: 'action', action: 'wave_off', seconds: 2.4, fps: 15 },
+  // customers (any pedestrian): queue at a stall, lean in at the monte game, eat/drink on the go
+  { name: 'queue', kind: 'action', action: 'queue', seconds: 7, fps: 8 },
+  { name: 'watch', kind: 'action', action: 'watch', seconds: 4, fps: 10 },
+  { name: 'walk_eat', kind: 'move', speed: 1.2, fps: 20, overlay: 'eat_walk' },
+  { name: 'walk_sip', kind: 'move', speed: 1.2, fps: 20, overlay: 'sip_walk' },
+  // street vendors' work (vendor templates only)
+  { name: 'serve', kind: 'action', action: 'vendor_serve', seconds: 3, fps: 12, only: ['vendor'] },
+  { name: 'call', kind: 'action', action: 'vendor_call', seconds: 2.4, fps: 12, only: ['vendor'] },
+  { name: 'shout', kind: 'action', action: 'vendor_shout', seconds: 2, fps: 12, only: ['vendor'] },
+  { name: 'duck', kind: 'action', action: 'duck_cart', seconds: 2, fps: 10, only: ['vendor'] },
+  { name: 'right_cart', kind: 'action', action: 'right_cart', seconds: 3, fps: 12, only: ['vendor'] },
+  { name: 'shine', kind: 'action', action: 'shine_shoes', seconds: 1.2, fps: 15, only: ['vendor'] },
+  { name: 'deal', kind: 'action', action: 'deal_cards', seconds: 1.6, fps: 15, only: ['vendor'] },
 ];
 
 export interface Baked { data: Float32Array; clips: BakeClip[]; frames: number }
@@ -42,19 +56,21 @@ export interface Baked { data: Float32Array; clips: BakeClip[]; frames: number }
  * restJoints: the template's rest joint positions (character space, metres, shoe lift included).
  * Writes NB*3 vec4 per frame: rows of (worldMatrix × inverseBind).
  */
-export function bakeTemplate(lib: AnimLibrary, restJoints: Float32Array, p: Personality): Baked {
+export function bakeTemplate(lib: AnimLibrary, restJoints: Float32Array, p: Personality, kind = 'general'): Baked {
   const clips: BakeClip[] = [];
   const frames: Float32Array[] = [];
   const restOff = new Float32Array(NUM_JOINTS * 3);
   for (let j = 0; j < NUM_JOINTS; j++) { const par = JOINTS[j].parent; for (let c = 0; c < 3; c++) restOff[j * 3 + c] = restJoints[j * 3 + c] - (par >= 0 ? restJoints[par * 3 + c] : 0); }
   const restPelvis: [number, number, number] = [restOff[3], restOff[4], restOff[5]];
   for (const def of CROWD_SET) {
+    if (def.only && !def.only.includes(kind)) continue;
     const an = new Animator(lib, restPelvis, p);
     an.setRestJoints(restJoints);
     const dt = 1 / 60;
     let seconds = def.seconds ?? 2, fps = def.fps ?? 15, speed = 0;
     if (def.kind === 'move') {
       speed = def.speed!;
+      if (def.overlay) void an.play(def.overlay, { loop: true, blendIn: 0.01 }).catch(() => {});
       for (let i = 0; i < 120; i++) { an.setLocomotion({ velocity: [0, 0, speed], grounded: true, heading: 0, mode: 'walk' }, dt); an.update(dt); }
       // one locomotion cycle at this speed (cadence model shared with Animator)
       const cps = cadence(speed, (restPelvis[1] / lib.restPelvisHeight) * p.stride);

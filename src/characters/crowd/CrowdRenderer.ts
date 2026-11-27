@@ -26,7 +26,41 @@ import { Character, armGirth, type GroundFn } from '../Character';
 import { hash2 } from '../util/rng';
 import type { ArchetypeRegistry } from '../archetypes';
 
-export interface AgentView { id: number; archetype: string; variant: number; x: number; y: number; z: number; yaw: number; speed: number; state: string }
+export interface AgentView {
+  id: number; archetype: string; variant: number; x: number; y: number; z: number; yaw: number; speed: number; state: string;
+  /** sim PedView.carry: what the ped holds ('frank', 'pretzel', 'coffee', 'newspaper', ...); '' or undefined = nothing */
+  carry?: string;
+}
+
+/**
+ * Street vendors and their customers (sim: docs/SIM_PROGRESS.md "Street vendors"). One mapping for
+ * both draw paths: `crowd` names a baked clip (bake.ts CROWD_SET), `near` an Animator action.
+ * Continuous states come from AgentView (state, speed, carry); one-shots come from sim events
+ * through CrowdRenderer.trigger(); continuous work the sim doesn't expose as a state (shining
+ * while a customer waits) through hold().
+ */
+const EAT = /frank|hot ?dog|pretzel|knish|chestnut|food|sandwich|slice|pizza|apple|ice ?cream/i, DRINK = /coffee|cup|soda|tea|drink|bottle/i;
+export const VENDOR_ONE_SHOTS: Record<string, { crowd: string; seconds: number }> = {
+  vendor_serve: { crowd: 'serve', seconds: 3 }, vendor_call: { crowd: 'call', seconds: 2.4 }, vendor_shout: { crowd: 'shout', seconds: 2 },
+  right_cart: { crowd: 'right_cart', seconds: 3 }, pay: { crowd: 'idle', seconds: 2 },
+};
+const HOLD_CROWD: Record<string, string> = { shine_shoes: 'shine', deal_cards: 'deal', duck_cart: 'duck', queue: 'queue', watch: 'watch' };
+function stateAction(kind: string, a: AgentView): { crowd: string; near: string } | null {
+  const s = a.state.toLowerCase(), arch = a.archetype.toLowerCase(), moving = a.speed > 0.15;
+  if (kind === 'vendor') {
+    if (/cower|duck|hide/.test(s)) return { crowd: 'duck', near: 'duck_cart' };
+    if (moving && /vendor|cart|push|arriv|clos/.test(s + arch) && /cart|vendor|grocer|news|flower/.test(arch)) return { crowd: 'push', near: 'push_cart' };
+    if (!moving && /monte_dealer/.test(arch)) return { crowd: 'deal', near: 'deal_cards' };
+  }
+  if (/queue/.test(s)) return { crowd: 'queue', near: 'queue' };
+  if (/^watch/.test(s) || /monte/.test(s)) return { crowd: 'watch', near: 'watch' };
+  if (moving && a.speed < 2.0 && a.carry) {
+    if (EAT.test(a.carry)) return { crowd: 'walk_eat', near: 'eat_walk' };
+    if (DRINK.test(a.carry)) return { crowd: 'walk_sip', near: 'sip_walk' };
+    // a newspaper is drawn by the outfit's prop under the arm; no clip needed
+  }
+  return null;
+}
 
 interface Template {
   archetype?: string;
@@ -34,7 +68,8 @@ interface Template {
   clips: BakeClip[]; frameBase: number; height: number;
   lods: { mesh: THREE.Mesh; geo: THREE.InstancedBufferGeometry; attrs: THREE.InstancedBufferAttribute[]; count: number; tris: number }[];
 }
-interface AgentState { phase: number; clip: number; tpl: number; lastX: number; lastZ: number; vx: number; vz: number; near: Character | null; pending: boolean; headId?: string | null; head?: HeadAsset | null }
+interface AgentState { phase: number; clip: number; tpl: number; lastX: number; lastZ: number; vx: number; vz: number; near: Character | null; pending: boolean; headId?: string | null; head?: HeadAsset | null;
+  oneShot?: { action: string; until: number; start: number } | null; hold?: string | null; nearAction?: string }
 
 const QUALITY = {
   low: { templates: 12, near: 3, nearR: 9, midR: 30, farR: 90 },
@@ -50,7 +85,8 @@ const FAMILIES: { kind: string; archetype?: string; share: number }[] = [
   { kind: 'vendor', archetype: 'vendor', share: 0.06 },
   { kind: 'general', share: 0.74 },
 ];
-const familyOf = (arch: string) => (/cop|police|patrol/.test(arch) ? 'police' : /handcart|cart|garment|worker|porter/.test(arch) ? 'worker' : /vendor/.test(arch) ? 'vendor' : 'general');
+// street vendors first: 'cart_vendor' must not land in the handcart workers (they have no vendor clips)
+const familyOf = (arch: string) => (/cop|police|patrol/.test(arch) ? 'police' : /vendor|grocer|flower_seller|news_vendor|shoeshine|peddler|monte_dealer/.test(arch) ? 'vendor' : /handcart|cart|garment|worker|porter/.test(arch) ? 'worker' : 'general');
 
 export class CrowdRenderer {
   readonly object = new THREE.Group();
@@ -137,7 +173,7 @@ export class CrowdRenderer {
     const shape = this.body.evaluate({ ...appearance.body, stature: appearance.stature });
     const lod2 = assemble(this.body, shape, appearance, outfit, 2);
     const lod3 = assemble(this.body, shape, appearance, outfit, 3);
-    const baked = bakeTemplate(this.lib, lod2.joints, { stride: appearance.gait.stride, swing: appearance.gait.swing, bounce: appearance.gait.bounce, slump: appearance.slump, age: appearance.age, heat: 0.6, formal: !!outfit.tie, girth: armGirth(appearance) });
+    const baked = bakeTemplate(this.lib, lod2.joints, { stride: appearance.gait.stride, swing: appearance.gait.swing, bounce: appearance.gait.bounce, slump: appearance.slump, age: appearance.age, heat: 0.6, formal: !!outfit.tie, girth: armGirth(appearance) }, fam.kind);
     const frameBase = this.atlasFrames;
     this.writeAtlas(baked.data, frameBase, baked.frames);
     this.atlasFrames += baked.frames;
@@ -218,9 +254,24 @@ export class CrowdRenderer {
     this.stats.nearBuilds++;
   }
 
+  private clock = 0;
+  /** A sim event's one-shot on a ped (vendorServed -> 'vendor_serve', vendorCall -> 'vendor_call', vendorShout -> 'vendor_shout', vendorAct right_cart -> 'right_cart', a paying customer -> 'pay'). */
+  trigger(id: number, action: string) {
+    const st = this.agents.get(id), def = VENDOR_ONE_SHOTS[action];
+    if (!st || !def) return;
+    st.oneShot = { action, until: this.clock + def.seconds, start: this.clock };
+    if (st.near) void st.near.animator.play(action, { blendIn: 0.15 }).catch(() => {});
+  }
+  /** Continuous work the sim doesn't carry as a state (shoeshine: 'shine_shoes' while a customer waits); null releases it. */
+  hold(id: number, action: string | null) {
+    const st = this.agents.get(id); if (!st) return;
+    st.hold = action && HOLD_CROWD[action] ? action : null;
+  }
+
   setAgents(list: readonly AgentView[]) {
     const t0 = performance.now();
     const now = t0, dt = Math.min(0.1, (now - this.lastT) / 1000); this.lastT = now;
+    this.clock += dt;
     if (this.toBuild.length) this.buildTemplates(this.templates.length ? 6 : 1e9);
     const ready = this.templates.filter(Boolean);
     if (!ready.length) return;
@@ -267,6 +318,13 @@ export class CrowdRenderer {
         if (st.near) {
           st.near.object.position.set(a.x, a.y, a.z);
           st.near.setLocomotion({ velocity: [st.vx, 0, st.vz], grounded: true, heading: a.yaw, mode: a.speed > 4 ? 'sprint' : a.speed > 2.2 ? 'run' : 'walk' });
+          // continuous vendor/customer states (one-shots are started by trigger())
+          const want = st.hold ?? stateAction(T.kind, a)?.near ?? '';
+          if (want !== (st.nearAction ?? '')) {
+            if (st.nearAction) st.near.animator.stop();
+            if (want) void st.near.animator.play(want, { loop: true, blendIn: 0.3 }).catch(() => {});
+            st.nearAction = want;
+          }
           if (visible) st.near.update(dt);
           st.near.object.visible = visible;
           near++;
@@ -312,7 +370,14 @@ export class CrowdRenderer {
     const idx = (n: string) => T.clips.findIndex((c) => c.name === n);
     const s = a.state.toLowerCase();
     let name: string;
-    if (a.speed > 0.15 && !/sit|lean|cower/.test(s)) {
+    // sim one-shot (vendor events): played once from its start, then back to the state mapping
+    if (st.oneShot && this.clock < st.oneShot.until) {
+      const i = idx(VENDOR_ONE_SHOTS[st.oneShot.action].crowd);
+      if (i >= 0) { if (i !== st.clip) st.clip = i; st.phase = Math.min(0.999, (this.clock - st.oneShot.start) / T.clips[i].cycle); return i; }
+    } else if (st.oneShot) st.oneShot = null;
+    const va = st.hold ? { crowd: HOLD_CROWD[st.hold], near: st.hold } : stateAction(T.kind, a);
+    if (va?.crowd && idx(va.crowd) >= 0) name = va.crowd;
+    else if (a.speed > 0.15 && !/sit|lean|cower/.test(s)) {
       name = a.speed < 1.05 ? 'walk_slow' : a.speed < 1.55 ? 'walk' : a.speed < 2.4 ? 'walk_brisk' : a.speed < 4.8 ? 'run' : 'sprint';
       if (T.kind === 'worker' && a.speed < 2.2 && /cart|push|work|deliver/.test(s + a.archetype)) name = 'push';
     } else {

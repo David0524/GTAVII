@@ -134,9 +134,55 @@ Wikimedia rate-limited this container, so sourcing is pending.
   - The money belt, florist's scissors and lining of watches aren't built.
   - The lineup's random seeds skew old; that's appearance, not the presets.
 
-**Animations: next.** Push cart; serve and make change; call out; duck behind the cart; right the
-cart; shine shoes; deal cards. Customers: queue, watch (leaning in), and eating or drinking on the
-go from `PedView.carry`.
+**Animations: first pass, wired to the sim's triggers.** Shots: `shots/characters/43_vendor_clips.jpg`
+(`scene=vendors&anims=1`, one clip per figure) and `42_vendor_crowd.jpg`
+(`scene=crowd&vendors=1`: a near cluster and a mid cluster, with near characters and baked
+instances).
+- **Authored clips** (`authored.ts`, our own keys):
+  - vendors: `vendor_serve` (hand the item over, dig out change, count it into the hand),
+    `vendor_call` (hand cupped at the mouth), `vendor_shout` (fist shaken at a car),
+    `duck_cart`, `right_cart` (squat, grip, drive up, shove), `shine_shoes` (on the box,
+    rag snapped side to side), `deal_cards` (three-card monte over the box);
+  - customers: `queue_wait`, `pay`, `watch_lean`, `eat_walk` and `sip_walk` (upper body over the
+    walk).
+  - Push cart reuses Quaternius `Push_Loop`.
+- **Crowd:** customer clips are baked for every template. Vendor clips are baked for
+  vendor-family templates only (`CROWD_SET.only`), so ordinary pedestrians don't pay for them in
+  the atlas. Eating and sipping are baked as walk cycles with the upper-body overlay.
+- **One mapping for both draw paths** (`stateAction` in `CrowdRenderer.ts`):
+
+  | Sim input | Clip |
+  |---|---|
+  | vendor + `cower` | duck |
+  | vendor moving (`vendorSpawned {arriving}`, closing) | push |
+  | `monte_dealer` idle | deal |
+  | `queue` | queue |
+  | `watch` | watch |
+  | moving with `carry` food | walk_eat |
+  | moving with `carry` drink | walk_sip |
+
+  Near characters now get these as Animator actions; before, they got locomotion only.
+- **Sim events → `crowd.trigger(pedId, action)`:**
+
+  | Sim event | Action |
+  |---|---|
+  | `vendorServed` | `vendor_serve` |
+  | `vendorCall` | `vendor_call` |
+  | `vendorShout` | `vendor_shout` |
+  | `vendorAct {act: 'right_cart'}` | `right_cart` |
+  | a paying customer | `pay` |
+
+  `crowd.hold(pedId, 'shine_shoes' | null)` covers shining while a customer is queued at the
+  stall. The engine glue has to call these; I've sent sim the contract.
+- **Fixed on the way:** `familyOf` sent `cart_vendor` to the handcart workers and the other
+  vendors to general pedestrians. Vendor ids are now matched first.
+- **Gaps:**
+  - Crowd vendor templates use the family's generic vendor outfit, not the per-archetype
+    presets; per-archetype crowd templates are still to do.
+  - `vendorAct {act: 'serve'}` maps to `vendor_serve` like `vendorServed`.
+  - Bumps (`stumble`, `down`, `getUp`, `angry`, `pedBumped`) and the kerb `onRoad` foot IK
+    are the movement block's.
+  - Clip quality is first-pass hand keys with no hand IK onto the cart, cards or shoe yet.
 
 ## Street figures: hair (oversight item "spiky card hair")
 Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
