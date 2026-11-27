@@ -125,6 +125,31 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number; v
   'step.park': { dur: 0.25, bake: (s, sr) => step(s, sr, 2600, 0.02, 0.8, 2) },
   'step.wood': { dur: 0.25, bake: (s, sr) => step(s, sr, 700, 0.02, 0.2, 3) },
   'step.tile': { dur: 0.2, bake: (s, sr) => step(s, sr, 2000, 0.008, 0.2, 4) },
+  // ---------------------------------------------------------------- combat (gunfire by invented period model/tier)
+  // Near-field (~1-2 m) dry shots; distance, air absorption, canyon echoes and the long tail are added live
+  // (world/gunfire.ts). Tiers: a cheap .22/.25 pocket pistol is thin and snappy; a .38 service revolver is the
+  // reference; a .357/.44 magnum has more body and sub; a 12-gauge pump has the longest, widest blast.
+  'gun.cheap': { variants: 4, dur: 0.5, gain: 0.7, bake: (s, sr) => shot(s, sr, { boom: 230, boomDec: 0.035, noise: 0.008, crack: 0.8, mech: 1.2, tail: 0.04, dur: 0.5 }) },
+  'gun.service': { variants: 4, dur: 0.7, gain: 0.9, bake: (s, sr) => shot(s, sr, { boom: 140, boomDec: 0.06, noise: 0.016, crack: 1, mech: 0.8, tail: 0.07, dur: 0.7 }) },
+  'gun.magnum': { variants: 4, dur: 0.9, gain: 1, bake: (s, sr) => shot(s, sr, { boom: 95, boomDec: 0.09, noise: 0.026, crack: 1, mech: 0.6, tail: 0.1, dur: 0.9 }) },
+  'gun.shotgun': { variants: 4, dur: 1.0, gain: 1, bake: (s, sr) => shot(s, sr, { boom: 72, boomDec: 0.12, noise: 0.04, crack: 0.7, mech: 0.4, tail: 0.14, dur: 1.0 }) },
+  /** Test only (tools/audio/gun-check.ts): a 0.3 ms click, so every scheduled arrival is a sharp, separable peak. */
+  'test.click': { variants: 1, dur: 0.02, bake: (_s, sr) => { const o = len(0.02, sr); const n = Math.max(2, Math.round(sr * 0.0003)); for (let i = 0; i < n; i++) o[i] = Math.sin(Math.PI * i / n); return o; } },
+  /** Pump-action cycle: fore-end back (slide + clack), forward (clack). */
+  'gun.pump': { variants: 2, dur: 0.6, bake: (s, sr) => { const r = new Rng(s), o = len(0.6, sr); const bp = new Biquad().set('bp', 2400, 1.2, sr); for (let i = Math.round(0.02 * sr); i < 0.14 * sr; i++) o[i] += bp.run(r.bi()) * 0.12; modal(o, sr, r, 0.14, [[1900, 0.03, 0.6], [4300, 0.015, 0.35], [7100, 0.008, 0.2]], 0.001); modal(o, sr, r, 0.38, [[2100, 0.03, 0.7], [4600, 0.015, 0.35]], 0.001); return fadeOut(normalize(o, 0.6), sr); } },
+  /** Dry fire / jam: hammer falls on nothing. */
+  'gun.dry': { variants: 2, dur: 0.15, bake: (s, sr) => { const r = new Rng(s), o = len(0.15, sr); modal(o, sr, r, 0.005, [[3200, 0.012, 0.8], [5800, 0.006, 0.4], [9100, 0.003, 0.2]], 0.0005); return fadeOut(normalize(o, 0.55), sr); } },
+  /** Revolver cylinder: swing out, shells out, click shut (reload). */
+  'gun.reload': { variants: 2, dur: 1.4, bake: (s, sr) => { const r = new Rng(s), o = len(1.4, sr); modal(o, sr, r, 0.02, [[2600, 0.02, 0.5], [5200, 0.01, 0.2]], 0.001); for (let k = 0; k < 5; k++) modal(o, sr, r, 0.25 + k * r.range(0.03, 0.06), [[r.range(5200, 6800), 0.05, 0.25], [r.range(9000, 11000), 0.03, 0.1]], 0.0004); for (let k = 0; k < 6; k++) modal(o, sr, r, 0.6 + k * 0.08, [[r.range(3000, 3600), 0.01, 0.2]], 0.0004); modal(o, sr, r, 1.2, [[2300, 0.025, 0.7], [4900, 0.012, 0.3]], 0.001); return fadeOut(normalize(o, 0.55), sr); } },
+  /** A round passing close: subsonic hiss with a Doppler sweep (a .38 is subsonic, so no sonic crack). */
+  'bullet.whiz': { variants: 3, dur: 0.25, bake: (s, sr) => { const r = new Rng(s), o = len(0.25, sr), bp = new Biquad(); for (let i = 0; i < o.length; i++) { const t = i / sr; if (i % 32 === 0) bp.set('bp', 5200 - 3000 * (t / 0.25), 2, sr); o[i] = bp.run(r.bi()) * Math.exp(-Math.pow((t - 0.06) / 0.035, 2)); } return fadeOut(normalize(o, 0.6), sr); } },
+  /** Ricochet: impact tick then the falling whine of a tumbling fragment. */
+  'bullet.ricochet': { variants: 3, dur: 0.7, bake: (s, sr) => { const r = new Rng(s), o = len(0.7, sr); modal(o, sr, r, 0, [[r.range(2500, 3500), 0.01, 0.5]], 0.0006); let ph = 0; const f0 = r.range(2600, 3400); for (let i = 0; i < o.length; i++) { const t = i / sr; const f = f0 * (1 - 0.45 * t / 0.7); ph += TAU * f / sr; o[i] += Math.sin(ph) * 0.35 * Math.exp(-t / 0.22) * Math.min(1, t / 0.01) * (1 + 0.3 * Math.sin(TAU * 38 * t)); } return fadeOut(normalize(o, 0.6), sr); } },
+  /** Bullet hits by material. */
+  'impact.brick': { variants: 3, dur: 0.6, bake: (s, sr) => { const r = new Rng(s), o = len(0.6, sr); body(o, sr, r, 0, 0.8); const lp = new OnePole(3500, sr); for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] += lp.lp(r.bi()) * 0.35 * Math.exp(-t / 0.05); } for (let k = 0; k < 18; k++) modal(o, sr, r, r.range(0.03, 0.5), [[r.range(1800, 5000), 0.004, r.range(0.02, 0.08)]], 0.0003); return fadeOut(normalize(o, 0.7), sr); } },
+  'impact.metal': { variants: 3, dur: 0.8, bake: (s, sr) => { const r = new Rng(s), o = len(0.8, sr); const f = r.range(380, 700); modal(o, sr, r, 0, [[f, 0.3, 0.6], [f * 2.76, 0.18, 0.4], [f * 5.4, 0.08, 0.25], [r.range(3500, 4500), 0.03, 0.3]], 0.0008); return fadeOut(normalize(o, 0.7), sr); } },
+  'impact.wood': { variants: 3, dur: 0.4, bake: (s, sr) => { const r = new Rng(s), o = len(0.4, sr); modal(o, sr, r, 0, [[r.range(180, 260), 0.04, 0.8], [r.range(600, 800), 0.025, 0.5], [r.range(1500, 2000), 0.012, 0.3]], 0.0015); for (let k = 0; k < 6; k++) modal(o, sr, r, r.range(0.01, 0.2), [[r.range(2000, 4000), 0.004, 0.05]], 0.0003); return fadeOut(normalize(o, 0.7), sr); } },
+  'impact.dirt': { variants: 2, dur: 0.35, bake: (s, sr) => { const r = new Rng(s), o = len(0.35, sr); body(o, sr, r, 0, 0.6); const lp = new OnePole(1800, sr); for (let i = 0; i < o.length; i++) o[i] += lp.lp(r.bi()) * 0.3 * Math.exp(-i / sr / 0.08); return fadeOut(normalize(o, 0.6), sr); } },
   // ---------------------------------------------------------------- street vendors (docs/briefs/STREET_VENDORS.md)
   /** Hot-dog cart: pot of franks at a simmer (bubbles) and steam hiss. Loopable. */
   'vendor.steam': { variants: 1, dur: 3, bake: (s, sr) => {
@@ -163,6 +188,8 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number; v
     for (let t = 0.3; t < 2.2; t += r.range(0.03, 0.08)) modal(o, sr, r, t, [[r.range(2200, 3200), 0.01, 0.06 * (1 - t / 2.4)]], 0.0004); // a can rolling away
     return fadeOut(normalize(o, 0.85), sr);
   } },
+  /** Paper: a wrapper crumpled and dropped, or newsprint handled (dense crinkle clicks, 2-7 kHz). */
+  'paper.crumple': { dur: 0.6, bake: (s, sr) => { const r = new Rng(s), o = len(0.6, sr), bp = new Biquad().set('bp', 4200, 0.8, sr); const env = (t: number) => Math.exp(-Math.pow((t - 0.2) / 0.16, 2)); for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = bp.run(r.bi()) * 0.08 * env(t) + (r.next() < 0.004 * env(t) ? r.bi() * 0.9 : 0); } const hp = new OnePole(1800, sr); for (let i = 0; i < o.length; i++) o[i] = hp.hp(o[i]); return fadeOut(normalize(o, 0.55), sr); } },
   /** Shoeshine rag snap. */
   'vendor.rag': { variants: 3, dur: 0.25, bake: (s, sr) => { const r = new Rng(s), o = len(0.25, sr), bp = new Biquad().set('bp', 2600, 0.9, sr); for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = bp.run(r.bi()) * Math.exp(-Math.abs(t - 0.04) / 0.012); } return fadeOut(normalize(o, 0.6), sr); } },
   // ---------------------------------------------------------------- movement set (docs/briefs/MOVEMENT.md)
@@ -330,6 +357,31 @@ function step(s: number, sr: number, f: number, dec: number, grit: number, kind:
   // low body thump of the heel
   const lp2 = new OnePole(180, sr); for (let i = 0; i < Math.min(o.length, sr * 0.04); i++) o[i] += lp2.lp(r.bi()) * (1 - i / (sr * 0.04)) * 0.8;
   return fadeOut(normalize(o, 0.7), sr);
+}
+
+/**
+ * A gunshot as heard at ~1-2 m: the muzzle blast's N-wave (sub-millisecond broadband crack), the propellant
+ * gas burst (noise whose band falls from ~9 kHz to ~1.5 kHz in a few ms), the blast's low "boom" (a damped,
+ * falling resonance), the action's metal click, and a short gas tail. Parameters set the tier's character.
+ */
+function shot(s: number, sr: number, o: { boom: number; boomDec: number; noise: number; crack: number; mech: number; tail: number; dur: number }): Float32Array {
+  const r = new Rng(s), out = len(o.dur, sr), boom = o.boom * r.range(0.94, 1.06);
+  const nw = Math.max(2, Math.round(sr * 0.0005 * r.range(0.8, 1.2)));
+  for (let i = 0; i < nw; i++) out[i] += (1 - 2 * i / nw) * o.crack;
+  const lp = new OnePole(9000, sr), lp2 = new OnePole(800, sr); let ph = 0;
+  for (let i = 0; i < out.length; i++) {
+    const t = i / sr;
+    if ((i & 15) === 0) lp.set(2200 + 8000 * Math.exp(-t / 0.008), sr);
+    const n = r.bi();
+    out[i] += lp.lp(n) * Math.exp(-t / (o.noise * 1.3)) * 1.5;
+    out[i] += lp2.lp(n) * Math.exp(-t / o.tail) * 0.25 * Math.min(1, t / 0.004);
+    ph += TAU * boom * (1 + 0.7 * Math.exp(-t / 0.008)) / sr;
+    out[i] += Math.sin(ph) * Math.exp(-t / o.boomDec) * Math.min(1, t / 0.0008) * 0.45;
+  }
+  const m: Float32Array = len(0.05, sr); modal(m, sr, r, 0, [[r.range(2600, 3200), 0.012, 0.6], [r.range(4800, 5600), 0.008, 0.35], [r.range(7600, 8800), 0.004, 0.2]], 0.0005);
+  for (let i = 0; i < m.length; i++) out[i] += m[i] * 0.12 * o.mech;
+  for (let i = 0; i < out.length; i++) out[i] = Math.tanh(out[i] * 1.4) / Math.tanh(1.4); // the blast saturates the near field
+  return fadeOut(normalize(out, 0.95), sr, 0.05);
 }
 
 /** Crossfade a sound's tail into its head so it loops seamlessly (length shrinks by `xf` seconds). */

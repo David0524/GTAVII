@@ -288,6 +288,16 @@ async function main() {
         x.g.on('wasted', () => M.fail('Wasted')); x.g.on('arrested', () => M.fail('Arrested'));
       };
       bindMissions();
+      // police dispatch scanner (audio 14): audio voices gameplay's radio/police events; radio text uses audio's
+      // place names (the rendered vocabulary); dispatch lines show as subtitles
+      const bindDispatch = () => {
+        if (!audioGlue) return;
+        const A = audioGlue.audio as unknown as { bindGameplay?: (g: unknown) => void; placeName?: (x: number, z: number) => string; on: (t: 'dispatch', cb: (e: { text: string; speaker: string; duration: number }) => void) => void };
+        if (!A.bindGameplay || !A.placeName) return;
+        A.bindGameplay(x.g); x.g.policeSys.placeName = (px, pz) => A.placeName!(px, pz);
+        A.on('dispatch', (e) => uiEvents.emit('subtitle', { speaker: e.speaker, text: e.text, channel: 'ambient', seconds: e.duration }));
+      };
+      bindDispatch();
       const bindDoors = () => interiors ? x.g.bindDoors({ doorsForChunk: (i, j) => interiors!.doorsForChunk(i, j) as never, chunkSize: 200 }) : setTimeout(bindDoors, 1000);
       bindDoors();
     }).catch((e) => console.warn('gameplay', e)));

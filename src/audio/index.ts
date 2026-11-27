@@ -12,7 +12,7 @@
 import { AUDIO_PRESETS, type BusId, type LoudnessProfile, type QualityName, type Vec3, type Category } from './config';
 import { AudioRuntime } from './core/runtime';
 import { Mixer } from './core/mixer';
-import { VoiceManager, type Listener } from './core/voices';
+import { VoiceManager, measureHrtfLatency, type Listener } from './core/voices';
 import { AcousticGeometry, type StreetRec } from './acoustics/geometry';
 import { CanyonAnalyzer, interiorReverb, lerpReverb, OUTDOOR_KINDS } from './acoustics/canyon';
 import { RoomTone } from './world/roomTone';
@@ -22,6 +22,9 @@ import { CityMap, weekday } from './world/cityMap';
 import { Ambience, runAudioTimers, clearAudioTimers, setTimeoutAudio } from './world/ambience';
 import { VehicleAudio, type AttachedVehicle, type SimLike } from './vehicles/vehicles';
 import { Footsteps } from './world/footsteps';
+import { Dispatch } from './world/dispatch';
+import { Gunfire, type GunTier, type Material, type ShotReport } from './world/gunfire';
+import { CrowdReactions } from './world/crowdReactions';
 import { Vendors, type VendorHandle, type VendorType } from './world/vendors';
 import { RadioSystem } from './radio/radio';
 import type { StationDef } from './radio/stations';
@@ -31,11 +34,12 @@ import { VoiceLibrary } from './dialogue/voiceLibrary';
 import { Rng } from './worklets/dsp';
 import { readChunk, type ChunkData } from '../shared/chunkFormat';
 import { REGION } from '../shared/geo';
-import { loadTerrain } from '../shared/terrain';
+import { loadTerrain, heightAt } from '../shared/terrain';
 import type { Env, OneShotOpts, Power, Weather } from './env';
 
 export type { Vec3, BusId, QualityName };
 export type { VendorHandle, VendorType } from "./world/vendors";
+export type { GunTier, Material, ShotReport } from "./world/gunfire";
 
 const AMBIENT_CATS = new Set<Category>(['animal', 'emitter', 'subway', 'weather', 'bed']);
 
@@ -53,6 +57,9 @@ export class AudioSystem {
   private vehicles!: VehicleAudio;
   private footsteps: Footsteps | null = null;
   private vendors!: Vendors;
+  private crowd!: CrowdReactions;
+  private gunfire: Gunfire | null = null;
+  private dispatch!: Dispatch;
   private sim: SimLike | null = null;
   private power = new Map<string, Power>();
   private canyonT = 0; private preloadT = 0;
@@ -108,6 +115,8 @@ export class AudioSystem {
       setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true); });
     });
     this.vendors = new Vendors(env, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions));
+    this.crowd = new CrowdReactions(env, () => this.footsteps, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions), this.baseUrl); this.crowd.contentEnabled = this.useContent;
+    this.dispatch = new Dispatch(env, this.voiceLib, (e) => env.emit('dispatch', e), () => this.ambience?.triggerSiren(), (x, z) => this.placeName(x, z), this.baseUrl); this.dispatch.contentEnabled = this.useContent;
     this.radio = { setStation: (id) => radio.setStation(id), get stations() { return radio.stations.map((s) => ({ id: s.id, name: s.name })); }, system: radio };
     this.dialogue = { play: (s, l, at, o) => dlg.play(s, l, at, o), on: (t, cb) => dlg.on(t, cb), overhear: (o) => dlg.overhear(o), registerScript: (s) => dlg.registerScript(s), bark: (t, at, sp, sub) => dlg.bark(t, at, sp, sub), system: dlg };
   }
@@ -133,22 +142,25 @@ export class AudioSystem {
     await loadTerrain(data + 'terrain.bin'); // ground heights for emitters and events (no-op when terrain is off)
     this.geo.build(chunks, streets!);
     this.env.map = new CityMap(streets!);
-    await this.voiceLib?.init(this.useContent);
+    await this.voiceLib?.init(this.useContent); await this.dispatch.loadContent();
     // Narrative radio content if the engine serves content/ (else the PLACEHOLDER stations stay).
     if (!this.customStations) {
       try { const r = await fetch(this.baseUrl + 'content/radio.json'); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const defs = stationsFromNarrative(await r.json()); if (defs.length) this.radio.system.setStations(defs); } } catch { /* no content */ }
     }
+    this.vm.hrtfLatency = await measureHrtfLatency(this.runtime.ctx.sampleRate); this.loadStats.hrtfLatencyMs = +(this.vm.hrtfLatency * 1000).toFixed(2);
     await this.bank.init();
-    await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic'), this.bank.loadGroup('movement')]);
+    await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic'), this.bank.loadGroup('movement'), this.bank.loadGroup('combat')]);
     this.ambience = new Ambience(this.env, REGION, this.radio.system);
     this.footsteps = new Footsteps(this.env, this.ambience.subway.gratings);
+    this.gunfire = new Gunfire(this.env, (db) => this.mixer.hdr(db));
+    this.vendors.groundFn = heightAt; this.crowd.ground = heightAt;
     this.roomTone = new RoomTone(this.env, this.radio.system);
     this.ambience.start(); this.vehicles.start();
     if (this.sim) this.vehicles.bindSim(this.sim);
     this.loaded = true;
     this.loadStats.loadMs = performance.now() - t0;
   }
-  readonly loadStats = { loadMs: 0 };
+  readonly loadStats = { loadMs: 0, hrtfLatencyMs: 0 };
 
   update(dt: number, listener: Listener): void {
     if (!this.loaded) return;
@@ -180,7 +192,7 @@ export class AudioSystem {
     this.radio.system.update(dt); lap('radio');
     this.ambience?.update(dt); lap('ambience');
     this.vehicles.update(dt); lap('vehicles');
-    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); this.vendors.update(dt); lap('footsteps');
+    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); this.vendors.update(dt); this.dispatch.update(); lap('footsteps');
     this.vm.update(listener, dt); lap('voices');
     const ms = performance.now() - t0;
     this.timing.updateMs = ms; this.timing.updateMaxMs = Math.max(this.timing.updateMaxMs, ms); this.timing.frames++; this.timing.sumMs += ms;
@@ -212,7 +224,11 @@ export class AudioSystem {
   setWeather(w: Weather) { this.weatherTarget = w; if (this.env && w === 'rain' && this.env.weather.rain === 0) this.env.weather.rain = 0.02; }
 
   /** area: 'all', a district id ('garment','fur','flower','eighth','deuce','herald') or 'x,z,radius'. */
-  setPower(area: string, state: Power) { if (state === 'on') this.power.delete(area); else this.power.set(area, state); }
+  setPower(area: string, state: Power) {
+    const wasOff = [...this.power.values()].includes('off');
+    if (state === 'on') this.power.delete(area); else this.power.set(area, state);
+    if (state === 'off' && !wasOff && this.loaded) this.dispatch.brownout(); // the dispatcher calls the dark signals once per outage
+  }
   private powerAt(x: number, z: number): Power {
     if (!this.power.size) return 'on';
     let worst: Power = 'on';
@@ -249,13 +265,48 @@ export class AudioSystem {
 
   attachVehicle(v: AttachedVehicle, profile: string): () => void { return this.vehicles.attach(v, profile); }
 
-  bindSim(sim: SimLike) { this.sim = sim; if (this.loaded) this.vehicles.bindSim(sim); }
+  /** Sim feed: traffic/peds for vehicles and footsteps, and street-vendor events (sim src/sim/vendors.ts). */
+  bindSim(sim: SimLike) { this.sim = sim; this.vendors.bindSim(sim); this.crowd.bindSim(sim); if (this.loaded) this.vehicles.bindSim(sim); }
 
   /**
    * Street vendor (docs/briefs/STREET_VENDORS.md): type from content/vendors.json ('hot_dog', 'nut_roaster',
    * 'italian_ice', 'shoeshine'...) or 'ice_cream_truck'. Returns a handle for sale / knockOver / move / react / remove.
    */
   vendor(id: string, type: VendorType, at: Vec3): VendorHandle { return this.vendors.add(id, type, at); }
+
+  /**
+   * Gunfire (combat): a shot at the muzzle with travel time, canyon echoes from the real facades and the HDR
+   * window. Tiers: 'cheap' (pocket .22/.25), 'service' (.38 revolver), 'magnum', 'shotgun', 'auto' (each
+   * round of a burst). Returns what was scheduled (distance, delay, echoes) for debugging and tests.
+   */
+  gunshot(at: Vec3, tier: GunTier = 'service', opts: { indoors?: boolean; family?: string } = {}): ShotReport | null { return this.loaded && this.gunfire ? this.gunfire.shot(at, tier, opts) : null; }
+  /** A round's flight (muzzle -> hit point): a whiz if it passes near the listener. */
+  bulletPass(from: Vec3, to: Vec3) { if (this.loaded) this.gunfire?.bulletPass(from, to); }
+  /** Bullet hit by material ('brick', 'metal', 'car', 'wood', 'glass', 'dirt', 'concrete'). */
+  bulletImpact(at: Vec3, material: Material = 'brick') { if (this.loaded) this.gunfire?.impact(at, material); }
+  /** Weapon handling: 'pump' | 'dry' (empty / jam) | 'reload'. */
+  gunFoley(kind: 'pump' | 'dry' | 'reload', at: Vec3) { if (this.loaded) this.gunfire?.foley(kind, at); }
+
+  /**
+   * Police dispatch (world/dispatch.ts): bind gameplay's emitter (`radio`, `police`, `copKilled`, `reportFiled`)
+   * and the scanner runs itself. `dispatchSay` queues a line directly. Subtitles arrive as on('dispatch').
+   */
+  bindGameplay(gp: { on(type: string, cb: (e: any) => void): void }) { this.dispatch.bindGameplay(gp); }
+  dispatchSay(text: string, o: { voice?: 'central' | 'car'; urgent?: boolean; car?: number } = {}) { this.dispatch.say(text, o); }
+  officerDown(at: [number, number]) { this.dispatch.officerDown(at); }
+  /**
+   * Spoken place name at x,z: the nearest intersection as dispatch says it ("West 31st and 8th"). Gameplay's
+   * `policeSys.placeName` can use this so its radio text stays inside the rendered vocabulary.
+   */
+  placeName(x: number, z: number): string {
+    let best: { a: string; b: string } | null = null, bd = 160;
+    for (const it of this.geo.intersections) { const d = Math.hypot(it.x - x, it.z - z); if (d < bd) { bd = d; best = it; } }
+    if (!best) return 'the area';
+    const short = (n: string) => n.replace(/ Street$| Drive$/, '').replace(/^(\d+\w+) Avenue$/, '$1');
+    const isAve = (n: string) => /Avenue|Broadway|Place/.test(n);
+    const [st, av] = isAve(best.a) && !isAve(best.b) ? [best.b, best.a] : [best.a, best.b];
+    return `${short(st)} and ${short(av)}`;
+  }
 
   /** Footstep from the characters' animation events (player or NPC). */
   footstep(e: Parameters<Footsteps['footstep']>[0]) { this.footsteps?.footstep(e); }
@@ -270,7 +321,7 @@ export class AudioSystem {
   }
 
   /** Engine events out: 'lightning' {distance, delay, near} (flash the sky), 'radioSubtitle', 'bark'. */
-  on(type: 'lightning' | 'radioSubtitle' | 'bark', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
+  on(type: 'lightning' | 'radioSubtitle' | 'bark' | 'dispatch', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
 
   /**
    * One-shots by name: any baked/streamed family ('door.slam', 'ui.select', 'glass'...), or
@@ -299,7 +350,7 @@ export class AudioSystem {
     if (!buf) { const g = Object.entries(GROUPS).find(([, f]) => f.includes(family))?.[0]; if (g) void this.bank.loadGroup(g); return null; }
     const rate = o.rate ?? 1; const cat = o.category ?? (family.startsWith('ui.') ? 'ui' : 'impact');
     const bus = o.bus ?? (cat === 'ui' ? 'ui' : AMBIENT_CATS.has(cat) ? 'ambience' : 'sfx');
-    return this.vm.play({ name: family, bus, category: cat, priority: o.priority ?? (cat === 'ui' ? 10 : 5), gain: (o.gain ?? 1) * this.bank.gainOf(family), at: o.at, vel: o.vel, doppler: o.doppler, occlude: !!o.at, wet: o.wet,
+    return this.vm.play({ name: family, bus, category: cat, priority: o.priority ?? (cat === 'ui' ? 10 : 5), gain: (o.gain ?? 1) * this.bank.gainOf(family), at: o.at, vel: o.vel, doppler: o.doppler, occlude: o.occlude ?? !!o.at, wet: o.wet, delay: o.delay,
       duration: buf.duration / rate, resumable: true, pinned: cat === 'ui', build: (ctx) => bufferSource(ctx, buf, { rate }) });
   }
 
@@ -312,7 +363,7 @@ export class AudioSystem {
   get stats() {
     return {
       state: this.runtime.state, voices: { ...this.vm?.stats }, mixer: { ...this.mixer?.stats }, bank: { ...this.bank?.stats, budget: this.bank?.budgetBytes, noiseBytes: this.noise ? noiseBytes(this.noise) : 0 },
-      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats },
+      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats }, dispatch: this.dispatch ? { ...this.dispatch.stats } : null, crowd: { ...this.crowd?.stats }, gunfire: this.gunfire ? { ...this.gunfire.stats } : null,
       dialogue: this.dialogue?.system.stats, speech: this.voiceLib?.stats, radioFeeds: this.radio?.system.activeFeeds, geo: this.geo.stats, timing: { ...this.timing, samples: undefined }, load: this.loadStats,
       emitters: this.ambience?.emitterCounts(), outputLatency: (this.runtime.ctx as AudioContext).outputLatency ?? 0, baseLatency: (this.runtime.ctx as AudioContext).baseLatency ?? 0,
     };

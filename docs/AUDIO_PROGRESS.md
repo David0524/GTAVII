@@ -91,11 +91,11 @@ for me to describe its audio reliably, so it isn't characterised below.
 |---|---|---|---|
 | Ambience layering by block and time | Dense, hand-authored beds per district and hour; constant small one-shots; weather and time shift everything | Beds and events driven by real district data, clock curves, weekday/date, weather and power; dozens of emitter types placed from the map | Sound design is synthesised, not recorded; far fewer unique one-shots. Plan: the mix pass under way, then more event families per district |
 | Footsteps by surface | Many surfaces, shoes, speeds; clean animation sync | 12 surfaces + traversal foley, kerb and grating auto-detected | Synthesised cloth/body foley is thin; no shoe types; sync waits on characters' events (request 9) |
-| Gunfire and canyon echo | Signature tails and slapback in city streets | The canyon reflection and FDN system that would give it exists and is measured | **Not built yet** (gameplay audio backlog); needs a gunfire category with a short HDR ducking window |
+| Gunfire and canyon echo | Signature tails and slapback in city streets | Built: per-shot image-source echoes from the real facades, travel time, HDR window; echo timing measured (26/26) | Synthesised shots are cleaner than recordings; few mechanical layers |
 | Vehicle engines | Recorded, multi-layer engines with loads, gears, backfires | Procedural per-cylinder engines with real firing orders, load, gears, Doppler, LOD to traffic beds | Cleaner and more "synthetic" than recordings, especially at steady mid revs. Plan: add mechanical noise layers and per-class variation |
 | Crowd walla | Recorded crowds with intelligible fragments and reactions | Density-driven formant walla on both sidewalks, kids in parks, narrative barks on horns/collisions | Formant babble is clearly synthetic up close; speech is eSpeak (placeholder tier) |
-| Police dispatch | Radio chatter as a key cue | Radio/phone filters and the bark/line system are ready | **Not built yet**: needs dispatch content (narrative) and the build-time voices |
-| Mix and ducking | Strong dynamic mixing; dialogue always clear; music ducks | Dialogue sidechain ducking, category mixing desk, loudness profiles, TP limiter, measured −16/−23 LUFS sessions | No HDR-style "loudest event wins" window yet. Plan: add it with gunfire |
+| Police dispatch | Radio chatter as a key cue | Built: stitched scanner from build-time fragments, driven by gameplay's radio/police/copKilled events; officer-down sequence with alert and siren surge | eSpeak fragments sound robotic; scanner is non-positional only (no car/cop radios yet) |
+| Mix and ducking | Strong dynamic mixing; dialogue always clear; music ducks | Dialogue sidechain ducking, category mixing desk, loudness profiles, TP limiter, measured −16/−23 LUFS sessions, HDR window on gunfire | The HDR window covers gunfire only; explosions and crashes should use it too |
 | Score cues | Adaptive score and radio | Procedural period instrumentals exist | Radio stations paused by the user; no adaptive score yet |
 
 ## Honest critique of the renders (`shots/audio/*.wav`)
@@ -226,8 +226,110 @@ Freesound (CC0 / CC-BY) and Sonniss GDC sounds are allowed through the gate. I'd
 is weakest (cloth and body foley, crowd close-ups, gunfire transients), reading each licence first and adding a row
 before any file lands. BBC Sound Effects is out (non-commercial).
 
+## Police dispatch (heat backlog, 2026-11-27)
+The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialogue/dispatchText.ts`. API: `audio.bindGameplay(gp)`, `audio.dispatchSay(text)`,
+`audio.officerDown([x, z])`, `audio.placeName(x, z)`; subtitles come from `on('dispatch')`. Engine wiring is ENGINE_REQUESTS "From audio: 14".
+- **Why stitched:** whole lines can't be rendered ahead of time.
+  - Gameplay's radio calls are free text built at runtime: precinct, crime, place, and the witness description.
+  - Narrative's police_radio lines are templates (`{street}`, `{avenue}`…).
+  - So the build renders a vocabulary instead, with three registers (Central flat, Central urgent, the cars): 772 fragments each.
+    It covers gameplay's fixed phrases, crime words, narrative's template fragments, precinct names, every street on the map, subject, clothing, vehicle, direction and item words, numbers 0–99, and the APCO phonetic alphabet for plates.
+    Every word that appears in a phrase is also rendered on its own, as the fallback.
+  - At runtime the text is normalised (numbers and ordinals to words, plates spelled), then segmented into the longest phrase available, else single words.
+  - Anything outside the vocabulary becomes a burst of garble on air; the subtitle keeps the full text.
+- **On air:** one half-duplex channel.
+  - One transmission at a time, queued by priority; stale chatter is dropped.
+  - Each transmission is a squelch kerchunk, the fragments (30 ms joins, 160 ms breaths at commas) and a squelch tail.
+  - A static bed runs under it, through a 320 Hz–3 kHz band with a presence bump and light clipping.
+  - Each radio car's voice sits slightly differently.
+  - Who speaks follows radio procedure: "Central to all cars…" is Central; "Central, car six…" is that car calling in.
+- **Events:**
+  - gameplay `radio` → Central speaks it, in the urgent register for shots, shootings, homicides and pursuits;
+  - `police` dispatched → a car acknowledges; pursuit → a car calls it in; lost, investigate and cleared → narrative's lines, with `{street}`/`{avenue}` filled from `placeName`; roadblock → a car reports it;
+  - idle chatter while a report is open;
+  - the brownout call once per outage.
+- **Officer down (`copKilled`):**
+  - the band clears for it;
+  - an alert of three 1.2 kHz pips (an original pattern), then Central urgent with narrative's "officer down" line;
+  - then narrative's cop_killed radio sequence, with car voices for car lines;
+  - three cars answering "on the way", and a surge of three sirens;
+  - for 90 s the channel stays hot: urgent register and busier chatter. This is the "tone shift".
+- **Measured (`render.ts --only heat_8th --content`):** Eighth Ave at W 33rd St, 9:40 p.m. The scene runs report → dispatched → pursuit → lost → officer down → cleared.
+  - 10–11 transmissions; every fragment was found in the vocabulary (0 garbled, coverage 1.0); voice library 0 misses.
+  - The scanner measures −21.2 LUFS while talking against a −15.2 LUFS street (stems tool), so it's clear without masking the world.
+  - Excerpt: `shots/audio/heat_8th.ogg`.
+- **Cost:** about 2,300 extra fragments; the voice deploy grows from 31 to 44 MB (Opus + AAC), fetched per fragment on demand into the 6 MB decoded LRU.
+  The full render took 73 s on a cold cache for the new fragments; a warm cache takes about 1 s.
+- **Honest limits:**
+  - Stitched eSpeak words sound clipped and robotic, more like a 1970s scanner than an actor, which partly suits the radio.
+  - Descriptions need gameplay to use `audio.placeName`; until then its placeholder place names ("the lot on the East Side") still fall inside the vocabulary.
+  - Real clothing and garment words come from gameplay's wardrobe data, which audio can't read at build time, so the colour and garment lists are curated. A word outside them garbles.
+- **vs GTA V / VI / RDR2:**
+  - GTA V's police scanner is the reference: concatenated recorded phrases (area, crime, suspect description, vehicle), with squelch and radio filtering.
+  - We match the structure (concatenation, description, place, squelch, escalation) and drive it from real gameplay state.
+  - We fall short on voice quality: GTA's fragments are recorded actors.
+  - Plan: real voice talent or a better free TTS when the voice decision changes, and positional radios in police cars and on cops.
+
+## Gunfire (combat backlog, 2026-11-27)
+`world/gunfire.ts`; API: `audio.gunshot(at, tier)`, `audio.bulletPass(from, to)`, `audio.bulletImpact(at, material)`,
+`audio.gunFoley('pump'|'dry'|'reload', at)`. All sounds self-made (AUDIO_SOURCES.md); the `combat` group is preloaded (~4 MB decoded).
+- **Tiers (invented period guns):**
+  - `cheap`: pocket .22/.25, thin and snappy, −5 dB;
+  - `service`: .38 revolver, the reference level;
+  - `magnum`: more body and sub, +2 dB;
+  - `shotgun`: 12-gauge pump, longest and widest blast, +3 dB;
+  - `auto`: each round of a burst.
+
+  Each shot is an N-wave crack, a falling-band gas burst, a damped "boom", the action's click and a gas tail.
+  After one balance pass, octave energy in the first 300 ms is broadband from 250 Hz to 8 kHz (within about 8 dB) with the tier's low body below that. The first bake was 15–20 dB short in the mids.
+- **Travel time:** the sound starts distance / 343 m/s after the trigger, so a shot at 450 m is heard 1.3 s after its flash.
+- **The canyon echo (signature):** image sources from the real facades around the shooter (the reverb's CanyonAnalyzer at 24 rays on every preset):
+  - first order off both facades and the block-end walls;
+  - higher orders between parallel facades (up to 4 where the canyon flutters);
+  - each echo is a positional voice at its image position, delayed by its extra path and attenuated by facade coverage and order;
+  - up to 8 echoes on High, 6 on Medium, 4 on Low; rapid fire keeps the strongest 3 per later round;
+  - each echo's path is line-of-sight checked on its first leg (shooter to first wall) and its last leg (last reflection point to listener), so shooters indoors or round a corner don't get street echoes;
+  - the FDN gets a high wet send for the long tail.
+- **HDR window:** ambience and radio dip 3–8 dB by the shot's loudness at the listener, hold 0.25 s, recover over about 1 s (`mixer.hdr`), timed to the shot's arrival.
+- **Engine fix found here:** voices can now start at a future time to the sample (`delay`), used for travel time and echoes.
+  Chromium's HRTF panner adds about 6 ms that equal-power panning doesn't, which skewed a direct sound against its echoes.
+  The latency is now measured at load (impulse through both panners, offline; 6.35 ms in Chromium), and delayed HRTF voices start that much early.
+- **Checks:**
+  - `npx tsx tools/audio/gun-check.ts` (timing, measured on the output): each shot is replaced by a 0.3 ms click.
+    - 26/26 separable predicted arrivals were found within −0.5/+1.5 ms across 5 shots at 16–150 m.
+    - In a control (the same test 7 ms off any arrival), the detector fired 2 times out of 21, so it isn't just finding peaks everywhere.
+    - Constant output latency is about 7.8 ms (limiter lookahead plus panner).
+  - `render.ts --only shootout_8th`: W 39th St east of 8th Ave at 11:20 p.m., all tiers at 13–450 m, a burst, whiz, impacts and foley (excerpt `shots/audio/shootout_8th.ogg`).
+    - High/mobile: −15.8 LUFS, max momentary −6.2, TP −1.50 dBTP, limiter peak reduction 0.8 dB, 50/64 voices, p95 0.6 ms.
+    - Home theatre: −22.8 LUFS, TP −3.6.
+    - Low: −18.5 LUFS, 24/24 voices.
+    - The main suite is unchanged (−16.28 / −23.05).
+  - `foley-check.ts combat`: 13 families, none bad (`shots/audio/combat.ogg`).
+- **vs GTA V / VI / RDR2:**
+  - The references' gunfire is recorded, layered by distance, with authored city tails; RDR2 is the benchmark for echo across terrain.
+  - We match the structure: travel time, distance layers via air absorption, and a per-shot ducking window.
+  - Our echoes come from the actual building geometry around the shooter, and their timing is measured.
+  - We fall short on the source sound: synthesised shots are cleaner and less "dirty" than recordings, and there are no per-gun mechanical layers beyond one click.
+  - Plan: add a supersonic crack for magnum rounds passing the listener, and casings and shell drops.
+
 ## Street vendors (STREET_VENDORS.md, 2026-11-27)
 All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2 MB decoded on every preset: variants capped per sound, loops one variant with rate jitter) loads when the first vendor registers.
+- **Sim-driven (sim fb337dc):** `bindSim` maps the sim's vendor events onto the handles:
+  - vendorSpawned / vendorOpened / vendorGone, and cart positions from `vendorViews` (cooking starts once the cart is set up; pushed carts rattle);
+  - vendorCall → a call (the sim times them; audio applies the 30 m range and 5 s gap);
+  - vendorShout → an angry line; monteScatter → the lookout's alarmed line;
+  - vendorServed / vendorAct serve → change; vendorAct right_cart → the knock-over;
+  - vendorCower / vendorFled → a scared line; vendorRecovered → reopen; cartRighted (6–10 s after a tip) → a clank, then reopen.
+  The test scene drives these through the mock sim's events, the same path as the real sim.
+- **Sidewalk reactions (sim 66e9453, `world/crowdReactions.ts`):**
+  - pedBumped: body foley by kind (a coat brush; a stumble with scuffs; a knockdown onto the pavement).
+    It also plays a line from the pedestrian's own bark pool (archetype → `barks` in content/npc_archetypes), context
+    `collision`, matched to the response: angry → angry; annoyed → annoyed/brisk; frightened → startled/hurt/worried.
+    It falls back to any collision line. At most one bump line every 3 s, half of brushes are silent, within 25 m.
+    Bumps with `byPlayer: true` (confirmed by sim 554d254: every bump today is player contact) always speak, reach 35 m and wait only 1 s.
+  - pedGotUp: cloth and scuffs. litter: a new self-made `paper.crumple` (also the newsstand's page sound).
+  - monteScatter: the lookout's shout, then four sets of running feet fanning out.
+  - Signal chirps: not added, since 1974 NYC had no accessible pedestrian signals (agreeing with sim's note).
 - **API:** `audio.vendor(id, type, at)` returns a handle: `sale()`, `knockOver(impulse)`, `reopen()`, `move(at, speed)`,
   `react('danger'|'traffic')`, `remove()`. Wiring is ENGINE_REQUESTS "From audio: 12".
 - **Per type (from content/vendors.json):**

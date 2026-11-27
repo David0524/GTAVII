@@ -849,3 +849,12 @@ wires it (about 10 lines in main.ts plus two ButtonActions in Input.ts). The eng
   - `indoors` comes from `interiors.inside()`, which is now in the main game. Gameplay owns the
     weapon → tier map: its weapon defs gain an `audioTier` field.
   - No architecture or scope impact.
+
+## Requests check, 2026-11-27 14:33
+- **Audio 14 (police dispatch: bind gameplay, use audio's place names): SHIPPED.**
+  - Audio branch merged.
+  - In main, once gameplay is up: `audio.bindGameplay(gameplay)` and
+    `policeSys.placeName = audio.placeName`. `audio.on('dispatch')` becomes UI subtitles on the
+    'ambient' channel.
+  - The deploy build already renders the fragments (audio 11); speech grows from 31 to 44 MB, fetched
+    on demand.

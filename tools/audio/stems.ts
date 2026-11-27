@@ -28,7 +28,7 @@ async function main() {
   for (const id of ids) {
     if (ONLY && id !== ONLY) continue;
     for (const r of runs) {
-      const res = await p.evaluate(([i, o]) => (window as any).__T74AUDIO.render(i, o), [id, { seconds: SECONDS, ...r.o }] as const);
+      const res = await p.evaluate(([i, o]) => (window as any).__T74AUDIO.render(i, o), [id, { seconds: SECONDS, content: args.includes('--content'), ...r.o }] as const);
       const buf = Buffer.from(res.pcm, 'base64'); const f = new Float32Array(buf.buffer, buf.byteOffset, buf.byteLength / 4);
       const n = f.length / 2, L = new Float32Array(n), R = new Float32Array(n); for (let i = 0; i < n; i++) { L[i] = f[i * 2]; R[i] = f[i * 2 + 1]; }
       const skip = 9600; const m = measure(L.subarray(skip), R.subarray(skip)); const oc = octaveBands(L, R);

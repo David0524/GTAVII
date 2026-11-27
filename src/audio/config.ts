@@ -43,7 +43,7 @@ export const LOUDNESS = {
 export type LoudnessProfile = keyof typeof LOUDNESS;
 
 export type Category =
-  | 'vehicle' | 'horn' | 'siren' | 'tyre' | 'impact' | 'footstep' | 'voice' | 'crowd' | 'emitter' | 'subway' | 'radio' | 'weather' | 'bed' | 'ui' | 'animal';
+  | 'vehicle' | 'horn' | 'siren' | 'tyre' | 'impact' | 'footstep' | 'voice' | 'crowd' | 'emitter' | 'subway' | 'radio' | 'weather' | 'bed' | 'ui' | 'animal' | 'gunfire';
 
 /** Distance curves: gain = ref / (ref + roll * (d - ref)) above ref, faded to 0 over the last 20% before max. */
 export const CURVES: Record<Category, { ref: number; max: number; roll: number; wet: number }> = {
@@ -52,6 +52,8 @@ export const CURVES: Record<Category, { ref: number; max: number; roll: number; 
   siren: { ref: 8, max: 1800, roll: 0.9, wet: 0.6 },
   tyre: { ref: 4, max: 300, roll: 0.55, wet: 0.4 },
   impact: { ref: 5, max: 400, roll: 0.5, wet: 0.5 },
+  /** Gunshots carry for blocks; a lot of what you hear at range is the canyon, so the wet send is high. */
+  gunfire: { ref: 3, max: 2500, roll: 0.35, wet: 0.8 },
   footstep: { ref: 1.5, max: 40, roll: 1.3, wet: 0.35 },
   voice: { ref: 1.5, max: 45, roll: 1.15, wet: 0.3 },
   /** A sidewalk of people is a line source, not a point: shallow roll-off. */
@@ -72,7 +74,7 @@ export const CURVES: Record<Category, { ref: number; max: number; roll: number; 
  * Leq at 30 m), and the crowd reads clearly on the sidewalks.
  */
 export const MIX_DB: Record<Category, number> = {
-  vehicle: 14, horn: 12, siren: 3, tyre: 9, impact: 9, footstep: 8, voice: 0, crowd: -1, emitter: 6, subway: 8, radio: 4, animal: 6, weather: 0, bed: 0, ui: 0,
+  vehicle: 14, horn: 12, siren: 3, tyre: 9, impact: 9, footstep: 8, voice: 0, crowd: -1, emitter: 6, subway: 8, radio: 4, animal: 6, weather: 0, bed: 0, ui: 0, gunfire: 8,
 };
 export const MIX_GAIN = Object.fromEntries(Object.entries(MIX_DB).map(([k, v]) => [k, Math.pow(10, v / 20)])) as Record<Category, number>;
 

@@ -5,9 +5,9 @@
  * 62.5 fps frame; suspend points must sit on 128-sample render quanta) and returns the PCM plus
  * the checks the test asserts on.
  */
-import { AudioSystem } from '../index';
+import { AudioSystem, type GunTier, type Material, type ShotReport } from '../index';
 import { MockSim } from './mockSim';
-import { SCENARIOS } from './scenarios';
+import { SCENARIOS, type Scenario } from './scenarios';
 import { CityMap } from '../world/cityMap';
 import type { StreetRec } from '../acoustics/geometry';
 import type { QualityName, LoudnessProfile } from '../config';
@@ -32,11 +32,12 @@ function b64(buf: ArrayBuffer): string {
   return btoa(s);
 }
 
-export async function render(id: string, o: { quality?: QualityName; seconds?: number; profile?: LoudnessProfile; sr?: number; solo?: string; only?: string } = {}) {
-  const sc = SCENARIOS.find((s) => s.id === id)!; const seconds = o.seconds ?? 60, sr = o.sr ?? 48000, quality = o.quality ?? 'high';
+export async function render(id: string, o: { quality?: QualityName; seconds?: number; profile?: LoudnessProfile; sr?: number; solo?: string; only?: string; /** Replace the scenario's events. */ events?: Scenario['events']; /** Listener stands still. */ still?: boolean; /** Load narrative content and rendered voices (dispatch, barks). */ content?: boolean } = {}) {
+  const base = SCENARIOS.find((s) => s.id === id)!;
+  const sc: Scenario = { ...base, events: o.events ?? base.events, walk: o.still ? 0 : base.walk }; const seconds = o.seconds ?? 60, sr = o.sr ?? 48000, quality = o.quality ?? 'high';
   live.clear(); created.n = 0;
   const ctx = new OfflineAudioContext({ numberOfChannels: 2, length: Math.round(seconds * sr), sampleRate: sr });
-  const sys = new AudioSystem({ quality, context: ctx, content: false }); // hermetic: no narrative content fetched
+  const sys = new AudioSystem({ quality, context: ctx, content: !!o.content }); // hermetic by default: no narrative content fetched
   await sys.whenReady();
   const streets: StreetRec[] = await fetch('/data/streets.json').then((r) => r.json());
   await sys.load({ streets });
@@ -55,11 +56,50 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   sim.density = sc.traffic; sim.pedDensity = sc.peds;
   for (let k = 0; k < 900; k++) sim.update(0.1, { x: st.x, z: st.z }, sc.clock.minutes / 60); // warm up 90 s
   sys.bindSim(sim);
-  const vendors = new Map((sc.vendors ?? []).map((v) => [v.id, { h: sys.vendor(v.id, v.type, [st.x + v.offset[0], heightAt(st.x + v.offset[0], st.z + v.offset[1]), st.z + v.offset[1]]), v }]));
+  // Vendors: sim-owned types arrive through the mock sim's events and views (the same path as the real sim,
+  // src/sim/vendors.ts); the ice-cream truck, which the sim doesn't own, through the direct handle.
+  const truck = new Map<string, ReturnType<typeof sys.vendor>>(); const pushing = new Set<string>();
+  for (const v of sc.vendors ?? []) {
+    const vx = st.x + v.offset[0], vz = st.z + v.offset[1];
+    if (v.type === 'ice_cream_truck') { truck.set(v.id, sys.vendor(v.id, v.type, [vx, heightAt(vx, vz), vz])); continue; }
+    sim.vendorViews.push({ id: v.id, kind: v.type, state: 'open', cartX: vx, cartZ: vz, open: true });
+    sim.fire('vendorSpawned', { id: v.id, kind: v.type, pedId: -1, x: vx, z: vz - 0.8, cart: { prop: 'cart', x: vx, z: vz, yaw: 0 }, arriving: false });
+  }
   const vendorEvent = (e: string, p?: Record<string, number>) => {
-    const [, id, act] = e.split(':'); const v = vendors.get(id); if (!v) return;
-    const pos = (): [number, number, number] => [st.x + v.v.offset[0], 0, st.z + v.v.offset[1]];
-    if (act === 'sale') v.h.sale(); else if (act === 'knockOver') v.h.knockOver(p?.impulse); else if (act === 'move') v.h.move(pos(), 1.1); else if (act === 'stop') v.h.move(pos(), 0);
+    const [, id, act] = e.split(':'); if (truck.has(id)) return;
+    if (act === 'sale') sim.fire('vendorServed', { id, kind: '', pedId: -1, good: '' });
+    else if (act === 'call') sim.fire('vendorCall', { id, kind: '', pedId: -1, x: 0, z: 0, bark: 'barks.vendor_calls' });
+    else if (act === 'knockOver') { sim.fire('vendorAct', { id, pedId: -1, act: 'right_cart' }); const w = sim.vendorViews.find((q) => q.id === id); if (w) { w.open = false; w.state = 'righting'; } void p; }
+    else if (act === 'righted') { sim.fire('cartRighted', { id }); const w = sim.vendorViews.find((q) => q.id === id); if (w) { w.open = true; w.state = 'open'; } }
+    else if (act === 'move') pushing.add(id); else if (act === 'stop') pushing.delete(id);
+  };
+  /** Fire a raw sim event at an offset from the listener's start (bumps, litter, monte scatter). Strings in params: none needed. */
+  const simEvent = (type: string, off: [number, number] = [0, 0], p: Record<string, number> = {}) => {
+    const KINDS = ['brush', 'stumble', 'knockdown'], RESP = ['none', 'annoyed', 'angry', 'frightened'];
+    sim.fire(type, { id: 'test', x: st.x + off[0], z: st.z + off[1], kind: KINDS[p.kind ?? 0], response: RESP[p.response ?? 0], archetype: 'npc.garment_pushboy', dirX: 1, dirZ: 0, by: 'ped', byPlayer: !!p.byPlayer });
+  };
+  // Combat events: 'gun:<tier>', 'hit:<material>', 'whiz' (a round passing ~1.5 m from the listener), 'gunfoley:<kind>'.
+  const shots: (ShotReport & { t: number })[] = [];
+  const combatEvent = (e: string, at: [number, number, number], t: number) => {
+    const [kind, arg] = e.split(':');
+    if (kind === 'gun') { const r = sys.gunshot(at, arg as GunTier, e.endsWith(':click') ? { family: 'test.click' } : {}); if (r) shots.push({ ...r, t }); }
+    else if (kind === 'hit') sys.bulletImpact(at, arg as Material);
+    else if (kind === 'gunfoley') sys.gunFoley(arg as 'pump', at);
+    else if (kind === 'whiz') sys.bulletPass(at, [x + 1.5 * st.dz, 1.6, z - 1.5 * st.dx]);
+  };
+  // Gameplay events for the dispatch scanner, through bindGameplay exactly as gameplay's emitter delivers them.
+  const gpH = new Map<string, ((e: unknown) => void)[]>(); sys.bindGameplay({ on: (t, cb) => { gpH.set(t, [...(gpH.get(t) ?? []), cb]); } });
+  const gp = (t: string, e: unknown) => { for (const cb of gpH.get(t) ?? []) cb(e); };
+  const dispatchLog: { t: number; text: string; speaker: string; duration: number; urgent: boolean }[] = [];
+  sys.on('dispatch', (e) => dispatchLog.push({ t: +ctx.currentTime.toFixed(2), ...e }));
+  const gpEvent = (name: string, at: [number, number]) => {
+    const place = sys.placeName(at[0], at[1]);
+    if (name === 'report') { gp('reportFiled', { id: 1 }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `Midtown Central, shots fired at ${place}. …Male, thirties, medium build, tan leisure suit, green sedan, plate starting 4K, may be armed…` }); }
+    else if (name === 'dispatched') gp('police', { kind: 'dispatched', unit: 'unit.7', report: 1 });
+    else if (name === 'pursuit') { gp('police', { kind: 'pursuit', unit: 'unit.7', suspect: 'player' }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `All units Midtown Central, in pursuit at ${place}. …Male, tan leisure suit…` }); }
+    else if (name === 'lost') gp('police', { kind: 'lost', unit: 'unit.7', report: 1, at });
+    else if (name === 'copKilled') gp('copKilled', { id: 'cop.3', by: 'player', at: [at[0], 0, at[1]], precinct: 'precinct.midtown_central' });
+    else if (name === 'cleared') gp('police', { kind: 'cleared', report: 1, precinct: 'precinct.midtown_central', why: 'decay' });
   };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
@@ -68,13 +108,14 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   const tick = () => {
     x += st.dx * sc.walk * step; z += st.dz * sc.walk * step; minutes += step / 60;
     sim.update(step, { x, z }, minutes / 60);
+    for (const w of sim.vendorViews) if (pushing.has(w.id)) w.cartX += 1.1 * step;
     sys.setClock(minutes, sc.clock.date);
     sys.update(step, listener());
     const v = sys.stats.voices; maxReal = Math.max(maxReal, v.real ?? 0); maxTotal = Math.max(maxTotal, v.total ?? 0);
   };
   for (let k = 1; k <= frames; k++) {
     const t = k * step;
-    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
+    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : e.play.startsWith('sim:') ? simEvent(e.play.slice(4), e.offset, e.params) : e.play.startsWith('gp:') ? gpEvent(e.play.slice(3), [x + (e.offset?.[0] ?? 0), z + (e.offset?.[1] ?? 0)]) : /^(gun|hit|whiz|gunfoley)/.test(e.play) ? combatEvent(e.play, [x + (e.offset?.[0] ?? 0), heightAt(x + (e.offset?.[0] ?? 0), z + (e.offset?.[1] ?? 0)) + 1.4, z + (e.offset?.[1] ?? 0)], t) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
   }
   sys.update(step, listener());
   const t0 = performance.now();
@@ -96,7 +137,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     id, title: sc.title, quality, profile: o.profile ?? 'mobile', sr, seconds, renderMs, pcm: b64(inter.buffer),
     checks: { nan, subnormals: sub, samplePeak: peak, maxRealVoices: maxReal, voiceCap: preset.voices, maxTotalVoices: maxTotal, connectedBeforeUnload: connectedBefore, leakedNodes: leaked.length, leakedTypes: leaked.slice(0, 20), nodesCreated: created.n, limiter: stats.mixer },
     timing: { frames: timing.length, p50: pct(0.5), p95: pct(0.95), p99: pct(0.99), max: timing[timing.length - 1], mean: timing.reduce((a, b) => a + b, 0) / Math.max(1, timing.length) },
-    stats: { ...stats, voices: stats.voices, voiceLog },
+    stats: { ...stats, voices: stats.voices, voiceLog }, shots, dispatchLog,
   };
 }
 
