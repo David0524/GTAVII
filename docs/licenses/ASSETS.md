@@ -6,7 +6,7 @@ This is the UI & cinematics stream's section. Other streams append their own. Th
 |---|---|---|---|---|
 | T74 Heros, Heros Cn, Schola, Cursor (`public/fonts/T74*.woff2`) | TeX Gyre, CTAN `fonts/tex-gyre` (GUST e-foundry) | GUST Font License (LPPL 1.3c) | 2026-11-26 | Renamed subsets, as the licence asks. **Not OFL**: this conflicts with FREE_ASSETS "OFL only" and is raised with the user for a decision (keep, or swap to OFL/Apache equivalents) |
 | Libre Franklin (`public/fonts/LibreFranklin-500-900.woff2`) | github.com/google/fonts `ofl/librefranklin` | SIL OFL 1.1 | 2026-11-26 | Licence text in `public/fonts/OFL-LibreFranklin.txt` |
-| Map pictograms, landmark glyphs, touch and HUD glyphs | Our own, drawn in code (`src/ui/map/pictograms.ts`, `src/ui/input/glyphs.ts`) | Ours | 2026-11-27 | No third-party icon set yet. If one is adopted, Tabler/Lucide (MIT) or Phosphor (MIT) per FREE_ASSETS, logged here |
+| Map pictograms, landmark glyphs, touch and HUD glyphs | Our own, drawn in code (`src/ui/map/pictograms.ts`, `src/ui/Prompts.ts`) | Ours | 2026-11-27 | No third-party icon set yet. If one is adopted, Tabler/Lucide (MIT) or Phosphor (MIT) per FREE_ASSETS, logged here |
 | Title wordmark (`public/ui/wordmark.svg`) | Our own constructed lettering (`tools/ui/wordmark.py`) | Ours | 2026-11-26 | Not a font |
 | Map street geometry, landmark and subway positions | OpenStreetMap, via the engine's `public/data` | ODbL 1.0 | 2026-11-27 | "Map data © OpenStreetMap contributors, ODbL" on the title footer, the map screen and Credits › Data sources |
 | Building footprints and heights (in map renders) | NYC Open Data (Building Footprints, PLUTO), via the engine | NYC Open Data terms of use | 2026-11-27 | "NYC Open Data" beside the OSM credit |
