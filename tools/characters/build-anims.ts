@@ -26,7 +26,8 @@ const CLIPS: Record<string, string[]> = {
   'UAL1_Standard.glb': ['A_TPose', 'Idle_Loop', 'Idle_Talking_Loop', 'Walk_Loop', 'Walk_Formal_Loop', 'Jog_Fwd_Loop', 'Sprint_Loop',
     'Crouch_Idle_Loop', 'Crouch_Fwd_Loop', 'Jump_Start', 'Jump_Loop', 'Jump_Land', 'Hit_Chest', 'Hit_Head', 'Push_Loop',
     'Sitting_Enter', 'Sitting_Idle_Loop', 'Sitting_Exit', 'Sitting_Talking_Loop', 'Driving_Loop', 'Interact', 'PickUp_Table',
-    'Fixing_Kneeling', 'Roll', 'Death01', 'Punch_Jab', 'Punch_Cross'],
+    'Fixing_Kneeling', 'Roll', 'Death01', 'Punch_Jab', 'Punch_Cross',
+    'Pistol_Idle_Loop', 'Pistol_Aim_Down', 'Pistol_Aim_Neutral', 'Pistol_Aim_Up', 'Pistol_Shoot', 'Pistol_Reload'],
   'UAL2_Standard.glb': ['ClimbUp_1m', 'Consume', 'Hit_Knockback', 'Idle_FoldArms_Loop', 'Idle_No_Loop', 'Idle_Rail_Call', 'Idle_Rail_Loop',
     'Idle_TalkingPhone_Loop', 'LayToIdle', 'Walk_Carry_Loop', 'Yes', 'OverhandThrow'],
 };

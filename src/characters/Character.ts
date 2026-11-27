@@ -17,6 +17,8 @@ import { Animator, type LocoInput } from './anim/Animator';
 import type { AnimLibrary } from './anim/AnimLibrary';
 import { twoBoneIK, lookAt as ikLookAt, alignToNormal, worldPos } from './anim/IK';
 import { JOINT_INDEX as JI } from './rig';
+import { WeaponRig, type CoverState, type WeaponState } from './weaponRig';
+import type { WeaponKind } from './build/weapons';
 
 export interface CharacterDesc { seed: number; archetype?: string; hero?: string; act?: number; overrides?: Record<string, unknown> }
 export type GroundFn = (x: number, z: number) => { y: number; surface?: string } | null;
@@ -122,6 +124,8 @@ export class Character {
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     const { bones, skeleton, root } = buildSkeleton(this.asm.joints);
     this.bones = bones; this.skeleton = skeleton;
+    // a rebuild (wardrobe change) replaces the bones: re-equip the weapon on the new ones
+    if (this.wrig) { const k = this.wrig.def?.kind ?? null, st = this.wrig.state, cover = this.wrig.cover; this.wrig.dispose(); this.wrig = null; if (k) { this.rig().setWeapon(k); this.rig().cover = cover; if (st === 'drawn' || st === 'drawing') void this.rig().draw(); } }
     const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
     const merge = !!(rb && this.rbFit && this.desc.overrides?.ourHair && this.asm.hair);
     const { main, hair } = createSkinnedMeshes(this.asm.main, merge ? null : this.asm.hair, skeleton, root);
@@ -152,6 +156,29 @@ export class Character {
 
   /** Engine controller input. heading: yaw about +Y (radians); the rest pose faces +Z. */
   setLocomotion(s: LocoInput) { this.loco = s; }
+
+  // --- firearms (weaponRig.ts) ------------------------------------------------------------------
+  private wrig: WeaponRig | null = null;
+  private rig() { return (this.wrig ??= new WeaponRig(this.bones, this.object, this.animator, (t, e) => this.emit(t, e))); }
+  /** Equip a weapon, holstered (right hip / across the back / under the coat), or null to unequip. */
+  setWeapon(kind: WeaponKind | null) { this.rig().setWeapon(kind); this.animator.setHands('relaxed', 'relaxed'); }
+  /** Draw (0.55 s handgun, 0.8 s long gun): resolves when the gun is in hand at low-ready. */
+  draw() { this.animator.setHands('relaxed', 'grip'); return this.rig().draw(); }
+  /** Holster: resolves when it is put away. */
+  holster() { return this.rig().holster().then(() => this.animator.setHands('relaxed', 'relaxed')); }
+  /** Aim at a world point (null lowers to low-ready). Upper body only: walk, crouch and cover keep the legs. */
+  setAim(target: THREE.Vector3 | null) { this.rig().setAim(target); }
+  /** A shot: recoil, and a 'shot' event { muzzle, dir } (ballistics and FX are the caller's). False if not drawn. */
+  fire() { return this.wrig?.fire() ?? false; }
+  /** Reload clip (upper body). */
+  reload() { return this.animator.play('reload'); }
+  /** Muzzle position and barrel direction in world space, or null when no gun is in hand. */
+  muzzle(pos?: THREE.Vector3, dir?: THREE.Vector3) { return this.wrig?.muzzle(pos, dir) ?? null; }
+  /** In cover (low: crouched until aiming; high: leans out to `side` when aiming), or null. */
+  setCover(c: CoverState | null) { this.rig().cover = c; }
+  get weaponState(): WeaponState { return this.wrig?.state ?? 'none'; }
+  /** test metrics (scene=weapons) */
+  weaponDebug() { return this.wrig?.debug() ?? null; }
   play(action: string, opts?: { loop?: boolean; blendIn?: number; speed?: number }): Promise<void> { return this.animator.play(action, opts); }
   stop() { this.animator.stop(); }
   lookAt(target: THREE.Vector3 | null) { this.lookTarget = target ? target.clone() : null; }
@@ -202,7 +229,7 @@ export class Character {
     this.build();
     this.applyHands();
   }
-  on(type: 'footstep' | 'contact' | 'hail', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
+  on(type: 'footstep' | 'contact' | 'hail' | 'shot', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
   private emit(type: string, e: any) { for (const cb of this.listeners[type] ?? []) cb(e); }
 
   update(dt: number) {
@@ -222,7 +249,9 @@ export class Character {
       let d = this.loco.heading - this.yaw; d = Math.atan2(Math.sin(d), Math.cos(d));
       this.yaw += d * Math.min(1, dt * 12);
       this.object.rotation.set(0, this.yaw, 0);
-      this.animator.setLocomotion({ ...this.loco, heading: this.yaw }, dt);
+      // low cover: crouched behind it until aiming (then up over it)
+      const mode = this.wrig?.wantsCrouch() ? 'crouch' as const : this.wrig?.cover?.height === 'low' && this.loco.mode === 'crouch' && this.wrig.state === 'drawn' && this.animator.gun.aim ? 'walk' as const : this.loco.mode;
+      this.animator.setLocomotion({ ...this.loco, mode, heading: this.yaw }, dt);
     }
     // steps (kerbs, stoops, stairs): the controller snaps the capsule up or down up to 0.4 m in
     // one frame. Keep the body where it was and let a critically damped spring (about 0.25 s)
@@ -252,6 +281,7 @@ export class Character {
     this.object.updateMatrixWorld(true);
     // procedural layers
     if (!this.seat) this.footIK(dt);
+    this.wrig?.update(dt);
     this.wheelHands();
     this.handIK();
     this.lookAtLayer(dt);
@@ -335,6 +365,7 @@ export class Character {
   jointWorld(name: string, out = new THREE.Vector3()) { return worldPos(this.bones[JI[name]], out); }
 
   dispose() {
+    this.wrig?.dispose();
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     this.skeleton.dispose();
     this.object.removeFromParent();

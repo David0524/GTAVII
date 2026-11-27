@@ -17,7 +17,7 @@ interface Action { clip: number; t: number; w: number; target: number; loop: boo
 
 /** Public action names → clips and layers. UAL clip names are accepted directly as well. */
 export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; loop?: boolean }> = {
-  hail_cab: { clip: 'hail_cab', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
+  hail_cab: { clip: 'hail_cab', layer: 'upper' }, reload: { clip: 'Pistol_Reload', layer: 'upper' }, shoot: { clip: 'Pistol_Shoot', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
   vault: { clip: 'vault', layer: 'full' }, vault_turnstile: { clip: 'vault', layer: 'full' }, climb: { clip: 'climb', layer: 'full' }, fence: { clip: 'fence', layer: 'full' },
   ladder: { clip: 'ladder', layer: 'full', loop: true }, ladder_pull: { clip: 'ladder_pull', layer: 'full' }, hang: { clip: 'hang', layer: 'full', loop: true },
   drop_land: { clip: 'drop_land', layer: 'full' }, drop_roll: { clip: 'Roll', layer: 'full' }, roof_jump: { clip: 'roof_jump', layer: 'full' },
@@ -55,6 +55,11 @@ export class Animator {
   private lib: AnimLibrary;
   private c: Record<string, number> = {};
   private upperMask = new Uint8Array(NUM_JOINTS);
+  /** weapon state, driven by Character: ready (drawn), aim, pitch (-1 down .. 1 up), long gun */
+  readonly gun = { ready: false, aim: false, pitch: 0, long: false, readyW: 0, aimW: 0 };
+  private gunBuf = new Pose();
+  /** the pistol clips' upper body without the lower spine (their spine leans the torso far back) */
+  private gunMask = new Uint8Array(NUM_JOINTS);
   /** Rest pelvis offset from the root (character metres). */
   private restPelvis: [number, number, number];
   private pelvisScale: number;
@@ -117,7 +122,9 @@ export class Animator {
     this.pelvisScale = restPelvis[1] / lib.restPelvisHeight;
 
     for (const n of ['Walk_Loop', 'Walk_Formal_Loop', 'Jog_Fwd_Loop', 'Sprint_Loop', 'Crouch_Fwd_Loop', 'Crouch_Idle_Loop', 'Jump_Loop', 'idle_relaxed', 'idle_heat', 'idle_pockets', 'idle_hands_behind', 'strafe_l', 'turn_step']) this.c[n] = lib.get(n);
+    for (const n of ['Pistol_Idle_Loop', 'Pistol_Aim_Neutral', 'Pistol_Aim_Up', 'Pistol_Aim_Down']) this.c[n] = lib.byName.get(n) ?? -1;
     for (const n of MASKS.upper) this.upperMask[JI[n]] = 255;
+    for (const n of MASKS.upper) if (n !== 'spine_01' && n !== 'spine_02') this.gunMask[JI[n]] = 255;
     this.idleClip = p.heat > 0.7 && p.age > 30 ? this.c.idle_heat : this.c.idle_relaxed;
     clearAcc(this.neutral); this.lib.accumulate(this.c.idle_relaxed, 0, 1, this.neutral); normalizePose(this.neutral);
     this.time = Math.random() * 10;
@@ -255,6 +262,25 @@ export class Animator {
       blendInto(out, p, a.w, a.layer === 'upper' ? (clip.mask ?? this.upperMask) : null);
     }
     this.actions = this.actions.filter((a) => !(a.done && a.w < 0.01));
+
+    // --- weapon (Character.setWeapon / setAim): handguns hold the pistol idle as low-ready and the
+    // three pistol aim clips blended by pitch when aiming; long guns are posed by Character (IK), so
+    // only the arms' base comes from here. Upper body only; legs keep walking.
+    const gn = this.gun;
+    gn.readyW += ((gn.ready ? 1 : 0) - gn.readyW) * Math.min(1, dt * 10);
+    gn.aimW += ((gn.aim ? 1 : 0) - gn.aimW) * Math.min(1, dt * 14);
+    if (this.c.Pistol_Idle_Loop >= 0 && gn.readyW > 0.01 && !gn.long) {
+      blendInto(out, this.sampleAbs(this.c.Pistol_Idle_Loop, this.time), gn.readyW * (1 - gn.aimW), this.gunMask);
+    }
+    if (this.c.Pistol_Aim_Neutral >= 0 && gn.aimW > 0.01) {
+      const p = this.gunBuf, pt = Math.max(-1, Math.min(1, gn.pitch));
+      clearAcc(p);
+      const other = pt < 0 ? this.c.Pistol_Aim_Down : this.c.Pistol_Aim_Up, wo = Math.abs(pt);
+      lib.accumulate(this.c.Pistol_Aim_Neutral, 0.2, 1 - wo, p);
+      if (wo > 0.001) lib.accumulate(other, 0.2, wo, p);
+      normalizePose(p);
+      blendInto(out, p, gn.aimW, this.gunMask);
+    }
 
     // --- hands: the stock clips clench fists; hold relaxed or gripping hands instead, except
     // where an action shapes the hand itself (hailing, waving off, arguing, talking)

@@ -786,6 +786,47 @@ Board: `shots/characters/47_ict_pool.jpg`, from `?characters=1&scene=rocketbox&p
 - No distance switch between Delphine's full and light meshes.
 - Only 10 identities.
 
+## Firearms: weapon in hand, draw/holster, aim, recoil, crouch and cover (oversight priority)
+
+Board: `shots/characters/49_weapons_aim.jpg` (`?characters=1&scene=weapons&t=1.4&yaw=90`; `&w=i,j` picks setups).
+
+**Weapons** (`src/characters/build/weapons.ts`). Five generated meshes, invented makes, about 300–700 triangles, two materials each (blued steel and wood):
+- a service revolver, a snub-nose and a semi-auto pistol;
+- a pump shotgun (slung across the back when holstered);
+- a sawn-off double (hidden under the coat when holstered).
+
+**Character API** (`src/characters/weaponRig.ts`), contract sent to the engine:
+- `setWeapon(kind | null)`: equips the weapon holstered. Handguns go in a belt holster on the right hip.
+- `draw()` / `holster()`: promises, 0.55 s for handguns and 0.8 s for long guns. The hand reaches the holster and the gun changes parent halfway through.
+- `setAim(worldPoint | null)`: upper body only, so walking, crouching (`loco.mode 'crouch'`) and cover keep the legs.
+- `fire()`: recoil, plus a `'shot'` event with `{ muzzle, dir }`.
+- `reload()`: the UAL `Pistol_Reload` clip.
+- `muzzle()`: the muzzle position and barrel direction.
+- `setCover({ height: 'low' | 'high', side } | null)`: low cover crouches until aiming, then stands; high cover leans out to `side` when aiming.
+- `weaponState`: one of `none`, `holstered`, `drawing`, `drawn`, `holstering`.
+
+**How the aim works.**
+- **Base pose:** the UAL pistol clips (`Pistol_Idle_Loop` for low-ready; `Pistol_Aim_Down`, `_Neutral` and `_Up` blended by pitch). These are newly retargeted. Spine_01 and spine_02 are masked out, because the clips leaned the torso far back.
+- **Spine:** the chest turns toward the target. Long guns use a bladed stance.
+- **Gun placement.** Handguns sit 0.42 m out on the eye-to-target line, pulled back if out of reach. Long guns have the butt in the right shoulder pocket and re-aim once from their own muzzle.
+- **Hands.** The right arm reaches the grip by two-bone IK, and the hand turns exactly onto the gun. The left hand wraps the grip (handguns) or goes under the forend (long guns). When a hand is out of reach, the clavicle swings the shoulder toward it, as shooters do.
+- **Recoil:** a critically damped spring kicks the muzzle up and the gun back, per weapon.
+
+**Measured** (report `weapons` in the test):
+- Barrel to target: 0.2–0.8° across all aim setups (handgun level, high, crouched, shotgun, sawn-off, high cover).
+- Right hand on the grip: 0 cm error.
+- Left knuckles to the support point: 6–8 cm, which is the expected palm offset.
+
+**vs GTA V / VI / RDR2.**
+- At the GTA V floor for the core loop: drawn, aimed at the reticle point, recoil, crouch aim, cover lean.
+- Missing next to V: hip-fire versus aim-down-sights distinction, weapon-specific reload clips for the shotgun and revolver, a muzzle-flash light, shell ejection, and holster or draw variants per weapon.
+- RDR2-style per-weapon handling (cocking, fanning, pump action) is not done.
+
+**Open.**
+- The shirt stretches and tears at the shoulder when the shotgun is shouldered (skinning limit at that twist plus a raised arm).
+- No pump action or break-open reload on the shotguns yet (a pistol reload stands in).
+- The shotgun draw grabs the stock at the back of the hip, not over the shoulder.
+
 ## Teddy and Nick: current vs ICT candidate board (for the user's sign-off; nothing switched)
 
 Board: `shots/characters/48_teddy_nick_ict_board.jpg`. Each row is current | ICT candidate A | ICT candidate B. To view live: `?characters=1&scene=rocketbox&zoom=head&focus=0&t=2&h_teddy=lead_teddy_ict_a` (Nick: `focus=4&h_nick=lead_nick_ict_a`).

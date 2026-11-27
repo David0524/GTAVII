@@ -18,11 +18,14 @@ import type { AgentView } from '../crowd/CrowdRenderer';
 import { hash2 } from '../util/rng';
 import { generateAppearance } from '../body/appearance';
 import { tintFor } from '../heads/rocketbox';
+import type { WeaponKind } from '../build/weapons';
 
 const qp = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (qp.has(k) ? +qp.get(k)! : d);
 // ?t= captures are meant to repeat exactly: seed Math.random (animator idle phases etc.)
 if (qp.has('t')) { let s = 0x9e3779b9 ^ num('rseed', 1); Math.random = () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; }; }
+
+const weaponTest = new Map<Character, { at?: [number, number, number]; crouch?: boolean; fire?: boolean }>();
 
 export async function runCharactersTest() {
   const scene = qp.get('scene') ?? 'lineup';
@@ -49,7 +52,7 @@ export async function runCharactersTest() {
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};
-  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox' || scene === 'vendors') tick = await lineup(world, camera, factory, scene, report);
+  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox' || scene === 'vendors' || scene === 'weapons') tick = await lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
@@ -187,6 +190,25 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       chars.push(c);
     });
     if (qp.has('anims')) report.vendorClips = clips;
+  } else if (scene === 'weapons') {
+    // firearms (weaponRig.ts): every weapon holstered, drawn, aimed (level, high, low), crouched,
+    // in high cover and mid-recoil; &t= picks the moment (draws finish by 0.8 s; shots fire at 1.5 s)
+    const S: { kind: WeaponKind; how: 'holster' | 'ready' | 'aim'; at?: [number, number, number]; crouch?: boolean; cover?: 'low' | 'high'; fire?: boolean }[] = [
+      { kind: 'revolver', how: 'holster' }, { kind: 'revolver', how: 'ready' }, { kind: 'revolver', how: 'aim', at: [0, 1.5, 6] },
+      { kind: 'pistol', how: 'aim', at: [1.5, 3.2, 5] }, { kind: 'snub', how: 'aim', at: [0, 0.3, 4], crouch: true },
+      { kind: 'shotgun', how: 'holster' }, { kind: 'shotgun', how: 'ready' }, { kind: 'shotgun', how: 'aim', at: [0, 1.4, 8], fire: true },
+      { kind: 'sawnoff', how: 'aim', at: [-1, 1.2, 5] }, { kind: 'pistol', how: 'aim', at: [2, 1.5, 6], cover: 'high' },
+    ];
+    const only = qp.get('w')?.split(',').map(Number);
+    S.forEach((w, i) => {
+      if (only && !only.includes(i)) return;
+      const c = factory.spawn(world, { seed: 1, hero: qp.get('hero') ?? 'char.teddy_arce' });
+      c.setWeapon(w.kind);
+      if (w.how !== 'holster') void c.draw();
+      if (w.cover) c.setCover({ height: w.cover, side: 'l' });
+      weaponTest.set(c, w);
+      chars.push(c);
+    });
   } else if (scene === 'leads') {
     const act = num('act', 1);
     // review shots: each lead in their own idle (relaxed weight shift, hands behind, hands in pockets)
@@ -226,10 +248,14 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   return (dt: number) => {
     t += dt;
     for (const c of chars) {
-      c.setLocomotion({ velocity: [0, 0, 0], grounded: true, heading: yaw + (spin ? t * 0.6 : 0), mode: 'walk' });
+      const w = weaponTest.get(c);
+      if (w?.at && t > 0.7) { const cy = Math.cos(yaw), sy = Math.sin(yaw); c.setAim(new THREE.Vector3(c.object.position.x + w.at[0] * cy + w.at[2] * sy, w.at[1], c.object.position.z - w.at[0] * sy + w.at[2] * cy)); }
+      if (w?.fire && t - dt < 1.5 && t >= 1.5) c.fire();
+      c.setLocomotion({ velocity: [0, 0, 0], grounded: true, heading: yaw + (spin ? t * 0.6 : 0), mode: w?.crouch ? 'crouch' : 'walk' });
       c.update(dt);
     }
     report.updateMs = chars.map((c) => +c.lastUpdateMs.toFixed(3));
+    if (weaponTest.size) report.weapons = chars.map((c) => ({ state: c.weaponState, ...c.weaponDebug() }));
     report.toneProbes = toneProbes(chars, camera);
   };
 }
