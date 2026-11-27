@@ -2,6 +2,8 @@ import * as THREE from 'three/webgpu';
 import { generate, type GeneratedModel } from './gen/body';
 import { addDamageMorphs } from './gen/morphs';
 import { GeoBuilder, rng } from './gen/builder';
+import { strHash } from './gen/rng';
+import { unpackModel, type PackedModel } from './geoTransfer';
 import type { ModelSpec } from './gen/spec';
 
 export interface Variant {
@@ -13,7 +15,6 @@ export interface Variant {
 }
 
 const VINYLS = [0xe6e1d2, 0x141414, 0x3a281a, 0xb8a684, 0x141414, 0xe6e1d2];
-const strHash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 
 /** Deterministic variant from an integer: paint, trim level, vinyl roof, wheels, grime. */
 export function variantOf(spec: ModelSpec, variant: number): Variant {
@@ -49,10 +50,75 @@ export function getAsset(spec: ModelSpec, v: Pick<Variant, 'vinyl' | 'whitewall'
   const lod0 = generate(spec, { lod: 0, ...v });
   addDamageMorphs(lod0.body, lod0, strHash(spec.id) % 97);
   if (lod0.hood) addDamageMorphs(lod0.hood, lod0, strHash(spec.id) % 97);
-  const lod1 = generate(spec, { lod: 1, ...v, whitewall: false });
+  for (const bg of [lod0.bumperF, lod0.bumperR]) if (bg) addDamageMorphs(bg, lod0, strHash(spec.id) % 97);
+  const lod1 = generate(spec, { lod: 1, ...v }); // keeps the whitewalls: LOD1 must read like LOD0 across the crossfade
   a = { spec, lod0, lod1, lod2: impostor(spec, lod0) };
   cache.set(key, a);
   return a;
+}
+
+const heroCache = new Map<string, GeneratedModel>();
+type TrimKey = Pick<Variant, 'vinyl' | 'whitewall' | 'wheelStyle'>;
+const heroKey = (spec: ModelSpec, v: TrimKey) => `${spec.id}|${v.vinyl}|${v.whitewall ? 1 : 0}|${v.wheelStyle}`;
+
+// ---- worker pipeline: hero meshes are built off the main thread, never during a frame
+let worker: Worker | null | undefined;
+const pending = new Map<string, Promise<GeneratedModel>>();
+const waiters = new Map<string, { resolve: (g: GeneratedModel) => void; reject: (e: unknown) => void }>();
+/** Worker generation times (ms), for the budget report. */
+export const heroGenTimes: number[] = [];
+function heroWorker(): Worker | null {
+  if (worker !== undefined) return worker;
+  try {
+    worker = typeof Worker !== 'undefined' ? new Worker(new URL('./heroWorker.ts', import.meta.url), { type: 'module' }) : null;
+    worker?.addEventListener('message', (e: MessageEvent<{ key: string; packed?: PackedModel; ms?: number; error?: string }>) => {
+      const w = waiters.get(e.data.key); if (!w) return;
+      waiters.delete(e.data.key);
+      if (e.data.error || !e.data.packed) { pending.delete(e.data.key); w.reject(e.data.error); return; }
+      const g = unpackModel(e.data.packed);
+      heroCache.set(e.data.key, g);
+      if (e.data.ms) heroGenTimes.push(e.data.ms);
+      w.resolve(g);
+    });
+  } catch { worker = null; }
+  return worker;
+}
+/** The hero mesh if it has been built, else null (and nothing is generated). */
+export function heroModelIfReady(spec: ModelSpec, v: TrimKey): GeneratedModel | null { return heroCache.get(heroKey(spec, v)) ?? null; }
+/**
+ * Build the hero mesh in the background: in a Web Worker where available, otherwise in an idle
+ * callback. Call at spawn / when a car approaches; promote it (setHero) once the promise resolves.
+ */
+export function requestHeroModel(spec: ModelSpec, v: TrimKey): Promise<GeneratedModel> {
+  const key = heroKey(spec, v);
+  const have = heroCache.get(key);
+  if (have) return Promise.resolve(have);
+  let p = pending.get(key);
+  if (p) return p;
+  const w = heroWorker();
+  p = new Promise<GeneratedModel>((resolve, reject) => {
+    if (w) { waiters.set(key, { resolve, reject }); w.postMessage({ key, specId: spec.id, v: { vinyl: v.vinyl, whitewall: v.whitewall, wheelStyle: v.wheelStyle } }); }
+    else {
+      const run = () => { try { resolve(getHeroModel(spec, v)); } catch (e) { reject(e); } };
+      const ric = (globalThis as unknown as { requestIdleCallback?: (f: () => void) => void }).requestIdleCallback;
+      if (ric) ric(run); else setTimeout(run, 0);
+    }
+  });
+  pending.set(key, p);
+  return p;
+}
+
+/** Hero LOD0, generated synchronously on this thread (tools / tests; the game uses requestHeroModel). */
+export function getHeroModel(spec: ModelSpec, v: TrimKey): GeneratedModel {
+  const key = heroKey(spec, v);
+  let g = heroCache.get(key);
+  if (g) return g;
+  g = generate(spec, { lod: 0, hero: true, ...v });
+  addDamageMorphs(g.body, g, strHash(spec.id) % 97);
+  if (g.hood) addDamageMorphs(g.hood, g, strHash(spec.id) % 97);
+  for (const bg of [g.bumperF, g.bumperR]) if (bg) addDamageMorphs(bg, g, strHash(spec.id) % 97);
+  heroCache.set(key, g);
+  return g;
 }
 
 function impostor(spec: ModelSpec, g: GeneratedModel): THREE.BufferGeometry {

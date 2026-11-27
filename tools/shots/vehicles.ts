@@ -13,7 +13,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
-const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,systems,bikes,subway,traffic,metrics').split(','));
+const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,vendors,parts,systems,bikes,subway,traffic,metrics').split(','));
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
@@ -238,6 +238,214 @@ async function main() {
       report.dents = moved;
       await sheet(page, dn, 2, 800, 450, 'visual_dents.jpg', ['25 mph wall hit: zone crumple + local dent', 'door hit (applyHit impact)', 'scripted dents: quarter panel, hood', 'repair() restores the shared geometry']);
       console.log('visual');
+    }
+
+    // ------------------------------------------------------------------ visual bar 2: surface detail, wet paint, LOD crossfade
+    if (only.has('visual2')) {
+      await open(page, 'mode=turntable&quality=high');
+      // pick a metallic variant with a vinyl roof for the Tiverton, and a plain one for the Bancroft
+      const pickVar = (id: string, want: { metallic?: boolean; vinyl?: boolean }) => page.evaluate(([id, want]: [string, any]) => {
+        const V = window.__VEH; const m = V.factory.models.find((x: any) => x.id === id);
+        for (let v = 0; v < 60; v++) { const r = V.variantOf(id, v); if ((want.metallic === undefined || r.metallic === want.metallic) && (want.vinyl === undefined || (r.vinyl !== 'none') === want.vinyl)) return v; }
+        void m; return 0;
+      }, [id, want] as [string, any]);
+      const vT = await pickVar('tiverton', { metallic: true, vinyl: true });
+      const dt: Buffer[] = [];
+      await page.evaluate((v: number) => { const V = window.__VEH; V.setModel('tiverton', v, { x: 0, z: 30, yaw: 0.5 }); V.player.setLights({ head: false }); V.simulate(0.8); }, vT);
+      // camera and target in the car's local frame; 'w' = front-right wheel centre, 'f' = front bumper centre
+      const camLocal = (c: number[], t: number[], fov: number, ref: 'w' | 'f' | 'o' = 'o') => page.evaluate(([c, t, fov, ref]: [number[], number[], number, string]) => {
+        const V = window.__VEH, o = V.player.object, g = V.player.asset.lod0;
+        const w = g.wheels.find((x: any) => x.front && x.side > 0);
+        const r = ref === 'w' ? [w.x, w.y, w.z] : ref === 'f' ? [0, 0, g.minZ] : [0, 0, 0];
+        const C = o.localToWorld(new o.position.constructor(r[0] + c[0], r[1] + c[1], r[2] + c[2])), T = o.localToWorld(new o.position.constructor(r[0] + t[0], r[1] + t[1], r[2] + t[2]));
+        V.setCamera(C.x, C.y, C.z, T.x, T.y, T.z, fov);
+      }, [c, t, fov, ref] as [number[], number[], number, string]);
+      await camLocal([0.55, 0.0, -1.0], [0.05, -0.06, 0], 34, 'w'); dt.push(await snap(page)); // front tyre, tread side
+      await camLocal([0.55, 0.62, -1.25], [0.05, 0.55, 0.05], 34, 'f'); dt.push(await snap(page)); // grille + bumper chrome
+      await camLocal([1.3, 2.05, 0.9], [0, 1.25, -0.4], 30); dt.push(await snap(page)); // vinyl roof + metallic paint
+      await camRel(page, [3.4, 1.25, 3.0], 34, 0.45); dt.push(await snap(page)); // rear quarter
+      await sheet(page, dt, 2, 800, 450, 'visual_detail.jpg', ['tyre: tread blocks, grooves, sidewall rings', 'egg-crate grille, pitted chrome', `vinyl grain, metallic flake (variant ${vT})`, 'orange peel in the reflections']);
+      // wet paint
+      const wt: Buffer[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 4, { x: 0, z: 30, yaw: 0.5 }); V.player.setLights({ head: false }); V.simulate(0.8); });
+      await camRel(page, [4.2, 1.7, -4.4], 38, 0.4); wt.push(await snap(page));
+      await page.evaluate(() => { window.__VEH.player.setWetness(1, 2); });
+      wt.push(await snap(page));
+      await page.evaluate(() => { window.__VEH.player.setWetness(0); });
+      await camRel(page, [0.9, 1.5, -2.8], 30, 0.75); wt.push(await snap(page));
+      await page.evaluate(() => { window.__VEH.player.setWetness(1, 2); });
+      wt.push(await snap(page));
+      await sheet(page, wt, 2, 800, 450, 'visual_wet.jpg', ['dry', 'wet: darker paint, sharper clearcoat, beads', 'hood, dry', 'hood, wet']);
+      // LOD crossfade: slow the fade down and catch it mid-switch (telephoto so the car stays large)
+      const lf: Buffer[] = [], ll: string[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.player.setWetness(0); V.setModel('bancroft', 4, { x: 0, z: 30, yaw: 0.9 }); V.simulate(0.5); V.player.object.traverse((o: any) => { if (o.fadeTime !== undefined) { o.fadeTime = 4; o.constructor.cutGap = 1e9; } }); });
+      const at = (d: number) => page.evaluate((d: number) => { const V = window.__VEH, p = V.player.object.position; V.setCamera(p.x + d * 0.7, 1.2 + d * 0.05, p.z - d * 0.7, p.x, 0.6, p.z, 6.5); }, d);
+      await at(36); await snap(page); lf.push(await snap(page)); ll.push('LOD0 at 36 m');
+      await at(47); await snap(page); lf.push(await snap(page)); ll.push('crossing 44 m: dither starts');
+      await page.waitForTimeout(1600); lf.push(await snap(page)); ll.push('mid-fade');
+      await page.waitForTimeout(3000); lf.push(await snap(page)); ll.push('LOD1 settled');
+      await sheet(page, lf, 2, 800, 450, 'visual_lod_fade.jpg', ll);
+      console.log('visual2');
+    }
+
+    // ------------------------------------------------------------------ item 0: hero model fidelity (player car + near ring)
+    if (only.has('hero')) {
+      await open(page, 'mode=turntable&quality=high');
+      const camLocal = (c: number[], t: number[], fov: number, ref: 'w' | 'c' | 'o' = 'c') => page.evaluate(([c, t, fov, ref]: [number[], number[], number, string]) => {
+        const V = window.__VEH, o = V.player.object, g = V.player.asset.lod0;
+        const w = g.wheels.find((x: any) => x.front && x.side > 0);
+        const r = ref === 'w' ? [w.x, w.y, w.z] : ref === 'c' ? [0, 0, (g.minZ + g.maxZ) / 2] : [0, 0, 0];
+        o.updateMatrixWorld();
+        const C = o.localToWorld(new o.position.constructor(r[0] + c[0], r[1] + c[1], r[2] + c[2])), T = o.localToWorld(new o.position.constructor(r[0] + t[0], r[1] + t[1], r[2] + t[2]));
+        V.setCamera(C.x, C.y, C.z, T.x, T.y, T.z, fov);
+      }, [c, t, fov, ref] as [number[], number[], number, string]);
+      const setCar = (id: string, v: number, yaw = 0.5) => page.evaluate(([id, v, yaw]: [string, number, number]) => { const V = window.__VEH; V.setModel(id, v, { x: 0, z: 30, yaw }); V.player.setLights({ head: false }); V.simulate(0.8); return { tris: V.player.isHero ? null : 0 }; }, [id, v, yaw] as [string, number, number]);
+      const hero = (on: boolean) => page.evaluate(async (on: boolean) => { window.__VEH.setHeroRing(on); if (on) await window.__VEH.heroReady(); }, on);
+      const refImg = (f: string) => fs.readFileSync(path.join(ROOT, 'references/img', f));
+      // 1. standard LOD0 vs hero, same frame
+      const hv: Buffer[] = [], hl: string[] = [];
+      for (const [id, v] of [['tiverton', 2], ['bancroft_cab', 1]] as [string, number][]) {
+        await setCar(id, v);
+        for (const on of [false, true]) { await hero(on); await camLocal([3.4, 1.15, -4.4], [0, 0.6, -0.4], 38); hv.push(await snap(page)); hl.push(`${id}: ${on ? 'HERO (~40k tris)' : 'standard LOD0 (~9k)'}`); }
+      }
+      await sheet(page, hv, 2, 800, 450, 'hero_vs_standard.jpg', hl);
+      // 2. details: wheel, gauges, crest + shut lines, fender emblem + handle
+      const dt: Buffer[] = [];
+      await setCar('tiverton', 2); await hero(true);
+      await camLocal([0.75, 0.12, -0.75], [0, 0, 0], 32, 'w'); dt.push(await snap(page));
+      const drv = await page.evaluate(() => { const s = window.__VEH.player.asset.spec; return { d: s.seats.driver, belt: s.beltY, front: s.gh.sA0 - (s.sF + s.wheelbase / 2) }; });
+      await camLocal([-0.9, 1.75, 4.6], [0, 0.85, 2.4], 32); dt.push(await snap(page));
+      await camLocal([0.9, 1.5, -3.6], [0, 0.85, -2.3], 30); dt.push(await snap(page));
+      await camLocal([2.1, 1.0, -1.0], [0.9, 0.75, -1.2], 34); dt.push(await snap(page));
+      await sheet(page, dt, 2, 800, 450, 'hero_details.jpg', ['48-segment wheel: tyre tread + sidewall geometry, fluted cover', 'deck lid: shut lines + crest (invented)', 'hood crest (invented), hood shut lines', 'fender emblem, door handle with lock barrel, shut line']);
+      // 2b. interior: over the driver's shoulder, and through the side glass from outside
+      const it: Buffer[] = [];
+      await camLocal([drv.d[0] + 0.12, drv.belt + 0.42, drv.d[2] + 0.12], [drv.d[0] + 0.08, drv.belt - 0.04, drv.d[2] - 0.6], 60, 'o'); it.push(await snap(page));
+      await camLocal([-2.4, 1.45, drv.d[2] + 0.4], [0, 0.85, drv.d[2]], 40, 'o'); it.push(await snap(page));
+      await camLocal([-0.3, drv.belt + 0.17, drv.d[2] + 0.2], [-0.2, drv.belt + 0.62, drv.d[2] - 1.8], 75, 'o'); it.push(await snap(page));
+      await camLocal([0.2, drv.belt + 0.22, drv.d[2] + 0.1], [-2, drv.belt + 0.17, drv.d[2] - 0.3], 70, 'o'); it.push(await snap(page));
+      await sheet(page, it, 2, 800, 450, 'hero_interior.jpg', ['over the shoulder: gauges, 3-spoke wheel, radio, column shift', 'through the side glass: bench seats under the glass, opera window', 'inside, looking up and out: headliner, A-pillars, header, mirror', 'inside, looking out the side: solid C-pillar with the opera window']);
+      // 3. glass: bullet into the windscreen (laminated web) and a side window (tempered dice)
+      const gl: Buffer[] = [];
+      const geo = await page.evaluate(() => { const s = window.__VEH.player.asset.spec, m = s.sF + s.wheelbase / 2; return { zF: (s.gh.sA0 + s.gh.sA1) / 2 - m, yF: (s.beltY + s.gh.roofY) / 2, zS: (s.gh.sA1 + s.gh.sC1) / 2 - m, hw: window.__VEH.player.asset.lod0.halfW }; });
+      await page.evaluate((g: any) => { const V = window.__VEH; V.shoot({ x: -0.35, y: g.yF + 0.05, z: g.zF - 0.05 }); V.shoot({ x: g.hw - 0.05, y: g.yF, z: g.zS - 0.3 }); V.simulate(0.1); }, geo);
+      await camLocal([0.3, 1.5, -4.2], [0, 1.05, -1.2], 32); gl.push(await snap(page));
+      await camLocal([2.6, 1.25, -0.6], [0.6, 1.05, -0.4], 36); gl.push(await snap(page));
+      await sheet(page, gl, 2, 800, 450, 'hero_glass.jpg', ['windscreen hit: radial spokes + rings from the impact (laminated)', 'side window hit: dice cracks spreading from the impact (tempered)']);
+      // 4. dent near the arch: clamped (no tearing, wheel stays outside)
+      const da: Buffer[] = [];
+      await setCar('tiverton', 2); await hero(true);
+      await page.evaluate(() => { const V = window.__VEH, g = V.player.asset.lod0, w = g.wheels.find((x: any) => x.front && x.side > 0); V.dentAt(g.halfW, 0.72, w.z + 0.75, 0.16, 0.7); V.dentAt(g.halfW, 0.6, w.z - 0.05, 0.16, 0.6); });
+      await camLocal([2.8, 0.95, -0.3], [0.8, 0.6, -0.9], 40); da.push(await snap(page));
+      await camLocal([3.6, 1.3, 2.5], [0, 0.6, -0.2], 38); da.push(await snap(page));
+      await sheet(page, da, 2, 800, 450, 'hero_dent_arch.jpg', ['door + fender dents next to the arch: the arch lip holds', 'same car, further back']);
+      // 5. class close-ups beside period photos (shape only)
+      const pairs: [string, number, number[], number[], number, string, string][] = [
+        ['tiverton', 2, [-2.6, 1.1, 3.4], [0.3, 0.7, -1.6], 50, 'documerica_549851.jpg', 'big sedan vs 549851 (large car, Manhattan traffic)'],
+        ['bancroft_cab', 1, [3.0, 1.15, -0.9], [0, 0.8, 0.5], 46, 'documerica_549869.jpg', 'taxi vs 549869 (Herald Square)'],
+        ['b60', 0, [-1.5, 1.6, 7.5], [0, 1.6, 0], 46, 'documerica_554299.jpg', 'box truck vs 554299 (47th Street)'],
+        ['ct40', 0, [2.2, 1.4, -8.5], [0, 1.6, -3], 46, 'documerica_549921.jpg', 'bus vs 549921 (Lower Manhattan)'],
+      ];
+      const cl: Buffer[] = [], cll: string[] = [];
+      for (const [id, v, c, t, fov, ref, label] of pairs) {
+        await setCar(id, v, 0.3); await hero(true);
+        await camLocal(c, t, fov); cl.push(await snap(page)); cll.push(`render (hero): ${label.split(' vs ')[0]}`);
+        cl.push(refImg(ref)); cll.push(`ref: DOCUMERICA ${label.split(' vs ')[1]}`);
+      }
+      await setCar('bancroft', 4); await hero(true);
+      await camLocal([0.8, 0.15, -0.6], [0, 0, 0], 34, 'w'); cl.push(await snap(page)); cll.push('render (hero): sedan wheel, hubcap + whitewall');
+      cl.push(refImg('documerica_555907.jpg')); cll.push('ref: DOCUMERICA 555907 (wheel and hubcap, Hell\'s Kitchen)');
+      await sheet(page, cl, 2, 640, 420, 'hero_classes_vs_period.jpg', cll);
+      // 6. cost
+      const cost = await page.evaluate(async () => {
+        const V = window.__VEH, out: Record<string, unknown> = {};
+        for (const id of ['bancroft', 'tiverton', 'ct40', 'courier']) {
+          V.setModel(id, 0, { x: 0, z: 30, yaw: 0 }); V.setHeroRing(false); await V.heroReady(); V.setHeroRing(false); V.renderOnce(); const ts = performance.now(); V.renderOnce(); const stdMs = performance.now() - ts;
+          const std = V.renderer.info.render.triangles;
+          V.setHeroRing(true);
+          // (hero mesh already built by the worker above: this times the swap + first draw only)
+          const t0 = performance.now(); V.renderOnce(); const ms = performance.now() - t0;
+          const t1 = performance.now(); V.renderOnce(); (out as any)[id + '_heroSteadyDrawMs'] = +(performance.now() - t1).toFixed(1);
+          out[id] = { frameTrisStandard: std, frameTrisHero: V.renderer.info.render.triangles, swapAndDrawMs: +ms.toFixed(1), standardDrawMs: +stdMs.toFixed(1), hero: V.player.isHero };
+        }
+        out.workerGenMs = (await V.heroReady()).map((x: number) => +x.toFixed(0));
+        return out;
+      });
+      report.hero = cost;
+      report.movementAnchors = await page.evaluate(() => {
+        const V = window.__VEH, out: Record<string, unknown> = {};
+        for (const id of ['bancroft', 'ct40', 'b60', 'walkin']) {
+          V.setModel(id, 0, { x: 0, z: 30, yaw: 0 }); V.simulate(0.5);
+          const a = V.player.movementAnchors();
+          out[id] = { doors: a.doors.map((d: any) => `${d.seat}:${d.side}`), surfaces: a.surfaces.map((x: any) => `${x.name} ${x.top.toFixed(2)} m ${x.kind}`) };
+        }
+        return out;
+      });
+      console.log('anchors', JSON.stringify(report.movementAnchors));
+      console.log('hero', cost);
+    }
+
+    // ------------------------------------------------------------------ street-vendor props: look, hit, tip, spill
+    if (only.has('vendors')) {
+      await open(page, 'mode=vendors&quality=high');
+      const vs: Buffer[] = [], vl: string[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.simulate(1); V.setModel('bancroft', 3, { x: -2.2, z: 6, yaw: 0 }); V.player.setLights({ head: false }); V.simulate(0.3); });
+      await page.evaluate(() => window.__VEH.setCamera(-3.2, 1.9, -11, -8.6, 0.9, -19, 46)); vs.push(await snap(page)); vl.push('carts: hot dog (umbrella, steam), pretzel/knish, ices, nuts, coffee');
+      await page.evaluate(() => window.__VEH.setCamera(3.4, 1.9, -11, 8.8, 0.9, -19, 46)); vs.push(await snap(page)); vl.push('stands: news kiosk, flowers, fruit, shoeshine, peddler case, monte box');
+      // drive the car into the hot-dog cart (stall0 at x -7.2, z -14): steer onto the sidewalk at ~20 mph
+      const res = await page.evaluate(() => {
+        const V = window.__VEH, ev: string[] = [];
+        V.vendors.on('cartHit', (e: any) => ev.push(`cartHit ${e.id} ${e.prop} by=${e.byVehicle} ${(e.speed * 2.237).toFixed(0)}mph`));
+        V.vendors.on('tipped', (e: any) => ev.push(`tipped ${e.id}`));
+        V.vendors.on('spill', (e: any) => ev.push(`spill ${e.id} x${e.count}`));
+        V.player.driverId = 'player';
+        // straight down the sidewalk line (x -8.2, clear of the corner post at x -6.6), up the kerb at z -12
+        V.player.setPose({ x: -8.2, y: 0.3, z: -2, yaw: 0 });
+        V.player.body.setLinvel({ x: 0, y: 0, z: -9 }, true);
+        V.setAuto({ throttle: 0.3, brake: 0, steer: 0, handbrake: false });
+        V.simulate(1.35);
+        V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: false });
+        V.simulate(0.15);
+        return { ev, goods: V.vendors.liveGoods };
+      });
+      await page.evaluate(() => window.__VEH.setCamera(-2.0, 2.2, -19, -7.2, 0.4, -12, 46)); vs.push(await snap(page)); vl.push('20 mph into the hot-dog cart: it tips, goods fly');
+      await page.evaluate(() => { const V = window.__VEH; V.simulate(2.5); });
+      await page.evaluate(() => { const V = window.__VEH, it = V.vendors.items.get('stall0'), p = it.body.translation(); V.setCamera(p.x + 4.2, 2.4, p.z - 4.5, p.x - 0.5, 0.2, p.z + 0.5, 46); }); vs.push(await snap(page)); vl.push(`settled: franks and cans on the sidewalk (${res.goods} goods live)`);
+      const righted = await page.evaluate(() => { const V = window.__VEH; V.vendors.right('stall0'); V.simulate(1); return V.vendors.liveGoods; });
+      // night: the hot-dog and nut carts' bare bulbs light the sidewalk
+      await page.evaluate(() => { const V = window.__VEH; V.setNight(1); V.simulate(0.1); V.setCamera(-3.0, 1.9, -10.5, -8.4, 0.8, -18.5, 48); });
+      vs.push(await snap(page)); vl.push('night: bare bulbs on the hot-dog and nut carts');
+      await page.evaluate(() => { const V = window.__VEH; V.setNight(0); });
+      await page.evaluate(() => window.__VEH.setCamera(11.5, 1.7, -12.0, 7.4, 0.9, -17.0, 44)); vs.push(await snap(page)); vl.push('stands from the sidewalk: kiosk racks and papers, flower buckets, fruit crates');
+      report.vendors = { events: res.ev, goodsLive: res.goods, afterRight: righted };
+      await sheet(page, vs, 2, 800, 450, 'vendors.jpg', vl);
+      console.log('vendors', res);
+    }
+
+    // ------------------------------------------------------------------ detachable parts + glass shards
+    if (only.has('parts')) {
+      await open(page, 'mode=drive&quality=high');
+      const ps: Buffer[] = [], pl: string[] = [];
+      const r = await page.evaluate(() => {
+        const V = window.__VEH, ev: string[] = [];
+        V.setModel('bancroft', 3, { x: 36, z: 30, yaw: -Math.PI / 2 });
+        V.player.on('component', (e: any) => ev.push(`${e.kind}:${e.detail}`));
+        V.setAuto({ throttle: 0, brake: 0, steer: 0, handbrake: false }); V.simulate(0.4);
+        V.player.body.setLinvel({ x: 13.41, y: 0, z: 0 }, true); V.simulate(1.9);
+        V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: true }); V.simulate(2.0);
+        const p = V.player.object.position;
+        return { ev, detached: V.player.detachedParts, at: [+p.x.toFixed(1), +p.y.toFixed(2), +p.z.toFixed(1)] };
+      });
+      const side = () => page.evaluate(() => { const V = window.__VEH, p = V.player.object.position; V.setCamera(p.x - 4.5, 2.2, p.z - 4.2, p.x + 1.5, 0.6, p.z, 44); });
+      await side(); ps.push(await snap(page)); pl.push(`30 mph into the wall: ${r.detached.join(' + ') || 'nothing'} off, engine bay open`);
+      await page.evaluate(() => { const V = window.__VEH, p = V.player.object.position; V.setCamera(p.x - 3, 3.4, p.z - 6, p.x + 4, 0.3, p.z, 50); }); ps.push(await snap(page)); pl.push('the hood and bumper on the ground (physics debris)');
+      await page.evaluate(() => { const V = window.__VEH; V.player.breakWindow('right'); V.player.breakWindow('left'); V.simulate(2.5); });
+      await camRel(page, [2.6, 0.9, 0.4], 46, 0.15); ps.push(await snap(page)); pl.push('smashed side windows: tempered-glass cubes on the ground');
+      await page.evaluate(() => { const V = window.__VEH; V.player.repair(); V.simulate(0.3); });
+      await side(); ps.push(await snap(page)); pl.push('repair(): parts back on, glass in');
+      report.parts = r;
+      await sheet(page, ps, 2, 800, 450, 'damage_parts.jpg', pl);
+      console.log('parts', r);
     }
 
     // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements

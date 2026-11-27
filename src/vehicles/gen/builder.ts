@@ -20,6 +20,14 @@ export class GeoBuilder {
   readonly pos: number[] = [];
   readonly uv: number[] = [];
   readonly idx = new Map<Slot, number[]>();
+  /**
+   * Hero detail: points inserted per span when a grid is smoothed (0 = off). Grids are refined
+   * with a chord-scaled Catmull-Rom (Hermite) spline in both directions; short spans (crisp
+   * character lines, chamfers) get short tangents, so they stay crisp and nothing overshoots.
+   */
+  sub = 0;
+  /** Segment count multiplier for round trims (tubes) at hero detail. */
+  tubeSegs = 5;
 
   get vcount() { return this.pos.length / 3; }
 
@@ -36,7 +44,21 @@ export class GeoBuilder {
    * Winding is fixed automatically so faces point away from `inside` (a point inside the solid),
    * or along `facing` when given (for open, flat-ish patches).
    */
-  grid(rows: V3[][], slot: Slot | ((i: number, j: number) => Slot | null), opt: { closeJ?: boolean; inside?: V3; facing?: V3 } = {}) {
+  grid(rows: V3[][], slot: Slot | ((i: number, j: number) => Slot | null), opt: { closeJ?: boolean; inside?: V3; facing?: V3; smooth?: false | 'i' | 'j' | 'ij' } = {}): number[][] {
+    const sm = opt.smooth === undefined ? 'ij' : opt.smooth;
+    if (this.sub > 0 && sm && rows.length >= 2 && rows[0].length >= 2) {
+      const kI = sm.includes('i') ? this.sub : 0, kJ = sm.includes('j') ? this.sub : 0;
+      let r2 = rows.map((r) => (kJ ? densify(r, kJ, !!opt.closeJ) : r));
+      if (kI) {
+        const nj2 = r2[0].length;
+        const cols: V3[][] = [];
+        for (let j = 0; j < nj2; j++) cols.push(densify(r2.map((r) => r[j]), kI, false));
+        r2 = cols[0].map((_, i) => cols.map((c) => c[i]));
+      }
+      const fi = kI + 1, fj = kJ + 1;
+      const sl = typeof slot === 'function' ? (i: number, j: number) => slot(Math.floor(i / fi), Math.floor(j / fj)) : slot;
+      return this.grid(r2, sl, { ...opt, smooth: false });
+    }
     const ni = rows.length, nj = rows[0].length;
     const ids: number[][] = rows.map((r, i) => r.map((p, j) => this.v(p, i / Math.max(1, ni - 1), j / Math.max(1, nj - 1))));
     const jm = opt.closeJ ? nj : nj - 1;
@@ -120,7 +142,7 @@ export class GeoBuilder {
       const a = new THREE.Vector3(...pts[i - 1]), c = new THREE.Vector3(...pts[i]);
       const len = a.distanceTo(c);
       if (len < 1e-4) continue;
-      const g = new THREE.CylinderGeometry(r, r, len + r * 1.5, segs, 1, true);
+      const g = new THREE.CylinderGeometry(r, r, len + r * 1.5, Math.max(segs, this.tubeSegs), 1, true);
       const m = new THREE.Matrix4().compose(a.clone().add(c).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), c.clone().sub(a).normalize()), new THREE.Vector3(1, 1, 1));
       this.add(slot, g, m);
     }
@@ -154,7 +176,7 @@ export class GeoBuilder {
       for (const i of l) all.push(i);
     }
     g.setIndex(all);
-    g.computeVertexNormals();
+    angleWeightedNormals(g);
     g.computeBoundingBox(); g.computeBoundingSphere();
     return g;
   }
@@ -184,3 +206,82 @@ export function pw(pts: [number, number][], t: number): number {
   return pts[pts.length - 1][1];
 }
 export { rng } from './rng';
+
+/**
+ * Insert k points per span along a polyline with a chord-scaled Catmull-Rom (Hermite) curve.
+ * Tangents are scaled by the span length relative to its neighbours, so a short span next to a
+ * long one (a crease, a chamfer) neither bulges nor overshoots. Zero-length spans stay put.
+ */
+export function densify(p: V3[], k: number, closed: boolean): V3[] {
+  const n = p.length;
+  if (k <= 0 || n < 2) return p;
+  const at = (i: number): V3 => {
+    if (closed) return p[((i % n) + n) % n];
+    if (i < 0) return sub(scale(p[0], 2), p[1]) as V3;
+    if (i >= n) return sub(scale(p[n - 1], 2), p[n - 2]) as V3;
+    return p[i];
+  };
+  const out: V3[] = [];
+  const spans = closed ? n : n - 1;
+  for (let i = 0; i < spans; i++) {
+    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+    out.push(p1);
+    const d01 = dist(p0, p1), d12 = dist(p1, p2), d23 = dist(p2, p3);
+    if (d12 < 1e-6) { for (let t = 1; t <= k; t++) out.push(p1); continue; }
+    const m1 = scale(sub(p2, p0), d12 / Math.max(1e-6, d01 + d12));
+    const m2 = scale(sub(p3, p1), d12 / Math.max(1e-6, d12 + d23));
+    for (let t = 1; t <= k; t++) {
+      const u = t / (k + 1), u2 = u * u, u3 = u2 * u;
+      const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+      out.push([
+        h00 * p1[0] + h10 * m1[0] + h01 * p2[0] + h11 * m2[0],
+        h00 * p1[1] + h10 * m1[1] + h01 * p2[1] + h11 * m2[1],
+        h00 * p1[2] + h10 * m1[2] + h01 * p2[2] + h11 * m2[2],
+      ]);
+    }
+  }
+  if (!closed) out.push(p[n - 1]);
+  return out;
+}
+const dist = (a: V3, b: V3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+/**
+ * Vertex normals weighted by each triangle's corner angle (not its area). Loft stations are
+ * unevenly spaced (1 cm next to 40 cm), and area weighting made a vertex's normal depend on its
+ * neighbours' widths: alternating normals along the belt line read as vertical shading bands.
+ * Angle weighting is independent of spacing and of the quad diagonal.
+ */
+export function angleWeightedNormals(g: THREE.BufferGeometry) {
+  const pos = g.getAttribute('position') as THREE.BufferAttribute;
+  const idx = g.index;
+  const n = new Float32Array(pos.count * 3);
+  const P = pos.array as ArrayLike<number>;
+  const tri = (ia: number, ib: number, ic: number) => {
+    const ax = P[ia * 3], ay = P[ia * 3 + 1], az = P[ia * 3 + 2];
+    const bx = P[ib * 3], by = P[ib * 3 + 1], bz = P[ib * 3 + 2];
+    const cx = P[ic * 3], cy = P[ic * 3 + 1], cz = P[ic * 3 + 2];
+    const e0x = bx - ax, e0y = by - ay, e0z = bz - az, e1x = cx - ax, e1y = cy - ay, e1z = cz - az, e2x = cx - bx, e2y = cy - by, e2z = cz - bz;
+    let fx = e0y * e1z - e0z * e1y, fy = e0z * e1x - e0x * e1z, fz = e0x * e1y - e0y * e1x;
+    const fl = Math.hypot(fx, fy, fz);
+    if (fl < 1e-12) return;
+    fx /= fl; fy /= fl; fz /= fl;
+    const l0 = Math.hypot(e0x, e0y, e0z), l1 = Math.hypot(e1x, e1y, e1z), l2 = Math.hypot(e2x, e2y, e2z);
+    const ang = (dx: number, dy: number, dz: number, ex: number, ey: number, ez: number, la: number, lb: number) =>
+      Math.acos(Math.max(-1, Math.min(1, (dx * ex + dy * ey + dz * ez) / (la * lb || 1))));
+    const wa = ang(e0x, e0y, e0z, e1x, e1y, e1z, l0, l1);
+    const wb = ang(-e0x, -e0y, -e0z, e2x, e2y, e2z, l0, l2);
+    const wc = Math.PI - wa - wb;
+    n[ia * 3] += fx * wa; n[ia * 3 + 1] += fy * wa; n[ia * 3 + 2] += fz * wa;
+    n[ib * 3] += fx * wb; n[ib * 3 + 1] += fy * wb; n[ib * 3 + 2] += fz * wb;
+    n[ic * 3] += fx * wc; n[ic * 3 + 1] += fy * wc; n[ic * 3 + 2] += fz * wc;
+  };
+  if (idx) { const I = idx.array as ArrayLike<number>; for (let k = 0; k < idx.count; k += 3) tri(I[k], I[k + 1], I[k + 2]); }
+  else for (let k = 0; k < pos.count; k += 3) tri(k, k + 1, k + 2);
+  for (let i = 0; i < pos.count; i++) {
+    const l = Math.hypot(n[i * 3], n[i * 3 + 1], n[i * 3 + 2]);
+    if (l > 1e-12) { n[i * 3] /= l; n[i * 3 + 1] /= l; n[i * 3 + 2] /= l; } else n[i * 3 + 1] = 1;
+  }
+  const attr = g.getAttribute('normal') as THREE.BufferAttribute | undefined;
+  if (attr && attr.count === pos.count) { (attr.array as Float32Array).set(n); attr.needsUpdate = true; }
+  else g.setAttribute('normal', new THREE.BufferAttribute(n, 3));
+}

@@ -41,7 +41,7 @@ import { facadeUniforms } from './render/FacadeMaterial';
 import { PostFX, postUniforms } from './render/PostFX';
 import { Simulation, type ArchetypeDef } from './sim';
 import { createCharacterFactory, type CharacterFactory } from './characters';
-import { createVehicleFactory, CarLightPool, updateCarLights, setGroundLightLevel } from './vehicles';
+import { createVehicleFactory, CarLightPool, updateCarLights, setGroundLightLevel, setVehicleViewCamera } from './vehicles';
 
 /**
  * URL parameters (all optional):
@@ -71,6 +71,7 @@ async function main() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
+  setVehicleViewCamera(camera); // vehicles' fade LOD switches by the render camera (not shadow or reflection passes)
   const atmosphere = new Atmosphere(scene);
   if (params.has('ao')) facadeUniforms.aoStrength.value = Number(params.get('ao'));
   // sky IBL: opt-in until verified against the look target; ?env=<intensity> (the raw sky is ~20x brighter than the fill)

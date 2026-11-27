@@ -119,9 +119,11 @@ export interface Components {
   engine: number; // health 1..0
   fuelTank: number; // health 1..0 (< 1 leaks)
   headlamps: boolean; taillamps: boolean; // broken?
+  /** Body parts that came off (hood, bumperF, bumperR); repaired by repair(). Optional in old saves. */
+  detached?: string[];
 }
 export function newComponents(wheels: number): Components {
-  return { tyresFlat: Array(wheels).fill(false), glass: { front: 0, rear: 0, left: 0, right: 0 }, radiator: 1, engine: 1, fuelTank: 1, headlamps: false, taillamps: false };
+  return { tyresFlat: Array(wheels).fill(false), glass: { front: 0, rear: 0, left: 0, right: 0 }, radiator: 1, engine: 1, fuelTank: 1, headlamps: false, taillamps: false, detached: [] };
 }
 
 // ============================================================================ security, plates, trunk
@@ -161,8 +163,10 @@ export function trunkRemove(t: Trunk, id: string, qty = 1): number {
 export function plateFor(spec: ModelSpec, r: () => number): string {
   const L = 'ABCDEFGHJKLMNPRSTUVWXYZ', D = '0123456789';
   const l = () => L[Math.floor(r() * L.length)], d = () => D[Math.floor(r() * 10)];
-  const commercial = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(spec.cls);
-  return commercial ? `${d()}${d()}${d()}${d()}-${l()}${l()}` : `${l()}${l()}${l()} ${d()}${d()}${d()}`;
+  void spec; void d;
+  // 1973–80 New York base: 12-ABC / 123-ABC, numbers 51–999
+  const n = 51 + Math.floor(r() * 949);
+  return `${n}-${l()}${l()}${l()}`;
 }
 
 // ============================================================================ engine systems

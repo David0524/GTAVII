@@ -6,9 +6,11 @@ import { qualityFromUrl } from '../../engine/quality';
 import { Input } from '../../input/Input';
 import { TouchControls } from '../../ui/TouchControls';
 import { DebugHud, FrameStats } from '../../engine/debug/DebugHud';
-import { createVehicleFactory, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
+import { renderThumbnailBlob } from '../thumbnail';
+import { createVehicleFactory, setVehicleViewCamera, updateHeroRing, HERO_RING, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
+import { variantOf, heroGenTimes } from '../assets';
 import { BIKES } from '../twowheel/bikes';
 import type { TwoWheeler } from '../twowheel/TwoWheeler';
 import { SubwayTrain } from '../subway/SubwayTrain';
@@ -16,6 +18,8 @@ import { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS } from '../assist';
 import { ZONES } from '../gen/morphs';
 import { VehicleLights, type VehicleClass } from '../../shared/traffic';
 import { CarLightPool, updateCarLights, setGroundLightLevel } from '../lighting';
+import { VENDOR_SPECS, type VendorPropId } from '../props/vendorModels';
+import type { VendorView } from '../props/VendorProps';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type N = any;
@@ -79,6 +83,7 @@ export async function runTestLot() {
   scene.fog = new THREE.Fog(0xb0a494, 120, 600);
   try { scene.environment = streetEnvironment(renderer); scene.environmentIntensity = 0.9; } catch (e) { console.warn('env map failed', e); }
   const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2000);
+  setVehicleViewCamera(camera);
   const sun = new THREE.DirectionalLight(0xffe2bc, 2.4);
   sun.position.set(-40, 60, 25);
   sun.castShadow = quality.shadows;
@@ -240,6 +245,7 @@ export async function runTestLot() {
     player.security.keysIn = true; player.security.locked = false; // the tester owns this car
     player.setLights({ head: true });
     player.isPlayer = true;
+    void player.prefetchHero().catch(() => undefined); // worker builds the hero mesh in the background
     wire(player, 'player');
   };
 
@@ -278,7 +284,11 @@ export async function runTestLot() {
   // ------------------------------------------------------------------ car lights: fixed pool of real lights for the nearest lamps
   const carLights = new CarLightPool(scene, qname, quality.shadows && (qname === 'high' || qname === 'ultra'));
   let lastTrafficCands: ReturnType<NonNullable<typeof traffic>['lightCandidates']> = [];
-  const prerender = () => updateCarLights(carLights, [player, ...parked], camera.position, lastTrafficCands);
+  let heroOn = !params.has('nohero');
+  const prerender = () => {
+    if (heroOn) updateHeroRing([player, ...parked], camera.position, HERO_RING[qname]);
+    updateCarLights(carLights, [player, ...parked], camera.position, lastTrafficCands);
+  };
   if (params.has('night')) setNight(Number(params.get('night')) || 1);
 
   // ------------------------------------------------------------------ traffic (visual-only instanced proxies)
@@ -310,6 +320,23 @@ export async function runTestLot() {
     lastTrafficCands = traffic.lightCandidates(tcars, camera.position);
     traffic.setInstances(tcars, camera.position, carLights);
   };
+
+  // ------------------------------------------------------------------ vendors (mode=vendors): a row of every prop on the sidewalk
+  const vendors = mode === 'vendors' || params.has('vendors') ? factory.createVendorProps(world, scene) : null;
+  const vendorViews: VendorView[] = [];
+  if (vendors) {
+    const ids = Object.keys(VENDOR_SPECS) as VendorPropId[];
+    // both sidewalks of the street at x = 0 (kerbs at x = ±6, 0.15 m high), 0.8 m in from the kerb, 3.2 m apart;
+    // the customer side (local +x) faces the pedestrians, away from the road
+    ids.forEach((prop, i) => {
+      const west = i < 6, k = west ? i : i - 6;
+      const halfW = VENDOR_SPECS[prop].w / 2;
+      vendorViews.push({ id: `stall${i}`, prop, cartX: west ? -6.8 - halfW : 6.8 + halfW, cartZ: -14 - k * 3.2, cartYaw: west ? Math.PI : 0, open: true, umbrella: true, variant: i, state: 'open' });
+    });
+    vendors.sync(vendorViews);
+    vendors.on('cartHit', (e) => { log.unshift(`cartHit ${e.id} (${e.prop}) by ${e.by ?? e.byVehicle ?? '?'} at ${(e.speed * 2.237).toFixed(0)} mph`); log.length = Math.min(log.length, 5); });
+    vendors.on('tipped', (e) => { log.unshift(`${e.id} tipped over`); });
+  }
 
   // ------------------------------------------------------------------ subway (mode=subway): straight track south of the lot
   let train: SubwayTrain | null = null;
@@ -434,7 +461,9 @@ export async function runTestLot() {
     for (const b of bikes) b.update(DT);
     for (const v of parked) v.update(DT);
     runTrain(DT);
+    vendors?.sync(vendorViews);
     world.step();
+    vendors?.update(DT);
     skids.update(DT);
     physMs = physMs * 0.95 + (performance.now() - t0) * 0.05;
   };
@@ -450,7 +479,8 @@ export async function runTestLot() {
     setModel(id: string, v = 0, pose = { x: 0, z: 40, yaw: 0 }) { modelIdx = MODELS.findIndex((m) => m.id === id); variant = v; spawnPlayer(pose.x, pose.z, pose.yaw); },
     setCamera(x: number, y: number, z: number, lx: number, ly: number, lz: number, fov = 55) { freeCam = { p: new THREE.Vector3(x, y, z), l: new THREE.Vector3(lx, ly, lz), fov }; },
     clearCamera() { freeCam = null; camera.fov = 55; camera.updateProjectionMatrix(); },
-    renderOnce() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.render(scene, camera); },
+    /** Render one frame (info counters reset first: with the loop paused nothing else resets them). */
+    renderOnce() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.info.reset(); renderer.render(scene, camera); },
     /** Render now and return the canvas as a PNG data URL (read before the frame is composited). */
     capture() { if (freeCam) applyFree(); moveTraffic(0); prerender(); renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
     /** Stop / restart the interactive loop (the shot rig drives frames itself). */
@@ -487,10 +517,26 @@ export async function runTestLot() {
       const n = camera.position.clone().sub(target).normalize();
       return player.applyHit({ point: target, normal: n, type: 'bullet', source: 'tester' });
     },
+    /** Variant options (paint, metallic, vinyl...) of a model. */
+    variantOf: (id: string, v: number) => variantOf(MODELS.find((m) => m.id === id)!, v),
+    /** Hero mesh ring on/off (off: every car back to the standard LOD0). */
+    setHeroRing(on: boolean) { heroOn = on; if (!on) for (const v of [player, ...parked]) v.setHero(false); },
+    /** Resolve once every car's hero mesh has been built (worker), then apply the ring. */
+    async heroReady() {
+      await Promise.all([player, ...parked].map((v) => v.prefetchHero().catch(() => undefined)));
+      for (let k = 0; k < 8; k++) prerender();
+      return heroGenTimes.slice();
+    },
+    /** UI thumbnail (renderThumbnailBlob) as a data URL, for the shot rig. */
+    async thumb(id: string, paint: number | null, angle: 'side' | 'three-quarter') {
+      const b = await renderThumbnailBlob(renderer, id, paint, angle);
+      return await new Promise<string>((res) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.readAsDataURL(b); });
+    },
     /** 0 = afternoon, 1 = night. */
     setNight, get night() { return night; }, carLights,
     /** Dent the player at a local point (metres of push), for damage close-ups. */
     dentAt(x: number, y: number, z: number, amount = 0.1, radius = 0.6) { player.object.updateMatrixWorld(); return player.dent(player.object.localToWorld(new THREE.Vector3(x, y, z)), amount, radius); },
+    vendors, vendorViews,
     hill: { x: HILL_X, heightAt: (x: number, z: number) => roadHeight(x, z) },
     moveTraffic,
     stats() {

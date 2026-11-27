@@ -4,6 +4,336 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 6: item 0, base model fidelity (oversight review of visual_dents)
+- **Hero LOD0** for the player car and the near ring (`updateHeroRing`, `HERO_RING`): low/phone
+  = player only, medium +1, high/ultra +3 within 30 m, with hysteresis at 38 m. At most one
+  promotion per frame.
+  - `generate(..., { hero: true })`: every surface grid is refined by a chord-scaled
+    Catmull-Rom spline in both directions (`GeoBuilder.sub`, `densify()`). Short spans keep
+    short tangents, so crisp character lines stay crisp and nothing overshoots.
+  - **Wheels:** 48 segments. The tyre is real geometry: rounded shoulders, two circumferential
+    grooves, 24 staggered tread blocks, a moulded bead ring and a blank raised lettering band.
+    Full covers have a 24-flute ring, a domed cap and a medallion; hubcaps get lug nuts.
+    Whitewalls are proud of the sidewall.
+  - **Panel gaps as geometry:** hood shut lines (both fender edges and the cowl), a deck-lid
+    rectangle on notchbacks, and door seams following the body (10 points).
+  - **Details:** door handles with a pull cup and lock barrel; invented relief badges (bevelled
+    chrome crest with a chevron on the hood and deck, three-bar fender emblems); a 3-spoke
+    steering wheel; a gauge cluster with chrome bezels, faces, ticks and needles; a centre
+    stack; a cabin shell (door cards, armrests, floor, transmission hump, firewall).
+  - `Vehicle.setHero(on)` swaps body, hood and wheel geometry and **replays the dents** (now
+    logged in body space).
+- **Budgets (triangles)** from the "hero frame" cost measurement:
+
+  | LOD | Use | Triangles |
+  | --- | --- | --- |
+  | Hero | player + near ring | cars 39–41k, trucks 29–37k, bus 43k |
+  | LOD0 | standard | 6–9k |
+  | LOD1 | | 1.5–2.7k |
+  | LOD2 | box | — |
+
+  - Hero generation: 65–205 ms per model (Node). First swap in the browser: 0.4–1.7 s under
+    SwiftShader, including the upload.
+  - **That is a hitch.** Plan: generate hero meshes in a worker or idle time at spawn
+    (`factory.preload`).
+  - In view, a hero car adds about 20–28k triangles to the frame.
+  - Phone: the player's car only, so +40k triangles on an iPhone 17 Pro tier — affordable
+    (scenes there run around 1–2M). Not benchmarked on a device: this container has no GPU.
+- **Glass:** cracks now radiate from the impact point, in the pane's own plane (per-pane `hit`
+  uniform).
+  - Laminated windscreen and back light: a spider web (about 17 spokes, rings, a crushed core).
+  - Tempered side glass: dice cracking that spreads from the hit.
+  - Bumped so the cracks catch light. Restored saves crack from the pane centre.
+  - "Refraction" is only the bump and highlight: the glass has no screen-space refraction.
+- **Dents near the arches are clamped.** There is no deformation inside the arch opening plus a
+  6 cm lip, with full deformation 20 cm beyond it. No tearing, and the wheel stays outside.
+  Shot: `hero_dent_arch.jpg`.
+- **MOVEMENT.md anchors:** `vehicle.movementAnchors()` returns, in world space:
+  - **doors** (per seat): stand point and yaw, handle, hinge, seat pose, carjack stand point,
+    throw direction, locked flag;
+  - **surfaces** (hood, roof, deck, cargo tops) as oriented boxes with their top height and
+    kind: `vault` (0.5–1.2 m), `climb` (1.2–2.2 m) or `none`.
+  - Example: the sedan's hood is 0.82 m (vault), its roof 1.36 m (climb) and its deck 0.87 m
+    (vault). Bus and box-truck roofs are `none`.
+- **Rig:** `renderer.info` was never reset with the loop paused, so triangle and draw counts
+  from `renderOnce()` were running totals. `renderOnce()` now resets it. **Earlier traffic
+  draw and triangle numbers in this file may be inflated.**
+- **Shots:**
+  - `hero_vs_standard.jpg`
+  - `hero_details.jpg`
+  - `hero_glass.jpg`
+  - `hero_dent_arch.jpg`
+  - `hero_classes_vs_period.jpg`: big sedan vs DOCUMERICA 549851, taxi vs 549869, box truck vs
+    554299, bus vs 549921, wheel and hubcap vs 555907 (shape only).
+
+- **Shape pass 1** (`ModelSpec.shape`): the side is no longer a slab. Two new loft rows give:
+  - a rocker tuck (sill width 0.86–0.89);
+  - a convex lower side (`round`);
+  - tumblehome toward the belt (0.965–0.976);
+  - a fender-top peak over the front fender;
+  - a rear-quarter hip swell over the rear wheel (1–2%, strongest on the Tiverton coupe).
+  - Set on the Bancroft family (sedan, patrol, cab, wagon), the Tiverton, the Ferris and the
+    Fareway.
+  - Cost: standard LOD0 is now 8.5–9.6k triangles for cars (about 20% over the ≈8k guide);
+    LOD1 is 1.6–2.0k.
+  - Against 549851 the big sedan now reads as curved sheet metal. The taxi still has a tall,
+    upright greenhouse and flatter arches than the 549869 cab: shape pass 2.
+- **Queued after item 0 (oversight, user decision):** street-vendor carts as physics props
+  (docs/briefs/STREET_VENDORS.md, fbaf7d2): hot-dog with umbrella, pretzel/knish, ices, nut
+  roaster, fruit, flower, shoeshine stand, and a coffee van. They push, tip over and spill
+  goods, with invented branding and the same LOD chain as the cars.
+
+- **Licence plates are period-correct now.** Checked against Wikipedia's New York plate table
+  (the 1973–80 base row):
+  - embossed dark-blue serial on reflective orange;
+  - a border line, with "NEW YORK" centred at the bottom;
+  - **no slogan.** "THE EMPIRE STATE" was a 1951–54 and 2001–10 slogan, and it is removed;
+  - a bordered sticker spot at the bottom right that New York never used (revalidation was a
+    windshield decal).
+  - Serials follow the base: `123-ABC` / `12-ABC`, numbers 51–999.
+  - Commercial vehicles use the same base: their 1974 legend isn't verified, so nothing invented.
+- **No generation hitch.** Hero meshes are built in a Web Worker (`heroWorker.ts`): 46–153 ms
+  per model off the main thread, then handed back as transferred buffers.
+  - `setHero(true)` only swaps once the mesh is ready; until then it requests it and returns
+    false. `vehicle.prefetchHero()` is called at spawn for the player. With no Worker, generation
+    falls back to an idle callback.
+  - The swap itself is cheap on the CPU (a steady hero frame is 1.5 ms CPU, the same as standard).
+  - Under SwiftShader the first draw after a swap takes 0.3–1 s. That is the software GPU
+    uploading the new buffers and the morph texture, which a real GPU does in milliseconds.
+    Not measurable here.
+  - Plan: warm the upload when the worker delivers (engine: `renderer.compileAsync` or an
+    off-screen draw).
+
+- **$0 / free assets (FREE_ASSETS.md):** four CC0 ambientCG materials, logged in
+  `docs/licenses/ASSETS.md` with the licence-page quote.
+  - Rubber004 → tyres; Leather026 → vinyl roofs and seats; Metal009 (roughness) → chrome wear;
+    SurfaceImperfections003 → rain-run dirt streaks on paint and road film on glass, scaled by
+    the car's dirt.
+  - Six greyscale 512² JPEGs, 396 KB in total, sampled triplanar in body space.
+  - Off on low (phone) quality: about 3 samples × 2 maps per material on desktop.
+  - The generator stays: no real car designs.
+
+- **Bus shape pass (CT-40, against DOCUMERICA 549921):** rounded front corners in plan
+  (cornerF 0.5), a deeply bowed (0.24 m) and raked "fishbowl" windscreen, a slightly sloped lower
+  front, and a gentle side tuck.
+  - The front and centre doors are now real two-leaf glazed doors: aluminium frames, upper and
+    lower glass with a mid-rail, a rubber centre seal, a recessed opening and a step well,
+    reaching the side-window line.
+  - LOD0 is 10.1k triangles.
+  - Still short of the photo: a flatter lower front, no chrome bumper band, no wipers or mirror
+    arms.
+- **Vendor props, ids from Sim** (fb337dc): cart_hot_dog, cart_pretzel, cart_ices, cart_nuts,
+  cart_coffee, stand_fruit, stand_flowers, stand_news, stand_shoeshine, peddler_case, monte_box.
+  - Positions come from `sim.vendorViews`; a hit sends gameplay `cartHit`.
+  - The engine side is docs/requests/sim.md item 13.
+
+- **Interior rework:**
+  - **Layout.** The cabin is now laid out from the driver's H-point. Seats moved back to about
+    0.95 m behind the windshield base (they were 0.4–0.6 m), so `seatPose` changed for the
+    Bancroft family, the Tiverton, the Ferris and the Fareway. The steering wheel sits 0.42 m
+    ahead of the hip, the dash face 0.6 m ahead, the seat back just behind, and the rear bench
+    one row (0.95 m) back.
+  - **The painted belt deck over the cabin is gone.** It hid the seats and dash from outside the
+    glass.
+  - **Hero cabin:** dash with a padded lip and a glovebox line; gauges on the dash face; a radio
+    and heater panel; pedals and a column shift; pleated bench tops; door cards with armrests,
+    pulls and window cranks; floor and transmission hump; firewall; rear-view mirror.
+  - Shot: `hero_interior.jpg` (over the shoulder, and through the side glass).
+- **Vendor-cart notes from Sim** (63099eb):
+  - `cart_coffee` is a pushcart (0.8 × 1.4, urn and roll tray). A van would be a separate
+    `van_coffee` id, parked in the kerb lane.
+  - Righting: Sim emits `cartRighted {id}` 6–10 s after `cartOverturned`; that's the cue for
+    `props.right(id)`. The cart then goes to `leaving` (kinematic).
+  - Sim uses the footprints above for pedestrian avoidance (kiosk 1.15 m, monte box 0.3 m).
+
+- **Street-vendor props (STREET_VENDORS.md, Sim's ids):** `src/vehicles/props/`, via
+  `factory.createVendorProps(world, scene)`.
+  - **API:** `sync(sim.vendorViews)` before the step; `update(dt)` after it; `on('cartHit' |
+    'tipped' | 'spill')`; `right(id)` (on Sim's `cartRighted`); `shove(id, from, impulse, byId)`
+    for characters; `anchors(id)` for the vendor stand point, three queue points and the push
+    handle, with facing yaws.
+  - **Props:** cart_hot_dog (striped umbrella, steam table, condiment bottles, spoked wheel,
+    steam), cart_pretzel (glass display case), cart_ices (tubs, syrup bottles, umbrella),
+    cart_nuts (brass roaster drum, chimney, coal glow, steam), cart_coffee (a pushcart per Sim:
+    two urns, a roll case, steam), stand_fruit (three tiers of crates, awning), stand_flowers
+    (stepped bench of buckets, awning), stand_news (fixed kiosk, magazine racks, paper stacks),
+    stand_shoeshine (raised chair on a drawer box, footrests), peddler_case (attaché on a stand),
+    monte_box.
+  - **Branding:** invented brand panels from `VENDOR_BRANDS`, picked by `variant`, for Narrative
+    to edit.
+  - **Rendering:** the car materials (grime, CC0 textures), FadeLOD LOD0/LOD1/culled, and a
+    contact shadow.
+  - **Physics:**
+    - Rapier bodies, kinematic while `arriving`/`leaving` and dynamic otherwise; a hit locks a
+      cart out of Sim's control until `right()` or a new push cycle.
+    - Vehicle contacts above 1 m/s emit `cartHit {id, prop, by: driverId, byVehicle, speed}`.
+    - The car's momentum is handed over (the kinematic case).
+    - Hits over 10 mph roll the cart over sideways, across its narrow base. Pitching it end over
+      end was absorbed by the ground contact.
+    - Hits over 3 m/s spill goods as small dynamic bodies (franks, cans, pretzels, cups, cones,
+      rolls, fruit, bunches, papers, tins, watches, cards, bottles), instanced per kind,
+      240 live at most, each lasting 60 s.
+  - **Test:** a 21 mph sidewalk hit on the hot-dog cart gave `cartHit`, a 13-item spill and
+    `tipped`. Shot: `vendors.jpg`. Test lot: `&mode=vendors`.
+  - **Not done yet:** `van_coffee`; instancing of parked carts (each cart is about 6 draws);
+    vendor-cart lights at night.
+
+- **Bus details:**
+  - A chrome front bumper with a deeper wrap.
+  - Chrome bands across the headlamp line and under the windscreen.
+  - Transit-style mirrors on long chrome arms from the front corners, reaching out and forward
+    to a head at about 2.2 m.
+- **Windscreen wipers on every vehicle** (LOD0): two arms parked along the base, with rubber
+  blades and pivots. Bus and truck arms are longer.
+- LOD0 triangles: bus 10.3k, cars 8.4–9.5k.
+
+- **Oversight review fixes (vendors.jpg, hero_interior.jpg):**
+  - **The "broken greenhouse" had two real causes.**
+    - The Tiverton coupe's rear bench back stuck up through the sloping back light. Seat backs
+      and headrests are now clamped under the glasshouse at their z, with 7 cm of clearance.
+    - The pillar and sail panels were one-sided, so from the seats the C-pillars looked missing.
+      Cars with cabins now get an inner skin on every opaque glasshouse panel.
+    - The "skylight" was the coupe's opera window on its steeply leaning sail panel: correct.
+    - `hero_interior.jpg` now has four angles: over the shoulder, through the glass, inside
+      looking up and out, and inside looking out the side.
+  - **Brands from Narrative:** `props/brands.ts` reads `content/vendors.json` at build time
+    (`import.meta.glob`; once the narrative branch merges, its file wins), with a fallback that
+    uses the same names. Cart panels carry the brand name and cart line. Umbrellas use the
+    brand's stripe colours ("yellow and red", "red, white and green", …). Stands get generic,
+    unbranded signs. `VENDOR_BRANDS` was removed.
+  - **Stands detail pass:**
+    - fruit: slatted crates on a stepped rack, fruit heaps, a chalkboard, an awning;
+    - flowers: a slatted step bench, rolled-rim buckets, paper cones with bunches;
+    - news: panelled body, roof cornice, raised shutter on props, three slanted magazine racks,
+      stacked papers, side posters;
+    - shoeshine: drawers with brass pulls, an upholstered chair with arms, chrome sole plates
+      with heel stops, polish tins.
+    - Poly Haven GLB props wait for the engine's shared loader.
+  - **Night:** the hot-dog and nut carts have a bare bulb (emissive) and a warm glow on the
+    sidewalk, scaled by `setGroundLightLevel`, off when closed or tipped.
+  - **For Sim:** a shoved cart that stays upright and settles more than 0.25 m away emits
+    `cartMoved {id, prop, x, z, yaw}`, which feeds `sim.vendorCartMoved`.
+
+- **UI thumbnails (for workstream 9):** `renderThumbnail(renderer, modelId, paint | null, 'side' |
+  'three-quarter', { width = 640, height = 280, variant, quality })` returns a Promise of an
+  ImageBitmap; `renderThumbnailBlob(...)` returns a WebP Blob. Both are in `src/vehicles/thumbnail.ts`
+  and exported from `src/vehicles/index.ts`.
+  - Renders the real LOD0 mesh off-screen with the game's renderer (WebGPU or WebGL backend):
+    transparent background, neutral three-point light plus a small studio environment, framed
+    to the bounding box. Pixels are read back asynchronously.
+  - Cached per model / paint / angle / size.
+  - 3–5 s each under SwiftShader (software); expect tens of ms on a GPU. WebP is 5–11 KB.
+  - Shot: `ui_thumbnails.jpg` (on a checkerboard).
+
+- **Detachable parts:**
+  - **Separate meshes:** LOD0 bumpers are their own meshes, with the damage morphs; they stay
+    merged at LOD1. The hood already was separate.
+  - **Damage progression:** a bumper sags with its zone's damage from 0.5 (one end drops, the bar
+    twists). It comes off at zone damage 0.82 or a hit of severity 0.55. The hood flies off at
+    front damage 0.9 or a hit of severity 0.7.
+  - `vehicle.detachPart('hood' | 'bumperF' | 'bumperR', push?, source?)` turns a part into a
+    physics debris body that keeps its dents and paint. Debris collides with the world and props
+    only (PROJECTILE membership), so wheels roll over it rather than perching on it. The plate
+    leaves with its bumper.
+  - Emits `component {kind: 'part', detail}`.
+  - Persisted in `components.detached` (optional in old saves; a restore hides the parts without
+    debris). `repair()` reattaches them. The hero swap updates the bumpers too.
+  - The 30 mph wall test now loses the front bumper and the hood.
+- **Engine bay:** passenger cars get a V8 under the hood: block, heads, valve covers in the
+  accent colour, exhaust manifolds, a chrome air cleaner, radiator, fan, hose, battery, bay floor
+  and fender walls. You see it once the hood is off.
+- **Glass shards:** when a pane shatters, chips burst out of it and fall. Tempered side glass
+  gives 70 cubes, a laminated windscreen 18 chips. They are ballistic (no physics bodies), bounce
+  once, settle on the ground under the car and fade after 25 s. One InstancedMesh per scene, up to
+  600 chips.
+- Shot: `damage_parts.jpg`. Rig section `parts`.
+
+- **1974 paint mix (engine review: the parked rows skewed white).**
+  - Civilian palettes are rebalanced toward earth tones, greens (avocado, forest), golds and
+    harvest yellow, maroons, dark blues and beige, with no silver.
+  - Share of white or cream per class (1000 variants): sedan 6.8%, hardtop 10.0%, compact 9.4%,
+    wagon 10.6%.
+  - Taxis, police and fleet liveries are unchanged. Still deterministic per variant.
+- **Traffic vinyl roofs:** TrafficRenderer batches for models with vinyl roofs carry the vinyl
+  panel as their own instanced part, coloured per instance (the variant's vinyl colour, or the
+  body paint when that car has none). Vinyl share: hardtops 90%, sedans 42%, compacts 9%.
+
+### vs GTA V / VI / RDR2 (vehicles)
+- **What the references do:**
+  - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
+  - Damage is vertex deformation everywhere. Doors, hoods and bumpers hang and fall off.
+    Windows shatter into falling shards. Tyres burst and leave rims that spark.
+  - Paint carries dirt layers. The cars sit in the world's reflections.
+  - GTA VI (trailers) adds wet surfaces, ray-traced reflections and dense, varied traffic.
+  - RDR2's wagons model visible mechanics and accumulate mud.
+- **Where we match:** round wheels with tread and sidewall geometry, wheel covers and
+  whitewalls; local dents that hold at the arches; radial safety-glass cracks; contact
+  shadows; headlights that light the road; wet paint with beads; no LOD pops; dirt grime; burn
+  stages; a nearest-cars LOD policy like GTA's.
+- **Where we fall short:**
+  1. **Sheet-metal shape.** Next to the period photos our bodies read boxy and flat-sided. The
+     real cars have tumblehome, fender peaks, swept quarters, deep bumpers and heavy chrome
+     sections. This is the spec and loft design, not polygon count: hero smoothing can't add
+     curvature the spec doesn't describe.
+  2. **Interior.** A cramped layout (seat, wheel and dash spacing are wrong) and boxy forms.
+  3. **No detachable parts** (hood, door, bumper) and no glass shards.
+  4. **No real world reflections:** an env map only, until the engine's probes or SSR land.
+  5. **No tyre lettering, no rim sparks.**
+- **Plan, in order:**
+  1. A shape pass per class against the period photos: tumblehome profile, fender-peak and
+     belt crease, quarter sweep, bumper sections.
+  2. An interior rework: proper H-point layout, sculpted dash and door cards.
+  3. Detachable bumper, hood and doors with hinge physics.
+  4. Glass shard particles.
+  5. Wire paint, chrome and glass to the engine probes when they exist.
+
+## Session 5b: visual bar 6, 7, 8 (surface detail, wet paint, LOD crossfade) + a shading bug
+- **The vertical shading bands on every car's sides were a real bug, now fixed:**
+  - Loft stations are unevenly spaced (1 cm next to 40 cm around the arches and lamps).
+  - Area-weighted vertex normals made each belt-line vertex lean toward whichever neighbour
+    was wider. Normals alternated station to station, which read as stripes in the reflections.
+  - `angleWeightedNormals()` (gen/builder.ts) now builds the normals for every generated mesh and
+    after every dent. Side rows also keep a fixed order at every station: they used to drop rows
+    at the arches, which twisted the quads.
+  - Visible in `visual_detail.jpg` (bottom right) and the new turntables.
+- **6, normal detail.** TSL bump maps, faded out with distance so they don't shimmer:
+  - paint: orange peel, plus metallic flake on metallic variants;
+  - chrome: pitting in the roughness and the bump;
+  - grilles: egg-crate bars;
+  - vinyl roofs: pebbled grain;
+  - tyres: a new `tyre` material on the wheels (`mats.wheelArray`), with tread blocks and grooves
+    on the crown and fine rings and dust on the sidewall.
+  - Wheels now have 18 segments at LOD0 (was 14). LOD1 wheels have 10 segments, a cover disc
+    and whitewalls, so LOD1 reads like LOD0.
+- **7, wet paint.** `setWetness(w)` now darkens the paint and the dirt, sharpens the clearcoat
+  (roughness 0.12 → 0.03) and raises water beads, which are stronger on upward faces and absent on
+  dirt. The glass already had rain streaks. Shot: `visual_wet.jpg`.
+- **8, no LOD pops.** `FadeLOD` (src/vehicles/fadeLod.ts) replaces THREE.LOD for bodies and wheels.
+  - 10% hysteresis band.
+  - 0.35 s screen-space dither crossfade: a per-object `lodFade` uniform read by a `maskNode` in
+    every vehicle material. The outgoing and incoming levels show complementary pixels, so there
+    are no holes.
+  - Camera cuts (more than 0.25 s since the last update, or a jump of 2 levels) switch instantly.
+  - Only the view camera drives it. Engine: call `setVehicleViewCamera(camera)`. Without it,
+    shadow-pass cameras flipped the levels, which hid whole cars in the first try.
+  - Off on low quality, where an always-on discard costs early-z on tiled phone GPUs; that path
+    keeps the hysteresis only. Shot: `visual_lod_fade.jpg`.
+- **Budgets (triangles):**
+  - LOD0: 6.1k (courier) to 8.8k (Bancroft), CT-40 bus 9.1k. The rounder wheels cost 480 per car.
+    Bancroft and the bus are now about 10% over the ≈8k target.
+  - LOD1: 1.5–2.0k for cars, 2.7k for the bus. Whitewalls and wheel covers are back, so LOD1
+    matches LOD0 through the fade.
+
+**Critique, honest:**
+- Tyre tread reads only in grazing light. In shadow under the arch it is black on black, as in
+  life.
+- The egg-crate bump is subtle next to the modelled vertical bars on the Tiverton grille.
+- Metallic flake needs a sunny close-up to show. SwiftShader shots under-sell all three.
+- LOD1 still has opaque glass (no cabin) and no side trim strip, so the dissolve is visible as a
+  glass-darkness change at 40 m.
+- Traffic instances switch LOD1→box at 160 m with no fade. A per-instance dither would need an
+  instance attribute: next.
+
 ## Session 5: visual bar (VISUAL_BAR.md): contact shadows, lights that light, local dents
 Gap list sent to oversight: 1 reflections (partial), 2 damage deformation (partial), 3 interiors
 (done, basic), 4 lights cast light (missing), 5 contact shadows (missing), 6 normal detail

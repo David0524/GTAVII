@@ -66,6 +66,16 @@ export interface ModelSpec {
   noseRake: number; tailRake: number;
   /** 0..1 height of the body-side character line (max width). */
   crease: number;
+  /**
+   * Sheet-metal shape (passenger cars, from the period photos). Width factors relative to the
+   * half-width; omitted fields keep the plain slab side.
+   *  tuck: rocker width at the sill (0.92 plain, ~0.86 for a 1970s full-size car);
+   *  round: 0..1 how convex the side is between sill and crease (0 = straight);
+   *  tumble: width just under the belt line (0.994 plain, ~0.97 = side leans in toward the glass);
+   *  peak: extra outward fender-top crease over the front fender (fraction, ~0.01);
+   *  hip: a rear-quarter swell over the rear wheel ('coke bottle'): centre s, half-length, amount.
+   */
+  shape?: { tuck?: number; round?: number; tumble?: number; peak?: number; hip?: { s: number; w: number; amount: number } };
   archGap: number;
   skirts?: boolean;
   hood: [number, number] | null;
