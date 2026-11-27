@@ -226,6 +226,12 @@ Freesound (CC0 / CC-BY) and Sonniss GDC sounds are allowed through the gate. I'd
 is weakest (cloth and body foley, crowd close-ups, gunfire transients), reading each licence first and adding a row
 before any file lands. BBC Sound Effects is out (non-commercial).
 
+## Elevators (engine Elevators.ts, 2026-11-27)
+- **Calls:** `audio.play('elevator.call' | 'elevator.doors' | 'elevator.ding', at)`; `'elevator.doors'` with `{ gate: 1 }` plays the Corwin's brass scissor gate.
+- **Ride:** `audio.loop('elevator.ride', at)` returns `{stop()}` for the hoist hum during travel. `loop()` is general-purpose for any loopable family.
+- **Sounds:** all self-made, group `interior` (loaded with interiors). The ride loop seam is 0.65× the average sample step.
+- **Check:** `foley-check.ts elevator`: 5 families, 0 bad (`shots/audio/elevator.ogg`).
+
 ## Traffic incidents (sim f9148be, 2026-11-27)
 All wired in `vehicles.ts` from the bound sim. Sounds are self-made; the new `impact.fender` bake is a chrome-bumper clank and ring, a sheet-metal crumple and a few falling bits.
 - **`honk` with chain/chainDepth:**

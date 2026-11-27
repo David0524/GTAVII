@@ -341,6 +341,8 @@ export class AudioSystem {
       case 'siren': this.ambience?.triggerSiren(); return;
       case 'thunder': { const near = (params.near ?? 0) > 0.5; void this.bank.loadGroup('rain').then(() => this.oneShot(near ? 'thunder.near' : 'thunder.far', { category: 'weather', gain: near ? 0.42 : 0.28 })); return; }
       case 'footstep': this.footstep({ position: at ?? this.vm.listener.position, intensity: params.intensity }); return;
+      // Elevators (engine Elevators.ts): 'elevator.doors' with { gate: 1 } is the Corwin's brass scissor gate.
+      case 'elevator.doors': if (params.gate) { this.play('elevator.gate', at, { ...params, gate: 0 }); return; } break;
     }
     if (!this.oneShot(event, { at, gain: params.gain, rate: params.rate })) {
       const g = Object.entries(GROUPS).find(([, f]) => f.includes(event))?.[0];
@@ -357,6 +359,20 @@ export class AudioSystem {
     const bus = o.bus ?? (cat === 'ui' ? 'ui' : AMBIENT_CATS.has(cat) ? 'ambience' : 'sfx');
     return this.vm.play({ name: family, bus, category: cat, priority: o.priority ?? (cat === 'ui' ? 10 : 5), gain: (o.gain ?? 1) * this.bank.gainOf(family), at: o.at, vel: o.vel, doppler: o.doppler, occlude: o.occlude ?? !!o.at, wet: o.wet, delay: o.delay,
       duration: buf.duration / rate, resumable: true, pinned: cat === 'ui', build: (ctx) => bufferSource(ctx, buf, { rate }) });
+  }
+
+  /**
+   * A looping sound you start and stop (e.g. 'elevator.ride' for the 1-4 s of travel). Returns a handle; stop() fades it.
+   * The family's group loads on first use, so the first call may start a beat late.
+   */
+  loop(family: string, at?: Vec3, gain = 1): { stop(): void } {
+    let v: ReturnType<VoiceManager['play']> | null = null, stopped = false;
+    const start = () => {
+      if (stopped) return; const buf = this.bank.get(family); if (!buf) return;
+      v = this.vm.play({ name: family, bus: 'sfx', category: at ? 'emitter' : 'ui', priority: 6, gain: gain * this.bank.gainOf(family), at, occlude: !!at, loop: true, build: (ctx) => bufferSource(ctx, buf, { loop: true }) });
+    };
+    if (this.bank.has(family)) start(); else { const g = Object.entries(GROUPS).find(([, f]) => f.includes(family))?.[0]; if (g) void this.bank.loadGroup(g).then(start); }
+    return { stop: () => { stopped = true; v?.stop(0.25); } };
   }
 
   /** Schedule a callback in audio time (pauses with the context). */

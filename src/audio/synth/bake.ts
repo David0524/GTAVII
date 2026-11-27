@@ -158,6 +158,32 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number; v
   'impact.metal': { variants: 3, dur: 0.8, bake: (s, sr) => { const r = new Rng(s), o = len(0.8, sr); const f = r.range(380, 700); modal(o, sr, r, 0, [[f, 0.3, 0.6], [f * 2.76, 0.18, 0.4], [f * 5.4, 0.08, 0.25], [r.range(3500, 4500), 0.03, 0.3]], 0.0008); return fadeOut(normalize(o, 0.7), sr); } },
   'impact.wood': { variants: 3, dur: 0.4, bake: (s, sr) => { const r = new Rng(s), o = len(0.4, sr); modal(o, sr, r, 0, [[r.range(180, 260), 0.04, 0.8], [r.range(600, 800), 0.025, 0.5], [r.range(1500, 2000), 0.012, 0.3]], 0.0015); for (let k = 0; k < 6; k++) modal(o, sr, r, r.range(0.01, 0.2), [[r.range(2000, 4000), 0.004, 0.05]], 0.0003); return fadeOut(normalize(o, 0.7), sr); } },
   'impact.dirt': { variants: 2, dur: 0.35, bake: (s, sr) => { const r = new Rng(s), o = len(0.35, sr); body(o, sr, r, 0, 0.6); const lp = new OnePole(1800, sr); for (let i = 0; i < o.length; i++) o[i] += lp.lp(r.bi()) * 0.3 * Math.exp(-i / sr / 0.08); return fadeOut(normalize(o, 0.6), sr); } },
+  // ---------------------------------------------------------------- elevators (lead homes, engine Elevators.ts)
+  /** Call button: a bakelite click, then the controller relay thunk in the machine room / shaft. */
+  'elevator.call': { variants: 2, dur: 0.6, bake: (s, sr) => { const r = new Rng(s), o = len(0.6, sr); modal(o, sr, r, 0.005, [[r.range(2800, 3400), 0.008, 0.5], [r.range(5500, 6500), 0.004, 0.2]], 0.0005); modal(o, sr, r, r.range(0.12, 0.2), [[r.range(110, 140), 0.05, 0.6], [r.range(380, 450), 0.03, 0.35], [r.range(1500, 1900), 0.01, 0.15]], 0.002); return fadeOut(normalize(o, 0.6), sr); } },
+  /** Sliding car and landing doors closing: rollers on the track, a rubber-edged bump, the latch. */
+  'elevator.doors': { variants: 2, dur: 2.2, bake: (s, sr) => {
+    const r = new Rng(s), o = len(2.2, sr), lp = new OnePole(700, sr), bp = new Biquad().set('bp', 260, 1.5, sr);
+    for (let i = 0; i < 1.5 * sr; i++) { const t = i / sr, e = Math.sin(Math.PI * Math.min(1, t / 1.5)) ** 0.6; o[i] = (lp.lp(r.bi()) * 0.5 + bp.run(r.bi()) * 0.35) * e * (1 + 0.25 * Math.sin(2 * Math.PI * 17 * t)); }
+    body(o, sr, r, 1.5, 0.5); modal(o, sr, r, 1.56, [[r.range(900, 1200), 0.02, 0.4], [r.range(2400, 2800), 0.01, 0.2]], 0.001);
+    return fadeOut(normalize(o, 0.6), sr);
+  } },
+  /** The Corwin's brass scissor gate drawn shut: the lattice rattling across, then the latch. */
+  'elevator.gate': { variants: 2, dur: 1.8, bake: (s, sr) => {
+    const r = new Rng(s), o = len(1.8, sr);
+    for (let t = 0.02; t < 1.3; t += r.range(0.015, 0.04)) modal(o, sr, r, t, [[r.range(1600, 3200), 0.03, r.range(0.08, 0.2) * Math.sin(Math.PI * Math.min(1, t / 1.3)) ** 0.5], [r.range(4500, 6500), 0.015, 0.05]], 0.0005);
+    modal(o, sr, r, 1.36, [[r.range(700, 900), 0.08, 0.7], [r.range(1900, 2300), 0.05, 0.4], [r.range(4200, 4800), 0.02, 0.2]], 0.001);
+    return fadeOut(normalize(o, 0.65), sr);
+  } },
+  /** Arrival bell: one stroke of a small gong (generic bell modes, inharmonic partials). */
+  'elevator.ding': { variants: 1, dur: 2.0, bake: (s, sr) => { const r = new Rng(s), o = len(2.0, sr), f = 988; modal(o, sr, r, 0, [[f, 1.2, 0.8], [f * 2.02, 0.6, 0.25], [f * 2.76, 0.35, 0.18], [f * 5.4, 0.12, 0.08]], 0.0008); return fadeOut(normalize(o, 0.55), sr); } },
+  /** Ride: the hoist motor-generator hum, cables and guide shoes in the shaft. Loopable. */
+  'elevator.ride': { variants: 1, dur: 3, bake: (s, sr) => {
+    const r = new Rng(s), o = len(3, sr), lp = new OnePole(300, sr), bp = new Biquad().set('bp', 900, 2, sr);
+    for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = Math.sin(2 * Math.PI * 120 * t) * 0.12 + Math.sin(2 * Math.PI * 240 * t) * 0.05 + lp.lp(r.bi()) * 0.5 + bp.run(r.bi()) * 0.06 * (1 + 0.5 * Math.sin(2 * Math.PI * 0.7 * t)); }
+    for (let k = 0; k < 5; k++) modal(o, sr, r, r.range(0.1, 2.7), [[r.range(500, 900), 0.03, 0.06]], 0.002); // the shoes ticking past rail joints
+    return loopify(normalize(o, 0.5), sr);
+  } },
   // ---------------------------------------------------------------- street vendors (docs/briefs/STREET_VENDORS.md)
   /** Hot-dog cart: pot of franks at a simmer (bubbles) and steam hiss. Loopable. */
   'vendor.steam': { variants: 1, dur: 3, bake: (s, sr) => {

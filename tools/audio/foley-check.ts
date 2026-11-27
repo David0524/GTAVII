@@ -3,11 +3,11 @@
  * montage: `foley-check.ts` (movement set -> shots/audio/movement_foley.ogg) or `foley-check.ts vendors`.
  */
 import { BAKERS } from '../../src/audio/synth/bake';
-const SETS: Record<string, RegExp> = { movement: /^(step\.(granite|subwaytile|stoop|iron|rung|gravel)|fence\.|foley\.|paper\.)/, vendors: /^(vendor\.|cart\.rattle$)/, combat: /^(gun\.|bullet\.|impact\.(brick|metal|wood|dirt))/ };
+const SETS: Record<string, RegExp> = { movement: /^(step\.(granite|subwaytile|stoop|iron|rung|gravel)|fence\.|foley\.|paper\.)/, vendors: /^(vendor\.|cart\.rattle$)/, elevator: /^elevator\./, combat: /^(gun\.|bullet\.|impact\.(brick|metal|wood|dirt))/ };
 const SET = process.argv[2] ?? 'movement';
 const MOVEMENT = Object.keys(BAKERS).filter((k) => SETS[SET].test(k));
 /** Loops: the seam (last->first sample) must be no bigger than a typical sample-to-sample step. */
-const LOOPS = new Set(['vendor.steam', 'vendor.sizzle', 'vendor.roaster']);
+const LOOPS = new Set(['vendor.steam', 'vendor.sizzle', 'vendor.roaster', 'elevator.ride']);
 import { writeWav16 } from './wav';
 import ffmpegPath from 'ffmpeg-static';
 import { spawnSync } from 'node:child_process';

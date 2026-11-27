@@ -15,7 +15,7 @@ export const GROUPS: Record<string, string[]> = {
   vendors: ['vendor.steam', 'vendor.sizzle', 'vendor.roaster', 'vendor.bell', 'vendor.chime', 'vendor.change', 'vendor.spill', 'vendor.rag', 'cart.rattle'],
   combat: ['gun.cheap', 'gun.service', 'gun.magnum', 'gun.shotgun', 'gun.pump', 'gun.dry', 'gun.reload', 'bullet.whiz', 'bullet.ricochet', 'impact.brick', 'impact.metal', 'impact.wood', 'impact.dirt', 'glass', 'test.click'],
   movement: ['step.granite', 'step.subwaytile', 'step.stoop', 'step.iron', 'step.rung', 'step.gravel', 'fence.rattle', 'foley.cloth', 'foley.vault', 'foley.climb', 'foley.land', 'foley.roll', 'foley.ragdoll', 'paper.crumple'],
-  interior: ['step.wood', 'step.tile', 'phone.ring'],
+  interior: ['step.wood', 'step.tile', 'phone.ring', 'elevator.call', 'elevator.doors', 'elevator.gate', 'elevator.ding', 'elevator.ride'],
   garment: ['cart.rattle', 'dock.bang', 'jackhammer', 'truck.compactor'],
   park: ['bird.sparrow', 'bird.starling', 'bird.pigeon'],
   night: ['ship.horn'],
