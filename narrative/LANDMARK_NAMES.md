@@ -121,7 +121,7 @@ All landmark signage is in `content/landmarks.json` → `signage` (slot, text, n
 
 ---
 
-## 11. The 1930 Art Deco tower at Lexington & 42nd (the stainless crown): proposal, the user picks
+## 11. The 1930 Art Deco tower at Lexington & 42nd: DECIDED as Chrysalis Building (oversight pick, 27 Nov 2026)
 
 | Option | Why | Search (exact phrase, Nov 2026) |
 |---|---|---|

@@ -282,7 +282,6 @@
       ],
       "name": "Chrysalis Building",
       "short": "Chrysalis Bldg",
-      "pending": "user pick between Chrysalis / Crestler / Chromecrest (oversight)",
       "mapCard": [
         "1930 Art Deco: a stainless-steel crown of sunbursts, the tallest building in the world for eleven months.",
         "1974: still the most beautiful thing on the skyline, and half empty."
@@ -297,7 +296,8 @@
             "effect": "crown triangles lit in rows"
           }
         }
-      ]
+      ],
+      "decided": "Oversight pick, 27 Nov 2026: Chrysalis Building"
     },
     {
       "id": "lm.pershing_sq",
