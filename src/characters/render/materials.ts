@@ -59,12 +59,12 @@ export function surfaceNodes(tint?: (col: any) => any) {
   const u1 = attribute('uv1', 'vec3');
   // tiles are stacked top to bottom; Low's 6 tiles are ancestry-averaged (layer / 3)
   const L = skinMaps.layers;
-  const layer = (L < 18 ? floor(u1.z.div(3)) : u1.z).max(0);
+  const layer = (L < 18 ? floor(u1.z.sub(1).div(3)) : u1.z.sub(1)).max(0);
   // keep a 1-texel margin inside each tile so mips/filtering don't bleed between neighbours
   const tv = float(1).sub(u1.y).clamp(0.002, 0.998);
   const skinTex = texture(skinMaps.strip, vec2(u1.x, layer.add(tv).div(L))).rgb.mul(2);
   // the default skins are smooth after normalisation: lift their contrast a little
-  const skinDetail = mix(vec3(1), skinTex.sub(1).mul(1.8).add(1).max(0.2), step(0, u1.z).mul(0.9));
+  const skinDetail = mix(vec3(1), skinTex.sub(1).mul(1.8).add(1).max(0.2), step(0.5, u1.z).mul(0.9));
 
   // --- cloth patterns ------------------------------------------------------------------------
   const pattern = Fn(() => {

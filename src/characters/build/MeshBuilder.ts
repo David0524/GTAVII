@@ -39,7 +39,7 @@ export class MeshBuilder {
     this.pos.push(p[0], p[1], p[2]);
     if (n) this.nrm.push(n[0], n[1], n[2]); else { this.nrm.push(0, 0, 0); this.hasN = false; }
     this.uv.push(uv[0], uv[1]);
-    if (uv1) this.u1.push(uv1[0], uv1[1], uv1[2]); else this.u1.push(0, 0, -1);
+    if (uv1) this.u1.push(uv1[0], uv1[1], uv1[2]); else this.u1.push(0, 0, 0); // z: skin layer + 1 (0 = none)
     this.sj.push(skinJ[0], skinJ[1], skinJ[2], skinJ[3]); this.sw.push(skinW[0], skinW[1], skinW[2], skinW[3]);
     this.ca.push(...m.cA); this.cb.push(...m.cB); this.m0.push(...m.m0); this.m1.push(...m.m1);
     this.sl.push(this.slot);

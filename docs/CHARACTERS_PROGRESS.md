@@ -396,6 +396,22 @@ variety, and the RDR2 level of animation detail. We study behaviour and quality;
 - **Our head:** the eyeballs are sized so the lids rest on them. Close-cropped natural hair is an
   even tapered layer (no bowl) when volume is 0 (Delphine).
 
+**Round 2 (after oversight's second review):**
+- **Male chest fixed in the body base.** The shirtless check (`&baretop=1`) showed MakeHuman's
+  average-plus-weight male has a soft, low chest. For men the bust girth is now taken in and
+  lifted; the drape shaving and nipple inversion (which left dimples) are removed.
+- **Finished hems:** cut edges are relaxed along their own loops (hem band included), so they read
+  as seams instead of zigzags.
+- **Lapels and tie** sit on the cloth surface; lapels are lifted clear of the jacket. **Fold
+  creases** (elbows, backs of knees, waist) are in the cloth shader.
+- **Skin detail layer encoding:** the stored layer is +1, so a mesh without `uv1` gets no detail
+  instead of sampling an empty corner of the strip.
+- **"White arms" in the street shot: not fixed.** It isn't the skin-detail lookup, the crowd tone
+  shift or the subsurface term (each tested and ruled out). The two near figures are pale-toned
+  and render almost white under the engine's midday sun. Next: check the pale end of the tone
+  table against measured skin reflectance (light skin albedo peaks around 0.6 in red) and the
+  engine's exposure; add tone probes to the street scene.
+
 **Still open:**
 - **Our head to Rocketbox level.** The dark rims are the inside of the eyelids, which need a
   pinkish wet line. Features need sculpting and normal maps. Delphine's hair is still a shell

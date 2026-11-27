@@ -97,7 +97,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
         if (tr > 0.02) { const ww = w * w * (3 - 2 * w), nd = d + (tr - d) * ww; px = opts.headAxis[0] + (dx / d) * nd; pz = opts.headAxis[1] + (dz / d) * nd; }
       }
     }
-    v = mb.vertex([px, py, pz], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer] : undefined);
+    v = mb.vertex([px, py, pz], null, sj, sw, m, [masks[3], masks[6]], isSkin ? [model.splitUV[s * 2], model.splitUV[s * 2 + 1], skinLayer + 1] : undefined); // layer + 1: 0 means "no skin detail" (a mesh without uv1 stays clean)
     used[s] = v;
     return v;
   };
