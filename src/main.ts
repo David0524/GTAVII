@@ -116,6 +116,18 @@ async function main() {
   const afterTitle = new Promise<void>((r) => { releaseAfterTitle = r; });
   let simReady = false, simPaused = false;
   let signals: SignalHeads | null = null, sigBuf: Uint8Array = new Uint8Array(0);
+  // Per-district density (oversight: busy blocks must read 1974-busy in view). The hook is an accept
+  // probability, so this is budget-neutral: quiet residential districts thin out, leaving the pool
+  // for Times Square, Herald Square and Broadway. Cached on a 25 m grid (the Locator is not free).
+  const BUSY: Record<string, number> = { 'Times Square': 1, 'Herald Square': 1, Broadway: 1, 'Penn Station': 1, 'The Garment District': 0.95, 'Madison Square': 0.9, 'Bryant Park': 0.9, 'The Tenderloin': 0.85, 'The Fur District': 0.8, 'The Flower District': 0.8, Midtown: 0.85, Chelsea: 0.5, 'Murray Hill': 0.45, 'Kips Bay': 0.4, Gramercy: 0.4 };
+  const densityCache = new Map<number, number>();
+  const districtOf = new Locator(streets);
+  sim?.setDensityHook((x, z, kind) => {
+    const key = Math.floor(x / 25) * 100003 + Math.floor(z / 25);
+    let m = densityCache.get(key);
+    if (m === undefined) { m = BUSY[districtOf.district(x, z)] ?? 0.7; densityCache.set(key, m); }
+    return kind === 'ped' ? m : Math.min(1, m + 0.15); // avenues carry through-traffic even past quiet blocks
+  });
   sim?.load().then(() => afterTitle).then(() => {
     if (!sim) return;
     // the sim's signal heads replace the OSM poles: every lit head is one the cars obey
