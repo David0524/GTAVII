@@ -297,6 +297,7 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
   - Three purchases at a cart make you a regular there; narrative's `flag.sidewalk_wire` makes you one everywhere. `vendorMenu().regular` offers the question.
   - `vendorTip(id)` gives the street's view within 600 m, once per vendor per game hour: beat posts, search cars, roadblocks and subway stakeouts as map hints `{at, kind, text}`.
   - If a report matches how you look, the vendor warns you instead: "They're asking about a man in a white shirt… Sounds a lot like you."
+  - Spoken through narrative's barks: a `bark {id, bark, context, vars, at}` event with `barks.vendor_tip_warning {description}`, `barks.vendor_tip_cops` (context = hint kind, `{where}` = the nearest hint's corner) or `barks.vendor_tip_quiet`. Hints are sorted nearest first; the rest stay map hints. `line` is a plain-text fallback.
   - Tips, not money. Saved.
 - **Saved:** tills and overturned carts.
 

@@ -105,15 +105,20 @@ test('the sidewalk wire: a regular hears where the cops are and whether they are
   r.g.registerPolice('foot', 'pct.gramercy', 120, -40, { corrupt: 0 });
   let tip = r.g.vendorTip('cyrus')!;
   assert.ok(tip.hints.some((h) => h.kind === 'post') && /beat cop/.test(tip.line), tip.line);
+  assert.equal(tip.bark!.key, 'barks.vendor_tip_cops'); assert.equal(tip.bark!.context, tip.hints[0].kind);
+  assert.ok(tip.bark!.vars.where, 'the {where} slot is filled');
   assert.equal(r.g.vendorTip('cyrus')!.hints.length, 0, 'nothing new inside the hour');
   // a report describing you: he warns you
   r.g.passTime(1.1, 'wait');
   r.g.policeSys.file({ witness: 'w', perp: 'player', kinds: ['theft'], desc: observe(r.g.appearance(), 1, new Rng(3)), lastKnown: [0, 0], crimeAt: [0, 0], via: 'callbox', time: 0 } as any);
   tip = r.g.vendorTip('cyrus')!;
   assert.match(tip.line, /asking about .*like you/, tip.line);
+  assert.equal(tip.bark!.key, 'barks.vendor_tip_warning'); assert.ok(tip.bark!.vars.description);
   // narrative's flag after The Sidewalk Wire makes every vendor talk
   r.g.registerVendor('peppy', 'pretzel_knish', 40, 0);
   assert.equal(r.g.vendorTip('peppy'), null);
   r.g.setFlags(['flag.sidewalk_wire']);
-  assert.ok(r.g.vendorTip('peppy'));
+  const quiet = r.g.vendorTip('peppy')!;
+  assert.ok(quiet);
+  assert.ok(['barks.vendor_tip_warning', 'barks.vendor_tip_cops', 'barks.vendor_tip_quiet'].includes(quiet.bark!.key));
 });

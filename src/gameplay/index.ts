@@ -1537,11 +1537,18 @@ export class Gameplay {
       const what = { stakeout: 'a car sitting on the subway stairs', roadblock: 'a roadblock', post: u.kind === 'foot' ? 'the beat cop on his corner' : 'a radio car parked up', search: 'cops going door to door', car: 'a patrol car cruising' }[kind];
       hints.push({ at: [u.x, u.z], kind, text: `${what}, ${this.placeNameAt(u.x, u.z)}` });
     }
+    hints.sort((a, b) => Math.hypot(a.at[0] - at.x, a.at[1] - at.z) - Math.hypot(b.at[0] - at.x, b.at[1] - at.z)); // nearest is spoken
     const rep = this.policeSys.reportFor(this.player.id);
-    const asking = rep && match(rep.description, this.appearance()) >= 0.45 ? `They're asking about ${describeText(rep.description, 0.4) || 'somebody'}. Sounds a lot like you.` : null;
-    const line = asking ?? (hints.length ? `Cops around: ${hints.slice(0, 3).map((h) => h.text).join('; ')}.` : 'Quiet today. Nobody\'s looking for nobody.');
-    this.emit('notice', { kind: 'vendorTip', vendor: vendorId, line, hints });
-    return { hints, line };
+    const looks = rep && match(rep.description, this.appearance()) >= 0.45 ? describeText(rep.description, 0.4) || 'somebody' : null;
+    // narrative's barks (content/barks.json): vendor_tip_warning {description}; vendor_tip_cops by hint kind {where}; vendor_tip_quiet
+    const bark: { key: string; context?: string; vars: Record<string, string> } = looks ? { key: 'barks.vendor_tip_warning', vars: { description: looks } }
+      : hints.length ? { key: 'barks.vendor_tip_cops', context: hints[0].kind, vars: { where: this.placeNameAt(hints[0].at[0], hints[0].at[1]) } }
+      : { key: 'barks.vendor_tip_quiet', vars: {} };
+    // plain-text fallback for builds without the bark table
+    const line = looks ? `They're asking about ${looks}. Sounds a lot like you.` : hints.length ? `Cops around: ${hints.slice(0, 3).map((h) => h.text).join('; ')}.` : 'Quiet today. Nobody\'s looking for nobody.';
+    this.emit('bark', { id: vendorId, bark: bark.key, context: bark.context, vars: bark.vars, at: [at.x, 0, at.z] });
+    this.emit('notice', { kind: 'vendorTip', vendor: vendorId, line, hints, bark });
+    return { hints, line, bark };
   }
   private placeNameAt(x: number, z: number) { return this.policeSys.placeName(x, z); }
   /** Take the till (or the peddler's roll). Small change for real heat: a theft, armed robbery with a gun out. */
