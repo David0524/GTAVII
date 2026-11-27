@@ -111,7 +111,10 @@ function sirenCost(S: SimCore, g: number, len: number): number {
   let queued = 0;
   for (const l of lanes) for (const w of S.occ[l]) if (w.v < 2) queued++;
   const gutter = (net.g.roads[L.owner].flags & 4) === 0; // links have no parking lane to run in
-  return len / (L.speed * 1.2) + queued * (gutter ? 0.4 : 2.5) + (net.isSignal(L.endJ) ? 4 : 1);
+  // a stopped queue head at the line: a siren unit coming out of the gutter waits beside it until it moves
+  let head = 0;
+  for (const l of lanes) { const h = S.occ[l][S.occ[l].length - 1]; if (h && h.v < 1 && net.len[l] - h.s < h.len / 2 + 3) head = 1; }
+  return len / (L.speed * 1.2) + queued * (gutter ? 0.4 : 2.5) + (net.isSignal(L.endJ) ? 4 : 1) + head * (net.isSignal(L.endJ) ? 10 : 3);
 }
 /** Group path from `from` to `to` (inclusive), or [] if unreachable. `siren`: weigh by expected time. */
 function routeGroups(S: SimCore, from: number, to: number, siren = false): number[] {

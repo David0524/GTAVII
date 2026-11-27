@@ -6,6 +6,7 @@
  */
 import { projectOnPoly, sampleAt } from './geom';
 import { JuncFlag, SpotKind, WalkKind } from './laneFormat';
+import { stepBumpState } from './bump';
 import type { SimCore, Ped, PedGoal } from './state';
 import { pedDensity } from './state';
 import type { ArchetypeRt } from './archetypes';
@@ -415,6 +416,15 @@ export function stepPeds(S: SimCore, dt: number) {
         if (p.jaywalking) { p.onRoad = true; p.y = 0; } else { p.onRoad = false; p.y = SIDEWALK_Y; }
         break;
       }
+      case 'stumble': case 'down': case 'getUp': case 'angry': {
+        stepBumpState(S, p, dt);
+        if ((p.state as string) === 'flee') { // frightened: back off, away from whoever bumped them
+          const E = g.walkEdges[p.edge], A = g.walkNodes[E.a], B = g.walkNodes[E.b];
+          p.dir = Math.hypot(B.x - p.fleeX, B.z - p.fleeZ) > Math.hypot(A.x - p.fleeX, A.z - p.fleeZ) ? 1 : -1;
+        }
+        const yaw = p.yaw; placeOnEdge(S, p); if (p.state === 'angry' || p.state === 'down' || p.state === 'getUp' || p.state === 'stumble') p.yaw = yaw;
+        break;
+      }
       default: walk(S, p, dt);
     }
   }
@@ -449,9 +459,20 @@ function walk(S: SimCore, p: Ped, dt: number) {
     }
   });
   for (const a of S.actors) {
+    // people make way: further ahead for someone running at them (crowds part for a sprinting player)
     const rx = a.x - p.x, rz = a.z - p.z, ahead = rx * fx + rz * fz, side = rx * -fz + rz * fx;
-    if (ahead > 0 && ahead < 3 && Math.abs(side) < 0.6 + a.radius) goalR = Math.max(-half, Math.min(half, side > 0 ? side - a.radius - 0.7 : side + a.radius + 0.7));
+    const closing = Math.max(0, -(a.vx * fx + a.vz * fz)), look = 3 + Math.min(5, closing * 0.9);
+    if (ahead > 0 && ahead < look && Math.abs(side) < 0.6 + a.radius) goalR = Math.max(-half, Math.min(half, side > 0 ? side - a.radius - 0.7 : side + a.radius + 0.7));
   }
+  // static obstacles (hydrants, mailboxes, newsstands, trash baskets...): step around them, no stopping
+  S.obsGrid.query(p.x + fx * 1.5, p.z + fz * 1.5, 2.5, (i) => {
+    const o = S.obstacles[i];
+    const rx = o.x - p.x, rz = o.z - p.z, ahead = rx * fx + rz * fz, side = rx * -fz + rz * fx;
+    if (ahead > -0.2 && ahead < 2.6 && Math.abs(side) < o.r + 0.45) {
+      const ob = myRight + side, passR = ob + o.r + 0.5, passL = ob - o.r - 0.5; // band coordinates; pass on the nearer side that fits
+      goalR = Math.abs(passR - myRight) < Math.abs(passL - myRight) && passR <= half ? passR : passL >= -half ? passL : passR;
+    }
+  });
   goalR = Math.max(-half, Math.min(half, goalR));
   myRight += Math.sign(goalR - myRight) * Math.min(Math.abs(goalR - myRight), dt * 0.9);
   const endRoom = Math.min(p.s, net.walkLen[p.edge] - p.s); // corners: taper the band to the path

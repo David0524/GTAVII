@@ -63,6 +63,9 @@ class Idx {
 const inBuilding = new Idx(bld), onRoad = new Idx(road);
 
 // ------------------------------------------------------------------ tour
+/** The user's rule: no child characters anywhere. */
+const CHILD = /child|kid|boy|girl|minor|teen|youth|infant|baby|schoolchild/i;
+
 const FOCI = [
   { name: 'Flatiron spawn', x: world.spawn.x, z: world.spawn.z },
   { name: 'Herald Square', x: -380, z: -915 },
@@ -97,7 +100,9 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const times: number[] = [];
   const steps = Math.round(opts.seconds / SIM_DT);
   const o = [0, 0, 0, 0];
-  let wildPeak = 0, powerChangedAt = -1, doorSeg = -1;
+  let wildPeak = 0, powerChangedAt = -1, doorSeg = -1, playerDist = 0;
+  const bumpKinds: Record<string, number> = {};
+  sim.on('pedBumped', (e) => { const k = `${e.kind}/${e.response}`; bumpKinds[k] = (bumpKinds[k] ?? 0) + 1; });
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
   for (let k = 0; k < steps; k++) {
     const t = k * SIM_DT;
@@ -164,9 +169,12 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       walkE = net.sidewalkIds.reduce((b, e) => { const p = g.walkEdges[e].pts; const d = Math.hypot(p[0] - f.x, p[1] - f.z); return d < b[1] && net.walkLen[e] > 40 ? [e, d] : b; }, [-1, Infinity])[0];
       carL = net.laneIds.reduce((b, l) => { const p = g.links[l].pts; const d = Math.hypot(p[0] - f.x, p[1] - f.z); return d < b[1] && net.len[l] > 40 ? [l, d] : b; }, [-1, Infinity])[0]; carS = 0;
     }
-    const wl = net.walkLen[walkE], ws = (t * 1.4) % (2 * wl), wsp = ws < wl ? ws : 2 * wl - ws;
+    // the player walks, then sprints, along a nearby sidewalk (bump reactions: brush, stumble, knockdown)
+    const pSpeed = Math.floor(t / 15) % 2 ? 6.0 : 1.4;
+    playerDist += pSpeed * SIM_DT;
+    const wl = net.walkLen[walkE], ws = playerDist % (2 * wl), wsp = ws < wl ? ws : 2 * wl - ws;
     sampleAt(g.walkEdges[walkE].pts, net.walkCum[walkE], wsp, o);
-    const pdir = ws < wl ? 1 : -1, px = o[0], pz = o[1], pvx = o[2] * 1.4 * pdir, pvz = o[3] * 1.4 * pdir;
+    const pdir = ws < wl ? 1 : -1, px = o[0], pz = o[1], pvx = o[2] * pSpeed * pdir, pvz = o[3] * pSpeed * pdir;
     carS += 8 * SIM_DT;
     while (carS > net.len[carL]) { carS -= net.len[carL]; const L = g.links[carL]; carL = L.kind === LinkKind.Lane ? L.next[k % L.next.length] : L.next[0]; }
     sampleAt(g.links[carL].pts, net.cum[carL], carS, o);
@@ -247,7 +255,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
     stepMs: { avg: +avg.toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), max: +times[times.length - 1].toFixed(3) },
     failures: fail, examples, maxStationarySec: +maxStill.toFixed(1), maxStationaryWho: maxStillWho,
     flow: { minMovingFraction: +minMovingFrac.toFixed(2), avgMovingFraction: flowSamples ? +(movingSum / flowSamples).toFixed(2) : 0 },
-    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); const sp: Record<string, number> = {}; for (const x of W.animals) sp[x.species] = (sp[x.species] ?? 0) + 1; return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders, species: sp }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings,
+    hooks, subway: sim.debugSubway(), doors: sim.debugDoors(), wildlife: (() => { const W = sim.debugWildlife(); const sp: Record<string, number> = {}; for (const x of W.animals) sp[x.species] = (sp[x.species] ?? 0) + 1; return { peakVisible: wildPeak, startles: W.startles, scatters: W.scatters, feeders: W.feeders, species: sp }; })(), stats: { ...sim.stats }, stuckWhy: sim.stuckWhy, stuckLog: sim.stuckLog, events, hash: hashState(sim), archetypeWarnings: sim.archetypeWarnings, minorsSeen: sim.peds.filter((p) => CHILD.test(p.archetype)).length, bumps: bumpKinds,
   };
 }
 
@@ -345,6 +353,17 @@ async function main() {
     if (ix.length < 3 || !ix.every((q) => q.streets.length >= 2)) problems.push(`nearestIntersections: ${JSON.stringify(ix.slice(0, 3))}`);
     const st = sim.subwayStations();
     if (st.filter((q) => q.complex === 'herald_sq').length !== 2 || st.filter((q) => q.complex === 'times_sq').length !== 2 || !st.some((q) => q.line === 'path') || st.some((q) => !q.contentId)) problems.push(`subway canon: ${st.map((q) => `${q.line}/${q.name}`).join(', ')}`);
+  }
+  {
+    const kinds = Object.keys(full.bumps);
+    if (!kinds.some((k) => k.startsWith('brush')) || !kinds.some((k) => k.startsWith('stumble') || k.startsWith('knockdown'))) problems.push(`bump reactions missing: ${JSON.stringify(full.bumps)}`);
+  }
+  // adults only: no child archetype may exist in the spawn tables, and none may appear in the street
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 10, maxPeds: 10, fetchBinary }); await sim.load();
+    const kids = sim.debugAgents().core.reg.list.filter((a) => CHILD.test(a.def.id) || CHILD.test(a.def.wardrobe ?? '') || (a.def as any).age !== undefined);
+    if (kids.length) problems.push(`child archetypes present: ${kids.map((a) => a.def.id).join(', ')}`);
+    if (full.minorsSeen) problems.push(`child pedestrians in the street: ${full.minorsSeen}`);
   }
   for (const d of dens) {
     const [needV, needP] = d.preset[0] >= 150 ? [20, 60] : [8, 35];

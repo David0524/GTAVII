@@ -54,6 +54,8 @@ export interface Ped {
   nerve: number; actName: string; actPrev: string; doorId: string;
   /** police officer state (src/sim/police.ts) */
   cop2: CopState | null;
+  /** bump reactions (bump.ts) */
+  bumpCd?: number; bumpPrev?: string; bumpResponse?: string;
 }
 
 export interface Hail { ped: number; road: number; side: number; x: number; z: number; claimedBy: number; t: number }
@@ -92,6 +94,7 @@ export interface Threat { x: number; z: number; r: number; until: number }
 export interface Stats {
   redLight: number; wrongWay: number; vehCollisions: number; pedHits: number;
   spawnedV: number; despawnedV: number; spawnedP: number; despawnedP: number;
+  bumps?: number;
   stuckDespawn: number; honks: number; hails: number; boardings: number; dropoffs: number; busStops: number;
   doubleParks: number; jaywalks: number; crossings: number; laneChanges: number;
 }
@@ -102,6 +105,8 @@ export interface SimCore {
   vehicles: Vehicle[]; peds: Ped[];
   occ: Vehicle[][]; occDirty: number[];
   pGrid: AgentGrid; vGrid: AgentGrid;
+  /** static sidewalk obstacles peds step around (engine street furniture via setObstacles, plus hydrants) */
+  obstacles: { x: number; z: number; r: number }[]; obsGrid: AgentGrid;
   /** peds currently on each crosswalk edge */
   onWalk: Map<number, Ped[]>;
   srcLane: Int32Array;

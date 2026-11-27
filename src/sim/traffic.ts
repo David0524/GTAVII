@@ -328,12 +328,9 @@ function sirenBlocked(S: SimCore, v: Vehicle): string {
   return '';
 }
 
-/** A siren unit turning out of the gutter swings back across the lane: not while someone is at the line beside it. */
-function gutterTurnBlocked(S: SimCore, v: Vehicle, c: number): boolean {
-  const turn = S.net.g.links[c].turn;
-  if (Math.abs(v.lat) < 1 || turn === Turn.Straight) return false;
-  // only turns away from the gutter cross the queue (gutter on the left: right turns, and vice versa)
-  if ((v.lat < 0 && turn === Turn.Left) || (v.lat > 0 && turn === Turn.Right)) return false;
+/** A siren unit leaving the gutter swings back across the lane: not while someone is at the line beside it (its rear would sweep over them). */
+function gutterTurnBlocked(S: SimCore, v: Vehicle, _c: number): boolean {
+  if (Math.abs(v.lat) < 1) return false;
   const len = S.net.len[v.link];
   for (const w of S.occ[v.link]) if (w !== v && len - w.s < w.len / 2 + 3 && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1.5) return true;
   return false;
@@ -491,7 +488,7 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
       let slowAhead = gutter;
       for (const w of list) if (w !== v && w.s > v.s && w.s - v.s < 70 && w.v < 6 && Math.abs(w.lat - v.lat) < 1.5) slowAhead = true;
       if (slowAhead) v.latTarget = gl;
-    } else if (L.kind !== LinkKind.Lane) v.latTarget = (L.turn === Turn.Straight ? v.s < v.len / 2 + 2 : L.turn !== (v.lat < 0 ? Turn.Right : Turn.Left) && v.s < v.len / 2) ? v.lat : 0; // keep the gutter line until the rear is past the queue head's nose (straight on: until it clears the line; turning to the gutter side: a shorter hold, the inside corner is close)
+    } else if (L.kind !== LinkKind.Lane) v.latTarget = 0;
   } else if (passing < 0) v.latTarget = passing;
   else if (v.state === 'drive' && v.latTarget < 0) v.latTarget = 0;
   if (passSlow < Infinity && v.v > passSlow) consider(Math.max(4, v.v * 2), passSlow, 'passing');

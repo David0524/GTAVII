@@ -13,6 +13,7 @@ import { buildSignalHeads, writeSignalStates, type SignalHead } from './signals'
 export { SignalState, type SignalHead } from './signals';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
+import { bumpReactions } from './bump';
 import { despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
@@ -39,6 +40,8 @@ export type AgentView = PedView;
 export interface PedView {
   /** nerve 0..1: courage (gameplay decides who runs to a call box and who freezes) */
   nerve: number;
+  /** in the roadway (vs on the sidewalk, a kerb height up): a change is a kerb step for foot IK */
+  onRoad: boolean;
   id: number; archetype: string;
   x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number;
 }
@@ -125,7 +128,7 @@ export class Simulation {
     const core: SimCore = {
       net, rng: new Rng(this.opts.seed), reg, t: 0, minute: this.minute, weather: this.weather,
       vehicles: [], peds: [], occ: g.links.map(() => []), occDirty: [],
-      pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), onWalk: new Map(), srcLane,
+      pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), obstacles: [], obsGrid: new AgentGrid(4), onWalk: new Map(), srcLane,
       actors: [], blocks: [], threats: [], closedRoads: new Map(), hails: [], spotOwner: new Int32Array(g.spots.length).fill(-1),
       focus: { x: 0, z: 0 }, maxVehicles: this.opts.maxVehicles, maxPeds: this.opts.maxPeds,
       ringV: [rOutV * 0.6, rOutV], view: null, ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,
@@ -141,6 +144,9 @@ export class Simulation {
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Connector) core.preds[l.next[0]].push(i); });
     this.core = core;
     this.parking = new Parking(core);
+    // hydrants are sidewalk obstacles too (the same positions the kerb rules use)
+    this.hydrantObs = this.parking.hydrantsNear(-540, -790, 1100).map((h) => ({ x: h.x, z: h.z, r: 0.22 }));
+    this.setObstacles([]);
     this.subway = new Subway(core);
     this.doors = new Doors(core);
     core.doorArrived = (p, id) => this.doors.arrived(p, id);
@@ -194,6 +200,7 @@ export class Simulation {
     dodgeActors(S);
     for (const p of S.peds) if (p.cop2 && p.alive) policePedTick(S, p);
     stepPeds(S, h);
+    bumpReactions(S, h);
     vehicleContacts(S, this.contactCd);
     this.wild.step(h);
     this.parking.step(h);
@@ -264,11 +271,11 @@ export class Simulation {
         : v.state === 'doubleParked' ? 'doublePark' : v.state === 'curb' ? (v.stopKind || 'pickup') : v.state;
     });
     const ps = this.peds as PedView[];
-    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', nerve: 0, x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
+    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', nerve: 0, onRoad: false, x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
     ps.length = S.peds.length;
     S.peds.forEach((p, i) => {
       const o = ps[i];
-      o.id = p.id; o.archetype = p.arch.def.id; o.nerve = p.nerve; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
+      o.id = p.id; o.archetype = p.arch.def.id; o.nerve = p.nerve; o.onRoad = p.onRoad; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
       // sidewalk top = road surface + kerb (src/shared/terrain.ts); in the roadway = road surface
       o.y = heightAt(o.x, o.z) + (p.y > 0 ? CURB_HEIGHT : 0);
       o.yaw = lerpYaw(p.pyaw, p.yaw); o.speed = p.v; o.variant = p.variant;
@@ -528,6 +535,17 @@ export class Simulation {
     const l = Math.hypot(fwdX, fwdZ) || 1;
     this.core.view = { x, z, dx: fwdX / l, dz: fwdZ / l, cosHalf: Math.cos((fovDeg / 2) * Math.PI / 180) };
   }
+  /**
+   * Static sidewalk obstacles pedestrians step around (engine street furniture: mailboxes, newsstands,
+   * trash baskets, call boxes, phone booths, sign posts...). Replaces the previous list; the sim's own
+   * hydrants are always included. r = footprint radius (m).
+   */
+  setObstacles(list: { x: number; z: number; r: number }[]) {
+    const S = this.core;
+    S.obstacles = [...this.hydrantObs, ...list];
+    S.obsGrid.clear(); S.obstacles.forEach((o, i) => S.obsGrid.add(o.x, o.z, i));
+  }
+  private hydrantObs: { x: number; z: number; r: number }[] = [];
   setClock(minutesSinceMidnight: number): void { this.minute = ((minutesSinceMidnight % 1440) + 1440) % 1440; }
   setWeather(w: 'clear' | 'overcast' | 'rain'): void { this.weather = w; }
   /** Optional hook: spawn-probability multiplier (0..1) by place, e.g. per district. */

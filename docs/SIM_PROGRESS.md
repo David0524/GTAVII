@@ -23,6 +23,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured; per-kind rates (`DOOR_RATES`, `setDoorRates`) |
 | Signal heads for the engine's props (Phase 3 block A) | `signalHeads()` (static: vehicle heads per signalised approach, WALK/DON'T WALK heads at crosswalk ends) + `signalStates(out)` (one byte per head per frame); ENGINE_REQUESTS sim 9 |
 | Visual bar "Life": density near the camera | Density-targeted spawning + `setView`; test asserts agents within 60 m (rush hour Herald Square: High 34 vehicles / 114 peds, Low 13 / 53) |
+| Movement brief (sim part) | Bump reactions (brush/stumble/knockdown, angry/frightened/annoyed), crowds part for a running player, `setObstacles` + hydrants, `PedView.onRoad`; adults only (test asserts no child archetype or pedestrian) |
 | Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
@@ -367,6 +368,44 @@ What doesn't (yet):
 - **Region edge**: streets are clipped at the REGION boundary, so edge blocks have fewer exits.
 - Permissive left turns only; no turn-arrow phases. Side streets are not coordinated, only avenues.
 - Street-level shot shows a truck right at the camera: the camera rig stands in the roadway.
+
+## Movement (MOVEMENT.md, 2026-11-27): the sim's part
+The engine owns bodies, stepping and ragdolls; characters own animation and IK; the sim decides where
+NPCs go and how they react.
+- **Done (no merge needed):**
+  - Bump reactions to the player (`src/sim/bump.ts`): contact severity from closing speed × how head-on it
+    is: **brush** (nudged aside, a check in their stride), **stumble** (pushed ~0.5 m, ~1 s), **knockdown**
+    (down 2.5–4 s, then `getUp`). Response from nerve and aggression: **angry** (turns on the player and
+    holds there 2–3.5 s; gameplay decides shove or fight), **frightened** (backs off at a jog) or
+    **annoyed** (a look, carries on). They stay on the sidewalk band throughout. Events `pedBumped
+    {id, kind, response, dirX, dirZ, by}` and `pedGotUp`; PedView.state shows `stumble`/`down`/`getUp`/`angry`.
+  - Crowds part for a running player: pedestrians look further ahead the faster the player closes
+    (3 m walking, up to 8 m at a sprint), so a sprint opens a lane and a careless one still clips people.
+  - Obstacles: `setObstacles([{x, z, r}])` for the engine's street furniture (mailboxes, newsstands,
+    trash baskets, call boxes, sign posts); the sim's own hydrants are always in. Pedestrians pick the
+    nearer side that fits in the band and pass without stopping.
+  - `PedView.onRoad`: flips at every kerb step (crosswalk entry/exit, jaywalking), for foot IK and the
+    stair/kerb gait.
+  - Test: the headless player now alternates walking and sprinting along a sidewalk; the test asserts
+    brushes and stumbles/knockdowns happen, and every sidewalk/roadway check still holds.
+- **Waits on the merge / other teams:**
+  - Same stepping as the player: NPC heights already follow `heightAt` + `CURB_HEIGHT`; the visible step
+    (foot IK, body dip) is characters' layer on the same controller rules. Stoops and subway stairs need
+    the engine's stair geometry: peds currently vanish at the top step of a subway entrance and
+    appear from doors at the threshold.
+  - Ragdoll for knockdowns and vehicle hits: the engine's ragdoll; the sim holds the ped in `down` and
+    gives the push direction.
+  - NPC-on-NPC bumps in crushes (rush-hour corners): avoidance prevents overlap today; shoulder-brush
+    animation between NPCs is a characters layer on `speed` + proximity.
+
+## vs GTA V / GTA VI / RDR2 (reference games; behaviour and quality only, nothing copied)
+| Area | What the reference does | Where we match | Where we fall short | Plan |
+|---|---|---|---|---|
+| Ambient density | Streets full in every shot; budgets concentrate near the camera; far traffic via LOD | Density-targeted spawning around the camera, out-of-view spawns; ~34 cars / ~114 people within 60 m at rush hour on High | No far-field traffic beyond ~150 m; parked cars missing; Low is thinner | `parkedCars()`; engine impostor traffic for long avenues; ask for Low 90/240 |
+| Pedestrian life | Scenarios (smokers, phone calls, vendors, arguments), varied routines, reacting to weather | Commuters, shoppers, loiterers, vendors, pigeon feeders, hailing cabs, bus and subway riders, door traffic by shop type, jaywalking | Few scenario variations; no rain behaviour beyond density (umbrellas, shelter in doorways) | Scenario spots from content (stoop sitters, card games, street preachers); rain: shelter under awnings |
+| Reactions to the player | Bumps, insults, flee/fight, filming (VI), recognising repeat offences (RDR2 memory and greetings) | Bumps with brush/stumble/knockdown + angry/frightened/annoyed; witnesses, flee from gunfire, nerve | No memory of the player; no greetings; no escalating confrontations | Per-ped memory of recent incidents (who, what, where) for gameplay; greeting/insult barks on proximity by archetype |
+| Traffic behaviour | Lane discipline, honking, impatience, crashes, road rage, emergency vehicles | Period one-ways, green waves, no right on red, honking, cabs cutting in, double-parking, buses, siren priority with gutter runs | No crashes/fender-benders or road rage; no motorcycles weaving | Minor collisions between NPC cars with argue-at-the-curb scenario; road-rage escalation tied to aggression |
+| Police AI and pursuit | Units converge, box in, roadblocks, helicopters (V), search patterns | Pursue/boxIn/roadblock/search goals, cut-off at real intersections, subway stakeouts, response 10–55 s by traffic | No helicopters (period: fewer), no PIT, foot chases simple | Foot-chase tactics (corner, cut through), radio-car relay timing with gameplay |
 
 ## Visual bar ("Life") gaps
 VISUAL_BAR.md: dense traffic and pedestrians, parked cars on every kerb, a street must never look empty.
