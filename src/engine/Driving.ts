@@ -95,7 +95,16 @@ export class Driving {
         driver = took.ownerPedId >= 0 ? `ped:${took.ownerPedId}` : 'npc';
       } else this.takenParked.add(c.p.id);
       const { modelId } = this.d.factory.resolve(vclass as VehicleClass, src.variant);
-      const pose = { x: src.x, y: heightAt(src.x, src.z) + 0.05, z: src.z, yaw: src.yaw };
+      const pose = { x: src.x, y: heightAt(src.x, src.z) + 0.25, z: src.z, yaw: src.yaw };
+      // parked spots sit tight to the kerb: clear the chassis off the kerb face, or it drags on the static
+      // world (vehicles' diagnose(): fixed chassisContacts, rear wheels spinning, ~0.4 m/s²)
+      if (c.kind === 'parked') {
+        const rx = Math.cos(src.yaw), rz = -Math.sin(src.yaw), y0 = heightAt(src.x, src.z) + 0.06; // car's right
+        for (const side of [1, -1]) {
+          const hit = this.d.physics.ray(pose.x, y0, pose.z, rx * side, 0, rz * side, 2.0);
+          if (hit !== null && hit < 1.35) { const push = 1.35 - hit; pose.x -= rx * side * push; pose.z -= rz * side * push; }
+        }
+      }
       const v = this.d.factory.spawn(this.d.physics.world, this.d.scene, modelId, pose, src.variant);
       owned = { v, vclass }; this.cars.push(owned); id = v.id; this.wire(v);
       owned.detachAudio = this.d.attachAudio?.(v, vclass);
