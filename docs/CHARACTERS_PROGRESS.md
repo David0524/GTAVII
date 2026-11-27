@@ -112,8 +112,14 @@ the size pass.
    - Relaxed idle in review shots: done.
    - Ragged sleeve hems: fixed. Cut-edge loops get 16 Taubin passes (no shrink) instead of 6 plain
      ones. The bodice's bottom edge over the skirt still shows a little raggedness.
-   - Neck band in back view: a thin lighter strip at the dress's back neckline. Logged with the
-     neck weld.
+   - Neck band in back view: mostly fixed.
+     - Cause: the body's neck was conformed in to ICT's thinner neck, so the skin flared back out
+       to the shoulders as a lit ledge above the collar.
+     - Fix: ICT heads now reverse the join. The body keeps its own neck (only the skin cut
+       applies), and the head's bottom 25 mm is stitched onto our neck profile. Rocketbox heads
+       keep the body-side conform.
+     - Left: a faint strip at the back of the collar, and small spikes at the front neckline
+       corners.
 
 Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
@@ -227,7 +233,17 @@ instances).
   | a paying customer | `pay` |
 
   `crowd.hold(pedId, 'shine_shoes' | null)` covers shining while a customer is queued at the
-  stall. The engine glue has to call these; I've sent sim the contract.
+  stall. The engine glue has to call these. Sim confirmed the contract (f8bf743) and added:
+
+  | Sim event | Call |
+  |---|---|
+  | `vendorServing {id, kind, pedId, customer, sec}` | `trigger(customer, 'pay')` |
+  | `vendorServing` at a shoeshine stall | `hold(pedId, 'shine_shoes')`, held for `sec` (60–110 s) until that stall's `vendorServed` |
+  | `pedBumped.kind` `stumble` | `trigger(id, 'stumble')` |
+  | `pedBumped.kind` `knockdown` | `trigger(id, 'fall_down')` |
+  | `pedBumped.kind` `brush` | nothing |
+
+  Crowd y already includes the kerb height on sidewalks.
 - **Fixed on the way:** `familyOf` sent `cart_vendor` to the handcart workers and the other
   vendors to general pedestrians. Vendor ids are now matched first.
 - **Gaps:**
