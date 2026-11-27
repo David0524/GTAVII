@@ -799,3 +799,25 @@ look shots.
     together with narrative `content/`.
   - Gate: the brands test must pass on rendered subtitles too. The GPL tools stay
     devDependencies and are verified absent from the bundle by a build check added at the merge.
+
+## Engine notice E17 (2026-11-27): planned bounds for Grand Central (applies AFTER the integration sprint)
+The user's decision: extend the map to include Grand Central with a full interior. To keep the
+small-map pillar, it's an **annex**, not a wider rectangle (pushing the whole east edge to Lexington
+would add all of Murray Hill).
+- **PLAYABLE** becomes the union of two rectangles:
+  - the current core: x −1292..213, z −1674..92 (unchanged);
+  - **the annex:** x **213..470** (just past Lexington Ave), z **−1755..−1506** (mid-block 41st/42nd
+    to mid-block 44th/45th). It takes in the terminal (42nd–44th, Vanderbilt x≈219 to Lexington
+    x≈447), the Park Ave viaduct around it, Pershing Square (42nd & Park) and the Pan Amity base.
+- `bounds.ts` keeps its API. `edgeDistance()` and `inwardDirection()` work on the union, and
+  `PLAYABLE` becomes `PLAYABLE_RECTS` plus a bounding `PLAYABLE` for code that only needs a box.
+  Boundary layers follow BOUNDARIES.md: the annex's outer edges are mid-block, with Lexington Ave as
+  the layer-0 edge.
+- **Streams:** sim (lanes inside the union), UI (map extents), narrative (story streets) and
+  interiors (index) update after the sprint lands it. These numbers are final unless a merge exposes
+  a problem.
+
+## UI ruling: src/camera/ThirdPersonCamera.ts: **YES**
+UI writes it as one new file behind OrbitCamera's interface. The engine reviews it at the UI merge and
+wires it (about 10 lines in main.ts plus two ButtonActions in Input.ts). The engine keeps ownership of
+`src/camera`: later changes go through ENGINE_REQUESTS.
