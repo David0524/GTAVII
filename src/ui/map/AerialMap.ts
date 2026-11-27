@@ -30,7 +30,17 @@ function loadManifest(baseUrl: string) {
   return manifestP;
 }
 
+interface Region { window: { minX: number; maxX: number; minZ: number; maxZ: number }; land: { name: string; rings: number[][] }[]; labels: { text: string; x: number; z: number; kind: 'water' | 'boro' | 'place'; rot: number }[] }
+let regionP: Promise<Region | null> | null = null;
+function loadRegion(baseUrl: string) { regionP ??= fetch(`${baseUrl}map/region.json`).then((r) => (r.ok ? (r.json() as Promise<Region>) : null)).catch(() => null); return regionP; }
+/** Regional zoom-out: how far past the sheet the map can pull back (metres), GTA-style "the world beyond". */
+const REGION_VIEW = { minX: -7200, maxX: 6200, minZ: -8600, maxZ: 5200 };
+/** The bake covers the playable sheet plus this margin (tools/ui/mapAerial.ts default); the pyramid is padded past it. */
+const BAKE_PAD = 120;
+const WATER = '#0b1013', LAND = '#2b2925', SHORE = 'rgba(242,237,227,.22)';
+
 export class AerialMap extends FoldingMap {
+  private region: Region | null = null;
   private man: { m: Manifest; base: string } | null = null;
   private tiles = new Map<string, HTMLImageElement | 'loading' | 'missing'>();
   private fogC = document.createElement('canvas');
@@ -42,11 +52,27 @@ export class AerialMap extends FoldingMap {
     this.canvas.className = 't74-foldmap t74-aerialmap';
   }
   private loading = false;
+  private regionLoading = false;
   private zT: number | null = null;
   private anchor: [number, number] = [0, 0];
 
   /** Smooth zoom (wheel, triggers, keys): ease to a target around the cursor; pinch stays direct under the fingers. */
-  protected override zoomAt(f: number, sx: number, sy: number) { this.zT = Math.min(2.4, Math.max(0.05, (this.zT ?? this.zoom) * f)); this.anchor = [sx, sy]; }
+  protected override zoomAt(f: number, sx: number, sy: number) { this.zT = Math.min(2.4, Math.max(this.minZoom(), (this.zT ?? this.zoom) * f)); this.anchor = [sx, sy]; }
+  /** The regional view fills the screen at the far end of the zoom. */
+  private minZoom() { const W = this.canvas.clientWidth || 800, H = this.canvas.clientHeight || 600; return Math.max(W / (REGION_VIEW.maxX - REGION_VIEW.minX), H / (REGION_VIEW.maxZ - REGION_VIEW.minZ)); }
+  /** Zoomed in, pan stays on the sheet (as before); pulled back past it, pan ranges over the region. */
+  protected override clamp() {
+    const W = this.canvas.clientWidth || 800, H = this.canvas.clientHeight || 600;
+    this.zoom = Math.min(2.4, Math.max(this.minZoom(), this.zoom));
+    const sheetFit = Math.max(W / (PLAYABLE.maxX - PLAYABLE.minX + 400), H / (PLAYABLE.maxZ - PLAYABLE.minZ + 400));
+    // blend the pan limits from the sheet (at sheet-fit zoom and closer) to the region (fully pulled back)
+    const t = this.zoom >= sheetFit ? 0 : Math.min(1, Math.log(sheetFit / this.zoom) / Math.log(sheetFit / this.minZoom()));
+    const lerp = (a: number, b: number) => a + (b - a) * t;
+    const lim = { minX: lerp(PLAYABLE.minX - 200, REGION_VIEW.minX), maxX: lerp(PLAYABLE.maxX + 200, REGION_VIEW.maxX), minZ: lerp(PLAYABLE.minZ - 200, REGION_VIEW.minZ), maxZ: lerp(PLAYABLE.maxZ + 200, REGION_VIEW.maxZ) };
+    const ax = (lo: number, hi: number, half: number) => (hi - lo > 2 * half ? [lo + half, hi - half] : [(lo + hi) / 2, (lo + hi) / 2]);
+    const [x0, x1] = ax(lim.minX, lim.maxX, W / 2 / this.zoom), [z0, z1] = ax(lim.minZ, lim.maxZ, H / 2 / this.zoom);
+    this.cx = Math.min(x1, Math.max(x0, this.cx)); this.cz = Math.min(z1, Math.max(z0, this.cz));
+  }
   override update(dt: number, input: Parameters<FoldingMap['update']>[1]) {
     if (this.zT !== null) {
       const before = this.zoom, next = before + (this.zT - before) * (1 - Math.exp(-dt * 14));
@@ -78,13 +104,24 @@ export class AerialMap extends FoldingMap {
     const t0 = performance.now();
     if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
     if (!this.man && !this.loading) { this.loading = true; void loadManifest(this.baseUrl).then((mf) => { this.man = mf; this.dirtyKey = ''; }); }
+    if (!this.region && !this.regionLoading) { this.regionLoading = true; void loadRegion(this.baseUrl).then((r) => { this.region = r; this.dirtyKey = ''; }); }
     const g = this.g; g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.fillStyle = '#0d0d0c'; g.fillRect(0, 0, W, H);
+    g.fillStyle = this.region ? WATER : '#0d0d0c'; g.fillRect(0, 0, W, H);
     const wx0 = this.cx - W / 2 / this.zoom, wz0 = this.cz - H / 2 / this.zoom, wx1 = this.cx + W / 2 / this.zoom, wz1 = this.cz + H / 2 / this.zoom;
     const X = (x: number) => (x - wx0) * this.zoom, Y = (z: number) => (z - wz0) * this.zoom;
 
+    // ---- 0. the region: land around the sheet (muted), water as the ground; the aerial covers it where it exists
+    if (this.region) {
+      g.beginPath();
+      for (const l of this.region.land) for (const r of l.rings) { g.moveTo(X(r[0]), Y(r[1])); for (let i = 2; i < r.length; i += 2) g.lineTo(X(r[i]), Y(r[i + 1])); g.closePath(); }
+      g.fillStyle = LAND; g.fill('evenodd'); g.strokeStyle = SHORE; g.lineWidth = 1; g.stroke();
+    }
+
     // ---- 1. the aerial: the finest level the screen needs, parents underneath while children stream in
+    const bk = { x0: PLAYABLE.minX - BAKE_PAD, z0: PLAYABLE.minZ - BAKE_PAD, x1: PLAYABLE.maxX + BAKE_PAD, z1: PLAYABLE.maxZ + BAKE_PAD };
+    const bakeClip = () => { g.beginPath(); g.rect(X(bk.x0), Y(bk.z0), (bk.x1 - bk.x0) * this.zoom, (bk.z1 - bk.z0) * this.zoom); g.clip(); };
     if (this.man) {
+      g.save(); bakeClip();
       const { m, base: _b } = this.man; void _b;
       const devMpp = 1 / (this.zoom * dpr);
       let L = m.levels.length - 1;
@@ -100,6 +137,7 @@ export class AerialMap extends FoldingMap {
           g.drawImage(img, Math.floor(sx), Math.floor(sy), Math.ceil(s + 1), Math.ceil(s + 1));
         }
       }
+      g.restore();
     }
 
     // ---- 2. fog over unexplored ground (soft: a coarse mask upscaled with smoothing), then the edge of the playable area
@@ -115,12 +153,20 @@ export class AerialMap extends FoldingMap {
         fg.putImageData(id, 0, 0);
       }
       g.imageSmoothingQuality = 'high';
+      // only over the baked aerial: beyond it the region is a plain land map with nothing to discover
+      g.save(); bakeClip();
       g.drawImage(this.fogC, X(qx0), Y(qz0), (qx1 - qx0) * this.zoom, (qz1 - qz0) * this.zoom);
+      g.restore();
     }
-    g.save(); g.beginPath(); g.rect(0, 0, W, H); g.rect(X(PLAYABLE.minX), Y(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * this.zoom, (PLAYABLE.maxZ - PLAYABLE.minZ) * this.zoom); g.clip('evenodd');
+    // out of bounds: shade and hatch the baked buffer ring around the sheet (beyond it the region is already muted)
+    const bx0 = bk.x0, bz0 = bk.z0, bx1 = bk.x1, bz1 = bk.z1;
+    g.save(); g.beginPath(); g.rect(X(bx0), Y(bz0), (bx1 - bx0) * this.zoom, (bz1 - bz0) * this.zoom); g.rect(X(PLAYABLE.minX), Y(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * this.zoom, (PLAYABLE.maxZ - PLAYABLE.minZ) * this.zoom); g.clip('evenodd');
     g.fillStyle = 'rgba(8,8,7,.72)'; g.fillRect(0, 0, W, H);
     g.strokeStyle = 'rgba(242,237,227,.05)'; g.lineWidth = 1; for (let d = -H; d < W; d += 7) { g.beginPath(); g.moveTo(d, H); g.lineTo(d + H, 0); g.stroke(); }
     g.restore();
+    // pulled back: the sheet gets a hairline frame so "where you can go" reads at a glance
+    const regional = this.zoom < 0.16;
+    if (regional) { g.strokeStyle = 'rgba(232,163,23,.7)'; g.lineWidth = 1.5; g.strokeRect(X(PLAYABLE.minX), Y(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * this.zoom, (PLAYABLE.maxZ - PLAYABLE.minZ) * this.zoom); }
 
     // ---- 3. labels and symbols share one placer (no collisions); chrome rects reserved first
     const Lp = new LabelPlacer(W, H, 2);
@@ -142,9 +188,9 @@ export class AerialMap extends FoldingMap {
     Lp.reserve([px - 12, py - 12, px + 12, py + 12]);
     if (m.waypoint) { const [wx, wy] = this.toScreen(m.waypoint.x, m.waypoint.z); spr('waypoint', wx + 3, wy - 9, 22, TAXI); Lp.reserve([wx - 6, wy - 22, wx + 14, wy + 2]); }
     // missions
-    for (const mi of this.missions) { const [sx, sy] = this.toScreen(mi.x, mi.z); if (sx < -20 || sy < -20 || sx > W + 20 || sy > H + 20) continue; spr('mission', sx, sy, 22, TAXI); Lp.reserve([sx - 12, sy - 12, sx + 12, sy + 12]); }
+    for (const mi of this.missions) { const [sx, sy] = this.toScreen(mi.x, mi.z); if (sx < -20 || sy < -20 || sx > W + 20 || sy > H + 20) continue; spr('mission', sx, sy, this.zoom < 0.16 ? 16 : 22, TAXI); Lp.reserve([sx - 12, sy - 12, sx + 12, sy + 12]); }
     // landmarks: silhouettes on a plinth, named
-    const lmSize = this.zoom > 0.5 ? 30 : 24;
+    const lmSize = this.zoom > 0.5 ? 30 : this.zoom < 0.16 ? 18 : 24;
     const lmDrawn: [string, number, number][] = [];
     for (const h of this.heroes as { id?: string; name: string; x: number; z: number }[]) {
       const ic = h.id ? LANDMARK_ICON[h.id] : undefined; if (!ic) continue;
@@ -153,10 +199,12 @@ export class AerialMap extends FoldingMap {
       if (!Lp.free(b)) continue; Lp.reserve(b); spr(ic, sx, sy, lmSize); lmDrawn.push([h.name, sx, sy]);
     }
     // places (discovered, filtered), declustered at low zoom; new ones get an amber tick
-    const size = this.zoom > 0.6 ? 20 : this.zoom > 0.3 ? 17 : 14;
+    const regionalNow = this.zoom < 0.16;
+    const size = this.zoom > 0.6 ? 20 : this.zoom > 0.3 ? 17 : regionalNow ? 12 : 14;
     const drawn: { id: string; name: string; sx: number; sy: number; cat: Category; key: boolean }[] = [];
     for (const p of m.discovery.known()) {
       if (!m.visible(p)) continue;
+      if (regionalNow && !['mission', 'home', 'safehouse', 'property', 'police', 'hospital'].includes(p.cat) && !this.ownerNotes[p.id]) continue; // pulled back: only what you'd plan a trip around
       const [sx, sy] = this.toScreen(p.x, p.z); if (sx < -10 || sy < -10 || sx > W + 10 || sy > H + 10) continue;
       const b: Box = [sx - size / 2, sy - size / 2, sx + size / 2, sy + size / 2];
       if (!Lp.free(b)) continue; Lp.reserve(b);
@@ -175,8 +223,9 @@ export class AerialMap extends FoldingMap {
     };
     g.textAlign = 'left'; g.textBaseline = 'alphabetic';
     for (const [n, sx, sy] of lmDrawn) point(n, sx, sy, `700 ${this.zoom > 0.5 ? 12 : 11}px ${F_COND}`, CREAM, lmSize);
+    if (this.region && this.zoom < 0.3) this.regionLabels(Lp, W, H);
     g.save(); (g as unknown as { letterSpacing: string }).letterSpacing = '0.28em';
-    for (const [t, x, z] of DISTRICTS) {
+    for (const [t, x, z] of regional ? [] : DISTRICTS) {
       const [sx, sy] = this.toScreen(x, z); g.font = `800 ${this.zoom > 0.5 ? 16 : 13}px ${F_VOICE}`;
       const w = g.measureText(t).width + t.length * (this.zoom > 0.5 ? 4.5 : 3.6), b: Box = [sx - w / 2, sy - 12, sx + w / 2, sy + 3]; // + letter-spacing
       if (Lp.free(b)) { Lp.reserve(b); g.textAlign = 'center'; g.fillStyle = 'rgba(242,237,227,.42)'; g.fillText(t, sx, sy); }
@@ -192,6 +241,28 @@ export class AerialMap extends FoldingMap {
     if (this.showReticle) { g.strokeStyle = CREAM; g.lineWidth = 1.5; g.beginPath(); g.moveTo(W / 2 - 12, H / 2); g.lineTo(W / 2 - 4, H / 2); g.moveTo(W / 2 + 4, H / 2); g.lineTo(W / 2 + 12, H / 2); g.moveTo(W / 2, H / 2 - 12); g.lineTo(W / 2, H / 2 - 4); g.moveTo(W / 2, H / 2 + 4); g.lineTo(W / 2, H / 2 + 12); g.stroke(); }
     this.cost.draw = performance.now() - t0;
     void CATEGORIES;
+  }
+
+  /** Rivers in italic along their run, boroughs in spaced caps, neighbourhoods small: what's out there, not playable. */
+  private regionLabels(L: LabelPlacer, W: number, H: number) {
+    const g = this.g;
+    for (const l of this.region!.labels) {
+      const [sx, sy] = this.toScreen(l.x, l.z); if (sx < -80 || sy < -30 || sx > W + 80 || sy > H + 30) continue;
+      if (l.x > PLAYABLE.minX && l.x < PLAYABLE.maxX && l.z > PLAYABLE.minZ && l.z < PLAYABLE.maxZ) continue;
+      if (l.kind === 'place' && this.zoom < 0.1) continue;
+      g.save();
+      (g as unknown as { letterSpacing: string }).letterSpacing = l.kind === 'boro' ? '0.32em' : l.kind === 'water' ? '0.12em' : '0.04em';
+      g.font = l.kind === 'water' ? `italic 600 ${this.zoom > 0.12 ? 15 : 13}px ${F_UI}` : l.kind === 'boro' ? `800 ${this.zoom > 0.12 ? 15 : 13}px ${F_VOICE}` : `600 11px ${F_UI}`;
+      const text = l.kind === 'boro' ? l.text.toUpperCase() : l.text, w = g.measureText(text).width + (l.kind === 'boro' ? text.length * 4 : 0), hh = 9;
+      const a = (l.rot * Math.PI) / 180, cs = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a));
+      const bw = w * cs + hh * 2 * sn, bh = w * sn + hh * 2 * cs, b: Box = [sx - bw / 2, sy - bh / 2, sx + bw / 2, sy + bh / 2];
+      if (L.free(b)) {
+        L.reserve(b); g.translate(sx, sy); g.rotate(a); g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillStyle = l.kind === 'water' ? 'rgba(150,178,196,.72)' : l.kind === 'boro' ? 'rgba(242,237,227,.5)' : 'rgba(242,237,227,.42)';
+        g.fillText(text, 0, 0);
+      }
+      g.restore();
+    }
   }
 
   /** Avenues always, cross streets once you're close: names set along the street with a dark halo. */

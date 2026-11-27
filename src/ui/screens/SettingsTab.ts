@@ -144,7 +144,8 @@ export class SettingsTab implements Tab {
   private view: 'options' | 'remap' = 'options';
   private section = 'Controls';
   private listening: { action: ButtonAction; device: 'keys' | 'pad' } | null = null;
-  private setNav: (i: NavItem[], keep?: boolean) => void = () => {};
+  private setNav: (i: NavItem[], keep?: boolean, focus?: number) => void = () => {};
+  private wantMain = false;
   onToast?: (t: string) => void;
   extraButtons: [string, () => void][] = [];
 
@@ -156,7 +157,7 @@ export class SettingsTab implements Tab {
       if (e.code !== 'Escape') this.bind(this.listening.action, 'keys', e.code); else { this.listening = null; this.render(); }
     }, true);
   }
-  open(setNav: (items: NavItem[], keep?: boolean) => void) { this.setNav = setNav; this.render(); }
+  open(setNav: (items: NavItem[], keep?: boolean, focus?: number) => void) { this.setNav = setNav; this.render(); }
   update() {
     if (this.listening?.device === 'pad') {
       for (let b = 0; b < 17; b++) if (this.input.pad.pressed(b as never) && b !== 9) { this.bind(this.listening.action, 'pad', b); return; }
@@ -188,7 +189,10 @@ export class SettingsTab implements Tab {
       ${this.view === 'options' ? `<nav class="st-groups">${groups.map((g) => `<button data-g="${esc(g.group)}" class="${g === cur ? 'on' : ''}"><span>${esc(g.group)}</span><i>${g.keys?.length ?? 0}</i></button>`).join('')}</nav>` : ''}
       <div class="st-extra"></div></aside><section class="st-main"></section>`;
     this.el.querySelectorAll<HTMLElement>('.st-views button').forEach((b) => items.push({ el: b, activate: () => { this.view = b.dataset.v as 'options' | 'remap'; this.render(); } }));
-    this.el.querySelectorAll<HTMLElement>('.st-groups button').forEach((b) => items.push({ el: b, activate: () => { this.section = b.dataset.g!; this.render(); } }));
+    // choosing a group (confirm, or right on the rail) opens it and moves focus into its rows, like a console settings menu
+    const enter = (g: string) => { this.section = g; this.wantMain = true; this.render(); };
+    this.el.querySelectorAll<HTMLElement>('.st-groups button').forEach((b) => items.push({ el: b, activate: () => enter(b.dataset.g!), inc: () => enter(b.dataset.g!) }));
+    const mainStart = items.length;
     const main = this.el.querySelector('.st-main') as HTMLElement;
     const wrap = document.createElement('div'); wrap.className = 't74-rows st-rows';
     if (this.view === 'options') {
@@ -205,7 +209,9 @@ export class SettingsTab implements Tab {
     }
     const extra = this.el.querySelector('.st-extra')!;
     for (const [l, fn] of this.extraButtons) { const b = document.createElement('div'); b.className = 't74-row btn'; b.innerHTML = `<div class="k">${esc(l)}</div><div class="v">›</div>`; extra.appendChild(b); items.push({ el: b, activate: fn }); }
-    this.setNav(items, true);
+    // after choosing a group, land on its first row (past the Restore defaults button)
+    if (this.wantMain) { this.wantMain = false; let i = mainStart; if (items[i]?.el.classList.contains('st-reset') && items.length > i + 1) i++; this.setNav(items, true, i); }
+    else this.setNav(items, true);
   }
 
   private options(wrap: HTMLElement, items: NavItem[], only: string) {

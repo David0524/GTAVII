@@ -26,7 +26,7 @@ export interface MissionDef {
   locations?: string[];
 }
 export interface Objective { id: string; type: string; text?: string; to?: string; at?: string; radius?: number; script?: string; marker?: string; until?: string; target?: string; who?: string }
-export interface DialogueLine { id: string; speaker?: string; emotion?: string; text?: string; if?: string; choices?: { text: string; goto?: string; setFlags?: string[] }[] }
+export interface DialogueLine { id: string; speaker?: string; emotion?: string; text?: string; if?: string; choices?: { text: string; goto?: string; setFlags?: string[]; confirm?: string }[] }
 export type Status = 'locked' | 'available' | 'active' | 'done' | 'failed';
 export interface NarrativeState { act: number; flags: Record<string, boolean>; missions: Record<string, Status | string>; relationships: Record<string, number> }
 
@@ -37,7 +37,8 @@ export interface MissionHost {
   loadDialogue(id: string): Promise<{ lines: DialogueLine[] } | null>;
   /** play one line (audio + subtitle); resolves when heard and readable */
   say(line: DialogueLine, script: string): Promise<void>;
-  choose(prompt: string | undefined, choices: { id: string; text: string }[]): Promise<string>;
+  /** last: who just spoke and what they said (UI's choice screen leads with it) */
+  choose(prompt: string | undefined, choices: { id: string; text: string; confirm?: string }[], last?: { speaker?: string; line?: string }): Promise<string>;
   objective(o: { text: string; target?: { x: number; z: number; label?: string }; mission?: string } | null): void;
   notify(text: string): void;
   discover(placeId: string, notify: 'silent' | 'toast', mission: string): void;
@@ -45,6 +46,8 @@ export interface MissionHost {
   addMoney(cents: number): void;
   /** skip the clock forward to HH:MM (a fade, as in "Wait until 21:30") */
   waitTo?(hhmm: string): void;
+  /** "Wait until 21:30?" (UI waitPrompt); resolves true to skip ahead */
+  askWait?(title: string, from: string, to: string): Promise<boolean>;
   missionBegin?(id: string): void;
   missionLines?(): { label: string; value: string }[];
   /** giver standing at a place, talkable; returns a remover */
@@ -56,7 +59,7 @@ const inWindow = (min: number, w: [string, string]) => { const a = hm(w[0]), b =
 const PLACEHOLDER = new Set(['combat', 'photo']);
 
 export class MissionRuntime {
-  active: { def: MissionDef; idx: number; t: number; busy: boolean; skipped: number } | null = null;
+  active: { def: MissionDef; idx: number; t: number; busy: boolean; skipped: number; asked?: boolean } | null = null;
   private givers = new Map<string, { remove: () => void; x: number; z: number }>();
   private interiorsById: Map<string, { address: string; kind?: string }>;
   checkT = 0;
@@ -129,7 +132,7 @@ export class MissionRuntime {
   private enter() {
     const a = this.active!, o = this.current();
     if (!o) { this.finish(true); return; }
-    a.t = 0;
+    a.t = 0; a.asked = false;
     const tgt = this.where(o.to ?? o.at ?? o.marker);
     this.host.objective({ text: o.text ?? '', target: tgt ? { x: tgt.x, z: tgt.z, label: tgt.name } : undefined, mission: a.def.id });
     if (o.type === 'dialogue' && o.script) { a.busy = true; void this.runDialogue(o.script).then(() => { a.busy = false; this.next(); }); }
@@ -147,7 +150,12 @@ export class MissionRuntime {
       case 'goto': done = near(o.radius ?? 15); break;
       case 'enter_interior': done = !!p.interior && (!tgt || near(60)); break;
       case 'wait':
-        if (o.until && a.t > 2 && this.host.waitTo && !inWindow(this.host.clock().minutes, [o.until, o.until])) this.host.waitTo(o.until);
+        // once per objective: ask (UI waitPrompt) or, headless, skip after 2 s
+        if (o.until && a.t > 2 && !a.asked && this.host.waitTo && !inWindow(this.host.clock().minutes, [o.until, o.until])) {
+          a.asked = true;
+          if (this.host.askWait) void this.host.askWait(a.def.title, o.until, o.until).then((ok) => { if (ok) this.host.waitTo!(o.until!); else a.asked = false; });
+          else this.host.waitTo(o.until);
+        }
         done = !o.until || inWindow(this.host.clock().minutes, [o.until, o.until.replace(/:(\d\d)$/, (_m, mm) => `:${String(Math.min(59, +mm + 30)).padStart(2, '0')}`)]); break;
       case 'switch_to': done = !o.target || p.lead === o.target; break;
       case 'enter_vehicle': done = p.inCar; break;
@@ -166,7 +174,8 @@ export class MissionRuntime {
       const l = d.lines[i];
       if (l.if && !st.flags[l.if]) continue;
       if (l.choices?.length) {
-        const pick = await this.host.choose(undefined, l.choices.map((c, k) => ({ id: String(k), text: c.text })));
+        const prev = d.lines.slice(0, i).reverse().find((x) => x.text && !x.choices);
+        const pick = await this.host.choose(undefined, l.choices.map((c, k) => ({ id: String(k), text: c.text, confirm: c.confirm })), { speaker: prev?.speaker, line: prev?.text });
         const c = l.choices[+pick] ?? l.choices[0];
         for (const f of c.setFlags ?? []) st.flags[f] = true;
         if (c.goto && byId.has(c.goto)) i = byId.get(c.goto)! - 1;

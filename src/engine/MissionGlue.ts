@@ -48,7 +48,8 @@ export function createMissions(d: MissionGlueDeps): MissionRuntime {
       const voiced = d.audioPlay?.(script, line.id);
       await Promise.all([voiced ?? Promise.resolve(), new Promise((r) => setTimeout(r, secs * 1000))]);
     },
-    choose: (prompt, choices) => new Promise((resolve) => d.ui.emit('choices', { prompt, choices, resolve })),
+    choose: (prompt, choices, last) => new Promise((resolve) => d.ui.emit('choices', { prompt, choices, resolve, speaker: last?.speaker ? speakerName(last.speaker) : undefined, line: last?.line, seconds: last?.line ? readingTime(last.line) : undefined })),
+    askWait: (title, from, to) => new Promise((resolve) => d.ui.emit('waitPrompt', { mission: title, title, windowStart: from, windowEnd: to, resolve })),
     objective: (o) => { d.setObjective(o); d.ui.emit('objective', o); },
     notify: (text) => d.ui.emit('notify', { kind: 'toast', text }),
     discover: (placeId, notify, mission) => d.ui.emit('discover', { placeId, via: 'mission', notify, mission }),

@@ -114,7 +114,7 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
   const carLot = new CarLot(input, host); carLot.onToast = toast;
   const home = new HomeUpgrades(input, host);
   const modals: Modal[] = [shop, leads, weapons, choices, waitPrompt, sleep, carLot, home];
-  host.on('choices', (e) => choices.ask(e.choices, e.resolve, { prompt: e.prompt }));
+  host.on('choices', (e) => choices.ask(e.choices, e.resolve, { prompt: e.prompt, speaker: e.speaker, line: e.line, seconds: e.seconds }));
   host.on('waitPrompt', (e) => waitPrompt.ask(e, e.resolve));
   new NoticeCard(host);
   const extras = { newsRead: new Set<string>(), achievements: {} as Record<string, string>, cutscenesSeen: new Set<string>() };
@@ -129,8 +129,8 @@ export function createUi(host: UiHost, o: UiOptions): UiRoot {
     ['home', () => home.openHome()],
     ['choices', () => choices.ask([
       { id: 'a', text: 'Tell him about Lisle.' }, { id: 'b', text: 'Say nothing. Pour the coffee.' },
-      { id: 'c', text: '"Not tonight, Carl."' }, { id: 'd', text: 'Ask what he really wants.', disabled: 'He hasn\'t earned it yet' },
-    ], () => {}, { prompt: 'Mayhew waits.' })],
+      { id: 'c', text: '"Not tonight, Carl."', confirm: 'He won\'t ask twice.' }, { id: 'd', text: 'Ask what he really wants.', disabled: 'He hasn\'t earned it yet' },
+    ], () => {}, { speaker: 'Carl Mayhew', line: 'You were on the desk Tuesday. You saw who went up to nine.', prompt: 'He doesn\'t touch the coffee.' })],
   ]);
 
   let title: TitleScreen | null = null;
