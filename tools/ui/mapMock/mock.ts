@@ -17,9 +17,9 @@ type Dir = 'A' | 'B' | 'C';
 const DIR = ((new URLSearchParams(location.search).get('dir') ?? 'A').toUpperCase()) as Dir;
 document.body.dataset.dir = DIR;
 const W = innerWidth, H = innerHeight, DPR = devicePixelRatio || 1;
-const LEG_W = 206, TOP = 32, BOTTOM = 22;
+const LEG_W = 206, TOP = 32, BOTTOM = 0;
 // view: Lacy's (Herald Sq) at the top, Chelsea and the Flatiron at the bottom
-const VIEW = { cx: -455, cz: -478, S: 2.86 }; // metres per CSS px
+const VIEW = { cx: -470, cz: -469, S: 3.0 }; // metres per CSS px: z −1000 sits just under the tabs, the Flatiron just above the bottom
 const OX = (LEG_W + W) / 2, OY = (TOP + H - BOTTOM) / 2;
 const X = (x: number) => OX + (x - VIEW.cx) / VIEW.S, Y = (z: number) => OY + (z - VIEW.cz) / VIEW.S;
 
@@ -56,19 +56,18 @@ const PLAYER = { x: 2, z: -55, yaw: -0.35 };
 const DEST = { x: -440, z: -905 }; // Lacy's front on 34th St
 const route = new RouteGraph(streets).find(PLAYER.x, PLAYER.z, DEST.x, DEST.z, 'foot');
 
-// discovered ground: where you've walked (Flatiron → 23rd → Chelsea → up Eighth to the Garden), plus Madison Square
-const TRAIL: [number, number][][] = [
-  [[60, -110], [5, 0], [-300, 10], [-720, 0], [-1150, -10]],
-  [[-880, 0], [-885, -400], [-880, -790]],
-  [[-1150, -10], [-1150, -300]],
-  [[-470, 0], [-470, -180]],
+// discovered ground: Chelsea to Madison Square south of ~27th St, and the Eighth Avenue corridor up to the Garden.
+// The Garment Center and Herald Square are still unexplored (the route heads into them).
+const AREAS: [number, number][][] = [
+  [[-1500, 200], [700, 200], [700, -300], [250, -330], [-300, -360], [-700, -330], [-1500, -300]],
+  [[-1060, -300], [-640, -330], [-650, -900], [-1060, -900]],
 ];
 const [maskC, mg] = off();
-mg.fillStyle = '#000'; mg.fillRect(0, 0, W, H);
-mg.strokeStyle = mg.fillStyle = '#fff'; mg.lineCap = mg.lineJoin = 'round'; mg.lineWidth = 2 * 165 / VIEW.S;
-for (const t of TRAIL) { mg.beginPath(); t.forEach(([x, z], i) => (i ? mg.lineTo(X(x), Y(z)) : mg.moveTo(X(x), Y(z)))); mg.stroke(); }
-mg.beginPath(); mg.arc(X(120), Y(-120), 150 / VIEW.S, 0, 7); mg.fill();
+mg.fillStyle = '#fff';
+for (const a of AREAS) { mg.beginPath(); a.forEach(([x, z], i) => (i ? mg.lineTo(X(x), Y(z)) : mg.moveTo(X(x), Y(z)))); mg.closePath(); mg.fill(); }
 const maskData = mg.getImageData(0, 0, maskC.width, maskC.height).data;
+/** The mask on black (for noise thresholding), and the alpha mask itself for cutting fog. */
+const maskBW = (() => { const [c, x] = off(); x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.drawImage(maskC, 0, 0, W, H); return c; })();
 const discovered = (sx: number, sy: number) => { const i = (Math.round(sy * DPR) * maskC.width + Math.round(sx * DPR)) * 4; return (maskData[i] ?? 0) > 127; };
 const inPlay = (x: number, z: number) => x > PLAYABLE.minX && x < PLAYABLE.maxX && z > PLAYABLE.minZ && z < PLAYABLE.maxZ;
 
@@ -123,7 +122,8 @@ const isAve = (n: string) => /Avenue|Broadway|Ave\b/.test(n);
 const shortName = (n: string) => n.replace(/^West /, 'W. ').replace(/^East /, 'E. ').replace(/ Street$/, ' St.').replace(/ Avenue$/, ' Ave.').replace(/^(\d+)(st|nd|rd|th) Ave\./, (m) => m);
 
 // chrome boxes the labels must avoid
-const CHROME: Box[] = [[0, 0, LEG_W + 4, H], [0, 0, W, TOP + 2], [W - 96, H - BOTTOM - 44, W, H], [LEG_W, H - BOTTOM - 22, LEG_W + 250, H], [W - 196, TOP, W, TOP + 74], [0, H - BOTTOM, W, H]];
+const CHROME: Box[] = [[0, 0, LEG_W + 4, H], [0, 0, W, TOP + 2]];
+const underChrome = (sx: number, sy: number, r = 8) => CHROME.some((b) => sx + r > b[0] && sx - r < b[2] && sy + r > b[1] && sy - r < b[3]);
 
 // ------------------------------------------------------------------ base layers
 const clipMap = () => { g.save(); g.beginPath(); g.rect(0, 0, W, H); g.clip(); };
@@ -144,7 +144,7 @@ function fog(paint: (ctx: CanvasRenderingContext2D) => void, feather: number, ra
   const [fc, fx] = off(); paint(fx);
   fx.globalCompositeOperation = 'destination-out'; fx.filter = `blur(${feather}px)`;
   if (ragged) { // an ink-bleed edge: the mask thresholded against noise instead of a smooth blur
-    const [mc, mx] = off(); mx.drawImage(maskC, 0, 0, W, H); mx.globalCompositeOperation = 'multiply'; mx.drawImage(noiseCanvas(9, 3, 7), 0, 0, W, H);
+    const [mc, mx] = off(); mx.drawImage(maskBW, 0, 0, W, H); mx.globalCompositeOperation = 'multiply'; mx.drawImage(noiseCanvas(9, 3, 7), 0, 0, W, H);
     const id = mx.getImageData(0, 0, mc.width, mc.height), d = id.data; for (let i = 0; i < d.length; i += 4) { const v = d[i] > 70 ? 255 : 0; d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = v; }
     mx.putImageData(id, 0, 0); fx.drawImage(mc, 0, 0, W, H);
   } else fx.drawImage(maskC, 0, 0, W, H);
@@ -154,11 +154,11 @@ function fog(paint: (ctx: CanvasRenderingContext2D) => void, feather: number, ra
 // ------------------------------------------------------------------ A: aerial
 function baseA() {
   g.fillStyle = '#121210'; g.fillRect(0, 0, W, H);
-  drawAerial(g, 'saturate(.55) sepia(.16) contrast(1.12) brightness(1.55)');
+  drawAerial(g, 'saturate(.55) sepia(.2) brightness(2.6) contrast(1.05)');
   // roads lifted a touch so the grid reads at a glance (GTA's map does the same over its render)
   g.lineCap = 'round';
   for (const s of streets) { if (!s.n && s.w < 8) continue; g.strokeStyle = isAve(s.n) ? 'rgba(236,230,214,.16)' : 'rgba(236,230,214,.09)'; g.lineWidth = Math.max(1, s.w / VIEW.S * 0.8); polyline(g, s.p); g.stroke(); }
-  fog((f) => { f.fillStyle = 'rgba(14,15,17,.74)'; f.fillRect(0, 0, W, H); f.globalAlpha = .35; f.drawImage(noiseCanvas(60, 3, 3), 0, 0, W, H); }, 10);
+  fog((f) => { f.fillStyle = 'rgba(52,54,58,.86)'; f.fillRect(0, 0, W, H); f.globalCompositeOperation = 'overlay'; f.globalAlpha = .35; f.drawImage(noiseCanvas(36, 4, 3), 0, 0, W, H); }, 5);
   outOfBounds(g, 'rgba(8,8,8,.7)', 'rgba(255,255,255,.05)');
 }
 
@@ -166,29 +166,29 @@ function baseA() {
 let paperB: HTMLCanvasElement | null = null;
 function baseB() {
   // paper: warm sheet, fibre noise, foxing at the edges
-  g.fillStyle = '#ece2c9'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#efe5cb'; g.fillRect(0, 0, W, H);
   paperB = noiseCanvas(3, 2, 11);
-  g.save(); g.globalCompositeOperation = 'multiply'; g.globalAlpha = .16; g.drawImage(paperB, 0, 0, W, H); g.globalAlpha = .22; g.drawImage(noiseCanvas(80, 3, 5), 0, 0, W, H); g.restore();
+  g.save(); g.globalCompositeOperation = 'overlay'; g.globalAlpha = .28; g.drawImage(paperB, 0, 0, W, H); g.globalAlpha = .3; g.drawImage(noiseCanvas(80, 3, 5), 0, 0, W, H); g.restore();
   // washes: blocks in a sand wash, buildings (from our render's roofs) in brick pink, parks in green
   const [wc, wx] = off();
-  wx.fillStyle = 'rgba(214,190,140,.55)'; wx.fillRect(0, 0, W, H);
+  wx.fillStyle = 'rgba(232,206,150,.62)'; wx.fillRect(0, 0, W, H);
   if (aerial && aerialMeta) {
-    const [bc, bx] = off(); drawAerialTo(bx, 'grayscale(1) contrast(2.2) brightness(1.15)');
+    const [bc, bx] = off(); drawAerialTo(bx, 'grayscale(1) brightness(1.6) contrast(1.6)');
     const id = bx.getImageData(0, 0, bc.width, bc.height), d = id.data;
     const [pc, px] = off(); drawAerialTo(px, 'none'); const pd = px.getImageData(0, 0, pc.width, pc.height).data;
     for (let i = 0; i < d.length; i += 4) {
       const roof = d[i] < 70, park = pd[i + 1] > pd[i] * 1.12 && pd[i + 1] > pd[i + 2] * 1.1 && pd[i + 1] > 40;
-      if (park) { d[i] = 142; d[i + 1] = 160; d[i + 2] = 112; d[i + 3] = 150; } else if (roof && pd[i + 3]) { d[i] = 196; d[i + 1] = 136; d[i + 2] = 116; d[i + 3] = 120; } else d[i + 3] = 0;
+      if (park) { d[i] = 150; d[i + 1] = 170; d[i + 2] = 118; d[i + 3] = 150; } else if (roof && pd[i + 3]) { d[i] = 226; d[i + 1] = 160; d[i + 2] = 132; d[i + 3] = 120; } else d[i + 3] = 0;
     }
     bx.putImageData(id, 0, 0);
-    wx.filter = 'blur(0.6px)'; wx.drawImage(bc, 0, 0, W, H); wx.filter = 'none';
+    wx.filter = 'blur(1.4px)'; wx.drawImage(bc, 0, 0, W, H); wx.filter = 'none';
   }
-  wx.globalCompositeOperation = 'multiply'; wx.globalAlpha = .5; wx.drawImage(noiseCanvas(14, 3, 2), 0, 0, W, H);
+  wx.globalCompositeOperation = 'overlay'; wx.globalAlpha = .45; wx.drawImage(noiseCanvas(14, 3, 2), 0, 0, W, H);
   wx.globalCompositeOperation = 'destination-out'; wx.globalAlpha = 1; wx.lineCap = 'round';
   for (const s of streets) { wx.lineWidth = s.w / VIEW.S + 0.6; polyline(wx, s.p); wx.stroke(); }
   // undiscovered: no wash yet; ink fills in as you discover, with a ragged bleed edge
   wx.globalCompositeOperation = 'destination-in';
-  const [mc, mx] = off(); mx.drawImage(maskC, 0, 0, W, H); mx.globalCompositeOperation = 'multiply'; mx.drawImage(noiseCanvas(9, 3, 7), 0, 0, W, H);
+  const [mc, mx] = off(); mx.filter = 'blur(9px)'; mx.drawImage(maskBW, 0, 0, W, H); mx.filter = 'none'; mx.globalCompositeOperation = 'multiply'; mx.drawImage(noiseCanvas(7, 4, 7), 0, 0, W, H);
   const id = mx.getImageData(0, 0, mc.width, mc.height), d = id.data; for (let i = 0; i < d.length; i += 4) { const v = d[i] > 70 ? 255 : 0; d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = v; } mx.putImageData(id, 0, 0);
   wx.drawImage(mc, 0, 0, W, H);
   g.save(); g.globalCompositeOperation = 'multiply'; g.drawImage(wc, 0, 0, W, H); g.restore();
@@ -213,7 +213,7 @@ function drawAerialTo(ctx: CanvasRenderingContext2D, filter: string) { drawAeria
 function baseC() {
   g.fillStyle = '#efe9dc'; g.fillRect(0, 0, W, H);
   if (aerial && aerialMeta) {
-    const [ac, ax] = off(); drawAerial(ax, 'grayscale(1) contrast(1.25) brightness(1.45)');
+    const [ac, ax] = off(); drawAerial(ax, 'grayscale(1) brightness(3) contrast(.8)');
     const src = ax.getImageData(0, 0, ac.width, ac.height).data, cw = ac.width;
     // AM halftone at 45°, one ink; dots fade to nothing in undiscovered ground (that part of the plate isn't printed yet)
     const cell = 4.2 * DPR / 2, ang = Math.PI / 4, ca = Math.cos(ang), sa = Math.sin(ang);
@@ -223,7 +223,7 @@ function baseC() {
       const px = u * ca - v * sa + ac.width / 2, py = u * sa + v * ca + ac.height / 2;
       if (px < 0 || py < 0 || px >= ac.width || py >= ac.height) continue;
       const i = (Math.floor(py) * cw + Math.floor(px)) * 4; if (!src[i + 3]) continue;
-      const m = maskData[i] / 255, k = 1 - src[i] / 255; const r = cell * 0.62 * Math.sqrt(Math.max(0, k)) * (0.18 + 0.82 * m);
+      const m = maskData[i] / 255, k = Math.min(0.5, (1 - src[i] / 255) * 0.62); const r = cell * 0.62 * Math.sqrt(Math.max(0, k)) * (0.2 + 0.8 * m);
       if (r < 0.25) continue; g.beginPath(); g.arc(px, py, r, 0, 7); g.fill();
     }
     g.restore();
@@ -274,14 +274,15 @@ async function overlays() {
   // icons first (they reserve their space), then type
   const icon = (cat: Category, sx: number, sy: number, size: number) => {
     const style = DIR === 'A' ? 'disc' : 'print';
-    const sp = pictogram(cat, size, DPR, style, DIR === 'B' && (cat === 'mission' || cat === 'home') ? '#a8281e' : DIR === 'C' && (cat === 'mission' || cat === 'home') ? '#b07a0c' : undefined);
+    const story = cat === 'mission' || cat === 'home';
+    const sp = pictogram(cat, size, DPR, style, DIR === 'B' ? (story ? '#a8281e' : '#2b2118') : DIR === 'C' ? (story ? '#b07a0c' : '#1e1b18') : undefined);
     g.drawImage(sp, sx - size / 2, sy - size / 2, size, size);
     L.reserve([sx - size / 2 - 1, sy - size / 2 - 1, sx + size / 2 + 1, sy + size / 2 + 1]);
   };
   const drawn: { p: Place; sx: number; sy: number }[] = [];
   for (const p of places) {
     const sx = X(p.x), sy = Y(p.z), size = p.cat === 'mission' || p.cat === 'home' ? 17 : 14;
-    if (drawn.some((d) => Math.hypot(d.sx - sx, d.sy - sy) < 13)) continue; // de-clutter at this zoom (cluster)
+    if (drawn.some((d) => Math.hypot(d.sx - sx, d.sy - sy) < 13) || underChrome(sx, sy)) continue; // de-clutter at this zoom (cluster); never under a panel
     icon(p.cat, sx, sy, size); drawn.push({ p, sx, sy });
   }
   // tips in the fog
@@ -296,7 +297,7 @@ async function overlays() {
   // landmarks: B gets ink vignettes (our 3D landmarks, drawn as ink), A and C get distinct silhouette glyphs
   for (const h of HEROES) {
     const sx = X(h.x), sy = Y(h.z);
-    if (sx < LEG_W || sx > W || sy < TOP || sy > H - BOTTOM) continue;
+    if (sx < LEG_W || sx > W || sy < TOP || sy > H - BOTTOM || underChrome(sx, sy, 10)) continue;
     if (DIR === 'B') {
       const img = await loadImg(`/shots/map/vig_${h.id}.png`);
       if (img) { const hh = h.id === 'empire' ? 74 : 54, ww = hh * img.width / img.height; g.drawImage(img, sx - ww / 2, sy - hh + 6, ww, hh); L.reserve([sx - ww / 2 + 6, sy - hh + 10, sx + ww / 2 - 6, sy + 6]); continue; }
@@ -334,7 +335,8 @@ async function overlays() {
   const stFont = DIR === 'B' ? `italic 400 9.5px ${F_BODY}` : `700 8.5px ${F_COND}`;
   for (const e of byLen) {
     const s = e.recs.reduce((a, b) => (visibleLen(b) > visibleLen(a) ? b : a));
-    const pts: number[] = []; for (let i = 0; i < s.p.length; i += 2) pts.push(X(s.p[i]), Y(s.p[i + 1]));
+    const pts: number[] = []; for (let i = 0; i < s.p.length; i += 2) if (inPlay(s.p[i], s.p[i + 1])) pts.push(X(s.p[i]), Y(s.p[i + 1])); // names only inside the playable sheet
+    if (pts.length < 4) continue;
     const text = DIR === 'B' ? shortName(e.n) : shortName(e.n).toUpperCase();
     lineLabel(L, text, pts, stFont, ink, halo);
   }
@@ -346,8 +348,11 @@ function lineLabel(L: LabelPlacer, text: string, pts: number[], font: string, in
   const w = g.measureText(text).width, h = parseFloat(font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? '9');
   for (const f of [0.5, 0.35, 0.65, 0.2, 0.8, 0.12, 0.9]) {
     const k = Math.max(0, Math.min(pts.length / 2 - 2, Math.floor((pts.length / 2 - 1) * f))) * 2;
-    const ax = pts[k], ay = pts[k + 1], bx = pts[k + 2], by = pts[k + 3]; if (bx === undefined) continue;
-    if (Math.hypot(bx - ax, by - ay) < w * 0.7) continue; // the segment must carry the name
+    // widen the span along the polyline until it carries the name (avenues are many one-block segments)
+    let k2 = k + 2; while (k2 + 1 < pts.length && Math.hypot(pts[k2] - pts[k], pts[k2 + 1] - pts[k + 1]) < w + 8) k2 += 2;
+    const ax = pts[k], ay = pts[k + 1], bx = pts[k2], by = pts[k2 + 1]; if (bx === undefined) continue;
+    if (Math.hypot(bx - ax, by - ay) < w + 6) continue;
+    if ((ax + bx) / 2 < LEG_W || (ay + by) / 2 < TOP) continue;
     let ang = Math.atan2(by - ay, bx - ax); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
     const mx = (ax + bx) / 2, my = (ay + by) / 2, c = Math.cos(ang), sn = Math.sin(ang);
     const corners = [[-w / 2, -h / 2], [w / 2, -h / 2], [-w / 2, h / 2], [w / 2, h / 2]].map(([u, v]) => [mx + u * c - v * sn, my + u * sn + v * c]);
@@ -392,21 +397,21 @@ function chrome() {
   el.innerHTML = `
     <nav class="tabs"><b class="on">Map</b><span>Pockets</span><span>Paper</span><span>Business</span><span>Cars</span><span>Record</span><span>System</span><i>Resume ✕</i></nav>
     <aside class="legend">
-      <header><b>${DIR === 'B' ? 'Index to this sheet' : 'Legend'}</b><span>${places.length + 7} known</span></header>
+      <section class="card"><small>${DIR === 'B' ? 'Waypoint · Landmark' : 'Waypoint · Landmark'}</small><b>Lacy's, Herald Square</b><span>${route ? `${(route.length / 1609).toFixed(1)} mi on foot · ${Math.round(route.length / 1.35 / 60)} min` : ''}</span></section>
+      <header><b>${DIR === 'B' ? 'Index' : 'Legend'}</b><span>${places.length + 7} known</span></header>
       <ul>${legend.map((l) => `<li class="${l.on ? '' : 'off'}"><img src="${icon(l.cat)}" alt=""><span>${l.label}</span><em>${l.n}</em></li>`).join('')}</ul>
       <div class="fogkey"><i></i>${DIR === 'B' ? 'Not yet surveyed' : 'Not yet explored'}</div>
-    </aside>
-    <section class="card"><small>Waypoint · Landmark</small><b>Lacy's, Herald Square</b><span>${route ? `${(route.length / 1609).toFixed(1)} mi on foot · ${Math.round(route.length / 1.35 / 60)} min` : ''}</span></section>
-    <div class="btns"><button aria-label="Centre on me">◎</button><button aria-label="Erase route">✕</button></div>
-    <div class="odbl">Map data © OpenStreetMap contributors, ODbL · NYC Open Data</div>
-    <footer><span><kbd>Tap</kbd> a place</span><span><kbd>Drag</kbd> pan · <kbd>Pinch</kbd> zoom</span><span><kbd>Hold</kbd> set waypoint</span></footer>`;
+      <div class="tools"><button aria-label="Centre on me">◎ Me</button><button aria-label="Erase route">✕ Route</button><span><kbd>Hold</kbd> waypoint</span></div>
+      <div class="odbl">Map data © OpenStreetMap contributors, ODbL · NYC Open Data</div>
+      </aside>
+`;
 }
 
 // ------------------------------------------------------------------ go
 clipMap();
 if (DIR === 'A') baseA(); else if (DIR === 'B') baseB(); else baseC();
 if (DIR === 'B') { /* the compass, the sheet's one decorative gesture */
-  const cx = W - 120, cy = H - BOTTOM - 74; g.save(); g.translate(cx, cy); g.strokeStyle = '#2b2118'; g.fillStyle = '#2b2118'; g.lineWidth = 0.8;
+  const cx = LEG_W + 30, cy = TOP + 34; g.save(); g.translate(cx, cy); g.strokeStyle = '#2b2118'; g.fillStyle = '#2b2118'; g.lineWidth = 0.8;
   g.beginPath(); g.arc(0, 0, 13, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, -18); g.lineTo(3, 0); g.lineTo(0, 18); g.lineTo(-3, 0); g.closePath(); g.stroke(); g.beginPath(); g.moveTo(0, -18); g.lineTo(3, 0); g.lineTo(-3, 0); g.closePath(); g.fill();
   g.font = `italic 700 9px ${F_BODY}`; g.textAlign = 'center'; g.fillText('N', 0, -21); g.restore(); CHROME.push([cx - 22, cy - 32, cx + 22, cy + 22]);
 }

@@ -43,7 +43,7 @@ await withServer(async (base) => {
     }, [cx, cz, TILE_M / 2]);
     await page.evaluate(() => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(res)))));
     const file = path.join(OUT, 'tiles', `t_${j}_${i}.png`);
-    await page.locator('#app canvas').first().screenshot({ path: file, timeout: 240_000 });
+    await page.screenshot({ path: file, timeout: 240_000, animations: 'disabled', caret: 'initial' });
     await page.evaluate(() => { const T = (window as any).__T74; T.renderer.render = T.renderer.__origRender; if (T.__fog) { T.scene.fog.near = T.__fog[0]; T.scene.fog.far = T.__fog[1]; } });
     console.log(`tile ${j},${i} @ ${cx},${cz}: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   }

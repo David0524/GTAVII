@@ -38,7 +38,7 @@ await withServer(async (base) => {
     await page.evaluate(() => (window as any).__T74.whenIdle());
     await page.waitForTimeout(400);
     const raw = path.join(OUT, 'vig_raw', `${id}.png`);
-    await page.locator('#app canvas').first().screenshot({ path: raw, timeout: 240_000 });
+    await page.screenshot({ path: raw, timeout: 240_000 });
     ink(raw, path.join(OUT, `vig_${id}.png`));
     console.log(`vig_${id}: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   }
