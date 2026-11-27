@@ -7,7 +7,7 @@ iPhone 17 Pro in the browser at a stable 30 fps, and better on desktop.
 **Aim:** push toward GTA VI-era density and lighting wherever the phone budget allows. On desktop
 WebGPU, go further (higher-quality GI, reflections and shadow resolution).
 
-Reference games are a **quality bar only**. Copy no assets, logos, UI, names or look-alike designs.
+Reference games: **GTA V, GTA VI and RDR2** (user, 2026-11-27: "Continue to reference the GTA games and RDR2. Also reference 1970s NYC"). They are a **quality bar only**. Copy no assets, logos, UI, names or look-alike designs.
 1974 photographs stay the reference for *what* things look like; the bar sets *how well* they're rendered.
 
 Our advantage is the small map (story core, 132 chunks). Spend that budget on **density and detail
