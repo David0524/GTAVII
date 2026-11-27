@@ -264,3 +264,67 @@ test('vendors through the sim: sales and overturned carts are animated there; an
   }
   assert.ok(swung >= 2 && fled >= 2, `the hot-dog man fights back about half the time (${swung} swung, ${fled} fled)`);
 });
+
+// ---- greet / antagonize (the player's side of sim's memory greetings)
+class TalkSim extends HandoffSim {
+  rep = 0; mem: any[] = [];
+  remember(kind: string, x: number, z: number, o: any = {}) { this.mem.push({ kind, x, z, ...o }); }
+  reputation() { return { score: this.rep, last: null, ago: Infinity }; }
+}
+function talkRig(nerve: number) {
+  const sim = new TalkSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  sim.peds.push({ id: 7, archetype: 'npc.dockworker', x: 1.5, y: 0, z: 0, yaw: 0, speed: 0, state: 'walk', variant: 1, nerve });
+  const replies: any[] = []; g.on('pedReply', (e: any) => replies.push(e));
+  const barks: any[] = []; g.on('bark', (e: any) => barks.push(e));
+  return { sim, g, pos, replies, barks };
+}
+
+test('greet: the context button says hello to a passer-by; the answer comes from the block\'s standing and what you did to them', () => {
+  const { sim, g, replies, barks } = talkRig(0.8);
+  const c = g.contextAction()!;
+  assert.equal(c.kind, 'greet'); assert.equal(c.target, 'ped:7'); assert.equal(c.alt?.kind, 'antagonize');
+  // most New Yorkers: a nod or nothing
+  const ctx = new Set<string>();
+  for (let i = 0; i < 30; i++) { (g as any).rapport.clear(); g.greet('ped:7'); ctx.add(replies.at(-1).context); }
+  assert.deepEqual([...ctx].sort(), ['greet', 'ignore']);
+  assert.ok(barks.some((b) => b.bark === 'barks.player_greet') && barks.some((b) => b.pool === 'barks.dockworker'), 'player line and the ped\'s pool');
+  // greeted before: a warm hello
+  g.greet('ped:7'); assert.equal(replies.at(-1).context, 'greet_known');
+  // a block that likes you
+  (g as any).rapport.clear(); sim.rep = 3; g.greet('ped:7'); assert.equal(replies.at(-1).context, 'greet_known');
+  // a block that resents you: a steady one complains
+  (g as any).rapport.clear(); sim.rep = -5; g.greet('ped:7'); assert.equal(replies.at(-1).context, 'complain');
+  assert.equal(sim.mem.length, 0, 'a hello is not a favour: nothing remembered');
+});
+
+test('antagonize: a steady one gives it back, then shoves, then squares up (they start it: no crime); the street remembers', () => {
+  const { sim, g } = talkRig(0.85);
+  const crimes: any[] = []; g.on('crimeWitnessed', (e: any) => crimes.push(e));
+  const a1 = g.doAltContextAction()!; assert.equal(a1.context, 'antagonize'); assert.equal(a1.escalated, 'none');
+  assert.equal(sim.mem.at(-1).kind, 'bumped'); assert.equal(sim.mem.at(-1).pedId, 7);
+  const a2 = g.antagonize('ped:7')!; assert.equal(a2.escalated, 'shove'); assert.ok(g.stumbling);
+  const a3 = g.antagonize('ped:7')!; assert.equal(a3.escalated, 'brawl'); assert.ok(g.brawls.has('brawl:7') && sim.released.has(7));
+  assert.equal(crimes.length, 0, 'mouthing off unarmed is no crime');
+});
+
+test('antagonize: a shy one backs off; with a gun out it is menacing and they hurry away', () => {
+  const { sim, g, replies } = talkRig(0.3);
+  const a = g.antagonize('ped:7')!; assert.equal(a.context, 'fear'); assert.equal(sim.goals.get(7).kind, 'goto');
+  g.greet('ped:7'); // within ten minutes they remember
+  assert.equal(replies.at(-1).context, 'fear'); assert.equal(replies.at(-1).recall, 'antagonized');
+  const t2 = talkRig(0.9);
+  t2.g.addProp('box', 'call_box', 30, 0, -10);
+  t2.sim.peds.push({ id: 8, archetype: 'npc.commuter', x: 5, y: 0, z: -3, yaw: Math.PI, speed: 0, state: 'walk', variant: 1, nerve: 0.9 });
+  t2.g.equip('weapon.service');
+  const kinds: string[] = []; t2.g.on('crimeWitnessed', (e: any) => kinds.push(e.crime.kind));
+  const b = t2.g.antagonize('ped:7')!;
+  assert.equal(b.context, 'fear', 'nobody squares up to a gun');
+  assert.ok(t2.sim.goals.get(7).urgent);
+  assert.ok(kinds.includes('menacing'), kinds.join());
+  // no greet offer with a gun drawn (combat mode)
+  assert.notEqual(t2.g.contextAction()?.kind, 'greet');
+});
