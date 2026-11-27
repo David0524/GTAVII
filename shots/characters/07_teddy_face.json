@@ -1,0 +1,90 @@
+{
+  "backend": "webgl2",
+  "scene": "leads",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "people": [
+    {
+      "seed": 1,
+      "hero": "char.teddy_arce",
+      "sex": 1,
+      "age": 34,
+      "hair": "sidePart",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 16158,
+      "draws": 2,
+      "buildMs": 129
+    },
+    {
+      "seed": 1,
+      "hero": "char.delphine_moore",
+      "sex": 0,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 20094,
+      "draws": 2,
+      "buildMs": 61.8
+    },
+    {
+      "seed": 1,
+      "hero": "char.nick_varelas",
+      "sex": 1,
+      "age": 51,
+      "hair": "slick",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 24268,
+      "draws": 2,
+      "buildMs": 143.2
+    }
+  ],
+  "updateMs": [
+    0,
+    0.1,
+    0
+  ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.557,
+        0.2641
+      ],
+      "neck": [
+        0.54,
+        0.3421
+      ],
+      "hand": [
+        0.2322,
+        1.1191
+      ]
+    }
+  ],
+  "renderMsSoftware": [
+    2,
+    1.099999999627471,
+    0.7999999998137355
+  ]
+}

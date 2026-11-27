@@ -1,0 +1,31 @@
+{
+  "backend": "webgl2",
+  "scene": "street",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "street": {
+    "name": "West 22nd Street",
+    "width": 10.4,
+    "length": 113.6,
+    "usedHalfLength": 54.8
+  },
+  "crowd": {
+    "agents": 120,
+    "cpuMs": 0.599999999627471,
+    "near": 3,
+    "mid": 24,
+    "far": 57,
+    "culled": 36,
+    "draws": 25,
+    "tris": 222687,
+    "templatesReady": 12,
+    "nearBuilds": 4,
+    "cpuAvgMs": 0.234,
+    "cpuP95Ms": 0.8,
+    "framesMeasured": 145
+  },
+  "renderMsSoftware": [
+    9.100000000558794,
+    5.3999999994412065,
+    4
+  ]
+}

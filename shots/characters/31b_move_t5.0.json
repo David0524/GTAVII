@@ -1,0 +1,58 @@
+{
+  "backend": "webgl2",
+  "scene": "move",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "events": [
+    {
+      "type": "start",
+      "t": 0.02,
+      "x": -2
+    },
+    {
+      "type": "step",
+      "t": 3.2,
+      "x": 3.06,
+      "rise": 0.2
+    },
+    {
+      "type": "traversal",
+      "t": 3.83,
+      "x": 5.15,
+      "event": {
+        "kind": "vault",
+        "height": 1,
+        "depth": 0.06,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.8480555555555611
+      },
+      "label": "railing"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 4.33,
+      "x": 6.66,
+      "label": "railing"
+    },
+    {
+      "type": "step",
+      "t": 5.05,
+      "x": 9.05,
+      "rise": 0.18
+    }
+  ],
+  "state": {
+    "t": 5.05,
+    "x": 9.05,
+    "y": 0.38,
+    "speed": 3.4,
+    "traversal": null,
+    "done": false
+  },
+  "updateMs": 0.1,
+  "renderMsSoftware": [
+    4.900000000023283,
+    1.8000000000465661,
+    1.099999999976717
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "backend": "webgl2",
+  "scene": "crowd",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "crowd": {
+    "agents": 120,
+    "cpuMs": 0.20000000018626451,
+    "near": 2,
+    "mid": 3,
+    "far": 40,
+    "culled": 75,
+    "draws": 18,
+    "tris": 94953,
+    "templatesReady": 12,
+    "nearBuilds": 2,
+    "cpuAvgMs": 0.174,
+    "cpuP95Ms": 0.3,
+    "framesMeasured": 145
+  },
+  "renderMsSoftware": [
+    4.7999999998137355,
+    3.099999999627471,
+    1.7000000001862645
+  ]
+}

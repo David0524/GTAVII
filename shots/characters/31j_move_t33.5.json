@@ -1,0 +1,386 @@
+{
+  "backend": "webgl2",
+  "scene": "move",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "events": [
+    {
+      "type": "start",
+      "t": 0.02,
+      "x": -2
+    },
+    {
+      "type": "step",
+      "t": 3.2,
+      "x": 3.06,
+      "rise": 0.2
+    },
+    {
+      "type": "traversal",
+      "t": 3.83,
+      "x": 5.15,
+      "event": {
+        "kind": "vault",
+        "height": 1,
+        "depth": 0.06,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.8480555555555611
+      },
+      "label": "railing"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 4.33,
+      "x": 6.66,
+      "label": "railing"
+    },
+    {
+      "type": "step",
+      "t": 5.05,
+      "x": 9.05,
+      "rise": 0.18
+    },
+    {
+      "type": "step",
+      "t": 5.13,
+      "x": 9.33,
+      "rise": 0.18000000000000005
+    },
+    {
+      "type": "step",
+      "t": 5.22,
+      "x": 9.61,
+      "rise": 0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.32,
+      "x": 9.95,
+      "rise": 0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.75,
+      "x": 11.43,
+      "rise": -0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.83,
+      "x": 11.71,
+      "rise": -0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.93,
+      "x": 12.05,
+      "rise": -0.18000000000000005
+    },
+    {
+      "type": "step",
+      "t": 6.02,
+      "x": 12.33,
+      "rise": -0.18
+    },
+    {
+      "type": "traversal",
+      "t": 6.28,
+      "x": 13.18,
+      "event": {
+        "kind": "vault",
+        "height": 1,
+        "depth": 1.6,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.8182000000000027
+      },
+      "label": "car hood"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 7.28,
+      "x": 16.2,
+      "label": "car hood"
+    },
+    {
+      "type": "traversal",
+      "t": 7.6,
+      "x": 17.17,
+      "event": {
+        "kind": "climb",
+        "height": 1.6,
+        "depth": 1.6,
+        "landRise": 1.6,
+        "speed": 3.4,
+        "approach": 0.8315333333333221
+      },
+      "label": "dumpster"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 8.6,
+      "x": 18.45,
+      "label": "dumpster"
+    },
+    {
+      "type": "start",
+      "t": 8.62,
+      "x": 18.45
+    },
+    {
+      "type": "traversal",
+      "t": 9.25,
+      "x": 19.58,
+      "event": {
+        "kind": "drop",
+        "height": 0,
+        "depth": 0,
+        "landRise": -1.6,
+        "speed": 3.4,
+        "approach": 0.01930555555555813
+      },
+      "label": "dumpster drop"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 10.13,
+      "x": 20,
+      "label": "dumpster drop"
+    },
+    {
+      "type": "start",
+      "t": 10.15,
+      "x": 20
+    },
+    {
+      "type": "traversal",
+      "t": 10.8,
+      "x": 21.19,
+      "event": {
+        "kind": "fence",
+        "height": 3,
+        "depth": 0.05,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.812638888888884
+      },
+      "label": "chain-link fence"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 15.93,
+      "x": 22.6,
+      "label": "chain-link fence"
+    },
+    {
+      "type": "start",
+      "t": 15.95,
+      "x": 22.6
+    },
+    {
+      "type": "step",
+      "t": 16.95,
+      "x": 25.03,
+      "rise": -0.17
+    },
+    {
+      "type": "step",
+      "t": 17.03,
+      "x": 25.32,
+      "rise": -0.17
+    },
+    {
+      "type": "step",
+      "t": 17.12,
+      "x": 25.6,
+      "rise": -0.16999999999999998
+    },
+    {
+      "type": "step",
+      "t": 17.22,
+      "x": 25.94,
+      "rise": -0.17000000000000004
+    },
+    {
+      "type": "step",
+      "t": 17.3,
+      "x": 26.22,
+      "rise": -0.1700000000000001
+    },
+    {
+      "type": "step",
+      "t": 17.38,
+      "x": 26.51,
+      "rise": -0.16999999999999993
+    },
+    {
+      "type": "step",
+      "t": 17.48,
+      "x": 26.85,
+      "rise": -0.17000000000000015
+    },
+    {
+      "type": "step",
+      "t": 17.57,
+      "x": 27.13,
+      "rise": -0.16999999999999993
+    },
+    {
+      "type": "step",
+      "t": 18.12,
+      "x": 29,
+      "rise": 0.16999999999999993
+    },
+    {
+      "type": "step",
+      "t": 18.22,
+      "x": 29.34,
+      "rise": 0.17000000000000015
+    },
+    {
+      "type": "step",
+      "t": 18.3,
+      "x": 29.62,
+      "rise": 0.16999999999999993
+    },
+    {
+      "type": "step",
+      "t": 18.38,
+      "x": 29.91,
+      "rise": 0.1700000000000001
+    },
+    {
+      "type": "step",
+      "t": 18.48,
+      "x": 30.25,
+      "rise": 0.17000000000000004
+    },
+    {
+      "type": "step",
+      "t": 18.57,
+      "x": 30.53,
+      "rise": 0.16999999999999998
+    },
+    {
+      "type": "step",
+      "t": 18.65,
+      "x": 30.81,
+      "rise": 0.17
+    },
+    {
+      "type": "step",
+      "t": 18.75,
+      "x": 31.15,
+      "rise": 0.17
+    },
+    {
+      "type": "traversal",
+      "t": 18.92,
+      "x": 31.66,
+      "event": {
+        "kind": "turnstile",
+        "height": 1,
+        "depth": 0.4,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.8359722222219723
+      },
+      "label": "turnstile"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 19.52,
+      "x": 33.5,
+      "label": "turnstile"
+    },
+    {
+      "type": "traversal",
+      "t": 20.22,
+      "x": 35.77,
+      "event": {
+        "kind": "dropLadder",
+        "height": 3.6,
+        "depth": 0.4,
+        "landRise": 3.6,
+        "speed": 3.4,
+        "approach": 0.8282000000000522
+      },
+      "label": "fire-escape drop ladder"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 28.77,
+      "x": 37.1,
+      "label": "fire-escape drop ladder"
+    },
+    {
+      "type": "start",
+      "t": 28.78,
+      "x": 37.1
+    },
+    {
+      "type": "traversal",
+      "t": 29.78,
+      "x": 39.9,
+      "event": {
+        "kind": "roofJump",
+        "height": 0,
+        "depth": 2,
+        "landRise": 0,
+        "speed": 5.59166666666667,
+        "approach": 1.10416666666665
+      },
+      "label": "roof gap"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 30.48,
+      "x": 43.8,
+      "label": "roof gap"
+    },
+    {
+      "type": "traversal",
+      "t": 31.72,
+      "x": 48,
+      "event": {
+        "kind": "hangDrop",
+        "height": 0,
+        "depth": 0,
+        "landRise": -3.6,
+        "speed": 3.4,
+        "approach": 0.00022222222235512845
+      },
+      "label": "roof edge hang-drop"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 33.22,
+      "x": 48.4,
+      "label": "roof edge hang-drop"
+    },
+    {
+      "type": "start",
+      "t": 33.23,
+      "x": 48.4
+    }
+  ],
+  "pelvis": {
+    "maxVerticalSpeed": 12.27,
+    "meanVerticalSpeed": 0.91,
+    "note": "grounded frames only; m/s"
+  },
+  "state": {
+    "t": 33.55,
+    "x": 48.72,
+    "y": 0.2,
+    "speed": 1.83,
+    "traversal": null,
+    "done": false
+  },
+  "updateMs": 0.3,
+  "renderMsSoftware": [
+    3,
+    1.900000000023283,
+    2.5
+  ]
+}

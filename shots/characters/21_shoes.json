@@ -1,0 +1,215 @@
+{
+  "backend": "webgl2",
+  "scene": "shoes",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "people": [
+    {
+      "seed": 258930949,
+      "sex": 1,
+      "age": 19,
+      "hair": "afro",
+      "facialHair": "moustacheSideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 8966,
+      "draws": 2,
+      "buildMs": 173.4
+    },
+    {
+      "seed": 2937687056,
+      "sex": 1,
+      "age": 52,
+      "hair": "sidePart",
+      "facialHair": "sideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "wingtip",
+      "hat": null,
+      "props": [
+        "cigarette"
+      ],
+      "tris": 9572,
+      "draws": 2,
+      "buildMs": 141.9
+    },
+    {
+      "seed": 3191179971,
+      "sex": 1,
+      "age": 51,
+      "hair": "pompadour",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 9044,
+      "draws": 2,
+      "buildMs": 89.2
+    },
+    {
+      "seed": 1897997640,
+      "sex": 1,
+      "age": 29,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "sneaker",
+      "hat": null,
+      "props": [
+        "newspaper"
+      ],
+      "tris": 10154,
+      "draws": 2,
+      "buildMs": 86.3
+    },
+    {
+      "seed": 840630346,
+      "sex": 1,
+      "age": 30,
+      "hair": "afroShort",
+      "facialHair": "moustache",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "workBoot",
+      "hat": null,
+      "props": [],
+      "tris": 9401,
+      "draws": 2,
+      "buildMs": 78.9
+    },
+    {
+      "seed": 236997132,
+      "sex": 0,
+      "age": 49,
+      "hair": "updo",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "boot",
+      "hat": null,
+      "props": [
+        "handbag"
+      ],
+      "tris": 11106,
+      "draws": 2,
+      "buildMs": 85.9
+    },
+    {
+      "seed": 1645099668,
+      "sex": 0,
+      "age": 18,
+      "hair": "longStraight",
+      "facialHair": "none",
+      "top": "tee",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "platform",
+      "hat": null,
+      "props": [
+        "tote"
+      ],
+      "tris": 10597,
+      "draws": 2,
+      "buildMs": 76.9
+    },
+    {
+      "seed": 2907309909,
+      "sex": 0,
+      "age": 43,
+      "hair": "longStraight",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "handbag"
+      ],
+      "tris": 10551,
+      "draws": 2,
+      "buildMs": 59.9
+    },
+    {
+      "seed": 468624596,
+      "sex": 0,
+      "age": 22,
+      "hair": "ponytail",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "slipOn",
+      "hat": null,
+      "props": [
+        "tote"
+      ],
+      "tris": 10448,
+      "draws": 2,
+      "buildMs": 43.8
+    },
+    {
+      "seed": 3431427693,
+      "sex": 0,
+      "age": 29,
+      "hair": "afro",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "sandal",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 10928,
+      "draws": 2,
+      "buildMs": 41.6
+    },
+    {
+      "seed": 3844223803,
+      "sex": 0,
+      "age": 42,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "clog",
+      "hat": null,
+      "props": [],
+      "tris": 10312,
+      "draws": 2,
+      "buildMs": 38.1
+    }
+  ],
+  "updateMs": [
+    0,
+    0.1,
+    0,
+    0.1,
+    0,
+    0,
+    0,
+    0.1,
+    0.1,
+    0,
+    0.1
+  ],
+  "renderMsSoftware": [
+    4.2000000001862645,
+    3,
+    3.099999999627471
+  ]
+}

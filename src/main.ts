@@ -51,6 +51,7 @@ type Screen = 'title' | 'play' | 'paused';
 
 async function main() {
   if (new URLSearchParams(location.search).has('vehicles')) return void (await import('./vehicles/testlot/TestLot')).runTestLot(); // vehicles workstream test scene
+  if (new URLSearchParams(location.search).has('characters')) { await (await import('./characters/test/CharactersTest')).runCharactersTest(); return; } // characters workstream test scene
   loadReport.mark('main');
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
