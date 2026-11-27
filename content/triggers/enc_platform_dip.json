@@ -27,7 +27,7 @@
       "type": "encounter",
       "spec": "mission.side_platform_dip",
       "systemic": true,
-      "note": "Systemic chase (ENGINE_REQUESTS 16). Uses the authored traversal beats; a tackle finishes it (Gameplay 4b0d4b4). Ignoring it is fine."
+      "note": "Systemic chase (ENGINE_REQUESTS 16). Uses the authored traversal beats; a tackle finishes it (Gameplay b4f05e9). Ignoring it is fine."
     }
   ]
 }

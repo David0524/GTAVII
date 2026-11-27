@@ -121,6 +121,11 @@
       "text": "Catch the firebug on the W 31st roofs",
       "finish": "tackle",
       "lawful": true,
+      "then": {
+        "restrain": true,
+        "walkTo": "Prentiss's car (o9)",
+        "doneOn": "restrained, then o9 begins at the car"
+      },
       "barks": "barks.traversal",
       "traversal": [
         {

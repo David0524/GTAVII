@@ -66,6 +66,7 @@ INSERTS = {
  # M26: after the firefight the firebug bolts up a fire escape and over the W 31st St roofs.
  ("mission.fire_watch", "o8b"): {"id": "o8c", "type": "chase", "target": "npc.hired_firebug", "catchDistanceM": 3,
    "text": "Catch the firebug on the W 31st roofs", "finish": "tackle", "lawful": True,
+   "then": {"restrain": True, "walkTo": "Prentiss's car (o9)", "doneOn": "restrained, then o9 begins at the car"},
    "route": [
      b("drop_ladder", "a dry-cleaner's rear fire escape off W 31st, ladder already down (he used it)", "tv.w31_fe_ladder"),
      b("fire_escape", "five landings up, past a window where an old man is watching the ballgame", "tv.w31_fe_stairs"),
@@ -103,7 +104,8 @@ SIDE = {
      b("fence_climb", "a chain-link fence into a rubble lot off W 41st", "tv.w41_lot_fence"),
      b("vault", "a burned-out car hulk in the lot", "tv.w41_lot_car"),
      b("fence_climb", "the lot's back fence, onto W 40th", "tv.w40_fence")],
-   "checkpointAfter": "tv.w41_lot_fence"},
+   "checkpointAfter": "tv.w41_lot_fence", "finish": "tackle", "lawful": True,
+   "then": {"restrain": True, "loadIntoCar": True, "doneOn": "notice quarryLoaded (Gameplay 60e0f02)"}},
 }
 
 
@@ -119,6 +121,7 @@ def _apply(spec, table):
             if r.get("text"): o["text"] = r["text"]
             if r.get("catchDistanceM"): o["catchDistanceM"] = r["catchDistanceM"]
             if r.get("finish"): o["finish"] = r["finish"]; o["lawful"] = r.get("lawful", True)
+            if r.get("then"): o["then"] = r["then"]
             if r.get("barks"): o["barks"] = r["barks"]
             if r.get("preChase"): o["note"] = (o.get("note", "") + " The skip runs first: chase him on foot (route), then take him down.").strip()
             cp = r.get("checkpointAfter")
