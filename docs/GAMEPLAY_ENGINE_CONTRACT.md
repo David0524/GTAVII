@@ -29,6 +29,12 @@ Each frame: `g.setClock({ minutes, day?, tempF?, heatwave? })` (live play advanc
 - `prop` + `speed`: hydrants, meters, newsstands break; a **vendor cart** prop (from sim's `vendorSpawned.cart.prop`)
   goes over (`cartHit` → `vendorNotice cartOverturned` to sim, audio keys off it).
 - `destroyed {vehicleId}` → `notice`.
+- **Pedestrians:** sim peds are kinematic, so the physics car never touches them. Gameplay checks the player's car
+  footprint itself each frame (5.4 × 2.0 m around the player position, facing `vehicleYaw`, at `speed` ≥ 2 m/s) against
+  sim peds: nothing to send. A `ped` impact from the engine is still accepted; one strike per ped per 2 s either way.
+- **Sim traffic:** sim's `collision {vehicle, actor, speed}` with `actor: 'player'` is a pedestrian strike on foot, and
+  in the car (sim traffic is kinematic too) an occupant crash at half the closing speed, unless the physics car
+  reported a crash in the same 0.3 s. Event `notice {kind: 'trafficCrash'}`.
 Getting in and out: `g.enterCar(id, 'keys'|'unlocked'|'slimjim'|'smash'|'hotwire'|'carjack')` returns time, noise and
 crimes (gameplay reports them); `g.exitCar()` (registers your own car with sim parking). While driving, set
 `setContext({ vehicle: {...}, speed })` each frame: the police see the car (descriptions match plate, colour, class).
