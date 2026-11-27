@@ -22,7 +22,7 @@ def piece(rank, id, title, kind, leads, acts, where, hook, twist, systems, rewar
 # kinds: arc (recurring stranger), job (systemic, skill curve and payout ladder), encounter (random street),
 # lead (lead-specific line), map (tied to a map feature), collectible (story payoff)
 piece(1, "pigeon_commodore", "The Pigeon Commodore", "arc", [ANY], [1, 2, 3], "Rooftop coop over W 29th St & 7th Ave; rooftops across the Fur District",
-      "Old Ignatz Halloran races pigeons from a tar-roof coop and swears someone is stealing his champions mid-race.",
+      "Old Ignatz Hallisey races pigeons from a tar-roof coop and swears someone is stealing his champions mid-race.",
       "Rooftop pursuit by sight: follow a bird's flight line across roofs, fire escapes and stairwells (enterable buildings), photograph its leg band to prove which roof it landed on. In Act 3 his birds carry a message for the march.",
       ["rooftops and interiors", "photo mode", "pigeons (ambient)", "brownout (birds roost early)"], "$20 a race; the final race unlocks a pigeon-post messenger that shows the next story marker",
       "Following is by viewpoint, not aim. Birds pause on landmarks. Every roof route has a stairwell exit.", parts=4)
@@ -211,10 +211,10 @@ SPECS = {
  "side.hollis_postcards": [O("o1", "deliver", "Bring Mrs. Pruitt the postcards", item="item.hollis_postcard", to="interior.corwin_lobby"),
                            O("o2", "dialogue", "Read them together", script="dlg.side_postcards")]}
 DLG = {
- "dlg.side_pigeon_1": [("char.ignatz_halloran", "conspiratorial", "Somebody's stealing my champions mid-race. Over these roofs. I need young legs."),
-                       ("char.ignatz_halloran", "proud", "That's Admiral Nelson. Blue bar, white band. Follow him. Don't lose him at the tanks.")],
- "dlg.side_pigeon_2": [("char.ignatz_halloran", "triumphant", "The roof with the green door! I knew it. That's Murphy's coop. He's been at it since '61."),
-                       ("char.ignatz_halloran", "warm", "Twenty dollars and a bird named after you. Don't argue.")],
+ "dlg.side_pigeon_1": [("char.ignatz_hallisey", "conspiratorial", "Somebody's stealing my champions mid-race. Over these roofs. I need young legs."),
+                       ("char.ignatz_hallisey", "proud", "That's Admiral Nelson. Blue bar, white band. Follow him. Don't lose him at the tanks.")],
+ "dlg.side_pigeon_2": [("char.ignatz_hallisey", "triumphant", "The roof with the green door! I knew it. That's Murphy's coop. He's been at it since '61."),
+                       ("char.ignatz_hallisey", "warm", "Twenty dollars and a bird named after you. Don't argue.")],
  "dlg.side_stunt_1": [("npc.film_ad", "bullhorn", "You! You drive? Our stunt man quit. Hundred-dollar day, fifty a take."),
                       ("npc.film_ad", "bullhorn", "Hit the mark, skid on cue, miss the camera car. That's the whole job. Picture's up!")],
  "dlg.side_stunt_2": [("npc.film_ad", "bullhorn", "Cut! Print it! Who are you? Never mind. Same time tomorrow!")],

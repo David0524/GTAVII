@@ -4,13 +4,13 @@
   "lines": [
     {
       "id": "l1",
-      "speaker": "char.ignatz_halloran",
+      "speaker": "char.ignatz_hallisey",
       "emotion": "triumphant",
       "text": "The roof with the green door! I knew it. That's Murphy's coop. He's been at it since '61."
     },
     {
       "id": "l2",
-      "speaker": "char.ignatz_halloran",
+      "speaker": "char.ignatz_hallisey",
       "emotion": "warm",
       "text": "Twenty dollars and a bird named after you. Don't argue."
     }

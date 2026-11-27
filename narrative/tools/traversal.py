@@ -38,7 +38,7 @@ ROUTES = {
  ("mission.independence_day", "o9"): {
    "text": "Lose them down Eighth, into Penn Station",
    "route": [
-     b("car_hood", "a double-parked Checker cab on Eighth Ave at 34th", "tv.8th_34_cab"),
+     b("car_hood", "a double-parked Fareway cab (Garrity) on Eighth Ave at 34th", "tv.8th_34_cab"),
      b("vault", "a shuttered newsstand counter at 33rd & Eighth", "tv.8th_33_newsstand"),
      b("scaffold", "a sidewalk shed on the Eighth Ave side of the Penn Square Garden block: up and along the plank deck", "tv.psg_sidewalk_shed"),
      b("hang_drop", "off the shed's end, into the crowd leaving the fireworks", "tv.psg_shed_end"),

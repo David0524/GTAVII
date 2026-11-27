@@ -719,6 +719,27 @@
       "status": "todo"
     },
     {
+      "id": "sign.ludwick.blade",
+      "file": "sign_ludwick_blade.png",
+      "owner": "narrative",
+      "use": "Ludwick Opticians · Madison Ave & E 25th St",
+      "aspect": "1:4",
+      "size": "512×2048",
+      "sizeFinal": false,
+      "prompt": "Create a vertical projecting blade sign, seen dead-on from the front, isolated on a flat black background for Ludwick Opticians (Optician), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. A projecting optician's sign shaped like a pair of round spectacles, black frame with frosted lenses; no text. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:4.",
+      "text": null,
+      "textPolicy": "none",
+      "accept": [
+        "no legible text anywhere",
+        "no real logo or brand",
+        "no people or vehicles",
+        "frontal and evenly lit",
+        "clean black background"
+      ],
+      "priority": 3,
+      "status": "todo"
+    },
+    {
       "id": "sign.marlowe.fascia",
       "file": "sign_marlowe_fascia.png",
       "owner": "narrative",
@@ -771,27 +792,6 @@
       "textPolicy": "exact",
       "accept": [
         "text letter-perfect",
-        "no real logo or brand",
-        "no people or vehicles",
-        "frontal and evenly lit",
-        "clean black background"
-      ],
-      "priority": 3,
-      "status": "todo"
-    },
-    {
-      "id": "sign.ostrander.blade",
-      "file": "sign_ostrander_blade.png",
-      "owner": "narrative",
-      "use": "Ostrander Opticians · Madison Ave & E 25th St",
-      "aspect": "1:4",
-      "size": "512×2048",
-      "sizeFinal": false,
-      "prompt": "Create a vertical projecting blade sign, seen dead-on from the front, isolated on a flat black background for Ostrander Opticians (Optician), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. A projecting optician's sign shaped like a pair of round spectacles, black frame with frosted lenses; no text. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:4.",
-      "text": null,
-      "textPolicy": "none",
-      "accept": [
-        "no legible text anywhere",
         "no real logo or brand",
         "no people or vehicles",
         "frontal and evenly lit",

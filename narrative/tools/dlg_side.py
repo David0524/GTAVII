@@ -161,8 +161,8 @@ s("dlg.side_water_tank_radio_2", "The man in the tank.", ("npc.park_sleeper", "s
 s("dlg.side_weather_prophet_1", "Herald Square, the man with the barometer.", (OBA, "booming", "The glass is falling, friend. The glass never lies. People lie."), (OBA, "conspiratorial", "Bring me readings from three roof gauges and I'll tell you which blocks go dark."))
 s("dlg.side_weather_prophet_2", "Reporting the first reading.", (OBA, "satisfied", "Twenty-nine point six. Brownout Thursday, west of Sixth. Write it down. Science, friend."))
 
-s("dlg.side_pigeon_bands_1", "Banded pigeons around the core; the Commodore's lost birds.", ("char.ignatz_halloran", "wistful", "Fifteen of my lost birds still wear my bands. Photograph them. I want to know they're fed."))
-s("dlg.side_pigeon_bands_2", "Bringing the band photos back.", ("char.ignatz_halloran", "moved", "Admiral Nelson's granddaughter! On the Library steps! She's fat. Good. Race day, Sunday."))
+s("dlg.side_pigeon_bands_1", "Banded pigeons around the core; the Commodore's lost birds.", ("char.ignatz_hallisey", "wistful", "Fifteen of my lost birds still wear my bands. Photograph them. I want to know they're fed."))
+s("dlg.side_pigeon_bands_2", "Bringing the band photos back.", ("char.ignatz_hallisey", "moved", "Admiral Nelson's granddaughter! On the Library steps! She's fat. Good. Race day, Sunday."))
 
 for sid, d in S.items():
     (C / "dialogue" / f"{sid.split('.', 1)[1]}.json").write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")

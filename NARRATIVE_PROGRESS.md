@@ -882,3 +882,31 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - New pool `barks.traversal`: 19 lead lines.
   - ENGINE_REQUESTS 15 lists 28 `tv.*` markup points.
   - Mobile: one button, no timing, soft-fail jumps, and a rubber-banded quarry.
+- **Name sweep (27 Nov 2026, oversight):**
+  - "Checker cab" became "Fareway cab (Garrity)", the vehicles chat's invented taxi model.
+  - Two clashes with the vehicles registry's makes were renamed: Ostrander Opticians became **Ludwick Opticians**, and Ignatz "The Commodore" Halloran became **Hallisey** (id `char.ignatz_hallisey`).
+  - No other real vehicle, consumer or brand names were found in player-facing content.
+  - **Open:** the vehicles chat rejected "Brannock" as a make because the Brannock Device is a well-known trademark. Our principal cop is Jimmy Brannock, so this is flagged to oversight for the user to decide (it's a surname, not a product use).
+
+### vs GTA V / VI / RDR2: chases and traversal
+- **What the references do:**
+  - GTA V's on-foot chases are short and pinned to the street. The quarry follows a scripted path through alleys and over low walls, the player loses only if the gap grows too large, and the chase usually ends in a tackle, a melee hit or a cutscene.
+  - RDR2 puts most chases on horseback. Its on-foot chases end with a tackle or a lasso, and crowds and townsfolk react loudly.
+  - GTA VI's public footage shows denser crowds and more vaulting and climbing woven into the street.
+  - All three keep failure soft: lose the target and you get a quick retry, never instant death from a missed jump.
+- **Where we match:**
+  - Authored routes through period fixtures: fire escapes, air-shaft gaps, sidewalk sheds, turnstiles, chain-link lots.
+  - A rubber-banded quarry, with soft failure on missed jumps and a mid-route checkpoint.
+  - Crowd-push beats.
+  - Story-specific stakes: Brannock is too heavy for the gap, and the turnstile is a fare-or-heat risk choice.
+  - Lead-voiced barks during the climb.
+- **Where we fall short:**
+  - No tackle or takedown verb to end a foot chase. Today a chase hands off to a combat objective.
+  - Every chase is authored; there are no systemic random-event chases yet.
+  - Six routes in total, all short.
+  - No bystander chatter specific to a chase.
+- **Plan:**
+  1. Ask Gameplay for a tackle or grab finisher on `chase`.
+  2. Turn the purse-snatch route into a systemic random encounter that picks its beats from nearby `tv.*` markup.
+  3. Add a rooftop chase to M26 Fire Watch (Prentiss's torch man).
+  4. Add a `barks.chase_bystander` pool ("Hey! My cart!").

@@ -48,7 +48,7 @@
 | **The Velvet Moon** | Grindhouse cinema | W 42nd St, 7th–8th Aves | VELVET MOON · 3 FEATURES · CONTINUOUS · $1 | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **The Orbit Lounge** | Bar | 8th Ave & W 41st St | ORBIT LOUNGE · COCKTAILS (neon Saturn) | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **Mr. Lucky's Lunch** | Lunch counter | 8th Ave & W 41st St | MR. LUCKY'S LUNCH · HOT DOGS · PAPAYA DRINK | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
-| **Ostrander Opticians** | Optician | Madison Ave & E 25th St | OSTRANDER OPTICIANS · EYES EXAMINED | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
+| **Ludwick Opticians** | Optician | Madison Ave & E 25th St | LUDWICK OPTICIANS · EYES EXAMINED | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **The Penny Lantern Diner** | Diner | W 23rd St & 9th Ave | PENNY LANTERN DINER · BREAKFAST ALL DAY | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **Krause Hardware** | Hardware store (Gus's) | 6th Ave & W 31st St | KRAUSE HARDWARE · KEYS MADE · FANS IN STOCK | Ambient shopfront for signage variety.  | batch-checked (multi-name query; weak). Re-check individually before ship |
 | **Botánica San Lázaro** | Botanica (religious goods) | 8th Ave & W 25th St | BOTÁNICA SAN LÁZARO · HIERBAS · VELAS | Ambient shopfront.  | descriptive or generic pattern; low risk; not searched |

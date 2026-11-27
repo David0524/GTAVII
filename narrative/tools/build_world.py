@@ -94,7 +94,7 @@ for id, name, trade, where, sign in [
     ("velvet_moon", "The Velvet Moon", "Grindhouse cinema", "W 42nd St, 7th–8th Aves", "VELVET MOON · 3 FEATURES · CONTINUOUS · $1"),
     ("orbit", "The Orbit Lounge", "Bar", "8th Ave & W 41st St", "ORBIT LOUNGE · COCKTAILS (neon Saturn)"),
     ("mr_lucky", "Mr. Lucky's Lunch", "Lunch counter", "8th Ave & W 41st St", "MR. LUCKY'S LUNCH · HOT DOGS · PAPAYA DRINK"),
-    ("ostrander", "Ostrander Opticians", "Optician", "Madison Ave & E 25th St", "OSTRANDER OPTICIANS · EYES EXAMINED"),
+    ("ludwick", "Ludwick Opticians", "Optician", "Madison Ave & E 25th St", "LUDWICK OPTICIANS · EYES EXAMINED"),
     ("penny_lantern", "The Penny Lantern Diner", "Diner", "W 23rd St & 9th Ave", "PENNY LANTERN DINER · BREAKFAST ALL DAY"),
     ("krause", "Krause Hardware", "Hardware store (Gus's)", "6th Ave & W 31st St", "KRAUSE HARDWARE · KEYS MADE · FANS IN STOCK")]:
     biz(f"biz.{id}", name, trade, where, "Ambient shopfront for signage variety.", [sign], BATCH, story=False)

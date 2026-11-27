@@ -410,7 +410,18 @@ Create lettering painted on a shop window, seen straight on, on a fully transpar
 Create a flat, frontal storefront fascia sign board, filling the frame edge to edge for Kaplowitz Hangers (Hanger supply), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. Grey board with black condensed letters and a painted wire hanger icon; utilitarian. EXACT TEXT: "KAPLOWITZ HANGERS". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.
 ```
 
-### 036. `sign.marlowe.fascia` · priority 3 · status: **todo**
+### 036. `sign.ludwick.blade` · priority 3 · status: **todo**
+- **file:** `sign_ludwick_blade.png` · **size:** 512×2048 (1:4, provisional) · **owner:** narrative
+- **use:** Ludwick Opticians · Madison Ave & E 25th St
+- **text policy:** none
+- **accept:** no legible text anywhere; no real logo or brand; no people or vehicles; frontal and evenly lit; clean black background
+- **prompt:**
+
+```text
+Create a vertical projecting blade sign, seen dead-on from the front, isolated on a flat black background for Ludwick Opticians (Optician), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. A projecting optician's sign shaped like a pair of round spectacles, black frame with frosted lenses; no text. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:4.
+```
+
+### 037. `sign.marlowe.fascia` · priority 3 · status: **todo**
 - **file:** `sign_marlowe_fascia.png` · **size:** 3072×512 (6:1, provisional) · **owner:** narrative
 - **use:** Marlowe Import House · Broadway & W 30th St
 - **text policy:** exact · **text:** `MARLOWE IMPORT HOUSE`
@@ -421,7 +432,7 @@ Create a flat, frontal storefront fascia sign board, filling the frame edge to e
 Create a flat, frontal storefront fascia sign board, filling the frame edge to edge for Marlowe Import House (Importer), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. Navy board with gilt serif letters and a thin brass border; slightly grand for the block. EXACT TEXT: "MARLOWE IMPORT HOUSE". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.
 ```
 
-### 037. `sign.mr_lucky.fascia` · priority 3 · status: **todo**
+### 038. `sign.mr_lucky.fascia` · priority 3 · status: **todo**
 - **file:** `sign_mr_lucky_fascia.png` · **size:** 3072×512 (6:1, provisional) · **owner:** narrative
 - **use:** Mr. Lucky's Lunch · 8th Ave & W 41st St
 - **text policy:** exact · **text:** `MR. LUCKY'S LUNCH`
@@ -432,7 +443,7 @@ Create a flat, frontal storefront fascia sign board, filling the frame edge to e
 Create a flat, frontal storefront fascia sign board, filling the frame edge to edge for Mr. Lucky's Lunch (Lunch counter), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. Orange and yellow plastic lightbox, a painted hot dog with a smiling face (generic, cartoonish), chips and cracks in the plastic. EXACT TEXT: "MR. LUCKY'S LUNCH". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6:1.
 ```
 
-### 038. `sign.orbit.blade` · priority 3 · status: **todo**
+### 039. `sign.orbit.blade` · priority 3 · status: **todo**
 - **file:** `sign_orbit_blade.png` · **size:** 512×2048 (1:4, provisional) · **owner:** narrative
 - **use:** The Orbit Lounge · 8th Ave & W 41st St
 - **text policy:** exact · **text:** `ORBIT`
@@ -441,17 +452,6 @@ Create a flat, frontal storefront fascia sign board, filling the frame edge to e
 
 ```text
 Create a vertical projecting blade sign, seen dead-on from the front, isolated on a flat black background for The Orbit Lounge (Bar), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. Neon Saturn with a tilted ring in pink and teal tubes above the word in script; space-age 1960s lounge sign, a bit tired. EXACT TEXT: "ORBIT". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1:4.
-```
-
-### 039. `sign.ostrander.blade` · priority 3 · status: **todo**
-- **file:** `sign_ostrander_blade.png` · **size:** 512×2048 (1:4, provisional) · **owner:** narrative
-- **use:** Ostrander Opticians · Madison Ave & E 25th St
-- **text policy:** none
-- **accept:** no legible text anywhere; no real logo or brand; no people or vehicles; frontal and evenly lit; clean black background
-- **prompt:**
-
-```text
-Create a vertical projecting blade sign, seen dead-on from the front, isolated on a flat black background for Ostrander Opticians (Optician), Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. A projecting optician's sign shaped like a pair of round spectacles, black frame with frosted lenses; no text. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1:4.
 ```
 
 ### 040. `sign.papadakis.fascia` · priority 3 · status: **todo**

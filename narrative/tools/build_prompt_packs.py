@@ -52,7 +52,7 @@ STOREFRONTS = [
  ("biz.velvet_moon", "marquee", None, "Grindhouse marquee: deep purple sheet-metal front with a crescent-moon cutout at the top centre lined in chaser bulbs, rust at the seams; three empty letter rows."),
  ("biz.orbit", "blade", "ORBIT", "Neon Saturn with a tilted ring in pink and teal tubes above the word in script; space-age 1960s lounge sign, a bit tired."),
  ("biz.mr_lucky", "fascia", "MR. LUCKY'S LUNCH", "Orange and yellow plastic lightbox, a painted hot dog with a smiling face (generic, cartoonish), chips and cracks in the plastic."),
- ("biz.ostrander", "blade", None, "A projecting optician's sign shaped like a pair of round spectacles, black frame with frosted lenses; no text."),
+ ("biz.ludwick", "blade", None, "A projecting optician's sign shaped like a pair of round spectacles, black frame with frosted lenses; no text."),
  ("biz.penny_lantern", "fascia", "PENNY LANTERN DINER", "Stainless steel diner fascia with red enamel letters and a small painted lantern; streamline bands."),
  ("biz.krause", "fascia", "KRAUSE HARDWARE", "Red board with white block letters, a painted key at one end; a neighbourhood hardware store."),
  ("biz.botanica", "window", "BOTÁNICA SAN LÁZARO", "Hand-painted window lettering in red and gold, with painted candles and simple leaves around it (no religious figures)."),

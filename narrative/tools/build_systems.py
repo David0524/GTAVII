@@ -92,7 +92,7 @@ SV = [
  svc("char.sully_garage", "Sully McNamee", 57, "Parking-garage attendant (owned-car storage)", "W 33rd St, 7th–8th Aves (Penn Garage)",
      "16:00–04:00", ["Monthly's sixty. Hourly's robbery. I don't set the prices, I just park the robbery.", "Your car's on four. Somebody tried the door. I tried his head.", "Leave the keys. I don't drive 'em. Much."],
      "Coveralls, a ticket punch, a transistor radio on the races"),
- svc("char.ignatz_halloran", "Ignatz “The Commodore” Halloran", 71, "Rooftop pigeon racer (side arc)", "Roof coop over W 29th St & 7th Ave",
+ svc("char.ignatz_hallisey", "Ignatz “The Commodore” Hallisey", 71, "Rooftop pigeon racer (side arc)", "Roof coop over W 29th St & 7th Ave",
      "06:00–09:00 and 17:00–20:00 on the roof; otherwise in his walk-up below",
      ["Pigeons are the only New Yorkers who always come home.", "That's Admiral Nelson. Blue bar, white band. He's smarter than the mayor.", "Somebody's stealing my champions mid-race. Over these roofs. I need young legs."],
      "Small, wiry, a captain's cap, binoculars, a feed bag, forearms freckled with old scratches", note="Pigeons (user: 'Definitely should be some pigeons'). Side arc rank 1."),

@@ -509,13 +509,13 @@
       "note": ""
     },
     {
-      "id": "biz.ostrander",
-      "name": "Ostrander Opticians",
+      "id": "biz.ludwick",
+      "name": "Ludwick Opticians",
       "trade": "Optician",
       "where": "Madison Ave & E 25th St",
       "era": "Ambient shopfront for signage variety.",
       "sign": [
-        "OSTRANDER OPTICIANS · EYES EXAMINED"
+        "LUDWICK OPTICIANS · EYES EXAMINED"
       ],
       "check": "batch-checked (multi-name query; weak). Re-check individually before ship",
       "story": false,
