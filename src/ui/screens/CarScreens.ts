@@ -24,7 +24,8 @@ const miles = (m: number) => `${m.toLocaleString('en-US')} mi`;
 const SWATCH: Record<string, string> = { maroon: '#6e1f2a', 'harvest gold': '#c8902c', avocado: '#6f7a3a', 'sky blue': '#6fa3c8', 'primer grey': '#8a8a86', 'midnight green': '#1f3a30', 'candy apple red': '#b3221f', 'bright yellow': '#e6c52a' };
 const paint = (colour: string) => SWATCH[colour.toLowerCase()] ?? '#777';
 const swatch = (colour: string) => `<i class="car-sw" style="background:${paint(colour)}" title="${esc(colour)}"></i>`;
-const plate = (p: string) => `<span class="car-plate"><small>New York</small>${esc(p)}</span>`;
+// 1973–80 New York base (matches the vehicles plate texture): embossed blue serial on reflective orange, NEW YORK at the bottom
+const plate = (p: string) => `<span class="car-plate">${esc(p)}<small>New York</small></span>`;
 
 export class CarLot extends Modal {
   onToast?: (t: string) => void;
