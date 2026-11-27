@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T10:36:41.209Z",
+  "date": "2026-11-27T14:16:50.352Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -244,13 +244,18 @@
   },
   "triangles": {
     "bancroft": {
-      "lod0": 9476,
-      "lod1": 1846,
+      "lod0": 10018,
+      "lod1": 1888,
       "lod2": 72
     },
-    "ct40": {
-      "lod0": 9878,
-      "lod1": 3094,
+    "bancroft_patrol": {
+      "lod0": 9486,
+      "lod1": 1928,
+      "lod2": 72
+    },
+    "bancroft_cab": {
+      "lod0": 9250,
+      "lod1": 1832,
       "lod2": 72
     }
   },
@@ -387,46 +392,46 @@
     "bodyVertices": 5535
   },
   "hero": {
-    "bancroft_heroSteadyDrawMs": 2.3,
+    "bancroft_heroSteadyDrawMs": 8.3,
     "bancroft": {
-      "frameTrisStandard": 22813,
-      "frameTrisHero": 53239,
-      "swapAndDrawMs": 1051.1,
-      "standardDrawMs": 2.8,
+      "frameTrisStandard": 23591,
+      "frameTrisHero": 55019,
+      "swapAndDrawMs": 3956.4,
+      "standardDrawMs": 3.1,
       "hero": true
     },
     "tiverton_heroSteadyDrawMs": 6.6,
     "tiverton": {
-      "frameTrisStandard": 22169,
-      "frameTrisHero": 51303,
-      "swapAndDrawMs": 1560.6,
-      "standardDrawMs": 2.4,
+      "frameTrisStandard": 22837,
+      "frameTrisHero": 52727,
+      "swapAndDrawMs": 3279,
+      "standardDrawMs": 3.1,
       "hero": true
     },
-    "ct40_heroSteadyDrawMs": 2.9,
+    "ct40_heroSteadyDrawMs": 4.7,
     "ct40": {
-      "frameTrisStandard": 22679,
-      "frameTrisHero": 51213,
-      "swapAndDrawMs": 270.6,
-      "standardDrawMs": 6.8,
+      "frameTrisStandard": 22529,
+      "frameTrisHero": 50727,
+      "swapAndDrawMs": 228,
+      "standardDrawMs": 2,
       "hero": true
     },
-    "courier_heroSteadyDrawMs": 2.4,
+    "courier_heroSteadyDrawMs": 5.9,
     "courier": {
       "frameTrisStandard": 20123,
       "frameTrisHero": 43785,
-      "swapAndDrawMs": 622.3,
-      "standardDrawMs": 2.6,
+      "swapAndDrawMs": 618.4,
+      "standardDrawMs": 5.9,
       "hero": true
     },
     "workerGenMs": [
-      144,
-      88,
-      86,
-      83,
-      65,
-      104,
-      80
+      159,
+      97,
+      81,
+      67,
+      54,
+      228,
+      117
     ]
   },
   "movementAnchors": {
@@ -500,6 +505,12 @@
       51.3,
       0,
       30
+    ]
+  },
+  "doors": {
+    "ajarAfterBraking": 0.17480449201975334,
+    "detached": [
+      "door0"
     ]
   }
 }

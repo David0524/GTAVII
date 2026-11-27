@@ -43,7 +43,8 @@ const bancroft: ModelSpec = {
   crown: 0.025, cornerF: 0.3, cornerR: 0.3, noseRake: 0.03, tailRake: 0.02, crease: 0.55, archGap: 0.05,
   shape: { tuck: 0.87, round: 0.7, tumble: 0.972, peak: 0.008, hip: { s: 4.09, w: 0.75, amount: 0.012 } },
   hood: [0.07, 1.98],
-  gh: { sA0: 2.05, sA1: 2.72, sC1: 3.86, sC0: 4.36, roofY: 1.33, beltInset: 0.07, roofHalfW: 0.7, crown: 0.035, bow: 0.05, bands: sedanBands(0.47, 0.86), winV: [0.04, 0.9], drip: true },
+  // pass 2 (vs DOCUMERICA 549869): raked windshield and backlight, a slightly lower, narrower, rounder roof
+  gh: { sA0: 1.98, sA1: 2.84, sC1: 3.78, sC0: 4.5, roofY: 1.31, beltInset: 0.075, roofHalfW: 0.66, crown: 0.05, bow: 0.07, bands: sedanBands(0.47, 0.84), winV: [0.04, 0.9], drip: true },
   grille: { kind: 'egg', hw: 0.38, y0: 0.5, y1: 0.72, bars: 12 },
   headlamps: { kind: 'quadRound', y: 0.62, xOut: 0.16, size: 0.15 },
   taillamps: { kind: 'band', y0: 0.6, y1: 0.72 },

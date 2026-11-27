@@ -268,6 +268,45 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
     hitch can't skip the fade.
   - Ground light pools appear once a car is more than half faded in.
 
+- **Doors (LOD0 passenger cars).**
+  - **Cutting them out:** doors are cut out of the generated body along their shut-line seams
+    (seams are now loft stations, so the cut is clean) by `extractRegions()`. Below the belt a
+    door takes the skin, handle, lock, shut lines and door card; above it, the door's side glass.
+  - **Count:** sedans, cabs and wagons have 2 per side, the Tiverton coupe 1. Trucks and buses
+    keep their cab doors in the body.
+  - **Hinges:** front-hinged on a pivot at the front seam, opening to about 70°. Damage morphs,
+    the hero swap, worker transfer and thumbnails all include doors.
+  - **API for the engine's enter / exit / carjack animations:**
+    - `setDoor(seat, 0..1)` (animated);
+    - `doorOpen(seat)`;
+    - `closeAllDoors()`;
+    - `movementAnchors().doors[].doorOpen`.
+  - **Damage:** side-zone damage over 0.55 unlatches the doors on that side. They then swing:
+    braking throws them open, cornering throws the outer door open, and airflow at speed blows
+    them shut, with a bang off the frame and the stop. Zone damage over 0.88, or a hit of
+    severity 0.6 or more, tears one off as debris (`door<i>`). Saved in `components.detached`;
+    `repair()` puts it back.
+  - Shot: `doors.jpg`. Rig section `doors`.
+
+- **Taxi glasshouse, pass 2 (Bancroft family: sedan, cab, patrol).**
+  - The windshield is raked further (run 0.86 m, was 0.67), and so is the back light (0.72 m,
+    was 0.5).
+  - The roof is 2 cm lower and narrower, with more crown and bow.
+  - The cab no longer reads tall and upright.
+  - Caveat: the cab in 549869 is itself a fairly upright type, so this pass follows the sedan-based
+    cabs in 554331 instead.
+- **Hero triangle count:** hero sedans are now about 44k triangles (41k before), because the door
+  seams became loft stations.
+
+- **Steering wheel for hand IK (engine request).** `vehicle.steeringWheelPose()` returns, in world
+  space: `centre`, `axis` (the column, pointing at the driver), `up`, `radius`, `turn` (rim angle,
+  the road-wheel angle × 14) and `leftGrip` / `rightGrip` (10 and 2 o'clock, turned with the rim).
+  - In passenger cars the modelled rim and spokes are now their own part, cut out of the body,
+    and they rotate by the same `turn`, so the hands stay on the rim.
+  - Trucks and buses use a flatter, bus-style layout placed from their seat (their wheel isn't
+    modelled separately yet).
+  - At full lock the rim turns 8.4 rad (about 1.3 turns).
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
