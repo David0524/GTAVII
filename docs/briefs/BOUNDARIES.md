@@ -121,3 +121,10 @@ when the film shoot wraps.
   block-party band) and the layer-4 projector bed and leader beeps.
 - **Characters:** archetypes and actions for film-crew PAs, utility workers and barricade cops,
   including a "wave off" animation.
+
+## Grand Central extension (user decision, 2026-11-27)
+The user chose "Extend map, full interior". The east edge moves just far enough to include Grand Central
+Terminal (42nd–44th St), the Park Ave viaduct and ramps, Pershing Square and the Pan Amity Building's
+base. It still fits the "small map, very interactive" pillar. The engine changes bounds.ts after
+the merge sprint and posts the new PLAYABLE numbers in ENGINE_RESPONSES. The concourse is a hero
+interior (interiors owns the content; engine owns the shell, lighting volume and streaming).
