@@ -6,37 +6,37 @@
     {
       "hero": "char.teddy_arce",
       "head": "lead_teddy",
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2
     },
     {
       "hero": "char.teddy_arce",
       "head": null,
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": "lead_delphine",
-      "tris": 17101,
+      "tris": 19490,
       "draws": 2
     },
     {
       "hero": "char.delphine_moore",
       "head": null,
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": "lead_nick",
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2
     },
     {
       "hero": "char.nick_varelas",
       "head": null,
-      "tris": 26140,
+      "tris": 33490,
       "draws": 2
     }
   ],
@@ -54,9 +54,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 16158,
+      "tris": 19961,
       "draws": 2,
-      "buildMs": 131
+      "buildMs": 194.3
     },
     {
       "seed": 1,
@@ -71,9 +71,9 @@
       "shoes": "oxford",
       "hat": null,
       "props": [],
-      "tris": 23909,
+      "tris": 27712,
       "draws": 2,
-      "buildMs": 86.9
+      "buildMs": 152
     },
     {
       "seed": 1,
@@ -90,9 +90,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 19490,
       "draws": 2,
-      "buildMs": 55
+      "buildMs": 79.8
     },
     {
       "seed": 1,
@@ -109,9 +109,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 20094,
+      "tris": 21940,
       "draws": 2,
-      "buildMs": 52.4
+      "buildMs": 77.3
     },
     {
       "seed": 1,
@@ -126,9 +126,9 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 24268,
+      "tris": 31624,
       "draws": 2,
-      "buildMs": 106.8
+      "buildMs": 119
     },
     {
       "seed": 1,
@@ -143,22 +143,42 @@
       "shoes": "loafer",
       "hat": null,
       "props": [],
-      "tris": 26140,
+      "tris": 33490,
       "draws": 2,
-      "buildMs": 115
+      "buildMs": 117
     }
   ],
   "updateMs": [
     0.1,
     0,
     0,
-    0.1,
+    0,
     0.1,
     0
   ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.3883,
+        0.5966
+      ],
+      "neck": [
+        0.4638,
+        0.7161
+      ],
+      "hand": [
+        0.0081,
+        2.1728
+      ]
+    }
+  ],
   "renderMsSoftware": [
-    2.7999999998137355,
-    1,
-    0.900000000372529
+    1.7000000001862645,
+    0.7999999998137355,
+    0.7000000001862645
   ]
 }

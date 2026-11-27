@@ -17,6 +17,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { writeContainer } from '../../src/characters/format.ts';
 import { JOINT_INDEX as JI } from '../../src/characters/rig.ts';
+import { repack } from './meshopt.ts';
+const pendingRepack: string[] = [];
 
 (globalThis as any).document = { createElementNS: () => ({ style: {}, addEventListener() {}, removeEventListener() {} }) };
 (globalThis as any).window = globalThis; (globalThis as any).self = globalThis;
@@ -241,6 +243,7 @@ print(json.dumps(list(cs[len(cs)//2]) if cs else [180,140,110]))`, path.join(dir
   };
   const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj: qsj, sw: qsw, kind: Uint8Array.from(kind), idx: nv < 65536 ? Uint16Array.from(idx) : Uint32Array.from(idx) });
   fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);
+  pendingRepack.push(path.join(OUT, `${id}.bin`));
   const total = blob.length + sizes.c + sizes.n + sizes.o;
   console.log(id.padEnd(18), 'verts', nv, 'tris', idx.length / 3, `(cards ${(idx.length - nSkin) / 3})`, 'bin', blob.length, 'tex', sizes, 'total KB', (total / 1024).toFixed(0), 'skin', outRGB);
   return { id, source: name, bytes: total, tag: POOL[name] ?? null, skinRGB: outRGB, lead: lead?.id ?? null, ownHair: !!lead?.ownHair };
@@ -260,3 +263,4 @@ if (args.includes('--leads')) {
 const merged = [...prev.heads.filter((h: any) => !index.some((x) => x.id === h.id)), ...index];
 fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify({ licence: 'MIT (Microsoft Rocketbox); see LICENSE-Rocketbox.md', heads: merged }, null, 1));
 console.log('heads', merged.length, 'pool bytes', merged.filter((h: any) => !h.lead).reduce((a: number, h: any) => a + h.bytes, 0), 'lead bytes', merged.filter((h: any) => h.lead).reduce((a: number, h: any) => a + h.bytes, 0));
+for (const f of pendingRepack) await repack(f); // meshopt index coding

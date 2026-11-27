@@ -74,6 +74,8 @@ export function taubin(P: Float32Array, tris: Uint32Array, inRegion: (k: number)
 
 export interface GarmentCtx {
   model: BodyModel; shape: BodyShape; F: Fields; outfit: Outfit; lod: number;
+  /** Men: the drape may shave small convex chest detail (never on a bust). */
+  male?: boolean;
 }
 
 const smooth = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -126,7 +128,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
       const d = (q[0] - P[k * 3]) * Nb[k * 3] + (q[1] - P[k * 3 + 1]) * Nb[k * 3 + 1] + (q[2] - P[k * 3 + 2]) * Nb[k * 3 + 2];
       // mostly outwards (bridge hollows), but small convex details (nipples, muscle edges) may be
       // shaved by up to 12 mm on the torso: the skin under a shirt is culled, so nothing pokes through
-      const out = Math.max(F.part[k] === PART.torso ? -0.012 : 0, d);
+      const out = Math.max(0, d); // (the male chest is fixed in the body base now; shaving left dimples)
       sm.set(k, [P[k * 3] + Nb[k * 3] * out, P[k * 3 + 1] + Nb[k * 3 + 1] * out, P[k * 3 + 2] + Nb[k * 3 + 2] * out]);
     }
     // cloth hangs from the chest apex toward the waist instead of tucking under the pectorals
@@ -177,6 +179,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
     }
     return sm;
   })() : undefined;
+  (ctx as GarmentCtx & { drape?: typeof drape }).drape = drape;
 
   // ---- top ---------------------------------------------------------------------------------------
   const t = outfit.top;
@@ -186,7 +189,10 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   const topOff = 0.005 + t.fit * 0.7;
   pieces.push({
     surface: 'helper-tights', fabric: t.fabric, hem: 0.004, hides: true, slot: 1, basePos: drape,
-    fields: [neckline(neckFront, neckBack), sleeve(t.sleeve), above(topHem), noLegs],
+    // under a long-sleeved jacket or coat only the shirt's cuff is kept (none if the shirt sleeve is
+    // shorter): the sleeve poked through the coat sleeve's inner elbow as light patches by the hips
+    fields: [neckline(neckFront, neckBack), sleeve(t.sleeve), above(topHem), noLegs,
+      ...(outfit.outer && outfit.outer.sleeve > 1.5 ? [(k: number) => (isArm(k) ? F.armS[k] - (Math.min(outfit.outer!.sleeve, 1.94) - 0.04) : 1)] : [])],
     offset: (k) => topOff + (isArm(k) ? t.fit * 0.6 + smooth(0, 1.0, F.armS[k]) * 0.004 : t.fit * (0.5 + 0.5 * smooth(y.waist, y.chest, Y(k)))),
     sweat: sweatMask,
   });
@@ -251,6 +257,8 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
 
   // ---- tie ---------------------------------------------------------------------------------------
   if (outfit.tie && !(o && o.open < 0.5 && o.lapel === 0)) trims.push((mb) => (mb.slot = 5, tie(ctx, mb, outfit.tie!, topOff + t.fit + 0.004)));
+  // test view (?characters=1 ...&baretop=1): no top, collar, tie or outer layer, to judge the body base under the cloth
+  if (typeof location !== 'undefined' && location.search.includes('baretop')) return { pieces: pieces.filter((p) => p.slot !== 1 && p.slot !== 3), trims: [] };
   return { pieces, trims };
 }
 
@@ -286,8 +294,10 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
     offset: (k) => off + (h.isArm(k) ? -0.001 + 0.003 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
     sweat: (k) => h.sweatMask(k) * 0.5,
   });
-  if (hemY < y.waist - 0.04) {
-    // tails / coat skirt from the skirt helper, overlapping the torso piece at the waist
+  // tails / coat skirt from the skirt helper, overlapping the torso piece at the waist: only for real
+  // coats hanging well below the crotch. The helper follows each thigh, so on hip-length jackets the
+  // short skirt split into two puffy pillows around the thighs; the torso piece already ends there.
+  if (hemY < y.crotch - 0.08) {
     pieces.push({
       surface: 'helper-skirt', fabric: o.fabric, hem: thick, hides: false, slot: 3, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
       fields: [h.below(y.waist - 0.0), h.above(hemY), front],
@@ -298,7 +308,7 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   if (o.belted) {
     pieces.push({ surface: 'helper-tights', fabric: o.fabric, hem: 0.003, hides: false, slot: 3, fields: [h.below(y.waist + 0.02), h.above(y.waist - 0.02), h.noLegs, front, (k) => (h.isArm(k) ? -1 : 1)], offset: () => off + 0.012 });
   }
-  if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.004, buttonY, gorgeY, openAngle)));
+  if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.017, buttonY, gorgeY, openAngle)));
   if (ctx.lod <= 1 && o.open < 0.5 && ['suitJacket', 'sportCoat', 'leisureJacket', 'overcoat', 'trench', 'uniformJacket', 'raincoat'].includes(o.kind)) {
     const n = o.kind === 'overcoat' || o.kind === 'trench' || o.kind === 'raincoat' ? 3 : o.kind === 'uniformJacket' ? 4 : 2;
     const ys = Array.from({ length: n }, (_, i) => buttonY - i * 0.1 + (o.kind === 'uniformJacket' ? 0.2 : 0));
@@ -342,7 +352,17 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
       const w = Math.min(1, Math.max(0, (F.legS[k] - 1.66) / 0.14));
       const ww = w * w * (3 - 2 * w);
       const tt = Math.min(t, al + 0.03);
-      const rr = rl + (R0 - rl) * ww;
+      // cloth, not a rubber tube: a pressed crease front and back, soft uneven vertical folds,
+      // and the break (fabric bunching where the hem rests on the shoe)
+      const fx = -u[0] * u[2], fy = -u[1] * u[2], fz = 1 - u[2] * u[2], fl = Math.hypot(fx, fy, fz) || 1;
+      const fa = [fx / fl, fy / fl, fz / fl], sa = [u[1] * fa[2] - u[2] * fa[1], u[2] * fa[0] - u[0] * fa[2], u[0] * fa[1] - u[1] * fa[0]];
+      const phi = Math.atan2(dir[0] * sa[0] + dir[1] * sa[1] + dir[2] * sa[2], dir[0] * fa[0] + dir[1] * fa[1] + dir[2] * fa[2]);
+      const crease = 0.0035 * (Math.exp(-((phi / 0.13) ** 2)) + 0.7 * Math.exp(-(((Math.abs(phi) - Math.PI) / 0.15) ** 2)));
+      const seedF = side === 'l' ? 1.3 : 4.1;
+      const folds = 0.0028 * Math.sin(phi * 3 + seedF + tt * 9) * Math.sin(tt * 14 + seedF * 2) + 0.0018 * Math.sin(phi * 5 - tt * 21 + seedF);
+      const hemT = Math.max(0, Math.min(1, (tt - (al - 0.07)) / 0.07));
+      const brk = 0.006 * hemT * Math.max(0, Math.cos(phi)) * (0.5 + 0.5 * Math.sin(tt * 110 + seedF));
+      const rr = rl + (R0 + (crease + folds + brk) * Math.min(1, R0 / 0.05) - rl) * ww;
       const q: [number, number, number] = [A[0] + u[0] * tt + dir[0] * rr, A[1] + u[1] * tt + dir[1] * rr, A[2] + u[2] * tt + dir[2] * rr];
       // keep the original position where blending hasn't started
       pos.set(k, [P[k * 3] + (q[0] - P[k * 3]) * ww, P[k * 3 + 1] + (q[1] - P[k * 3 + 1]) * ww, P[k * 3 + 2] + (q[2] - P[k * 3 + 2]) * ww]);
@@ -363,20 +383,22 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
 /** The neck alone (no trapezius/shoulders), around the neck joint: shirt collars stand on this. */
 function neckRadius(ctx: GarmentCtx) { return torsoRadius(ctx, true); }
 
-function torsoRadius(ctx: GarmentCtx, neckOnly = false) {
+export function torsoRadius(ctx: GarmentCtx, neckOnly = false, src?: Map<number, [number, number, number]>) {
   const { F, shape } = ctx;
   const P = shape.pos, J = shape.joints;
   const NB = 48, y0 = neckOnly ? F.y.neck - 0.07 : F.y.crotch, y1 = F.y.neck + 0.08, NY = neckOnly ? 15 : 40;
   const r = new Float32Array(NB * NY);
   const T = F.tris('helper-tights', 0);
-  const used = new Set<number>(T);
+  // with a cloth surface (the drape), profile its own points; otherwise the tights helper
+  const used = src ? new Set<number>(src.keys()) : new Set<number>(T);
   const cj = neckOnly ? JI.neck_01 : JI.spine_02, cx = J[cj * 3], cz = J[cj * 3 + 2];
   for (const k of used) {
     if (neckOnly ? F.part[k] !== PART.neck : F.part[k] !== PART.torso && F.part[k] !== PART.neck) continue;
-    const yy = P[k * 3 + 1]; if (yy < y0 || yy > y1) continue;
-    const a = Math.atan2(P[k * 3] - cx, P[k * 3 + 2] - cz);
+    const q = src?.get(k), px = q ? q[0] : P[k * 3], py = q ? q[1] : P[k * 3 + 1], pz = q ? q[2] : P[k * 3 + 2];
+    const yy = py; if (yy < y0 || yy > y1) continue;
+    const a = Math.atan2(px - cx, pz - cz);
     const bi = Math.floor(((a / (2 * Math.PI) + 1) % 1) * NB), yi = Math.min(NY - 1, Math.floor(((yy - y0) / (y1 - y0)) * NY));
-    const d = Math.hypot(P[k * 3] - cx, P[k * 3 + 2] - cz);
+    const d = Math.hypot(px - cx, pz - cz);
     r[yi * NB + bi] = Math.max(r[yi * NB + bi], d);
   }
   // fill holes by neighbour averaging
@@ -407,16 +429,39 @@ const torsoSkin = (ctx: GarmentCtx, yy: number, outJ: number[], outW: number[]) 
 };
 
 /** Builds a quad-strip ribbon: rows of points (each row = [outer…inner]) skinned along the torso. */
-function ribbon(ctx: GarmentCtx, mb: MeshBuilder, rows: [number, number, number][][], m: MatData, flip = false) {
+/**
+ * A grid of rows as a cloth strip. With `thick` (m) it becomes a slab: a back face offset behind
+ * the front along its normals and an edge band all round, so collars, lapels and ties have real
+ * thickness and a rounded-reading edge instead of a paper cut-out.
+ */
+function ribbon(ctx: GarmentCtx, mb: MeshBuilder, rows: [number, number, number][][], m: MatData, flip = false, thick = 0) {
   const base = mb.count, i0 = mb.indexCount;
   const sj: number[] = [0, 0, 0, 0], sw: number[] = [0, 0, 0, 0];
   for (const row of rows) for (const p of row) { torsoSkin(ctx, p[1], sj, sw); mb.vertex(p, null, sj, sw, m); }
-  const w = rows[0].length;
-  for (let r = 0; r + 1 < rows.length; r++) for (let c = 0; c + 1 < w; c++) {
-    const a = base + r * w + c, b = a + 1, d = a + w, e = d + 1;
-    if (flip) { mb.tri(a, d, b); mb.tri(b, d, e); } else { mb.tri(a, b, d); mb.tri(b, e, d); }
-  }
+  const w = rows[0].length, h = rows.length;
+  const quad = (a: number, b: number, d: number, e: number, f: boolean) => { if (f) { mb.tri(a, d, b); mb.tri(b, d, e); } else { mb.tri(a, b, d); mb.tri(b, e, d); } };
+  for (let r = 0; r + 1 < h; r++) for (let c = 0; c + 1 < w; c++) { const a = base + r * w + c; quad(a, a + 1, a + w, a + w + 1, flip); }
   mb.computeNormals(base, mb.count, i0);
+  if (thick <= 0) return;
+  // back face: every front vertex pushed back along its normal, triangles reversed
+  const back = mb.count, bi0 = mb.indexCount;
+  for (let v = 0; v < w * h; v++) {
+    const p = mb.posAt(base + v), n = mb.normalAt(base + v);
+    torsoSkin(ctx, p[1], sj, sw);
+    mb.vertex([p[0] - n[0] * thick, p[1] - n[1] * thick, p[2] - n[2] * thick], null, sj, sw, m);
+  }
+  for (let r = 0; r + 1 < h; r++) for (let c = 0; c + 1 < w; c++) { const a = back + r * w + c; quad(a, a + 1, a + w, a + w + 1, !flip); }
+  // edge band round the boundary (front edge to back edge)
+  const ring: number[] = [];
+  for (let c = 0; c < w; c++) ring.push(c);
+  for (let r = 1; r < h; r++) ring.push(r * w + w - 1);
+  for (let c = w - 2; c >= 0; c--) ring.push((h - 1) * w + c);
+  for (let r = h - 2; r >= 1; r--) ring.push(r * w);
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    quad(base + a, base + b, back + a, back + b, !flip);
+  }
+  mb.computeNormals(back, mb.count, bi0);
 }
 
 function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number, off: number, backH: number, closed = false) {
@@ -462,13 +507,13 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
       }
       rows.push([outer, fold, standBase]);
     }
-    ribbon(ctx, mb, rows, m, side < 0);
+    ribbon(ctx, mb, rows, m, side < 0, ctx.lod <= 1 ? 0.0025 : 0);
   }
 }
 
 /** Small domed buttons on the torso front (az ≈ 0), skinned to the spine. */
 function buttons(ctx: GarmentCtx, mb: MeshBuilder, ys: number[], az: number, off: number, color: string, r: number) {
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape); // on the cloth surface, not the body
   const m = fabricMat({ color, color2: color, pattern: 'solid', scale: 0.02, rough: 0.3, sheen: 0, fade: 0, dirt: 0 } as Fabric, KIND.leather);
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const seg = ctx.lod === 0 ? 10 : 6;
@@ -489,7 +534,7 @@ function buttons(ctx: GarmentCtx, mb: MeshBuilder, ys: number[], az: number, off
 
 /** A thin seam/placket line down the front at azimuth az, from y0 down to y1. */
 function frontLine(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, az: number, y0: number, y1: number, off: number) {
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
   const m = fabricMat({ ...f, color: shade(f.color, 0.62), color2: shade(f.color2, 0.62) });
   const rows: [number, number, number][][] = [];
   const n = 10;
@@ -506,7 +551,7 @@ function neckBand(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, off: number, h: n
 }
 
 function lapels(ctx: GarmentCtx, mb: MeshBuilder, o: OuterDesc, off: number, buttonY: number, gorgeY: number, openAngle: (y: number) => number) {
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
   const m = fabricMat(o.fabric);
   const y = ctx.F.y;
   for (const side of [1, -1]) {
@@ -529,12 +574,13 @@ function lapels(ctx: GarmentCtx, mb: MeshBuilder, o: OuterDesc, off: number, but
       const a = side * (openAngle(gorgeY) + u * (Math.PI - openAngle(gorgeY)));
       rows.push([tr.at(y.neck - 0.035 + u * 0.01, a, off + 0.006), tr.at(y.neck + 0.01, a, off)]);
     }
-    ribbon(ctx, mb, rows, m, side > 0);
+    ribbon(ctx, mb, rows, m, side > 0, ctx.lod <= 1 ? 0.004 : 0);
   }
 }
 
 function tie(ctx: GarmentCtx, mb: MeshBuilder, t: Fabric & { width: number }, off: number) {
-  const tr = torsoRadius(ctx), y = ctx.F.y;
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
+  const y = ctx.F.y;
   const m = fabricMat(t, KIND.cloth);
   const top = y.neck + 0.005, bottom = y.waist + 0.03;
   const rows: [number, number, number][][] = [];
@@ -547,7 +593,16 @@ function tie(ctx: GarmentCtx, mb: MeshBuilder, t: Fabric & { width: number }, of
     if (i === steps) { rows.push([tr.at(yy - w * 0.9, 0, off + 0.006), tr.at(yy - w * 0.9, 0, off + 0.006)]); continue; }
     rows.push([tr.at(yy, -w / r, off + 0.004 + u * 0.004), tr.at(yy, w / r, off + 0.004 + u * 0.004)]);
   }
-  ribbon(ctx, mb, rows, m);
+  ribbon(ctx, mb, rows, m, false, ctx.lod <= 1 ? 0.005 : 0);
+  // the knot: a tapered four-in-hand block under the collar points, proud of the blade
+  if (ctx.lod <= 1) {
+    const krows: [number, number, number][][] = [];
+    for (let i = 0; i <= 4; i++) {
+      const u = i / 4, yy = top - 0.004 - u * 0.04, hw = (0.024 - u * 0.007) / 0.16;
+      krows.push([tr.at(yy, -hw, off + 0.016 - u * 0.004), tr.at(yy, 0, off + 0.02 - u * 0.004), tr.at(yy, hw, off + 0.016 - u * 0.004)]);
+    }
+    ribbon(ctx, mb, krows, m, false, 0.012);
+  }
 }
 
 /**
@@ -575,6 +630,18 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const js: number[] = [], ws: number[] = [];
   const disp = [0, 0, 0];
+  // fold mask for the cloth shader (uv = [strength, ring coordinate]): concentric creases round
+  // the elbows and the backs of the knees, horizontal bunching at the waist
+  const J = shape.joints, jp = (n: string) => [J[JI[n] * 3], J[JI[n] * 3 + 1], J[JI[n] * 3 + 2]];
+  const elbows = [jp('lowerarm_l'), jp('lowerarm_r')], knees = [jp('calf_l'), jp('calf_r')];
+  const waistY = F.y.waist;
+  const folds = (q: number[]): [number, number] => {
+    let best = 0, coord = 0;
+    for (const e of elbows) { const d = Math.hypot(q[0] - e[0], q[1] - e[1], q[2] - e[2]); const w = 1 - smooth(0.03, 0.1, d); if (w > best) { best = w; coord = d; } }
+    for (const k of knees) { const d = Math.hypot(q[0] - k[0], q[1] - k[1], q[2] - k[2]); const w = (1 - smooth(0.04, 0.12, d)) * (q[2] < k[2] + 0.02 ? 1 : 0.4); if (w > best) { best = w; coord = d; } }
+    const dw = Math.abs(q[1] - waistY); const ww = (1 - smooth(0.02, 0.07, dw)) * 0.7; if (ww > best) { best = ww; coord = q[1]; }
+    return [best, coord];
+  };
   const resolve = (v: { ids: number[]; w: number[] }, extraOff: number) => {
     const pos = [0, 0, 0];
     js.length = 0; ws.length = 0;
@@ -593,17 +660,38 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
     mergeSkin(js, ws, sj, sw);
     const m = fabricMat(p.fabric, p.kind ?? KIND.cloth, sweat);
     m.m1[2] = Math.min(1, p.fabric.dirt * (0.5 + dust) + dust * 0.25);
-    return mb.vertex(pos, null, sj, sw, m);
+    return mb.vertex(pos, null, sj, sw, m, p.kind === undefined || p.kind === KIND.cloth ? folds(pos) : [0, 0]);
   };
   const map = res.verts.map((v) => resolve(v, 0));
   for (let i = 0; i < res.tris.length; i += 3) mb.tri(map[res.tris[i]], map[res.tris[i + 1]], map[res.tris[i + 2]]);
   // hem bands: turn every cut edge inwards by the cloth thickness
+  const bEdges = boundaryEdges(res.tris);
+  const inner = new Map<number, number>();
   if (p.hem > 0) {
-    const inner = new Map<number, number>();
     const innerOf = (vi: number) => { let j = inner.get(vi); if (j === undefined) { j = resolve(res.verts[vi], -p.hem); inner.set(vi, j); } return j; };
-    for (const [a, b] of boundaryEdges(res.tris)) {
+    for (const [a, b] of bEdges) {
       const ia = innerOf(a), ib = innerOf(b);
       mb.tri(map[b], map[a], ia); mb.tri(map[b], ia, ib);
+    }
+  }
+  // finished edges: the cut follows the body's triangles and zigzags; relax each cut loop along
+  // itself (the outer surface and its hem band move together), so hems read as clean seams
+  {
+    const nb = new Map<number, number[]>();
+    for (const [a, b] of bEdges) { (nb.get(a) ?? nb.set(a, []).get(a)!).push(b); (nb.get(b) ?? nb.set(b, []).get(b)!).push(a); }
+    // Taubin (shrink/inflate alternating): 6 plain passes left visible zigzag on sleeve hems, and more
+    // plain passes would shrink the openings
+    for (let it = 0; it < 16; it++) {
+      const moves: [number, number[]][] = [];
+      const f = it % 2 === 0 ? 0.5 : -0.53;
+      for (const [v, ns] of nb) {
+        if (ns.length !== 2) continue;
+        const pv = mb.posAt(map[v]), pa = mb.posAt(map[ns[0]]), pb = mb.posAt(map[ns[1]]);
+        moves.push([v, [0, 1, 2].map((c) => ((pa[c] + pb[c]) * 0.5 - pv[c]) * f)]);
+      }
+      for (const [v, d] of moves) {
+        for (const vi of [map[v], inner.get(v)]) { if (vi === undefined) continue; const q = mb.posAt(vi); mb.setPos(vi, [q[0] + d[0], q[1] + d[1], q[2] + d[2]]); }
+      }
     }
   }
   mb.computeNormals(base, mb.count, i0);

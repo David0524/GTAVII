@@ -40,7 +40,7 @@ try {
     fs.mkdirSync(path.dirname(out), { recursive: true });
     await page.screenshot({ path: out, timeout: 180000 });
     const report = await page.evaluate(() => (window as any).__CHAR?.report ?? null);
-    if (report) fs.writeFileSync(out.replace(/\.png$/, '.json'), JSON.stringify(report, null, 2));
+    if (report) fs.writeFileSync(out.replace(/\.(png|jpe?g)$/, '.json'), JSON.stringify(report, null, 2));
     console.log('shot', out, report ? JSON.stringify(report).slice(0, 400) : '');
     for (const l of logs.filter((l) => !/\[(debug|log)\]/.test(l) || /CHAR/.test(l)).slice(0, 30)) console.log('  ', l);
     await page.close();

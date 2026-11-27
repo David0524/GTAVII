@@ -8,7 +8,7 @@ import { BodyModel } from '../body/BodyModel';
 import { generateAppearance } from '../body/appearance';
 import { generateOutfit } from '../wardrobe/outfit';
 import { assemble } from '../build/assemble';
-import { fitHead, neckProfileData } from '../heads/rocketbox';
+import { fitHead, neckProfileData, headFaceExtents } from '../heads/rocketbox';
 
 let model: BodyModel | null = null;
 self.onmessage = async (e: MessageEvent) => {
@@ -20,7 +20,7 @@ self.onmessage = async (e: MessageEvent) => {
     const shape = model.evaluate({ ...appearance.body, stature: appearance.stature });
     // a Rocketbox head (near ring, Medium+): assemble headless and return what the main thread needs to fit it
     const fit = m.head ? fitHead({ meta: m.head }, shape.joints) : null;
-    const asm = assemble(model, shape, appearance, outfit, m.lod, false, fit ? { headCutY: fit.cutY, headRing: fit.ringY, headRingR: fit.ringR, headAxis: fit.neckAxis } : {});
+    const asm = assemble(model, shape, appearance, outfit, m.lod, false, fit ? { headCutY: fit.cutY, headRing: fit.ringY, headRingR: fit.ringR, headAxis: fit.neckAxis, headFace: headFaceExtents({ meta: m.head }, fit) } : {});
     const transfer: Transferable[] = [];
     for (const g of [asm.main, asm.hair]) if (g) for (const v of Object.values(g)) if (ArrayBuffer.isView(v)) transfer.push(v.buffer);
     const head = fit ? { joints: Float32Array.from(shape.joints), neck: neckProfileData(shape.pos, shape.joints, fit.neckBottom - 0.012, fit.neckBottom + 0.08) } : null;

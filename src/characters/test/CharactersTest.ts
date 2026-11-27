@@ -47,11 +47,12 @@ export async function runCharactersTest() {
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};
-  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox') tick = await lineup(world, camera, factory, scene, report);
+  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox' || scene === 'vendors') tick = await lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
   else if (scene === 'move') tick = (await import('./MoveCourse')).moveCourse(world, camera, factory, report, qp);
+  else if (scene === 'ict') tick = await (await import('./IctTest')).ictScene(world, camera, report, qp);
   const simT = qp.has('t') ? num('t', 0) : -1;
   const frameMs: number[] = [];
   if (simT >= 0) {
@@ -142,10 +143,22 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       else Object.assign(ov, { outer: null });
       chars.push(factory.spawn(world, { seed, overrides: ov }));
     });
+  } else if (scene === 'vendors') {
+    // street vendors (sim archetypes): one of each, wardrobe presets from src/characters/wardrobe/outfit.ts
+    const ids = ['cart_vendor', 'grocer', 'flower_seller', 'news_vendor', 'shoeshine', 'peddler', 'monte_dealer', 'monte_shill', 'monte_lookout'];
+    // &anims=1: one work/customer clip per figure (posing check), looped; &t= picks the moment
+    const clips = qp.get('clips')?.split(',') ?? ['vendor_serve', 'vendor_call', 'duck_cart', 'right_cart', 'shine_shoes', 'deal_cards', 'queue', 'watch', 'eat_walk'];
+    ids.forEach((id, i) => {
+      const c = factory.spawn(world, { seed: num('seed', 7) * 101 + i * 13, archetype: `npc.${id}` });
+      if (id === 'monte_lookout') c.animator.setIdle('idle_pockets');
+      if (qp.has('anims') && clips[i]) void c.animator.play(clips[i], { loop: true, blendIn: 0.01 }).catch(() => {});
+      chars.push(c);
+    });
+    if (qp.has('anims')) report.vendorClips = clips;
   } else if (scene === 'leads') {
     const act = num('act', 1);
     // review shots: each lead in their own idle (relaxed weight shift, hands behind, hands in pockets)
-    const idles: Record<string, string> = { 'char.teddy_arce': 'idle_relaxed', 'char.delphine_moore': 'idle_hands_behind', 'char.nick_varelas': 'idle_pockets' };
+    const idles: Record<string, string> = { 'char.teddy_arce': 'idle_relaxed', 'char.delphine_moore': 'idle_relaxed', 'char.nick_varelas': 'idle_pockets' };
     for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) { const c = factory.spawn(world, { seed: 1, hero, act }); c.animator.setIdle(idles[hero]); chars.push(c); }
   } else {
     const page = num('page', 0), per = num('n', 10), seed0 = num('seed', 1974);
@@ -172,7 +185,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   else if (zoom === 'shoe') { camera.fov = 24; camera.updateProjectionMatrix(); camera.position.set(0.75, 0.22, 0.7); camera.lookAt(0.03, 0.06, 0.04); }
   else if (zoom === 'feet') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.5, 0.35, 1.3); camera.lookAt(0, 0.08, 0); }
   else if (zoom === 'head') { const hy = (chars[num('focus', 0)]?.appearance.stature ?? 1.7) - 0.13; camera.fov = 24; camera.position.set(0, hy + 0.06, 1.0); camera.lookAt(0, hy, 0); camera.updateProjectionMatrix(); }
-  else if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
+  else if (zoom) { camera.position.set(0, num('cy', 1.5), 1.7); camera.lookAt(0, num('ty', 1.4), 0); }
   else if (scene === 'hair') { camera.fov = 22; camera.position.set(0, 1.56, 0.5 + n * 0.42); camera.lookAt(0, 1.52, 0); camera.updateProjectionMatrix(); }
   else if (scene === 'shoes') { const d = 0.6 + n * 0.32; camera.fov = 22; camera.position.set(0, 0.45, d); camera.lookAt(0, 0.1, 0); camera.updateProjectionMatrix(); }
   else { const w = n * gap; camera.fov = 26; camera.position.set(0, 1.2, Math.max(5.5, w * 1.12 + 1.5)); camera.lookAt(0, 0.92, 0); camera.updateProjectionMatrix(); }
@@ -205,7 +218,9 @@ function toneProbes(chars: Character[], camera: THREE.PerspectiveCamera) {
     const mid = head.clone().lerp(neck, 0.55);
     const hand = c.jointWorld('hand_r').lerp(c.jointWorld('middle_01_r'), 0.6);
     return { hero: c.desc.hero ?? null, seed: c.desc.seed, rb: (c.desc.overrides?.rbHead as any)?.id ?? null, tone: c.appearance.skin.tone,
-      cheek: scr(off(eye, 0.006, -0.03, 0.01)), neck: scr(off(mid, 0.03, 0, 0.035)), hand: scr(hand) };
+      cheek: scr(off(eye, 0.006, -0.03, 0.01)), neck: scr(off(mid, 0.03, 0, 0.035)), hand: scr(hand),
+      // hands in pockets: nothing to measure (the probe would land on the garment)
+      handHidden: /pockets/.test(c.animator.idleName) };
   });
 }
 
@@ -322,6 +337,23 @@ function crowd(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Cha
     const dir = h(3) < 0.5 ? 1 : -1;
     const archetype = h(4) < 0.06 ? 'beat_cop' : h(4) < 0.16 ? 'worker_handcart' : h(4) < 0.2 ? 'vendor' : h(4) < 0.6 ? 'commuter' : 'shopper';
     agents.push({ id: i + 1, archetype, variant: hash2(i, 99), x: (lane - 2.5) * 9 + (h(5) - 0.5) * 3, y: 0, z: (h(6) - 0.5) * 220, yaw: dir > 0 ? 0 : Math.PI, speed: moving ? 0.8 + h(7) * 1.1 : 0, state });
+  }
+  if (qp.has('vendors')) {
+    // &vendors=1: a stall cluster in front of the camera (near ring + baked mid ring): a monte dealer
+    // with a crowd leaning in, a cart vendor with a queue, a vendor ducking, eaters walking past
+    const put = (i: number, archetype: string, x: number, z: number, yaw: number, state: string, speed = 0, carry = '') => Object.assign(agents[i], { archetype, x, z, yaw, state, speed, carry, y: 0 });
+    let i = 0;
+    for (const zc of [12, -6]) { // one cluster near (in the full-character ring), one at mid range (baked clips)
+      put(i++, 'npc.monte_dealer', -2, zc, 0, 'vendor');
+      for (let k = 0; k < 4; k++) put(i++, 'commuter', -2 + Math.cos(k * 1.3 + 0.4) * 0.9, zc + 0.9 + Math.sin(k * 1.3 + 0.4) * 0.5, Math.PI, 'watch');
+      put(i++, 'npc.cart_vendor', 3, zc, Math.PI / 2, 'vendor');
+      for (let k = 0; k < 3; k++) put(i++, 'shopper', 4.2 + k * 0.75, zc + 0.2, -Math.PI / 2, 'queue');
+      put(i++, 'npc.grocer', 6.5, zc - 2, 0, 'cower');
+      put(i++, 'commuter', 0.5, zc + 3, 0, 'walk', 1.1, 'frank');
+      put(i++, 'shopper', 1.5, zc + 4, Math.PI, 'walk', 1.0, 'coffee');
+      put(i++, 'commuter', -5, zc + 2, 0.5, 'down'); put(i++, 'shopper', -6.5, zc + 1, -0.5, 'getUp'); put(i++, 'commuter', -4, zc - 1.5, 0, 'angry');
+    }
+    report.vendorAgents = i;
   }
   camera.fov = 40; camera.updateProjectionMatrix();
   camera.position.set(num('cx', 3), num('cy', 3.2), num('cz', 24)); camera.lookAt(0, 1.2, -10);
