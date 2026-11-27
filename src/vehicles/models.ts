@@ -175,9 +175,12 @@ const ct40: ModelSpec = {
   L: 12.2, W: 2.59, sF: 2.2, wheelbase: 7.2, wheelR: 0.5, tireW: 0.28, track: 2.06, trackR: 1.84, dualRear: true,
   sillY: 0.42, beltY: 1.32,
   top: [[0, 1.32], [12.2, 1.32]],
-  crown: 0, cornerF: 0.25, cornerR: 0.2, noseRake: 0, tailRake: 0, crease: 0.5, archGap: 0.06,
+  // 'fishbowl'-era coach (DOCUMERICA 549921): rounded front corners, a deeply bowed and raked
+  // windscreen, a slightly sloped lower front
+  crown: 0, cornerF: 0.5, cornerR: 0.3, noseRake: 0.06, tailRake: 0, crease: 0.5, archGap: 0.06,
+  shape: { tuck: 0.95, round: 0.4, tumble: 0.99 },
   hood: null,
-  gh: { sA0: 0.02, sA1: 0.2, sC1: 12.12, sC0: 12.18, roofY: 2.95, beltInset: 0.0, roofHalfW: 1.2, crown: 0.07, bow: 0.06, bands: busBands(),
+  gh: { sA0: 0.04, sA1: 0.36, sC1: 12.12, sC0: 12.18, roofY: 2.95, beltInset: 0.0, roofHalfW: 1.2, crown: 0.07, bow: 0.24, bands: busBands(),
     winV: [0.06, 0.74], signBand: [0.82, 0.97], splitWindshield: true, backlight: 'twoWindows', wsFrame: 0.04 },
   grille: { kind: 'bus', hw: 0.7, y0: 0.5, y1: 0.78, bars: 4 },
   headlamps: { kind: 'quadRound', y: 0.62, xOut: 0.2, size: 0.15, housing: 'trim' },

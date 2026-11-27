@@ -113,6 +113,20 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - Off on low (phone) quality: about 3 samples × 2 maps per material on desktop.
   - The generator stays: no real car designs.
 
+- **Bus shape pass (CT-40, against DOCUMERICA 549921):** rounded front corners in plan
+  (cornerF 0.5), a deeply bowed (0.24 m) and raked "fishbowl" windscreen, a slightly sloped lower
+  front, and a gentle side tuck.
+  - The front and centre doors are now real two-leaf glazed doors: aluminium frames, upper and
+    lower glass with a mid-rail, a rubber centre seal, a recessed opening and a step well,
+    reaching the side-window line.
+  - LOD0 is 10.1k triangles.
+  - Still short of the photo: a flatter lower front, no chrome bumper band, no wipers or mirror
+    arms.
+- **Vendor props, ids from Sim** (fb337dc): cart_hot_dog, cart_pretzel, cart_ices, cart_nuts,
+  cart_coffee, stand_fruit, stand_flowers, stand_news, stand_shoeshine, peddler_case, monte_box.
+  - Positions come from `sim.vendorViews`; a hit sends gameplay `cartHit`.
+  - The engine side is docs/requests/sim.md item 13.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

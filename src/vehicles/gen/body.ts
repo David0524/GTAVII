@@ -444,10 +444,23 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       // rear engine louvres
       for (let k = 0; k < 6; k++) b.box('trim', 0, 0.62 + k * 0.08, Z(L) + 0.012, m.W * 0.62, 0.03, 0.02);
     } else if (e === 'busDoor') {
-      for (const [s0, s1] of [[0.25, 1.35], [6.3, 7.4]] as const) {
-        const x = halfW((s0 + s1) / 2) + 0.004;
-        b.box('glass', x, (m.sillY + m.beltY) / 2 + 0.05, Z((s0 + s1) / 2), 0.012, m.beltY - m.sillY - 0.15, s1 - s0 - 0.1);
-        b.box('trim', x + 0.004, (m.sillY + m.beltY) / 2 + 0.05, Z((s0 + s1) / 2), 0.014, m.beltY - m.sillY - 0.12, 0.05);
+      // two-leaf glazed doors (front and centre): aluminium frames, upper and lower glass with a
+      // mid-rail, rubber centre seal, a dark step well; the leaves reach the side-window line
+      const yTop = m.beltY + (m.gh.roofY - m.beltY) * (m.gh.winV[1] - 0.02), yBot = m.sillY - 0.08;
+      for (const [s0, s1] of [[0.22, 1.38], [6.3, 7.4]] as const) {
+        const x = halfW((s0 + s1) / 2) + 0.012;
+        b.box('under', x - 0.01, (yBot + yTop) / 2, Z((s0 + s1) / 2), 0.012, yTop - yBot + 0.04, s1 - s0 + 0.04); // opening recess
+        const leaf = (s1 - s0) / 2;
+        for (let k = 0; k < 2; k++) {
+          const a0 = s0 + k * leaf, a1 = a0 + leaf, zc = Z((a0 + a1) / 2), mid = lerp(yBot, yTop, 0.42);
+          const fr = (y: number, h: number, z: number, d: number) => b.box('chrome', x + 0.006, y, z, 0.03, h, d);
+          fr(yTop - 0.03, 0.06, zc, leaf); fr(yBot + 0.05, 0.1, zc, leaf); fr(mid, 0.05, zc, leaf);
+          fr((yBot + yTop) / 2, yTop - yBot, Z(a0) + 0.025, 0.05); fr((yBot + yTop) / 2, yTop - yBot, Z(a1) - 0.025, 0.05);
+          b.box('glass', x + 0.002, (mid + yTop) / 2, zc, 0.01, yTop - mid - 0.08, leaf - 0.08);
+          b.box('glass', x + 0.002, (yBot + mid) / 2 + 0.04, zc, 0.01, mid - yBot - 0.16, leaf - 0.08);
+        }
+        b.box('rubber', x + 0.02, (yBot + yTop) / 2, Z((s0 + s1) / 2), 0.03, yTop - yBot - 0.04, 0.03); // centre seal
+        b.box('under', x - 0.25, yBot + 0.02, Z((s0 + s1) / 2), 0.5, 0.04, s1 - s0); // step well
       }
     } else if (e === 'stepDoor') {
       for (const sx of [-1, 1]) b.box('interior', sx * (halfW(0.9) + 0.003), (m.sillY + m.beltY) / 2 + 0.05, Z(0.95), 0.01, m.beltY - m.sillY - 0.1, 0.62);
@@ -557,9 +570,9 @@ function heroDetails(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, half
     const onDeck = new THREE.Matrix4().makeTranslation(0, yR + 0.002, Z(sR)).multiply(new THREE.Matrix4().makeRotationX(-Math.PI / 2)).multiply(new THREE.Matrix4().makeRotationZ(Math.PI));
     b.add('chrome', crestGeo(), onDeck.clone());
   }
-  // fender emblem: three stacked chrome bars behind the front arch (both sides)
+  // fender emblem: three stacked chrome bars behind the front arch (both sides; cars only)
   const sE = m.sF + archR + 0.25, yE = lerp(m.sillY, m.beltY, 0.62);
-  for (const sx of [1, -1]) for (let k = 0; k < 3; k++) {
+  if (PASSENGER.has(m.cls)) for (const sx of [1, -1]) for (let k = 0; k < 3; k++) {
     const len = 0.12 - k * 0.025;
     b.box('chrome', sx * (halfW(sE) + 0.004), yE + k * 0.016, Z(sE + len / 2), 0.006, 0.008, len);
   }
