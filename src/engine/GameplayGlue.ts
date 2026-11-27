@@ -32,6 +32,10 @@ export interface GameplayGlue {
   /** label for the context button, or null */
   context(): string | null;
   doContext(): void;
+  /** combat input on foot (contract §3); returns whether the player is aiming (camera + facing) */
+  combat(i: { aim: boolean; fire: boolean; reload: boolean; melee: boolean; cover: boolean; lock: boolean; move: [number, number] }): boolean;
+  /** audio 13: gunfire, bullet passes and impacts to audio; shots to the sim (peds/vendors react) */
+  bindAudio(a: { gunshot(at: [number, number, number], tier: string, o?: { indoors?: boolean }): unknown; bulletPass(from: [number, number, number], to: [number, number, number]): void; bulletImpact(at: [number, number, number], m: string): void }, indoors: () => boolean): void;
   lastMs: number;
 }
 
@@ -56,7 +60,7 @@ export async function createGameplay(o: { quality: Quality; physics: Physics; pl
   bind();
   o.saves.provideSection({ name: 'gameplay', capture: () => g.serialize(), restore: (d) => { if (d) g.deserialize(d); } });
 
-  let boundLead = o.lead();
+  let boundLead = o.lead(), aiming = false, firing = false;
   const glue: GameplayGlue = {
     g, lastMs: 0,
     update(dt, ctx) {
@@ -91,6 +95,29 @@ export async function createGameplay(o: { quality: Quality; physics: Physics; pl
     // "Say hello · Hold [F] Mouth off" (glyph from the device gameplay was told about)
     context() { return g.contextPrompt(); },
     doContext() { g.doContextAction(null); },
+    combat(i) {
+      if (i.aim !== aiming) { aiming = i.aim; g.setAiming(i.aim); }
+      if (i.fire !== firing) { firing = i.fire; g.setFiring(i.fire); }
+      if (i.reload) g.reload();
+      if (i.melee) g.meleeAttack('light');
+      if (i.cover) g.toggleCover(i.move);
+      if (i.lock) g.lockOn();
+      return aiming || firing;
+    },
+    bindAudio(a, indoors) {
+      // weapon → audio tier (audio 13). Gameplay may add an audioTier field to weapon defs; until then, by id
+      const tier = (w: string) => /shotgun|coach|pump/.test(w) ? 'shotgun' : /magnum|357|\.44|python/.test(w) ? 'magnum' : /smg|tommy|thompson|grease|mac|auto/.test(w) ? 'auto' : /saturday|\.22|\.25|derringer|junk|zip/.test(w) ? 'cheap' : 'service';
+      g.on('shot', (e: { origin: [number, number, number]; dir: [number, number, number]; weapon: string }) => {
+        a.gunshot(e.origin, tier(e.weapon), { indoors: indoors() });
+        const to: [number, number, number] = [e.origin[0] + e.dir[0] * 60, e.origin[1] + e.dir[1] * 60, e.origin[2] + e.dir[2] * 60];
+        a.bulletPass(e.origin, to);
+        o.sim?.emit({ type: 'gunfire', x: e.origin[0], z: e.origin[2] });
+      });
+      g.on('impact', (e: { point: [number, number, number]; material: string }) => {
+        const m = /metal|car/.test(e.material) ? 'car' : /glass/.test(e.material) ? 'glass' : /wood/.test(e.material) ? 'wood' : /concrete|asphalt/.test(e.material) ? 'concrete' : /dirt|soil/.test(e.material) ? 'dirt' : 'brick';
+        a.bulletImpact(e.point, m);
+      });
+    },
   };
   return glue;
 }

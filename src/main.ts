@@ -26,6 +26,7 @@ import { createAudio } from './engine/AudioGlue';
 import { createInteriors, type Interiors } from './interiors';
 import { Driving } from './engine/Driving';
 import { createMissions } from './engine/MissionGlue';
+import { gameplayTouch } from './ui/touch/adapters';
 import type { MissionRuntime } from './mission/MissionRuntime';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
@@ -300,6 +301,8 @@ async function main() {
         A.on('dispatch', (e) => uiEvents.emit('subtitle', { speaker: e.speaker, text: e.text, channel: 'ambient', seconds: e.duration }));
       };
       bindDispatch();
+      // audio 13: gunfire through audio (travel time, canyon echoes) and to the sim (peds/vendors react)
+      if (audioGlue) x.bindAudio(audioGlue.audio as never, () => insideKind !== null);
       const bindDoors = () => interiors ? x.g.bindDoors({ doorsForChunk: (i, j) => interiors!.doorsForChunk(i, j) as never, chunkSize: 200 }) : setTimeout(bindDoors, 1000);
       bindDoors();
     }).catch((e) => console.warn('gameplay', e)));
@@ -442,6 +445,12 @@ async function main() {
     },
     on: (k, cb) => uiEvents.on(k, cb),
     camera: director, scene,
+    project: (x, y, z) => {
+      const v = new THREE.Vector3(x, y, z).project(camera); if (v.z > 1) return null;
+      const r = view.getBoundingClientRect(); return { x: r.left + (v.x + 1) / 2 * r.width, y: r.top + (1 - v.y) / 2 * r.height };
+    },
+    // touch combat (UI TouchLayout reads it each frame): gameplay's verbs through UI's adapter once gameplay is up
+    get touch() { return gp ? (touchHost ??= gameplayTouch(gp.g as never, (x, y, z) => host.project!(x, y, z))) : undefined; },
     freezePlayer: (f) => { frozen = f; },
     playerVisible: (v) => { body.object.visible = v; },
     commit: (cue, data) => {
@@ -506,6 +515,7 @@ async function main() {
   // in-view spawns stay beyond this (sim fe9ba45); traffic dithers in over 0.4 s (vehicles 028f6e3), so it can be close
   const simFade = 45;
   let gpContext: string | null = null, ctxT = 0, carPrompt: string | null = null;
+  let touchHost: ReturnType<typeof gameplayTouch> | undefined;
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -569,10 +579,16 @@ async function main() {
       if (!inCar) { body.object.position.set(rp.x, rp.y, rp.z); body.setLocomotion(player.loco()); }
       driving?.update(dt, light.night, director.gameplay as THREE.PerspectiveCamera);
       body.update(dt);
+      // combat input on foot (contract §3): aim/fire/reload/melee/cover/lock; aiming turns the body with the camera
+      let aimingNow = false;
+      if (gp && playing && !frozen && !inCar) {
+        aimingNow = gp.combat({ aim: input.isHeld('aim'), fire: input.isHeld('fire'), reload: input.pressed('reload'), melee: input.pressed('melee'), cover: input.pressed('cover'), lock: input.pressed('lock'), move: [input.move.x, input.move.y] });
+        if (aimingNow) player.heading = orbit.yaw;
+      }
       if (!inCar) {
         orbit.lookBehind = input.isHeld('lookBehind');
         if (input.pressed('shoulderSwap')) orbit.swapShoulder();
-        orbit.update(dt, rp, player.loco());
+        orbit.update(dt, rp, { ...player.loco(), aiming: aimingNow });
       }
       // the one context button: in a car → get out; next to a car → get in; else gameplay's context
       // car actions fire on the press; gameplay's context runs every frame (tap = main verb, 0.45 s hold = alternate)
