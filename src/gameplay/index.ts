@@ -1757,6 +1757,14 @@ export class Gameplay {
     r.taunts = this.time - r.tauntedAt < T.tauntWindow ? r.taunts + 1 : 1; r.tauntedAt = this.time; this.rapport.set(q.id, r);
     this.emit('bark', { id: this.player.id, lead: this.leadTag(), bark: 'barks.player_antagonize', context: r.taunts > 1 ? 'again' : 'first', at: p, to: `ped:${q.id}` });
     const armed = this.pc.weapon !== 'weapon.fists';
+    if (this.isCopPed(q.id)) {
+      // a beat cop doesn't shove, fight or run: he warns you, then it's a stop (menacing in front of an officer)
+      const stop = armed || r.taunts >= T.brawlAfter;
+      if (stop) this.crime('menacing', { victim: `ped:${q.id}`, at: [q.x, q.y, q.z], noise: 8 });
+      else this.remember('bumped', [q.x, q.y, q.z], `ped:${q.id}`);
+      const out = this.replyBark(q, 'antagonize', stop ? 'stern' : 'warning');
+      return { target: `ped:${q.id}`, ...out, escalated: stop ? 'stop' as const : 'none' as const };
+    }
     if (armed) this.crime('menacing', { victim: `ped:${q.id}`, at: [q.x, q.y, q.z], noise: 8 });
     else this.remember('bumped', [q.x, q.y, q.z], `ped:${q.id}`);
     if (!tough || armed) {
@@ -1775,6 +1783,11 @@ export class Gameplay {
     }
     this.simLike?.pedAct?.(q.id, 'square_up', 1.5);
     return { target: `ped:${q.id}`, ...out, escalated: 'none' as const };
+  }
+  /** a foot patrolman (sim lists him under `police` with his ped id as agentId; archetype as a fallback) */
+  isCopPed(n: number) {
+    const sim = this.simLike ?? (this.sim as unknown as SimLike | undefined);
+    return !!sim?.police?.some((u) => u.kind === 'foot' && u.agentId === n) || /cop|patrol|police/.test(sim?.peds?.find((x) => x.id === n)?.archetype ?? '');
   }
   /** the lead as narrative tags lines: 'char.teddy_arce' -> 'teddy' */
   private leadTag() { return (this.player?.lead ?? '').replace(/^char\./, '').split('_')[0]; }

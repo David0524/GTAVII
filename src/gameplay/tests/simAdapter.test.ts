@@ -364,3 +364,16 @@ test('player lines carry the lead for narrative\'s per-lead variants', () => {
   g.greet('ped:7'); g.antagonize('ped:7');
   assert.deepEqual(barks.filter((b) => b.id === 'player').map((b) => b.lead), ['teddy', 'teddy']);
 });
+
+test('antagonize a beat cop: no shove, no fight, no running; a warning, then a stop for menacing', () => {
+  const { sim, g } = talkRig(0.9);
+  (sim as any).police = [{ id: 3, kind: 'foot', x: 1.5, z: 0, yaw: 0, speed: 0, mode: 'patrol', siren: false, agentId: 7 }];
+  const kinds: string[] = []; g.on('crimeWitnessed', (e: any) => kinds.push(e.crime.kind));
+  assert.equal(g.antagonize('ped:7')!.escalated, 'none');
+  assert.equal(g.antagonize('ped:7')!.escalated, 'none', 'no shove from a cop');
+  const third = g.antagonize('ped:7')!;
+  assert.equal(third.escalated, 'stop'); assert.ok(!g.brawls.size && !sim.released.has(7));
+  assert.ok(!g.stumbling);
+  void kinds;
+  assert.deepEqual((sim as any).mem.map((m: any) => m.kind), ['bumped', 'bumped', 'assault'], 'two warnings, then menacing (an assault to the street)');
+});
