@@ -167,8 +167,9 @@ export function generateOutfit(seed: number, ctx: OutfitContext): Outfit {
   }
   if (rain && !o.props.includes('umbrella') && rng.chance(0.5)) o.props.push('umbrella');
 
-  // narrative archetype palette drives the main colours
-  if (ctx.palette?.length) {
+  // narrative archetype palette drives the main colours (vendor presets keep theirs: the palette's
+  // third colour would turn a white apron slate)
+  if (ctx.palette?.length && !o.uniform?.startsWith('vendor')) {
     const pal = ctx.palette.filter((c) => /^#[0-9a-f]{6}$/i.test(c));
     if (pal.length) {
       o.top.fabric.color = jitter(rng, pal[0], 0.03);
@@ -348,6 +349,10 @@ function uniformPreset(arch: string, brief: string): Preset | null {
   if (has('transit', 'conductor', 'bus driver', 'rail')) return (r, m, a) => workUniform(r, m, a, UNIFORM.transitGrey, 'transit');
   if (has('doorman')) return doorman;
   if (has('hard hat', 'hardhat', 'construction')) return (r, m, a) => { const o = workUniform(r, m, a, CLOTH.chambray, 'construction'); o.hat = { kind: 'hardHat', fabric: fabric(r, UNIFORM.hardhat, { rough: 0.4, sheen: 0.3 }) }; return o; };
+  // street vendors (sim: src/sim/archetypes.ts, docs/SIM_PROGRESS.md "Street vendors"), matched on
+  // the archetype id first: 'cart_vendor' must not fall through to the garment worker's handcart
+  const v = VENDOR_PRESETS[arch];
+  if (v) return v;
   if (has('garment', 'cart', 'handcart', 'presser', 'smock')) return garmentWorker;
   if (has('vendor')) return vendor;
   return null;
@@ -389,4 +394,67 @@ const vendor: Preset = (rng, male, age) => {
   base.tie = null; base.props = [];
   base.hat = rng.chance(0.5) ? { kind: 'flatCap', fabric: fabric(rng, CLOTH.white) } : base.hat;
   return base;
+};
+
+// --- street vendors -------------------------------------------------------------------------------
+// One preset per sim archetype, from its wardrobe note. Adults only (the sim never spawns minors as
+// vendors; generateAppearance's MIN_ADULT_AGE clamp applies regardless). Aprons are the sleeveless
+// smock (front and back); a front-only tied apron is not built yet.
+const apron = (rng: Rng, color: string, length: number, dirt = 0.35): OuterDesc => ({ kind: 'smock', length, lapel: 0, open: 0, sleeve: 0.05, belted: false, fabric: fabric(rng, color, { dirt, rough: 0.85 }) });
+const vendorBase = (rng: Rng, male: boolean, age: number, kind: string): Outfit => {
+  const o = male ? menOutfit(rng, age, true) : womenOutfit(rng, age, true);
+  o.tie = null; o.props = []; o.outer = null; o.uniform = `vendor:${kind}`;
+  if (o.glasses && o.glasses.tint > 0.5) o.glasses = null; // no sunglasses at the stall
+  return o;
+};
+const rolled = (o: Outfit, rng: Rng) => { if (o.top.sleeve > 1.3) o.top.sleeve = rng.range(1.12, 1.3); };
+const VENDOR_PRESETS: Record<string, Preset> = {
+  cart_vendor: (rng, male, age) => { // white apron over shirtsleeves, paper cap, money belt
+    const o = vendorBase(rng, male, age, 'cart_vendor'); rolled(o, rng);
+    o.top.fabric = fabric(rng, rng.pick([CLOTH.white, CLOTH.paleBlue, CLOTH.chambray]), { fade: 0.2 });
+    o.outer = apron(rng, CLOTH.white, 0.42, 0.45);
+    o.hat = { kind: 'peakedCap', fabric: fabric(rng, CLOTH.white, { rough: 0.9 }) };
+    return o;
+  },
+  grocer: (rng, male, age) => { // long grocer's apron, rolled sleeves
+    const o = vendorBase(rng, male, age, 'grocer'); rolled(o, rng);
+    o.outer = apron(rng, '#f2efe6', 0.58, 0.3);
+    return o;
+  },
+  flower_seller: (rng, male, age) => { // cardigan (the work apron would be a second outer layer)
+    const o = vendorBase(rng, male, age, 'flower_seller');
+    o.outer = { kind: 'cardigan', length: 0.14, lapel: 0, open: 1, sleeve: 1.6, belted: false, fabric: fabric(rng, rng.pick(['#5b4a3a', CLOTH.greyMarl, CLOTH.olive]), { pattern: 'rib', scale: 0.005, dirt: 0.25 }) };
+    return o;
+  },
+  news_vendor: (rng, male, age) => { // flat cap, cardigan, a cigarette
+    const o = vendorBase(rng, male, age, 'news_vendor');
+    o.outer = { kind: 'cardigan', length: 0.12, lapel: 0, open: 1, sleeve: 1.97, belted: false, fabric: fabric(rng, rng.pick([CLOTH.charcoal, '#7a6a4a', CLOTH.greyMarl]), { pattern: 'rib', scale: 0.005, dirt: 0.3 }) };
+    o.hat = { kind: rng.chance(0.6) ? 'flatCap' : 'newsboy', fabric: fabric(rng, rng.pick([CLOTH.charcoal, '#5a5048'])) };
+    if (rng.chance(0.5)) o.props = ['cigarette'];
+    return o;
+  },
+  shoeshine: (rng, male, age) => { // shirtsleeves, waistcoat
+    const o = vendorBase(rng, male, age, 'shoeshine'); rolled(o, rng);
+    o.outer = { kind: 'vest', length: 0.05, lapel: 0, open: 0, sleeve: 0, belted: false, fabric: fabric(rng, rng.pick(['#2e2e2e', '#4a3a2a']), { dirt: 0.4 }) };
+    if (o.dress) o.bottom.fabric.color = '#2e2e2e';
+    return o;
+  },
+  peddler: (rng, male, age) => { // long raincoat (watches inside), sometimes a hat
+    const o = vendorBase(rng, male, age, 'peddler');
+    o.outer = { kind: 'raincoat', length: rng.range(0.55, 0.68), lapel: 0.1, open: 1, sleeve: 1.97, belted: false, fabric: fabric(rng, rng.pick(['#4a4a4a', CLOTH.trench, '#5a5040']), { dirt: 0.35 }) };
+    if (rng.chance(0.5)) o.hat = { kind: 'fedora', fabric: fabric(rng, CLOTH.charcoal) };
+    return o;
+  },
+  monte_dealer: (rng, male, age) => { // leisure suit, open collar
+    const o = vendorBase(rng, male, age, 'monte_dealer');
+    o.outer = { kind: 'leisureJacket', length: 0.26, lapel: 0.11, open: 1, sleeve: 1.97, belted: false, fabric: fabric(rng, rng.pick(['#5a2a2a', '#6a5a3a', '#3a4a5a']), { sheen: 0.2 }) };
+    o.top.open = 2;
+    return o;
+  },
+  monte_lookout: (rng, male, age) => { // windbreaker, hands in pockets (idle: pockets)
+    const o = vendorBase(rng, male, age, 'monte_lookout');
+    o.outer = { kind: 'windbreaker', length: 0.1, lapel: 0, open: rng.chance(0.5) ? 1 : 0, sleeve: 1.97, belted: false, fabric: fabric(rng, rng.pick(['#2a2a2a', CLOTH.navy, '#4a4a3a'])) };
+    return o;
+  },
+  // monte_shill: "ordinary office clothes, too eager" — the default generator is right for that
 };

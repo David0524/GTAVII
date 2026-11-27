@@ -47,7 +47,7 @@ export async function runCharactersTest() {
   factory.setClimate({ heat: 0.7 });
   const report: any = { backend, scene, note: 'Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.' };
   let tick: (dt: number) => void = () => {};
-  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox') tick = await lineup(world, camera, factory, scene, report);
+  if (scene === 'lineup' || scene === 'leads' || scene === 'shoes' || scene === 'hair' || scene === 'rocketbox' || scene === 'vendors') tick = await lineup(world, camera, factory, scene, report);
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
@@ -143,6 +143,10 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       else Object.assign(ov, { outer: null });
       chars.push(factory.spawn(world, { seed, overrides: ov }));
     });
+  } else if (scene === 'vendors') {
+    // street vendors (sim archetypes): one of each, wardrobe presets from src/characters/wardrobe/outfit.ts
+    const ids = ['cart_vendor', 'grocer', 'flower_seller', 'news_vendor', 'shoeshine', 'peddler', 'monte_dealer', 'monte_shill', 'monte_lookout'];
+    ids.forEach((id, i) => { const c = factory.spawn(world, { seed: num('seed', 7) * 101 + i * 13, archetype: `npc.${id}` }); if (id === 'monte_lookout') c.animator.setIdle('idle_pockets'); chars.push(c); });
   } else if (scene === 'leads') {
     const act = num('act', 1);
     // review shots: each lead in their own idle (relaxed weight shift, hands behind, hands in pockets)

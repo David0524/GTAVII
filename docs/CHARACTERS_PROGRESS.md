@@ -106,6 +106,38 @@ Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
 Wikimedia rate-limited this container, so sourcing is pending.
 
+## Street vendors (sim relay; `docs/SIM_PROGRESS.md` "Street vendors")
+**Wardrobes: done.** Shot: `shots/characters/41_vendors.jpg` (`?characters=1&scene=vendors`).
+- Each archetype id has a preset in `src/characters/wardrobe/outfit.ts` (`VENDOR_PRESETS`),
+  built from the sim's wardrobe notes:
+
+  | Archetype | Wardrobe |
+  |---|---|
+  | `cart_vendor` | White apron over rolled shirtsleeves; white cap standing in for a paper cap |
+  | `grocer` | Long apron |
+  | `flower_seller` | Cardigan |
+  | `news_vendor` | Cardigan; flat cap or newsboy; sometimes a cigarette |
+  | `shoeshine` | Waistcoat over rolled sleeves |
+  | `peddler` | Long open raincoat; sometimes a fedora |
+  | `monte_dealer` | Leisure jacket, open collar |
+  | `monte_shill` | Default office clothes (deliberately ordinary) |
+  | `monte_lookout` | Windbreaker, hands-in-pockets idle |
+
+- **Bug fixed on the way:** `cart_vendor` used to match the garment worker's `cart` keyword
+  (handcart and smock). Vendor presets are now matched on the id first.
+- Vendor outfits keep their own colours. The generic palette mapping would have turned the
+  white apron slate.
+- **Gaps:**
+  - The apron is the sleeveless smock (front and back), so it reads as a tunic. A front-only
+    tied apron is still to build.
+  - There's no paper-cap hat kind.
+  - The money belt, florist's scissors and lining of watches aren't built.
+  - The lineup's random seeds skew old; that's appearance, not the presets.
+
+**Animations: next.** Push cart; serve and make change; call out; duck behind the cart; right the
+cart; shine shoes; deal cards. Customers: queue, watch (leaning in), and eating or drinking on the
+go from `PedView.carry`.
+
 ## Street figures: hair (oversight item "spiky card hair")
 Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
 - **Grey and white card hair was scan-line noise.** Per-strand alpha and grey noise ran
