@@ -224,9 +224,9 @@ export class Ambience {
         const c = env.canyon.state, s = this.rng.next() < 0.5 ? -1 : 1, d = Math.max(3, Math.min(s < 0 ? c.dL : c.dR, 12) - 2), along = this.rng.range(-30, 30);
         const p0: Vec3 = [lx - c.az * d * s + c.ax * along, 0.5, lz + c.ax * d * s + c.az * along]; const v = 1.4 * (this.rng.next() < 0.5 ? -1 : 1);
         const t0 = env.ctx.currentTime;
-        env.oneShot('cart.rattle', { category: 'emitter', gain: 1.0, at: () => { const t = env.ctx.currentTime - t0; return [p0[0] + c.ax * v * t, 0.5, p0[2] + c.az * v * t]; } });
+        env.oneShot('cart.rattle', { category: 'emitter', gain: 2.0, at: () => { const t = env.ctx.currentTime - t0; return [p0[0] + c.ax * v * t, 0.5, p0[2] + c.az * v * t]; } });
       }
-      if (this.every('dock', garment * 0.1, dt)) env.oneShot('dock.bang', { category: 'impact', gain: 0.8, at: this.around(25, 90, 1) });
+      if (this.every('dock', garment * 0.1, dt)) env.oneShot('dock.bang', { category: 'impact', gain: 1.6, at: this.around(25, 90, 1) });
     }
     if (this.every('jackhammer', (h > 7.5 && h < 16.5 && wd >= 1 && wd <= 5 ? 1 : 0) * 0.025, dt)) {
       const p = this.around(80, 220, 0.5); for (let k = 0; k < 4; k++) setTimeoutAudio(env, k * 3.6, () => env.oneShot('jackhammer', { category: 'impact', gain: 0.45, at: p }));
