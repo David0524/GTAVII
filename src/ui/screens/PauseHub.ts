@@ -7,6 +7,12 @@ import type { Input } from '../../input/Input';
 import { MenuNav, type NavItem } from '../MenuNav';
 import { glyph } from '../Prompts';
 import { esc } from '../util';
+import { icon, type IconName } from '../icons';
+
+/** Tab icons (DESIGN_A §5). Grouped tabs show their group's icon. */
+const TAB_ICON: Record<string, IconName> = { map: 'map', pockets: 'pockets', paper: 'paper', business: 'business', cars: 'cars', record: 'record', system: 'system', saves: 'save', settings: 'system', credits: 'record' };
+/** What the header shows beside the title: where and when you are, and your money. */
+export interface HubStatus { place: string; time: string; cash: number | null }
 
 export interface Tab {
   id: string; label: string;
@@ -34,6 +40,7 @@ export class PauseHub {
   active = '';
   open = false;
   onClose?: () => void;
+  status?: () => HubStatus;
 
   constructor(private input: Input) {
     this.nav = new MenuNav(input);
@@ -66,8 +73,13 @@ export class PauseHub {
     this.active = t.id; t.el.style.display = '';
     const st = this.input.promptStyle;
     if (t.group) this.lastInGroup.set(t.group, t.id);
-    this.tabsEl.innerHTML = `<span class="brand">Tenderloin '74</span>` + this.entries.map((e) => `<button data-t="${e.id}" class="${(e.group ? t.group === e.group : e.id === t.id) ? 'active' : ''}">${esc(e.label)}</button>`).join('') +
-      (st === 'touch' ? '' : `<span class="hint">${glyph('tabPrev', st)} ${glyph('tabNext', st)}</span>`) + `<button class="resume">${this.only ? 'BACK' : 'RESUME'} ✕</button>`;
+    // header (DESIGN_A): the screen's name large on the left, where/when under it; tabs with icons; money and resume on the right
+    const title = (t.group && !this.only ? this.entries.find((e) => e.group === t.group)?.label : t.label) ?? t.label;
+    const stt = this.status?.();
+    const sentence = (x: string) => x.charAt(0) + x.slice(1).toLowerCase();
+    this.tabsEl.innerHTML = `<div class="hub-title"><b>${esc(sentence(title))}</b>${stt ? `<small>${esc(stt.place)}<i></i>${esc(stt.time)}</small>` : ''}</div>`
+      + `<nav class="hub-tabs">${st === 'touch' ? '' : `<span class="hint">${glyph('tabPrev', st)}</span>`}${this.entries.map((e) => `<button data-t="${e.id}" class="${(e.group ? t.group === e.group : e.id === t.id) ? 'active' : ''}">${icon(TAB_ICON[e.group ?? e.id] ?? TAB_ICON[e.id] ?? 'map', 18)}<span>${esc(e.label)}</span></button>`).join('')}${st === 'touch' ? '' : `<span class="hint">${glyph('tabNext', st)}</span>`}</nav>`
+      + `<div class="hub-right">${stt && stt.cash !== null ? `<span class="cash">$${stt.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>` : ''}<button class="resume">${icon('close', 16)}<span>${this.only ? 'Back' : 'Resume'}</span></button></div>`;
     this.tabsEl.querySelectorAll<HTMLElement>('button[data-t]').forEach((b) => b.addEventListener('click', () => this.select(b.dataset.t!)));
     this.tabsEl.querySelector('.resume')!.addEventListener('click', () => this.hide());
     this.tabsEl.querySelector('button.active')?.scrollIntoView?.({ inline: 'nearest', block: 'nearest' });

@@ -13,27 +13,34 @@ export class Record implements Tab {
   el = document.createElement('div');
   private view: 'stats' | 'checklist' | 'achievements' = 'stats';
   private setNav: (i: NavItem[], keep?: boolean) => void = () => {};
-  constructor(private host: UiHost, private model: MapModel) { this.el.className = 'u-scroll u-record'; }
+  constructor(private host: UiHost, private model: MapModel) { this.el.className = 'u-scroll u-record a-split rc-a'; }
   open(setNav: (items: NavItem[], keep?: boolean) => void) { this.setNav = setNav; this.render(); }
 
   private render() {
     const items: NavItem[] = [];
-    const head = `<div class="np-pages">${(['stats', 'checklist', 'achievements'] as const).map((v) => `<button data-v="${v}" class="${v === this.view ? 'on' : ''}">${v === 'stats' ? 'The numbers' : v === 'checklist' ? 'Checklist' : 'Achievements'}</button>`).join('')}</div>`;
+    // DESIGN_A: a hero column (how much of the city is yours, big) beside dense ruled data; no cards
+    const comp = this.host.completion().map((r) => (r.label === 'Places discovered' ? { ...r, done: this.model.discovery.counts.known, total: this.model.discovery.counts.total } : r));
+    const done = comp.reduce((s, r) => s + r.done / Math.max(1, r.total), 0) / Math.max(1, comp.length);
+    const walked = this.model.explored?.fraction?.() ?? 0;
+    const ach = this.host.achievements(), got = ach.filter((x) => x.unlocked).length;
+    const PAGES = [['stats', 'The numbers'], ['checklist', 'Checklist'], ['achievements', 'Achievements']] as const;
+    const hero = `<aside class="rc-hero">
+        <span class="a-label">Of the city, all told</span><b class="a-num rc-pct">${(done * 100).toFixed(1)}<i>%</i></b>
+        <div class="rc-sub"><span><b class="a-num">${Math.round(walked * 100)}%</b> of the streets walked</span><span><b class="a-num">${got}</b> of ${ach.length} achievements</span></div>
+        <nav class="rc-pages">${PAGES.map(([v, l]) => `<button data-v="${v}" class="${v === this.view ? 'on' : ''}">${l}</button>`).join('')}</nav>
+      </aside>`;
     let body = '';
+    const group = (g: string) => `<h4 class="t74-group">${esc(g)}</h4>`;
     if (this.view === 'stats') {
       const rows = this.host.stats().map((r) => (r.label === 'Places discovered' ? { ...r, value: String(this.model.discovery.counts.known) } : r));
-      const groups = [...new Set(rows.map((r) => r.group))];
-      body = `<div class="rc-book">${groups.map((g) => `<section><h3>${esc(g)}</h3>${rows.filter((r) => r.group === g).map((r) => `<div class="rc-row"><span>${esc(r.label)}</span><i></i><b>${esc(r.value)}</b></div>`).join('')}</section>`).join('')}</div>`;
+      body = [...new Set(rows.map((r) => r.group))].map((g) => `<section>${group(g)}${rows.filter((r) => r.group === g).map((r) => `<div class="rc-row"><span>${esc(r.label)}</span><b>${esc(r.value)}</b></div>`).join('')}</section>`).join('');
     } else if (this.view === 'checklist') {
-      const rows = this.host.completion().map((r) => (r.label === 'Places discovered' ? { ...r, done: this.model.discovery.counts.known, total: this.model.discovery.counts.total } : r));
-      const done = rows.reduce((s, r) => s + r.done / r.total, 0) / rows.length;
-      body = `<div class="rc-total"><b>${(done * 100).toFixed(1)}%</b><span>of the city, all told</span></div><div class="rc-book">${[...new Set(rows.map((r) => r.group))].map((g) => `<section><h3>${esc(g)}</h3>${rows.filter((r) => r.group === g).map((r) => `<div class="rc-check"><span>${esc(r.label)}</span><b>${r.done} / ${r.total}</b><i class="bar"><i style="width:${(r.done / r.total * 100).toFixed(1)}%"></i></i></div>`).join('')}</section>`).join('')}</div>`;
+      body = [...new Set(comp.map((r) => r.group))].map((g) => `<section>${group(g)}${comp.filter((r) => r.group === g).map((r) => `<div class="rc-row rc-check${r.done >= r.total ? ' full' : ''}"><span>${esc(r.label)}</span><b>${r.done}<small> / ${r.total}</small></b><i class="bar"><i style="width:${(r.done / Math.max(1, r.total) * 100).toFixed(1)}%"></i></i></div>`).join('')}</section>`).join('');
     } else {
-      const a = this.host.achievements();
-      body = `<div class="rc-total"><b>${a.filter((x) => x.unlocked).length} / ${a.length}</b><span>clippings</span></div><div class="rc-clips">${a.map((x) => `<div class="rc-clip${x.unlocked ? '' : ' locked'}"><b>${x.hidden && !x.unlocked ? 'Not yet' : esc(x.name)}</b><p>${x.hidden && !x.unlocked ? 'Keep living in the city.' : esc(x.text)}</p>${x.unlocked ? `<small>${esc(x.unlocked)}</small>` : ''}</div>`).join('')}</div>`;
+      body = `<section class="rc-ach">${ach.map((x) => `<div class="rc-a${x.unlocked ? '' : ' locked'}"><b>${x.hidden && !x.unlocked ? 'Not yet' : esc(x.name)}</b><p>${x.hidden && !x.unlocked ? 'Keep living in the city.' : esc(x.text)}</p><small>${x.unlocked ? esc(x.unlocked) : 'Locked'}</small></div>`).join('')}</section>`;
     }
-    this.el.innerHTML = head + body;
-    this.el.querySelectorAll<HTMLElement>('.np-pages button').forEach((b) => items.push({ el: b, activate: () => { this.view = b.dataset.v as typeof this.view; this.render(); } }));
+    this.el.innerHTML = hero + `<div class="rc-data ${this.view}">${body}</div>`;
+    this.el.querySelectorAll<HTMLElement>('.rc-pages button').forEach((b) => items.push({ el: b, activate: () => { this.view = b.dataset.v as typeof this.view; this.render(); } }));
     this.setNav(items, true);
   }
 }
