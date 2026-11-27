@@ -285,3 +285,16 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
 - Teddy's 9F: the AC with its towel now sits in the room's real window (dressing gets the window span). Letter-labelled rooms prefer the back (airshaft) side when one exists; floor 9 has none, so 9F looks onto the street. The brief says airshaft, so that's flagged for narrative. Evidence: docs/interiors/corwin_teddy_9F_v2.png.
 - Poly Haven props in hero rooms: held at the one test chair until the PBR foundation lands. With the interim lights the models read as pasted-in (much brighter than the baked rooms), so placing more now would make the hero rooms look worse.
 - The Grand Central concourse build spec is added to docs/interiors/GRAND_CENTRAL_PLAN.md: cells, content list, markers and slots, practicals, phone budget, steps.
+- **Hero: Midtown Central station house** (`interior.station_house_desk`, src/interiors/gen/heroes/precinct.ts). Placed at 232 W 31st St, a 1920 seven-storey building, 12 × 21.8 m.
+  - Placement: the resolver now handles "7th–8th Aves" addresses and a `lowrise` preference (floors nearest 4, built before 1935, frontage at least as wide as the hero, depth at least 18 m).
+  - Rooms:
+    - public room: terrazzo floor; the sergeant's raised desk on a platform behind a brass rail, with the log and a green lamp; benches; the WANTED board (art slot); payphone; Kearney's desk slot;
+    - corridor, with the locked squad-room stair door;
+    - booking room: fingerprint stand, height chart (art slot), mugshot camera on a tripod, booking desk; two barred holding cells with steel benches and toilets (spawn and wait markers);
+    - muster room: lectern, rows of chairs, roll-call board;
+    - property clerk's wire cage: counter, shelving, a `deposit_box` marker, an evidence stash.
+  - Evidence: docs/interiors/precinct_v1.jpg.
+  - Critique:
+    - The muster room is narrow (2.9 m) and the property room long (12.8 m): rebalance the back-room widths by the lot width.
+    - The desk front is a flat dark slab; it needs panel mouldings.
+    - The reference pass for precinct interiors is still running; judge against it when it lands.

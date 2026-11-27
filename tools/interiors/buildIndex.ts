@@ -432,19 +432,29 @@ const avenueXAt = (name: string, z: number) => {
   for (const g of segs) if (streetNames[g.s] === n) { const t = Math.max(0, Math.min(1, (z - g.az) / ((g.bz - g.az) || 1e-9))); const x = g.ax + (g.bx - g.ax) * t; const zz = g.az + (g.bz - g.az) * t; const d = Math.abs(zz - z); if (d < best) { best = d; bx = x; } }
   return bx;
 };
+const byIdB = new Map<number, B>(); for (const q of blds) byIdB.set(q.id, q);
 for (const h of heroContent) {
   const place = HERO_PLACEMENT[h.id]; if (!place || h.parent) continue;
   const m = /^(.+?),\s*(.+?)[–-](.+?),\s*(north|south|east|west) side/i.exec(h.address);
   if (!m) { heroLog.push(`${h.id}: unsupported address form "${h.address}"`); continue; }
   const street = normaliseStreet(m[1]), sIdx = streetNames.indexOf(street);
+  // "7th–8th Aves" / "Broadway–6th Ave": give a bare ordinal the avenue suffix and drop the plural
+  const avName = (t: string) => { const q = t.trim().replace(/\bAves\b/i, 'Ave'); return /ave|broadway|square|place/i.test(q) ? q : `${q} Ave`; };
+  m[2] = avName(m[2]); m[3] = avName(m[3]);
   const cand = out.filter((b) => b.frontage.some((e) => e[4] === sIdx)).map((b) => {
     const e = b.frontage.find((q) => q[4] === sIdx)!; const mx = (e[0] + e[2]) / 2, mz = (e[1] + e[3]) / 2;
     const xa = avenueXAt(m[2], mz), xb = avenueXAt(m[3], mz);
     const between = mx > Math.min(xa, xb) && mx < Math.max(xa, xb);
     const north = m[4].toLowerCase() === 'north' ? (b.units[0]?.nz ?? 0) < 0 : (b.units[0]?.nz ?? 0) > 0;
-    return { b, e, ok: between && north && b.year < 1975 && b.floors >= (place.minFloors ?? 0) };
-  }).filter((q) => q.ok).sort((p, q) => q.b.floors - p.b.floors || p.b.year - q.b.year);
+    const fl = Math.hypot(e[2] - e[0], e[3] - e[1]), src = byIdB.get(b.id), depth = src ? Math.min(src.maxX - src.minX, src.maxZ - src.minZ) : 0;
+    const big = place.prefer !== 'lowrise' || (fl >= place.width && depth >= (place.minDepth ?? 0) && b.year < 1935);
+    return { b, e, ok: between && north && big && b.year < 1975 && b.floors >= (place.minFloors ?? 0) };
+  }).filter((q) => q.ok).sort(place.prefer === 'lowrise' ? (p, q) => Math.abs(p.b.floors - 4) - Math.abs(q.b.floors - 4) || p.b.year - q.b.year : (p, q) => q.b.floors - p.b.floors || p.b.year - q.b.year);
   const pick = cand[0];
+  if (process.env.DBG_HERO === h.id) {
+    const all = out.filter((b) => b.frontage.some((e) => e[4] === sIdx)).map((b) => { const e = b.frontage.find((q) => q[4] === sIdx)!; const mx = (e[0] + e[2]) / 2, mz = (e[1] + e[3]) / 2; return `${b.id} fl${b.floors} y${b.year} mx${mx.toFixed(0)} xa${avenueXAt(m[2], mz).toFixed(0)} xb${avenueXAt(m[3], mz).toFixed(0)} nz${(b.units[0]?.nz ?? 0).toFixed(2)}`; });
+    console.log(h.id, street, sIdx, all.slice(0, 40));
+  }
   if (!pick) { heroLog.push(`${h.id}: no building matches "${h.address}"`); continue; }
   const b = pick.b, [ax, az, bx, bz] = pick.e, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
   const w = Math.min(place.width, L - 0.6), t0 = (L - w) / 2;
