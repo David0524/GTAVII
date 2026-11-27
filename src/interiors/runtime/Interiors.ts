@@ -4,6 +4,7 @@
  * area power (brownouts). No loading screens: an interior is resident before you reach its door.
  */
 import * as THREE from 'three/webgpu';
+import { placeModels, cellLights } from './models';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { decodeIndex, unitDoor, facadeDoorRec, isCoreKind, type BuildingIdx, type DoorRec, type IndexFile, type UnitRec, type WireIndex } from '../indexFormat';
 import { KINDS, isOpen } from '../catalog';
@@ -12,7 +13,7 @@ import type { WorkerReq, WorkerRes } from '../worker';
 import { createGlassMaterial, createInteriorMaterial, type InteriorLook } from './material';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
-export interface InteriorsOpts { quality: Quality; content: { interiors: unknown; places: unknown }; baseUrl?: string; workers?: number }
+export interface InteriorsOpts { quality: Quality; content: { interiors: unknown; places: unknown }; baseUrl?: string; workers?: number; /** instance CC0 prop models (interim until the engine PBR foundation) */ propModels?: boolean }
 export interface PowerState { area: string; state: 'on' | 'dim' | 'off' }
 
 const STREAM_IN = 30, STREAM_OUT = 48, MAX_LIVE = 24;
@@ -252,6 +253,11 @@ export class Interiors {
       group.add(obj);
       return { out: d, obj, open: 0, target: 0, collider: null, locked: d.locked };
     });
+    if (this.opts.propModels && built.models?.length) {
+      const meshes = cells.map((c) => c.opaque);
+      cellLights(built, meshes);
+      void placeModels((import.meta.env?.BASE_URL ?? '/'), built, meshes).then(() => group.updateMatrixWorld(true));
+    }
     this.object.add(group); group.updateMatrixWorld(true);
     const L: Live = { id, unit: e.u, b: e.b, built, group, matrix: m, inv: m.clone().invert(), cells, doors, look, colliders: null, requestedAt, readyAt: performance.now() };
     this.live.set(id, L);
@@ -261,7 +267,7 @@ export class Interiors {
   private unload(L: Live) {
     if (L.colliders && this.world) for (const c of L.colliders) this.world.removeCollider(c, false);
     for (const d of L.doors) if (d.collider && this.world) this.world.removeCollider(d.collider, false);
-    L.group.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).geometry.dispose(); });
+    L.group.traverse((o) => { if ((o as THREE.Mesh).isMesh && !o.userData.shared) (o as THREE.Mesh).geometry.dispose(); });
     this.object.remove(L.group);
     this.live.delete(L.id);
   }

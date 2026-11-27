@@ -269,6 +269,9 @@ function teddy(k: Kit, rc: [number, number, number, number], y0: number) {
   k.artSlot('photo', fx - 0.25, y0 + 0.445, fz - 0.1, 0.25, 0.2, 0, 0);
   k.artSlot('calendar', x0 + 0.03, y0 + 1.5, z0 + 2.0, 0.3, 0.45, 1, 0);
   k.marker('stash', fx, y0 + 0.2, fz, 'footlocker (nightstick, act 1)');
+  // a slat-back kitchen chair pulled up to the footlocker (CC0 model, Poly Haven painted_wooden_chair_01)
+  k.model('kitchen_chair_b', fx + 0.75, y0, fz - 0.15, -Math.PI / 2 + 0.25);
+  k.collider({ c: [fx + 0.75, y0 + 0.25, fz - 0.15], h: [0.22, 0.25, 0.22], yaw: 0.25, breakable: 'chair' });
   // mirror with the expired hack licence tucked in it, Saint Christopher on a nail
   P.mirror(k, { x: x1 - 0.02, z: z1 - 1.0, yaw: Math.PI / 2 }, 0.4, 0.55, y0 + 1.3);
   k.box(x1 - 0.045, y0 + 1.33, z1 - 1.12, x1 - 0.04, y0 + 1.43, z1 - 0.98, tint(M.paper, '#d8c86a'), { occlude: false });

@@ -4,7 +4,7 @@
  * three.js. Everything is generated, nothing is shipped.
  */
 import { type Mat, M } from './materials';
-import type { ArtSlotOut, TraversalMark, CellOut, ColliderOut, DoorOut, LightOut, MarkerOut, MarkerType, MeshArrays, MoverOut, PortalOut, SlotOut } from '../spec';
+import type { ArtSlotOut, TraversalMark, ModelOut, CellOut, ColliderOut, DoorOut, LightOut, MarkerOut, MarkerType, MeshArrays, MoverOut, PortalOut, SlotOut } from '../spec';
 
 export type V3 = [number, number, number];
 
@@ -104,6 +104,9 @@ export class Kit {
   readonly movers: MoverOut[] = [];
   readonly art: ArtSlotOut[] = [];
   readonly traversal: TraversalMark[] = [];
+  readonly models: ModelOut[] = [];
+  /** Place a free prop model (CC0 GLB). Callers keep emitting the box version as the fallback/collision unless `replace`. */
+  model(key: string, x: number, y: number, z: number, yaw: number, s?: number) { this.models.push({ key, x, y, z, yaw, s, cell: this.cur }); }
   /** occluder boxes for baking shadows/AO (local AABBs) */
   readonly occluders: [number, number, number, number, number, number][] = [];
   cur = 0;

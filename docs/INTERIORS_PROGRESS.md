@@ -255,3 +255,8 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
   - Sketchfab downloads require a logged-in account.
   - Smithsonian Open Access needs a free api.data.gov key.
 - Before adoption: confirm the CC-BY version (4.0) on each Sketchfab model page, strip brand marks (listed in the candidates file), and log each in docs/licenses/ASSETS.md.
+- **CC0 prop pipeline (Poly Haven, no account):** tools/interiors/fetchProps.ts downloads 18 models (the hero-room picks from PROP_CANDIDATES), downsizes textures to 512 px JPEG, and packs each into one GLB in public/models/interiors/ (6.0 MB total, 600-16k tris each). It writes src/interiors/props/manifest.json (bounds computed through the node TRS) and the ledger rows in docs/licenses/ASSETS.md (CC0 1.0, polyhaven.com/license, checked 2026-11-27).
+  - Generators place models with `Kit.model(key, x, y, z, yaw)`, carried in `BuiltInterior.models`. The runtime parents each model to its cell mesh, so portal culling hides it with the cell. `src/interiors/runtime/models.ts` is a small GLB reader on three/webgpu, because GLTFLoader would pull in a second copy of three.js.
+  - First use: a slat-back chair in Teddy's room 9F (docs/interiors/first_cc0_model_corwin_v1.png).
+  - Honest critique: the model reads as pasted in. Its lit PBR material is far brighter than the baked room around it, and the interim point lights from `cellLights` don't match the bake. This is the expected seam until the engine's PBR and probe foundation (request 9) lights the rooms and the props with the same lights.
+  - To verify: the facing offset per model, and scale (`kitchen_table` is 0.96 m high, so it needs about 0.8× scale; `suitcase` bounds are 1.6 m wide, so check its scale before use).
