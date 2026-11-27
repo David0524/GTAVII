@@ -26,6 +26,8 @@ export function scalpHairMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, app
     thick: (up, w) => ((0.008 + 0.004 * up) + app.hair.volume * 0.05 * (0.5 + 0.5 * up)) * w,
     density: (w) => Math.min(1, w ** 1.3) * (coily ? 1.1 : 1), freq: coily ? 3000 : 1800, clump: coily ? 2 : 0, brow: false,
   }];
+  // close crops (and bald: the head's weights hold only a fringe, see ict_tex.py 'horseshoe')
+  if (app.hair.style === 'buzz' || app.hair.style === 'bald') specs.forEach((sp) => { sp.thick = (_u, w) => 0.004 * w; sp.layers = Math.min(sp.layers, 3); });
   // brows: ~1 mm of short straight strands
   // (both: triangles touching the mask are kept, density tapers to 0 at its edge: no hard cut) lying along the arc (LOD 0-1 only)
   if (h.brow && lod <= 1) specs.push({ w: h.brow, layers: 2, thick: (_u, w) => 0.0012 * w, density: (w) => w ** 1.5 * 0.85, freq: 5200, clump: 0, brow: true });

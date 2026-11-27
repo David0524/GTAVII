@@ -123,6 +123,13 @@ eyeY = job['eyeY']
 nape = eyeY - 0.072 + 0.006 * (fbm(p, 300, 2) - 0.5)
 hairS = ss(nape - 0.004, nape + 0.008, p[:, 1]) * isS
 hairM = np.maximum(hairF, hairS)
+# male-pattern baldness (job pattern 'horseshoe'): no hair over the crown; a fringe stays around the
+# sides and back. The line rises from the temples (just above the eye line) towards the back.
+def crownCut(pp):
+    zf = np.clip((job['eyes']['L'][2] - pp[:, 2]) / 0.12, 0, 1)
+    return eyeY + 0.035 + 0.03 * zf
+if job.get('pattern') == 'horseshoe':
+    hairM = hairM * (1 - ss(crownCut(p) - 0.006, crownCut(p) + 0.01, p[:, 1]))
 
 # --- albedo (linear) -------------------------------------------------------------------------
 base = lin(job['tone'])
@@ -350,6 +357,8 @@ hwF = ss(hlv - 0.002, hlv + 0.03, vv) * (1 - earV) * vF
 napeY = eyeY - 0.07 - 0.012 * np.exp(-(pos[:, 0] / 0.03) ** 2) + 0.006 * (vnoise(pos * 180) - 0.5)
 hwS = ss(napeY, napeY + 0.03, pos[:, 1]) * vS
 hw = np.maximum(hwF, hwS)
+if job.get('pattern') == 'horseshoe':
+    hw = hw * (1 - ss(crownCut(pos) - 0.012, crownCut(pos) + 0.004, pos[:, 1]))
 # brows (same arcs as the albedo, on vertices): short shells grow there at runtime
 def browV(side):
     cu = 0.3475 if side < 0 else 0.6525

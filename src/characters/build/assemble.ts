@@ -30,7 +30,7 @@ export interface Assembled {
 
 /** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
 /** opts.headCutY: drop our head (skin above this height, eyes, teeth, hair) for a substituted head (evaluation). */
-export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean; headFace?: { browZ: number; hx: number; hz: number; cz: number } } = {}): Assembled {
+export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean; /** keep none of our neck reaching more than this above the seam (default 0.03) */ headBand?: number; headFace?: { browZ: number; hx: number; hz: number; cz: number } } = {}): Assembled {
   const t0 = performance.now();
   // heeled shoes stand the body on its heels (foot pitched in the bind pose)
   const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
@@ -110,7 +110,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
     if (cutY !== undefined) {
       const above = (x: number, h: number) => { const k = model.splitSrc[x]; return ring ? P[k * 3 + 1] > ring(P[k * 3], P[k * 3 + 2]) + h : F.part[k] === PART.head || P[k * 3 + 1] > cutY; };
       // fully past the seam, or reaching beyond the conformed band (it would poke through the head)
-      if ([a, b, c].every((x) => above(x, 0.003)) || (ring && [a, b, c].some((x) => above(x, 0.03)))) continue;
+      if ([a, b, c].every((x) => above(x, 0.003)) || (ring && [a, b, c].some((x) => above(x, opts.headBand ?? 0.03)))) continue;
     }
     mb.tri(skinVert(a), skinVert(b), skinVert(c));
   }

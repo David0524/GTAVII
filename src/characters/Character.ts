@@ -10,7 +10,7 @@ import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
 import { scalpHairMesh } from './heads/scalpHair';
-import { neckProfile, headFaceExtents, fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
+import { neckProfile, neckSampler, headFaceExtents, fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
 import { Animator, type LocoInput } from './anim/Animator';
@@ -102,7 +102,11 @@ export class Character {
     if (prebuilt) {
       this.asm = prebuilt;
       const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
-      if (rb && this.prebuiltHead) { this.rbFit = fitHead(rb, this.prebuiltHead.joints); }
+      if (rb && this.prebuiltHead) {
+        this.rbFit = fitHead(rb, this.prebuiltHead.joints);
+        // ICT heads stitch onto our neck (profile measured in the build worker)
+        this.rbNeck = (rb.meta as { packed?: boolean }).packed ? neckSampler(this.prebuiltHead.neck) : null;
+      }
     }
     else {
       const shape = this.model.evaluate({ ...this.appearance.body, stature: this.appearance.stature });
@@ -112,7 +116,7 @@ export class Character {
       // Pulling our neck in to ICT's thinner neck left a lit ledge above the collar where the skin
       // flared back out to the shoulders. Rocketbox heads keep the body-side conform.
       const ict = !!(rb && (rb.meta as { packed?: boolean }).packed);
-      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, headRing: this.rbFit.ringY, ...(ict ? {} : { headRingR: this.rbFit.ringR, headAxis: this.rbFit.neckAxis }), keepHair: !!this.desc.overrides?.ourHair, headFace: headFaceExtents(rb!, this.rbFit) } : {});
+      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, headRing: this.rbFit.ringY, ...(ict ? { headBand: 0.022 } : { headRingR: this.rbFit.ringR, headAxis: this.rbFit.neckAxis }), keepHair: !!this.desc.overrides?.ourHair, headFace: headFaceExtents(rb!, this.rbFit) } : {});
       this.rbNeck = ict && this.rbFit ? neckProfile(shape.pos, shape.joints, this.rbFit.neckBottom - 0.012, this.rbFit.neckBottom + 0.08) : null;
     }
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }

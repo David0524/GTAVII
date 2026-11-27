@@ -22,10 +22,15 @@ import { repack } from './meshopt.ts';
 await formatReady(); // meshopt-coded index blobs
 
 const name = process.argv[2];
-const leads = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, 'ict_leads.json'), 'utf8'));
-const spec = leads[name];
-if (!spec) throw new Error(`no ICT lead ${name}`);
-const id = `lead_${name}`;
+// --pool: a near-ring pool identity (tools/characters/ict_pool.json). Pool heads share one
+// topology: every cut that picks triangles is decided on ICT's neutral, not on the identity, so all
+// pool heads keep the same vertices in the same order and one simplified index serves them all
+// (tools/characters/ict-lod.ts --topo). Smaller textures (512), tagged for HeadLibrary.pick.
+const pool = process.argv.includes('--pool');
+const specs = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, pool ? 'ict_pool.json' : 'ict_leads.json'), 'utf8'));
+const spec = pool ? { texSize: 512, ...specs.defaults, ...specs.heads[name] } : specs[name];
+if (!spec) throw new Error(`no ICT ${pool ? 'pool head' : 'lead'} ${name}`);
+const id = pool ? `ict_${name}` : `lead_${name}`;
 const OUT = path.resolve(import.meta.dirname, '../../public/characters/rb');
 const TMP = path.resolve(import.meta.dirname, 'scratch/ict');
 fs.mkdirSync(TMP, { recursive: true });
@@ -42,17 +47,20 @@ const parts = C.meta.parts as Record<string, [number, number]>;
 const P = Float32Array.from(neutral);
 (spec.c as number[]).forEach((w, m) => { if (!w || m >= modes) return; const s = w * scales[m], o = m * nv * 3; for (let i = 0; i < nv * 3; i++) P[i] += s * deltas[o + i]; });
 
-let neckCutY = 0;
+// S: positions the triangle-selecting cuts are decided on (the neutral for the pool)
+const S = pool ? Float32Array.from(neutral) : P;
+let neckCutY = 0, liftY = 0;
 // --- neck length: ICT's neck runs down past the collarbones, so our body would be cut open at the
 // chest. Skin below `neckCut` (metres under the eye line; spec.neckCut, default 0.125: the Rocketbox leads end ~2.3 interocular distances under the eyes, ICT ~3.1) is lifted
 // onto the cut, which leaves a clean, level-ish bottom edge for the body to conform to.
 {
-  let ey = 0, c = 0; for (let k = parts.eyeL[0]; k < parts.eyeR[1]; k++) { ey += P[k * 3 + 1]; c++; } ey /= c;
-  neckCutY = ey - (spec.neckCut ?? 0.125);
+  const eyeLine = (Q: Float32Array) => { let ey = 0, c = 0; for (let k = parts.eyeL[0]; k < parts.eyeR[1]; k++) { ey += Q[k * 3 + 1]; c++; } return ey / c; };
+  neckCutY = eyeLine(S) - (spec.neckCut ?? 0.125);
+  liftY = eyeLine(P) - (spec.neckCut ?? 0.125);
 }
 // skin triangles wholly below the cut are dropped (ICT's front neck flaps reach onto the chest);
 // the remaining vertices below it are lifted onto it after triangle selection
-const belowCut = (k: number) => k < parts.headNeck[1] && P[k * 3 + 1] < neckCutY;
+const belowCut = (k: number) => k < parts.headNeck[1] && S[k * 3 + 1] < neckCutY;
 
 // --- parts ---------------------------------------------------------------------------------
 const inP = (k: number, p: string) => k >= parts[p][0] && k < parts[p][1];
@@ -62,10 +70,10 @@ const outerEye = (k: number) => (k >= parts.eyeL[0] && k < parts.irisL[0]) || (k
 // the mouth's back half (molars, back gums) is never seen with lips that only part a little: it
 // was ~28% of the head's vertices. Teeth/gums more than 2.6 cm behind the front of the mouth go.
 let mouthFrontZ = -Infinity;
-for (let k = parts.teeth[0]; k < parts.teeth[1]; k++) mouthFrontZ = Math.max(mouthFrontZ, P[k * 3 + 2]);
-const backOfMouth = (k: number) => P[k * 3 + 2] < mouthFrontZ - (spec.mouthDepth ?? 0.026);
-const eyeCzL = (() => { let a = Infinity, b = -Infinity; for (let k = parts.eyeL[0]; k < parts.irisL[0]; k++) { a = Math.min(a, P[k * 3 + 2]); b = Math.max(b, P[k * 3 + 2]); } return (a + b) / 2; })();
-const eyeCzR = (() => { let a = Infinity, b = -Infinity; for (let k = parts.eyeR[0]; k < parts.irisR[0]; k++) { a = Math.min(a, P[k * 3 + 2]); b = Math.max(b, P[k * 3 + 2]); } return (a + b) / 2; })();
+for (let k = parts.teeth[0]; k < parts.teeth[1]; k++) mouthFrontZ = Math.max(mouthFrontZ, S[k * 3 + 2]);
+const backOfMouth = (k: number) => S[k * 3 + 2] < mouthFrontZ - (spec.mouthDepth ?? 0.026);
+const eyeCzL = (() => { let a = Infinity, b = -Infinity; for (let k = parts.eyeL[0]; k < parts.irisL[0]; k++) { a = Math.min(a, S[k * 3 + 2]); b = Math.max(b, S[k * 3 + 2]); } return (a + b) / 2; })();
+const eyeCzR = (() => { let a = Infinity, b = -Infinity; for (let k = parts.eyeR[0]; k < parts.irisR[0]; k++) { a = Math.min(a, S[k * 3 + 2]); b = Math.max(b, S[k * 3 + 2]); } return (a + b) / 2; })();
 const eyeCz = (k: number) => (k < parts.eyeR[0] ? eyeCzL : eyeCzR);
 function regionOf(k: number, tileU: number): Region {
   if (inP(k, 'face') || inP(k, 'headNeck')) return tileU < 1 ? 'face' : 'scalp';
@@ -74,7 +82,7 @@ function regionOf(k: number, tileU: number): Region {
   if (inP(k, 'gums')) return backOfMouth(k) ? null : 'gums';
   if (inP(k, 'teeth')) return backOfMouth(k) ? null : 'teeth';
   // the back half of each eyeball sits inside the socket, never seen
-  if (outerEye(k)) return P[k * 3 + 2] < eyeCz(k) - 0.004 ? null : 'eye';
+  if (outerEye(k)) return S[k * 3 + 2] < eyeCz(k) - 0.004 ? null : 'eye';
   if (inP(k, 'lashesL') || inP(k, 'lashesR')) return 'lash';
   // (the eye-occlusion film is not drawn: alpha-tested it would be a hard band; the lid shadow is
   // painted into the sclera from the lid contour instead, see ict_tex.py)
@@ -114,7 +122,10 @@ for (let t = 0; t < idxIn.length; t += 3) {
   }
 }
 const n = vSplit.length;
-for (const k of new Set(vSplit.map((i) => splitSrc[i]))) if (belowCut(k)) P[k * 3 + 1] = neckCutY;
+// onto the identity's own cut: everything under it, and (pool) everything the neutral's cut selected,
+// so the bottom edge is level for every identity (for leads S = P: the same set)
+for (const k of new Set(vSplit.map((i) => splitSrc[i]))) if (k < parts.headNeck[1] && (belowCut(k) || P[k * 3 + 1] < liftY)) P[k * 3 + 1] = liftY;
+if (!Number.isFinite(liftY)) throw new Error('no neck cut');
 // relaxed upper lids: ICT's neutral holds the eyes wide open (sclera above the iris). The upper lid
 // margin and the skin above it (falloff over ~9 mm) and the upper lashes drop by spec.lidDrop
 // (default 1.3 mm), so the lid rests on the top of the iris as in a relaxed gaze.
@@ -191,6 +202,7 @@ for (let t = 0; t < tris.length; t += 3) {
 }
 const loop = new Set<number>();
 for (const [k, c] of edgeCount) if (c === 1) for (const q of [Math.floor(k / nv), k % nv]) if (P[q * 3 + 1] < eyeY - 0.12) loop.add(q);
+if (loop.size < 20) throw new Error(`${id}: neck loop has ${loop.size} vertices (cut not found)`);
 const lc = [0, 0, 0]; for (const q of loop) for (let a = 0; a < 3; a++) lc[a] += P[q * 3 + a] / loop.size;
 const Neck = [lc[0], lc[1] + 0.03, lc[2]];
 const Head = [(LEye[0] + REye[0]) / 2, eyeY + 0.02, eyeZ - 0.075];
@@ -249,17 +261,17 @@ const quv = Uint16Array.from(vUV, (x) => Math.round(x * 65535));
 let neckMinY = Infinity; for (let v = 0; v < n; v++) if (vRegion[v] <= 1) neckMinY = Math.min(neckMinY, pos[v * 3 + 1]);
 const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const meta = {
-  id, source: 'ICT-FaceKit Light, synthesised identity', licence: 'MIT (ICT-FaceKit, Copyright (c) 2020 USC Institute for Creative Technologies)', lead: id,
+  id, source: 'ICT-FaceKit Light, synthesised identity', licence: 'MIT (ICT-FaceKit, Copyright (c) 2020 USC Institute for Creative Technologies)', lead: pool ? null : id,
   bbox: { min: mn, max: mx }, skinIdx: nSkinIdx, cardIdx: tris.length - nSkinIdx,
   skinRGB: hex(spec.tone), neckRGB: hex(spec.tone), neckMinY, neckRing,
   landmarks: { Head, Neck, LEye, REye, MNose, MJaw, LCheek, RCheek, MUpperLip, MBottomLip, LMouthCorner, RMouthCorner },
-  tag: null, coef: spec.c, packed: true,
+  tag: pool ? spec.tag : null, coef: spec.c, packed: true,
 };
 
 
 // --- textures (procedural; texture.py) -------------------------------------------------------
 const job = {
-  size: spec.texSize ?? 2048, out: path.join(OUT, id), tone: spec.tone, brow: spec.brow ?? '#141010', iris: spec.iris ?? '#2a1a10', lip: spec.lip ?? null, seed: spec.seed ?? 7,
+  pattern: spec.pattern ?? null, size: spec.texSize ?? 2048, out: path.join(OUT, id), tone: spec.tone, brow: spec.brow ?? '#141010', iris: spec.iris ?? '#2a1a10', lip: spec.lip ?? null, seed: spec.seed ?? 7,
   uv: vUV, orig: vOrig, region: vRegion, pos: Array.from(pos), tris,
   eyes: { L: LEye, R: REye }, lids, eyeY, mouthY,
   // CC0 MakeHuman skin for photographic micro-detail (data/raw, gitignored; licence in the .mhmat)
@@ -280,6 +292,6 @@ const bytes = blob.length + sizes.c + sizes.n + sizes.o;
 
 const idxFile = path.join(OUT, 'index.json');
 const index = JSON.parse(fs.readFileSync(idxFile, 'utf8'));
-index.heads = [...index.heads.filter((h: any) => h.id !== id), { id, source: meta.source, bytes, tag: null, skinRGB: meta.skinRGB, lead: id, ownHair: spec.ownHair ?? true }];
+index.heads = [...index.heads.filter((h: any) => h.id !== id), { id, source: meta.source, bytes, tag: pool ? spec.tag : null, skinRGB: meta.skinRGB, lead: pool ? null : id, ownHair: spec.ownHair ?? true }];
 fs.writeFileSync(idxFile, JSON.stringify(index, null, 1));
 console.log(id, 'verts', n, 'tris', tris.length / 3, 'bin', blob.length, 'tex', sizes, 'total KB', (bytes / 1024).toFixed(0), 'eyes', LEye.map((x) => x.toFixed(3)), 'neck', Neck.map((x) => x.toFixed(3)));

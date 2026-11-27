@@ -95,7 +95,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, ...cand, ...(qp.has('rbhair') ? { ourHair: false } : {}), ...JSON.parse(qp.get('ov') ?? '{}') } }));
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }
-    if (qp.has('pool')) {
+    if (qp.has('pool') && !qp.has('heads')) {
       chars.length = 0;
       const heads = factory.heads!;
       const used = new Set<string>();
@@ -108,7 +108,33 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
         i++;
       }
     }
-    report.heads = chars.map((c) => ({ hero: c.desc.hero, head: (c.desc.overrides?.rbHead as any)?.id ?? null, tris: c.stats.tris, draws: c.stats.draws }));
+    if (qp.has('heads')) {
+      // given pool heads (heads=ict: every ICT pool head), each on a generated pedestrian that fits
+      // its tag (sex, age band, a hairstyle its scalp shells can show)
+      for (const c of chars) c.object.removeFromParent();
+      chars.length = 0;
+      const heads = factory.heads!;
+      const want = qp.get('heads') === 'ict' ? heads.pool.filter((h) => h.id.startsWith('ict_')).map((h) => h.id) : qp.get('heads')!.split(',');
+      for (const [k, id] of want.entries()) {
+        const e = heads.pool.find((h) => h.id === id); if (!e?.tag) continue;
+        const others = new Set(heads.pool.map((h) => h.id).filter((x) => x !== id));
+        let seed = 0, a = null as ReturnType<typeof generateAppearance> | null;
+        for (let s = 0; s < 4000; s++) {
+          const q = generateAppearance(hash2(7300 + k * 31, s)), cat = /afro/.test(q.hair.style) ? 'curly' : q.hair.style === 'bald' || q.hair.style === 'buzz' ? 'bald' : '';
+          // (bald is rare in generation: any short-haired man of the band stands in, styled bald below)
+          const catOk = cat === e.tag.hair || (e.tag.hair === 'bald' && q.hair.style === 'short');
+          if (!catOk) continue;
+          // the same gate the crowd uses (sex, age, ancestry, tone after tint): only this head may pass
+          const qq = e.tag.hair === 'bald' ? { ...q, hair: { ...q.hair, style: 'bald' as const } } : q;
+          if (heads.pick(qq, others) === id) { seed = hash2(7300 + k * 31, s); a = q; break; }
+        }
+        if (!a) { console.warn('no pedestrian for', id); continue; }
+        const asset = await heads.load(id);
+        const hair = e.tag.hair === 'bald' && !/bald|buzz/.test(a.hair.style) ? { hair: { style: 'bald' } } : {};
+        chars.push(factory.spawn(world, { seed, overrides: { hat: null, glasses: null, rbHead: asset, headTint: tintFor(asset, a.skin.tone), ...hair } }));
+      }
+    }
+    report.heads = chars.map((c) => ({ hero: c.desc.hero, head: (c.desc.overrides?.rbHead as any)?.id ?? null, tris: c.stats.tris, draws: c.stats.draws, style: c.appearance.hair.style, meshes: (c as any).meshes?.map((m: any) => m.name || m.geometry?.index?.count / 3) }));
   } else if (scene === 'hair') {
     // every hair style on a head; women's and men's styles on matching seeds; hats off
     const styles = (qp.get('styles') ?? 'short,sidePart,slick,combOver,pompadour,feathered,shag,earLength,bob,flip,longStraight,ponytail,braid,updo,setCurls,afro,afroShort,curlyMid,cornrows,buzz').split(',');

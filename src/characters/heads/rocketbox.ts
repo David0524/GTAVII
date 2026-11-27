@@ -64,6 +64,9 @@ export class HeadLibrary {
     for (const h of this.pool) {
       const t = h.tag!;
       if (t.sex !== sex || exclude.has(h.id)) continue;
+      // heads with their own scalp hair (ICT pool) grow shells: close crops, afros, bald only, and
+      // only the hair their weights were baked for (a 'bald' head holds a fringe, an afro head a full scalp)
+      if (h.ownHair && (!SHELL_STYLES.has(app.hair.style) || hairCat(app.hair.style) !== t.hair)) continue;
       const ageGap = app.age < t.age[0] ? t.age[0] - app.age : app.age > t.age[1] ? app.age - t.age[1] : 0;
       const ancGap = Math.abs(anc[0] - t.anc[0]) + Math.abs(anc[1] - t.anc[1]) + Math.abs(anc[2] - t.anc[2]);
       const hl = h.skinRGB.map(toLin);
@@ -81,6 +84,8 @@ export class HeadLibrary {
   }
 }
 
+/** hairstyles the scalp-shell hair (scalpHair.ts) can show */
+export const SHELL_STYLES = new Set(['afro', 'afroShort', 'buzz', 'bald']);
 const hexRGB = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 /** CIE76 distance between two linear-sRGB colours (0..1). */
 function labDist(a: number[], b: number[]) {
@@ -100,13 +105,42 @@ function hairCat(style: string): HeadTag['hair'] {
   return 'short';
 }
 
+const topoCache = new Map<string, Promise<Map<string, ArrayBufferView>>>();
+function sharedTopo(base: string, id: string) {
+  let p = topoCache.get(base + id);
+  if (!p) { p = fetch(`${base}${id}.bin`).then((r) => r.arrayBuffer()).then((b) => readContainer(b).blobs); topoCache.set(base + id, p); }
+  return p;
+}
+/**
+ * Vertex normals from quantised positions: area-weighted face normals, averaged over every vertex at
+ * the same position (UV seams split vertices; their normals must agree or the seam shows).
+ */
+function seamNormals(qp: Uint16Array, idx: ArrayLike<number>, ext: number[]) {
+  const n = qp.length / 3, acc = new Float64Array(n * 3);
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
+    // positions are quantised per axis over the bbox: scale back to metres' proportions
+    const e1 = [(qp[b] - qp[a]) * ext[0], (qp[b + 1] - qp[a + 1]) * ext[1], (qp[b + 2] - qp[a + 2]) * ext[2]], e2 = [(qp[c] - qp[a]) * ext[0], (qp[c + 1] - qp[a + 1]) * ext[1], (qp[c + 2] - qp[a + 2]) * ext[2]];
+    const cr = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+    for (const v of [a, b, c]) for (let k = 0; k < 3; k++) acc[v + k] += cr[k];
+  }
+  const key = (v: number) => (qp[v * 3] * 65536 + qp[v * 3 + 1]) * 65536 + qp[v * 3 + 2];
+  const sum = new Map<number, [number, number, number]>();
+  for (let v = 0; v < n; v++) { const k = key(v), s = sum.get(k); if (s) { s[0] += acc[v * 3]; s[1] += acc[v * 3 + 1]; s[2] += acc[v * 3 + 2]; } else sum.set(k, [acc[v * 3], acc[v * 3 + 1], acc[v * 3 + 2]]); }
+  const out = new Int8Array(n * 3);
+  for (let v = 0; v < n; v++) { const s = sum.get(key(v))!, l = Math.hypot(s[0], s[1], s[2]) || 1; for (let k = 0; k < 3; k++) out[v * 3 + k] = Math.round((s[k] / l) * 127); }
+  return out;
+}
+
 async function loadHead(base: string, id: string, ktxMaps: string[] = [], ktx: { loadAsync(url: string): Promise<THREE.Texture> } | null = null, tex = id): Promise<HeadAsset> {
   const buf = await (await fetch(`${base}${id}.bin`)).arrayBuffer();
   await formatReady();
   const c = readContainer(buf);
   const meta = c.meta;
-  const B = (k: string) => c.blobs.get(k) as any;
-  const qp = B('pos') as Uint16Array, qn = B('nrm') as Int8Array, quv = B('uv') as Uint16Array, qsj = B('sj') as Uint8Array, qsw = B('sw') as Uint8Array, kd = B('kind') as Uint8Array;
+  // pool heads (ICT): uv, kind and index live in a shared topology file, fetched once
+  const sh = meta.shared ? await sharedTopo(base, meta.shared) : null;
+  const B = (k: string) => (c.blobs.get(k) ?? sh?.get(k)) as any;
+  const qp = B('pos') as Uint16Array, qn = (B('nrm') as Int8Array | undefined) ?? seamNormals(qp, B('idx'), meta.bbox.min.map((m: number, i: number) => meta.bbox.max[i] - m)), quv = B('uv') as Uint16Array, qsj = B('sj') as Uint8Array, qsw = B('sw') as Uint8Array, kd = B('kind') as Uint8Array;
   const n = qp.length / 3, mn = meta.bbox.min, mx = meta.bbox.max;
   const pos = new Float32Array(n * 3), nrm = new Float32Array(n * 3), uvs = new Float32Array(n * 2), sj = new Uint16Array(n * 4), sw = new Float32Array(n * 4), kind = new Float32Array(n);
   for (let v = 0; v < n; v++) {
@@ -264,7 +298,9 @@ export function headMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, skeleton
     let p = fit.map(h.pos[v * 3], h.pos[v * 3 + 1], h.pos[v * 3 + 2]);
     // neck stitch: the bottom 25 mm of the head's neck blends onto our neck surface
     if (o.neck && !h.kind[v]) {
-      const rb = fit.ringY(p[0], p[2]), w = sm(rb + 0.025, rb, p[1]);
+      // band: 25 mm (ICT heads: 35 mm, matching assemble's lower trim of our neck, headBand)
+      const band = (h.meta as { packed?: boolean }).packed ? 0.035 : 0.025;
+      const rb = fit.ringY(p[0], p[2]), w = sm(rb + band, rb, p[1]);
       if (w > 0) {
         const { r, cx, cz } = o.neck(p[0], p[1], p[2]);
         if (r > 0) { const dx = p[0] - cx, dz = p[2] - cz, d = Math.hypot(dx, dz) || 1; const tr = d + (r + 0.002 - d) * w; p = [cx + (dx / d) * tr, p[1], cz + (dz / d) * tr]; }

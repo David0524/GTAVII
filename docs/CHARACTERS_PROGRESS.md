@@ -732,6 +732,60 @@ real problems, and the cause went deeper than tuning:
 - **Framing:** `04_leads_act1_vs_refs` now shows the leads head to toe. The lineups (`01`, `02`)
   now show the Medium+ near ring with matched Rocketbox heads, which is what players see close up.
 
+## ICT near-ring pool (oversight order: after Delphine, before the Teddy/Nick boards)
+
+Board: `shots/characters/47_ict_pool.jpg`, from `?characters=1&scene=rocketbox&pool=1&heads=ict&t=2&zoom=head&focus=0..9`.
+
+**What it is.** 10 synthesised adult identities (`tools/characters/ict_pool.json`).
+- Coefficients: seeded random on ICT identity modes 1–11, with mode 0 set for sex, mode 2 for age and mode 3 for breadth.
+- Tones and ancestry tags are set by hand. Never fitted to photographs.
+- Weighted to the gap the Rocketbox pool can't fill: it has 2 curly-haired heads and no adult woman who reads as Black.
+  - 4 Black men: two with afros, two balding.
+  - 3 Black women with afros.
+  - 3 balding men of other ancestries.
+
+**How they're built.**
+- **Shared topology.** In pool mode (`bake-ict.ts --pool`), every cut that picks triangles is decided on ICT's neutral face, not on the identity. All pool heads therefore keep the same 19,620 vertices in the same order.
+- **Light mesh.** `ict-lod.ts` simplifies the neutral once with meshoptimizer: UV, hair and brow weights are attributes, and borders are locked. The result is 10k skin triangles, 7,616 vertices and 12,160 triangles including lash cards, with a geometric error of 0.37 mm. That one index serves every identity.
+- **Download split.**
+  - `ict_pool_topo.bin` (UV, kind, index) is downloaded once: 41 KB gzipped.
+  - Each head ships positions, skin weights and hair/brow weights: 44 KB gzipped.
+  - Normals are rebuilt at load, welded across UV seams.
+  - Textures are 512² WebP: 39 KB.
+  - Total: **about 83 KB per head, plus 41 KB once**. A Rocketbox pool head is 151 KB (32 KB geometry, 119 KB textures). The same light mesh shipped per head, without the shared file, was 158 KB.
+- **Delphine's light mesh** `lead_delphine_l1`: 35.5k → 10k skin triangles, error 0.37 mm, 104 KB gzipped against 263 KB, reusing her full textures (`tex` in index.json). It isn't wired to a distance switch yet.
+
+**Hair.** ICT heads only have scalp shells so far.
+- `HeadLibrary.pick` gives a head with its own hair only to pedestrians whose style the shells can show (`afro`, `afroShort`, `buzz`, `bald`), and only if the hair category matches the head's tag.
+- Balding heads use a `horseshoe` pattern: hair is removed over the crown in the painted texture and in the shell weights, leaving a fringe at the sides and back.
+- Long, tied and straight short hair stays with the Rocketbox pool and our own heads until card hair grows on the ICT scalp.
+
+**In the crowd.**
+- The build worker now treats ICT heads as ICT: our neck is kept, trimmed lower (`headBand` 0.022), and the head is stitched onto the profile measured in the worker. Before this, the crowd path assembled them like Rocketbox heads.
+- Street test (400 agents): 10 near-ring pedestrians, of which 2 have ICT heads, 1 Rocketbox and 7 our own (`crowd.nearHeads` in the report).
+
+**Fixes on the way.**
+- **Neck landmark.** On an identity whose neck ran higher than the neutral's, the neck landmark fell back to the origin, so the head sank into the shoulders. The cut edge is now lifted level onto each identity's own cut, and the bake fails loudly if the neck loop is missing.
+- **Sex convention.** Pool tags follow `HeadTag` (1 = male, 0 = female), the same as the Rocketbox entries.
+- **Repeatable shots.** `?t=` shots now repeat exactly: `Math.random` is seeded in the test page. The animator's random idle phase had made two shots of the same query differ more than the change being checked.
+- **Neck seam for ICT heads (leads too).** Our neck is trimmed to 22 mm above the seam, and the head's stitch band widened to 35 mm. Delphine's collar strip is quieter for it.
+
+**vs GTA V / VI / RDR2.**
+- Silhouette and face variety at 3–10 m are around GTA V's near pedestrians. GTA V's near pedestrians are roughly 5–10k-triangle heads with their own hair meshes and hand-made 512–1024 textures.
+- These faces are scan-based, so proportions read as more real than GTA V's at the same distance.
+- At close range they fall short of V:
+  - flat 512² skin with no pores in the normal map;
+  - shell hair that reads as a cap on the afros;
+  - a darker band at the collar on some heads.
+- RDR2 and VI are well ahead: per-pedestrian hair cards, wrinkle maps, skin variation.
+
+**Open.**
+- Darker collar band on some pool heads (head–body tone and seam shading).
+- Afro shells read as a cap at close range.
+- No card hair on the ICT scalp yet, so most pedestrians can't use these heads.
+- No distance switch between Delphine's full and light meshes.
+- Only 10 identities.
+
 ## vs GTA V / VI / RDR2 (required on every milestone; `docs/briefs/REFERENCE_GAMES.md`)
 Benchmarks for this stream: faces, skin, hair, clothing, wardrobe variety, facial animation, idle
 variety, and the RDR2 level of animation detail. We study behaviour and quality; we copy nothing.

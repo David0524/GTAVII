@@ -121,7 +121,7 @@ export class CrowdRenderer {
   setCamera(cam: THREE.Camera) { this.camera = cam; }
   /** Pending near-ring builds (tests wait for 0). */
   get pendingBuilds() { let n = 0; for (const st of this.agents.values()) if (st.pending) n++; return n; }
-  readonly stats = { cpuMs: 0, near: 0, mid: 0, far: 0, culled: 0, draws: 0, tris: 0, templatesReady: 0, nearBuilds: 0 };
+  readonly stats = { cpuMs: 0, near: 0, mid: 0, far: 0, culled: 0, draws: 0, tris: 0, templatesReady: 0, nearBuilds: 0, nearHeads: {} as Record<string, number> };
 
   constructor(body: BodyModel, lib: AnimLibrary, opts: { max: number; quality: keyof typeof QUALITY; ground: () => GroundFn | null; baseUrl?: string; archetypes?: ArchetypeRegistry; bodyUrl?: string; nearLod?: number; heads?: HeadLibrary | null }) {
     this.heads = opts.heads ?? null;
@@ -236,7 +236,7 @@ export class CrowdRenderer {
     const seed = hash2(a.variant, 0xc0ffee);
     const post = (head: HeadAsset | null) => {
       st.head = head;
-      this.worker!.postMessage({ type: 'build', id: a.id, seed, archetype: a.archetype, lod: this.nearLod, head: head ? { landmarks: head.meta.landmarks, neckMinY: head.meta.neckMinY, neckRing: head.meta.neckRing, face: head.meta.face } : null });
+      this.worker!.postMessage({ type: 'build', id: a.id, seed, archetype: a.archetype, lod: this.nearLod, head: head ? { landmarks: head.meta.landmarks, neckMinY: head.meta.neckMinY, neckRing: head.meta.neckRing, face: head.meta.face, packed: !!(head.meta as { packed?: boolean }).packed } : null });
     };
     if (!this.heads) { post(null); return; }
     const used = new Set<string>();
@@ -371,7 +371,9 @@ export class CrowdRenderer {
     }
     for (const [id, st] of this.agents) if (!seen.has(id)) { st.near?.dispose(); this.agents.delete(id); }
     for (const st of this.agents.values()) if (st.near) { draws += st.near.stats.draws; tris += st.near.stats.tris; }
-    Object.assign(this.stats, { cpuMs: performance.now() - t0, near, mid, far, culled, draws, tris });
+    const heads: Record<string, number> = {};
+    for (const s of this.agents.values()) if (s.near) { const k = s.headId ? (s.headId.startsWith('ict_') ? 'ict' : 'rocketbox') : 'ours'; heads[k] = (heads[k] ?? 0) + 1; }
+    Object.assign(this.stats, { cpuMs: performance.now() - t0, near, mid, far, culled, draws, tris, nearHeads: heads });
   }
 
   private pickClip(T: Template, a: AgentView, st: AgentState): number {

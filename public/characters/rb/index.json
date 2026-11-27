@@ -809,6 +809,256 @@
    ],
    "tex": "lead_delphine",
    "lodOf": "lead_delphine"
+  },
+  {
+   "id": "ict_m_afr_20s",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 163362,
+   "tag": {
+    "sex": 1,
+    "age": [
+     18,
+     32
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    92,
+    58,
+    38
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_m_afr_30s",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 160290,
+   "tag": {
+    "sex": 1,
+    "age": [
+     28,
+     45
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    74,
+    46,
+    31
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_m_afr_50s",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 162364,
+   "tag": {
+    "sex": 1,
+    "age": [
+     42,
+     62
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "bald"
+   },
+   "skinRGB": [
+    110,
+    70,
+    48
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_m_afr_65",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 160320,
+   "tag": {
+    "sex": 1,
+    "age": [
+     55,
+     80
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "bald"
+   },
+   "skinRGB": [
+    86,
+    54,
+    36
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_f_afr_20s",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 164992,
+   "tag": {
+    "sex": 0,
+    "age": [
+     18,
+     32
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    106,
+    67,
+    48
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_f_afr_35",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 161412,
+   "tag": {
+    "sex": 0,
+    "age": [
+     30,
+     50
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    78,
+    49,
+    33
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_f_afr_55",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 166576,
+   "tag": {
+    "sex": 0,
+    "age": [
+     45,
+     70
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    122,
+    80,
+    56
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_m_cau_60",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 169034,
+   "tag": {
+    "sex": 1,
+    "age": [
+     50,
+     78
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "bald"
+   },
+   "skinRGB": [
+    207,
+    158,
+    128
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_m_cau_45",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 168846,
+   "tag": {
+    "sex": 1,
+    "age": [
+     35,
+     58
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "bald"
+   },
+   "skinRGB": [
+    214,
+    168,
+    138
+   ],
+   "lead": null,
+   "ownHair": true
+  },
+  {
+   "id": "ict_m_lat_50",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 166962,
+   "tag": {
+    "sex": 1,
+    "age": [
+     40,
+     65
+    ],
+    "anc": [
+     0.15,
+     0.15,
+     0.7
+    ],
+    "hair": "bald"
+   },
+   "skinRGB": [
+    176,
+    126,
+    92
+   ],
+   "lead": null,
+   "ownHair": true
   }
  ]
 }
