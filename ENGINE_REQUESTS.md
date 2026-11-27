@@ -88,3 +88,41 @@ m.emissiveNode = select(isRoof, vec3(0), mix(emissiveWin, tierC.add(emissiveWin.
 Interiors ships no third-party assets yet. Our notes on the planned CC0 materials, the art slots fed by narrative's prompt
 queue and the interior reference photos are in `docs/interiors/ART_NOTES.md`. Please add the relevant lines to
 `docs/ART_SOURCES.md` when the first interior asset lands. Narrative's six Corwin art slots (commit c88da12) are the first ones.
+
+## From interiors: 9. Shared PBR material library, probes, SSAO and reflection probes for interiors (VISUAL_BAR)
+Interiors move from an unlit, vertex-baked material to the engine's lit PBR path. The engine owns these pieces and interiors consume them. Please define:
+- **Material library**: where it lives (proposal `public/materials/` with `src/shared/materials.ts` as the manifest), the format (KTX2/Basis texture arrays, 1K on Low and 2K on High; albedo, normal and an ORM pack of AO, roughness and metal), and the texture budget per tier. Interiors need about 20 sets: plaster (painted, peeling), hex tile, subway tile, terrazzo, checker lino, plain lino, oak planks (good, worn), carpet (two weaves), tin ceiling, acoustic tile, painted brick, wood panelling, formica, vinyl, chrome or brushed steel, enamel, fabric (two weaves), concrete. Each needs a CC0 source with its licence logged.
+- **Material API**: a node-material factory interiors can call per surface class with a texture-array layer index plus per-vertex tint, wear, grime and wet masks. Interiors keep their procedural pattern logic as masks over the PBR layers.
+- **Indirect light**: either (a) lightmaps, where interiors emit a second UV set and bake in the worker as today but to a texture atlas per interior; or (b) per-cell irradiance probes (SH9) supplied by the interior, sampled by the engine's lit material. Interiors propose (b) as the default, since it suits streaming and the worker bake already has the data, with (a) on desktop High.
+- **Direct light**: the engine's clustered or forward+ local lights. Interiors will hand over at most 2 shadowed and 8 unshadowed lights per visible cell, using the existing `LightOut` list.
+- **Sun and sky through windows**: the engine's sun direction and sky colour per frame. Interiors provide window portals (already in `PortalOut`) so the engine, or the interior material, can cast sun patches with frame shadows that follow time of day.
+- **SSAO/GTAO** enabled inside interiors, and **reflection probes**: one box-projected cubemap per room, captured at build time and supplied by interiors with its box, if the engine's probe system accepts runtime-supplied probes.
+Until this is defined, interiors keep the current path and do content work.
+
+## From interiors: 10. Traversal markup contract (MOVEMENT.md)
+Interiors own traversal markup on fire escapes, interior stairs, roof access and roof-to-roof gaps. The engine's PlayerController detects and executes it. Proposed shared type (engine to place it, e.g. `src/shared/traversal.ts`):
+```ts
+export type TraversalKind =
+  | 'drop_ladder'   // fire-escape ladder: pull-down at the lowest platform (a = bottom when lowered, b = platform top)
+  | 'ladder'        // fixed ladder or ship's ladder (a = bottom, b = top; n = facing the climber)
+  | 'fe_platform'   // fire-escape balcony walk surface (box), with rail height
+  | 'fe_stair'      // fire-escape stair flight between platforms (a -> b)
+  | 'sill'          // window sill a climber can stand or hang on (segment a -> b, n out of the wall)
+  | 'ledge'         // grabbable edge: parapet, cornice, roof edge (segment a -> b, n outward)
+  | 'roof_gap'      // jumpable gap between roofs (a = take-off edge midpoint, b = landing, width, drop)
+  | 'hatch'         // roof hatch or bulkhead door (interior <-> roof)
+  | 'vault'         // low obstacle 0.5-1.2 m (railing, counter, turnstile)
+  | 'fence';        // chain-link fence 1.8-3 m (climb over)
+export interface TraversalMark {
+  kind: TraversalKind;
+  a: [number, number, number]; b: [number, number, number];   // world metres
+  n?: [number, number];                                       // outward or facing normal (x, z)
+  w?: number; h?: number;                                     // width; rail or obstacle height
+  building?: number; unit?: string;                           // ownership for streaming
+  flags?: number;                                             // 1 locked, 2 noisy (police notice), 4 one-way down
+}
+```
+- **Delivery**: per chunk, beside the interiors index (`public/data/interiors/traversal/<i>_<j>.json`), loaded with the chunk. Inside interiors, the built interior adds its own stairs, ladders and hatches at build time through `BuiltInterior.traversal` in the same type.
+- **Fire escapes**: who builds the geometry? The facade work owns exterior fire-escape meshes. Interiors propose generating the placement (which buildings, which facade, platform per floor at the shared floorHeight, a drop ladder over the sidewalk or yard) in the index builder from building data and period rules (tenements and lofts of 5 or more floors, 1900-1940, street or rear facade). We publish the marks, and the engine builds meshes from the same marks, so collision and visuals agree.
+- **Roof gaps**: computed in the index builder from adjacent roof heights (gap of 4 m or less, drop of 6 m or less), plus parapet ledges along every roof edge we make reachable.
+Please confirm or amend the type and the ownership of fire-escape meshes.
