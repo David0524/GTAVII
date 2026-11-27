@@ -1,0 +1,198 @@
+{
+  "backend": "webgl2",
+  "scene": "rocketbox",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "heads": [
+    {
+      "head": "Male_Adult_02",
+      "tris": 8911,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_11",
+      "tris": 8131,
+      "draws": 2
+    },
+    {
+      "head": "Female_Adult_01",
+      "tris": 10038,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_12",
+      "tris": 9773,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_04",
+      "tris": 10076,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_16",
+      "tris": 9500,
+      "draws": 2
+    },
+    {
+      "head": "Female_Party_01",
+      "tris": 10930,
+      "draws": 2
+    },
+    {
+      "head": "Female_Adult_05",
+      "tris": 10251,
+      "draws": 2
+    }
+  ],
+  "people": [
+    {
+      "seed": 2092652658,
+      "sex": 1,
+      "age": 43,
+      "hair": "buzz",
+      "facialHair": "sideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 8911,
+      "draws": 2,
+      "buildMs": 187.2
+    },
+    {
+      "seed": 2322029675,
+      "sex": 1,
+      "age": 36,
+      "hair": "sidePart",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "boot",
+      "hat": null,
+      "props": [],
+      "tris": 8131,
+      "draws": 2,
+      "buildMs": 125.1
+    },
+    {
+      "seed": 3193206706,
+      "sex": 0,
+      "age": 32,
+      "hair": "longStraight",
+      "facialHair": "none",
+      "top": "turtleneck",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "sandal",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 10038,
+      "draws": 2,
+      "buildMs": 84.8
+    },
+    {
+      "seed": 657641660,
+      "sex": 1,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "jeans",
+      "outer": "suitJacket",
+      "shoes": "sneaker",
+      "hat": null,
+      "props": [
+        "briefcase"
+      ],
+      "tris": 9773,
+      "draws": 2,
+      "buildMs": 76.9
+    },
+    {
+      "seed": 1088469578,
+      "sex": 1,
+      "age": 51,
+      "hair": "afroShort",
+      "facialHair": "moustache",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 10076,
+      "draws": 2,
+      "buildMs": 80.9
+    },
+    {
+      "seed": 1084730023,
+      "sex": 1,
+      "age": 40,
+      "hair": "pompadour",
+      "facialHair": "moustacheSideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "boot",
+      "hat": null,
+      "props": [],
+      "tris": 9500,
+      "draws": 2,
+      "buildMs": 88.7
+    },
+    {
+      "seed": 1206781239,
+      "sex": 0,
+      "age": 49,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "boot",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 10930,
+      "draws": 2,
+      "buildMs": 103.1
+    },
+    {
+      "seed": 2213939181,
+      "sex": 0,
+      "age": 22,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "sandal",
+      "hat": null,
+      "props": [],
+      "tris": 10251,
+      "draws": 2,
+      "buildMs": 90.7
+    }
+  ],
+  "updateMs": [
+    0,
+    1.5,
+    0,
+    0.1,
+    0,
+    0.2,
+    0,
+    0.2
+  ],
+  "renderMsSoftware": [
+    3.7000000001862645,
+    2.5,
+    4.3999999994412065
+  ]
+}

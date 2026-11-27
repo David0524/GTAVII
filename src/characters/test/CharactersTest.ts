@@ -157,7 +157,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   if (zoom === 'hand') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.6, 0.95, 1.1); camera.lookAt(0.2, 0.8, 0); }
   else if (zoom === 'shoe') { camera.fov = 24; camera.updateProjectionMatrix(); camera.position.set(0.75, 0.22, 0.7); camera.lookAt(0.03, 0.06, 0.04); }
   else if (zoom === 'feet') { camera.fov = 30; camera.updateProjectionMatrix(); camera.position.set(0.5, 0.35, 1.3); camera.lookAt(0, 0.08, 0); }
-  else if (zoom === 'head') { camera.fov = 24; camera.position.set(0, 1.56, 1.0); camera.lookAt(0, 1.5, 0); camera.updateProjectionMatrix(); }
+  else if (zoom === 'head') { const hy = (chars[num('focus', 0)]?.appearance.stature ?? 1.7) - 0.13; camera.fov = 24; camera.position.set(0, hy + 0.06, 1.0); camera.lookAt(0, hy, 0); camera.updateProjectionMatrix(); }
   else if (zoom) { camera.position.set(0, 1.5, 1.7); camera.lookAt(0, 1.4, 0); }
   else if (scene === 'hair') { camera.fov = 22; camera.position.set(0, 1.56, 0.5 + n * 0.42); camera.lookAt(0, 1.52, 0); camera.updateProjectionMatrix(); }
   else if (scene === 'shoes') { const d = 0.6 + n * 0.32; camera.fov = 22; camera.position.set(0, 0.45, d); camera.lookAt(0, 0.1, 0); camera.updateProjectionMatrix(); }

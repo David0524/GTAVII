@@ -86,17 +86,17 @@ is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
 **Crowd LODs:** LOD2 about 3.4–4.5k (shoes about 0.3–0.7k); LOD3 about 1.5–2.3k (shoes about 150–380).
 
 **Crowd: 400 agents, High (`19_crowd_400_high`, 145 frames, measured with nothing else running)**
-- `setAgents` CPU: **0.39 ms avg, 1.1 ms p95** (budget 1.5 ms), including 10 near-ring characters.
-- 74 draws, about 554k triangles in view (10 near, 46 mid, 158 far, 186 culled); 33 templates.
+- `setAgents` CPU: **0.43 ms avg, 1.2 ms p95** (budget 1.5 ms), including 10 near-ring characters with Rocketbox heads (faces block; was 0.39/1.1 before them).
+- 74 draws, about 550k triangles in view (10 near, 46 mid, 158 far, 186 culled); 33 templates.
 - (A run during other CPU load measured 0.63/1.4 ms; the clean number is the one above.)
 
 **Crowd: 120 agents, Low (`20_crowd_120_low`)**
-- `setAgents` CPU: **0.20 ms avg, 0.5 ms p95**. 18 draws, about 96k triangles; near ring of 2 at LOD2.
+- `setAgents` CPU: **0.17 ms avg, 0.3 ms p95**. 18 draws, about 95k triangles; near ring of 2 at LOD2 (our heads).
 
 **Crowd on a real street (engine city, West 22nd Street at 13:30, `24`–`26`)**
-- 140 agents, eye level, High: **0.46 ms avg, 1.4 ms p95**, 65 draws, 368k tris.
-- 400 agents from 6 m, High: **0.43 ms avg, 0.9 ms p95**, 65 draws, 760k tris (158 mid-LOD in view).
-- 120 agents, Low: **0.24 ms avg, 0.9 ms p95**, 25 draws, 224k tris.
+- 140 agents, eye level, High: **0.38 ms avg, 1.3 ms p95**, 65 draws, 367k tris.
+- 400 agents from 6 m, High: **0.39 ms avg, 0.9 ms p95**, 65 draws, 758k tris (158 mid-LOD in view).
+- 120 agents, Low: **0.23 ms avg, 0.8 ms p95**, 25 draws, 223k tris.
 
 **Foot sliding** (`npx tsx tools/characters/measure-sliding.ts`; ankle drift while planted, 3 bodies
 × 3 crowd speeds; re-measured after heeled shoes pitch the foot):
@@ -116,7 +116,7 @@ is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
   (budget 6; oversight's target was about 2 MiB). No Rocketbox heads on Low.
 
 ## Critique of the lineup and leads (honest)
-Shots: `shots/characters/01_lineup_a_vs_refs.png` and `02_lineup_b_vs_refs.png` show 20 seeded
+Shots: `shots/characters/01_lineup_a_vs_refs.jpg` and `02_lineup_b_vs_refs.jpg` show 20 seeded
 pedestrians above the DOCUMERICA photos the wardrobe tables came from. `04`–`09` are the leads,
 including close-ups. Locomotion frames are `10`–`17`; crowds are `19` and `20`.
 
@@ -278,18 +278,26 @@ leads `04`–`09` and the street `24`–`26` (near-ring heads); the leads beside
      closes at the throat under a tie.
 
 **Measured**
-- Leads: 2 draws each (body + head-and-hair). Heads: Teddy 3.2k triangles, Delphine 3.4k (with
-  their own hair cards), Nick 2.9k plus our hair cards; whole-character totals in
-  `27_rocketbox_ab.json`. Per-frame CPU unchanged (the head is one more skinned piece).
+- Leads: 2 draws each (body + head-and-hair). Whole character (`27_rocketbox_ab.json`): Teddy
+  16.2k triangles, Delphine 17.1k, Nick 24.3k. Teddy and Delphine fall below the 20–30k hero
+  budget: their Rocketbox heads, about 3.3k triangles with hair, replace our head plus card hair.
+  The budget is a ceiling, but the headroom could buy collar and garment detail. Per-frame CPU unchanged (the head is one more skinned piece).
 - Pool heads: 79–342 KiB each, 2.9k–5.5k triangles (23 of 30 with hair/lash cards); our head
   and hair are dropped, so a near-ring pedestrian is still 2 draws (body + head). Crowd timings
-  with near-ring heads: see Measurements (`19`, `24`–`26`).
+  with near-ring heads (re-measured, nothing else running):
+  - 400 agents, High: 0.43 ms avg, 1.2 ms p95, 74 draws;
+  - street, 140 agents: 0.38 ms avg, 1.3 ms p95;
+  - street, 400 agents: 0.39 ms avg, 0.9 ms p95;
+  - street, 120 agents, Low: 0.23 ms avg, 0.8 ms p95;
+  - 120 agents, Low: 0.17 ms avg, 0.3 ms p95.
+  All are within 1.5 ms.
 
 **Honest state**
 - Close up, the leads' and near pedestrians' faces are a large step up: real eyes, skin and
-  ageing. Delphine's hair is close-cropped and pulled back rather than a natural crop; that's a
-  deviation from her sheet, and it stays until a cropped-natural Rocketbox base or authored card
-  set exists.
+  ageing. Delphine's hair is slicked back into a low bun rather than the cropped natural hair on her
+  sheet. That's a deviation, and it stays until a cropped-natural base or an authored card set
+  exists. Building her head showed that compressing hair volume had been squashing her face too;
+  the face is now excluded, with smooth weights.
 - The neck seam is clean in side and back views. A small tone step remains under some lights,
   because our skin shader and the Rocketbox material shade differently.
 - Nick's grey slick hair (our cards) looks noisy up close in SwiftShader shots, which have no

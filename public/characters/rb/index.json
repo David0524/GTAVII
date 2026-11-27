@@ -734,19 +734,6 @@
    "lead": null
   },
   {
-   "id": "lead_delphine",
-   "source": "Female_Adult_11",
-   "bytes": 409716,
-   "tag": null,
-   "skinRGB": [
-    90,
-    56,
-    37
-   ],
-   "lead": "lead_delphine",
-   "ownHair": true
-  },
-  {
    "id": "lead_teddy",
    "source": "Male_Adult_07",
    "bytes": 267378,
@@ -757,6 +744,19 @@
     103
    ],
    "lead": "lead_teddy",
+   "ownHair": true
+  },
+  {
+   "id": "lead_delphine",
+   "source": "Female_Adult_11",
+   "bytes": 412390,
+   "tag": null,
+   "skinRGB": [
+    80,
+    50,
+    31
+   ],
+   "lead": "lead_delphine",
    "ownHair": true
   }
  ]

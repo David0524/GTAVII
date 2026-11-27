@@ -45,5 +45,13 @@ declare -a SHOTS=(
 for s in "${SHOTS[@]}"; do
   IFS='|' read -r name url w h <<< "$s"
   [[ -n "${1:-}" && "$name" != *"$1"* ]] && continue
-  npx tsx tools/characters/shot.ts --base "$B" --url "$url" --out "shots/characters/$name.png" --w "$w" --h "$h" --timeout 560000 2>&1 | grep -q '^shot' && echo "ok $name" || echo "FAILED $name"
+  if npx tsx tools/characters/shot.ts --base "$B" --url "$url" --out "shots/characters/$name.png" --w "$w" --h "$h" --timeout 560000 2>&1 | grep -q '^shot'; then
+    # committed as JPEG q85, at most 1600 px wide (oversight: keep the repo small)
+    python3 -c "
+from PIL import Image; import sys
+n = sys.argv[1]; im = Image.open(n + '.png').convert('RGB')
+if im.width > 1600: im = im.resize((1600, round(im.height * 1600 / im.width)), Image.LANCZOS)
+im.save(n + '.jpg', quality=85, optimize=True)" "shots/characters/$name" && rm "shots/characters/$name.png"
+    echo "ok $name"
+  else echo "FAILED $name"; fi
 done

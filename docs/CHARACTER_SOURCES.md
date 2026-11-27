@@ -169,10 +169,10 @@ SOFTWARE.
       narrowed and lengthened, lower lip fuller;
     - Nick: jaw and masseters widened, nose enlarged, brow ridge heavier, outer brows lowered.
   - Lab colour transfer of skin and hair to each character's appearance sheet (Teddy `#b98a67`,
-    hair `#1c1814`; Delphine `#5a3825`, hair `#141010`; Nick `#c8a17e`, hair `#7a7570`).
+    hair `#1c1814`; Delphine `#50321f` (her sheet's `#5a3825`, set a little darker because the head's material renders lighter than our body's skin), hair `#141010`; Nick `#c8a17e`, hair `#7a7570`).
   - Hair:
-    - Delphine: the base's slicked-back hair, with its bun compressed onto the skull and the
-      bun's cards removed;
+    - Delphine: the base's slicked-back hair; the crown volume is compressed onto the skull, the
+      bun is kept as a low bun, and the bun's loose cards are removed;
     - Teddy: the base's own short crop (it matches his sheet, a near-black side parting);
     - Nick: our generated strand cards, because his base is bald.
   - Rocketbox avatars are generic library characters, not scans of named public people; the edits

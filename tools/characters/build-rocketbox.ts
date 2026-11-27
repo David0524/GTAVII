@@ -160,11 +160,18 @@ function build(name: string, id: string, texC: number, texN: number, lead?: Lead
       const hc = [lm.Head[0], lm.Head[1] + 0.03, lm.Head[2] - 0.01], skull = 0.1, browY = (lm.LEye[1] + lm.REye[1]) / 2 + 0.02;
       for (let v = 0; v < nv; v++) {
         const d = Math.hypot(pos[v * 3] - hc[0], pos[v * 3 + 1] - hc[1], pos[v * 3 + 2] - hc[2]);
-        if (kind[v] === 1) { for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * lead.hairScale; continue; }
-        // the crown above the brow, and anything behind the skull above the nape (buns, ponytails)
-        const behind = pos[v * 3 + 2] < hc[2] - 0.04 && pos[v * 3 + 1] > lm.Neck[1] + 0.03;
-        if (d > skull && (pos[v * 3 + 1] > browY - 0.04 || behind)) {
-          const nd = skull + (d - skull) * Math.max(0.05, lead.hairScale - 0.55);
+        // hair cards only (eyelash cards sit below the brow and stay where they are)
+        if (kind[v] === 1) { if (pos[v * 3 + 1] > browY - 0.01) for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * lead.hairScale; continue; }
+        // smooth weights: the crown above the brow and anything behind the skull above the nape
+        // (buns, ponytails) are compressed; the face (brow, eyes, nose) never is
+        const ss = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+        const y = pos[v * 3 + 1], z = pos[v * 3 + 2];
+        const wCrown = ss(browY - 0.06, browY - 0.01, y);
+        const wBehind = ss(hc[2] - 0.02, hc[2] - 0.06, z) * ss(lm.Neck[1], lm.Neck[1] + 0.04, y);
+        const wFace = ss(hc[2], hc[2] + 0.05, z) * (1 - ss(browY + 0.02, browY + 0.08, y));
+        const w = Math.max(wCrown, wBehind) * (1 - wFace), r0 = skull - 0.015 * wBehind;
+        if (w > 0 && d > r0) {
+          const nd = d + (r0 + (d - r0) * Math.max(0.05, lead.hairScale - 0.55) - d) * w;
           for (let a = 0; a < 3; a++) pos[v * 3 + a] = hc[a] + (pos[v * 3 + a] - hc[a]) * (nd / d);
         }
       }

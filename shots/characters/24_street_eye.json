@@ -10,22 +10,22 @@
   },
   "crowd": {
     "agents": 140,
-    "cpuMs": 2.100000001490116,
+    "cpuMs": 1.2999999998137355,
     "near": 10,
     "mid": 51,
     "far": 40,
     "culled": 39,
     "draws": 65,
-    "tris": 368261,
+    "tris": 367028,
     "templatesReady": 33,
     "nearBuilds": 10,
-    "cpuAvgMs": 0.461,
-    "cpuP95Ms": 1.4,
+    "cpuAvgMs": 0.38,
+    "cpuP95Ms": 1.3,
     "framesMeasured": 145
   },
   "renderMsSoftware": [
-    9,
-    14.900000000372529,
-    6
+    10.900000000372529,
+    7.599999999627471,
+    6.2999999998137355
   ]
 }

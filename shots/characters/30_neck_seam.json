@@ -1,0 +1,164 @@
+{
+  "backend": "webgl2",
+  "scene": "rocketbox",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "heads": [
+    {
+      "hero": "char.teddy_arce",
+      "head": "lead_teddy",
+      "tris": 16158,
+      "draws": 2
+    },
+    {
+      "hero": "char.teddy_arce",
+      "head": null,
+      "tris": 23909,
+      "draws": 2
+    },
+    {
+      "hero": "char.delphine_moore",
+      "head": "lead_delphine",
+      "tris": 17081,
+      "draws": 2
+    },
+    {
+      "hero": "char.delphine_moore",
+      "head": null,
+      "tris": 20094,
+      "draws": 2
+    },
+    {
+      "hero": "char.nick_varelas",
+      "head": "lead_nick",
+      "tris": 24268,
+      "draws": 2
+    },
+    {
+      "hero": "char.nick_varelas",
+      "head": null,
+      "tris": 26140,
+      "draws": 2
+    }
+  ],
+  "people": [
+    {
+      "seed": 1,
+      "hero": "char.teddy_arce",
+      "sex": 1,
+      "age": 34,
+      "hair": "sidePart",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 16158,
+      "draws": 2,
+      "buildMs": 138.9
+    },
+    {
+      "seed": 1,
+      "hero": "char.teddy_arce",
+      "sex": 1,
+      "age": 34,
+      "hair": "sidePart",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 23909,
+      "draws": 2,
+      "buildMs": 91.5
+    },
+    {
+      "seed": 1,
+      "hero": "char.delphine_moore",
+      "sex": 0,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 17081,
+      "draws": 2,
+      "buildMs": 80.6
+    },
+    {
+      "seed": 1,
+      "hero": "char.delphine_moore",
+      "sex": 0,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 20094,
+      "draws": 2,
+      "buildMs": 46.8
+    },
+    {
+      "seed": 1,
+      "hero": "char.nick_varelas",
+      "sex": 1,
+      "age": 51,
+      "hair": "slick",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 24268,
+      "draws": 2,
+      "buildMs": 121.7
+    },
+    {
+      "seed": 1,
+      "hero": "char.nick_varelas",
+      "sex": 1,
+      "age": 51,
+      "hair": "slick",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 26140,
+      "draws": 2,
+      "buildMs": 68.9
+    }
+  ],
+  "updateMs": [
+    0,
+    0,
+    0.1,
+    0,
+    0,
+    0
+  ],
+  "renderMsSoftware": [
+    4.400000000372529,
+    1.7999999998137355,
+    1.2999999998137355
+  ]
+}
