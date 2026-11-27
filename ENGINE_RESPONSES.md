@@ -788,3 +788,14 @@ look shots.
   floor counts are re-derived where they fall outside period floor-to-floor ranges.
   `src/shared/facade.ts` is the one grid definition (floor height, bay, sill) shared by the
   shader, the props and the doors. Interiors and signage should use it too.
+
+## Requests check, 2026-11-27 00:33
+- **Audio 11, rendered speech at build time: ACCEPTED, at the audio merge** (the user approved
+  build-time rendering).
+  - The deploy build becomes: copy narrative `content/` to `public/content` → `npm run
+    audio:voices:build` (soft-fail, cache in `node_modules/.cache/t74-voices/`) → `tsc` → `vite
+    build`.
+  - The engine owns `package.json` scripts and the Vite config, so it wires this at the merge,
+    together with narrative `content/`.
+  - Gate: the brands test must pass on rendered subtitles too. The GPL tools stay
+    devDependencies and are verified absent from the bundle by a build check added at the merge.

@@ -6,6 +6,9 @@ import { heightAt, terrainLoaded } from '../shared/terrain';
 import { createFacadeMaterial } from '../render/FacadeMaterial';
 import { createGroundMaterial } from '../render/GroundMaterial';
 import { loadReport } from '../engine/debug/LoadReport';
+import { streetLightUniforms } from './StreetLights';
+import { facadeUniforms } from '../render/FacadeMaterial';
+import { uv, vec2, vec3, float, length, sub, smoothstep, fract, floor, vertexColor } from 'three/tsl';
 
 export interface WorldManifest {
   region: { minX: number; maxX: number; minZ: number; maxZ: number };
@@ -60,6 +63,23 @@ export class World {
   readonly buildingMat = createFacadeMaterial();
   readonly groundMat = createGroundMaterial();
   readonly propMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.05 });
+  /** Storefront spill on the sidewalk: additive, warm, radial falloff from the door; on with the street lights. */
+  readonly spillMat = (() => {
+    const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    const d = length(sub(uv(), vec2(0.5, 0.0)).mul(vec2(1.0, 0.85)));
+    m.colorNode = vertexColor().mul(float(1).sub(smoothstep(0.0, 0.9, d)).pow(1.6)).mul(streetLightUniforms.lightsOn).mul(0.55);
+    return m;
+  })();
+  /** Marquee bulb bands: rows of round bulbs on a dark band, a slow chase; faint by day, bright at night. */
+  readonly marqueeMat = (() => {
+    const m = new THREE.MeshBasicNodeMaterial();
+    const g = uv().mul(vec2(36, 5));
+    const cell = fract(g).sub(0.5), bulb = float(1).sub(smoothstep(0.18, 0.3, length(cell)));
+    const chase = smoothstep(0.55, 1.0, fract(floor(g.x).mul(0.25).sub(facadeUniforms.time.mul(1.2))));
+    const on = streetLightUniforms.lightsOn.mul(0.85).add(0.15);
+    m.colorNode = vec3(0.06, 0.05, 0.04).add(vertexColor().mul(bulb).mul(on).mul(float(1.4).add(chase.mul(1.2))));
+    return m;
+  })();
   /** Debug/bench: mesh names to hide in every chunk ('buildings' | 'ground' | 'props' | 'lod1'). */
   readonly debugHide = new Set<string>();
   stats = { ready: 0, lod0: 0, lod1: 0, loading: 0, parseMsTotal: 0, failed: 0 };
@@ -198,7 +218,10 @@ export class World {
     b.castShadow = b.receiveShadow = true; g.receiveShadow = true;
     const pr = new THREE.Mesh(toGeometry(m.props), this.propMat); pr.name = 'props'; pr.castShadow = true; pr.receiveShadow = true;
     const detail = m.detail.map((d) => { const dm = new THREE.Mesh(toGeometry(d), this.propMat); dm.name = 'detail'; dm.castShadow = true; dm.receiveShadow = true; return dm; });
-    lod0.add(b, g, pr, ...detail);
+    const lights: THREE.Mesh[] = [];
+    if (m.spill.index.length) { const sm = new THREE.Mesh(toGeometry(m.spill), this.spillMat); sm.name = 'spill'; sm.renderOrder = 2; lights.push(sm); }
+    if (m.marquee.index.length) { const mm = new THREE.Mesh(toGeometry(m.marquee), this.marqueeMat); mm.name = 'marquee'; lights.push(mm); }
+    lod0.add(b, g, pr, ...detail, ...lights);
     const lod1 = new THREE.Mesh(toGeometry(m.buildingsLod1), this.buildingMat); lod1.name = 'lod1';
     group.add(lod0, lod1);
     lod0.visible = false; lod1.visible = false;

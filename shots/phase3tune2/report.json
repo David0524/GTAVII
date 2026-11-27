@@ -1,0 +1,36 @@
+{
+  "quality": "high",
+  "forceWebGL": true,
+  "date": "2026-11-27T00:52:47.787Z",
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+  "views": [
+    {
+      "view": "D_herald_square_1930",
+      "cam": "-308.2,1.7,-826.3,12,5",
+      "backend": "webgl2",
+      "avg": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 197,
+      "triangles": 765622,
+      "chunks": {
+        "ready": 132,
+        "lod0": 54,
+        "lod1": 78,
+        "loading": 0,
+        "parseMsTotal": 8404.69999999553,
+        "failed": 0
+      }
+    }
+  ],
+  "logs": [
+    "[warning] [.WebGL-0x21fc003bf800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] THREE.PostProcessing: \"PostProcessing\" has been renamed to \"RenderPipeline\". Please update your code to use \"THREE.RenderPipeline\" instead.",
+    "[warning] THREE.WebGPURenderer: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+    "[warning] [.WebGL-0x21fc003bf800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x21fc003bf800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x21fc003bf800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}

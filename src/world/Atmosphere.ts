@@ -24,6 +24,8 @@ export interface LightState {
   lightsOn: number;
   /** Tone-mapping exposure: stopped down at noon, opened up at night (cinematographer's iris). */
   exposure: number;
+  /** 0..1 civil-twilight blue hour (sun ~1-9 deg below the horizon): cool sky fill against warm practicals. */
+  blueHour: number;
 }
 
 /**
@@ -71,7 +73,7 @@ export class Atmosphere {
     this.sun.position.set(sx + this.lightDir.x * 500, y + this.lightDir.y * 500, sz + this.lightDir.z * 500);
     this.sun.target.updateMatrixWorld();
   }
-  readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0, exposure: 1 };
+  readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0, exposure: 1, blueHour: 0 };
 
   /** Recompute sun, sky, lights and haze from the world clock. Cheap; call every frame. */
   update(): LightState {
@@ -92,9 +94,12 @@ export class Atmosphere {
     // sky / ground fill: blue skylight by day, sodium-lit city glow bouncing up at night
     // Midday fill: hazy summer skylight, less blue than a clean sky (1974 Midtown haze; refs read warm, not blue)
     lerpC(C(0.7, 0.68, 0.7), C(0.42, 0.4, 0.52), golden, this.tmp.a);
-    lerpC(this.tmp.a, C(0.09, 0.1, 0.17), night, this.hemi.color);
+    lerpC(this.tmp.a, C(0.16, 0.13, 0.13), night, this.hemi.color); // night: sodium-lit sky glow (1974 Midtown never went black)
+    // blue hour: the sky fill turns cool while the street lights are already on (the warm/cool split of the look)
+    const blue = smooth(-0.5, -3, el) * (1 - smooth(-7, -11, el));
+    this.hemi.color.lerp(C(0.22, 0.3, 0.55), blue * 0.85);
     lerpC(C(0.42, 0.32, 0.24), C(0.3, 0.18, 0.09), night, this.hemi.groundColor); // warm street / brick bounce
-    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.55 * night + 0.2;
+    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.9 * night + 0.2;
     // sky dome
     // (Tried higher turbidity/mie for a hazier noon: this sky model turns a saturated deep blue instead. Kept.)
     this.sky.turbidity.value = 6 + 4 * golden;
@@ -102,10 +107,12 @@ export class Atmosphere {
     // haze colour follows the sky: bleached day, rose dusk, sodium-brown night
     lerpC(C(0.66, 0.63, 0.6), C(0.52, 0.42, 0.42), golden, this.tmp.b);
     lerpC(this.tmp.b, C(0.09, 0.075, 0.07), night, (this.scene.fog as THREE.Fog).color);
+    (this.scene.fog as THREE.Fog).color.lerp(C(0.16, 0.2, 0.32), blue * 0.7);
     // late-night windows thin out between 1:00 and 5:30
     const m = worldClock.minutes, late = m > 60 && m < 330 ? 0.45 : 1;
+    this.state.blueHour = blue;
     this.state.sunElevation = el; this.state.night = night * late; this.state.lightsOn = smooth(6, -1, el);
-    this.state.exposure = 0.6 + 0.3 * golden + 0.3 * night; // ~0.6 noon, ~0.9 golden, ~1.2 night
+    this.state.exposure = 0.6 + 0.5 * golden + 0.6 * night; // ~0.6 noon, ~1.1 golden, ~1.7 night (night shots: p50 5-9 vs band 12-40)
     return this.state;
   }
 

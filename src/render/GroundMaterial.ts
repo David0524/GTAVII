@@ -25,7 +25,8 @@ export function createGroundMaterial(): THREE.MeshStandardNodeMaterial {
 
   // road: warm asphalt, repair patches (darker newer tar vs grey older), grit
   const patch = smoothstep(0.55, 0.62, n1);
-  const asphalt = mix(vec3(0.052, 0.04, 0.036), vec3(0.03, 0.026, 0.025), patch)
+  // worn 1974 asphalt: oxidised grey-mauve (refs: the roadway reads mid-tone in sun), darker fresh tar patches
+  const asphalt = mix(vec3(0.115, 0.098, 0.092), vec3(0.055, 0.046, 0.043), patch)
     .mul(float(0.9).add(n2.mul(0.18))).mul(float(1).add(n3.sub(0.5).mul(0.25).mul(fine)));
 
   // sidewalk: slabs on a 1.5 m world grid (streets are grid-aligned), joint lines, stains

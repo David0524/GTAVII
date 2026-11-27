@@ -61,12 +61,12 @@ export const TAG_PNT = tag('PNT ') >>> 0;
  *  255 = open sky to 127 m) | oppHeight u8 (2 m units; height of what the wall faces). Baked by the pipeline. */
 export const TAG_WAO = tag('WAO ') >>> 0;
 /** Doors (optional): per door buildingId u32 | x,z i16 (cm, chunk-local) | yaw i16 (centi-rad, outward) |
- *  style u8 | width u8 (dm) | height u8 (dm) | rise u8 (cm) | flags u8 (1 nightGate, 2 enterable).
+ *  style u8 | width u8 (dm) | height u8 (dm) | rise u8 (cm) | flags u8 (1 nightGate, 2 enterable, 4 marquee).
  *  Same fields as interiors' DoorRec; interiors' doorsForChunk replaces these at its merge. */
 export const TAG_DOOR = tag('DOOR') >>> 0;
 export const DOOR_STYLES = ['shop', 'shop_recessed', 'stoop', 'vestibule', 'brass_double', 'revolving', 'freight', 'service', 'boarded', 'garage', 'church', 'rear', 'internal'] as const;
 export type DoorStyle = (typeof DOOR_STYLES)[number];
-export interface DoorRecC { buildingId: number; x: number; z: number; yaw: number; style: DoorStyle; width: number; height: number; rise: number; nightGate: boolean; enterable: boolean }
+export interface DoorRecC { buildingId: number; x: number; z: number; yaw: number; style: DoorStyle; width: number; height: number; rise: number; nightGate: boolean; enterable: boolean; marquee?: boolean }
 
 // ---------------------------------------------------------------- reader
 export function readChunk(buf: ArrayBuffer): ChunkData {
@@ -111,7 +111,7 @@ export function readChunk(buf: ArrayBuffer): ChunkData {
       for (let k = 0; k < count; k++) {
         const fl = dv.getUint8(o + 14); // byte 15 is padding
         out.doors.push({ buildingId: dv.getUint32(o, true), x: dv.getInt16(o + 4, true) / 100, z: dv.getInt16(o + 6, true) / 100, yaw: dv.getInt16(o + 8, true) / 100,
-          style: DOOR_STYLES[dv.getUint8(o + 10)] ?? 'shop', width: dv.getUint8(o + 11) / 10, height: dv.getUint8(o + 12) / 10, rise: dv.getUint8(o + 13) / 100, nightGate: !!(fl & 1), enterable: !!(fl & 2) });
+          style: DOOR_STYLES[dv.getUint8(o + 10)] ?? 'shop', width: dv.getUint8(o + 11) / 10, height: dv.getUint8(o + 12) / 10, rise: dv.getUint8(o + 13) / 100, nightGate: !!(fl & 1), enterable: !!(fl & 2), marquee: !!(fl & 4) });
         o += 16;
       }
     } else if (t === TAG_PNT) {
@@ -187,7 +187,7 @@ export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p
     for (const d of doors) {
       w.u32(d.buildingId); w.i16(clampI16(d.x * 100)); w.i16(clampI16(d.z * 100)); w.i16(clampI16(d.yaw * 100));
       w.u8(Math.max(0, DOOR_STYLES.indexOf(d.style))); w.u8(Math.min(255, Math.round(d.width * 10))); w.u8(Math.min(255, Math.round(d.height * 10)));
-      w.u8(Math.min(255, Math.round(d.rise * 100))); w.u8((d.nightGate ? 1 : 0) | (d.enterable ? 2 : 0)); w.u8(0);
+      w.u8(Math.min(255, Math.round(d.rise * 100))); w.u8((d.nightGate ? 1 : 0) | (d.enterable ? 2 : 0) | (d.marquee ? 4 : 0)); w.u8(0);
     }
   });
   section(TAG_POIS, p.length, () => {

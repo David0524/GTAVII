@@ -132,15 +132,27 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
 
   // lit probability: residential evenings, offices emptier, derelict dark; storefronts lit at dusk/night
   const resid = isTenement.or(isPostwar);
-  const litP = facadeUniforms.night.mul(select(resid, float(0.55), float(0.28))).mul(select(cond.lessThan(0.5), float(0.08), float(1)));
+  const litP = facadeUniforms.night.mul(select(resid, float(0.4), float(0.16))).mul(select(cond.lessThan(0.5), float(0.08), float(1)));
   const isLit = rnd.lessThan(litP).and(boarded.not());
   const office = style.equal(4).or(style.equal(5));
+  // colour temperature spread (oversight: windows read as identical saturated orange): incandescent
+  // (warm, the 1974 default at home), fluorescent tubes (green-white: most offices, some kitchens), TV blue
+  // (flickering), and warm-tinted curtains with folds over some lit apartment windows
+  const rnd4 = idHash(77);
   const tv = rnd3.lessThan(0.12).and(resid);
+  const fluor = select(office, rnd4.lessThan(0.85), rnd4.lessThan(0.12));
   const flicker = sin(facadeUniforms.time.mul(7.0).add(rnd.mul(40))).mul(0.15).add(0.85);
-  const lampCol = select(office, vec3(0.9, 0.88, 0.72), select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), vec3(1.0, 0.7, 0.38)));
+  const curtain = resid.and(rnd4.greaterThan(0.6)).and(rnd4.lessThan(0.78));
+  const folds = abs(sin(fu.mul(28))).mul(0.4).add(0.6);
+  const lampCol = select(tv, vec3(0.42, 0.55, 1.0).mul(flicker), select(fluor, vec3(0.8, 0.93, 0.8), select(curtain, vec3(1.0, 0.6, 0.36).mul(folds), vec3(1.0, 0.8, 0.55))));
   const storeLit = groundFloor.and(hasStore).and(facadeUniforms.night.greaterThan(0.15)).and(rnd.lessThan(0.7));
   // Emission is modest: the Phase 3 post stack (filmic tonemap + bloom/halation) supplies the glow.
-  const emissiveSharp = select(isLit.or(storeLit), lampCol.mul(select(storeLit, float(0.55), float(0.38))), vec3(0));
+  // Lit windows are not flat panels: brightness varies per room (lamp wattage, distance), light falls off from
+  // the ceiling lamp toward the sill, a drawn shade glows dimmer and warmer, storefronts are dimmer behind displays.
+  const roomLevel = rnd2.mul(0.6).add(0.45);
+  const falloff = mix(float(0.55), float(1.0), smoothstep(0.0, 1.0, fv.sub(sill).div(head.sub(sill)).clamp(0, 1)));
+  const shadeGlow = select(shadeHere, float(0.55), float(1));
+  const emissiveSharp = select(isLit.or(storeLit), select(storeLit, vec3(1.0, 0.86, 0.66), lampCol).mul(select(storeLit, float(0.5), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
   const emissiveAvg = lampCol.mul(litP.mul(0.38));
   const emissiveWin = mix(emissiveSharp, emissiveAvg, lodFade);
 

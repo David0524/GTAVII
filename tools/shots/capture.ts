@@ -44,7 +44,8 @@ const on = (name: string, x: number, z: number, y = 1.8): [number, number, numbe
 const esb = hero('lm.empire_state'), macys = hero('lm.macys'), msg = hero('lm.msg'), chelsea = hero('lm.hotel_chelsea'), flat = hero('lm.flatiron');
 
 /** Phase 3 judged set (PROGRESS.md look target): matched to reference frames A-D, each at four times of day. */
-const P3_TIMES = ['12:30', '19:30', '20:14', '23:00'];
+// noon, golden hour (sun ~9 deg), blue hour (sun ~4 deg below; sunset 21 June 1974 is ~20:27 EDT), night
+const P3_TIMES = ['12:30', '19:30', '20:50', '23:00'];
 const P3_VIEWS: { name: string; cam: string; ref?: string }[] = [
   { name: 'A_42nd_west_of_7th', cam: (() => { const c = on('West 42nd Street', -700, -1550, 1.7); return `${c[0]},${c[1]},${c[2]},90,3`; })(), ref: 'documerica_554297' },
   { name: 'B_6th_and_32nd_uptown', cam: (() => { const c = on('6th Avenue', -300, -790, 1.7); return `${c[0] + 6},${c[1]},${c[2]},0,4`; })(), ref: 'documerica_554293' },
@@ -75,7 +76,7 @@ const VIEWS: { name: string; cam?: string; at?: string }[] = [
 
 async function main() {
   const port = await new Promise<number>((res) => { const srv = net.createServer(); srv.listen(0, () => { const p = (srv.address() as net.AddressInfo).port; srv.close(() => res(p)); }); });
-  const p3 = phase === 'phase3';
+  const p3 = phase.startsWith('phase3');
   const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'ignore', detached: true });
   for (let k = 0; k < 120; k++) { try { if ((await fetch(`http://localhost:${port}/`)).ok) break; } catch { /* not up */ } await new Promise((r) => setTimeout(r, 500)); }
   const browser = await chromium.launch({
@@ -102,8 +103,9 @@ async function main() {
       const t = (window as any).__T74; const s = t.frames.summary(); const i = t.renderer.info.render;
       return { backend: t.backend, ...s, drawCalls: i.drawCalls, triangles: i.triangles, chunks: { ...t.world.stats } };
     });
-    const file = path.join(outDir, `${v.name}.png`);
-    await page.screenshot({ path: file });
+    // JPEG q85, 1600 px wide (oversight policy: full PNGs were ~1.5 MB each in git)
+    const file = path.join(outDir, `${v.name}.jpg`);
+    await page.screenshot({ path: file, type: 'jpeg', quality: 85 });
     report.push({ view: v.name, cam: v.cam ?? 'spawn', ...stats });
     console.log(v.name, `${stats.backend} avg ${stats.avg.toFixed(1)} ms p95 ${stats.p95.toFixed(1)} draws ${stats.drawCalls} tris ${stats.triangles}`);
   }

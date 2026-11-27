@@ -678,7 +678,10 @@ const doorOf = new Map<number, DoorRecC>();
     let sAlong = (Math.round(mid / bay - 0.5) + 0.5) * bay - along[best]; // centre of the nearest bay
     sAlong = Math.min(L - w / 2 - 0.3, Math.max(w / 2 + 0.3, sAlong));
     const x = a[0] + ux * sAlong, z = a[1] + uz * sAlong;
-    doorOf.set(b.id, { buildingId: b.id, x, z, yaw: Math.atan2(-bn[0], -bn[1]), style, width: w, height: h, rise: style === 'stoop' ? 0.75 : style === 'church' ? 0.45 : 0, nightGate: style === 'shop' || style === 'shop_recessed', enterable: false });
+    // The Deuce (W 42nd St between 7th and 8th Aves, 1974: a row of grindhouse marquees): placeholder marquees
+    // over doors facing 42nd St until sign slots land.
+    const deuce = x > -881 && x < -605 && Math.abs(z + 1548) < 32 && Math.abs(bn[1]) > 0.7;
+    doorOf.set(b.id, { buildingId: b.id, x, z, yaw: Math.atan2(-bn[0], -bn[1]), style: deuce && style !== 'revolving' ? 'shop' : style, width: w, height: h, rise: style === 'stoop' ? 0.75 : style === 'church' ? 0.45 : 0, nightGate: style === 'shop' || style === 'shop_recessed' || deuce, enterable: false, marquee: deuce });
     n++;
   }
   log(`doors: ${n} buildings got a street door`);
