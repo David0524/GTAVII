@@ -33,6 +33,14 @@ with typecheck, npm test, and a headless smoke shot.
      is bound, else from the engine's ledge probe.
 7. **Audio:** the AudioSystem plus world feeds (docs/requests/audio.md items 1 and 3).
 
+**Queued (low priority, UI 2c508fb + vehicles e046440):** add
+`UiHost.carThumb?(model, angle)` → `renderThumbnailBlob(renderer, model.id, model.paint ?? null, angle,
+{ variant: model.variant })` from src/vehicles/thumbnail.ts. Fill `CarView.model` and
+`LotView.cars[].model` from the save. Do this at the next UI + vehicles merge.
+
+**Sim 5 parkedCars:** accepted, and the sim stream is shipping `parkedCars(x, z, r)`. The engine
+instances the results as static cars.
+
 Then: the touch-only combined run, the integrated board (Park Ave top-down and mid-block views, wide
 A and D with cars, street-sign accuracy against 1970s photos), deploy, and the note to oversight.
 
