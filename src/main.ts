@@ -170,7 +170,7 @@ async function main() {
     const ch = chars.spawn(scene, { seed: 74, hero: party.activeId });
     ch.on('footstep', (e) => audioGlue?.footstep(e));
     body = ch;
-    body.object.position.copy(old.object.position); body.object.visible = vis;
+    body.object.position.set(player.pos.x, player.pos.y, player.pos.z); body.object.rotation.y = player.heading; body.object.visible = vis;
     old.object.removeFromParent(); old.dispose();
   };
   // Gameplay cameras write into director.gameplay; the director owns the real camera (cutscene hand-off).
@@ -464,6 +464,8 @@ async function main() {
     } else {
       physics.update(dt, () => { jumpLatch = false; });
       fly.update(dt);
+      // the lead stays where it was left (it would otherwise sit at the origin until the first on-foot frame)
+      body.object.position.set(player.pos.x, player.pos.y, player.pos.z); body.object.rotation.y = player.heading;
     }
     input.endFrame();
     director.update(dt);
