@@ -196,14 +196,17 @@ function buildDoors(data: ChunkData, hf: HeightFn, g: Geo, spill: UVGeo, marquee
     const at = (s: number, out: number) => [d.x + ux * s + nx * out, d.z + uz * s + nz * out] as const;
     const stoneish = d.style === 'stoop' || d.style === 'church' || d.style === 'vestibule' || d.style === 'brass_double';
     const sur: RGB = stoneish ? STONE : IRON;
+    // with facade cuts an enterable door is interiors' to draw: its reveals, frame, transom and leaves sit
+    // in the same planes as this surround (oversight 2026-11-27: the overlap z-fought into a speckle)
+    const open = cuts && d.enterable;
     // surround: jambs + lintel
-    for (const side of [-1, 1]) { const [px, pz] = at(side * (hw + 0.1), 0.06); g.box(px, base + H / 2 + 0.06, pz, 0.1, H / 2 + 0.06, 0.07, ux, uz, sur, true); }
-    { const [px, pz] = at(0, 0.07); g.box(px, base + H + 0.14, pz, hw + 0.22, 0.12, 0.08, ux, uz, sur, true); }
+    if (!open) for (const side of [-1, 1]) { const [px, pz] = at(side * (hw + 0.1), 0.06); g.box(px, base + H / 2 + 0.06, pz, 0.1, H / 2 + 0.06, 0.07, ux, uz, sur, true); }
+    if (!open) { const [px, pz] = at(0, 0.07); g.box(px, base + H + 0.14, pz, hw + 0.22, 0.12, 0.08, ux, uz, sur, true); }
     // transom light over shop / vestibule / church doors
-    if (d.style !== 'freight' && d.style !== 'revolving') { const [px, pz] = at(0, 0.02); g.box(px, base + H + 0.36, pz, hw, 0.18, 0.02, ux, uz, GLASS, true); }
+    if (!open && d.style !== 'freight' && d.style !== 'revolving') { const [px, pz] = at(0, 0.02); g.box(px, base + H + 0.36, pz, hw, 0.18, 0.02, ux, uz, GLASS, true); }
     // leaf (with facade cuts, an enterable door's opening is open: interiors draw and animate the real leaves,
     // and a leaf here would also put a collider across the doorway)
-    const openLeaf = cuts && d.enterable;
+    const openLeaf = open;
     const leaf: RGB = d.style === 'freight' ? STEEL_GREEN : d.style === 'shop' || d.style === 'shop_recessed' || d.style === 'brass_double' ? GLASS : WOOD;
     const recess = d.style === 'shop_recessed' || d.style === 'vestibule' ? -0.0 : 0.02;
     if (!openLeaf) { const [px, pz] = at(0, recess + 0.02); g.box(px, base + H / 2, pz, hw, H / 2, 0.02, ux, uz, leaf, true); }
