@@ -123,6 +123,7 @@
       "lawful": true,
       "then": {
         "restrain": true,
+        "noBolt": true,
         "walkTo": "Prentiss's car (o9)",
         "doneOn": "restrained, then o9 begins at the car"
       },

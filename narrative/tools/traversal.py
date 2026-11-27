@@ -66,7 +66,7 @@ INSERTS = {
  # M26: after the firefight the firebug bolts up a fire escape and over the W 31st St roofs.
  ("mission.fire_watch", "o8b"): {"id": "o8c", "type": "chase", "target": "npc.hired_firebug", "catchDistanceM": 3,
    "text": "Catch the firebug on the W 31st roofs", "finish": "tackle", "lawful": True,
-   "then": {"restrain": True, "walkTo": "Prentiss's car (o9)", "doneOn": "restrained, then o9 begins at the car"},
+   "then": {"restrain": True, "noBolt": True, "walkTo": "Prentiss's car (o9)", "doneOn": "restrained, then o9 begins at the car"},
    "route": [
      b("drop_ladder", "a dry-cleaner's rear fire escape off W 31st, ladder already down (he used it)", "tv.w31_fe_ladder"),
      b("fire_escape", "five landings up, past a window where an old man is watching the ballgame", "tv.w31_fe_stairs"),
