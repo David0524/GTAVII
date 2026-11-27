@@ -10,19 +10,21 @@ const BASE = import.meta.env.BASE_URL;
 let fontsReady: Promise<void> | null = null;
 export function loadDecalFonts(): Promise<void> {
   if (!fontsReady) {
+    // the project's type direction A faces (public/fonts; the earlier League Gothic / Courier Prime / Archivo
+    // files were removed with it, so decals use the same families as the UI)
     const faces = [
-      new FontFace('League Gothic', `url(${BASE}fonts/LeagueGothic-normal-400.woff2)`),
-      new FontFace('Courier Prime', `url(${BASE}fonts/CourierPrime-normal-700.woff2)`, { weight: '700' }),
-      new FontFace('Archivo', `url(${BASE}fonts/Archivo-normal-400-800.woff2)`, { weight: '400 800' }),
+      new FontFace('T74 Heros Cn', `url(${BASE}fonts/T74HerosCn-700.woff2)`, { weight: '700' }),
+      new FontFace('T74 Cursor', `url(${BASE}fonts/T74Cursor-400.woff2)`),
+      new FontFace('Libre Franklin', `url(${BASE}fonts/LibreFranklin-500-900.woff2)`, { weight: '500 900' }),
     ];
     fontsReady = Promise.all(faces.map((f) => f.load().then((ff) => { document.fonts.add(ff); }).catch(() => undefined))).then(() => undefined);
   }
   return fontsReady;
 }
 
-const GOTHIC = '"League Gothic", "Arial Narrow", Impact, sans-serif';
-const MONO = '"Courier Prime", "Courier New", monospace';
-const GROT = 'Archivo, Helvetica, Arial, sans-serif';
+const GOTHIC = '"T74 Heros Cn", "Arial Narrow", Impact, sans-serif';
+const MONO = '"T74 Cursor", "Courier New", monospace';
+const GROT = '"Libre Franklin", Helvetica, Arial, sans-serif';
 
 const BUSINESSES = ['DIMARCO BAKERY', 'SUNRISE LINEN SUPPLY', 'KOVAC BROS. MOVERS', 'GARMENT CENTER DELIVERY', 'HUDSON RIVER PRODUCE', 'ESPOSITO & SON PLUMBING', 'MIDTOWN OFFICE FURNITURE', 'TEN-O-ONE DAIRY'];
 const ROUTES = ['34  CROSSTOWN', '42  CROSSTOWN', '6  AVENUE  UPTOWN', '7  AVENUE  DOWNTOWN', '23  CROSSTOWN', 'NOT IN SERVICE'];

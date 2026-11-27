@@ -71,7 +71,19 @@ export class StreetFurniture {
       const mesh = new THREE.InstancedMesh(make(), mat, pts.length); mesh.count = 0; mesh.frustumCulled = false; mesh.castShadow = true; mesh.receiveShadow = true; mesh.name = type;
       this.meshes.set(type, { mesh, pts }); this.root.add(mesh);
     }
-    this.buildSignals(); this.buildSigns();
+    this.buildSignals();
+    // the blades use the UI's Helvetica-class face (type direction A); wait for it so the atlas never bakes a fallback
+    await document.fonts.load('700 72px "T74 Heros"').catch(() => undefined);
+    this.buildSigns();
+  }
+
+  /** Sidewalk footprints for the sim's pedestrians to step around (Simulation.setObstacles). Hydrants are the sim's own. */
+  obstacles(): { x: number; z: number; r: number }[] {
+    const R: Record<string, number> = { callbox: 0.25, payphone: 0.7, mailbox: 0.4, meter: 0.15, newsstand: 1.5, trash: 0.35, busstop: 0.15 };
+    const out: { x: number; z: number; r: number }[] = [];
+    for (const [type, x, z] of this.data?.items ?? []) if (R[type]) out.push({ x, z, r: R[type] });
+    for (const s of this.data?.signals ?? []) out.push({ x: s[0], z: s[1], r: 0.2 });
+    return out;
   }
 
   private buildSignals() {
@@ -116,8 +128,8 @@ export class StreetFurniture {
     names.forEach((nm, i) => {
       const cx = (i % cols) * cw, cy = Math.floor(i / cols) * ch;
       g.strokeStyle = '#111'; g.lineWidth = 6; g.strokeRect(cx + 6, cy + 6, cw - 12, ch - 12);
-      let size = 72; g.font = `700 ${size}px Archivo, Helvetica, Arial, sans-serif`;
-      while (g.measureText(nm).width > cw - 40 && size > 30) { size -= 4; g.font = `700 ${size}px Archivo, Helvetica, Arial, sans-serif`; }
+      let size = 72; g.font = `700 ${size}px "T74 Heros", Helvetica, Arial, sans-serif`;
+      while (g.measureText(nm).width > cw - 40 && size > 30) { size -= 4; g.font = `700 ${size}px "T74 Heros", Helvetica, Arial, sans-serif`; }
       g.fillText(nm, cx + cw / 2, cy + ch / 2 + 2);
     });
     const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;

@@ -35,6 +35,8 @@ import { Locator } from './world/Districts';
 import { settings } from './settings/Settings';
 import { facadeUniforms } from './render/FacadeMaterial';
 import { PostFX, postUniforms } from './render/PostFX';
+import { Simulation, type ArchetypeDef } from './sim';
+import { createVehicleFactory, CarLightPool, updateCarLights, setGroundLightLevel } from './vehicles';
 
 /**
  * URL parameters (all optional):
@@ -42,6 +44,7 @@ import { PostFX, postUniforms } from './render/PostFX';
  *   cam=x,y,z,yawDeg,pitchDeg        start in photo (free) camera at this pose (screenshot rig)
  *   at=x,z,headingDeg                start on foot at this point instead of the Flatiron spawn
  *   title=0                          skip the title screen (implied by cam= and at=)
+ *   sim=0                            no ambient traffic / pedestrians (sim=1 is the sim stream's debug view)
  */
 type Mode = 'onfoot' | 'photo';
 
@@ -92,6 +95,25 @@ async function main() {
   await furniture.load(base + 'furniture.json').catch((e) => console.warn('furniture', e));
   scene.add(furniture.root);
   loadReport.mark('streets+lights');
+
+  // ---------------------------------------------------------------- ambient sim (traffic, pedestrians, wildlife)
+  // Loads in the background: the title and first frame never wait for lanes.bin. ?sim=1 keeps the sim
+  // stream's own debug view (which runs its own Simulation), so the game's one is off there.
+  const simOn = params.get('sim') !== '0' && params.get('sim') !== '1';
+  const sim = simOn ? new Simulation({
+    seed: 1974, maxVehicles: quality.name === 'low' ? 40 : 150, maxPeds: quality.name === 'low' ? 120 : 400,
+    baseUrl: base, archetypes: Object.values(import.meta.glob('/content/npc_archetypes/*.json', { eager: true, import: 'default' }) as Record<string, ArchetypeDef>),
+  }) : null;
+  let simReady = false, simPaused = false;
+  sim?.load().then(() => { sim.setObstacles(furniture.obstacles()); simReady = true; loadReport.mark('sim'); }).catch((e) => console.warn('sim', e));
+  // AI traffic: visual-only instanced cars fed from sim.vehicles. Real headlight spots only on High/Ultra:
+  // every forward-lit material pays per light per fragment (the facades most of all); lower tiers keep the
+  // emissive ground pools.
+  const vehicles = sim ? createVehicleFactory({ quality: quality.name }) : null;
+  const traffic = vehicles?.createTrafficRenderer(quality.name === 'low' ? 48 : 160) ?? null;
+  if (traffic) scene.add(traffic.object);
+  const carLights = traffic && (quality.name === 'high' || quality.name === 'ultra') ? new CarLightPool(scene, quality.name, false) : null;
+  const simActors = [{ id: 'player', x: 0, z: 0, vx: 0, vz: 0, radius: 0.4, kind: 'player' as const }];
 
   // ---------------------------------------------------------------- input
   const input = new Input(renderer.domElement);
@@ -217,6 +239,8 @@ async function main() {
     { name: 'no street lights', ...hideObj(streetLights) },
     { name: 'no trees + park dressing', ...hideObj(parks.root) },
     { name: 'no street furniture', ...hideObj(furniture.root) },
+    ...(traffic ? [{ name: 'no traffic', ...hideObj(traffic.object) }] : []),
+    { name: 'sim paused', apply: () => { simPaused = true; }, revert: () => { simPaused = false; } },
     { name: 'baseline again', apply: () => {}, revert: () => {} },
   ]) : null;
   // Per-frame safety net. It only DETECTS a change; the resize itself runs as a separate task, never
@@ -240,7 +264,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -313,6 +337,7 @@ async function main() {
   let lastRenderT = -1e9;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
+  const simFwd = new THREE.Vector3();
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -387,6 +412,19 @@ async function main() {
     input.endFrame();
     director.update(dt);
     world.update(mode === 'onfoot' ? body.object.position : camera.position);
+    if (sim && simReady && !simPaused && (playing || ui.state === 'title')) {
+      const f = mode === 'onfoot' ? body.object.position : camera.position;
+      sim.setClock(worldClock.minutes); sim.setWeather(worldClock.weather);
+      camera.getWorldDirection(simFwd); sim.setView(camera.position.x, camera.position.z, simFwd.x, simFwd.z, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)));
+      const a = simActors[0]; a.x = player.pos.x; a.z = player.pos.z; a.vx = player.vel.x; a.vz = player.vel.z;
+      sim.setExternalActors(mode === 'onfoot' ? simActors : []);
+      sim.update(dt, f);
+    }
+    if (traffic && sim && simReady) {
+      setGroundLightLevel(light.lightsOn);
+      if (carLights) updateCarLights(carLights, [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
+      traffic.setInstances(sim.vehicles, camera.position, carLights ?? undefined);
+    }
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
     // A menu over the game (pause hub, shop, any modal) holds the last frame instead of re-rendering the
     // city behind it: same picture, a fraction of the GPU and battery (and the canvas keeps its last
@@ -421,6 +459,7 @@ async function main() {
         `chunks lod0 ${world.stats.lod0}  lod1 ${world.stats.lod1}  loading ${world.stats.loading}  phys ${physics.stats.chunksWithColliders}\n` +
         `pos ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}  ${lat.toFixed(5)}, ${lon.toFixed(5)}\n` +
         `${mode}${mode === 'onfoot' ? `  ${player.mode} ${Math.hypot(player.vel.x, player.vel.z).toFixed(1)} m/s ${player.grounded ? 'grounded' : 'air'}${player.climbing ? ' climbing' : ''}${player.active ? '' : ' (waiting for ground)'}` : ''}  ${party.active.displayName}\n` +
+        (sim ? `sim ${simReady ? `${sim.vehicles.length} cars ${sim.peds.length} peds ${sim.lastUpdateMs.toFixed(2)} ms` : 'loading'}\n` : '') +
         `near ${loc.crossing}  ui ${ui.state}  hud ${ui.hud.cost.frame.toFixed(2)} ms  minimap ${ui.hud.minimap.cost.draw.toFixed(2)} ms\n` +
         `input ${input.activeDevice}${input.pad.connected ? ` (${input.pad.id.slice(0, 40)})` : ''}`,
       );
