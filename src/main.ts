@@ -48,6 +48,7 @@ import { createVehicleFactory, CarLightPool, updateCarLights, setGroundLightLeve
  *   cam=x,y,z,yawDeg,pitchDeg        start in photo (free) camera at this pose (screenshot rig)
  *   at=x,z,headingDeg                start on foot at this point instead of the Flatiron spawn
  *   title=0                          skip the title screen (implied by cam= and at=)
+ *   debug=1                          developer tools: the free-camera toggle (P) and its key hints
  *   sim=0                            no ambient traffic / pedestrians (sim=1 is the sim stream's debug view)
  */
 type Mode = 'onfoot' | 'photo';
@@ -105,7 +106,7 @@ async function main() {
   // stream's own debug view (which runs its own Simulation), so the game's one is off there.
   const simOn = params.get('sim') !== '0' && params.get('sim') !== '1';
   const sim = simOn ? new Simulation({
-    seed: 1974, maxVehicles: quality.name === 'low' ? 40 : 150, maxPeds: quality.name === 'low' ? 120 : 400,
+    seed: 1974, maxVehicles: quality.name === 'low' ? 90 : 150, maxPeds: quality.name === 'low' ? 240 : 400, // sim 10: Low 90/240 (oversight: never empty in a screenshot); bench on the phone
     baseUrl: base, archetypes: Object.values(import.meta.glob('/content/npc_archetypes/*.json', { eager: true, import: 'default' }) as Record<string, ArchetypeDef>),
   }) : null;
   // Everything that brings new materials (signals, traffic, bodies, crowd) waits for the title: their shader
@@ -127,7 +128,7 @@ async function main() {
   // emissive ground pools.
   let traffic: ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']> | null = null, carLights: CarLightPool | null = null;
   if (sim) void afterTitle.then(() => {
-    traffic = createVehicleFactory({ quality: quality.name }).createTrafficRenderer(quality.name === 'low' ? 48 : 160);
+    traffic = createVehicleFactory({ quality: quality.name }).createTrafficRenderer(quality.name === 'low' ? 100 : 160);
     scene.add(traffic.object);
     if (quality.name === 'high' || quality.name === 'ultra') carLights = new CarLightPool(scene, quality.name, false);
   });
@@ -142,7 +143,7 @@ async function main() {
     const climate = () => { const h = worldClock.minutes / 60; f.setClimate({ heat: h > 11 && h < 18 ? 0.7 : 0.35, wetness: worldClock.weather === 'rain' ? 1 : 0 }); };
     climate(); setInterval(climate, 10_000);
     spawnLeadBody();
-    if (sim) { crowd = f.createCrowdRenderer(quality.name === 'low' ? 120 : 400); scene.add(crowd.object); }
+    if (sim) { crowd = f.createCrowdRenderer(quality.name === 'low' ? 240 : 400); scene.add(crowd.object); }
     loadReport.mark('characters');
   }).catch((e) => console.warn('characters', e));
   const simActors = [{ id: 'player', x: 0, z: 0, vx: 0, vz: 0, radius: 0.4, kind: 'player' as const }];
@@ -226,6 +227,8 @@ async function main() {
   let gp: GameplayGlue | null = null;
   void afterTitle.then(() => createGameplay({ quality: quality.name, physics, player, lead: () => party.activeId, camera, sim, saves })
     .then((x) => { gp = x; loadReport.mark('gameplay'); }).catch((e) => console.warn('gameplay', e)));
+  // the free camera is a developer tool (photo rig): its toggle and key hints only with ?debug=1 (oversight 2026-11-27)
+  const devTools = params.get('debug') === '1';
   const skipTitle = params.get('title') === '0' || params.has('cam') || params.has('at');
 
   // ---------------------------------------------------------------- HUD, minimap, report
@@ -369,7 +372,7 @@ async function main() {
       const d = data as { text?: string } | undefined;
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
-    prompts: () => (mode === 'onfoot' ? [...(gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']]),
+    prompts: () => (mode === 'onfoot' ? [...(gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
     newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
     continueGame: async () => {
       loadReport.mark('continue');
@@ -421,7 +424,7 @@ async function main() {
     const playing = ui.state === 'play' && !ui.paused;
     // no data credit during play (user request): it lives on the title footer, the map screen and Credits › Data sources
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
-    if (playing && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
+    if (playing && devTools && input.pressed('photo')) setMode(mode === 'onfoot' ? 'photo' : 'onfoot');
     if (playing && input.pressed('jump')) jumpLatch = true;
     if (playing && mode === 'onfoot' && player.active) saves.tick(dt);
     if (frozen) jumpLatch = false;
