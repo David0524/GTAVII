@@ -46,6 +46,14 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number; v
     return fadeOut(normalize(o, 0.8), sr);
   } },
   /** Light car-to-car impact: crumple noise, panel modes, bumper chrome ring. */
+  /** Fender-bender: a 1970s chrome bumper tapping another (clank and ring), a short sheet-metal crumple, a few bits falling. */
+  'impact.fender': { variants: 3, dur: 1.2, bake: (s, sr) => {
+    const r = new Rng(s), o = len(1.2, sr);
+    modal(o, sr, r, 0, [[r.range(160, 220), 0.12, 0.9], [r.range(430, 520), 0.09, 0.6], [r.range(1150, 1400), 0.06, 0.35], [r.range(2600, 3100), 0.03, 0.2]], 0.004);
+    const bp = new Biquad().set('bp', 1600, 0.8, sr); for (let i = Math.round(0.01 * sr); i < 0.16 * sr; i++) { const t = i / sr; o[i] += bp.run(r.bi()) * 0.35 * Math.exp(-(t - 0.01) / 0.05) * (r.next() < 0.3 ? 1.6 : 1); }
+    for (let k = 0; k < 4; k++) modal(o, sr, r, r.range(0.25, 0.9), [[r.range(1800, 4000), 0.02, r.range(0.04, 0.12)]], 0.0005);
+    return fadeOut(normalize(o, 0.8), sr);
+  } },
   'impact.light': { dur: 1.0, bake: (s, sr) => {
     const r = new Rng(s), o = len(1.0, sr), p = new Pink(r), lp = new OnePole(2200, sr);
     for (let i = 0; i < o.length; i++) { const t = i / sr; o[i] = lp.lp(p.next()) * env(t, 0.001, 0.05) * (1 + 0.6 * Math.sin(t * 90)) * 1.6; }

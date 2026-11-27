@@ -226,6 +226,28 @@ Freesound (CC0 / CC-BY) and Sonniss GDC sounds are allowed through the gate. I'd
 is weakest (cloth and body foley, crowd close-ups, gunfire transients), reading each licence first and adding a row
 before any file lands. BBC Sound Effects is out (non-commercial).
 
+## Traffic incidents (sim f9148be, 2026-11-27)
+All wired in `vehicles.ts` from the bound sim. Sounds are self-made; the new `impact.fender` bake is a chrome-bumper clank and ring, a sheet-metal crumple and a few falling bits.
+- **`honk` with chain/chainDepth:**
+  - followers in a chain give short impatient toots, sometimes doubled;
+  - `reason: 'rage'` leans on the horn for 1.6–3 s;
+  - only the first driver in a chain may also shout out of the window.
+- **`hornChain` (3+ drivers):** the chorus builds with 2–6 more horns of mixed classes, each further back down the line and joining 0.25–0.6 s apart.
+- **`roadRage`:**
+  - shout/gesture → a line;
+  - forceIn → tyre chirp and a line;
+  - leanOnHorn → sometimes a line after the long honk;
+  - shove → cloth, a body knock and a line.
+- **`fenderBender`:** the crunch (sometimes a lamp lens tinkles), then two doors as the drivers get out.
+  `incidentAct`: inspect, argue and exchangeDetails → lines; stagger → cloth; enterCar → the door.
+- **Lines:** narrative's `road_rage` pool (requested; contexts horn, shout, gesture, forceIn, shove, inspect, argue, details).
+  Until it exists, each falls back to the driver's own pool (horn) or commuter/street_tough (collision, complain). The bark event gained a `fallback` field for this.
+- **Check:** `render.ts --only incidents_7th --content` (7th Ave at W 36th, 5:15 p.m.) runs a chain of 3 plus the chorus, road rage, a fender-bender with the argument and the drivers leaving, all passing.
+  - Lines spoken via the fallbacks: 6 on High, 7 on Low; 0 misses.
+  - Integrated −12.8 LUFS: a deliberately busy rush-hour scene; it's a diagnostic, not in the session target.
+  - Excerpt: `shots/audio/incidents_7th.ogg`.
+- **vs GTA V / VI / RDR2:** GTA's horn chains and road rage are a signature of its streets. We match the behaviours (chains, chorus, rage, fender-benders with arguments), driven by the sim's real incidents. The lines are eSpeak, and the horns are synthesised period horns.
+
 ## Police dispatch (heat backlog, 2026-11-27)
 The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialogue/dispatchText.ts`. API: `audio.bindGameplay(gp)`, `audio.dispatchSay(text)`,
 `audio.officerDown([x, z])`, `audio.placeName(x, z)`; subtitles come from `on('dispatch')`. Engine wiring is ENGINE_REQUESTS "From audio: 14".

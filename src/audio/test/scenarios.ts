@@ -58,4 +58,15 @@ export const SCENARIOS: Scenario[] = [
       { t: 2, play: 'gp:report', offset: [-30, 10] }, { t: 9, play: 'gp:dispatched' }, { t: 16, play: 'gp:pursuit', offset: [0, 20] }, { t: 26, play: 'gp:heat4', offset: [0, 30] }, { t: 30, play: 'gp:lost', offset: [0, 40] },
       { t: 38, play: 'gp:copKilled', offset: [5, 25] }, { t: 58, play: 'gp:cleared' },
     ] },
+  { id: 'incidents_7th', title: '7th Ave at W 36th St, Wednesday 5:15 p.m., traffic incidents', clock: { minutes: 17 * 60 + 15, date: '1974-06-26' }, weather: 'clear', traffic: 0.9, peds: 0.7, extra: true,
+    start: (m) => ({ x: m.x('7th Avenue') - 12, z: m.z(36) - 30, dx: 0, dz: 1 }), walk: 0.9,
+    events: [
+      { t: 4, play: 'sim:honk', offset: [8, 25], params: { depth: 0 } }, { t: 4.8, play: 'sim:honk', offset: [8, 33], params: { depth: 1 } }, { t: 5.5, play: 'sim:honk', offset: [9, 41], params: { depth: 2 } },
+      { t: 5.6, play: 'sim:hornChain', offset: [8, 33], params: { length: 3 } },
+      { t: 14, play: 'sim:roadRage', offset: [10, 20], params: { act: 3, rage: 1 } }, { t: 14, play: 'sim:honk', offset: [10, 20], params: { rage: 1 } }, { t: 17, play: 'sim:roadRage', offset: [10, 20], params: { act: 0 } },
+      { t: 24, play: 'sim:fenderBender', offset: [6, 30] }, { t: 30, play: 'sim:incidentAct', offset: [3, 30], params: { act: 7 } },
+      { t: 35, play: 'sim:incidentAct', offset: [3, 30], params: { act: 5 } }, { t: 39, play: 'sim:incidentAct', offset: [3, 33], params: { act: 5 } },
+      { t: 44, play: 'sim:roadRage', offset: [3, 31], params: { act: 4 } }, { t: 50, play: 'sim:incidentAct', offset: [3, 30], params: { act: 6 } },
+      { t: 56, play: 'sim:incidentAct', offset: [6, 30], params: { act: 8 } }, { t: 56.5, play: 'sim:incidentAct', offset: [6, 34], params: { act: 8 } },
+    ] },
 ];

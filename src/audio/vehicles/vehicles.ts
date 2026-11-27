@@ -10,6 +10,7 @@
  *  - Sim light bits: Siren -> a siren on that car; Brake at walking pace -> brake squeal sometimes;
  *    bus 'busStop' state -> door hiss. Loose manhole covers clank under passing wheels.
  */
+import { setTimeoutAudio } from '../world/ambience';
 import type { Env } from '../env';
 import type { Voice } from '../core/voices';
 import type { Vec3 } from '../config';
@@ -39,7 +40,7 @@ export class VehicleAudio {
   private manholeCool = new Map<number, number>();
   private busState = new Map<number, string>();
   private brakeCool = new Map<number, number>();
-  stats = { fullEngines: 0, simVehicles: 0, honks: 0, collisions: 0, nearMiss: 0, hails: 0, manholes: 0 };
+  stats = { fullEngines: 0, simVehicles: 0, honks: 0, collisions: 0, nearMiss: 0, hails: 0, manholes: 0, hornChains: 0, roadRage: 0, fenderBenders: 0 };
 
   constructor(private env: Env) {
     // Loose manhole covers along the avenue lanes (deterministic).
@@ -98,9 +99,48 @@ export class VehicleAudio {
     const near = (p: Vec3, r: number) => { const l = this.env.vm.listener.position; return Math.hypot(p[0] - l[0], p[2] - l[2]) < r; };
     sim.on('honk', (e) => {
       this.stats.honks++; const vc = vclassOf(e), p = pos(e);
-      this.horn(vc, p, num(e?.duration, this.rng.range(0.25, 1.1)));
-      // 1974: the horn is often followed by an opinion through the open window.
-      if (near(p, 30) && this.rng.next() < 0.3) this.env.emit('bark', { pool: pool(vc), context: 'horn', at: [p[0], gh(p[0], p[2]) + 1.3, p[2]], delay: 0.6 });
+      // Road rage leans on it; a horn-chain follower gives a short impatient toot or two; otherwise a normal tap.
+      const rage = e?.reason === 'rage', depth = num(e?.chainDepth, 0);
+      const dur = num(e?.duration, rage ? this.rng.range(1.6, 3) : depth > 0 ? this.rng.range(0.2, 0.6) : this.rng.range(0.25, 1.1));
+      this.horn(vc, p, dur);
+      if (depth > 0 && this.rng.next() < 0.35) setTimeoutAudio(this.env, dur + this.rng.range(0.12, 0.3), () => this.horn(vc, p, this.rng.range(0.15, 0.4))); // the double toot
+      // 1974: the horn is often followed by an opinion through the open window (not from every car in a chain).
+      if (depth === 0 && !rage && near(p, 30) && this.rng.next() < 0.3) this.env.emit('bark', { pool: pool(vc), context: 'horn', at: [p[0], gh(p[0], p[2]) + 1.3, p[2]], delay: 0.6 });
+    });
+    // A horn chain of 3+ drivers: the chorus builds behind the cars already honking (sim f9148be).
+    sim.on('hornChain', (e) => {
+      this.stats.hornChains++; const p = pos(e); if (!near(p, 220)) return;
+      const n = Math.min(6, 2 + num(e?.length, 3));
+      for (let k = 0; k < n; k++) setTimeoutAudio(this.env, 0.4 + k * this.rng.range(0.25, 0.6), () => {
+        const a = this.rng.range(0, Math.PI * 2), d = 8 + k * this.rng.range(5, 9); // further back down the line each time
+        this.horn(['sedan', 'taxi', 'hardtop', 'compact', 'box_truck'][this.rng.next() * 5 | 0], [p[0] + Math.cos(a) * d, p[1], p[2] + Math.sin(a) * d], this.rng.range(0.3, 1.4));
+      });
+    });
+    // Road rage (shout | gesture | forceIn | leanOnHorn | shove): lines from narrative's road_rage pool when it exists, else the driver's own.
+    const rageLine = (p: Vec3, ctx: string, fallbackPool: string, fallbackCtx: string, delay = 0.3) => {
+      if (!near(p, 40)) return; const at: Vec3 = [p[0], gh(p[0], p[2]) + 1.4, p[2]];
+      this.env.emit('bark', { pool: 'road_rage', context: ctx, at, delay, fallback: { pool: fallbackPool, context: fallbackCtx } });
+    };
+    sim.on('roadRage', (e) => {
+      this.stats.roadRage++; const p = pos(e), vc = vclassOf(e), act = String(e?.act ?? '');
+      if (act === 'forceIn') { this.tyreChirp(p, 0.6); rageLine(p, 'forceIn', pool(vc), 'horn', 0.8); }
+      else if (act === 'shout' || act === 'gesture') rageLine(p, act, pool(vc), 'horn');
+      else if (act === 'shove') { this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.5, priority: 5 }); this.env.oneShot('impact.light', { category: 'impact', at: p, gain: 0.25, rate: 1.4, priority: 5 }); rageLine(p, 'shove', 'street_tough', 'collision', 0.2); }
+      else if (act === 'leanOnHorn' && this.rng.next() < 0.4) rageLine(p, 'horn', pool(vc), 'horn', 2.2);
+    });
+    // Fender-benders: the crunch, then the drivers get out and have it out on the kerb.
+    sim.on('fenderBender', (e) => {
+      this.stats.fenderBenders++; const p = pos(e); if (!near(p, 160)) return;
+      this.env.oneShot('impact.fender', { category: 'impact', at: p, gain: 0.7, rate: this.rng.range(0.92, 1.06), priority: 7 });
+      if (this.rng.next() < 0.3) this.env.oneShot('glass', { category: 'impact', at: p, gain: 0.25, rate: 1.3, priority: 5 }); // a lamp lens
+      setTimeoutAudio(this.env, 1.2, () => this.env.oneShot('door.slam', { category: 'impact', at: p, gain: 0.45, priority: 4 }));
+      setTimeoutAudio(this.env, 1.6, () => this.env.oneShot('door.slam', { category: 'impact', at: [p[0] + 4, p[1], p[2]], gain: 0.45, priority: 4 }));
+    });
+    sim.on('incidentAct', (e) => {
+      const p = pos(e), act = String(e?.act ?? '');
+      if (act === 'argue' || act === 'exchangeDetails' || act === 'inspect') rageLine(p, act === 'argue' ? 'argue' : act === 'inspect' ? 'inspect' : 'details', 'commuter', act === 'argue' ? 'collision' : 'complain', this.rng.range(0.2, 1.5));
+      else if (act === 'stagger') this.env.oneShot('foley.cloth', { category: 'footstep', at: p, gain: 0.4, priority: 4 });
+      else if (act === 'enterCar') this.env.oneShot('door.slam', { category: 'impact', at: p, gain: 0.45, rate: this.rng.range(0.95, 1.05), priority: 4 });
     });
     sim.on('collision', (e) => {
       this.stats.collisions++; const p = pos(e); this.impact(p, num(e?.impulse, num(e?.speed, 6) * 1400));

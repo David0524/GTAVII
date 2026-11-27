@@ -110,9 +110,10 @@ export class AudioSystem {
     this.voiceLib = new VoiceLibrary(ctx, this.baseUrl); dlg.lib = this.voiceLib; radio.voices = this.voiceLib;
     radio.onSubtitle = (e) => env.emit('radioSubtitle', e);
     // Reaction barks from the narrative's bark pools (content/barks/*.json), positional, subtitled as overheard.
-    (this.listeners.bark ??= []).push((e: { pool?: string; context?: string; at?: Vec3; delay?: number }) => {
+    // `fallback`: another pool/context to try when the first has no such line (yet).
+    (this.listeners.bark ??= []).push((e: { pool?: string; context?: string; at?: Vec3; delay?: number; fallback?: { pool: string; context: string } }) => {
       if (!e.pool || !e.context || !e.at) return; const at = e.at;
-      setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true); });
+      setTimeoutAudio(env, e.delay ?? 0, () => { void dlg.barkFrom(e.pool!, e.context!, at, `npc.${e.pool}`, true).then((ok) => { if (!ok && e.fallback) void dlg.barkFrom(e.fallback.pool, e.fallback.context, at, `npc.${e.fallback.pool}`, true); }); });
     });
     this.vendors = new Vendors(env, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions));
     this.crowd = new CrowdReactions(env, () => this.footsteps, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions), this.baseUrl); this.crowd.contentEnabled = this.useContent;

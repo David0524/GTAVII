@@ -11,7 +11,7 @@ import { Rng } from '../worklets/dsp';
 
 export const GROUPS: Record<string, string[]> = {
   boot: ['ui.move', 'ui.select', 'ui.back', 'ui.map', 'ui.switch', 'ui.pickup', 'ui.coins', 'step.concrete', 'step.asphalt', 'step.grating', 'step.park', 'door.slam', 'impact.light', 'signal.click', 'whistle.hail', 'brake.squeal', 'manhole.clank', 'drip'],
-  traffic: ['impact.heavy', 'glass', 'bus.door'],
+  traffic: ['impact.heavy', 'glass', 'bus.door', 'impact.fender'],
   vendors: ['vendor.steam', 'vendor.sizzle', 'vendor.roaster', 'vendor.bell', 'vendor.chime', 'vendor.change', 'vendor.spill', 'vendor.rag', 'cart.rattle'],
   combat: ['gun.cheap', 'gun.service', 'gun.magnum', 'gun.shotgun', 'gun.pump', 'gun.dry', 'gun.reload', 'bullet.whiz', 'bullet.ricochet', 'impact.brick', 'impact.metal', 'impact.wood', 'impact.dirt', 'glass', 'test.click'],
   movement: ['step.granite', 'step.subwaytile', 'step.stoop', 'step.iron', 'step.rung', 'step.gravel', 'fence.rattle', 'foley.cloth', 'foley.vault', 'foley.climb', 'foley.land', 'foley.roll', 'foley.ragdoll', 'paper.crumple'],
