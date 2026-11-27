@@ -198,12 +198,15 @@ function plant(k: Kit, f: Frame, tall: boolean) {
   const r = k.wr, [x, z] = toWorld(f, 0, 0), dead = k.grade <= 1;
   k.cyl(x, 0, z, 0.17, 0.32, W.terracotta, 10, { r1: 0.21, collide: true });
   k.cyl(x, 0.3, z, 0.19, 0.01, M.paintBrown, 10);
-  const h = tall ? r.range(1.2, 1.7) : r.range(0.5, 0.8), n = tall ? 7 : 5, leaf = dead ? W.deadLeaf : W.leaf;
+  const h = tall ? r.range(1.0, 1.4) : r.range(0.5, 0.8), n = tall ? 14 : 9, leaf = dead ? W.deadLeaf : W.leaf;
   k.cyl(x, 0.3, z, 0.02, h * 0.7, M.woodDark, 5, { top: false });
+  // arching fronds (two tube segments: up-and-out, then out-and-down), drooping flat when dead
   for (let q = 0; q < n; q++) {
     const a = (q / n) * Math.PI * 2 + r.range(-0.3, 0.3), L = r.range(0.35, 0.6) * (tall ? 1 : 0.7);
-    const y0 = 0.3 + h * r.range(0.45, 0.75), droop = dead ? -0.35 : r.range(-0.05, 0.25);
-    k.obox(x + Math.cos(a) * L * 0.5, y0 + droop * L * 0.5, z + Math.sin(a) * L * 0.5, L * 0.5, 0.008, 0.07, -a, leaf);
+    const y0 = 0.3 + h * r.range(0.55, 0.8), ca = Math.cos(a), sa = Math.sin(a);
+    const mid: [number, number, number] = [x + ca * L * 0.45, y0 + (dead ? 0.02 : L * 0.35), z + sa * L * 0.45];
+    const tip: [number, number, number] = [x + ca * L, y0 - (dead ? L * 0.5 : L * 0.05), z + sa * L];
+    k.tube([x, y0, z], mid, 0.04, leaf, 5); k.tube(mid, tip, 0.03, leaf, 5);
   }
 }
 function rug(k: Kit, b: Box6) {
@@ -260,7 +263,7 @@ export function dressCells(k: Kit) {
       if (k.wr.chance(0.35)) put(0.6, 0.5, (f) => (style === 'home' || k.wr.chance(0.5) ? paperStack(k, f) : cartons(k, f)));
     } else {
       if (style === 'home' || style === 'hall') { if (style === 'home' || k.wr.chance(0.5)) rug(k, b); }
-      const plants = g >= 4 ? (area > 20 ? 2 : 1) : k.wr.chance(0.6) ? 1 : 0;
+      const plants = style === 'hall' ? (k.wr.chance(g >= 4 ? 0.7 : 0.4) ? 1 : 0) : g >= 4 ? (area > 20 ? 2 : 1) : k.wr.chance(0.6) ? 1 : 0;
       for (let q = 0; q < plants; q++) put(0.5, 0.5, (f) => plant(k, f, style !== 'home' || k.wr.chance(0.4)));
     }
   }
