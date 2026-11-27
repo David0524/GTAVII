@@ -23,7 +23,31 @@
       "id": "o2",
       "type": "chase",
       "text": "Chase the purse thief",
-      "target": "npc.stickup_man"
+      "target": "npc.stickup_man",
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "catchDistanceM": 3,
+      "traversal": [
+        {
+          "move": "crowd_push",
+          "at": "the W 34th St shoppers outside Lacy's",
+          "marker": "tv.w34_crowd"
+        },
+        {
+          "move": "vault",
+          "at": "a hot-dog cart at Broadway",
+          "marker": "tv.w34_hotdog_cart"
+        },
+        {
+          "move": "car_hood",
+          "at": "a stalled bus on 34th",
+          "marker": "tv.w34_bus"
+        },
+        {
+          "move": "stoop",
+          "at": "up and over a stoop rail on W 35th",
+          "marker": "tv.w35_stoop"
+        }
+      ]
     },
     {
       "id": "o3",

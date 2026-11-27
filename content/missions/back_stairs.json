@@ -85,7 +85,50 @@
         "loc.bauer_arcade"
       ],
       "fallback": "goto interior.arden_back_stairs with timeLimitSec 90 (timer fail = caught)",
-      "text": "Lose him: the Arden's back stairs"
+      "text": "Up the Arden fire escape, over the roofs",
+      "traversal": [
+        {
+          "move": "crowd_push",
+          "at": "8th Ave & W 38th St, the Saturday-night sidewalk",
+          "marker": "tv.8th_38_sidewalk",
+          "note": "Shoulder through; Brannock bulls through behind."
+        },
+        {
+          "move": "vault",
+          "at": "a garbage-can row at the alley mouth, W 38th St",
+          "marker": "tv.w38_alley_cans"
+        },
+        {
+          "move": "drop_ladder",
+          "at": "the Arden's rear fire escape: jump and pull the counterweighted ladder down",
+          "marker": "tv.arden_fe_ladder"
+        },
+        {
+          "move": "fire_escape",
+          "at": "the Arden's fire escape, four landings up, past lit windows (an argument; a baby; a radio)",
+          "marker": "tv.arden_fe_stairs"
+        },
+        {
+          "move": "roof_jump",
+          "at": "the Arden's parapet to the lower walk-up next door, over a 2 m air shaft",
+          "marker": "tv.w38_airshaft_gap",
+          "note": "Ledge grab on a near miss."
+        },
+        {
+          "move": "climb",
+          "at": "a water-tank platform, to break line of sight",
+          "marker": "tv.w38_watertank"
+        },
+        {
+          "move": "hang_drop",
+          "at": "into the back stairwell bulkhead: the Arden's back stairs",
+          "marker": "tv.arden_bulkhead",
+          "note": "Brannock is too heavy for the gap; he shouts from the far roof."
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "barks": "barks.traversal",
+      "checkpointAfterMarker": "tv.arden_fe_stairs"
     },
     {
       "id": "o5",

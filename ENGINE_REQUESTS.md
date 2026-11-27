@@ -275,3 +275,43 @@ normal. Consider how GTA handles these things". Applied to all 32 missions by
     non-lethal contrast, Delphine, Nick and the street;
   - `content/police/precincts.json` `copKilled`: precinct memory, relationship nudges and
     headline templates.
+
+## From narrative: 15. Traversal markup for chase routes (MOVEMENT.md)
+Chase and evade objectives now carry `traversal`: an ordered list of beats `{move, at, marker, note?}`. This field is separate from `route`, which is already used for vehicle routes. Moves come from MOVEMENT.md's required set (vault, climb, fence_climb, drop_ladder, fire_escape, roof_jump, hang_drop, ladder, scaffold, subway_stairs, turnstile_vault, car_hood, crowd_push, cellar_doors, stoop).
+- **Engine / interiors data:** please place traversal markup at each `tv.*` marker below, so the quarry and the player's assist line up with real fixtures. If a fixture doesn't exist at that spot, the nearest equivalent within about 30 m is fine. Tell me the move and I'll adjust the text.
+- **Gameplay / sim:** the quarry path-follows the beats in order and rubber-bands to stay within about 40 m. A missed roof jump catches the ledge or drops to the fire-escape landing below. `turnstile_vault` adds +1 heat only if a transit cop sees it.
+- `checkpointAfterMarker` puts a mid-route checkpoint after that beat. Each objective's `barks` names its lead-line pool (`barks.traversal`).
+
+| marker | move | where | used by |
+|---|---|---|---|
+| `tv.8th_38_sidewalk` | crowd_push | 8th Ave & W 38th St, the Saturday-night sidewalk | mission.back_stairs |
+| `tv.w38_alley_cans` | vault | a garbage-can row at the alley mouth, W 38th St | mission.back_stairs |
+| `tv.arden_fe_ladder` | drop_ladder | the Arden's rear fire escape: jump and pull the counterweighted ladder down | mission.back_stairs |
+| `tv.arden_fe_stairs` | fire_escape | the Arden's fire escape, four landings up, past lit windows (an argument; a baby; a radio) | mission.back_stairs |
+| `tv.w38_airshaft_gap` | roof_jump | the Arden's parapet to the lower walk-up next door, over a 2 m air shaft | mission.back_stairs |
+| `tv.w38_watertank` | climb | a water-tank platform, to break line of sight | mission.back_stairs |
+| `tv.arden_bulkhead` | hang_drop | into the back stairwell bulkhead: the Arden's back stairs | mission.back_stairs |
+| `tv.8th_34_cab` | car_hood | a double-parked Checker cab on Eighth Ave at 34th | mission.independence_day |
+| `tv.8th_33_newsstand` | vault | a shuttered newsstand counter at 33rd & Eighth | mission.independence_day |
+| `tv.psg_sidewalk_shed` | scaffold | a sidewalk shed on the Eighth Ave side of the Penn Square Garden block: up and along the plank deck | mission.independence_day |
+| `tv.psg_shed_end` | hang_drop | off the shed's end, into the crowd leaving the fireworks | mission.independence_day |
+| `tv.penn_8th_stairs` | subway_stairs | down the Eighth Ave entrance at 33rd into the concourse | mission.independence_day |
+| `tv.herald_turnstiles` | turnstile_vault | the IND turnstiles. Vault (fare evasion: +1 heat if a transit cop sees) or pay the 35¢ token and lose three seconds | mission.shoebox |
+| `tv.passage_gate` | vault | a fallen 'PASSAGE CLOSED' sawhorse at the 33rd St gate | mission.shoebox |
+| `tv.passage_fixtures` | climb | over a heap of dumped display fixtures from the shuttered shops | mission.shoebox |
+| `tv.passage_sleepers` | crowd_push | through a sleeping-bag row by the dead lights (walk; don't run anyone over) | mission.shoebox |
+| `tv.passage_hatch` | cellar_doors | a service hatch into the Penn IND mezzanine | mission.shoebox |
+| `tv.w34_crowd` | crowd_push | the W 34th St shoppers outside Lacy's | mission.side_purse_snatch |
+| `tv.w34_hotdog_cart` | vault | a hot-dog cart at Broadway | mission.side_purse_snatch |
+| `tv.w34_bus` | car_hood | a stalled bus on 34th | mission.side_purse_snatch |
+| `tv.w35_stoop` | stoop | up and over a stoop rail on W 35th | mission.side_purse_snatch |
+| `tv.w32_tarbeach` | vault | over the sunbather's folding chairs and tar-paper blankets | mission.side_tar_beach |
+| `tv.w32_plank` | roof_jump | a plank laid across the gap to the next roof (it bounces) | mission.side_tar_beach |
+| `tv.w33_watertank` | ladder | up the steel ladder of a water tank, to see where he went | mission.side_tar_beach |
+| `tv.w34_coop_gap` | roof_jump | a short gap to a lower roof with a pigeon coop (the birds explode upward) | mission.side_tar_beach |
+| `tv.w35_fe` | fire_escape | down a fire escape to the W 35th St side | mission.side_tar_beach |
+| `tv.w35_fe_drop` | drop_ladder | drop from the lowest platform; the ladder is rusted up | mission.side_tar_beach |
+| `tv.w41_cellar` | cellar_doors | he bolts out through the sidewalk cellar doors of the pool hall | mission.side_skip_board |
+| `tv.w41_lot_fence` | fence_climb | a chain-link fence into a rubble lot off W 41st | mission.side_skip_board |
+| `tv.w41_lot_car` | vault | a burned-out car hulk in the lot | mission.side_skip_board |
+| `tv.w40_fence` | fence_climb | the lot's back fence, onto W 40th | mission.side_skip_board |

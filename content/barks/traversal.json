@@ -1,0 +1,102 @@
+{
+  "id": "barks.traversal",
+  "core": false,
+  "note": "Lead lines on climbs, vaults, roof jumps and drops (route beats in chase/evade objectives; docs/briefs/MOVEMENT.md). context = lead.",
+  "lines": [
+    {
+      "context": "teddy",
+      "emotion": "winded",
+      "text": "I was a cop. Cops take the stairs. Inside stairs."
+    },
+    {
+      "context": "teddy",
+      "emotion": "strained",
+      "text": "Thirty-four years old and I'm climbing a fire escape. Ma would love this."
+    },
+    {
+      "context": "teddy",
+      "emotion": "grim",
+      "text": "Don't look down. Looked down."
+    },
+    {
+      "context": "teddy",
+      "emotion": "winded",
+      "text": "Who builds a roof this far from the next roof?"
+    },
+    {
+      "context": "teddy",
+      "emotion": "dry",
+      "text": "Knees. I used to have knees."
+    },
+    {
+      "context": "teddy",
+      "emotion": "strained",
+      "text": "Over the hood. Sorry, pal. Send me the bill."
+    },
+    {
+      "context": "delphine",
+      "emotion": "focused",
+      "text": "Rule four: never run where you can climb."
+    },
+    {
+      "context": "delphine",
+      "emotion": "cool",
+      "text": "Heels off. Heels in the bag. Go."
+    },
+    {
+      "context": "delphine",
+      "emotion": "focused",
+      "text": "Up, over, down. Count it. Up, over, down."
+    },
+    {
+      "context": "delphine",
+      "emotion": "dry",
+      "text": "Thirty-five cents for the train. Not tonight."
+    },
+    {
+      "context": "delphine",
+      "emotion": "breathless",
+      "text": "Gap's nothing. The landing's the thing."
+    },
+    {
+      "context": "delphine",
+      "emotion": "cool",
+      "text": "He's heavy. He won't make the jump. I will."
+    },
+    {
+      "context": "nick",
+      "emotion": "breathless",
+      "text": "I am a businessman! Businessmen use doors!"
+    },
+    {
+      "context": "nick",
+      "emotion": "strained",
+      "text": "This suit was two hundred dollars. Was."
+    },
+    {
+      "context": "nick",
+      "emotion": "breathless",
+      "text": "In Kastoria we climbed mountains. I was nine. I'm not nine."
+    },
+    {
+      "context": "nick",
+      "emotion": "strained",
+      "text": "Nobody photographs this. Nobody."
+    },
+    {
+      "context": "nick",
+      "emotion": "grim",
+      "text": "My heart. My heart, my heart. Keep going."
+    },
+    {
+      "context": "any",
+      "emotion": "startled",
+      "text": "Pigeons! Every roof has pigeons!"
+    },
+    {
+      "context": "any",
+      "emotion": "winded",
+      "text": "Fence. Of course there's a fence."
+    }
+  ]
+}

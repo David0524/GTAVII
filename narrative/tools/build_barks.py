@@ -15,6 +15,27 @@ def pool(pid, core, note, *lines):
               "lines": [{"context": c, "emotion": e, "text": t} for c, e, t in lines]}
 
 
+pool("barks.traversal", False, "Lead lines on climbs, vaults, roof jumps and drops (route beats in chase/evade objectives; docs/briefs/MOVEMENT.md). context = lead.",
+ ("teddy", "winded", "I was a cop. Cops take the stairs. Inside stairs."),
+ ("teddy", "strained", "Thirty-four years old and I'm climbing a fire escape. Ma would love this."),
+ ("teddy", "grim", "Don't look down. Looked down."),
+ ("teddy", "winded", "Who builds a roof this far from the next roof?"),
+ ("teddy", "dry", "Knees. I used to have knees."),
+ ("teddy", "strained", "Over the hood. Sorry, pal. Send me the bill."),
+ ("delphine", "focused", "Rule four: never run where you can climb."),
+ ("delphine", "cool", "Heels off. Heels in the bag. Go."),
+ ("delphine", "focused", "Up, over, down. Count it. Up, over, down."),
+ ("delphine", "dry", "Thirty-five cents for the train. Not tonight."),
+ ("delphine", "breathless", "Gap's nothing. The landing's the thing."),
+ ("delphine", "cool", "He's heavy. He won't make the jump. I will."),
+ ("nick", "breathless", "I am a businessman! Businessmen use doors!"),
+ ("nick", "strained", "This suit was two hundred dollars. Was."),
+ ("nick", "breathless", "In Kastoria we climbed mountains. I was nine. I'm not nine."),
+ ("nick", "strained", "Nobody photographs this. Nobody."),
+ ("nick", "grim", "My heart. My heart, my heart. Keep going."),
+ ("any", "startled", "Pigeons! Every roof has pigeons!"),
+ ("any", "winded", "Fence. Of course there's a fence."))
+
 pool("barks.garment", True, "Pushboys, cutters, pressers, fur workers. Garment and Fur Districts, daytime.",
  ("greet", "cocky", "Morning! Watch the rack, it bites."),
  ("greet", "friendly", "Hey, you new? You look new. Everybody looks new at seven."),

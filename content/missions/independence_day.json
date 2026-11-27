@@ -127,7 +127,38 @@
         "interior.penn_station_concourse"
       ],
       "fallback": "goto interior.penn_station_concourse with timeLimitSec 120",
-      "text": "Lose them in Penn Station, Eighth Ave"
+      "text": "Lose them down Eighth, into Penn Station",
+      "traversal": [
+        {
+          "move": "car_hood",
+          "at": "a double-parked Checker cab on Eighth Ave at 34th",
+          "marker": "tv.8th_34_cab"
+        },
+        {
+          "move": "vault",
+          "at": "a shuttered newsstand counter at 33rd & Eighth",
+          "marker": "tv.8th_33_newsstand"
+        },
+        {
+          "move": "scaffold",
+          "at": "a sidewalk shed on the Eighth Ave side of the Penn Square Garden block: up and along the plank deck",
+          "marker": "tv.psg_sidewalk_shed"
+        },
+        {
+          "move": "hang_drop",
+          "at": "off the shed's end, into the crowd leaving the fireworks",
+          "marker": "tv.psg_shed_end"
+        },
+        {
+          "move": "subway_stairs",
+          "at": "down the Eighth Ave entrance at 33rd into the concourse",
+          "marker": "tv.penn_8th_stairs",
+          "note": "Run the stairs; the crew loses you in the holiday crowd."
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "barks": "barks.traversal",
+      "checkpointAfterMarker": "tv.8th_33_newsstand"
     },
     {
       "id": "o10",

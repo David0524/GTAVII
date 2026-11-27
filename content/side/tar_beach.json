@@ -28,7 +28,42 @@
       "id": "o3",
       "type": "chase",
       "text": "Chase the thief across the roofs",
-      "target": "npc.stickup_man"
+      "target": "npc.stickup_man",
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "checkpointAfterMarker": "tv.w33_watertank",
+      "traversal": [
+        {
+          "move": "vault",
+          "at": "over the sunbather's folding chairs and tar-paper blankets",
+          "marker": "tv.w32_tarbeach"
+        },
+        {
+          "move": "roof_jump",
+          "at": "a plank laid across the gap to the next roof (it bounces)",
+          "marker": "tv.w32_plank"
+        },
+        {
+          "move": "ladder",
+          "at": "up the steel ladder of a water tank, to see where he went",
+          "marker": "tv.w33_watertank"
+        },
+        {
+          "move": "roof_jump",
+          "at": "a short gap to a lower roof with a pigeon coop (the birds explode upward)",
+          "marker": "tv.w34_coop_gap"
+        },
+        {
+          "move": "fire_escape",
+          "at": "down a fire escape to the W 35th St side",
+          "marker": "tv.w35_fe"
+        },
+        {
+          "move": "drop_ladder",
+          "at": "drop from the lowest platform; the ladder is rusted up",
+          "marker": "tv.w35_fe_drop",
+          "note": "Hang-drop instead: a 2.5 m fall, a roll on landing."
+        }
+      ]
     },
     {
       "id": "o4",

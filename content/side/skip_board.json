@@ -48,7 +48,32 @@
           "count": 1
         }
       ],
-      "nonLethalAllowed": true
+      "nonLethalAllowed": true,
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "note": "The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down.",
+      "checkpointAfterMarker": "tv.w41_lot_fence",
+      "traversal": [
+        {
+          "move": "cellar_doors",
+          "at": "he bolts out through the sidewalk cellar doors of the pool hall",
+          "marker": "tv.w41_cellar"
+        },
+        {
+          "move": "fence_climb",
+          "at": "a chain-link fence into a rubble lot off W 41st",
+          "marker": "tv.w41_lot_fence"
+        },
+        {
+          "move": "vault",
+          "at": "a burned-out car hulk in the lot",
+          "marker": "tv.w41_lot_car"
+        },
+        {
+          "move": "fence_climb",
+          "at": "the lot's back fence, onto W 40th",
+          "marker": "tv.w40_fence"
+        }
+      ]
     },
     {
       "id": "o6",

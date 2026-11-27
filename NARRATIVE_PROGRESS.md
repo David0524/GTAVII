@@ -870,3 +870,15 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - Heists: Cold Storage pays $33.5k across the three leads; the finale pays $6k each.
   - Exceptions: M1, M19, M25 and M28 pay $0; Brownout costs Nick $6k.
   - Gameplay may tune the figures from its economy simulation.
+- **Chase and traversal pass (27 Nov 2026, per MOVEMENT.md):** `narrative/tools/traversal.py` adds `traversal` beats to chase and evade objectives:
+  - Story missions:
+    - **M8**, the Arden fire escape to the W 38th St roofs and an air-shaft jump;
+    - **M9**, a cab hood, a newsstand and the sidewalk shed down into Penn Station;
+    - **M23**, the turnstile vault (pay the token or risk heat) and the 33rd St passage obstacles.
+  - Side quests:
+    - **purse snatch**, a hot-dog cart, a bus and a stoop;
+    - **tar beach**, a plank bridge, a water tank, a pigeon-coop gap and a rusted drop ladder;
+    - **skip board**, cellar doors and chain-link lot fences.
+  - New pool `barks.traversal`: 19 lead lines.
+  - ENGINE_REQUESTS 15 lists 28 `tv.*` markup points.
+  - Mobile: one button, no timing, soft-fail jumps, and a rubber-banded quarry.

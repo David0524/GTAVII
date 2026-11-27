@@ -68,6 +68,7 @@ for f in sorted(SIDE.glob("*.json")):
     if key not in P: raise SystemExit(f"no pay row for {key}")
     money, dur, heat, note = P[key]
     d["rewards"].update(money=money, payNote=note); d["durationMin"] = dur; d["heat"] = heat
+    import traversal; traversal.apply_side(d)
     f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n"); n += 1
 big = {k: v for k, v in P.items() if v[0] >= 5000}
 assert all(v[1] >= 20 and v[2] >= 2 for v in big.values()), "big side jobs must be 20+ min with real heat"

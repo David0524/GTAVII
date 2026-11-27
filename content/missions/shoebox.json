@@ -61,8 +61,18 @@
     {
       "id": "o5",
       "type": "enter_interior",
-      "text": "Into the old 33rd Street passage",
-      "marker": "interior.passage_33rd"
+      "text": "Over the turnstile, into 33rd St passage",
+      "marker": "interior.passage_33rd",
+      "traversal": [
+        {
+          "move": "turnstile_vault",
+          "at": "the IND turnstiles. Vault (fare evasion: +1 heat if a transit cop sees) or pay the 35¢ token and lose three seconds",
+          "marker": "tv.herald_turnstiles",
+          "note": "Both work. It's the player's choice of risk; neither is a fail."
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "barks": "barks.traversal"
     },
     {
       "id": "o6",
@@ -81,7 +91,33 @@
         "flooded section",
         "dead lights"
       ],
-      "fallback": "goto interior.penn_ind_platform with timeLimitSec 150"
+      "fallback": "goto interior.penn_ind_platform with timeLimitSec 150",
+      "traversal": [
+        {
+          "move": "vault",
+          "at": "a fallen 'PASSAGE CLOSED' sawhorse at the 33rd St gate",
+          "marker": "tv.passage_gate"
+        },
+        {
+          "move": "climb",
+          "at": "over a heap of dumped display fixtures from the shuttered shops",
+          "marker": "tv.passage_fixtures"
+        },
+        {
+          "move": "crowd_push",
+          "at": "through a sleeping-bag row by the dead lights (walk; don't run anyone over)",
+          "marker": "tv.passage_sleepers",
+          "note": "Running here is a choice with a reputation cost."
+        },
+        {
+          "move": "cellar_doors",
+          "at": "a service hatch into the Penn IND mezzanine",
+          "marker": "tv.passage_hatch"
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "barks": "barks.traversal",
+      "checkpointAfterMarker": "tv.passage_fixtures"
     },
     {
       "id": "o7",
