@@ -426,6 +426,16 @@ export class Simulation {
    * stops moving it, never despawns it, and draws it wherever `moveReleasedPed` puts it, until `reclaimPed`
    * (or its death). Returns false for unknown/dead peds.
    */
+  /**
+   * A short one-off action played in place (gameplay: `shove` on shovedBack, `point`, `shout`...): the ped
+   * holds still for `duration` s with PedView.state `act:<name>` and then carries on. Emits `pedAct`.
+   */
+  pedAct(pedId: number, act: string, duration = 0.9): boolean {
+    const p = this.core.pedById.get(pedId); if (!p || !p.alive || p.state === 'dead' || p.state === 'external') return false;
+    if (p.vendor && p.state === 'vendor') { this.core.emit('pedAct', { id: p.id, act, vendor: p.vendor }); return true; } // a stall vendor stays put; the animation plays at the cart
+    setPedGoal(this.core, p, { kind: 'act', name: act, duration });
+    this.core.emit('pedAct', { id: p.id, act }); return true;
+  }
   releasePed(pedId: number): boolean {
     const p = this.core.pedById.get(pedId); if (!p || !p.alive || p.state === 'dead') return false;
     if (p.vendor && p.state === 'vendor') this.vendors.setReleased(pedId, true);
