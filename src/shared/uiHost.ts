@@ -115,6 +115,17 @@ export interface ActorHost {
   spawn(id: string, cast: string, pose: { x: number; y?: number; z: number; heading: number }): void;
   pose(id: string, pose: { x: number; y?: number; z: number; heading: number }, anim?: string): void;
   despawn(id: string): void;
+  // ---- performance tracks (docs/CUTSCENE_PERFORMANCE.md; characters implement). All optional.
+  /** Apply a resolved frame (clips sampled at the given times, look, IK, expressions, visemes, props). Replaces pose() for that actor. */
+  perform?(id: string, frame: import('../cinematics/performance').ActorFrame): void;
+  /** At scene end: turn the cinematic body into the live entity in place (no despawn). */
+  handOff?(id: string, after: import('../cinematics/performance').HandOff, pose: { x: number; y?: number; z: number; heading: number }): void;
+  /** Pickers for the ?cine= tool. */
+  clips?(): { id: string; duration: number; loop: boolean }[];
+  expressions?(): string[];
+  props?(): string[];
+  /** World position of a joint, for look and IK targets. */
+  joint?(id: string, joint: string): [number, number, number] | null;
 }
 export interface PostHost { set(p: { dofFocusM?: number; fStop?: number; focalMm?: number; grain?: number; weave?: number; letterbox?: number }): void }
 

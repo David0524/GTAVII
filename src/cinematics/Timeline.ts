@@ -11,9 +11,10 @@
  */
 import type { Cutscene, Shot, CamKey, ActorKey, V3, DialogueLine } from './schema';
 import { lensToFov, normaliseCutscene } from './schema';
+import { Performance, keysOf, type PerfWorld, type ActorFrame } from './performance';
 
 export interface CamPose { pos: V3; look: V3; fov: number; lensMm: number; focusM: number; fStop: number; roll: number }
-export interface ScheduledLine { t0: number; t1: number; ref: string; speaker: string; text: string; shot: string }
+export interface ScheduledLine { t0: number; t1: number; ref: string; speaker: string; speakerId?: string; text: string; shot: string }
 export interface TimedEvent { t: number; kind: 'cue' | 'audio' | 'card'; cue: string; data?: unknown; seconds?: number; style?: string; shot: string }
 
 const EASE = {
@@ -34,7 +35,7 @@ export class Timeline {
   private actorKeys = new Map<string, (ActorKey & { abs: number })[]>();
 
   constructor(readonly scene: Cutscene, dialogue: (ref: string) => DialogueLine | null = () => null, speakerName: (id: string) => string = (s) => s,
-    picks: ReadonlyMap<string, number> | 'all' = new Map()) {
+    picks: ReadonlyMap<string, number> | 'all' = new Map(), lipsync: (ref: string) => [number, string, number][] | null = () => null) {
     normaliseCutscene(scene);
     // Unresolved branches are left out, so a scene plays straight to its choice hold; the player rebuilds
     // the timeline with the pick, which leaves every shot before the hold where it was.
@@ -51,7 +52,7 @@ export class Timeline {
         const text = line?.text ?? `[${ref}]`;
         const dur = (typeof d === 'object' && d.seconds) || readingTime(text);
         const t0 = typeof d === 'object' && d.t !== undefined ? d.t : cursor;
-        this.lines.push({ t0: st + t0, t1: st + Math.min(s.durationSec + 0.6, t0 + dur), ref, speaker: line ? speakerName(line.speaker) : '', text, shot: s.id });
+        this.lines.push({ t0: st + t0, t1: st + Math.min(s.durationSec + 0.6, t0 + dur), ref, speaker: line ? speakerName(line.speaker) : '', speakerId: line?.speaker, text, shot: s.id });
         cursor = t0 + dur + 0.25;
       }
       for (const a of s.audio ?? []) if (typeof a === 'object') this.events.push({ t: st + a.t, kind: 'audio', cue: a.cue, shot: s.id });
@@ -59,12 +60,24 @@ export class Timeline {
       for (const c of s.cards ?? []) this.events.push({ t: st + c.t, kind: 'card', cue: c.text, seconds: c.seconds ?? 4, style: c.style ?? 'title', shot: s.id });
       for (const [id, ks] of Object.entries(s.actors ?? {})) {
         const arr = this.actorKeys.get(id) ?? [];
-        for (const k of ks) arr.push({ ...k, abs: st + k.t });
+        for (const k of keysOf(ks)) arr.push({ ...k, abs: st + k.t });
         this.actorKeys.set(id, arr);
       }
     });
     this.events.sort((a, b) => a.t - b.t);
     for (const a of this.actorKeys.values()) a.sort((p, q) => p.abs - q.abs);
+    // a line belongs to an actor when its speaker is the actor's id or the cast member they play
+    const cast = scene.cast ?? {};
+    this.perf = new Performance(this.shots, this.shotStart, this.lines, (id, l) => !!l.speakerId && (l.speakerId === id || l.speakerId === cast[id]?.cast), lipsync);
+  }
+
+  readonly perf: Performance;
+
+  /** The resolved performance frame for an actor at t (null when the actor isn't on set). */
+  actorFrame(id: string, t: number, world: Partial<PerfWorld> = {}): ActorFrame | null {
+    const a = this.actor(id, t); if (!a) return null;
+    const w: PerfWorld = { rootOf: (o, tt) => this.actor(o, tt), ...world };
+    return this.perf.frame(id, t, { x: a.x, z: a.z, heading: a.heading, ...(a.y !== undefined ? { y: a.y } : {}) }, w);
   }
 
   shotIndexAt(t: number) { let i = 0; while (i + 1 < this.shotStart.length && t >= this.shotStart[i + 1]) i++; return i; }
@@ -111,7 +124,7 @@ export class Timeline {
         const a = ks[k - 1], b = ks[k], u = (t - a.abs) / Math.max(1e-6, b.abs - a.abs);
         let dh = b.heading - a.heading; while (dh > Math.PI) dh -= 2 * Math.PI; while (dh < -Math.PI) dh += 2 * Math.PI;
         const moving = Math.hypot(b.x - a.x, b.z - a.z) > 0.05;
-        return { t, x: a.x + (b.x - a.x) * u, z: a.z + (b.z - a.z) * u, heading: a.heading + dh * u, anim: moving ? (a.anim ?? 'walk') : a.anim };
+        return { t, x: a.x + (b.x - a.x) * u, z: a.z + (b.z - a.z) * u, heading: a.heading + dh * u, ...(a.y !== undefined && b.y !== undefined ? { y: a.y + (b.y - a.y) * u } : {}), anim: moving ? (a.anim ?? 'walk') : a.anim };
       }
     }
     return ks[ks.length - 1];

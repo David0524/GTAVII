@@ -17,7 +17,7 @@ import * as THREE from 'three/webgpu';
 import type { UiHost } from '../shared/uiHost';
 import { Timeline } from './Timeline';
 import type { Cutscene, ShotFilm, V3 } from './schema';
-import { loadCutscene } from './content';
+import { loadCutscene, lipsync } from './content';
 import { settings } from '../settings/Settings';
 import { esc } from '../ui/util';
 
@@ -76,7 +76,7 @@ export class CinematicPlayer {
     const { scene, dialogue, choices, speaker } = await loadCutscene(id);
     this.choicesOf = choices; this.held.clear(); this.waiting = false;
     this.scene = scene; this.opts = opts;
-    this.picks = new Map(); this.rebuild = () => new Timeline(scene, dialogue, speaker, this.picks);
+    this.picks = new Map(); this.rebuild = () => new Timeline(scene, dialogue, speaker, this.picks, lipsync);
     this.tl = this.rebuild();
     this.t = opts.startAt ?? 0; this.playing = true; this.paused = !!opts.paused; this.skipHeld = 0; this.lastLine = '';
     if (this.host.camera) { this.cam = this.host.camera.acquire('cinematics'); this.restoreFov = this.cam.fov; }
@@ -101,11 +101,41 @@ export class CinematicPlayer {
       const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, h * 0.42, 4, 10), mat); torso.position.y = h * 0.52;
       const legs = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, h * 0.36, 4, 8), new THREE.MeshStandardMaterial({ color: col.clone().multiplyScalar(0.55), roughness: 0.9 })); legs.position.y = h * 0.24;
       const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 12), new THREE.MeshStandardMaterial({ color: 0x9a7058, roughness: 0.7 })); head.position.y = h * 0.92;
-      const nose = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), head.material); nose.position.set(0, h * 0.92, -0.12); // which way they face
-      g.add(torso, legs, head, nose); g.userData.lead = c.cast === lead;
+      const nose = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), head.material); nose.position.set(0, 0, -0.12); // which way they face
+      const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.02, 0.02), new THREE.MeshBasicMaterial({ color: 0x2a1410 })); mouth.position.set(0, -0.06, -0.1);
+      const headG = new THREE.Group(); headG.position.y = h * 0.92; head.position.y = 0; headG.add(head, nose, mouth);
+      g.add(torso, legs, headG); g.userData.lead = c.cast === lead; g.userData.head = headG; g.userData.mouth = mouth;
       this.actors.add(g); this.bodies.set(id, g);
     }
     if (!this.host.actors) this.host.scene?.add(this.actors);
+  }
+
+  /** Where targets are, for look-at and IK resolution. */
+  private perfWorld() {
+    const A = this.host.actors, cam = this.cam;
+    return {
+      camera: () => (cam ? [cam.position.x, cam.position.y, cam.position.z] as V3 : null),
+      joint: A?.joint ? (a: string, j: string) => A.joint!(a, j) : undefined,
+      clipInfo: A?.clips ? (() => { const m = new Map(A.clips!().map((c) => [c.id, c])); return (c: string) => m.get(c) ?? null; })() : undefined,
+    };
+  }
+
+  /**
+   * Scene end (played or skipped): cast with `after` other than despawn become live entities where the scene
+   * left them. With ActorHost.handOff the same body carries on; otherwise the engine gets an actor.handoff cue
+   * with the exact pose and spawns the live one there. (Fixes "Mayhew vanishes at the blend".)
+   */
+  private handOffCast(tl: Timeline) {
+    const A = this.host.actors;
+    for (const [id, c] of Object.entries(this.scene!.cast ?? {})) {
+      const after = c.after ?? 'despawn', a = tl.actor(id, tl.duration);
+      if (after !== 'despawn' && a) {
+        const pose = { x: a.x, z: a.z, heading: a.heading, y: a.y ?? groundY(a.x, a.z) };
+        if (A?.handOff) { A.handOff(id, after, pose); continue; }
+        this.host.commit?.('actor.handoff', { id, cast: c.cast, after, pose });
+      }
+      A?.despawn(id);
+    }
   }
 
   private gameplayPose() {
@@ -194,7 +224,22 @@ export class CinematicPlayer {
       const bob = a.anim === 'walk' ? Math.abs(Math.sin(this.t * 6.2)) * 0.035 : 0;
       g.position.set(a.x, groundY(a.x, a.z) + bob, a.z); g.rotation.y = a.heading;
     }
-    if (this.host.actors) for (const id of tl.actorIds) { const a = tl.actor(id, this.t); if (a) this.host.actors.pose(id, { x: a.x, z: a.z, heading: a.heading }, a.anim); }
+    const A = this.host.actors;
+    if (A) for (const id of tl.actorIds) {
+      // performance tracks go through perform(); actors with only root keys keep the host's own locomotion
+      if (A.perform && tl.perf.has(id)) { const f = tl.actorFrame(id, this.t, this.perfWorld()); if (f) A.perform(id, f); continue; }
+      const a = tl.actor(id, this.t); if (a) A.pose(id, { x: a.x, z: a.z, heading: a.heading, ...(a.y !== undefined ? { y: a.y } : {}) }, a.anim);
+    }
+    // stand-ins show the look-at (the head turns) so blocking reads in the tool before bodies exist
+    for (const [id, g] of this.bodies) {
+      const headG = g.userData.head as THREE.Object3D | undefined; if (!headG || !g.visible) continue;
+      const f = tl.perf.has(id) ? tl.actorFrame(id, this.t, this.perfWorld()) : null;
+      let yaw = 0;
+      if (f?.look.at) { const dx = f.look.at[0] - g.position.x, dz = f.look.at[2] - g.position.z; yaw = Math.atan2(-dx, -dz) - g.rotation.y; while (yaw > Math.PI) yaw -= 2 * Math.PI; while (yaw < -Math.PI) yaw += 2 * Math.PI; yaw = Math.max(-1.3, Math.min(1.3, yaw)) * f.look.weight; }
+      headG.rotation.y = yaw;
+      const mouth = g.userData.mouth as THREE.Object3D | undefined;
+      if (mouth) { const open = f ? Object.entries(f.visemes).reduce((m, [v, w]) => m + w * (/^(aa|O|E|U|I)$/.test(v) ? 1 : 0.35), 0) : 0; mouth.scale.y = 0.2 + open * 1.6; }
+    }
     // film layer
     const local = this.t - tl.shotStart[si];
     const lbTarget = settings.get('cutsceneLetterbox') && film.letterbox !== 0 ? 1 : 0;
@@ -242,7 +287,7 @@ export class CinematicPlayer {
       this.cam = null;
     }
     this.host.scene?.remove(this.actors);
-    if (this.host.actors) for (const id of Object.keys(this.scene!.cast ?? {})) this.host.actors.despawn(id);
+    this.handOffCast(tl);
     this.host.playerVisible?.(true);
     this.host.freezePlayer?.(false);
     for (const c of this.cardEls) c.remove(); this.cardEls = [];

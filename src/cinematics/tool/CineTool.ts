@@ -9,6 +9,9 @@
  *    focal length like a zoom ring); K keys the camera at the playhead; lens, focus, stop, roll,
  *    easing, handheld; "focus on" an actor sets the focus distance;
  *  - actors: pick one, click the ground to key their mark at the playhead, [ and ] turn them;
+ *  - performance (docs/CUTSCENE_PERFORMANCE.md): per selected actor, lanes for clips, look-at, IK, expressions,
+ *    lips and props, keyed at the playhead from the host's own clip/expression/prop lists; keys show on the
+ *    timeline under the shots and can be deleted from the lane list;
  *  - shot ops: add after, duplicate, delete, duration, start/end on the gameplay camera;
  *  - validation as you go; Export downloads the layout JSON (content/cutscenes/layout/<id>.layout.json) (and keeps an autosave in this browser).
  * The tool owns the camera (CameraDirector owner 'cine-tool') while open.
@@ -16,15 +19,23 @@
 import * as THREE from 'three/webgpu';
 import type { UiHost } from '../../shared/uiHost';
 import { CinematicPlayer } from '../CinematicPlayer';
-import { cutsceneIds, loadCutscene } from '../content';
+import { cutsceneIds, loadCutscene, lipsync } from '../content';
 import { validateCutscene, lensToFov, fovToLens, applyLayout, extractLayout, type Cutscene, type CutsceneLayout, type Shot, type CamKey, type V3 } from '../schema';
 import { Timeline } from '../Timeline';
+import { asTrack, keysOf, isTrack, TRACKS, type ActorTrack, type Chain, type Layer, type Target } from '../performance';
 import { esc } from '../../ui/util';
 import { heightAt, CURB_HEIGHT } from '../../shared/terrain';
 import './cinetool.css';
 
 const LENSES = [18, 24, 28, 35, 40, 50, 65, 85, 100, 135];
 const r3 = (v: number) => Math.round(v * 100) / 100;
+type Lane = typeof TRACKS[number];
+const LANE_NAME: Record<Lane, string> = { clips: 'Clip', look: 'Look', ik: 'IK', expr: 'Face', lips: 'Lips', props: 'Prop' };
+/** Starter names until the host lists its own (characters confirm them; see CUTSCENE_PERFORMANCE.md). */
+const EXPR_FALLBACK = ['smile', 'smirk', 'frown', 'brow_raise', 'brow_furrow', 'squint', 'eyes_wide', 'sneer', 'jaw_clench', 'lip_press', 'pout', 'disgust', 'fear', 'sad'];
+const CLIP_FALLBACK = ['idle', 'walk', 'idle_talk_a', 'idle_talk_b', 'wave', 'point', 'shrug', 'nod', 'head_shake', 'sit', 'stand_up', 'smoke'];
+const JOINTS = ['Head', 'neck_01', 'spine_03', 'upperarm_l', 'upperarm_r', 'hand_l', 'hand_r', 'pelvis'];
+const SOCKETS = ['hand_r', 'hand_l', 'Head', 'spine_03', 'pelvis'];
 
 export class CineTool {
   readonly root = document.createElement('div');
@@ -39,6 +50,9 @@ export class CineTool {
   private keys = new Set<string>();
   private drag: { x: number; y: number } | null = null;
   private actorSel = '';
+  private lane: Lane = 'clips';
+  private pick: 'look' | 'ik' | null = null; // the next street click sets a look/IK point
+  private form = { clip: '', blend: 0.3, layer: 'full' as Layer, loop: true, expr: 'smile', w: 0.7, chain: 'hand_r' as Chain, joint: 'Head', prop: '', socket: 'hand_r' };
   private dirty = false;
   private errors: string[] = [];
   private markers = new THREE.Group();
@@ -85,8 +99,9 @@ export class CineTool {
     const old = this.player.tl!;
     // keep the dialogue resolver from the player's load
     const lineOf = (ref: string) => old.lines.find((l) => l.ref === ref);
+    const display = new Map(old.lines.map((l) => [l.speakerId ?? l.speaker, l.speaker]));
     // every branch shot is laid out in sequence in the tool ('all'), so each can be keyed
-    this.player.tl = new Timeline(sc, (ref) => { const l = lineOf(ref); return l ? { id: ref, speaker: l.speaker, text: l.text } : null; }, (s) => s, 'all');
+    this.player.tl = new Timeline(sc, (ref) => { const l = lineOf(ref); return l ? { id: ref, speaker: l.speakerId ?? l.speaker, text: l.text } : null; }, (id) => display.get(id) ?? id, 'all', lipsync);
     this.player.scene = sc;
     this.dirty = true;
     try { localStorage.setItem(`t74.cine.${this.id}`, JSON.stringify(extractLayout(sc, this.script!))); } catch { /* ignore */ }
@@ -132,18 +147,95 @@ export class CineTool {
     let hit: THREE.Vector3 | null = null;
     for (let t = 0.5; t < 400; t += 0.25) { const p = o.clone().addScaledVector(d, t); if (p.y <= heightAt(p.x, p.z) + CURB_HEIGHT) { hit = p; break; } }
     if (!hit) return;
+    if (this.pick) { const p = this.pick; this.pick = null; this.addPerf(p, [r3(hit.x), r3(hit.y + (p === 'look' ? 1.6 : 1.0)), r3(hit.z)]); return; }
     const s = this.shot, t = r3(Math.max(0, Math.min(s.durationSec, this.local)));
     s.actors ??= {};
-    const ks = (s.actors[this.actorSel] ??= []);
+    const ks = keysOf(s.actors[this.actorSel]);
     const prev = this.player.tl!.actor(this.actorSel, this.player.t);
     const k = { t, x: r3(hit.x), z: r3(hit.z), heading: r3(prev?.heading ?? 0), anim: prev?.anim ?? 'idle' };
-    s.actors[this.actorSel] = ks.filter((x) => Math.abs(x.t - t) > 0.05).concat(k).sort((a, b) => a.t - b.t);
+    const next = ks.filter((x) => Math.abs(x.t - t) > 0.05).concat(k).sort((a, b) => a.t - b.t);
+    const v = s.actors[this.actorSel];
+    if (isTrack(v)) v.keys = next; else s.actors[this.actorSel] = next;
     this.rebuild();
   }
   private turnActor(d: number) {
     if (!this.actorSel) return;
-    const s = this.shot, t = this.local, ks = s.actors?.[this.actorSel]; if (!ks?.length) return;
+    const s = this.shot, t = this.local, ks = keysOf(s.actors?.[this.actorSel]); if (!ks.length) return;
     const k = ks.reduce((b, x) => (Math.abs(x.t - t) < Math.abs(b.t - t) ? x : b)); k.heading = r3(k.heading + d); this.rebuild();
+  }
+
+  /** Add a performance key for the selected actor at the playhead, on the current lane. */
+  private addPerf(kind: Lane, arg?: Target | string | null) {
+    if (!this.actorSel) return;
+    const s = this.shot, t = r3(Math.max(0, Math.min(s.durationSec, this.local))), f = this.form;
+    const tr: ActorTrack = asTrack((s.actors ??= {}), this.actorSel);
+    const put = <K extends { t: number }>(arr: K[] | undefined, k: K, same: (x: K) => boolean = () => true) =>
+      arr ? arr.filter((x) => !(Math.abs(x.t - t) < 0.05 && same(x))).concat(k).sort((a, b) => a.t - b.t) : [k];
+    if (kind === 'clips') tr.clips = put(tr.clips, { t, clip: (arg as string | null) ?? null, blend: f.blend, ...(f.layer !== 'full' ? { layer: f.layer } : {}), loop: f.loop }, (x) => (x.layer ?? 'full') === f.layer);
+    if (kind === 'look') tr.look = put(tr.look, { t, at: (arg as Target | null) ?? null, blend: f.blend });
+    if (kind === 'ik') tr.ik = put(tr.ik, { t, chain: f.chain, at: (arg as Target | null) ?? null, blend: f.blend }, (x) => x.chain === f.chain);
+    if (kind === 'expr') tr.expr = put(tr.expr, { t, name: f.expr, w: f.w, blend: f.blend }, (x) => x.name === f.expr);
+    if (kind === 'props') tr.props = put(tr.props, { t, prop: f.prop, attach: (arg as string | null) ?? null }, (x) => x.prop === f.prop);
+    this.rebuild();
+  }
+  private delPerf(kind: Lane, i: number) {
+    const tr = this.shot.actors?.[this.actorSel]; if (!isTrack(tr)) return;
+    const arr = tr[kind]; if (Array.isArray(arr)) { arr.splice(i, 1); if (!arr.length) delete tr[kind]; }
+    this.rebuild();
+  }
+  private perfPanel(castIds: string[]): string {
+    if (!this.actorSel) return '';
+    const A = this.host.actors, f = this.form, tr = this.shot.actors?.[this.actorSel], lane = this.lane;
+    const opt = (xs: string[], cur: string) => xs.map((x) => `<option ${x === cur ? 'selected' : ''}>${esc(x)}</option>`).join('');
+    const others = castIds.filter((c) => c !== this.actorSel);
+    const clips = A?.clips?.().map((c) => c.id) ?? CLIP_FALLBACK, exprs = A?.expressions?.() ?? EXPR_FALLBACK, props = A?.props?.() ?? [];
+    if (!f.clip) f.clip = clips[0] ?? '';
+    const body: Record<Lane, string> = {
+      clips: `<select class="pf-clip">${opt(clips, f.clip)}</select><select class="pf-layer">${opt(['full', 'upper', 'additive'], f.layer)}</select>
+        <label><input type="checkbox" class="pf-loop" ${f.loop ? 'checked' : ''}> loop</label><button class="pf-add" data-v="clip">Add</button><button class="pf-add" data-v="null">End layer</button>`,
+      look: `${others.map((c) => `<button class="pf-tgt" data-a="${c}">${esc(c)}</button>`).join('')}<button class="pf-tgt" data-a="camera">camera</button>
+        <button class="pf-pick ${this.pick === 'look' ? 'on' : ''}" data-k="look">point…</button><button class="pf-tgt" data-a="">release</button>`,
+      ik: `<select class="pf-chain">${opt(['hand_r', 'hand_l', 'foot_r', 'foot_l'], f.chain)}</select> to <select class="pf-joint">${opt(JOINTS, f.joint)}</select> of
+        ${others.map((c) => `<button class="pf-tgt" data-a="${c}">${esc(c)}</button>`).join('')}<button class="pf-pick ${this.pick === 'ik' ? 'on' : ''}" data-k="ik">point…</button><button class="pf-tgt" data-a="">release</button>`,
+      expr: `<select class="pf-expr">${opt(exprs, f.expr)}</select><input class="pf-w" type="range" min="0" max="1" step="0.05" value="${f.w}"><span>${f.w}</span><button class="pf-add">Add</button>`,
+      lips: `${['auto', 'off'].map((m) => `<button class="pf-lips ${((isTrack(tr) ? tr.lips : undefined) ?? 'auto') === m ? 'on' : ''}" data-m="${m}">${m}</button>`).join('')}<span class="hint">auto = lip-sync file per spoken line, or a text estimate</span>`,
+      props: `${props.length ? `<select class="pf-prop">${opt(props, f.prop || props[0])}</select>` : `<input class="pf-prop" placeholder="prop id" value="${esc(f.prop)}">`}
+        <select class="pf-sock">${opt(SOCKETS, f.socket)}</select><button class="pf-add" data-v="attach">Attach</button><button class="pf-add" data-v="null">Drop</button>`,
+    };
+    const keys = isTrack(tr) && lane !== 'lips' ? ((tr[lane] ?? []) as { t: number }[]) : [];
+    const desc = (k: Record<string, unknown>) => esc(lane === 'clips' ? `${k.clip ?? '(end)'}${k.layer ? ` · ${k.layer}` : ''}` : lane === 'expr' ? `${k.name} ${k.w}` : lane === 'props' ? `${k.prop} → ${k.attach ?? 'drop'}`
+      : `${lane === 'ik' ? `${k.chain} → ` : ''}${k.at === null ? 'release' : typeof k.at === 'string' ? k.at : Array.isArray(k.at) ? 'point' : (k.at as { actor: string; joint?: string }).actor + ((k.at as { joint?: string }).joint ? `.${(k.at as { joint?: string }).joint}` : '')}`);
+    return `<div class="ct-perf"><div class="row"><b>${esc(this.actorSel)}</b> performance ${A?.perform ? '' : '<span class="hint">(stand-in: the host has no perform() yet)</span>'}</div>
+      <div class="row tabs">${TRACKS.map((l) => `<button class="pf-lane ${l === lane ? 'on' : ''}" data-l="${l}">${LANE_NAME[l]}</button>`).join('')}</div>
+      <div class="row">${body[lane]}</div>
+      ${lane !== 'lips' && lane !== 'props' ? `<div class="row"><label>Blend</label><input class="pf-blend" type="number" step="0.05" min="0" value="${f.blend}"> s</div>` : ''}
+      <ol class="pf-keys">${keys.map((k, i) => `<li><span data-t="${k.t}">${k.t.toFixed(2)}s</span> ${desc(k as Record<string, unknown>)} <button class="pf-del" data-i="${i}">×</button></li>`).join('')}</ol></div>`;
+  }
+  private wirePerf(castIds: string[]) {
+    const r = this.root, f = this.form, val = (c: string) => (r.querySelector(c) as HTMLInputElement | null)?.value;
+    void castIds;
+    r.querySelectorAll<HTMLElement>('.pf-lane').forEach((b) => (b.onclick = () => { this.lane = b.dataset.l as Lane; this.pick = null; this.render(); }));
+    const read = () => {
+      f.clip = val('.pf-clip') ?? f.clip; f.layer = (val('.pf-layer') as Layer) ?? f.layer; f.loop = (r.querySelector('.pf-loop') as HTMLInputElement | null)?.checked ?? f.loop;
+      f.expr = val('.pf-expr') ?? f.expr; f.w = +(val('.pf-w') ?? f.w); f.chain = (val('.pf-chain') as Chain) ?? f.chain; f.joint = val('.pf-joint') ?? f.joint;
+      f.prop = val('.pf-prop') ?? f.prop; f.socket = val('.pf-sock') ?? f.socket; f.blend = Math.max(0, +(val('.pf-blend') ?? f.blend));
+    };
+    r.querySelectorAll<HTMLElement>('.pf-add').forEach((b) => (b.onclick = () => {
+      read();
+      if (this.lane === 'clips') this.addPerf('clips', b.dataset.v === 'null' ? null : f.clip);
+      else if (this.lane === 'props') { if (f.prop) this.addPerf('props', b.dataset.v === 'null' ? null : f.socket); }
+      else this.addPerf(this.lane);
+    }));
+    r.querySelectorAll<HTMLElement>('.pf-tgt').forEach((b) => (b.onclick = () => {
+      read(); const a = b.dataset.a!;
+      const at: Target | null = !a ? null : a === 'camera' ? 'camera' : this.lane === 'ik' ? { actor: a, joint: f.joint } : { actor: a };
+      this.addPerf(this.lane, at);
+    }));
+    r.querySelectorAll<HTMLElement>('.pf-pick').forEach((b) => (b.onclick = () => { read(); this.pick = this.pick ? null : (b.dataset.k as 'look' | 'ik'); this.render(); }));
+    r.querySelectorAll<HTMLElement>('.pf-lips').forEach((b) => (b.onclick = () => { const tr = asTrack((this.shot.actors ??= {}), this.actorSel); tr.lips = b.dataset.m as 'auto' | 'off'; if (tr.lips === 'auto') delete tr.lips; this.rebuild(); }));
+    r.querySelectorAll<HTMLElement>('.pf-del').forEach((b) => (b.onclick = () => this.delPerf(this.lane, +b.dataset.i!)));
+    r.querySelectorAll<HTMLElement>('.pf-keys span').forEach((sp) => (sp.onclick = () => this.gotoShot(this.shotI, +sp.dataset.t!)));
+    const w = r.querySelector('.pf-w') as HTMLInputElement | null; if (w) w.oninput = () => { (w.nextElementSibling as HTMLElement).textContent = w.value; };
   }
 
   private onKey(e: KeyboardEvent, down: boolean) {
@@ -234,7 +326,8 @@ export class CineTool {
         <div class="row"><button class="ct-key primary">Key camera (K)</button><button class="ct-delkey">Delete key</button></div>
         <div class="row"><label>Duration</label><input class="ct-dur" type="number" step="0.1" min="0.5" value="${s.durationSec}"><label>Handheld</label><input class="ct-hh" type="range" min="0" max="1" step="0.05" value="${s.camera?.handheld ?? 0}"></div>
         <div class="row"><label><input type="checkbox" class="ct-from" ${s.camera?.fromGameplay ? 'checked' : ''}> start on gameplay cam</label><label><input type="checkbox" class="ct-to" ${s.camera?.toGameplay ? 'checked' : ''}> end on gameplay cam</label></div>
-        <div class="row"><label>Actor</label>${castIds.map((c) => `<button class="ct-act ${c === this.actorSel ? 'on' : ''}" data-a="${c}">${esc(c)}</button>`).join('')}<span class="hint">${this.actorSel ? 'click the street to mark · [ ] turn' : ''}</span></div>
+        <div class="row"><label>Actor</label>${castIds.map((c) => `<button class="ct-act ${c === this.actorSel ? 'on' : ''}" data-a="${c}">${esc(c)}</button>`).join('')}<span class="hint">${this.actorSel ? (this.pick ? `click the street to set the ${this.pick} point` : 'click the street to mark · [ ] turn') : ''}</span></div>
+        ${this.perfPanel(castIds)}
         <div class="row"><button class="ct-add">+ Shot after</button><button class="ct-dup">Duplicate</button><button class="ct-del">Delete shot</button></div>
         <div class="row"><button class="ct-play primary">${this.mode === 'edit' ? '▶ Preview (Space)' : '❚❚ Edit (Space)'}</button><button class="ct-export">${this.dirty ? '⬇ Export JSON*' : '⬇ Export JSON'}</button><button class="ct-reset">Revert</button></div>
         <div class="row hint">WASD/QE fly · Shift fast · right-drag look · wheel = zoom ring · PgUp/PgDn shots</div>
@@ -245,7 +338,9 @@ export class CineTool {
     const track = this.root.querySelector('.ct-track') as HTMLElement, D = tl.duration;
     track.innerHTML = sc.shots.map((x, i) => `<div class="blk ${i === this.shotI ? 'on' : ''}" style="left:${(tl.shotStart[i] / D) * 100}%;width:${(x.durationSec / D) * 100}%"><b>${esc(x.id)}</b>${(x.camera?.keys ?? []).map((k) => `<i class="k" style="left:${(k.t / x.durationSec) * 100}%"></i>`).join('')}</div>`).join('')
       + tl.lines.map((l) => `<div class="ln" style="left:${(l.t0 / D) * 100}%;width:${((l.t1 - l.t0) / D) * 100}%" title="${esc(l.speaker)}: ${esc(l.text)}"></div>`).join('')
-      + tl.events.map((e) => `<div class="ev ${e.kind}" style="left:${(e.t / D) * 100}%" title="${esc(e.kind)}: ${esc(e.cue)}"></div>`).join('');
+      + tl.events.map((e) => `<div class="ev ${e.kind}" style="left:${(e.t / D) * 100}%" title="${esc(e.kind)}: ${esc(e.cue)}"></div>`).join('')
+      + this.laneMarks(D);
+    this.root.querySelector('.ct-tl')!.classList.toggle('perf', !!this.actorSel);
     const ruler = this.root.querySelector('.ct-ruler') as HTMLElement;
     for (let t = 0; t <= D; t += 5) ruler.insertAdjacentHTML('beforeend', `<span style="left:${(t / D) * 100}%">${t}s</span>`);
     const scrub = (e: PointerEvent) => { const r = track.getBoundingClientRect(); const t = ((e.clientX - r.left) / r.width) * D; this.player.seek(t); this.shotI = tl.shotIndexAt(this.player.t); this.syncFlyFromPose(); this.updatePlayhead(); };
@@ -273,7 +368,13 @@ export class CineTool {
     q('.ct-play').onclick = () => this.togglePreview();
     q('.ct-export').onclick = () => this.export();
     q('.ct-reset').onclick = () => { try { localStorage.removeItem(`t74.cine.${this.id}`); } catch { /* ignore */ } void this.open(this.id); };
+    this.wirePerf(castIds);
     void fovToLens;
+  }
+  /** The selected actor's performance keys as one row per lane under the shots. */
+  private laneMarks(D: number) {
+    const lanes = this.actorSel ? this.player.tl!.perf.lanes(this.actorSel) : null; if (!lanes) return '';
+    return TRACKS.map((l, i) => `<div class="pl" style="top:${72 + i * 10}px"><em>${LANE_NAME[l]}</em>${(lanes[l] as { abs: number }[]).map((k) => `<i style="left:${(k.abs / D) * 100}%"></i>`).join('')}</div>`).join('');
   }
   private updatePlayhead() {
     const h = this.root.querySelector('.ct-head') as HTMLElement | null; if (!h || !this.player.tl) return;

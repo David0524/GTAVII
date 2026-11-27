@@ -29,3 +29,14 @@ body.cine-tool .u-hud, body.cine-tool .t74-touch { display: none !important; }
 .ct-safe i:nth-child(1) { left: 33.33%; top: 0; bottom: 0; border-left-width: 1px; } .ct-safe i:nth-child(2) { left: 66.66%; top: 0; bottom: 0; border-left-width: 1px; }
 .ct-safe i:nth-child(3) { top: 33.33%; left: 0; right: 0; border-top-width: 1px; } .ct-safe i:nth-child(4) { top: 66.66%; left: 0; right: 0; border-top-width: 1px; }
 body.cine-tool .cine-fx { z-index: 60; }
+
+/* performance lanes (docs/CUTSCENE_PERFORMANCE.md) */
+.ct-tl.perf { height: 152px; }
+.ct-track .pl { position: absolute; left: 0; right: 0; height: 8px; border-top: 1px solid #ffffff12; }
+.ct-track .pl em { position: absolute; left: 0; top: -1px; z-index: 1; padding: 0 4px 0 0; background: rgba(10,6,7,.95); font: 600 8px/9px var(--f-ui); color: var(--dim); font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
+.ct-track .pl i { position: absolute; top: 1px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--taxi); }
+.ct-perf { border-top: 1px solid #ffffff1a; margin-top: 6px; padding-top: 4px; }
+.ct-perf .tabs button.on, .ct-perf .pf-lips.on, .ct-perf .pf-pick.on { background: var(--taxi); color: #111; }
+.ct-perf select, .ct-perf input:not([type=checkbox]) { max-width: 120px; }
+.pf-keys { margin: 4px 0 0; padding: 0 0 0 16px; max-height: 120px; overflow: auto; font-size: 11px; }
+.pf-keys span { cursor: pointer; color: var(--taxi); } .pf-keys button { padding: 0 6px; min-height: 0; }

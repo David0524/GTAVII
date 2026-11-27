@@ -9,6 +9,11 @@ import { applyLayout } from './schema';
 const SCENES = import.meta.glob<Cutscene>('/content/cutscenes/*.json', { import: 'default' });
 const LAYOUTS = import.meta.glob<CutsceneLayout>('/content/cutscenes/layout/*.layout.json', { import: 'default' });
 const DIALOGUE = import.meta.glob<{ id: string; lines: (DialogueLine & Partial<DialogueChoiceSet>)[] }>('/content/dialogue/*.json', { import: 'default' });
+/** Viseme timing per dialogue line (characters generate it from the voice audio; docs/CUTSCENE_PERFORMANCE.md). */
+const LIPSYNC = import.meta.glob<{ line: string; visemes: [number, string, number][] }>('/content/lipsync/*.json', { import: 'default', eager: true });
+const LIPS = new Map<string, [number, string, number][]>();
+for (const f of Object.values(LIPSYNC)) if (f?.line && Array.isArray(f.visemes)) LIPS.set(f.line, f.visemes);
+export function lipsync(ref: string) { return LIPS.get(ref) ?? null; }
 const CAST = import.meta.glob<{ id: string; name: string }[]>('/content/cast/*.json', { import: 'default', eager: true });
 
 export function cutsceneIds(): string[] { return Object.keys(SCENES).map((p) => p.replace(/^.*\/(.*)\.json$/, '$1')); }

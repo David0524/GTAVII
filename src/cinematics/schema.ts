@@ -10,6 +10,8 @@
  * anchor and a "NOT LAID OUT" slate, so narrative can preview timing before layout.
  */
 export type V3 = [number, number, number];
+import type { ActorValue, HandOff } from './performance';
+import { keysOf, isTrack, TRACKS, VISEMES } from './performance';
 
 export interface CamKey {
   t: number;              // seconds from the start of the shot
@@ -20,7 +22,7 @@ export interface CamKey {
   roll?: number;          // degrees (dutch)
   ease?: 'linear' | 'in' | 'out' | 'inOut' | 'hold';
 }
-export interface ActorKey { t: number; x: number; z: number; heading: number; anim?: string }
+export interface ActorKey { t: number; x: number; z: number; heading: number; y?: number; anim?: string }
 export interface ShotFilm { grain?: number; weave?: number; halation?: number; letterbox?: number; fadeIn?: number; fadeOut?: number }
 
 export interface Shot {
@@ -30,7 +32,8 @@ export interface Shot {
   type?: string; lensMm?: number; move?: string; framing?: string; blocking?: string; beats?: string[]; notes?: string;
   // layout
   camera?: { keys: CamKey[]; handheld?: number; fromGameplay?: boolean; toGameplay?: boolean };
-  actors?: Record<string, ActorKey[]>;
+  /** Root keys, or a performance track (docs/CUTSCENE_PERFORMANCE.md). */
+  actors?: Record<string, ActorValue>;
   dialogue?: (string | { ref: string; t?: number; seconds?: number })[];
   audio?: (string | { t: number; cue: string })[];
   cues?: { t: number; cue: string; data?: unknown }[];
@@ -51,7 +54,8 @@ export interface Cutscene {
   mission?: string; before?: string; time?: string; date?: string; weather?: string; logline?: string;
   skippable?: boolean;
   anchor?: { x: number; z: number };
-  cast?: Record<string, { cast: string; colour?: string; height?: number }>;
+  /** `after`: what the actor becomes when the scene ends (default despawn); see CUTSCENE_PERFORMANCE.md. */
+  cast?: Record<string, { cast: string; colour?: string; height?: number; after?: HandOff }>;
   shots: Shot[];
 }
 
@@ -84,7 +88,22 @@ export function validateCutscene(c: Cutscene): string[] {
     }
     for (const [a, ks] of Object.entries(s.actors ?? {})) {
       if (c.cast && !(a in c.cast)) errs.push(`${p}.actors.${a} not in cast`);
-      ks.forEach((k, j) => { if (![k.t, k.x, k.z, k.heading].every(Number.isFinite)) errs.push(`${p}.actors.${a}[${j}]`); });
+      keysOf(ks).forEach((k, j) => { if (![k.t, k.x, k.z, k.heading].every(Number.isFinite)) errs.push(`${p}.actors.${a}[${j}]`); });
+      if (isTrack(ks)) {
+        const q = `${p}.actors.${a}`;
+        for (const k of Object.keys(ks)) if (k !== 'keys' && k !== 'blinks' && !(TRACKS as readonly string[]).includes(k)) errs.push(`${q}.${k}: unknown track`);
+        const inShot = (k: { t: number }, lane: string, j: number) => { if (!(k.t >= 0 && k.t <= s.durationSec + 1e-6)) errs.push(`${q}.${lane}[${j}].t outside the shot`); };
+        const target = (at: unknown, lane: string, j: number) => {
+          if (at && typeof at === 'object' && !Array.isArray(at) && 'actor' in at) { const o = (at as { actor: string }).actor; if (c.cast && !(o in c.cast)) errs.push(`${q}.${lane}[${j}] targets ${o}, not in cast`); if (o === a) errs.push(`${q}.${lane}[${j}] targets itself`); }
+          else if (Array.isArray(at) && !isV3(at)) errs.push(`${q}.${lane}[${j}].at`);
+        };
+        (ks.clips ?? []).forEach((k, j) => { inShot(k, 'clips', j); if (k.layer && !['full', 'upper', 'additive'].includes(k.layer)) errs.push(`${q}.clips[${j}].layer`); });
+        (ks.look ?? []).forEach((k, j) => { inShot(k, 'look', j); target(k.at, 'look', j); });
+        (ks.ik ?? []).forEach((k, j) => { inShot(k, 'ik', j); target(k.at, 'ik', j); if (!['hand_l', 'hand_r', 'foot_l', 'foot_r'].includes(k.chain)) errs.push(`${q}.ik[${j}].chain`); });
+        (ks.expr ?? []).forEach((k, j) => { inShot(k, 'expr', j); if (!(k.w >= 0 && k.w <= 1)) errs.push(`${q}.expr[${j}].w (0–1)`); });
+        (ks.props ?? []).forEach((k, j) => inShot(k, 'props', j));
+        if (Array.isArray(ks.lips)) ks.lips.forEach((k, j) => { inShot(k, 'lips', j); if (!(VISEMES as readonly string[]).includes(k.v)) errs.push(`${q}.lips[${j}].v "${k.v}" (not a viseme)`); });
+      }
     }
     for (const d of s.dialogue ?? []) { const ref = typeof d === 'string' ? d : d.ref; if (!/^dlg\.[\w.]+#\w+$/.test(ref)) errs.push(`${p}.dialogue "${ref}" (expected dlg.<script>#<line>)`); }
   });
