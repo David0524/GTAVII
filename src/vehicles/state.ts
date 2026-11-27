@@ -161,8 +161,10 @@ export function trunkRemove(t: Trunk, id: string, qty = 1): number {
 export function plateFor(spec: ModelSpec, r: () => number): string {
   const L = 'ABCDEFGHJKLMNPRSTUVWXYZ', D = '0123456789';
   const l = () => L[Math.floor(r() * L.length)], d = () => D[Math.floor(r() * 10)];
-  const commercial = !['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(spec.cls);
-  return commercial ? `${d()}${d()}${d()}${d()}-${l()}${l()}` : `${l()}${l()}${l()} ${d()}${d()}${d()}`;
+  void spec; void d;
+  // 1973–80 New York base: 12-ABC / 123-ABC, numbers 51–999
+  const n = 51 + Math.floor(r() * 949);
+  return `${n}-${l()}${l()}${l()}`;
 }
 
 // ============================================================================ engine systems

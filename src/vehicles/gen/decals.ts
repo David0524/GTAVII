@@ -145,14 +145,24 @@ export function buildDecals(anchors: DecalAnchor[], seed: number, opKind: 'bus' 
  * Licence plate texture. Generic period plate: dark blue characters on a goldenrod field with a
  * state legend (state names are public facts, not trademarks). Exact 1974 NY colours: (verify).
  */
-export function drawPlate(text: string, opts: { commercial?: boolean } = {}): HTMLCanvasElement {
+/**
+ * New York passenger plate as issued 1973–80 (the base on the street in 1974): embossed dark-blue
+ * serial on reflective orange, a border line, "NEW YORK" centred at the bottom, no slogan, and a
+ * bordered (never used) sticker spot at the bottom right; revalidation was a windshield decal.
+ * Serials are digits-dash-letters, 12-ABC / 123-ABC (state.ts plateFor). Commercial vehicles use
+ * the same base here (their 1974 variants are not verified, so no invented legend).
+ */
+export function drawPlate(text: string, _opts: { commercial?: boolean } = {}): HTMLCanvasElement {
   const c = canvas(256, 128), g = c.getContext('2d')!;
-  g.fillStyle = '#d9a53a'; g.fillRect(0, 0, 256, 128);
-  g.strokeStyle = '#1e2a4a'; g.lineWidth = 6; g.strokeRect(5, 5, 246, 118);
-  g.fillStyle = '#1e2a4a'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = `600 18px ${GROT}`; g.fillText('NEW YORK', 128, 20);
-  g.font = `76px ${GOTHIC}`; g.fillText(text, 128, 72, 236);
-  if (opts.commercial) { g.font = `600 14px ${GROT}`; g.fillText('COMMERCIAL', 128, 112); }
-  else { g.font = `600 14px ${GROT}`; g.fillText('THE EMPIRE STATE', 128, 112); }
+  const BLUE = '#1c2850';
+  g.fillStyle = '#e08a2a'; g.fillRect(0, 0, 256, 128);
+  // reflective sheeting sheen
+  const sh = g.createLinearGradient(0, 0, 256, 128); sh.addColorStop(0, 'rgba(255,230,180,0.18)'); sh.addColorStop(0.5, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(120,50,0,0.12)');
+  g.fillStyle = sh; g.fillRect(0, 0, 256, 128);
+  g.strokeStyle = BLUE; g.lineWidth = 4; g.strokeRect(7, 7, 242, 114);
+  g.lineWidth = 2; g.strokeRect(206, 96, 36, 20); // sticker spot (unused in New York)
+  g.fillStyle = BLUE; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `78px ${GOTHIC}`; g.fillText(text, 128, 58, 232);
+  g.font = `700 17px ${GROT}`; g.fillText('NEW YORK', 128, 107);
   return c;
 }

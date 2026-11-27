@@ -83,6 +83,27 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   roaster, fruit, flower, shoeshine stand, and a coffee van. They push, tip over and spill
   goods, with invented branding and the same LOD chain as the cars.
 
+- **Licence plates are period-correct now.** Checked against Wikipedia's New York plate table
+  (the 1973–80 base row):
+  - embossed dark-blue serial on reflective orange;
+  - a border line, with "NEW YORK" centred at the bottom;
+  - **no slogan.** "THE EMPIRE STATE" was a 1951–54 and 2001–10 slogan, and it is removed;
+  - a bordered sticker spot at the bottom right that New York never used (revalidation was a
+    windshield decal).
+  - Serials follow the base: `123-ABC` / `12-ABC`, numbers 51–999.
+  - Commercial vehicles use the same base: their 1974 legend isn't verified, so nothing invented.
+- **No generation hitch.** Hero meshes are built in a Web Worker (`heroWorker.ts`): 46–153 ms
+  per model off the main thread, then handed back as transferred buffers.
+  - `setHero(true)` only swaps once the mesh is ready; until then it requests it and returns
+    false. `vehicle.prefetchHero()` is called at spawn for the player. With no Worker, generation
+    falls back to an idle callback.
+  - The swap itself is cheap on the CPU (a steady hero frame is 1.5 ms CPU, the same as standard).
+  - Under SwiftShader the first draw after a swap takes 0.3–1 s. That is the software GPU
+    uploading the new buffers and the morph texture, which a real GPU does in milliseconds.
+    Not measurable here.
+  - Plan: warm the upload when the worker delivers (engine: `renderer.compileAsync` or an
+    off-screen draw).
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import type RAPIER from './rapier';
-import { getHeroModel, type ModelAsset, type Variant } from './assets';
+import { heroModelIfReady, requestHeroModel, type ModelAsset, type Variant } from './assets';
 import type { GeneratedModel } from './gen/body';
 import { createMaterialSet, type MaterialSet, type Quality } from './gen/materials';
 import { buildDecals, drawPlate } from './gen/decals';
@@ -79,13 +79,14 @@ export const HERO_RING: Record<Quality, number> = { low: 0, medium: 1, high: 3, 
  * 30 m, with hysteresis (a car leaves the ring past 38 m or when it drops two places).
  */
 export function updateHeroRing(cars: readonly Vehicle[], cam: THREE.Vector3, n: number) {
-  // hero meshes are generated on first use (70–200 ms per model): promote at most one car per call
+  // hero meshes come from a worker (setHero returns false until ready); swapping one costs a
+  // geometry upload, so promote at most one car per call
   let budget = 1;
   const ranked = cars.filter((c) => !c.isPlayer).map((c) => ({ c, d: c.object.position.distanceTo(cam) })).sort((a, b) => a.d - b.d);
-  for (const c of cars) if (c.isPlayer && !c.isHero && budget-- > 0) c.setHero(true);
+  for (const c of cars) if (c.isPlayer && !c.isHero && budget > 0 && c.setHero(true)) budget--;
   ranked.forEach(({ c, d }, i) => {
     if (c.isHero) { if (d > 38 || i >= n + 1) c.setHero(false); }
-    else if (d < 30 && i < n && budget-- > 0) c.setHero(true);
+    else if (d < 30 && i < n && budget > 0 && c.setHero(true)) budget--;
   });
 }
 
@@ -917,9 +918,14 @@ export class Vehicle implements Lightable {
    * tris) or back. Dents are replayed on the new mesh. Use updateHeroRing() rather than calling
    * this directly.
    */
-  setHero(on: boolean) {
-    if (on === !!this.hero) return;
-    this.hero = on ? getHeroModel(this.asset.spec, this.variant) : null;
+  setHero(on: boolean): boolean {
+    if (on === !!this.hero) return true;
+    if (on) {
+      // never generate on the frame: use the mesh only once the worker has delivered it
+      const ready = heroModelIfReady(this.asset.spec, this.variant);
+      if (!ready) { void requestHeroModel(this.asset.spec, this.variant).catch(() => undefined); return false; }
+      this.hero = ready;
+    } else this.hero = null;
     const g = this.hero ?? this.asset.lod0;
     if (this.dentGeo) { this.dentGeo.body.dispose(); this.dentGeo.hood?.dispose(); this.dentGeo = null; }
     this.bodyMesh.geometry = g.body;
@@ -933,7 +939,10 @@ export class Vehicle implements Lightable {
     });
     for (const d of this.dentLog) this.applyDent(d);
     this.refreshDamage(true);
+    return true;
   }
+  /** Start building this car's hero mesh in the background (e.g. at spawn for the player). */
+  prefetchHero() { return requestHeroModel(this.asset.spec, this.variant); }
   private dentLog: { x: number; y: number; z: number; amount: number; radius: number; seed: number }[] = [];
 
   private updateLightsAndFx(dt: number) {

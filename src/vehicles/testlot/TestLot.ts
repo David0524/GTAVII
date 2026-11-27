@@ -9,7 +9,7 @@ import { DebugHud, FrameStats } from '../../engine/debug/DebugHud';
 import { createVehicleFactory, setVehicleViewCamera, updateHeroRing, HERO_RING, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
-import { variantOf } from '../assets';
+import { variantOf, heroGenTimes } from '../assets';
 import { BIKES } from '../twowheel/bikes';
 import type { TwoWheeler } from '../twowheel/TwoWheeler';
 import { SubwayTrain } from '../subway/SubwayTrain';
@@ -242,6 +242,7 @@ export async function runTestLot() {
     player.security.keysIn = true; player.security.locked = false; // the tester owns this car
     player.setLights({ head: true });
     player.isPlayer = true;
+    void player.prefetchHero().catch(() => undefined); // worker builds the hero mesh in the background
     wire(player, 'player');
   };
 
@@ -498,6 +499,12 @@ export async function runTestLot() {
     variantOf: (id: string, v: number) => variantOf(MODELS.find((m) => m.id === id)!, v),
     /** Hero mesh ring on/off (off: every car back to the standard LOD0). */
     setHeroRing(on: boolean) { heroOn = on; if (!on) for (const v of [player, ...parked]) v.setHero(false); },
+    /** Resolve once every car's hero mesh has been built (worker), then apply the ring. */
+    async heroReady() {
+      await Promise.all([player, ...parked].map((v) => v.prefetchHero().catch(() => undefined)));
+      for (let k = 0; k < 8; k++) prerender();
+      return heroGenTimes.slice();
+    },
     /** 0 = afternoon, 1 = night. */
     setNight, get night() { return night; }, carLights,
     /** Dent the player at a local point (metres of push), for damage close-ups. */

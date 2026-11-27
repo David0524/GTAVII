@@ -300,7 +300,7 @@ async function main() {
         V.setCamera(C.x, C.y, C.z, T.x, T.y, T.z, fov);
       }, [c, t, fov, ref] as [number[], number[], number, string]);
       const setCar = (id: string, v: number, yaw = 0.5) => page.evaluate(([id, v, yaw]: [string, number, number]) => { const V = window.__VEH; V.setModel(id, v, { x: 0, z: 30, yaw }); V.player.setLights({ head: false }); V.simulate(0.8); return { tris: V.player.isHero ? null : 0 }; }, [id, v, yaw] as [string, number, number]);
-      const hero = (on: boolean) => page.evaluate((on: boolean) => window.__VEH.setHeroRing(on), on);
+      const hero = (on: boolean) => page.evaluate(async (on: boolean) => { window.__VEH.setHeroRing(on); if (on) await window.__VEH.heroReady(); }, on);
       const refImg = (f: string) => fs.readFileSync(path.join(ROOT, 'references/img', f));
       // 1. standard LOD0 vs hero, same frame
       const hv: Buffer[] = [], hl: string[] = [];
@@ -351,14 +351,18 @@ async function main() {
       cl.push(refImg('documerica_555907.jpg')); cll.push('ref: DOCUMERICA 555907 (wheel and hubcap, Hell\'s Kitchen)');
       await sheet(page, cl, 2, 640, 420, 'hero_classes_vs_period.jpg', cll);
       // 6. cost
-      const cost = await page.evaluate(() => {
+      const cost = await page.evaluate(async () => {
         const V = window.__VEH, out: Record<string, unknown> = {};
         for (const id of ['bancroft', 'tiverton', 'ct40', 'courier']) {
-          V.setModel(id, 0, { x: 0, z: 30, yaw: 0 }); V.setHeroRing(false); V.renderOnce();
+          V.setModel(id, 0, { x: 0, z: 30, yaw: 0 }); V.setHeroRing(false); await V.heroReady(); V.setHeroRing(false); V.renderOnce(); const ts = performance.now(); V.renderOnce(); const stdMs = performance.now() - ts;
           const std = V.renderer.info.render.triangles;
-          const t0 = performance.now(); V.setHeroRing(true); V.renderOnce(); const ms = performance.now() - t0;
-          out[id] = { frameTrisStandard: std, frameTrisHero: V.renderer.info.render.triangles, firstSwapMs: +ms.toFixed(1) };
+          V.setHeroRing(true);
+          // (hero mesh already built by the worker above: this times the swap + first draw only)
+          const t0 = performance.now(); V.renderOnce(); const ms = performance.now() - t0;
+          const t1 = performance.now(); V.renderOnce(); (out as any)[id + '_heroSteadyDrawMs'] = +(performance.now() - t1).toFixed(1);
+          out[id] = { frameTrisStandard: std, frameTrisHero: V.renderer.info.render.triangles, swapAndDrawMs: +ms.toFixed(1), standardDrawMs: +stdMs.toFixed(1), hero: V.player.isHero };
         }
+        out.workerGenMs = (await V.heroReady()).map((x: number) => +x.toFixed(0));
         return out;
       });
       report.hero = cost;
