@@ -44,7 +44,7 @@ export class CrowdReactions {
   private at(e: { x: number; z: number }, h: number): Vec3 { return [e.x, this.ground(e.x, e.z) + h, e.z]; }
 
   /**
-   * `byPlayer` (default false; agreed with oversight while sim confirms, `by === 'player'` also accepted): lines aimed
+   * `byPlayer` (sim 554d254: every pedBumped is player contact today and carries `byPlayer: true` and `by: 'player'`; ped-on-ped brushes, if added, will say false): lines aimed
    * at the player are never dropped for brushes, carry 35 m and only wait 1 s, not the 3 s ambient gap.
    */
   private bumped(e: { kind?: string; response?: string; x: number; z: number; archetype?: string; byPlayer?: boolean; by?: string }) {

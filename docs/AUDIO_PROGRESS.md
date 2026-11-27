@@ -282,7 +282,7 @@ All sounds are self-made bakes, logged in AUDIO_SOURCES.md. Group `vendors` (3.2
     It also plays a line from the pedestrian's own bark pool (archetype → `barks` in content/npc_archetypes), context
     `collision`, matched to the response: angry → angry; annoyed → annoyed/brisk; frightened → startled/hurt/worried.
     It falls back to any collision line. At most one bump line every 3 s, half of brushes are silent, within 25 m.
-    Bumps with `byPlayer: true` (assumed field, default false, pending sim's answer) always speak, reach 35 m and wait only 1 s.
+    Bumps with `byPlayer: true` (confirmed by sim 554d254: every bump today is player contact) always speak, reach 35 m and wait only 1 s.
   - pedGotUp: cloth and scuffs. litter: a new self-made `paper.crumple` (also the newsstand's page sound).
   - monteScatter: the lookout's shout, then four sets of running feet fanning out.
   - Signal chirps: not added, since 1974 NYC had no accessible pedestrian signals (agreeing with sim's note).

@@ -7,7 +7,8 @@
  *
  * Sim-driven (sim fb337dc, src/sim/vendors.ts): `bindSim` listens to vendorSpawned / vendorOpened / vendorGone,
  * vendorCall (barks.vendor_calls), vendorShout, monteScatter, vendorServed, vendorCower / vendorFled,
- * vendorAct (right_cart = the cart just went over; serve = a player sale) and vendorRecovered, and reads cart
+ * vendorAct (right_cart = the cart just went over, within a frame of gameplay's cartOverturned notice; serve = a player
+ * sale), cartRighted (back on its wheels) and vendorRecovered, and reads cart
  * positions and open state from `sim.vendorViews` every frame (pushed carts rattle). When the sim drives,
  * call timing is the sim's. `audio.vendor(id, type, at)` stays for things the sim doesn't own (the ice-cream
  * truck, scripted scenes); its handle also takes a physics impulse for a knock-over.
@@ -133,6 +134,8 @@ export class Vendors {
     sim.on('vendorServed', (e) => h(e)?.sale());
     sim.on('vendorAct', (e: { id: string; act: string }) => { if (e.act === 'right_cart') h(e)?.knockOver(); else if (e.act === 'serve') h(e)?.sale(); });
     sim.on('vendorRecovered', (e) => h(e)?.reopen());
+    // The vendor sets the cart back on its wheels 6-10 s after the tip (sim 554d254): a heavy clank, then it reopens.
+    sim.on('cartRighted', (e) => { const v = this.list.get(e?.id); if (!v) return; this.env.oneShot('cart.rattle', { category: 'emitter', at: [v.at[0], v.at[1] + 0.5, v.at[2]], gain: 0.45, rate: 0.85, priority: 5 }); h(e)?.reopen(); });
     // The lookout's warning, then the crew scatters (the monte box has no handle once the crew is gone).
     sim.on('monteScatter', (e: { id: string; x: number; z: number }) => {
       const at: Vec3 = [e.x, y(e.x, e.z) + 1.6, e.z]; this.lastCall = this.env.ctx.currentTime; this.stats.calls++;
