@@ -17,7 +17,7 @@ interface Action { clip: number; t: number; w: number; target: number; loop: boo
 
 /** Public action names → clips and layers. UAL clip names are accepted directly as well. */
 export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; loop?: boolean }> = {
-  hail_cab: { clip: 'hail_cab', layer: 'upper' }, reload: { clip: 'Pistol_Reload', layer: 'upper' }, shoot: { clip: 'Pistol_Shoot', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
+  hail_cab: { clip: 'hail_cab', layer: 'upper' }, check_watch: { clip: 'cs.m01.teddy_check_watch', layer: 'upper' }, wave: { clip: 'cs.m01.mayhew_wave', layer: 'upper' }, reload: { clip: 'Pistol_Reload', layer: 'upper' }, shoot: { clip: 'Pistol_Shoot', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
   vault: { clip: 'vault', layer: 'full' }, vault_turnstile: { clip: 'vault', layer: 'full' }, climb: { clip: 'climb', layer: 'full' }, fence: { clip: 'fence', layer: 'full' },
   ladder: { clip: 'ladder', layer: 'full', loop: true }, ladder_pull: { clip: 'ladder_pull', layer: 'full' }, hang: { clip: 'hang', layer: 'full', loop: true },
   drop_land: { clip: 'drop_land', layer: 'full' }, drop_roll: { clip: 'Roll', layer: 'full' }, roof_jump: { clip: 'roof_jump', layer: 'full' },

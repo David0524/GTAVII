@@ -255,6 +255,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       c.update(dt);
     }
     report.updateMs = chars.map((c) => +c.lastUpdateMs.toFixed(3));
+    if (qp.has('armprobe')) report.arm = chars.map((c) => { const o = c.object.position, r = (n: string) => c.jointWorld(n).sub(o).toArray().map((x) => +x.toFixed(3)); return { sh: r(`upperarm_${qp.get('armprobe')}`), el: r(`lowerarm_${qp.get('armprobe')}`), wr: r(`hand_${qp.get('armprobe')}`), head: r('Head') }; });
     if (weaponTest.size) report.weapons = chars.map((c) => ({ state: c.weaponState, ...c.weaponDebug() }));
     report.toneProbes = toneProbes(chars, camera);
   };

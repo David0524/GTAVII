@@ -231,6 +231,26 @@ export function authoredClips(): ClipDef[] {
       { t: 3, j: {} },
     ],
   });
+  // --- cutscene gestures (UI & cinematics: docs/CHARACTERS_PROGRESS.md "Cutscene clips") ---------
+  defs.push({ // Teddy lifts his left wrist and glances at his watch (M1), ~1.6 s, upper body
+    name: 'cs.m01.teddy_check_watch', duration: 1.6, loop: false, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.45, j: { upperarm_l: [-72, 24, -6], lowerarm_l: [0, -128, 0], hand_l: [0, 0, 18], ...fingers('l', 20), neck_01: [16, 14, 0], Head: [6, 6, 0], spine_03: [3, 4, 0] } },
+      { t: 1.05, j: { upperarm_l: [-72, 24, -6], lowerarm_l: [0, -130, 0], hand_l: [0, 0, 18], ...fingers('l', 20), neck_01: [18, 14, 0], Head: [8, 6, 0], spine_03: [3, 4, 0] } },
+      { t: 1.6, j: {} },
+    ],
+  });
+  defs.push({ // Mayhew's small raised-hand greeting across the street (M1), ~1.5 s, upper body
+    name: 'cs.m01.mayhew_wave', duration: 1.5, loop: false, mask: MASKS.upper, base: R,
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.35, j: { clavicle_r: [0, 0, 6], upperarm_r: [-110, -15, -70], lowerarm_r: [0, 95, 0], hand_r: [0, 0, 8], ...fingers('r', -10), neck_01: [-3, 0, 0] } },
+      { t: 0.65, j: { clavicle_r: [0, 0, 6], upperarm_r: [-110, -15, -70], lowerarm_r: [0, 95, 0], hand_r: [0, 0, -14], ...fingers('r', -10), neck_01: [-3, 0, 0] } },
+      { t: 0.95, j: { clavicle_r: [0, 0, 6], upperarm_r: [-110, -15, -70], lowerarm_r: [0, 95, 0], hand_r: [0, 0, 12], ...fingers('r', -10), neck_01: [-3, 0, 0] } },
+      { t: 1.5, j: {} },
+    ],
+  });
   defs.push({ // vendorCall: hand cupped at the mouth, head up, calling the wares down the block
     name: 'vendor_call', duration: 2.4, loop: false, mask: MASKS.upper, base: R,
     keys: [
