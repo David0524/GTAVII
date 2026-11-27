@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { GeoBuilder, SLOTS, extractRegions, type Slot, type V3, clamp, lerp, pw, smooth } from './builder';
+import { GeoBuilder, SLOTS, extractRegions, withInnerSkin, type Slot, type V3, clamp, lerp, pw, smooth } from './builder';
 import { type ModelSpec, type GlassKind, type CargoSpec, sMid } from './spec';
 
 /** Where decals (canvas textures) go; created by decals.ts. */
@@ -13,6 +13,8 @@ export interface BoxCollider { cx: number; cy: number; cz: number; hx: number; h
 export interface GeneratedModel {
   body: THREE.BufferGeometry;
   hood: THREE.BufferGeometry | null;
+  /** LOD0 notchback cars: the deck lid (hinged at its front edge, opens up). */
+  trunkLid: { geo: THREE.BufferGeometry; hinge: V3; z1: number } | null;
   /** LOD0 passenger cars: the steering wheel rim and spokes (turns about `axis` through `centre`). */
   steering: { geo: THREE.BufferGeometry; centre: V3; axis: V3 } | null;
   /** LOD0 passenger cars: doors cut from the body (front-hinged; swing open, hang, detach). */
@@ -172,7 +174,8 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
 
   // ---------------------------------------------------------------- stations
   const st = new Set<number>();
-  if (lod === 0) for (const sd of doorSeams) { st.add(sd); st.add(sd - 0.004); st.add(sd + 0.004); } // doors cut cleanly along their seams
+  if (lod === 0) for (const sd of doorSeams) { st.add(sd); st.add(sd - 0.006); st.add(sd + 0.006); } // doors cut cleanly along their seams
+  if (lod === 0 && PASSENGER.has(m.cls)) for (const sd of [m.gh.sC0 + 0.12, L - 0.1]) { st.add(sd); st.add(sd - 0.006); st.add(sd + 0.006); } // deck lid seams
   const n = Math.max(lod === 0 ? 14 : 7, Math.round(L / (lod === 0 ? 0.42 : 0.85)));
   for (let i = 0; i <= n; i++) st.add(L * i / n);
   for (const a of axles) {
@@ -591,6 +594,20 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       doors.push({ side: r.side, z0: Math.min(r.z0, r.z1), z1: Math.max(r.z0, r.z1), hinge: [r.side * (sideX(r.sFront, (m.sillY + m.beltY) / 2) + 0.01), (m.sillY + m.beltY) / 2, hingeZ], geo });
     });
   }
+  // ---------------------------------------------------------------- deck (trunk) lid: its own part on notchbacks
+  let trunkLid: GeneratedModel['trunkLid'] = null;
+  if (lod === 0 && PASSENGER.has(m.cls) && m.cls !== 'wagon' && !m.cargo) {
+    const deck0 = m.gh.sC0 + 0.12, deck1 = L - 0.1;
+    if (topY((deck0 + deck1) / 2) < m.gh.roofY - 0.3 && deck1 - deck0 > 0.6) {
+      const zA = Z(deck0), zB = Z(deck1);
+      const tl = extractRegions(body, [(cx, cy, cz) => {
+        if (cz < zA + 0.002 || cz > zB - 0.002) return false;
+        const sC = cz - Z(0);
+        return Math.abs(cx) < halfW(sC) * 0.9 && cy > topY(sC) - 0.06;
+      }]);
+      if (tl.parts[0].index && tl.parts[0].index.count >= 3) { body = tl.rest; trunkLid = { geo: withInnerSkin(tl.parts[0], 'under', 0.012, [0, 1, 0]), hinge: [0, topY(deck0), zA], z1: zB }; }
+    }
+  }
   // ---------------------------------------------------------------- steering wheel: its own part so it can turn
   let steering: GeneratedModel['steering'] = null;
   if (lod === 0 && PASSENGER.has(m.cls)) {
@@ -610,11 +627,11 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   let maxZ = Z(L) + rDepth;
   for (const c of m.cargo ?? []) maxZ = Math.max(maxZ, Z(c.s1));
   return {
-    body, hood, doors, steering, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
+    body, hood, doors, steering, trunkLid, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
     wheelR, wheelL, wheels, beacon, decals, colliders,
     lamps: { head, tail }, plates: plateMounts(m, Z, lastCargo),
     minZ: Z(0) - fDepth, maxZ, halfW: m.W / 2, height: Math.max(roofTop, ...(m.cargo ?? []).map((c) => c.y1)),
-    tris: tris(body) + tris(hood) + doors.reduce((a, d) => a + tris(d.geo), 0) + (steering ? tris(steering.geo) : 0) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
+    tris: tris(body) + tris(hood) + doors.reduce((a, d) => a + tris(d.geo), 0) + (steering ? tris(steering.geo) : 0) + (trunkLid ? tris(trunkLid.geo) : 0) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
   };
 }
 

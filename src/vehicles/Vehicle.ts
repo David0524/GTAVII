@@ -72,6 +72,24 @@ const OWNER = new Map<number, Vehicle>();
 export function vehicleOfCollider(c: RAPIER.Collider | null | undefined): Vehicle | null { return c ? OWNER.get(c.handle) ?? null : null; }
 
 const MAX_HOLES = 48;
+const MAX_SCUFFS = 24;
+let scuffMat: THREE.MeshStandardNodeMaterial | null = null;
+/** Scuffs: grey-white scratch streaks and a dark rubber smear, drawn once on a canvas (shared). */
+function scuffMaterial() {
+  if (scuffMat) return scuffMat;
+  const c = document.createElement('canvas'); c.width = 256; c.height = 96;
+  const g = c.getContext('2d')!;
+  g.clearRect(0, 0, 256, 96);
+  for (let i = 0; i < 26; i++) {
+    const y = 20 + Math.random() * 56, x0 = Math.random() * 60, x1 = 180 + Math.random() * 76;
+    g.strokeStyle = i % 5 === 0 ? 'rgba(25,22,20,0.55)' : `rgba(210,206,198,${0.25 + Math.random() * 0.45})`;
+    g.lineWidth = i % 5 === 0 ? 5 + Math.random() * 6 : 0.8 + Math.random() * 1.8;
+    g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y + (Math.random() - 0.5) * 10); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  scuffMat = new THREE.MeshStandardNodeMaterial({ map: t, transparent: true, depthWrite: false, roughness: 0.8, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+  return scuffMat;
+}
 const smoothstep01 = (t: number) => { const x = Math.min(1, Math.max(0, t)); return x * x * (3 - 2 * x); };
 
 /** How many cars besides the player get the hero mesh, per quality (phones: the player only). */
@@ -217,6 +235,21 @@ export class Vehicle implements Lightable {
       holder.add(mesh); lod0.add(holder);
       this.parts[name] = { mesh, holder, body: null, sag: 0 };
     }
+    if (g0.trunkLid) {
+      const tl = g0.trunkLid;
+      const pivot = new THREE.Group();
+      pivot.position.set(...tl.hinge);
+      const mesh = new THREE.Mesh(tl.geo, this.mats.array);
+      mesh.position.set(-tl.hinge[0], -tl.hinge[1], -tl.hinge[2]);
+      mesh.castShadow = true; mesh.updateMorphTargets();
+      pivot.add(mesh); lod0.add(pivot);
+      this.parts.trunk = { mesh, holder: pivot, body: null, sag: 0 };
+      this.lid = { pivot, angle: 0, vel: 0, target: 0 };
+    }
+    // scuff marks (fender-benders): instanced canvas streaks in body space
+    this.scuffs = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.42, 0.14), scuffMaterial(), MAX_SCUFFS);
+    this.scuffs.count = 0; this.scuffs.frustumCulled = false;
+    lod0.add(this.scuffs);
     if (g0.steering) {
       const st = g0.steering;
       this.steerPivot = new THREE.Group();
@@ -742,7 +775,7 @@ export class Vehicle implements Lightable {
     ZONES.forEach((z, i) => { infl[i] = this.zones[z]; });
     const hood = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
     if (hood?.morphTargetInfluences) ZONES.forEach((z, i) => { hood.morphTargetInfluences![i] = this.zones[z]; });
-    for (const name of ['bumperF', 'bumperR', ...this.doors.map((d) => d.name)]) { const m = this.parts[name]?.mesh; if (m?.morphTargetInfluences) ZONES.forEach((z, i) => { m.morphTargetInfluences![i] = this.zones[z]; }); }
+    for (const name of ['bumperF', 'bumperR', 'trunk', ...this.doors.map((d) => d.name)]) { const m = this.parts[name]?.mesh; if (m?.morphTargetInfluences) ZONES.forEach((z, i) => { m.morphTargetInfluences![i] = this.zones[z]; }); }
     this.physics.wheels.forEach((w, i) => { w.flat = this.components.tyresFlat[i]; });
     const prev = this.stage;
     if (this.stage !== 'destroyed') {
@@ -1044,6 +1077,7 @@ export class Vehicle implements Lightable {
     for (const name of ['bumperF', 'bumperR'] as const) { const p = this.parts[name], ng = g[name]; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } }
     this.doors.forEach((d, i) => { const p = this.parts[d.name], ng = g.doors[i]?.geo; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } });
     if (this.steerMesh && g.steering) this.steerMesh.geometry = g.steering.geo;
+    { const p = this.parts.trunk; if (p && g.trunkLid) { p.mesh.geometry = g.trunkLid.geo; p.mesh.updateMorphTargets(); } }
     this.wheelObjs.forEach((o, i) => {
       const w = this.asset.lod0.wheels[i];
       const lvl = o.lod.levels[0].object;
@@ -1062,6 +1096,9 @@ export class Vehicle implements Lightable {
   /** Doors (LOD0 passenger cars): open amount 0..1 (1 = ~70°), animated toward `target`. */
   private doors: { name: string; side: 1 | -1; z0: number; z1: number; pivot: THREE.Group; angle: number; vel: number; target: number }[] = [];
   private prevVel = new THREE.Vector3();
+  private lid: { pivot: THREE.Group; angle: number; vel: number; target: number } | null = null;
+  private scuffs!: THREE.InstancedMesh;
+  private scuffN = 0;
   private steerPivot: THREE.Group | null = null;
   private steerMesh: THREE.Mesh | null = null;
   private steerAxis = new THREE.Vector3(0, 0, 1);
@@ -1072,7 +1109,7 @@ export class Vehicle implements Lightable {
    * Knock a part off: it becomes a physics body (debris) that keeps the dents and paint it had.
    * `push` (world, m/s) adds to the car's velocity. Returns false if already off or not present.
    */
-  detachPart(name: 'hood' | 'bumperF' | 'bumperR' | `door${number}`, push?: { x: number; y: number; z: number }, source: string | null = null): boolean {
+  detachPart(name: 'hood' | 'trunk' | 'bumperF' | 'bumperR' | `door${number}`, push?: { x: number; y: number; z: number }, source: string | null = null): boolean {
     const part = this.parts[name];
     const list = (this.components.detached ??= []);
     if (!part || list.includes(name)) return false;
@@ -1129,6 +1166,45 @@ export class Vehicle implements Lightable {
   }
   /** Current opening of a seat's door (0..1); null when there is none. */
   doorOpen(seat: SeatId): number | null { const d = this.doorFor(seat); return d ? d.angle : null; }
+  /** Deck lid: open toward `open` (0..1, ~65°) for trunk access. False on cars without one (wagons, trucks). */
+  setTrunkLid(open: number): boolean {
+    if (!this.lid || this.components.detached?.includes('trunk')) return false;
+    this.lid.target = Math.max(0, Math.min(1, open));
+    return true;
+  }
+  trunkLidOpen(): number | null { return this.lid && !this.components.detached?.includes('trunk') ? this.lid.angle : null; }
+  /**
+   * Low-speed knock (sim fenderBender): a shallow dent and scuff marks on the struck panel.
+   * `where` = the zone that took it, or a world point; `other` = the other car's id (for events).
+   */
+  fenderBender(where: Zone | { x: number; y: number; z: number }, other: string | null = null) {
+    const g = this.asset.lod0;
+    this.object.updateMatrixWorld();
+    let lp: THREE.Vector3;
+    if (typeof where === 'string') {
+      const r = () => (Math.random() - 0.5);
+      const zc = (g.minZ + g.maxZ) / 2;
+      lp = where === 'front' ? new THREE.Vector3(r() * g.halfW, 0.45, g.minZ + 0.12)
+        : where === 'rear' ? new THREE.Vector3(r() * g.halfW, 0.5, g.maxZ - 0.12)
+        : new THREE.Vector3((where === 'right' ? 1 : -1) * (g.halfW - 0.03), 0.6, zc + r() * (g.maxZ - g.minZ) * 0.6);
+    } else lp = this.object.worldToLocal(new THREE.Vector3(where.x, where.y, where.z));
+    const zone = typeof where === 'string' ? where : this.zoneOf(where as THREE.Vector3);
+    this.dent(this.object.localToWorld(lp.clone()), 0.012, 0.3);
+    // scuffs: two or three streaks across the panel, facing out of it
+    const n = new THREE.Vector3(zone === 'front' ? 0 : zone === 'rear' ? 0 : zone === 'right' ? 1 : -1, 0, zone === 'front' ? -1 : zone === 'rear' ? 1 : 0);
+    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+    for (let k = 0; k < 3; k++) {
+      const i = this.scuffN++ % MAX_SCUFFS;
+      const p = lp.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.25)).addScaledVector(n, 0.012);
+      const rq = q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), (Math.random() - 0.5) * 0.5));
+      this.scuffs.setMatrixAt(i, new THREE.Matrix4().compose(p, rq, new THREE.Vector3(0.7 + Math.random() * 0.6, 0.7 + Math.random() * 0.5, 1)));
+    }
+    this.scuffs.count = Math.min(MAX_SCUFFS, this.scuffN);
+    this.scuffs.instanceMatrix.needsUpdate = true;
+    this.zones[zone] = Math.min(1, this.zones[zone] + 0.02);
+    this.refreshDamage(true);
+    this.emit('component', { vehicleId: this.id, kind: 'part', detail: `scuff:${zone}${other ? ':' + other : ''}`, source: other } satisfies ComponentEvent);
+  }
   /** Every door shut (e.g. after the engine's enter animation). */
   closeAllDoors() { for (const d of this.doors) d.target = 0; }
   private updateDoors(dt: number) {
@@ -1155,6 +1231,16 @@ export class Vehicle implements Lightable {
         d.vel = 0;
       }
       d.pivot.rotation.y = d.side * d.angle * 1.22;
+    }
+    const lid = this.lid;
+    if (lid && !this.components.detached?.includes('trunk')) {
+      if (this.zones.rear > 0.6) {
+        // latch sprung: the lid bounces on its hinges with the car's pitch and bumps
+        const push = 0.35 - Math.max(0, -acc.z) * 0.05 + acc.y * 0.03;
+        lid.vel += (push - lid.angle) * dt * 18 - lid.vel * dt * 3;
+        lid.angle = Math.max(0, Math.min(1, lid.angle + lid.vel * dt));
+      } else lid.angle += (lid.target - lid.angle) * Math.min(1, dt * 4);
+      lid.pivot.rotation.x = -lid.angle * 1.13;
     }
   }
 
@@ -1190,6 +1276,7 @@ export class Vehicle implements Lightable {
       if (this.zones[zone] > 0.82 || sev > 0.55) this.detachPart(name, { x: fwd.x * 1.5, y: 0.5, z: fwd.z * 1.5 }, source);
     }
     if (zone === 'front' && (this.zones.front > 0.9 || sev > 0.7)) this.detachPart('hood', { x: fwd.x * 0.5, y: 3, z: fwd.z * 0.5 }, source);
+    if (zone === 'rear' && (this.zones.rear > 0.92 || sev > 0.75)) this.detachPart('trunk', { x: fwd.x * 0.5, y: 2.5, z: fwd.z * 0.5 }, source);
     if ((zone === 'left' || zone === 'right') && (this.zones[zone] > 0.88 || sev > 0.6)) {
       const side = zone === 'right' ? 1 : -1;
       const out = _v4.set(side, 0.2, 0).applyQuaternion(this.object.quaternion);
@@ -1204,6 +1291,8 @@ export class Vehicle implements Lightable {
     for (const p of Object.values(this.parts)) if (p) { p.mesh.visible = true; p.sag = 0; if (p.holder !== this.hoodPivot) { p.holder.rotation.set(0, 0, 0); p.holder.position.set(0, 0, 0); } }
     if (this.components.detached) this.components.detached.length = 0;
     for (const d of this.doors) { d.angle = 0; d.vel = 0; d.target = 0; d.pivot.rotation.y = 0; }
+    if (this.lid) { this.lid.angle = 0; this.lid.vel = 0; this.lid.target = 0; this.lid.pivot.rotation.x = 0; }
+    this.scuffN = 0; this.scuffs.count = 0;
   }
 
   private updateLightsAndFx(dt: number) {

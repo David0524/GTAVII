@@ -327,3 +327,33 @@ export function extractRegions(g: THREE.BufferGeometry, tests: ((cx: number, cy:
   };
   return { rest: make(buckets[0]), parts: buckets.slice(1).map(make) };
 }
+
+/** Append the reverse side of every triangle in the given slot (an inner skin, e.g. a lid's underside). */
+export function withInnerSkin(g: THREE.BufferGeometry, slot: Slot, offset = 0.006, dir?: V3): THREE.BufferGeometry {
+  const pos = g.getAttribute('position'), nrm = g.getAttribute('normal'), idx = g.index!;
+  const n = pos.count;
+  const P = new Float32Array(n * 6), N = new Float32Array(n * 6);
+  for (let i = 0; i < n; i++) {
+    for (let c = 0; c < 3; c++) { P[i * 3 + c] = (pos.array as ArrayLike<number>)[i * 3 + c]; N[i * 3 + c] = (nrm.array as ArrayLike<number>)[i * 3 + c]; }
+    const nx = nrm.getX(i), ny = nrm.getY(i), nz = nrm.getZ(i);
+    // offset along a fixed direction when given: vertex normals tilt at creases and would push edges out
+    const ox = dir ? -dir[0] : nx, oy = dir ? -dir[1] : ny, oz = dir ? -dir[2] : nz;
+    P[(n + i) * 3] = pos.getX(i) - ox * offset; P[(n + i) * 3 + 1] = pos.getY(i) - oy * offset; P[(n + i) * 3 + 2] = pos.getZ(i) - oz * offset;
+    if (dir) { N[(n + i) * 3] = -nx; N[(n + i) * 3 + 1] = -ny; N[(n + i) * 3 + 2] = -nz; continue; }
+    P[(n + i) * 3] = pos.getX(i) - nx * offset; P[(n + i) * 3 + 1] = pos.getY(i) - ny * offset; P[(n + i) * 3 + 2] = pos.getZ(i) - nz * offset;
+    N[(n + i) * 3] = -nx; N[(n + i) * 3 + 1] = -ny; N[(n + i) * 3 + 2] = -nz;
+  }
+  const ix: number[] = [];
+  const out = new THREE.BufferGeometry();
+  for (const grp of g.groups) { const start = ix.length; for (let k = grp.start; k < grp.start + grp.count; k++) ix.push(idx.getX(k)); out.addGroup(start, ix.length - start, grp.materialIndex); }
+  const start = ix.length;
+  for (let k = 0; k < idx.count; k += 3) ix.push(n + idx.getX(k), n + idx.getX(k + 2), n + idx.getX(k + 1));
+  out.addGroup(start, ix.length - start, SLOTS.indexOf(slot));
+  out.setAttribute('position', new THREE.BufferAttribute(P, 3));
+  out.setAttribute('normal', new THREE.BufferAttribute(N, 3));
+  const uv = g.getAttribute('uv');
+  if (uv) { const U = new Float32Array(n * 4); U.set(uv.array as ArrayLike<number>, 0); U.set(uv.array as ArrayLike<number>, n * 2); out.setAttribute('uv', new THREE.BufferAttribute(U, 2)); }
+  out.setIndex(ix);
+  out.computeBoundingBox(); out.computeBoundingSphere();
+  return out;
+}

@@ -307,6 +307,21 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
     modelled separately yet).
   - At full lock the rim turns 8.4 rad (about 1.3 turns).
 
+- **Trunk (deck) lid on notchback cars.** It is cut out of the body like the doors. Its seams
+  are now real stations: the earlier ±4 mm offsets were dropped by the station filter, which cut
+  through whole cells as a sawtooth; now ±6 mm, for the doors too. It has a dark inner skin and is
+  hinged at its front edge.
+  - `setTrunkLid(0..1)` (about 65°) and `trunkLidOpen()`, for trunk access.
+  - Rear damage over 0.6 springs the latch and the lid bounces. It tears off at rear damage 0.92
+    or a hit of severity 0.75 (`trunk`).
+  - Wagons and trucks have no lid.
+- **Fender-benders (sim `fenderBender {a, b}`):** `vehicle.fenderBender(zone | worldPoint,
+  otherId?)` gives a shallow local dent (12 mm) plus three canvas scuff streaks (grey scratches,
+  a dark rubber smear) on the struck panel.
+  - At most 24 per car; `repair()` clears them.
+  - Emits `component {kind: 'part', detail: 'scuff:<zone>:<other>'}`.
+- Shot: `doors.jpg` (now six panels: trunk open, scuffs).
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

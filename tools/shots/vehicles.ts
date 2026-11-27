@@ -467,8 +467,13 @@ async function main() {
       await camRel(page, [-4.6, 1.8, -2.5], 42, 0.35); ds.push(await snap(page)); dl.push(`side damage unlatched the left doors: braking swings them open (${(r.ajar * 70).toFixed(0)}°)`);
       const r2 = await page.evaluate(() => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: true }); V.simulate(1.5); V.player.applyDamage('right', 0.75); V.simulate(2.5); return V.player.detachedParts; });
       await camRel(page, [4.6, 2.0, -3.0], 42, 0.35); ds.push(await snap(page)); dl.push(`hard right-side hit: ${r2.filter((x: string) => x.startsWith('door')).length} door torn off`);
+      // trunk lid for trunk access, and fender-bender scuffs
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('tiverton', 2, { x: 0, z: 30, yaw: 0.4 }); V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: true }); V.simulate(0.5); V.player.setTrunkLid(1); V.simulate(1.2); });
+      await camRel(page, [-3.0, 2.3, 5.6], 42, 0.4); ds.push(await snap(page)); dl.push('setTrunkLid(1): deck lid open for trunk access');
+      await page.evaluate(() => { const V = window.__VEH; V.player.setTrunkLid(0); V.simulate(2.5); V.player.fenderBender('rear', 'veh-b'); V.player.fenderBender('left', 'veh-c'); V.simulate(0.5); });
+      await camRel(page, [-3.2, 1.3, 4.2], 36, 0.3); ds.push(await snap(page)); dl.push('fenderBender(): shallow dents + scuffs on the rear and left');
       report.doors = { ajarAfterBraking: r.ajar, detached: r2 };
-      await sheet(page, ds, 2, 800, 450, 'doors.jpg', dl);
+      await sheet(page, ds, 2, 640, 360, 'doors.jpg', dl);
       console.log('doors', report.doors);
     }
 
