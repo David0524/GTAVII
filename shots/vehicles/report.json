@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T03:32:13.789Z",
+  "date": "2026-11-27T03:38:35.375Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -244,83 +244,83 @@
   },
   "triangles": {
     "bancroft": {
-      "lod0": 8764,
-      "lod1": 1630,
+      "lod0": 9628,
+      "lod1": 1846,
       "lod2": 72
     },
     "bancroft_patrol": {
-      "lod0": 8376,
-      "lod1": 1750,
+      "lod0": 9128,
+      "lod1": 1886,
       "lod2": 72
     },
     "bancroft_cab": {
-      "lod0": 8140,
-      "lod1": 1654,
+      "lod0": 8892,
+      "lod1": 1790,
       "lod2": 72
     },
     "tiverton": {
-      "lod0": 8052,
-      "lod1": 1600,
+      "lod0": 8868,
+      "lod1": 1712,
       "lod2": 72
     },
     "ferris": {
-      "lod0": 7530,
-      "lod1": 1422,
+      "lod0": 8258,
+      "lod1": 1526,
       "lod2": 72
     },
     "homestead": {
-      "lod0": 8404,
-      "lod1": 1574,
+      "lod0": 9316,
+      "lod1": 1694,
       "lod2": 72
     },
     "fareway": {
-      "lod0": 7578,
-      "lod1": 1560,
+      "lod0": 8290,
+      "lod1": 1688,
       "lod2": 72
     },
     "ct40": {
-      "lod0": 8700,
-      "lod1": 2564,
+      "lod0": 9292,
+      "lod1": 2724,
       "lod2": 72
     },
     "b60": {
-      "lod0": 6880,
-      "lod1": 1834,
+      "lod0": 7360,
+      "lod1": 1922,
       "lod2": 84
     },
     "walkin": {
-      "lod0": 5966,
-      "lod1": 1484,
+      "lod0": 6502,
+      "lod1": 1596,
       "lod2": 72
     },
     "b80": {
-      "lod0": 6894,
-      "lod1": 1836,
+      "lod0": 7366,
+      "lod1": 1916,
       "lod2": 84
     },
     "medic": {
-      "lod0": 7040,
-      "lod1": 2120,
+      "lod0": 7528,
+      "lod1": 2192,
       "lod2": 84
     },
     "pumper": {
-      "lod0": 7378,
-      "lod1": 2004,
+      "lod0": 7882,
+      "lod1": 2076,
       "lod2": 84
     },
     "ladder": {
-      "lod0": 7512,
-      "lod1": 2072,
+      "lod0": 8016,
+      "lod1": 2144,
       "lod2": 84
     },
     "courier": {
-      "lod0": 5776,
-      "lod1": 1382,
+      "lod0": 6272,
+      "lod1": 1470,
       "lod2": 72
     },
     "scoop": {
-      "lod0": 5996,
-      "lod1": 1590,
+      "lod0": 6444,
+      "lod1": 1662,
       "lod2": 84
     }
   },
@@ -458,24 +458,24 @@
   },
   "hero": {
     "bancroft": {
-      "frameTrisStandard": 31585,
-      "frameTrisHero": 51243,
-      "firstSwapMs": 852.3
+      "frameTrisStandard": 32705,
+      "frameTrisHero": 53459,
+      "firstSwapMs": 673.8
     },
     "tiverton": {
-      "frameTrisStandard": 21605,
-      "frameTrisHero": 49259,
-      "firstSwapMs": 1622.3
+      "frameTrisStandard": 22133,
+      "frameTrisHero": 51347,
+      "firstSwapMs": 1191.9
     },
     "ct40": {
-      "frameTrisStandard": 21501,
-      "frameTrisHero": 48307,
-      "firstSwapMs": 353.1
+      "frameTrisStandard": 22093,
+      "frameTrisHero": 50651,
+      "firstSwapMs": 234.3
     },
     "courier": {
-      "frameTrisStandard": 19515,
-      "frameTrisHero": 41785,
-      "firstSwapMs": 603.3
+      "frameTrisStandard": 20011,
+      "frameTrisHero": 43745,
+      "firstSwapMs": 585.7
     }
   },
   "movementAnchors": {

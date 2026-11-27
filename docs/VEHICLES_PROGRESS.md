@@ -66,6 +66,23 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - `hero_classes_vs_period.jpg`: big sedan vs DOCUMERICA 549851, taxi vs 549869, box truck vs
     554299, bus vs 549921, wheel and hubcap vs 555907 (shape only).
 
+- **Shape pass 1** (`ModelSpec.shape`): the side is no longer a slab. Two new loft rows give:
+  - a rocker tuck (sill width 0.86–0.89);
+  - a convex lower side (`round`);
+  - tumblehome toward the belt (0.965–0.976);
+  - a fender-top peak over the front fender;
+  - a rear-quarter hip swell over the rear wheel (1–2%, strongest on the Tiverton coupe).
+  - Set on the Bancroft family (sedan, patrol, cab, wagon), the Tiverton, the Ferris and the
+    Fareway.
+  - Cost: standard LOD0 is now 8.5–9.6k triangles for cars (about 20% over the ≈8k guide);
+    LOD1 is 1.6–2.0k.
+  - Against 549851 the big sedan now reads as curved sheet metal. The taxi still has a tall,
+    upright greenhouse and flatter arches than the 549869 cab: shape pass 2.
+- **Queued after item 0 (oversight, user decision):** street-vendor carts as physics props
+  (docs/briefs/STREET_VENDORS.md, fbaf7d2): hot-dog with umbrella, pretzel/knish, ices, nut
+  roaster, fruit, flower, shoeshine stand, and a coffee van. They push, tip over and spill
+  goods, with invented branding and the same LOD chain as the cars.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

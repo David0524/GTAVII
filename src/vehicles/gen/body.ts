@@ -61,7 +61,10 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     const cf = m.cornerF, cr = m.cornerR;
     if (s < cf) { const t = (cf - s) / cf; inset = cf * 0.55 * (1 - Math.sqrt(Math.max(0, 1 - t * t))); }
     if (s > L - cr) { const t = (s - (L - cr)) / cr; inset = Math.max(inset, cr * 0.55 * (1 - Math.sqrt(Math.max(0, 1 - t * t)))); }
-    return m.W / 2 - inset;
+    let hw = m.W / 2 - inset;
+    const hip = m.shape?.hip;
+    if (hip) { const t = (s - hip.s) / hip.w; hw *= 1 + hip.amount * Math.exp(-t * t * 2.2); }
+    return hw;
   };
   const axles: { s: number; skirt: boolean }[] = [];
   const rearS = m.sF + m.wheelbase;
@@ -97,7 +100,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   // Row order from the nominal (mid-body) heights.
   const nominal = (lod0: boolean) => {
     const yb = m.beltY, c = lerp(m.sillY, m.beltY, m.crease);
-    return [m.sillY, m.sillY + 0.05, c, ...(lod0 ? extraY : []), yb - 0.07, yb - 0.025, yb];
+    return [m.sillY, m.sillY + 0.05, lerp(m.sillY + 0.05, c, 0.5), c, lerp(c, yb - 0.07, 0.5), ...(lod0 ? extraY : []), yb - 0.07, yb - 0.025, yb];
   };
   const order = nominal(lod === 0).map((y, k) => [y, k]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((e) => e[1]);
   const SIDE_ORDER = (n: number) => (n === order.length ? order : [...Array(n).keys()]);
@@ -107,7 +110,17 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     const creaseY = lerp(m.sillY, m.beltY, m.crease);
     // over the wheel arches the skin stays vertical (a clean cut-out), only the sill tucks under
     const arch = y0 > m.sillY + 0.01;
-    return hw * pw([[y0, arch ? 0.992 : 0.92], [y0 + 0.05, arch ? 0.998 : 0.985], [Math.max(y0 + 0.06, creaseY), 1], [yb - 0.07, 0.994], [yb - 0.025, 1.0], [yb, 0.968]], y);
+    const sh = m.shape ?? {};
+    const tuck = sh.tuck ?? 0.92, tumble = sh.tumble ?? 0.994, round = sh.round ?? 0;
+    const cY = Math.max(y0 + 0.06, creaseY);
+    const w05 = arch ? 0.998 : lerp(tuck, 1, 0.81);
+    // convex lower side: the mid point between sill and crease bulges out by `round`
+    const lowY = lerp(y0 + 0.05, cY, 0.5), lowLin = lerp(w05, 1, 0.5);
+    const low = arch ? 0.999 : lerp(lowLin, 1, round * 0.85);
+    const upY = lerp(cY, yb - 0.07, 0.5), up = lerp(1, tumble, 0.42);
+    // fender-top peak over the front fender only (fades out at the cowl)
+    const peak = 1 + (sh.peak ?? 0) * (1 - smooth(m.gh.sA0 - 0.3, m.gh.sA0 + 0.2, s));
+    return hw * pw([[y0, arch ? 0.992 : tuck], [y0 + 0.05, w05], [lowY, low], [cY, 1], [upY, up], [yb - 0.07, tumble], [yb - 0.025, peak], [yb, 0.968]], y);
   };
 
   const section = (s: number): Section => {
@@ -116,7 +129,8 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     // Every station gets the same rows in the same order (the order they have mid-body), clamped
     // into [y0, yb] and kept monotonic. Dropping rows at the arches (as before) shifted row
     // indices between neighbouring stations, twisting the quads into visible shading bands.
-    const raw = [y0, y0 + 0.05, creaseY, ...(lod === 0 ? extraY : []), yb - 0.07, yb - 0.025, yb];
+    const cY = Math.max(y0 + 0.06, creaseY);
+    const raw = [y0, y0 + 0.05, lerp(y0 + 0.05, cY, 0.5), creaseY, lerp(cY, yb - 0.07, 0.5), ...(lod === 0 ? extraY : []), yb - 0.07, yb - 0.025, yb];
     let prev = -Infinity;
     const ys = SIDE_ORDER(raw.length).map((k) => {
       let y = clamp(raw[k], y0, yb);
