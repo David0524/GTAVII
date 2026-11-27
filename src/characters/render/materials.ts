@@ -202,7 +202,13 @@ export function surfaceNodes(tint?: (col: any) => any) {
       const crows = uvA.y.mul(smoothstep(0.3, 0.75, age)).mul(sin(atan(p.y.mul(100), abs(p.x).mul(100)).mul(40)).mul(0.5).add(0.5));
       h.assign(pores.add(forehead.mul(0.9)).add(crows.mul(0.7)).add(nMid.mul(0.15).mul(age)));
     });
-    If(kind.equal(KIND.cloth), () => { h.assign(clothDetail.mul(0.85).add(mx_noise_float(p.mul(300)).mul(0.12))); });
+    If(kind.equal(KIND.cloth), () => {
+      // creases where garments bend (uv from the builder: strength, ring coordinate): broken,
+      // uneven ridges rather than perfect rings
+      const ring = sin(uvA.y.mul(170).add(mx_noise_float(p.mul(40)).mul(3.5))).mul(0.5).add(0.5);
+      const creases = uvA.x.mul(ring.pow(3)).mul(smoothstep(-0.2, 0.4, mx_noise_float(p.mul(18))));
+      h.assign(clothDetail.mul(0.85).add(mx_noise_float(p.mul(300)).mul(0.12)).add(creases.mul(1.4)));
+    });
     If(kind.equal(KIND.leather), () => { h.assign(fb.z.mul(0.6).add(mx_noise_float(p.mul(700)).mul(0.1))); });
     return h;
   });

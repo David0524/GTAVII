@@ -301,7 +301,7 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
   if (o.belted) {
     pieces.push({ surface: 'helper-tights', fabric: o.fabric, hem: 0.003, hides: false, slot: 3, fields: [h.below(y.waist + 0.02), h.above(y.waist - 0.02), h.noLegs, front, (k) => (h.isArm(k) ? -1 : 1)], offset: () => off + 0.012 });
   }
-  if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.004, buttonY, gorgeY, openAngle)));
+  if (o.lapel > 0) trims.push((mb) => (mb.slot = 3, lapels(ctx, mb, o, off + 0.017, buttonY, gorgeY, openAngle)));
   if (ctx.lod <= 1 && o.open < 0.5 && ['suitJacket', 'sportCoat', 'leisureJacket', 'overcoat', 'trench', 'uniformJacket', 'raincoat'].includes(o.kind)) {
     const n = o.kind === 'overcoat' || o.kind === 'trench' || o.kind === 'raincoat' ? 3 : o.kind === 'uniformJacket' ? 4 : 2;
     const ys = Array.from({ length: n }, (_, i) => buttonY - i * 0.1 + (o.kind === 'uniformJacket' ? 0.2 : 0));
@@ -544,7 +544,7 @@ function neckBand(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, off: number, h: n
 }
 
 function lapels(ctx: GarmentCtx, mb: MeshBuilder, o: OuterDesc, off: number, buttonY: number, gorgeY: number, openAngle: (y: number) => number) {
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
   const m = fabricMat(o.fabric);
   const y = ctx.F.y;
   for (const side of [1, -1]) {
@@ -572,7 +572,8 @@ function lapels(ctx: GarmentCtx, mb: MeshBuilder, o: OuterDesc, off: number, but
 }
 
 function tie(ctx: GarmentCtx, mb: MeshBuilder, t: Fabric & { width: number }, off: number) {
-  const tr = torsoRadius(ctx), y = ctx.F.y;
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
+  const y = ctx.F.y;
   const m = fabricMat(t, KIND.cloth);
   const top = y.neck + 0.005, bottom = y.waist + 0.03;
   const rows: [number, number, number][][] = [];
@@ -622,6 +623,18 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const js: number[] = [], ws: number[] = [];
   const disp = [0, 0, 0];
+  // fold mask for the cloth shader (uv = [strength, ring coordinate]): concentric creases round
+  // the elbows and the backs of the knees, horizontal bunching at the waist
+  const J = shape.joints, jp = (n: string) => [J[JI[n] * 3], J[JI[n] * 3 + 1], J[JI[n] * 3 + 2]];
+  const elbows = [jp('lowerarm_l'), jp('lowerarm_r')], knees = [jp('calf_l'), jp('calf_r')];
+  const waistY = F.y.waist;
+  const folds = (q: number[]): [number, number] => {
+    let best = 0, coord = 0;
+    for (const e of elbows) { const d = Math.hypot(q[0] - e[0], q[1] - e[1], q[2] - e[2]); const w = 1 - smooth(0.03, 0.1, d); if (w > best) { best = w; coord = d; } }
+    for (const k of knees) { const d = Math.hypot(q[0] - k[0], q[1] - k[1], q[2] - k[2]); const w = (1 - smooth(0.04, 0.12, d)) * (q[2] < k[2] + 0.02 ? 1 : 0.4); if (w > best) { best = w; coord = d; } }
+    const dw = Math.abs(q[1] - waistY); const ww = (1 - smooth(0.02, 0.07, dw)) * 0.7; if (ww > best) { best = ww; coord = q[1]; }
+    return [best, coord];
+  };
   const resolve = (v: { ids: number[]; w: number[] }, extraOff: number) => {
     const pos = [0, 0, 0];
     js.length = 0; ws.length = 0;
@@ -640,7 +653,7 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
     mergeSkin(js, ws, sj, sw);
     const m = fabricMat(p.fabric, p.kind ?? KIND.cloth, sweat);
     m.m1[2] = Math.min(1, p.fabric.dirt * (0.5 + dust) + dust * 0.25);
-    return mb.vertex(pos, null, sj, sw, m);
+    return mb.vertex(pos, null, sj, sw, m, p.kind === undefined || p.kind === KIND.cloth ? folds(pos) : [0, 0]);
   };
   const map = res.verts.map((v) => resolve(v, 0));
   for (let i = 0; i < res.tris.length; i += 3) mb.tri(map[res.tris[i]], map[res.tris[i + 1]], map[res.tris[i + 2]]);
