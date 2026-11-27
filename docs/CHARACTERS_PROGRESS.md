@@ -122,13 +122,20 @@ is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
 | 1.3 m/s | 110–165 mm/s | 8–17 mm/s |
 | 1.75 m/s | 160–210 mm/s | 17–28 mm/s |
 
-**Downloads** (re-measured after the faces block)
-- **High:** body 6.9 + anims 0.97 + fabric maps 0.26 + skin detail 0.15 = 8.28 MiB at start, plus
-  the two Rocketbox lead heads (Teddy and Nick), 0.44 MiB, preloaded = **8.73 MiB**. The near-ring
-  pool, 31 heads of 79–342 KiB, loads only on demand; if every one were fetched, the worst case
-  is **14.38 MiB** (budget 15).
-- **Mobile Low:** body_low 0.95 + anims 0.97 + fabric maps 0.07 + skin detail 0.02 = **2.01 MiB**
-  (budget 6; oversight's target was about 2 MiB). No Rocketbox heads on Low.
+**Downloads** (size pass, gzip as served; `tools/characters/pack-body.ts`, `pack-locals.ts`, `pack-anims.ts`)
+- **Mobile Low: 0.85 MB** (was 1.06): body_low 0.43 + anims 0.32 + fabric 0.07 + skin detail 0.02.
+  No Rocketbox heads.
+- **High at start: 4.5 MB** (was 5.7): body 3.30 + anims 0.32 + fabric 0.28 + skin detail 0.15,
+  plus the two Rocketbox lead heads, 0.44 preloaded. The near-ring pool, 31 heads of 79–342 KiB,
+  loads on demand.
+- **How:**
+  - The four leading PCA components stay int16; the rest are int8 with per-component scales
+    folded into basisScale. Max vertex error 0.46 mm, mean 0.08 mm, checked on 200 bodies.
+  - Container delta filters (per-axis vertex deltas, time deltas for rotation tracks, index
+    deltas), decoded at load and verified bit-exact.
+- **Not yet:** meshopt for LOD indices and UVs (about 0.3 MB), KTX2 heads for GPU memory, and a
+  real phone load time (needs the engine's throttled profile). At 10 Mbit/s, the transfer alone is
+  about 0.7 s for Low and 3.6 s for High.
 
 ## Critique of the lineup and leads (honest)
 Shots: `shots/characters/01_lineup_a_vs_refs.jpg` and `02_lineup_b_vs_refs.jpg` show 20 seeded
