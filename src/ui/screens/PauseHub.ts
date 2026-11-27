@@ -20,7 +20,7 @@ export interface Tab {
   group?: string;
   el: HTMLElement;
   /** Called each time the tab becomes active; hands back its focusable items. */
-  open(setNav: (items: NavItem[], keep?: boolean) => void): void;
+  open(setNav: (items: NavItem[], keep?: boolean, focus?: number) => void): void;
   update?(dt: number): void;
   /** Return true if the tab consumed 'back' (e.g. closed a card). */
   back?(): boolean;
@@ -88,7 +88,7 @@ export class PauseHub {
     const members = t.group && !this.only ? this.visible.filter((x) => x.group === t.group) : [];
     this.subEl.style.display = members.length > 1 ? '' : 'none';
     for (const x of members) { const b = document.createElement('button'); b.textContent = x.label; b.className = x.id === t.id ? 'active' : ''; b.addEventListener('click', () => this.select(x.id)); this.subEl.appendChild(b); }
-    t.open((items, keep) => this.nav.set(items, keep));
+    t.open((items, keep, focus) => { this.nav.set(items, keep); if (focus != null) this.nav.focus(Math.min(focus, items.length - 1)); });
     this.foot.innerHTML = st === 'touch'
       ? `<span>Tap to choose</span>${t.hint ? `<span>${t.hint}</span>` : ''}`
       : `<span>${glyph('confirm', st)} Select</span><span>${glyph('back', st)} Back</span><span>${glyph('pause', st)} Resume</span>${t.hint ? `<span>${t.hint}</span>` : ''}`;

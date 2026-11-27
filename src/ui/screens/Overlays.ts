@@ -105,7 +105,7 @@ export class WeaponSelect extends Modal {
     const inv = this.host.inventory(), items: NavItem[] = [];
     const weapons = inv.items.filter((i) => i.kind === 'weapon');
     const HIDES: Record<string, string> = { pocket: 'a pocket gun', jacket: 'a jacket gun', longcoat: 'a long gun under the coat', bag: 'what fits in the bag', visible: 'nothing' };
-    const rx = Math.min(300, innerWidth * (innerHeight < 480 ? 0.24 : 0.3)), ry = Math.min(190, innerHeight * (innerHeight < 480 ? 0.25 : 0.3));
+    const rx = Math.min(300, innerWidth * (innerHeight < 480 ? 0.17 : 0.3)), ry = Math.min(190, innerHeight * (innerHeight < 480 ? 0.25 : 0.3));
     // DESIGN_A: no boxes. A hairline ring over the live street, a square node per weapon, the label outside it.
     this.root.innerHTML = `<div class="ws-ring"><svg class="ws-orbit" width="${rx * 2 + 4}" height="${ry * 2 + 4}" style="left:${-rx - 2}px;top:${-ry - 2}px"><ellipse cx="${rx + 2}" cy="${ry + 2}" rx="${rx}" ry="${ry}"/></svg>
       <div class="ws-centre"><span class="a-label">Wearing</span><b>${esc(inv.outfit.name)}</b><span>Hides ${HIDES[inv.outfit.hides]}</span></div></div>`;
