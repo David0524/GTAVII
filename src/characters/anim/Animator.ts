@@ -17,7 +17,7 @@ interface Action { clip: number; t: number; w: number; target: number; loop: boo
 
 /** Public action names → clips and layers. UAL clip names are accepted directly as well. */
 export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; loop?: boolean }> = {
-  hail_cab: { clip: 'hail_cab', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' },
+  hail_cab: { clip: 'hail_cab', layer: 'upper' }, sit_stoop: { clip: 'sit_stoop', layer: 'full', loop: true }, climb_ledge: { clip: 'ClimbUp_1m', layer: 'full' }, roll: { clip: 'Roll', layer: 'full' },
   smoke: { clip: 'smoke', layer: 'upper', loop: true }, light_up: { clip: 'light_up', layer: 'upper' }, read_paper: { clip: 'read_paper', layer: 'upper', loop: true },
   lean_wall: { clip: 'lean_wall', layer: 'full', loop: true }, fan: { clip: 'fan_heat', layer: 'upper', loop: true }, argue: { clip: 'argue', layer: 'upper', loop: true },
   vendor: { clip: 'vendor_work', layer: 'upper', loop: true }, flinch: { clip: 'flinch', layer: 'full' }, cower: { clip: 'cower', layer: 'full', loop: true },

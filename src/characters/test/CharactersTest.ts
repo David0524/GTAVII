@@ -6,6 +6,7 @@
  *   scene=course  shot=walkrun|curb|stairs|slope|turn|hail|ledge   locomotion course with foot IK
  *   scene=slide              foot-sliding measurement at three crowd speeds (report only)
  *   scene=crowd   n=400 quality=high|low                           crowd stress test + timings
+ *   scene=move  the movement course (MOVEMENT.md): stand-in controller, traversals, steps
  *   zoom=1, lod=n, seed=n, dbg=n|nobump
  */
 import * as THREE from 'three/webgpu';
@@ -50,6 +51,7 @@ export async function runCharactersTest() {
   else if (scene === 'course' || scene === 'slide') tick = course(world, camera, factory, report, scene === 'slide');
   else if (scene === 'crowd') tick = crowd(world, camera, factory, report);
   else if (scene === 'street') tick = await (await import('./StreetTest')).street(world, camera, factory, report, qp);
+  else if (scene === 'move') tick = (await import('./MoveCourse')).moveCourse(world, camera, factory, report, qp);
   const simT = qp.has('t') ? num('t', 0) : -1;
   const frameMs: number[] = [];
   if (simT >= 0) {

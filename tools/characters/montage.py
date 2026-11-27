@@ -39,3 +39,27 @@ for shot, refs in SETS.items():
     if out.width > 1600: out = out.resize((1600, round(out.height * 1600 / out.width)), Image.LANCZOS)
     out.save(name, quality=85, optimize=True)
     print('wrote', name, out.size)
+
+# movement course frame strip (31a-31j): one board, chronological, labelled with the sim state
+import glob
+frames = sorted(glob.glob(os.path.join(ROOT, 'shots/characters/31?_move_t*.jpg')))
+if frames:
+    W, H = 400, 225
+    cols = 5
+    board = Image.new('RGB', (W * cols, H * ((len(frames) + cols - 1) // cols) + 30), (18, 16, 15))
+    d = ImageDraw.Draw(board)
+    for i, fpath in enumerate(frames):
+        im = Image.open(fpath).convert('RGB').resize((W, H))
+        x, y = (i % cols) * W, (i // cols) * H
+        board.paste(im, (x, y))
+        rep = fpath[:-4] + '.json'
+        lab = os.path.basename(fpath)[4:-4]
+        if os.path.exists(rep):
+            st = json.load(open(rep)).get('state', {})
+            tr = st.get('traversal')
+            lab = f"t={st.get('t')}s x={st.get('x')} " + (f"{tr['label']} {int(tr['u'] * 100)}%" if tr else f"{st.get('speed')} m/s")
+        d.text((x + 6, y + 6), lab, fill=(240, 230, 200))
+    d.text((8, board.height - 22), 'Movement course (?characters=1&scene=move): stand-in controller, traversal root curves; poses are placeholders until the authored traversal clips (M4).', fill=(200, 190, 170))
+    out = os.path.join(ROOT, 'shots/characters/31_move_strip.jpg')
+    board.save(out, quality=85, optimize=True)
+    print('wrote', out, board.size)
