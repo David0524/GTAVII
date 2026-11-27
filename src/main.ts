@@ -52,6 +52,7 @@ async function main() {
   loadReport.mark('main');
   if (new URLSearchParams(location.search).has('gameplay')) return void (await import('./gameplay/scene/GameplayScene')).runGameplayScene(); // gameplay test scene (?gameplay=1)
   const params = new URLSearchParams(location.search);
+  if (params.has('audio')) return void import('./audio/test/entry').then((m) => m.startAudioTest(params)); // audio workstream test scene / offline harness
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
