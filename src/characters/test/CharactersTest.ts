@@ -147,11 +147,11 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     // street vendors (sim archetypes): one of each, wardrobe presets from src/characters/wardrobe/outfit.ts
     const ids = ['cart_vendor', 'grocer', 'flower_seller', 'news_vendor', 'shoeshine', 'peddler', 'monte_dealer', 'monte_shill', 'monte_lookout'];
     // &anims=1: one work/customer clip per figure (posing check), looped; &t= picks the moment
-    const clips = ['vendor_serve', 'vendor_call', 'duck_cart', 'right_cart', 'shine_shoes', 'deal_cards', 'queue', 'watch', 'eat_walk'];
+    const clips = qp.get('clips')?.split(',') ?? ['vendor_serve', 'vendor_call', 'duck_cart', 'right_cart', 'shine_shoes', 'deal_cards', 'queue', 'watch', 'eat_walk'];
     ids.forEach((id, i) => {
       const c = factory.spawn(world, { seed: num('seed', 7) * 101 + i * 13, archetype: `npc.${id}` });
       if (id === 'monte_lookout') c.animator.setIdle('idle_pockets');
-      if (qp.has('anims')) void c.animator.play(clips[i], { loop: true, blendIn: 0.01 }).catch(() => {});
+      if (qp.has('anims') && clips[i]) void c.animator.play(clips[i], { loop: true, blendIn: 0.01 }).catch(() => {});
       chars.push(c);
     });
     if (qp.has('anims')) report.vendorClips = clips;
@@ -351,6 +351,7 @@ function crowd(world: THREE.Scene, camera: THREE.PerspectiveCamera, factory: Cha
       put(i++, 'npc.grocer', 6.5, zc - 2, 0, 'cower');
       put(i++, 'commuter', 0.5, zc + 3, 0, 'walk', 1.1, 'frank');
       put(i++, 'shopper', 1.5, zc + 4, Math.PI, 'walk', 1.0, 'coffee');
+      put(i++, 'commuter', -5, zc + 2, 0.5, 'down'); put(i++, 'shopper', -6.5, zc + 1, -0.5, 'getUp'); put(i++, 'commuter', -4, zc - 1.5, 0, 'angry');
     }
     report.vendorAgents = i;
   }

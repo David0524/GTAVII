@@ -43,15 +43,23 @@ const EAT = /frank|hot ?dog|pretzel|knish|chestnut|food|sandwich|slice|pizza|app
 export const VENDOR_ONE_SHOTS: Record<string, { crowd: string; seconds: number }> = {
   vendor_serve: { crowd: 'serve', seconds: 3 }, vendor_call: { crowd: 'call', seconds: 2.4 }, vendor_shout: { crowd: 'shout', seconds: 2 },
   right_cart: { crowd: 'right_cart', seconds: 3 }, pay: { crowd: 'idle', seconds: 2 },
+  // pedBumped responses: a stagger, or knocked down (then the sim's 'down' / 'getUp' states take over)
+  stumble: { crowd: 'stumble', seconds: 1.1 }, fall_down: { crowd: 'fall', seconds: 0.9 },
 };
 const HOLD_CROWD: Record<string, string> = { shine_shoes: 'shine', deal_cards: 'deal', duck_cart: 'duck', queue: 'queue', watch: 'watch' };
 function stateAction(kind: string, a: AgentView): { crowd: string; near: string } | null {
   const s = a.state.toLowerCase(), arch = a.archetype.toLowerCase(), moving = a.speed > 0.15;
-  if (kind === 'vendor') {
+  const bump = /^down/.test(s) || /getup|get_up|stumble|angry/.test(s);
+  if (kind === 'vendor' && !bump) {
     if (/cower|duck|hide/.test(s)) return { crowd: 'duck', near: 'duck_cart' };
     if (moving && /vendor|cart|push|arriv|clos/.test(s + arch) && /cart|vendor|grocer|news|flower/.test(arch)) return { crowd: 'push', near: 'push_cart' };
     if (!moving && /monte_dealer/.test(arch)) return { crowd: 'deal', near: 'deal_cards' };
   }
+  // bumps (sim MOVEMENT states): these win over everything else
+  if (/^down/.test(s)) return { crowd: 'down', near: 'down' };
+  if (/getup|get_up/.test(s)) return { crowd: 'get_up', near: 'get_up' };
+  if (/stumble/.test(s)) return { crowd: 'stumble', near: 'stumble' };
+  if (/angry/.test(s)) return { crowd: 'argue', near: 'angry' };
   if (/queue/.test(s)) return { crowd: 'queue', near: 'queue' };
   if (/^watch/.test(s) || /monte/.test(s)) return { crowd: 'watch', near: 'watch' };
   if (moving && a.speed < 2.0 && a.carry) {

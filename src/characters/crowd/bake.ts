@@ -40,6 +40,11 @@ export const CROWD_SET: { name: string; kind: 'idle' | 'move' | 'action'; speed?
   { name: 'watch', kind: 'action', action: 'watch', seconds: 4, fps: 10 },
   { name: 'walk_eat', kind: 'move', speed: 1.2, fps: 20, overlay: 'eat_walk' },
   { name: 'walk_sip', kind: 'move', speed: 1.2, fps: 20, overlay: 'sip_walk' },
+  // bumps (sim MOVEMENT): stumble, knocked down, lying, getting up, angry
+  { name: 'stumble', kind: 'action', action: 'stumble', seconds: 1.1, fps: 15 },
+  { name: 'fall', kind: 'action', action: 'fall_down', seconds: 0.9, fps: 15 },
+  { name: 'down', kind: 'action', action: 'down', seconds: 3, fps: 6 },
+  { name: 'get_up', kind: 'action', action: 'get_up', seconds: 2.4, fps: 12 },
   // street vendors' work (vendor templates only)
   { name: 'serve', kind: 'action', action: 'vendor_serve', seconds: 3, fps: 12, only: ['vendor'] },
   { name: 'call', kind: 'action', action: 'vendor_call', seconds: 2.4, fps: 12, only: ['vendor'] },

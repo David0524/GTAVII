@@ -354,6 +354,38 @@ export function authoredClips(): ClipDef[] {
       { t: 3.0, j: {} },
     ],
   });
+  // --- bumps (sim MOVEMENT: stumble / down / getUp / angry, pedBumped) -----------------------------
+  // lying = the whole body pitched back 90° about the pelvis (legs forward along the ground), pelvis
+  // dropped to ~0.1 m; arms out to the sides, head lifted a little off the ground
+  const LIE = { pelvis: [-90, 0, 0] as Euler, thigh_l: [-4, 0, -6] as Euler, thigh_r: [-4, 0, 6] as Euler, calf_l: [12, 0, 0] as Euler, calf_r: [6, 0, 0] as Euler, foot_l: [20, 0, 0] as Euler, foot_r: [20, 0, 0] as Euler,
+    upperarm_l: [0, 0, 55] as Euler, upperarm_r: [0, 0, -55] as Euler, lowerarm_l: [0, -15, 0] as Euler, lowerarm_r: [0, 15, 0] as Euler, neck_01: [18, 0, 0] as Euler };
+  const LIE_P: [number, number, number] = [0, -0.84, -0.05];
+  defs.push({ // knocked down (pedBumped response 'fall'): a stagger back, then down on the back
+    name: 'fall_down', duration: 0.9, loop: false, base: R,
+    keys: [
+      { t: 0, j: {} },
+      { t: 0.35, j: { pelvis: [-25, 0, 0], spine_01: [10, 0, 0], spine_02: [10, 0, 0], neck_01: [20, 0, 0], upperarm_l: [-40, 20, 50], upperarm_r: [-40, -20, -50], thigh_l: [-30, 0, 0], calf_l: [40, 0, 0], calf_r: [25, 0, 0] }, pelvis: [0, -0.3, -0.12] },
+      { t: 0.9, j: LIE, pelvis: LIE_P },
+    ],
+  });
+  defs.push({ // down: lying, winded; breath and a slow head turn
+    name: 'down_lie', duration: 3, loop: true, base: R,
+    keys: [
+      { t: 0, j: LIE, pelvis: LIE_P },
+      { t: 1.5, j: { ...LIE, neck_01: [24, 12, 0], spine_02: [2, 0, 0], upperarm_r: [-20, 0, -45], lowerarm_r: [0, 40, 0] }, pelvis: LIE_P },
+    ],
+  });
+  defs.push({ // getUp: roll up to sitting, a hand down, onto a crouch, stand (non-looping)
+    name: 'get_up', duration: 2.4, loop: false, base: R,
+    keys: [
+      { t: 0, j: LIE, pelvis: LIE_P },
+      { t: 0.7, j: { pelvis: [-15, 0, 0], spine_01: [25, 0, 0], spine_02: [15, 0, 0], neck_01: [10, 0, 0], thigh_l: [-80, 0, -8], thigh_r: [-60, 0, 8], calf_l: [110, 0, 0], calf_r: [70, 0, 0],
+        upperarm_r: [20, 0, -25], lowerarm_r: [0, 10, 0], upperarm_l: [-30, 10, 20], lowerarm_l: [0, -40, 0] }, pelvis: [0, -0.78, -0.12] },
+      { t: 1.5, j: { spine_01: [35, 0, 0], spine_02: [15, 0, 0], neck_01: [-5, 0, 0], thigh_l: [-70, 0, -10], thigh_r: [-75, 0, 10], calf_l: [110, 0, 0], calf_r: [115, 0, 0], foot_l: [-25, 0, 0], foot_r: [-25, 0, 0],
+        upperarm_l: [-40, 10, 10], upperarm_r: [-40, -10, -10], lowerarm_l: [0, -30, 0], lowerarm_r: [0, 30, 0] }, pelvis: [0, -0.48, -0.1] },
+      { t: 2.4, j: {} },
+    ],
+  });
   // --- talking gestures by emotion (layered over idles; amplitude scales with intensity) --------
   const talk = (name: string, amp: number, dur: number, lean: number, headNod: number) => defs.push({
     name, duration: dur, loop: true, mask: MASKS.upper, base: R,

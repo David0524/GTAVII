@@ -180,8 +180,22 @@ instances).
   - Crowd vendor templates use the family's generic vendor outfit, not the per-archetype
     presets; per-archetype crowd templates are still to do.
   - `vendorAct {act: 'serve'}` maps to `vendor_serve` like `vendorServed`.
-  - Bumps (`stumble`, `down`, `getUp`, `angry`, `pedBumped`) and the kerb `onRoad` foot IK
-    are the movement block's.
+  - **Bumps are now in** (authored `fall_down`, `down_lie`, `get_up`; existing `stumble` and
+    `argue`):
+
+    | Sim input | Result |
+    |---|---|
+    | `stumble` | stumble |
+    | `down` | lying (pelvis pitched −90°, about 0.1 m off the ground) |
+    | `getUp` | get up |
+    | `angry` | argue |
+    | `pedBumped` | `trigger(id, 'stumble' \| 'fall_down')` by response |
+
+    These states win over the vendor and customer mappings. They're baked for every template
+    (about 80 frames) and checked in `scene=crowd&vendors=1`.
+  - Kerb `onRoad`: near characters already foot-IK against the engine's ground function,
+    which includes kerbs, so nothing is needed unless that function lacks them. Instanced
+    figures take y from the sim.
   - Clip quality is first-pass hand keys with no hand IK onto the cart, cards or shoe yet.
 
 ## Street figures: hair (oversight item "spiky card hair")
