@@ -122,7 +122,9 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
   the budget (Herald Square on High: ~150 m for traffic, ~120 m for people; floors 110 m / 75 m), so a
   smaller budget shrinks the disc instead of thinning the street. Spawns go into under-filled 15–20 m
   bands, at the rim or anywhere beyond 20–30 m that the camera isn't looking (`setView`); despawn beyond
-  the disc; gridlock fallback:
+  the disc. Budget-neutral view bias: the fill target is ×1.4 inside the camera's cone, ×0.45 behind it, and
+  with the pool full a car or person far behind the camera (out of sight) is recycled now and then so spawning
+  can put it in view; in view, nothing appears closer than the fade distance (`setView(..., fovDeg, fadeDist)`). gridlock fallback:
   a vehicle stationary > 60 s while not at a red (and > 70 m from the focus, or > 150 s anywhere)
   is despawned. Signals are a pure function of time (no state), so the sim is deterministic.
 

@@ -126,7 +126,7 @@ export interface SimCore {
   maxVehicles: number; maxPeds: number;
   ringV: [number, number]; ringP: [number, number];
   /** Camera (engine `setView`): position, unit forward on the ground and cos of half the horizontal FOV. */
-  view: { x: number; z: number; dx: number; dz: number; cosHalf: number } | null;
+  view: { x: number; z: number; dx: number; dz: number; cosHalf: number; fade: number } | null;
   densityHook: ((x: number, z: number, kind: 'vehicle' | 'ped') => number) | null;
   emit(type: string, e: Record<string, unknown>): void;
   stats: Stats; nextId: number;
@@ -157,6 +157,23 @@ export function pedDensity(minute: number) {
   const h = minute / 60;
   if (h < 5) return 0.15; if (h < 6.5) return 0.3; if (h < 9.5) return 1.0; if (h < 16.5) return 0.85; if (h < 19.5) return 1.0; if (h < 22) return 0.65; return 0.35;
 }
+/**
+ * Where the camera is looking (budget-neutral bias): the fill target of a spot is scaled by this, so more of
+ * the pool sits in the view cone and less behind the camera. 1 everywhere without a view.
+ */
+export function viewWeight(S: { view: SimCore['view'] }, x: number, z: number): number {
+  const v = S.view; if (!v) return 1;
+  const dx = x - v.x, dz = z - v.z, d = Math.hypot(dx, dz) || 1, c = (dx * v.dx + dz * v.dz) / d;
+  return c >= v.cosHalf ? 1.4 : c >= -0.2 ? 0.95 : 0.45;
+}
+/** May something appear here without being seen popping in? (out of the cone, or in it beyond the fade) */
+export function hiddenSpawn(S: { view: SimCore['view'] }, x: number, z: number, minOut: number): boolean {
+  const v = S.view; if (!v) return false;
+  const dx = x - v.x, dz = z - v.z, d = Math.hypot(dx, dz);
+  if (d < minOut) return false;
+  return (dx * v.dx + dz * v.dz) / d < v.cosHalf - 0.15 || d >= v.fade;
+}
+
 export function vehDensity(minute: number) {
   const h = minute / 60;
   if (h < 5) return 0.4; if (h < 6.5) return 0.55; if (h < 10) return 1.0; if (h < 16) return 0.85; if (h < 19.5) return 1.0; if (h < 23) return 0.7; return 0.45;

@@ -288,7 +288,7 @@ export class Vendors {
       }
       case 'open': case 'serving': {
         p.v = 0; p.x = v.x; p.z = v.z;
-        if (v.state === 'open' && v.queue.length && v.queue[0].state === 'queue') { v.serving = v.queue[0]; v.state = 'serving'; v.timer = S.rng.range(v.def.serve[0], v.def.serve[1]); p.yaw = v.yaw; }
+        if (v.state === 'open' && v.queue.length && v.queue[0].state === 'queue') { v.serving = v.queue[0]; v.state = 'serving'; v.timer = S.rng.range(v.def.serve[0], v.def.serve[1]); p.yaw = v.yaw; S.emit('vendorServing', { id: v.id, kind: v.kind, pedId: p.id, customer: v.serving.id, sec: v.timer }); } // customer pays; shoeshine: shine until vendorServed
         if (v.state === 'serving') {
           if (!v.serving || !v.serving.alive || v.serving.state !== 'queue') { v.serving = null; v.state = 'open'; v.queue = v.queue.filter((q) => q.alive && q.state === 'queue'); break; }
           if ((v.timer -= dt) <= 0) this.sell(v);

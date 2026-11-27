@@ -9,7 +9,7 @@ import { projectOnPoly, sampleAt } from './geom';
 import { LinkFlag, LinkKind, RoadFlag, Turn, type Link } from './laneFormat';
 import { Sig } from './network';
 import type { SimCore, Vehicle, Hail } from './state';
-import { vehDensity } from './state';
+import { vehDensity, viewWeight, hiddenSpawn } from './state';
 import type { VehicleKind, ArchetypeRt } from './archetypes';
 import type { VehicleClass } from '../shared/traffic';
 import { edgeDistance, EDGE } from '../shared/bounds';
@@ -192,12 +192,7 @@ function vehicleField(S: SimCore): Field {
   return field;
 }
 /** Is (x,z) outside the camera's view cone (or no view given → false)? */
-function outOfView(S: SimCore, x: number, z: number): boolean {
-  const v = S.view; if (!v) return false;
-  const dx = x - v.x, dz = z - v.z, d = Math.hypot(dx, dz);
-  if (d < 30) return false;
-  return (dx * v.dx + dz * v.dz) / d < v.cosHalf - 0.15;
-}
+function outOfView(S: SimCore, x: number, z: number): boolean { return hiddenSpawn(S, x, z, 30); }
 
 export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
   const { net } = S;
@@ -221,7 +216,7 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     if (d > R) continue;
     if (!full && d < R * 0.55 && !outOfView(S, tmp[0], tmp[1])) continue;
     const b = Math.floor(d / BAND);
-    if (occ[b] >= F.laneM[b] * rho) continue;
+    if (occ[b] >= F.laneM[b] * rho * viewWeight(S, tmp[0], tmp[1])) continue; // fuller where the camera looks
     if (S.densityHook && S.rng.next() > S.densityHook(tmp[0], tmp[1], 'vehicle')) continue;
     const road = net.g.roads[L.owner];
     const arch = S.reg.pick((a) => a.behaviour === 'driver' && (a.vehicle !== 'bus' || (road.flags & RoadFlag.BusRoute) !== 0), tmp[0], tmp[1], S.minute, S.rng.next());
@@ -243,6 +238,21 @@ export function spawnVehicles(S: SimCore, budget: number, full: boolean) {
     makeVehicle(S, kind, vclass, arch, lane, s); n++; budget--; occ[b]++;
     S.stats.spawnedV++;
   }
+}
+
+/**
+ * Budget-neutral view bias: with the pool full, now and then recycle a car far behind the camera (out of
+ * sight, nothing special about it) so spawning can put it where the camera looks.
+ */
+export function cullBehindView(S: SimCore, dt: number) {
+  const view = S.view; if (!view || !S.vehicles.length) return;
+  const target = Math.round(S.maxVehicles * vehDensity(S.minute));
+  if (S.vehicles.length < target * 0.95 || !S.rng.chance(dt * 2)) return;
+  const v = S.vehicles[S.rng.int(S.vehicles.length)];
+  if (!v.alive || v.state !== 'drive' || v.cop || v.ride || v.dest || v.kind === 'bus' || v.lcT < 1) return;
+  const dx = v.x - view.x, dz = v.z - view.z, d = Math.hypot(dx, dz);
+  if (d < 50 || (dx * view.dx + dz * view.dz) / d > -0.3) return;
+  despawnVehicle(S, v); S.stats.despawnedV++;
 }
 
 /** Create and register a vehicle on a lane (ambient spawns, police, scripted). */

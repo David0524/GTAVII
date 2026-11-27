@@ -14,7 +14,8 @@ export { SignalState, type SignalHead } from './signals';
 import { LinkKind, type LaneGraph, readLaneGraph } from './laneFormat';
 import { AgentGrid, Network, Sig } from './network';
 import { bumpReactions } from './bump';
-import { despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
+import { cullBehindView } from './traffic';
+import { cullPedsBehindView, despawnPed, dodgeActors, gunfire, killPed, setPedGoal, spawnPedAt, spawnPedNear, spawnPeds, stepPeds, threaten } from './peds';
 import { newStats, type Actor, type Ped, type PedGoal, type SimCore, type Stats, type Vehicle } from './state';
 export type { PedGoal } from './state';
 import { Wildlife, type WildlifeView } from './wildlife';
@@ -237,6 +238,7 @@ export class Simulation {
       for (const [k, l] of S.onWalk) { const f = l.filter((p) => p.alive && p.edge === k); S.onWalk.set(k, f); }
     }
     if (this.contactCd.size > 500) for (const [k, t] of this.contactCd) if (t < S.t) this.contactCd.delete(k);
+    cullBehindView(S, h); cullPedsBehindView(S, h);
     spawnVehicles(S, 2, false);
     spawnPeds(S, 3, false);
     // now and then an ambulance runs through with its siren on (ambient; Gameplay dispatches the rest)
@@ -628,9 +630,9 @@ export class Simulation {
    * by where the camera isn't looking, so the near field is full from the first frame after a turn-around.
    * forward is any horizontal direction; fovDeg the horizontal field of view.
    */
-  setView(x: number, z: number, fwdX: number, fwdZ: number, fovDeg = 75) {
+  setView(x: number, z: number, fwdX: number, fwdZ: number, fovDeg = 75, fadeDist = 90) {
     const l = Math.hypot(fwdX, fwdZ) || 1;
-    this.core.view = { x, z, dx: fwdX / l, dz: fwdZ / l, cosHalf: Math.cos((fovDeg / 2) * Math.PI / 180) };
+    this.core.view = { x, z, dx: fwdX / l, dz: fwdZ / l, cosHalf: Math.cos((fovDeg / 2) * Math.PI / 180), fade: fadeDist };
   }
   /**
    * Static sidewalk obstacles pedestrians step around (engine street furniture: mailboxes, newsstands,

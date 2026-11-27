@@ -8,7 +8,7 @@ import { projectOnPoly, sampleAt } from './geom';
 import { JuncFlag, SpotKind, WalkKind } from './laneFormat';
 import { stepBumpState } from './bump';
 import type { SimCore, Ped, PedGoal } from './state';
-import { pedDensity } from './state';
+import { pedDensity, viewWeight, hiddenSpawn } from './state';
 import type { ArchetypeRt } from './archetypes';
 import { edgeDistance, EDGE } from '../shared/bounds';
 
@@ -94,10 +94,17 @@ function pedField(S: SimCore): PField {
   R = Math.max(75, Math.min(RMAX, R));
   return (pfield = { x: f.x, z: f.z, R, edges, walkM, max: S.maxPeds, net });
 }
-function pedOutOfView(S: SimCore, x: number, z: number): boolean {
-  const v = S.view; if (!v) return false;
-  const dx = x - v.x, dz = z - v.z, d = Math.hypot(dx, dz);
-  return d >= 20 && (dx * v.dx + dz * v.dz) / d < v.cosHalf - 0.15;
+function pedOutOfView(S: SimCore, x: number, z: number): boolean { return hiddenSpawn(S, x, z, 20); }
+/** Budget-neutral view bias for people (see cullBehindView in traffic.ts). */
+export function cullPedsBehindView(S: SimCore, dt: number) {
+  const view = S.view; if (!view || !S.peds.length) return;
+  const target = Math.round(S.maxPeds * pedDensity(S.minute));
+  if (S.peds.length < target * 0.95 || !S.rng.chance(dt * 4)) return;
+  const p = S.peds[S.rng.int(S.peds.length)];
+  if (!p.alive || p.state !== 'walk' || p.goal || p.cop2 || p.vendor || p.carry) return;
+  const dx = p.x - view.x, dz = p.z - view.z, d = Math.hypot(dx, dz);
+  if (d < 30 || (dx * view.dx + dz * view.dz) / d > -0.3) return;
+  despawnPed(S, p); S.stats.despawnedP++;
 }
 
 export function spawnPeds(S: SimCore, budget: number, full: boolean) {
@@ -121,7 +128,7 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
     if (d > R) continue;
     if (!full && d < R * 0.6 && !pedOutOfView(S, tmp[0], tmp[1])) continue;
     const band = Math.floor(d / BAND_P);
-    if (occ[band] >= F.walkM[band] * rho) continue;
+    if (occ[band] >= F.walkM[band] * rho * viewWeight(S, tmp[0], tmp[1])) continue; // fuller where the camera looks
     occ[band]++;
     if (S.densityHook && S.rng.next() > S.densityHook(tmp[0], tmp[1], 'ped')) continue;
     // crowds thicken toward the playable edge (BOUNDARIES layer 3)
