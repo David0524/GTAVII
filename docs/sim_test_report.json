@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T10:19:30.819Z",
+  "generated": "2026-11-27T10:26:00.212Z",
   "note": "Headless Node timings, CPU only (container, no GPU); single thread.",
   "seed": 1974,
   "high": {
@@ -12,9 +12,9 @@
       "peds": 400
     },
     "stepMs": {
-      "avg": 1.613,
-      "p95": 2.242,
-      "max": 43.071
+      "avg": 1.393,
+      "p95": 1.78,
+      "max": 42.376
     },
     "failures": {
       "vehOffRoad": 0,
@@ -214,9 +214,9 @@
       "peds": 120
     },
     "stepMs": {
-      "avg": 0.403,
-      "p95": 0.705,
-      "max": 15.901
+      "avg": 0.369,
+      "p95": 0.599,
+      "max": 13.412
     },
     "failures": {
       "vehOffRoad": 0,
@@ -408,10 +408,10 @@
         400
       ],
       "clock": 1050,
-      "vehiclesAvg": 31.4,
-      "vehiclesMin": 28,
-      "pedsAvg": 99.3,
-      "pedsMin": 81
+      "vehiclesAvg": 31.8,
+      "vehiclesMin": 21,
+      "pedsAvg": 92.9,
+      "pedsMin": 82
     },
     {
       "label": "High, midday, Times Square",
@@ -420,10 +420,10 @@
         400
       ],
       "clock": 780,
-      "vehiclesAvg": 41.2,
-      "vehiclesMin": 36,
-      "pedsAvg": 156.9,
-      "pedsMin": 134
+      "vehiclesAvg": 37.2,
+      "vehiclesMin": 32,
+      "pedsAvg": 119.4,
+      "pedsMin": 105
     },
     {
       "label": "Low, rush hour, Herald Square",
@@ -432,10 +432,10 @@
         120
       ],
       "clock": 1050,
-      "vehiclesAvg": 12.7,
-      "vehiclesMin": 9,
-      "pedsAvg": 51,
-      "pedsMin": 46
+      "vehiclesAvg": 17.8,
+      "vehiclesMin": 15,
+      "pedsAvg": 61.4,
+      "pedsMin": 56
     }
   ],
   "vendors": [
@@ -461,17 +461,17 @@
         "pretzel_knish": 1,
         "newsstand": 1
       },
-      "sales": 81,
-      "scatters": 4,
+      "sales": 75,
+      "scatters": 5,
       "movedOn": 1,
-      "calls": 38,
+      "calls": 31,
       "events": {
-        "vendorSpawned": 11,
-        "monteScatter": 4,
-        "vendorGone": 5,
-        "vendorCall": 38,
-        "vendorServed": 81,
-        "litter": 27,
+        "vendorSpawned": 12,
+        "monteScatter": 5,
+        "vendorGone": 6,
+        "vendorServed": 75,
+        "vendorCall": 31,
+        "litter": 25,
         "peddlerMovedOn": 1
       }
     },
@@ -483,25 +483,26 @@
         "peddler",
         "pretzel_knish"
       ],
-      "maxKindsAtOnce": 2,
+      "maxKindsAtOnce": 3,
       "maxQueue": 3,
-      "maxWatchers": 6,
-      "count": 1,
+      "maxWatchers": 7,
+      "count": 6,
       "byKind": {
-        "pretzel_knish": 1
+        "monte": 1,
+        "pretzel_knish": 1,
+        "peddler": 4
       },
-      "sales": 18,
-      "scatters": 2,
-      "movedOn": 4,
-      "calls": 13,
+      "sales": 20,
+      "scatters": 1,
+      "movedOn": 0,
+      "calls": 17,
       "events": {
         "vendorSpawned": 7,
-        "monteScatter": 2,
-        "vendorGone": 6,
-        "vendorServed": 18,
-        "vendorCall": 13,
-        "litter": 3,
-        "peddlerMovedOn": 4
+        "vendorServed": 20,
+        "vendorCall": 17,
+        "monteScatter": 1,
+        "vendorGone": 1,
+        "litter": 1
       }
     },
     {
@@ -517,15 +518,15 @@
       "byKind": {
         "coffee_cart": 6
       },
-      "sales": 86,
+      "sales": 87,
       "scatters": 0,
       "movedOn": 0,
-      "calls": 31,
+      "calls": 33,
       "events": {
         "vendorSpawned": 6,
-        "vendorCall": 31,
-        "vendorServed": 86,
-        "litter": 22
+        "vendorServed": 87,
+        "vendorCall": 33,
+        "litter": 24
       }
     },
     {
