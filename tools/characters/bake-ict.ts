@@ -203,7 +203,7 @@ const meta = {
   bbox: { min: mn, max: mx }, skinIdx: nSkinIdx, cardIdx: tris.length - nSkinIdx,
   skinRGB: hex(spec.tone), neckRGB: hex(spec.tone), neckMinY, neckRing,
   landmarks: { Head, Neck, LEye, REye, MNose, MJaw, LCheek, RCheek, MUpperLip, MBottomLip, LMouthCorner, RMouthCorner },
-  tag: null, coef: spec.c,
+  tag: null, coef: spec.c, packed: true,
 };
 const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj, sw, kind, idx: n < 65536 ? Uint16Array.from(tris) : Uint32Array.from(tris) },
   // vertex order follows first use in the triangle list, so deltas are small and gzip well

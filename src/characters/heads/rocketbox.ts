@@ -10,6 +10,7 @@
  */
 import * as THREE from 'three/webgpu';
 import { texture, uv, attribute, float, vec3, uniform, normalMap, normalView, mix, dot, smoothstep } from 'three/tsl';
+import { SkinNodeMaterial } from '../render/skinLighting';
 import { readContainer } from '../format';
 import type { GeoArrays } from '../build/MeshBuilder';
 import { hairMaterial } from '../render/materials';
@@ -254,7 +255,10 @@ export function headMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, skeleton
 
 /** Skin and cards in one material: the per-vertex kind picks the texture set. */
 function headMaterial(h: HeadAsset, tint: [number, number, number], bodyLin: [number, number, number] | null) {
-  const m = new THREE.MeshSSSNodeMaterial({ side: THREE.DoubleSide, roughness: 0.5 });
+  const m = new SkinNodeMaterial({ side: THREE.DoubleSide, roughness: 0.5 });
+  // ICT heads pack roughness (r), cavity (g) and skin weight (b) into the card texture's RGB on
+  // the non-card texels (stored sRGB-encoded so the sampled linear value is the datum)
+  const packed = !!(h.meta as { packed?: boolean }).packed;
   const kind = attribute('hkind', 'float');
   const isCard = kind.greaterThan(0.5);
   const tc = texture(h.color, uv()), tn = texture(h.normal, uv());
@@ -268,12 +272,14 @@ function headMaterial(h: HeadAsset, tint: [number, number, number], bodyLin: [nu
   const neckC = neckV.mul(dot(skinC, vec3(0.3, 0.6, 0.1)).div(dot(neckV, vec3(0.3, 0.6, 0.1)).add(1e-4)).clamp(0.6, 1.4));
   // at the seam itself the body colour wins outright (luminance too), so the edge disappears
   const seamC = mix(neckC, neckV, smoothstep(0.55, 1, attribute('hfade', 'float')));
-  m.colorNode = isCard.select(to.rgb, mix(skinC, seamC, fadeW));
+  const cavity = packed ? to.g : float(1);
+  m.colorNode = isCard.select(to.rgb, mix(skinC.mul(cavity), seamC, fadeW));
+  m.skinWeightNode = isCard.select(float(0), packed ? to.b : float(1));
   m.opacityNode = isCard.select(h.opacity ? to.a : float(1), float(1));
   m.alphaTest = 0.4;
   m.alphaToCoverage = true;
   m.normalNode = isCard.select(normalView, normalMap(tn));
-  m.roughnessNode = isCard.select(float(0.65), float(0.5));
+  m.roughnessNode = isCard.select(float(0.65), packed ? to.r : float(0.5));
   // warm transmission through ears and nose, like our own skin shader; none on the cards
   // scaled by the skin's own colour, so darker skin doesn't glow orange
   m.thicknessColorNode = isCard.select(vec3(0), skinC.mul(vec3(1.1, 0.45, 0.3)));

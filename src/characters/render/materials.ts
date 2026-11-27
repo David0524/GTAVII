@@ -9,6 +9,7 @@
  * Per-vertex data means every character shares one compiled pipeline per material.
  */
 import * as THREE from 'three/webgpu';
+import { SkinNodeMaterial } from './skinLighting';
 import {
   attribute, positionGeometry, normalGeometry, texture, float, vec2, vec3, mix, smoothstep, step, fract, abs, sin, cos, Fn, If, uniform,
   mx_noise_float, mx_worley_noise_float, bumpMap, max, min, floor, dot, length, clamp, atan, pow, normalize, normalMap, normalView,
@@ -173,7 +174,7 @@ export function surfaceNodes(tint?: (col: any) => any) {
     const r = float(m0.z).toVar();
     If(kind.equal(KIND.skin).or(kind.equal(KIND.hosiery)), () => {
       const oily = m1.w.mul(charUniforms.heat).mul(0.25);
-      r.assign(mix(0.58, 0.42, m0.x).sub(oily).add(nHi.mul(0.08)));
+      r.assign(mix(0.62, 0.48, m0.x).sub(oily).add(nHi.mul(0.08)));
     });
     If(kind.equal(KIND.cloth), () => { r.assign(mix(m0.z, 0.5, m0.w.mul(0.6)).add(m1.z.mul(0.1))); });
     If(kind.equal(KIND.leather), () => { r.assign(m0.z.add(m1.z.mul(smoothstep(0.4, 0.8, nMid)).mul(0.35))); });
@@ -217,11 +218,12 @@ export function surfaceNodes(tint?: (col: any) => any) {
   return { color: col, roughness: roughness(), height: height(), kind, m0, m1, detail: vec3(fa.x, fa.y, fb.z), skinDet: skinTex.mul(0.5) };
 }
 
-let shared: THREE.MeshSSSNodeMaterial | null = null;
-export function characterMaterial(): THREE.MeshSSSNodeMaterial {
+let shared: SkinNodeMaterial | null = null;
+export function characterMaterial(): SkinNodeMaterial {
   if (shared) return shared;
   // double-sided: the inside of collars, cuffs and hems shows fabric, not a hole
-  const m = new THREE.MeshSSSNodeMaterial({ side: THREE.DoubleSide });
+  // skin lighting (pre-integrated diffuse, dual-lobe specular) on skin texels, as on the heads
+  const m = new SkinNodeMaterial({ side: THREE.DoubleSide });
   const { color: col, roughness: rough, height: h, kind, m0, m1 } = surfaceNodes();
   m.colorNode = col;
   m.roughnessNode = rough;
@@ -234,6 +236,7 @@ export function characterMaterial(): THREE.MeshSSSNodeMaterial {
   m.clearcoatRoughnessNode = float(0.03);
   // subsurface (skin only): warm red transmission through thin parts (ears, nose, fingers)
   const isSkin = kind.equal(KIND.skin).or(kind.equal(KIND.hosiery));
+  m.skinWeightNode = kind.equal(KIND.skin).select(float(1), float(0));
   m.thicknessColorNode = isSkin.select(mix(vec3(0.45, 0.1, 0.05), vec3(0.18, 0.05, 0.03), m1.y), vec3(0));
   m.thicknessDistortionNode = float(0.15);
   m.thicknessAmbientNode = float(0.0);

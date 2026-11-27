@@ -210,8 +210,6 @@ nz = np.ones_like(nx)
 l = np.sqrt(nx * nx + ny * ny + nz * nz)
 nmap = np.stack([nx / l, ny / l, nz / l], -1) * 0.5 + 0.5
 
-# --- write (with gutter dilation so mips and bilinear never pull in empty texels) -------------
-cimg = np.zeros((W, W, 3)); cimg[ii] = col
 def dilate(img, mask, it=12):
     img = img.copy(); m = mask.copy()
     for _ in range(it):
@@ -222,6 +220,25 @@ def dilate(img, mask, it=12):
         new = (~m) & (cnt > 0)
         img[new] = acc[new] / cnt[new][:, None]; m = m | new
     return img
+# --- packed surface data (the card texture's RGB on non-lash texels): roughness, cavity, skin weight
+rough = np.full(N, 0.6)
+tzone = np.maximum(blob(u, v, 0.5, 0.84, 0.12, 0.06), blob(u, v, 0.5, 0.62, 0.05, 0.1)) * isF
+rough -= 0.06 * tzone
+rough += 0.04 * cheekM
+rough = rough * (1 - lipM) + (0.42 - 0.12 * lipInner) * lipM
+rough += 0.06 * (fbm(p + 9.1, 120, 2) - 0.5) * skinMask
+rough = np.where(hairM > 0.5, 0.6, rough)
+rough[r == EYE] = 0.06
+rough[r == TEETH] = 0.22; rough[r == GUMS] = 0.28; rough[r == MOUTH] = 0.35; rough[r == SOCKET] = 0.25
+cav = np.ones(N)
+cav -= 0.25 * alarM
+cav[r == MOUTH] = 0.45; cav[r == SOCKET] = 0.7
+skw = np.where(skinMask | (r == GUMS) | (r == MOUTH) | (r == SOCKET), 1.0, 0.0)
+pk = np.zeros((W, W, 3)); pk[ii] = np.stack([rough, cav, skw], 1)
+pk = dilate(pk, filled)
+
+# --- write (with gutter dilation so mips and bilinear never pull in empty texels) -------------
+cimg = np.zeros((W, W, 3)); cimg[ii] = col
 cimg = dilate(cimg, filled); nimg = dilate(nmap, filled)
 nimg[~filled & (nimg.sum(-1) == 0)] = [0.5, 0.5, 1]
 srgb = np.where(cimg <= 0.0031308, 12.92 * cimg, 1.055 * np.clip(cimg, 0, None) ** (1 / 2.4) - 0.055)
@@ -250,7 +267,7 @@ length *= 0.45 + 0.55 * np.sin(np.pi * np.clip(fu, 0, 1)) ** 0.5   # shorter at 
 width = 0.22 * (0.25 + 0.75 * t)
 a = (1 - ss(width * 0.6, width, d)) * ss(1 - length - 0.05, 1 - length + 0.05, t) * inC
 a *= (h1(i + 0.71) > np.where(upper, 0.08, 0.35))                 # gaps, more on the lower lid
-oimg[..., :3] = lin(job['brow']) * 0.6
+oimg[..., :3] = np.where(inC[..., None], lin(job['brow'])[None, None] * 0.6, pk)
 oimg[..., 3] = np.clip(a * 1.15, 0, 1)
 srgbO = np.where(oimg[..., :3] <= 0.0031308, 12.92 * oimg[..., :3], 1.055 * oimg[..., :3] ** (1 / 2.4) - 0.055)
 Image.fromarray(np.clip(np.concatenate([srgbO, oimg[..., 3:]], -1) * 255 + 0.5, 0, 255).astype(np.uint8), 'RGBA').save(job['out'] + '_o.webp', 'WEBP', quality=90, exact=True)
