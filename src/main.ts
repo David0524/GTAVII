@@ -20,6 +20,7 @@ import { loadReport } from './engine/debug/LoadReport';
 import { AdaptiveResolution } from './engine/AdaptiveResolution';
 import { Parks } from './world/Parks';
 import { StreetFurniture } from './world/StreetFurniture';
+import { SignalHeads } from './world/SignalHeads';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -36,6 +37,7 @@ import { settings } from './settings/Settings';
 import { facadeUniforms } from './render/FacadeMaterial';
 import { PostFX, postUniforms } from './render/PostFX';
 import { Simulation, type ArchetypeDef } from './sim';
+import { createCharacterFactory, type CharacterFactory } from './characters';
 import { createVehicleFactory, CarLightPool, updateCarLights, setGroundLightLevel } from './vehicles';
 
 /**
@@ -105,7 +107,13 @@ async function main() {
     baseUrl: base, archetypes: Object.values(import.meta.glob('/content/npc_archetypes/*.json', { eager: true, import: 'default' }) as Record<string, ArchetypeDef>),
   }) : null;
   let simReady = false, simPaused = false;
-  sim?.load().then(() => { sim.setObstacles(furniture.obstacles()); simReady = true; loadReport.mark('sim'); }).catch((e) => console.warn('sim', e));
+  let signals: SignalHeads | null = null, sigBuf: Uint8Array = new Uint8Array(0);
+  sim?.load().then(() => {
+    // the sim's signal heads replace the OSM poles: every lit head is one the cars obey
+    signals = new SignalHeads(sim.signalHeads()); scene.add(signals.root); furniture.signalGroup.visible = false;
+    sim.setObstacles([...furniture.obstacles(false), ...signals.obstacles()]);
+    simReady = true; loadReport.mark('sim');
+  }).catch((e) => console.warn('sim', e));
   // AI traffic: visual-only instanced cars fed from sim.vehicles. Real headlight spots only on High/Ultra:
   // every forward-lit material pays per light per fragment (the facades most of all); lower tiers keep the
   // emissive ground pools.
@@ -113,6 +121,18 @@ async function main() {
   const traffic = vehicles?.createTrafficRenderer(quality.name === 'low' ? 48 : 160) ?? null;
   if (traffic) scene.add(traffic.object);
   const carLights = traffic && (quality.name === 'high' || quality.name === 'ultra') ? new CarLightPool(scene, quality.name, false) : null;
+  // Pedestrians: the characters crowd renderer, fed from sim.peds (created with the factory).
+  let crowd: ReturnType<CharacterFactory['createCrowdRenderer']> | null = null;
+  createCharacterFactory({ quality: quality.name }).then((f) => {
+    chars = f;
+    // feet and footstep surfaces: the real collision ground (kerbs, stoops), else the terrain
+    f.setGround((x, z) => { const top = heightAt(x, z) + 2.5, d = physics.ray(x, top, z, 0, -1, 0, 4, player.collider); return { y: d === null ? heightAt(x, z) : top - d, surface: 'concrete' }; });
+    const climate = () => { const h = worldClock.minutes / 60; f.setClimate({ heat: h > 11 && h < 18 ? 0.7 : 0.35, wetness: worldClock.weather === 'rain' ? 1 : 0 }); };
+    climate(); setInterval(climate, 10_000);
+    spawnLeadBody();
+    if (sim) { crowd = f.createCrowdRenderer(quality.name === 'low' ? 120 : 400); scene.add(crowd.object); }
+    loadReport.mark('characters');
+  }).catch((e) => console.warn('characters', e));
   const simActors = [{ id: 'player', x: 0, z: 0, vx: 0, vz: 0, radius: 0.4, kind: 'player' as const }];
 
   // ---------------------------------------------------------------- input
@@ -127,8 +147,18 @@ async function main() {
   const startY = heightAt(start.x, start.z) + SIDEWALK_H;
   const party = new Party({ x: start.x, y: startY, z: start.z, heading: start.heading });
   const player = new PlayerController(physics, start.x, startY, start.z, start.heading);
-  const body: PlayerBody = new StandInBody();
+  // The stand-in shows until the characters factory resolves (it loads in the background, never gating
+  // the title), then the active lead's real body replaces it. Lead switches respawn the body.
+  let body: PlayerBody = new StandInBody();
   scene.add(body.object);
+  let chars: CharacterFactory | null = null;
+  const spawnLeadBody = () => {
+    if (!chars) return;
+    const old = body, vis = old.object.visible;
+    body = chars.spawn(scene, { seed: 74, hero: party.activeId });
+    body.object.position.copy(old.object.position); body.object.visible = vis;
+    old.object.removeFromParent(); old.dispose();
+  };
   // Gameplay cameras write into director.gameplay; the director owns the real camera (cutscene hand-off).
   const director = new CameraDirector(camera);
   const orbit = new ThirdPersonCamera(director.gameplay, input, physics, player.collider);
@@ -171,7 +201,7 @@ async function main() {
         if (l) Object.assign(l, { money: c.money, inventory: [...c.inventory], wardrobe: c.wardrobe, at: { ...c.at } });
         else party.leads.set(id, { id, displayName: id.replace(/^char\./, ''), ...c, inventory: [...c.inventory], at: { ...c.at } });
       }
-      party.switchTo(s.party.activeCharacter);
+      party.switchTo(s.party.activeCharacter); spawnLeadBody();
       narrativeState = s.narrative;
       const a = party.active.at;
       player.teleport(a.x, a.y, a.z, a.heading); player.active = false; // re-activates once colliders exist there
@@ -239,6 +269,7 @@ async function main() {
     { name: 'no street lights', ...hideObj(streetLights) },
     { name: 'no trees + park dressing', ...hideObj(parks.root) },
     { name: 'no street furniture', ...hideObj(furniture.root) },
+    { name: 'no crowd', apply: () => { if (crowd) crowd.object.visible = false; }, revert: () => { if (crowd) crowd.object.visible = true; } },
     ...(traffic ? [{ name: 'no traffic', ...hideObj(traffic.object) }] : []),
     { name: 'sim paused', apply: () => { simPaused = true; }, revert: () => { simPaused = false; } },
     { name: 'baseline again', apply: () => {}, revert: () => {} },
@@ -306,7 +337,7 @@ async function main() {
     act: (a) => {
       if (a.kind === 'switchLead') {
         storeActiveLead(); if (!party.switchTo(a.lead)) return { ok: false, text: 'Not available' };
-        const t = party.active.at; player.teleport(t.x, t.y, t.z, t.heading); placeAt(); uiEvents.emit('lead', { id: a.lead }); return { ok: true };
+        const t = party.active.at; player.teleport(t.x, t.y, t.z, t.heading); placeAt(); spawnLeadBody(); uiEvents.emit('lead', { id: a.lead }); return { ok: true };
       }
       if (a.kind === 'waypoint') return { ok: true };
       return { ok: false, text: 'Not in the game yet' };
@@ -425,6 +456,8 @@ async function main() {
       if (carLights) updateCarLights(carLights, [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
       traffic.setInstances(sim.vehicles, camera.position, carLights ?? undefined);
     }
+    if (signals && sim) { sigBuf = sim.signalStates(sigBuf); signals.update(dt, sigBuf); }
+    if (crowd && sim && simReady) { crowd.setAgents(sim.peds); crowd.update?.(dt, camera); }
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
     // A menu over the game (pause hub, shop, any modal) holds the last frame instead of re-rendering the
     // city behind it: same picture, a fraction of the GPU and battery (and the canvas keeps its last

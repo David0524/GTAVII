@@ -78,15 +78,18 @@ export class StreetFurniture {
   }
 
   /** Sidewalk footprints for the sim's pedestrians to step around (Simulation.setObstacles). Hydrants are the sim's own. */
-  obstacles(): { x: number; z: number; r: number }[] {
+  obstacles(includeSignals = true): { x: number; z: number; r: number }[] {
     const R: Record<string, number> = { callbox: 0.25, payphone: 0.7, mailbox: 0.4, meter: 0.15, newsstand: 1.5, trash: 0.35, busstop: 0.15 };
     const out: { x: number; z: number; r: number }[] = [];
     for (const [type, x, z] of this.data?.items ?? []) if (R[type]) out.push({ x, z, r: R[type] });
-    for (const s of this.data?.signals ?? []) out.push({ x: s[0], z: s[1], r: 0.2 });
+    if (includeSignals) for (const s of this.data?.signals ?? []) out.push({ x: s[0], z: s[1], r: 0.2 });
     return out;
   }
 
+  /** The OSM-placed poles (clock-driven lenses): hidden once the sim's SignalHeads take over. */
+  readonly signalGroup = new THREE.Group();
   private buildSignals() {
+    this.signalGroup.name = 'osmSignals'; this.root.add(this.signalGroup);
     const S = this.data.signals; const n = S.length;
     // pole + mast stub + two head bodies (axis A faces yaw, axis B faces yaw+90)
     const pole = merge([[cyl(0.08, 0.11, 4.2, 0, 2.1, 0), POLE_GREEN], [box(0.32, 0.95, 0.28, 0, 3.6, -0.22), [0.15, 0.17, 0.1]], [box(0.28, 0.95, 0.32, -0.22, 3.6, 0), [0.15, 0.17, 0.1]]]);
@@ -95,7 +98,7 @@ export class StreetFurniture {
     // lenses: 6 per pole (3 per head), each instanced mesh is one colour; per-instance phase offset
     const phase = new THREE.InstancedBufferAttribute(new Float32Array(n), 1);
     S.forEach(([x, z, yaw], i) => { phase.setX(i, ((x * 0.37 + z * 0.11) % 60 + 60) % 60); this.q.setFromAxisAngle(this.up, yaw); this.p.set(x, heightAt(x, z) + CURB_HEIGHT, z); this.m.compose(this.p, this.q, this.one); poles.setMatrixAt(i, this.m); });
-    poles.instanceMatrix.needsUpdate = true; poles.computeBoundingSphere(); this.root.add(poles);
+    poles.instanceMatrix.needsUpdate = true; poles.computeBoundingSphere(); this.signalGroup.add(poles);
     const lens = (colour: THREE.Color, y: number, which: 0 | 1 | 2) => {
       const geo = merge([[new THREE.CircleGeometry(0.1, 10).rotateY(Math.PI).translate(0, y, -0.37), [1, 1, 1]], [new THREE.CircleGeometry(0.1, 10).rotateY(-Math.PI / 2).translate(-0.37, y, 0), [1, 1, 1]]]); // discs face out of each head
       // the second disc belongs to axis B (per-vertex flag)
@@ -111,7 +114,7 @@ export class StreetFurniture {
       m.colorNode = vec3(colour.r, colour.g, colour.b).mul(lit.mul(2.6).add(0.06));
       const im = new THREE.InstancedMesh(geo, m, n);
       S.forEach((_s, i) => { poles.getMatrixAt(i, this.m); im.setMatrixAt(i, this.m); });
-      im.instanceMatrix.needsUpdate = true; im.computeBoundingSphere(); this.root.add(im);
+      im.instanceMatrix.needsUpdate = true; im.computeBoundingSphere(); this.signalGroup.add(im);
     };
     lens(new THREE.Color(1, 0.12, 0.05), 3.9, 0); lens(new THREE.Color(1, 0.6, 0.05), 3.6, 1); lens(new THREE.Color(0.25, 1, 0.55), 3.3, 2);
   }
