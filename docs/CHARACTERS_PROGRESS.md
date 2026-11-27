@@ -367,6 +367,44 @@ variety, and the RDR2 level of animation detail. We study behaviour and quality;
 | **Facial animation** | Blinks, saccades, full lip-sync and expressive cutscene faces; RDR2 ambient facial idles | None yet | Everything | Blinks and saccades now, visemes and expressions for cutscenes |
 | **Idles and animation detail** | RDR2: dozens of idle variants, contextual gestures, weight shifts, foot planting and hand contacts everywhere | Blend space with stride warp, foot IK with locking, look-at, hand IK, seat pose, ambient props; crowd near ring at full fidelity | Few idle variants, simple turn-in-place, no traversal or ragdoll yet | The movement brief block: traversal, momentum, ragdoll blend, stumbles, plus an idle-variety pass |
 
+## Cutscene performance pipeline (plan; ordered after the bodies and clothing fidelity block)
+UI's cutscene runtime and tool are done but play capsule stand-ins. Characters owns the performance.
+1. **Body performance source.** Everything ships as files in a web build, so every source is
+   licence-checked before use.
+   - **CMU Graphics Lab Motion Capture Database:** the FAQ allows use in any project, commercial
+     included; the raw data may not be resold as a dataset. About 2,600 takes: walks, talks,
+     gestures, sitting, fights. Retarget to our rig with the same pipeline as the Quaternius clips
+     (`tools/characters/build-anims.ts`). I'll record the exact licence text in CHARACTER_SOURCES
+     before shipping any take.
+   - Other mocap with CC0 or CC-BY terms is checked one by one. **Excluded:** LAFAN1 and Bandai's
+     dataset (non-commercial), Mixamo (raw files may not be redistributed).
+   - **Acting layers authored in UI's `?cine=` timeline as actor tracks:** gestures, look-ats,
+     weight shifts, prop handling and our existing talk gestures by emotion. This is what makes
+     generic mocap read as a performance.
+   - **Costed option for the user: phone-video markerless mocap.** The user or actors film each
+     scene on an iPhone, and a markerless tool (examples: Move.ai, Rokoko Vision, DeepMotion; each
+     tool's output-ownership terms checked) produces bespoke performances we retarget. This gives
+     RDR2-style acting per scene. Cost is a subscription plus time; prices to be quoted from
+     current plans before asking.
+2. **Faces:**
+   - an expression set (neutral, smile, contempt, anger, fear, sadness, surprise, disgust, plus
+     blends) on our expression targets and the Rocketbox facial bones;
+   - blinks (about 15 a minute, more under stress), saccades and eye darts;
+   - **lip-sync at build time** from the voice audio with Rhubarb Lip Sync (MIT, build-time only,
+     not shipped), writing `content/lipsync/<line id>.json` in UI's 15-viseme set;
+   - text-estimated timing until audio's voice renders land, coordinated with audio.
+3. **Hands:** grip, pinch and relaxed shapes exist. To add: cigarette, glass, gun, medal and
+   paper grips, with prop sockets (hand_l, hand_r, mouth, head) and finger poses per prop.
+4. **Contract with UI:** the actor track format in UI's `docs/CUTSCENE_PERFORMANCE.md` (clips,
+   look, ik, expr, lips, props), accepted with notes.
+   - Ours: a stateless `ActorHost.perform(id, frame)` that samples clips at the given times,
+     `handOff`, and the `clips()`, `expressions()`, `props()` and `joint()` lists.
+5. **Done-means:** a first vertical-slice scene fully animated (a dialogue scene with Teddy, so it
+   exercises faces, lip-sync, gestures and a prop), with a vs GTA V / RDR2 note.
+   - The references perform every story scene with bespoke capture and full facial animation.
+     Generic mocap plus authored layers won't match that; phone mocap per scene would close
+     most of the body gap.
+
 ## Gaps against the visual bar (`docs/briefs/VISUAL_BAR.md`: "GTA V level at worst")
 The Characters bar asks for photoreal heads, skin with subsurface scattering, hair cards, cloth
 with normal detail, and blinks, lip-sync and facial animation in cutscenes. Where we stand:
