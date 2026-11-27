@@ -253,6 +253,8 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 
 ## Decisions (and why)
 
+- **Children are never targets** (narrative content rule: no violence against minors). A sim pedestrian flagged `child` is never registered as a body in the world: no hitbox, no melee, no impact damage, no health record, no body, and never a witness who reports (`witnesses.ts`). Rounds pass by them; the sim is asked to steer children clear of traffic. Test: `bodies.test.ts`.
+
 - **Money scale, user decision of 2026-11-26, relayed by oversight, verbatim: "Yes, but in GTA VI you can really rack up money. Like 10s of thousands".** Oversight added these terms:
   - everyday 1974 prices stay real;
   - missions pay hundreds to low thousands, and the big jobs $10k–$50k+;

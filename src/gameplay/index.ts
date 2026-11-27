@@ -363,6 +363,9 @@ export class Gameplay {
   /** Register an ambient pedestrian body for hits (sim peds are registered automatically each frame). */
   private ensurePed(p: PedSnapshot) {
     if (this.actors.has(p.id)) return;
+    // content rule (narrative): no violence against minors. A child is never a target: no hitbox, no melee,
+    // no impact damage. Rounds pass by them and cars miss them (the sim steers children clear).
+    if (p.child) { this.childPeds.add(p.id); return; }
     this.healthSys.register(p.id, { maxHp: 70 });
     const port = this.port;
     this.actors.set(p.id, { id: p.id, kind: 'ped', team: 'civilian', pos: () => { const q = port.ped(p.id); return q ? [q.x, q.y, q.z] : [p.x, p.y, p.z]; }, yaw: () => port.ped(p.id)?.yaw ?? 0, stance: () => 'stand' });
@@ -1043,6 +1046,7 @@ export class Gameplay {
   }
 
   private applyDamage(id: string, d: { amount: number; region?: string; source?: string; type: DamageType; bleed?: number; power?: number }) {
+    if (this.childPeds.has(id)) return null;
     const before = this.healthSys.state(id);
     if (!before || before.dead) return null;
     if (id === this.ringOpponent && before.hp - d.amount * 1.5 <= 0) d = { ...d, amount: Math.max(0, (before.hp - 5) / 1.5) }; // never lethal in the ring
@@ -1398,7 +1402,9 @@ export class Gameplay {
     if (e.occupant && e.dv) this.applyDamage(e.occupant, { amount: occupantImpactDamage(e.dv), type: 'impact' });
     if (e.prop && e.speed) this.damageProp(e.prop, e.speed * 25, 'impact', e.driver ?? null);
   }
+  private readonly childPeds = new Set<string>();
   private onSimCollision(e: { a?: string; b?: string; speed?: number; ped?: string; x?: number; z?: number }) {
+    if (e.ped && this.childPeds.has(`${e.ped}`)) return;
     if (e.ped && e.speed) this.applyDamage(`${e.ped}`, { amount: pedestrianImpactDamage(e.speed), type: 'impact' });
   }
   /** The engine reports a fall from height (m) for any actor. */

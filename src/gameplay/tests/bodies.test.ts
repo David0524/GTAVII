@@ -69,3 +69,18 @@ test('bodies: put down somewhere quiet buys time; a hiding spot keeps it from pa
   assert.equal(r2.g.bodies.list.get('v3')!.place, 'hidden');
   assert.equal(r2.g.bodies.list.get('v3')!.discoverAt, Infinity);
 });
+
+test('content rule: a child is never a target (no hitbox, no melee, no impact damage, no body)', () => {
+  const r = rig();
+  (r.sim as any).add('ped_kid', 0, -6, { child: true });
+  (r.sim as any).add('ped_adult', 3, -6, {});
+  r.step(0.5, 0.1);
+  const ids = r.g.hitboxes().map((h) => h.actorId ?? (h as any).id);
+  assert.ok(!ids.includes('ped_kid'), 'no hitbox');
+  assert.ok(ids.includes('ped_adult'), 'adults are bodies in the world');
+  assert.ok(!r.g.melee.fighters.has('ped_kid'), 'no melee');
+  (r.g as any).onSimCollision({ ped: 'ped_kid', speed: 15 });
+  (r.g as any).applyDamage('ped_kid', { amount: 500, type: 'bullet' });
+  assert.ok(!r.g.bodies.list.has('ped_kid'));
+  assert.equal(r.g.health.get('ped_kid').injuries[0], 'unknown', 'never registered in health');
+});
