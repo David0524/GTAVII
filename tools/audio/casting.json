@@ -18,6 +18,18 @@
    "pitch": 66,
    "speed": 172,
    "gap": 1
+  },
+  "dispatch.central": {
+   "variant": "f2",
+   "pitch": 50,
+   "speed": 172,
+   "gap": 0
+  },
+  "dispatch.car": {
+   "variant": "m3",
+   "pitch": 36,
+   "speed": 178,
+   "gap": 0
   }
  }
 }

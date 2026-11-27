@@ -32,12 +32,12 @@ function b64(buf: ArrayBuffer): string {
   return btoa(s);
 }
 
-export async function render(id: string, o: { quality?: QualityName; seconds?: number; profile?: LoudnessProfile; sr?: number; solo?: string; only?: string; /** Replace the scenario's events. */ events?: Scenario['events']; /** Listener stands still. */ still?: boolean } = {}) {
+export async function render(id: string, o: { quality?: QualityName; seconds?: number; profile?: LoudnessProfile; sr?: number; solo?: string; only?: string; /** Replace the scenario's events. */ events?: Scenario['events']; /** Listener stands still. */ still?: boolean; /** Load narrative content and rendered voices (dispatch, barks). */ content?: boolean } = {}) {
   const base = SCENARIOS.find((s) => s.id === id)!;
   const sc: Scenario = { ...base, events: o.events ?? base.events, walk: o.still ? 0 : base.walk }; const seconds = o.seconds ?? 60, sr = o.sr ?? 48000, quality = o.quality ?? 'high';
   live.clear(); created.n = 0;
   const ctx = new OfflineAudioContext({ numberOfChannels: 2, length: Math.round(seconds * sr), sampleRate: sr });
-  const sys = new AudioSystem({ quality, context: ctx, content: false }); // hermetic: no narrative content fetched
+  const sys = new AudioSystem({ quality, context: ctx, content: !!o.content }); // hermetic by default: no narrative content fetched
   await sys.whenReady();
   const streets: StreetRec[] = await fetch('/data/streets.json').then((r) => r.json());
   await sys.load({ streets });
@@ -70,6 +70,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     if (act === 'sale') sim.fire('vendorServed', { id, kind: '', pedId: -1, good: '' });
     else if (act === 'call') sim.fire('vendorCall', { id, kind: '', pedId: -1, x: 0, z: 0, bark: 'barks.vendor_calls' });
     else if (act === 'knockOver') { sim.fire('vendorAct', { id, pedId: -1, act: 'right_cart' }); const w = sim.vendorViews.find((q) => q.id === id); if (w) { w.open = false; w.state = 'righting'; } void p; }
+    else if (act === 'righted') { sim.fire('cartRighted', { id }); const w = sim.vendorViews.find((q) => q.id === id); if (w) { w.open = true; w.state = 'open'; } }
     else if (act === 'move') pushing.add(id); else if (act === 'stop') pushing.delete(id);
   };
   /** Fire a raw sim event at an offset from the listener's start (bumps, litter, monte scatter). Strings in params: none needed. */
@@ -86,6 +87,20 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     else if (kind === 'gunfoley') sys.gunFoley(arg as 'pump', at);
     else if (kind === 'whiz') sys.bulletPass(at, [x + 1.5 * st.dz, 1.6, z - 1.5 * st.dx]);
   };
+  // Gameplay events for the dispatch scanner, through bindGameplay exactly as gameplay's emitter delivers them.
+  const gpH = new Map<string, ((e: unknown) => void)[]>(); sys.bindGameplay({ on: (t, cb) => { gpH.set(t, [...(gpH.get(t) ?? []), cb]); } });
+  const gp = (t: string, e: unknown) => { for (const cb of gpH.get(t) ?? []) cb(e); };
+  const dispatchLog: { t: number; text: string; speaker: string; duration: number; urgent: boolean }[] = [];
+  sys.on('dispatch', (e) => dispatchLog.push({ t: +ctx.currentTime.toFixed(2), ...e }));
+  const gpEvent = (name: string, at: [number, number]) => {
+    const place = sys.placeName(at[0], at[1]);
+    if (name === 'report') { gp('reportFiled', { id: 1 }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `Midtown Central, shots fired at ${place}. …Male, thirties, medium build, tan leisure suit, green sedan, plate starting 4K, may be armed…` }); }
+    else if (name === 'dispatched') gp('police', { kind: 'dispatched', unit: 'unit.7', report: 1 });
+    else if (name === 'pursuit') { gp('police', { kind: 'pursuit', unit: 'unit.7', suspect: 'player' }); gp('radio', { precinct: 'precinct.midtown_central', at, text: `All units Midtown Central, in pursuit at ${place}. …Male, tan leisure suit…` }); }
+    else if (name === 'lost') gp('police', { kind: 'lost', unit: 'unit.7', report: 1, at });
+    else if (name === 'copKilled') gp('copKilled', { id: 'cop.3', by: 'player', at: [at[0], 0, at[1]], precinct: 'precinct.midtown_central' });
+    else if (name === 'cleared') gp('police', { kind: 'cleared', report: 1, precinct: 'precinct.midtown_central', why: 'decay' });
+  };
   const step = 768 / sr; const frames = Math.floor(seconds / step) - 1;
   let x = st.x, z = st.z, maxReal = 0, maxTotal = 0; const voiceLog: number[] = [];
   const listener = () => ({ position: [x, heightAt(x, z) + 1.8, z] as [number, number, number], forward: [st.dx, 0, st.dz] as [number, number, number], up: [0, 1, 0] as [number, number, number], velocity: [st.dx * sc.walk, 0, st.dz * sc.walk] as [number, number, number] });
@@ -100,7 +115,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
   };
   for (let k = 1; k <= frames; k++) {
     const t = k * step;
-    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : e.play.startsWith('sim:') ? simEvent(e.play.slice(4), e.offset, e.params) : /^(gun|hit|whiz|gunfoley)/.test(e.play) ? combatEvent(e.play, [x + (e.offset?.[0] ?? 0), heightAt(x + (e.offset?.[0] ?? 0), z + (e.offset?.[1] ?? 0)) + 1.4, z + (e.offset?.[1] ?? 0)], t) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
+    void ctx.suspend(t).then(() => { tick(); if (k % 62 === 0) voiceLog.push(sys.stats.voices.real ?? 0); for (const e of sc.events ?? []) if (Math.floor(e.t / step) === k) /* exactly one frame per event (|e.t - t| < step/2 missed half-step times) */ e.play.startsWith('vendor:') ? vendorEvent(e.play, e.params) : e.play.startsWith('sim:') ? simEvent(e.play.slice(4), e.offset, e.params) : e.play.startsWith('gp:') ? gpEvent(e.play.slice(3), [x + (e.offset?.[0] ?? 0), z + (e.offset?.[1] ?? 0)]) : /^(gun|hit|whiz|gunfoley)/.test(e.play) ? combatEvent(e.play, [x + (e.offset?.[0] ?? 0), heightAt(x + (e.offset?.[0] ?? 0), z + (e.offset?.[1] ?? 0)) + 1.4, z + (e.offset?.[1] ?? 0)], t) : sys.play(e.play, e.offset ? [x + e.offset[0], 1, z + e.offset[1]] : undefined, e.params); return ctx.resume(); });
   }
   sys.update(step, listener());
   const t0 = performance.now();
@@ -122,7 +137,7 @@ export async function render(id: string, o: { quality?: QualityName; seconds?: n
     id, title: sc.title, quality, profile: o.profile ?? 'mobile', sr, seconds, renderMs, pcm: b64(inter.buffer),
     checks: { nan, subnormals: sub, samplePeak: peak, maxRealVoices: maxReal, voiceCap: preset.voices, maxTotalVoices: maxTotal, connectedBeforeUnload: connectedBefore, leakedNodes: leaked.length, leakedTypes: leaked.slice(0, 20), nodesCreated: created.n, limiter: stats.mixer },
     timing: { frames: timing.length, p50: pct(0.5), p95: pct(0.95), p99: pct(0.99), max: timing[timing.length - 1], mean: timing.reduce((a, b) => a + b, 0) / Math.max(1, timing.length) },
-    stats: { ...stats, voices: stats.voices, voiceLog }, shots,
+    stats: { ...stats, voices: stats.voices, voiceLog }, shots, dispatchLog,
   };
 }
 

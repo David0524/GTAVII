@@ -94,7 +94,7 @@ for me to describe its audio reliably, so it isn't characterised below.
 | Gunfire and canyon echo | Signature tails and slapback in city streets | Built: per-shot image-source echoes from the real facades, travel time, HDR window; echo timing measured (26/26) | Synthesised shots are cleaner than recordings; few mechanical layers |
 | Vehicle engines | Recorded, multi-layer engines with loads, gears, backfires | Procedural per-cylinder engines with real firing orders, load, gears, Doppler, LOD to traffic beds | Cleaner and more "synthetic" than recordings, especially at steady mid revs. Plan: add mechanical noise layers and per-class variation |
 | Crowd walla | Recorded crowds with intelligible fragments and reactions | Density-driven formant walla on both sidewalks, kids in parks, narrative barks on horns/collisions | Formant babble is clearly synthetic up close; speech is eSpeak (placeholder tier) |
-| Police dispatch | Radio chatter as a key cue | Radio/phone filters and the bark/line system are ready | **Not built yet**: needs dispatch content (narrative) and the build-time voices |
+| Police dispatch | Radio chatter as a key cue | Built: stitched scanner from build-time fragments, driven by gameplay's radio/police/copKilled events; officer-down sequence with alert and siren surge | eSpeak fragments sound robotic; scanner is non-positional only (no car/cop radios yet) |
 | Mix and ducking | Strong dynamic mixing; dialogue always clear; music ducks | Dialogue sidechain ducking, category mixing desk, loudness profiles, TP limiter, measured −16/−23 LUFS sessions, HDR window on gunfire | The HDR window covers gunfire only; explosions and crashes should use it too |
 | Score cues | Adaptive score and radio | Procedural period instrumentals exist | Radio stations paused by the user; no adaptive score yet |
 
@@ -225,6 +225,50 @@ run only at build time and are absent from the production bundle. Licences are l
 Freesound (CC0 / CC-BY) and Sonniss GDC sounds are allowed through the gate. I'd only reach for them where synthesis
 is weakest (cloth and body foley, crowd close-ups, gunfire transients), reading each licence first and adding a row
 before any file lands. BBC Sound Effects is out (non-commercial).
+
+## Police dispatch (heat backlog, 2026-11-27)
+The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialogue/dispatchText.ts`. API: `audio.bindGameplay(gp)`, `audio.dispatchSay(text)`,
+`audio.officerDown([x, z])`, `audio.placeName(x, z)`; subtitles come from `on('dispatch')`. Engine wiring is ENGINE_REQUESTS "From audio: 14".
+- **Why stitched:** whole lines can't be rendered ahead of time.
+  - Gameplay's radio calls are free text built at runtime: precinct, crime, place, and the witness description.
+  - Narrative's police_radio lines are templates (`{street}`, `{avenue}`…).
+  - So the build renders a vocabulary instead, with three registers (Central flat, Central urgent, the cars): 772 fragments each.
+    It covers gameplay's fixed phrases, crime words, narrative's template fragments, precinct names, every street on the map, subject, clothing, vehicle, direction and item words, numbers 0–99, and the APCO phonetic alphabet for plates.
+    Every word that appears in a phrase is also rendered on its own, as the fallback.
+  - At runtime the text is normalised (numbers and ordinals to words, plates spelled), then segmented into the longest phrase available, else single words.
+  - Anything outside the vocabulary becomes a burst of garble on air; the subtitle keeps the full text.
+- **On air:** one half-duplex channel.
+  - One transmission at a time, queued by priority; stale chatter is dropped.
+  - Each transmission is a squelch kerchunk, the fragments (30 ms joins, 160 ms breaths at commas) and a squelch tail.
+  - A static bed runs under it, through a 320 Hz–3 kHz band with a presence bump and light clipping.
+  - Each radio car's voice sits slightly differently.
+  - Who speaks follows radio procedure: "Central to all cars…" is Central; "Central, car six…" is that car calling in.
+- **Events:**
+  - gameplay `radio` → Central speaks it, in the urgent register for shots, shootings, homicides and pursuits;
+  - `police` dispatched → a car acknowledges; pursuit → a car calls it in; lost, investigate and cleared → narrative's lines, with `{street}`/`{avenue}` filled from `placeName`; roadblock → a car reports it;
+  - idle chatter while a report is open;
+  - the brownout call once per outage.
+- **Officer down (`copKilled`):**
+  - the band clears for it;
+  - an alert of three 1.2 kHz pips (an original pattern), then Central urgent with narrative's "officer down" line;
+  - then narrative's cop_killed radio sequence, with car voices for car lines;
+  - three cars answering "on the way", and a surge of three sirens;
+  - for 90 s the channel stays hot: urgent register and busier chatter. This is the "tone shift".
+- **Measured (`render.ts --only heat_8th --content`):** Eighth Ave at W 33rd St, 9:40 p.m. The scene runs report → dispatched → pursuit → lost → officer down → cleared.
+  - 10–11 transmissions; every fragment was found in the vocabulary (0 garbled, coverage 1.0); voice library 0 misses.
+  - The scanner measures −21.2 LUFS while talking against a −15.2 LUFS street (stems tool), so it's clear without masking the world.
+  - Excerpt: `shots/audio/heat_8th.ogg`.
+- **Cost:** about 2,300 extra fragments; the voice deploy grows from 31 to 44 MB (Opus + AAC), fetched per fragment on demand into the 6 MB decoded LRU.
+  The full render took 73 s on a cold cache for the new fragments; a warm cache takes about 1 s.
+- **Honest limits:**
+  - Stitched eSpeak words sound clipped and robotic, more like a 1970s scanner than an actor, which partly suits the radio.
+  - Descriptions need gameplay to use `audio.placeName`; until then its placeholder place names ("the lot on the East Side") still fall inside the vocabulary.
+  - Real clothing and garment words come from gameplay's wardrobe data, which audio can't read at build time, so the colour and garment lists are curated. A word outside them garbles.
+- **vs GTA V / VI / RDR2:**
+  - GTA V's police scanner is the reference: concatenated recorded phrases (area, crime, suspect description, vehicle), with squelch and radio filtering.
+  - We match the structure (concatenation, description, place, squelch, escalation) and drive it from real gameplay state.
+  - We fall short on voice quality: GTA's fragments are recorded actors.
+  - Plan: real voice talent or a better free TTS when the voice decision changes, and positional radios in police cars and on cops.
 
 ## Gunfire (combat backlog, 2026-11-27)
 `world/gunfire.ts`; API: `audio.gunshot(at, tier)`, `audio.bulletPass(from, to)`, `audio.bulletImpact(at, material)`,

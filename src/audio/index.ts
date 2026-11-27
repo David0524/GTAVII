@@ -22,6 +22,7 @@ import { CityMap, weekday } from './world/cityMap';
 import { Ambience, runAudioTimers, clearAudioTimers, setTimeoutAudio } from './world/ambience';
 import { VehicleAudio, type AttachedVehicle, type SimLike } from './vehicles/vehicles';
 import { Footsteps } from './world/footsteps';
+import { Dispatch } from './world/dispatch';
 import { Gunfire, type GunTier, type Material, type ShotReport } from './world/gunfire';
 import { CrowdReactions } from './world/crowdReactions';
 import { Vendors, type VendorHandle, type VendorType } from './world/vendors';
@@ -58,6 +59,7 @@ export class AudioSystem {
   private vendors!: Vendors;
   private crowd!: CrowdReactions;
   private gunfire: Gunfire | null = null;
+  private dispatch!: Dispatch;
   private sim: SimLike | null = null;
   private power = new Map<string, Power>();
   private canyonT = 0; private preloadT = 0;
@@ -114,6 +116,7 @@ export class AudioSystem {
     });
     this.vendors = new Vendors(env, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions));
     this.crowd = new CrowdReactions(env, () => this.footsteps, (pool, context, at, emotions) => dlg.barkFrom(pool, context, at, `npc.${pool}`, true, emotions), this.baseUrl); this.crowd.contentEnabled = this.useContent;
+    this.dispatch = new Dispatch(env, this.voiceLib, (e) => env.emit('dispatch', e), () => this.ambience?.triggerSiren(), (x, z) => this.placeName(x, z), this.baseUrl); this.dispatch.contentEnabled = this.useContent;
     this.radio = { setStation: (id) => radio.setStation(id), get stations() { return radio.stations.map((s) => ({ id: s.id, name: s.name })); }, system: radio };
     this.dialogue = { play: (s, l, at, o) => dlg.play(s, l, at, o), on: (t, cb) => dlg.on(t, cb), overhear: (o) => dlg.overhear(o), registerScript: (s) => dlg.registerScript(s), bark: (t, at, sp, sub) => dlg.bark(t, at, sp, sub), system: dlg };
   }
@@ -139,7 +142,7 @@ export class AudioSystem {
     await loadTerrain(data + 'terrain.bin'); // ground heights for emitters and events (no-op when terrain is off)
     this.geo.build(chunks, streets!);
     this.env.map = new CityMap(streets!);
-    await this.voiceLib?.init(this.useContent);
+    await this.voiceLib?.init(this.useContent); await this.dispatch.loadContent();
     // Narrative radio content if the engine serves content/ (else the PLACEHOLDER stations stay).
     if (!this.customStations) {
       try { const r = await fetch(this.baseUrl + 'content/radio.json'); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const defs = stationsFromNarrative(await r.json()); if (defs.length) this.radio.system.setStations(defs); } } catch { /* no content */ }
@@ -189,7 +192,7 @@ export class AudioSystem {
     this.radio.system.update(dt); lap('radio');
     this.ambience?.update(dt); lap('ambience');
     this.vehicles.update(dt); lap('vehicles');
-    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); this.vendors.update(dt); lap('footsteps');
+    this.footsteps?.update(dt, this.sim ? this.sim.peds : null); this.roomTone?.update(dt); this.vendors.update(dt); this.dispatch.update(); lap('footsteps');
     this.vm.update(listener, dt); lap('voices');
     const ms = performance.now() - t0;
     this.timing.updateMs = ms; this.timing.updateMaxMs = Math.max(this.timing.updateMaxMs, ms); this.timing.frames++; this.timing.sumMs += ms;
@@ -221,7 +224,11 @@ export class AudioSystem {
   setWeather(w: Weather) { this.weatherTarget = w; if (this.env && w === 'rain' && this.env.weather.rain === 0) this.env.weather.rain = 0.02; }
 
   /** area: 'all', a district id ('garment','fur','flower','eighth','deuce','herald') or 'x,z,radius'. */
-  setPower(area: string, state: Power) { if (state === 'on') this.power.delete(area); else this.power.set(area, state); }
+  setPower(area: string, state: Power) {
+    const wasOff = [...this.power.values()].includes('off');
+    if (state === 'on') this.power.delete(area); else this.power.set(area, state);
+    if (state === 'off' && !wasOff && this.loaded) this.dispatch.brownout(); // the dispatcher calls the dark signals once per outage
+  }
   private powerAt(x: number, z: number): Power {
     if (!this.power.size) return 'on';
     let worst: Power = 'on';
@@ -280,6 +287,27 @@ export class AudioSystem {
   /** Weapon handling: 'pump' | 'dry' (empty / jam) | 'reload'. */
   gunFoley(kind: 'pump' | 'dry' | 'reload', at: Vec3) { if (this.loaded) this.gunfire?.foley(kind, at); }
 
+  /**
+   * Police dispatch (world/dispatch.ts): bind gameplay's emitter (`radio`, `police`, `copKilled`, `reportFiled`)
+   * and the scanner runs itself. `dispatchSay` queues a line directly. Subtitles arrive as on('dispatch').
+   */
+  bindGameplay(gp: { on(type: string, cb: (e: any) => void): void }) { this.dispatch.bindGameplay(gp); }
+  dispatchSay(text: string, o: { voice?: 'central' | 'car'; urgent?: boolean; car?: number } = {}) { this.dispatch.say(text, o); }
+  officerDown(at: [number, number]) { this.dispatch.officerDown(at); }
+  /**
+   * Spoken place name at x,z: the nearest intersection as dispatch says it ("West 31st and 8th"). Gameplay's
+   * `policeSys.placeName` can use this so its radio text stays inside the rendered vocabulary.
+   */
+  placeName(x: number, z: number): string {
+    let best: { a: string; b: string } | null = null, bd = 160;
+    for (const it of this.geo.intersections) { const d = Math.hypot(it.x - x, it.z - z); if (d < bd) { bd = d; best = it; } }
+    if (!best) return 'the area';
+    const short = (n: string) => n.replace(/ Street$| Drive$/, '').replace(/^(\d+\w+) Avenue$/, '$1');
+    const isAve = (n: string) => /Avenue|Broadway|Place/.test(n);
+    const [st, av] = isAve(best.a) && !isAve(best.b) ? [best.b, best.a] : [best.a, best.b];
+    return `${short(st)} and ${short(av)}`;
+  }
+
   /** Footstep from the characters' animation events (player or NPC). */
   footstep(e: Parameters<Footsteps['footstep']>[0]) { this.footsteps?.footstep(e); }
 
@@ -293,7 +321,7 @@ export class AudioSystem {
   }
 
   /** Engine events out: 'lightning' {distance, delay, near} (flash the sky), 'radioSubtitle', 'bark'. */
-  on(type: 'lightning' | 'radioSubtitle' | 'bark', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
+  on(type: 'lightning' | 'radioSubtitle' | 'bark' | 'dispatch', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }
 
   /**
    * One-shots by name: any baked/streamed family ('door.slam', 'ui.select', 'glass'...), or
@@ -335,7 +363,7 @@ export class AudioSystem {
   get stats() {
     return {
       state: this.runtime.state, voices: { ...this.vm?.stats }, mixer: { ...this.mixer?.stats }, bank: { ...this.bank?.stats, budget: this.bank?.budgetBytes, noiseBytes: this.noise ? noiseBytes(this.noise) : 0 },
-      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats }, crowd: { ...this.crowd?.stats }, gunfire: this.gunfire ? { ...this.gunfire.stats } : null,
+      canyon: this.canyon?.state, mix: this.ambience?.mix, ambience: this.ambience?.stats, vehicles: this.vehicles?.stats, footsteps: this.footsteps?.stats, vendors: { ...this.vendors?.stats }, dispatch: this.dispatch ? { ...this.dispatch.stats } : null, crowd: { ...this.crowd?.stats }, gunfire: this.gunfire ? { ...this.gunfire.stats } : null,
       dialogue: this.dialogue?.system.stats, speech: this.voiceLib?.stats, radioFeeds: this.radio?.system.activeFeeds, geo: this.geo.stats, timing: { ...this.timing, samples: undefined }, load: this.loadStats,
       emitters: this.ambience?.emitterCounts(), outputLatency: (this.runtime.ctx as AudioContext).outputLatency ?? 0, baseLatency: (this.runtime.ctx as AudioContext).baseLatency ?? 0,
     };

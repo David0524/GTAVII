@@ -145,3 +145,17 @@ engine branch. Format: `## From <team>: N. Title` with what, why and the fallbac
 - **Also, for sim:** forward the same shots to `sim.emit({ type: 'gunfire', x, z })` as today. Vendors and peds react through the sim, and audio voices those reactions from the sim's events.
 - **Cost:** a shot is 1 voice plus up to 8 echoes (High) or 4 (Low). Measured on the `shootout_8th` scene: p95 0.6 ms on High, voice cap held.
 - **Fallback:** no calls means no gunfire audio.
+
+## From audio: 14. Police dispatch: bind gameplay's emitter, and use audio's place names
+- **What:**
+  - Call `audio.bindGameplay(gameplay)` once. Audio listens to `radio`, `police`, `copKilled` and `reportFiled`, and runs the scanner itself.
+  - Set `policeSys.placeName = (x, z) => audio.placeName(x, z)` ("West 31st and 8th", from the map's real intersections).
+  - Show `audio.on('dispatch', e)` as subtitles. The payload is `{text, speaker: 'Central' | 'Car N', duration, urgent}`.
+- **Why:**
+  - Dispatch is stitched from build-time voice fragments.
+  - Radio text that uses audio's place names stays inside the rendered vocabulary.
+  - Anything outside the vocabulary is garbled on air, but stays readable in the subtitle.
+- **Build:** nothing new. The fragments render in `npm run audio:voices:build` (request 11). The deploy grows from 31 to 44 MB of fetched-on-demand speech, about 2,300 fragments.
+- **Fallback:**
+  - Without the binding, no scanner plays.
+  - Without renders, every word garbles, but the subtitles still work.

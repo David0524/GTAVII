@@ -23,6 +23,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { voiceKey, castVoice, type VoiceCast } from '../../src/audio/dialogue/voiceKey';
 import { measure } from './loudness';
+import { dispatchVocab } from '../../src/audio/dialogue/dispatchText';
 
 const args = process.argv.slice(2);
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
@@ -72,7 +73,18 @@ for (const f of readdirSync(join(CONTENT, 'dialogue')).filter((x) => x.endsWith(
 }
 for (const f of readdirSync(join(CONTENT, 'barks')).filter((x) => x.endsWith('.json'))) {
   const d = JSON.parse(readFileSync(join(CONTENT, 'barks', f), 'utf8')); const pool = f.replace(/\.json$/, '');
-  for (const l of d.lines ?? []) add(`npc.${pool}`, l.emotion, l.text, `barks.${pool}:${l.context}`);
+  // Templated lines ({street}, {description}...) are dispatch radio: they're stitched from fragments below, never rendered whole.
+  for (const l of d.lines ?? []) if (!/[{}]/.test(l.text ?? '')) add(`npc.${pool}`, l.emotion, l.text, `barks.${pool}:${l.context}`);
+}
+// Police dispatch fragments (src/audio/dialogue/dispatchText.ts): Central in two registers, the radio cars in one.
+{
+  const streets = existsSync('public/data/streets.json') ? [...new Set((JSON.parse(readFileSync('public/data/streets.json', 'utf8')) as { n: string }[]).map((x) => x.n))] : [];
+  const pf = join(CONTENT, 'police', 'precincts.json'); const precincts = existsSync(pf) ? (JSON.parse(readFileSync(pf, 'utf8')).precincts ?? []).map((x: { name: string }) => x.name) : [];
+  const templates: string[] = [];
+  for (const f of ['police_radio', 'cop_killed']) { const bf = join(CONTENT, 'barks', `${f}.json`); if (existsSync(bf)) for (const l of JSON.parse(readFileSync(bf, 'utf8')).lines ?? []) if (f === 'police_radio' || l.context === 'radio') templates.push(l.text); }
+  const vocab = dispatchVocab({ streets, precincts, templates });
+  for (const v of vocab) { add('dispatch.central', 'flat', v, 'dispatch'); add('dispatch.central', 'urgent', v, 'dispatch'); add('dispatch.car', 'flat', v, 'dispatch'); }
+  console.log(`dispatch vocabulary: ${vocab.length} fragments x 3 voice registers`);
 }
 if (existsSync(join(CONTENT, 'radio.json'))) {
   for (const s of JSON.parse(readFileSync(join(CONTENT, 'radio.json'), 'utf8')).stations ?? []) (s.patter ?? []).forEach((p: { text: string }, i: number) => add(`dj.${s.id}`, 'radio', p.text, `${s.id}.p${i}`));
