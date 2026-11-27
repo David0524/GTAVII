@@ -139,6 +139,8 @@ export interface SimCore {
   view: { x: number; z: number; dx: number; dz: number; cosHalf: number; fade: number } | null;
   densityHook: ((x: number, z: number, kind: 'vehicle' | 'ped') => number) | null;
   emit(type: string, e: Record<string, unknown>): void;
+  /** horn chains (incidents.ts): every honk reports here and gets its chain id/depth */
+  hornHook?: (v: Vehicle, reason: string) => { chain: number; depth: number };
   stats: Stats; nextId: number;
   pedById: Map<number, Ped>;
   busStopOf: Map<number, BusStop>;
