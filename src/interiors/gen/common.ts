@@ -46,8 +46,8 @@ export function makeCtx(k: Kit, unit: UnitRec, b: BuildingInfo, quality: GenCtx[
 
 export function wallMatFor(c: GenCtx, kind: InteriorKind): Mat {
   const r = c.r;
-  if (c.k.grade >= 4 && r.chance(0.75)) return r.pick([M.paneling, M.marble, M.wallpaper, M.panelingLight]);
-  if (c.k.grade === 0 && r.chance(0.5)) return r.pick([M.brickPainted, tint(M.plasterCream, '#a89a7a'), M.brick]);
+  if (c.k.grade >= 4 && c.k.wr.chance(0.75)) return c.k.wr.pick([M.paneling, M.marble, M.wallpaper, M.panelingLight]);
+  if (c.k.grade === 0 && c.k.wr.chance(0.5)) return c.k.wr.pick([M.brickPainted, tint(M.plasterCream, '#a89a7a'), M.brick]);
   switch (kind) {
     case 'diner': case 'coffee_shop': return r.pick([M.subway, M.plasterCream, tint(M.subway, '#d9cfae')]);
     case 'bar': return r.pick([M.paneling, M.wallpaper, M.brick, tint(M.plasterCream, '#8c6a4a')]);
@@ -58,11 +58,11 @@ export function wallMatFor(c: GenCtx, kind: InteriorKind): Mat {
     default: return r.pick([M.plasterCream, M.plasterGreen, M.brickPainted, M.panelingLight, M.plasterYellow]);
   }
 }
-export function ceilingMatFor(c: GenCtx): Mat { if (c.k.grade >= 4) return c.era === 'modern' ? M.ceilingPlaster : M.tin; return c.era === 'modern' ? (c.r.chance(0.6) ? M.acoustic : M.ceilingPlaster) : c.era === 'deco' ? M.ceilingPlaster : M.tin; }
+export function ceilingMatFor(c: GenCtx): Mat { if (c.k.grade >= 4) return c.era === 'modern' ? M.ceilingPlaster : M.tin; return c.era === 'modern' ? (c.k.wr.chance(0.6) ? M.acoustic : M.ceilingPlaster) : c.era === 'deco' ? M.ceilingPlaster : M.tin; }
 export function floorMatFor(c: GenCtx, kind: InteriorKind): Mat {
   const r = c.r;
-  if (c.k.grade >= 4 && r.chance(0.7)) return r.pick([M.terrazzo, M.marble, M.carpetRed]);
-  if (c.k.grade <= 1 && r.chance(0.6)) return r.pick([M.planksWorn, M.lino, M.linoGreen, M.concrete]);
+  if (c.k.grade >= 4 && c.k.wr.chance(0.7)) return c.k.wr.pick([M.terrazzo, M.marble, M.carpetRed]);
+  if (c.k.grade <= 1 && c.k.wr.chance(0.6)) return c.k.wr.pick([M.planksWorn, M.lino, M.linoGreen, M.concrete]);
   switch (kind) {
     case 'diner': return r.pick([M.checkerBW, M.checkerRed, M.terrazzo, M.lino]);
     case 'coffee_shop': return r.pick([M.hexWhite, M.terrazzo, M.lino, M.checkerBW]);
@@ -116,7 +116,7 @@ export function shopShell(c: GenCtx, kind: InteriorKind, o: { back?: number | fa
   for (const q of ops) revealBox(k, q.s0, q.s1, q.y0, q.y1, frame, q.y0 > 0.01);
   // above-ceiling spandrel cap so you can't see into the wall from the street
   // glass + street portals
-  const boarded = k.grade === 0 && r.chance(0.55); // derelict storefronts: plywood over the display glass (DOCUMERICA street refs)
+  const boarded = k.grade === 0 && k.wr.chance(0.55); // derelict storefronts: plywood over the display glass (DOCUMERICA street refs)
   for (const [s0, s1] of windows) {
     if (boarded) for (let x = s0; x < s1 - 0.05; x += 1.22) k.box(x, sill - 0.05, 0.08, Math.min(s1, x + 1.2), winTop + 0.05, 0.1, tint(M.planksWorn, '#8a7a5a'), { occlude: true, collide: true });
     k.box(s0, sill, 0.06, s1, winTop, 0.075, M.glass, { glass: true, occlude: false });
@@ -199,8 +199,8 @@ export function shopLights(c: GenCtx, s: ShopShell, o: { intensity?: number; kin
   let kind: 'fluor' | 'globe' | 'pendant' | 'bulb' | 'chandelier' = o.kind ?? (c.era === 'modern' ? 'fluor' : c.era === 'deco' ? 'globe' : 'pendant');
   if (g >= 4 && kind !== 'fluor') kind = 'chandelier';
   else if (g >= 4 && kind === 'fluor') kind = 'globe';
-  else if (g <= 1 && kind === 'pendant') kind = c.r.chance(0.5) ? 'bulb' : 'pendant';
-  else if (g === 0) kind = c.r.chance(0.6) ? 'bulb' : kind;
+  else if (g <= 1 && kind === 'pendant') kind = k.wr.chance(0.5) ? 'bulb' : 'pendant';
+  else if (g === 0) kind = k.wr.chance(0.6) ? 'bulb' : kind;
   const I = o.intensity ?? 1;
   const W = s.x1 - s.x0, D = s.z1 - s.z0;
   const cols = Math.max(1, Math.round(W / 3.2)), rows = Math.max(1, Math.round(D / 3.2));

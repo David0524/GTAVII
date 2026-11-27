@@ -38,7 +38,7 @@ async function shot(page: Page, q: string, file: string, settle = 600) {
 }
 
 async function main() {
-  const [mode, a, b] = args;
+  const [mode, a, b, cview] = args;
   if (mode === 'gallery') {
     // one page load per kind; interiors are swapped in-page (__INT.show)
     const kinds = a === 'all' ? ['diner', 'coffee_shop', 'bar', 'deli', 'bodega', 'liquor', 'barber', 'beauty', 'pawn', 'laundromat', 'shoe_repair', 'tailor', 'newsstand', 'clothing', 'hardware', 'florist', 'garment_showroom', 'fur_showroom', 'pool_hall', 'gym', 'cinema_lobby', 'tenement', 'sro', 'apartment_lobby', 'office_lobby', 'hotel_lobby', 'loft', 'garage', 'church', 'union_hall'] : a.split(',');
@@ -103,9 +103,9 @@ async function main() {
       await page.goto(url(`gallery=${a}&n=${b ?? 0}`));
       await page.waitForFunction(() => (window as any).__INT?.ready, null, { timeout: 180_000 });
       for (let g = 0; g <= 4; g++) {
-        await page.evaluate(([k, i, gg]) => (window as any).__INT.show(k, i, 'door', gg), [a, +(b ?? 0), g] as [string, number, number]);
+        await page.evaluate(([k, i, gg, v]) => (window as any).__INT.show(k, i, v, gg), [a, +(b ?? 0), g, cview ?? 'door'] as [string, number, number, string]);
         await page.waitForTimeout(300);
-        const f = path.join(ROOT, `shots/interiors/grades/${a}_${b ?? 0}_g${g}.png`); fs.mkdirSync(path.dirname(f), { recursive: true }); await page.screenshot({ path: f });
+        const f = path.join(ROOT, `shots/interiors/grades/${a}_${b ?? 0}${cview ? '_' + cview.replace(/\W+/g, '') : ''}_g${g}.png`); fs.mkdirSync(path.dirname(f), { recursive: true }); await page.screenshot({ path: f });
       }
     });
   } else if (mode === 'tierc') {

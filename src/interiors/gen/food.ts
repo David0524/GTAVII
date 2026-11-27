@@ -98,7 +98,7 @@ export function genDiner(c: GenCtx, coffee = false) {
   const side: 'x0' | 'x1' = doorLeft ? 'x1' : 'x0';
   const zStart = s.z0 + 1.5, zEnd = s.z1 - (s.backCell === null ? 1.4 : 0.6);
   const seat = r.pick([M.vinylRed, M.vinylGreen, M.vinylBrown, M.vinylOrange]);
-  const top = c.k.grade >= 3 ? M.enamelWhite /* linen (kept/pristine: Stouffer's, Schrafft's references) */ : r.pick([M.formicaCream, M.formicaTeal, tint(M.formicaCream, '#c9c2b0')]);
+  const formica = r.pick([M.formicaCream, M.formicaTeal, tint(M.formicaCream, '#c9c2b0')]), top = c.k.grade >= 3 ? M.enamelWhite /* linen (kept/pristine: Stouffer's, Schrafft's references) */ : formica;
   const front = r.pick([M.formicaRed, M.steel, tint(M.formicaRed, '#7a4a2a'), M.subway]);
   counterRun(c, s, side, zStart, zEnd, { seat, top, front, backBar: 'diner' });
   const counterSpan = 0.62 + 0.85 + 0.62 + 0.42 + 0.45; // back bar + aisle + counter + stools reach

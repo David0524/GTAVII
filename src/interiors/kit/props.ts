@@ -6,6 +6,7 @@
  */
 import { type Kit, type BoxOpts, type V3, F } from './Kit';
 import { M, type Mat, tint, hex } from './materials';
+import { seatWear, antimacassar, tableDressing, mismatch, W as WM } from './wear';
 
 export interface Frame { x: number; z: number; yaw: number }
 /** Box in a prop frame (axis-aligned in the frame). */
@@ -39,20 +40,28 @@ export const toWorld = (f: Frame, x: number, z: number): [number, number] => {
 export function stool(k: Kit, x: number, z: number, seat: Mat = M.vinylRed, h = 0.72) {
   k.cyl(x, 0, z, 0.2, 0.03, M.chrome, 10);
   k.cyl(x, 0.03, z, 0.035, h - 0.1, M.chrome, 6, { top: false });
-  k.cyl(x, h - 0.08, z, 0.19, 0.08, seat, 12);
+  // derelict/worn: a seat torn off its post; otherwise tape or splits on the vinyl
+  if (k.wr.chance([0.25, 0.07, 0, 0, 0][k.grade])) k.cyl(x, h - 0.1, z, 0.06, 0.02, M.steel, 8);
+  else { k.cyl(x, h - 0.08, z, 0.19, 0.08, mismatch(k, seat), 12); seatWear(k, { x, z, yaw: k.wr.range(0, 6.28) }, -0.12, -0.12, 0.12, 0.12, h); }
   k.collider({ c: [x, h / 2, z], h: [0.18, h / 2, 0.18], yaw: 0 });
 }
 export function chair(k: Kit, f: Frame, mat: Mat = M.wood, seat: Mat = mat) {
+  if (k.grade <= 1 && k.wr.chance(k.grade === 0 ? 0.4 : 0.28)) { mat = k.wr.pick([M.wood, M.woodDark, M.woodLight, M.paintGrey]); seat = mismatch(k, mat); }
+  const broken = k.wr.chance([0.3, 0.06, 0, 0, 0][k.grade]);
   for (const [lx, lz] of [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]]) pbox(k, f, lx - 0.02, 0, lz - 0.02, lx + 0.02, 0.45, lz + 0.02, mat, { occlude: false });
   pbox(k, f, -0.23, 0.45, -0.23, 0.23, 0.49, 0.23, seat, { breakable: 'chair' });
-  pbox(k, f, -0.22, 0.49, 0.19, 0.22, 0.92, 0.23, mat, { occlude: false });
+  if (broken) pbox(k, f, -0.22, 0.49, 0.19, -0.18, 0.75, 0.23, mat, { occlude: false }); // back snapped off, one upright left
+  else pbox(k, f, -0.22, 0.49, 0.19, 0.22, 0.92, 0.23, mat, { occlude: false });
+  if (seat !== mat) seatWear(k, f, -0.2, -0.2, 0.2, 0.2, 0.49);
   k.collider({ c: [f.x, 0.25, f.z], h: [0.22, 0.25, 0.22], yaw: f.yaw, breakable: 'chair' });
 }
 export function chromeChair(k: Kit, f: Frame, seat: Mat = M.vinylRed) {
+  seat = mismatch(k, seat);
   for (const [lx, lz] of [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]]) pbox(k, f, lx - 0.012, 0, lz - 0.012, lx + 0.012, 0.44, lz + 0.012, M.chrome, { occlude: false });
   pbox(k, f, -0.22, 0.44, -0.22, 0.22, 0.5, 0.22, seat);
   pbox(k, f, -0.2, 0.58, 0.18, 0.2, 0.86, 0.24, seat, { occlude: false });
   pbox(k, f, -0.2, 0.5, 0.2, -0.18, 0.62, 0.22, M.chrome, { occlude: false }); pbox(k, f, 0.18, 0.5, 0.2, 0.2, 0.62, 0.22, M.chrome, { occlude: false });
+  seatWear(k, f, -0.2, -0.2, 0.2, 0.2, 0.5);
   k.collider({ c: [f.x, 0.25, f.z], h: [0.22, 0.25, 0.22], yaw: f.yaw, breakable: 'chair' });
 }
 /** Diner/bar booth: two benches facing each other with a table, along local x width w (~1.2). Frame z points along the booth's length. */
@@ -62,6 +71,7 @@ export function booth(k: Kit, f: Frame, len: number, seat: Mat, table: Mat = M.f
     const z0 = side < 0 ? 0 : len - 0.55, z1 = side < 0 ? 0.55 : len;
     pbox(k, f, -w / 2, 0, z0, w / 2, 0.44, z1, M.woodDark, { collide: 'cover' });
     pbox(k, f, -w / 2 + 0.02, 0.44, z0 + 0.006, w / 2 - 0.02, 0.5, z1 - 0.006, seat, { faces: F.ALL & ~F.NY });
+    seatWear(k, f, -w / 2 + 0.1, z0 + 0.1, w / 2 - 0.1, z1 - 0.1, 0.5);
     const bz0 = side < 0 ? 0 : len - 0.14, bz1 = side < 0 ? 0.14 : len;
     pbox(k, f, -w / 2 + 0.004, 0.5, bz0 + (side < 0 ? 0.004 : 0), w / 2 - 0.004, 1.15, bz1 - (side < 0 ? 0 : 0.004), seat, { collide: 'cover', faces: F.ALL & ~F.NY });
     pbox(k, f, -w / 2, 1.15, bz0 - 0.01, w / 2, 1.2, bz1 + 0.01, M.woodDark, { faces: F.ALL & ~F.NY });
@@ -82,9 +92,16 @@ export function armchair(k: Kit, f: Frame, mat: Mat = M.fabricBrown) {
   const W = (x: number, y: number, z: number): V3 => { const [wx, wz] = toWorld(f, x, z); return [wx, y, wz]; };
   pbox(k, f, -0.4, 0.12, -0.38, 0.4, 0.36, 0.38, mat, { collide: 'cover' });
   pbox(k, f, -0.41, 0.115, -0.385, 0.41, 0.125, 0.385, M.woodDark, { occlude: false });
-  pbox(k, f, -0.27, 0.36, -0.36, 0.27, 0.47, 0.2, mat, { occlude: false });
-  k.tube(W(-0.27, 0.47, -0.36), W(0.27, 0.47, -0.36), 0.012, tint(mat, mat.c.map((c) => c * 0.7) as [number, number, number]), 6);
+  // derelict: the seat cushion is gone (springs and hessian showing); worn: sagging and taped
+  if (k.wr.chance([0.5, 0.1, 0, 0, 0][k.grade])) pbox(k, f, -0.27, 0.34, -0.34, 0.27, 0.36, 0.2, tint(WM.stuffing, '#8a7a5a'), { occlude: false });
+  else {
+    const sag = k.grade <= 1 ? 0.035 : 0;
+    pbox(k, f, -0.27, 0.36, -0.36, 0.27, 0.47 - sag, 0.2, mat, { occlude: false });
+    k.tube(W(-0.27, 0.47 - sag, -0.36), W(0.27, 0.47 - sag, -0.36), 0.012, tint(mat, mat.c.map((c) => c * 0.7) as [number, number, number]), 6);
+    seatWear(k, f, -0.25, -0.34, 0.25, 0.18, 0.47 - sag);
+  }
   pbox(k, f, -0.26, 0.47, 0.18, 0.26, 0.88, 0.3, mat, { occlude: false });                                   // back cushion
+  antimacassar(k, f, -0.18, 0.18, 0.95, 0.3, 0.38);
   pbox(k, f, -0.4, 0.36, 0.3, 0.4, 0.95, 0.38, mat, { occlude: false });
   for (const sx of [-1, 1]) { pbox(k, f, sx * 0.335 - 0.065, 0.36, -0.36, sx * 0.335 + 0.065, 0.58, 0.36, mat, { occlude: false }); k.tube(W(sx * 0.335, 0.6, -0.38), W(sx * 0.335, 0.6, 0.34), 0.075, mat, 10); }
   for (const [lx, lz] of [[-0.33, -0.3], [0.33, -0.3], [-0.33, 0.3], [0.33, 0.3]]) { const [wx, wz] = toWorld(f, lx, lz); k.cyl(wx, 0, wz, 0.02, 0.12, M.woodDark, 6, { r1: 0.028 }); }
@@ -98,11 +115,18 @@ export function sofa(k: Kit, f: Frame, len = 2, mat: Mat = M.fabricPlaid) {
   const n = len > 1.6 ? 3 : 2, cw = (2 * inner) / n;
   for (let q = 0; q < n; q++) {
     const x0 = -inner + q * cw + 0.01, x1 = x0 + cw - 0.02;
-    pbox(k, f, x0, 0.36, -0.38, x1, 0.47, 0.2, mat, { occlude: false });                                     // seat cushion
+    if (k.wr.chance([0.45, 0.08, 0, 0, 0][k.grade])) pbox(k, f, x0, 0.34, -0.36, x1, 0.36, 0.2, tint(WM.stuffing, '#8a7a5a'), { occlude: false }); // cushion gone
+    else {
+      const sag = k.grade <= 1 ? k.wr.range(0.01, 0.045) : 0;
+      pbox(k, f, x0, 0.36, -0.38, x1, 0.47 - sag, 0.2, mat, { occlude: false });                             // seat cushion
+      k.tube(W(x0, 0.47 - sag, -0.38), W(x1, 0.47 - sag, -0.38), 0.012, tint(mat, mat.c.map((c) => c * 0.7) as [number, number, number]), 6); // piping
+      seatWear(k, f, x0 + 0.04, -0.36, x1 - 0.04, 0.18, 0.47 - sag);
+    }
     pbox(k, f, x0 + 0.02, 0.47, 0.18, x1 - 0.02, 0.86, 0.34, mat, { occlude: false });                       // back cushion
-    k.tube(W(x0, 0.47, -0.38), W(x1, 0.47, -0.38), 0.012, tint(mat, mat.c.map((c) => c * 0.7) as [number, number, number]), 6); // piping
+    antimacassar(k, f, (x0 + x1) / 2 - 0.15, (x0 + x1) / 2 + 0.15, 0.9, 0.32, 0.42);
   }
   pbox(k, f, -len / 2 + 0.02, 0.36, 0.32, len / 2 - 0.02, 0.9, 0.42, mat, { occlude: false });                 // frame back
+  if (k.grade >= 4) for (const sx of [-1, 1]) { const [wx, wz] = toWorld(f, sx * (inner - 0.2), 0.08); k.obox(wx, 0.62, wz, 0.18, 0.15, 0.06, f.yaw + sx * 0.25, k.wr.pick([M.fabricRust, M.fabricCamel, M.fabricOlive]), {}); } // throw cushions
   for (const sx of [-1, 1]) {
     const ax = sx * (len / 2 - arm / 2);
     pbox(k, f, ax - arm / 2, 0.36, -0.38, ax + arm / 2, 0.58, 0.4, mat, { occlude: false });
@@ -114,6 +138,7 @@ export function sofa(k: Kit, f: Frame, len = 2, mat: Mat = M.fabricPlaid) {
 // ---------------------------------------------------------------- tables & counters
 export function table(k: Kit, f: Frame, w: number, d: number, top: Mat = M.formicaCream, h = 0.75, legs: Mat = M.chrome) {
   pbox(k, f, -w / 2, h - 0.03, -d / 2, w / 2, h, d / 2, top, { collide: 'cover', breakable: 'table' });
+  tableDressing(k, f, w, d, h);
   if (w < 0.9 && d < 0.9) { pbox(k, f, -0.035, 0, -0.035, 0.035, h - 0.03, 0.035, legs, { occlude: false }); pbox(k, f, -0.25, 0, -0.25, 0.25, 0.02, 0.25, legs); }
   else for (const [lx, lz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pbox(k, f, lx * (w / 2 - 0.06) - 0.025, 0, lz * (d / 2 - 0.06) - 0.025, lx * (w / 2 - 0.06) + 0.025, h - 0.03, lz * (d / 2 - 0.06) + 0.025, legs, { occlude: false });
 }
@@ -331,8 +356,12 @@ export function consoleTV(k: Kit, f: Frame, on: boolean) {
 }
 export function bed(k: Kit, f: Frame, w = 1.35, len = 1.95, spread: Mat = M.fabricRust) {
   pbox(k, f, -w / 2, 0, 0, w / 2, 0.35, len, M.steel, { collide: 'cover' });
-  pbox(k, f, -w / 2 + 0.02, 0.35, 0.02, w / 2 - 0.02, 0.55, len - 0.02, spread);
-  pbox(k, f, -w / 2 + 0.1, 0.55, 0.05, w / 2 - 0.1, 0.65, 0.4, M.enamelWhite);
+  if (k.grade === 0) { pbox(k, f, -w / 2 + 0.02, 0.35, 0.02, w / 2 - 0.02, 0.5, len - 0.02, WM.ticking); if (k.wr.chance(0.5)) { const [wx, wz] = toWorld(f, 0.1, len * 0.6); k.obox(wx, 0.52, wz, w * 0.35, 0.02, 0.5, f.yaw + 0.4, M.fabricOlive); } } // bare ticking, an army blanket
+  else {
+    pbox(k, f, -w / 2 + 0.02, 0.35, 0.02, w / 2 - 0.02, 0.55, len - 0.02, k.grade >= 3 ? spread : mismatch(k, spread));
+    if (k.grade >= 3) pbox(k, f, -w / 2 + 0.015, 0.5, 0.42, w / 2 - 0.015, 0.556, 0.7, WM.linen, { occlude: false }); // turned-down sheet
+    pbox(k, f, -w / 2 + 0.1, 0.55, 0.05, w / 2 - 0.1, 0.65, 0.4, k.grade <= 1 ? tint(M.enamelWhite, '#b8ab8a') : M.enamelWhite);
+  }
   pbox(k, f, -w / 2, 0, -0.04, w / 2, 1.05, 0.0, M.steel, { occlude: false });
 }
 export function dresser(k: Kit, f: Frame, w = 1.0) {

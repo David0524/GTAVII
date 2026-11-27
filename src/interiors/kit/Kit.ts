@@ -92,6 +92,8 @@ interface CellBuild { id: number; name: string; level: number; box: CellOut['box
 
 export class Kit {
   readonly rng: Rng;
+  /** wear/dressing stream, independent of layout: the same interior keeps its layout at every condition grade */
+  readonly wr: Rng;
   readonly cells: CellBuild[] = [];
   readonly colliders: ColliderOut[] = [];
   readonly portals: PortalOut[] = [];
@@ -113,6 +115,7 @@ export class Kit {
   readonly low: boolean;
   constructor(seed: number, public readonly id: string, quality: 'low' | 'medium' | 'high' | 'ultra') {
     this.rng = new Rng(seed);
+    this.wr = new Rng((seed ^ 0x5bd1e995) >>> 0);
     this.tess = quality === 'low' ? 1.1 : quality === 'medium' ? 0.8 : 0.6;
     this.low = quality === 'low';
   }
@@ -274,7 +277,7 @@ export class Kit {
     // structural cues per grade: derelict debris and fallen plaster; kept/pristine crown moulding + picture rail
     if (this.grade === 0) {
       const n = Math.round(((x1 - x0) * (z1 - z0)) / 6);
-      for (let q = 0; q < n; q++) { const x = this.rng.range(x0 + 0.3, x1 - 0.3), z = this.rng.range(z0 + 0.3, z1 - 0.3), sz = this.rng.range(0.1, 0.45); this.box(x - sz, y0, z - sz * 0.7, x + sz, y0 + this.rng.range(0.03, 0.18), z + sz * 0.7, { c: [0.5, 0.46, 0.4], pat: 23, p: 0, wear: 1 } as Mat, { occlude: false }); }
+      for (let q = 0; q < n; q++) { const w = this.wr, x = w.range(x0 + 0.3, x1 - 0.3), z = w.range(z0 + 0.3, z1 - 0.3), sz = w.range(0.1, 0.45); this.box(x - sz, y0, z - sz * 0.7, x + sz, y0 + w.range(0.03, 0.18), z + sz * 0.7, { c: [0.5, 0.46, 0.4], pat: 23, p: 0, wear: 1 } as Mat, { occlude: false }); }
       // fallen-plaster patches on the ceiling are procedural too (material.ts, ceilings at high wear)
     } else if (this.grade >= 3 && y1 - y0 > 2.6) {
       const mould = this.grade >= 4 ? ({ c: [0.86, 0.8, 0.66], pat: 0, p: 0, wear: 0.1 } as Mat) : ({ c: [0.78, 0.73, 0.62], pat: 0, p: 0, wear: 0.2 } as Mat);
@@ -356,7 +359,7 @@ export class Kit {
 
   light(x: number, y: number, z: number, color: [number, number, number], intensity: number, kind: LightOut['kind'] = 'bulb', flicker?: number) {
     const g = GRADE[this.grade];
-    const dying = kind !== 'neon' && kind !== 'window' && this.rng.chance(g.dying);
+    const dying = kind !== 'neon' && kind !== 'window' && this.wr.chance(g.dying);
     this.lights.push({ x, y, z, color, intensity: intensity * g.lamp * (dying ? 0.35 : 1), kind, cell: this.cur, flicker: dying ? 1 : flicker });
   }
   artSlot(use: ArtSlotOut['use'], x: number, y: number, z: number, w: number, h: number, nx: number, nz: number) {

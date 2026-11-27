@@ -77,7 +77,7 @@ export async function runInteriorsTest() {
     const fly = new FlyCamera(camera, new Input(renderer.domElement));
     let label = '';
     /** Show seeded interior n (0..29) of `kind`; picks are spread evenly across the city's units of that kind. */
-    const show = async (kind: string, n: number, view: 'door' | 'back' | 'cam' = 'door', cond?: number) => {
+    const show = async (kind: string, n: number, view: 'door' | 'back' | 'cam' | string = 'door', cond?: number) => {
       const list: { b: BuildingIdx; u: UnitRec }[] = [];
       for (const { b, u } of interiors.allUnits()) if (u.kind === kind) list.push({ b, u });
       const step = Math.max(1, Math.floor(list.length / 30));
@@ -97,7 +97,13 @@ export async function runInteriorsTest() {
       const street = new THREE.Mesh(new THREE.PlaneGeometry(80, 30).rotateX(-Math.PI / 2), streetMat); street.position.set(pick.u.w / 2, -0.05, -15); holder.add(street);
       const opp = new THREE.Mesh(new THREE.BoxGeometry(80, 25, 2), oppMat); opp.position.set(pick.u.w / 2, 12, -22); holder.add(opp);
       const cp = params.get('cam')?.split(',').map(Number);
-      if (view === 'cam' && cp) fly.set(cp[0], cp[1], cp[2], THREE.MathUtils.degToRad(cp[3]), THREE.MathUtils.degToRad(cp[4] ?? 0));
+      const cellRe = view.startsWith('cell:') ? new RegExp(view.slice(5), 'i') : null;
+      const vc = cellRe ? built.cells.find((c) => cellRe.test(c.name) && c.box[4] - c.box[1] < 5.5) : undefined;
+      if (vc) {
+        // inside a named cell: stand in one corner at eye height, look across the diagonal
+        const [x0, y0, z0, x1, , z1] = vc.box, ex = x0 + 0.35, ez = z0 + 0.35;
+        fly.set(ex, y0 + 1.6, ez, Math.atan2(-(x1 - ex), -(z1 - ez)), -0.16);
+      } else if (view === 'cam' && cp) fly.set(cp[0], cp[1], cp[2], THREE.MathUtils.degToRad(cp[3]), THREE.MathUtils.degToRad(cp[4] ?? 0));
       else if (view === 'back') fly.set(Math.min(pick.u.w - 0.6, Math.max(0.6, pick.u.w * 0.75)), 1.65, pick.u.d - 1.0, 0.25 * (pick.u.w > 3 ? 1 : 0), -0.1);
       else fly.set(pick.u.door.t, 1.6, Math.min(1.8, pick.u.d * 0.18), Math.PI, -0.12);
       label = `${kind} #${n}  b${pick.b.id} ${pick.b.address ?? ''}  ${pick.b.year} use ${pick.b.use} style ${pick.b.style}  ${pick.u.w.toFixed(1)}x${pick.u.d.toFixed(1)} m  ${pick.b.district}  ${interiors.index.streets[pick.u.street] ?? ''}\nbuild ${ms.toFixed(0)} ms (main thread, ${quality.name})  verts ${built.stats.verts} tris ${tris} cells ${built.cells.length} slots ${built.slots.length} markers ${built.markers.length} colliders ${built.colliders.length}  [${backend}]`;

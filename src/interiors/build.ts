@@ -7,6 +7,7 @@ import type { BuiltInterior, MeshArrays } from './spec';
 import { bake } from './bake';
 import { makeCtx, type BuildingInfo, type GenCtx } from './gen/common';
 import { GENERATORS, genGenericShop } from './gen/registry';
+import { dressCells } from './kit/wear';
 import { KINDS } from './catalog';
 
 export interface BuildRequest {
@@ -33,6 +34,7 @@ export function buildInterior(req: BuildRequest): BuiltInterior {
   }
   const ctx: GenCtx = makeCtx(k, u, req.building, req.quality, ring, req.street);
   (GENERATORS[u.kind] ?? genGenericShop)(ctx);
+  if (u.kind !== 'hero') dressCells(k); // heroes are hand-dressed
   const cells = k.finishCells();
   const t1 = performance.now();
   // bounds

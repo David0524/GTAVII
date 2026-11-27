@@ -203,3 +203,7 @@ Reads as a modern kit or is wrong:
 5. The new requirements from oversight: subway stations and tunnels, lead homes, hospital ER,
    booking room and holding cell, garages and car lots, economy `upgradeLevel`, nav graph export
    for police pursuit.
+
+## Resume note (condition-grade furniture, in progress)
+- Done: `src/interiors/kit/wear.ts` (seat tape/tears, mismatched chairs, broken/fallen chairs, missing cushions, antimacassars, tablecloths/vases, ashtrays; `dressCells` post-pass adds grade clutter: cartons, bottles, trash bags, plywood, mattresses, papers at 0-1; rugs and plants at 3-4). Kit.wr is a separate wear RNG so layouts stay identical across grades. Stress: 0 failures.
+- Next: capture `grades` boards (tenement `cell:apt_`, diner 3, bar 1) as JPEG beside references, critique, tune; then review the pass-2 reference helper output (tools/refs/collectInteriors2.ts, uncommitted until reviewed).
