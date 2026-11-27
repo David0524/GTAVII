@@ -254,6 +254,7 @@ async function main() {
   }));
   report.show(hud.visible);
   document.getElementById('loading')?.remove();
+  if (params.get('sim') === '1') import('./sim/debug/SimDebugView').then((m) => m.attachSimDebug(scene, camera));
 
   // ---------------------------------------------------------------- UI (UI & Cinematics stream: one host, one update)
   // The UI reads the game only through this UiHost (src/shared/uiHost.ts). Gameplay, sim and narrative
