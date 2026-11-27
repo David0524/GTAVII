@@ -786,6 +786,34 @@ Board: `shots/characters/47_ict_pool.jpg`, from `?characters=1&scene=rocketbox&p
 - No distance switch between Delphine's full and light meshes.
 - Only 10 identities.
 
+## Teddy and Nick: current vs ICT candidate board (for the user's sign-off; nothing switched)
+
+Board: `shots/characters/48_teddy_nick_ict_board.jpg`. Each row is current | ICT candidate A | ICT candidate B. To view live: `?characters=1&scene=rocketbox&zoom=head&focus=0&t=2&h_teddy=lead_teddy_ict_a` (Nick: `focus=4&h_nick=lead_nick_ict_a`).
+
+**How the candidates were made.**
+- Synthesised from the written sheets in `heroes.ts`, never from photos:
+  - Teddy: 34, mixed ancestry, nose hump.
+  - Nick: 51, broad head, heavy brow.
+- 12 seeded candidates each, with sex, age and breadth modes set from the sheet. They were shown with `?scene=ict&cands=...` and the two closest picked by eye.
+- Baked as leads at full resolution (about 1.1 MB each, Delphine's budget). They carry:
+  - the sheet's tone, iris and brow colour;
+  - Teddy's stubble (new `stubble` option in `ict_tex.py`);
+  - CC0 MakeHuman photo micro-detail from the young and middle-aged Caucasian male skins.
+- Hair grows from the ICT scalp as a slim shell: 7 mm for `slick`, 12 mm for the side part. Our hair cards don't fit the ICT skull; on it they formed a mop.
+
+**Honest read: the current heads win for both. My recommendation is not to switch yet.**
+- **Hair.** The shell reads as a skull cap. Teddy's Rocketbox hair (its own cards) is far better. Nick's current card hair is a mop, but at least it reads as hair.
+- **Skin.** ICT skin is still flatter than the photographic Rocketbox textures, even with the MakeHuman detail.
+- **Teddy's neck seam.** It's jagged, and the shirt interior (red) shows. His body's neck is thicker than the ICT neck.
+- **Where ICT is ahead.** Proportions are more natural, with no Rocketbox low-poly silhouette, and every candidate keeps the same rig-free pipeline as Delphine.
+
+**What would make ICT win.**
+- Card hair grown on the ICT scalp (the open hair item).
+- Hand-painted or projected pore and wrinkle detail per lead.
+- A neck join that adapts to thicker necks.
+
+**Fixed while making the board: hair spikes.** Long `slick` and `sidePart` cards ran off the head below the ears. There the head map's radial projection lands on the neck or shoulders, and since today's strand texture, those cards showed as thin spikes. Strands now end when a step jumps or they leave the skull radius. This fixes our heads and Nick's current head. Nick's `slick` is still too mop-like; that's logged here.
+
 ## vs GTA V / VI / RDR2 (required on every milestone; `docs/briefs/REFERENCE_GAMES.md`)
 Benchmarks for this stream: faces, skin, hair, clothing, wardrobe variety, facial animation, idle
 variety, and the RDR2 level of animation detail. We study behaviour and quality; we copy nothing.

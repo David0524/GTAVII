@@ -1059,6 +1059,58 @@
    ],
    "lead": null,
    "ownHair": true
+  },
+  {
+   "id": "lead_teddy_ict_a",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 1166982,
+   "tag": null,
+   "skinRGB": [
+    185,
+    138,
+    103
+   ],
+   "lead": "lead_teddy_ict_a",
+   "ownHair": true
+  },
+  {
+   "id": "lead_nick_ict_a",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 1090796,
+   "tag": null,
+   "skinRGB": [
+    200,
+    161,
+    126
+   ],
+   "lead": "lead_nick_ict_a",
+   "ownHair": true
+  },
+  {
+   "id": "lead_teddy_ict_b",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 1174756,
+   "tag": null,
+   "skinRGB": [
+    185,
+    138,
+    103
+   ],
+   "lead": "lead_teddy_ict_b",
+   "ownHair": true
+  },
+  {
+   "id": "lead_nick_ict_b",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 1087632,
+   "tag": null,
+   "skinRGB": [
+    200,
+    161,
+    126
+   ],
+   "lead": "lead_nick_ict_b",
+   "ownHair": true
   }
  ]
 }

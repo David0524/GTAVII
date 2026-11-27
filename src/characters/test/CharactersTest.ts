@@ -91,7 +91,11 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     const act = num('act', 1);
     if (!qp.has('pool')) for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
       // Delphine's candidate head isn't preloaded as a lead (no matching base); load it to compare
-      const cand = /delphine/.test(hero) && factory.heads?.lead('lead_delphine') ? { rbHead: await factory.heads.load(qp.get('dhead') ?? 'lead_delphine'), ourHair: false } : {};
+      // h_<lead>=<head id>: a candidate head for that lead (ICT boards for sign-off); our hair cards
+      // unless the head grows its own
+      const short = hero.split('.')[1].split('_')[0], hid = qp.get(`h_${short}`) ?? (short === 'delphine' ? qp.get('dhead') ?? 'lead_delphine' : null);
+      const he = hid ? factory.heads?.index.find((h) => h.id === hid) : null;
+      const cand = he && factory.heads ? { rbHead: await factory.heads.load(he.id), ourHair: !he.ownHair } : {};
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, ...cand, ...(qp.has('rbhair') ? { ourHair: false } : {}), ...JSON.parse(qp.get('ov') ?? '{}') } }));
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }

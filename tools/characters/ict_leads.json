@@ -1,45 +1,247 @@
 {
-  "note": "Synthesised ICT-FaceKit Light identities (coefficients on the unit-variance identity modes, designed by hand in ?characters=1&scene=ict; never fitted to photographs). Mode 0: masculine/broad (-) to feminine/fine (+); mode 2: (+) longer, older; mode 3: (+) broader, softer face, wider nose.",
-  "delphine": {
-    "c": [
-      2.4,
-      0.5,
-      -0.8,
-      2.2,
-      0.6,
-      0,
-      0,
-      0.8
+ "note": "Synthesised ICT-FaceKit Light identities (coefficients on the unit-variance identity modes, designed by hand in ?characters=1&scene=ict; never fitted to photographs). Mode 0: masculine/broad (-) to feminine/fine (+); mode 2: (+) longer, older; mode 3: (+) broader, softer face, wider nose.",
+ "delphine": {
+  "c": [
+   2.4,
+   0.5,
+   -0.8,
+   2.2,
+   0.6,
+   0,
+   0,
+   0.8
+  ],
+  "tone": "#5a3825",
+  "status": "starting identity (candidate D); to refine with skin, eyes and hair",
+  "iris": "#4a2a16",
+  "detail": {
+   "png": "data/raw/characters/mh_skins/young_african_female.png",
+   "source": "MakeHuman system assets (CC0), skins/young_african_female/young_darkskinned_female_diffuse.png",
+   "crop": [
+    1540,
+    780,
+    440,
+    520
+   ],
+   "rotate": -90,
+   "eyes": [
+    [
+     172,
+     176
     ],
-    "tone": "#5a3825",
-    "status": "starting identity (candidate D); to refine with skin, eyes and hair",
-    "iris": "#4a2a16",
-    "detail": {
-      "png": "data/raw/characters/mh_skins/young_african_female.png",
-      "source": "MakeHuman system assets (CC0), skins/young_african_female/young_darkskinned_female_diffuse.png",
-      "crop": [
-        1540,
-        780,
-        440,
-        520
-      ],
-      "rotate": -90,
-      "eyes": [
-        [
-          172,
-          176
-        ],
-        [
-          312,
-          176
-        ]
-      ],
-      "mouth": [
-        245,
-        318
-      ],
-      "sigma": 6,
-      "strength": 0.85
-    }
+    [
+     312,
+     176
+    ]
+   ],
+   "mouth": [
+    245,
+    318
+   ],
+   "sigma": 6,
+   "strength": 0.85
   }
+ },
+ "teddy_ict_a": {
+  "c": [
+   -1.52,
+   -0.19,
+   -0.69,
+   0.39,
+   0.56,
+   -0.51,
+   0.8,
+   -0.27,
+   -0.12,
+   0.33,
+   -0.46,
+   -0.03,
+   -0.17,
+   1.09
+  ],
+  "tone": "#b98a67",
+  "iris": "#3a2414",
+  "brow": "#1c1814",
+  "stubble": 0.8,
+  "ownHair": true,
+  "status": "candidate for user sign-off (board 48); not switched",
+  "detail": {
+   "png": "data/raw/characters/mh_skins/young_caucasian_male.png",
+   "source": "MakeHuman system assets (CC0), skins/young_caucasian_male/young_lightskinned_male_diffuse.png",
+   "crop": [
+    1540,
+    780,
+    440,
+    520
+   ],
+   "rotate": -90,
+   "eyes": [
+    [
+     172,
+     176
+    ],
+    [
+     312,
+     176
+    ]
+   ],
+   "mouth": [
+    245,
+    318
+   ],
+   "sigma": 6,
+   "strength": 0.85
+  }
+ },
+ "teddy_ict_b": {
+  "c": [
+   -1.7000000000000002,
+   -1.03,
+   -0.22,
+   0.26,
+   -0.36,
+   0.6,
+   0.16,
+   -1.31,
+   -0.42,
+   0.64,
+   -0.33,
+   1.84,
+   -0.47,
+   -0.41
+  ],
+  "tone": "#b98a67",
+  "iris": "#3a2414",
+  "brow": "#1c1814",
+  "stubble": 0.8,
+  "ownHair": true,
+  "status": "candidate for user sign-off (board 48); not switched",
+  "detail": {
+   "png": "data/raw/characters/mh_skins/young_caucasian_male.png",
+   "source": "MakeHuman system assets (CC0), skins/young_caucasian_male/young_lightskinned_male_diffuse.png",
+   "crop": [
+    1540,
+    780,
+    440,
+    520
+   ],
+   "rotate": -90,
+   "eyes": [
+    [
+     172,
+     176
+    ],
+    [
+     312,
+     176
+    ]
+   ],
+   "mouth": [
+    245,
+    318
+   ],
+   "sigma": 6,
+   "strength": 0.85
+  }
+ },
+ "nick_ict_a": {
+  "c": [
+   -1.69,
+   0.94,
+   0.99,
+   1.88,
+   0.12,
+   1.01,
+   0.72,
+   -0.36,
+   1.27,
+   -0.26,
+   -1.08,
+   -0.34,
+   -0.65,
+   -0.39
+  ],
+  "tone": "#c8a17e",
+  "iris": "#2a1a10",
+  "brow": "#4a4440",
+  "ownHair": true,
+  "status": "candidate for user sign-off (board 48); not switched",
+  "detail": {
+   "png": "data/raw/characters/mh_skins/middleage_caucasian_male.png",
+   "source": "MakeHuman system assets (CC0), skins/middleage_caucasian_male/middleage_lightskinned_male_diffuse.png",
+   "crop": [
+    1540,
+    780,
+    440,
+    520
+   ],
+   "rotate": -90,
+   "eyes": [
+    [
+     172,
+     176
+    ],
+    [
+     312,
+     176
+    ]
+   ],
+   "mouth": [
+    245,
+    318
+   ],
+   "sigma": 6,
+   "strength": 0.85
+  }
+ },
+ "nick_ict_b": {
+  "c": [
+   -2.33,
+   -0.56,
+   1.42,
+   1.6300000000000001,
+   0.4,
+   -0.04,
+   -1.03,
+   -0.04,
+   0.72,
+   -0.92,
+   -0.76,
+   -0.58,
+   1.47,
+   -0.2
+  ],
+  "tone": "#c8a17e",
+  "iris": "#2a1a10",
+  "brow": "#4a4440",
+  "ownHair": true,
+  "status": "candidate for user sign-off (board 48); not switched",
+  "detail": {
+   "png": "data/raw/characters/mh_skins/middleage_caucasian_male.png",
+   "source": "MakeHuman system assets (CC0), skins/middleage_caucasian_male/middleage_lightskinned_male_diffuse.png",
+   "crop": [
+    1540,
+    780,
+    440,
+    520
+   ],
+   "rotate": -90,
+   "eyes": [
+    [
+     172,
+     176
+    ],
+    [
+     312,
+     176
+    ]
+   ],
+   "mouth": [
+    245,
+    318
+   ],
+   "sigma": 6,
+   "strength": 0.85
+  }
+ }
 }

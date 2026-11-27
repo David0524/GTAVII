@@ -26,6 +26,8 @@ export function scalpHairMesh(h: HeadAsset, fit: ReturnType<typeof fitHead>, app
     thick: (up, w) => ((0.008 + 0.004 * up) + app.hair.volume * 0.05 * (0.5 + 0.5 * up)) * w,
     density: (w) => Math.min(1, w ** 1.3) * (coily ? 1.1 : 1), freq: coily ? 3000 : 1800, clump: coily ? 2 : 0, brow: false,
   }];
+  // straight short styles lie on the scalp (slicked back, side part): a slim shell, no afro volume
+  if (!coily && /slick|sidePart|short|combOver/.test(app.hair.style)) specs.forEach((sp) => { if (sp.brow) return; const t = app.hair.style === 'slick' ? 0.007 : 0.012; sp.thick = (up, w) => (t * (0.7 + 0.3 * up)) * w; });
   // close crops (and bald: the head's weights hold only a fringe, see ict_tex.py 'horseshoe')
   if (app.hair.style === 'buzz' || app.hair.style === 'bald') specs.forEach((sp) => { sp.thick = (_u, w) => 0.004 * w; sp.layers = Math.min(sp.layers, 3); });
   // brows: ~1 mm of short straight strands

@@ -310,6 +310,13 @@ export function buildCards(ctx: CardCtx, mb: MeshBuilder, map: HeadMap): void {
       const t = s / len;
       const off = 0.0015 + vol * layer * st.lift(t, rootRel) + layer * 0.0015;
       const p = map.at(d, off);
+      // below the ears the head map's radial projection can land on the neck or shoulders: a strand
+      // that jumps (step far longer than ds) or leaves the skull's radius ends there
+      if (i > 0) {
+        const q = pts[pts.length - 1].p, jump = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+        const R0 = Math.hypot(rootRel[0], rootRel[1], rootRel[2]), Rp = Math.hypot(p[0] - c[0], p[1] - c[1], p[2] - c[2]);
+        if (jump > ds * 3 + 0.004 || Rp > R0 * 1.2 + 0.01) break;
+      }
       pts.push({ p, n: d, t });
       if (p[1] < cutY && i > 1) break;
       // never across the eyes or cheeks (fringes stop at the brow)

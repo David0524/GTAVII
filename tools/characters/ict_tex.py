@@ -156,6 +156,16 @@ sl = np.where(u < 0.5, tL, tR)
 strand = vnoise(np.stack([sl * 70 + v * 900, (v - np.where(u < 0.5, vbL, vbR)) * 260 + sl * 6, np.zeros_like(u)], 1))
 bd = browM * np.clip(0.45 + 0.75 * strand, 0, 1)
 col = col * (1 - 0.92 * bd[:, None]) + lin(job['brow'])[None] * 0.92 * bd[:, None]
+# stubble (job 'stubble' 0..1): a shadow over the beard area of the face tile (upper lip, chin,
+# jaw, up to the sideburns at the sides; the lips left clear) with a fine stipple of hair tips
+if job.get('stubble'):
+    top = 0.535 + 0.13 * ss(0.17, 0.33, au)
+    bm = isF * ss(top + 0.012, top - 0.02, v) * ss(0.13, 0.2, v) * ss(0.43, 0.36, au) * (1 - lipM) * (1 - earM)
+    bm *= 0.75 + 0.25 * fbm(p + 4.2, 60, 2)
+    tips = np.clip((vnoise(p * 2600) - 0.45) * 2.2, 0, 1)
+    k = float(job['stubble'])
+    col = col * (1 - (0.22 * k * bm)[:, None]) * np.array([1.0, 1.0, 1.04])[None] ** bm[:, None]
+    col = col * (1 - (0.5 * k * bm * tips)[:, None]) + lin(job['brow'])[None] * (0.5 * k * bm * tips)[:, None]
 # close-cropped hair: dark stipple over a shadowed scalp
 stip = vnoise(p * 1800)
 hd = hairM * np.clip(0.55 + 0.6 * (stip - 0.4), 0, 1)

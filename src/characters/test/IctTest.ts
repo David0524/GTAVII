@@ -4,6 +4,7 @@
  *   &c=0.5,-1.2,...   identity coefficients (unit-variance modes, typically -3..3)
  *   &grid=k           mode k at -3, 0, +3 side by side (to learn what each mode does)
  *   &modes=a-b        grid rows for several modes (e.g. 0-5): one row per mode
+ *   &cands=c;c;...    candidate identities in a grid (&cols=4)
  *   &yaw=deg          head turn
  * Identities are designed by hand from these controls only; never fitted to photographs.
  */
@@ -64,12 +65,15 @@ export async function ictScene(world: THREE.Scene, camera: THREE.PerspectiveCame
   const rows: number[] = [];
   if (qp.has('grid')) rows.push(Number(qp.get('grid')));
   if (qp.has('modes')) { const [a, b] = qp.get('modes')!.split('-').map(Number); for (let m = a; m <= b; m++) rows.push(m); }
-  if (rows.length) rows.forEach((m, r) => [-3, 0, 3].forEach((w, c) => { const cv = coef.slice(); cv[m] = (cv[m] ?? 0) + w; const h = headMesh(B, cv, mats); h.position.set((c - 1) * 0.3, -r * 0.36, 0); heads.push(h); }));
+  const cands = (qp.get('cands') ?? '').split(';').filter(Boolean).map((c) => c.split(',').map(Number));
+  const cols = Number(qp.get('cols') ?? 4);
+  if (cands.length) cands.forEach((cv, i) => { const h = headMesh(B, cv, mats); h.position.set(((i % cols) - (cols - 1) / 2) * 0.3, -Math.floor(i / cols) * 0.36, 0); heads.push(h); });
+  else if (rows.length) rows.forEach((m, r) => [-3, 0, 3].forEach((w, c) => { const cv = coef.slice(); cv[m] = (cv[m] ?? 0) + w; const h = headMesh(B, cv, mats); h.position.set((c - 1) * 0.3, -r * 0.36, 0); heads.push(h); }));
   else heads.push(headMesh(B, coef, mats));
   for (const h of heads) { h.rotation.y = yaw; world.add(h); }
-  const nR = Math.max(1, rows.length);
+  const nR = Math.max(1, rows.length, cands.length ? Math.ceil(cands.length / cols) : 0), grid = rows.length || cands.length;
   camera.fov = 30; camera.updateProjectionMatrix();
-  camera.position.set(0, -(nR - 1) * 0.18 + 0.02, rows.length ? nR * 0.68 + 0.25 : 0.75); camera.lookAt(0, -(nR - 1) * 0.18, 0);
+  camera.position.set(0, -(nR - 1) * 0.18 + 0.02, grid ? Math.max(nR * 0.68, cands.length ? cols * 0.42 : 0) + 0.25 : 0.75); camera.lookAt(0, -(nR - 1) * 0.18, 0);
   report.ict = { modes: B.modes, rows, coef };
   return () => {};
 }
