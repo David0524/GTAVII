@@ -82,6 +82,22 @@ tools/audio/          render.ts (the test), loudness.ts (BS.1770-4 + TP), wav.ts
   cast descriptions, never names; 6 named characters with no cast entry get a neutral voice until
   narrative adds them; overrides in `tools/audio/casting.json`.
 
+## vs GTA V / VI / RDR2 (audio row of docs/briefs/REFERENCE_GAMES.md)
+Behaviour and quality only; nothing is copied. Caveat: I can't play or listen to these games. The
+reference column is general knowledge of how they behave, not a measured comparison. GTA VI is too new
+for me to describe its audio reliably, so it isn't characterised below.
+
+| Area | What the references do | Where we match | Where we fall short, and the plan |
+|---|---|---|---|
+| Ambience layering by block and time | Dense, hand-authored beds per district and hour; constant small one-shots; weather and time shift everything | Beds and events driven by real district data, clock curves, weekday/date, weather and power; dozens of emitter types placed from the map | Sound design is synthesised, not recorded; far fewer unique one-shots. Plan: the mix pass under way, then more event families per district |
+| Footsteps by surface | Many surfaces, shoes, speeds; clean animation sync | 12 surfaces + traversal foley, kerb and grating auto-detected | Synthesised cloth/body foley is thin; no shoe types; sync waits on characters' events (request 9) |
+| Gunfire and canyon echo | Signature tails and slapback in city streets | The canyon reflection and FDN system that would give it exists and is measured | **Not built yet** (gameplay audio backlog); needs a gunfire category with a short HDR ducking window |
+| Vehicle engines | Recorded, multi-layer engines with loads, gears, backfires | Procedural per-cylinder engines with real firing orders, load, gears, Doppler, LOD to traffic beds | Cleaner and more "synthetic" than recordings, especially at steady mid revs. Plan: add mechanical noise layers and per-class variation |
+| Crowd walla | Recorded crowds with intelligible fragments and reactions | Density-driven formant walla on both sidewalks, kids in parks, narrative barks on horns/collisions | Formant babble is clearly synthetic up close; speech is eSpeak (placeholder tier) |
+| Police dispatch | Radio chatter as a key cue | Radio/phone filters and the bark/line system are ready | **Not built yet**: needs dispatch content (narrative) and the build-time voices |
+| Mix and ducking | Strong dynamic mixing; dialogue always clear; music ducks | Dialogue sidechain ducking, category mixing desk, loudness profiles, TP limiter, measured −16/−23 LUFS sessions | No HDR-style "loudest event wins" window yet. Plan: add it with gunfire |
+| Score cues | Adaptive score and radio | Procedural period instrumentals exist | Radio stations paused by the user; no adaptive score yet |
+
 ## Honest critique of the renders (`shots/audio/*.wav`)
 **Read this first:** I can't hear. This critique comes from measurements (stems per bus and per
 voice group, octave balance, loudness range, correlation) and from what each synthesis method is
