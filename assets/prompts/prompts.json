@@ -454,7 +454,7 @@
       "id": "lm.hotel_kelsey_blade",
       "file": "lm_hotel_kelsey_blade.png",
       "owner": "narrative",
-      "use": "Hotel Kelsey vertical sign, W 23rd St",
+      "use": "Hotel Kelsey vertical sign, W 23rd St (day, unlit)",
       "aspect": "1:4",
       "size": "512×2048",
       "sizeFinal": false,
@@ -472,10 +472,32 @@
       "status": "todo"
     },
     {
+      "id": "lm.hotel_kelsey_blade.night",
+      "file": "lm_hotel_kelsey_blade_night.png",
+      "owner": "narrative",
+      "use": "Hotel Kelsey vertical sign, W 23rd St (night, lit)",
+      "aspect": "1:4",
+      "size": "512×2048",
+      "sizeFinal": false,
+      "prompt": "Create a tall vertical neon sign on a black-painted can, red neon letters stacked one above another, a small neon crescent at the top, a few rust streaks. Manhattan, 1974. Photorealistic texture, flat and frontal, shown at night against a pure black background, the sign glowing red neon, the crescent lit, no glow bleed beyond the letters' edges, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"HOTEL KELSEY\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1:4.",
+      "text": "HOTEL KELSEY",
+      "textPolicy": "exact",
+      "accept": [
+        "text letter-perfect",
+        "no real logo or brand",
+        "frontal and evenly lit",
+        "letters stacked vertically",
+        "clean black background",
+        "night version matches the day version's layout exactly"
+      ],
+      "priority": 2,
+      "status": "todo"
+    },
+    {
       "id": "lm.hotel_penn_roof",
       "file": "lm_hotel_penn_roof.png",
       "owner": "narrative",
-      "use": "Hotel Pennsylvanian rooftop sign",
+      "use": "Hotel Pennsylvanian rooftop sign (day, unlit)",
       "aspect": "8:1",
       "size": "4096×512",
       "sizeFinal": false,
@@ -492,10 +514,70 @@
       "status": "todo"
     },
     {
+      "id": "lm.hotel_penn_roof.night",
+      "file": "lm_hotel_penn_roof_night.png",
+      "owner": "narrative",
+      "use": "Hotel Pennsylvanian rooftop sign (night, lit)",
+      "aspect": "8:1",
+      "size": "4096×512",
+      "sizeFinal": false,
+      "prompt": "Create giant red neon rooftop letters on a black steel lattice, art deco style. Manhattan, 1974. Photorealistic texture, flat and frontal, shown at night against a pure black background, the sign glowing red neon, no glow bleed beyond the letters' edges, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"HOTEL PENNSYLVANIAN\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+      "text": "HOTEL PENNSYLVANIAN",
+      "textPolicy": "exact",
+      "accept": [
+        "text letter-perfect",
+        "no real logo or brand",
+        "frontal and evenly lit",
+        "clean black background",
+        "night version matches the day version's layout exactly"
+      ],
+      "priority": 2,
+      "status": "todo"
+    },
+    {
+      "id": "lm.pan_amity_roof",
+      "file": "lm_pan_amity_roof.png",
+      "owner": "narrative",
+      "use": "Pan Amity Building rooftop letters (north and south faces), Park Ave over Grand Central (day, unlit)",
+      "aspect": "8:1",
+      "size": "4096×512",
+      "sizeFinal": false,
+      "prompt": "Create giant white sans-serif rooftop letters on a dark steel frame, 1960s jet-age corporate style, unlit (daytime). Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"PAN AMITY\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+      "text": "PAN AMITY",
+      "textPolicy": "exact",
+      "accept": [
+        "text letter-perfect",
+        "no real airline lettering style",
+        "clean dark background"
+      ],
+      "priority": 2,
+      "status": "todo"
+    },
+    {
+      "id": "lm.pan_amity_roof.night",
+      "file": "lm_pan_amity_roof_night.png",
+      "owner": "narrative",
+      "use": "Pan Amity Building rooftop letters (north and south faces), Park Ave over Grand Central (night, lit)",
+      "aspect": "8:1",
+      "size": "4096×512",
+      "sizeFinal": false,
+      "prompt": "Create giant white sans-serif rooftop letters on a dark steel frame, 1960s jet-age corporate style, unlit (daytime). Manhattan, 1974. Photorealistic texture, flat and frontal, shown at night against a pure black background, the sign letters lit white from within, no glow bleed beyond the letters' edges, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"PAN AMITY\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+      "text": "PAN AMITY",
+      "textPolicy": "exact",
+      "accept": [
+        "text letter-perfect",
+        "no real airline lettering style",
+        "clean dark background",
+        "night version matches the day version's layout exactly"
+      ],
+      "priority": 2,
+      "status": "todo"
+    },
+    {
       "id": "lm.psg_marquee",
       "file": "lm_psg_marquee.png",
       "owner": "narrative",
-      "use": "Penn Square Garden, 8th Ave marquee",
+      "use": "Penn Square Garden, 8th Ave marquee (day, unlit)",
       "aspect": "4:1",
       "size": "3072×768",
       "sizeFinal": false,
@@ -507,6 +589,27 @@
         "no real logo or brand",
         "frontal and evenly lit",
         "letter rows empty (the game sets the fight card)"
+      ],
+      "priority": 2,
+      "status": "todo"
+    },
+    {
+      "id": "lm.psg_marquee.night",
+      "file": "lm_psg_marquee_night.png",
+      "owner": "narrative",
+      "use": "Penn Square Garden, 8th Ave marquee (night, lit)",
+      "aspect": "4:1",
+      "size": "3072×768",
+      "sizeFinal": false,
+      "prompt": "Create an arena marquee front: a wide stainless-steel band with three EMPTY changeable-letter rows (white boards, black rails, no letters on them) under a name band, ringed by chaser bulbs. Manhattan, 1974. Photorealistic texture, flat and frontal, shown at night against a pure black background, the sign chaser bulbs lit, name band backlit, no glow bleed beyond the letters' edges, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"PENN SQUARE GARDEN\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 4:1.",
+      "text": "PENN SQUARE GARDEN",
+      "textPolicy": "exact",
+      "accept": [
+        "text letter-perfect",
+        "no real logo or brand",
+        "frontal and evenly lit",
+        "letter rows empty (the game sets the fight card)",
+        "night version matches the day version's layout exactly"
       ],
       "priority": 2,
       "status": "todo"
@@ -761,7 +864,7 @@
       "id": "lm.amalgamated_crown",
       "file": "lm_amalgamated_crown.png",
       "owner": "narrative",
-      "use": "Amalgamated Chemical Tower crown letters",
+      "use": "Amalgamated Chemical Tower crown letters (day, unlit)",
       "aspect": "8:1",
       "size": "4096×512",
       "sizeFinal": false,
@@ -773,6 +876,27 @@
         "no real logo or brand",
         "frontal and evenly lit",
         "clean dark background"
+      ],
+      "priority": 3,
+      "status": "todo"
+    },
+    {
+      "id": "lm.amalgamated_crown.night",
+      "file": "lm_amalgamated_crown_night.png",
+      "owner": "narrative",
+      "use": "Amalgamated Chemical Tower crown letters (night, lit)",
+      "aspect": "8:1",
+      "size": "4096×512",
+      "sizeFinal": false,
+      "prompt": "Create plain white illuminated letters at the crown of a narrow office tower, on a dark band. Manhattan, 1974. Photorealistic texture, flat and frontal, shown at night against a pure black background, the sign letters lit white, no glow bleed beyond the letters' edges, no perspective. No people, no cars, no logos, no brand names other than the exact text given, no modern materials. Muted, slightly soot-dulled 1970s colour. EXACT TEXT: \"AMALGAMATED\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+      "text": "AMALGAMATED",
+      "textPolicy": "exact",
+      "accept": [
+        "text letter-perfect",
+        "no real logo or brand",
+        "frontal and evenly lit",
+        "clean dark background",
+        "night version matches the day version's layout exactly"
       ],
       "priority": 3,
       "status": "todo"

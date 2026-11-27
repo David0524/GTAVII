@@ -15,12 +15,19 @@
         {
           "slot": "roof",
           "text": "LACY'S",
-          "note": "Giant red slab-serif rooftop letters with bulb outline (prompt sign.baxter_lowe.roof)."
+          "note": "Giant red slab-serif rooftop letters with bulb outline (prompt sign.baxter_lowe.roof).",
+          "animate": {
+            "night": "lit",
+            "effect": "bulb outline chase, 0.6 s step"
+          }
         },
         {
           "slot": "facade_banner",
           "text": "LACY'S · A WHOLE CITY BLOCK OF EVERYTHING",
-          "note": "Long canvas banner over the 34th St entrances. Our wording, not the real store's slogan."
+          "note": "Long canvas banner over the 34th St entrances. Our wording, not the real store's slogan.",
+          "animate": {
+            "effect": "cloth sway in wind"
+          }
         },
         {
           "slot": "canopy",
@@ -82,7 +89,11 @@
         {
           "slot": "marquee",
           "text": "PENN SQUARE GARDEN",
-          "note": "Name band over a three-row changeable-letter board. The renderer sets the card: FRIDAY · 'IRON' EDDIE MALLORY vs. BENNY CRUZ · 10 RDS"
+          "note": "Name band over a three-row changeable-letter board. The renderer sets the card: FRIDAY · 'IRON' EDDIE MALLORY vs. BENNY CRUZ · 10 RDS",
+          "animate": {
+            "night": "lit",
+            "effect": "chaser bulbs, 0.4 s step; letterboard static"
+          }
         },
         {
           "slot": "emblem",
@@ -105,7 +116,11 @@
         {
           "slot": "roof",
           "text": "HOTEL PENNSYLVANIAN",
-          "note": "Red neon rooftop letters on a steel frame facing Seventh Ave. Never the real hotel's famous phone exchange."
+          "note": "Red neon rooftop letters on a steel frame facing Seventh Ave. Never the real hotel's famous phone exchange.",
+          "animate": {
+            "night": "lit",
+            "effect": "steady neon; one letter flickers every ~20 s"
+          }
         },
         {
           "slot": "canopy",
@@ -128,7 +143,11 @@
         {
           "slot": "entrance",
           "text": "EMPIRE ESTATE BUILDING",
-          "note": "Stainless Art Deco letters over the Fifth Ave entrance. No rooftop name: the real tower has none either."
+          "note": "Stainless Art Deco letters over the Fifth Ave entrance. No rooftop name: the real tower has none either.",
+          "animate": {
+            "night": "floodlit",
+            "effect": "none"
+          }
         },
         {
           "slot": "observatory",
@@ -161,7 +180,11 @@
         {
           "slot": "blade",
           "text": "HOTEL KELSEY",
-          "note": "Vertical red neon on a black can, letters stacked, with a small neon crescent at the top. Over the W 23rd St entrance."
+          "note": "Vertical red neon on a black can, letters stacked, with a small neon crescent at the top. Over the W 23rd St entrance.",
+          "animate": {
+            "night": "lit",
+            "effect": "steady neon; crescent pulses slowly"
+          }
         },
         {
           "slot": "plaque",
@@ -179,19 +202,23 @@
       ],
       "name": "Pan Amity Building",
       "short": "Pan Amity Bldg",
-      "pending": "user pick between Pan Amity / Pan Global / Pan Atlantica (oversight)",
       "signage": [
         {
           "slot": "roof",
           "text": "PAN AMITY",
-          "note": "Giant rooftop letters on the north and south faces, lit at night, with the emblem beside them. Name pending the user's pick."
+          "note": "Giant rooftop letters on the north and south faces, lit at night, with the emblem beside them. Name pending the user's pick.",
+          "animate": {
+            "night": "lit",
+            "effect": "steady; letters lit white, emblem backlit blue"
+          }
         },
         {
           "slot": "emblem",
           "text": null,
           "note": "A globe made of crossed meridian bands with a single swept wing across it, in a deep sky blue. Distinct from the real airline's globe (no plain banded sphere)."
         }
-      ]
+      ],
+      "decided": "User pick via oversight, 27 Nov 2026: Pan Amity (\"Pan Amity World Airways\")"
     },
     {
       "id": "lm.times_tower",
@@ -206,12 +233,20 @@
         {
           "slot": "zipper",
           "text": null,
-          "note": "The moving news band wrapping the tower: the game runs headlines from content/newspapers.json (Daily Ticker items)."
+          "note": "The moving news band wrapping the tower: the game runs headlines from content/newspapers.json (Daily Ticker items).",
+          "animate": {
+            "night": "lit",
+            "effect": "news zipper scrolls right-to-left, ~1 letter per 0.12 s; runs day and night"
+          }
         },
         {
           "slot": "crown",
           "text": "AMALGAMATED",
-          "note": "Plain white letters at the crown."
+          "note": "Plain white letters at the crown.",
+          "animate": {
+            "night": "lit",
+            "effect": "steady"
+          }
         }
       ]
     }

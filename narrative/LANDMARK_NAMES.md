@@ -102,7 +102,7 @@ Avoid *The Chelsean*, an operating hotel at 160 W 25th St.
 
 ---
 
-## 9. The Pan Am Building (200 Park Ave, over Grand Central): the airline; proposal, the user picks
+## 9. The Pan Am Building (200 Park Ave, over Grand Central): DECIDED as Pan Amity ("Pan Amity World Airways"), 27 Nov 2026
 The tower carries the airline's name on its roof, so the airline needs a sound-alike name. Grand Central stays a plain place name.
 
 | Option | Why | Search (exact phrase, Nov 2026) |

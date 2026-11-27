@@ -938,3 +938,5 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - New landmarks: the airline tower (pending the user's pick: Pan Amity / Pan Global / Pan Atlantica) and the Amalgamated Chemical Tower (Times Square, with its news zipper).
   - 12 sign and emblem prompts were added to the queue (61 entries; still NOT YET RUNNABLE). The airline's rooftop-letter prompt follows the pick.
   - Pre-ship USPTO additions: the airline name, Amalgamated, and the Lacy's banner line.
+- **Airline (user pick via oversight, 27 Nov):** **Pan Amity** ("Pan Amity World Airways"; the Pan Amity Building). Rooftop-letter prompt queued; added to the pre-ship USPTO list.
+- **Signage hints:** each lit landmark sign now carries `animate` hints (bulb chase timing, neon flicker, news-zipper speed) and a night/day state. The image queue now holds day/night twins for the lit signs: 67 entries, still NOT YET RUNNABLE.
