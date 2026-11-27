@@ -36,9 +36,9 @@ export const AUDIO_PRESETS: Record<QualityName, AudioQuality> = {
 /** Loudness profiles: integrated target and the true-peak ceiling the limiter enforces. */
 export const LOUDNESS = {
   /** Phones/laptops: gentle 2:1 bus compression above -18 dBFS (the node adds ~+5 dB makeup), then the TP limiter. */
-  mobile: { lufs: -16, ceilingDbtp: -1.5, trimDb: -4.3, comp: { threshold: -18, ratio: 2, knee: 10, attack: 0.012, release: 0.25 } },
+  mobile: { lufs: -16, ceilingDbtp: -1.5, trimDb: -3.7, comp: { threshold: -18, ratio: 2, knee: 10, attack: 0.012, release: 0.25 } },
   /** Full dynamic range (compressor bypassed: ratio 1). */
-  homeTheatre: { lufs: -23, ceilingDbtp: -1.5, trimDb: -9.9, comp: { threshold: 0, ratio: 1, knee: 0, attack: 0.012, release: 0.25 } },
+  homeTheatre: { lufs: -23, ceilingDbtp: -1.5, trimDb: -8.9, comp: { threshold: 0, ratio: 1, knee: 0, attack: 0.012, release: 0.25 } },
 } as const;
 export type LoudnessProfile = keyof typeof LOUDNESS;
 
