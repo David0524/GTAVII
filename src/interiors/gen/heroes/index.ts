@@ -11,9 +11,9 @@ export const HERO_GENERATORS: Record<string, (c: GenCtx) => void> = {
   'interior.varelas_apartment': genVarelas,
 };
 /** Hero placement preferences for the address resolver. */
-export const HERO_PLACEMENT: Record<string, { width: number; prefer: 'tallest_prewar' | 'lowrise' | 'any'; minFloors?: number; minDepth?: number }> = {
+export const HERO_PLACEMENT: Record<string, { width: number; prefer: 'tallest_prewar' | 'lowrise' | 'any'; minFloors?: number; minDepth?: number; minFront?: number }> = {
   'interior.corwin_lobby': { width: 8, prefer: 'tallest_prewar', minFloors: 10 },
   'interior.station_house_desk': { width: 12, prefer: 'lowrise', minFloors: 3, minDepth: 18 }, // 1900s precinct house: 3-5 floors
   'interior.penn_south_delphine': { width: 10, prefer: 'any', minFloors: 8 },   // Penn South slab tower (1962)
-  'interior.varelas_apartment': { width: 10, prefer: 'any', minFloors: 11 },    // prewar doorman building, Madison & E 37th
+  'interior.varelas_apartment': { width: 16, prefer: 'any', minFloors: 11, minFront: 15 }, // prewar doorman building, Madison & E 37th: a wide lot so the flat reads grand
 };

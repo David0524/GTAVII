@@ -324,3 +324,4 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
     - The back strip rooms are deep (bath 2.2 × 5.3 m): split it with a closet.
     - The rug medallions read as targets.
     - The elevator is a prop until engine request 5; reaching floors 7 and 11 means climbing the stairs.
+- Nick re-placed (oversight): corner lots now need at least 15 m of frontage on the first-named street, so 11A moved to 220 Madison Ave (1941, 15 floors, 16 m frontage). The `grand` plan variant gives a 15.5 m flat, 3.2 m ceilings, a gallery-width entrance hall (4.6 m), and a 9 × 4.6 m living room with every facade bay as a tall window. Evidence: docs/interiors/varelas_grand_living_v2.png. Critique: the back strip is now a very large kitchen (8.5 × 8.8 m). Next pass: split it into a dining room plus a kitchen.

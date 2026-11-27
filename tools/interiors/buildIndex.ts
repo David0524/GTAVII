@@ -441,7 +441,8 @@ for (const h of heroContent) {
   const corner = /^([^,&(]+?)\s*&\s*([^,(]+?)\s*(?:\(|$)/.exec(h.address);
   if (!m && corner) {
     const sa = streetNames.indexOf(normaliseStreet(corner[1].trim())), sb = streetNames.indexOf(normaliseStreet(corner[2].trim()));
-    const cand = out.filter((b) => b.frontage.some((e) => e[4] === sa) && b.frontage.some((e) => e[4] === sb) && b.year < 1975 && b.floors >= (place.minFloors ?? 0))
+    const flen = (b: BuildingIdx, s: number) => Math.max(0, ...b.frontage.filter((e) => e[4] === s).map((e) => Math.hypot(e[2] - e[0], e[3] - e[1])));
+    const cand = out.filter((b) => b.frontage.some((e) => e[4] === sa) && b.frontage.some((e) => e[4] === sb) && b.year < 1975 && b.floors >= (place.minFloors ?? 0) && flen(b, sa) >= (place.minFront ?? 0))
       .sort((p, q) => q.floors - p.floors || p.year - q.year);
     if (!cand.length) { heroLog.push(`${h.id}: no corner building at "${h.address}" (${sa}, ${sb})`); continue; }
     // reuse the face-placement path below on the corner building's longer face along the first-named street

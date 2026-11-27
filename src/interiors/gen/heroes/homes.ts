@@ -26,6 +26,7 @@ type R4 = [number, number, number, number];
 export interface HomePlan { living: R4; bed: R4; foyer: R4; kitchen: R4; bath: R4; y0: number; H: number; win: { living?: [number, number]; bed?: [number, number]; sill: number; head: number } }
 interface HomeSpec {
   floor: number;                         // 0-based floor index of the home
+  grand?: boolean;                       // wide pre-war plan: gallery foyer, living room with every facade bay
   label: string;                         // apartment number on the door
   lobby: 'coop1960' | 'prewar';
   finishes: { floor: Mat; wall: Mat; bedWall: Mat; ceiling: Mat; hall: Mat; hallFloor: Mat };
@@ -64,15 +65,16 @@ export function genHomeTower(c: GenCtx, s: HomeSpec) {
   // ------------------------------------------------ the fire stair, open at the home's floor
   const f = Math.min(s.floor, L.floors - 1);
   const stairs = stairTower(c, L, lobby, [f]);
-  const y0 = f * L.fh, H = Math.min(2.8, L.fh - 0.25);
+  const y0 = f * L.fh, H = Math.min(s.grand ? 3.2 : 2.8, L.fh - 0.2);
   // corridor in front of the stair door, running -x
   const cz1 = L.zs - 0.15, cz0 = cz1 - 1.5, dx0 = L.x0 + 0.2;
   const crc = fitRect(c.ring, [dx0 - 1, cz0, L.x1, cz1], [-40, cz0, L.x1, cz1], [], 0.3);
-  const cx0 = Math.max(crc[0], (L.x1 - 14));
+  const cx0 = Math.max(crc[0], (L.x1 - (s.grand ? 19 : 14)));
   const hall = k.cell(`home_hall${f}`, [cx0, y0, cz0, L.x1, y0 + H, cz1], f);
   k.portalRect(stairs[f], hall, dx0, cz1, dx0 + 0.9, cz1, y0, y0 + 2.1);
   // the apartment: from the facade to the corridor, left of the door
-  const front = fitRect(c.ring, [cx0, cz0 - 3, Math.min(L.x1, cx0 + 8), cz0], [cx0, WALL_T, Math.min(L.x1, cx0 + 9), cz0], [], 0.25);
+  const aw = s.grand ? 15.5 : 8;
+  const front = fitRect(c.ring, [cx0, cz0 - 3, Math.min(L.x1, cx0 + aw - 1), cz0], [cx0, WALL_T, Math.min(L.x1, cx0 + aw), cz0], [], 0.25);
   const ax0 = front[0], ax1 = front[2], az0 = Math.max(WALL_T, front[1]), D = cz0 - az0, Wd = ax1 - ax0;
   const doorX = ax1 - 1.1;
   k.floor(cx0, cz0, L.x1, cz1, y0, s.finishes.hallFloor); k.ceiling(cx0, cz0, L.x1, cz1, y0 + H, M.ceilingPlaster);
@@ -87,7 +89,8 @@ export function genHomeTower(c: GenCtx, s: HomeSpec) {
   // plan: front rooms (living + bed) up to 4.6 m deep, back strip foyer | kitchen | bath
   const zf = az0 + Math.min(4.6, Math.max(3.2, D - 2.4)), lw = Wd * 0.58;
   const living: R4 = [ax0, az0, ax0 + lw, zf], bed: R4 = [ax0 + lw + 0.1, az0, ax1, zf];
-  const foyer: R4 = [ax1 - 2.0, zf + 0.1, ax1, cz0], bath: R4 = [ax0, zf + 0.1, ax0 + Math.min(2.2, Wd * 0.3), cz0], kitchen: R4 = [bath[2] + 0.1, zf + 0.1, foyer[0] - 0.1, cz0];
+  // grand: a gallery-width entrance hall
+  const foyer: R4 = [ax1 - (s.grand ? 4.6 : 2.0), zf + 0.1, ax1, cz0], bath: R4 = [ax0, zf + 0.1, ax0 + Math.min(2.2, Wd * 0.3), cz0], kitchen: R4 = [bath[2] + 0.1, zf + 0.1, foyer[0] - 0.1, cz0];
   const fin = s.finishes;
   const cellOf = (name: string, r: R4) => k.cell(name, [r[0], y0, r[1], r[2], y0 + H, r[3]], f);
   const cf = cellOf(`home_foyer`, foyer), cl = cellOf('home_living', living), cb = cellOf('home_bedroom', bed), ck = cellOf('home_kitchen', kitchen), cbt = cellOf('home_bath', bath);
@@ -95,14 +98,15 @@ export function genHomeTower(c: GenCtx, s: HomeSpec) {
   // openings: foyer->living (wide arch through the shared z wall), foyer->kitchen (open side), living->bed door, kitchen->bath door
   const arch = { x0: Math.max(foyer[0], living[0]) + 0.2, x1: Math.min(foyer[2], living[2]) - 0.2 };
   const hasArch = arch.x1 - arch.x0 > 0.9;
-  const bwin = bayWindowSpans(c, living[0], living[2])[0], bwin2 = bayWindowSpans(c, bed[0], bed[2])[0];
+  const bwins = bayWindowSpans(c, living[0], living[2]), bwin = bwins[0], bwin2 = bayWindowSpans(c, bed[0], bed[2])[0];
+  const lwins = s.grand ? bwins : bwins.slice(0, 1);
   const [wy0, wy1] = floorWindowY(c, f);
   const sill = Math.max(y0 + 0.35, wy0), head = Math.min(y0 + H - 0.15, wy1);
   // living room
   k.use(cl);
   k.room(...living.slice(0, 2) as [number, number], ...living.slice(2) as [number, number], y0, y0 + H, { floor: fin.floor, wall: fin.wall, ceiling: fin.ceiling },
-    { z0: bwin ? [{ s0: bwin[0] - living[0], s1: bwin[1] - living[0], y0: sill, y1: head, depth: 0.3 }] : [], x1: [{ s0: 0.6, s1: 1.5, y0, y1: y0 + 2.05 }], z1: hasArch ? [{ s0: living[2] - arch.x1, s1: living[2] - arch.x0, y0, y1: y0 + 2.2 }] : [] });
-  if (bwin) { k.portalRect(cl, -1, bwin[0], living[1], bwin[1], living[1], sill, head); k.box(bwin[0], sill, living[1] - 0.02, bwin[1], head, living[1] - 0.01, M.glass, { glass: true, occlude: false }); }
+    { z0: lwins.map((bw) => ({ s0: bw[0] - living[0], s1: bw[1] - living[0], y0: sill, y1: head, depth: 0.3 })), x1: [{ s0: 0.6, s1: 1.5, y0, y1: y0 + 2.05 }], z1: hasArch ? [{ s0: living[2] - arch.x1, s1: living[2] - arch.x0, y0, y1: y0 + 2.2 }] : [] });
+  for (const bw of lwins) { k.portalRect(cl, -1, bw[0], living[1], bw[1], living[1], sill, head); k.box(bw[0], sill, living[1] - 0.02, bw[1], head, living[1] - 0.01, M.glass, { glass: true, occlude: false }); }
   if (hasArch) k.portalRect(cf, cl, arch.x0, zf, arch.x1, zf, y0, y0 + 2.2);
   // bedroom
   k.use(cb);
@@ -188,7 +192,7 @@ export function genDelphine(c: GenCtx) {
 // ---------------------------------------------------------------- Nick Varelas, Madison & E 37th, 11th floor (pristine)
 export function genVarelas(c: GenCtx) {
   genHomeTower(c, {
-    floor: 10, label: '11A', lobby: 'prewar',
+    floor: 10, label: '11A', lobby: 'prewar', grand: true,
     finishes: { floor: tint(M.planks, '#6a4a2a'), wall: M.paneling, bedWall: tint(M.wallpaper, '#8a7a5a'), ceiling: M.ceilingPlaster, hall: tint(M.wallpaper, '#a08a64'), hallFloor: M.carpetRed },
     dress: (k, p) => {
       const { living: Lr, bed: Br, y0 } = p;
