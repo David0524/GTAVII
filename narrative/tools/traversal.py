@@ -105,7 +105,7 @@ SIDE = {
      b("vault", "a burned-out car hulk in the lot", "tv.w41_lot_car"),
      b("fence_climb", "the lot's back fence, onto W 40th", "tv.w40_fence")],
    "checkpointAfter": "tv.w41_lot_fence", "finish": "tackle", "lawful": True,
-   "then": {"restrain": True, "loadIntoCar": True, "doneOn": "notice quarryLoaded (Gameplay 60e0f02)"}},
+   "then": {"restrain": True, "loadIntoCar": True, "doneOn": "notice quarryLoaded (Gameplay 67724f1)"}},
 }
 
 
