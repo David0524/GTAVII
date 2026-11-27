@@ -373,6 +373,7 @@ test('antagonize a beat cop: no shove, no fight, no running; a warning, then a s
   assert.equal(g.antagonize('ped:7')!.escalated, 'none', 'no shove from a cop');
   const third = g.antagonize('ped:7')!;
   assert.equal(third.escalated, 'stop'); assert.ok(!g.brawls.size && !sim.released.has(7));
+  assert.equal(third.context, 'cop_stop');
   assert.ok(!g.stumbling);
   void kinds;
   assert.deepEqual((sim as any).mem.map((m: any) => m.kind), ['bumped', 'bumped', 'assault'], 'two warnings, then menacing (an assault to the street)');

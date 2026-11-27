@@ -1762,7 +1762,7 @@ export class Gameplay {
       const stop = armed || r.taunts >= T.brawlAfter;
       if (stop) this.crime('menacing', { victim: `ped:${q.id}`, at: [q.x, q.y, q.z], noise: 8 });
       else this.remember('bumped', [q.x, q.y, q.z], `ped:${q.id}`);
-      const out = this.replyBark(q, 'antagonize', stop ? 'stern' : 'warning');
+      const out = stop ? this.replyBark(q, 'cop_stop', 'stern', armed ? 'violence' : null) : this.replyBark(q, 'antagonize', 'warning');
       return { target: `ped:${q.id}`, ...out, escalated: stop ? 'stop' as const : 'none' as const };
     }
     if (armed) this.crime('menacing', { victim: `ped:${q.id}`, at: [q.x, q.y, q.z], noise: 8 });
