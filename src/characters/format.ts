@@ -4,7 +4,13 @@
  *   u32 magic 'T74X' | u32 version | u32 jsonBytes | json (utf8, space-padded to 4) | blobs
  */
 export type BlobType = 'f32' | 'i16' | 'u16' | 'i8' | 'u8' | 'u32' | 'i32';
-export interface BlobDesc { name: string; type: BlobType; offset: number; length: number }
+/**
+ * Optional per-blob filter, undone at load. delta3: per-axis deltas between consecutive vertices
+ * (stride 3), restarting every `seg` elements (one morph/PCA component), integer wrap-around so
+ * decoding is exact. It makes vertex-ordered geometry data compress far better under gzip.
+ */
+export interface BlobFilter { kind: 'delta3'; seg: number }
+export interface BlobDesc { name: string; type: BlobType; offset: number; length: number; filter?: BlobFilter }
 export interface Container { meta: any; blobs: Map<string, ArrayBufferView> }
 
 const MAGIC = 0x58343754; // 'T74X'
@@ -15,11 +21,24 @@ const typeOf = (a: ArrayBufferView): BlobType => {
   if (a instanceof Int32Array) return 'i32'; throw new Error('format: unsupported blob type');
 };
 
-export function writeContainer(meta: any, blobs: Record<string, ArrayBufferView>): Uint8Array {
+/** Applies a filter (write side): returns a filtered copy. */
+export function encodeFilter(a: ArrayBufferView, f: BlobFilter): ArrayBufferView {
+  const src = a as unknown as { length: number; [i: number]: number }, Ctor = (a as any).constructor;
+  const out = new Ctor(src.length);
+  for (let s0 = 0; s0 < src.length; s0 += f.seg) for (let i = 0; i < f.seg && s0 + i < src.length; i++) out[s0 + i] = i >= 3 ? src[s0 + i] - src[s0 + i - 3] : src[s0 + i];
+  return out;
+}
+function decodeFilter(a: ArrayBufferView, f: BlobFilter) {
+  const v = a as unknown as { length: number; [i: number]: number };
+  for (let s0 = 0; s0 < v.length; s0 += f.seg) for (let i = 3; i < f.seg && s0 + i < v.length; i++) v[s0 + i] = v[s0 + i] + v[s0 + i - 3];
+}
+
+export function writeContainer(meta: any, blobs: Record<string, ArrayBufferView>, filters: Record<string, BlobFilter> = {}): Uint8Array {
   const descs: BlobDesc[] = [];
   let off = 0;
+  blobs = Object.fromEntries(Object.entries(blobs).map(([n, a]) => [n, filters[n] ? encodeFilter(a, filters[n]) : a]));
   for (const [name, a] of Object.entries(blobs)) {
-    descs.push({ name, type: typeOf(a), offset: off, length: (a as unknown as { length: number }).length });
+    descs.push({ name, type: typeOf(a), offset: off, length: (a as unknown as { length: number }).length, ...(filters[name] ? { filter: filters[name] } : {}) });
     off += Math.ceil(a.byteLength / 4) * 4;
   }
   let json = JSON.stringify({ meta, blobs: descs });
@@ -41,6 +60,6 @@ export function readContainer(buf: ArrayBuffer): Container {
   const { meta, blobs } = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 12, jl))) as { meta: any; blobs: BlobDesc[] };
   const base = 12 + jl;
   const map = new Map<string, ArrayBufferView>();
-  for (const d of blobs) map.set(d.name, new CTOR[d.type](buf, base + d.offset, d.length));
+  for (const d of blobs) { const v = new CTOR[d.type](buf, base + d.offset, d.length); if (d.filter) decodeFilter(v, d.filter); map.set(d.name, v); }
   return { meta, blobs: map };
 }
