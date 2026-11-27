@@ -18,6 +18,7 @@ import type { Physics } from '../physics/Physics';
 import type { PlayerController } from '../player/PlayerController';
 import type { Simulation } from '../sim';
 import type { HealthView, HeatView } from '../shared/uiHost';
+import { loadReport } from './debug/LoadReport';
 
 // gameplay versions its own blob (src/gameplay/save.ts migrate); the engine section is just a carrier
 registerSection<unknown>({ name: 'gameplay', version: 1, migrations: {}, empty: () => null });
@@ -36,8 +37,10 @@ export interface GameplayGlue {
 
 export async function createGameplay(o: { quality: Quality; physics: Physics; player: PlayerController; lead: () => string; camera: THREE.Camera; sim: Simulation | null; saves: SaveManager }): Promise<GameplayGlue> {
   const narrative = await import('../gameplay/scene/narrativeContent').then((m) => m.loadNarrativeContent()).catch((e) => { console.warn('gameplay content', e); return null; });
+  loadReport.mark('gameplay-content');
   if (narrative?.warnings.length) console.info(`[gameplay] content from ${narrative.source}: ${narrative.warnings.length} warnings`);
   const g = new Gameplay({ quality: o.quality, content: narrative ? (narrative.content as never) : { items: null, shops: null, weapons: null } });
+  loadReport.mark('gameplay-core');
   if (narrative?.content.vendors) g.loadVendorContent(narrative.content.vendors);
   const rq = new RapierWorldQuery(o.physics);
   rq.excluded.add(o.player.collider.handle);
