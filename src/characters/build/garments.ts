@@ -74,6 +74,8 @@ export function taubin(P: Float32Array, tris: Uint32Array, inRegion: (k: number)
 
 export interface GarmentCtx {
   model: BodyModel; shape: BodyShape; F: Fields; outfit: Outfit; lod: number;
+  /** Men: the drape may shave small convex chest detail (never on a bust). */
+  male?: boolean;
 }
 
 const smooth = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -126,7 +128,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
       const d = (q[0] - P[k * 3]) * Nb[k * 3] + (q[1] - P[k * 3 + 1]) * Nb[k * 3 + 1] + (q[2] - P[k * 3 + 2]) * Nb[k * 3 + 2];
       // mostly outwards (bridge hollows), but small convex details (nipples, muscle edges) may be
       // shaved by up to 12 mm on the torso: the skin under a shirt is culled, so nothing pokes through
-      const out = Math.max(F.part[k] === PART.torso ? -0.012 : 0, d);
+      const out = Math.max(F.part[k] === PART.torso && ctx.male ? -0.012 : 0, d);
       sm.set(k, [P[k * 3] + Nb[k * 3] * out, P[k * 3 + 1] + Nb[k * 3 + 1] * out, P[k * 3 + 2] + Nb[k * 3 + 2] * out]);
     }
     // cloth hangs from the chest apex toward the waist instead of tucking under the pectorals
@@ -177,6 +179,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
     }
     return sm;
   })() : undefined;
+  (ctx as GarmentCtx & { drape?: typeof drape }).drape = drape;
 
   // ---- top ---------------------------------------------------------------------------------------
   const t = outfit.top;
@@ -363,20 +366,22 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
 /** The neck alone (no trapezius/shoulders), around the neck joint: shirt collars stand on this. */
 function neckRadius(ctx: GarmentCtx) { return torsoRadius(ctx, true); }
 
-function torsoRadius(ctx: GarmentCtx, neckOnly = false) {
+function torsoRadius(ctx: GarmentCtx, neckOnly = false, src?: Map<number, [number, number, number]>) {
   const { F, shape } = ctx;
   const P = shape.pos, J = shape.joints;
   const NB = 48, y0 = neckOnly ? F.y.neck - 0.07 : F.y.crotch, y1 = F.y.neck + 0.08, NY = neckOnly ? 15 : 40;
   const r = new Float32Array(NB * NY);
   const T = F.tris('helper-tights', 0);
-  const used = new Set<number>(T);
+  // with a cloth surface (the drape), profile its own points; otherwise the tights helper
+  const used = src ? new Set<number>(src.keys()) : new Set<number>(T);
   const cj = neckOnly ? JI.neck_01 : JI.spine_02, cx = J[cj * 3], cz = J[cj * 3 + 2];
   for (const k of used) {
     if (neckOnly ? F.part[k] !== PART.neck : F.part[k] !== PART.torso && F.part[k] !== PART.neck) continue;
-    const yy = P[k * 3 + 1]; if (yy < y0 || yy > y1) continue;
-    const a = Math.atan2(P[k * 3] - cx, P[k * 3 + 2] - cz);
+    const q = src?.get(k), px = q ? q[0] : P[k * 3], py = q ? q[1] : P[k * 3 + 1], pz = q ? q[2] : P[k * 3 + 2];
+    const yy = py; if (yy < y0 || yy > y1) continue;
+    const a = Math.atan2(px - cx, pz - cz);
     const bi = Math.floor(((a / (2 * Math.PI) + 1) % 1) * NB), yi = Math.min(NY - 1, Math.floor(((yy - y0) / (y1 - y0)) * NY));
-    const d = Math.hypot(P[k * 3] - cx, P[k * 3 + 2] - cz);
+    const d = Math.hypot(px - cx, pz - cz);
     r[yi * NB + bi] = Math.max(r[yi * NB + bi], d);
   }
   // fill holes by neighbour averaging
@@ -407,16 +412,39 @@ const torsoSkin = (ctx: GarmentCtx, yy: number, outJ: number[], outW: number[]) 
 };
 
 /** Builds a quad-strip ribbon: rows of points (each row = [outer…inner]) skinned along the torso. */
-function ribbon(ctx: GarmentCtx, mb: MeshBuilder, rows: [number, number, number][][], m: MatData, flip = false) {
+/**
+ * A grid of rows as a cloth strip. With `thick` (m) it becomes a slab: a back face offset behind
+ * the front along its normals and an edge band all round, so collars, lapels and ties have real
+ * thickness and a rounded-reading edge instead of a paper cut-out.
+ */
+function ribbon(ctx: GarmentCtx, mb: MeshBuilder, rows: [number, number, number][][], m: MatData, flip = false, thick = 0) {
   const base = mb.count, i0 = mb.indexCount;
   const sj: number[] = [0, 0, 0, 0], sw: number[] = [0, 0, 0, 0];
   for (const row of rows) for (const p of row) { torsoSkin(ctx, p[1], sj, sw); mb.vertex(p, null, sj, sw, m); }
-  const w = rows[0].length;
-  for (let r = 0; r + 1 < rows.length; r++) for (let c = 0; c + 1 < w; c++) {
-    const a = base + r * w + c, b = a + 1, d = a + w, e = d + 1;
-    if (flip) { mb.tri(a, d, b); mb.tri(b, d, e); } else { mb.tri(a, b, d); mb.tri(b, e, d); }
-  }
+  const w = rows[0].length, h = rows.length;
+  const quad = (a: number, b: number, d: number, e: number, f: boolean) => { if (f) { mb.tri(a, d, b); mb.tri(b, d, e); } else { mb.tri(a, b, d); mb.tri(b, e, d); } };
+  for (let r = 0; r + 1 < h; r++) for (let c = 0; c + 1 < w; c++) { const a = base + r * w + c; quad(a, a + 1, a + w, a + w + 1, flip); }
   mb.computeNormals(base, mb.count, i0);
+  if (thick <= 0) return;
+  // back face: every front vertex pushed back along its normal, triangles reversed
+  const back = mb.count, bi0 = mb.indexCount;
+  for (let v = 0; v < w * h; v++) {
+    const p = mb.posAt(base + v), n = mb.normalAt(base + v);
+    torsoSkin(ctx, p[1], sj, sw);
+    mb.vertex([p[0] - n[0] * thick, p[1] - n[1] * thick, p[2] - n[2] * thick], null, sj, sw, m);
+  }
+  for (let r = 0; r + 1 < h; r++) for (let c = 0; c + 1 < w; c++) { const a = back + r * w + c; quad(a, a + 1, a + w, a + w + 1, !flip); }
+  // edge band round the boundary (front edge to back edge)
+  const ring: number[] = [];
+  for (let c = 0; c < w; c++) ring.push(c);
+  for (let r = 1; r < h; r++) ring.push(r * w + w - 1);
+  for (let c = w - 2; c >= 0; c--) ring.push((h - 1) * w + c);
+  for (let r = h - 2; r >= 1; r--) ring.push(r * w);
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    quad(base + a, base + b, back + a, back + b, !flip);
+  }
+  mb.computeNormals(back, mb.count, bi0);
 }
 
 function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number, off: number, backH: number, closed = false) {
@@ -462,13 +490,13 @@ function shirtCollar(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, point: number,
       }
       rows.push([outer, fold, standBase]);
     }
-    ribbon(ctx, mb, rows, m, side < 0);
+    ribbon(ctx, mb, rows, m, side < 0, ctx.lod <= 1 ? 0.0025 : 0);
   }
 }
 
 /** Small domed buttons on the torso front (az ≈ 0), skinned to the spine. */
 function buttons(ctx: GarmentCtx, mb: MeshBuilder, ys: number[], az: number, off: number, color: string, r: number) {
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape); // on the cloth surface, not the body
   const m = fabricMat({ color, color2: color, pattern: 'solid', scale: 0.02, rough: 0.3, sheen: 0, fade: 0, dirt: 0 } as Fabric, KIND.leather);
   const sj = [0, 0, 0, 0], sw = [0, 0, 0, 0];
   const seg = ctx.lod === 0 ? 10 : 6;
@@ -489,7 +517,7 @@ function buttons(ctx: GarmentCtx, mb: MeshBuilder, ys: number[], az: number, off
 
 /** A thin seam/placket line down the front at azimuth az, from y0 down to y1. */
 function frontLine(ctx: GarmentCtx, mb: MeshBuilder, f: Fabric, az: number, y0: number, y1: number, off: number) {
-  const tr = torsoRadius(ctx);
+  const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
   const m = fabricMat({ ...f, color: shade(f.color, 0.62), color2: shade(f.color2, 0.62) });
   const rows: [number, number, number][][] = [];
   const n = 10;
@@ -529,7 +557,7 @@ function lapels(ctx: GarmentCtx, mb: MeshBuilder, o: OuterDesc, off: number, but
       const a = side * (openAngle(gorgeY) + u * (Math.PI - openAngle(gorgeY)));
       rows.push([tr.at(y.neck - 0.035 + u * 0.01, a, off + 0.006), tr.at(y.neck + 0.01, a, off)]);
     }
-    ribbon(ctx, mb, rows, m, side > 0);
+    ribbon(ctx, mb, rows, m, side > 0, ctx.lod <= 1 ? 0.004 : 0);
   }
 }
 
@@ -547,7 +575,16 @@ function tie(ctx: GarmentCtx, mb: MeshBuilder, t: Fabric & { width: number }, of
     if (i === steps) { rows.push([tr.at(yy - w * 0.9, 0, off + 0.006), tr.at(yy - w * 0.9, 0, off + 0.006)]); continue; }
     rows.push([tr.at(yy, -w / r, off + 0.004 + u * 0.004), tr.at(yy, w / r, off + 0.004 + u * 0.004)]);
   }
-  ribbon(ctx, mb, rows, m);
+  ribbon(ctx, mb, rows, m, false, ctx.lod <= 1 ? 0.005 : 0);
+  // the knot: a tapered four-in-hand block under the collar points, proud of the blade
+  if (ctx.lod <= 1) {
+    const krows: [number, number, number][][] = [];
+    for (let i = 0; i <= 4; i++) {
+      const u = i / 4, yy = top - 0.004 - u * 0.04, hw = (0.024 - u * 0.007) / 0.16;
+      krows.push([tr.at(yy, -hw, off + 0.016 - u * 0.004), tr.at(yy, 0, off + 0.02 - u * 0.004), tr.at(yy, hw, off + 0.016 - u * 0.004)]);
+    }
+    ribbon(ctx, mb, krows, m, false, 0.012);
+  }
 }
 
 /**

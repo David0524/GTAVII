@@ -219,20 +219,35 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
     case 'briefcase': {
       const f = handFrame('r');
       const down: V3 = [0, -1, 0];
-      box(mb, [f.c[0], f.c[1] - 0.17, f.c[2]], [0, 0, 1], down, [1, 0, 0], 0.21, 0.15, 0.05, leather('#3a2418'), f.joint);
+      // handle in the curled fingers, the case hanging directly beneath it
+      const g: V3 = [f.c[0] - f.along[0] * 0.012 + f.palm[0] * 0.016, f.c[1] - f.along[1] * 0.012 + f.palm[1] * 0.016, f.c[2] - f.along[2] * 0.012 + f.palm[2] * 0.016];
+      box(mb, g, f.across, f.along, f.palm, 0.08, 0.01, 0.01, leather('#1e140e'), f.joint);
+      box(mb, [g[0], g[1] - 0.035 - 0.15, g[2]], [0, 0, 1], down, [1, 0, 0], 0.21, 0.15, 0.05, leather('#3a2418'), f.joint);
       break;
     }
-    case 'shoulderBag': { // strap across the body, bag at the left hip
-      const h = jp('thigh_l');
-      box(mb, [h[0] + 0.07, h[1] + 0.06, h[2] + 0.02], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.12, 0.09, 0.04, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), JI.pelvis);
+    case 'shoulderBag': { // over the left shoulder: strap down the side of the chest, the bag against the left hip
+      const h = jp('thigh_l'), cl = jp('clavicle_l'), ua = jp('upperarm_l');
+      const col = leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494');
+      const bag: V3 = [h[0] + 0.115, h[1] + 0.07, h[2] + 0.015];
+      box(mb, bag, [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.11, 0.085, 0.035, col, JI.pelvis);
+      // strap: bag top -> front of the shoulder -> over the top of the shoulder
+      const pts: V3[] = [[bag[0] - 0.01, bag[1] + 0.085, bag[2] + 0.03], [ua[0] - 0.035, (ua[1] + bag[1]) / 2 + 0.06, ua[2] + 0.09], [(cl[0] + ua[0]) / 2, ua[1] + 0.06, ua[2] + 0.07], [(cl[0] + ua[0]) / 2, ua[1] + 0.085, ua[2] - 0.02]];
+      for (let i = 0; i + 1 < pts.length; i++) {
+        const a = pts[i], b = pts[i + 1], d = sub(b, a), len = Math.hypot(d[0], d[1], d[2]);
+        const ay = nrm(d), ax = nrm(cross(ay, [0, 0, 1])), az = cross(ax, ay);
+        box(mb, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], ax, ay, az, 0.016, len / 2, 0.003, leather('#2a1e16'), i === 0 ? JI.pelvis : JI.spine_03);
+      }
       break;
     }
-    case 'handbag': case 'tote': { // held by its handle in the left hand
+    case 'handbag': case 'tote': { // held by its handle in the left hand: handle in the curled fingers, straps down to the bag
       const f = handFrame('l');
       const big = id === 'tote';
-      const hh = big ? 0.14 : 0.09;
-      box(mb, [f.c[0] + f.palm[0] * 0.03, f.c[1] - hh - 0.05, f.c[2] + f.palm[2] * 0.03], [0, 0, 1], [0, 1, 0], [1, 0, 0], big ? 0.16 : 0.12, hh, 0.045, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), f.joint);
-      box(mb, [f.c[0] + f.palm[0] * 0.03, f.c[1] - 0.025, f.c[2] + f.palm[2] * 0.03], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.05, 0.03, 0.006, leather('#2a1e16'), f.joint);
+      const hh = big ? 0.14 : 0.09, col = leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494');
+      const g: V3 = [f.c[0] - f.along[0] * 0.012 + f.palm[0] * 0.016, f.c[1] - f.along[1] * 0.012 + f.palm[1] * 0.016, f.c[2] - f.along[2] * 0.012 + f.palm[2] * 0.016];
+      box(mb, g, f.across, f.along, f.palm, 0.07, 0.008, 0.008, leather('#2a1e16'), f.joint);
+      const top = g[1] - 0.05;
+      for (const s of [-1, 1]) box(mb, [g[0] + f.across[0] * 0.03 * s, (g[1] + top) / 2, g[2] + f.across[2] * 0.03 * s], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.006, 0.05, 0.004, leather('#2a1e16'), f.joint);
+      box(mb, [g[0], top - hh, g[2]], [0, 0, 1], [0, 1, 0], [1, 0, 0], big ? 0.16 : 0.12, hh, 0.045, col, f.joint);
       break;
     }
     case 'shoppingBag': case 'paperBag': {

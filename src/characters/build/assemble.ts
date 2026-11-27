@@ -36,7 +36,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
   const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
   const F = computeFields(model, shape);
   const ff = faceFrame(shape, F);
-  const ctx: GarmentCtx = { model, shape, F, outfit, lod };
+  const ctx: GarmentCtx = { model, shape, F, outfit, lod, male: app.sex >= 0.5 };
   const mb = new MeshBuilder();
   const P = shape.pos;
   const { pieces, trims } = garmentPieces(ctx);

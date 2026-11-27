@@ -62,6 +62,9 @@ export class MeshBuilder {
   }
   get indexCount() { return this.idx.n; }
   /** Translate a vertex range (e.g. lift everything by the shoe sole). */
+  /** Position / normal of vertex i (after computeNormals for the normal). */
+  posAt(i: number): [number, number, number] { const a = this.pos.a; return [a[i * 3], a[i * 3 + 1], a[i * 3 + 2]]; }
+  normalAt(i: number): [number, number, number] { const a = this.nrm.a; return [a[i * 3], a[i * 3 + 1], a[i * 3 + 2]]; }
   translate(dy: number) { for (let i = 1; i < this.pos.n; i += 3) this.pos.a[i] += dy; }
 
   finish(): GeoArrays {
