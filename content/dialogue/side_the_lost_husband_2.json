@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_the_lost_husband_2",
+  "context": "The projectionist's booth.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.lou_ferraro",
+      "emotion": "gentle",
+      "text": "Harold Cho? Bit part in 'Pier Seventeen', forty-nine. A waiter. Two lines. Good lines."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.lou_ferraro",
+      "emotion": "gentle",
+      "text": "I'll run the reel for her. Midnight. No charge. Some things you don't charge for."
+    }
+  ]
+}

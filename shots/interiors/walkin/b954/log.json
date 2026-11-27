@@ -1,0 +1,98 @@
+[
+ {
+  "d": 8,
+  "inside": null,
+  "live": 12,
+  "visCells": 6,
+  "draws": 68,
+  "extHidden": false
+ },
+ {
+  "d": 5,
+  "inside": null,
+  "live": 12,
+  "visCells": 6,
+  "draws": 60,
+  "extHidden": false
+ },
+ {
+  "d": 3,
+  "inside": null,
+  "live": 12,
+  "visCells": 4,
+  "draws": 52,
+  "extHidden": false
+ },
+ {
+  "d": 1.5,
+  "inside": null,
+  "live": 12,
+  "visCells": 4,
+  "draws": 52,
+  "extHidden": false
+ },
+ {
+  "d": 0.5,
+  "inside": null,
+  "live": 13,
+  "visCells": 5,
+  "draws": 61,
+  "extHidden": false
+ },
+ {
+  "d": -0.5,
+  "inside": {
+   "interiorId": "b954",
+   "kind": "loft",
+   "roomVolume": 74,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 13,
+  "visCells": 5,
+  "draws": 45,
+  "extHidden": false
+ },
+ {
+  "d": -1.5,
+  "inside": {
+   "interiorId": "b954",
+   "kind": "loft",
+   "roomVolume": 74,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 13,
+  "visCells": 3,
+  "draws": 41,
+  "extHidden": false
+ },
+ {
+  "d": -3,
+  "inside": {
+   "interiorId": "b954",
+   "kind": "loft",
+   "roomVolume": 74,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 13,
+  "visCells": 2,
+  "draws": 37,
+  "extHidden": false
+ },
+ {
+  "d": -5,
+  "inside": {
+   "interiorId": "b954",
+   "kind": "loft",
+   "roomVolume": 74,
+   "reverb": "stairwell",
+   "cell": "floor0"
+  },
+  "live": 13,
+  "visCells": 3,
+  "draws": 40,
+  "extHidden": true
+ }
+]

@@ -1,0 +1,48 @@
+{
+  "id": "dlg.m26_false_alarm",
+  "context": "M26 o7. (Teddy.) 02:40. Fire bells. Engines on W 31st. Tenants on the sidewalk in robes. No smoke.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.firefighter",
+      "emotion": "annoyed",
+      "text": "Who pulled the box? Somebody pulled the box. Building's fine."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "Everybody out. Slowly. Mr. Ostrow, your teeth are in your pocket."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.gus_wilkie",
+      "emotion": "panicked",
+      "text": "It wasn't me! I left the door locked! I locked it, Teddy!",
+      "ifRelationship": {
+        "char.teddy_arce/char.gus_wilkie": ">-3"
+      }
+    },
+    {
+      "id": "l3b",
+      "speaker": "char.gus_wilkie",
+      "emotion": "ashamed",
+      "text": "I left the service door open. Prentiss paid me. I'm sorry. I'm sorry.",
+      "ifRelationship": {
+        "char.teddy_arce/char.gus_wilkie": "<=-3"
+      }
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "radio",
+      "text": "(Payphone) Teddy. Your firebug's walking east on Thirty-First. Two cans. Tan jacket."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "decisive",
+      "text": "Got him. Delphine, stay with the tenants. I'll find who's paying."
+    }
+  ]
+}

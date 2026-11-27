@@ -1,0 +1,23 @@
+{
+ "note": "Per-speaker voice overrides for tools/audio/voices.ts. Variants: eSpeak NG m1-m7, f1-f5, klatt-klatt6; pitch 0-99; speed words/min; gap = extra word gap (10 ms units). Re-run npm run audio:voices after editing.",
+ "speakers": {
+  "char.teddy_arce": {
+   "variant": "m2",
+   "pitch": 44,
+   "speed": 168,
+   "gap": 1
+  },
+  "char.nick_varelas": {
+   "variant": "m7",
+   "pitch": 30,
+   "speed": 152,
+   "gap": 2
+  },
+  "char.delphine_moore": {
+   "variant": "f4",
+   "pitch": 66,
+   "speed": 172,
+   "gap": 1
+  }
+ }
+}

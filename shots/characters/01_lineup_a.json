@@ -1,0 +1,375 @@
+{
+  "backend": "webgl2",
+  "scene": "lineup",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "people": [
+    {
+      "seed": 3099973695,
+      "sex": 1,
+      "age": 52,
+      "hair": "sidePart",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [
+        "briefcase"
+      ],
+      "tris": 10222,
+      "draws": 2,
+      "buildMs": 162.4
+    },
+    {
+      "seed": 1977783798,
+      "sex": 1,
+      "age": 43,
+      "hair": "afroShort",
+      "facialHair": "sideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "workBoot",
+      "hat": null,
+      "props": [],
+      "tris": 9907,
+      "draws": 2,
+      "buildMs": 114.9
+    },
+    {
+      "seed": 4286010875,
+      "sex": 1,
+      "age": 22,
+      "hair": "shag",
+      "facialHair": "stubble",
+      "top": "workShirt",
+      "bottom": "jeans",
+      "outer": "workJacket",
+      "shoes": "boot",
+      "hat": null,
+      "props": [],
+      "tris": 10358,
+      "draws": 2,
+      "buildMs": 96.2
+    },
+    {
+      "seed": 4022143663,
+      "sex": 1,
+      "age": 68,
+      "hair": "sidePart",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "sneaker",
+      "hat": "fedora",
+      "props": [],
+      "tris": 9440,
+      "draws": 2,
+      "buildMs": 55.5
+    },
+    {
+      "seed": 1422669857,
+      "sex": 1,
+      "age": 71,
+      "hair": "afroShort",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "wingtip",
+      "hat": null,
+      "props": [],
+      "tris": 9045,
+      "draws": 2,
+      "buildMs": 50.8
+    },
+    {
+      "seed": 2134067074,
+      "sex": 0,
+      "age": 57,
+      "hair": "setCurls",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "sandal",
+      "hat": null,
+      "props": [],
+      "tris": 10122,
+      "draws": 2,
+      "buildMs": 61.5
+    },
+    {
+      "seed": 84956558,
+      "sex": 0,
+      "age": 50,
+      "hair": "setCurls",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "tote",
+        "cigarette"
+      ],
+      "tris": 10314,
+      "draws": 2,
+      "buildMs": 45.2
+    },
+    {
+      "seed": 2593002056,
+      "sex": 1,
+      "age": 49,
+      "hair": "sidePart",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "boot",
+      "hat": null,
+      "props": [
+        "briefcase"
+      ],
+      "tris": 10444,
+      "draws": 2,
+      "buildMs": 64
+    },
+    {
+      "seed": 1571629204,
+      "sex": 1,
+      "age": 39,
+      "hair": "earLength",
+      "facialHair": "none",
+      "top": "knitPolo",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [
+        "newspaper"
+      ],
+      "tris": 9350,
+      "draws": 2,
+      "buildMs": 52.2
+    },
+    {
+      "seed": 2079497775,
+      "sex": 1,
+      "age": 31,
+      "hair": "short",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "sneaker",
+      "hat": null,
+      "props": [],
+      "tris": 8497,
+      "draws": 2,
+      "buildMs": 44.5
+    }
+  ],
+  "updateMs": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0.1,
+    0.1,
+    0,
+    0,
+    0.1
+  ],
+  "toneProbes": [
+    {
+      "hero": null,
+      "seed": 3099973695,
+      "rb": null,
+      "tone": "#714b2e",
+      "cheek": [
+        0.0728,
+        0.3813
+      ],
+      "neck": [
+        0.076,
+        0.3898
+      ],
+      "hand": [
+        0.0518,
+        0.5229
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 1977783798,
+      "rb": "Male_Adult_04",
+      "tone": "#7e5136",
+      "cheek": [
+        0.1688,
+        0.3797
+      ],
+      "neck": [
+        0.1712,
+        0.3899
+      ],
+      "hand": [
+        0.1435,
+        0.5269
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 4286010875,
+      "rb": null,
+      "tone": "#d6af93",
+      "cheek": [
+        0.2662,
+        0.374
+      ],
+      "neck": [
+        0.2668,
+        0.3862
+      ],
+      "hand": [
+        0.2419,
+        0.5252
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 4022143663,
+      "rb": null,
+      "tone": "#896243",
+      "cheek": [
+        0.3599,
+        0.3929
+      ],
+      "neck": [
+        0.3609,
+        0.401
+      ],
+      "hand": [
+        0.3345,
+        0.5272
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 1422669857,
+      "rb": null,
+      "tone": "#855639",
+      "cheek": [
+        0.458,
+        0.3697
+      ],
+      "neck": [
+        0.4567,
+        0.3797
+      ],
+      "hand": [
+        0.4289,
+        0.5201
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 2134067074,
+      "rb": null,
+      "tone": "#d7b296",
+      "cheek": [
+        0.5525,
+        0.3888
+      ],
+      "neck": [
+        0.5514,
+        0.3988
+      ],
+      "hand": [
+        0.5303,
+        0.527
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 84956558,
+      "rb": "Female_Adult_01",
+      "tone": "#c49677",
+      "cheek": [
+        0.6467,
+        0.3666
+      ],
+      "neck": [
+        0.6453,
+        0.3794
+      ],
+      "hand": [
+        0.6179,
+        0.5142
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 2593002056,
+      "rb": null,
+      "tone": "#cfa588",
+      "cheek": [
+        0.7425,
+        0.3663
+      ],
+      "neck": [
+        0.7403,
+        0.3765
+      ],
+      "hand": [
+        0.7123,
+        0.5144
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 1571629204,
+      "rb": null,
+      "tone": "#cba57e",
+      "cheek": [
+        0.8388,
+        0.3308
+      ],
+      "neck": [
+        0.8352,
+        0.3456
+      ],
+      "hand": [
+        0.8058,
+        0.5022
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 2079497775,
+      "rb": "Male_Adult_11",
+      "tone": "#c39475",
+      "cheek": [
+        0.9332,
+        0.3707
+      ],
+      "neck": [
+        0.9299,
+        0.3815
+      ],
+      "hand": [
+        0.893,
+        0.5223
+      ]
+    }
+  ],
+  "renderMsSoftware": [
+    4.5,
+    1.8999999999650754,
+    1.6000000000349246
+  ]
+}

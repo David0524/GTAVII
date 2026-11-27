@@ -1,0 +1,7 @@
+{
+  "v": 2,
+  "leads": {
+    "char.teddy_arce": { "money": 1234, "items": [{ "id": "item.service", "qty": 1 }, { "id": "item.ammo_38", "qty": 37 }], "outfits": ["outfit.teddy_desk", "outfit.leisure_tan"], "wearing": "outfit.leisure_tan" }
+  },
+  "payoffs": { "pct.midtown_central": 0.5 }
+}

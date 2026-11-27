@@ -1,0 +1,238 @@
+{
+  "_note": "Invented stations with no call letters or dial frequencies (real NYC frequencies all belong to real stations). Every song and artist is invented. DJ lines are 90 characters or fewer, and each one also appears as an '(Radio)' subtitle.",
+  "stations": [
+    {
+      "id": "radio.night_owl",
+      "name": "Night Owl Radio",
+      "format": "Soul, Philly-style strings and the first disco mixes, midnight to six",
+      "period": "Disco was emerging from NYC and Philadelphia clubs in 1974 [S19].",
+      "dj": {
+        "name": "Vernon “Velvet” Gale",
+        "voice": "Low, unhurried, talks to night-shift workers by trade"
+      },
+      "patter": [
+        {
+          "text": "Night Owl Radio. Cabbies, nurses, night desks: this one's for you."
+        },
+        {
+          "text": "Ninety-one degrees at two a.m. I'm not complaining. I'm reporting."
+        },
+        {
+          "text": "To the man behind the glass on Thirty-First: you know who you are. Stay awake, brother."
+        },
+        {
+          "text": "Lights out on the West Side? Turn me up. Batteries are cheaper than heartbreak.",
+          "context": "brownout"
+        },
+        {
+          "text": "Tonight we're not playing records for a while. Tonight we listen to the man in Washington.",
+          "date": "1974-08-08"
+        },
+        {
+          "text": "Four a.m. Pie at the Royal, coffee at the Penn Station counter. I'll meet you in the song."
+        },
+        {
+          "text": "Something new from a club downtown. Mixed long, so you dance till sunrise."
+        },
+        {
+          "text": "Night Owl Radio. If you're up, you're family."
+        }
+      ],
+      "songs": [
+        {
+          "title": "Sodium Light Serenade",
+          "artist": "The Marquee Five"
+        },
+        {
+          "title": "Don't Let the Meter Run",
+          "artist": "Lorraine Pettaway"
+        },
+        {
+          "title": "Night Desk Blues",
+          "artist": "Calvin Rook & the Midnights"
+        },
+        {
+          "title": "Four A.M. Pie",
+          "artist": "Sister Vee"
+        },
+        {
+          "title": "Long Mix for a Short Summer",
+          "artist": "The Velour Strings"
+        },
+        {
+          "title": "Steam From the Street",
+          "artist": "Darnell Coates"
+        },
+        {
+          "title": "Keep the Change, Baby",
+          "artist": "The Glass Elevators"
+        },
+        {
+          "title": "Brownout Love",
+          "artist": "Gloria Mae Trent"
+        }
+      ]
+    },
+    {
+      "id": "radio.caribe",
+      "name": "Radio Caribe Nueva York",
+      "format": "Salsa, boogaloo, bolero, bilingual",
+      "period": "Salsa was at a creative peak in early-1970s New York [S19].",
+      "dj": {
+        "name": "Ramón “El Tigre” Ferrer",
+        "voice": "Fast, bilingual, shout-outs to blocks and bodegas"
+      },
+      "patter": [
+        {
+          "text": "¡Radio Caribe Nueva York! From the Bronx to Penn South, ¡todo el mundo a bailar!"
+        },
+        {
+          "text": "Saludos to the ladies at the machines on Thirty-Seventh. Forty years. ¡Respeto!"
+        },
+        {
+          "text": "Hydrant's open on Twenty-Seventh. Kids are happy. Turn it up for the kids."
+        },
+        {
+          "text": "Se fue la luz on the West Side. Radio Caribe on batteries. ¡No se apaga!",
+          "context": "brownout"
+        },
+        {
+          "text": "From Mayagüez to Manhattan, this bolero is for every mother who fed us. Mamá, te quiero."
+        },
+        {
+          "text": "March on Herald Square Friday. Bring your flag, bring your chair, bring your abuela.",
+          "dateRange": [
+            "1974-08-19",
+            "1974-08-23"
+          ]
+        },
+        {
+          "text": "Radio Caribe. Second hour. The trombones are coming. Step back."
+        }
+      ],
+      "songs": [
+        {
+          "title": "Calle Treinta y Uno",
+          "artist": "Orquesta Brisa Nueva"
+        },
+        {
+          "title": "El Hombre del Sobre",
+          "artist": "Tito Almeyda y su Conjunto"
+        },
+        {
+          "title": "Boogaloo en la Ocho",
+          "artist": "Los Hermanos Quintero"
+        },
+        {
+          "title": "Máquina de Coser",
+          "artist": "Celia Rubio"
+        },
+        {
+          "title": "Bolero para Carmen",
+          "artist": "Trio Malecón"
+        },
+        {
+          "title": "Hydrant Mambo",
+          "artist": "Johnny Pabón Sextet"
+        },
+        {
+          "title": "La Ciudad Sin Plata",
+          "artist": "Orquesta Brisa Nueva"
+        },
+        {
+          "title": "Trombones in the Heat",
+          "artist": "Los Hermanos Quintero"
+        }
+      ]
+    },
+    {
+      "id": "radio.hourly",
+      "name": "The Hourly",
+      "format": "All-news and talk; headlines track the weekly front pages",
+      "dj": {
+        "name": "Harold Vance (anchor) and a rotating 'Man on the Street'",
+        "voice": "Clipped, worried, municipal"
+      },
+      "patter": [
+        {
+          "text": "The Hourly. The city's borrowing again. The comptroller says, quote, 'again.'"
+        },
+        {
+          "text": "Hudson Union asks you to set your air-conditioner to seventy-eight. Or off."
+        },
+        {
+          "text": "Traffic: Thirty-Seventh is a parking lot. Thirty-Seventh is always a parking lot."
+        },
+        {
+          "text": "Signals are dark from Twenty-Sixth to Thirty-Fourth. Treat every crossing as a stop.",
+          "context": "brownout"
+        },
+        {
+          "text": "We interrupt: the President will address the nation from the White House at nine.",
+          "date": "1974-08-08"
+        },
+        {
+          "text": "Tenants and workers are expected on Broadway this morning. Avoid Herald Square till one.",
+          "date": "1974-08-23"
+        },
+        {
+          "text": "The Hourly. Weather: hot. Tomorrow: hotter. Your rent: higher."
+        }
+      ],
+      "songs": []
+    },
+    {
+      "id": "radio.easy",
+      "name": "Easy Seventy",
+      "format": "Easy listening and standards (Nick's car radio)",
+      "dj": {
+        "name": "Gil Ormsby",
+        "voice": "Smooth and avuncular; restaurant recommendations"
+      },
+      "patter": [
+        {
+          "text": "Easy Seventy. Strings for the drive home, wherever home is tonight."
+        },
+        {
+          "text": "A gentleman never hurries. Especially on Seventh Avenue at five o'clock."
+        },
+        {
+          "text": "Storm warnings for this evening. Close the sunroof, sir."
+        },
+        {
+          "text": "Power's out downtown, they tell me. Our generator thanks you for listening.",
+          "context": "brownout"
+        },
+        {
+          "text": "For the furriers' banquet at the Pennsylvania tonight: something cool."
+        }
+      ],
+      "songs": [
+        {
+          "title": "Moonlight Over Madison Square",
+          "artist": "The Percy Lyle Orchestra"
+        },
+        {
+          "title": "A Coat for October",
+          "artist": "Della Fairmont"
+        },
+        {
+          "title": "Sunroof",
+          "artist": "The Ormsby Strings"
+        },
+        {
+          "title": "Penthouse Waltz",
+          "artist": "The Percy Lyle Orchestra"
+        },
+        {
+          "title": "Thirtieth Street Rain",
+          "artist": "Della Fairmont"
+        },
+        {
+          "title": "Everybody Gets Paid",
+          "artist": "Monty Carvell"
+        }
+      ]
+    }
+  ]
+}

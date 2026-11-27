@@ -1,0 +1,45 @@
+{
+  "id": "dlg.m10_count",
+  "context": "M10 o6. The Shamrock Rail at 07:30, chairs still on tables. Mayhew counts envelopes on the bar.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "pleased",
+      "text": "Flowers, wigs, Earl. Look at you, kid. A natural."
+    },
+    {
+      "id": "l2a",
+      "speaker": "char.carl_mayhew",
+      "emotion": "suspicious",
+      "text": "Hold on. July Fourth. The Moore woman. Fifty short.",
+      "if": "flag.teddy_returned_tax"
+    },
+    {
+      "id": "l2b",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "I told you. I lost it running. Lonnie's boys.",
+      "if": "flag.teddy_returned_tax"
+    },
+    {
+      "id": "l2c",
+      "speaker": "char.carl_mayhew",
+      "emotion": "cold",
+      "text": "Lost it. Sure. I'll make it up out of your next week. Like a bank.",
+      "if": "flag.teddy_returned_tax"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Two hundred. And here's the list for next week. The furs are on it. Easy people."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "And kid? Wurtz asked about you. Means you're doing fine. Keep doing fine."
+    }
+  ]
+}

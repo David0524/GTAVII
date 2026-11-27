@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m04_augie",
+  "context": "M4 o7. 37th & Seventh, the morning jam. Augie Lomax steps out of the crowd, cigar in his teeth.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.augie_lomax",
+      "emotion": "gruff",
+      "text": "You're the guy on my driver's case on Twenty-Ninth. Wait. I know you."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.augie_lomax",
+      "emotion": "gruff",
+      "text": "Arce. Christmas list, Midtown. You took a turkey and a fifty. Sixty-nine."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "Seventy. And it was a ham."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.augie_lomax",
+      "emotion": "gruff",
+      "text": "Thirty-Seventh's a parking lot seven to ten. That's not traffic. That's my office."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.augie_lomax",
+      "emotion": "warning",
+      "text": "You carry for Feld, fine. You carry opinions, you carry 'em someplace else."
+    }
+  ]
+}

@@ -1,0 +1,722 @@
+[
+  {
+    "file": "01_shootout_cover.png",
+    "note": "Teddy crouched behind a parked sedan (low cover, engine block to his left). A five-man crew has spread into cover among the crates; labels show AI state, attack token (●), morale and rounds. Orange lines are rounds being fired.",
+    "state": {
+      "hp": 110,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:inCover",
+        "gang:inCover",
+        "gang:inCover",
+        "gang:inCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.44310344827907355,
+        "gameplayP95": 2,
+        "frameAvg": 12.99482758620208,
+        "frameP95": 36.5,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0,
+          "totalMs": 0.10000000009313226,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "02_shootout_peek_fire.png",
+    "note": "Peeking over the car with a lock-on (touch mode) and returning fire; tracers, muzzle flash, hit marker. Enemies without a token suppress the car instead of all shooting at once.",
+    "state": {
+      "hp": 105,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:flee",
+        "gang:suppress",
+        "gang:inCover",
+        "gang:moveToCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.528571428581407,
+        "gameplayP95": 2.099999999627471,
+        "frameAvg": 10.673809523805089,
+        "frameP95": 16.5,
+        "combat": {
+          "combatMs": 0.20000000018626451,
+          "policeMs": 0,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "03_shootout_blind_fire.png",
+    "note": "Blind fire: the revolver held up over the car without exposing the body (wide spread).",
+    "state": {
+      "hp": 105,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:flee",
+        "gang:retreat",
+        "gang:inCover",
+        "gang:moveToCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.5139784946316673,
+        "gameplayP95": 2.099999999627471,
+        "frameAvg": 10.181720430111532,
+        "frameP95": 16.5,
+        "combat": {
+          "combatMs": 0.20000000018626451,
+          "policeMs": 0,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "04_shootout_morale.png",
+    "note": "Later in the same fight: wounded and outnumbered crew members retreat, surrender (hands up) or run rather than fighting to the death.",
+    "state": {
+      "hp": 94,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:leave",
+        "radio_car:search"
+      ],
+      "ai": [
+        "gang:flank",
+        "gang:flee",
+        "gang:inCover",
+        "gang:inCover",
+        "gang:moveToCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.4626865671746044,
+        "gameplayP95": 1.900000000372529,
+        "frameAvg": 8.717164179105172,
+        "frameP95": 14.399999999906868,
+        "combat": {
+          "combatMs": 0.3000000002793968,
+          "policeMs": 0,
+          "totalMs": 0.3000000002793968,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "05_melee_closing.png",
+    "note": "Melee yard: an unarmed hood closes in; the windup is telegraphed (longer for NPCs so a thumb can react).",
+    "state": {
+      "hp": 72,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "hood:charge"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.6175000000046567,
+        "gameplayP95": 2.799999999930151,
+        "frameAvg": 14.519999999992432,
+        "frameP95": 105.40000000002328,
+        "combat": {
+          "combatMs": 0.2000000000698492,
+          "policeMs": 0,
+          "totalMs": 0.2000000000698492,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "06_melee_exchange.png",
+    "note": "The exchange: block / parry on the telegraph, then a counter (×2 damage after a parry).",
+    "state": {
+      "hp": 53,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "hood:charge"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.5157894736927885,
+        "gameplayP95": 1.7999999999301508,
+        "frameAvg": 11.270175438594856,
+        "frameP95": 36.5,
+        "combat": {
+          "combatMs": 0.09999999997671694,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.2000000000698492,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "07_melee_grapple_shove.png",
+    "note": "Grab, then shove: a fighter driven into the yard wall is slammed (extra damage, knockdown).",
+    "state": {
+      "hp": 52,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "hood:charge"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.4608695652231277,
+        "gameplayP95": 1.5,
+        "frameAvg": 10.001449275363669,
+        "frameP95": 20.199999999953434,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0,
+          "totalMs": 0,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "08_witness_runs_to_callbox.png",
+    "note": "W 31st St between 7th and 8th Aves (real block). A shot into the air: people scatter, a witness breaks for the red call box. Red lines: the witness's run and what they last saw. \"Someone's running for the call box.\"",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:enroute"
+      ],
+      "ai": [],
+      "witnesses": [
+        "calling",
+        "bystander",
+        "toReport",
+        "bystander",
+        "bystander",
+        "bystander",
+        "bystander",
+        "toReport",
+        "toReport"
+      ],
+      "timings": {
+        "gameplayAvg": 0.3287037037187946,
+        "gameplayP95": 1.4000000001396984,
+        "frameAvg": 13.702777777751045,
+        "frameP95": 30.699999999953434,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0.2999999998137355,
+          "totalMs": 0.39999999990686774,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "09_witness_on_callbox.png",
+    "note": "The witness on the call box (6 s call). Break the box, catch them, or be gone — nothing is reported until the call goes through.",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:enroute"
+      ],
+      "ai": [],
+      "witnesses": [
+        "calling",
+        "bystander",
+        "toReport",
+        "bystander",
+        "bystander",
+        "bystander",
+        "bystander",
+        "toReport",
+        "toReport"
+      ],
+      "timings": {
+        "gameplayAvg": 0.3135593220477103,
+        "gameplayP95": 1.4000000001396984,
+        "frameAvg": 13.058474576248692,
+        "frameP95": 30.699999999953434,
+        "combat": {
+          "combatMs": 0.09999999986030161,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.19999999995343387,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "10_report_filed_radio.png",
+    "note": "Report filed with Midtown Central: the radio line carries the description (\"RADIO ...\"), the report panel shows heat/tier, and the search circle appears on the radar at the last-known point.",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 1.4,
+          "tier": 1,
+          "text": "…male, thirties, medium build, white short-sleeve shirt…"
+        }
+      ],
+      "units": [
+        "foot:post",
+        "radio_car:pursuit"
+      ],
+      "ai": [],
+      "witnesses": [
+        "calling",
+        "bystander",
+        "toReport",
+        "bystander",
+        "bystander",
+        "toReport",
+        "toReport",
+        "toReport",
+        "toReport",
+        "bystander"
+      ],
+      "timings": {
+        "gameplayAvg": 0.445312500003638,
+        "gameplayP95": 2.300000000046566,
+        "frameAvg": 12.108593749991996,
+        "frameP95": 29.5999999998603,
+        "combat": {
+          "combatMs": 0.6999999999534339,
+          "policeMs": 0.39999999990686774,
+          "totalMs": 1.0999999998603016,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "11_patrol_response.png",
+    "note": "The response: cops coming out of the station house on this block and a radio car rolling, sight cones on the ground (yellow searching, orange suspicious).",
+    "state": {
+      "hp": 100,
+      "money": 3200,
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 3.64,
+          "tier": 3,
+          "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks, may be armed…"
+        }
+      ],
+      "units": [
+        "foot:post",
+        "foot:approach",
+        "radio_car:approach"
+      ],
+      "ai": [],
+      "witnesses": [
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed"
+      ],
+      "timings": {
+        "gameplayAvg": 0.2437759336041619,
+        "gameplayP95": 0.5999999998603016,
+        "frameAvg": 7.4197095435622815,
+        "frameP95": 14.699999999953434,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.10000000009313226,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "12_stopped_by_patrolman.png",
+    "note": "Stopped: \"Hold it right there.\" Comply, offer money, or run. No meter — just the man in front of you.",
+    "state": {
+      "hp": 100,
+      "money": 19200,
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 3.61,
+          "tier": 3,
+          "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks, may be armed…"
+        }
+      ],
+      "units": [
+        "foot:post",
+        "foot:encounter",
+        "radio_car:approach"
+      ],
+      "ai": [],
+      "witnesses": [
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed"
+      ],
+      "timings": {
+        "gameplayAvg": 0.2350393700831401,
+        "gameplayP95": 0.5,
+        "frameAvg": 7.34704724409733,
+        "frameP95": 14.099999999860302,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0.19999999995343387,
+          "totalMs": 0.19999999995343387,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "13_bribe_refused.png",
+    "note": "A $10 offer for a shots-fired report: refused. The money stays in your pocket.",
+    "state": {
+      "hp": 100,
+      "money": 19200,
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 3.61,
+          "tier": 3,
+          "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks, may be armed…"
+        }
+      ],
+      "units": [
+        "foot:post",
+        "foot:encounter",
+        "radio_car:encounter"
+      ],
+      "ai": [],
+      "witnesses": [
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed"
+      ],
+      "timings": {
+        "gameplayAvg": 0.23365570599937405,
+        "gameplayP95": 0.5,
+        "frameAvg": 7.317988394586661,
+        "frameP95": 14.099999999860302,
+        "combat": {
+          "combatMs": 0.09999999986030161,
+          "policeMs": 0,
+          "totalMs": 0.09999999986030161,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "14_bribe_accepted.png",
+    "note": "$150 to a cop on a house that's on the pad: accepted. The report is lost, the cop walks.",
+    "state": {
+      "hp": 100,
+      "money": 4200,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "foot:leave",
+        "radio_car:leave"
+      ],
+      "ai": [],
+      "witnesses": [
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed",
+        "filed"
+      ],
+      "timings": {
+        "gameplayAvg": 0.23136882129578565,
+        "gameplayP95": 0.5,
+        "frameAvg": 7.292395437265545,
+        "frameP95": 13.899999999906868,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.10000000009313226,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "15_description_broken.png",
+    "note": "Description broken: the report says \"white short-sleeve shirt, brown slacks\"; he's now in \"navy windbreaker, white undershirt, navy cap, dark blue dungarees\". A searching cop passes within his cone without recognising him (recognition stays at 0%).",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 3.23,
+          "tier": 3,
+          "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks, may be armed…"
+        }
+      ],
+      "units": [
+        "foot:post",
+        "radio_car:search",
+        "foot:search",
+        "radio_car:search",
+        "sector_car:enroute"
+      ],
+      "ai": [],
+      "witnesses": [
+        "filed",
+        "filed",
+        "filed",
+        "filed"
+      ],
+      "timings": {
+        "gameplayAvg": 0.2596774193546718,
+        "gameplayP95": 0.599999999627471,
+        "frameAvg": 8.606810035851641,
+        "frameP95": 18.200000000186265,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "16_hydrant_geyser.png",
+    "note": "A hydrant opened with a length of pipe on a hot afternoon: it geysers for 90 s and pushes people back. Opening it is vandalism, and the witnesses treat it like any other crime.",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [
+        {
+          "pct": "pct.midtown_central",
+          "heat": 1.4,
+          "tier": 1,
+          "text": "…male, thirties, medium build, white short-sleeve shirt, brown slacks…"
+        }
+      ],
+      "units": [
+        "foot:post",
+        "radio_car:pursuit"
+      ],
+      "ai": [],
+      "witnesses": [
+        "calling",
+        "bystander",
+        "toReport",
+        "bystander"
+      ],
+      "timings": {
+        "gameplayAvg": 0.3598130841034456,
+        "gameplayP95": 0.7000000001862645,
+        "frameAvg": 13.954205607451394,
+        "frameP95": 34.799999999813735,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0,
+          "totalMs": 0.10000000009313226,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "17_touch_lockon.png",
+    "note": "Phone landscape (844×390): touch layout. AIM locks the best target, ◀ ▶ cycle, HEAD/BODY/LEGS pick a limb, hold FIRE for assisted fire. No precise free aim needed.",
+    "state": {
+      "hp": 76,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [
+        "gang:inCover",
+        "gang:peek",
+        "gang:flank",
+        "gang:inCover"
+      ],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.7276923076822781,
+        "gameplayP95": 2.8000000002793968,
+        "frameAvg": 15.601538461518402,
+        "frameP95": 40.1999999997206,
+        "combat": {
+          "combatMs": 0.19999999972060323,
+          "policeMs": 0,
+          "totalMs": 0.19999999972060323,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "18_narrative_shop.png",
+    "note": "The shop panel running on narrative's own content through the adapter: their item names and 1974 dollar prices, gameplay's numbers behind them.",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.3694444444425042,
+        "gameplayP95": 1.099999999976717,
+        "frameAvg": 14.469444444458027,
+        "frameP95": 97.40000000002328,
+        "combat": {
+          "combatMs": 0.09999999997671694,
+          "policeMs": 0,
+          "totalMs": 0.19999999995343387,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "19_narrative_shop_2.png",
+    "note": "A second narrative shop on the same content (`?gameplay=1&content=narrative`).",
+    "state": {
+      "hp": 100,
+      "money": 4000,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.31224489795300653,
+        "gameplayP95": 1.099999999976717,
+        "frameAvg": 11.591836734708133,
+        "frameP95": 26.400000000023283,
+        "combat": {
+          "combatMs": 0,
+          "policeMs": 0.09999999997671694,
+          "totalMs": 0.09999999997671694,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "20_arcade_pinball.png",
+    "note": "Night Owl, an original 1974 electro-mechanical pinball table, on a phone in landscape. Pop bumpers, slingshots, the O-W-L rollovers and drop bank, a tilt bob and a replay score. Touch: left and right halves flip, pull down on the plunger, swipe to nudge. The physics runs at a fixed step and is the same code the headless tests play.",
+    "state": {
+      "hp": 100,
+      "money": 475,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.8901639344346267,
+        "gameplayP95": 2.199999999953434,
+        "frameAvg": 7.013934426223401,
+        "frameP95": 10.199999999953434,
+        "combat": {
+          "combatMs": 0.10000000009313226,
+          "policeMs": 0.10000000009313226,
+          "totalMs": 0.20000000018626451,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  },
+  {
+    "file": "21_arcade_gallery.png",
+    "note": "Dead-Eye Gallery, an original electro-mechanical rifle gallery: tin ducks, rabbits and a slow owl on three chain belts, and a gold bell that adds ten seconds. Drag to aim, lift to fire. A dime a game; high scores go on the machine card and are saved.",
+    "state": {
+      "hp": 100,
+      "money": 465,
+      "reports": [],
+      "units": [
+        "foot:post",
+        "radio_car:post"
+      ],
+      "ai": [],
+      "witnesses": [],
+      "timings": {
+        "gameplayAvg": 0.7646739130432252,
+        "gameplayP95": 1.5,
+        "frameAvg": 5.71847826086425,
+        "frameP95": 8.399999999906868,
+        "combat": {
+          "combatMs": 0.09999999986030161,
+          "policeMs": 0,
+          "totalMs": 0.09999999986030161,
+          "ballisticsMs": 0
+        }
+      }
+    }
+  }
+]

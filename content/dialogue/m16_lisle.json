@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m16_lisle",
+  "context": "M16 o8. Lisle's office, 11th floor. Marjorie brings papers. Lisle never touches them.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Nicholas. A bridge loan. From investors who admire you. Ninety days."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "In exchange, a few more signatures. The hotels on Broadway. Routine."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "tired",
+      "text": "What am I signing, Howard?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.howard_lisle",
+      "emotion": "soft",
+      "text": "Notwithstanding the foregoing, your future. Sign where Marjorie marks."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.marjorie_kell",
+      "emotion": "flat",
+      "text": "Here. And here. And here."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "I signed without reading. Like always. The secretary watched me do it."
+    }
+  ]
+}

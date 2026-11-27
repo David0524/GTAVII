@@ -1,0 +1,139 @@
+{
+  "_note": "Subway stations inside the story-core bounds (E8), as named in 1974. Line names, not route letters (1974 letter service differs from today's). 'verified' = confirmed by a source in this session; 'to_verify' = well known but not yet checked against a period source.",
+  "stations": [
+    {
+      "id": "station.herald_sq",
+      "name": "34th St–Herald Square",
+      "lines": [
+        "BMT Broadway",
+        "IND Sixth Avenue"
+      ],
+      "at": "W 34th St & 6th Ave",
+      "interior": "interior.herald_sq_station",
+      "status": "verified",
+      "source": "Wikipedia, 34th Street–Herald Square station (IND platforms opened 1940; BMT 1917)"
+    },
+    {
+      "id": "station.penn_ind",
+      "name": "34th St–Penn Station",
+      "lines": [
+        "IND Eighth Avenue"
+      ],
+      "at": "8th Ave & W 33rd St",
+      "interior": "interior.penn_ind_platform",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.penn_irt",
+      "name": "34th St–Penn Station",
+      "lines": [
+        "IRT Broadway–Seventh Avenue"
+      ],
+      "at": "7th Ave & W 33rd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.28th_irt",
+      "name": "28th St",
+      "lines": [
+        "IRT Broadway–Seventh Avenue"
+      ],
+      "at": "7th Ave & W 28th St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.28th_bmt",
+      "name": "28th St",
+      "lines": [
+        "BMT Broadway"
+      ],
+      "at": "Broadway & W 28th St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.23rd_irt",
+      "name": "23rd St",
+      "lines": [
+        "IRT Broadway–Seventh Avenue"
+      ],
+      "at": "7th Ave & W 23rd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.23rd_ind8",
+      "name": "23rd St",
+      "lines": [
+        "IND Eighth Avenue"
+      ],
+      "at": "8th Ave & W 23rd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.23rd_ind6",
+      "name": "23rd St",
+      "lines": [
+        "IND Sixth Avenue"
+      ],
+      "at": "6th Ave & W 23rd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.23rd_bmt",
+      "name": "23rd St",
+      "lines": [
+        "BMT Broadway"
+      ],
+      "at": "Broadway & E 23rd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.42nd_ind8",
+      "name": "42nd St–Port Authority Bus Terminal",
+      "lines": [
+        "IND Eighth Avenue"
+      ],
+      "at": "8th Ave & W 42nd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.42nd_ind6",
+      "name": "42nd St–Bryant Park",
+      "lines": [
+        "IND Sixth Avenue"
+      ],
+      "at": "6th Ave & W 42nd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.times_sq",
+      "name": "Times Square–42nd St",
+      "lines": [
+        "IRT Broadway–Seventh Avenue",
+        "BMT Broadway"
+      ],
+      "at": "7th Ave & W 42nd St",
+      "status": "to_verify"
+    },
+    {
+      "id": "station.path_33",
+      "name": "33rd St (PATH)",
+      "lines": [
+        "PATH (to New Jersey)"
+      ],
+      "at": "6th Ave & W 33rd St",
+      "status": "to_verify"
+    }
+  ],
+  "passages": [
+    {
+      "id": "passage.33rd",
+      "name": "The old 33rd Street passage",
+      "from": "station.herald_sq",
+      "to": "station.penn_ind",
+      "interior": "interior.passage_33rd",
+      "status": "verified (closing date uncertain: 1970s or c.1990)",
+      "source": "Wikipedia, Gimbels Passageway; Untapped Cities; Subwaynut"
+    }
+  ],
+  "fare": "35¢ token (since 1972) [S17]"
+}

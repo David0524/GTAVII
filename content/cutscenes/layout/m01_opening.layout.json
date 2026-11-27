@@ -1,0 +1,834 @@
+{
+ "id": "cut.m01_opening",
+ "format": "t74-cutscene-layout",
+ "version": 1,
+ "_about": "Layout layer for content/cutscenes/m01_opening.json (narrative's script). Written by the ?cine= tool and the UI & cinematics stream only. Merged per shot id at load: camera, actors, cards, cues, timed audio, film settings, dialogue timing, and durationSec overrides. Narrative never edits this file; this stream never edits the script.",
+ "anchor": {
+  "x": -2.15,
+  "z": -19.4
+ },
+ "cast": {
+  "teddy": {
+   "cast": "char.teddy_arce",
+   "colour": "#8a6a4a",
+   "height": 1.78
+  },
+  "mayhew": {
+   "cast": "char.carl_mayhew",
+   "colour": "#5a4a3a",
+   "height": 1.86,
+   "after": "companion"
+  }
+ },
+ "shots": {
+  "s1": {
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       112,
+       122,
+       -205
+      ],
+      "look": [
+       8.52,
+       42.54,
+       -15.59
+      ],
+      "lensMm": 40,
+      "focusM": 230,
+      "fStop": 8
+     },
+     {
+      "t": 5,
+      "pos": [
+       88,
+       72,
+       -165
+      ],
+      "look": [
+       2.96,
+       25.62,
+       -13.29
+      ],
+      "lensMm": 40,
+      "focusM": 180,
+      "fStop": 8
+     },
+     {
+      "t": 9,
+      "pos": [
+       58,
+       27,
+       -118
+      ],
+      "look": [
+       0.35,
+       10.66,
+       -25.75
+      ],
+      "lensMm": 40,
+      "focusM": 110,
+      "fStop": 5.6
+     }
+    ]
+   },
+   "actors": {
+    "teddy": [
+     {
+      "t": 0,
+      "x": -2.15,
+      "z": -19.4,
+      "heading": 0.26,
+      "anim": "idle"
+     }
+    ],
+    "mayhew": [
+     {
+      "t": 0,
+      "x": -34,
+      "z": -44,
+      "heading": -1.1,
+      "anim": "idle"
+     }
+    ]
+   },
+   "cards": [
+    {
+     "t": 1.6,
+     "text": "Tenderloin '74",
+     "style": "title",
+     "seconds": 4.6
+    }
+   ],
+   "audio": [
+    {
+     "t": 0,
+     "cue": "amb.city_dusk"
+    },
+    {
+     "t": 2.5,
+     "cue": "amb.radio_open_window"
+    }
+   ],
+   "film": {
+    "grain": 0.9,
+    "weave": 0.7,
+    "halation": 0.8,
+    "fadeIn": 1.2
+   },
+   "notes": "the crane rises over Madison Square Park (the Lifeline Tower roof itself is solid, so the camera starts beside it, above the park)."
+  },
+  "s2": {
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       1.5,
+       1.7,
+       -112
+      ],
+      "look": [
+       -1,
+       7,
+       -18
+      ],
+      "lensMm": 28,
+      "focusM": 90,
+      "fStop": 5.6
+     },
+     {
+      "t": 2,
+      "pos": [
+       1.5,
+       1.7,
+       -112
+      ],
+      "look": [
+       -1,
+       7,
+       -18
+      ],
+      "lensMm": 28,
+      "focusM": 90,
+      "fStop": 5.6,
+      "ease": "hold"
+     },
+     {
+      "t": 6,
+      "pos": [
+       0.8,
+       1.65,
+       -88
+      ],
+      "look": [
+       -1.5,
+       5,
+       -18
+      ],
+      "lensMm": 28,
+      "focusM": 70,
+      "fStop": 5.6,
+      "ease": "inOut"
+     }
+    ]
+   },
+   "audio": [
+    {
+     "t": 1.2,
+     "cue": "veh.cab_horn_far"
+    }
+   ],
+   "film": {
+    "grain": 0.8,
+    "weave": 0.5,
+    "halation": 0.7
+   }
+  },
+  "s3": {
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       -1.35,
+       1.62,
+       -24.6
+      ],
+      "look": [
+       -2.15,
+       1.58,
+       -19.4
+      ],
+      "lensMm": 85,
+      "focusM": 5.2,
+      "fStop": 2
+     },
+     {
+      "t": 5,
+      "pos": [
+       -1.25,
+       1.6,
+       -24.2
+      ],
+      "look": [
+       -2.15,
+       1.55,
+       -19.4
+      ],
+      "lensMm": 85,
+      "focusM": 4.8,
+      "fStop": 2
+     }
+    ],
+    "handheld": 0.6
+   },
+   "actors": {
+    "teddy": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 0.26,
+       "anim": "idle"
+      },
+      {
+       "t": 1.5,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 0.26,
+       "anim": "check_watch"
+      },
+      {
+       "t": 3.6,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 0.45,
+       "anim": "look_up_street"
+      }
+     ],
+     "clips": [
+      {
+       "t": 0,
+       "clip": "idle",
+       "loop": true
+      },
+      {
+       "t": 1.3,
+       "clip": "check_watch",
+       "layer": "upper",
+       "blend": 0.3,
+       "loop": false
+      },
+      {
+       "t": 3.2,
+       "clip": null,
+       "layer": "upper",
+       "blend": 0.4
+      }
+     ],
+     "look": [
+      {
+       "t": 3.4,
+       "at": [
+        -13.02,
+        1.8,
+        -41.91
+       ],
+       "blend": 0.5
+      }
+     ],
+     "expr": [
+      {
+       "t": 3.4,
+       "name": "squint",
+       "w": 0.4,
+       "blend": 0.4
+      }
+     ]
+    }
+   },
+   "cards": [
+    {
+     "t": 1.8,
+     "text": "8:31",
+     "style": "lower",
+     "seconds": 1.4
+    }
+   ],
+   "film": {
+    "grain": 0.8,
+    "weave": 0.4,
+    "halation": 0.6
+   }
+  },
+  "s4": {
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       -1.85,
+       1.36,
+       -20.75
+      ],
+      "look": [
+       -2.12,
+       1.32,
+       -19.45
+      ],
+      "lensMm": 100,
+      "focusM": 1.35,
+      "fStop": 2
+     },
+     {
+      "t": 3,
+      "pos": [
+       -1.86,
+       1.35,
+       -20.7
+      ],
+      "look": [
+       -2.12,
+       1.31,
+       -19.45
+      ],
+      "lensMm": 100,
+      "focusM": 1.3,
+      "fStop": 2
+     }
+    ],
+    "handheld": 0.35
+   },
+   "actors": {
+    "teddy": [
+     {
+      "t": 0,
+      "x": -2.15,
+      "z": -19.4,
+      "heading": 0.45,
+      "anim": "touch_medal"
+     }
+    ]
+   },
+   "film": {
+    "grain": 0.85,
+    "weave": 0.4
+   }
+  },
+  "s5": {
+   "durationSec": 5.6,
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       -0.8,
+       1.74,
+       -19.1
+      ],
+      "look": [
+       -18.06,
+       1.5,
+       -29.2
+      ],
+      "lensMm": 50,
+      "focusM": 20,
+      "fStop": 2.8
+     },
+     {
+      "t": 5.6,
+      "pos": [
+       -0.82,
+       1.74,
+       -19.12
+      ],
+      "look": [
+       -8.33,
+       1.58,
+       -24.08
+      ],
+      "lensMm": 50,
+      "focusM": 9,
+      "fStop": 2.8
+     }
+    ]
+   },
+   "actors": {
+    "teddy": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 1.05,
+       "anim": "idle"
+      }
+     ],
+     "look": [
+      {
+       "t": 1.2,
+       "at": {
+        "actor": "mayhew"
+       },
+       "blend": 0.8
+      }
+     ],
+     "expr": [
+      {
+       "t": 2.5,
+       "name": "lip_press",
+       "w": 0.3,
+       "blend": 0.5
+      }
+     ]
+    },
+    "mayhew": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -27,
+       "z": -35,
+       "heading": -2.1,
+       "anim": "walk"
+      },
+      {
+       "t": 5.6,
+       "x": -9.5,
+       "z": -25.5,
+       "heading": -2.2,
+       "anim": "walk"
+      }
+     ],
+     "clips": [
+      {
+       "t": 0,
+       "clip": "walk",
+       "loop": true
+      },
+      {
+       "t": 1.6,
+       "clip": "wave",
+       "layer": "upper",
+       "blend": 0.3,
+       "loop": false
+      },
+      {
+       "t": 3.6,
+       "clip": null,
+       "layer": "upper",
+       "blend": 0.5
+      }
+     ],
+     "look": [
+      {
+       "t": 0.4,
+       "at": {
+        "actor": "teddy"
+       },
+       "blend": 0.6
+      }
+     ],
+     "expr": [
+      {
+       "t": 0.8,
+       "name": "smile",
+       "w": 0.8,
+       "blend": 0.6
+      }
+     ],
+     "props": [
+      {
+       "t": 0,
+       "prop": "sportcoat_folded",
+       "attach": "hand_l",
+       "offset": [
+        0,
+        -0.05,
+        0.02
+       ]
+      }
+     ]
+    }
+   },
+   "film": {
+    "grain": 0.8,
+    "weave": 0.4
+   }
+  },
+  "s6": {
+   "durationSec": 13.4,
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       2.6,
+       1.58,
+       -25.6
+      ],
+      "look": [
+       -2.7,
+       1.55,
+       -20.4
+      ],
+      "lensMm": 40,
+      "focusM": 7.2,
+      "fStop": 2.8
+     },
+     {
+      "t": 13.4,
+      "pos": [
+       0.2,
+       1.58,
+       -26.6
+      ],
+      "look": [
+       -2.9,
+       1.55,
+       -20.3
+      ],
+      "lensMm": 40,
+      "focusM": 6.6,
+      "fStop": 2.8,
+      "ease": "linear"
+     }
+    ]
+   },
+   "actors": {
+    "teddy": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 1.05,
+       "anim": "idle"
+      }
+     ],
+     "look": [
+      {
+       "t": 0,
+       "at": {
+        "actor": "mayhew"
+       },
+       "blend": 0
+      }
+     ],
+     "expr": [
+      {
+       "t": 0,
+       "name": "lip_press",
+       "w": 0.3,
+       "blend": 0
+      },
+      {
+       "t": 5,
+       "name": "brow_furrow",
+       "w": 0.35,
+       "blend": 0.5
+      }
+     ]
+    },
+    "mayhew": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -9.5,
+       "z": -25.5,
+       "heading": -2.2,
+       "anim": "walk"
+      },
+      {
+       "t": 2.2,
+       "x": -3.4,
+       "z": -21.2,
+       "heading": -2.1,
+       "anim": "talk"
+      }
+     ],
+     "clips": [
+      {
+       "t": 0,
+       "clip": "walk",
+       "loop": true
+      },
+      {
+       "t": 2.2,
+       "clip": "idle_talk_a",
+       "blend": 0.4,
+       "loop": true
+      }
+     ],
+     "look": [
+      {
+       "t": 0,
+       "at": {
+        "actor": "teddy"
+       },
+       "blend": 0
+      }
+     ],
+     "expr": [
+      {
+       "t": 0,
+       "name": "smile",
+       "w": 0.8,
+       "blend": 0
+      },
+      {
+       "t": 7.5,
+       "name": "smirk",
+       "w": 0.6,
+       "blend": 0.4
+      }
+     ],
+     "props": [
+      {
+       "t": 0,
+       "prop": "sportcoat_folded",
+       "attach": "hand_l",
+       "offset": [
+        0,
+        -0.05,
+        0.02
+       ]
+      }
+     ]
+    }
+   },
+   "film": {
+    "grain": 0.75,
+    "weave": 0.35
+   }
+  },
+  "s7": {
+   "camera": {
+    "keys": [
+     {
+      "t": 0,
+      "pos": [
+       0.2,
+       1.58,
+       -26.6
+      ],
+      "look": [
+       -2.9,
+       1.55,
+       -20.3
+      ],
+      "lensMm": 40,
+      "focusM": 6.6,
+      "fStop": 2.8
+     },
+     {
+      "t": 1.6,
+      "pos": [
+       3,
+       2.3,
+       -17
+      ],
+      "look": [
+       -4,
+       1.7,
+       -27
+      ],
+      "lensMm": 36,
+      "focusM": 8,
+      "fStop": 4
+     }
+    ],
+    "toGameplay": true
+   },
+   "actors": {
+    "teddy": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 1.05,
+       "anim": "idle"
+      },
+      {
+       "t": 1.2,
+       "x": -2.15,
+       "z": -19.4,
+       "heading": 0.26,
+       "anim": "idle"
+      }
+     ],
+     "look": [
+      {
+       "t": 0,
+       "at": {
+        "actor": "mayhew"
+       },
+       "blend": 0
+      },
+      {
+       "t": 1.4,
+       "at": null,
+       "blend": 0.6
+      }
+     ]
+    },
+    "mayhew": {
+     "keys": [
+      {
+       "t": 0,
+       "x": -3.4,
+       "z": -21.2,
+       "heading": -2.1,
+       "anim": "talk"
+      },
+      {
+       "t": 1,
+       "x": -3.6,
+       "z": -23.4,
+       "heading": 0.3,
+       "anim": "walk"
+      },
+      {
+       "t": 4,
+       "x": -5.2,
+       "z": -31,
+       "heading": 0.3,
+       "anim": "walk"
+      }
+     ],
+     "clips": [
+      {
+       "t": 0,
+       "clip": "idle_talk_a",
+       "loop": true
+      },
+      {
+       "t": 0.8,
+       "clip": "walk",
+       "blend": 0.4,
+       "loop": true
+      }
+     ],
+     "look": [
+      {
+       "t": 0,
+       "at": {
+        "actor": "teddy"
+       },
+       "blend": 0
+      },
+      {
+       "t": 1.2,
+       "at": null,
+       "blend": 0.6
+      }
+     ],
+     "ik": [
+      {
+       "t": 0.3,
+       "chain": "hand_r",
+       "at": {
+        "actor": "teddy",
+        "joint": "upperarm_l"
+       },
+       "blend": 0.3
+      },
+      {
+       "t": 1.0,
+       "chain": "hand_r",
+       "at": null,
+       "blend": 0.3
+      }
+     ],
+     "expr": [
+      {
+       "t": 0,
+       "name": "smirk",
+       "w": 0.6,
+       "blend": 0
+      }
+     ],
+     "props": [
+      {
+       "t": 0,
+       "prop": "sportcoat_folded",
+       "attach": "hand_l",
+       "offset": [
+        0,
+        -0.05,
+        0.02
+       ]
+      }
+     ]
+    }
+   },
+   "cues": [
+    {
+     "t": 4,
+     "cue": "mission.objective",
+     "data": {
+      "objective": "o2",
+      "text": "Walk up Broadway with Mayhew"
+     }
+    }
+   ],
+   "transition": "blend",
+   "film": {
+    "grain": 0.4,
+    "weave": 0,
+    "halation": 0.4,
+    "letterbox": 0
+   },
+   "dialogueTiming": {
+    "dlg.m01_prow#l5": {
+     "t": 0.2
+    }
+   }
+  }
+ },
+ "_notes": "Camera, actors, timing and film fields laid out with the ?cine=1 tool by the UI & Cinematics stream; script fields (type, framing, blocking, beats, move, notes) are narrative's."
+}

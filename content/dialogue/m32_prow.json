@@ -1,0 +1,180 @@
+{
+  "id": "dlg.m32_prow",
+  "context": "M32 o8. The Flatiron prow, Labor Day night. Lines keyed to the ending (Branch B) and to each lead's resolution.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "breathless",
+      "text": "Made it. Rule seventeen: always end up where you started. Count what changed."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "tired",
+      "text": "I parked on the sidewalk. Somebody will give me a ticket. Good. I'll pay it."
+    },
+    {
+      "id": "l3a",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Calloway is moving me somewhere safe till the trial. Months. The desk will miss me.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_prosecutor"
+        ]
+      }
+    },
+    {
+      "id": "l3b",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Sunday paper's out. Page nine's on every stoop. Lisle's not answering his phone.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_press"
+        ]
+      }
+    },
+    {
+      "id": "l3c",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Lisle's stool is mine from Monday. Twelve-forty. Tuna on rye.",
+      "requires": {
+        "all": [
+          "flag.ledger_kept"
+        ]
+      }
+    },
+    {
+      "id": "l3d",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "It's ashes. Nobody gets the Tenderloin. Not even me.",
+      "requires": {
+        "all": [
+          "flag.ledger_burned"
+        ]
+      }
+    },
+    {
+      "id": "l4a",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Tina's doing hair Monday. My shop. My two chairs.",
+      "requires": {
+        "all": [
+          "flag.delphine_shop",
+          "flag.tina_stays"
+        ]
+      }
+    },
+    {
+      "id": "l4b",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "My shop opens Monday. One chair empty. Postcard from Philly on the mirror.",
+      "requires": {
+        "all": [
+          "flag.delphine_shop",
+          "flag.tina_gone"
+        ]
+      }
+    },
+    {
+      "id": "l4c",
+      "speaker": "char.delphine_moore",
+      "emotion": "steady",
+      "text": "No shop. The club meets Sunday. Same table. Clean count.",
+      "requires": {
+        "none": [
+          "flag.delphine_shop"
+        ]
+      }
+    },
+    {
+      "id": "l5a",
+      "speaker": "char.nick_varelas",
+      "emotion": "warm",
+      "text": "The Corwin belongs to the council now. Mrs. Pruitt sent cookies. Stale.",
+      "requires": {
+        "all": [
+          "flag.corwin_to_council"
+        ]
+      }
+    },
+    {
+      "id": "l5b",
+      "speaker": "char.nick_varelas",
+      "emotion": "firm",
+      "text": "The Corwin's mine. New wiring Tuesday. A fan on every floor.",
+      "requires": {
+        "all": [
+          "flag.corwin_kept"
+        ]
+      }
+    },
+    {
+      "id": "l5c",
+      "speaker": "char.nick_varelas",
+      "emotion": "ashamed",
+      "text": "The Corwin's sold on. October first. I'll be there when they come. I owe her that.",
+      "requires": {
+        "all": [
+          "flag.corwin_sold_on"
+        ]
+      }
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "quiet",
+      "text": "Dusk on Broadway. Same corner. I used to stand right here like a fire hydrant."
+    },
+    {
+      "id": "l7a",
+      "speaker": "char.teddy_arce",
+      "emotion": "decided",
+      "text": "Walk with me. Downtown, this time.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_prosecutor"
+        ]
+      }
+    },
+    {
+      "id": "l7b",
+      "speaker": "char.teddy_arce",
+      "emotion": "decided",
+      "text": "Walk with me. Uptown. Like old times. Except it's ours.",
+      "requires": {
+        "all": [
+          "flag.ledger_to_press"
+        ]
+      }
+    },
+    {
+      "id": "l7c",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "Car's here. Back seat. I'll find you, Delphine. I find everybody now.",
+      "requires": {
+        "all": [
+          "flag.ledger_kept"
+        ]
+      }
+    },
+    {
+      "id": "l7d",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Delroy's cab line is forty deep tonight. I'll take a shift. Goodnight.",
+      "requires": {
+        "all": [
+          "flag.ledger_burned"
+        ]
+      }
+    }
+  ]
+}

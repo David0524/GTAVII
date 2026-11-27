@@ -1,0 +1,28 @@
+{
+  "id": "dlg.sys_bail_d_n",
+  "context": "Bail-out: char.delphine_moore bails out char.nick_varelas at a precinct desk (CORE_SYSTEMS arrest flow). Remembered: relationship +1 both ways.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Mr. Varelas. The landlord, in the lockup. I'll want a discount on rent."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "humble",
+      "text": "You'll have it. And my gratitude, which is cheaper."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "I'll take the discount.",
+      "setRelationships": {
+        "char.delphine_moore/char.nick_varelas": 1,
+        "char.nick_varelas/char.delphine_moore": 1
+      }
+    }
+  ]
+}

@@ -3,5 +3,5 @@
  * (ENGINE_RESPONSES E13: src/shared/rapier.ts, non-compat package, one wasm instance), change
  * the line below to re-export from '../shared/rapier' and drop the test lot's init() call.
  */
-export { default } from '@dimforge/rapier3d-compat';
-export * from '@dimforge/rapier3d-compat';
+export { default } from '../shared/rapier';
+export * from '../shared/rapier';

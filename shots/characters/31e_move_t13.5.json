@@ -1,0 +1,188 @@
+{
+  "backend": "webgl2",
+  "scene": "move",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "events": [
+    {
+      "type": "start",
+      "t": 0.02,
+      "x": -2
+    },
+    {
+      "type": "step",
+      "t": 3.2,
+      "x": 3.06,
+      "rise": 0.2
+    },
+    {
+      "type": "traversal",
+      "t": 3.83,
+      "x": 5.15,
+      "event": {
+        "kind": "vault",
+        "height": 1,
+        "depth": 0.06,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.8480555555555611
+      },
+      "label": "railing"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 4.33,
+      "x": 6.66,
+      "label": "railing"
+    },
+    {
+      "type": "step",
+      "t": 5.05,
+      "x": 9.05,
+      "rise": 0.18
+    },
+    {
+      "type": "step",
+      "t": 5.13,
+      "x": 9.33,
+      "rise": 0.18000000000000005
+    },
+    {
+      "type": "step",
+      "t": 5.22,
+      "x": 9.61,
+      "rise": 0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.32,
+      "x": 9.95,
+      "rise": 0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.75,
+      "x": 11.43,
+      "rise": -0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.83,
+      "x": 11.71,
+      "rise": -0.17999999999999994
+    },
+    {
+      "type": "step",
+      "t": 5.93,
+      "x": 12.05,
+      "rise": -0.18000000000000005
+    },
+    {
+      "type": "step",
+      "t": 6.02,
+      "x": 12.33,
+      "rise": -0.18
+    },
+    {
+      "type": "traversal",
+      "t": 6.28,
+      "x": 13.18,
+      "event": {
+        "kind": "vault",
+        "height": 1,
+        "depth": 1.6,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.8182000000000027
+      },
+      "label": "car hood"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 7.28,
+      "x": 16.2,
+      "label": "car hood"
+    },
+    {
+      "type": "traversal",
+      "t": 7.6,
+      "x": 17.17,
+      "event": {
+        "kind": "climb",
+        "height": 1.6,
+        "depth": 1.6,
+        "landRise": 1.6,
+        "speed": 3.4,
+        "approach": 0.8315333333333221
+      },
+      "label": "dumpster"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 8.6,
+      "x": 18.45,
+      "label": "dumpster"
+    },
+    {
+      "type": "start",
+      "t": 8.62,
+      "x": 18.45
+    },
+    {
+      "type": "traversal",
+      "t": 9.25,
+      "x": 19.58,
+      "event": {
+        "kind": "drop",
+        "height": 0,
+        "depth": 0,
+        "landRise": -1.6,
+        "speed": 3.4,
+        "approach": 0.01930555555555813
+      },
+      "label": "dumpster drop"
+    },
+    {
+      "type": "traversalEnd",
+      "t": 10.13,
+      "x": 20,
+      "label": "dumpster drop"
+    },
+    {
+      "type": "start",
+      "t": 10.15,
+      "x": 20
+    },
+    {
+      "type": "traversal",
+      "t": 10.8,
+      "x": 21.19,
+      "event": {
+        "kind": "fence",
+        "height": 3,
+        "depth": 0.05,
+        "landRise": 0,
+        "speed": 3.4,
+        "approach": 0.812638888888884
+      },
+      "label": "chain-link fence"
+    }
+  ],
+  "state": {
+    "t": 13.55,
+    "x": 22,
+    "y": 1.972,
+    "speed": 3.4,
+    "traversal": {
+      "label": "chain-link fence",
+      "kind": "fence",
+      "u": 0.5369117883004763
+    },
+    "done": false
+  },
+  "updateMs": 0.4,
+  "renderMsSoftware": [
+    3.299999999930151,
+    1.6000000000931323,
+    7.099999999976717
+  ]
+}

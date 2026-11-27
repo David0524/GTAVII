@@ -1,0 +1,27 @@
+{
+  "id": "npc.arcade_patron",
+  "behaviour": "loiterer",
+  "palette": [
+    "#2F2F2F",
+    "#FF8C00"
+  ],
+  "wardrobe": "Young men in T-shirts and jackets; old men in fedoras.",
+  "props": [
+    "roll of quarters"
+  ],
+  "schedule": [
+    {
+      "from": "12:00",
+      "to": "03:00",
+      "area": "Arcades on 42nd St and 8th Ave",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.3,
+    "night": 0.4
+  },
+  "barks": "barks.deuce",
+  "scripted": false,
+  "note": ""
+}

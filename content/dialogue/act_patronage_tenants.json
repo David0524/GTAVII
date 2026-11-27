@@ -1,0 +1,33 @@
+{
+  "id": "dlg.act_patronage_tenants",
+  "context": "Patronage: the Corwin lobby, with a box of fans.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "awkward",
+      "text": "Fans. For the hot floors. From the owner. From me."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "cold",
+      "text": "Fans are nice, Mr. Varelas. Wiring is nicer. Leases are nicest."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "humble",
+      "text": "One thing at a time, Mrs. Pruitt."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "That's what we've been saying for eighteen years.",
+      "setRelationships": {
+        "char.nick_varelas/char.odessa_pruitt": 1
+      }
+    }
+  ]
+}

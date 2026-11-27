@@ -1,0 +1,123 @@
+{
+  "id": "dlg.m30_odessa",
+  "context": "M30 o6. Corwin lobby. Nick sits in the chair next to Odessa's. The radio plays. Residents watch from the stairs.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "humble",
+      "text": "Mrs. Pruitt. I came inside. It's very hot in here."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "It's been hot in here since 1956, Mr. Varelas. You're the new thing."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "honest",
+      "text": "I can sell it on, keep it, or give it away to people who'll keep it housing."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "And which one are you, Mr. Varelas?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Sell it on to Lisle's people.",
+          "goto": "l_sell",
+          "setFlags": [
+            "flag.corwin_sold_on"
+          ],
+          "setRelationships": {
+            "char.nick_varelas/char.odessa_pruitt": -3
+          }
+        },
+        {
+          "text": "Keep it. Run it right.",
+          "goto": "l_keep",
+          "setFlags": [
+            "flag.corwin_kept"
+          ],
+          "setRelationships": {
+            "char.nick_varelas/char.odessa_pruitt": 1
+          },
+          "requires": {
+            "any": [
+              "flag.baek_bought_building",
+              "flag.vault_claim_paid"
+            ]
+          },
+          "disabledText": "You can't afford to keep it."
+        },
+        {
+          "text": "Give it to the council. $1.",
+          "goto": "l_give",
+          "setFlags": [
+            "flag.corwin_to_council"
+          ],
+          "setRelationships": {
+            "char.nick_varelas/char.odessa_pruitt": 3
+          },
+          "requires": {
+            "relationship": {
+              "char.nick_varelas/char.odessa_pruitt": ">=2"
+            }
+          },
+          "disabledText": "Mrs. Pruitt doesn't trust you yet."
+        }
+      ]
+    },
+    {
+      "id": "l_sell",
+      "speaker": "char.nick_varelas",
+      "emotion": "ashamed",
+      "text": "I have to sell. The bank. My wife. I'm sorry. October first."
+    },
+    {
+      "id": "l_sell2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "cold",
+      "text": "Then I'll be here October first. In this chair. Bring movers. Bring many.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_keep",
+      "speaker": "char.nick_varelas",
+      "emotion": "firm",
+      "text": "I keep it. New wiring. Real wiring. And a fan for every room on eleven."
+    },
+    {
+      "id": "l_keep2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "Fans. We'll see. A landlord who comes inside is a start.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_give",
+      "speaker": "char.nick_varelas",
+      "emotion": "quiet",
+      "text": "One dollar. The West Midtown Housing Council. It stays housing. Forever."
+    },
+    {
+      "id": "l_give2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "moved",
+      "text": "Mr. Varelas. You're shorter than the paper. You're taller than I thought.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Nobody told me there were people in it. Now somebody has."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "trigger.grate_deuce",
+  "volume": {
+    "at": "W 42nd St & 7th Ave",
+    "radius": 10
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "07:00",
+      "02:00"
+    ],
+    "weather": [
+      "any"
+    ]
+  },
+  "once": false,
+  "cooldownMin": 240,
+  "do": [
+    {
+      "type": "overhear",
+      "script": "dlg.amb_grate_deuce",
+      "at": "W 42nd St & 7th Ave",
+      "radius": 10,
+      "falloff": "soft"
+    }
+  ]
+}

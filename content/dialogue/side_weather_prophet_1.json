@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_weather_prophet_1",
+  "context": "Herald Square, the man with the barometer.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.obadiah_vane",
+      "emotion": "booming",
+      "text": "The glass is falling, friend. The glass never lies. People lie."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.obadiah_vane",
+      "emotion": "conspiratorial",
+      "text": "Bring me readings from three roof gauges and I'll tell you which blocks go dark."
+    }
+  ]
+}

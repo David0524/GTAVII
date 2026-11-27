@@ -1,0 +1,29 @@
+{
+  "id": "npc.penn_south_neighbor",
+  "behaviour": "loiterer",
+  "palette": [
+    "#2E5E4E",
+    "#F0E6D2",
+    "#B22222"
+  ],
+  "wardrobe": "House dresses, guayaberas, undershirts, slippers on the plaza.",
+  "props": [
+    "domino set",
+    "folding chair"
+  ],
+  "schedule": [
+    {
+      "from": "09:00",
+      "to": "22:00",
+      "area": "Penn South plaza, W 23rd–29th, 8th–9th Aves",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.4,
+    "night": 0.2
+  },
+  "barks": "barks.neighbor",
+  "scripted": false,
+  "note": ""
+}

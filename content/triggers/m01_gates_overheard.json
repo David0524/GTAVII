@@ -1,0 +1,7 @@
+{
+  "id": "trigger.m01_gates_overheard",
+  "volume": { "at": "Broadway & W 27th St", "radius": 18 },
+  "when": { "flags": [], "time": ["20:00", "22:00"], "weather": ["any"], "mission": "mission.dusk_on_broadway" },
+  "once": true,
+  "do": [ { "type": "overhear", "script": "dlg.amb_m01_gates", "at": "Broadway & W 27th St", "radius": 18, "falloff": "soft" } ]
+}

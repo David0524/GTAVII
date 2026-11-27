@@ -1,0 +1,788 @@
+{
+ "licence": "MIT (Microsoft Rocketbox); see LICENSE-Rocketbox.md",
+ "heads": [
+  {
+   "id": "lead_nick",
+   "source": "Male_Adult_14",
+   "bytes": 196648,
+   "tag": null,
+   "skinRGB": [
+    200,
+    161,
+    126
+   ],
+   "lead": "lead_nick"
+  },
+  {
+   "id": "Female_Adult_01",
+   "source": "Female_Adult_01",
+   "bytes": 218162,
+   "tag": {
+    "sex": 0,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    178,
+    129,
+    98
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_02",
+   "source": "Female_Adult_02",
+   "bytes": 188780,
+   "tag": {
+    "sex": 0,
+    "age": [
+     35,
+     55
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    144,
+    130,
+    121
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_03",
+   "source": "Female_Adult_03",
+   "bytes": 223512,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     40
+    ],
+    "anc": [
+     0,
+     0.8,
+     0.2
+    ],
+    "hair": "long"
+   },
+   "skinRGB": [
+    150,
+    113,
+    96
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_04",
+   "source": "Female_Adult_04",
+   "bytes": 236640,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    178,
+    114,
+    88
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_05",
+   "source": "Female_Adult_05",
+   "bytes": 179858,
+   "tag": {
+    "sex": 0,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0,
+     0.1,
+     0.9
+    ],
+    "hair": "long"
+   },
+   "skinRGB": [
+    152,
+    102,
+    79
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_07",
+   "source": "Female_Adult_07",
+   "bytes": 208514,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    165,
+    117,
+    88
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_08",
+   "source": "Female_Adult_08",
+   "bytes": 197238,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "long"
+   },
+   "skinRGB": [
+    142,
+    95,
+    74
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_09",
+   "source": "Female_Adult_09",
+   "bytes": 204100,
+   "tag": {
+    "sex": 0,
+    "age": [
+     35,
+     55
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    137,
+    114,
+    100
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_12",
+   "source": "Female_Adult_12",
+   "bytes": 199976,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "long"
+   },
+   "skinRGB": [
+    153,
+    97,
+    71
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_13",
+   "source": "Female_Adult_13",
+   "bytes": 232638,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    174,
+    120,
+    89
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_14",
+   "source": "Female_Adult_14",
+   "bytes": 231008,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "long"
+   },
+   "skinRGB": [
+    149,
+    105,
+    79
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_15",
+   "source": "Female_Adult_15",
+   "bytes": 229570,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "long"
+   },
+   "skinRGB": [
+    138,
+    84,
+    65
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Adult_17",
+   "source": "Female_Adult_17",
+   "bytes": 222916,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    183,
+    121,
+    87
+   ],
+   "lead": null
+  },
+  {
+   "id": "Female_Party_01",
+   "source": "Female_Party_01",
+   "bytes": 350596,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    175,
+    126,
+    96
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_01",
+   "source": "Male_Adult_01",
+   "bytes": 207324,
+   "tag": {
+    "sex": 1,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    142,
+    108,
+    94
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_02",
+   "source": "Male_Adult_02",
+   "bytes": 188062,
+   "tag": {
+    "sex": 1,
+    "age": [
+     25,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    169,
+    130,
+    109
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_03",
+   "source": "Male_Adult_03",
+   "bytes": 302436,
+   "tag": {
+    "sex": 1,
+    "age": [
+     58,
+     75
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    164,
+    127,
+    114
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_04",
+   "source": "Male_Adult_04",
+   "bytes": 218408,
+   "tag": {
+    "sex": 1,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0.7,
+     0,
+     0.3
+    ],
+    "hair": "curly"
+   },
+   "skinRGB": [
+    134,
+    89,
+    66
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_05",
+   "source": "Male_Adult_05",
+   "bytes": 212210,
+   "tag": {
+    "sex": 1,
+    "age": [
+     50,
+     70
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    124,
+    122,
+    119
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_06",
+   "source": "Male_Adult_06",
+   "bytes": 269680,
+   "tag": {
+    "sex": 1,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    170,
+    113,
+    88
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_08",
+   "source": "Male_Adult_08",
+   "bytes": 209606,
+   "tag": {
+    "sex": 1,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    142,
+    117,
+    104
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_09",
+   "source": "Male_Adult_09",
+   "bytes": 207990,
+   "tag": {
+    "sex": 1,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0,
+     1,
+     0
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    149,
+    133,
+    123
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_10",
+   "source": "Male_Adult_10",
+   "bytes": 185248,
+   "tag": {
+    "sex": 1,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0.6,
+     0.4
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    180,
+    118,
+    75
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_11",
+   "source": "Male_Adult_11",
+   "bytes": 84180,
+   "tag": {
+    "sex": 1,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    197,
+    129,
+    102
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_12",
+   "source": "Male_Adult_12",
+   "bytes": 80680,
+   "tag": {
+    "sex": 1,
+    "age": [
+     25,
+     45
+    ],
+    "anc": [
+     1,
+     0,
+     0
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    103,
+    68,
+    49
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_13",
+   "source": "Male_Adult_13",
+   "bytes": 85094,
+   "tag": {
+    "sex": 1,
+    "age": [
+     45,
+     65
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "bald"
+   },
+   "skinRGB": [
+    174,
+    115,
+    81
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_15",
+   "source": "Male_Adult_15",
+   "bytes": 94648,
+   "tag": {
+    "sex": 1,
+    "age": [
+     25,
+     45
+    ],
+    "anc": [
+     0.1,
+     0.5,
+     0.4
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    129,
+    111,
+    101
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_16",
+   "source": "Male_Adult_16",
+   "bytes": 87262,
+   "tag": {
+    "sex": 1,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    180,
+    124,
+    97
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_17",
+   "source": "Male_Adult_17",
+   "bytes": 91478,
+   "tag": {
+    "sex": 1,
+    "age": [
+     22,
+     40
+    ],
+    "anc": [
+     0.1,
+     0.5,
+     0.4
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    114,
+    99,
+    91
+   ],
+   "lead": null
+  },
+  {
+   "id": "Male_Adult_20",
+   "source": "Male_Adult_20",
+   "bytes": 88988,
+   "tag": {
+    "sex": 1,
+    "age": [
+     25,
+     45
+    ],
+    "anc": [
+     0,
+     0,
+     1
+    ],
+    "hair": "short"
+   },
+   "skinRGB": [
+    149,
+    112,
+    96
+   ],
+   "lead": null
+  },
+  {
+   "id": "lead_teddy",
+   "source": "Male_Adult_07",
+   "bytes": 267378,
+   "tag": null,
+   "skinRGB": [
+    185,
+    138,
+    103
+   ],
+   "lead": "lead_teddy",
+   "ownHair": true
+  },
+  {
+   "id": "Female_Adult_11",
+   "source": "Female_Adult_11",
+   "bytes": 191020,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     1,
+     0
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    167,
+    115,
+    83
+   ],
+   "lead": null,
+   "ownHair": false
+  },
+  {
+   "id": "lead_delphine",
+   "source": "Female_Party_02",
+   "bytes": 478398,
+   "tag": null,
+   "skinRGB": [
+    80,
+    50,
+    31
+   ],
+   "lead": "lead_delphine",
+   "ownHair": true
+  }
+ ]
+}

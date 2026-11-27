@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m05_recognition",
+  "context": "M5 o5. Through the luncheonette window, telephoto, Lisle at the counter. Teddy's inner voice.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Tall. Grey suit. Eats like he's being graded."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "I know that face. Not from a notice. From a back seat."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Carl's car. Thirty-Fifth Street. Autumn, seventy-one. I waited outside."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "He got in the back with a briefcase. He got out without it."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "H. Lisle, counsel. Okay, counsel. Let's see who you eat with."
+    }
+  ]
+}

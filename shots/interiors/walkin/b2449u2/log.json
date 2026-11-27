@@ -1,0 +1,98 @@
+[
+ {
+  "d": 8,
+  "inside": null,
+  "live": 13,
+  "visCells": 6,
+  "draws": 37,
+  "extHidden": false
+ },
+ {
+  "d": 5,
+  "inside": null,
+  "live": 14,
+  "visCells": 20,
+  "draws": 141,
+  "extHidden": false
+ },
+ {
+  "d": 3,
+  "inside": null,
+  "live": 14,
+  "visCells": 18,
+  "draws": 132,
+  "extHidden": false
+ },
+ {
+  "d": 1.5,
+  "inside": null,
+  "live": 14,
+  "visCells": 14,
+  "draws": 118,
+  "extHidden": false
+ },
+ {
+  "d": 0.5,
+  "inside": null,
+  "live": 14,
+  "visCells": 11,
+  "draws": 106,
+  "extHidden": false
+ },
+ {
+  "d": -0.5,
+  "inside": {
+   "interiorId": "b2449u2",
+   "kind": "bar",
+   "roomVolume": 143,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 14,
+  "visCells": 8,
+  "draws": 87,
+  "extHidden": false
+ },
+ {
+  "d": -1.5,
+  "inside": {
+   "interiorId": "b2449u2",
+   "kind": "bar",
+   "roomVolume": 143,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 15,
+  "visCells": 8,
+  "draws": 85,
+  "extHidden": false
+ },
+ {
+  "d": -3,
+  "inside": {
+   "interiorId": "b2449u2",
+   "kind": "bar",
+   "roomVolume": 143,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 15,
+  "visCells": 8,
+  "draws": 81,
+  "extHidden": false
+ },
+ {
+  "d": -5,
+  "inside": {
+   "interiorId": "b2449u2",
+   "kind": "bar",
+   "roomVolume": 143,
+   "reverb": "shop",
+   "cell": "shop"
+  },
+  "live": 15,
+  "visCells": 7,
+  "draws": 77,
+  "extHidden": false
+ }
+]

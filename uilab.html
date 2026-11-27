@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <link rel="stylesheet" href="%BASE_URL%fonts/fonts.css" />
+    <title>Tenderloin '74 · UI lab</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0c0b0a; overflow: hidden; overscroll-behavior: none; touch-action: none; -webkit-user-select: none; user-select: none; }
+      #app { position: fixed; inset: 0; }
+      #backdrop { position: fixed; inset: 0; background: linear-gradient(180deg, #6b4a44 0%, #a86a4a 38%, #3a2a26 62%, #1e1614 100%); }
+    </style>
+  </head>
+  <body>
+    <div id="backdrop"></div>
+    <div id="app"></div>
+    <script type="module" src="/src/ui/lab/lab.ts"></script>
+  </body>
+</html>

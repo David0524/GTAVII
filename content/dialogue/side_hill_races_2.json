@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_hill_races_2",
+  "context": "Settling up at the finish.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.cab_driver",
+      "emotion": "sour",
+      "text": "Okay. You know the hill. Who taught you the hill?"
+    }
+  ]
+}

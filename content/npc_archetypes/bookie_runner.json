@@ -1,0 +1,25 @@
+{
+  "id": "npc.bookie_runner",
+  "behaviour": "loiterer",
+  "palette": [
+    "#8B4513",
+    "#F5DEB3"
+  ],
+  "wardrobe": "Porkpie hat, racing form, quick walk.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "18:00",
+      "area": "Penn Station cab line",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.deuce",
+  "scripted": true,
+  "note": "Photo Jobs subject; keeps a fixed routine."
+}

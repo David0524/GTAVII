@@ -1,0 +1,24 @@
+{
+  "id": "dlg.act_patronage_retirement",
+  "context": "Patronage: a cop's retirement party at the Shamrock Rail.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.off_duty_cop",
+      "emotion": "friendly",
+      "text": "Mr. Varelas! You're buying the round? Everybody, Mr. Varelas is buying!"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "charming",
+      "text": "Everybody gets paid. Tonight it's whiskey."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Somebody's taking pictures by the door. Tall woman. I'd know that bag anywhere."
+    }
+  ]
+}

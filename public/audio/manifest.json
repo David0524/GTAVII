@@ -1,0 +1,42 @@
+{
+  "thunder.near": {
+    "variants": [
+      {
+        "opus": "audio/thunder.near.0.webm",
+        "aac": "audio/thunder.near.0.m4a",
+        "bytesOpus": 50339,
+        "bytesAac": 75039,
+        "seed": 1012,
+        "seconds": 9
+      },
+      {
+        "opus": "audio/thunder.near.1.webm",
+        "aac": "audio/thunder.near.1.m4a",
+        "bytesOpus": 52227,
+        "bytesAac": 75053,
+        "seed": 8931,
+        "seconds": 9
+      }
+    ]
+  },
+  "thunder.far": {
+    "variants": [
+      {
+        "opus": "audio/thunder.far.0.webm",
+        "aac": "audio/thunder.far.0.m4a",
+        "bytesOpus": 63116,
+        "bytesAac": 91477,
+        "seed": 1011,
+        "seconds": 11
+      },
+      {
+        "opus": "audio/thunder.far.1.webm",
+        "aac": "audio/thunder.far.1.m4a",
+        "bytesOpus": 63267,
+        "bytesAac": 91498,
+        "seed": 8930,
+        "seconds": 11
+      }
+    ]
+  }
+}

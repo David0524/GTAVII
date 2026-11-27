@@ -1,0 +1,57 @@
+{
+  "id": "mission.side_corner_pocket",
+  "kind": "side",
+  "title": "Corner Pocket",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Corner Pocket, W 41st & 8th",
+      "to": "W 41st St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "text": "Meet the house hustler",
+      "script": "dlg.side_corner_pocket_1"
+    },
+    {
+      "id": "o3",
+      "type": "wait",
+      "text": "Play the first rack",
+      "seconds": 20
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Settle the stakes",
+      "script": "dlg.side_corner_pocket_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o1"
+  ],
+  "rewards": {
+    "text": "Stakes"
+  },
+  "where": "Corner Pocket Billiards, over a W 41st St storefront (invented)",
+  "systems": [
+    "interiors",
+    "betting",
+    "Read the Room tells"
+  ],
+  "mobile": "Aim assist on; one-touch shots.",
+  "rank": 19,
+  "slice": false
+}

@@ -1,0 +1,31 @@
+{
+  "id": "npc.strip_worker",
+  "behaviour": "loiterer",
+  "palette": [
+    "#8B0000",
+    "#F5DEB3",
+    "#000000",
+    "#FF69B4"
+  ],
+  "wardrobe": "Period street clothes: wrap dresses, halters with slacks, denim, platform sandals, light jackets at dawn. Mixed ages (all adults) and backgrounds. Content rule: never costume, never sexualised framing.",
+  "props": [
+    "shoulder bag",
+    "cigarette",
+    "umbrella"
+  ],
+  "schedule": [
+    {
+      "from": "20:00",
+      "to": "04:00",
+      "area": "8th Ave, W 37th–42nd St",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.35
+  },
+  "barks": "barks.strip",
+  "scripted": false,
+  "note": "Adults only. Background mix must vary (N2 critique). Camera rule: never leering."
+}

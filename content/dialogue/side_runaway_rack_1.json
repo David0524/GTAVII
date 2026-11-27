@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_runaway_rack_1",
+  "context": "The shop's thanks after the rack is caught on the W 37th hill.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.sam_feld",
+      "emotion": "relieved",
+      "text": "Forty dresses saved by one lunatic. Take a suit. Take two. Take the one with the lapels."
+    }
+  ]
+}

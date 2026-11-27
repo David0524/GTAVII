@@ -1,0 +1,86 @@
+{
+  "id": "dlg.m24_calloway",
+  "context": "M24 o2. (Nick.) Herald Square lunch counter. Calloway slides a single typed page across.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Mr. Varelas. Insurance fraud in a brownout. Lieutenant's men on the corner. Photographs."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Testify against Lisle, and the insurance matter becomes a misunderstanding."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "proud",
+      "text": "You're asking me to sell my lawyer."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.ruth_calloway",
+      "emotion": "dry",
+      "text": "I'm asking you to stop being his merchandise. The offer expires in September. So do I."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Take the deal.",
+          "goto": "l_take",
+          "confirm": "This decides who can testify.",
+          "setFlags": [
+            "flag.nick_flipped"
+          ],
+          "setRelationships": {
+            "char.nick_varelas/char.ruth_calloway": 2,
+            "char.nick_varelas/char.howard_lisle": -3
+          }
+        },
+        {
+          "text": "Refuse. I'll handle Lisle.",
+          "goto": "l_refuse",
+          "setRelationships": {
+            "char.nick_varelas/char.ruth_calloway": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_take",
+      "speaker": "char.nick_varelas",
+      "emotion": "tired",
+      "text": "Where do I sign? No. Where do I read? This time I read first."
+    },
+    {
+      "id": "l_take2",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Every page. I'll wait. I have a budget for coffee.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_refuse",
+      "speaker": "char.nick_varelas",
+      "emotion": "proud",
+      "text": "I came here with nothing. I'll leave my own way. Good afternoon."
+    },
+    {
+      "id": "l_refuse2",
+      "speaker": "char.ruth_calloway",
+      "emotion": "cold",
+      "text": "Then I'll see you in a courtroom, Mr. Varelas. On the wrong side.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Everybody gets paid. Today I found out what I cost."
+    }
+  ]
+}

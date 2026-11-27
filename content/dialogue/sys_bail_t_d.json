@@ -1,0 +1,28 @@
+{
+  "id": "dlg.sys_bail_t_d",
+  "context": "Bail-out: char.teddy_arce bails out char.delphine_moore at a precinct desk (CORE_SYSTEMS arrest flow). Remembered: relationship +1 both ways.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "dry",
+      "text": "Rule one, Delphine. Don't get caught."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "cold",
+      "text": "That's my rule, collector. Pay the man and walk me out."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Paid. You owe me a pie.",
+      "setRelationships": {
+        "char.teddy_arce/char.delphine_moore": 1,
+        "char.delphine_moore/char.teddy_arce": 1
+      }
+    }
+  ]
+}

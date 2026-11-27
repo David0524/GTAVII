@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "diner #0  b4356 1115 BROADWAY  1914 use 5 style 4  7.0x20.0 m  tenderloin  West 25th Street\nbuild 88 ms (main thread, medium)  verts 13112 tris 11050 cells 2 slots 19 markers 6 colliders 94  [webgl2]",
+  "stats": {
+   "verts": 13112,
+   "tris": 11050,
+   "genMs": 10.1,
+   "bakeMs": 77.8,
+   "cells": 2
+  },
+  "ms": 88,
+  "slots": 19,
+  "markers": 6,
+  "colliders": 94,
+  "building": 4356,
+  "unit": "b4356u3"
+ }
+]

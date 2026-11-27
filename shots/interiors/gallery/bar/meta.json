@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "bar #0  b4356 1115 BROADWAY  1914 use 5 style 4  5.7x4.5 m  tenderloin  Broadway\nbuild 54 ms (main thread, medium)  verts 2236 tris 1642 cells 1 slots 0 markers 3 colliders 28  [webgl2]",
+  "stats": {
+   "verts": 2236,
+   "tris": 1642,
+   "genMs": 4,
+   "bakeMs": 49.4,
+   "cells": 1
+  },
+  "ms": 53.5,
+  "slots": 0,
+  "markers": 3,
+  "colliders": 28,
+  "building": 4356,
+  "unit": "b4356u1"
+ }
+]

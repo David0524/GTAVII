@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "garage #0  b5363 38 WEST 46 STREET  1967 use 10 style 6  9.7x31.0 m  midtown  West 46th Street\nbuild 46 ms (main thread, medium)  verts 5690 tris 6010 cells 1 slots 4 markers 3 colliders 17  [webgl2]",
+  "stats": {
+   "verts": 5690,
+   "tris": 6010,
+   "genMs": 2.8,
+   "bakeMs": 43.3,
+   "cells": 1
+  },
+  "ms": 46.1999999997206,
+  "slots": 4,
+  "markers": 3,
+  "colliders": 17,
+  "building": 5363,
+  "unit": "b5363"
+ }
+]

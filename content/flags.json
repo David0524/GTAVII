@@ -1,0 +1,484 @@
+{
+  "_note": "Flag registry. Every flag set or read by content must be listed. Rendered to content/FLAGS.md by narrative/tools/content.py.",
+  "flags": [
+    {
+      "id": "flag.corwin_sold",
+      "setBy": [
+        "mission.night_desk"
+      ],
+      "readBy": [
+        "mission.yes",
+        "ambient"
+      ],
+      "world": "Sale notice taped to the Corwin mailboxes; Prentiss appears in the lobby by day.",
+      "notes": ""
+    },
+    {
+      "id": "flag.saw_surcharge",
+      "setBy": [
+        "mission.surcharge"
+      ],
+      "readBy": [
+        "ambient"
+      ],
+      "world": "Envelopes become visible on the dashboards of Carriers' trucks in the Garment District (prop toggle).",
+      "notes": ""
+    },
+    {
+      "id": "flag.saw_lisle_mayhew",
+      "setBy": [
+        "mission.contact_sheet"
+      ],
+      "readBy": [
+        "mission.yes"
+      ],
+      "world": "None by itself; enables the photo choice in M7.",
+      "notes": "Seed of Mayhew's secret."
+    },
+    {
+      "id": "flag.tax_raised",
+      "setBy": [
+        "mission.the_club"
+      ],
+      "readBy": [
+        "ambient",
+        "mission.back_stairs"
+      ],
+      "world": "Brannock's collection car is parked on 8th Ave at W 38th St at night.",
+      "notes": ""
+    },
+    {
+      "id": "flag.vacate_notices",
+      "setBy": [
+        "mission.yes"
+      ],
+      "readBy": [
+        "ambient"
+      ],
+      "world": "Vacate notices on Corwin room doors; tenant posters appear later in Act 2.",
+      "notes": ""
+    },
+    {
+      "id": "flag.mayhew_saw_photo",
+      "setBy": [
+        "mission.yes"
+      ],
+      "readBy": [
+        "mission.cold_room",
+        "mission.the_car"
+      ],
+      "world": "None. Changes Mayhew's lines (he stops calling Teddy 'kid').",
+      "notes": ""
+    },
+    {
+      "id": "flag.teddy_collector",
+      "setBy": [
+        "mission.yes"
+      ],
+      "readBy": [
+        "mission.independence_day",
+        "activity.collections"
+      ],
+      "world": "Teddy's wardrobe set switches to 'collector' (tan sport coat). Unlocks the collections side activity in Act 2.",
+      "notes": ""
+    },
+    {
+      "id": "flag.photo_file_started",
+      "setBy": [
+        "mission.back_stairs"
+      ],
+      "readBy": [
+        "mission.contact_prints"
+      ],
+      "world": "Delphine's photo file exists (inventory item.print_brannock_1).",
+      "notes": ""
+    },
+    {
+      "id": "flag.teddy_returned_tax",
+      "setBy": [
+        "mission.independence_day"
+      ],
+      "readBy": [
+        "mission.lunch_counter",
+        "mission.tax_day"
+      ],
+      "world": "None. Delphine +2; Mayhew finds the count short in M10.",
+      "notes": ""
+    },
+    {
+      "id": "flag.act2_started",
+      "setBy": [
+        "mission.independence_day"
+      ],
+      "readBy": [
+        "ambient",
+        "boundaries"
+      ],
+      "world": "Act 2 world set (N3 §7).",
+      "notes": ""
+    },
+    {
+      "id": "flag.branch_a_wire",
+      "setBy": [
+        "mission.lunch_counter"
+      ],
+      "readBy": [
+        "mission.carbon_copy",
+        "mission.the_address",
+        "mission.the_ledger",
+        "ambient"
+      ],
+      "world": "Navarro shadows Teddy; Calloway's car is on his block in Act 3.",
+      "notes": "Branch A, option 1."
+    },
+    {
+      "id": "flag.branch_a_burned",
+      "setBy": [
+        "mission.lunch_counter"
+      ],
+      "readBy": [
+        "mission.carbon_copy",
+        "mission.the_address",
+        "mission.the_ledger",
+        "ambient"
+      ],
+      "world": "Plainclothes 'watched' state on Teddy in Act 3.",
+      "notes": "Branch A, option 2."
+    },
+    {
+      "id": "flag.photo_file_3",
+      "setBy": [
+        "mission.contact_prints",
+        "mission.cold_storage",
+        "mission.exposure"
+      ],
+      "readBy": [
+        "mission.the_ledger"
+      ],
+      "world": "None. Counts as one corroboration for B2.",
+      "notes": "Set when Delphine holds 3+ prints."
+    },
+    {
+      "id": "flag.hollis_dead",
+      "setBy": [
+        "mission.rewiring"
+      ],
+      "readBy": [
+        "ambient",
+        "mission.the_march",
+        "mission.closing"
+      ],
+      "world": "Room 1112 sealed; Hollis's radio plays at the desk; black armbands among tenants.",
+      "notes": "Death is off screen."
+    },
+    {
+      "id": "flag.have_marjorie_carbons",
+      "setBy": [
+        "mission.carbon_copy"
+      ],
+      "readBy": [
+        "mission.the_ledger"
+      ],
+      "world": "None.",
+      "notes": "Corroboration."
+    },
+    {
+      "id": "flag.act3_started",
+      "setBy": [
+        "mission.carbon_copy"
+      ],
+      "readBy": [
+        "ambient",
+        "boundaries"
+      ],
+      "world": "Act 3 world set; the film shoot NIGHT RATE wraps.",
+      "notes": ""
+    },
+    {
+      "id": "flag.nick_flipped",
+      "setBy": [
+        "mission.flip"
+      ],
+      "readBy": [
+        "mission.the_ledger"
+      ],
+      "world": "Calloway's car outside the Varelas loft.",
+      "notes": "Opens B1 without the wire."
+    },
+    {
+      "id": "flag.have_kearney_list",
+      "setBy": [
+        "mission.the_car"
+      ],
+      "readBy": [
+        "mission.the_ledger"
+      ],
+      "world": "None.",
+      "notes": "Corroboration."
+    },
+    {
+      "id": "flag.delphine_forgave_tina",
+      "setBy": [
+        "mission.shoebox"
+      ],
+      "readBy": [
+        "mission.exposure"
+      ],
+      "world": "None.",
+      "notes": ""
+    },
+    {
+      "id": "flag.have_wurtz_locker",
+      "setBy": [
+        "mission.exposure"
+      ],
+      "readBy": [
+        "mission.the_ledger"
+      ],
+      "world": "None.",
+      "notes": "Corroboration."
+    },
+    {
+      "id": "flag.editor_neutralised",
+      "setBy": [
+        "mission.exposure"
+      ],
+      "readBy": [
+        "mission.the_ledger"
+      ],
+      "world": "None.",
+      "notes": "Required for B2."
+    },
+    {
+      "id": "flag.tina_stays",
+      "setBy": [
+        "mission.exposure"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "Tina at the beauty shop chair or the club table in the epilogue.",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.tina_gone",
+      "setBy": [
+        "mission.exposure"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "A postcard from Tina pinned behind Rita's bar.",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.bauer_burned",
+      "setBy": [
+        "mission.exposure"
+      ],
+      "readBy": [
+        "ambient"
+      ],
+      "world": "Lucky Quarter Amusements boarded up.",
+      "notes": ""
+    },
+    {
+      "id": "flag.feld_left",
+      "setBy": [
+        "mission.rewiring"
+      ],
+      "readBy": [
+        "ambient",
+        "mission.the_march"
+      ],
+      "world": "Feld Frocks dark; an operators' picket in the morning.",
+      "notes": ""
+    },
+    {
+      "id": "flag.ledger_to_prosecutor",
+      "setBy": [
+        "mission.the_ledger"
+      ],
+      "readBy": [
+        "mission.labor_day",
+        "epilogue"
+      ],
+      "world": "Testimony ending.",
+      "notes": "Branch B1."
+    },
+    {
+      "id": "flag.ledger_to_press",
+      "setBy": [
+        "mission.the_ledger"
+      ],
+      "readBy": [
+        "mission.labor_day",
+        "epilogue"
+      ],
+      "world": "Ledger Goes Public ending.",
+      "notes": "Branch B2."
+    },
+    {
+      "id": "flag.ledger_kept",
+      "setBy": [
+        "mission.the_ledger"
+      ],
+      "readBy": [
+        "mission.labor_day",
+        "epilogue"
+      ],
+      "world": "New Pad ending.",
+      "notes": "Branch B3."
+    },
+    {
+      "id": "flag.ledger_burned",
+      "setBy": [
+        "mission.the_ledger"
+      ],
+      "readBy": [
+        "mission.labor_day",
+        "epilogue"
+      ],
+      "world": "Ashes ending.",
+      "notes": "Branch B4."
+    },
+    {
+      "id": "flag.baek_bought_building",
+      "setBy": [
+        "mission.margin_call",
+        "mission.closing"
+      ],
+      "readBy": [
+        "mission.closing",
+        "epilogue"
+      ],
+      "world": "New sign: the Baeks' name on their building.",
+      "notes": ""
+    },
+    {
+      "id": "flag.vault_claim_paid",
+      "setBy": [
+        "mission.cold_storage"
+      ],
+      "readBy": [
+        "mission.closing"
+      ],
+      "world": "None.",
+      "notes": "Nick's insurance money."
+    },
+    {
+      "id": "flag.corwin_sold_on",
+      "setBy": [
+        "mission.closing"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "Scaffolding and 'FOR CONVERSION' hoardings on the Corwin in October.",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.corwin_kept",
+      "setBy": [
+        "mission.closing"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "The Corwin under Nick, freshly painted lobby.",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.corwin_to_council",
+      "setBy": [
+        "mission.closing"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "West Midtown Housing Council sign; 'CORWIN STAYS' banner.",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.club_count_settled",
+      "setBy": [
+        "mission.shoebox",
+        "mission.lease"
+      ],
+      "readBy": [
+        "mission.lease"
+      ],
+      "world": "None.",
+      "notes": ""
+    },
+    {
+      "id": "flag.delphine_shop",
+      "setBy": [
+        "mission.lease"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "The W 37th St beauty shop is open (interior).",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.club_merged_kye",
+      "setBy": [
+        "mission.lease"
+      ],
+      "readBy": [
+        "epilogue"
+      ],
+      "world": "A joint credit-club meeting in the Hanyang House back room.",
+      "notes": "Resolution."
+    },
+    {
+      "id": "flag.epilogue_started",
+      "setBy": [
+        "mission.labor_day"
+      ],
+      "readBy": [
+        "ambient",
+        "boundaries"
+      ],
+      "world": "Epilogue world set (date 1974-10-01).",
+      "notes": ""
+    },
+    {
+      "id": "flag.arson_stopped",
+      "setBy": [
+        "mission.fire_watch"
+      ],
+      "readBy": [
+        "ambient",
+        "mission.the_march"
+      ],
+      "world": "Corwin tenants sit outside on folding chairs at night; a bedsheet banner reads 'WE STAYED UP'.",
+      "notes": "Always set: M26 can't end in a fire."
+    },
+    {
+      "id": "flag.teddy_spared_mayhew",
+      "setBy": [
+        "mission.the_car"
+      ],
+      "readBy": [
+        "mission.labor_day",
+        "epilogue"
+      ],
+      "world": "None.",
+      "notes": "Choice in M25: let Mayhew go or bring him to Calloway."
+    },
+    {
+      "id": "flag.teddy_stepped_in_baek",
+      "setBy": [
+        "mission.surcharge"
+      ],
+      "readBy": [
+        "mission.surcharge"
+      ],
+      "world": "None. Gates the Carriers' brawl in M4.",
+      "notes": "Set by the 'Step in' choice in dlg.m04_baek_envelope."
+    }
+  ]
+}

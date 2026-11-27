@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_locksmith_2",
+  "context": "Inside the flat (Teddy).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Three locks inside the bedroom door. Not to keep people out. To keep something in."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "A box of letters. Not mine to read. Hers."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m18_teddy",
+  "context": "M18 o5. (Teddy.) W 30th St in the dark. A box truck at the Varelas dock. Plainclothes on the corner.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Collection night, and the furrier's loading coats at midnight in a blackout."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Wurtz's green sedan on the corner. Brannock smoking. Watching the dock, not the street."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "flat",
+      "text": "Collector. Envelope's at the car tonight. Lieutenant's collecting personal."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "inner",
+      "text": "Wurtz never collects personal. Unless it's big."
+    }
+  ]
+}

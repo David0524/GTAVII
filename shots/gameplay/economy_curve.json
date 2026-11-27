@@ -1,0 +1,485 @@
+{
+ "description": "25-hour playthrough on narrative's story pay (snapshot f0a96c9), deterministic (seed 1974). 1 game minute = 2 real seconds. Money in dollars. User decision: \"Yes, but in GTA VI you can really rack up money. Like 10s of thousands\".",
+ "storyPay": 113800,
+ "storyHours": 8.72,
+ "storyEndRealHour": 21.563888888888886,
+ "netWorth": 118758.47,
+ "realHours": 25,
+ "gameHours": 750,
+ "curve": [
+  {
+   "realHour": 0,
+   "gameHour": 0,
+   "total": 365,
+   "leads": {
+    "Teddy": 40,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 1,
+   "gameHour": 30,
+   "total": 537.93,
+   "leads": {
+    "Teddy": 212.93,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 2,
+   "gameHour": 60,
+   "total": 880.07,
+   "leads": {
+    "Teddy": 555.07,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 3,
+   "gameHour": 90,
+   "total": 1560.36,
+   "leads": {
+    "Teddy": 1235.36,
+    "Delphine": 25,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 4,
+   "gameHour": 120,
+   "total": 1569.37,
+   "leads": {
+    "Teddy": 935.36,
+    "Delphine": 334.01,
+    "Nick": 300
+   }
+  },
+  {
+   "realHour": 5,
+   "gameHour": 150,
+   "total": 2573.88,
+   "leads": {
+    "Teddy": 1400.36,
+    "Delphine": 908.52,
+    "Nick": 265
+   }
+  },
+  {
+   "realHour": 6,
+   "gameHour": 180,
+   "total": 6088.76,
+   "leads": {
+    "Teddy": 4315.24,
+    "Delphine": 1508.52,
+    "Nick": 265
+   }
+  },
+  {
+   "realHour": 7,
+   "gameHour": 210,
+   "total": 8082.17,
+   "leads": {
+    "Teddy": 5335.82,
+    "Delphine": 2508.52,
+    "Nick": 237.83
+   }
+  },
+  {
+   "realHour": 8,
+   "gameHour": 240,
+   "total": 11500.04,
+   "leads": {
+    "Teddy": 5335.82,
+    "Delphine": 2508.52,
+    "Nick": 3655.7
+   }
+  },
+  {
+   "realHour": 9,
+   "gameHour": 270,
+   "total": 11542.36,
+   "leads": {
+    "Teddy": 1500,
+    "Delphine": 3708.52,
+    "Nick": 6333.84
+   }
+  },
+  {
+   "realHour": 10,
+   "gameHour": 300,
+   "total": 13988.5,
+   "leads": {
+    "Teddy": 617.42,
+    "Delphine": 3708.52,
+    "Nick": 9662.56
+   }
+  },
+  {
+   "realHour": 11,
+   "gameHour": 330,
+   "total": 16237.91,
+   "leads": {
+    "Teddy": 1436.83,
+    "Delphine": 5173.52,
+    "Nick": 9627.56
+   }
+  },
+  {
+   "realHour": 12,
+   "gameHour": 360,
+   "total": 55257.27,
+   "leads": {
+    "Teddy": 12898.45,
+    "Delphine": 9731.26,
+    "Nick": 32627.56
+   }
+  },
+  {
+   "realHour": 13,
+   "gameHour": 390,
+   "total": 55257.27,
+   "leads": {
+    "Teddy": 12898.45,
+    "Delphine": 9731.26,
+    "Nick": 32627.56
+   }
+  },
+  {
+   "realHour": 14,
+   "gameHour": 420,
+   "total": 68312.02,
+   "leads": {
+    "Teddy": 18453.2,
+    "Delphine": 9731.26,
+    "Nick": 40127.56
+   }
+  },
+  {
+   "realHour": 15,
+   "gameHour": 450,
+   "total": 67559.05,
+   "leads": {
+    "Teddy": 13270.23,
+    "Delphine": 11196.26,
+    "Nick": 43092.56
+   }
+  },
+  {
+   "realHour": 16,
+   "gameHour": 480,
+   "total": 67559.05,
+   "leads": {
+    "Teddy": 13270.23,
+    "Delphine": 11196.26,
+    "Nick": 43092.56
+   }
+  },
+  {
+   "realHour": 17,
+   "gameHour": 510,
+   "total": 63405.99,
+   "leads": {
+    "Teddy": 16667.17,
+    "Delphine": 15196.26,
+    "Nick": 31542.56
+   }
+  },
+  {
+   "realHour": 18,
+   "gameHour": 540,
+   "total": 85799.71,
+   "leads": {
+    "Teddy": 20060.89,
+    "Delphine": 23196.26,
+    "Nick": 42542.56
+   }
+  },
+  {
+   "realHour": 19,
+   "gameHour": 570,
+   "total": 75499.71,
+   "leads": {
+    "Teddy": 20460.89,
+    "Delphine": 12496.26,
+    "Nick": 42542.56
+   }
+  },
+  {
+   "realHour": 20,
+   "gameHour": 600,
+   "total": 75414.83,
+   "leads": {
+    "Teddy": 20460.89,
+    "Delphine": 12411.38,
+    "Nick": 42542.56
+   }
+  },
+  {
+   "realHour": 21,
+   "gameHour": 630,
+   "total": 84525.32,
+   "leads": {
+    "Teddy": 25571.38,
+    "Delphine": 16411.38,
+    "Nick": 42542.56
+   }
+  },
+  {
+   "realHour": 22,
+   "gameHour": 660,
+   "total": 105203.3,
+   "leads": {
+    "Teddy": 34319.36,
+    "Delphine": 22376.38,
+    "Nick": 48507.56
+   }
+  },
+  {
+   "realHour": 23,
+   "gameHour": 690,
+   "total": 106800.75,
+   "leads": {
+    "Teddy": 35916.81,
+    "Delphine": 22376.38,
+    "Nick": 48507.56
+   }
+  },
+  {
+   "realHour": 24,
+   "gameHour": 720,
+   "total": 107558.47,
+   "leads": {
+    "Teddy": 36106.55,
+    "Delphine": 22944.36,
+    "Nick": 48507.56
+   }
+  },
+  {
+   "realHour": 25,
+   "gameHour": 750,
+   "total": 107558.47,
+   "leads": {
+    "Teddy": 36106.55,
+    "Delphine": 22944.36,
+    "Nick": 48507.56
+   }
+  }
+ ],
+ "final": {
+  "Teddy": 36106.55,
+  "Delphine": 22944.36,
+  "Nick": 48507.56
+ },
+ "totalCash": 107558.47,
+ "assetsAtPurchasePrice": 11200,
+ "startCash": 365,
+ "earned": {
+  "mission": 113800,
+  "legal": 233.41,
+  "crime": 4967.56,
+  "gamble": -12.43,
+  "property": 23694.7,
+  "side": 19870
+ },
+ "spent": {
+  "clothes": 162,
+  "business": 11200,
+  "film": 21.96,
+  "gun": 75,
+  "ammo": 6.5,
+  "rent": 420,
+  "licence": 150,
+  "tailored suits": 2550,
+  "gamble.fight": 17.13,
+  "bribe": 963,
+  "debt": 6000,
+  "property": 1686.31,
+  "gold watch": 3600,
+  "premium car": 28500,
+  "side cost": 25
+ },
+ "hoursByCategory": {
+  "mission": 261.5,
+  "legal": 110.66666666666666,
+  "crime": 207.73333333333332,
+  "gamble": 5,
+  "property": 10.5,
+  "side": 168.5
+ },
+ "attempts": {
+  "job.bail": 3,
+  "side": 19,
+  "crime.pickpocket": 3,
+  "job.locksmith": 2,
+  "job.photos": 3,
+  "property.collect": 14,
+  "gamble.fight": 2,
+  "crime.safe": 2,
+  "gamble.pool": 1,
+  "crime.chop": 2,
+  "crime.collections": 1,
+  "job.cab": 2,
+  "mission": 32
+ },
+ "owned": [
+  "biz.newsstand",
+  "biz.poolhall"
+ ],
+ "bought": [
+  {
+   "id": "biz.newsstand",
+   "tier": "starter",
+   "realHour": 3.08,
+   "lead": "char.teddy_arce"
+  },
+  {
+   "id": "biz.poolhall",
+   "tier": "mid",
+   "realHour": 8.92,
+   "lead": "char.teddy_arce"
+  }
+ ],
+ "businesses": [
+  {
+   "id": "biz.newsstand",
+   "tier": "starter",
+   "price": 1200
+  },
+  {
+   "id": "biz.laundromat",
+   "tier": "starter",
+   "price": 3500
+  },
+  {
+   "id": "biz.diner",
+   "tier": "mid",
+   "price": 16000
+  },
+  {
+   "id": "biz.poolhall",
+   "tier": "mid",
+   "price": 10000
+  },
+  {
+   "id": "biz.arcade",
+   "tier": "big",
+   "price": 50000
+  },
+  {
+   "id": "biz.garage",
+   "tier": "big",
+   "price": 65000
+  },
+  {
+   "id": "biz.rooming_house",
+   "tier": "big",
+   "price": 90000
+  },
+  {
+   "id": "biz.supper_club",
+   "tier": "big",
+   "price": 150000,
+   "lead": "char.nick_varelas"
+  }
+ ],
+ "hourlyVsMissions": {
+  "missionsPerRealHour": 13055.45,
+  "bestLegal": {
+   "id": "job.cab",
+   "ratio": 0.005
+  },
+  "bestCrime": {
+   "id": "crime.hijack",
+   "ratio": 0.084
+  },
+  "all": {
+   "job.cab": {
+    "vsMissions": 0.005,
+    "dollarsPerRealHour": 65.49
+   },
+   "job.garment": {
+    "vsMissions": 0.004,
+    "dollarsPerRealHour": 56.25
+   },
+   "job.locksmith": {
+    "vsMissions": 0.005,
+    "dollarsPerRealHour": 60.84
+   },
+   "job.photos": {
+    "vsMissions": 0.005,
+    "dollarsPerRealHour": 64.41
+   },
+   "job.bail": {
+    "vsMissions": 0.004,
+    "dollarsPerRealHour": 48.08
+   },
+   "job.tow": {
+    "vsMissions": 0.004,
+    "dollarsPerRealHour": 52.99
+   },
+   "crime.register": {
+    "vsMissions": 0.004,
+    "dollarsPerRealHour": 55.62
+   },
+   "crime.safe": {
+    "vsMissions": 0.038,
+    "dollarsPerRealHour": 495.49
+   },
+   "crime.burglary": {
+    "vsMissions": 0.046,
+    "dollarsPerRealHour": 596.84
+   },
+   "crime.hijack": {
+    "vsMissions": 0.084,
+    "dollarsPerRealHour": 1100.8
+   },
+   "crime.pickpocket": {
+    "vsMissions": 0.006,
+    "dollarsPerRealHour": 77.82
+   },
+   "crime.collections": {
+    "vsMissions": 0.064,
+    "dollarsPerRealHour": 836.83
+   },
+   "crime.chop": {
+    "vsMissions": 0.018,
+    "dollarsPerRealHour": 230.14
+   },
+   "biz.newsstand": {
+    "vsMissions": 0.026,
+    "dollarsPerRealHour": 337.89
+   },
+   "biz.laundromat": {
+    "vsMissions": 0.042,
+    "dollarsPerRealHour": 553.7
+   },
+   "biz.diner": {
+    "vsMissions": 0.115,
+    "dollarsPerRealHour": 1496.74
+   },
+   "biz.poolhall": {
+    "vsMissions": 0.078,
+    "dollarsPerRealHour": 1023.08
+   },
+   "biz.arcade": {
+    "vsMissions": 0.216,
+    "dollarsPerRealHour": 2817.83
+   },
+   "biz.garage": {
+    "vsMissions": 0.256,
+    "dollarsPerRealHour": 3344.91
+   },
+   "biz.rooming_house": {
+    "vsMissions": 0.315,
+    "dollarsPerRealHour": 4108.05
+   },
+   "biz.supper_club": {
+    "vsMissions": 0.45,
+    "dollarsPerRealHour": 5881
+   }
+  }
+ }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "dlg.amb_grate_chelsea",
+  "context": "23rd St grate near Seventh.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.office_lunch_crowd",
+      "emotion": "worried",
+      "text": "My firm's moving to Stamford. Says the city's finished."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.office_lunch_crowd",
+      "emotion": "dry",
+      "text": "The city's been finished since I was born. Still here."
+    }
+  ]
+}

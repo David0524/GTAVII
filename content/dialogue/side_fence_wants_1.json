@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_fence_wants_1",
+  "context": "Marty's back room.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.marty_fence",
+      "emotion": "flat",
+      "text": "This week I want a radio, a camera, and a fur. Don't ask about the fur."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.marty_fence",
+      "emotion": "dry",
+      "text": "I don't buy from cops, kids, or people who cry. You're none of those. Today."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "dlg.m31_kye",
+  "context": "M31 o4. Hanyang House back room (when there's no shop). Mi-sook and Delphine with two ledgers.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "sharp",
+      "text": "Your women, my families. Same pot, two books. Fine. I count faster."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "You count faster. I remember longer."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.mi_sook_baek",
+      "emotion": "dry",
+      "text": "Then nobody cheats us twice."
+    }
+  ]
+}

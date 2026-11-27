@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "hardware #0  b5804 6 WEST 48 STREET  1918 use 5 style 4  6.9x15.0 m  midtown  West 48th Street\nbuild 57 ms (main thread, medium)  verts 19020 tris 11992 cells 2 slots 1 markers 4 colliders 25  [webgl2]",
+  "stats": {
+   "verts": 19020,
+   "tris": 11992,
+   "genMs": 8.7,
+   "bakeMs": 48,
+   "cells": 2
+  },
+  "ms": 56.799999999813735,
+  "slots": 1,
+  "markers": 4,
+  "colliders": 25,
+  "building": 5804,
+  "unit": "b5804u1"
+ }
+]

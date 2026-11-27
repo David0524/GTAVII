@@ -1,0 +1,62 @@
+{
+  "id": "mission.side_otb_tips",
+  "kind": "side",
+  "title": "The Teletrack Tip",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "A fare whispers a tip",
+      "script": "dlg.side_otb_tips_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The Teletrack, 8th Ave & 37th",
+      "to": "W 37th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Place the bet at the window",
+      "script": "dlg.side_otb_tips_2"
+    },
+    {
+      "id": "o4",
+      "type": "wait",
+      "text": "Watch the race",
+      "seconds": 15
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "text": "Hear the tip's source",
+      "script": "dlg.side_otb_tips_3"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Bets"
+  },
+  "where": "Eighth Avenue Teletrack (invented OTB parlour)",
+  "systems": [
+    "overheard dialogue",
+    "betting",
+    "police heat"
+  ],
+  "mobile": "Menus only.",
+  "rank": 20,
+  "slice": false
+}

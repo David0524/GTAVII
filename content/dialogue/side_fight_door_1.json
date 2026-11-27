@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_fight_door_1",
+  "context": "The Garden's back corridor.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.augustus_kitt",
+      "emotion": "rasping",
+      "text": "Fight night. I need a door man who knows a fake ticket and a real drunk."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.augustus_kitt",
+      "emotion": "wry",
+      "text": "Ten bucks and a ringside folding chair. Don't sit on it."
+    }
+  ]
+}

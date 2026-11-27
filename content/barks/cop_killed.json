@@ -1,0 +1,72 @@
+{
+  "id": "barks.cop_killed",
+  "core": false,
+  "note": "Consequences of killing a police officer (user: 'Fully lethal everywhere'). Heat is Gameplay's; this is flavour. Teddy's lines are a meaningful contrast with his always-available non-lethal option.",
+  "lines": [
+    {
+      "context": "radio",
+      "emotion": "urgent",
+      "text": "Central to all cars: officer down, {street} and {avenue}. All units. All units."
+    },
+    {
+      "context": "radio",
+      "emotion": "grave",
+      "text": "Central, the officer is not breathing. Repeat: not breathing."
+    },
+    {
+      "context": "radio",
+      "emotion": "cold",
+      "text": "All precincts: shooter of a police officer. Description follows. Use extreme caution."
+    },
+    {
+      "context": "radio",
+      "emotion": "grave",
+      "text": "Central to all cars: a moment of silence on the air for car one-four. …Back to work."
+    },
+    {
+      "context": "teddy",
+      "emotion": "shaken",
+      "text": "(Teddy) I wore that uniform. Eight years. God forgive me."
+    },
+    {
+      "context": "teddy",
+      "emotion": "hollow",
+      "text": "(Teddy) Some kid from Bay Ridge. He had a mother. Everybody's got a mother."
+    },
+    {
+      "context": "teddy",
+      "emotion": "cold",
+      "text": "(Teddy) Kearney will hear about this before I'm off the block."
+    },
+    {
+      "context": "teddy_nonlethal",
+      "emotion": "relieved",
+      "text": "(Teddy) Down, not dead. Cuffs on his own wrist. He'll go home tonight."
+    },
+    {
+      "context": "teddy_nonlethal",
+      "emotion": "dry",
+      "text": "(Teddy) Old habits. You don't shoot a man you'd have bought coffee for."
+    },
+    {
+      "context": "delphine",
+      "emotion": "cold",
+      "text": "(Delphine) Rule twenty-one: they'll never stop looking now. Never."
+    },
+    {
+      "context": "nick",
+      "emotion": "panicked",
+      "text": "(Nick) I'm a furrier! I'm a furrier! What have I done?"
+    },
+    {
+      "context": "street",
+      "emotion": "shocked",
+      "text": "They shot a cop. On Eighth Avenue. They shot a cop."
+    },
+    {
+      "context": "street",
+      "emotion": "low",
+      "text": "Get inside. Every cop in the city is coming here."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_corner_pocket_2",
+  "context": "Settling up.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.arcade_patron",
+      "emotion": "sour",
+      "text": "Okay. Okay. You're not terrible either. Pay you Friday."
+    }
+  ]
+}

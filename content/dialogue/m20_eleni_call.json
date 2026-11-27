@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m20_eleni_call",
+  "context": "M20 o6. A booth at the Iron Gate. Nick on the house phone.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Eleni. My name is on everything. The hotels. The trucks. A lieutenant's boat."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.eleni_varelas",
+      "emotion": "dry",
+      "text": "Of course it is, Nikos. You sign. That's what you're for."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "What do I do?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.eleni_varelas",
+      "emotion": "cold",
+      "text": "Read, for once. Then decide what kind of man owns a building with people in it."
+    }
+  ]
+}

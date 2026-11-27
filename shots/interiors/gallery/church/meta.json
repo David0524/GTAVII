@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "church #0  b6303 27 WEST 23 STREET  1881 use 8 style 8  12.0x24.0 m  tenderloin  West 23rd Street\nbuild 81 ms (main thread, medium)  verts 10985 tris 11270 cells 1 slots 7 markers 1 colliders 44  [webgl2]",
+  "stats": {
+   "verts": 10985,
+   "tris": 11270,
+   "genMs": 6.6,
+   "bakeMs": 73.8,
+   "cells": 1
+  },
+  "ms": 80.5,
+  "slots": 7,
+  "markers": 1,
+  "colliders": 44,
+  "building": 6303,
+  "unit": "b6303"
+ }
+]

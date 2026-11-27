@@ -1,0 +1,81 @@
+{
+  "id": "dlg.m28_owner",
+  "context": "M28 o7. (Nick.) Herald Square. Nick walks through the crowd to Odessa. People recognise him. The noise drops.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.nick_varelas",
+      "emotion": "uncertain",
+      "text": "Mrs. Pruitt. I'm Nikos Varelas. My name is on your building."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "cold",
+      "text": "So you're the paper. You're shorter than the paper."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nick_varelas",
+      "emotion": "honest",
+      "text": "I bought a building. Nobody told me there were people in it."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "steady",
+      "text": "Somebody's telling you now. Two hundred people. One radio. One dead seaman."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "Walk with them.",
+          "goto": "l_walk",
+          "setRelationships": {
+            "char.nick_varelas/char.odessa_pruitt": 2
+          }
+        },
+        {
+          "text": "Leave. Quietly.",
+          "goto": "l_leave",
+          "setRelationships": {
+            "char.nick_varelas/char.odessa_pruitt": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "l_walk",
+      "speaker": "char.nick_varelas",
+      "emotion": "quiet",
+      "text": "May I walk with you, Mrs. Pruitt? I'm not good at it. I'll learn."
+    },
+    {
+      "id": "l_walk2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "dry",
+      "text": "Slowly, Mr. Varelas. Let them see you.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_leave",
+      "speaker": "char.nick_varelas",
+      "emotion": "ashamed",
+      "text": "…I'm sorry. I'm sorry for your seaman."
+    },
+    {
+      "id": "l_leave2",
+      "speaker": "char.odessa_pruitt",
+      "emotion": "cold",
+      "text": "Sorry is a short word, Mr. Varelas. Try a longer one by Friday.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "npc.marcher",
+      "emotion": "proud",
+      "text": "Who owns the Tenderloin? We do!"
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+#!/usr/bin/env python3
+"""Validate narrative content (missions, dialogue, triggers, spawns, interiors, flags) against
+the brief's rules and against each other, then render content/FLAGS.md.
+
+Usage:  python3 narrative/tools/content.py          # validate + render FLAGS.md
+        python3 narrative/tools/content.py --check  # validate only
+
+Errors are rule breaks (text too long, unknown ids, undocumented flags). Warnings are known
+gaps (for example dialogue scripts not written until N5). Standard library only.
+"""
+import json, re, sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+C = ROOT / "content"
+OBJ_TEXT_MAX, LINE_MAX, CHOICE_MAX, CHOICES_MAX = 40, 90, 40, 4
+OBJ_TYPES = {"goto", "enter_vehicle", "deliver", "follow", "enter_interior", "photo", "wait", "dialogue",
+             "escort", "switch_to", "evade", "combat", "chase"}  # brief contract + accepted engine responses (N4, N5) + request 8
+FAIL_TYPES = {"target_lost", "vehicle_destroyed", "timer", "spotted", "caught", "player_down", "busted", "essential_died"}
+LEADS = {"char.teddy_arce", "char.delphine_moore", "char.nick_varelas"}
+TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+WEATHER = {"any", "clear", "overcast", "rain"}
+
+
+def jl(p):
+    return json.loads(p.read_text())
+
+
+def load():
+    cast = {c["id"]: c for f in (C / "cast").glob("*.json") for c in jl(f)}
+    for extra in ("cast_service.json", "cast_side.json"):
+        if (C / extra).exists():
+            cast.update({c["id"]: c for c in jl(C / extra)["characters"]})
+    places = {p["id"]: p for p in jl(C / "places.json")["places"]}
+    flags = {f["id"]: f for f in jl(C / "flags.json")["flags"]}
+    missions = {m["id"]: m for m in (jl(f) for f in sorted((C / "missions").glob("*.json")))}
+    dialogue = {d["id"]: d for d in (jl(f) for f in sorted((C / "dialogue").glob("*.json")))}
+    triggers = {t["id"]: t for t in (jl(f) for f in sorted((C / "triggers").glob("*.json")))}
+    spawns = {s["id"]: s for s in jl(C / "spawns.json")["spawns"]}
+    interiors = {i["id"]: i for i in jl(C / "interiors.json")["interiors"]}
+    planned = dict(re.findall(r"^\|\s*(\d+)\s*\|\s*(mission\.[a-z0-9_]+)\s*\|", (ROOT / "narrative" / "N3_STRUCTURE.md").read_text(), re.M))
+    planned = {v: int(k) for k, v in planned.items()}
+    return cast, places, flags, missions, dialogue, triggers, spawns, interiors, planned
+
+
+def main():
+    cast, places, flags, missions, dialogue, triggers, spawns, interiors, planned = load()
+    errs, warns = [], []
+    E, W = errs.append, warns.append
+
+    def loc_ok(where, at):
+        if at.startswith("loc."):
+            if at not in places: E(f"{where}: unknown place {at}")
+        elif at.startswith("interior."):
+            if at not in interiors: E(f"{where}: unknown interior {at}")
+        elif at.startswith("char."):
+            if at not in cast: E(f"{where}: unknown character {at}")
+        elif not ("&" in at or re.search(r"\b(St|Ave|Broadway)\b", at)):
+            E(f"{where}: '{at}' is not a place id, interior or intersection")
+
+    def flag_ok(where, f):
+        if f not in flags: E(f"{where}: flag {f} not documented in content/flags.json")
+
+    def req_ok(where, rq):
+        if not rq: return
+        for k in ("all", "any", "none"):
+            for f in rq.get(k, []): flag_ok(where + " requires." + k, f)
+        al = rq.get("atLeast")
+        if al:
+            for f in al["of"]: flag_ok(where + " requires.atLeast", f)
+            if not 1 <= al["n"] <= len(al["of"]): E(f"{where}: atLeast.n out of range")
+        for k in (rq.get("relationship") or {}):
+            a, _, b = k.partition("/")
+            if a not in LEADS or b not in cast: E(f"{where}: relationship key {k} invalid")
+
+    def rel_ok(where, rels):
+        for k, v in (rels or {}).items():
+            a, _, b = k.partition("/")
+            if a not in LEADS: E(f"{where}: relationship key '{k}' must start with a lead id")
+            if b not in cast: E(f"{where}: relationship target {b} unknown")
+            if not -3 <= v <= 3: E(f"{where}: relationship delta {v} outside -3..3")
+
+    # missions
+    for mid, m in missions.items():
+        w = mid
+        if mid not in planned: E(f"{w}: not in the N3 mission chain")
+        elif planned[mid] != m.get("number"): E(f"{w}: number {m.get('number')} != N3 #{planned[mid]}")
+        if m.get("playAs") not in LEADS: E(f"{w}: playAs must be a lead")
+        if not 8 <= m.get("durationMin", 0) <= 20: E(f"{w}: durationMin outside 8-20")
+        if len(m.get("pillars", [])) < 2: E(f"{w}: must serve at least two pillars")
+        if not m.get("mobile"): E(f"{w}: missing mobile note")
+        rq = m["requires"]
+        for f in rq.get("flags", []) + rq.get("notFlags", []): flag_ok(w, f)
+        tw = rq.get("timeWindow")
+        if tw and not all(TIME_RE.match(t) for t in tw): E(f"{w}: bad timeWindow")
+        for x in rq.get("weather", []):
+            if x not in WEATHER: E(f"{w}: unknown weather {x}")
+        if m.get("giver") and m["giver"] not in cast: E(f"{w}: giver unknown")
+        st = m["start"]
+        if st.get("who") and st["who"] not in cast: E(f"{w}: start.who unknown")
+        if st.get("at"): loc_ok(w + " start", st["at"])
+        if st.get("marker") and st["marker"] not in interiors: E(f"{w}: start marker unknown")
+        if st.get("spawn") and st["spawn"] not in spawns: E(f"{w}: start spawn unknown")
+        ids = [o["id"] for o in m["objectives"]]
+        if len(ids) != len(set(ids)): E(f"{w}: duplicate objective ids")
+        for mdone in rq.get("missionsDone", []):
+            if mdone not in planned: E(f"{w}: requires.missionsDone unknown {mdone}")
+        for o in m["objectives"]:
+            ow = f"{w}.{o['id']}"
+            if o.get("if"): flag_ok(ow + " if", o["if"].lstrip("!"))
+            for f in o.get("onComplete", {}).get("setFlags", []): flag_ok(ow + " onComplete", f)
+            rel_ok(ow, o.get("onComplete", {}).get("relationships"))
+            if o["type"] not in OBJ_TYPES: E(f"{ow}: unknown objective type {o['type']}")
+            t = o.get("text", "")
+            if not t: E(f"{ow}: missing objective text")
+            if len(t) > OBJ_TEXT_MAX: E(f"{ow}: objective text {len(t)} chars > {OBJ_TEXT_MAX}: {t}")
+            for k in ("to", "at"):
+                if isinstance(o.get(k), str): loc_ok(ow, o[k])
+            for r in o.get("route", []): loc_ok(ow, r)
+            for k in ("who", "target", "subject", "with", "character"):
+                v = o.get(k)
+                if v and v.startswith("char.") and v not in cast: E(f"{ow}: {k} {v} unknown")
+            if o.get("marker") and o["marker"] not in interiors: E(f"{ow}: interior {o['marker']} unknown")
+            for z in o.get("safeZones", []): loc_ok(ow, z)
+            if o["type"] == "combat":
+                if o.get("mode") not in ("takedown", "melee", "firefight", "survive", "defend", "eliminate"): E(f"{ow}: bad combat mode")
+                for tg in o.get("targets", []):
+                    if tg.get("character") and tg["character"] not in cast: E(f"{ow}: target {tg['character']} unknown")
+            scripts = ([o["script"]] if o.get("script") else []) + o.get("dialogue", [])
+            for s in scripts:
+                if s not in dialogue: W(f"{ow}: dialogue {s} not written yet (N5)")
+        for cp in m.get("checkpoints", []) + m.get("switchPoints", []):
+            if cp not in ids: E(f"{w}: checkpoint/switchPoint {cp} not an objective")
+        if m.get("durationMin", 0) > 12 and len(m.get("checkpoints", [])) < 3:
+            E(f"{w}: missions over 12 min need 3+ checkpoints (mobile rule)")
+        if len(m.get("checkpoints", [])) < max(1, -(-m.get("durationMin", 0) // 5) - 1):
+            E(f"{w}: fewer checkpoints than one per 5 minutes")
+        for f in m.get("fail", []):
+            if f["type"] not in FAIL_TYPES: E(f"{w}: unknown fail type {f['type']}")
+        rw = m["rewards"]
+        for f in rw.get("setFlags", []): flag_ok(w, f)
+        for u in rw.get("unlock", []):
+            if u.startswith("mission.") and u not in planned: E(f"{w}: unlocks unknown mission {u}")
+        rel_ok(w, rw.get("relationships"))
+        for n in m.get("npcs", []):
+            if n not in cast: E(f"{w}: npc {n} unknown")
+        for t in m.get("triggers", []):
+            if t not in triggers: E(f"{w}: trigger {t} unknown")
+        for l in m.get("locations", []): loc_ok(w + " locations", l)
+    # chain integrity: every written mission (except #1) is unlocked by its predecessor if written
+    by_num = {m["number"]: m for m in missions.values()}
+    for n, m in by_num.items():
+        unlocked_by = [x for x in missions.values() if m["id"] in x["rewards"].get("unlock", [])]
+        if n > 1 and not unlocked_by:
+            W(f"{m['id']}: not unlocked by any written mission")
+
+    # dialogue
+    for did, d in dialogue.items():
+        lids = {l["id"] for l in d["lines"]}
+        for l in d["lines"]:
+            lw = f"{did}.{l['id']}"
+            if "choices" in l:
+                if len(l["choices"]) > CHOICES_MAX: E(f"{lw}: more than {CHOICES_MAX} choices")
+                for c in l["choices"]:
+                    if c.get("if"): flag_ok(lw + " choice if", c["if"].lstrip("!"))
+                    req_ok(lw + " choice", c.get("requires"))
+                    if c.get("requires") and not c.get("disabledText"): E(f"{lw}: gated choice needs disabledText (greyed reason)")
+                    if len(c["text"]) > CHOICE_MAX: E(f"{lw}: choice over {CHOICE_MAX} chars: {c['text']}")
+                    if c.get("goto") and c["goto"] not in lids: E(f"{lw}: choice goto {c['goto']} missing")
+                    for f in c.get("setFlags", []): flag_ok(lw, f)
+                    rel_ok(lw, c.get("setRelationships"))
+                if l.get("timeoutSec", 99) < 6: E(f"{lw}: timed choice under 6 s")
+                continue
+            if len(l.get("text", "")) > LINE_MAX: E(f"{lw}: line {len(l['text'])} chars > {LINE_MAX}")
+            sp = l.get("speaker", "")
+            if sp.startswith("char.") and sp not in cast: E(f"{lw}: speaker {sp} unknown")
+            elif not (sp.startswith("char.") or sp.startswith("npc.")): E(f"{lw}: speaker must be char.* or npc.*")
+            if l.get("goto") and l["goto"] not in lids: E(f"{lw}: goto {l['goto']} missing")
+            if l.get("if") and l["if"].lstrip("!") not in flags: E(f"{lw}: condition flag {l['if']} undocumented")
+            req_ok(lw, l.get("requires"))
+            for f in l.get("setFlags", []): flag_ok(lw, f)
+
+    # triggers
+    for tid, t in triggers.items():
+        loc_ok(tid, t["volume"]["at"])
+        for f in t.get("when", {}).get("flags", []): flag_ok(tid, f)
+        for a in t["do"]:
+            if a.get("script") and a["script"] not in dialogue: E(f"{tid}: script {a['script']} missing")
+
+    # activities
+    acts_doc = jl(C / "activities.json")["activities"] if (C / "activities.json").exists() else []
+    PH = re.compile(r"\{[A-Za-z]+\}")
+    IDP = ("loc.", "char.", "npc.", "item.", "interior.", "dlg.", "vehicle_role.")
+    for a in acts_doc:
+        aw = a["id"]
+        leads = a["lead"] if isinstance(a["lead"], list) else [a["lead"]]
+        for l in leads:
+            if l not in LEADS: E(f"{aw}: lead {l} is not a lead")
+        u = a["unlockedBy"]
+        if u.startswith("mission.") and u not in planned: E(f"{aw}: unlockedBy unknown {u}")
+        if len(a.get("pillars", [])) < 2: E(f"{aw}: must serve at least two pillars")
+        if not a.get("mobile"): E(f"{aw}: missing mobile note")
+        rows = [r for v in a["pool"].values() for r in v]
+        for r in rows:
+            if not isinstance(r, dict): E(f"{aw}: pool rows must be objects keyed by placeholder"); continue
+            for x in r.values():
+                if isinstance(x, str) and x.startswith("loc.") and x not in places: E(f"{aw}: pool place {x} unknown")
+                if isinstance(x, str) and x.startswith("interior.") and x not in interiors: E(f"{aw}: pool interior {x} unknown")
+                if isinstance(x, str) and x.startswith("char.") and x not in cast: E(f"{aw}: pool character {x} unknown")
+                if isinstance(x, str) and ("&" in x and not x.startswith(IDP)): loc_ok(aw, x)
+        keys = {k for r in rows if isinstance(r, dict) for k in r}
+        for o in a["loop"]:
+            if o["type"] not in OBJ_TYPES: E(f"{aw}.{o['id']}: unknown objective type {o['type']}")
+            for ph in PH.findall(o["text"]):
+                if ph[1:-1] not in keys: E(f"{aw}.{o['id']}: placeholder {ph} has no pool field")
+            tmpl = o.get("script")
+            if tmpl and PH.search(tmpl):
+                for r in rows:
+                    if isinstance(r, dict):
+                        sid = PH.sub(lambda m: str(r.get(m.group(0)[1:-1], m.group(0))), tmpl)
+                        if sid not in dialogue: W(f"{aw}.{o['id']}: activity dialogue {sid} not written yet")
+            elif tmpl and tmpl not in dialogue:
+                W(f"{aw}.{o['id']}: activity dialogue {tmpl} not written yet")
+            for r in rows:
+                if not isinstance(r, dict): continue
+                worst = PH.sub(lambda m: str(r.get(m.group(0)[1:-1], m.group(0))), o["text"])
+                if len(worst) > OBJ_TEXT_MAX: E(f"{aw}.{o['id']}: text reaches {len(worst)} chars: {worst}")
+            for k in ("to", "marker"):
+                v = o.get(k)
+                if isinstance(v, str) and not PH.search(v): loc_ok(f"{aw}.{o['id']}", v)
+
+    # archetypes and barks
+    archs = {x["id"]: x for x in (jl(f) for f in sorted((C / "npc_archetypes").glob("*.json")))}
+    pools = {x["id"]: x for x in (jl(f) for f in sorted((C / "barks").glob("*.json")))}
+    bnd = jl(C / "boundaries.json") if (C / "boundaries.json").exists() else {"barks": {}}
+    pool_ids = set(pools) | set(bnd.get("barks", {}))
+    for aid, x in archs.items():
+        if x.get("barks") and x["barks"] not in pool_ids: E(f"{aid}: bark pool {x['barks']} missing")
+        if sum(1 for r in x["schedule"] for k in ("from", "to") if not TIME_RE.match(r[k]) and r[k] != "24:00"): E(f"{aid}: bad schedule time")
+    for pid, x in pools.items():
+        if x.get("core") and len(x["lines"]) < 30: E(f"{pid}: core pool has {len(x['lines'])} lines (<30)")
+        for l in x["lines"]:
+            if len(re.sub(r"\{[A-Za-z]+\}", "xxxxxxxx", l["text"])) > LINE_MAX: E(f"{pid}: bark over {LINE_MAX}: {l['text']}")
+    blob = json.dumps([list(missions.values()), acts_doc, list(dialogue.values()), bnd])
+    for ref in sorted(set(re.findall(r'"(npc\.[a-z_]+)"', blob))):
+        if ref not in archs: E(f"archetype {ref} referenced but not defined")
+    for b in bnd.get("blockers", []):
+        if b.get("barks") and b["barks"] not in pool_ids: E(f"{b['id']}: bark pool {b['barks']} missing")
+
+    # N6 world data
+    if (C / "street_text.json").exists():
+        st = jl(C / "street_text.json")
+        for x in st.get("slogans", []) + st.get("posters", []):
+            req_ok("street_text", x.get("requires"))
+    if (C / "interior_dressing.json").exists():
+        for act, rooms in jl(C / "interior_dressing.json")["acts"].items():
+            for rm in rooms:
+                if rm["interior"] not in interiors: E(f"interior_dressing act {act}: unknown {rm['interior']}")
+                for pp in rm.get("people", []):
+                    if pp.startswith("char.") and pp not in cast: E(f"interior_dressing: unknown {pp}")
+                    if pp.startswith("npc.") and pp not in archs: E(f"interior_dressing: unknown archetype {pp}")
+                for f in rm.get("afterFlag", {}): flag_ok("interior_dressing afterFlag", f)
+    if (C / "newspapers.json").exists():
+        for pg in jl(C / "newspapers.json")["pages"]:
+            req_ok(pg["id"], pg.get("requires"))
+    if (C / "radio.json").exists():
+        for stn in jl(C / "radio.json")["stations"]:
+            for l in stn["patter"]:
+                if len(l["text"]) > LINE_MAX: E(f"{stn['id']}: DJ line over {LINE_MAX}: {l['text']}")
+
+    # cutscenes: dialogue refs "dlg.x#line" must resolve
+    for f in sorted((C / "cutscenes").glob("*.json")) if (C / "cutscenes").exists() else []:
+        cs = jl(f)
+        for sh in cs.get("shots", []):
+            for ref in sh.get("dialogue", []):
+                sid, _, lid = ref.partition("#")
+                if sid not in dialogue or lid not in {l["id"] for l in dialogue[sid]["lines"]}:
+                    E(f"{cs['id']}.{sh['id']}: dialogue ref {ref} does not resolve")
+
+    # side specs (content/side/<id>.json, mission format with kind: side)
+    for f in sorted((C / "side").glob("*.json")):
+        if f.name == "side_content.json": continue
+        sp = jl(f); sw = sp.get("id", f.name)
+        if sp.get("kind") != "side": E(f"{sw}: kind must be 'side'")
+        oids = [o["id"] for o in sp.get("objectives", [])]
+        if not oids: E(f"{sw}: no objectives")
+        for o in sp.get("objectives", []):
+            ow = f"{sw}.{o['id']}"
+            if o["type"] not in OBJ_TYPES: E(f"{ow}: unknown objective type {o['type']}")
+            if len(o.get("text", "")) > OBJ_TEXT_MAX: E(f"{ow}: objective text over {OBJ_TEXT_MAX}: {o.get('text')}")
+            for k in ("to", "at"):
+                if isinstance(o.get(k), str): loc_ok(ow, o[k])
+            if o.get("marker") and o["marker"] not in interiors: E(f"{ow}: interior {o['marker']} unknown")
+            for k in ("who", "target", "subject"):
+                v = o.get(k)
+                if isinstance(v, str) and v.startswith("char.") and v not in cast: E(f"{ow}: {k} {v} unknown")
+            if o.get("script") and o["script"] not in dialogue: W(f"{ow}: side dialogue {o['script']} not written yet")
+        for cp in sp.get("checkpoints", []):
+            if cp not in oids: E(f"{sw}: checkpoint {cp} not an objective")
+        if not sp.get("mobile"): E(f"{sw}: missing mobile note")
+
+    # flags: documented but never set by written content -> info only
+    set_somewhere = set()
+    def walk(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k == "setFlags": set_somewhere.update(v)
+                walk(v)
+        elif isinstance(x, list):
+            for v in x: walk(v)
+    walk([list(missions.values()), list(dialogue.values())])
+    for f in flags:
+        if f not in set_somewhere: W(f"{f}: documented but never set by any mission or dialogue")
+
+    for x in warns: print("WARN ", x)
+    for x in errs: print("ERROR", x)
+    print(f"{len(archs)} archetypes, {len(pools)} bark pools ({sum(len(x['lines']) for x in pools.values())} lines), {len(acts_doc)} activities, {len(missions)}/{len(planned)} missions, {len(dialogue)} dialogue scripts, {len(triggers)} triggers, "
+          f"{len(spawns)} spawns, {len(interiors)} interiors, {len(flags)} flags ({len(set_somewhere)} set by written content); "
+          f"{len(errs)} errors, {len(warns)} warnings")
+    if errs:
+        sys.exit(1)
+    if "--check" not in sys.argv:
+        L = ["# FLAGS: narrative flag registry", "",
+             "> Generated from `content/flags.json` by `narrative/tools/content.py`. Don't edit by hand.",
+             "> The narrative team owns the `flag.` namespace (see NARRATIVE_BRIEF.md). Keep flags minimal.", "",
+             "| Flag | Set by | Read by | What changes in the world | Notes |", "|---|---|---|---|---|"]
+        for f in flags.values():
+            L.append(f"| `{f['id']}` | {', '.join(f['setBy'])} | {', '.join(f['readBy'])} | {f['world']} | {f['notes']} |")
+        (C / "FLAGS.md").write_text("\n".join(L) + "\n")
+        print("wrote content/FLAGS.md")
+
+
+if __name__ == "__main__":
+    main()

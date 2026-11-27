@@ -1,0 +1,138 @@
+{
+  "id": "mission.lease",
+  "title": "Lease",
+  "number": 31,
+  "act": 3,
+  "chapter": 10,
+  "playAs": "char.delphine_moore",
+  "date": "1974-08-31",
+  "durationMin": 14,
+  "pillars": [
+    "P4",
+    "P1"
+  ],
+  "giver": "char.claudette_bijou",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "14:00",
+      "18:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "dateRange": [
+      "1974-08-31",
+      "1974-08-31"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.claudette_bijou",
+    "at": "loc.arden_hotel"
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Claudette wants a full count",
+      "script": "dlg.m31_count"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The shop, W 37th St",
+      "to": "loc.beauty_shop",
+      "radius": 15
+    },
+    {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "melee",
+      "targets": [
+        {
+          "character": "char.lonnie_gage"
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's last try, at the shop door",
+      "weapons": [
+        "item.straight_razor"
+      ],
+      "note": "Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Keys, or no keys",
+      "script": "dlg.m31_lease",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Hanyang House back room",
+      "script": "dlg.m31_kye",
+      "if": "!flag.delphine_shop"
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o1",
+    "o2",
+    "o2b",
+    "o3"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.labor_day"
+    ]
+  },
+  "npcs": [
+    "char.claudette_bijou",
+    "char.tina_mercado",
+    "char.rita_haines",
+    "char.mi_sook_baek",
+    "char.nick_varelas"
+  ],
+  "archetypes": [
+    "npc.strip_worker"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.arden_hotel",
+    "loc.beauty_shop",
+    "loc.korean_restaurant"
+  ],
+  "mobile": "Walking and talking only. The count is a dialogue, not arithmetic. Untimed choices.",
+  "design": "Delphine's resolution (N3 §3): the shop (needs her relationship with Nick at +1 or more, plus flag.club_count_settled), or merging the club with Mi-sook's kye (needs her relationship with Mi-sook at +1 or more), or carrying on as before. Either way, the women vote. Delphine doesn't decide for them. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.lonnie_gage",
+      "reason": "died"
+    },
+    {
+      "character": "char.mi_sook_baek",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

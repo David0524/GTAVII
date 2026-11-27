@@ -1,0 +1,62 @@
+{
+  "id": "mission.side_passage_shops",
+  "kind": "side",
+  "title": "Behind the Passage Gate",
+  "number": null,
+  "leads": [
+    "char.teddy_arce"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Teddy tries the passage gate",
+      "script": "dlg.side_passage_shops_1"
+    },
+    {
+      "id": "o2",
+      "type": "enter_interior",
+      "text": "Through the passage gate",
+      "marker": "interior.passage_33rd"
+    },
+    {
+      "id": "o3",
+      "type": "combat",
+      "text": "Drive off the rats",
+      "mode": "survive",
+      "targets": [
+        {
+          "archetype": "npc.rat_swarm",
+          "count": 1
+        }
+      ],
+      "nonLethalAllowed": true
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Read the shoeshine stand's list",
+      "script": "dlg.side_passage_shops_2"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "$ and lore"
+  },
+  "where": "The old 33rd Street passage",
+  "systems": [
+    "subway",
+    "keys",
+    "rats"
+  ],
+  "mobile": "Flashlight auto-aims.",
+  "rank": 41,
+  "slice": false
+}

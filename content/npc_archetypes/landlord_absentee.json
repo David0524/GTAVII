@@ -1,0 +1,25 @@
+{
+  "id": "npc.landlord_absentee",
+  "behaviour": "loiterer",
+  "palette": [
+    "#8B4513",
+    "#F5DEB3"
+  ],
+  "wardrobe": "Leisure suit, a car too nice for the block.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "18:00",
+      "area": "W 29th St & 8th Ave",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.deuce",
+  "scripted": true,
+  "note": "Photo Jobs subject; keeps a fixed routine."
+}

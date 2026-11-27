@@ -1,0 +1,205 @@
+{
+  "id": "mission.independence_day",
+  "title": "Independence Day",
+  "number": 9,
+  "act": 1,
+  "chapter": 3,
+  "playAs": "char.teddy_arce",
+  "switchPoints": [
+    "o5",
+    "o8"
+  ],
+  "date": "1974-07-04",
+  "durationMin": 20,
+  "pillars": [
+    "P1",
+    "P4"
+  ],
+  "giver": "char.carl_mayhew",
+  "requires": {
+    "flags": [
+      "flag.teddy_collector",
+      "flag.photo_file_started"
+    ],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "20:00",
+      "23:30"
+    ],
+    "weather": [
+      "clear"
+    ],
+    "dateRange": [
+      "1974-07-04",
+      "1974-07-04"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.corwin_hotel",
+    "note": "Holiday quiet; fireworks thud from the rivers (audio). The district is almost empty."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "to": "loc.poole_shine",
+      "radius": 15,
+      "text": "First collection: Earl, 42nd & Seventh"
+    },
+    {
+      "id": "o2",
+      "type": "dialogue",
+      "script": "dlg.m09_earl",
+      "text": "Collect from Earl Poole"
+    },
+    {
+      "id": "o3",
+      "type": "enter_interior",
+      "marker": "interior.royal_cafeteria",
+      "text": "Next: Royal Cafeteria, Eighth & 40th"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "script": "dlg.m09_envelope",
+      "text": "Collect from the woman in oxblood"
+    },
+    {
+      "id": "o5",
+      "type": "switch_to",
+      "character": "char.delphine_moore",
+      "cut": "transition",
+      "text": "(Delphine)"
+    },
+    {
+      "id": "o6",
+      "type": "follow",
+      "target": "char.teddy_arce",
+      "keepWithinM": 70,
+      "avoidSpottedM": 10,
+      "text": "Follow your money down Eighth"
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "script": "dlg.m09_ambush",
+      "text": "Lonnie's men, 35th & Eighth"
+    },
+    {
+      "id": "o8",
+      "type": "switch_to",
+      "character": "char.teddy_arce",
+      "cut": "hard",
+      "text": "(Teddy)"
+    },
+    {
+      "id": "o8b",
+      "type": "combat",
+      "mode": "survive",
+      "targets": [
+        {
+          "archetype": "npc.lonnie_crew",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Lonnie's crew opens fire on Eighth Ave",
+      "weapons": [
+        "item.revolver_service"
+      ],
+      "cover": [
+        "parked cars",
+        "the post office steps"
+      ],
+      "durationSec": 90,
+      "note": "Delphine fights as a companion NPC with her razor and snub-nose. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o9",
+      "type": "evade",
+      "from": [
+        "npc.lonnie_crew"
+      ],
+      "breakDistanceM": 90,
+      "safeZones": [
+        "interior.penn_station_concourse"
+      ],
+      "fallback": "goto interior.penn_station_concourse with timeLimitSec 120",
+      "text": "Lose them in Penn Station, Eighth Ave"
+    },
+    {
+      "id": "o10",
+      "type": "dialogue",
+      "script": "dlg.m09_concourse",
+      "text": "Catch your breath with Delphine",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "target_lost",
+      "objective": "o6"
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o3",
+    "o5",
+    "o8",
+    "o8b",
+    "o10"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.act2_started"
+    ],
+    "unlock": [
+      "mission.five_am"
+    ],
+    "act": 2,
+    "relationships": {
+      "char.teddy_arce/char.delphine_moore": 1,
+      "char.delphine_moore/char.teddy_arce": 1,
+      "char.teddy_arce/char.earl_poole": 1
+    }
+  },
+  "npcs": [
+    "char.earl_poole",
+    "char.dwayne_little",
+    "char.carl_mayhew",
+    "char.lonnie_gage",
+    "char.tina_mercado",
+    "char.jimmy_brannock"
+  ],
+  "archetypes": [
+    "npc.lonnie_crew",
+    "npc.holiday_stroller",
+    "npc.penn_porter"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.poole_shine",
+    "loc.eighth_ave_cafeteria",
+    "8th Ave & W 35th St",
+    "loc.penn_station_lockers"
+  ],
+  "mobile": "Four checkpoints. Switches only at the safe beats (o5 after the handover, o8 at the ambush). The tail is generous; 'spotted' is warned twice before it fails. The escape is solved by Penn Station's two entrances (Eighth Ave and Seventh Ave), so it's route knowledge, not speed. No fighting.",
+  "design": "End of Act 1. The first two-lead mission makes P1 literal: Delphine follows her own money. Lonnie's ambush, arranged with Brannock to make the civilian bagman look weak, forces the two together. In the concourse dialogue Teddy chooses whether to hand back her fifty (flag.teddy_returned_tax, applied in the dialogue). Mayhew finds the count short in M10. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "night",
+  "essential": [],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

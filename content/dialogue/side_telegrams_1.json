@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_telegrams_1",
+  "context": "A telegraph office on W 34th St.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.bank_teller",
+      "emotion": "brisk",
+      "text": "Twelve telegrams. Births, deaths, one horse-race result. Bad news after six p.m. only."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.bank_teller",
+      "emotion": "brisk",
+      "text": "Company policy. People take it better after supper."
+    }
+  ]
+}

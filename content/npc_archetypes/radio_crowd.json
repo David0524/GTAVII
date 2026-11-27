@@ -1,0 +1,27 @@
+{
+  "id": "npc.radio_crowd",
+  "behaviour": "loiterer",
+  "palette": [
+    "#696969",
+    "#F5F5DC"
+  ],
+  "wardrobe": "Whoever is out on a summer night.",
+  "props": [
+    "transistor radio"
+  ],
+  "schedule": [
+    {
+      "from": "20:30",
+      "to": "00:30",
+      "area": "42nd St, Corwin lobby, bars (8 Aug only)",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.radio_crowd",
+  "scripted": true,
+  "note": ""
+}

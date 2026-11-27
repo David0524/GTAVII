@@ -1,0 +1,162 @@
+{
+  "id": "barks.beat_cop",
+  "core": true,
+  "note": "Uniformed foot-post police (Herald Sq, 42nd St, Penn Station). Institutional voice; no real individuals.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "flat",
+      "text": "Evening."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "How you doing. Hot one, huh?"
+    },
+    {
+      "context": "greet",
+      "emotion": "gruff",
+      "text": "Keep moving, folks. Nice and easy."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Fourteen hours on this corner. Herald Square's my living room."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "City's broke. They want us to walk faster to save shoe leather."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Since the Commission, nobody takes a coffee. Not even a coffee."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Sarge says watch the pickpockets. I watch everybody."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Overtime frozen. Patrol cars broke. Radio's from Korea."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Another hydrant open. Another kid soaked. Another report."
+    },
+    {
+      "context": "rain",
+      "emotion": "weary",
+      "text": "Rain. Great. Raincoat's in the car. Car's in the shop."
+    },
+    {
+      "context": "rain",
+      "emotion": "flat",
+      "text": "Watch the curb, ma'am, it's slick."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Wool uniform in August. Whoever designed it never wore it."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Lay off the horn! You want a ticket?"
+    },
+    {
+      "context": "horn",
+      "emotion": "flat",
+      "text": "Hey! Nobody's moving faster because you're honking!"
+    },
+    {
+      "context": "collision",
+      "emotion": "gruff",
+      "text": "Watch where you're going, pal."
+    },
+    {
+      "context": "collision",
+      "emotion": "flat",
+      "text": "Easy. You're bumping a police officer. Bad habit."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alert",
+      "text": "Hey! Slow down! What's the hurry?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "suspicious",
+      "text": "Where you running to, buddy?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "flat",
+      "text": "Walk it. This isn't a track meet."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Off the sidewalk! Pull it over! Now!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "alert",
+      "text": "Hey! You! License and registration!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "alert",
+      "text": "Signals are out. I'm the traffic light now. Wait for my hand."
+    },
+    {
+      "context": "brownout",
+      "emotion": "flat",
+      "text": "Stay calm, folks. Power'll be back. Stay off the stoops."
+    },
+    {
+      "context": "night",
+      "emotion": "weary",
+      "text": "Midnight tour. Me and the pigeons."
+    },
+    {
+      "context": "night",
+      "emotion": "flat",
+      "text": "Ma'am, you should get home. It's late."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Tourists ask me where the Empire Estate is. I point up."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Kid, get off the mailbox. Thank you."
+    },
+    {
+      "context": "complain",
+      "emotion": "low",
+      "text": "Layoffs coming, they say. I got four kids."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Morning, Mrs. Pruitt. Nice hat."
+    },
+    {
+      "context": "idle",
+      "emotion": "flat",
+      "text": "Somebody's selling watches out of a coat again."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Duck under the awning, folks. It'll pass."
+    }
+  ]
+}

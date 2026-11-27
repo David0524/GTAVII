@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "id": "item.ammo_25",
+      "name": ".25 cartridges (box of 50)",
+      "price": 5
+    },
+    {
+      "id": "item.ammo_22",
+      "name": ".22 cartridges (box of 50)",
+      "price": 2
+    },
+    {
+      "id": "item.ammo_38",
+      "name": ".38 cartridges (box of 50)",
+      "price": 7
+    },
+    {
+      "id": "item.ammo_45",
+      "name": ".45 cartridges (box of 50)",
+      "price": 11
+    },
+    {
+      "id": "item.ammo_9",
+      "name": "9mm cartridges (box of 50)",
+      "price": 9
+    },
+    {
+      "id": "item.ammo_12ga",
+      "name": "12-gauge shells (box of 25)",
+      "price": 6
+    },
+    {
+      "id": "item.ammo_30",
+      "name": ".30 cartridges (box of 20)",
+      "price": 8
+    }
+  ]
+}

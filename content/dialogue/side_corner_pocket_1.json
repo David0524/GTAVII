@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_corner_pocket_1",
+  "context": "Corner Pocket Billiards, smoke and green felt.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.arcade_patron",
+      "emotion": "smooth",
+      "text": "Friendly game? Five a rack. I'm terrible. Ask anybody."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.hotel_bar_regular",
+      "emotion": "low",
+      "text": "He's not terrible. He's never been terrible in his life."
+    }
+  ]
+}

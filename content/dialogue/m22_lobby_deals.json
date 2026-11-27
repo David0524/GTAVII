@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m22_lobby_deals",
+  "context": "M22 o10. (Nick.) The Pennsylvania lobby at midnight. Men in clusters. Lisle working them like a host.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.augie_lomax",
+      "emotion": "gruff",
+      "text": "Varelas. Your lawyer's selling lifeboats. You got a seat?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ray_bauer",
+      "emotion": "nervous",
+      "text": "Mr. Varelas! Ray Bauer. Legit. Very legit. Is the deal still on? Is anything on?"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.nora_finch",
+      "emotion": "rapid",
+      "text": "Nora Finch, Evening paper. City's broke and somebody's buying hotels. You?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.nick_varelas",
+      "emotion": "low",
+      "text": "Not tonight, Miss Finch."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "inner",
+      "text": "Everyone's selling everyone. And my name is the merchandise."
+    }
+  ]
+}

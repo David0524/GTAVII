@@ -1,0 +1,64 @@
+{
+  "id": "mission.side_rent_day",
+  "kind": "side",
+  "title": "Rent Day",
+  "number": null,
+  "leads": [
+    "char.nick_varelas"
+  ],
+  "acts": [
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Nick's rent list",
+      "script": "dlg.side_rent_day_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The W 29th building",
+      "to": "W 29th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "dialogue",
+      "text": "Handle the burst pipe",
+      "script": "dlg.side_rent_day_2"
+    },
+    {
+      "id": "o4",
+      "type": "goto",
+      "text": "The W 37th storefront",
+      "to": "W 37th St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Check on the Corwin",
+      "to": "loc.corwin_hotel",
+      "radius": 20
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "Rent income; Odessa trust"
+  },
+  "where": "Nick's properties (the W 29th building, W 37th storefront, the Corwin)",
+  "systems": [
+    "economy",
+    "bribes",
+    "relationships"
+  ],
+  "mobile": "Choice menus with short actions.",
+  "rank": 37,
+  "slice": false
+}

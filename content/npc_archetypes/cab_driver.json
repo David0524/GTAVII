@@ -1,0 +1,27 @@
+{
+  "id": "npc.cab_driver",
+  "behaviour": "driver",
+  "palette": [
+    "#FFD700",
+    "#2F4F4F"
+  ],
+  "wardrobe": "Cabbie cap, short-sleeve plaid shirt, toothpick.",
+  "props": [
+    "cab (vehicle_role.cab)"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "All avenues",
+      "activity": "drive"
+    }
+  ],
+  "density": {
+    "day": 0.5,
+    "night": 0.5
+  },
+  "barks": "barks.cab_driver",
+  "scripted": false,
+  "note": "Driver archetype for ambient yellow cabs."
+}

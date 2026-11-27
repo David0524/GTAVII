@@ -1,0 +1,274 @@
+{
+  "backend": "webgl2",
+  "scene": "rocketbox",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "heads": [
+    {
+      "hero": "char.teddy_arce",
+      "head": "lead_teddy",
+      "tris": 16158,
+      "draws": 2
+    },
+    {
+      "hero": "char.teddy_arce",
+      "head": null,
+      "tris": 23909,
+      "draws": 2
+    },
+    {
+      "hero": "char.delphine_moore",
+      "head": "lead_delphine",
+      "tris": 17644,
+      "draws": 2
+    },
+    {
+      "hero": "char.delphine_moore",
+      "head": null,
+      "tris": 20094,
+      "draws": 2
+    },
+    {
+      "hero": "char.nick_varelas",
+      "head": "lead_nick",
+      "tris": 24268,
+      "draws": 2
+    },
+    {
+      "hero": "char.nick_varelas",
+      "head": null,
+      "tris": 26140,
+      "draws": 2
+    }
+  ],
+  "people": [
+    {
+      "seed": 1,
+      "hero": "char.teddy_arce",
+      "sex": 1,
+      "age": 34,
+      "hair": "sidePart",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 16158,
+      "draws": 2,
+      "buildMs": 117.9
+    },
+    {
+      "seed": 1,
+      "hero": "char.teddy_arce",
+      "sex": 1,
+      "age": 34,
+      "hair": "sidePart",
+      "facialHair": "stubble",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 23909,
+      "draws": 2,
+      "buildMs": 105.3
+    },
+    {
+      "seed": 1,
+      "hero": "char.delphine_moore",
+      "sex": 0,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 17644,
+      "draws": 2,
+      "buildMs": 50.7
+    },
+    {
+      "seed": 1,
+      "hero": "char.delphine_moore",
+      "sex": 0,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 20094,
+      "draws": 2,
+      "buildMs": 55
+    },
+    {
+      "seed": 1,
+      "hero": "char.nick_varelas",
+      "sex": 1,
+      "age": 51,
+      "hair": "slick",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 24268,
+      "draws": 2,
+      "buildMs": 149.9
+    },
+    {
+      "seed": 1,
+      "hero": "char.nick_varelas",
+      "sex": 1,
+      "age": 51,
+      "hair": "slick",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 26140,
+      "draws": 2,
+      "buildMs": 67.6
+    }
+  ],
+  "updateMs": [
+    0,
+    0,
+    0.1,
+    0,
+    0,
+    0.1
+  ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.1371,
+        0.2922
+      ],
+      "neck": [
+        0.1403,
+        0.3098
+      ],
+      "hand": [
+        0.0982,
+        0.5292
+      ]
+    },
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": null,
+      "tone": "#b98a67",
+      "cheek": [
+        0.2821,
+        0.2923
+      ],
+      "neck": [
+        0.285,
+        0.3096
+      ],
+      "hand": [
+        0.2381,
+        0.5277
+      ]
+    },
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": "lead_delphine",
+      "tone": "#5a3825",
+      "cheek": [
+        0.4333,
+        0.2696
+      ],
+      "neck": [
+        0.4326,
+        0.2918
+      ],
+      "hand": [
+        0.3923,
+        0.5104
+      ]
+    },
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": null,
+      "tone": "#5a3825",
+      "cheek": [
+        0.5797,
+        0.2687
+      ],
+      "neck": [
+        0.5779,
+        0.2914
+      ],
+      "hand": [
+        0.5355,
+        0.5097
+      ]
+    },
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": "lead_nick",
+      "tone": "#c8a17e",
+      "cheek": [
+        0.7253,
+        0.3125
+      ],
+      "neck": [
+        0.7226,
+        0.3289
+      ],
+      "hand": [
+        0.6649,
+        0.536
+      ]
+    },
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": null,
+      "tone": "#c8a17e",
+      "cheek": [
+        0.8758,
+        0.3096
+      ],
+      "neck": [
+        0.8699,
+        0.3277
+      ],
+      "hand": [
+        0.8136,
+        0.5369
+      ]
+    }
+  ],
+  "renderMsSoftware": [
+    4.099999999991269,
+    1.5,
+    2
+  ]
+}

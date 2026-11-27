@@ -1,0 +1,101 @@
+{
+  "id": "dlg.m01_offer",
+  "context": "M1 o3. Broadway & W 31st St, under a wholesaler's dark awning. One untimed choice.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "Here it is. People still need to pay. Cops can't take it. Not by hand. Not now."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "serious",
+      "text": "So we need a civilian. Somebody who knows every door. Somebody nobody watches."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "A bagman."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "A courier. Two hundred a week, cash. You'd be doing the old crowd a favor."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.carl_mayhew",
+      "emotion": "wry",
+      "text": "And kid? Your hotel just got sold. Ask who's buying. Then call me."
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "No.",
+          "goto": "l_hard",
+          "setRelationships": {
+            "char.teddy_arce/char.carl_mayhew": -1
+          }
+        },
+        {
+          "text": "Not tonight, Carl.",
+          "goto": "l_soft"
+        },
+        {
+          "text": "Who's buying the Corwin?",
+          "goto": "l_who"
+        }
+      ]
+    },
+    {
+      "id": "l_hard",
+      "speaker": "char.teddy_arce",
+      "emotion": "cold",
+      "text": "No. I stopped carrying for you when I stopped carrying a gun."
+    },
+    {
+      "id": "l_hard2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "wry",
+      "text": "You never stopped, kid. You just stopped getting paid.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_soft",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Not tonight, Carl. I got a shift."
+    },
+    {
+      "id": "l_soft2",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Sure. Nights are long. Think about it in the elevator.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_who",
+      "speaker": "char.carl_mayhew",
+      "emotion": "wry",
+      "text": "Read the notice. Lawyers love a notice. Then think about my offer."
+    },
+    {
+      "id": "l_who2",
+      "speaker": "char.teddy_arce",
+      "emotion": "flat",
+      "text": "The answer's still no.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.carl_mayhew",
+      "emotion": "warm",
+      "text": "Go on. Your old men are waiting. I'll find you."
+    }
+  ]
+}

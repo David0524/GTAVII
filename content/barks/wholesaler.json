@@ -1,0 +1,162 @@
+{
+  "id": "barks.wholesaler",
+  "core": true,
+  "note": "Broadway wholesalers, importers, florist wholesalers. Roll gates, hand trucks, cigars.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "gruff",
+      "text": "We're wholesale. Buying a dozen or browsing?"
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Morning! Come in, come in, everything's a deal."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Another week like this, I'm pulling the gate for good."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Wigs, luggage, plastic flowers. The American dream, by the gross."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Forty years on Broadway. My father, forty before me."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Landlord wants double. Trucks want double. Customers want half."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Korean fellows on Twenty-Ninth sell wigs better than me. Good for them."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Surcharge! Surcharge for what? For breathing on Broadway?"
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Shipment's late. Truck's late. Everybody's late but the rent."
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Somebody slashed the flower truck tires again. Again!"
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain! Pull the stock in! Pull it in!"
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "Plastic flowers love the rain. Real ones complain."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Shop's an oven. The candles are melting. Wholesale candles."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Honk! Honk! Broadway's one way and so is my patience."
+    },
+    {
+      "context": "horn",
+      "emotion": "gruff",
+      "text": "Wait your turn! I'm unloading!"
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "Hey! The boxes! That's glassware!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Watch the hand truck, mister. It's older than you."
+    },
+    {
+      "context": "player_running",
+      "emotion": "suspicious",
+      "text": "Where's he running? Check the register."
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running past a sale? Big mistake."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "You're on my sidewalk! My stock's on that sidewalk!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Power's out. Lock the gate. Lock it now."
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "No lights, no customers. Same as Tuesday."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Pulling the gate. Rattles like my knees."
+    },
+    {
+      "context": "idle",
+      "emotion": "friendly",
+      "text": "Five a.m. on Twenty-Eighth. Smells like a garden in a tunnel."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Somebody bought the hotel on the corner. Somebody always buys."
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Mrs. Moretti says hello. Mrs. Moretti says everything loudly."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "City wants a permit for the awning. The awning's from 1931."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Gross means a hundred forty-four. Also how I feel."
+    },
+    {
+      "context": "rain",
+      "emotion": "friendly",
+      "text": "Stand under the awning. No charge. Today."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "Palms from Florida, ferns from Jersey. Best on the block."
+    },
+    {
+      "context": "night",
+      "emotion": "low",
+      "text": "Trucks come at four. I'll sleep at five. Maybe."
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "_note": "Spawn points. 'at' is a real intersection; 'side' is the corner or block face. Heading uses grid terms (uptown, downtown, crosstown_east, crosstown_west).",
+  "spawns": [
+    {
+      "id": "spawn.player_start",
+      "at": "Broadway & 5th Ave & E 23rd St",
+      "side": "flatiron_north_prow",
+      "heading": "uptown",
+      "kind": "player",
+      "playAs": "char.teddy_arce",
+      "note": "New game. Matches world.json spawn; facing north up Broadway at dusk."
+    },
+    {
+      "id": "spawn.m01_mayhew",
+      "at": "5th Ave & E 23rd St",
+      "side": "nw_corner",
+      "heading": "crosstown_west",
+      "kind": "npc",
+      "character": "char.carl_mayhew"
+    },
+    {
+      "id": "spawn.home_teddy",
+      "at": "W 31st St",
+      "between": [
+        "Broadway",
+        "6th Ave"
+      ],
+      "side": "north",
+      "heading": "crosstown_east",
+      "kind": "player",
+      "playAs": "char.teddy_arce"
+    },
+    {
+      "id": "spawn.home_delphine",
+      "at": "W 27th St",
+      "heading": "crosstown_east",
+      "kind": "player",
+      "playAs": "char.delphine_moore",
+      "between": [
+        "8th Ave",
+        "9th Ave"
+      ],
+      "side": "south"
+    },
+    {
+      "id": "spawn.home_nick",
+      "at": "Madison Ave & E 37th St",
+      "side": "west",
+      "heading": "downtown",
+      "kind": "player",
+      "playAs": "char.nick_varelas"
+    },
+    {
+      "id": "spawn.night_nick_sedan",
+      "at": "7th Ave & W 30th St",
+      "side": "east",
+      "heading": "downtown",
+      "kind": "player",
+      "playAs": "char.nick_varelas",
+      "vehicle": "vehicle_role.nick_sedan",
+      "note": "Superseded: Nick now has a home in bounds (homes.json). Kept for night switching while he's driving."
+    }
+  ]
+}

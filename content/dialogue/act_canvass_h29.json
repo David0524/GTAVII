@@ -1,0 +1,30 @@
+{
+  "id": "dlg.act_canvass_h29",
+  "context": "Tenant canvass at the hotel on 29th (Act 3).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "earnest",
+      "text": "Tenants' petition. The march is the twenty-third. Will you sign?"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.sro_resident",
+      "emotion": "angry",
+      "text": "They turned off our hot water in June. It's August. Yes, I'll sign."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.sro_resident",
+      "emotion": "sad",
+      "text": "My neighbor took the money and a bus ticket. Sign for him too?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Thank you. Bring a chair on the twenty-third."
+    }
+  ]
+}

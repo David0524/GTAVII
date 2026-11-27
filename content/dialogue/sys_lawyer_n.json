@@ -1,0 +1,24 @@
+{
+  "id": "dlg.sys_lawyer_n",
+  "context": "Arrested char.nick_varelas calls Maureen Kehoe from the precinct payphone.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.maureen_kehoe",
+      "emotion": "brisk",
+      "text": "Kehoe. Don't say anything. Not even 'hello'. Which precinct?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "tired",
+      "text": "I don't know. One with a very rude sergeant."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.maureen_kehoe",
+      "emotion": "dry",
+      "text": "Fifty now, fifty when you're out. Sit. Look bored. I'll be there in twenty."
+    }
+  ]
+}

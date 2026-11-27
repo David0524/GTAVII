@@ -1,0 +1,56 @@
+{
+  "id": "dlg.act_read_room_arden_2",
+  "context": "Read the Room at the Arden bar. Tap patrons for their tell lines first (engine), then choose.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.rita_haines",
+      "emotion": "low",
+      "text": "Somebody in here is a cop. Which one, sugar?"
+    },
+    {
+      "id": "c1",
+      "choices": [
+        {
+          "text": "The couple fighting quietly",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The man who orders club soda",
+          "goto": "l_right",
+          "setRelationships": {
+            "char.delphine_moore/char.rita_haines": 1
+          }
+        },
+        {
+          "text": "The woman with the poodle",
+          "goto": "l_wrong"
+        },
+        {
+          "text": "The trumpet player on break",
+          "goto": "l_wrong"
+        }
+      ]
+    },
+    {
+      "id": "l_right",
+      "speaker": "char.rita_haines",
+      "emotion": "pleased",
+      "text": "Club soda on duty, and a wedding-ring tan. He's married to the job.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_wrong",
+      "speaker": "char.rita_haines",
+      "emotion": "dry",
+      "text": "No, sugar. Club soda on duty, and a wedding-ring tan. He's married to the job.",
+      "goto": "l_end"
+    },
+    {
+      "id": "l_end",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule nineteen: the cop is the one who isn't enjoying himself."
+    }
+  ]
+}

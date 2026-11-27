@@ -1,0 +1,30 @@
+{
+  "id": "npc.marcher",
+  "behaviour": "walker",
+  "palette": [
+    "#FFFFFF",
+    "#4B0082",
+    "#B22222"
+  ],
+  "wardrobe": "Sunday clothes, union T-shirts, church hats, aprons straight from work.",
+  "props": [
+    "placard",
+    "bedsheet banner",
+    "flowers"
+  ],
+  "schedule": [
+    {
+      "from": "10:00",
+      "to": "13:00",
+      "area": "Broadway, W 31st–34th St (23 Aug only)",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.marcher",
+  "scripted": true,
+  "note": ""
+}

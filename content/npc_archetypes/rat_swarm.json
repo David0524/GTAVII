@@ -1,0 +1,24 @@
+{
+  "id": "npc.rat_swarm",
+  "behaviour": "critter",
+  "palette": [
+    "#3B3B3B"
+  ],
+  "wardrobe": "Rats: a skittering swarm that scatters from light and footsteps. Startle, never damage.",
+  "props": [],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Subway passages, alleys, trash at night",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.1,
+    "night": 0.4
+  },
+  "barks": null,
+  "scripted": false,
+  "note": "User: 'Definitely should be some pigeons and rats.' Non-human ambient."
+}

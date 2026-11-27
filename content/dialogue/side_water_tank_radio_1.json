@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_water_tank_radio_1",
+  "context": "Chalk on a rooftop near W 36th & Ninth.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.night_reader",
+      "emotion": "curious",
+      "text": "Somebody chalks the roofs at night. Arrows, numbers, all toward the tank on Thirty-Sixth."
+    }
+  ]
+}

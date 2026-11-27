@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_brownout_relief_1",
+  "context": "Brownout block. Neighbours on the stoop.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.brownout_crowd",
+      "emotion": "tired",
+      "text": "Ice for the diabetics on four. Candles for the Royal. Somebody check the elevator."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.brownout_crowd",
+      "emotion": "wry",
+      "text": "Hudson Union says an hour. Hudson Union always says an hour."
+    }
+  ]
+}

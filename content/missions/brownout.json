@@ -1,0 +1,170 @@
+{
+  "id": "mission.brownout",
+  "title": "Brownout",
+  "number": 15,
+  "act": 2,
+  "chapter": 5,
+  "playAs": "char.nick_varelas",
+  "date": "1974-07-19",
+  "durationMin": 18,
+  "pillars": [
+    "P5",
+    "P3"
+  ],
+  "giver": "char.yiannis_doukas",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 2,
+    "timeWindow": [
+      "21:00",
+      "01:00"
+    ],
+    "weather": [
+      "clear"
+    ],
+    "dateRange": [
+      "1974-07-19",
+      "1974-07-19"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.hotel_pennsylvania",
+    "cut": "transition",
+    "note": "Nick's introduction. Title card: NIKOS VARELAS · W 30TH STREET."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Trade dinner. The lights flicker.",
+      "script": "dlg.m15_ballroom"
+    },
+    {
+      "id": "o2",
+      "type": "enter_vehicle",
+      "text": "Get to your car on Seventh Ave",
+      "vehicle": "vehicle_role.nick_sedan"
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Drive to the vault, W 30th St",
+      "to": "loc.varelas_loft",
+      "radius": 15
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Yiannis: the compressors stopped",
+      "script": "dlg.m15_compressors"
+    },
+    {
+      "id": "o5",
+      "type": "goto",
+      "text": "Ice house, 37th St & Ninth Ave",
+      "to": "W 37th St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Buy every block of ice they have",
+      "script": "dlg.m15_ice_house"
+    },
+    {
+      "id": "o6b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.brownout_looter",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Looters rush the ice truck in the dark",
+      "protect": "vehicle_role.ice_truck",
+      "note": "Nick: poor shot. Hire the ice men as muscle (Payroll) or pay the looters off (bribe). Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o7",
+      "type": "follow",
+      "text": "Lead the ice truck back to W 30th St",
+      "target": "vehicle_role.ice_truck",
+      "keepWithinM": 80,
+      "to": "loc.varelas_loft"
+    },
+    {
+      "id": "o8",
+      "type": "dialogue",
+      "text": "A man at the door. He's collecting.",
+      "script": "dlg.m15_teddy_at_door",
+      "requireNoHeat": true
+    }
+  ],
+  "fail": [
+    {
+      "type": "vehicle_destroyed"
+    },
+    {
+      "type": "target_lost",
+      "objective": "o7"
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o3",
+    "o5",
+    "o6b",
+    "o7"
+  ],
+  "rewards": {
+    "money": -300,
+    "setFlags": [],
+    "unlock": [
+      "mission.margin_call"
+    ],
+    "relationships": {
+      "char.nick_varelas/char.yiannis_doukas": 1,
+      "char.nick_varelas/char.teddy_arce": 0
+    }
+  },
+  "npcs": [
+    "char.nick_varelas",
+    "char.yiannis_doukas",
+    "char.teddy_arce",
+    "char.eleni_varelas"
+  ],
+  "archetypes": [
+    "npc.trade_dinner_guest",
+    "npc.ice_house_worker",
+    "npc.brownout_crowd"
+  ],
+  "vehicles": [
+    "vehicle_role.nick_sedan",
+    "vehicle_role.ice_truck"
+  ],
+  "locations": [
+    "loc.hotel_pennsylvania",
+    "loc.varelas_loft",
+    "W 37th St & 9th Ave"
+  ],
+  "mobile": "The brownout (set_power, ENGINE N2) darkens W 28th–34th. Dark signals are all-way stops for AI. The ice truck is slow and waits for you. There's no timer, but Yiannis calls the thermometer every minute as urgency flavour. The route uses the 1974 one-ways (west on 37th, back down Ninth or Seventh).",
+  "design": "Introduces Nick through crisis and money (spending is a verb: the ice costs $300). It ends with the first meeting: Teddy at the vault door in his collector's coat, and Nick in a dinner jacket, sleeves rolled, wet to the elbows. Neither knows the other is tied to the Corwin until the last line. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "night",
+  "essential": [],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

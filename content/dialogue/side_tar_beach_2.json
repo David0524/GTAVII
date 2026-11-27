@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_tar_beach_2",
+  "context": "Returning it.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.hotel_bar_regular",
+      "emotion": "delighted",
+      "text": "My radio! Here, cold soda. You want the ballgame? Of course you want the ballgame."
+    }
+  ]
+}

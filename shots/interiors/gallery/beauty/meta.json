@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "beauty #0  b5755 22 WEST 23 STREET  1854 use 5 style 2  4.4x13.0 m  tenderloin  West 23rd Street\nbuild 30 ms (main thread, medium)  verts 5584 tris 3854 cells 2 slots 6 markers 4 colliders 36  [webgl2]",
+  "stats": {
+   "verts": 5584,
+   "tris": 3854,
+   "genMs": 4,
+   "bakeMs": 25.6,
+   "cells": 2
+  },
+  "ms": 29.700000000186265,
+  "slots": 6,
+  "markers": 4,
+  "colliders": 36,
+  "building": 5755,
+  "unit": "b5755u1"
+ }
+]

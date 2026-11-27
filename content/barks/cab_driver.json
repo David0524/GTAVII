@@ -1,0 +1,162 @@
+{
+  "id": "barks.cab_driver",
+  "core": true,
+  "note": "Yellow-cab drivers (ambient traffic). Horns, collisions, routing advice.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "easy",
+      "text": "Where to, chief?"
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Move it! Light's been green since Tuesday!"
+    },
+    {
+      "context": "horn",
+      "emotion": "angry",
+      "text": "You park like you're in Ohio!"
+    },
+    {
+      "context": "horn",
+      "emotion": "impatient",
+      "text": "Come on, come on, come on!"
+    },
+    {
+      "context": "horn",
+      "emotion": "wry",
+      "text": "Honk once for hello, twice for move your car."
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "Hey! You hit my cab! That's my living!"
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Fender bender. Great. Insurance company's gonna laugh."
+    },
+    {
+      "context": "collision",
+      "emotion": "wry",
+      "text": "Nice! Now we both got a dent. Matching."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Wrong way! Sixth goes UP!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Seventh comes DOWN, genius! Down!"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "annoyed",
+      "text": "Signal! Ever heard of a signal?"
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "wry",
+      "text": "Nice driving. Get a license with that?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Running? Get in, I'll run you there for a buck."
+    },
+    {
+      "context": "idle",
+      "emotion": "easy",
+      "text": "Medallion costs more than a house in Queens."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "Twelve-hour shift. Lease is due. Gas is up."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Fare to Kennedy? I'd rather drive to Ohio."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Cops pulled me over twice today. Twice! For being yellow."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Gas went up again. Everything goes up but the meter."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Nobody tips. Everybody's broke. City's broke."
+    },
+    {
+      "context": "rain",
+      "emotion": "busy",
+      "text": "Rain! Everybody wants a cab. Now I'm popular."
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "In the rain, I'm the most handsome man in Manhattan."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "No air-conditioning. Window down. Exhaust in. Lovely."
+    },
+    {
+      "context": "brownout",
+      "emotion": "alert",
+      "text": "Signals are out! Four-way stop, everybody! Four-way!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "wry",
+      "text": "Dark avenue. Drive slow. Drive scared."
+    },
+    {
+      "context": "night",
+      "emotion": "easy",
+      "text": "Night shift. Drunks, nurses, and philosophers."
+    },
+    {
+      "context": "horn",
+      "emotion": "angry",
+      "text": "Double-parked truck! Every block a double-parked truck!"
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "You blind? This is a cab! Yellow! Big!"
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Broadway does what it wants. So do I."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "annoyed",
+      "text": "Twenty-Third's two-way, pal. Stay on your side."
+    },
+    {
+      "context": "idle",
+      "emotion": "easy",
+      "text": "Penn Station line's forty cabs deep. I'll wait. Always wait."
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Wipers broke. I'm driving by memory."
+    }
+  ]
+}

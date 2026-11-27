@@ -1,0 +1,25 @@
+{
+  "id": "dlg.amb_grate_herald",
+  "context": "Herald Square subway grate. Two voices rise with the warm air.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.evening_commuter",
+      "emotion": "weary",
+      "text": "Twenty minutes in the tunnel. Lights out. Somebody sang."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.evening_commuter",
+      "emotion": "wry",
+      "text": "Was he good?"
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.evening_commuter",
+      "emotion": "weary",
+      "text": "No. But it helped."
+    }
+  ]
+}

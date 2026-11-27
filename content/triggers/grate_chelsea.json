@@ -1,0 +1,28 @@
+{
+  "id": "trigger.grate_chelsea",
+  "volume": {
+    "at": "W 23rd St & 7th Ave",
+    "radius": 10
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "07:00",
+      "02:00"
+    ],
+    "weather": [
+      "any"
+    ]
+  },
+  "once": false,
+  "cooldownMin": 240,
+  "do": [
+    {
+      "type": "overhear",
+      "script": "dlg.amb_grate_chelsea",
+      "at": "W 23rd St & 7th Ave",
+      "radius": 10,
+      "falloff": "soft"
+    }
+  ]
+}

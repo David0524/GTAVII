@@ -1,0 +1,30 @@
+{
+  "id": "dlg.act_canvass_h32",
+  "context": "Tenant canvass at the hotel on 32nd (Act 3).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "earnest",
+      "text": "Tenants' petition. The march is the twenty-third. Will you sign?"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.sro_resident",
+      "emotion": "wary",
+      "text": "Corwin? Never heard. Same owner as us? …Give me the pen."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.sro_resident",
+      "emotion": "tired",
+      "text": "They emptied six floors here already. Six. Who's left to sign?"
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Thank you. Bring a chair on the twenty-third."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "dlg.m12_delphine_calloway",
+  "context": "M12 o6. Fifth Ave & W 36th. Delphine knocks on the window of Calloway's parked sedan.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "You bought a man lunch. I'd like to know what's on his bill."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "And you are the woman two stools down with a camera in her bag."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Rule eight: if you see me, I've already seen you."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.ruth_calloway",
+      "emotion": "interested",
+      "text": "Brannock. Wurtz. The tax on Eighth. You've been taking pictures."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "Maybe. They're mine. Not evidence. Not yet."
+    },
+    {
+      "id": "l6",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Everybody in that district is a witness. Most just don't know it yet."
+    }
+  ]
+}

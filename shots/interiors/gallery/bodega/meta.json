@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "bodega #0  b3778 32 WEST 25 STREET  1935 use 5 style 7  4.4x15.0 m  tenderloin  West 25th Street\nbuild 61 ms (main thread, medium)  verts 15561 tris 12642 cells 2 slots 1 markers 4 colliders 24  [webgl2]",
+  "stats": {
+   "verts": 15561,
+   "tris": 12642,
+   "genMs": 8.6,
+   "bakeMs": 52.7,
+   "cells": 2
+  },
+  "ms": 61.39999999990687,
+  "slots": 1,
+  "markers": 4,
+  "colliders": 24,
+  "building": 3778,
+  "unit": "b3778u0"
+ }
+]

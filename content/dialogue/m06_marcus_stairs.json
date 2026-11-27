@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m06_marcus_stairs",
+  "context": "M6 o7. The Arden's service corridor. Marcus opens a grey door.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "Miss Moore. A minute. I want to show you something you won't need."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "Service stairs. Basement to roof. Door on Thirty-Ninth. Door to Rita's bar."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "Nobody uses them but me. Back stairs are always open for you."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Marcus, are you courting me or protecting me?"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.marcus_teague",
+      "emotion": "formal",
+      "text": "Carried luggage forty years. I know what's heavy and what's money. Good night."
+    }
+  ]
+}

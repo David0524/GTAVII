@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_practice_chair_1",
+  "context": "Moss Barbers after eight (Delphine).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ezekiel_barber",
+      "emotion": "kind",
+      "text": "Chair's yours after eight. Don't cut anybody I like."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.tina_mercado",
+      "emotion": "excited",
+      "text": "Del! A real chair! With a pump! Sit. Trust me. Don't look."
+    }
+  ]
+}

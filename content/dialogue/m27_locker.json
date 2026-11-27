@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m27_locker",
+  "context": "M27 o7. (Delphine.) Penn Station coin lockers, 8th Ave side. Locker 418. A fat manila folder.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Photographs. Arrest reports. Dates. Every envelope Wurtz ever took, he wrote down."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Insurance against Lisle. Now it's mine. Rule fifteen: own the other man's insurance."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.claudette_bijou",
+      "emotion": "radio",
+      "text": "(Payphone) Delphine. The paper's man drinks at the Pennsylvania bar. With Lisle. Now."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "decisive",
+      "text": "Then I need one more picture tonight."
+    }
+  ]
+}

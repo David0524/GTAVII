@@ -1,0 +1,85 @@
+{
+  "items": [
+    {
+      "id": "item.coffee",
+      "name": "Coffee, to go",
+      "price": 0.2,
+      "effect": "small stamina"
+    },
+    {
+      "id": "item.diner_meal",
+      "name": "Blue-plate special",
+      "price": 1.75,
+      "effect": "health"
+    },
+    {
+      "id": "item.pie",
+      "name": "Pie (Royal Cafeteria)",
+      "price": 0.3,
+      "effect": "small health"
+    },
+    {
+      "id": "item.first_aid",
+      "name": "First-aid kit (drugstore)",
+      "price": 3,
+      "effect": "health, stops bleeding"
+    },
+    {
+      "id": "item.aspirin",
+      "name": "Aspirin tin",
+      "price": 0.79,
+      "effect": "steadies aim briefly"
+    },
+    {
+      "id": "item.cigarettes",
+      "name": "Pack of cigarettes (invented brand: Harbor Lights)",
+      "price": 0.55,
+      "effect": "none (flavour; NPC barter)"
+    },
+    {
+      "id": "item.beer",
+      "name": "Beer, bar",
+      "price": 0.5,
+      "effect": "flavour; slight sway"
+    },
+    {
+      "id": "item.whiskey",
+      "name": "Whiskey, shot",
+      "price": 1.0,
+      "effect": "flavour; sway"
+    },
+    {
+      "id": "item.ice",
+      "name": "Ice block (5 lb)",
+      "price": 0.4,
+      "effect": "heat relief; brownout activity"
+    },
+    {
+      "id": "item.candles",
+      "name": "Candles (box)",
+      "price": 0.6
+    },
+    {
+      "id": "item.subway_token",
+      "name": "Subway token",
+      "price": 0.35
+    },
+    {
+      "id": "item.newspaper",
+      "name": "Newspaper",
+      "price": 0.15,
+      "effect": "reveals map tips (discovery)"
+    },
+    {
+      "id": "item.film_pack",
+      "name": "Instant-camera film pack",
+      "price": 4.5,
+      "effect": "10 photos (Delphine)"
+    },
+    {
+      "id": "item.dime",
+      "name": "Dime (payphone)",
+      "price": 0.1
+    }
+  ]
+}

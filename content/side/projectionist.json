@@ -1,0 +1,60 @@
+{
+  "id": "mission.side_projectionist",
+  "kind": "side",
+  "title": "The Projectionist's Reels",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The projectionist's lost reels",
+      "script": "dlg.side_projectionist_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "The first cinema, W 42nd & 8th",
+      "to": "W 42nd St & 8th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Check the alley, W 41st & 9th",
+      "to": "W 41st St & 9th Ave",
+      "radius": 20
+    },
+    {
+      "id": "o4",
+      "type": "deliver",
+      "text": "Return the first reel",
+      "to": "W 42nd St & 8th Ave",
+      "item": "item.film_reel",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o3"
+  ],
+  "rewards": {
+    "text": "A screening cutscene; the film's poster for a lead's home"
+  },
+  "where": "Cinemas, pawnshops and alleys on the Deuce",
+  "systems": [
+    "interiors",
+    "the Deuce",
+    "cinema"
+  ],
+  "mobile": "Reels glint; marquees hint.",
+  "rank": 40,
+  "slice": false
+}

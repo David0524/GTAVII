@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_skip_board_2",
+  "context": "Asking the skip's regulars.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.hotel_bar_regular",
+      "emotion": "cagey",
+      "text": "Vinnie? Never heard of him. He plays Tuesdays at the Corner Pocket. Never heard of him."
+    }
+  ]
+}

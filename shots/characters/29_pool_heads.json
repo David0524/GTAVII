@@ -1,0 +1,344 @@
+{
+  "backend": "webgl2",
+  "scene": "rocketbox",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "heads": [
+    {
+      "head": "Male_Adult_02",
+      "tris": 8911,
+      "draws": 2
+    },
+    {
+      "head": "Female_Adult_01",
+      "tris": 10038,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_12",
+      "tris": 9773,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_04",
+      "tris": 10076,
+      "draws": 2
+    },
+    {
+      "head": "Male_Adult_11",
+      "tris": 9386,
+      "draws": 2
+    },
+    {
+      "head": "Female_Party_01",
+      "tris": 10930,
+      "draws": 2
+    },
+    {
+      "head": "Female_Adult_05",
+      "tris": 10251,
+      "draws": 2
+    },
+    {
+      "head": "Female_Adult_13",
+      "tris": 8383,
+      "draws": 2
+    }
+  ],
+  "people": [
+    {
+      "seed": 2092652658,
+      "sex": 1,
+      "age": 43,
+      "hair": "buzz",
+      "facialHair": "sideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "oxford",
+      "hat": null,
+      "props": [],
+      "tris": 8911,
+      "draws": 2,
+      "buildMs": 137.1
+    },
+    {
+      "seed": 3193206706,
+      "sex": 0,
+      "age": 32,
+      "hair": "longStraight",
+      "facialHair": "none",
+      "top": "turtleneck",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "sandal",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 10038,
+      "draws": 2,
+      "buildMs": 98.9
+    },
+    {
+      "seed": 657641660,
+      "sex": 1,
+      "age": 29,
+      "hair": "afroShort",
+      "facialHair": "none",
+      "top": "dressShirt",
+      "bottom": "jeans",
+      "outer": "suitJacket",
+      "shoes": "sneaker",
+      "hat": null,
+      "props": [
+        "briefcase"
+      ],
+      "tris": 9773,
+      "draws": 2,
+      "buildMs": 86.9
+    },
+    {
+      "seed": 1088469578,
+      "sex": 1,
+      "age": 51,
+      "hair": "afroShort",
+      "facialHair": "moustache",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "loafer",
+      "hat": null,
+      "props": [],
+      "tris": 10076,
+      "draws": 2,
+      "buildMs": 63.5
+    },
+    {
+      "seed": 1084730023,
+      "sex": 1,
+      "age": 40,
+      "hair": "pompadour",
+      "facialHair": "moustacheSideburns",
+      "top": "dressShirt",
+      "bottom": "trousers",
+      "outer": "suitJacket",
+      "shoes": "boot",
+      "hat": null,
+      "props": [],
+      "tris": 9386,
+      "draws": 2,
+      "buildMs": 51
+    },
+    {
+      "seed": 1206781239,
+      "sex": 0,
+      "age": 49,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "trousers",
+      "outer": null,
+      "shoes": "boot",
+      "hat": null,
+      "props": [
+        "shoulderBag"
+      ],
+      "tris": 10930,
+      "draws": 2,
+      "buildMs": 41.5
+    },
+    {
+      "seed": 2213939181,
+      "sex": 0,
+      "age": 22,
+      "hair": "shag",
+      "facialHair": "none",
+      "top": "blouse",
+      "bottom": "skirt",
+      "outer": null,
+      "shoes": "sandal",
+      "hat": null,
+      "props": [],
+      "tris": 10251,
+      "draws": 2,
+      "buildMs": 65.7
+    },
+    {
+      "seed": 2399206016,
+      "sex": 0,
+      "age": 23,
+      "hair": "bob",
+      "facialHair": "none",
+      "top": "shell",
+      "bottom": "jeans",
+      "outer": null,
+      "shoes": "pump",
+      "hat": null,
+      "props": [],
+      "tris": 8383,
+      "draws": 2,
+      "buildMs": 41.5
+    }
+  ],
+  "updateMs": [
+    0.2,
+    0,
+    0.1,
+    0,
+    0.1,
+    0,
+    0,
+    0.1
+  ],
+  "toneProbes": [
+    {
+      "hero": null,
+      "seed": 2092652658,
+      "rb": "Male_Adult_02",
+      "tone": "#ca9e80",
+      "cheek": [
+        0.1003,
+        0.3221
+      ],
+      "neck": [
+        0.1025,
+        0.3355
+      ],
+      "hand": [
+        0.0697,
+        0.5117
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 3193206706,
+      "rb": "Female_Adult_01",
+      "tone": "#b88f6c",
+      "cheek": [
+        0.2149,
+        0.3821
+      ],
+      "neck": [
+        0.2171,
+        0.3965
+      ],
+      "hand": [
+        0.1873,
+        0.5435
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 657641660,
+      "rb": "Male_Adult_12",
+      "tone": "#7c5035",
+      "cheek": [
+        0.331,
+        0.3052
+      ],
+      "neck": [
+        0.3317,
+        0.3215
+      ],
+      "hand": [
+        0.2984,
+        0.5113
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 1088469578,
+      "rb": "Male_Adult_04",
+      "tone": "#86573a",
+      "cheek": [
+        0.4462,
+        0.3273
+      ],
+      "neck": [
+        0.4465,
+        0.3413
+      ],
+      "hand": [
+        0.4137,
+        0.5162
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 1084730023,
+      "rb": "Male_Adult_11",
+      "tone": "#c49677",
+      "cheek": [
+        0.5634,
+        0.3352
+      ],
+      "neck": [
+        0.562,
+        0.3485
+      ],
+      "hand": [
+        0.5246,
+        0.5188
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 1206781239,
+      "rb": "Female_Party_01",
+      "tone": "#c29374",
+      "cheek": [
+        0.6783,
+        0.3464
+      ],
+      "neck": [
+        0.6764,
+        0.3636
+      ],
+      "hand": [
+        0.636,
+        0.5234
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 2213939181,
+      "rb": "Female_Adult_05",
+      "tone": "#8e6647",
+      "cheek": [
+        0.7946,
+        0.3772
+      ],
+      "neck": [
+        0.7917,
+        0.3889
+      ],
+      "hand": [
+        0.7651,
+        0.5387
+      ]
+    },
+    {
+      "hero": null,
+      "seed": 2399206016,
+      "rb": "Female_Adult_13",
+      "tone": "#b38b68",
+      "cheek": [
+        0.9095,
+        0.3315
+      ],
+      "neck": [
+        0.9056,
+        0.3474
+      ],
+      "hand": [
+        0.8721,
+        0.5138
+      ]
+    }
+  ],
+  "renderMsSoftware": [
+    4.400000000023283,
+    2.7000000000116415,
+    2.5
+  ]
+}

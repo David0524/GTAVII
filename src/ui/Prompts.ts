@@ -27,13 +27,13 @@ const PS_SHAPES: Record<string, string> = {
 
 export const PROMPT_CSS = `
 .t74-key { display:inline-flex; align-items:center; justify-content:center; min-width:1.7em; height:1.7em; padding:0 .4em;
-  border:1.5px solid currentColor; border-radius:.3em; font:700 .72em/1 Archivo, ui-sans-serif, sans-serif; letter-spacing:.04em;
+  border:1.5px solid currentColor; border-radius:.3em; font:700 .72em/1 var(--f-ui); letter-spacing:.04em;
   vertical-align:middle; box-sizing:border-box; opacity:.95 }
 .t74-face { display:inline-flex; width:1.75em; height:1.75em; border-radius:50%; background:#111c; border:1.5px solid #ffffff55;
-  align-items:center; justify-content:center; vertical-align:middle; font:800 .8em/1 Archivo, sans-serif }
+  align-items:center; justify-content:center; vertical-align:middle; font:700 .8em/1 var(--f-ui) }
 .t74-face svg { width:100%; height:100% }
 .t74-pill { display:inline-flex; align-items:center; justify-content:center; height:1.6em; padding:0 .5em; border-radius:.8em;
-  background:#111c; border:1.5px solid #ffffff55; font:700 .68em/1 Archivo, sans-serif; letter-spacing:.05em; vertical-align:middle }
+  background:#111c; border:1.5px solid #ffffff55; font:700 .68em/1 var(--f-ui); letter-spacing:.05em; vertical-align:middle }
 `;
 
 export function glyph(action: ButtonAction, style: Style): string {

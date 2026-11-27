@@ -1,0 +1,167 @@
+{
+  "id": "barks.strip",
+  "core": true,
+  "note": "Women working the Eighth Ave strip and hotel bars. Content rule: barks are about weather, cops, money, feet, friends. Nothing sexual.",
+  "lines": [
+    {
+      "context": "greet",
+      "emotion": "dry",
+      "text": "Evening, sugar. You lost or just walking slow?"
+    },
+    {
+      "context": "greet",
+      "emotion": "friendly",
+      "text": "Hey, Del's friend. You look tired. Everybody looks tired."
+    },
+    {
+      "context": "greet",
+      "emotion": "wry",
+      "text": "You a cop? You walk like a cop. Relax your shoulders."
+    },
+    {
+      "context": "idle",
+      "emotion": "weary",
+      "text": "My feet hurt in two languages."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Rent's due. Tax is due. Everything's due but me."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Brannock's car went by twice. Twice means he's hungry."
+    },
+    {
+      "context": "idle",
+      "emotion": "warm",
+      "text": "Tina says she's doing hair by Christmas. I'd let her do mine."
+    },
+    {
+      "context": "idle",
+      "emotion": "dry",
+      "text": "Saving up for a sofa. A real one. With legs."
+    },
+    {
+      "context": "complain",
+      "emotion": "angry",
+      "text": "Fifty a week to stand on a sidewalk the city owns."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Cops on Monday, Lonnie on Tuesday. Who's Wednesday?"
+    },
+    {
+      "context": "complain",
+      "emotion": "annoyed",
+      "text": "Somebody stole my good umbrella. In July. Who does that?"
+    },
+    {
+      "context": "rain",
+      "emotion": "annoyed",
+      "text": "Rain. There goes the hair. There goes the night."
+    },
+    {
+      "context": "rain",
+      "emotion": "wry",
+      "text": "Wet night, slow night. Coffee at the Royal, anybody?"
+    },
+    {
+      "context": "rain",
+      "emotion": "dry",
+      "text": "Rain's good for one thing. Cops stay in the car."
+    },
+    {
+      "context": "heat",
+      "emotion": "tired",
+      "text": "Hot enough to fry an egg on the hood of a squad car."
+    },
+    {
+      "context": "heat",
+      "emotion": "wry",
+      "text": "Hundred degrees and they want us in nylons."
+    },
+    {
+      "context": "horn",
+      "emotion": "annoyed",
+      "text": "Keep honking, mister. I'm deaf in that ear anyway."
+    },
+    {
+      "context": "horn",
+      "emotion": "dry",
+      "text": "Horn don't make you handsome."
+    },
+    {
+      "context": "collision",
+      "emotion": "angry",
+      "text": "Watch the shoes! These cost more than your car."
+    },
+    {
+      "context": "collision",
+      "emotion": "annoyed",
+      "text": "Excuse you."
+    },
+    {
+      "context": "player_running",
+      "emotion": "alarmed",
+      "text": "Who's chasing you? Should I be running too?"
+    },
+    {
+      "context": "player_running",
+      "emotion": "wry",
+      "text": "Run, baby, run. Nobody runs on Eighth for good news."
+    },
+    {
+      "context": "player_vehicle",
+      "emotion": "angry",
+      "text": "Get off the curb, you maniac!"
+    },
+    {
+      "context": "brownout",
+      "emotion": "worried",
+      "text": "Lights out. Everybody stay where Marcus can see you."
+    },
+    {
+      "context": "brownout",
+      "emotion": "dry",
+      "text": "Dark street, dark business. Go home, girls."
+    },
+    {
+      "context": "night",
+      "emotion": "tired",
+      "text": "Four a.m. Pie at the Royal. Best part of the night."
+    },
+    {
+      "context": "night",
+      "emotion": "warm",
+      "text": "Walk me to the bus? No? Okay. Next time."
+    },
+    {
+      "context": "idle",
+      "emotion": "proud",
+      "text": "I got a kid in Catholic school. Every dollar, Catholic school."
+    },
+    {
+      "context": "idle",
+      "emotion": "low",
+      "text": "Club meets Sunday. Bring your five. Bring your sister."
+    },
+    {
+      "context": "idle",
+      "emotion": "wry",
+      "text": "Rule number one, says Del: count everything. Rule two: count it again."
+    },
+    {
+      "context": "complain",
+      "emotion": "weary",
+      "text": "Lonnie says he's protection. From what? From Lonnie?"
+    },
+    {
+      "context": "greet",
+      "emotion": "warm",
+      "text": "Morning, Marcus! Yes, I know it's morning. Barely."
+    }
+  ]
+}

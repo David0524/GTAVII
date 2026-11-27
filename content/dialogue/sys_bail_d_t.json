@@ -1,0 +1,28 @@
+{
+  "id": "dlg.sys_bail_d_t",
+  "context": "Bail-out: char.delphine_moore bails out char.teddy_arce at a precinct desk (CORE_SYSTEMS arrest flow). Remembered: relationship +1 both ways.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "dry",
+      "text": "Officer Arce, back behind bars. The wrong side this time."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.teddy_arce",
+      "emotion": "tired",
+      "text": "Don't. Just sign."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "warm",
+      "text": "Signed. Rule six: nobody gives money back. Remember?",
+      "setRelationships": {
+        "char.delphine_moore/char.teddy_arce": 1,
+        "char.teddy_arce/char.delphine_moore": 1
+      }
+    }
+  ]
+}

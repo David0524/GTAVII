@@ -1,0 +1,184 @@
+{
+  "id": "mission.the_march",
+  "title": "The March",
+  "number": 28,
+  "act": 3,
+  "chapter": 9,
+  "playAs": "char.teddy_arce",
+  "date": "1974-08-23",
+  "durationMin": 18,
+  "pillars": [
+    "P5",
+    "P3",
+    "P2"
+  ],
+  "giver": "char.odessa_pruitt",
+  "requires": {
+    "flags": [],
+    "notFlags": [],
+    "act": 3,
+    "timeWindow": [
+      "10:00",
+      "13:00"
+    ],
+    "weather": [
+      "clear"
+    ],
+    "dateRange": [
+      "1974-08-23",
+      "1974-08-23"
+    ]
+  },
+  "start": {
+    "type": "auto",
+    "at": "loc.corwin_hotel",
+    "note": "The Herald Square route is closed 10:00–13:00 (N3 §7)."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "Odessa's in her white hat",
+      "script": "dlg.m28_lobby"
+    },
+    {
+      "id": "o2",
+      "type": "escort",
+      "text": "Walk with Odessa up Broadway",
+      "who": "char.odessa_pruitt",
+      "pace": "match",
+      "waitRadius": 10,
+      "route": [
+        "loc.corwin_hotel",
+        "Broadway & W 32nd St",
+        "Broadway & W 34th St"
+      ],
+      "dialogue": [
+        "dlg.m28_walk_a",
+        "dlg.m28_walk_b"
+      ]
+    },
+    {
+      "id": "o2b",
+      "type": "combat",
+      "mode": "defend",
+      "targets": [
+        {
+          "archetype": "npc.prentiss_mover",
+          "count": 4
+        }
+      ],
+      "nonLethalAllowed": true,
+      "text": "Prentiss's men try to break the march",
+      "protect": "char.odessa_pruitt",
+      "note": "Crowd fight on Broadway; marchers help. Odessa is essential. Cops among the targets are ordinary killable police (heat only)."
+    },
+    {
+      "id": "o3",
+      "type": "switch_to",
+      "text": "(Delphine)",
+      "character": "char.delphine_moore",
+      "cut": "transition"
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "The operators join at 34th & Seventh",
+      "script": "dlg.m28_operators",
+      "requireNoHeat": true
+    },
+    {
+      "id": "o5",
+      "type": "switch_to",
+      "text": "(Nick)",
+      "character": "char.nick_varelas",
+      "cut": "transition"
+    },
+    {
+      "id": "o6",
+      "type": "goto",
+      "text": "Herald Square. Walk to Odessa.",
+      "to": "W 34th St & Broadway",
+      "radius": 15
+    },
+    {
+      "id": "o7",
+      "type": "dialogue",
+      "text": "The owner meets the tenant",
+      "script": "dlg.m28_owner"
+    }
+  ],
+  "fail": [
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o2",
+    "o2b",
+    "o3",
+    "o5",
+    "o7"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [],
+    "unlock": [
+      "mission.the_ledger"
+    ],
+    "relationships": {
+      "char.nick_varelas/char.odessa_pruitt": 1,
+      "char.teddy_arce/char.carmen_arce": 1
+    }
+  },
+  "npcs": [
+    "char.odessa_pruitt",
+    "char.carmen_arce",
+    "char.mei_lin_chow",
+    "char.anna_moretti",
+    "char.jung_ho_baek",
+    "char.nora_finch",
+    "char.ruth_calloway",
+    "char.dwayne_little",
+    "char.yiannis_doukas",
+    "char.sam_feld"
+  ],
+  "archetypes": [
+    "npc.marcher",
+    "npc.shopper",
+    "npc.beat_cop"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.corwin_hotel",
+    "Broadway & W 34th St",
+    "W 34th St & 7th Ave"
+  ],
+  "mobile": "Walking pace with the escort matching the player (Odessa uses a cane, so it's slow on purpose). The crowd is dense but passable. No timers. One untimed choice for Nick at the end.",
+  "design": "P5 turned around: the city's working people show up. Every community's sympathetic figure marches: Carmen and Mei-lin, Moretti with flowers, the Baeks, Dwayne. Nick's walk to Odessa builds the non-transactional bond (N3 §3) that gates the council resolution. COMBAT (26 Nov): see COMBAT table in build_act23_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.carmen_arce",
+      "reason": "died"
+    },
+    {
+      "character": "char.mei_lin_chow",
+      "reason": "died"
+    },
+    {
+      "character": "char.odessa_pruitt",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

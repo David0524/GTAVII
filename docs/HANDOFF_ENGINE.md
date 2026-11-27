@@ -300,3 +300,32 @@ randomised attempts, plus a frame strip):**
      - Hero exterior: the 42nd St facade, viaduct and ramps.
      - The engine owns the interior shell (Main Concourse, ramps, shuttle and Lexington connections),
        its lighting volume and streaming; interiors own the content.
+
+## Integration sprint status (2026-11-27)
+**Merged and verified on the engine branch.** Each merge ran typecheck, every stream's tests, its test
+scene with 0 console errors, load and viewport where relevant, and a note to oversight.
+- **vehicles** 648b139: registry stopgap for the tow and sweeper classes.
+- **characters** 808010e: 17 MB of assets, which need a size pass before they're on by default on phones.
+- **UI** 24a3439: UiHost/bootUi own title, pause and HUD. ThirdPersonCamera is wired (B look-behind,
+  C or D-pad Right shoulder swap). The load test now skips the M1 intro with a held Enter.
+- **gameplay** 2bb818f: `src/shared/rapier.ts` is the single Rapier import.
+- **interiors** eb492d6: all index building ids match the current chunks.
+- **audio** 122a189: the GPL build tools are verified absent from the bundle.
+
+**Outstanding: sim.**
+- Its verified candidate 0447d43 fails `test:sim` on the current street data (vehOverlap 5: an
+  emergency vehicle changing lanes into a stopped car at −43.9, −148). Its head 50c7e24 is WIP.
+- I asked the sim chat to merge the engine head, run `data:lanes` and `test:sim`, and fix it.
+- Merge recipe: merge their fixed head, keep both `package.json` script blocks, run
+  `git mv ENGINE_REQUESTS.md docs/requests/sim.md`, then `npm run data:lanes` and `npm run test:sim`,
+  plus npm test, the load and viewport tests and a `?sim=1` smoke test.
+
+**After the sim lands, game-loop wiring (one block on main.ts):**
+- sim update and feeds (clock, terrain, external actors with siren);
+- vehicles traffic renderer from `sim.vehicles`;
+- characters: the player body from `player.loco()` and the crowd from `sim.peds`;
+- gameplay: bindPlayer, bindWorld (RapierWorldQuery), bindSim, bindVehicles, the save section,
+  talkables and TouchLayout;
+- audio: AudioSystem and world feeds;
+- signals synced to `sim.signalStates()`;
+- then the touch-only combined run and integrated shots, followed by deploy.

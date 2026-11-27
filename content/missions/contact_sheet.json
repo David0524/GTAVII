@@ -1,0 +1,173 @@
+{
+  "id": "mission.contact_sheet",
+  "title": "Contact Sheet",
+  "number": 5,
+  "act": 1,
+  "chapter": 2,
+  "playAs": "char.teddy_arce",
+  "date": "1974-06-28",
+  "durationMin": 15,
+  "pillars": [
+    "P1",
+    "P2"
+  ],
+  "giver": "char.bernard_ostrow",
+  "requires": {
+    "flags": [
+      "flag.corwin_sold"
+    ],
+    "notFlags": [],
+    "act": 1,
+    "timeWindow": [
+      "12:20",
+      "14:30"
+    ],
+    "weather": [
+      "clear",
+      "overcast"
+    ],
+    "dateRange": [
+      "1974-06-27",
+      "1974-07-04"
+    ]
+  },
+  "start": {
+    "type": "talk",
+    "who": "char.bernard_ostrow",
+    "at": "loc.corwin_hotel",
+    "note": "Bernard: 'Lisle eats at twelve-forty. Men like that always eat at twelve-forty.' He lends Teddy his late brother's camera."
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "to": "5th Ave & W 36th St",
+      "radius": 25,
+      "text": "Get to Fifth Ave & 36th St"
+    },
+    {
+      "id": "o2",
+      "type": "wait",
+      "until": "12:40",
+      "text": "Watch Lisle's door, Fifth & 36th"
+    },
+    {
+      "id": "o3",
+      "type": "follow",
+      "target": "char.howard_lisle",
+      "keepWithinM": 60,
+      "text": "Tail Lisle to lunch"
+    },
+    {
+      "id": "o4",
+      "type": "photo",
+      "subject": "char.howard_lisle",
+      "minScreenFraction": 0.08,
+      "text": "Photograph Lisle at the counter"
+    },
+    {
+      "id": "o5",
+      "type": "dialogue",
+      "script": "dlg.m05_recognition",
+      "text": "Remember where you've seen him"
+    },
+    {
+      "id": "o6",
+      "type": "follow",
+      "target": "char.howard_lisle",
+      "keepWithinM": 70,
+      "text": "Tail Lisle to the Hotel Pennsylvanian"
+    },
+    {
+      "id": "o7",
+      "type": "photo",
+      "subject": "char.carl_mayhew",
+      "with": "char.howard_lisle",
+      "minScreenFraction": 0.06,
+      "text": "Photograph who he's meeting"
+    },
+    {
+      "id": "o8",
+      "type": "evade",
+      "from": [
+        "npc.lisle_driver"
+      ],
+      "breakDistanceM": 80,
+      "safeZones": [
+        "loc.hotel_pennsylvania",
+        "loc.herald_sq_store"
+      ],
+      "text": "Lisle's driver saw the camera. Lose him.",
+      "fallback": "goto with timeLimitSec 120"
+    }
+  ],
+  "fail": [
+    {
+      "type": "target_lost"
+    },
+    {
+      "type": "spotted",
+      "by": "char.howard_lisle",
+      "withinM": 6,
+      "note": "Proposed fail type (ENGINE_REQUESTS 8). Fallback: target_lost only."
+    },
+    {
+      "type": "player_down",
+      "note": "Wasted: retry from checkpoint (hospital flow, Gameplay)."
+    },
+    {
+      "type": "busted",
+      "note": "Arrested: retry from checkpoint (booking flow, Gameplay)."
+    },
+    {
+      "type": "essential_died",
+      "note": "Shown as '<Name> died'. Retry from checkpoint; offer a skip after repeated failures."
+    }
+  ],
+  "checkpoints": [
+    "o3",
+    "o5",
+    "o6",
+    "o8"
+  ],
+  "rewards": {
+    "money": 0,
+    "setFlags": [
+      "flag.saw_lisle_mayhew"
+    ],
+    "unlock": [
+      "mission.the_club"
+    ],
+    "items": [
+      "item.photo_lisle_counter",
+      "item.photo_lisle_mayhew"
+    ]
+  },
+  "npcs": [
+    "char.howard_lisle",
+    "char.marjorie_kell",
+    "char.carl_mayhew",
+    "char.ruth_calloway",
+    "char.bernard_ostrow"
+  ],
+  "archetypes": [
+    "npc.office_lunch_crowd",
+    "npc.hotel_bellhop"
+  ],
+  "vehicles": [],
+  "locations": [
+    "loc.lisle_office",
+    "loc.lisle_luncheonette",
+    "loc.hotel_pennsylvania"
+  ],
+  "mobile": "The photo objectives auto-frame when the subject is in view and the shutter button is held, so precise aim isn't needed. The size threshold is generous. The tail follows a fixed, learnable route (Lisle walks W 36th → 6th Ave → W 33rd → 7th Ave), so a player who knows it can wait ahead. Lunch-crowd density gives cover.",
+  "design": "Lisle's routine (cast schedule 12:40) becomes gameplay. Calloway sits in a parked car across Fifth Ave and Teddy notices her (one line), seeding M12. The photo with Mayhew sets up M7's choice. COMBAT (26 Nov): see COMBAT table in build_act1_missions.py.",
+  "timeOfDay": "day",
+  "essential": [
+    {
+      "character": "char.howard_lisle",
+      "reason": "died"
+    }
+  ],
+  "conventions": "FEATURE_AUDIT 'Mission conventions': cop kills feed heat only; 'Lose the police' gates on requireNoHeat objectives; fail only for standard reasons."
+}

@@ -1,4 +1,4 @@
-import RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '../shared/rapier';
 import { loadReport } from '../engine/debug/LoadReport';
 import type * as THREE from 'three/webgpu';
 import { GROUPS } from '../shared/physicsGroups';

@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "tenement #0  b828 22 WEST 25 STREET  1925 use 4 style 1  3.0x16.0 m  tenderloin  West 25th Street\nbuild 44 ms (main thread, medium)  verts 11769 tris 10450 cells 7 slots 2 markers 6 colliders 113  [webgl2]",
+  "stats": {
+   "verts": 11769,
+   "tris": 10450,
+   "genMs": 7.5,
+   "bakeMs": 36.1,
+   "cells": 7
+  },
+  "ms": 43.700000000186265,
+  "slots": 2,
+  "markers": 6,
+  "colliders": 113,
+  "building": 828,
+  "unit": "b828"
+ }
+]

@@ -1,0 +1,18 @@
+{
+  "id": "dlg.side_hydrant_war_1",
+  "context": "A hot side street near Ninth: an open hydrant, a cop, a block.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.beat_cop",
+      "emotion": "weary",
+      "text": "Hydrant's gotta close. Water pressure's down on the whole block. Fire code."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.penn_south_neighbor",
+      "emotion": "pleading",
+      "text": "It's a hundred degrees, officer. Let the kids be kids an hour."
+    }
+  ]
+}

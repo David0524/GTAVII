@@ -1,0 +1,9 @@
+{
+  "_note": "Engine draft save shape (ENGINE_RESPONSES N5 / src/player/Party.ts): money in DOLLARS (float), inventory as a list of item ids, wardrobe 'default'.",
+  "characters": {
+    "char.teddy_arce": { "money": 40.35, "inventory": ["item.service", "item.bandage", "item.bandage", "item.key_corwin"], "at": { "x": 0, "y": 0, "z": 0, "heading": 0 }, "wardrobe": "default" },
+    "char.delphine_moore": { "money": 25, "inventory": ["item.knife"], "wardrobe": "default" },
+    "char.nick_varelas": { "money": 300, "inventory": ["item.snub", "item.no_longer_exists"], "wardrobe": "outfit.nick_weekend" }
+  },
+  "activeCharacter": "char.teddy_arce"
+}

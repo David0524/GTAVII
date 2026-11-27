@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m09_ambush",
+  "context": "M9 o7. 8th Ave & W 35th St. Delphine, tailing, sees two men step out of a doorway at Teddy.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule five: know where your money's going. Mine's going to Thirty-First and Eighth."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Two of Lonnie's boys. In the doorway. That's not police. That's a stickup."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.lonnie_gage",
+      "emotion": "offscreen",
+      "text": "Make it look bad, fellas. Jimmy says the new man's soft."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.delphine_moore",
+      "emotion": "shouting",
+      "text": "Collector! Behind you! Run!"
+    },
+    {
+      "id": "l5",
+      "speaker": "char.teddy_arce",
+      "emotion": "startled",
+      "text": "Penn Station. Eighth Avenue doors. Go!"
+    }
+  ]
+}

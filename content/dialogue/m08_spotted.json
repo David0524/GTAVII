@@ -1,0 +1,30 @@
+{
+  "id": "dlg.m08_spotted",
+  "context": "M8 o3. 8th & W 38th. The flash goes off. Brannock turns.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "angry",
+      "text": "Hey! Hey, you with the bag! What was that?"
+    },
+    {
+      "id": "l2",
+      "speaker": "char.lonnie_gage",
+      "emotion": "alarmed",
+      "text": "That's Del! She's got a camera, Jimmy!"
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule three: when they see you, you're already gone."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.jimmy_brannock",
+      "emotion": "angry",
+      "text": "Stop right there! Police!"
+    }
+  ]
+}

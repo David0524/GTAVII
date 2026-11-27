@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m24_augie",
+  "context": "M24 o4. Carriers' garage, dispatch booth. Augie grey in the face, coughing, cigar unlit.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.augie_lomax",
+      "emotion": "gruff",
+      "text": "Varelas. You come to my garage? You never come to my garage."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.nick_varelas",
+      "emotion": "direct",
+      "text": "Lisle says you're selling the Association. To him."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.augie_lomax",
+      "emotion": "tired",
+      "text": "I'm sick, Varelas. Doctor gives me a year. Who gets my drivers? A lawyer."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.augie_lomax",
+      "emotion": "bitter",
+      "text": "Forty years I fought the old rackets off these streets. Look what I built instead."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.nick_varelas",
+      "emotion": "honest",
+      "text": "Same as me, Augie. Same as all of us."
+    }
+  ]
+}

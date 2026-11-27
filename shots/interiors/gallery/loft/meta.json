@@ -1,0 +1,19 @@
+[
+ {
+  "n": 0,
+  "label": "loft #0  b1077 12 WEST 23 STREET  1859 use 5 style 2  3.4x14.0 m  tenderloin  West 23rd Street\nbuild 50 ms (main thread, medium)  verts 10282 tris 9330 cells 7 slots 2 markers 6 colliders 79  [webgl2]",
+  "stats": {
+   "verts": 10282,
+   "tris": 9330,
+   "genMs": 4.1,
+   "bakeMs": 45.5,
+   "cells": 7
+  },
+  "ms": 49.60000000009313,
+  "slots": 2,
+  "markers": 6,
+  "colliders": 79,
+  "building": 1077,
+  "unit": "b1077"
+ }
+]

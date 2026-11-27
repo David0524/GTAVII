@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_monte_2",
+  "context": "Aftermath.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.deuce_crowd",
+      "emotion": "wry",
+      "text": "Monte's never about the cards, pal. It's about who's standing next to you."
+    }
+  ]
+}

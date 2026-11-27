@@ -1,0 +1,26 @@
+{
+  "backend": "webgl2",
+  "scene": "move",
+  "note": "Headless timings are SwiftShader software rendering (no GPU): CPU-side numbers are meaningful, frame times are not.",
+  "events": [
+    {
+      "type": "start",
+      "t": 0.02,
+      "x": -2
+    }
+  ],
+  "state": {
+    "t": 3.05,
+    "x": 2.57,
+    "y": 0,
+    "speed": 2.88,
+    "traversal": null,
+    "done": false
+  },
+  "updateMs": 0.1,
+  "renderMsSoftware": [
+    3.900000000023283,
+    1.5,
+    1.6999999999534339
+  ]
+}

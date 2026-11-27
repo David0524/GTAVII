@@ -1,5 +1,6 @@
 import type { Input, ButtonAction } from '../input/Input';
 import { settings } from '../settings/Settings';
+import { fullscreenRoute, enterFullscreen, showInstallCard } from './touch/installCard';
 
 /**
  * Landscape touch layout (phones/tablets):
@@ -17,7 +18,9 @@ const CSS = `
   background: #e6dcc677; }
 .t74-btns { position: absolute; right: calc(12px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom));
   display: grid; grid-template-columns: repeat(2, 58px); gap: 10px; }
-.t74-btn { width: 58px; height: 58px; border-radius: 50%; border: 2px solid #e6dcc666; background: #0006; color: #efe6d0;
+.t74-touch.lefty .t74-btns { right: auto; left: calc(12px + env(safe-area-inset-left)); }
+.t74-btns { opacity: var(--tb-alpha, .8); }
+.t74-btn { width: calc(58px * var(--tb-scale, 1)); height: calc(58px * var(--tb-scale, 1)); border-radius: 50%; border: 2px solid #e6dcc666; background: #0006; color: #efe6d0;
   font: 600 12px ui-monospace, monospace; display: grid; place-items: center; letter-spacing: .05em; }
 .t74-btn.on { background: #e6dcc655; }
 .t74-fs { position: fixed; top: calc(8px + env(safe-area-inset-top)); right: calc(8px + env(safe-area-inset-right)); z-index: 6;
@@ -95,14 +98,23 @@ export class TouchControls {
     }
     this.root.appendChild(btns);
     document.body.appendChild(this.root);
+    // Settings: button size and opacity; left-handed swaps the stick and look/buttons sides.
+    const apply = () => {
+      const lh = settings.get('touchLeftHanded');
+      this.root.style.setProperty('--tb-scale', String(settings.get('touchButtonSize')));
+      this.root.style.setProperty('--tb-alpha', String(settings.get('touchOpacity')));
+      this.root.classList.toggle('lefty', lh);
+      // the stick zone (45%) moves to the right edge and the look zone (55%) to the left
+      left.style.left = lh ? '' : '0'; left.style.right = lh ? '0' : '';
+      right.style.right = lh ? '' : '0'; right.style.left = lh ? '0' : '';
+    };
+    apply(); settings.subscribe((_s, k) => { if (k === 'touchButtonSize' || k === 'touchOpacity' || k === 'touchLeftHanded') apply(); });
 
     const fs = document.createElement('button'); fs.className = 't74-fs'; fs.textContent = '⛶'; fs.title = 'Fullscreen';
-    fs.addEventListener('click', async () => {
-      try {
-        await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
-        await (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('landscape');
-      } catch { /* iOS Safari: no fullscreen/orientation lock; the rotate prompt covers it */ }
-    });
+    // fullscreen API where it exists; iPhone has none for pages, so it explains Add to Home Screen instead
+    const route = fullscreenRoute();
+    fs.addEventListener('click', () => { if (route === 'api') void enterFullscreen(); else if (route === 'install') showInstallCard('fullscreen'); });
+    if (route === 'none') fs.style.visibility = 'hidden';
     document.body.appendChild(fs);
 
     // A controller takes over: hide the on-screen controls; the next touch brings them back.

@@ -1,0 +1,30 @@
+{
+  "id": "dlg.act_canvass_corwin",
+  "context": "Tenant canvass at the Corwin (Act 3).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.teddy_arce",
+      "emotion": "earnest",
+      "text": "Tenants' petition. The march is the twenty-third. Will you sign?"
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.sro_resident",
+      "emotion": "proud",
+      "text": "Sign? I'll sign twice. Once for me, once for Walter."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.sro_resident",
+      "emotion": "worried",
+      "text": "If I sign, does Prentiss see my name? …Okay. Okay, I'll sign."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.teddy_arce",
+      "emotion": "warm",
+      "text": "Thank you. Bring a chair on the twenty-third."
+    }
+  ]
+}

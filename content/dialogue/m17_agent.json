@@ -1,0 +1,36 @@
+{
+  "id": "dlg.m17_agent",
+  "context": "M17 o2. The papered window on W 37th. A rental agent with a key ring, smiling too much.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.delphine_moore",
+      "emotion": "brisk",
+      "text": "Two chairs, a sink, a window. I can pay six months in advance. Cash."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.rental_agent",
+      "emotion": "smooth",
+      "text": "The owner prefers… established tenants. Bank references."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.delphine_moore",
+      "emotion": "cool",
+      "text": "I have twenty references. They're women. None of them have banks."
+    },
+    {
+      "id": "l4",
+      "speaker": "npc.rental_agent",
+      "emotion": "smooth",
+      "text": "Then I'm afraid it's no. Have a nice day, miss."
+    },
+    {
+      "id": "l5",
+      "speaker": "char.delphine_moore",
+      "emotion": "inner",
+      "text": "Rule ten: when the clerk says no, find the man who owns the clerk."
+    }
+  ]
+}

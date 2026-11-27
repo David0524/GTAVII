@@ -1,0 +1,12 @@
+{
+  "id": "dlg.side_four_pianos_2",
+  "context": "Paid on the landing.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.janos_tibor",
+      "emotion": "breathless",
+      "text": "Laci, the corner! …Ah. Good. Twenty-five dollars. And our phone number, for next time."
+    }
+  ]
+}

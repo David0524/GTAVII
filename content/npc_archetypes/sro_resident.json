@@ -1,0 +1,30 @@
+{
+  "id": "npc.sro_resident",
+  "behaviour": "loiterer",
+  "palette": [
+    "#708090",
+    "#F5DEB3",
+    "#556B2F"
+  ],
+  "wardrobe": "Older men in undershirts and suspenders, cardigans despite heat; women in house dresses; a few younger mothers placed by welfare.",
+  "props": [
+    "folding chair",
+    "paper bag",
+    "transistor radio"
+  ],
+  "schedule": [
+    {
+      "from": "08:00",
+      "to": "21:00",
+      "area": "SRO hotel lobbies and stoops (Broadway & Fifth, 28th–32nd; 8th Ave)",
+      "activity": "socialize"
+    }
+  ],
+  "density": {
+    "day": 0.4,
+    "night": 0.15
+  },
+  "barks": "barks.sro",
+  "scripted": false,
+  "note": ""
+}

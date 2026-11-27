@@ -1,0 +1,137 @@
+{
+  "id": "barks.sleep",
+  "core": false,
+  "note": "TIME.md: waking up (by lead), a bad night in the heat, and the SRO desk clerk renting a room. 'who' marks lead-specific lines.",
+  "lines": [
+    {
+      "context": "wake",
+      "emotion": "groggy",
+      "text": "(Teddy) Seven a.m. Somebody's radio. Somebody's always got a radio."
+    },
+    {
+      "context": "wake",
+      "emotion": "dry",
+      "text": "(Teddy) Up. Shower down the hall. Hot water's a rumour."
+    },
+    {
+      "context": "wake",
+      "emotion": "tired",
+      "text": "(Teddy) Dreamt about the car again. Thirty-Fifth Street. Coffee."
+    },
+    {
+      "context": "wake",
+      "emotion": "brisk",
+      "text": "(Delphine) Rule one before coffee: count the box. Then coffee."
+    },
+    {
+      "context": "wake",
+      "emotion": "warm",
+      "text": "(Delphine) Afternoon light through the curtain. Nobody banging on the door. A good day."
+    },
+    {
+      "context": "wake",
+      "emotion": "dry",
+      "text": "(Delphine) Feet still hurt. Feet always hurt. Up."
+    },
+    {
+      "context": "wake",
+      "emotion": "groggy",
+      "text": "(Nick) Eleni's already at the office. Eleni is always already at the office."
+    },
+    {
+      "context": "wake",
+      "emotion": "proud",
+      "text": "(Nick) Morning. Somewhere a bank is thinking about me. Let it think."
+    },
+    {
+      "context": "wake",
+      "emotion": "worried",
+      "text": "(Nick) Bills in the drawer. Close the drawer. Shave."
+    },
+    {
+      "context": "wake_heat",
+      "emotion": "miserable",
+      "text": "(Teddy) Window painted shut. Slept in a puddle. The fan just moved the hot around."
+    },
+    {
+      "context": "wake_heat",
+      "emotion": "tired",
+      "text": "(Teddy) Ninety at midnight. Ninety at six. Ninety is the new zero."
+    },
+    {
+      "context": "wake_heat",
+      "emotion": "miserable",
+      "text": "(Delphine) Too hot to sleep, too hot to think. Rule two: think anyway."
+    },
+    {
+      "context": "wake_heat",
+      "emotion": "tired",
+      "text": "(Delphine) Wet towel on the neck, all night. Like sleeping in soup."
+    },
+    {
+      "context": "wake_heat",
+      "emotion": "miserable",
+      "text": "(Nick) Even the air-conditioner gave up. Like my bank."
+    },
+    {
+      "context": "wake_heat",
+      "emotion": "dry",
+      "text": "(Nick) I slept on the balcony. Madison Avenue sounds like a war."
+    },
+    {
+      "context": "wake_brownout",
+      "emotion": "uneasy",
+      "text": "Woke up in the dark. Power came back at four. The refrigerator's crying."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "flat",
+      "text": "Room's four-fifty a night. Bath down the hall. Key back by noon."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "tired",
+      "text": "Sign the book. Any name. Everybody's Smith on Eighth Avenue."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "wry",
+      "text": "Fan's extra. Fifty cents. Window opens. Mostly."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "suspicious",
+      "text": "No visitors after eleven. That's the rule. I enforce it with my eyes closed."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "friendly",
+      "text": "Corwin's full of old men, but they're quiet. Mostly. Eleven-oh-four sings."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "flat",
+      "text": "Weekly's twenty-two. Nightly's four-fifty. You look nightly."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "weary",
+      "text": "Elevator's out. Room's on seven. Builds character."
+    },
+    {
+      "context": "rent_room",
+      "emotion": "wry",
+      "text": "Cash. In advance. I don't take checks, IOUs, or sad stories."
+    },
+    {
+      "context": "cant_sleep",
+      "emotion": "flat",
+      "text": "Can't sleep now. Sirens on the block. Somebody's looking for somebody."
+    },
+    {
+      "context": "cant_sleep",
+      "emotion": "tired",
+      "text": "Not now. Too much going on. Sleep's for people with nothing to do."
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "id": "cut.m17_two_bankers",
+  "mission": "mission.the_lease",
+  "before": "o4",
+  "time": "17:10",
+  "date": "1974-07-24",
+  "skippable": true,
+  "logline": "Midpoint. Nick's penthouse office on Madison. A fur king and a woman from Eighth Avenue discover they're both locked out of the same bank.",
+  "shots": [
+    {
+      "id": "s1",
+      "type": "wide",
+      "lensMm": 24,
+      "move": "static",
+      "framing": "A corner office: windows on Madison, a desk the size of a car, a fox stole on a dress form",
+      "blocking": "Delphine seated across the desk, ledger on her knee; Nick standing at the window",
+      "beats": [
+        "Two worlds in one frame: let the space sit"
+      ],
+      "durationSec": 5,
+      "notes": "lighting: late afternoon, gold through tall windows | film: clean; less grain than the street scenes"
+    },
+    {
+      "id": "s2",
+      "type": "medium",
+      "lensMm": 50,
+      "move": "static",
+      "framing": "Nick turns from the window",
+      "blocking": "",
+      "beats": [
+        "l1"
+      ],
+      "durationSec": 3.9,
+      "dialogue": [
+        "dlg.m17_two_bankers#l1"
+      ]
+    },
+    {
+      "id": "s3",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Delphine, ledger open",
+      "blocking": "She sets the ledger on the desk and turns it to face him",
+      "beats": [
+        "l2"
+      ],
+      "durationSec": 4,
+      "dialogue": [
+        "dlg.m17_two_bankers#l2"
+      ]
+    },
+    {
+      "id": "s4",
+      "type": "over-the-shoulder",
+      "lensMm": 50,
+      "move": "slow push",
+      "framing": "Over Delphine: Nick reading the columns, impressed despite himself",
+      "blocking": "",
+      "beats": [
+        "l3"
+      ],
+      "durationSec": 3.6,
+      "dialogue": [
+        "dlg.m17_two_bankers#l3"
+      ]
+    },
+    {
+      "id": "s5",
+      "type": "close",
+      "lensMm": 85,
+      "move": "static",
+      "framing": "Delphine",
+      "blocking": "",
+      "beats": [
+        "l4"
+      ],
+      "durationSec": 4.9,
+      "dialogue": [
+        "dlg.m17_two_bankers#l4"
+      ]
+    },
+    {
+      "id": "s6",
+      "type": "two-shot",
+      "lensMm": 40,
+      "move": "static",
+      "framing": "Both, the desk between them, for the first time level",
+      "blocking": "Nick sits down",
+      "beats": [
+        "l5: the midpoint lands"
+      ],
+      "durationSec": 5.2,
+      "dialogue": [
+        "dlg.m17_two_bankers#l5"
+      ],
+      "notes": "film: hold two beats after the line"
+    }
+  ]
+}

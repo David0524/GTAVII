@@ -1,0 +1,25 @@
+{
+  "id": "dlg.amb_m01_gates",
+  "context": "Overheard (ambient channel). Two wholesalers pulling down roll gates, Broadway & W 27th.",
+  "channel": "ambient",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "npc.wholesaler",
+      "emotion": "weary",
+      "text": "Another week like this, I'm pulling the gate for good."
+    },
+    {
+      "id": "l2",
+      "speaker": "npc.wholesaler",
+      "emotion": "wry",
+      "text": "You said that in seventy-one."
+    },
+    {
+      "id": "l3",
+      "speaker": "npc.wholesaler",
+      "emotion": "weary",
+      "text": "In seventy-one I meant it less."
+    }
+  ]
+}

@@ -136,3 +136,38 @@ interface Interiors {
 - A generator gallery of 30 interiors per type, next to period reference photos, with an honest
   critique of what reads as 1974 and what reads as a modern asset kit.
 - Streaming and portal timing at street level, plus phone numbers from the user's device.
+
+## Addendum: reference-driven interiors, from worn out to beautiful (user requirement)
+The user: *"Ensure interiors use references too. Some will be older/worn down while some will be
+beautiful."*
+- **Build an interior reference library** the way the engine built the exterior one
+  (`tools/refs/collect.ts`, `references/catalog.json`):
+  - Public-domain sources first: the **Library of Congress HABS/HAER collections** (measured
+    photos of NYC lobbies, hotels, churches, theatres, lofts), **NARA DOCUMERICA** interiors (SROs,
+    diners, workplaces, 1971–77), and the public-domain items in the NYPL Digital Collections.
+  - Commit only public-domain images, with full credits. Anything else is study-only: note
+    the source URL in the catalogue, but don't commit the file.
+  - Tag every reference by interior type, period and **condition grade**.
+- **A condition spectrum with 5 grades,** each with a reference board and a material and wear
+  recipe:
+  1. **Derelict:** shuttered, collapsing plaster, debris, boarded windows.
+  2. **Worn down:** the SRO and tenement norm. Peeling paint over earlier paint, water stains,
+     cracked linoleum, nicotine yellowing, flickering tubes, chicken-wire glass, a radiator
+     painted 20 times.
+  3. **Kept up:** clean but tired. Diners, union halls, shops.
+  4. **Well-to-do:** wood panelling, carpet, brass, newer fixtures.
+  5. **Beautiful:** marble, terrazzo, coffered ceilings, crystal, gilt, polished brass, stained
+     glass. Pre-war lobbies, hotel ballrooms, churches, a grand library reading room, an Art Deco
+     tower lobby, Nick's apartment.
+- **What sets the grade:** the building's year, use and size (from the chunk data), the block's
+  social geography (`narrative/N1_STORY_BIBLE.md`), the owner, and the **story act** (the Corwin
+  decays or is restored depending on choices; Nick's apartment loses furniture if repossessed).
+  Mix grades **within** buildings too: a gorgeous 1910 lobby with a worn-out 1974 elevator, a grand
+  ballroom with a stained carpet.
+- **Beautiful hero interiors are a priority, not an afterthought.** Within the bounds, consider:
+  the Hotel Pennsylvania ballroom (story), a grand Fifth Avenue library reading room, an Art Deco
+  tower lobby, churches in the district, the department-store floor (invented "Baxter & Lowe"),
+  and old banking halls. Use invented names where trademarks apply (narrative's registry).
+- **Done means gains:** a **side-by-side board** for each condition grade (our interior next to
+  its reference), and an honest critique of how well the worn grades read as truly lived-in and
+  the beautiful ones as truly beautiful.

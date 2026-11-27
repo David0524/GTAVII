@@ -1,0 +1,27 @@
+{
+  "id": "npc.lisle_driver",
+  "behaviour": "driver",
+  "palette": [
+    "#2F2F2F",
+    "#8B4513"
+  ],
+  "wardrobe": "Lisle's driver: dark suit, chauffeur's cap in his pocket, a weightlifter's neck.",
+  "props": [
+    "sedan keys"
+  ],
+  "schedule": [
+    {
+      "from": "00:00",
+      "to": "24:00",
+      "area": "Scripted scenes only",
+      "activity": "loiter"
+    }
+  ],
+  "density": {
+    "day": 0.0,
+    "night": 0.0
+  },
+  "barks": "barks.street_tough",
+  "scripted": true,
+  "note": "M5 escape."
+}

@@ -1,0 +1,29 @@
+{
+  "id": "npc.ice_house_worker",
+  "behaviour": "worker",
+  "palette": [
+    "#B0C4DE",
+    "#FFFFFF",
+    "#000000"
+  ],
+  "wardrobe": "Rubber apron, heavy gloves, ice tongs.",
+  "props": [
+    "ice tongs",
+    "ice block"
+  ],
+  "schedule": [
+    {
+      "from": "06:00",
+      "to": "22:00",
+      "area": "Ice house, W 37th St & 9th Ave",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.05,
+    "night": 0.05
+  },
+  "barks": "barks.truck_driver",
+  "scripted": false,
+  "note": ""
+}
