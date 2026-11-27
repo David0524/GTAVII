@@ -214,7 +214,7 @@ W("economy.json", {"_note": "Free-roam money (user: 'Make sure there's a way for
 # ------------------------------------------------------------------ homes (HOMES_AND_CARS.md)
 W("homes.json", {"_note": "Each lead's own home (user: 'The characters should all have their own home. Apartments should match the characters.'). Portrait dressing for the Interiors chat. Sleeping per TIME.md.", "homes": [
   {"lead": "char.teddy_arce", "interior": "interior.corwin_9f", "where": "Hotel Corwin, room 9F (W 31st St, Broadway–6th Ave)",
-   "why": "The job comes with the room (N1). He lives where he works: eight by ten, a window onto an airshaft.",
+   "why": "The job comes with the room (N1). He lives where he works: eight by ten, one window on West Thirty-First Street: the Corwin's own broken neon (HOT  CO WIN) blinks red through it all night.",
    "portrait": ["Army footlocker as a table", "academy class photo, turned face-down", "expired hack licence tucked in the mirror", "Saint Christopher on a nail", "broken window air-conditioner with a towel in it", "Carmen's tupperware, washed, never returned", "a hot plate and one pan"],
    "byAct": {"1": "the nightstick in the footlocker", "2": "the revolver in a coffee can on the shelf (after M7); collection envelopes counted on the bed", "3": "Hollis's radio on the sill (after M19); the ledger copy under the floorboard (if wire)", "epilogue": "packed (Testimony) / unchanged (Public) / a new suit on the door (New Pad) / bare (Ashes)"},
    "storyObjects": ["item.nightstick", "item.revolver_service", "item.ledger"]},
