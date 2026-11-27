@@ -18,6 +18,14 @@ with typecheck, npm test, and a headless smoke shot.
 6. **Gameplay:** `new Gameplay({quality, content})`, with bindPlayer, bindWorld(new
    RapierWorldQuery(physics)), bindSim, bindVehicles; `update(dt)` after physics; the save section;
    talkables (gameplay 15).
+   - Mission and trigger runtime (UI 024acfa, gameplay ba2e825):
+     - `discover` events carry `notify: content.discoveryNotify ?? 'silent'`, and `mission: <id>`
+       when the place belongs to the running mission (the "Added to map" fix).
+     - Call `g.missionBegin(id)` at mission start.
+     - On completion or failure, emit `missionEnd { result: 'passed' | 'failed', title, reason?, cash?,
+       lines: g.missionLines() }`. UI's MissionCard renders it.
+   - Traversal hint: `UiHost.traversal?()` (UI 6.3) comes from gameplay's traversal system once it
+     is bound, else from the engine's ledge probe.
 7. **Audio:** the AudioSystem plus world feeds (docs/requests/audio.md items 1 and 3).
 
 Then: the touch-only combined run, the integrated board (Park Ave top-down and mid-block views, wide
@@ -31,3 +39,11 @@ A and D with cars, street-sign accuracy against 1970s photos), deploy, and the n
 - meshopt and KTX2.
 
 Verify each LICENSE file and log it in docs/licenses/ASSETS.md.
+
+**glTF loading (oversight relay, interiors fa1c25c):** under WebGPU builds, GLTFLoader can pull in a
+second copy of three.js. Every stream must load models the same way. Either:
+- alias `three` to `three/webgpu` in vite.config, or
+- share interiors' GLB reader from src/shared.
+
+Decide this before the first CC0 asset lands. Interiors' props also need the shared lighting
+foundation (interiors request 9) to stop looking pasted in.
