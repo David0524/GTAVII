@@ -124,7 +124,13 @@ Rebuild with `npm run data:lanes` whenever `bounds.ts`, `streets.json` or the ch
   bands, at the rim or anywhere beyond 20–30 m that the camera isn't looking (`setView`); despawn beyond
   the disc. Budget-neutral view bias: the fill target is ×1.4 inside the camera's cone, ×0.45 behind it, and
   with the pool full a car or person far behind the camera (out of sight) is recycled now and then so spawning
-  can put it in view; in view, nothing appears closer than the fade distance (`setView(..., fovDeg, fadeDist)`). gridlock fallback:
+  can put it in view; in view, nothing appears closer than the fade distance (`setView(..., fovDeg, fadeDist)`,
+  default 60 m: the engine should pass the distance its fade-in hides). Spawning is capped per block as well as
+  per ring, so one long queue can't take a ring's whole share while the next avenue stands empty. Through
+  routes cut off by the map edge (7th Avenue above 43rd, the crosstown ends) are fed as entries, and the
+  build keeps edge entry blocks the strong-connectivity prune used to drop (`edge entries revived`).
+  Measured at 42nd & 7th, noon, Low 90/240, cars 15–80 m in the view cone: looking north ~22, south ~22,
+  east ~9 (with a 60 m fade). gridlock fallback:
   a vehicle stationary > 60 s while not at a red (and > 70 m from the focus, or > 150 s anywhere)
   is despawned. Signals are a pure function of time (no state), so the sim is deterministic.
 
