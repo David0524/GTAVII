@@ -1801,7 +1801,7 @@ export class Gameplay {
     const n = id ? simPedNumber(id) : undefined; if (n === undefined) return null;
     const b = this.brawls.get(`brawl:${n}`), r = this.rapport.get(n) ?? { greetedAt: -Infinity, tauntedAt: -Infinity, taunts: 0 };
     const peds = (this.simLike ?? (this.sim as unknown as SimLike | undefined))?.peds ?? [];
-    const q = peds.find((x) => x.id === n) ?? (b ? (() => { const a = this.ai.agents.get(`brawl:${n}`)!; return { id: n, archetype: 'npc.passerby', x: a.pos[0], y: a.pos[1], z: a.pos[2], nerve: 0.8 }; })() : null);
+    const q = peds.find((x) => x.id === n) ?? (b ? (() => { const a = this.ai.agents.get(`brawl:${n}`)!; return { id: n, archetype: b.archetype ?? 'npc.passerby', x: a.pos[0], y: a.pos[1], z: a.pos[2], nerve: 0.8 }; })() : null);
     if (!q) return null;
     const p = this.player.position();
     this.emit('bark', { id: this.player.id, lead: this.leadTag(), bark: 'barks.player_apologise', context: b ? 'fight' : 'shove', at: p, to: `ped:${n}` });
@@ -1824,7 +1824,7 @@ export class Gameplay {
   static FIGHT_BACK: Partial<Record<VendorKind, number>> = { hot_dog: 0.5, pretzel_knish: 0.3, newsstand: 0.35, fruit_stand: 0.3, coffee_cart: 0.25 };
   /** A street fight lasts until someone's down, the brawler loses heart, the player walks off (25 m) or 30 s pass. */
   static BRAWL = { seconds: 30, walkAway: 25, hp: 55 } as const;
-  readonly brawls = new Map<string, { pedId: number; until: number; reason: 'shoved' | 'robbed' | 'provoked' }>();
+  readonly brawls = new Map<string, { pedId: number; until: number; reason: 'shoved' | 'robbed' | 'provoked'; archetype?: string }>();
   /** Take a ped over from the sim as a fist fighter (non-lethal fists; the brawler started it, so no crime for the player). */
   startBrawl(pedId: number, reason: 'shoved' | 'robbed' | 'provoked') {
     const sim = this.simLike; if (!sim?.releasePed || !this.player) return false;
@@ -1833,7 +1833,8 @@ export class Gameplay {
     if (!sim.releasePed(pedId)) return false;
     if (!this.spawnCombatant({ id, faction: 'hood', squad: id, pos: [q.x, q.y, q.z], weapon: null, melee: 'weapon.fists', hp: Gameplay.BRAWL.hp })) { sim.reclaimPed?.(pedId); return false; }
     const p = this.player.position(); this.ai.alert(id, [p[0], p[2]], 'player');
-    this.brawls.set(id, { pedId, until: this.time + Gameplay.BRAWL.seconds, reason });
+    const archetype = sim.peds?.find((x) => x.id === pedId)?.archetype; // kept for their lines while gameplay drives them
+    this.brawls.set(id, { pedId, until: this.time + Gameplay.BRAWL.seconds, reason, archetype });
     this.emit('notice', { kind: 'brawl', id, pedId, reason });
     return true;
   }
