@@ -381,7 +381,9 @@ for (const r of RESTORED_BUILDINGS) {
 
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
 const DRIVABLE = new Set(['motorway', 'motorway_link', 'trunk', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'residential', 'unclassified', 'living_street']);
-interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean }
+/** `grade`: 0 at street level; 1 elevated (Park Ave viaduct: bridge / layer > 0); -1 below grade (tunnels and
+ *  their portal ramps). Non-zero grades are not paved at ground level and get no lights or furniture. */
+interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean; grade?: number }
 const streets: Street[] = [];
 const dirStats: Record<string, number> = {};
 for (const w of ways) {
@@ -404,12 +406,18 @@ for (const w of ways) {
     if (era.dir !== 'two') { const want = (era.dir === 'north') === runsNorth ? 1 : -1; changed = want !== oneway; oneway = want; }
   } else if (TWO_WAY_STREETS.test(name)) { changed = oneway !== 0; oneway = 0; }
   if (changed) dirStats[name] = (dirStats[name] ?? 0) + 1;
-  streets.push({ name, cls: hw, width: roadwayWidth(name, hw), oneway, pts, changed });
+  // Park Ave bug (user report 2026-11-27: no sidewalks, odd light posts): a two-way avenue mapped as two
+  // divided one-way carriageways got the full avenue width on EACH way, so the pair paved over the median
+  // and both sidewalks. A divided carriageway is half the avenue's roadway.
+  let width = roadwayWidth(name, hw);
+  if (era?.dir === 'two' && (t.oneway === 'yes' || t.oneway === '1' || t.oneway === '-1')) width /= 2;
+  const grade = t.bridge === 'yes' || (t.layer && parseInt(t.layer) > 0) ? 1 : /Tunnel/.test(name) ? -1 : 0;
+  streets.push({ name, cls: hw, width, oneway, pts, changed, grade });
 }
 log(`streets: ${streets.length}; 1974 direction overrides applied to`, dirStats);
 
 // ------------------------------------------------------------------ ground polygons (per chunk)
-const roadLines = streets.map((s) => ({ pts: s.pts, half: s.width / 2, bb: bbox([s.pts]) }));
+const roadLines = streets.filter((s) => !s.grade).map((s) => ({ pts: s.pts, half: s.width / 2, bb: bbox([s.pts]) })); // ground-level roadways only
 
 // ------------------------------------------------------------------ road paint (1974 NYC markings)
 // White dashed lane lines (10 ft dash / 30 ft gap) between lanes, double yellow on two-way streets,
@@ -419,7 +427,7 @@ const paintStrokes: WPaint[] = [];
 {
   const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
   const nodeUse = new Map<string, { p: P; legs: { dir: P; width: number }[] }>();
-  for (const s of streets) s.pts.forEach((p, k) => {
+  for (const s of streets.filter((x) => !x.grade)) s.pts.forEach((p, k) => {
     const e = nodeUse.get(key(p)) ?? nodeUse.set(key(p), { p, legs: [] }).get(key(p))!;
     for (const nb of [s.pts[k - 1], s.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: s.width }); }
   });
@@ -428,7 +436,7 @@ const paintStrokes: WPaint[] = [];
   for (const j of junctions) { const k = `${Math.floor(j.p[0] / 40)},${Math.floor(j.p[1] / 40)}`; (jIndex.get(k) ?? jIndex.set(k, []).get(k)!).push(j.p); }
   const nearJunction = (x: number, z: number, r: number) => { for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const q of jIndex.get(`${Math.floor(x / 40) + a},${Math.floor(z / 40) + b}`) ?? []) if (Math.hypot(q[0] - x, q[1] - z) < r) return true; return false; };
   const DASH = 3.05, GAP = 9.15;
-  for (const s of streets) {
+  for (const s of streets.filter((x) => !x.grade)) {
     if (s.cls === 'motorway' || s.cls === 'motorway_link') continue;
     const lanes = Math.max(1, Math.round(s.width / 3.4)), laneW = s.width / lanes;
     const offsets: [number, number][] = []; // [offset, kind]
@@ -550,7 +558,7 @@ const parksJson = { trees: [] as number[][], benches: [] as number[][], lamps: [
   }
   // street trees: sparse, residential side streets (tenement frontage within 12 m), none on avenues
   let street = 0;
-  for (const st of streets) {
+  for (const st of streets.filter((x) => !x.grade)) {
     if (!st.name || /Avenue|Broadway|Place|Plaza|Highway|Drive/.test(st.name) || st.cls === 'motorway') continue;
     for (const side of [-1, 1]) {
       let along = 0;
@@ -595,7 +603,7 @@ const parksJson = { trees: [] as number[][], benches: [] as number[][], lamps: [
   // junction legs with street names
   const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
   const node = new Map<string, { p: P; legs: { dir: P; width: number; name?: string }[] }>();
-  for (const st of streets) st.pts.forEach((p, k) => {
+  for (const st of streets.filter((x) => !x.grade)) st.pts.forEach((p, k) => {
     const e = node.get(key(p)) ?? node.set(key(p), { p, legs: [] }).get(key(p))!;
     for (const nb of [st.pts[k - 1], st.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: st.width, name: st.name }); }
   });
@@ -632,7 +640,7 @@ const parksJson = { trees: [] as number[][], benches: [] as number[][], lamps: [
     if (ave && r(9) < 0.25) { const c = pick(10), q = off(c, 0.6, 4.0); if (free(q)) furn.items.push(['newsstand', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.b.dir)]); }
   }
   // along the kerbs: hydrants (~75 m), meters (commercial side streets, 6 m), bus stops (avenues, ~240 m)
-  for (const st of streets) {
+  for (const st of streets.filter((x) => !x.grade)) {
     if (!st.name || st.cls === 'motorway') continue;
     const ave = isAve(st.name);
     for (const side of [-1, 1]) {
@@ -925,7 +933,7 @@ const world = {
 };
 fs.writeFileSync(path.join(OUT, 'world.json'), JSON.stringify(world));
 const r1 = (v: number) => Math.round(v * 10) / 10;
-fs.writeFileSync(path.join(OUT, 'streets.json'), JSON.stringify(streets.map((s) => ({ n: s.name, c: s.cls, w: s.width, o: s.oneway, p: s.pts.flatMap(([x, z]) => [r1(x), r1(z)]) }))));
+fs.writeFileSync(path.join(OUT, 'streets.json'), JSON.stringify(streets.map((s) => ({ n: s.name, c: s.cls, w: s.width, o: s.oneway, ...(s.grade ? { g: s.grade } : {}), p: s.pts.flatMap(([x, z]) => [r1(x), r1(z)]) }))));
 log('stats', world.stats);
 log('spawn', spawn, 'heroes', heroes.map((h) => `${h.name} (${h.ids.length} parts, ${h.height} m)`));
 

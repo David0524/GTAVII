@@ -23,7 +23,7 @@ const AVENUE = /Avenue|Broadway|^(East|West) (14|23|34|42)(st|nd|rd|th) Street/;
 export function buildStreetLights(streets: StreetRec[]): THREE.Group {
   const pts: { x: number; y: number; z: number; yaw: number; sodium: boolean }[] = [];
   for (const s of streets) {
-    if (!s.n) continue;
+    if (!s.n || (s as StreetRec & { g?: number }).g) continue; // no lamps on the viaduct or in tunnels (Park Ave bug)
     const sodium = AVENUE.test(s.n);
     const spacing = sodium ? 27 : 34, off = s.w / 2 + 0.55; // denser (oversight: street level too dark at night)
     let carry = spacing / 2, side = 1;
