@@ -37,6 +37,9 @@ export interface SimLike {
   takeVehicle?(vehicleId: number): { ownerPedId: number; vclass: string; variant: number; x: number; z: number; yaw: number } | null;
   /** Street vendors (sim fb337dc): commands to the vendor's people, and notices the sim animates. */
   vendorCommand?(id: string, c: { type: 'flee' | 'cower'; x?: number; z?: number }): void;
+  /** sim memory.ts (39af2cb): the street remembers what the player did; the block's standing decays (~15 min half-life). */
+  remember?(kind: SimMemKind, x: number, z: number, opts?: { witnessR?: number; pedId?: number }): void;
+  reputation?(x: number, z: number): { score: number; last: SimMemKind | null; ago: number };
   vendorNotice?(n: { kind: 'cartOverturned' | 'vendorSale' | 'monteFolded'; vendor: string; good?: string }): void;
   /** Ped hand-off: released peds are gameplay's (moved each frame) until reclaimed (then `pedCalmed`). */
   releasePed?(pedId: number): boolean;
@@ -59,6 +62,8 @@ export interface SimLike {
   emit(e: any): void;
 }
 
+export type SimMemKind = 'helped' | 'tipped' | 'bumped' | 'knockdown' | 'reckless' | 'theft' | 'robbed' | 'assault' | 'gunfire' | 'killed';
+export const simPedNumber = (id: string) => { const n = Number(id.startsWith('ped:') ? id.slice(4) : id); return Number.isFinite(n) ? n : undefined; };
 const pedId = (id: string) => Number(id.startsWith('ped:') ? id.slice(4) : id);
 
 /** 1. Pedestrian port over setGoal/kill. */
