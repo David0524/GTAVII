@@ -51,6 +51,19 @@ export class Driving {
   private camPos = new THREE.Vector3(); private camLook = new THREE.Vector3(); private camInit = false;
   private tmp = new THREE.Vector3(); private fwd = new THREE.Vector3();
   lastEnter = '';
+  /** in the car, engine not started: `use` retries the hot-wire (time and noise are gameplay's) */
+  hotwiring = false;
+
+  /** `use` while in the car: retry a stalled hot-wire, else get out. Returns 'started' | 'exited' | 'stalled' | 'moving'. */
+  useInCar(): 'started' | 'exited' | 'stalled' | 'moving' {
+    const o = this.car; if (!o) return 'moving';
+    if (this.hotwiring) {
+      const h = this.d.gameplay()?.hotwire();
+      if (!h || h.ok) { this.hotwiring = false; o.v.hotwire(); o.v.ignition(true); return 'started'; }
+      return 'stalled';
+    }
+    return this.tryExit() ? 'exited' : 'moving';
+  }
 
   constructor(private d: DrivingDeps) {
     this.assist = new DriverAssist(d.input.isTouch ? TOUCH_DEFAULTS : PAD_DEFAULTS);
@@ -113,16 +126,17 @@ export class Driving {
     const g = this.d.gameplay();
     if (g) {
       const lead = this.d.lead();
-      if (!g.cars.cars.get(id)) g.cars.add({ id, vclass, colour: `#${(owned.v as unknown as { paint?: number }).paint?.toString(16) ?? '777777'}`, driver, x: owned.v.object.position.x, z: owned.v.object.position.z, ...(driver ? { locked: false } : {}) });
+      if (!g.cars.cars.get(id)) g.cars.add({ id, vclass, colour: `#${((owned.v as unknown as { paint?: number }).paint ?? 0x777777).toString(16).padStart(6, '0')}`, driver, x: owned.v.object.position.x, z: owned.v.object.position.z, ...(driver ? { locked: false } : {}) });
       const methods = g.cars.methods(id, lead);
       const method = methods.includes('keys') ? 'keys' : methods.includes('carjack') ? 'carjack' : methods.includes('unlocked') ? 'unlocked' : 'smash';
       const res = g.enterCar(id, method as never);
       this.lastEnter = method;
       if (res && 'ok' in res && !res.ok) return false;
-      if (res && (res as { needsHotwire?: boolean }).needsHotwire) { g.hotwire(); owned.v.hotwire(); }
+      // hot-wiring can stall (gameplay emits notice 'stalled'): the engine stays off until a retry on `use` succeeds
+      if (res && (res as { needsHotwire?: boolean }).needsHotwire) { const h = g.hotwire(); if (h && h.ok) owned.v.hotwire(); else this.hotwiring = true; }
       if (method === 'smash') owned.v.breakWindow('left');
     }
-    owned.v.ignition(true, { key: true });
+    if (!this.hotwiring) owned.v.ignition(true, { key: true });
     owned.v.isPlayer = true; (owned.v as unknown as { driverId?: string }).driverId = 'player';
     owned.v.setParked(false);
     this.car = owned; this.camInit = false;

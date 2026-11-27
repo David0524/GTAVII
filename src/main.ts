@@ -426,7 +426,7 @@ async function main() {
       const d = data as { text?: string } | undefined;
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
-    prompts: () => (driving?.driving ? [['use', 'Get out'], ['jump', 'Handbrake'], ['map', 'Map']] as [ButtonAction, string][] : mode === 'onfoot' ? [...(carPrompt ? [['use', carPrompt] as [ButtonAction, string]] : gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
+    prompts: () => (driving?.driving ? [['use', driving.hotwiring ? 'Hot-wire' : 'Get out'], ['jump', 'Handbrake'], ['map', 'Map']] as [ButtonAction, string][] : mode === 'onfoot' ? [...(carPrompt ? [['use', carPrompt] as [ButtonAction, string]] : gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
     newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
     continueGame: async () => {
       loadReport.mark('continue');
@@ -518,7 +518,7 @@ async function main() {
       }
       // the one context button: in a car → get out; next to a car → get in; else gameplay's context
       if (playing && !frozen && input.pressed('use')) {
-        if (inCar) { if (driving!.tryExit()) { orbit.snap(player.pos, player.heading); } }
+        if (inCar) { if (driving!.useInCar() === 'exited') { orbit.snap(player.pos, player.heading); } }
         else if (driving?.nearestCar() && driving.tryEnter()) { /* now driving */ }
         else if (gp && gpContext) gp.doContext();
       }
