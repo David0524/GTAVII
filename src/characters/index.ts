@@ -44,7 +44,8 @@ export interface CharacterFactory {
   readonly heads: HeadLibrary | null;
 }
 
-export async function createCharacterFactory(opts: { quality: Quality; baseUrl?: string }): Promise<CharacterFactory> {
+/** opts.renderer (optional): enables KTX2 head textures (GPU-compressed; ~4-8x less VRAM). Without it heads use WebP. */
+export async function createCharacterFactory(opts: { quality: Quality; baseUrl?: string; renderer?: unknown }): Promise<CharacterFactory> {
   const base = (opts.baseUrl ?? import.meta.env.BASE_URL) + 'characters/';
   // mobile Low loads a reduced body (≈1 MB: far LOD vertices only, 32 shape components)
   const bodyFile = opts.quality === 'low' ? 'body_low.bin' : 'body.bin';
@@ -62,7 +63,15 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
   } catch (e) { console.warn('characters: skin maps', e); }
   // Rocketbox heads (Medium and above): the leads' altered heads are preloaded; the near-ring pool
   // loads on demand. Low keeps our generated heads everywhere.
-  const heads = opts.quality === 'low' ? null : await new HeadLibrary(base + 'rb/').init();
+  let ktx2: import('three/examples/jsm/loaders/KTX2Loader.js').KTX2Loader | null = null;
+  if (opts.renderer && opts.quality !== 'low') {
+    try {
+      const { KTX2Loader } = await import('three/examples/jsm/loaders/KTX2Loader.js');
+      ktx2 = new KTX2Loader().setTranscoderPath(base + 'basis/');
+      (ktx2 as any).detectSupport(opts.renderer); // the renderer is initialised by the caller (engine createRenderer)
+    } catch (e) { console.warn('characters: KTX2 unavailable, WebP heads', e); ktx2 = null; }
+  }
+  const heads = opts.quality === 'low' ? null : await new HeadLibrary(base + 'rb/', ktx2).init();
   const leadHeads = new Map<string, HeadAsset>();
   // Delphine: no Rocketbox base matches her sheet (the adult library has no woman who reads as
   // Black), so she keeps our parametric head until a suitable head exists (CHARACTERS_PROGRESS)

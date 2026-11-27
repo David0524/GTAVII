@@ -18,7 +18,7 @@ import { JOINT_INDEX as JI } from '../rig';
 import type { Appearance } from '../body/appearance';
 
 export interface HeadTag { sex: 0 | 1; age: [number, number]; anc: [number, number, number]; hair: 'short' | 'long' | 'curly' | 'bald' | 'tied' }
-export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean }
+export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean; /** maps also shipped as KTX2 (tools/characters/ktx2.ts) */ ktx2?: string[] }
 export interface HeadAsset {
   id: string;
   meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; neckRing?: number[]; face?: { browZ: number; hx: number; zmin: number; zmax: number }; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
@@ -37,7 +37,7 @@ const toLin = (c: number) => { const s = c / 255; return s <= 0.04045 ? s / 12.9
 export class HeadLibrary {
   private cache = new Map<string, Promise<HeadAsset>>();
   index: HeadIndexEntry[] = [];
-  constructor(private base: string) {}
+  constructor(private base: string, private ktx2: { loadAsync(url: string): Promise<THREE.Texture> } | null = null) {}
   async init() {
     try { this.index = (await (await fetch(this.base + 'index.json')).json()).heads; } catch { this.index = []; }
     return this;
@@ -46,7 +46,7 @@ export class HeadLibrary {
   lead(name: string) { return this.index.find((h) => h.lead === name) ?? null; }
   load(id: string): Promise<HeadAsset> {
     let p = this.cache.get(id);
-    if (!p) { p = loadHead(this.base, id); this.cache.set(id, p); }
+    if (!p) { p = loadHead(this.base, id, this.ktx2 ? (this.index.find((h) => h.id === id)?.ktx2 ?? []) : [], this.ktx2); this.cache.set(id, p); }
     return p;
   }
   /**
@@ -100,7 +100,7 @@ function hairCat(style: string): HeadTag['hair'] {
   return 'short';
 }
 
-async function loadHead(base: string, id: string): Promise<HeadAsset> {
+async function loadHead(base: string, id: string, ktxMaps: string[] = [], ktx: { loadAsync(url: string): Promise<THREE.Texture> } | null = null): Promise<HeadAsset> {
   const buf = await (await fetch(`${base}${id}.bin`)).arrayBuffer();
   await formatReady();
   const c = readContainer(buf);
@@ -117,7 +117,15 @@ async function loadHead(base: string, id: string): Promise<HeadAsset> {
     kind[v] = kd[v];
   }
   const tl = new THREE.TextureLoader();
-  const load = async (f: string, srgb: boolean) => { const t = await tl.loadAsync(`${base}${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t; };
+  const load = async (f: string, srgb: boolean) => {
+    // KTX2 when shipped and a transcoder is up (pre-flipped in the file: flipY stays false)
+    const m = /_([a-z])\.webp$/.exec(f)?.[1];
+    if (ktx && m && ktxMaps.includes(m)) {
+      try { const t = await ktx.loadAsync(`${base}${f.replace(/\.webp$/, '.ktx2')}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t; }
+      catch (e) { console.warn('characters: KTX2 head map failed, WebP', f, e); }
+    }
+    const t = await tl.loadAsync(`${base}${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t;
+  };
   const [color, normal, opacity] = await Promise.all([load(`${id}_c.webp`, true), load(`${id}_n.webp`, false), meta.cardIdx > 0 ? load(`${id}_o.webp`, true) : Promise.resolve(null)]);
   meta.face = faceOf(pos, kind, meta.landmarks);
   if (!meta.neckRing) meta.neckRing = neckRingOf(meta.landmarks.Neck, pos, kind, B('idx'), meta.skinIdx);

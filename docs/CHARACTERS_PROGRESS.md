@@ -112,7 +112,17 @@ the size pass.
      low body 428 → 420 KB, the Rocketbox heads about −20% each, Delphine 317 → 270 KB.
    - The other blobs gained little over the delta filters, so they stay as they are.
    - `meshoptimizer@1.1.1` is pinned as a dev dependency (the encoder is tools-only).
-   - Next: KTX2 textures and a real phone load test.
+   - **KTX2 (done for Delphine):**
+     - `tools/characters/ktx2.ts` encodes head maps to Basis ETC1S with mips, pre-flipped. On
+       the GPU that's ~3–6 MB per 2048 map instead of ~22 MB RGBA8.
+     - Delphine's c and o maps: 2048² ETC1S, 0.21 MB and 0.12 MB to download (the WebP versions
+       are 0.14 and 0.11 MB).
+     - Runtime: `createCharacterFactory({ renderer })` enables three's KTX2Loader, with the
+       transcoder in `public/characters/basis/` (585 KB, ~200 KB gzip, loaded only when used).
+       Without a renderer, or on failure, heads fall back to WebP.
+     - Visually the same as WebP in the leads shot.
+     - The normal map stays WebP (ETC1S is too lossy for normals; UASTC was 0.95 MB).
+     - Next: the Rocketbox leads, and a real phone load and VRAM test.
    Earlier trims: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
    are cut in the bake. 25.7k → 20.5k vertices; the .bin goes from 391 to 317 KB gzip, and the
    whole head is about 0.66 MB. meshopt is still to do.

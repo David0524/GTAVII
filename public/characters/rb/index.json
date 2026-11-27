@@ -782,7 +782,11 @@
     37
    ],
    "lead": "lead_delphine",
-   "ownHair": true
+   "ownHair": true,
+   "ktx2": [
+    "c",
+    "o"
+   ]
   }
  ]
 }

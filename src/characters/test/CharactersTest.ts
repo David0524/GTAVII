@@ -36,7 +36,7 @@ export async function runCharactersTest() {
   const rim = new THREE.DirectionalLight(0xc0d0ff, 1.0); rim.position.set(-5, 3, -6); world.add(rim);
   }
   const quality = (qp.get('quality') ?? 'high') as 'low' | 'high';
-  const factory = await createCharacterFactory({ quality });
+  const factory = await createCharacterFactory({ quality, renderer: qp.has('noktx') ? undefined : renderer });
   if (qp.get('dbg') === 'n') { const mm = characterMaterial(); mm.colorNode = normalGeometry.mul(0.5).add(0.5); mm.normalNode = null; }
   if (qp.get('dbg') === 'skin2') { const mm = characterMaterial(); const u = attribute('uv1', 'vec3'); mm.colorNode = texture(skinMaps.strip, vec2(u.x, float(1).sub(u.y).add(5).div(18))).rgb.sub(0.5).mul(6).add(0.5); mm.normalNode = null; }
   if (qp.get('dbg') === 'skin3') { const mm = characterMaterial(); mm.colorNode = texture(skinMaps.strip, uv()).rgb; mm.normalNode = null; }

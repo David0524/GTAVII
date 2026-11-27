@@ -28,6 +28,7 @@
     "@types/three": "0.187.0",
     "clipper-lib": "6.4.2",
     "earcut": "3.2.4",
+    "ktx2-encoder": "^0.6.0",
     "meshoptimizer": "^1.1.1",
     "playwright": "1.63.0",
     "tsx": "4.23.15",

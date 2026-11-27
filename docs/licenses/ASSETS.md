@@ -18,6 +18,7 @@ Full records with edits are in `docs/CHARACTER_SOURCES.md`; the head-source rese
 | Quaternius Universal Animation Library 1 and 2 | CC0 1.0 | quaternius.com: "CC0" | locomotion and action clips |
 | Poly Haven fabric scans (6) | CC0 1.0 | polyhaven.com/license: "CC0" | cloth relief maps |
 | ICT-FaceKit "Light" (USC ICT) | MIT | github.com/ICT-VGL/ICT-FaceKit LICENSE: "Permission is hereby granted, free of charge... to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"; notice shipped in `public/characters/rb/LICENSE-ICT-FaceKit.md` | Delphine's head (`lead_delphine`): one synthesised identity baked by `tools/characters/bake-ict.ts`; the basis is dev-only and never ships; textures are procedural (ours). Synthesised identities only, never fitted to photos of real people. The separately licensed "Full ICT Face Model" is not used. |
+| Basis Universal transcoder (`public/characters/basis/`, copied from three's `examples/jsm/libs/basis`) | Apache-2.0 | Binomial LLC; redistribution permitted with the licence notice | decoding KTX2 head textures at runtime |
 | Microsoft Rocketbox (adult heads) | MIT | repo LICENSE.md "Permission is hereby granted, free of charge... to deal in the Software without restriction"; notice shipped in `public/characters/rb/LICENSE-Rocketbox.md` | Teddy and Nick heads, near-ring heads |
 
 ### Approved to adopt (passes the gate)
