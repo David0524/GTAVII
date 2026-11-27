@@ -66,7 +66,8 @@ function react(S: SimCore, p: Ped, kind: 'brush' | 'stumble' | 'knockdown', dirX
   }
   p.bumpResponse = response;
   p.fleeX = p.x - dirX * 2; p.fleeZ = p.z - dirZ * 2; // where the bump came from
-  S.emit('pedBumped', { id: p.id, kind, response, x: p.x, z: p.z, dirX, dirZ, by, archetype: p.arch.def.id });
+  // only the player's actor bumps people (NPCs avoid each other), so every pedBumped is player-caused
+  S.emit('pedBumped', { id: p.id, kind, response, x: p.x, z: p.z, dirX, dirZ, by: 'player', actor: by, byPlayer: true, archetype: p.arch.def.id });
   S.stats.bumps = (S.stats.bumps ?? 0) + 1;
 }
 

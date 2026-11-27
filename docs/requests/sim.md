@@ -37,6 +37,7 @@ headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
   `{ x, z, yaw, vclass, variant }[]`, deterministic per place and day, as static instances (no per-frame
   sim cost). The sim's kerb uses (cab pickups, siren gutter runs, service stops) then move to the gaps.
   Say if you'd rather place them yourselves; otherwise the sim does it next.
+- **Status:** accepted by the engine; shipped as `sim.parkedCars(x, z, r)` (see SIM_PROGRESS "Parked cars").
 
 ## From sim: 6. Terrain data without fetch (workers and Node)
 - **What:** a `setTerrainData(buf: ArrayBuffer)` in `src/shared/terrain.ts` next to `loadTerrain()`.

@@ -23,8 +23,10 @@ import { Parking, type ParkingRule } from './parking';
 import { Subway, type Station, type TrainCall } from './subway';
 import { Doors, type DoorRec, type DoorRate } from './doors';
 import { Vendors, type VendorView } from './vendors';
+import { ParkedCars, type ParkedCar } from './parked';
 export type { DoorRec, DoorRate } from './doors';
 export { VENDOR_KINDS, type VendorView, type VendorKind } from './vendors';
+export type { ParkedCar } from './parked';
 export { DOOR_RATES } from './doors';
 export type { Station, TrainCall } from './subway';
 export type { ParkingRule } from './parking';
@@ -155,6 +157,8 @@ export class Simulation {
     this.subway = new Subway(core);
     this.doors = new Doors(core);
     this.vendors = new Vendors(core, () => this.parking.dow);
+    this.parked = new ParkedCars(core, this.parking);
+    core.parked = this.parked;
     core.onThreat = (x, z, r) => this.vendors.onThreat(x, z, r);
     core.doorArrived = (p, id) => this.doors.arrived(p, id);
     core.doorStepIn = (p) => this.doors.stepIn(p);
@@ -418,6 +422,16 @@ export class Simulation {
   vendorCommand(vendorId: string, cmd: { type: 'flee' | 'cower'; x?: number; z?: number }): boolean { return this.vendors.command(vendorId, cmd); }
   /** Gameplay notices: `cartOverturned` (right it, close 2 h), `vendorSale` (serve + make change), `monteFolded` (crew walks off). */
   vendorNotice(n: { kind: 'cartOverturned' | 'vendorSale' | 'monteFolded'; vendor: string; good?: string }): boolean { return this.vendors.notice(n); }
+  private parked!: ParkedCars;
+  /**
+   * Parked cars along the kerbs within r of (x, z): static instances for the traffic renderer. Deterministic
+   * per place and day; they follow the kerb rules (hydrants, bus stops, corners, avenue rush-hour no-standing,
+   * the alternate-side cleaning window), so refresh when the focus moves ~100 m or on the quarter hour.
+   * Fields: x, z, yaw (heading = (-sin, -cos)), vclass, variant, len, wid (+ lane, s, side for debugging).
+   */
+  parkedCars(x: number, z: number, r: number): ParkedCar[] { return this.parked.near(x, z, r); }
+  /** Vehicles' cart physics: a cart came to rest somewhere else after a shove (call once it settles). */
+  vendorCartMoved(vendorId: string, x: number, z: number, yaw: number): boolean { return this.vendors.cartMoved(vendorId, x, z, yaw); }
   debugVendors() { return { count: this.vendors.count, byKind: this.vendors.byKind(), sales: this.vendors.sales, scatters: this.vendors.scatters, movedOn: this.vendors.movedOn, calls: this.vendors.calls }; }
 
   // ---------------------------------------------------------------- handing a ped to gameplay (brawls)

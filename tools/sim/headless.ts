@@ -91,7 +91,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const hooks = { escorts: 0, gotos: 0, witnesses: 0, police: 0, acts: 0, kills: 0, stolen: 0, fire: 0, cab: -1, parkRule: '' };
   for (const t of ['escortProgress', 'escortDone', 'goalReached', 'policeArrived', 'policeBlocked', 'vehicleStolen', 'dispatched', 'responderArrived', 'responderLeft', 'mailStop', 'iceCreamStop', 'iceCreamChime', 'cabCalled', 'cabReady', 'cabDeparted', 'cabTurnAhead', 'cabRideArrived', 'cabGaveUp', 'ticketIssued', 'towDispatched', 'vehicleTowed', 'sweeperOut', 'trainArriving', 'trainDeparted']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
   for (const t of ['honk', 'collision', 'nearMiss', 'hail', 'jaywalk', 'doubleParked', 'pickup', 'dropoff', 'busStop', 'subwayExit', 'subwayEnter', 'dodge']) sim.on(t, () => { events[t] = (events[t] ?? 0) + 1; });
-  const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
+  const fail: Record<string, number> = { vehOffRoad: 0, vehOffLane: 0, wrongWay: 0, redLight: 0, vehOverlap: 0, pedInBuilding: 0, pedOffSidewalk: 0, pedHitByVehicle: 0, vehHitsParked: 0, beyondEdge: 0, badHeight: 0, animalInBuilding: 0, animalOnRoad: 0 };
   const examples: Record<string, string[]> = {};
   const seen = new Set<string>();
   const note = (k: string, s: string) => { fail[k]++; const key = k + s.split(' at ')[0].split(' ')[0]; if (seen.has(key)) return; seen.add(key); (examples[k] ??= []).length < 8 && examples[k].push(s); };
@@ -101,6 +101,7 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
   const steps = Math.round(opts.seconds / SIM_DT);
   const o = [0, 0, 0, 0];
   let wildPeak = 0, powerChangedAt = -1, doorSeg = -1, playerDist = 0;
+  let parkedNow: ReturnType<typeof sim.parkedCars> = [];
   const bumpKinds: Record<string, number> = {};
   sim.on('pedBumped', (e) => { const k = `${e.kind}/${e.response}`; bumpKinds[k] = (bumpKinds[k] ?? 0) + 1; });
   let fi = 0, actorSeg = -1, walkE = -1, carL = -1, carS = 0;
@@ -227,6 +228,12 @@ async function run(opts: { seconds: number; maxVehicles: number; maxPeds: number
       if (obbOverlap(A, B, 0.3)) note('vehOverlap', `#${A.id} ${A.kind}/${A.state}/L${A.link}(${g.links[A.link].kind})s${A.s.toFixed(1)}/lat${A.lat.toFixed(1)}/lc${A.lcT.toFixed(2)}from${A.lcFrom} v${A.v.toFixed(1)} & #${B.id} ${B.kind}/${B.state}/L${B.link}(${g.links[B.link].kind})s${B.s.toFixed(1)}/lat${B.lat.toFixed(1)}/lc${B.lcT.toFixed(2)}from${B.lcFrom} v${B.v.toFixed(1)} at ${A.x.toFixed(1)},${A.z.toFixed(1)}`);
     }
     if (vehicles.length > 20) { const frac = moving / vehicles.length; minMovingFrac = Math.min(minMovingFrac, frac); movingSum += frac; flowSamples++; }
+    // traffic never drives through the parked cars at the kerb (static; refreshed every 10 s)
+    if (k % 300 === 0) parkedNow = sim.parkedCars(f.x, f.z, 260);
+    if (k % 3 === 0) for (const v of vehicles) for (const c of parkedNow) {
+      if (Math.abs(c.x - v.x) > 9 || Math.abs(c.z - v.z) > 9) continue;
+      if (obbOverlap(v, c, 0.3)) note('vehHitsParked', `#${v.id} ${v.kind}/${v.state}/L${v.link}s${v.s.toFixed(1)}/lat${v.lat.toFixed(1)}/${v.stopKind} v${v.v.toFixed(1)} & parked ${c.vclass} lane ${c.lane} s${c.s.toFixed(1)} at ${c.x.toFixed(1)},${c.z.toFixed(1)}`);
+    }
     for (const p of peds) {
       if (inBuilding.has(p.x, p.z)) note('pedInBuilding', `#${p.id} ${p.state} at ${p.x.toFixed(1)},${p.z.toFixed(1)}`);
       if (!p.onRoad && onRoad.has(p.x, p.z)) note('pedOffSidewalk', `#${p.id} ${p.state} edge ${p.edge}(k${g.walkEdges[p.edge].kind} s${p.s.toFixed(1)}/${net.walkLen[p.edge].toFixed(1)} lat${p.lat.toFixed(2)}/${g.walkEdges[p.edge].half.toFixed(2)}) at ${p.x.toFixed(1)},${p.z.toFixed(1)}`);

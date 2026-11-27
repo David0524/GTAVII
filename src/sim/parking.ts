@@ -82,7 +82,11 @@ export class Parking {
     if (!k) return { allowed: false, towAway: false, fine: 'none', reasons: ['not at a kerb'], street: '', road: -1, side: 0, cleaning: null };
     const reasons: string[] = []; let tow = false, major = false;
     const weekday = dow >= 1 && dow <= 5;
-    if (net.isAvenue(k.road) && weekday && ((minute >= 7 * 60 && minute < 10 * 60) || (minute >= 16 * 60 && minute < 19 * 60))) { reasons.push('no standing (rush hour)'); tow = true; }
+    // Midtown business district: avenues and the major crosstown streets are "No Standing" through the business
+    // day (1970s signs: "No Standing 7 AM - 7 PM Except Trucks Loading"); side streets park solid. This also keeps
+    // the emergency corridors (siren gutter runs) open by day.
+    const majorRoad = net.isAvenue(k.road) || /^(East|West) (14th|23rd|34th|42nd|57th) Street$/.test(net.roadName(k.road));
+    if (majorRoad && weekday && minute >= 7 * 60 && minute < 19 * 60) { reasons.push('no standing (business day)'); tow = true; }
     const cl = this.cleaning(k.road, k.side);
     if (cl && cl.days.includes(dow) && minute >= cl.from && minute < cl.to) reasons.push(`street cleaning ${cl.days.map((d) => DAY[d]).join('/')} ${hhmm(cl.from)}-${hhmm(cl.to)}`);
     for (const bs of S.net.g.busStops) { const sp = S.net.g.spots[bs.spot]; if (Math.hypot(sp.x - x, sp.z - z) < 15) { reasons.push('no standing (bus stop)'); tow = true; major = true; break; } }
