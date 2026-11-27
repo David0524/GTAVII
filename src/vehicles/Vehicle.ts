@@ -217,6 +217,15 @@ export class Vehicle implements Lightable {
       holder.add(mesh); lod0.add(holder);
       this.parts[name] = { mesh, holder, body: null, sag: 0 };
     }
+    if (g0.steering) {
+      const st = g0.steering;
+      this.steerPivot = new THREE.Group();
+      this.steerPivot.position.set(...st.centre);
+      this.steerAxis.set(...st.axis);
+      this.steerMesh = new THREE.Mesh(st.geo, this.mats.array);
+      this.steerMesh.position.set(-st.centre[0], -st.centre[1], -st.centre[2]);
+      this.steerPivot.add(this.steerMesh); lod0.add(this.steerPivot);
+    }
     g0.doors.forEach((d, i) => {
       const pivot = new THREE.Group();
       pivot.position.set(...d.hinge);
@@ -370,6 +379,35 @@ export class Vehicle implements Lightable {
       })),
       chassisContacts: contacts,
     };
+  }
+  /**
+   * Steering-wheel pose for character hand IK, in world space: rim centre, column axis (pointing at
+   * the driver), the wheel's up (12 o'clock at straight-ahead), rim radius, the rim's current turn
+   * (radians, same sign as the steer input, ~14:1 ratio) and the two grip points (10 and 2 o'clock,
+   * turned with it). The modelled rim turns by the same amount, so hands stay on it.
+   * Matches the modelled wheel in passenger cars; trucks and buses use the same layout from their seat.
+   */
+  steeringWheelPose() {
+    const sp = this.asset.spec, d = sp.seats.driver;
+    const passenger = ['sedan', 'police', 'coupe', 'compact', 'wagon', 'taxi'].includes(sp.cls);
+    const local = passenger ? new THREE.Vector3(d[0], sp.beltY + 0.08, d[2] - 0.42) : new THREE.Vector3(d[0], d[1] + 0.32, d[2] - 0.45);
+    const tilt = passenger ? -0.45 : -0.75; // buses and trucks: a flatter, bus-style wheel
+    const qTilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+    const axisL = new THREE.Vector3(0, 0, 1).applyQuaternion(qTilt), upL = new THREE.Vector3(0, 1, 0).applyQuaternion(qTilt);
+    const front = this.physics.wheels.filter((w) => w.front);
+    const roadSteer = front.length ? front.reduce((a, w) => a + w.steer, 0) / front.length : 0;
+    const turn = roadSteer * 14;
+    const radius = passenger ? 0.19 : 0.24;
+    this.object.updateMatrixWorld();
+    const q = this.object.getWorldQuaternion(new THREE.Quaternion());
+    const centre = this.object.localToWorld(local.clone());
+    const axis = axisL.clone().applyQuaternion(q), up = upL.clone().applyQuaternion(q);
+    const grip = (clock: number) => { // clock angle from 12 o'clock, clockwise as seen by the driver
+      const a = clock + turn;
+      const right = new THREE.Vector3().crossVectors(up, axis).normalize(); // driver's right (+x: the car faces -z)
+      return centre.clone().addScaledVector(up, Math.cos(a) * radius).addScaledVector(right, Math.sin(a) * radius);
+    };
+    return { centre, axis, up, radius, turn, leftGrip: grip(-Math.PI / 3), rightGrip: grip(Math.PI / 3) };
   }
   /** Steering geometry for the driver assist. */
   get handling() { return { wheelbase: this.asset.spec.wheelbase, maxSteer: this.physics.p.maxSteer }; }
@@ -1005,6 +1043,7 @@ export class Vehicle implements Lightable {
     if (hm && g.hood) { hm.geometry = g.hood; hm.updateMorphTargets(); }
     for (const name of ['bumperF', 'bumperR'] as const) { const p = this.parts[name], ng = g[name]; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } }
     this.doors.forEach((d, i) => { const p = this.parts[d.name], ng = g.doors[i]?.geo; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } });
+    if (this.steerMesh && g.steering) this.steerMesh.geometry = g.steering.geo;
     this.wheelObjs.forEach((o, i) => {
       const w = this.asset.lod0.wheels[i];
       const lvl = o.lod.levels[0].object;
@@ -1023,6 +1062,9 @@ export class Vehicle implements Lightable {
   /** Doors (LOD0 passenger cars): open amount 0..1 (1 = ~70°), animated toward `target`. */
   private doors: { name: string; side: 1 | -1; z0: number; z1: number; pivot: THREE.Group; angle: number; vel: number; target: number }[] = [];
   private prevVel = new THREE.Vector3();
+  private steerPivot: THREE.Group | null = null;
+  private steerMesh: THREE.Mesh | null = null;
+  private steerAxis = new THREE.Vector3(0, 0, 1);
   private partDebris: { mesh: THREE.Mesh; body: RAPIER.RigidBody }[] = [];
   /** Parts currently off the car. */
   get detachedParts(): string[] { return [...(this.components.detached ?? [])]; }
@@ -1119,6 +1161,12 @@ export class Vehicle implements Lightable {
   /** Bumpers sag with their zone's damage, then come off; the hood flies on a hard front hit. */
   private updateParts(dt: number) {
     this.updateDoors(dt);
+    if (this.steerPivot) {
+      // the rim turns with the road wheels (~14:1); positive steer turns it clockwise as the driver sees it
+      const front = this.physics.wheels.filter((w) => w.front);
+      const turn = front.length ? (front.reduce((a, w) => a + w.steer, 0) / front.length) * 14 : 0;
+      this.steerPivot.quaternion.setFromAxisAngle(this.steerAxis, -turn);
+    }
     for (const [name, zone] of [['bumperF', 'front'], ['bumperR', 'rear']] as const) {
       const part = this.parts[name];
       if (!part || this.components.detached?.includes(name)) continue;

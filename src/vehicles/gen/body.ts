@@ -13,6 +13,8 @@ export interface BoxCollider { cx: number; cy: number; cz: number; hx: number; h
 export interface GeneratedModel {
   body: THREE.BufferGeometry;
   hood: THREE.BufferGeometry | null;
+  /** LOD0 passenger cars: the steering wheel rim and spokes (turns about `axis` through `centre`). */
+  steering: { geo: THREE.BufferGeometry; centre: V3; axis: V3 } | null;
   /** LOD0 passenger cars: doors cut from the body (front-hinged; swing open, hang, detach). */
   doors: DoorPart[];
   /** LOD0 only: bumpers as separate meshes (sag, detach); null at LOD1 (merged into the body). */
@@ -589,16 +591,30 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
       doors.push({ side: r.side, z0: Math.min(r.z0, r.z1), z1: Math.max(r.z0, r.z1), hinge: [r.side * (sideX(r.sFront, (m.sillY + m.beltY) / 2) + 0.01), (m.sillY + m.beltY) / 2, hingeZ], geo });
     });
   }
+  // ---------------------------------------------------------------- steering wheel: its own part so it can turn
+  let steering: GeneratedModel['steering'] = null;
+  if (lod === 0 && PASSENGER.has(m.cls)) {
+    const d = m.seats.driver;
+    const c: V3 = [d[0], m.beltY + 0.08, d[2] - 0.42];
+    const ax: V3 = [0, Math.sin(0.45), Math.cos(0.45)]; // column axis toward the driver (rotationX(-0.45) of +z)
+    const sw = extractRegions(body, [(cx, cy, cz) => {
+      const dx = cx - c[0], dy = cy - c[1], dz = cz - c[2];
+      const along = dx * ax[0] + dy * ax[1] + dz * ax[2];
+      const r2 = dx * dx + dy * dy + dz * dz - along * along;
+      return Math.abs(along) < 0.045 && r2 < 0.215 * 0.215;
+    }]);
+    if (sw.parts[0].index && sw.parts[0].index.count >= 3) { body = sw.rest; steering = { geo: sw.parts[0], centre: c, axis: ax }; }
+  }
   const hood = lod === 0 && m.hood && hoodB.pos.length ? hoodB.build() : null;
   const tris = (g2: THREE.BufferGeometry | null) => (g2 ? (g2.index ? g2.index.count : g2.getAttribute('position').count) / 3 : 0);
   let maxZ = Z(L) + rDepth;
   for (const c of m.cargo ?? []) maxZ = Math.max(maxZ, Z(c.s1));
   return {
-    body, hood, doors, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
+    body, hood, doors, steering, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
     wheelR, wheelL, wheels, beacon, decals, colliders,
     lamps: { head, tail }, plates: plateMounts(m, Z, lastCargo),
     minZ: Z(0) - fDepth, maxZ, halfW: m.W / 2, height: Math.max(roofTop, ...(m.cargo ?? []).map((c) => c.y1)),
-    tris: tris(body) + tris(hood) + doors.reduce((a, d) => a + tris(d.geo), 0) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
+    tris: tris(body) + tris(hood) + doors.reduce((a, d) => a + tris(d.geo), 0) + (steering ? tris(steering.geo) : 0) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
   };
 }
 

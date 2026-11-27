@@ -298,6 +298,15 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
 - **Hero triangle count:** hero sedans are now about 44k triangles (41k before), because the door
   seams became loft stations.
 
+- **Steering wheel for hand IK (engine request).** `vehicle.steeringWheelPose()` returns, in world
+  space: `centre`, `axis` (the column, pointing at the driver), `up`, `radius`, `turn` (rim angle,
+  the road-wheel angle × 14) and `leftGrip` / `rightGrip` (10 and 2 o'clock, turned with the rim).
+  - In passenger cars the modelled rim and spokes are now their own part, cut out of the body,
+    and they rotate by the same `turn`, so the hands stay on the rim.
+  - Trucks and buses use a flatter, bus-style layout placed from their seat (their wheel isn't
+    modelled separately yet).
+  - At full lock the rim turns 8.4 rad (about 1.3 turns).
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

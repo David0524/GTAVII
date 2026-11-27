@@ -44,6 +44,7 @@ export function packModel(m: GeneratedModel): { packed: PackedModel; transfer: A
   const out: Record<string, unknown> = { ...m };
   for (const k of GEO_KEYS) out[k] = m[k] ? packGeometry(m[k]!, transfer) : null;
   out.doors = m.doors.map((d) => ({ ...d, geo: packGeometry(d.geo, transfer) }));
+  out.steering = m.steering ? { ...m.steering, geo: packGeometry(m.steering.geo, transfer) } : null;
   return { packed: out as PackedModel, transfer };
 }
 
@@ -51,5 +52,7 @@ export function unpackModel(p: PackedModel): GeneratedModel {
   const out: Record<string, unknown> = { ...p };
   for (const k of GEO_KEYS) out[k] = p[k] ? unpackGeometry(p[k]!) : null;
   out.doors = (p.doors as unknown as { geo: PackedGeometry }[]).map((d) => ({ ...d, geo: unpackGeometry(d.geo) }));
+  const st = p.steering as unknown as { geo: PackedGeometry } | null;
+  out.steering = st ? { ...st, geo: unpackGeometry(st.geo) } : null;
   return out as unknown as GeneratedModel;
 }

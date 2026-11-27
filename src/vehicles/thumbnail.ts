@@ -43,7 +43,7 @@ async function render(renderer: THREE.WebGPURenderer, modelId: string, paint: nu
   const car = new THREE.Group();
   car.add(new THREE.Mesh(g.body, mats.array));
   if (g.hood) car.add(new THREE.Mesh(g.hood, mats.array));
-  for (const bg of [g.bumperF, g.bumperR, ...g.doors.map((d) => d.geo)]) if (bg) car.add(new THREE.Mesh(bg, mats.array));
+  for (const bg of [g.bumperF, g.bumperR, ...g.doors.map((d) => d.geo), g.steering?.geo ?? null]) if (bg) car.add(new THREE.Mesh(bg, mats.array));
   if (g.beacon) car.add(new THREE.Mesh(g.beacon, mats.array));
   for (const wm of g.wheels) {
     const m = new THREE.Mesh(wm.side > 0 ? g.wheelR : g.wheelL, mats.wheelArray);
