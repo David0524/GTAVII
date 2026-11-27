@@ -103,7 +103,17 @@ the size pass.
    distance. Brows are done (shells).
 3. Nape: done. Profile neck seam: needs the head-to-body weld (open).
 4. Dress collar spikes: fixed at the front.
-5. Size: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
+5. Size, meshopt: triangle index blobs are now coded with meshoptimizer's index codec (container
+   filter `meshopt-idx`, decoded by three's bundled `meshopt_decoder`; every loader awaits
+   `formatReady()`).
+   - `tools/characters/meshopt.ts` repacks in place, with a round-trip check (triangles compared
+     up to rotation). Every builder now repacks its output.
+   - All characters `.bin` files together went from 5.69 to 5.34 MB gzip: body 3.29 → 3.19 MB,
+     low body 428 → 420 KB, the Rocketbox heads about −20% each, Delphine 317 → 270 KB.
+   - The other blobs gained little over the delta filters, so they stay as they are.
+   - `meshoptimizer@1.1.1` is pinned as a dev dependency (the encoder is tools-only).
+   - Next: KTX2 textures and a real phone load test.
+   Earlier trims: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
    are cut in the bake. 25.7k → 20.5k vertices; the .bin goes from 391 to 317 KB gzip, and the
    whole head is about 0.66 MB. meshopt is still to do.
 6. Oversight's board notes:

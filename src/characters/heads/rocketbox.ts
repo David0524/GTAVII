@@ -11,7 +11,7 @@
 import * as THREE from 'three/webgpu';
 import { texture, uv, attribute, float, vec2, vec3, uniform, normalMap, normalView, mix, dot, smoothstep, parallaxUV } from 'three/tsl';
 import { SkinNodeMaterial } from '../render/skinLighting';
-import { readContainer } from '../format';
+import { readContainer, formatReady } from '../format';
 import type { GeoArrays } from '../build/MeshBuilder';
 import { hairMaterial } from '../render/materials';
 import { JOINT_INDEX as JI } from '../rig';
@@ -102,6 +102,7 @@ function hairCat(style: string): HeadTag['hair'] {
 
 async function loadHead(base: string, id: string): Promise<HeadAsset> {
   const buf = await (await fetch(`${base}${id}.bin`)).arrayBuffer();
+  await formatReady();
   const c = readContainer(buf);
   const meta = c.meta;
   const B = (k: string) => c.blobs.get(k) as any;

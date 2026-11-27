@@ -6,7 +6,9 @@
  */
 import fs from 'node:fs';
 import zlib from 'node:zlib';
-import { readContainer, writeContainer, type BlobFilter } from '../../src/characters/format';
+import { readContainer, formatReady, writeContainer, type BlobFilter } from '../../src/characters/format';
+import { repack } from './meshopt.ts';
+await formatReady(); // meshopt-coded index blobs
 
 const file = process.argv.find((a) => a.startsWith('--file='))?.slice(7) ?? 'public/characters/body.bin';
 const src = fs.readFileSync(file);
@@ -31,4 +33,4 @@ for (const [n, v] of c.blobs) {
 }
 const gz = (u: Uint8Array) => zlib.gzipSync(u, { level: 9 }).length;
 console.log(`${file} gzip ${gz(src)} -> ${gz(out)} (lossless, verified)`);
-if (process.argv.includes('--write')) { fs.writeFileSync(file, out); console.log('wrote', file); }
+if (process.argv.includes('--write')) { fs.writeFileSync(file, out); console.log('wrote', file, await repack(file)); }

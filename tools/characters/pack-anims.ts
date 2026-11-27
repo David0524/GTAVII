@@ -6,7 +6,8 @@
  */
 import fs from 'node:fs';
 import zlib from 'node:zlib';
-import { readContainer, writeContainer, type BlobFilter } from '../../src/characters/format';
+import { readContainer, formatReady, writeContainer, type BlobFilter } from '../../src/characters/format';
+await formatReady(); // meshopt-coded index blobs
 
 const file = 'public/characters/anims.bin';
 const src = fs.readFileSync(file);

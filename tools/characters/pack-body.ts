@@ -11,9 +11,11 @@
  */
 import fs from 'node:fs';
 import zlib from 'node:zlib';
-import { readContainer, writeContainer } from '../../src/characters/format';
+import { readContainer, formatReady, writeContainer } from '../../src/characters/format';
 import { BodyModel } from '../../src/characters/body/BodyModel';
 import { generateAppearance } from '../../src/characters/body/appearance';
+import { repack } from './meshopt.ts';
+await formatReady(); // meshopt-coded index blobs
 
 const file = process.argv.find((a) => a.startsWith('--file='))?.slice(7) ?? 'public/characters/body.bin';
 const src = fs.readFileSync(file);
@@ -52,4 +54,4 @@ for (let i = 0; i < 200; i++) {
 const gz = (u: Uint8Array) => zlib.gzipSync(u, { level: 9 }).length;
 console.log(`body.bin raw ${src.length} -> ${out.length}; gzip ${gz(src)} -> ${gz(out)}; vertex error max ${(maxE * 1000).toFixed(2)} mm, mean ${(sumE / n * 1000).toFixed(3)} mm`);
 if (maxE > 0.0015) { console.log('refused: error above 1.5 mm'); process.exit(1); }
-if (process.argv.includes('--write')) { fs.writeFileSync(file, out); console.log('wrote', file); }
+if (process.argv.includes('--write')) { fs.writeFileSync(file, out); console.log('wrote', file, await repack(file)); }

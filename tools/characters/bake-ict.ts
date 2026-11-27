@@ -16,8 +16,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { readContainer, writeContainer } from '../../src/characters/format.ts';
+import { readContainer, formatReady, writeContainer } from '../../src/characters/format.ts';
 import { JOINT_INDEX as JI } from '../../src/characters/rig.ts';
+import { repack } from './meshopt.ts';
+await formatReady(); // meshopt-coded index blobs
 
 const name = process.argv[2];
 const leads = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, 'ict_leads.json'), 'utf8'));
@@ -269,8 +271,9 @@ execFileSync('python3', ['-I', path.resolve(import.meta.dirname, 'ict_tex.py'), 
 const hairJ = JSON.parse(fs.readFileSync(path.join(OUT, `${id}_hair.json`), 'utf8'));
 const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj, sw, kind, hair: Uint8Array.from(hairJ.hair), brow: Uint8Array.from(hairJ.brow), idx: n < 65536 ? Uint16Array.from(tris) : Uint32Array.from(tris) },
   // vertex order follows first use in the triangle list, so deltas are small and gzip well
-  { pos: { kind: 'delta3', seg: n * 3 }, nrm: { kind: 'delta3', seg: n * 3 }, uv: { kind: 'delta', seg: n * 2, stride: 2 }, idx: { kind: 'delta', seg: tris.length, stride: 1 } });
+  { pos: { kind: 'delta3', seg: n * 3 }, nrm: { kind: 'delta3', seg: n * 3 }, uv: { kind: 'delta', seg: n * 2, stride: 2 } });
 fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);
+await repack(path.join(OUT, `${id}.bin`)); // meshopt index coding
 fs.rmSync(path.join(OUT, `${id}_hair.json`));
 const sizes = { c: fs.statSync(path.join(OUT, `${id}_c.webp`)).size, n: fs.statSync(path.join(OUT, `${id}_n.webp`)).size, o: fs.statSync(path.join(OUT, `${id}_o.webp`)).size };
 const bytes = blob.length + sizes.c + sizes.n + sizes.o;
