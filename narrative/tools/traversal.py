@@ -65,7 +65,7 @@ ROUTES = {
 INSERTS = {
  # M26: after the firefight the firebug bolts up a fire escape and over the W 31st St roofs.
  ("mission.fire_watch", "o8b"): {"id": "o8c", "type": "chase", "target": "npc.hired_firebug", "catchDistanceM": 3,
-   "text": "Catch the firebug on the W 31st roofs", "finish": "tackle",
+   "text": "Catch the firebug on the W 31st roofs", "finish": "tackle", "lawful": True,
    "route": [
      b("drop_ladder", "a dry-cleaner's rear fire escape off W 31st, ladder already down (he used it)", "tv.w31_fe_ladder"),
      b("fire_escape", "five landings up, past a window where an old man is watching the ballgame", "tv.w31_fe_stairs"),
@@ -84,7 +84,7 @@ SIDE = {
      b("vault", "a hot-dog cart at Broadway", "tv.w34_hotdog_cart"),
      b("car_hood", "a stalled bus on 34th", "tv.w34_bus"),
      b("stoop", "up and over a stoop rail on W 35th", "tv.w35_stoop")],
-   "catchDistanceM": 3},
+   "catchDistanceM": 3, "finish": "tackle", "lawful": True},
  # Tar beach: a rooftop chase over the W 30s walk-ups.
  ("mission.side_tar_beach", "o3"): {
    "route": [
@@ -94,7 +94,7 @@ SIDE = {
      b("roof_jump", "a short gap to a lower roof with a pigeon coop (the birds explode upward)", "tv.w34_coop_gap"),
      b("fire_escape", "down a fire escape to the W 35th St side", "tv.w35_fe"),
      b("drop_ladder", "drop from the lowest platform; the ladder is rusted up", "tv.w35_fe_drop", "Hang-drop instead: a 2.5 m fall, a roll on landing.")],
-   "checkpointAfter": "tv.w33_watertank"},
+   "checkpointAfter": "tv.w33_watertank", "finish": "tackle", "lawful": True},
  # Skip board: the skip runs through a vacant lot.
  ("mission.side_skip_board", "o5"): {
    "preChase": True,
@@ -118,6 +118,7 @@ def _apply(spec, table):
             o["traversalMobile"] = MOBILE
             if r.get("text"): o["text"] = r["text"]
             if r.get("catchDistanceM"): o["catchDistanceM"] = r["catchDistanceM"]
+            if r.get("finish"): o["finish"] = r["finish"]; o["lawful"] = r.get("lawful", True)
             if r.get("barks"): o["barks"] = r["barks"]
             if r.get("preChase"): o["note"] = (o.get("note", "") + " The skip runs first: chase him on foot (route), then take him down.").strip()
             cp = r.get("checkpointAfter")

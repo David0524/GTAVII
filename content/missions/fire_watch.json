@@ -120,6 +120,7 @@
       "catchDistanceM": 3,
       "text": "Catch the firebug on the W 31st roofs",
       "finish": "tackle",
+      "lawful": true,
       "barks": "barks.traversal",
       "traversal": [
         {

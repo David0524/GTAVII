@@ -1,0 +1,86 @@
+{
+  "id": "mission.side_platform_dip",
+  "kind": "side",
+  "title": "The Dip at Rush Hour",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Penn Station IND platform, 8th Ave",
+      "to": "8th Ave & W 33rd St",
+      "radius": 30
+    },
+    {
+      "id": "o2",
+      "type": "chase",
+      "text": "Catch the pickpocket in the crowd",
+      "target": "npc.stickup_man",
+      "catchDistanceM": 3,
+      "finish": "tackle",
+      "lawful": true,
+      "traversal": [
+        {
+          "move": "crowd_push",
+          "at": "the rush-hour platform, shoulder to shoulder",
+          "marker": "tv.penn_ind_platform_crowd"
+        },
+        {
+          "move": "vault",
+          "at": "a wooden platform bench",
+          "marker": "tv.penn_ind_bench"
+        },
+        {
+          "move": "subway_stairs",
+          "at": "up the stairs against the crowd coming down",
+          "marker": "tv.penn_8th_stairs"
+        },
+        {
+          "move": "turnstile_vault",
+          "at": "back over the exit turnstiles (heat only if a transit cop sees)",
+          "marker": "tv.penn_ind_turnstiles"
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault/tackle), auto-aligned. No precise timing. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "barks": "barks.chase_bystander"
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "Wallet back to the commuter, 33rd & 8th",
+      "to": "8th Ave & W 33rd St",
+      "item": "item.lifted_wallet",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "A tip, or keep the wallet (+1 heat if a witness saw)",
+    "money": 40,
+    "payNote": "The commuter's tip; keep the wallet instead for about $60 and +1 heat if seen."
+  },
+  "where": "Penn Station IND platform (8th Ave)",
+  "systems": [
+    "chase",
+    "tackle",
+    "witness system",
+    "crowds"
+  ],
+  "mobile": "Generous catch distance; no platform-edge hazards during the chase.",
+  "rank": 53,
+  "slice": false,
+  "systemic": true,
+  "durationMin": 5,
+  "heat": 1
+}

@@ -1,0 +1,33 @@
+{
+  "id": "trigger.enc_coop_thief",
+  "volume": {
+    "at": "W 29th St & 8th Ave",
+    "radius": 120,
+    "alsoAt": [
+      "W 32nd St & 8th Ave",
+      "W 38th St & 8th Ave"
+    ]
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "16:00",
+      "20:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "notDuringMission": true,
+    "minActs": 1
+  },
+  "once": false,
+  "cooldownMin": 120,
+  "do": [
+    {
+      "type": "encounter",
+      "spec": "mission.side_coop_thief",
+      "systemic": true,
+      "note": "Systemic chase (ENGINE_REQUESTS 16). Uses the authored traversal beats; a tackle finishes it (Gameplay 4b0d4b4). Ignoring it is fine."
+    }
+  ]
+}

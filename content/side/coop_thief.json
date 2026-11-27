@@ -1,0 +1,85 @@
+{
+  "id": "mission.side_coop_thief",
+  "kind": "side",
+  "title": "Who Took the Champion?",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "goto",
+      "text": "Hallisey's coop, W 29th St roofs",
+      "to": "W 29th St & 8th Ave",
+      "radius": 25
+    },
+    {
+      "id": "o2",
+      "type": "chase",
+      "text": "Catch the coop thief on the roofs",
+      "target": "npc.stickup_man",
+      "catchDistanceM": 3,
+      "finish": "tackle",
+      "lawful": true,
+      "traversal": [
+        {
+          "move": "vault",
+          "at": "over a coop's wire run (birds everywhere)",
+          "marker": "tv.w29_coop"
+        },
+        {
+          "move": "roof_jump",
+          "at": "a narrow gap to a tenement roof, laundry lines across it",
+          "marker": "tv.w29_gap"
+        },
+        {
+          "move": "ladder",
+          "at": "up a water tank's ladder; he's hiding the shoebox up there",
+          "marker": "tv.w29_watertank"
+        },
+        {
+          "move": "hang_drop",
+          "at": "off the tank platform onto the tar",
+          "marker": "tv.w29_tank_drop"
+        }
+      ],
+      "traversalMobile": "One context button (climb/vault/tackle), auto-aligned. No precise timing. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
+      "barks": "barks.chase_bystander"
+    },
+    {
+      "id": "o3",
+      "type": "deliver",
+      "text": "The champion back to Hallisey's coop",
+      "to": "W 29th St & 8th Ave",
+      "item": "item.champion_pigeon",
+      "radius": 15
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o2"
+  ],
+  "rewards": {
+    "text": "Hallisey's gratitude; a race tip",
+    "money": 75,
+    "payNote": "Hallisey pays in cash and a race tip."
+  },
+  "where": "Roofs over W 29th St",
+  "systems": [
+    "chase",
+    "tackle",
+    "rooftops"
+  ],
+  "mobile": "Missed jumps catch the ledge; no fall death.",
+  "rank": 54,
+  "slice": false,
+  "systemic": true,
+  "durationMin": 8,
+  "heat": 0
+}

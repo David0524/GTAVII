@@ -38,6 +38,14 @@
       "name": "Stolen purse"
     },
     {
+      "id": "item.lifted_wallet",
+      "name": "A commuter's lifted wallet"
+    },
+    {
+      "id": "item.champion_pigeon",
+      "name": "A banded champion pigeon in a shoebox"
+    },
+    {
       "id": "item.stored_coat",
       "name": "Customer's stored fur coat"
     },

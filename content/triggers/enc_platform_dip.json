@@ -1,0 +1,33 @@
+{
+  "id": "trigger.enc_platform_dip",
+  "volume": {
+    "at": "8th Ave & W 33rd St",
+    "radius": 120,
+    "alsoAt": [
+      "W 34th St & 6th Ave",
+      "W 42nd St & 7th Ave"
+    ]
+  },
+  "when": {
+    "flags": [],
+    "time": [
+      "07:00",
+      "10:00"
+    ],
+    "weather": [
+      "any"
+    ],
+    "notDuringMission": true,
+    "minActs": 1
+  },
+  "once": false,
+  "cooldownMin": 120,
+  "do": [
+    {
+      "type": "encounter",
+      "spec": "mission.side_platform_dip",
+      "systemic": true,
+      "note": "Systemic chase (ENGINE_REQUESTS 16). Uses the authored traversal beats; a tackle finishes it (Gameplay 4b0d4b4). Ignoring it is fine."
+    }
+  ]
+}

@@ -318,3 +318,8 @@ Chase and evade objectives now carry `traversal`: an ordered list of beats `{mov
 
 ## From narrative: 16. Systemic encounter triggers (`do.type: "encounter"`)
 `content/triggers/enc_purse_snatch.json` is the first systemic chase. While no mission is running, inside `volume` (its `at` plus `alsoAt`, radius 120 m) and with the cooldown elapsed, the game spawns the spec (`mission.side_purse_snatch`) as an ambient encounter. It builds a 3–5 beat `traversal` route from nearby markup of the listed kinds within 150 m, instead of the authored route. Ignoring the encounter is fine. Bystanders use `barks.chase_bystander` (context = beat kind: cart, hood, crowd, window, roof, subway, lot, newsstand). M26 also gains objective `o8c`, a rooftop chase with `finish: "tackle"`; the tackle API is pending from Gameplay. New tv.* markers are listed by `traversal.markers()`: tv.w31_fe_ladder, tv.w31_fe_stairs, tv.w31_skylight, tv.w31_gap, tv.w31_setback, tv.w31_billboard.
+- **Update (27 Nov):** tackle finishers now use Gameplay's API (commit 4b0d4b4): `finish: "tackle"` with `lawful: true` on purse_snatch, tar_beach, platform_dip, coop_thief and M26 o8c. Two more systemic encounter types:
+  - `trigger.enc_platform_dip`: a pickpocket at the morning rush on the Penn IND, Herald Square and Times Square platforms;
+  - `trigger.enc_coop_thief`: a pigeon thief on the W 29th–38th roofs in the late afternoon.
+
+  New markers: tv.penn_ind_platform_crowd, tv.penn_ind_bench, tv.penn_ind_turnstiles, tv.w29_coop, tv.w29_gap, tv.w29_watertank, tv.w29_tank_drop. tv.penn_8th_stairs is reused.

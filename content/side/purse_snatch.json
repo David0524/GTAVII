@@ -47,7 +47,9 @@
           "at": "up and over a stoop rail on W 35th",
           "marker": "tv.w35_stoop"
         }
-      ]
+      ],
+      "finish": "tackle",
+      "lawful": true
     },
     {
       "id": "o3",

@@ -135,7 +135,7 @@ W("items/quest.json", {"_note": "Carried quest items for activities and side que
   {"id": "item.flower_order", "name": "Flower order (Moretti)"}, {"id": "item.garment_racks", "name": "Garment racks"},
   {"id": "item.ice_candles", "name": "Ice and candles (brownout relief)"}, {"id": "item.money_order", "name": "Postal money order"},
   {"id": "item.paper_bundle", "name": "Newspaper bundle (bulldog edition)"}, {"id": "item.slips", "name": "Numbers slips"},
-  {"id": "item.purse", "name": "Stolen purse"}, {"id": "item.stored_coat", "name": "Customer's stored fur coat"},
+  {"id": "item.purse", "name": "Stolen purse"}, {"id": "item.lifted_wallet", "name": "A commuter's lifted wallet"}, {"id": "item.champion_pigeon", "name": "A banded champion pigeon in a shoebox"}, {"id": "item.stored_coat", "name": "Customer's stored fur coat"},
   {"id": "item.telegram", "name": "Telegram"}, {"id": "item.vehicle", "name": "A car on the Dukes' list (the car itself; Gameplay delivers vehicles)"},
   {"id": "item.wanted_goods", "name": "Marty's want-list goods (radio, camera, fur)"}, {"id": "item.water", "name": "Water cans"},
   {"id": "item.ice", "name": "Ice block"}]})

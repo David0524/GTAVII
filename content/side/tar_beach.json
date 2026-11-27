@@ -63,7 +63,9 @@
           "marker": "tv.w35_fe_drop",
           "note": "Hang-drop instead: a 2.5 m fall, a roll on landing."
         }
-      ]
+      ],
+      "finish": "tackle",
+      "lawful": true
     },
     {
       "id": "o4",
