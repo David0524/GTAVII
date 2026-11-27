@@ -657,6 +657,40 @@
         "hiddenUntilIntroduced": false,
         "note": "Green lamps outside"
       }
+    },
+    {
+      "id": "loc.grand_central",
+      "name": "Grand Central Terminal",
+      "at": "E 42nd St & Park Ave",
+      "invented": false,
+      "kind": "landmark",
+      "discovery": {
+        "via": [
+          "landmark",
+          "sight"
+        ],
+        "sightM": 220,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Seen down 42nd St from Fifth and Madison, and up Park Ave. The Pan Amity Building rises behind it."
+      }
+    },
+    {
+      "id": "loc.grand_central_concourse",
+      "name": "Grand Central concourse",
+      "at": "E 42nd St & Park Ave",
+      "invented": false,
+      "kind": "interior",
+      "interior": "interior.grand_central_concourse",
+      "discovery": {
+        "via": [
+          "landmark"
+        ],
+        "sightM": 0,
+        "shady": false,
+        "hiddenUntilIntroduced": false,
+        "note": "Channel 'enter': discovered on first entry through the 42nd St doors."
+      }
     }
   ],
   "_discovery_note": "Format per the UI & cinematics chat: {via:[landmark|sight|tip|overheard|newspaper|card|mission], sightM, shady, tipFrom:[char ids], mission, hiddenUntilIntroduced, note}."

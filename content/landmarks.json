@@ -249,6 +249,29 @@
           }
         }
       ]
+    },
+    {
+      "id": "lm.grand_central",
+      "real": "Grand Central Terminal",
+      "aliases": [
+        "Grand Central",
+        "Grand Central Station"
+      ],
+      "name": "Grand Central Terminal",
+      "short": "Grand Central",
+      "keepReal": "Public terminal and plain place name (oversight and UI agree); no brand issue.",
+      "mapCard": [
+        "Opened 1913; the Main Concourse ceiling shows the zodiac, painted backwards.",
+        "1974: grimy, half-lit, and fought over. Developers want a tower on top; the courts are deciding.",
+        "Under the clock is where New York says 'meet me'."
+      ],
+      "signage": [
+        {
+          "slot": "entrance",
+          "text": "GRAND CENTRAL TERMINAL",
+          "note": "Carved letters over the 42nd St facade (real public name)."
+        }
+      ]
     }
   ]
 }
