@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-27T12:25:20.132Z",
+  "generated": "2026-11-27T14:15:22.340Z",
   "note": "Headless Node timings, CPU only (container, no GPU); single thread.",
   "seed": 1974,
   "high": {
@@ -12,9 +12,9 @@
       "peds": 400
     },
     "stepMs": {
-      "avg": 2.533,
-      "p95": 3.453,
-      "max": 53.81
+      "avg": 2.113,
+      "p95": 2.806,
+      "max": 40.117
     },
     "failures": {
       "vehOffRoad": 0,
@@ -214,9 +214,9 @@
       "peds": 120
     },
     "stepMs": {
-      "avg": 0.5,
-      "p95": 0.826,
-      "max": 18.399
+      "avg": 0.422,
+      "p95": 0.661,
+      "max": 16.569
     },
     "failures": {
       "vehOffRoad": 0,
@@ -550,6 +550,15 @@
   "handOff": {
     "poseError": 0,
     "followGap": 2.5
+  },
+  "worker": {
+    "maxViewError": 0.00007528345554419502,
+    "eventsDirect": 118,
+    "eventsRemote": 118,
+    "parked": [
+      52,
+      52
+    ]
   },
   "signalHeads": {
     "vehicle": 286,

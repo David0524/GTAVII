@@ -15,6 +15,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { RemoteSimulation, serveSimulation, portPair } from '../../src/sim/remote';
 import { Simulation, SIM_DT } from '../../src/sim/index.ts';
 import { readChunk, GroundKind } from '../../src/shared/chunkFormat.ts';
 import { CHUNK_SIZE } from '../../src/shared/geo.ts';
@@ -431,6 +432,25 @@ async function main() {
   // walkers passing within 0.2 m (half a body): only brief transients where two sidewalk edges meet a corner
   if (full.pedWalkingThrough > 5) problems.push(`people walking through each other: ${full.pedWalkingThrough} sampled pairs under 0.2 m (${full.pedWalkingThroughEx.join('; ')})`);
   if (full.pedCloseAvg > 1.0) problems.push(`people standing inside each other: ${full.pedCloseAvg} pairs closer than 0.25 m per sample`);
+  // worker-ready: the same sim behind a message port (in-memory here) gives the same views as the direct one
+  {
+    const opts = { seed: SEED, maxVehicles: 60, maxPeds: 120, fetchBinary };
+    const direct = new Simulation(opts); await direct.load(); direct.setClock(12 * 60);
+    const [hostPort, clientPort] = portPair();
+    serveSimulation(hostPort, (o: any) => new Simulation(o));
+    const remote = new RemoteSimulation(clientPort, opts as any); await remote.load(); remote.cmd('setClock', 12 * 60);
+    let evD = 0, evR = 0; direct.on('*', () => evD++); remote.on('*', () => evR++);
+    const f = FOCI[1]; let worst = 0;
+    for (let k = 0; k < 40 / SIM_DT; k++) {
+      for (const s2 of [direct, remote] as any[]) { s2.setView(f.x, f.z, 0, -1, 75, 60); s2.setExternalActors([{ id: 'player', x: f.x, z: f.z, vx: 0, vz: 0, radius: 0.4, kind: 'player' }]); s2.update(SIM_DT, f); }
+      if (direct.vehicles.length !== remote.vehicles.length || direct.peds.length !== remote.peds.length) { worst = Infinity; break; }
+      direct.vehicles.forEach((v, i) => { worst = Math.max(worst, Math.abs(v.x - remote.vehicles[i].x) + Math.abs(v.z - remote.vehicles[i].z) + (v.state === remote.vehicles[i].state ? 0 : 99)); });
+      direct.peds.forEach((p, i) => { worst = Math.max(worst, Math.abs(p.x - remote.peds[i].x) + Math.abs(p.z - remote.peds[i].z) + (p.state === remote.peds[i].state && p.archetype === remote.peds[i].archetype ? 0 : 99)); });
+    }
+    const pk = (await remote.call<unknown[]>('parkedCars', f.x, f.z, 120)).length, pd = direct.parkedCars(f.x, f.z, 120).length;
+    report.worker = { maxViewError: worst, eventsDirect: evD, eventsRemote: evR, parked: [pd, pk] };
+    if (!(worst < 1e-3) || evD !== evR || pk !== pd) problems.push(`worker parity: ${JSON.stringify(report.worker)}`);
+  }
   // adults only: no child archetype may exist in the spawn tables, and none may appear in the street
   {
     const sim = new Simulation({ seed: SEED, maxVehicles: 10, maxPeds: 10, fetchBinary }); await sim.load();

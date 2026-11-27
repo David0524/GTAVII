@@ -538,6 +538,15 @@ on the timetable, once the engine posts the new PLAYABLE and the concourse walka
 - Cost: High ~2.3–2.5 ms per step in this container (Low ~0.5 ms): over the 2 ms desktop budget, so the
   sim should move to a worker on desktop (requests item 7; it has no DOM or three.js dependency).
 
+## Running in a Web Worker (`src/sim/remote.ts`, `src/sim/sim.worker.ts`)
+- `new RemoteSimulation(new Worker(new URL('./sim/sim.worker.ts', import.meta.url), { type: 'module' }), opts)`;
+  `await sim.load()`; per frame `setView`, `setExternalActors`, `update(dt, focus)`; read `vehicles`, `peds`,
+  `wildlife`, `police`, `vendorViews`, `signals` (the last snapshot: one frame behind) and `on(type, cb)`
+  for events. Setters: `cmd('setClock', m)`; queries: `await call('parkedCars', x, z, r)`.
+- Views travel as transferred typed arrays plus a string table; a busy worker drops a frame's post rather
+  than queueing them. `setDensityAreas(boxes)` replaces the function hook across the worker boundary.
+- Test: the same seed behind an in-memory port matches the direct sim (max view error 1e-4 m, same events).
+
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
       (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.

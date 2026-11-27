@@ -556,7 +556,10 @@ export class Simulation {
 
   on(type: SimEventType | string, cb: (e: any) => void): void { (this.listeners.get(type) ?? this.listeners.set(type, []).get(type)!).push(cb); }
   private fire(type: string, e: Record<string, unknown>) {
-    if (type === 'subwayEnter' && this.subway) this.subway.riderEntered(e.x as number, e.z as number); const l = this.listeners.get(type); if (l) { e.type = type; e.t = this.core.t; for (const cb of l) cb(e); } }
+    if (type === 'subwayEnter' && this.subway) this.subway.riderEntered(e.x as number, e.z as number);
+    const l = this.listeners.get(type), any = this.listeners.get('*');
+    if (l || any) { e.type = type; e.t = this.core.t; if (l) for (const cb of l) cb(e); if (any) for (const cb of any) cb(e); }
+  }
 
   // ---------------------------------------------------------------- gameplay / narrative hooks
   /**
@@ -651,6 +654,18 @@ export class Simulation {
   setWeather(w: 'clear' | 'overcast' | 'rain'): void { this.weather = w; }
   /** Optional hook: spawn-probability multiplier (0..1) by place, e.g. per district. */
   setDensityHook(fn: ((x: number, z: number, kind: 'vehicle' | 'ped') => number) | null) { this.densityHook = fn; }
+  /**
+   * The same as setDensityHook as plain data (works across a worker boundary): accept probability by area,
+   * the last matching box wins, 1 outside all of them. `vehicle`/`ped` default to `both`.
+   */
+  setDensityAreas(areas: { minX: number; maxX: number; minZ: number; maxZ: number; both?: number; vehicle?: number; ped?: number }[] | null) {
+    if (!areas || !areas.length) { this.densityHook = null; return; }
+    const list = areas.slice();
+    this.densityHook = (x, z, kind) => {
+      for (let i = list.length - 1; i >= 0; i--) { const a = list[i]; if (x >= a.minX && x <= a.maxX && z >= a.minZ && z <= a.maxZ) return (kind === 'vehicle' ? a.vehicle : a.ped) ?? a.both ?? 1; }
+      return 1;
+    };
+  }
   /** Register more archetypes after load (content hot reload). */
   registerArchetypes(defs: ArchetypeDef[]) { if (this.core) this.core.reg.register(defs); else this.pendingArchetypes.push(...defs); }
 
