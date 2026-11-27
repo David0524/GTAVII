@@ -18,7 +18,7 @@
     {
       "hero": "char.delphine_moore",
       "head": "lead_delphine",
-      "tris": 17101,
+      "tris": 17644,
       "draws": 2
     },
     {
@@ -56,7 +56,7 @@
       "props": [],
       "tris": 16158,
       "draws": 2,
-      "buildMs": 128.4
+      "buildMs": 119.3
     },
     {
       "seed": 1,
@@ -73,7 +73,7 @@
       "props": [],
       "tris": 23909,
       "draws": 2,
-      "buildMs": 98.5
+      "buildMs": 91.4
     },
     {
       "seed": 1,
@@ -90,9 +90,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 17644,
       "draws": 2,
-      "buildMs": 79.2
+      "buildMs": 54.1
     },
     {
       "seed": 1,
@@ -111,7 +111,7 @@
       ],
       "tris": 20094,
       "draws": 2,
-      "buildMs": 82.8
+      "buildMs": 59.1
     },
     {
       "seed": 1,
@@ -128,7 +128,7 @@
       "props": [],
       "tris": 24268,
       "draws": 2,
-      "buildMs": 114.6
+      "buildMs": 116.9
     },
     {
       "seed": 1,
@@ -145,20 +145,130 @@
       "props": [],
       "tris": 26140,
       "draws": 2,
-      "buildMs": 72
+      "buildMs": 70.5
     }
   ],
   "updateMs": [
     0.1,
     0,
-    0.1,
     0,
+    0.2,
     0,
     0
   ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.1357,
+        0.2905
+      ],
+      "neck": [
+        0.1398,
+        0.3128
+      ],
+      "hand": [
+        0.0958,
+        0.5213
+      ]
+    },
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": null,
+      "tone": "#b98a67",
+      "cheek": [
+        0.2824,
+        0.2919
+      ],
+      "neck": [
+        0.285,
+        0.3135
+      ],
+      "hand": [
+        0.2385,
+        0.5214
+      ]
+    },
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": "lead_delphine",
+      "tone": "#5a3825",
+      "cheek": [
+        0.4306,
+        0.2715
+      ],
+      "neck": [
+        0.4308,
+        0.2977
+      ],
+      "hand": [
+        0.388,
+        0.5046
+      ]
+    },
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": null,
+      "tone": "#5a3825",
+      "cheek": [
+        0.5802,
+        0.2686
+      ],
+      "neck": [
+        0.5775,
+        0.2964
+      ],
+      "hand": [
+        0.5349,
+        0.5043
+      ]
+    },
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": "lead_nick",
+      "tone": "#c8a17e",
+      "cheek": [
+        0.727,
+        0.3107
+      ],
+      "neck": [
+        0.7229,
+        0.3321
+      ],
+      "hand": [
+        0.6682,
+        0.5288
+      ]
+    },
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": null,
+      "tone": "#c8a17e",
+      "cheek": [
+        0.8773,
+        0.3113
+      ],
+      "neck": [
+        0.8703,
+        0.3329
+      ],
+      "hand": [
+        0.8159,
+        0.5312
+      ]
+    }
+  ],
   "renderMsSoftware": [
-    3.1000000005587935,
-    1.400000000372529,
-    1.2000000001862645
+    4.3999999994412065,
+    1.6000000005587935,
+    1.5
   ]
 }
