@@ -511,7 +511,7 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
     if (gl !== 0 && L.kind === LinkKind.Lane) {
       let slowAhead = gutter;
       for (const w of list) if (w !== v && w.s > v.s && w.s - v.s < 70 && w.v < 6 && Math.abs(w.lat - v.lat) < 1.5) slowAhead = true;
-      if (slowAhead) v.latTarget = gl;
+      if (slowAhead && (gutter || !S.parked?.occupied(v.link, v.s - v.len, len, gl > 0 ? 1 : -1))) v.latTarget = gl; // the gutter must be clear of parked cars to the end of the block
     } else if (L.kind !== LinkKind.Lane) v.latTarget = L.turn === Turn.Straight && v.s < v.len / 2 + 2 ? v.lat : 0; // straight on: keep the gutter line until the rear is past the queue head's nose
   } else if (passing < 0) v.latTarget = passing;
   else if (v.state === 'drive' && v.latTarget < 0) v.latTarget = 0;
@@ -525,6 +525,11 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
   for (const w of S.lcList) if (w !== v && w.lcFrom === v.link && w.lcT < 0.8) {
     const ws = mapS(S, w.link, w.s, v.link);
     if (ws > v.s) { consider(ws - v.s - (w.len + v.len) / 2, w.v, 'queue'); out.hard = Math.min(out.hard, ws - (w.len + v.len) / 2 - 0.3); }
+  }
+  // out in the parking lane (pulled in to the kerb, gutter run): the parked cars there are in the way
+  if (L.kind === LinkKind.Lane && Math.abs(v.lat) > L.width / 2 && S.parked) {
+    const rear = S.parked.nextAhead(v.link, v.s - v.len / 2, v.lat > 0 ? 1 : -1);
+    if (rear < Infinity) { consider(rear - v.s - v.len / 2 - 0.5, 0, 'parked'); out.hard = Math.min(out.hard, rear - v.len / 2 - 0.3); }
   }
   // lane blocks
   for (const b of S.blocks) if (b.link === v.link && b.s > v.s) { consider(b.s - v.s - v.len / 2 - 1, 0, 'blocked'); out.hard = Math.min(out.hard, b.s - v.len / 2 - 1); }
@@ -783,7 +788,10 @@ function periodBehaviour(S: SimCore, v: Vehicle, dt: number) {
   } else if (v.stopLink === v.link && v.state === 'drive' && v.s >= v.stopAt - 3 && v.v < 1.0) {
     if (v.stopKind === 'bus') { v.state = 'busStop'; v.dwell = S.rng.range(10, 18); v.latTarget = Math.min(1.6, (L.width - v.wid) / 2 + 1.0); S.stats.busStops++; v.busServed = v.link; S.onBusStop(S.busStopOf.get(v.link)!.spot, v); S.emit('busStop', { id: v.id, x: v.x, z: v.z, stop: S.busStopOf.get(v.link)?.spot }); }
     else {
-      v.state = 'curb'; v.dwell = v.stopKind === 'pickup' ? S.rng.range(5, 9) : S.rng.range(4, 7); v.latTarget = v.kerb * ((L.width - v.wid) / 2 + 1.5);
+      v.state = 'curb'; v.dwell = v.stopKind === 'pickup' ? S.rng.range(5, 9) : S.rng.range(4, 7);
+      // into a gap at the kerb; parked solid: stop at the lane edge beside them (double-parked, 1974-style)
+      const parked = !!S.parked?.occupied(v.link, v.s - v.len / 2 - 1, v.s + v.len / 2 + 1, v.kerb > 0 ? 1 : -1);
+      v.latTarget = v.kerb * (parked ? Math.max(0, (L.width - v.wid) / 2 - 0.1) : (L.width - v.wid) / 2 + 1.5);
       if (v.ride) rideStopStarted(S, v);
       else if (v.kind === 'service') serviceStopStarted(S, v);
       else S.emit(v.stopKind, { id: v.id, x: v.x, z: v.z, kerb: v.kerb });
@@ -888,6 +896,7 @@ export function stepVehicles(S: SimCore, dt: number) {
     if (Math.abs(v.latTarget) < Math.abs(v.lat) && Math.abs(v.lat) > 0.3) {
       for (const w of S.occ[v.link]) if (w !== v && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 1 && Math.sign(w.lat - v.lat) === Math.sign(v.latTarget - v.lat)) { holdLat = true; break; }
     }
+    if (holdLat && L.kind === LinkKind.Lane && Math.abs(v.lat) > L.width / 2) v.v = Math.min(v.v, 0.3); // and don't carry on along the kerb into the parked cars
     if (!holdLat) v.lat += Math.sign(v.latTarget - v.lat) * Math.min(Math.abs(v.latTarget - v.lat), dt * (v.cop?.siren && L.kind !== LinkKind.Lane ? 3.5 : 1.4));
 
     if (v.cop) policeVehicleTick(S, v, dt);
@@ -923,19 +932,27 @@ export function stepVehicles(S: SimCore, dt: number) {
       const fx = -Math.sin(v.yaw), fz = -Math.cos(v.yaw), ahead = rx * fx + rz * fz, avf = ac.vx * fx + ac.vz * fz;
       if ((ahead < 8 && avf > 1) || (ahead > 0 && avf < -1 && d < 60)) v.pullT = 2.5;
     }
+    let kerbPull = false;
     if (v.pullT > 0) {
       const gside = gutterSideOf(S, L);
-      if (L.kind === LinkKind.Lane && v.state === 'drive' && gutterLat(S, L) !== 0) {
+      // only stop for it when it can actually get by: a gutter clear of parked cars beside us, or a gap to pull into;
+      // otherwise keep the traffic moving so the siren unit can follow it through
+      const gutterFree = gutterLat(S, L) !== 0 && !S.parked?.occupied(v.link, v.s - 45, v.s + v.len, gutterLat(S, L) > 0 ? 1 : -1);
+      const kerbGap = L.laneIndex === 0 && gside < 0 && !!(L.flags & LinkFlag.RightKerbRoom) && !S.parked?.occupied(v.link, v.s - v.len / 2 - 2, v.s + v.len / 2 + 2, 1);
+      if (L.kind === LinkKind.Lane && v.state === 'drive' && gutterFree) {
         // kerb-side lane next to the siren's gutter: stop and lean away from it
         a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren'; if (Math.abs(v.latTarget) <= 0.35) v.latTarget = -gside * 0.3; // (not while passing a double-parker)
-      } else if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive' && gside < 0) {
+      } else if (L.kind === LinkKind.Lane && L.laneIndex === 0 && v.state === 'drive' && gside < 0 && kerbGap) {
         // one-way street: pull right into the parking lane, unless something is parked there (then just stop)
         a = Math.min(a, v.v > 0.2 ? -2.8 : 0); v.blockedBy = 'siren';
-        const kerbBusy = S.occ[v.link].some((w) => w !== v && (w.state !== 'drive' || w.passable) && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 4);
-        if (!kerbBusy && v.latTarget >= 0 && L.flags & LinkFlag.RightKerbRoom) v.latTarget = (L.width - v.wid) / 2 + 1.1;
+        const kerbBusy = S.occ[v.link].some((w) => w !== v && (w.state !== 'drive' || w.passable) && Math.abs(w.s - v.s) < (w.len + v.len) / 2 + 4)
+          || !!S.parked?.occupied(v.link, v.s - v.len / 2 - 2, v.s + v.len / 2 + 2, 1);
+        if (!kerbBusy && v.latTarget >= 0 && L.flags & LinkFlag.RightKerbRoom) { v.latTarget = (L.width - v.wid) / 2 + 1.1; kerbPull = true; }
       }
       else if (v.v > 4) a = Math.min(a, -1.5); // slow down
     } else if (v.pullT > -0.1 && (v.latTarget > 0.35 || Math.abs(v.latTarget) <= 0.35) && v.latTarget !== 0 && v.state === 'drive' && !v.cop && !v.passable) v.latTarget = 0; // undo pull-over offsets only (not passing)
+    // a kerb offset with no live reason (the siren went by, the stop was cancelled): back to the lane
+    if (v.state === 'drive' && !v.cop && !kerbPull && !v.passable && !(v.stopLink === v.link && v.stopAt - v.s < 3) && L.kind === LinkKind.Lane && Math.abs(v.latTarget) > L.width / 2) v.latTarget = 0;
     a = Math.max(-B_MAX, Math.min(v.aMax, a));
     let nv = Math.max(0, v.v + a * dt);
     let ds = v.v * dt + 0.5 * a * dt * dt;

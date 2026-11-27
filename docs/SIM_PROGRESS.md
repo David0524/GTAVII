@@ -27,6 +27,7 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Cutscene → play hand-off | `handOff({cast, x, z, yaw, speed?, after: companion|stay|ambient})`: a live ped at exactly the cutscene's last pose, then companion follow / hold / ambient; `actorHandedOff`; test asserts pose error 0 and the follow (requests item 11) |
 | Street vendors (STREET_VENDORS.md) | **First pass**: 11 narrative types placed by spot kind, district, hour and weather; carts pushed in/out; queues, sales, calls, litter; reactions (gunfire, reckless drivers, police move peddlers on, monte lookouts scatter the crew); gameplay commands/notices; `vendorViews`; test asserts per place and hour |
 | Hand a ped to gameplay (brawls) | `releasePed` / `moveReleasedPed` / `reclaimPed` (`pedCalmed`) |
+| Parked cars on every kerb | **Done**: `parkedCars(x, z, r)` (static, rule-aware, deterministic per place and day); traffic uses only the gaps; test asserts no vehicle ever touches a parked car |
 | Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
@@ -489,6 +490,27 @@ mirrors them; brands and menus stay in content). Adults only.
 - *Plan:* per-vendor memory of the player (served, robbed, tipped) for barks; stand-and-eat scenarios at
   hot-dog carts; physics carts and spills via vehicles; protection-racket and permit beats with gameplay.
 
+## Parked cars (VISUAL_BAR "parked cars on every kerb"; requests item 5)
+- `sim.parkedCars(x, z, r)` → `{x, z, yaw, vclass, variant, len, wid, lane, s, side}[]`: a slot every ~6.3 m
+  along each kerb whose parking lane is on roadway ground (both kerbs of one-lane one-way streets), clear of
+  the corners; empty where `Parking.rule` says no; otherwise ~86% full by day, ~93% at night,
+  deterministic per slot and day. The engine instances them through the traffic renderer and refreshes when
+  the focus moves ~100 m or on the quarter hour (rules change with time).
+- **Kerb rules (period):** Midtown avenues and the major crosstown streets (14th, 23rd, 34th, 42nd, 57th)
+  are "No Standing 7 AM – 7 PM" on weekdays; side streets park solid; everything parks at night and at
+  weekends; hydrants, bus stops and corners stay clear; alternate-side cleaning empties one side in its
+  window. The same rules ticket and tow the player's car.
+- **Traffic uses the gaps:** siren gutter runs only where the gutter is clear to the end of the block;
+  civilians pull over for a siren only into a gap (otherwise they keep moving so it can follow); cab and
+  service stops pull into a gap, or stop at the lane edge beside the parked cars (double-parked, 1974-style);
+  anything out in the parking lane treats the parked cars as obstacles.
+- **Emergency response with parked kerbs:** units on patrol start on the open corridors; side streets cost
+  more to route through (nobody can get out of the way); a unit heading for a side-street scene stops on
+  the nearest corridor within ~75 m; a unit stuck in traffic within sight of the scene (90 m; a block if
+  it's wedged in a parked side street) stops and the crew goes on foot. First unit on scene in the test:
+  13–28 s on both seeds.
+- **Counts (Herald Square, 150 m):** ~75 by day (side streets), ~180 at night (every kerb).
+
 ## Grand Central (user decision; after the merge sprint)
 The east edge moves to include Grand Central Terminal. Plan (requests item 12): the Park Avenue viaduct and
 ramps as their own lane level (streets with grade `g` ≠ 0 are left out of the ground graph today, so they
@@ -510,7 +532,8 @@ on the timetable, once the engine posts the new PLAYABLE and the concourse walka
       to the player's car specifically (only generic external vehicles).
 - [ ] Real-hardware timing (desktop + phone); move to a worker if High > 2 ms on device.
 - [ ] Cab dispatch over the next 2–3 blocks; bus route ids and denser stop service.
-- [ ] Parked-car props for the parking lanes (engine) and kerb gaps at hydrants/bus stops.
+- [x] Parked cars (sim supplies them; engine instances).
+- [ ] Rush-hour gridlock at Herald Square / West 34th: longest standstill in the test is up to ~179 s on seed 7 (cap 180).
 - [ ] Walk graph: fall back to a narrower band or a kerb-hugging path where buildings meet the kerb.
 - [ ] Turn-arrow phases where 1974 practice had them; pedestrian countdown is implicit.
 - [ ] Clock-driven schedules once the engine clock exists (`setClock` already honoured).

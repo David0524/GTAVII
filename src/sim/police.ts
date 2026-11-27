@@ -80,12 +80,14 @@ export function sirenTimeTo(S: SimCore, fromGroup: number, gx: number, gz: numbe
 /** A free lane spot whose siren travel time to (x,z) is close to `targetSec` (a unit already on patrol nearby). */
 export function responderStart(S: SimCore, x: number, z: number, targetSec = 20): { lane: number; s: number } | null {
   let best: { lane: number; s: number } | null = null, bd = Infinity;
-  for (let tries = 0; tries < 40; tries++) {
+  for (let tries = 0; tries < 100; tries++) {
     const a = S.rng.next() * Math.PI * 2, r = S.rng.range(80, 260);
     const near = nearestLane(S, x + Math.cos(a) * r, z + Math.sin(a) * r);
     if (near.lane < 0 || near.d > 45) continue;
     const len = S.net.len[near.lane];
     if (len < 20) continue; // too short to start on (stubs between close junctions)
+    // units on patrol cruise the open corridors (avenues, major streets), not side streets parked solid
+    if ((tries < 90 || best) && (S.net.groups.get(S.net.g.links[near.lane].group) ?? [near.lane]).some((l) => S.parked?.occupied(l, 0, S.net.len[l]))) continue;
     const s = Math.max(6, Math.min(len - 10, near.s));
     if (S.occ[near.lane].some((o) => Math.abs(o.s - s) < o.len / 2 + 9)) continue;
     sampleAt(S.net.g.links[near.lane].pts, S.net.cum[near.lane], s, tmp);
@@ -110,11 +112,15 @@ function sirenCost(S: SimCore, g: number, len: number): number {
   const net = S.net, lanes = net.groups.get(g)!, L = net.g.links[lanes[0]];
   let queued = 0;
   for (const l of lanes) for (const w of S.occ[l]) if (w.v < 2) queued++;
-  const gutter = (net.g.roads[L.owner].flags & 4) === 0; // links have no parking lane to run in
+  // a gutter to run in: not on link roads, and the kerb lane's parking lane clear of parked cars
+  const gside: 1 | -1 = net.g.roads[L.owner].oneway !== 0 ? -1 : 1; // the siren gutter: left kerb on one-ways, right on two-way streets
+  const gutter = (net.g.roads[L.owner].flags & 4) === 0 && !lanes.some((l) => S.parked?.occupied(l, 0, net.len[l], gside));
   // a stopped queue head at the line: a siren unit coming out of the gutter waits beside it until it moves
   let head = 0;
   for (const l of lanes) { const h = S.occ[l][S.occ[l].length - 1]; if (h && h.v < 1 && net.len[l] - h.s < h.len / 2 + 3) head = 1; }
-  return len / (L.speed * 1.2) + queued * (gutter ? 0.4 : 2.5) + (net.isSignal(L.endJ) ? 4 : 1) + head * (net.isSignal(L.endJ) ? 10 : 3);
+  // no gutter and a single lane: nobody can get out of the way, the unit rides the queue at traffic pace
+  const stuck = !gutter && lanes.length < 2;
+  return len / (L.speed * (stuck ? 0.6 : 1.2)) + queued * (gutter ? 0.4 : stuck ? 6 : 2.5) + (stuck ? 12 : 0) + (net.isSignal(L.endJ) ? 4 : 1) + head * (net.isSignal(L.endJ) ? 10 : 3);
 }
 /** Group path from `from` to `to` (inclusive), or [] if unreachable. `siren`: weigh by expected time. */
 function routeGroups(S: SimCore, from: number, to: number, siren = false): number[] {
@@ -163,12 +169,36 @@ export function policeConnector(S: SimCore, v: Vehicle): number {
   return r.conn;
 }
 
+/** Avenues and the major crosstown streets: the corridors kept clear by day (Parking.rule). */
+function groupMajor(S: SimCore, grp: number): boolean {
+  const lanes = S.net.groups.get(grp); if (!lanes?.length) return false;
+  const road = S.net.g.links[lanes[0]].owner, name = S.net.roadName(road);
+  return S.net.isAvenue(road) || /^(East|West) (14th|23rd|34th|42nd|57th) Street$/.test(name);
+}
+function groupParked(S: SimCore, grp: number): boolean {
+  return (S.net.groups.get(grp) ?? []).some((l) => S.parked?.occupied(l, 0, S.net.len[l]));
+}
+
 /** Connector at the end of v's current lane on the shortest legal route to (gx,gz); -1 when already on the goal block. */
 export function routeConnectorTo(S: SimCore, v: Vehicle, gx: number, gz: number, goalGroup = -1): { conn: number; path: number[] } {
   const siren = !!v.cop?.siren;
   const net = S.net, L = net.g.links[v.link];
   if (L.kind !== LinkKind.Lane) return { conn: -1, path: [] };
-  if (goalGroup < 0) { const goal = nearestLane(S, gx, gz); if (goal.lane < 0) return { conn: -1, path: [] }; goalGroup = net.g.links[goal.lane].group; }
+  if (goalGroup < 0) {
+    const goal = nearestLane(S, gx, gz); if (goal.lane < 0) return { conn: -1, path: [] }; goalGroup = net.g.links[goal.lane].group;
+    // a siren unit doesn't drive into a side street (parked solid, one lane): it stops on the nearest open corridor
+    // within ~75 m and the crew walks in (arrival radius widened to match)
+    if (siren && !groupMajor(S, goalGroup)) {
+      let bd = 75, alt = -1;
+      for (const l of net.lanesNear(gx, gz, 75, new Set())) {
+        if (net.g.links[l].kind !== LinkKind.Lane || !groupMajor(S, net.g.links[l].group) || groupParked(S, net.g.links[l].group)) continue;
+        const p = net.g.links[l].pts; let d = Infinity;
+        for (let k = 0; k < p.length; k += 2) d = Math.min(d, Math.hypot(p[k] - gx, p[k + 1] - gz));
+        if (d < bd) { bd = d; alt = l; }
+      }
+      if (alt >= 0) { goalGroup = net.g.links[alt].group; v.cop!.arriveR = Math.max(45, bd + 20); }
+    }
+  }
   const path = routeGroups(S, L.group, goalGroup, siren);
   if (path.length < 2) return { conn: -1, path };
   const nextG = path[1];
@@ -200,12 +230,18 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
     return false;
   }
   // close enough (goto): pull in right here
-  if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && d < 45 && v.stopLink !== v.link) {
+  if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && d < (c.arriveR ?? 45) && v.stopLink !== v.link) {
     const at = v.s + Math.max(4, v.v * v.v / 5);
     if (at < net.len[v.link] - 4) { v.stopLink = v.link; v.stopAt = at; v.stopKind = 'police'; }
     else if (L.kind === LinkKind.Lane && net.len[v.link] - 4 > v.s + 2) { v.stopLink = v.link; v.stopAt = net.len[v.link] - 4; v.stopKind = 'police'; } // brake hard to the end of the block
     else if (v.v < 2 && L.kind === LinkKind.Lane) { v.stopLink = v.link; v.stopAt = v.s; v.stopKind = 'police'; } // no room ahead: this is the spot
     else c.pullInNext = true;
+  }
+  // stuck in traffic within sight of the scene: stop where it stands, the crew goes the rest on foot
+  // (a block away if it's stuck in a side street parked solid: nothing will let it through)
+  const walkR = groupParked(S, L.group) && !groupMajor(S, L.group) ? 130 : 90;
+  if ((c.mode === 'goto' || c.role) && c.mode !== 'roadblock' && !c.arrived && d < walkR && v.v < 0.5 && c.stuckT > 3 && v.stopLink !== v.link) {
+    v.stopLink = v.link; v.stopAt = v.s; v.stopKind = 'police';
   }
   // carried over from the previous block: pull in at the start of this one
   if (c.pullInNext && L.kind === LinkKind.Lane && v.stopLink !== v.link && !c.arrived) {

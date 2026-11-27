@@ -64,6 +64,8 @@ export interface Hail { ped: number; road: number; side: number; x: number; z: n
 export interface Actor { id: string; x: number; z: number; vx: number; vz: number; radius: number; kind: 'player' | 'vehicle'; /** emergency siren on: civilians pull over */ siren?: boolean }
 /** Police locomotion state for a foot cop or a police car (decisions stay with Gameplay). */
 export interface CopState {
+  /** arrival radius (m): widened when the scene is on a side street parked solid and the unit stops on a corridor */
+  arriveR?: number;
   id: number; kind: 'foot' | 'car'; role?: 'police' | 'ambulance' | 'fire' | 'tow'; precinct: string; mode: 'patrol' | 'goto' | 'search' | 'pursue' | 'boxIn' | 'roadblock' | 'idle';
   x: number; z: number; cx: number; cz: number; radius: number; yaw: number; target: string | null; urgent: boolean; siren: boolean; maxSpeed: number;
   route: number[]; arrived: boolean; stuckT: number; blockIds: number;
@@ -107,6 +109,8 @@ export interface SimCore {
   vehicles: Vehicle[]; peds: Ped[];
   occ: Vehicle[][]; occDirty: number[];
   pGrid: AgentGrid; vGrid: AgentGrid;
+  /** parked cars in the kerb parking lanes (parked.ts): kerb uses only where there's a gap */
+  parked?: { occupied(lane: number, s0: number, s1: number, side?: 1 | -1): boolean; nextAhead(lane: number, s: number, side: 1 | -1): number };
   /** threats reach the vendor layer too (vendors.ts) */
   onThreat?: (x: number, z: number, r: number) => void;
   /** connectors siren units are about to enter: cross traffic holds at the line */
