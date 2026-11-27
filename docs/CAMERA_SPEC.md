@@ -72,3 +72,16 @@
   - the frame strip shows corners and fire-escape rails.
 - **Timings:** shoulder swap, look-behind and climb framing, each measured on the test course against the numbers above.
 - **Phone:** the camera update stays ≤ 0.15 ms per frame on the mobile Low profile; the sphere cast plus 2 rays is cheaper than per-object checks.
+
+## vs GTA V / VI / RDR2 (REFERENCE_GAMES.md)
+- **What they do:**
+  - collision that never clips in alleys, with pull-in that doesn't pop;
+  - a shoulder swap button;
+  - look-behind while running or driving;
+  - a camera that frames the ledge during climbs (RDR2 most clearly);
+  - fall lag before landing.
+- **Where we match (on paper):** every one of these is specified above, with numbers and an acceptance test.
+- **Where we fall short:**
+  - nothing is built yet; it waits for the ownership answer;
+  - RDR2's camera also reacts to horse and terrain slope, and that's out of scope here;
+  - GTA V's fine-tuned per-weapon aim offsets will be a single aim pose here until gameplay lands its weapons list.

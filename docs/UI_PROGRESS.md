@@ -191,6 +191,21 @@ are not cross-merged. Adapters for gameplay's `?gameplay=1` scene and vehicles' 
   - `uilab.html` isn't in the production build, because `vite.config` is engine-owned. To use it
     on a phone, run it in dev mode.
 
+## vs GTA V / VI / RDR2 (user decision: "Reference those games for EVERYTHING"; docs/briefs/REFERENCE_GAMES.md)
+GTA VI is judged from public trailers and footage only. We study behaviour and quality and copy nothing: no art, fonts, icons, names or layouts.
+
+| Area | What the reference does | Where we match | Where we fall short, and the plan |
+|---|---|---|---|
+| **HUD** | GTA V: radar bottom-left, with health and armour as rim bars; cash and wanted stars top-right, fading when idle. RDR2: a minimal radar with cores, and everything can fade in quiet moments | Every element is On, Dynamic or Off. The minimap hides when you stand still. Heat is radio text and cones on the map instead of stars, and health is an edge vignette | RDR2's meters breathe with the scene and ours just fade. Plan: tie fades to combat and heat events once gameplay's real state lands |
+| **Minimap and discovery** | GTA V: a GPS line and every blip is known. RDR2: fog of war is lifted by travel, with places found by sight | Discovery is stricter than either (sight, tips, overheard, papers), and the route is pencilled instead of a GPS line, which suits 1974 | Ours is a 2D print with no terrain or height cue. RDR2 shades elevation. Plan: hatch the elevated lines and bridges (low cost) |
+| **Pause and map flow** | GTA V: tabs over a darkened frame, the map as the first tab. RDR2: a desaturated live frame, a single band and a quick map key | A held, graded frame behind translucent panels; the map opens first and is opaque; tabs and sub-tabs cycle on the shoulder buttons | GTA's map zoom is smoother. Ours redraws vectors on the first draw. Plan: tile cache, measured on a low-end phone |
+| **Menus over the world** | RDR2 catalogues: the period artefact stays inside the object, and the controls are clean sans on dark | Same rule (UI_REFERENCES rule 2): newspaper, ledger and plates are artefacts, and the chrome is one sans face | RDR2 holds the book in 3D hands. Ours is flat. Plan: a "held" camera pose for paper screens once characters lands hands (needs engine and characters) |
+| **Interaction prompts and traversal** | GTA V: a button glyph in the corner help box. RDR2: a bottom-right prompt stack with hold rings. GTA VI footage: context prompts sit next to the object | The chip sits on the edge itself ("SPACE Vault"), and on touch the jump button relabels instead of adding a button | No hold rings yet. Plan: a ring fill on the chip for hold actions when gameplay exposes hold timing |
+| **Camera** (spec only) | GTA V and RDR2: sphere-cast collision, shoulder swap, look-behind, a camera that lifts on climbs, and fall lag | docs/CAMERA_SPEC.md covers all five, with numbers and acceptance tests | Not built. It waits for the engine's ownership answer (ENGINE_REQUESTS "From ui: 6") |
+| **Cutscenes** | GTA V and RDR2: hand-animated performance capture, shallow DoF, cuts on action, seamless hand-back to play | Seamless hand-back with no black frame, period lens language (35 mm geometry, zooms, rack-focus data) and 2.39 letterbox | Capsule stand-ins, no faces, no DoF. This is the biggest gap and won't close until the characters stream and the engine's post stack land. Honest call: on phones, DoF will be a cheap two-layer blur |
+| **Title and loading** | GTA V: painted key-art panels. RDR2: quiet loading slides with a tip | A film-look title with the wordmark, and title gating on the load report | No key art: it routes through narrative's image prompts. Plan: loading tips as period newspaper briefs |
+| **Touch** (no reference: none of the three games is on phones) | — | Context button, pedals, the layout editor, and the rig at 30 of 30 checks plus 2 new ones | Judged against the phone, not the references |
+
 ## Cinematics: branches
 Narrative's `showIf {choice, option}` is accepted. Branch shots play only for the picked option; the timeline is rebuilt at the pick, so timing before the hold is unchanged. The tool lays out every branch, validation checks that each branch follows its hold, and m29 has a test for all four options.
 
