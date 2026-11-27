@@ -386,6 +386,29 @@ export function authoredClips(): ClipDef[] {
       { t: 2.4, j: {} },
     ],
   });
+  // --- cars (engine: seat callback). In place, relative to the SEATED root (setSeat): the character
+  // starts/ends standing outside the driver's door, which is on its left (+x). End/start pose matches
+  // the drive clip (pelvis 0.36 m below rest, 0.3 m back). ~1.2 s each.
+  const SIT = { thigh_l: [-85, 0, -6] as Euler, thigh_r: [-85, 0, 6] as Euler, calf_l: [85, 0, 0] as Euler, calf_r: [85, 0, 0] as Euler, spine_01: [-4, 0, 0] as Euler, upperarm_l: [-45, 10, 10] as Euler, upperarm_r: [-45, -10, -10] as Euler, lowerarm_l: [0, -55, 0] as Euler, lowerarm_r: [0, 55, 0] as Euler };
+  const SIT_P: [number, number, number] = [0, -0.36, -0.3];
+  const enterKeys: Key[] = [
+    { t: 0, j: {}, pelvis: [0.45, 0, 0.05] },
+    { t: 0.35, j: { pelvis: [0, 70, 0], thigh_r: [-20, 0, 0], calf_r: [30, 0, 0], neck_01: [0, -20, 0] }, pelvis: [0.4, -0.04, 0] },
+    { t: 0.75, j: { pelvis: [0, 70, 0], spine_01: [18, 0, 0], spine_02: [12, 0, 0], neck_01: [14, -30, 0], thigh_l: [-75, 0, -8], thigh_r: [-75, 0, 8], calf_l: [80, 0, 0], calf_r: [80, 0, 0], upperarm_l: [-20, 0, 20], lowerarm_l: [0, -30, 0] }, pelvis: [0.14, -0.33, -0.2] },
+    { t: 1.2, j: SIT, pelvis: SIT_P },
+  ];
+  defs.push({ name: 'car_enter_l', duration: 1.2, loop: false, base: R, keys: enterKeys });
+  defs.push({ name: 'car_exit_l', duration: 1.2, loop: false, base: R, keys: enterKeys.slice().reverse().map((k) => ({ ...k, t: +(1.2 - k.t).toFixed(3) })) });
+  defs.push({ // carjack victim: yanked out of the driver's seat by the collar, stumbles, ends standing hunched ~1 m out
+    name: 'pulled_out', duration: 1.6, loop: false, base: R,
+    keys: [
+      { t: 0, j: SIT, pelvis: SIT_P },
+      { t: 0.25, j: { ...SIT, spine_01: [0, 0, 25], spine_02: [0, 0, 15], neck_01: [-10, 0, 10], upperarm_l: [-60, 20, 70], upperarm_r: [-80, -20, -40], lowerarm_l: [0, -30, 0], lowerarm_r: [0, 70, 0] }, pelvis: [0.25, -0.3, -0.2] },
+      { t: 0.6, j: { pelvis: [0, 30, 20], spine_01: [10, 0, 20], thigh_l: [-40, 0, 0], thigh_r: [-60, 0, 0], calf_l: [50, 0, 0], calf_r: [70, 0, 0], upperarm_l: [-30, 20, 80], upperarm_r: [-70, -20, -60], neck_01: [-15, 15, 0] }, pelvis: [0.6, -0.18, -0.02] },
+      { t: 1.0, j: { pelvis: [0, 40, 0], spine_01: [28, 0, 0], spine_02: [12, 0, 0], thigh_r: [-35, 0, 0], calf_r: [40, 0, 0], upperarm_l: [-40, 20, 30], upperarm_r: [-40, -20, -30], neck_01: [10, 0, 0] }, pelvis: [0.9, -0.1, 0.05] },
+      { t: 1.6, j: { pelvis: [0, 60, 0], spine_01: [14, 0, 0], spine_02: [8, 0, 0], neck_01: [-4, -25, 0], upperarm_l: [-60, 25, 10], upperarm_r: [-60, -25, -10], lowerarm_l: [0, -90, 0], lowerarm_r: [0, 90, 0] }, pelvis: [1.0, -0.04, 0.05] },
+    ],
+  });
   // --- talking gestures by emotion (layered over idles; amplitude scales with intensity) --------
   const talk = (name: string, amp: number, dur: number, lean: number, headNod: number) => defs.push({
     name, duration: dur, loop: true, mask: MASKS.upper, base: R,

@@ -135,6 +135,24 @@ Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;
 Wikimedia rate-limited this container, so sourcing is pending.
 
+## Cars (engine request, player driving in the main game)
+- **Seat:** `Character.setSeat(pose, { hip: true })` takes the seat point and places the root so
+  the drive clip's pelvis lands on it. The drive pelvis sits 0.514 m up and 0.296 m back from the
+  root at rest-pelvis height 0.873 m, scaled to each body. Without `hip`, the old contract stays
+  (the pose is the root).
+- **Drive:** `drive` = Quaternius `Driving_Loop`.
+- **Steering:** `setWheel({center, axis, up, radius}, steer)` and `setSteer(-1..1)` IK the hands
+  onto the rim at ten-to-two, turned by up to ±90°. `setWheel(null)` releases them.
+- **Authored clips** (in place, relative to the seated root; the driver's door is on the
+  character's left):
+  - `car_enter_l` (1.2 s): starts standing ~0.45 m out, back to the seat, sits ducking, swings in,
+    ends in the drive pose.
+  - `car_exit_l`: the reverse.
+  - `pulled_out` (1.6 s): a carjack victim yanked out sideways, stumbles, ends standing hunched
+    ~1 m out.
+- **Not yet:** separate steering clips (the hand IK covers steering), right-door variants,
+  passenger seats.
+
 ## Estimate: moving the cast onto ICT identities (oversight request)
 Measured today:
 

@@ -38,6 +38,7 @@ export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; lo
   deal_cards: { clip: 'deal_cards', layer: 'full', loop: true }, queue: { clip: 'queue_wait', layer: 'full', loop: true }, pay: { clip: 'pay', layer: 'upper' },
   watch: { clip: 'watch_lean', layer: 'full', loop: true }, eat_walk: { clip: 'eat_walk', layer: 'upper', loop: true }, sip_walk: { clip: 'sip_walk', layer: 'upper', loop: true },
   fall_down: { clip: 'fall_down', layer: 'full' }, down: { clip: 'down_lie', layer: 'full', loop: true }, get_up: { clip: 'get_up', layer: 'full' }, angry: { clip: 'argue', layer: 'upper', loop: true },
+  car_enter_l: { clip: 'car_enter_l', layer: 'full' }, car_exit_l: { clip: 'car_exit_l', layer: 'full' }, pulled_out: { clip: 'pulled_out', layer: 'full' },
   idle_pockets: { clip: 'idle_pockets', layer: 'full', loop: true }, idle_hands_behind: { clip: 'idle_hands_behind', layer: 'full', loop: true }, idle_heat: { clip: 'idle_heat', layer: 'full', loop: true },
 };
 
