@@ -30,10 +30,13 @@ class Occupancy {
     if (i < 0 || j < 0 || k < 0 || i >= this.nx || j >= this.ny || k >= this.nz) return 0;
     return this.bits[(k * this.ny + j) * this.nx + i];
   }
-  private cache = new Map<number, number>();
+  private cache = new Map<string, number>();
   /** trace() memoised on a 0.25 m grid per source id: dense small props share one visibility sample. */
-  traceCached(src: number, x0: number, y0: number, z0: number, x1: number, y1: number, z1: number) {
-    const key = ((((src * 1024 + (Math.floor(x0 * 4) & 1023)) * 1024 + (Math.floor(y0 * 4) & 1023)) * 1024) + (Math.floor(z0 * 4) & 1023));
+  traceCached(src: number, x0: number, y0: number, z0: number, x1: number, y1: number, z1: number, nb = 0) {
+    // key: source, a 0.125 m cell of the start point and the surface's dominant normal direction (0..5). Without the
+    // normal, faces on opposite sides of a thin wall or jamb shared one result and baked a blocky dark grid
+    // (engine board storefronts_cut_noon: door surrounds and jambs).
+    const key = `${src}:${Math.floor(x0 * 8)}:${Math.floor(y0 * 8)}:${Math.floor(z0 * 8)}:${nb}`;
     let v = this.cache.get(key);
     if (v === undefined) { v = this.trace(x0, y0, z0, x1, y1, z1); this.cache.set(key, v); }
     return v;
@@ -104,6 +107,7 @@ function bakeMesh(m: MeshArrays, c: CellOut, sources: { l: LightOut; via: Portal
   for (let v = 0; v < nv; v++) {
     const x = P[3 * v], y = P[3 * v + 1], z = P[3 * v + 2], nx = N[3 * v], ny = N[3 * v + 1], nz = N[3 * v + 2];
     const px = x + nx * 0.03, py = y + ny * 0.03, pz = z + nz * 0.03;
+    const ax = Math.abs(nx), ay = Math.abs(ny), az = Math.abs(nz), nb = ax >= ay && ax >= az ? (nx > 0 ? 0 : 1) : ay >= az ? (ny > 0 ? 2 : 3) : (nz > 0 ? 4 : 5);
     let r = 0, g = 0, bl = 0;
     for (const s of sources) {
       const l = s.l, lx = l.x - px, ly = l.y - py, lz = l.z - pz, d2 = lx * lx + ly * ly + lz * lz, d = Math.sqrt(d2);
@@ -115,7 +119,7 @@ function bakeMesh(m: MeshArrays, c: CellOut, sources: { l: LightOut; via: Portal
       // bulbs in shades throw more down than up
       const down = l.kind === 'bulb' ? (ly > 0 ? 1 : 0.3) : 1; // shaded fixtures pool light below, ceilings stay darker
       let e = (l.intensity * 1.25 * cos * down) / (d2 + 0.3); // near inverse-square: pools under fixtures, fall-off into corners
-      if (occ && e > 0.004) e *= occ.traceCached(s.id, px, py, pz, l.x, l.y, l.z);
+      if (occ && e > 0.004) e *= occ.traceCached(s.id, px, py, pz, l.x, l.y, l.z, nb);
       r += e * l.color[0]; g += e * l.color[1]; bl += e * l.color[2];
     }
     // window light: sample each glazed street opening at 6 points (rough form factor)
@@ -134,7 +138,7 @@ function bakeMesh(m: MeshArrays, c: CellOut, sources: { l: LightOut; via: Portal
         const cw = Math.abs((lx * wn[0] + ly * wn[1] + lz * wn[2]) / d);
         // light from a window comes in mostly downward: weight samples on the upper part
         let e = (area / 6) * cv * cw / (Math.PI * (d2 + 0.25)) * (0.6 + sv * 0.6);
-        if (occ && e > 0.002) e *= occ.traceCached(5000 + wi * 8 + si, px, py, pz, sx, sy, sz);
+        if (occ && e > 0.002) e *= occ.traceCached(5000 + wi * 8 + si, px, py, pz, sx, sy, sz, nb);
         sky += e;
       }
     }

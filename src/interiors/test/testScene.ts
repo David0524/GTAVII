@@ -26,6 +26,7 @@ import { FlyCamera } from '../../camera/FlyCamera';
 import { Input } from '../../input/Input';
 import { FrameStats } from '../../engine/debug/DebugHud';
 import { createInteriors } from '../index';
+import { placeModels, cellLights } from '../runtime/models';
 import { buildShell, type ShellArrays, type WindowArrays } from './testShell';
 import { createWindowRoomMaterial } from '../windowRooms';
 import { roofHatchesWorld } from '../layout';
@@ -54,7 +55,7 @@ export async function runInteriorsTest() {
   const base = import.meta.env.BASE_URL + 'data/';
   await loadTerrain();
 
-  const interiors = createInteriors({ quality: quality.name, content: { interiors: null, places: null } });
+  const interiors = createInteriors({ quality: quality.name, content: { interiors: null, places: null }, propModels: !params.has('noModels') });
   await interiors.ready;
   if (params.get('power')) interiors.setPower('all', params.get('power') as 'dim' | 'off');
   const clock = { minutes, date: '1974-07-19' };
@@ -92,7 +93,9 @@ export async function runInteriorsTest() {
       const built = buildInterior({ unit: pick.u, building: { ...pick.b, ...(cond !== undefined ? { cond } : {}) }, quality: quality.name, ring, street: interiors.index.streets[pick.u.street] ?? '' });
       const ms = performance.now() - t0;
       let tris = 0;
-      for (const c of built.cells) for (const [m, mt] of [[c.opaque, mat], [c.glass, glass]] as [MeshArrays | null, THREE.Material][]) if (m) { const me = new THREE.Mesh(geom(m), mt); me.userData.interior = look; holder.add(me); tris += m.index.length / 3; }
+      const cellMeshes: THREE.Object3D[] = [];
+      for (const c of built.cells) for (const [m, mt] of [[c.opaque, mat], [c.glass, glass]] as [MeshArrays | null, THREE.Material][]) if (m) { const me = new THREE.Mesh(geom(m), mt); me.userData.interior = look; holder.add(me); tris += m.index.length / 3; if (mt === mat) cellMeshes.push(me); }
+      if (!params.has('noModels') && built.models.length) { cellLights(built, cellMeshes); await placeModels(import.meta.env.BASE_URL ?? '/', built, cellMeshes); }
       for (const d of built.doors) { if (d.street || Math.hypot(d.hinge[0] - pick.u.door.t, d.hinge[2] - 1.5) < 2.5) continue; const g = new THREE.Group(); g.position.set(...d.hinge); g.rotation.y = d.yaw + d.swing * 1.5; const me = new THREE.Mesh(geom(d.mesh), mat); me.userData.interior = look; g.add(me); holder.add(g); }
       const street = new THREE.Mesh(new THREE.PlaneGeometry(80, 30).rotateX(-Math.PI / 2), streetMat); street.position.set(pick.u.w / 2, -0.05, -15); holder.add(street);
       const opp = new THREE.Mesh(new THREE.BoxGeometry(80, 25, 2), oppMat); opp.position.set(pick.u.w / 2, 12, -22); holder.add(opp);
