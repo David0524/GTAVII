@@ -24,6 +24,7 @@ import { Parking, type ParkingRule } from './parking';
 import { Subway, type Station, type TrainCall } from './subway';
 import { Doors, type DoorRec, type DoorRate } from './doors';
 import { Vendors, type VendorView } from './vendors';
+import { Memory, type MemKind } from './memory';
 import { ParkedCars, type ParkedCar } from './parked';
 export type { DoorRec, DoorRate } from './doors';
 export { VENDOR_KINDS, type VendorView, type VendorKind } from './vendors';
@@ -152,6 +153,8 @@ export class Simulation {
     g.links.forEach((l, i) => { if (l.kind === LinkKind.Connector) core.preds[l.next[0]].push(i); });
     this.core = core;
     this.parking = new Parking(core);
+    this.memory = new Memory(core, (x, z) => this.blockAt(x, z));
+    this.on('pedBumped', (e: any) => { if (e.byPlayer) this.memory.remember(e.kind === 'knockdown' ? 'knockdown' : 'bumped', e.x, e.z, { pedId: e.id }); });
     // hydrants are sidewalk obstacles too (the same positions the kerb rules use)
     this.hydrantObs = this.parking.hydrantsNear(-540, -790, 1100).map((h) => ({ x: h.x, z: h.z, r: 0.22 }));
     this.setObstacles([]);
@@ -220,6 +223,7 @@ export class Simulation {
     this.subway.step(h);
     this.doors.step(h);
     this.vendors.step(h);
+    this.memory.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -345,6 +349,19 @@ export class Simulation {
 
   // ---------------------------------------------------------------- kerbside rules, enforcement, tows, street cleaning
   private parking!: Parking;
+  // ---------------------------------------------------------------- memory of the player (memory.ts)
+  private memory!: Memory;
+  /**
+   * Gameplay: something the player did at (x, z) that the street remembers: helped | tipped | bumped | knockdown |
+   * reckless | theft | robbed | assault | gunfire | killed. The block's reputation shifts (decays over ~15 min
+   * half-life) and witnesses within the kind's radius remember it personally (~10 min); `pedId` = the person it
+   * was done to/for. Player bumps, `kill(..., byPlayer)` and `emit({..., byPlayer})` are recorded automatically.
+   */
+  remember(kind: MemKind, x: number, z: number, opts: { witnessR?: number; pedId?: number } = {}) { this.memory.remember(kind, x, z, opts); }
+  /** The player's standing on the block at (x, z): `{score, last, ago}` (score < 0 = feared/resented). */
+  reputation(x: number, z: number) { return this.memory.reputation(x, z); }
+  /** Greetings emitted so far (`pedGreets` events). */
+  get greetings() { return this.memory.greetings; }
   /** Day of week for kerb rules (0 Sun .. 6 Sat; default Friday, 21 June 1974). */
   setDay(dow: number) { this.parking.dow = ((Math.floor(dow) % 7) + 7) % 7; }
   /** Can a car park at this kerb now (or at `minute`/`dow`)? Reasons, tow-away and fine tier. */
@@ -479,8 +496,9 @@ export class Simulation {
 
   // ---------------------------------------------------------------- violence and theft (gameplay)
   /** Stop simulating a pedestrian and leave the body for `bodySeconds`. */
-  kill(pedId: number, bodySeconds = 120): boolean {
+  kill(pedId: number, bodySeconds = 120, byPlayer = false): boolean {
     const p = this.core.pedById.get(pedId); if (!p || !p.alive) return false;
+    if (byPlayer) this.memory.remember('killed', p.x, p.z);
     killPed(this.core, p, bodySeconds); return true;
   }
   /**
@@ -516,8 +534,9 @@ export class Simulation {
 
   setExternalActors(actors: Actor[]): void { if (this.core) this.core.actors = actors.slice(); }
 
-  emit(event: { type: 'threat' | 'blockLane' | 'closeStreet' | 'gunfire'; x: number; z: number; radius?: number; until?: number; loudness?: number }): void {
+  emit(event: { type: 'threat' | 'blockLane' | 'closeStreet' | 'gunfire'; x: number; z: number; radius?: number; until?: number; loudness?: number; byPlayer?: boolean }): void {
     const S = this.core, net = this.net;
+    if (event.byPlayer && (event.type === 'gunfire' || event.type === 'threat')) this.memory.remember(event.type === 'gunfire' ? 'gunfire' : 'assault', event.x, event.z, event.type === 'gunfire' ? { witnessR: Math.min(120, (event.loudness ?? event.radius ?? 120) * 0.6) } : {});
     const until = event.until ?? S.t + 60;
     if (event.type === 'gunfire') {
       const loud = event.loudness ?? event.radius ?? 120;

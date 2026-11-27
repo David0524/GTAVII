@@ -547,6 +547,27 @@ on the timetable, once the engine posts the new PLAYABLE and the concourse walka
   than queueing them. `setDensityAreas(boxes)` replaces the function hook across the worker boundary.
 - Test: the same seed behind an in-memory port matches the direct sim (max view error 1e-4 m, same events).
 
+## NPC memory and greetings (`src/sim/memory.ts`; oversight gap list item 2)
+- **Block reputation:** each block (`blockAt`) keeps a decaying score of the player (half-life 15 sim minutes):
+  helped +3, tipped +1.5, bumped -0.4, knockdown -1.2, reckless -1, theft -2, robbed/assault -4, gunfire -3,
+  killed -6. Query with `sim.reputation(x, z)` -> `{score, last, ago}`.
+- **Witnesses:** peds within the kind's radius (8 m for a bump up to 70 m for gunfire) remember it personally
+  for 10 minutes; the worst thing they saw sticks.
+- **Sources:** player bumps (automatic), `kill(id, secs, byPlayer)`, `emit({type:'gunfire'|'threat', byPlayer})`,
+  and gameplay's `sim.remember(kind, x, z, {witnessR?, pedId?})` for everything else (helped, tipped, robbed...).
+- **Greetings:** as the player passes within 3.5 m, every 0.5 s, with a 45 s per-ped cooldown, people may react:
+  `greet_known` (recall a favour), `antagonize` (saw something bad, steady nerves) or `fear` (shaky nerves:
+  they hesitate), `complain`/`fear` on a block with a bad reputation, `player_running`, or a passing `greet`
+  (8%, more on a friendly block). Most New Yorkers say nothing.
+  Event `pedGreets {id, pool, context, mood, recall, archetype, x, z}`; `pool` is narrative's bark set
+  (`barks.<archetype>`), audio picks the line by `context`.
+- **Test:** a favour is recalled (greet_known), a robbery on another block draws complain/fear/antagonize, and
+  reputations have the right sign (seed 7: greet_known 8, fear 1; robbed -4, helped +2.7).
+- **vs RDR2 / GTA V / VI:** RDR2's per-town honour and greet/antagonise is the model; we key it to the city
+  block rather than a town, which suits Manhattan's density. GTA V NPCs only react in the moment. Not yet:
+  a player-initiated greet/antagonise button (gameplay input -> `remember`), and a reputation that spreads
+  between neighbouring blocks.
+
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
       (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.
