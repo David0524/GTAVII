@@ -274,6 +274,58 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Where we fall short:** an angry pedestrian never escalates to a fist fight (ambient peds have no combat AI), and nobody remembers you.
 - **Plan:** promote an angry pedestrian who was shoved twice into a brief melee brawler (the melee system already registers peds as fighters), and give bumps a short-term grudge per ped.
 
+### Street vendors (STREET_VENDORS.md, user decision 2026-11-27; `economy/vendors.ts`, `vendors.test.ts`)
+Sim places and plays the vendors; gameplay owns the interaction. Adults only, invented brands, 1974 prices.
+
+- **Buying:**
+  - Food and drink:
+
+    | Good | Price | Effect |
+    |---|---|---|
+    | Frank with onions | 35¢ | +6 hp |
+    | Two franks | 65¢ | +11 hp |
+    | Soda | 25¢ | +8 stamina, cools |
+    | Pretzel | 25¢ | +4 hp |
+    | Knish | 40¢ | +8 hp |
+    | Lemon/cherry ice | 20¢ | +15 stamina, cools |
+    | Cashews | 50¢ | |
+    | Peanuts | 25¢ | |
+    | Apple | 15¢ | |
+    | Peach | 20¢ | |
+    | Coffee | 25¢ | +12 stamina, sobers 0.08 |
+    | Buttered roll | 20¢ | |
+    | Danish | 35¢ | |
+    | Candy bar | 15¢ | |
+  - Carried goods:
+
+    | Good | Price |
+    |---|---|
+    | Evening paper | 15¢ |
+    | Cigarettes | 55¢ |
+    | Magazine | 75¢ |
+    | Carnation | 50¢ |
+    | Bunch of flowers | $2 |
+    | Umbrella | $2 |
+    | Sunglasses | $3 |
+    | Keychain | $1 |
+    | Pennant | $1.50 |
+    | LP | $2 |
+    | 8-track | $2.50 |
+    | Fake "gold" watch | $10 (a mission prop, worth about $2 to a fence) |
+  - "Cools" means sprinting drains as at 80°F for a while on a heatwave day.
+- **Shoeshine:** 50¢ plus a 25¢ tip; shined shoes for the day (a grooming touch).
+- **Robbing a cart:** small change for real heat. A full till is $6–$80 by kind (a hot-dog cart $18), refilling over 6 game hours. It's theft, or `assault_weapon` with a gun out; the vendor flees or cowers.
+- **Carts knocked over:** at 3 m/s or more, by the player, a car or a chase. The cart spills (`notice cartOverturned` lists the goods) and is closed for 2 game hours. The player on foot commits vandalism; in a car, reckless.
+- **Three-card monte** ("Find the lady"): $2–$20 a hand, and rigged, because the dealer palms the queen on a real bet. Catch the tell, the bent corner of the queen visible for 0.21–0.49 s during the 4 s deal (wider with stealth skill, narrower drunk), and you follow it to an even-money win. After two wins the dealer folds the box.
+- **Context button:** "Buy" (the UI gets `notice vendorMenu`), "Shine 50¢" or "Find the lady".
+- **Saved:** tills and overturned carts.
+
+#### vs GTA V / VI / RDR2
+- **References:** GTA V's vendors are mostly ambient (hot-dog stands you can't really use, a few snack machines), and its street scams are scenery. RDR2's camps, stalls and general stores have real menus with stat effects and eating animations, and robbing a store is a full scenario. GTA VI is expected to deepen ambient commerce.
+- **Where we match or exceed:** every cart is usable, with period menus and small, meaningful effects (heal, breath, cooling in the 1974 heatwave, sobering). A rigged hustle you can beat by skill is something neither reference has as a playable minigame. Robbing and knocking over carts go through the same witness heat as everything else.
+- **Where we fall short:** no eating or shine animations yet (characters). The vendor's reaction to a robbery is a flee or cower command, not a scenario with pleading or a fight back. Vendors as tipsters and protection beats are narrative's side content, not wired yet.
+- **Plan:** wire narrative's vendor tipsters into the context button (a "Talk" beat when a vendor has a tip). Add a vendor who fights back (an angry hot-dog man with a ladle) once peds can become brawlers (asked of sim).
+
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
 | Case | Avg | p95 | p99 | Max | Budget |

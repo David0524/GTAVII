@@ -32,6 +32,8 @@ export interface SaveV3 {
   economy?: unknown;
   /** arcade credits and high-score cards (optional; absent in older saves) */
   arcade?: unknown;
+  /** street vendors' tills and overturned carts */
+  vendors?: unknown;
   /** bodies left lying, carried or in trunks; discoverAt is seconds remaining (-1 = never by passers-by) */
   bodies?: unknown;
   activeLead?: string;

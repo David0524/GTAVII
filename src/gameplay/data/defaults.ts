@@ -61,6 +61,18 @@ export const ITEMS: ItemDef[] = [
   I({ id: 'item.photo_evidence', name: 'Instant photo: a cop with his hand out', kind: 'photo', price: 0, stack: 20, sellable: false }),
   I({ id: 'item.bag', name: 'Gym bag', kind: 'misc', price: 450, stack: 1, sellable: true, note: 'Hides one long gun; you must take it out to use it.' }),
   I({ id: 'item.ledger_page', name: 'Ledger page', kind: 'evidence', price: 0, stack: 20, sellable: false }),
+  // street vendors and peddlers (STREET_VENDORS.md; invented goods, 1974 prices)
+  I({ id: 'item.flower', name: 'A carnation', kind: 'misc', price: 50, stack: 3, sellable: false }),
+  I({ id: 'item.flowers', name: 'A bunch of flowers', kind: 'misc', price: 200, stack: 2, sellable: false }),
+  I({ id: 'item.cigarettes', name: 'Cigarettes (pack)', kind: 'misc', price: 55, stack: 5, sellable: false }),
+  I({ id: 'item.magazine', name: 'Magazine', kind: 'misc', price: 75, stack: 3, sellable: false }),
+  I({ id: 'item.fake_watch', name: '"Gold" watch (it isn\'t)', kind: 'misc', price: 1000, stack: 3, sellable: true, note: 'Worth about $2 to a fence; a mission prop.' }),
+  I({ id: 'item.umbrella', name: 'Umbrella', kind: 'misc', price: 200, stack: 1, sellable: false }),
+  I({ id: 'item.trinket', name: 'Big Town keychain', kind: 'misc', price: 100, stack: 5, sellable: false }),
+  I({ id: 'item.pennant', name: 'Pennant', kind: 'misc', price: 150, stack: 3, sellable: false }),
+  I({ id: 'item.lp', name: 'LP record', kind: 'misc', price: 200, stack: 5, sellable: true }),
+  I({ id: 'item.eight_track', name: '8-track', kind: 'misc', price: 250, stack: 5, sellable: true }),
+  I({ id: 'item.sunglasses', name: 'Sunglasses', kind: 'misc', price: 300, stack: 1, sellable: false }),
 ];
 
 const S = (s: ShopDef) => s;

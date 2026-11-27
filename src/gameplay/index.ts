@@ -47,6 +47,7 @@ import { Stats } from './meta/stats';
 import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
 import type { SuspectMotion } from './police/pursuit';
 import { Bodies, discoveryDelay, type Body } from './police/bodies';
+import { MENUS, MONTE, Monte, SHINE, Vendors, type MonteDeal, type VendorKind } from './economy/vendors';
 import { allowed as moveAllowed, locomotion as moveLocomotion, landing, bargeChance, tackleChance, TACKLE, BARGE_SECONDS, DOORS, LADDER_PER_M, STAMINA_COST, TURNSTILE, type Carrying, type DoorKind, type MoveAction, type MoverState } from './player/movement';
 import { Economy } from './economy';
 import { Arcade } from './arcade';
@@ -669,6 +670,10 @@ export class Gameplay {
       sim.on('vehicleTowed', (e) => this.ownership.tow(carOf(e), day()));
     }
     sim.on('pedBumped', (e) => this.onPedBumped(e));
+    // street vendors placed by the sim (STREET_VENDORS.md): spawned and gone as carts arrive and leave
+    sim.on('vendorSpawned', (e) => this.registerVendor(String(e.id), e.kind, e.x, e.z));
+    sim.on('vendorGone', (e) => this.vendorPos.delete(String(e.id)));
+    sim.on('cartHit', (e) => this.cartHit(String(e.id), { by: e.by === 'player' || e.by === this.player?.id ? 'player' : e.byVehicle ? 'car' : 'npc', speed: e.speed ?? 0, driving: !!e.byVehicle }));
     for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
     sim.on('cabReady', (e) => { const c = this.cab; if (c && c.id === e.cabId) { c.state = 'ready'; c.kerb = [e.x, e.z]; this.emit('cab', { kind: 'ready', ...e }); } });
     sim.on('cabTurnAhead', (e) => { if (this.cab?.id === e.cabId) this.emit('cab', { kind: 'turn', ...e }); });
@@ -798,7 +803,7 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry' | 'holdOn'; label: string; target?: string } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody' | 'tackle' | 'restrain' | 'loadQuarry' | 'holdOn' | 'buy' | 'shine' | 'monte'; label: string; target?: string } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
@@ -823,6 +828,7 @@ export class Gameplay {
     if (t && !t.ped) return { kind: 'talk', label: `Talk`, target: t.id };
     const d = this.nearestDoor(p[0], p[2]);
     if (d) return { kind: 'door', label: d.locked ? (this.doorOpenNow(d) ? 'Knock' : 'Locked') : 'Go in', target: d.id };
+    { const v = this.vendorNear(p[0], p[2]); if (v && this.pc.carrying === 'none' && this.vendors.open(v, this.economy.nowH())) return v.kind === 'shoeshine' ? { kind: 'shine', label: 'Shine 50¢', target: v.id } : v.kind === 'monte' ? { kind: 'monte', label: 'Find the lady', target: v.id } : { kind: 'buy', label: 'Buy', target: v.id }; }
     if (this.pc.cover) return { kind: 'leaveCover', label: 'Leave cover' };
     if (this.cover.near(p[0], p[2], null, 2)) return { kind: 'cover', label: 'Take cover' };
     if (t) return { kind: 'talk', label: 'Talk', target: t.id };
@@ -847,6 +853,8 @@ export class Gameplay {
       case 'restrain': this.restrain(a.target); break;
       case 'loadQuarry': this.loadQuarry(a.target!); break;
       case 'holdOn': this.holdOn(); break;
+      case 'shine': this.shoeshine(a.target!); break;
+      case 'buy': case 'monte': this.emit('notice', { kind: a.kind === 'buy' ? 'vendorMenu' : 'monteTable', vendor: a.target, menu: this.vendorMenu(a.target!) }); break;
       case 'dropBody': this.dropBody(); break;
       case 'stowBody': this.stowBody(a.target!); break;
       case 'door': { const d = this.nearestDoor(this.player.position()[0], this.player.position()[2]); if (d && !d.locked) this.doors?.open?.(d.id); this.emit('notice', { kind: 'door', id: a.target, locked: d?.locked ?? false }); break; }
@@ -981,7 +989,7 @@ export class Gameplay {
     // stamina and fitness
     const li = this.inv.ensure(lead);
     const mode = this.pc.sprinting ? 'sprint' : this.pc.speed > 2.5 ? 'run' : this.pc.speed > 0.3 ? 'walk' : 'idle';
-    if (!stepStamina(li.stamina, dt, mode, this.pc.tempF, this.pc.unlimitedSprint)) this.pc.sprinting = false;
+    if (!stepStamina(li.stamina, dt, mode, this.time < this.coolUntil ? Math.min(this.pc.tempF, 80) : this.pc.tempF, this.pc.unlimitedSprint)) this.pc.sprinting = false;
     if (mode === 'sprint') learn(li.skills, 'sprintSecond', dt);
     if (li.intox > 0) li.intox = Math.max(0, li.intox - SOBER_PER_S * dt);
     if (this.pc.jamClear > 0) { this.pc.jamClear -= dt; if (this.pc.jamClear <= 0) { const gs = this.gunState(); if (gs) gs.jammed = false; this.emit('notice', { kind: 'jamCleared' }); } }
@@ -1419,6 +1427,95 @@ export class Gameplay {
   /** The engine reports a fall from height (m) for any actor. */
   fell(id: string, dropM: number) { const d = fallDamage(dropM); if (d > 0) this.applyDamage(id, { amount: d, type: 'fall' }); }
 
+  // ------------------------------------------------------------------ street vendors (STREET_VENDORS.md)
+  readonly vendors = new Vendors();
+  private vendorPos = new Map<string, { x: number; z: number }>();
+  private montes = new Map<string, Monte>();
+  private monteDeals = new Map<number, { vendor: string; deal: MonteDeal }>();
+  /** For the rest of this game time (s), a cold ice or a soda takes the edge off the heat: sprint drains as at 80°F. */
+  private coolUntil = -1;
+  registerVendor(id: string, kind: VendorKind, x: number, z: number) {
+    if (!MENUS[kind]) return false;
+    if (!this.vendors.list.has(id)) this.vendors.add(id, kind, this.economy.nowH());
+    this.vendorPos.set(id, { x, z }); return true;
+  }
+  vendorNear(x: number, z: number, r = 2.5) {
+    let best: string | null = null, bd = r;
+    for (const [id, p] of this.vendorPos) { const d = Math.hypot(p.x - x, p.z - z); if (d < bd) { bd = d; best = id; } }
+    return best ? this.vendors.list.get(best)! : null;
+  }
+  /** The menu for the UI: goods with affordability (the cart must be standing). */
+  vendorMenu(id: string) {
+    const v = this.vendors.list.get(id); if (!v || !this.player) return null;
+    const cash = this.inv.ensure(this.player.lead).money;
+    return { kind: v.kind, open: this.vendors.open(v, this.economy.nowH()), goods: MENUS[v.kind].map((g) => ({ ...g, affordable: cash >= g.cents })), shine: v.kind === 'shoeshine' ? SHINE : null };
+  }
+  /** Buy and eat or pocket. Food heals a little, drinks restore breath, an ice cools you in the heat, coffee sobers a touch. */
+  buyFromVendor(id: string, goodId: string) {
+    const v = this.vendors.list.get(id); if (!v || !this.player || !this.vendors.open(v, this.economy.nowH())) return false;
+    const g = MENUS[v.kind].find((x) => x.id === goodId); if (!g) return false;
+    const lead = this.player.lead, li = this.inv.ensure(lead);
+    if (!this.inv.spend(lead, g.cents, `vendor:${v.kind}`)) return false;
+    if (g.item) this.inv.give(lead, g.item, 1);
+    if (g.heal) this.healthSys.heal(this.player.id, g.heal);
+    if (g.stamina) li.stamina.value = Math.min(li.stamina.max, li.stamina.value + g.stamina);
+    if (g.sober) li.intox = Math.max(0, li.intox - g.sober);
+    if (g.cool) this.coolUntil = Math.max(this.coolUntil, this.time) + g.cool * 1800;
+    this.emit('notice', { kind: 'vendorSale', vendor: id, good: g.id, cents: g.cents, eatSeconds: g.eatSeconds ?? 0 });
+    return true;
+  }
+  /** A shine: 50¢ and a quarter tip; shined shoes for the day (a grooming touch). */
+  shoeshine(id: string) {
+    const v = this.vendors.list.get(id); if (!v || v.kind !== 'shoeshine' || !this.player) return false;
+    if (!this.inv.spend(this.player.lead, SHINE.cents + SHINE.tip, 'shoeshine')) return false;
+    const li = this.inv.ensure(this.player.lead); li.grooming = li.grooming.includes('shined shoes') ? li.grooming : (li.grooming ? li.grooming + ', ' : '') + 'shined shoes';
+    this.emit('notice', { kind: 'shined', vendor: id, seconds: SHINE.seconds });
+    return true;
+  }
+  /** Take the till (or the peddler's roll). Small change for real heat: a theft, armed robbery with a gun out. */
+  robVendor(id: string) {
+    const v = this.vendors.list.get(id); if (!v || !this.player) return null;
+    const armed = this.reg.weapon(this.pc.weapon).class !== 'melee' || this.pc.aiming;
+    const cents = this.vendors.rob(v, this.economy.nowH());
+    if (cents > 0) this.inv.addMoney(this.player.lead, cents, 'vendor robbery');
+    const at = this.vendorPos.get(id);
+    this.crime(armed ? 'assault_weapon' : 'theft', { victim: id, noise: armed ? 18 : 12, at: at ? [at.x, this.player.position()[1], at.z] : undefined });
+    this.port.command(id, { type: armed ? 'cower' : 'flee', fromX: this.player.position()[0], fromZ: this.player.position()[2] } as any);
+    this.emit('notice', { kind: 'vendorRobbed', vendor: id, cents, armed });
+    return { cents, armed };
+  }
+  /**
+   * A cart is hit (the sim or vehicles report it; or the player barges it): over 3 m/s it goes over, goods spill,
+   * and the vendor is out of business for 2 game hours. The player doing it is vandalism on foot, reckless in a car.
+   */
+  cartHit(id: string, o: { by: 'player' | 'car' | 'npc'; speed: number; driving?: boolean }) {
+    const v = this.vendors.list.get(id); if (!v || o.speed < 3) return false;
+    this.vendors.overturn(v, this.economy.nowH(), 2);
+    this.emit('notice', { kind: 'cartOverturned', vendor: id, by: o.by, spill: MENUS[v.kind].map((g) => g.id) });
+    if (o.by === 'player') { const at = this.vendorPos.get(id); this.crime(o.driving ? 'reckless' : 'vandalism', { victim: id, noise: 20, at: at && this.player ? [at.x, this.player.position()[1], at.z] : undefined }); }
+    return true;
+  }
+  /** Three-card monte: put the stake down and watch the deal. Returns the deal (with the tell timing for the UI). */
+  monteDeal(id: string, stakeCents: number) {
+    const v = this.vendors.list.get(id); if (!v || v.kind !== 'monte' || !this.player) return null;
+    const m = this.montes.get(id) ?? (this.montes.set(id, new Monte(this.rng)), this.montes.get(id)!);
+    const li = this.inv.ensure(this.player.lead);
+    const eye = Math.max(0, Math.min(1, ((li.skills.stealth ?? 50) / 100) * (1 - li.intox)));
+    const d = m.deal(stakeCents, eye); if (!d) return null;
+    if (!this.inv.spend(this.player.lead, stakeCents, 'monte')) return null;
+    this.monteDeals.set(d.id, { vendor: id, deal: d });
+    return { dealId: d.id, stake: d.stake, dealSeconds: MONTE.dealSeconds, tellAt: d.tellAt, tellWindow: d.tellWindow, shownQueen: d.shownQueen };
+  }
+  /** Point at a card; `pressedAt` = when (s into the deal) the player pressed to follow the bent corner, or null. */
+  montePick(dealId: number, card: 0 | 1 | 2, pressedAt: number | null) {
+    const r = this.monteDeals.get(dealId); if (!r || !this.player) return null;
+    this.monteDeals.delete(dealId);
+    const res = this.montes.get(r.vendor)!.pick(r.deal, card, pressedAt);
+    if (res.won) this.inv.addMoney(this.player.lead, r.deal.stake * 2, 'monte');
+    if (res.folded) this.emit('notice', { kind: 'monteFolded', vendor: r.vendor });
+    return res;
+  }
+
   // ------------------------------------------------------------------ sidewalk bumps (sim's pedBumped)
   /**
    * Barging through a 1974 sidewalk crowd (vs GTA V's shoulder-barge reactions, RDR2's jostle):
@@ -1707,7 +1804,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), arcade: this.arcade.serialize(), bodies: this.bodies.serialize().map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : Math.max(0, b.discoverAt - this.time), diedAt: 0 })), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), arcade: this.arcade.serialize(), vendors: this.vendors.serialize(), bodies: this.bodies.serialize().map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : Math.max(0, b.discoverAt - this.time), diedAt: 0 })), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -1728,6 +1825,7 @@ export class Gameplay {
     this.stats.deserialize((s as any).stats);
     if ((s as any).economy) this.economy.restore((s as any).economy);
     if ((s as any).arcade) this.arcade.restore((s as any).arcade);
+    if ((s as any).vendors) this.vendors.restore((s as any).vendors);
     if ((s as any).bodies) this.bodies.restore(((s as any).bodies as any[]).map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : this.time + b.discoverAt })));
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);
