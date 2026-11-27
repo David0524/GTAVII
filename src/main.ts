@@ -143,9 +143,17 @@ async function main() {
   // every forward-lit material pays per light per fragment (the facades most of all); lower tiers keep the
   // emissive ground pools.
   let traffic: ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']> | null = null, carLights: CarLightPool | null = null;
+  // Parked cars on every kerb (sim 5): the sim places them by its kerb rules (hydrants, bus stops, corners,
+  // no-standing hours, street cleaning); a second, static traffic renderer draws them.
+  type TrafficR = ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']>;
+  let parked: TrafficR | null = null as TrafficR | null, parkedList: { vclass: string; variant: number; x: number; y: number; z: number; yaw: number; lights: number }[] = [];
+  const parkedAt = { x: 1e9, z: 1e9, q: -1 };
   if (sim) void afterTitle.then(() => {
-    traffic = createVehicleFactory({ quality: quality.name }).createTrafficRenderer(quality.name === 'low' ? 100 : 160);
+    const vf = createVehicleFactory({ quality: quality.name });
+    traffic = vf.createTrafficRenderer(quality.name === 'low' ? 100 : 160);
     scene.add(traffic.object);
+    const pr = vf.createTrafficRenderer(quality.name === 'low' ? 160 : 400);
+    scene.add(pr.object); parked = pr;
     if (quality.name === 'high' || quality.name === 'ultra') carLights = new CarLightPool(scene, quality.name, false);
   });
   // ---------------------------------------------------------------- audio (wiring step 7); ?sound=0 leaves it out (?audio= is the audio test scene)
@@ -321,6 +329,7 @@ async function main() {
     { name: 'no trees + park dressing', ...hideObj(parks.root) },
     { name: 'no street furniture', ...hideObj(furniture.root) },
     { name: 'no crowd', apply: () => { if (crowd) crowd.object.visible = false; }, revert: () => { if (crowd) crowd.object.visible = true; } },
+    { name: 'no parked cars', apply: () => { const t = parked as { object: THREE.Object3D } | null; if (t) t.object.visible = false; }, revert: () => { const t = parked as { object: THREE.Object3D } | null; if (t) t.object.visible = true; } },
     { name: 'no traffic', apply: () => { const t = traffic as { object: THREE.Object3D } | null; if (t) t.object.visible = false; }, revert: () => { const t = traffic as { object: THREE.Object3D } | null; if (t) t.object.visible = true; } },
     { name: 'sim paused', apply: () => { simPaused = true; }, revert: () => { simPaused = false; } },
     { name: 'baseline again', apply: () => {}, revert: () => {} },
@@ -527,6 +536,15 @@ async function main() {
       }
     }
     if (signals && sim) { sigBuf = sim.signalStates(sigBuf); signals.update(dt, sigBuf); }
+    if (parked && sim && simReady) {
+      const f = mode === 'onfoot' ? player.pos : camera.position, quarter = Math.floor(worldClock.minutes / 15);
+      if (Math.hypot(f.x - parkedAt.x, f.z - parkedAt.z) > 100 || quarter !== parkedAt.q) {
+        Object.assign(parkedAt, { x: f.x, z: f.z, q: quarter });
+        const R = quality.name === 'low' ? 160 : 260;
+        parkedList = sim.parkedCars(f.x, f.z, R).map((c) => ({ vclass: c.vclass as string, variant: c.variant, x: c.x, y: heightAt(c.x, c.z), z: c.z, yaw: c.yaw, lights: 0 }));
+      }
+      parked.setInstances(parkedList as never, camera.position);
+    }
     if (crowd && sim && simReady) { crowd.setAgents(sim.peds); crowd.update?.(dt, camera); }
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss
     // A menu over the game (pause hub, shop, any modal) holds the last frame instead of re-rendering the
