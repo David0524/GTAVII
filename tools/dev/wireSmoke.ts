@@ -27,7 +27,7 @@ try {
   await page.evaluate(() => (window as any).__T74.whenIdle());
   await page.waitForFunction(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'sim')); await page.waitForFunction(() => (window as any).__T74.load.marks.some(([n]: [string]) => n === 'characters'));
   await page.waitForTimeout(12_000); // a few headless frames of traffic
-  const info = await page.evaluate(() => { const T = (window as any).__T74; return { cars: T.sim?.vehicles.length, peds: T.sim?.peds.length, simMs: T.sim?.lastUpdateMs, draws: T.renderer.info.render.drawCalls, marks: T.load.marks.map(([n, t]: [string, number]) => `${n} ${(t / 1000).toFixed(1)}`).join(' | ') }; });
+  const info = await page.evaluate(() => { const T = (window as any).__T74; return { cars: T.sim?.vehicles.length, peds: T.sim?.peds.length, simMs: T.sim?.lastUpdateMs, draws: T.renderer.info.render.drawCalls, mode: T.mode, screen: T.screen, cam: T.camera.position.toArray().map((v: number) => +v.toFixed(1)), player: [T.player.pos.x, T.player.pos.y, T.player.pos.z].map((v: number) => +v.toFixed(1)), active: T.player.active, body: T.body ? { vis: T.body.object.visible, pos: T.body.object.position.toArray().map((v: number) => +v.toFixed(1)), inScene: !!T.body.object.parent, kind: T.body.constructor.name } : null, marks: T.load.marks.map(([n, t]: [string, number]) => `${n} ${(t / 1000).toFixed(1)}`).join(' | ') }; });
   console.log(JSON.stringify(info));
   await page.screenshot({ path: out, type: 'jpeg', quality: 85 });
 } finally { await browser.close(); stop(); }

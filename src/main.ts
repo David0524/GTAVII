@@ -295,7 +295,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get body() { return body; }, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
