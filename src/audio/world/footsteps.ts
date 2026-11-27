@@ -10,10 +10,11 @@ import type { Vec3 } from '../config';
 import type { Grating } from './subway';
 import { Rng } from '../worklets/dsp';
 
-export type Surface = 'concrete' | 'asphalt' | 'grating' | 'park' | 'wood' | 'tile';
+/** Footstep surfaces; the last six come from the movement brief (characters/engine pass them explicitly). */
+export type Surface = 'concrete' | 'asphalt' | 'grating' | 'park' | 'wood' | 'tile' | 'granite' | 'subwaytile' | 'stoop' | 'iron' | 'rung' | 'gravel';
 interface PedLike { id: number; x: number; y: number; z: number; speed: number }
 
-const INTERIOR_SURFACE: Record<string, Surface> = { diner: 'tile', sro: 'tile', bar: 'wood', precinct: 'tile', loft: 'wood', cinema: 'wood', shop: 'tile', subway: 'concrete', stairwell: 'concrete' };
+const INTERIOR_SURFACE: Record<string, Surface> = { diner: 'tile', sro: 'tile', bar: 'wood', precinct: 'tile', loft: 'wood', cinema: 'wood', shop: 'tile', subway: 'subwaytile', stairwell: 'concrete' };
 
 export class Footsteps {
   private phase = new Map<number, number>();
@@ -32,13 +33,14 @@ export class Footsteps {
     if (this.env.geo.inPark(x, z)) return 'park';
     const ns = this.env.geo.nearestStreet(x, z, 40);
     if (ns && ns.d < ns.street.w / 2) return 'asphalt';
+    if (ns && ns.d < ns.street.w / 2 + 0.45) return 'granite'; // the kerbstone at the sidewalk edge
     return 'concrete';
   }
 
   /** External footstep event (player/characters). Unknown fields are tolerated. */
   footstep(e: { position?: Vec3; x?: number; y?: number; z?: number; surface?: string; intensity?: number; run?: boolean; who?: string }) {
     const p: Vec3 = e.position ?? [e.x ?? 0, e.y ?? 0, e.z ?? 0];
-    const surf = (e.surface as Surface) ?? this.surfaceAt(p[0], p[2]);
+    const surf = normSurface(e.surface) ?? this.surfaceAt(p[0], p[2]);
     this.stats.external++;
     this.step(p, surf, e.intensity ?? (e.run ? 1 : 0.7), e.who === 'player' ? 7 : 4);
   }
@@ -66,3 +68,7 @@ export class Footsteps {
     this.env.peds.near = Math.min(1, n / 18); this.env.peds.fromSim = true;
   }
 }
+
+const ALIASES: Record<string, Surface> = { kerb: 'granite', curb: 'granite', granite: 'granite', tar: 'gravel', roof: 'gravel', gravel: 'gravel', fire_escape: 'iron', fireescape: 'iron', metal: 'iron', iron: 'iron', ladder: 'rung', rung: 'rung', stoop: 'stoop', wood_stoop: 'stoop', subway_tile: 'subwaytile', subwaytile: 'subwaytile', tile: 'tile', wood: 'wood', concrete: 'concrete', sidewalk: 'concrete', asphalt: 'asphalt', road: 'asphalt', grating: 'grating', grate: 'grating', park: 'park', grass: 'park', dirt: 'park' };
+/** Callers may name surfaces their own way; unknown names fall back to the world lookup. */
+function normSurface(s: string | undefined): Surface | undefined { return s ? ALIASES[s.toLowerCase().replace(/[\s-]/g, '_')] : undefined; }

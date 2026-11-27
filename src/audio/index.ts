@@ -135,7 +135,7 @@ export class AudioSystem {
       try { const r = await fetch(this.baseUrl + 'content/radio.json'); if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) { const defs = stationsFromNarrative(await r.json()); if (defs.length) this.radio.system.setStations(defs); } } catch { /* no content */ }
     }
     await this.bank.init();
-    await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic')]);
+    await Promise.all([this.bank.loadGroup('boot'), this.bank.loadGroup('power'), this.bank.loadGroup('traffic'), this.bank.loadGroup('movement')]);
     this.ambience = new Ambience(this.env, REGION, this.radio.system);
     this.footsteps = new Footsteps(this.env, this.ambience.subway.gratings);
     this.roomTone = new RoomTone(this.env, this.radio.system);
@@ -249,6 +249,15 @@ export class AudioSystem {
 
   /** Footstep from the characters' animation events (player or NPC). */
   footstep(e: Parameters<Footsteps['footstep']>[0]) { this.footsteps?.footstep(e); }
+
+  /**
+   * Traversal foley (docs/briefs/MOVEMENT.md): 'vault' | 'climb' | 'land' | 'roll' | 'ragdoll' | 'cloth' | 'fence'.
+   * `intensity` 0..1 (e.g. landing speed, impact impulse) scales level and slightly lowers pitch for heavy hits.
+   */
+  foley(action: 'vault' | 'climb' | 'land' | 'roll' | 'ragdoll' | 'cloth' | 'fence', at: Vec3, intensity = 0.7) {
+    const fam = action === 'fence' ? 'fence.rattle' : `foley.${action}`; const k = Math.max(0, Math.min(1, intensity));
+    this.oneShot(fam, { category: action === 'ragdoll' ? 'impact' : 'footstep', at, gain: 0.35 + 0.65 * k, rate: 1.06 - 0.12 * k, priority: 7 });
+  }
 
   /** Engine events out: 'lightning' {distance, delay, near} (flash the sky), 'radioSubtitle', 'bark'. */
   on(type: 'lightning' | 'radioSubtitle' | 'bark', cb: (e: any) => void) { (this.listeners[type] ??= []).push(cb); }

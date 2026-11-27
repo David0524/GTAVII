@@ -183,6 +183,17 @@ public/audio/voice/, pushed with --force-with-lease."
   engine commits kept their hashes; the engine session was told.
 - The WASM build takes no SSML, so emotion is applied as rate, pitch and level offsets (was SSML prosody).
 
+## Movement foley set (MOVEMENT.md, 2026-11-27)
+Self-made (baked synthesis, logged in AUDIO_SOURCES.md), preloaded as group `movement` (~0.5 MB decoded):
+- Surfaces (`audio.footstep({ surface })`, aliases accepted: kerb/curb, tar/roof, fire_escape/metal,
+  ladder…): granite kerb (also auto-detected at the sidewalk edge), subway tile (also inside `subway`),
+  wood stoop, fire-escape iron, ladder rung, gravel roof tar.
+- Actions (`audio.foley(action, at, intensity)`): vault, climb, land, roll, ragdoll, cloth, fence
+  (chain-link rattle). Intensity scales level and lowers pitch for heavy hits.
+- Check: `npx tsx tools/audio/foley-check.ts` (no NaN, peaks in range) writes `shots/audio/movement_foley.wav`.
+- Honest note: synthesised foley is credible for metal, stone and gravel; cloth and body thuds are the
+  weakest (they read as "filtered noise" up close).
+
 ## Backlog relayed from the oversight session (2026-11-26; not in the original brief)
 Recorded as scope additions to plan for; the brief's "done means" came first.
 - **Combat (Gameplay stream):** period gunfire by invented model and tier (cheap guns sound cheap),

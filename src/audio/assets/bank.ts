@@ -12,6 +12,7 @@ import { Rng } from '../worklets/dsp';
 export const GROUPS: Record<string, string[]> = {
   boot: ['ui.move', 'ui.select', 'ui.back', 'ui.map', 'ui.switch', 'ui.pickup', 'ui.coins', 'step.concrete', 'step.asphalt', 'step.grating', 'step.park', 'door.slam', 'impact.light', 'signal.click', 'whistle.hail', 'brake.squeal', 'manhole.clank', 'drip'],
   traffic: ['impact.heavy', 'glass', 'bus.door'],
+  movement: ['step.granite', 'step.subwaytile', 'step.stoop', 'step.iron', 'step.rung', 'step.gravel', 'fence.rattle', 'foley.cloth', 'foley.vault', 'foley.climb', 'foley.land', 'foley.roll', 'foley.ragdoll'],
   interior: ['step.wood', 'step.tile', 'phone.ring'],
   garment: ['cart.rattle', 'dock.bang', 'jackhammer', 'truck.compactor'],
   park: ['bird.sparrow', 'bird.starling', 'bird.pigeon'],
@@ -21,7 +22,7 @@ export const GROUPS: Record<string, string[]> = {
   rain: ['thunder.near', 'thunder.far'],
 };
 /** Families whose content needs the full band; the rest bake at 32 kHz to save memory. */
-const HI_RATE = /^(ui\.|glass|whistle|bird\.|signal|step\.)/;
+const HI_RATE = /^(ui\.|glass|whistle|bird\.|signal|step\.|fence\.|foley\.)/;
 const LONG = 2.5;
 
 interface Entry { buffers: AudioBuffer[]; bytes: number; lastUse: number; group: string; streamed: boolean }

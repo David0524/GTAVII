@@ -124,6 +124,61 @@ export const BAKERS: Record<string, { bake: Baker; dur: number; gain?: number }>
   'step.park': { dur: 0.25, bake: (s, sr) => step(s, sr, 2600, 0.02, 0.8, 2) },
   'step.wood': { dur: 0.25, bake: (s, sr) => step(s, sr, 700, 0.02, 0.2, 3) },
   'step.tile': { dur: 0.2, bake: (s, sr) => step(s, sr, 2000, 0.008, 0.2, 4) },
+  // ---------------------------------------------------------------- movement set (docs/briefs/MOVEMENT.md)
+  /** Granite kerb: hard, bright heel click with a short stone ring. */
+  'step.granite': { dur: 0.2, bake: (s, sr) => { const o = step(s, sr, 2400, 0.006, 0.15, 0); const r = new Rng(s + 1); modal(o, sr, r, 0.001, [[r.range(3200, 4200), 0.008, 0.25], [r.range(1700, 2100), 0.012, 0.2]], 0.0004); return fadeOut(normalize(o, 0.7), sr); } },
+  /** Glazed subway tile over concrete: click plus the tiled room's flutter does the rest. */
+  'step.subwaytile': { dur: 0.22, bake: (s, sr) => { const o = step(s, sr, 2200, 0.007, 0.15, 4); const r = new Rng(s + 2); modal(o, sr, r, 0.001, [[r.range(4200, 5200), 0.012, 0.2]], 0.0004); return fadeOut(normalize(o, 0.7), sr); } },
+  /** Brownstone/wood stoop step: hollow riser boom under the tread. */
+  'step.stoop': { dur: 0.3, bake: (s, sr) => { const o = step(s, sr, 650, 0.018, 0.25, 3); const r = new Rng(s + 3); modal(o, sr, r, 0.002, [[r.range(95, 130), 0.07, 0.8], [r.range(240, 300), 0.04, 0.35]], 0.003); return fadeOut(normalize(o, 0.75), sr); } },
+  /** Fire-escape iron: grated tread clank, rattle of the loose landing, long ringing modes. */
+  'step.iron': { dur: 0.6, bake: (s, sr) => {
+    const r = new Rng(s), o = len(0.6, sr);
+    modal(o, sr, r, 0, [[r.range(210, 260), 0.18, 0.7], [r.range(530, 610), 0.12, 0.45], [r.range(1150, 1350), 0.09, 0.3], [r.range(2500, 2900), 0.05, 0.15]], 0.0015);
+    for (let k = 0; k < 4; k++) modal(o, sr, r, 0.02 + k * r.range(0.025, 0.05), [[r.range(700, 1500), 0.02, 0.18 / (k + 1)]], 0.0008); // loose bolts
+    return fadeOut(normalize(o, 0.75), sr);
+  } },
+  /** Ladder rung (fire-escape drop ladder, sidewalk scaffold): sharp tube ping. */
+  'step.rung': { dur: 0.35, bake: (s, sr) => { const r = new Rng(s), o = len(0.35, sr); modal(o, sr, r, 0, [[r.range(780, 900), 0.12, 0.6], [r.range(2150, 2450), 0.07, 0.35], [r.range(4200, 4700), 0.03, 0.15]], 0.0008); return fadeOut(normalize(o, 0.7), sr); } },
+  /** Gravel over roof tar: granular crunch (many tiny stones) on a soft, damped base. */
+  'step.gravel': { dur: 0.3, bake: (s, sr) => {
+    const r = new Rng(s), o = len(0.3, sr), lp = new OnePole(260, sr);
+    for (let k = 0; k < 70; k++) { const t0 = Math.pow(r.next(), 1.8) * 0.18; modal(o, sr, r, t0, [[r.range(2500, 7000), r.range(0.002, 0.006), r.range(0.05, 0.25)]], 0.0003); }
+    for (let i = 0; i < sr * 0.06; i++) o[i] += lp.lp(r.bi()) * (1 - i / (sr * 0.06)) * 0.9; // tar thud
+    return fadeOut(normalize(o, 0.7), sr);
+  } },
+  /** Chain-link fence: wire mesh rattle from a hand/foot hold (also the drop over the top). */
+  'fence.rattle': { dur: 1.1, bake: (s, sr) => {
+    const r = new Rng(s), o = len(1.1, sr);
+    for (let k = 0; k < 90; k++) { const t0 = Math.pow(r.next(), 1.5) * 0.9; modal(o, sr, r, t0, [[r.range(1800, 5200), r.range(0.01, 0.04), r.range(0.04, 0.2) * Math.exp(-t0 * 2)]], 0.0004); }
+    modal(o, sr, r, 0, [[r.range(60, 90), 0.25, 0.5], [r.range(140, 180), 0.15, 0.3]], 0.004); // post and panel flex
+    return fadeOut(normalize(o, 0.7), sr);
+  } },
+  /** Cloth rustle (jacket/trousers), used under every traversal move. */
+  'foley.cloth': { dur: 0.45, bake: (s, sr) => fadeOut(normalize(cloth(new Rng(s), len(0.45, sr), sr, 0, 0.45, 1), 0.5), sr) },
+  /** Vault: two hand slaps on the obstacle, body swish, light land. */
+  'foley.vault': { dur: 0.9, bake: (s, sr) => {
+    const r = new Rng(s), o = len(0.9, sr);
+    hit(o, sr, r, 0, 0.6, 1800); hit(o, sr, r, r.range(0.03, 0.06), 0.5, 1700);
+    cloth(r, o, sr, 0.05, 0.5, 0.8); body(o, sr, r, r.range(0.5, 0.6), 0.7);
+    return fadeOut(normalize(o, 0.8), sr);
+  } },
+  /** Climb: hand plant, shoe scrape up the wall, pull-up cloth. */
+  'foley.climb': { dur: 1.4, bake: (s, sr) => {
+    const r = new Rng(s), o = len(1.4, sr); hit(o, sr, r, 0, 0.7, 1500); hit(o, sr, r, r.range(0.12, 0.2), 0.5, 1500);
+    const bp = new Biquad().set('bp', 2200, 1.2, sr); for (let i = Math.round(sr * 0.25); i < sr * 0.75; i++) { const t = i / sr - 0.25; o[i] += bp.run(r.bi()) * Math.sin(Math.PI * t / 0.5) * 0.25; } // shoe scrape
+    cloth(r, o, sr, 0.3, 0.9, 1); return fadeOut(normalize(o, 0.75), sr);
+  } },
+  /** Landing from a drop: heavy body thump, both feet, knees, cloth. */
+  'foley.land': { dur: 0.7, bake: (s, sr) => { const r = new Rng(s), o = len(0.7, sr); body(o, sr, r, 0, 1); hit(o, sr, r, 0.008, 0.5, 900); cloth(r, o, sr, 0.02, 0.4, 0.7); return fadeOut(normalize(o, 0.85), sr); } },
+  /** Landing roll: shoulder, back and hip contacts in sequence with grit scrape and cloth. */
+  'foley.roll': { dur: 1.3, bake: (s, sr) => {
+    const r = new Rng(s), o = len(1.3, sr); for (const [t, a] of [[0, 0.8], [0.22, 0.6], [0.45, 0.5], [0.7, 0.7]] as [number, number][]) body(o, sr, r, t + r.range(-0.02, 0.02), a);
+    const hp = new OnePole(1800, sr); for (let i = 0; i < sr * 0.9; i++) o[i] += hp.hp(r.bi()) * 0.12 * Math.sin(Math.PI * i / (sr * 0.9));
+    cloth(r, o, sr, 0, 1.1, 1.2); return fadeOut(normalize(o, 0.8), sr);
+  } },
+  /** Ragdoll body impact (hit by a car, fall): dull, heavy, no bones-snap gore. */
+  'foley.ragdoll': { dur: 0.8, bake: (s, sr) => { const r = new Rng(s), o = len(0.8, sr); body(o, sr, r, 0, 1.2); body(o, sr, r, r.range(0.12, 0.25), 0.6); cloth(r, o, sr, 0, 0.6, 0.9); return fadeOut(normalize(o, 0.85), sr); } },
   /** Birds: house-sparrow chirps, starling whistles, pigeon coos (FM and AM synthesis). */
   'bird.sparrow': { dur: 0.5, bake: (s, sr) => {
     const r = new Rng(s), o = len(0.5, sr); let t0 = 0;
@@ -234,6 +289,24 @@ function step(s: number, sr: number, f: number, dec: number, grit: number, kind:
   // low body thump of the heel
   const lp2 = new OnePole(180, sr); for (let i = 0; i < Math.min(o.length, sr * 0.04); i++) o[i] += lp2.lp(r.bi()) * (1 - i / (sr * 0.04)) * 0.8;
   return fadeOut(normalize(o, 0.7), sr);
+}
+
+/** Fabric rustle: bursts of band-passed noise with a slow swish envelope. */
+function cloth(r: Rng, o: Float32Array, sr: number, at: number, dur: number, amp: number): Float32Array {
+  const bp = new Biquad().set('bp', r.range(2500, 4500), 0.8, sr); const i0 = Math.round(at * sr), n = Math.round(dur * sr); let burst = 0;
+  for (let i = 0; i < n && i0 + i < o.length; i++) { if (r.next() < 0.002) burst = r.range(0.3, 1); burst *= 0.9993; const env = Math.sin(Math.PI * i / n); o[i0 + i] += bp.run(r.bi()) * env * (0.25 + burst) * 0.35 * amp; }
+  return o;
+}
+/** Palm/shoe contact: short slap with a skin-on-surface resonance. */
+function hit(o: Float32Array, sr: number, r: Rng, at: number, amp: number, f: number) {
+  const bp = new Biquad().set('bp', f * r.range(0.8, 1.2), 1, sr); const i0 = Math.round(at * sr), n = Math.round(0.03 * sr);
+  for (let i = 0; i < n && i0 + i < o.length; i++) o[i0 + i] += bp.run(r.bi()) * Math.exp(-i / (0.006 * sr)) * amp * 1.5;
+}
+/** Body mass on the ground: low thud with a little chest resonance. */
+function body(o: Float32Array, sr: number, r: Rng, at: number, amp: number) {
+  const lp = new OnePole(220, sr), i0 = Math.round(at * sr), n = Math.round(0.15 * sr);
+  for (let i = 0; i < n && i0 + i < o.length; i++) o[i0 + i] += lp.lp(r.bi()) * Math.exp(-i / (0.035 * sr)) * amp * 3;
+  modal(o, sr, r, at, [[r.range(70, 110), 0.06, 0.5 * amp], [r.range(180, 240), 0.03, 0.25 * amp]], 0.004);
 }
 
 function thunder(s: number, sr: number, dur: number, near: boolean): Float32Array {
