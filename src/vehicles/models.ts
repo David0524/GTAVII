@@ -53,7 +53,8 @@ const bancroft: ModelSpec = {
   wheelStyle: 'fullcover', whitewall: true,
   extras: ['mirrorL', 'antenna'],
   seats: carSeats(0.45), // H-point ~0.95 m behind the windshield base
-  palette: [C.sgAvocado, C.sgHarvest, C.rust, C.bronze, C.sgCream, C.sgBrown, C.sgWhite, C.forest, C.sgMaroon, C.powder, C.silver, C.navy, C.gold, C.sgBrown, C.sgWhite],
+  // 1974 street mix (engine review): earth tones, greens, golds, maroons, dark blues, one beige, ~10% white
+  palette: [C.sgAvocado, C.forest, C.sgHarvest, C.gold, C.rust, C.bronze, C.sgBrown, C.copper, C.sgMaroon, C.burgundy, C.navy, 0x2a3a5a, C.tan, 0xb8a888, C.sgWhite, C.powder],
   metallicChance: 0.35, vinylChance: 0.4,
   physics: carPhysics({}),
 };
@@ -96,7 +97,7 @@ const tiverton: ModelSpec = {
   wheelStyle: 'wire', whitewall: true,
   extras: ['mirrorL', 'antenna'],
   seats: carSeats(0.58, 0.6),
-  palette: [C.burgundy, C.bronze, C.cream, C.forest, C.navy, C.white, C.black, C.gold, C.copper],
+  palette: [C.burgundy, C.bronze, C.forest, C.navy, C.gold, C.copper, C.black, C.tan, C.white, C.sgMaroon],
   metallicChance: 0.6, vinylChance: 0.9,
   physics: carPhysics({ mass: 2150, freqF: 0.95, freqR: 1.05, zeta: 0.2, torque: 480, muPeak: 0.84 }),
 };
@@ -118,7 +119,7 @@ const ferris: ModelSpec = {
   wheelStyle: 'hubcap', whitewall: false,
   extras: ['mirrorL'],
   seats: carSeats(0.3, 0.6),
-  palette: [C.lime, C.harvest, C.orange, C.powder, C.white, C.tan, C.red, C.mint, C.brown],
+  palette: [C.lime, C.harvest, C.orange, C.powder, C.tan, C.red, C.mint, C.brown, C.sgAvocado, C.white],
   metallicChance: 0.1, vinylChance: 0.1,
   physics: carPhysics({ mass: 1400, comY: 0.53, torque: 290, peakRpm: 2000, redline: 4400, finalDrive: 2.9, freqF: 1.2, freqR: 1.3, zeta: 0.25, antiRoll: 0.2, cdA: 0.85, steerRate: 2.4 }),
 };
@@ -135,7 +136,7 @@ const homestead: ModelSpec = {
   rearBumper: { kind: 'chrome', y: 0.3, h: 0.18, depth: 0.08, wrap: 0.3 },
   trim: { rocker: true, wheelLip: true, windowFrame: 'chrome', doors: true },
   extras: ['roofRack', 'mirrorL', 'antenna'],
-  palette: [C.harvest, C.avocado, C.white, C.cream, C.brown, C.powder, C.bronze, C.forest],
+  palette: [C.harvest, C.avocado, C.brown, C.bronze, C.forest, C.tan, C.gold, C.copper, 0xb8a888, C.white],
   vinylChance: 0,
   physics: carPhysics({ mass: 2100, frontWeight: 0.52 }),
 };

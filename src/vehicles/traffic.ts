@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { SLOTS, type Slot } from './gen/builder';
 import { trafficSlotColor, type Quality } from './gen/materials';
-import { getAsset } from './assets';
+import { getAsset, variantOf } from './assets';
 import type { ModelSpec } from './gen/spec';
 import { MODEL_BY_ID } from './models';
 import { BIKE_BY_ID, buildBike, type BikeSpec } from './twowheel/bikes';
@@ -19,15 +19,16 @@ interface SplitOpts { paint2?: number; roofColor?: ModelSpec['roofColor']; signW
 function splitForInstancing(spec: SplitOpts, g: THREE.BufferGeometry) {
   const pos = g.getAttribute('position'), nrm = g.getAttribute('normal');
   const idx = g.index!;
-  const out = { paint: [] as number[], fixed: [] as number[], fixedCol: [] as number[], tail: [] as number[], head: [] as number[], sign: [] as number[] };
+  const out = { paint: [] as number[], fixed: [] as number[], fixedCol: [] as number[], tail: [] as number[], head: [] as number[], sign: [] as number[], vinyl: [] as number[] };
   const roofFixed = typeof spec.roofColor === 'number' ? spec.roofColor : spec.roofColor === 'paint2' ? spec.paint2 ?? 0xffffff : null;
   const c = new THREE.Color();
   const push = (arr: number[], i: number) => arr.push(pos.getX(i), pos.getY(i), pos.getZ(i), nrm.getX(i), nrm.getY(i), nrm.getZ(i));
   for (const grp of g.groups) {
     const slot = SLOTS[grp.materialIndex!] as Slot;
-    let target: 'paint' | 'fixed' | 'tail' | 'head' | 'sign';
+    let target: 'paint' | 'fixed' | 'tail' | 'head' | 'sign' | 'vinyl';
     let col: number | null = null;
     if (slot === 'paint' || (slot === 'roof' && roofFixed === null)) target = 'paint';
+    else if (slot === 'vinyl') target = 'vinyl'; // per-instance colour: vinyl, or the paint when the car has none
     else if (slot === 'taillamp') target = 'tail';
     else if (slot === 'headlamp') target = 'head';
     else if (slot === 'white' && spec.signWhite) target = 'sign'; // taxi roof light box / beacons
@@ -51,7 +52,7 @@ function splitForInstancing(spec: SplitOpts, g: THREE.BufferGeometry) {
     if (col) geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
     return geo;
   };
-  return { paint: mk(out.paint), fixed: mk(out.fixed, out.fixedCol), tail: mk(out.tail), head: mk(out.head), sign: mk(out.sign) };
+  return { paint: mk(out.paint), fixed: mk(out.fixed, out.fixedCol), tail: mk(out.tail), head: mk(out.head), sign: mk(out.sign), vinyl: mk(out.vinyl) };
 }
 
 /** A two-wheeler's LOD1 parts merged (frame, steering assembly, wheels) for instancing. */
@@ -69,7 +70,9 @@ function bikeGeometry(b: BikeSpec): THREE.BufferGeometry {
 
 /** Body + wheels merged into one geometry so a whole car is three instanced draws. */
 function withWheels(spec: ModelSpec, lod: 1 | 2): THREE.BufferGeometry {
-  const a = getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle });
+  // models that come with vinyl roofs carry the vinyl panel; cars without one get it painted (per instance)
+  const vinyl = spec.vinylChance > 0 ? (spec.cls === 'coupe' ? 'landau' : 'full') : 'none';
+  const a = getAsset(spec, { vinyl, whitewall: false, wheelStyle: spec.wheelStyle });
   if (lod === 2) return a.lod2;
   const g = a.lod1;
   const parts: THREE.BufferGeometry[] = [g.body.clone()];
@@ -110,6 +113,7 @@ function mergeGrouped(gs: THREE.BufferGeometry[]): THREE.BufferGeometry {
 }
 
 interface ModelBatch {
+  vinyl: THREE.InstancedMesh | null;
   paint: THREE.InstancedMesh; fixed: THREE.InstancedMesh; tail: THREE.InstancedMesh; head: THREE.InstancedMesh; sign: THREE.InstancedMesh | null;
   /** Contact shadow (one quad per car); ground light pools (own counts: only cars with lamps lit). */
   shadow: THREE.InstancedMesh; pool: THREE.InstancedMesh; brake: THREE.InstancedMesh; tailGlow: THREE.InstancedMesh;
@@ -126,7 +130,7 @@ export class TrafficRenderer {
   private batches = new Map<string, [ModelBatch, ModelBatch]>();
   private dims = new Map<string, ModelDims>();
   private shadowMats: THREE.Material[] = [];
-  private resolveCache = new Map<string, { modelId: string; paint: THREE.Color }>();
+  private resolveCache = new Map<string, { modelId: string; paint: THREE.Color; vinyl: THREE.Color }>();
   private lampCols = {
     brake: new THREE.Color(0xff2a10).multiplyScalar(2.2), tailRun: new THREE.Color(0xc01808), tailOff: new THREE.Color(0x4a0806),
     reverse: new THREE.Color(0xffffff).multiplyScalar(1.6), amber: new THREE.Color(0xff9a20).multiplyScalar(2),
@@ -134,7 +138,7 @@ export class TrafficRenderer {
     signOn: new THREE.Color(0xfff2d0).multiplyScalar(1.8), signOff: new THREE.Color(0xc8c4b8),
     beacon: new THREE.Color(0xff2010).multiplyScalar(3), beaconOff: new THREE.Color(0x5a0a08),
   };
-  private mats: { paint: THREE.Material; fixed: THREE.Material; lamp: THREE.Material };
+  private mats: { paint: THREE.Material; fixed: THREE.Material; lamp: THREE.Material; vinyl: THREE.Material };
   private _m = new THREE.Matrix4(); private _q = new THREE.Quaternion(); private _p = new THREE.Vector3(); private _s = new THREE.Vector3(1, 1, 1); private _y = new THREE.Vector3(0, 1, 0);
   /** Distance (m) beyond which the box impostor is used. */
   lod2Distance: number;
@@ -147,6 +151,7 @@ export class TrafficRenderer {
       paint: new THREE.MeshStandardNodeMaterial({ roughness: 0.45, metalness: 0.1 }),
       fixed: new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 0.4, metalness: 0.3 }),
       lamp: new THREE.MeshBasicNodeMaterial({}),
+      vinyl: new THREE.MeshStandardNodeMaterial({ roughness: 0.78, metalness: 0 }),
     };
   }
 
@@ -190,10 +195,11 @@ export class TrafficRenderer {
         paint.name = 'traffic-paint';
         const tail = im(parts.tail, this.mats.lamp, true), head = im(parts.head, this.mats.lamp, true);
         const sign = parts.sign.getAttribute('position').count ? im(parts.sign, this.mats.lamp, true) : null;
+        const vinyl = parts.vinyl.getAttribute('position').count ? im(parts.vinyl, this.mats.vinyl, true) : null;
         const flat = (geo: THREE.BufferGeometry, mat: THREE.Material) => { const m = im(geo, mat, false); m.castShadow = false; m.renderOrder = -1; return m; };
         const shadow = flat(shadowGeo, smat);
         const pool = flat(poolGeo, gm.head), brake = flat(glowGeo, gm.brake), tailGlow = flat(glowGeo, gm.tail);
-        return { paint, fixed, tail, head, sign, shadow, pool, brake, tailGlow, meshes: [paint, fixed, tail, head, shadow, ...(sign ? [sign] : [])], n: 0, np: 0, nb: 0, nt: 0 };
+        return { paint, fixed, tail, head, sign, vinyl, shadow, pool, brake, tailGlow, meshes: [paint, fixed, tail, head, shadow, ...(sign ? [sign] : []), ...(vinyl ? [vinyl] : [])], n: 0, np: 0, nb: 0, nt: 0 };
       };
       b = [mk(1), mk(2)];
       this.batches.set(modelId, b);
@@ -204,7 +210,14 @@ export class TrafficRenderer {
   private resolved(vclass: TrafficInstance['vclass'], variant: number) {
     const k = vclass + ':' + variant;
     let r = this.resolveCache.get(k);
-    if (!r) { const x = resolve(vclass, variant); r = { modelId: x.modelId, paint: new THREE.Color(x.paint) }; this.resolveCache.set(k, r); }
+    if (!r) {
+      const x = resolve(vclass, variant);
+      const spec = MODEL_BY_ID.get(x.modelId);
+      const v = spec ? variantOf(spec, variant) : null;
+      const paint = new THREE.Color(x.paint);
+      r = { modelId: x.modelId, paint, vinyl: v && v.vinyl !== 'none' ? new THREE.Color(v.vinylColor) : paint };
+      this.resolveCache.set(k, r);
+    }
     return r;
   }
 
@@ -228,6 +241,7 @@ export class TrafficRenderer {
       const i = b.n++;
       for (const m of b.meshes) m.setMatrixAt(i, this._m);
       b.paint.setColorAt(i, r.paint);
+      b.vinyl?.setColorAt(i, r.vinyl);
       const lt = it.lights;
       if (pools) {
         const key = 'traffic:' + idx;

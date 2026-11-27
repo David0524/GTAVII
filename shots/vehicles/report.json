@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T09:39:05.203Z",
+  "date": "2026-11-27T10:36:41.209Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -28,17 +28,17 @@
   "traffic": {
     "high_150": {
       "instances": 150,
-      "setInstancesMsAvg": 0.08333333333430346,
-      "setInstancesMsP95": 0.2000000000698492,
-      "drawCalls": 330,
-      "triangles": 340079
+      "setInstancesMsAvg": 0.15500000000004852,
+      "setInstancesMsP95": 0.20000000001164153,
+      "drawCalls": 479,
+      "triangles": 616389
     },
     "low_40": {
       "instances": 40,
-      "setInstancesMsAvg": 0.045833333334303464,
-      "setInstancesMsP95": 0.19999999995343387,
-      "drawCalls": 170,
-      "triangles": 30347
+      "setInstancesMsAvg": 0.0800000000000485,
+      "setInstancesMsP95": 0.19999999999708962,
+      "drawCalls": 194,
+      "triangles": 35005
     }
   },
   "driving": {

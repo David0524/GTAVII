@@ -248,6 +248,16 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   600 chips.
 - Shot: `damage_parts.jpg`. Rig section `parts`.
 
+- **1974 paint mix (engine review: the parked rows skewed white).**
+  - Civilian palettes are rebalanced toward earth tones, greens (avocado, forest), golds and
+    harvest yellow, maroons, dark blues and beige, with no silver.
+  - Share of white or cream per class (1000 variants): sedan 6.8%, hardtop 10.0%, compact 9.4%,
+    wagon 10.6%.
+  - Taxis, police and fleet liveries are unchanged. Still deterministic per variant.
+- **Traffic vinyl roofs:** TrafficRenderer batches for models with vinyl roofs carry the vinyl
+  panel as their own instanced part, coloured per instance (the variant's vinyl colour, or the
+  body paint when that car has none). Vinyl share: hardtops 90%, sedans 42%, compacts 9%.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
