@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T10:36:41.209Z",
+  "date": "2026-11-27T14:13:42.048Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -500,6 +500,12 @@
       51.3,
       0,
       30
+    ]
+  },
+  "doors": {
+    "ajarAfterBraking": 0.17480449201975334,
+    "detached": [
+      "door0"
     ]
   }
 }

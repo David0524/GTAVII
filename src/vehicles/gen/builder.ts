@@ -285,3 +285,45 @@ export function angleWeightedNormals(g: THREE.BufferGeometry) {
   if (attr && attr.count === pos.count) { (attr.array as Float32Array).set(n); attr.needsUpdate = true; }
   else g.setAttribute('normal', new THREE.BufferAttribute(n, 3));
 }
+
+/**
+ * Split an indexed, grouped geometry by triangle centroid: each triangle goes to the first region
+ * whose test passes (cx, cy, cz, material index), else stays in `rest`. Outputs are compact
+ * geometries with their own vertices, the same groups (material slots) and attributes.
+ */
+export function extractRegions(g: THREE.BufferGeometry, tests: ((cx: number, cy: number, cz: number, slot: number) => boolean)[]): { rest: THREE.BufferGeometry; parts: THREE.BufferGeometry[] } {
+  const pos = g.getAttribute('position'), idx = g.index!;
+  const buckets: Map<number, number[]>[] = [new Map(), ...tests.map(() => new Map<number, number[]>())]; // per output: slot -> indices
+  for (const grp of g.groups) {
+    const slot = grp.materialIndex ?? 0;
+    for (let k = grp.start; k < grp.start + grp.count; k += 3) {
+      const a = idx.getX(k), b = idx.getX(k + 1), c = idx.getX(k + 2);
+      const cx = (pos.getX(a) + pos.getX(b) + pos.getX(c)) / 3, cy = (pos.getY(a) + pos.getY(b) + pos.getY(c)) / 3, cz = (pos.getZ(a) + pos.getZ(b) + pos.getZ(c)) / 3;
+      let out = 0;
+      for (let t = 0; t < tests.length; t++) if (tests[t](cx, cy, cz, slot)) { out = t + 1; break; }
+      let l = buckets[out].get(slot); if (!l) buckets[out].set(slot, (l = []));
+      l.push(a, b, c);
+    }
+  }
+  const make = (bk: Map<number, number[]>) => {
+    const remap = new Map<number, number>();
+    const order: number[] = [];
+    const ix: number[] = [];
+    const ng = new THREE.BufferGeometry();
+    for (const slot of [...bk.keys()].sort((x, y) => x - y)) {
+      const start = ix.length;
+      for (const v of bk.get(slot)!) { let r = remap.get(v); if (r === undefined) { r = order.length; remap.set(v, r); order.push(v); } ix.push(r); }
+      ng.addGroup(start, ix.length - start, slot);
+    }
+    for (const [name, attr] of Object.entries(g.attributes)) {
+      const a = attr as THREE.BufferAttribute, n = a.itemSize, src = a.array as ArrayLike<number>;
+      const arr = new Float32Array(order.length * n);
+      order.forEach((v, i) => { for (let c = 0; c < n; c++) arr[i * n + c] = src[v * n + c]; });
+      ng.setAttribute(name, new THREE.BufferAttribute(arr, n));
+    }
+    ng.setIndex(ix);
+    ng.computeBoundingBox(); ng.computeBoundingSphere();
+    return ng;
+  };
+  return { rest: make(buckets[0]), parts: buckets.slice(1).map(make) };
+}

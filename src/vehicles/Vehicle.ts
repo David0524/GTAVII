@@ -217,6 +217,17 @@ export class Vehicle implements Lightable {
       holder.add(mesh); lod0.add(holder);
       this.parts[name] = { mesh, holder, body: null, sag: 0 };
     }
+    g0.doors.forEach((d, i) => {
+      const pivot = new THREE.Group();
+      pivot.position.set(...d.hinge);
+      const mesh = new THREE.Mesh(d.geo, this.mats.array);
+      mesh.position.set(-d.hinge[0], -d.hinge[1], -d.hinge[2]);
+      mesh.castShadow = true; mesh.receiveShadow = true; mesh.updateMorphTargets();
+      pivot.add(mesh); lod0.add(pivot);
+      const name = `door${i}`;
+      this.parts[name] = { mesh, holder: pivot, body: null, sag: 0 };
+      this.doors.push({ name, side: d.side, z0: d.z0, z1: d.z1, pivot, angle: 0, vel: 0, target: 0 });
+    });
     this.decals = buildDecals(g0.decals, variant.seed, spec.cls === 'bus' ? 'bus' : spec.cls === 'garbage' ? 'garbage' : 'other');
     lod0.add(this.decals.group);
     if (g0.beacon) {
@@ -452,6 +463,8 @@ export class Vehicle implements Lightable {
         seatPose: this.seatPose(seat),
         carjack: { stand: jack, throwDir: new THREE.Vector3(side, 0, 0.4).normalize().applyQuaternion(q) },
         locked: this.security.locked,
+        /** 0..1 door opening (null: no separate door on this model, e.g. trucks and buses). Drive it with setDoor(seat, x). */
+        doorOpen: this.doorOpen(seat),
       };
     });
     const tops = (s: number) => pw(sp.top, s);
@@ -691,7 +704,7 @@ export class Vehicle implements Lightable {
     ZONES.forEach((z, i) => { infl[i] = this.zones[z]; });
     const hood = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
     if (hood?.morphTargetInfluences) ZONES.forEach((z, i) => { hood.morphTargetInfluences![i] = this.zones[z]; });
-    for (const name of ['bumperF', 'bumperR'] as const) { const m = this.parts[name]?.mesh; if (m?.morphTargetInfluences) ZONES.forEach((z, i) => { m.morphTargetInfluences![i] = this.zones[z]; }); }
+    for (const name of ['bumperF', 'bumperR', ...this.doors.map((d) => d.name)]) { const m = this.parts[name]?.mesh; if (m?.morphTargetInfluences) ZONES.forEach((z, i) => { m.morphTargetInfluences![i] = this.zones[z]; }); }
     this.physics.wheels.forEach((w, i) => { w.flat = this.components.tyresFlat[i]; });
     const prev = this.stage;
     if (this.stage !== 'destroyed') {
@@ -991,6 +1004,7 @@ export class Vehicle implements Lightable {
     const hm = this.hoodPivot?.children[0] as THREE.Mesh | undefined;
     if (hm && g.hood) { hm.geometry = g.hood; hm.updateMorphTargets(); }
     for (const name of ['bumperF', 'bumperR'] as const) { const p = this.parts[name], ng = g[name]; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } }
+    this.doors.forEach((d, i) => { const p = this.parts[d.name], ng = g.doors[i]?.geo; if (p && ng) { p.mesh.geometry = ng; p.mesh.updateMorphTargets(); } });
     this.wheelObjs.forEach((o, i) => {
       const w = this.asset.lod0.wheels[i];
       const lvl = o.lod.levels[0].object;
@@ -1005,7 +1019,10 @@ export class Vehicle implements Lightable {
   private dentLog: { x: number; y: number; z: number; amount: number; radius: number; seed: number }[] = [];
 
   // ============================================================ detachable parts (hood, bumpers)
-  private parts: Partial<Record<'hood' | 'bumperF' | 'bumperR', { mesh: THREE.Mesh; holder: THREE.Object3D; body: RAPIER.RigidBody | null; sag: number }>> = {};
+  private parts: Record<string, { mesh: THREE.Mesh; holder: THREE.Object3D; body: RAPIER.RigidBody | null; sag: number } | undefined> = {};
+  /** Doors (LOD0 passenger cars): open amount 0..1 (1 = ~70°), animated toward `target`. */
+  private doors: { name: string; side: 1 | -1; z0: number; z1: number; pivot: THREE.Group; angle: number; vel: number; target: number }[] = [];
+  private prevVel = new THREE.Vector3();
   private partDebris: { mesh: THREE.Mesh; body: RAPIER.RigidBody }[] = [];
   /** Parts currently off the car. */
   get detachedParts(): string[] { return [...(this.components.detached ?? [])]; }
@@ -1013,7 +1030,7 @@ export class Vehicle implements Lightable {
    * Knock a part off: it becomes a physics body (debris) that keeps the dents and paint it had.
    * `push` (world, m/s) adds to the car's velocity. Returns false if already off or not present.
    */
-  detachPart(name: 'hood' | 'bumperF' | 'bumperR', push?: { x: number; y: number; z: number }, source: string | null = null): boolean {
+  detachPart(name: 'hood' | 'bumperF' | 'bumperR' | `door${number}`, push?: { x: number; y: number; z: number }, source: string | null = null): boolean {
     const part = this.parts[name];
     const list = (this.components.detached ??= []);
     if (!part || list.includes(name)) return false;
@@ -1046,13 +1063,62 @@ export class Vehicle implements Lightable {
     // It joins the PROJECTILE membership so wheel rays (WORLD|VEHICLE|PROP) roll over it instead of
     // perching the car on a flat hood.
     world.createCollider(RAPIER.ColliderDesc.cuboid(Math.max(0.03, half.x), Math.max(0.025, half.y), Math.max(0.03, half.z)).setTranslation(c.x, c.y, c.z)
-      .setMass(name === 'hood' ? 22 : 14).setFriction(0.6).setRestitution(0.2).setCollisionGroups(groups(G.PROJECTILE, G.WORLD | G.PROP)), body);
+      .setMass(name === 'hood' ? 22 : name.startsWith('door') ? 30 : 14).setFriction(0.6).setRestitution(0.2).setCollisionGroups(groups(G.PROJECTILE, G.WORLD | G.PROP)), body);
     this.partDebris.push({ mesh: debris, body });
     this.emit('component', { vehicleId: this.id, kind: 'part', detail: name, source, point: debris.position.clone() } satisfies ComponentEvent);
     return true;
   }
+  // ---- doors: the engine's enter / exit / carjack animations drive these
+  private doorFor(seat: SeatId) {
+    const sl = this.seatLocal(seat), side = sl.x < 0 ? -1 : 1;
+    let best: (typeof this.doors)[number] | null = null, bd = Infinity;
+    for (const d of this.doors) if (d.side === side && !this.components.detached?.includes(d.name)) {
+      const dz = sl.z < d.z0 ? d.z0 - sl.z : sl.z > d.z1 ? sl.z - d.z1 : 0;
+      if (dz < bd) { bd = dz; best = d; }
+    }
+    return best;
+  }
+  /** Swing a seat's door toward `open` (0 closed … 1 wide, ~70°). Returns false if the car has no such door (or it is gone). */
+  setDoor(seat: SeatId, open: number): boolean {
+    const d = this.doorFor(seat);
+    if (!d) return false;
+    d.target = Math.max(0, Math.min(1, open));
+    return true;
+  }
+  /** Current opening of a seat's door (0..1); null when there is none. */
+  doorOpen(seat: SeatId): number | null { const d = this.doorFor(seat); return d ? d.angle : null; }
+  /** Every door shut (e.g. after the engine's enter animation). */
+  closeAllDoors() { for (const d of this.doors) d.target = 0; }
+  private updateDoors(dt: number) {
+    const lv = this.physics.body.linvel();
+    const vel = _v4.set(lv.x, lv.y, lv.z);
+    // car acceleration in its own frame: braking (+z, the car faces -z) swings front-hinged doors open,
+    // cornering throws the outer door open; airflow at speed blows them shut
+    const acc = vel.clone().sub(this.prevVel).divideScalar(Math.max(1e-3, dt)).applyQuaternion(_q.copy(this.object.quaternion).invert());
+    this.prevVel.copy(vel);
+    const speed = Math.abs(this.physics.speed);
+    for (const d of this.doors) {
+      if (this.components.detached?.includes(d.name)) continue;
+      const zone = d.side > 0 ? 'right' : 'left';
+      const unlatched = this.zones[zone] > 0.55;
+      if (unlatched) {
+        const push = Math.max(0, acc.z) * 0.12 + Math.max(0, -d.side * acc.x) * 0.1 - speed * speed * 0.0012;
+        d.vel += (push - d.angle * 1.5 - d.vel * 1.2) * dt * 6;
+        d.angle = Math.max(0, Math.min(1.05, d.angle + d.vel * dt));
+        if (d.angle === 0 || d.angle === 1.05) d.vel *= -0.3; // bang against the frame / the stop
+      } else {
+        // animated by the engine (enter / exit), or shut
+        const k = Math.min(1, dt * 5);
+        d.angle += (d.target - d.angle) * k;
+        d.vel = 0;
+      }
+      d.pivot.rotation.y = d.side * d.angle * 1.22;
+    }
+  }
+
   /** Bumpers sag with their zone's damage, then come off; the hood flies on a hard front hit. */
   private updateParts(dt: number) {
+    this.updateDoors(dt);
     for (const [name, zone] of [['bumperF', 'front'], ['bumperR', 'rear']] as const) {
       const part = this.parts[name];
       if (!part || this.components.detached?.includes(name)) continue;
@@ -1076,6 +1142,12 @@ export class Vehicle implements Lightable {
       if (this.zones[zone] > 0.82 || sev > 0.55) this.detachPart(name, { x: fwd.x * 1.5, y: 0.5, z: fwd.z * 1.5 }, source);
     }
     if (zone === 'front' && (this.zones.front > 0.9 || sev > 0.7)) this.detachPart('hood', { x: fwd.x * 0.5, y: 3, z: fwd.z * 0.5 }, source);
+    if ((zone === 'left' || zone === 'right') && (this.zones[zone] > 0.88 || sev > 0.6)) {
+      const side = zone === 'right' ? 1 : -1;
+      const out = _v4.set(side, 0.2, 0).applyQuaternion(this.object.quaternion);
+      const d = this.doors.find((x) => x.side === side && !this.components.detached?.includes(x.name));
+      if (d) this.detachPart(d.name as `door${number}`, { x: out.x * 2, y: 0.8, z: out.z * 2 }, source);
+    }
   }
   private reattachParts() {
     for (const d of this.partDebris) { this.physics.world.removeRigidBody(d.body); d.mesh.removeFromParent(); }
@@ -1083,6 +1155,7 @@ export class Vehicle implements Lightable {
     for (const pm of this.plateMeshes) pm.visible = true;
     for (const p of Object.values(this.parts)) if (p) { p.mesh.visible = true; p.sag = 0; if (p.holder !== this.hoodPivot) { p.holder.rotation.set(0, 0, 0); p.holder.position.set(0, 0, 0); } }
     if (this.components.detached) this.components.detached.length = 0;
+    for (const d of this.doors) { d.angle = 0; d.vel = 0; d.target = 0; d.pivot.rotation.y = 0; }
   }
 
   private updateLightsAndFx(dt: number) {

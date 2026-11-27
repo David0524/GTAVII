@@ -268,6 +268,26 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
     hitch can't skip the fade.
   - Ground light pools appear once a car is more than half faded in.
 
+- **Doors (LOD0 passenger cars).**
+  - **Cutting them out:** doors are cut out of the generated body along their shut-line seams
+    (seams are now loft stations, so the cut is clean) by `extractRegions()`. Below the belt a
+    door takes the skin, handle, lock, shut lines and door card; above it, the door's side glass.
+  - **Count:** sedans, cabs and wagons have 2 per side, the Tiverton coupe 1. Trucks and buses
+    keep their cab doors in the body.
+  - **Hinges:** front-hinged on a pivot at the front seam, opening to about 70°. Damage morphs,
+    the hero swap, worker transfer and thumbnails all include doors.
+  - **API for the engine's enter / exit / carjack animations:**
+    - `setDoor(seat, 0..1)` (animated);
+    - `doorOpen(seat)`;
+    - `closeAllDoors()`;
+    - `movementAnchors().doors[].doorOpen`.
+  - **Damage:** side-zone damage over 0.55 unlatches the doors on that side. They then swing:
+    braking throws them open, cornering throws the outer door open, and airflow at speed blows
+    them shut, with a bang off the frame and the stop. Zone damage over 0.88, or a hit of
+    severity 0.6 or more, tears one off as debris (`door<i>`). Saved in `components.detached`;
+    `repair()` puts it back.
+  - Shot: `doors.jpg`. Rig section `doors`.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

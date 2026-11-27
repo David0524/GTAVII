@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { GeoBuilder, type Slot, type V3, clamp, lerp, pw, smooth } from './builder';
+import { GeoBuilder, SLOTS, extractRegions, type Slot, type V3, clamp, lerp, pw, smooth } from './builder';
 import { type ModelSpec, type GlassKind, type CargoSpec, sMid } from './spec';
 
 /** Where decals (canvas textures) go; created by decals.ts. */
@@ -13,6 +13,8 @@ export interface BoxCollider { cx: number; cy: number; cz: number; hx: number; h
 export interface GeneratedModel {
   body: THREE.BufferGeometry;
   hood: THREE.BufferGeometry | null;
+  /** LOD0 passenger cars: doors cut from the body (front-hinged; swing open, hang, detach). */
+  doors: DoorPart[];
   /** LOD0 only: bumpers as separate meshes (sag, detach); null at LOD1 (merged into the body). */
   bumperF: THREE.BufferGeometry | null;
   bumperR: THREE.BufferGeometry | null;
@@ -44,6 +46,9 @@ export interface GenOptions {
    */
   hero?: boolean;
 }
+
+/** A door cut out of the body: side, z span, hinge point (body space), its own geometry. */
+export interface DoorPart { side: 1 | -1; z0: number; z1: number; hinge: V3; geo: THREE.BufferGeometry }
 
 /** Body cross-section run indices: right side, top, left side, underside. */
 interface Section { s: number; side: V3[]; top: V3[]; under: [V3, V3] }
@@ -150,8 +155,22 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     return { s, side, top, under: [[-side[0][0], side[0][1], side[0][2]], side[0]] };
   };
 
+  // ---------------------------------------------------------------- door seams (shared by stations, trim, door split)
+  const doorSeams: number[] = [];
+  if (m.trim.doors) {
+    const g2 = m.gh;
+    const beltS = (u: number) => lerp(g2.sA0, g2.sC0, u);
+    const bandCentres = g2.bands.map((b2, i) => ({ ...b2, c: (b2.u + (g2.bands[i + 1]?.u ?? 1)) / 2 }));
+    const bPillar = bandCentres.find((b2, i) => i > 0 && b2.k === 'pillar' && b2.c < 0.8);
+    const lastGlass = [...g2.bands].reverse().find((b2) => b2.k === 'glass' || b2.k === 'opera');
+    doorSeams.push(g2.sA0 + 0.03);
+    if (bPillar) doorSeams.push(beltS(bPillar.c));
+    doorSeams.push(bPillar ? Math.min(rearS - archR - 0.05, beltS(g2.bands[g2.bands.length - 1].u) + 0.05) : beltS(lastGlass && lastGlass.k === 'opera' ? lastGlass.u : 0.6));
+  }
+
   // ---------------------------------------------------------------- stations
   const st = new Set<number>();
+  if (lod === 0) for (const sd of doorSeams) { st.add(sd); st.add(sd - 0.004); st.add(sd + 0.004); } // doors cut cleanly along their seams
   const n = Math.max(lod === 0 ? 14 : 7, Math.round(L / (lod === 0 ? 0.42 : 0.85)));
   for (let i = 0; i <= n; i++) st.add(L * i / n);
   for (const a of axles) {
@@ -360,15 +379,7 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
     }
     // door shut lines + handles: front edge at the A-pillar foot, a seam at the B-pillar, the rear edge ahead of the rear arch
     if (m.trim.doors) {
-      const g2 = m.gh;
-      const beltS = (u: number) => lerp(g2.sA0, g2.sC0, u);
-      const bandCentres = g2.bands.map((b2, i) => ({ ...b2, c: (b2.u + (g2.bands[i + 1]?.u ?? 1)) / 2 }));
-      const bPillar = bandCentres.find((b2, i) => i > 0 && b2.k === 'pillar' && b2.c < 0.8);
-      const lastGlass = [...g2.bands].reverse().find((b2) => b2.k === 'glass' || b2.k === 'opera');
-      const seams = [g2.sA0 + 0.03];
-      if (bPillar) seams.push(beltS(bPillar.c));
-      const rearEdge = bPillar ? Math.min(rearS - archR - 0.05, beltS(g2.bands[g2.bands.length - 1].u) + 0.05) : beltS(lastGlass && lastGlass.k === 'opera' ? lastGlass.u : 0.6);
-      seams.push(rearEdge);
+      const seams = doorSeams;
       for (const sx of [1, -1]) {
         for (const sSeam of seams) {
           const pts: V3[] = [];
@@ -554,17 +565,40 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   }];
   for (const c of m.cargo ?? []) if (!c.dressing) colliders.push({ cx: 0, cy: (c.y0 + c.y1) / 2, cz: Z((c.s0 + c.s1) / 2), hx: c.hw, hy: (c.y1 - c.y0) / 2, hz: (c.s1 - c.s0) / 2 });
 
-  const body = b.build();
+  let body = b.build();
+  // ---------------------------------------------------------------- doors: cut out of the body (LOD0 passenger cars)
+  const doors: DoorPart[] = [];
+  if (lod === 0 && PASSENGER.has(m.cls) && doorSeams.length >= 2) {
+    const gh2 = m.gh;
+    const hwCab = halfW((gh2.sA0 + gh2.sC0) / 2) - gh2.beltInset - 0.06;
+    const regions: { side: 1 | -1; z0: number; z1: number; sFront: number }[] = [];
+    for (const side of [1, -1] as const) for (let i = 0; i < doorSeams.length - 1; i++) regions.push({ side, z0: Z(doorSeams[i]), z1: Z(doorSeams[i + 1]), sFront: doorSeams[i] });
+    const glassSlots = new Set([SLOTS.indexOf('glassL'), SLOTS.indexOf('glassR')]);
+    const split = extractRegions(body, regions.map((r) => (cx: number, cy: number, cz: number, slot: number) => {
+      if (cx * r.side < hwCab + 0.012) return false;
+      if (cz < Math.min(r.z0, r.z1) + 0.002 || cz > Math.max(r.z0, r.z1) - 0.002) return false;
+      if (cy < m.sillY - 0.06) return false;
+      if (cy <= m.beltY + 0.015) return true;                 // skin, handle, shut lines, door card below the belt
+      return glassSlots.has(slot) && cy < gh2.roofY - 0.06;   // and the door's side glass
+    }));
+    body = split.rest;
+    regions.forEach((r, i) => {
+      const geo = split.parts[i];
+      if (!geo.index || geo.index.count < 3) return;
+      const hingeZ = Math.min(r.z0, r.z1); // the front seam (the car faces -z): doors open front-hinged
+      doors.push({ side: r.side, z0: Math.min(r.z0, r.z1), z1: Math.max(r.z0, r.z1), hinge: [r.side * (sideX(r.sFront, (m.sillY + m.beltY) / 2) + 0.01), (m.sillY + m.beltY) / 2, hingeZ], geo });
+    });
+  }
   const hood = lod === 0 && m.hood && hoodB.pos.length ? hoodB.build() : null;
   const tris = (g2: THREE.BufferGeometry | null) => (g2 ? (g2.index ? g2.index.count : g2.getAttribute('position').count) / 3 : 0);
   let maxZ = Z(L) + rDepth;
   for (const c of m.cargo ?? []) maxZ = Math.max(maxZ, Z(c.s1));
   return {
-    body, hood, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
+    body, hood, doors, bumperF: lod === 0 && bumpFB.pos.length ? bumpFB.build() : null, bumperR: lod === 0 && bumpRB.pos.length ? bumpRB.build() : null, hoodPivot: m.hood ? [0, topY(m.hood[1]), Z(m.hood[1])] : [0, 0, 0],
     wheelR, wheelL, wheels, beacon, decals, colliders,
     lamps: { head, tail }, plates: plateMounts(m, Z, lastCargo),
     minZ: Z(0) - fDepth, maxZ, halfW: m.W / 2, height: Math.max(roofTop, ...(m.cargo ?? []).map((c) => c.y1)),
-    tris: tris(body) + tris(hood) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
+    tris: tris(body) + tris(hood) + doors.reduce((a, d) => a + tris(d.geo), 0) + (tris(wheelR) * (wheels.length + (m.dualRear ? 2 : 0))) + tris(beacon),
   };
 }
 

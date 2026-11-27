@@ -43,11 +43,13 @@ export function packModel(m: GeneratedModel): { packed: PackedModel; transfer: A
   const transfer: ArrayBufferLike[] = [];
   const out: Record<string, unknown> = { ...m };
   for (const k of GEO_KEYS) out[k] = m[k] ? packGeometry(m[k]!, transfer) : null;
+  out.doors = m.doors.map((d) => ({ ...d, geo: packGeometry(d.geo, transfer) }));
   return { packed: out as PackedModel, transfer };
 }
 
 export function unpackModel(p: PackedModel): GeneratedModel {
   const out: Record<string, unknown> = { ...p };
   for (const k of GEO_KEYS) out[k] = p[k] ? unpackGeometry(p[k]!) : null;
+  out.doors = (p.doors as unknown as { geo: PackedGeometry }[]).map((d) => ({ ...d, geo: unpackGeometry(d.geo) }));
   return out as unknown as GeneratedModel;
 }
