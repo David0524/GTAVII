@@ -29,6 +29,7 @@ async function main() {
   const host = new MockHost(input, streets, base, world.heroes);
   const tv = q.get('trav'); if (tv) host.travKind = tv as typeof host.travKind;
   const tm = q.get('touchmode'); if (tm) host.touchMode = tm as typeof host.touchMode;
+  if (q.get('ctx') === 'greet') host.greet = true;
   const heat = q.get('heat'); if (heat) host.heatPhase = heat as HeatView['phase'];
   // mock player starts at the Flatiron prow facing up Broadway
   host.pos = { x: Number(q.get('x') ?? 4), z: Number(q.get('z') ?? -52), yaw: Number(q.get('yaw') ?? 0.21) };

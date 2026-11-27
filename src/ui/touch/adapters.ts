@@ -18,6 +18,8 @@ export interface GameplayTouchLike {
   armed(): boolean;
   contextAction(): (TouchContext & { target?: string }) | null;
   doContextAction(moveDir?: Dir): void;
+  /** gameplay 8c27467: the alt verb of the current context (greet/antagonize). */
+  doAltContextAction?(): void;
   lockables(): { id: string; chest: V3; threat?: number }[];
   aimer: { locked: string | null };
   lockTarget(id: string | null): void;
@@ -36,8 +38,9 @@ export function gameplayTouch(g: GameplayTouchLike, project: (x: number, y: numb
   return {
     mode: () => g.touchMode(),
     armed: () => g.armed(),
-    context: () => { const c = g.contextAction(); return c ? { kind: c.kind, label: c.label } : null; },
+    context: () => { const c = g.contextAction(); return c ? { kind: c.kind, label: c.label, ...(c.alt ? { alt: { kind: c.alt.kind, label: c.alt.label } } : {}) } : null; },
     doContext: (d) => g.doContextAction(d),
+    doAltContext: () => g.doAltContextAction?.(),
     lockables: () => g.lockables().map((l) => ({ id: l.id, x: l.chest[0], y: l.chest[1], z: l.chest[2], threat: l.threat })),
     locked: () => g.aimer.locked,
     lockTarget: (id) => g.lockTarget(id),
