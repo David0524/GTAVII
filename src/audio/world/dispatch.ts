@@ -18,14 +18,14 @@ import type { VoiceLibrary } from '../dialogue/voiceLibrary';
 import type { SourceGraph } from '../core/voices';
 import { segment, normalise, numberWords, carWords } from '../dialogue/dispatchText';
 
-type Voice = 'central' | 'car';
+type Voice = 'central' | 'car' | 'sergeant';
 interface Line { text: string; voice: Voice; urgent: boolean; car?: number; queuedAt: number; priority: number; alert?: boolean }
 interface Item { buf: AudioBuffer; at: number; rate: number; gain: number; band?: boolean }
-interface Bark { context: string; emotion?: string; text: string; voice?: 'dispatcher' | 'car' }
+interface Bark { context: string; emotion?: string; text: string; voice?: 'dispatcher' | 'car' | 'sergeant' }
 /** Witness description as gameplay sends it on reportFiled (src/gameplay/police/description.ts). */
 interface Desc { subject?: { v: string }; sex?: { v: string }; clothes?: { v: string }[]; vehicle?: { vclass?: { v: string }; colour?: { v: string }; plate?: { v: string } } }
 
-const SPEAKER: Record<Voice, string> = { central: 'dispatch.central', car: 'dispatch.car' };
+const SPEAKER: Record<Voice, string> = { central: 'dispatch.central', car: 'dispatch.car', sergeant: 'dispatch.sergeant' };
 const GAP = -0.045, PAUSE = 0.16, GARBLE = 0.24, STALE = 18;
 
 /** A transmission: buffers at fixed offsets through one radio chain (start/offset-aware, so it can resume). */
@@ -108,7 +108,7 @@ export class Dispatch {
     const now = this.env.ctx.currentTime, fresh = all.filter((l) => now - (this.heard.get(l.text) ?? -1e9) > 90), ok = fresh.length ? fresh : all;
     const l = ok[(this.env.rng.next() * ok.length) | 0]; this.heard.set(l.text, now);
     const text = l.text.replace(/\{(\w+)\}/g, (_m, k: string) => fills[k]);
-    const voice: Voice | undefined = l.voice === 'dispatcher' ? 'central' : l.voice === 'car' ? 'car' : undefined;
+    const voice: Voice | undefined = l.voice === 'dispatcher' ? 'central' : l.voice === 'car' ? 'car' : l.voice === 'sergeant' ? 'sergeant' : undefined;
     this.say(text, { ...o, urgent: /urgent|breathless|alarmed/.test(l.emotion ?? '') || o.urgent, voice, fallback: o.voice });
     return true;
   }
@@ -141,6 +141,8 @@ export class Dispatch {
     // Narrative's escalate lines include 'officer down'; prefer one of those, else say it plainly.
     const esc = (this.pools.police_radio ?? []).some((l) => l.context === 'escalate' && /officer down/i.test(l.text));
     if (!esc || !this.sayPoolMatching('police_radio', 'escalate', /officer down/i, at, { priority: 4, alert: true, urgent: true })) this.say(`Central to all cars, officer down, ${this.place(at[0], at[1])}. All units respond.`, { urgent: true, priority: 4, alert: true });
+    // The tone shift (narrative's `hot` set): the band clears, cars check in, the sergeant takes the air.
+    for (let k = 0; k < 3; k++) setTimeout0(this.env, 4 + k * 11, () => this.sayPool('police_radio', 'hot', at, { priority: 3 }));
     const seq = (this.pools.cop_killed ?? []).filter((l) => l.context === 'radio');
     seq.slice(1).forEach((l, i) => setTimeout0(this.env, 6 + i * 9, () => this.say(l.text, { urgent: l.emotion !== 'grave', priority: 3 })));
     for (let k = 0; k < 3; k++) setTimeout0(this.env, 3 + k * 5 + this.env.rng.range(0, 3), () => this.siren());
@@ -189,7 +191,7 @@ export class Dispatch {
     const now = this.env.ctx.currentTime;
     if (!this.env.live) return;
     // Idle chatter while a report is open (or the channel is hot).
-    if ((this.openReports.size || now < this.hotUntil) && now >= this.nextIdle) { this.nextIdle = now + this.env.rng.range(25, 60); if (!this.queue.length) this.sayPool('police_radio', now < this.hotUntil ? 'search' : 'idle', null, { voice: this.env.rng.next() < 0.5 ? 'car' : 'central', car: this.env.rng.range(3, 40) | 0 }); }
+    if ((this.openReports.size || now < this.hotUntil) && now >= this.nextIdle) { this.nextIdle = now + this.env.rng.range(25, 60); if (!this.queue.length) (now < this.hotUntil && this.sayPool('police_radio', 'hot', this.lastAt, { priority: 2 })) || this.sayPool('police_radio', now < this.hotUntil ? 'search' : 'idle', null, { voice: this.env.rng.next() < 0.5 ? 'car' : 'central', car: this.env.rng.range(3, 40) | 0 }); }
     if (this.speaking || now < this.busyUntil || !this.queue.length) return;
     const line = this.queue.shift()!;
     if (now - line.queuedAt > STALE && line.priority < 3) { this.stats.dropped++; return; }
@@ -197,7 +199,7 @@ export class Dispatch {
   }
 
   private async transmit(l: Line) {
-    const sp = SPEAKER[l.voice], em = l.urgent ? 'urgent' : 'flat';
+    const sp = SPEAKER[l.voice], em = l.urgent && l.voice !== 'sergeant' ? 'urgent' : 'flat'; // the sergeant has one register: slow
     const segs = segment(l.text, (f) => this.lib.duration(sp, em, f) !== undefined);
     const bufs = await Promise.all(segs.map((s) => (s.frag === ',' || !s.known ? Promise.resolve(null) : this.lib.get(sp, em, s.frag, 1.5))));
     const rate = l.voice === 'car' ? 0.94 + ((l.car ?? 7) % 9) * 0.015 : 1; // each car's radio and voice sit a little differently
@@ -221,7 +223,7 @@ export class Dispatch {
     this.env.vm.play({ name: 'dispatch', bus: 'dialogue', category: 'voice', priority: 8, unkeyed: true, pinned: true, gain: this.level, duration: dur, resumable: true,
       build: (ctx) => new Transmission(ctx, items, dur) });
     this.stats.transmissions++;
-    this.emit({ text: l.text, speaker: l.voice === 'central' ? 'Central' : l.car !== undefined ? `Car ${l.car}` : 'Car', duration: dur, urgent: l.urgent, spoken: normalise(l.text) });
+    this.emit({ text: l.text, speaker: l.voice === 'central' ? 'Central' : l.voice === 'sergeant' ? 'Sergeant' : l.car !== undefined ? `Car ${l.car}` : 'Car', duration: dur, urgent: l.urgent, spoken: normalise(l.text) });
     this.busyUntil = this.env.ctx.currentTime + dur + this.env.rng.range(0.5, 1.4);
   }
 }

@@ -254,6 +254,8 @@ The scanner lives in `world/dispatch.ts`. Its text and vocabulary are in `dialog
     A line needing a slot we can't fill is skipped.
   - The same line isn't repeated within 90 s.
   - Car numbers are spoken digit by digit ("car one-four"), and hyphenated tokens are spoken part by part.
+  - The tone shift: narrative's `hot` set (dced70bc) plays three times in the 90 s after officer down, and as the idle chatter while the channel is hot.
+    Its `sergeant` voice is a fifth register (older, slower; only his own lines' fragments are rendered, 54 files). In the heat_8th scene: 0 garbled, 0 misses.
   - Heat tiers: `reportFiled.severity` → gameplay's `tierOf` → each rising tier puts a `heat1`–`heat5` call on the air. Tiers 4–5 make the channel hot.
   - Context mapping:
     - dispatched → `responding`/`ack`;

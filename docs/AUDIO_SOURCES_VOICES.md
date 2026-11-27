@@ -2,7 +2,7 @@
 
 Every file in `public/audio/voice/` is rendered by `tools/audio/voices.ts` from the narrative team's text (`content/` on `claude/sharp-maxwell-jnb6hr`) with **eSpeak NG 1.51** (formant synthesis, no recorded voice; the program is GPL-3 but its audio output carries no licence obligation). Licence of the files: the project's own. Edits: silence trim, 90 Hz high-pass, loudness normalised to −20 LUFS, encoded with ffmpeg (Opus 16 kb/s VBR `.webm`; AAC-LC 20 kb/s at 16 kHz `.m4a`). Last render: 2026-11-27. Generated; do not edit by hand.
 
-Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
+Totals: 5221 lines, 138.8 min, Opus 21.2 MB, AAC 30.2 MB.
 
 | Key (`<key>.webm`, `<key>.m4a`) | Speaker | Emotion | eSpeak voice | Seconds |
 |---|---|---|---|---|
@@ -876,6 +876,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 0dffece31cdd9c96 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.12 |
 | 0e19ad8b1a09d0a6 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.25 |
 | 0e23dde96479bb68 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
+| 0e4140b87606d5b7 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.31 |
 | 0ea61ae51de24916 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.56 |
 | 0ea8eb232ca06a1e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.40 |
 | 0ebc6942a0f2934b | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.94 |
@@ -889,6 +890,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 0fb808f8b47c2ce3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.47 |
 | 0fc27deb89262330 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.58 |
 | 1019b0b10e323bb8 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.32 |
+| 101b31f16cf3b06a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
 | 103ff67ba6b42cb4 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.47 |
 | 10803c323528656d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.30 |
 | 10a5a1aabf264341 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.00 |
@@ -912,9 +914,12 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 1232e3ebf1e550ce | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.77 |
 | 128390ccda365469 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.59 |
 | 129b7d13bc03143c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.14 |
+| 12a7f2ffa67807b6 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.33 |
 | 12c5e9af372c759c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.48 |
 | 12d527c4c812c381 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.98 |
+| 12ea4dc1fbb1f6e8 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.39 |
 | 1319b56aabcd300b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.31 |
+| 1328b5c1f6ad9754 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.30 |
 | 13dd215de841b486 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.58 |
 | 13ddd24b0f65edbc | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.48 |
 | 13e2492ae85346dd | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.50 |
@@ -926,6 +931,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 14a2a909b7fe7b7e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.41 |
 | 14ad900b75f46384 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.54 |
 | 14bf68a8f7329251 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.86 |
+| 14ce12ded55b3e49 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.08 |
 | 14e3c614b802424d | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.68 |
 | 15086af4810aa2b3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.39 |
 | 1519b890cf53eed5 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.33 |
@@ -938,11 +944,13 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 1619ba234968245e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.44 |
 | 16325d4d8c28b57a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.50 |
 | 163661de769d29d1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.38 |
+| 16abfe8182ac6226 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.37 |
 | 16e86f8198780258 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.81 |
 | 17029473a55142f6 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.20 |
 | 1719bbb6c37c59e7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.28 |
 | 1733d03a1ccb7ff3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.69 |
 | 1766af51bb49adbe | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.30 |
+| 176c2d6a947d9119 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.30 |
 | 176cbf7f68e5dcf8 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.30 |
 | 176de43d0a14f98c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | 1773b7de11051e11 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.33 |
@@ -1014,6 +1022,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 2025fa3bbe67d68c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.56 |
 | 205eb54f1696ff22 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.82 |
 | 2078069d5f924f22 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.28 |
+| 20a4e132de655f97 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.60 |
 | 20ead88cb1a66637 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.39 |
 | 2113ed52dbc83f73 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.24 |
 | 2119cb7416616c69 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.32 |
@@ -1067,9 +1076,11 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 27801cafc7853adc | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | 2785d858db160f2b | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.41 |
 | 27c46773ff23ea8c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.49 |
+| 27f84d3fc9c9f27e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.01 |
 | 282e932edb3de20d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
 | 2838c08c0173760f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.73 |
 | 28600e4ff47cd108 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.31 |
+| 286de4a07ff536a9 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.68 |
 | 289adc40d338d1e1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
 | 28a3b7980e31cd85 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.69 |
 | 28c3ff055e02e64a | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.47 |
@@ -1098,6 +1109,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 2c4dd0a928cfbce6 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.09 |
 | 2c4f5806d6d5270f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.50 |
 | 2c6bd2248683997f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
+| 2c715dbc017535bb | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.29 |
 | 2c8e8a2baffb8ac2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
 | 2cb79629d8f3995a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.59 |
 | 2cfe169d13456ee6 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.61 |
@@ -1139,6 +1151,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 329451cc003a9f43 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.33 |
 | 32a0dc93e8fcb3ee | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.54 |
 | 32ab968ce5a7663b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.25 |
+| 32c339b98d597a2e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.31 |
 | 33423e8efad65ce9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.24 |
 | 3345dad6a0be2d65 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | 33857bc8a83fa0a7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.62 |
@@ -1153,6 +1166,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 342c78247c77f4c9 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.25 |
 | 342d418cf2880e69 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.53 |
 | 34638c91bc242f12 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.37 |
+| 347a64b06ecfe0bf | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.29 |
 | 348558639bd82c92 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.44 |
 | 349bd879ed5139ec | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.84 |
 | 34a96ee0b7c66893 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.33 |
@@ -1172,6 +1186,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 35d3734791727e40 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.92 |
 | 35f3965b14c86616 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.68 |
 | 36411103a7b1d8ce | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
+| 364fbed4c2e5dfe7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.38 |
 | 3657d594b55fa9f7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.29 |
 | 36691eb5137935fe | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.32 |
 | 3682b69bd54aee38 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.29 |
@@ -1192,14 +1207,17 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 3938cfb574c25a7a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.58 |
 | 3956cb623a9f92c1 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.37 |
 | 396e5ab7b987348e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.40 |
+| 3976da5ea0973a57 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.51 |
 | 39803b581d3868cd | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.72 |
 | 3981f09fd43bc92a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.56 |
 | 39c77f8e9c99a619 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
 | 39dd77b972bae040 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.57 |
 | 39fd716778898c9c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.17 |
+| 3a2c785ae06c1a13 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.90 |
 | 3a315bc471f841e1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.13 |
 | 3a49429fdd4b0a18 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.30 |
 | 3a908adb11bb43b2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.71 |
+| 3afc51e3c70d042c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.78 |
 | 3b03d0fcf1dee7d5 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.38 |
 | 3b04c624dc8e1519 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.54 |
 | 3b5b68d04d173f67 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.84 |
@@ -1282,6 +1300,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 455162ae297df94b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.28 |
 | 45a948f9c3f103e2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.26 |
 | 45b1f928ea792c81 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.65 |
+| 45bbea8646e18865 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.50 |
 | 45c04299aae013f2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.18 |
 | 45ee61e43e3c3dcf | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | 46fe702c933c195f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.27 |
@@ -1320,6 +1339,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 4c890f1fe44d3fec | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.43 |
 | 4cd346060f8b414d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.43 |
 | 4cd4694d303f6f50 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.33 |
+| 4d154fc46f6e5169 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.76 |
 | 4d486c740ba7dc27 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.81 |
 | 4d8cf16d0b278eee | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.77 |
 | 4dbf22767afd086d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
@@ -1341,10 +1361,12 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 504c5b54d9df4d1d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.98 |
 | 50544c474b571018 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.29 |
 | 50c332daad7d40f9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.33 |
+| 510fa9fc8184cebf | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.43 |
 | 51ab28be4e87a5bf | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.44 |
 | 51afab02beff5d9f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.38 |
 | 51f9e521ff84dd9c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.37 |
 | 522b590ed914cdab | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.74 |
+| 5261449bc1232df4 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.37 |
 | 52761be59fcbe0b8 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.28 |
 | 529014ab7925d778 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | 52cfe52f0c8528f0 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.71 |
@@ -1375,6 +1397,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 5554bd60a434163d | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.51 |
 | 5572ba8cfa42f6ff | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.33 |
 | 55858e848915ddef | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.40 |
+| 55ae665e461cd1bb | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.63 |
 | 55f35f1a8a455725 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
 | 55faa68f6290de22 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.74 |
 | 5628d0d0321b8599 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
@@ -1384,7 +1407,10 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 566f4213f6cf8da4 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.08 |
 | 5697c926113890b3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.57 |
 | 569c5beddd684160 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.68 |
+| 56cc836996254d68 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.04 |
 | 570befc69b7809c9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.36 |
+| 570f2b3aa29d440d | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.32 |
+| 5754fedc97d103df | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.35 |
 | 578a43876fba3d9c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.02 |
 | 578e444bb3d0fad8 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.90 |
 | 57a11f39ceb02292 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.75 |
@@ -1393,6 +1419,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 583586e6f9f6e3f5 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.75 |
 | 587b68fbeedfc52a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.34 |
 | 58c5dacbf63c900e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 2.21 |
+| 59386620da03268f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.01 |
 | 59787f6345c579ea | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | 598d1b7cf9af2bb9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.76 |
 | 5991b756744d0cb3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.37 |
@@ -1400,10 +1427,12 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 59e94a3ece7cb3c3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.67 |
 | 59ec3d7544b24fec | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.42 |
 | 5a4fae073aa68e26 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.03 |
+| 5a82fb450581fc18 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.84 |
 | 5a8d8c2508d6de6c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.49 |
 | 5abb40976421cbfa | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.62 |
 | 5ad851871d3902e0 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.45 |
 | 5ae19b6f14a5056e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.82 |
+| 5b0736cab1220c9d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.36 |
 | 5b0809f2b7c94a81 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.48 |
 | 5b2028bab7e6b967 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.54 |
 | 5b2b263b89d47624 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.65 |
@@ -1449,6 +1478,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 614bbe9b2b66e898 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.30 |
 | 618d834727bc2b2a | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.01 |
 | 6203fc39042913ca | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.68 |
+| 62066908c5b4c94d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.62 |
 | 626a50dc7a82c871 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.88 |
 | 62a911e033c81bb1 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.44 |
 | 62cf44762abd766b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.59 |
@@ -1471,6 +1501,8 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 652b8af5cb18f6da | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.78 |
 | 6534824fa6addf96 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.88 |
 | 657bce182d1e78f3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.35 |
+| 65cee0b03b295623 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.38 |
+| 663079f37a3dffc0 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.62 |
 | 663467bdc37e16f2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.21 |
 | 66cb97bad2d58837 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.04 |
 | 66cf9babb701259e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.29 |
@@ -1488,6 +1520,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 68527a0fee76cb32 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.62 |
 | 687b69d38944c726 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | 68857b963d9df00f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.81 |
+| 68864ccb5d8292da | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.81 |
 | 6892dbaf429fe938 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.19 |
 | 6894f34b3f328b56 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.53 |
 | 68b5785c8835cdcd | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.89 |
@@ -1496,6 +1529,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6928ace6fed9989f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.34 |
 | 694532ef36bc52a2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.15 |
 | 694def2e564a93a3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.58 |
+| 697b6b660358fcaf | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | 69a5d2254648ef8a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.35 |
 | 69abe3fa1d0fd529 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.35 |
 | 69b226d95c618f7e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 2.01 |
@@ -1506,6 +1540,8 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6a9143cd7991586e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.42 |
 | 6a9ebb754e4dc47a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.39 |
 | 6b08cb1184c8ffcc | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.49 |
+| 6b4ae32083273b9d | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
+| 6b547157406692ec | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.32 |
 | 6b555630fb3b84fb | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.60 |
 | 6b63efc6985d1341 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.30 |
 | 6b9c3b3812fff00d | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.39 |
@@ -1534,6 +1570,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6e590ec0f01c10af | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.43 |
 | 6e6ee6e3d4da32c4 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.56 |
 | 6e7104b5133642d2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.10 |
+| 6e787fd35c8fe2cc | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.29 |
 | 6eafb3c3e6360156 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.70 |
 | 6ec27c7f2e68c714 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.78 |
 | 6edc9348aeb5dd65 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.36 |
@@ -1602,6 +1639,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 78e410c2d6b89c8f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.75 |
 | 78f0bfe286025b87 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.27 |
 | 78f7b0c129e5794a | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.58 |
+| 78ff96ec3eba2acb | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.23 |
 | 790289972b03d95e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
 | 7916e74470db4e67 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.44 |
 | 7955102085ce2f4b | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.67 |
@@ -1615,6 +1653,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 7a63dad70cc90b7e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.65 |
 | 7a643c37b22c7c52 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.14 |
 | 7a6e45442be9eb9b | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.65 |
+| 7a700a009d40a8b9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.37 |
 | 7a751f19d2884b7a | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.68 |
 | 7ab6c2d35473af00 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.74 |
 | 7ae528ad52cf3320 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.39 |
@@ -1682,6 +1721,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 83bffde6ebba1cc3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
 | 83c3e791edec3b26 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.45 |
 | 83ca93c4b7e427c3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.28 |
+| 83d05ff1cd7c724c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.00 |
 | 83d5c59cc03bd56b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.44 |
 | 840e830934805d44 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.90 |
 | 8418a9ba1125efe9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.43 |
@@ -1720,6 +1760,8 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 8b33146c284ce5a5 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.59 |
 | 8b826d29313f3dd4 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.14 |
 | 8b9681cdd6da77b4 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.40 |
+| 8bb3c4e90e8db4a2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.52 |
+| 8bf3ad11b22b438e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.56 |
 | 8c1985d6b82ae6b7 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.47 |
 | 8c4080d34ab34208 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.23 |
 | 8c447353d03928b2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.36 |
@@ -1737,6 +1779,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 8e71e6447e8ad131 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.60 |
 | 8e76829175485a3c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.68 |
 | 8ea6ae38abf1ba77 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.35 |
+| 8ec99d81e8ef7d36 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.66 |
 | 8eefd3de02f3045f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.81 |
 | 8f2049acd87633d1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.45 |
 | 8f2e7d7cf02e27b7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
@@ -1750,6 +1793,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 911e1ff4e936e7db | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.46 |
 | 913fb2a5b15fe010 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.40 |
 | 919162d38a4ce7c2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.06 |
+| 9197485875907eb1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.53 |
 | 91a115be7e8a14b1 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.67 |
 | 91ccb1471ad4bbb8 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.38 |
 | 91e108d0c0b41387 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.94 |
@@ -1828,6 +1872,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 9d9659971000db5c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.68 |
 | 9ded3b4eed789999 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.23 |
 | 9e0480da0d030cab | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.68 |
+| 9e389f387172c15d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.46 |
 | 9e54d66444698c67 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.41 |
 | 9e5e7d45c4dbeb7c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.53 |
 | 9e5fc7e98500fe04 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.36 |
@@ -1842,12 +1887,14 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 9f6df50e61d45c29 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.40 |
 | 9f7ab8c1908c096e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.68 |
 | 9fa625f37152c9de | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.03 |
+| 9feb924447353f2b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.29 |
 | 9ffd859515e16b8c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.35 |
 | a022c45f802e9d40 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.57 |
 | a027ffe229c4098d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | a034e620da561e85 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.29 |
 | a036ac7aa43295d3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.75 |
 | a062d1ed0f44737e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.36 |
+| a07879e05f36e4cf | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.40 |
 | a08ff0bb53da8400 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.93 |
 | a0e39bc6c12743c7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.67 |
 | a11e79e9f3031d72 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.11 |
@@ -1925,6 +1972,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | ab68a720e08e6821 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.47 |
 | aba98b75a7851802 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.52 |
 | abf1a34d789a5720 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.24 |
+| ac06e76b86a34114 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.47 |
 | ac645431433e4412 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
 | acb4a9882c7ec9b3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.79 |
 | ad11cc3e1d560547 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.50 |
@@ -1940,6 +1988,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | aeac32ff9312b866 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.01 |
 | aecc289af99a0f7b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.46 |
 | aef89cefc2e4011a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.38 |
+| af191c12252468fb | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.72 |
 | af3e7f52e98f3643 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.62 |
 | af9a13ae8179c237 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.34 |
 | afa579db3193fea4 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.54 |
@@ -1964,6 +2013,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | b20114478a5c9296 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.14 |
 | b2380af65014911d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.06 |
 | b27a0f1a1e2cf4c1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.70 |
+| b30bd45e308c4edf | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.92 |
 | b3177f8abfceed17 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.24 |
 | b32fe1ab3db8aede | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.65 |
 | b33ab09bc7eeba14 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.48 |
@@ -1990,9 +2040,11 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | b6666de77ec96c9a | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.59 |
 | b68175a7c069415e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.62 |
 | b7068431ad5c9780 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.96 |
+| b71ee0823ad8bcdf | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.60 |
 | b75c48c4f3a9628f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.32 |
 | b76ca84158adf2e0 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.49 |
 | b7e30711f46efe22 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.51 |
+| b7f3f4f73b01e6ce | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | b805bd46e4658441 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.40 |
 | b8554ad05303d105 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.60 |
 | b8567f33a9cbb61a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.89 |
@@ -2006,6 +2058,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | b933cbf0dd7c97eb | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.69 |
 | b9612c283c77961d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.43 |
 | b96e4da9aa987bba | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.69 |
+| b97db29e4d41714b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.45 |
 | b996fbaad624b9a7 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.30 |
 | b9faad473cf7cc6e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.32 |
 | ba092e13a4f86816 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
@@ -2089,6 +2142,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | c577f00fd5b7e7e2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.65 |
 | c57ef00be2e4b114 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.68 |
 | c589279577dba368 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.66 |
+| c5bc4facaa4b80a1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.73 |
 | c5c4a2e6af12cd1f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.51 |
 | c5dab72bccb6836e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.76 |
 | c5ea7b697b3aa5e4 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.40 |
@@ -2102,11 +2156,14 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | c680c0d5a6d98d0e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.45 |
 | c6a93ef221e390f5 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.48 |
 | c6c1c0cdd43b6d14 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.69 |
+| c6ca327f5b67fa92 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.85 |
+| c6d27ed02261dd25 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.69 |
 | c722da70efe3c7c1 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | c773653c66f4669f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.40 |
 | c780402b02476806 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.41 |
 | c79feeac414e1ccf | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.34 |
 | c7a5062470911ad3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.40 |
+| c7d7ccbad32791cd | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.05 |
 | c7f2d9015b31246e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.17 |
 | c80a07d4dcf7e159 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.37 |
 | c83a32dbf2089f6e | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.23 |
@@ -2116,7 +2173,9 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | c8ac40c9fadebeba | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.86 |
 | c8cba08f9d8807f2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.72 |
 | c8e8efa9a19c6386 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.72 |
+| c9016372a0088035 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.86 |
 | c919690da7dfbb22 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.12 |
+| c9395b9e7d64476f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.39 |
 | c95006cfcdf18658 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.13 |
 | c975c64054c9b2b1 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.51 |
 | c994053b1ada477c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.40 |
@@ -2180,6 +2239,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | d09d34d054932493 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.83 |
 | d09df10642333eb3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.60 |
 | d0a566749ed2a217 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.51 |
+| d0b7352eee704431 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.03 |
 | d0da925ce547aff9 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.63 |
 | d10079577d533700 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.34 |
 | d13d584995346658 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.53 |
@@ -2238,12 +2298,14 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | d704c68927fab3e8 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.81 |
 | d70f6be8458bbb89 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.33 |
 | d71747ae9a28afc7 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.42 |
+| d73665dfd58efdd8 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.94 |
 | d7434ba014147b8f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.66 |
 | d789ce56ca63f107 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.89 |
 | d7a25638bcadfbb9 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.40 |
 | d7c08431724425f0 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.23 |
 | d7f6d15cc2116aa5 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.55 |
 | d816027d98430ff6 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.38 |
+| d830e8f49f772f65 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.49 |
 | d84ad139a1c95e6a | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.66 |
 | d853cb3ff52503a8 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.58 |
 | d854d45ece64ae43 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.81 |
@@ -2263,6 +2325,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | da8d039da2ba30a6 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.29 |
 | da8f48d25e4aff9f | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.74 |
 | daa2f9ae72029579 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.53 |
+| daae7c1b0fecb3aa | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.24 |
 | dac088ea0fdf1a43 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.26 |
 | db1f2d1f15437ec0 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.21 |
 | db34767cc473ab89 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.22 |
@@ -2292,6 +2355,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | dfd64a7f1dcb80e4 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.91 |
 | dfdf508720e4fcb8 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.47 |
 | dffe062a37545a65 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.19 |
+| e0293fcdb9147db8 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.02 |
 | e06898bb3a68d274 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.44 |
 | e07e51abbf041a24 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.69 |
 | e0c0925cec585b79 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.23 |
@@ -2330,6 +2394,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | e3f7a688d6404fbd | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.41 |
 | e415eed57b005106 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.39 |
 | e418ada9d3750bf0 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.33 |
+| e41f3b4ad66531dd | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.24 |
 | e431cbbd65c426a8 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
 | e43ababf9903af88 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.33 |
 | e44289c6217fc9a7 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.03 |
@@ -2340,7 +2405,9 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | e4d0177bce64a68c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.44 |
 | e5050f05c9e54ed0 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.27 |
 | e50f7a3f032f813e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.46 |
+| e514b675500a60f2 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.09 |
 | e5388c77d483d908 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.99 |
+| e546904a50f49ad9 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.30 |
 | e55028b1c7135c86 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.40 |
 | e55b0f82da29b021 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.19 |
 | e55d52630116354c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.64 |
@@ -2374,20 +2441,26 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | e8828561e4af75ee | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.90 |
 | e89f112e620f9879 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.42 |
 | e8a3657f5df3af82 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.56 |
+| e8a9850f29d10cfe | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.61 |
 | e8c09ef4bcfa07c1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.20 |
 | e8cee17a1ad4e341 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.81 |
 | e8da990488cba16b | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.25 |
 | e8fb4c2f3c6a7a12 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.48 |
 | e92ab726ee153b8f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.56 |
 | e96f23ea6f7ba717 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.28 |
+| e97b240552bbb040 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.50 |
 | e9988cfd18dc5d80 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.64 |
 | e99be7a136755998 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.49 |
 | e9c0a087370e3d4a | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.17 |
 | e9dc929839fac469 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.31 |
 | e9f007a3b3e80fca | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.47 |
+| ea06be14ae8d4ce9 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.85 |
 | ea18f122e8d4358d | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.34 |
+| ea33c33516da07f0 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.34 |
 | ea542c9f165d4d54 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.50 |
+| ea649e93264647da | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.22 |
 | eaa9d95d3e86d06c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.39 |
+| eabd1b6084cf8c57 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.29 |
 | eac0a21ab12272d3 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.23 |
 | eaccd419c18d70fe | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.40 |
 | eaf2566864a0f1db | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.51 |
@@ -2398,6 +2471,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | ebc6415719e1a9ca | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.58 |
 | ebfa4b7c934ea5f3 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | ec1c1f49cdc2e802 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
+| ec28423e43bfdce1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.24 |
 | ec350e31c3dfefde | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.22 |
 | ec3b8f7b1728f8b2 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.22 |
 | ec63b6b30b0d2a12 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.67 |
@@ -2420,6 +2494,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | ee609299c71b4474 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.96 |
 | ee611b9737e0cf7c | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.92 |
 | ee63cad1c020fe98 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.79 |
+| ee74ec1942dcee1c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | ee873326bfadff55 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.66 |
 | ee8cc855a406b640 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.76 |
 | eed594d859aa0f8f | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.66 |
@@ -2447,6 +2522,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | f12acbd9a10c03be | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.78 |
 | f16a2f1a6ecf30db | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.03 |
 | f17fe00ac12e4973 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.53 |
+| f185c7ca0c65dd4b | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.56 |
 | f18e60620afefe19 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.41 |
 | f19930f01c968961 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.72 |
 | f1a2e2bfb730fdfa | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.54 |
@@ -2480,6 +2556,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | f5e83a3fc4d5be3e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.35 |
 | f5e9f65b2b3e75be | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.19 |
 | f5f8d7eb5fab0af6 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.79 |
+| f601404ea720e7d5 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.13 |
 | f602239ddde6841e | dispatch.car | flat | wasm en-us+m3 p36 s178 | 1.55 |
 | f61dfabed9465a2b | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.42 |
 | f62192e336e06420 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.62 |
@@ -2525,6 +2602,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | fb1fe24b16e4307c | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.85 |
 | fb2e6a09a1194cfe | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.24 |
 | fb4341455e127500 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.60 |
+| fbaa72f3866225a6 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.34 |
 | fbab281bd3a4fe16 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 0.29 |
 | fbccd8c615926403 | dispatch.car | flat | wasm en-us+m3 p36 s178 | 0.84 |
 | fbf91604e536fce1 | dispatch.car | urgent | wasm en-us+m3 p36 s178 | 1.08 |
@@ -2582,14 +2660,18 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 032583a67f3ece53 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 032f5b4bf1ee9688 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 03b01cba0c2d3365 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
+| 03ca483f76f8824c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
 | 03e1361fd2bfb95e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.69 |
 | 0405ddb2fec02933 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 042ed05bfc7cc7b2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
+| 049e34d871cb1db1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
 | 04e446dc2db46833 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 04f3942fe438a642 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.89 |
 | 0514095e21fc1925 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 05317aa8249d33b9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.00 |
 | 055820bcd2b1001d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
+| 05a33a4d8e60dfce | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
+| 05c1a891aca5586a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
 | 05c6588965be611a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 05cc1d96b2c7153d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 05cf541fe17d42ba | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
@@ -2666,6 +2748,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 0f091c45a9596026 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.59 |
 | 0f45e8d5ecc8dbbe | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 0f598596e50f1e43 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
+| 0f775d9e50c5caff | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
 | 0f7c4facd1d945cd | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
 | 0fe2e16e7d166867 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 0feddde8201bf35b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
@@ -2696,6 +2779,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 131d5d0b48452a14 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 132e0d38d5fdc5d5 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
 | 1358806a901d6947 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
+| 13c4f5da6e762131 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
 | 1401d59533a9e19a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 1418b0771c603594 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.30 |
 | 14269af53d498b28 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
@@ -2706,6 +2790,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 14bbbcffc8ab06fa | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
 | 1532d7b1bd5540f8 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | 154c830e5ed0e3f1 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
+| 1560b17f589bd5da | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.79 |
 | 15758dba5abeb133 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
 | 15cdb157b743c5de | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 1626f68be7e6bed4 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
@@ -2800,7 +2885,9 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 2343db8cca92dc75 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
 | 2358f1eb8cf0dbde | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 235e8d40576bd321 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
+| 2365de4c5c3ce6a1 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | 23671a2932bb5aec | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
+| 23af8959b6193a4a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 244776b1ee42191e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 2480b96062058053 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.57 |
 | 249f9da512643276 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -2837,6 +2924,8 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 28a48d5bf43e6b9a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
 | 28af91385f8bc38b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 28dc31affc01ccd2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
+| 28e3f1481a3e699d | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
+| 28f2a3c363dd94ba | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 292c0159d2f2a5fe | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 29c4fed53b4f6fec | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.89 |
 | 29d9eed2c89d601d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
@@ -2861,6 +2950,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 2b461c107801ecbb | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 2b4a97d6f10490eb | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 2bd514e3cb55caee | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
+| 2c20a841c52020ae | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 2c51bcaec5745771 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 2c6f7308fce92ec9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 2ca6106ab68c074b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -2894,6 +2984,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 3030942dc0686260 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 309d1b7cea695991 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
 | 30ea6a645207a81d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
+| 3103606172ba9ecc | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | 31121e7239839025 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.69 |
 | 311685828339cd43 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 3153a1435d92b7a2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -2920,6 +3011,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 3431bef3be60870c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.07 |
 | 3444585daa099ba8 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 3448096ddca606aa | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| 34785efe13226d99 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 348c758bf6c6772c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 34a1d0ee75118e81 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.88 |
 | 34e5ac455bc04f56 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
@@ -2932,6 +3024,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 35ab601865b2beef | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
 | 35b207571bca7e1a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 35d622eb25424ef8 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
+| 3612156cfcda6139 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
 | 3642be748796a19f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 36442b1b645be8c6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 367251379f85bfa8 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -2940,6 +3033,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 36d23cddbc6c732a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 36d6e2623c145ed9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 36e27d7e69263eff | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
+| 36e938a841576835 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
 | 36f821fa7a743c4d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 36fbfc3a34f59797 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | 370cdf3000fbe3e1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
@@ -2957,14 +3051,17 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 38ccaa711a4ffe40 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 38eafe174aa4ce0a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 38f659ba9340c201 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
+| 394222a815dc7467 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 396c274a4c42cd57 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 397c14323e2b1ce1 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 397e44aa5de02d65 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
+| 39954e36a30f99bd | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 3997b2e43ced1413 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 39c375b1e8395d7e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.99 |
 | 3a24355483fb6c13 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 3aafad8eca1fffe9 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 3ac382acb6bd71c3 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
+| 3ac68640e95f7623 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 3b029de9e491ad72 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 3b22456286d14315 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 3b60e49d60ba7402 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
@@ -2974,6 +3071,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 3b979abcaa6d8b71 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.18 |
 | 3b98a0fc14fd528f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | 3c518fcafae24305 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.67 |
+| 3c6659fb57e8e7c2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 3c6acd72d0bec5d5 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 3c8961ef89133b84 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.50 |
 | 3c9f570723115d9c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -2998,6 +3096,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 3fa4750efb21752f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 3fd2c8c02c10f5db | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 3ff3ca3798195182 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| 4028a38343e89154 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 403dfff8b81cfa3d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 4042993a78fb0da9 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
 | 409a9c489fff383b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
@@ -3046,6 +3145,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 45abe6c73026c306 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.89 |
 | 45ffab7f2067b53e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 46a270c83cf2737d | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
+| 46d807f9be210e8c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 46ffad129a7beac7 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 470f2c26a392a39f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 472bae49765880d6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.58 |
@@ -3054,6 +3154,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 47830a1953dffbe0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | 47c68e9689b1baab | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 47d512b0b2ea8387 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| 47e8eda03cde828f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 47eb063c160a4ff7 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 47ffaea514902050 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 4817a5f72e74237e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -3065,20 +3166,25 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 49810f8ab43d9953 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | 49aa37c5ae628c94 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 49bb938afcfc0e71 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
+| 49c1edca6238b991 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 49c9fd682d6d4915 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 49e874c773273048 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 49ffb1cb677532d2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 4a1623a1161a3182 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.79 |
 | 4a2f05d41f651e1b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
+| 4a726913c054a656 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 4aa2a67eaf96398f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 4abe448a3d24497f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 4affb35ee189685b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 4b01ebf9520367d0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
+| 4bb8c2ad34890646 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 4bdc051ac7ebe1ef | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.96 |
 | 4bffb4f15b9d9de4 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.38 |
 | 4c286f2c018cb4e9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 4c33d6c6c6ca6f51 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.66 |
 | 4ca1cd4db626bbce | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.40 |
+| 4d1fc35a77562e9d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
+| 4d4ecfa3c6eb72a8 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 4d6e9a744ae7efb3 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 4d75ac5c63c52591 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
 | 4d784f5cb847cb4b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
@@ -3088,6 +3194,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 4da40ca4bec11c37 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.50 |
 | 4dbe49434ca442aa | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 4dd363fb77e33842 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
+| 4dffb557c6932666 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.00 |
 | 4e050c11542b416e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | 4e0eeb197f642064 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 4e50dbc7fe99462a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
@@ -3104,6 +3211,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 505d939552f4cfa0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.85 |
 | 50715ec5368e737a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
 | 507f809eefe5653f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
+| 508e6149f3786bb4 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 508f83208e6ef5cd | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 50ffbcd05f460221 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 51088f884d8f4d9f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
@@ -3113,6 +3221,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 512d8a5e6e493375 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 514347caac7a8e85 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 514ad42822a569a5 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
+| 5166bd86d5797f1f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 5166e93a20905b5b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 51ffbe63d95a37aa | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 520b862deb4dbc88 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
@@ -3158,6 +3267,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 57ffc7d5b5d378e0 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 581384198fe56dae | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 582d40f0326b1a27 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.97 |
+| 5854734d9d12f9ca | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 5874b7fd5ef5fd08 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.69 |
 | 588de42e252d69c1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 58ac72d9bb8f8234 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
@@ -3198,6 +3308,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 5d27abe5db92d2e4 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 5d483b0f5fcfc1c6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.05 |
 | 5d6ef9ddb27d9f94 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
+| 5d709d0ec96e562f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 5d94b59fce5c759a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 5de0eff0c95b1c51 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 5de96d8058c2a1b1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
@@ -3229,6 +3340,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6028cac2e06c9129 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 60336921a261b266 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 609ce0524aa34e8f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
+| 60a20389f776d3b6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
 | 6157ffda8b517fd9 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 615f7c226accd9c9 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 6173be2621ebdf53 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
@@ -3268,7 +3380,9 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6588d6d7f759d25e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 65ac74dcc7a29b71 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | 65f6dc9f646b097e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| 662ba71f3d6e17bc | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 6635e06c3b82d5a3 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.99 |
+| 666c615c669f2b67 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 666f083bc12c741a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.47 |
 | 6693bca3281e76ca | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
 | 6693e69f9378e334 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
@@ -3307,6 +3421,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6b96857b84748c98 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
 | 6ba927e15af43202 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 6bb89e452091f6fa | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
+| 6bc01d36b15ff3ed | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 6be8eab6acc4ce3f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.69 |
 | 6bf6665439927109 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 6bfd49909709d481 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
@@ -3322,6 +3437,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6d182a6ca510af73 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 6d43dd8b6eb89a30 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
 | 6d5b1a62ff36048f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.68 |
+| 6d5d2e15c524696c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 6d82b7ec3d2453eb | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 6d850cf517006d0c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.49 |
 | 6db5b17b1df1e744 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
@@ -3338,6 +3454,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 6fb453d68401d889 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 700b6dce7fc0d311 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 7023fe4af377eb33 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
+| 703d85a4cbbf65e7 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | 7072a58940bd741a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 7072ec0e751f62a9 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 707cb6ba08f22437 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
@@ -3362,6 +3479,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 72d6c9384d8babff | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 731310c6dc15d913 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | 735fad0647dd1a09 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
+| 739fddae2f7a5d77 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 74305e85021ef826 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 7440730d37b05da2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | 744aa752e173eb4d | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
@@ -3397,6 +3515,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 785ac61c101d55c5 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 78618c5147fc3b0c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | 787c97f46c89d2f9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
+| 78945263b298b710 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.46 |
 | 794fda729382a323 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | 797da0fe00cdb6e9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
 | 79929f2bcb1df0e6 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 2.07 |
@@ -3411,6 +3530,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 7a6bb91941a9e1dc | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.70 |
 | 7abc70589c9ccb3d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 7ac2c2817bf5fd18 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
+| 7ad1c95d61e739c8 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.79 |
 | 7adb6ed346450bfa | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 7b185c0c5d0e3f99 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 7b32ef57c70ef50c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
@@ -3429,6 +3549,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 7d7e18aab2fbbc67 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 7da82962626d2b5f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 7e0b40f976fc255a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| 7e34c743d0136cb8 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 7e7f67ae9f302373 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 7e8015e064998be7 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 7e8e399455c28d3d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -3480,6 +3601,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 84fac442dfe00f41 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.89 |
 | 850b5d052b630d5a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | 8519cfaf7fd44502 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
+| 853766d2af154141 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 853bdc85a8dc3e0a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 856bdbb8fe7a645f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 859c7b0deb6cc152 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
@@ -3521,6 +3643,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 89f15bb65d6397f1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 8a03e74276ebdadb | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 8a0439b5ca63c448 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
+| 8a20512b27a7ffa0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.30 |
 | 8a5e21053eceb53a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
 | 8a9ff5a86767b727 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.69 |
 | 8aa7bb0d453ceda0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
@@ -3533,6 +3656,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 8b8e47c6d4a0089b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 8b9e68b5111dcde6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 8bae0ad2ced6ca21 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.30 |
+| 8bbe007aeeec2a5f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 8bc6367ed1da7c7b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.60 |
 | 8bf2d37a3a981491 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 8c1fb2bfe8473c74 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
@@ -3559,6 +3683,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 8f6207b6e043aa1b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
 | 8fbd8b8c17aa2acf | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
 | 8fccb2688daae131 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
+| 8fe266e43ebce73d | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
 | 90383aef7b54bf3a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | 90e9c08009decd71 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
 | 90fe7f9c03077557 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.00 |
@@ -3570,6 +3695,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 913656784edfdb11 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 916bac8147c87b9c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | 916d9900226323a7 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
+| 9178c149d3f3a3aa | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | 91908780bf40c51f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | 919326cac18961a1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.88 |
 | 9199316778328af4 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -3582,6 +3708,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 922e2afa7c09fd11 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | 9240e0ba7fef389b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | 9266ca6a23852383 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.47 |
+| 92a2ed563eb3152f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | 92b04e78dfeb6b5d | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | 92e474d167c0ae1e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 92e8e99b221a3c6e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -3668,6 +3795,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 9da086ff4d5afeb4 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | 9dae8d824e714a83 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.59 |
 | 9de92f642bdbe46d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
+| 9e061e672c41388c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | 9e5860e4f852153d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.39 |
 | 9e725b8536581c8a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
 | 9ea5fda85ba24b1d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
@@ -3690,7 +3818,9 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | a0b74b429171eb5f | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.80 |
 | a0d820fcbf4d3281 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.40 |
 | a0e5fa5744038c70 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
+| a0e9341d9a188508 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | a10ea8e125f39950 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.79 |
+| a161564be4f8fa6e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | a1979c396eb66b40 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | a1b64a996aa1bebc | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | a1bea39901241126 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
@@ -3775,6 +3905,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | abdd60f97376636a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | abe42fd1d66dda46 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.47 |
 | ac0b9d8d4771ebb0 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
+| ac247979978dab90 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | ac345de53ced10cc | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.78 |
 | ac7e2b74b8b2c2eb | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | ac90e47e026626fb | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.39 |
@@ -3798,6 +3929,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | aeb65f105b21c591 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | aedb96ca6c3ca499 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | af38592f6476a310 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
+| af53c35b8b75e4bc | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | af7033bce9aa3dfb | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.58 |
 | af9dbca69bdf1c95 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | afa18e93bc433a24 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.87 |
@@ -3897,6 +4029,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | bb4a5675dfc9d75a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | bb8aea7072c992a5 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | bb920acd5a289fac | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
+| bba4f0c50f39d188 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | bbb67387ece524f6 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | bbe62bfbc0f146b2 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.89 |
 | bc35ecfb25aa6072 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.05 |
@@ -3912,6 +4045,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | bd7aad369d60a5cf | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | bdb676ade10d9008 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | bdd5b9e3c84bca6a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| bdf8b2b9f3f3c9b0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.79 |
 | be2a2eb7dbf9b266 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
 | be2fe709ff5f1f64 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | be4b9aa07d0da0d7 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
@@ -3922,6 +4056,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | bf0234b8b4cb8647 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | bf0ba514d124c11b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.75 |
 | bf32985baaefcc9e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| bf3e99bd287cb620 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | bf8b9f3f359b3210 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | bfadc50f2c7d8fc2 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
 | bff03013fe28d5be | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
@@ -3941,6 +4076,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | c1d0523106eb77c4 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
 | c1e82a11c381c1e4 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.79 |
 | c22eb0a3a7a21cf4 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| c2445a0c7f1baf01 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | c24d7f32433d3245 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | c28c72746da851eb | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | c339c6cf89e9ec28 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.00 |
@@ -3967,9 +4103,11 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | c5aa0d4b65cfb4da | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.89 |
 | c5ddbe73eee0e87c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | c6647bd26413cd21 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
+| c66e322ca61f66c9 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | c6908b8c0bfbd697 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | c6921378105e2855 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | c6c88546153b1e81 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
+| c6ccd2a4f02b4817 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.45 |
 | c6e7eeaccd13df05 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | c71bc45e595b066b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.90 |
 | c721a0d986e4dcf2 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.50 |
@@ -4000,6 +4138,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | cbab236b877e679e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | cbc0b6edfcd769cc | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | cbd7cd28b36441ab | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
+| cc0defbe8f24c337 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.39 |
 | cc1dba58472ca793 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | cc7d10a99a542584 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | cc936db6ed7e987d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
@@ -4009,8 +4148,10 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | cd132688dae82329 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | cd15fe2c0494bf53 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | cd24bc38f418d43f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
+| cd3c929784843efe | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | cd520d954c78c2ae | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.20 |
 | cd54f7b14aa0d4ca | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| cd9c720b62156afc | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | cdb152d411aed2d9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | cdc9aab01f9d52c1 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | cdc9b46f697b553a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -4024,6 +4165,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | ce4ae0193c461890 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | ce63075c9fb8980b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | ce723c4c0a28fb29 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
+| cea95feec31b71ff | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | cee07f1e26bbb203 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.50 |
 | cefe580be6198614 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.79 |
 | cf0424ebcf3e703a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.69 |
@@ -4037,6 +4179,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | d0033ece6f8bd253 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | d02c727ac471418d | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | d05d2a07eb409fb2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
+| d06590153b597f82 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.59 |
 | d06fcf013079afd2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | d0ddc5cda154e9c2 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.60 |
 | d10ec18a4175bd5b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
@@ -4045,6 +4188,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | d15a39ff9cd593e0 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | d1839d41e5870b1c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | d18a6152de861bab | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
+| d19afd1afe8c6c87 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
 | d1a28cda9687fccb | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
 | d1ab2cdd9355fc8c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | d1c09293d374f3c2 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
@@ -4077,6 +4221,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | d59ec45d9f0e4398 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | d5fb5e191cb13bc0 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.40 |
 | d60945524328e7bb | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.58 |
+| d61ce48f5d12ccae | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.09 |
 | d678aa1dc430b31a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | d682162c1722c377 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | d6b5a724c184db59 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.30 |
@@ -4134,6 +4279,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | df96cdfe75a3426b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | df9be822080dd4ed | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | dfa3022f155ca84e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.48 |
+| dfb8a430e81f93eb | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | e0323e0b8630af1e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | e065ce1780c8bbe4 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | e0a76e7bf24c5f64 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.20 |
@@ -4159,6 +4305,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | e44cc3c50dc1d4fc | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | e4517d1f03e280cc | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | e463e123b09d3aae | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
+| e47d621f29bf151c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.49 |
 | e506908176880432 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.50 |
 | e55dcb5160446112 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.50 |
 | e570682b1cf6a544 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
@@ -4201,9 +4348,12 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | ead9b1045a23a489 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.49 |
 | eb0c50fb1b779906 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.75 |
 | eb69dd4affe61305 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.30 |
+| eb776e159b11ca2e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.49 |
 | eb795fd3deb0151e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | eb7bc74bc09f5ba8 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
+| eb7c55c18ed2f590 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | eb987f616b280ccc | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
+| eba80cafc4c163b6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | ebb6e782c60a75b7 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | ebc3041323c23088 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | ec0a1bfeb160cf35 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 2.10 |
@@ -4255,6 +4405,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | f1515552ca2d25bd | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | f159ae4c119bdd07 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
 | f17bd513293b11ea | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
+| f18319f4704f7de9 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.40 |
 | f186aee08956081b | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.10 |
 | f1c01fda4b3ed9cd | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | f1c307cc595ee189 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -4298,6 +4449,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | f87623f43e970259 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
 | f88449ffaf5e035e | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
 | f887653fea30cc2a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.60 |
+| f893152190c00e0a | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | f8e1691ca8a534ff | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.30 |
 | f8f732abf56ad55a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.90 |
 | f914ed40d7bd8e67 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -4306,6 +4458,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | f94c9dd669410fbd | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | f95a95831d4d194c | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | f976df2caa18eca3 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
+| f97d73dd54a064a6 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.10 |
 | f984d981d47cdf16 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.48 |
 | f9badd44d00c4c9f | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | fa124672bac785b3 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.85 |
@@ -4320,6 +4473,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | fc7c9cc7056ee22e | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.29 |
 | fc88fb108e65c119 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.30 |
 | fc8aa35fe8056b8c | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.60 |
+| fc8bb967ec2107ee | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.50 |
 | fc9c7eb6f7974bf1 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.70 |
 | fca27d34b75aee07 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | fccaae4741824c88 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -4332,6 +4486,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | fdeb4d8e7698ea77 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | fdebcca07f9b92ef | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | fe0bd87c82a91e45 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 1.00 |
+| fe1f040f27f8d488 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.50 |
 | fe2aebfa075e65af | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | fe2f78e461ece477 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 1.00 |
 | fe51caa2f7a34247 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
@@ -4340,9 +4495,44 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | fece5d5b83b890ac | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.94 |
 | ff035250696fbce3 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.70 |
 | ff520a7ffd4279c4 | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.80 |
+| ff532737788fa80a | dispatch.central | flat | wasm en-us+f2 p50 s172 | 0.50 |
 | ff768e8273e42c8b | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | ffd019c86ecf484d | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.40 |
 | ffe2cdf9efb1caf0 | dispatch.central | urgent | wasm en-us+f2 p50 s172 | 0.80 |
+| 06ac7f87578612a6 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 1.23 |
+| 2a2956d2045416cf | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.49 |
+| 43243768fd89ee43 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.42 |
+| 471246c8831f0151 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.44 |
+| 4d8479fd1c9c6740 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.45 |
+| 627022fd2f273320 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.64 |
+| 6edde697a904c99e | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.39 |
+| 6fdde82a2318ff27 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.38 |
+| 71007bffced0b552 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.42 |
+| 71254cd8122c7255 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.41 |
+| 74ddf009857e0ad4 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.41 |
+| 75ddf19cff92405d | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.32 |
+| 76e6ed8b751c1c12 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.43 |
+| 7ad3ea9c3a48a7a3 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 1.32 |
+| 82bc925c50559013 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.41 |
+| 836cccbabcefdc57 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.63 |
+| 8a23360dd3a6ca94 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.49 |
+| 9f20855609db2955 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 1.33 |
+| a359b29bcdfd98c2 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 1.68 |
+| a55fcfe4299e15dd | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 1.06 |
+| b3823cc0587893e3 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.59 |
+| bc995ced4a491552 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.50 |
+| cb5588c3e0be3730 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.39 |
+| cc02bdeecd0b62c7 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.53 |
+| ce2a5a59092f3ff6 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.47 |
+| dac916a84f448c8f | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.35 |
+| db6561542a5ecc03 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 1.32 |
+| e302d256d03a823d | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.91 |
+| e35dfd5050fd9d27 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.39 |
+| e90ecac8ad465de7 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.52 |
+| f033173e7a164ebf | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.71 |
+| f59c38d17a7ab662 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.77 |
+| f70671f079dcd005 | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.77 |
+| fc2b5cbea54c431b | dispatch.sergeant | flat | wasm en-us+m1 p26 s140 | 0.69 |
 | 0f9897ff013a8f10 | dj.radio.caribe | radio | wasm en-us+m3 p48 s178 | 4.25 |
 | 2b8f4fa24efd470d | dj.radio.caribe | radio | wasm en-us+m3 p48 s178 | 4.32 |
 | 37a5584e01cba2f7 | dj.radio.caribe | radio | wasm en-us+m3 p48 s178 | 4.01 |
@@ -4731,9 +4921,11 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 08f03a8a8e2691c9 | npc.police_radio | grave | wasm en-us+f4 p60 s170 | 5.65 |
 | 0bfd586d58155e18 | npc.police_radio | weary | wasm en-us+f4 p60 s170 | 3.83 |
 | 13740801ea7e0f1c | npc.police_radio | flat | wasm en-us+f4 p60 s170 | 5.07 |
+| 20eaf61ee4df82d3 | npc.police_radio | grave | wasm en-us+f4 p60 s170 | 6.82 |
 | 2324ab69e57c4e44 | npc.police_radio | urgent | wasm en-us+f4 p60 s170 | 5.09 |
 | 290295b1210f6cd2 | npc.police_radio | urgent | wasm en-us+f4 p60 s170 | 3.02 |
 | 2c20bb0e19821ecf | npc.police_radio | flat | wasm en-us+f4 p60 s170 | 5.03 |
+| 443ae3325cba0037 | npc.police_radio | urgent | wasm en-us+f4 p60 s170 | 4.83 |
 | 4f9a8c83896b9532 | npc.police_radio | wry | wasm en-us+f4 p60 s170 | 4.52 |
 | 5af47733920f2c42 | npc.police_radio | flat | wasm en-us+f4 p60 s170 | 4.25 |
 | 61e0870626736b9b | npc.police_radio | flat | wasm en-us+f4 p60 s170 | 2.65 |
@@ -4743,6 +4935,7 @@ Totals: 5028 lines, 136.4 min, Opus 20.7 MB, AAC 29.6 MB.
 | 7a1a1697fc47f6ca | npc.police_radio | weary | wasm en-us+f4 p60 s170 | 4.12 |
 | 9a7d9de14b4b45b0 | npc.police_radio | flat | wasm en-us+f4 p60 s170 | 4.25 |
 | 9f60ff5efce11077 | npc.police_radio | urgent | wasm en-us+f4 p60 s170 | 4.42 |
+| a4492333d9e31790 | npc.police_radio | grave | wasm en-us+f4 p60 s170 | 5.53 |
 | b40d6228f5699e83 | npc.police_radio | wry | wasm en-us+f4 p60 s170 | 3.21 |
 | b8b4de3da2920732 | npc.police_radio | urgent | wasm en-us+f4 p60 s170 | 5.00 |
 | c48700be20ae3cc5 | npc.police_radio | wry | wasm en-us+f4 p60 s170 | 3.40 |

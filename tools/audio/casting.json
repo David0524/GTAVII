@@ -30,6 +30,12 @@
    "pitch": 36,
    "speed": 178,
    "gap": 0
+  },
+  "dispatch.sergeant": {
+   "variant": "m1",
+   "pitch": 26,
+   "speed": 140,
+   "gap": 1
   }
  }
 }

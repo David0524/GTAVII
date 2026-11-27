@@ -23,7 +23,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { voiceKey, castVoice, type VoiceCast } from '../../src/audio/dialogue/voiceKey';
 import { measure } from './loudness';
-import { dispatchVocab } from '../../src/audio/dialogue/dispatchText';
+import { dispatchVocab, templateFragments } from '../../src/audio/dialogue/dispatchText';
 
 const args = process.argv.slice(2);
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
@@ -92,6 +92,9 @@ for (const f of readdirSync(join(CONTENT, 'barks')).filter((x) => x.endsWith('.j
   const vocab = dispatchVocab({ streets, precincts, templates, slots });
   // Four registers: Central calm/urgent, the cars calm/urgent (urgent also serves 'breathless' foot pursuits).
   for (const v of vocab) for (const [sp, em] of [['dispatch.central', 'flat'], ['dispatch.central', 'urgent'], ['dispatch.car', 'flat'], ['dispatch.car', 'urgent']]) add(sp, em, v, 'dispatch');
+  // The sergeant (narrative's `voice: sergeant`, older and slower) only says his own lines: render just their fragments and words.
+  const pr = join(CONTENT, 'barks', 'police_radio.json');
+  if (existsSync(pr)) { const sg = (JSON.parse(readFileSync(pr, 'utf8')).lines ?? []).filter((l: { voice?: string }) => l.voice === 'sergeant').map((l: { text: string }) => l.text); const frags = templateFragments(sg); for (const f of new Set([...frags, ...frags.flatMap((x) => x.split(' '))])) if (f && f !== ',') add('dispatch.sergeant', 'flat', f, 'dispatch'); }
   console.log(`dispatch vocabulary: ${vocab.length} fragments x 4 voice registers`);
 }
 if (existsSync(join(CONTENT, 'radio.json'))) {
