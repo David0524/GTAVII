@@ -672,7 +672,7 @@ export class Gameplay {
     }
     sim.on('pedBumped', (e) => this.onPedBumped(e));
     // street vendors placed by the sim (STREET_VENDORS.md): spawned and gone as carts arrive and leave
-    sim.on('vendorSpawned', (e) => { this.registerVendor(String(e.id), e.kind, e.x, e.z); if (e.pedId !== undefined) this.vendorPed.set(String(e.id), Number(e.pedId)); });
+    sim.on('vendorSpawned', (e) => { this.registerVendor(String(e.id), e.kind, e.x, e.z); if (e.pedId !== undefined) this.vendorPed.set(String(e.id), Number(e.pedId)); if (e.cart?.prop) this.cartProp.set(String(e.cart.prop), String(e.id)); });
     sim.on('vendorGone', (e) => this.vendorPos.delete(String(e.id)));
     sim.on('cartHit', (e) => this.cartHit(String(e.id), { by: e.by === 'player' || e.by === this.player?.id ? 'player' : e.byVehicle ? 'car' : 'npc', speed: e.speed ?? 0, driving: !!e.byVehicle }));
     for (const k of ['dispatched', 'responderArrived', 'responderLeft'] as const) sim.on(k, (e) => this.emit('notice', { kind: k, ...e }));
@@ -1436,7 +1436,7 @@ export class Gameplay {
       if (e.driver && e.driver === this.player?.id && res && res.dealt > 0) this.crime(res.killed ? 'homicide' : 'hit_and_run', { victim: e.ped });
     }
     if (e.occupant && e.dv) this.applyDamage(e.occupant, { amount: occupantImpactDamage(e.dv), type: 'impact' });
-    if (e.prop && e.speed) this.damageProp(e.prop, e.speed * 25, 'impact', e.driver ?? null);
+    if (e.prop && e.speed) { const v = this.cartProp.get(e.prop); if (v) this.cartHit(v, { by: e.driver === this.player?.id ? 'player' : 'car', speed: e.speed, driving: true }); else this.damageProp(e.prop, e.speed * 25, 'impact', e.driver ?? null); }
   }
   private readonly childPeds = new Set<string>();
   private onSimCollision(e: { a?: string; b?: string; speed?: number; ped?: string; x?: number; z?: number }) {
@@ -1455,6 +1455,8 @@ export class Gameplay {
   private vendorPos = new Map<string, { x: number; z: number }>();
   /** the person at each cart (sim's pedId), for the brawler hand-off */
   private vendorPed = new Map<string, number>();
+  /** cart prop id (vehicles/engine physics) -> vendor id, so a car hitting the cart knocks it over */
+  private cartProp = new Map<string, string>();
   private montes = new Map<string, Monte>();
   private monteDeals = new Map<number, { vendor: string; deal: MonteDeal }>();
   /** For the rest of this game time (s), a cold ice or a soda takes the edge off the heat: sprint drains as at 80°F. */
