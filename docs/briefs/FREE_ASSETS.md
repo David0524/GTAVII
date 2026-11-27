@@ -8,7 +8,7 @@
 that allows commercial use **and** shipping the files inside a web game. The 3D Scan Store option is off the table.
 
 ## Licence gate (every chat, every asset, no exceptions)
-- Allowed: CC0, public domain, MIT, BSD, Apache-2.0, zlib, OFL (fonts), CC-BY 4.0 (attribution goes in Credits).
+- Allowed: CC0, public domain, MIT, BSD, Apache-2.0, zlib, OFL or GUST Font License (fonts), CC-BY 4.0 (attribution goes in Credits).
 - Not allowed: NC (non-commercial), ND, "editorial only", "personal use", research-only, GPL code shipped
   to the client (GPL tools used only at build time are fine), and any "may not redistribute raw files" clause.
 - Read the actual LICENSE file before using anything (not a README badge or a listing site), and record it in
@@ -55,7 +55,7 @@ These are starting points I believe are free; each one needs verifying. Go beyon
   (RemArc licence is **non-commercial**, so not allowed). Self-recorded or synthesised sounds stay preferred.
 
 **UI**
-- Fonts: OFL only (Google Fonts). Icons: CC0 or MIT sets (Tabler, Lucide, Phosphor). Map art: our own renders.
+- Fonts: OFL or GUST (TeX Gyre), licence text bundled. Icons: CC0 or MIT sets (Tabler, Lucide, Phosphor). Map art: our own renders.
 
 ## Done-means
 Each stream reports: what it adopted (with licence proof), before/after shots, phone cost, and a
