@@ -354,6 +354,35 @@ real problems, and the cause went deeper than tuning:
 - **Framing:** `04_leads_act1_vs_refs` now shows the leads head to toe. The lineups (`01`, `02`)
   now show the Medium+ near ring with matched Rocketbox heads, which is what players see close up.
 
+## Gaps against the visual bar (`docs/briefs/VISUAL_BAR.md`: "GTA V level at worst")
+The Characters bar asks for photoreal heads, skin with subsurface scattering, hair cards, cloth
+with normal detail, and blinks, lip-sync and facial animation in cutscenes. Where we stand:
+
+| Item | Today | Gap to the bar | Plan |
+|---|---|---|---|
+| **Heads** | Rocketbox for Teddy, Nick and matched near-ring pedestrians; our parametric head elsewhere (Delphine, Black women in the near ring, distant crowds, Low) | Uneven; our head reads mannequin-like close up | **User decision pending** (`docs/research/HEAD_SOURCES.md`: MetaHuman if Epic confirms web use, else 3D Scan Store heads). Distant crowds can keep ours |
+| **Skin shading** | Wrap-lighting SSS approximation plus thickness transmission; MakeHuman CC0 detail; Rocketbox albedo and normal maps | No real diffusion (screen-space or pre-integrated skin), single specular lobe, no micro-normal, no cavity or AO maps, so faces look flat under hard sun | Pre-integrated skin BRDF (curvature LUT) plus a dual-lobe specular and a detail micro-normal; screen-space SSS on desktop WebGPU. Both are within the phone budget as a per-pixel LUT |
+| **Hair** | Our strand cards (alpha-to-coverage) with procedural strand alpha; Rocketbox cards on Rocketbox heads | No anisotropic hair shading (Kajiya-Kay/Marschner), no authored strand textures, speckle without MSAA/TAA, no hair-to-skin shadowing | Two-lobe anisotropic hair shader, an authored CC0/own strand atlas, a depth prepass for the cards, and reliance on the engine TAA (requested). Delphine needs cropped natural hair |
+| **Cloth** | Garments cut from the body with procedural patterns plus CC0 fabric relief | **No folds or wrinkle normals**; collars and lapels are flat ribbons; no seams or stitching normal; no cloth sim | Baked wrinkle and fold normal maps per garment type (elbows, knees, waist, armpits), driven by joint angle; seam and stitch normals; rolled collar and lapel geometry; secondary motion on skirts, coats and ties |
+| **Eyes** | Rocketbox eyes on Rocketbox heads; ours are simple spheres | No wet line, tear meniscus, refraction or eye AO | Eye shader with refraction plus wet-line and AO geometry (Rocketbox heads partly have this) |
+| **Facial animation** | None in play: no blinks, no lip-sync, no expressions | Required in cutscenes; blinks needed always | Blinks and saccades on Rocketbox facial bones and our expression targets; viseme lip-sync from dialogue audio (phoneme timing) for cutscenes; an expression set for the cutscene timeline |
+| **LOD and crowd density** | Near ring of 10 (High), mid and far instanced; culled beyond 170 m | Pops at LOD switches; no impostors; streets must "never look empty" | Dithered LOD cross-fades, impostor billboards beyond the far LOD, a density pass with the sim |
+| **Shadows and contact** | Cascaded shadows from the engine | Contact shadows under feet and on faces (hat brims, collars) | Rely on the engine's GTAO and contact shadows (engine request), plus capsule AO under characters |
+
+## Movement brief (`docs/briefs/MOVEMENT.md`): characters' part (next block)
+Owned here: animations, blending, foot and hand IK, procedural layers, the motion test course and
+the feel. That covers:
+- foot IK on kerbs, stoops and stairs without pops, and a stair gait;
+- momentum starts, stops and pivots;
+- vault, climb, chain-link fence, ladder, fire-escape and drop animations with hand IK;
+- ragdoll blend with get-ups, and stumbles;
+- car enter, exit and carjack;
+- the expanded course with every item in the brief;
+- a written feel comparison against GTA V/VI and RDR2.
+
+First step: agree the root-motion and IK contract with the engine (ENGINE_REQUESTS), meaning who
+moves the capsule, how traversal detection hands targets to the animation, and ragdoll ownership.
+
 ## Known issues (honest)
 - **Faces** (our heads, distant crowds and Low): still mannequin-like close up; they're only seen
   at distance now. No blinks or lip-sync yet on any head (Rocketbox facial bones are there).

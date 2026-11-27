@@ -199,7 +199,7 @@ function toneProbes(chars: Character[], camera: THREE.PerspectiveCamera) {
     const eye = c.jointWorld('eye_l');
     const head = c.jointWorld('Head'), neck = c.jointWorld('neck_01');
     const mid = head.clone().lerp(neck, 0.55);
-    const hand = c.jointWorld('hand_r').lerp(c.jointWorld('hand_tip_r'), 0.4);
+    const hand = c.jointWorld('hand_r').lerp(c.jointWorld('middle_01_r'), 0.6);
     return { hero: c.desc.hero ?? null, seed: c.desc.seed, rb: (c.desc.overrides?.rbHead as any)?.id ?? null, tone: c.appearance.skin.tone,
       cheek: scr(off(eye, 0.006, -0.03, 0.01)), neck: scr(off(mid, 0.03, 0, 0.035)), hand: scr(hand) };
   });
