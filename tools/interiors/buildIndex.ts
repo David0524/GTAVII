@@ -14,7 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readChunk, GroundKind, Style, BuildingFlag } from '../../src/shared/chunkFormat';
-import { PLAYABLE } from '../../src/shared/bounds';
+import { inPlayable, edgeDistance } from '../../src/shared/bounds';
 import { decodeTerrain } from '../../src/shared/terrain';
 import { districtAt, type District } from '../../src/interiors/grid';
 import { KINDS, shopWeights, type InteriorKind, type ShopKind, type CoreKind } from '../../src/interiors/catalog';
@@ -271,8 +271,8 @@ const kindCount: Record<string, number> = {};
 const lost: Record<string, number> = {};
 for (const b of blds) {
   const cx = (b.minX + b.maxX) / 2, cz = (b.minZ + b.maxZ) / 2;
-  const inPlay = cx >= PLAYABLE.minX && cx <= PLAYABLE.maxX && cz >= PLAYABLE.minZ && cz <= PLAYABLE.maxZ;
-  const inRegion = cx >= PLAYABLE.minX - 120 && cx <= PLAYABLE.maxX + 120 && cz >= PLAYABLE.minZ - 120 && cz <= PLAYABLE.maxZ + 120;
+  const inPlay = inPlayable(cx, cz); // core + Grand Central annex (engine E17), not their bounding box
+  const inRegion = edgeDistance(cx, cz) >= -120;
   if (inPlay) cov.buildingsPlayable++;
   if (b.minHeight > 0.01 || !inRegion) continue; // upper building:parts carry no doors
   if (inPlay) cov.groundBuildings++;
