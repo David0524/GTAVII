@@ -3,6 +3,21 @@
 Branch `claude/characters-74`; brief `docs/briefs/CHARACTERS_BRIEF.md`. Read this first, update it
 last.
 
+## Resume here (2026-11-27, WIP)
+- **Waiting on the user:** a head source for Delphine and Black women in the near ring
+  (`docs/research/HEAD_SOURCES.md`: ask Epic about MetaHuman web distribution, or buy 3D Scan
+  Store Retopologised heads). Until then Delphine stays on our head.
+- **In flight:** a tone-check re-run after retuning the probes (hand: toward the fingertip; neck:
+  higher) and relaxing the pool gate to 1.45×. Re-run with
+  `for f in 27_ 29_ 01_ 02_; do bash tools/characters/shots.sh $f; done`, then
+  `python3 -I tools/characters/tone-check.py shots/characters/{27_rocketbox_ab,29_pool_heads,01_lineup_a,02_lineup_b}`.
+  Check each `*_tone.jpg` to confirm the probes landed on skin.
+  - Previous run: Teddy's Rocketbox head failed face-neck dC 8–12, and pool heads failed often,
+    but many probes had landed on collars or missed the hands.
+  - Then send the numbers and shots (27, 28, 29, 01/02/04 `_vs_refs`) to oversight.
+- **Then:** improve Delphine's own head (afroShort reads as a cap; soften it toward cropped natural
+  hair), roll the collars, add blinks and lip-sync.
+
 ## Status (2026-11-26)
 | Area | State |
 |---|---|
