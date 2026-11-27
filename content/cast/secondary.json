@@ -316,7 +316,7 @@
         "to": "09:00",
         "at": "Broadway & W 30th St",
         "activity": "errand",
-        "note": "Walks the children to the day-camp bus"
+        "note": "Back from seeing her children off to day camp (offscreen; no child characters)"
       },
       {
         "from": "09:00",
@@ -344,7 +344,7 @@
         "weight": -1
       }
     ],
-    "arc": "Takes the buyout in Act 1. In Act 3 she's Prentiss's proof that the arson plan exists. Her children are never on screen in any danger. Content rule: they're at camp or with a sister during M26.",
+    "arc": "Takes the buyout in Act 1. In Act 3 she's Prentiss's proof that the arson plan exists. Her children are never on screen (content rule: no child characters anywhere); they're at camp or with her sister.",
     "visual": {
       "palette": [
         "#20B2AA",

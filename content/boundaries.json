@@ -220,7 +220,7 @@
       },
       "barks": "barks.utility_crew",
       "sign": "BD. OF MAINS & HYDRANTS — DANGER",
-      "note": "The heat-wave water-main break. Madison is northbound and flows out here. Content rule: children appear only at an opened hydrant on a separate, safe corner."
+      "note": "The heat-wave water-main break. Madison is northbound and flows out here. Content rule: no child characters anywhere; the crowd at the opened hydrant is adults."
     },
     {
       "id": "blocker.trench_madison_north",

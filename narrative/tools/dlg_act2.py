@@ -139,7 +139,7 @@ S("dlg.m13_ricky", "M13 o5. Bryant Park, west terrace, rain on the leaves. Ricky
   (D, "cold", "And you told him?"),
   (RIC, "ashamed", "Not yet. I'm not a rat. I'm a guy with a calendar. He's coming now. Hide."))
 S("dlg.m13_rita_prints", "M13 o8. Rita's bar after close. Prints laid out on the bar under a lamp.",
-  (RIT, "low", "Brannock taking. Wurtz with the park boy. Brannock again. You've got a file, sugar."),
+  (RIT, "low", "Brannock taking. Wurtz with the park dealer. Brannock again. You've got a file, sugar."),
   (D, "tired", "Three pictures. Three men who'd lose everything if I mailed them anywhere."),
   (RIT, "warning", "Or three men who'd make you disappear first. Mail them nowhere. Yet."),
   (D, "dry", "Rule nine: a picture you've never shown is worth more than one you have."))

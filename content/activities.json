@@ -1596,7 +1596,7 @@
       "start": {
         "type": "talk",
         "at": "W 26th St & 8th Ave",
-        "note": "An ice-cream driver's helper quit in the heat, and the Penn South kids are waiting."
+        "note": "An ice-cream driver's helper quit in the heat, and half of Chelsea is melting on its stoops."
       },
       "loop": [
         {
@@ -1640,7 +1640,7 @@
       "vehicles": [
         "vehicle_role.ice_cream_truck"
       ],
-      "mobile": "Slow, gentle driving through a playful crowd, with no timers. Content rule: children are ambient customers only and never in traffic danger (the truck is limited to walking speed near crowds).",
+      "mobile": "Slow, gentle driving through a hot crowd, with no timers. Customers are adults: heat-struck office workers, garment workers on break, park regulars, cabbies at the hydrant. Content rule: no child characters anywhere. The truck is limited to walking speed near crowds.",
       "design": "Summer texture and a breather from the crime plot (P3)."
     }
   ]

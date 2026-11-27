@@ -257,7 +257,7 @@ S("dlg.m29_inventory", "M29 o1. Corwin lobby table. Bernard lays out what the le
   L("l2a", BER, "precise", "Exhibit: Miss Kell's carbons. Fifteen years, in a laundry bag.", requires={"all": ["flag.have_marjorie_carbons"]}),
   L("l2b", BER, "precise", "Exhibit: Sergeant Kearney's Christmas list. Sixty-nine to seventy-one.", requires={"all": ["flag.have_kearney_list"]}),
   L("l2c", BER, "precise", "Exhibit: the lieutenant's own locker. His insurance, now ours.", requires={"all": ["flag.have_wurtz_locker"]}),
-  L("l2d", BER, "precise", "Exhibit: Miss Moore's photographs. Brannock, Wurtz, the park boy.", requires={"all": ["flag.photo_file_3"]}),
+  L("l2d", BER, "precise", "Exhibit: Miss Moore's photographs. Brannock, Wurtz, the park dealer.", requires={"all": ["flag.photo_file_3"]}),
   L("l2e", BER, "precise", "And a picture of a newspaper editor's brother-in-law drinking with Lisle.", requires={"all": ["flag.editor_neutralised"]}),
   (BER, "grave", "Now the question isn't what you have, Mr. Arce. It's who you give it to."))
 S("dlg.m29_choice", "M29 o2. **Branch B.** Untimed. Locked options are shown greyed out with their reason.",

@@ -102,7 +102,7 @@ s("dlg.side_hack_license_1", "Taxi-licence bureau, a clerk behind three inches o
 s("dlg.side_hack_license_2", "Kehoe's office (Teddy).", ("char.maureen_kehoe", "brisk", "Seven forms, stamped, in order. You did it straight. I'm almost proud. Sign here."))
 s("dlg.side_hill_races_1", "The cabbies' bet at the Iron Gate's back door.", ("npc.cab_driver", "cocky", "Your fancy sedan against my hack. Madison and Thirtieth. Uphill. Twenty bucks."), ("npc.cab_driver", "easy", "Wrong way on a one-way, you lose. That's the only rule. That's the whole city."))
 s("dlg.side_hill_races_2", "Settling up at the finish.", ("npc.cab_driver", "sour", "Okay. You know the hill. Who taught you the hill?"))
-s("dlg.side_hydrant_war_1", "A hot side street near Ninth: an open hydrant, a cop, a block.", ("npc.beat_cop", "weary", "Hydrant's gotta close. Water pressure's down on the whole block. Fire code."), ("npc.penn_south_neighbor", "pleading", "It's a hundred degrees, officer. Let the kids be kids an hour."))
+s("dlg.side_hydrant_war_1", "A hot side street near Ninth: an open hydrant, a cop, a block.", ("npc.beat_cop", "weary", "Hydrant's gotta close. Water pressure's down on the whole block. Fire code."), ("npc.penn_south_neighbor", "pleading", "It's a hundred degrees, officer. Let the block cool off an hour. Just an hour."))
 s("dlg.side_hydrant_war_2", "Settled.", ("npc.beat_cop", "relenting", "Spray cap on, pressure's fine, everybody's happy. Even me. Barely."))
 s("dlg.side_insomnia_drives_1", "Nick, alone in the sedan at 2 a.m. (Nick).", (N, "inner", "There was a club on Thirty-Ninth. Nineteen fifty-two. I danced with Eleni there once."), (N, "inner", "Left here. Is it still there? Everything closes. Some things just change their name."))
 s("dlg.side_insomnia_drives_2", "Nick finds the place (Nick).", (N, "inner", "Still here. Different sign, same door. The doorman's son is the doorman now. Good."))
@@ -115,7 +115,7 @@ s("dlg.side_lost_tourists_1", "A family from Ohio with a folded map, Herald Squa
   {"id": "l_r", "speaker": "npc.cab_fare_tourist", "emotion": "happy", "text": "Two blocks up, east side of Fifth. Thank you! New Yorkers are nice!", "goto": "l_e"},
   {"id": "l_u", "speaker": "npc.cab_fare_tourist", "emotion": "startled", "text": "Oh! Oh, there it is. It's right there. I feel foolish. Thank you.", "goto": "l_e"},
   {"id": "l_w", "speaker": "npc.cab_fare_tourist", "emotion": "doubtful", "text": "Any one? Okay… we'll write to the paper about this.", "goto": "l_e"},
-  {"id": "l_e", "speaker": "npc.cab_fare_tourist", "emotion": "warm", "text": "Kids, say thank you to the nice… person."})
+  {"id": "l_e", "speaker": "npc.cab_fare_tourist", "emotion": "warm", "text": "Harold, say thank you to the nice… person."})
 s("dlg.side_lost_tourists_2", "Their thanks.", ("npc.cab_fare_tourist", "warm", "Here's a dollar. Don't argue, my wife says. My wife's in charge of dollars."))
 s("dlg.side_marquee_letters_1", "The Velvet Moon box office.", (MYR, "indignant", "Somebody stole my marquee letters. The whole alphabet."), (MYR, "dry", "Find my letters and I'll put up whatever you want. Within reason. My reason."))
 s("dlg.side_marquee_letters_2", "Handing back the first letters.", (MYR, "pleased", "An R, an O and a K. You could spell 'ROCK'. You could spell 'KORO'. I'll take them."))

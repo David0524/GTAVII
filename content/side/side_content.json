@@ -608,8 +608,8 @@
         2
       ],
       "where": "Any hot afternoon, side streets near 9th Ave",
-      "hook": "Kids (ambient) have opened a hydrant; a cop wants it shut; the block wants it open.",
-      "twist": "Choose: fit a spray cap (a block party breaks out), shut it (the cop owes you), or bribe the cop to look away. No danger to children (content rule).",
+      "hook": "The block's grown-ups have opened a hydrant (garment workers on break, the stoop regulars); a cop wants it shut; the block wants it open.",
+      "twist": "Choose: fit a spray cap (a block party breaks out), shut it (the cop owes you), or bribe the cop to look away. No child characters (content rule).",
       "systems": [
         "heat",
         "bribes",
@@ -872,7 +872,7 @@
       ],
       "where": "Midtown Central; the old foot posts",
       "hook": "Kearney asks for things he can't do in uniform.",
-      "twist": "Small off-book favours (find a missing ledger page, sit with a dying informant, return a kid's bike to the right stoop) that build the 'Old Beat' special.",
+      "twist": "Small off-book favours (find a missing ledger page, sit with a dying informant, return a stolen bike to the right stoop) that build the 'Old Beat' special.",
       "systems": [
         "Teddy's specials",
         "relationships",

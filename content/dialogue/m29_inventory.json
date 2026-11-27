@@ -45,7 +45,7 @@
       "id": "l2d",
       "speaker": "char.bernard_ostrow",
       "emotion": "precise",
-      "text": "Exhibit: Miss Moore's photographs. Brannock, Wurtz, the park boy.",
+      "text": "Exhibit: Miss Moore's photographs. Brannock, Wurtz, the park dealer.",
       "requires": {
         "all": [
           "flag.photo_file_3"

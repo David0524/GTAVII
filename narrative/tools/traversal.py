@@ -28,7 +28,7 @@ ROUTES = {
      b("crowd_push", "8th Ave & W 38th St, the Saturday-night sidewalk", "tv.8th_38_sidewalk", "Shoulder through; Brannock bulls through behind."),
      b("vault", "a garbage-can row at the alley mouth, W 38th St", "tv.w38_alley_cans"),
      b("drop_ladder", "the Arden's rear fire escape: jump and pull the counterweighted ladder down", "tv.arden_fe_ladder"),
-     b("fire_escape", "the Arden's fire escape, four landings up, past lit windows (an argument; a baby; a radio)", "tv.arden_fe_stairs"),
+     b("fire_escape", "the Arden's fire escape, four landings up, past lit windows (an argument; a card game; a radio)", "tv.arden_fe_stairs"),
      b("roof_jump", "the Arden's parapet to the lower walk-up next door, over a 2 m air shaft", "tv.w38_airshaft_gap", "Ledge grab on a near miss."),
      b("climb", "a water-tank platform, to break line of sight", "tv.w38_watertank"),
      b("hang_drop", "into the back stairwell bulkhead: the Arden's back stairs", "tv.arden_bulkhead", "Brannock is too heavy for the gap; he shouts from the far roof.")],

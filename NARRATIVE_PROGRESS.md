@@ -915,3 +915,17 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - **M26**: new o8c, a rooftop chase after the firebug (a dry-cleaner's fire escape, a skylight, a roof gap with a leaking gas can, a setback ladder, a billboard catwalk), finished with a tackle.
   - **`barks.chase_bystander`**: 18 lines (carts, car hoods, windows, roofs, subway, lots, newsstands).
   - **Systemic purse-snatch**: an encounter trigger, `trigger.enc_purse_snatch` (ENGINE_REQUESTS 16).
+- **Content rule (27 Nov 2026, user via oversight): no child characters anywhere.** None spawn, none appear on screen, none are customers.
+  - **Fixed:**
+    - the ice-cream truck activity: customers are now adults (office workers, garment workers on break, park regulars, cabbies);
+    - the beat-cop "Kid, get off the mailbox" line now says "Pal…";
+    - the window bark "Ma! Ma!" now says "Ethel! Ethel!";
+    - the tourist's "Kids, say thank you" now says "Harold…";
+    - Hydrant War: adults opened the hydrant;
+    - Old Beat: "a kid's bike" became "a stolen bike";
+    - "the park boy" became "the park dealer";
+    - M8's fire-escape window "a baby" became "a card game";
+    - Inez's schedule and arc: her children are offscreen only;
+    - the boundaries note.
+  - Offscreen mentions in dialogue ("I got four kids") stay, as words only.
+  - **Validator:** `content.py` now errors on any child entity id, any `ageRange` under 18, and on-screen child cues in text across archetypes, missions, dialogue, barks, triggers, spawns, side specs and activities.

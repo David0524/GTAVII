@@ -312,6 +312,30 @@ def main():
     for f in flags:
         if f not in set_somewhere: W(f"{f}: documented but never set by any mission or dialogue")
 
+    # CONTENT RULE (user, 27 Nov 2026): no child characters anywhere: none spawn, none on screen, none are customers.
+    import re as _re
+    CHILD_ID = _re.compile(r"(^|[._])(child|children|kid|kids|boy|girl|teen|teens|baby|babies|toddler|infant|schoolkid|youth)([._]|$)")
+    CHILD_TXT = _re.compile(r"\b(kids|children)\s*\(ambient\)|\bchildren are (ambient|customers)|^kids?,|\bkids are waiting\b|\bchildren appear\b", _re.I)
+    def child_scan(where, x):
+        if isinstance(x, dict):
+            for k2, v in x.items():
+                if k2 in ("archetype", "npc", "character", "who", "target", "spawn", "id") and isinstance(v, str) and v.startswith(("npc.", "archetype.", "char.")) and CHILD_ID.search(v.split(".", 1)[1]):
+                    E(f"{where}: child entity '{v}' (no child characters anywhere)")
+                if k2 in ("ageRange",) and isinstance(v, list) and v and isinstance(v[0], (int, float)) and v[0] < 18:
+                    E(f"{where}: ageRange {v} includes a minor (no child characters anywhere)")
+                if isinstance(v, str) and CHILD_TXT.search(v):
+                    E(f"{where}: text requires a child on screen: {v[:60]!r}")
+                child_scan(where, v)
+        elif isinstance(x, list):
+            for v in x: child_scan(where, v)
+    for name, coll in (("archetype", archs), ("mission", missions), ("dialogue", dialogue), ("bark", pools), ("trigger", triggers), ("spawn", spawns)):
+        for kk, vv in (coll.items() if isinstance(coll, dict) else enumerate(coll)):
+            child_scan(f"{name} {kk}", vv)
+    for sf in sorted((C / "side").glob("*.json")):
+        child_scan(f"side {sf.stem}", json.loads(sf.read_text()))
+    if (C / "activities.json").exists():
+        child_scan("activities", json.loads((C / "activities.json").read_text()))
+
     for x in warns: print("WARN ", x)
     for x in errs: print("ERROR", x)
     print(f"{len(archs)} archetypes, {len(pools)} bark pools ({sum(len(x['lines']) for x in pools.values())} lines), {len(acts_doc)} activities, {len(missions)}/{len(planned)} missions, {len(dialogue)} dialogue scripts, {len(triggers)} triggers, "

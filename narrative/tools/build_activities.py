@@ -171,11 +171,11 @@ act("activity.payphone_calls", "Payphone Calls", [T, D, N], "mission.night_desk"
  {"money": 0, "relationships": "+1 caller"}, 90, "One tap to answer, then a short errand. Ignoring it costs nothing.",
  "Keeps the cast present between missions, and teaches the phone as the 1974 way to reach someone.")
 act("activity.hot_pavement", "Hot Pavement", [T, D, N], "mission.margin_call", ["P3", "P5"], ("13:00", "18:00"), ["clear"],
- {"type": "talk", "at": "W 26th St & 8th Ave", "note": "An ice-cream driver's helper quit in the heat, and the Penn South kids are waiting."},
+ {"type": "talk", "at": "W 26th St & 8th Ave", "note": "An ice-cream driver's helper quit in the heat, and half of Chelsea is melting on its stoops."},
  [O("o1", "enter_vehicle", "Into the ice-cream truck", "vehicle_role.ice_cream_truck"), O("o2", "goto", "Next stop: {stopName}", "{stop}", radius=20)],
  {"stop": [["W 26th St & 8th Ave", "Penn South plaza"], ["W 27th St & 9th Ave", "Chelsea Park"], ["W 29th St & 9th Ave", "the hydrant on 29th"], ["Madison Ave & E 24th St", "Madison Square"]]},
  {"perRun": 8}, 720,
- "Slow, gentle driving through a playful crowd, with no timers. Content rule: children are ambient customers only and never in traffic danger (the truck is limited to walking speed near crowds).",
+ "Slow, gentle driving through a hot crowd, with no timers. Customers are adults: heat-struck office workers, garment workers on break, park regulars, cabbies at the hydrant. Content rule: no child characters anywhere. The truck is limited to walking speed near crowds.",
  "Summer texture and a breather from the crime plot (P3).", veh=["vehicle_role.ice_cream_truck"])
 
 # Field names for each pool's rows: the keys match the {placeholders} in the objective templates.

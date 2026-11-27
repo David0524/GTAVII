@@ -104,7 +104,7 @@ piece(22, "own_business", "Own a Business", "job", [ANY], [2, 3], "Businesses fo
       "Weekly income plus 'trouble' events (a health inspector's tip, Lonnie's crew, a skimming night manager) that come as short side jobs.",
       ["economy", "combat", "bribes"], "$40–150 a week", "Trouble events are short and skippable (income dips).")
 piece(23, "hydrant_war", "Hydrant War", "encounter", [ANY], [1, 2], "Any hot afternoon, side streets near 9th Ave",
-      "Kids (ambient) have opened a hydrant; a cop wants it shut; the block wants it open.", "Choose: fit a spray cap (a block party breaks out), shut it (the cop owes you), or bribe the cop to look away. No danger to children (content rule).",
+      "The block's grown-ups have opened a hydrant (garment workers on break, the stoop regulars); a cop wants it shut; the block wants it open.", "Choose: fit a spray cap (a block party breaks out), shut it (the cop owes you), or bribe the cop to look away. No child characters (content rule).",
       ["heat", "bribes", "police"], "Relationship and reputation on the block", "A one-choice scene.")
 piece(24, "purse_snatch", "Snatch on Thirty-Fourth", "encounter", [ANY], [1, 2, 3], "Herald Square crowds", "A purse thief bolts through the shoppers.",
       "Chase through the department store's two doors. Being seen helping lowers your own heat with witnesses (positive witness system).",
@@ -131,7 +131,7 @@ piece(32, "three_am_phone", "The Three A.M. Phone", "arc", [ANY], [2, 3], "Payph
       "An anonymous caller feeds tips about the syndicate, each checkable (a truck, a meeting, a stash). The caller is Marjorie Kell (reveal in part 4).",
       ["payphones", "time of day", "photo mode"], "Story intel; corroboration evidence route for Branch B", "Calls are subtitled; tips are marked on the minimap only after you check them.", parts=4)
 piece(33, "old_beat", "Old Beat Favours", "lead", [T], [1, 2, 3], "Midtown Central; the old foot posts", "Kearney asks for things he can't do in uniform.",
-      "Small off-book favours (find a missing ledger page, sit with a dying informant, return a kid's bike to the right stoop) that build the 'Old Beat' special.",
+      "Small off-book favours (find a missing ledger page, sit with a dying informant, return a stolen bike to the right stoop) that build the 'Old Beat' special.",
       ["Teddy's specials", "relationships", "police system"], "Relationship with Kearney (unlocks report downgrades)", "Short walks and talks.")
 piece(34, "hack_license", "Getting Licensed", "lead", [T], [2], "Taxi bureau (invented), Kehoe's office, a doctor, a photo booth", "Teddy wants his hack licence back. The city wants seven forms.",
       "A comic bureaucracy crawl across the small map: each office needs something from another. Shortcut with a bribe, or do it straight and earn Kehoe's respect.",

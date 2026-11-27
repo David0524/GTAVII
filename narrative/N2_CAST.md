@@ -836,11 +836,11 @@ Weights run from −3 (hostile) to +3 (devoted), from the first character's poin
 - **Daily schedule (weekday):**
   - 22:00–06:30 · sleep · Hotel Corwin (SRO), W 31st St (Broadway–6th Ave)
   - 06:30–08:00 · home · Hotel Corwin (SRO), W 31st St (Broadway–6th Ave)
-  - 08:00–09:00 · errand · Broadway & W 30th St — Walks the children to the day-camp bus
+  - 08:00–09:00 · errand · Broadway & W 30th St — Back from seeing her children off to day camp (offscreen; no child characters)
   - 09:00–16:00 · work · Hotel Corwin (SRO), W 31st St (Broadway–6th Ave) — Piecework
   - 16:00–22:00 · home · Hotel Corwin (SRO), W 31st St (Broadway–6th Ave)
 - **Relationships:** Odessa Pruitt (committee, +1); Vic Prentiss (took money from, -1)
-- **Arc:** Takes the buyout in Act 1. In Act 3 she's Prentiss's proof that the arson plan exists. Her children are never on screen in any danger. Content rule: they're at camp or with a sister during M26.
+- **Arc:** Takes the buyout in Act 1. In Act 3 she's Prentiss's proof that the arson plan exists. Her children are never on screen (content rule: no child characters anywhere); they're at camp or with her sister.
 - **Visual:** palette `#20B2AA` `#FFFFFF` `#8B4513`. *Silhouette:* Young and tired; hair in a scarf.
   *Wardrobe:* Cotton house dress, canvas sneakers. *Props:* laundry bag, hot plate, bundle of piecework collars.
 - **Missions:** 2, 26
