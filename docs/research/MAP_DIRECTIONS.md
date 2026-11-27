@@ -14,7 +14,7 @@
 - our route graph and our label placer, which keeps type clear of icons, the route and the chrome;
 - the city render in A and C is **an orthographic render of our own city from the engine** (`tools/ui/mapAerial.ts`).
 
-The mockup code is in `tools/ui/mapMock/` and the shots are in `docs/research/map_directions/`.
+The mockup code is in `tools/ui/mapMock/`. The shots are in `docs/research/map_directions/`: `map_A.jpg`, `map_B.jpg`, `map_C.jpg`, and `board_ABC.jpg` side by side.
 
 ## What was wrong with the current map (oversight's read, which I agree with)
 - It reads as a flat web-app vector map: uniform blocks, white roads and a default sans.
@@ -27,7 +27,7 @@ The mockup code is in `tools/ui/mapMock/` and the shots are in `docs/research/ma
 |---|---|---|---|
 | **Base** | Our city rendered straight down (rooftops, water tanks, street furniture, parks, shadows), graded to the 1974 film look (desaturated, warm), with roads lifted slightly so the grid reads | An inked 1974 street atlas on paper: double-ruled streets with a slight hand wobble, sand washes for blocks, brick pink for buildings (traced from our render's roofs), green for parks, paper grain and foxing | Our aerial render printed as a single-ink 45° halftone on cream stock, with streets printed clean over the screen and paper grain darkening at the edges |
 | **Undiscovered** | A dark haze over the render (the city is there, you just haven't been) | Paper with only the pencilled construction grid. **The ink and washes fill in as you discover**, with a ragged ink-bleed edge | Plain paper: the plate isn't printed there yet, so the halftone fades to nothing, leaving the street hairlines |
-| **Landmarks** | Distinct silhouette glyphs (wedge, spire, arena, clock tower) in dark discs | **Ink vignettes of our own 3D landmarks**: edges plus dithered tone, faded out, like an engraver's views on a period map | The same silhouette glyphs, printed in ink on paper discs |
+| **Landmarks** | Distinct silhouette glyphs (wedge, spire, arena, clock tower) in dark discs | **Ink vignettes**: small drawings of our landmarks in oblique projection, with a hatched shadow side, window ticks, a gilded pyramid, a clock face and the prow. Each sits by its spot with a hairline leader and its name lettered beneath | The same silhouette glyphs, printed in ink on paper discs |
 | **Route** | Bold taxi-yellow GPS line with a dark casing | A red crayon line with a slight wobble | Taxi-yellow (a second ink) with an ink casing |
 | **Type** | Heros Condensed caps with dark halos; districts as spaced caps | Schola italic, lettered like an atlas; districts in spaced roman caps | Heros Condensed caps with paper halos |
 | **Chrome** | Slim dark translucent UI layer: a legend list with counts and toggles, round icon buttons, a key-hint footer | The legend becomes the atlas's own printed index (ink on paper), with one decorative gesture: a compass | Same UI layer as A |
@@ -41,7 +41,8 @@ The mockup code is in `tools/ui/mapMock/` and the shots are in `docs/research/ma
   - **Where we fall short:** smooth zoom needs tile LODs, which is the full-build cost above. Our blip set is smaller.
 - **RDR2:**
   - **What the reference does:** a painterly period map on paper with ink linework, lettered names, illustrated landmarks, fog of war, and an in-world feel.
-  - **Where we match:** B covers each of these: the ink, washes, lettering, vignettes and ink filling in as you discover. The vignettes are drawn from our own buildings, not painted by hand.
+  - **Where we match:** B covers each of these: the ink, washes, lettering, vignettes and ink filling in as you discover.
+  - **Note on the vignettes:** I first tried tracing engine renders of the landmarks (`tools/ui/mapVignettes.ts`), but our current models aren't distinctive enough to read at this size. The mockup vignettes are drawn in code instead; a full build would have them drawn properly (ART_ASSETS route).
   - **Where we fall short:** RDR2's map is hand-painted by artists. Our washes and ink are procedural plus processed renders, so they're convincing at phone size but won't match it at full screen on a TV.
 - **C** is ours rather than borrowed from either game: GTA's readability, with 1974 print production (halftone, two inks, stock).
 

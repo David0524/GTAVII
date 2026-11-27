@@ -251,6 +251,80 @@ const LM_GLYPH: Record<string, (c: CanvasRenderingContext2D) => void> = {
   lifeline: (c) => { c.fillRect(-3, -4, 6, 10); c.beginPath(); c.moveTo(-3, -4); c.lineTo(0, -9); c.lineTo(3, -4); c.closePath(); c.fill(); c.save(); c.globalCompositeOperation = 'destination-out'; c.beginPath(); c.arc(0, -1, 1.6, 0, 7); c.fill(); c.restore(); },
 };
 
+// ------------------------------------------------------------------ B: landmark vignettes, inked in cabinet-oblique (our drawings of our buildings)
+type Mass = { w: number; d: number; h: number; x?: number; roof?: 'flat' | 'pyramid' | 'spire' | 'mast' | 'cornice' | 'drum' | 'wedge' | 'clock' };
+const VIG: Record<string, { scale: number; parts: Mass[] }> = {
+  flatiron: { scale: 0.62, parts: [{ w: 22, d: 46, h: 87, roof: 'wedge' }] },
+  empire: { scale: 0.2, parts: [{ w: 130, d: 60, h: 25, roof: 'flat' }, { w: 90, d: 45, h: 190, x: 0, roof: 'flat' }, { w: 64, d: 32, h: 120, roof: 'flat' }, { w: 30, d: 16, h: 40, roof: 'mast' }] },
+  macys: { scale: 0.5, parts: [{ w: 110, d: 60, h: 45, roof: 'cornice' }, { w: 60, d: 30, h: 14, roof: 'flat' }] },
+  kelsey: { scale: 0.62, parts: [{ w: 56, d: 30, h: 50, roof: 'cornice' }] },
+  nylife: { scale: 0.3, parts: [{ w: 90, d: 50, h: 120, roof: 'flat' }, { w: 40, d: 26, h: 40, roof: 'flat' }, { w: 30, d: 20, h: 30, roof: 'pyramid' }] },
+  garden: { scale: 0.42, parts: [{ w: 130, d: 130, h: 46, roof: 'drum' }] },
+  lifeline: { scale: 0.25, parts: [{ w: 76, d: 40, h: 60, roof: 'flat' }, { w: 42, d: 42, h: 150, roof: 'clock' }, { w: 30, d: 30, h: 26, roof: 'pyramid' }] },
+};
+const vigCache = new Map<string, { c: HTMLCanvasElement; w: number; h: number }>();
+function vignette(id: string) {
+  const hit = vigCache.get(id); if (hit) return hit;
+  const spec = VIG[id]; const S = spec.scale, ox = 0.42, oy = -0.32; // oblique: depth goes up and right
+  const W0 = 120, H0 = 110; const [c, x] = off(W0, H0);
+  const INK = '#2b2118'; x.lineJoin = 'round'; x.lineCap = 'round';
+  let base = H0 - 10, cxm = W0 / 2 - 8;
+  const hatch = (poly: [number, number][], gap: number, a: number) => {
+    x.save(); x.beginPath(); poly.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.closePath(); x.clip();
+    x.strokeStyle = 'rgba(43,33,24,.55)'; x.lineWidth = 0.45;
+    for (let k = -200; k < 200; k += gap) { x.beginPath(); x.moveTo(-50 + k, -50); x.lineTo(-50 + k + Math.cos(a) * 400, -50 + Math.sin(a) * 400); x.stroke(); }
+    x.restore();
+  };
+  // ground shadow and a few strokes of street
+  x.strokeStyle = 'rgba(43,33,24,.4)'; x.lineWidth = 0.5; for (let i = 0; i < 3; i++) { x.beginPath(); x.moveTo(8 + i * 3, base + 4 + i * 1.6); x.lineTo(W0 - 8 - i * 6, base + 4 + i * 1.6); x.stroke(); }
+  for (const m of spec.parts) {
+    const w = m.w * S, d = m.d * S, h = m.h * S, l = cxm - w / 2 + (m.x ?? 0) * S, t = base - h, dx = d * ox, dy = d * oy;
+    if (m.roof === 'drum') {
+      const rx = w / 2, ry = rx * 0.38, cx0 = l + rx;
+      x.fillStyle = '#efe5cb'; x.beginPath(); x.ellipse(cx0, base, rx, ry, 0, 0, Math.PI); x.lineTo(cx0 - rx, t); x.ellipse(cx0, t, rx, ry, 0, Math.PI, 0, true); x.closePath(); x.fill();
+      hatch([[cx0 + rx * 0.2, t], [cx0 + rx, t], [cx0 + rx, base], [cx0 + rx * 0.2, base + ry]], 1.6, 1.2);
+      x.strokeStyle = INK; x.lineWidth = 0.9; x.beginPath(); x.ellipse(cx0, t, rx, ry, 0, 0, 7); x.stroke();
+      x.beginPath(); x.moveTo(cx0 - rx, t); x.lineTo(cx0 - rx, base); x.ellipse(cx0, base, rx, ry, 0, Math.PI, 0, true); x.lineTo(cx0 + rx, t); x.stroke();
+      x.lineWidth = 0.4; for (let k = 1; k < 12; k++) { const a = Math.PI * k / 12, u = cx0 - Math.cos(a) * rx; x.beginPath(); x.moveTo(u, t + Math.sin(a) * ry); x.lineTo(u, base + Math.sin(a) * ry); x.stroke(); }
+      base = t; continue;
+    }
+    if (m.roof === 'wedge') { // the prow: a narrow front face, a long side running back
+      const front: [number, number][] = [[l + w * 0.35, base], [l + w * 0.65, base], [l + w * 0.65, t], [l + w * 0.35, t]];
+      const side: [number, number][] = [[l + w * 0.65, base], [l + w * 0.65 + d * 0.9, base + d * oy * 1.2], [l + w * 0.65 + d * 0.9, t + d * oy * 1.2], [l + w * 0.65, t]];
+      const side2: [number, number][] = [[l + w * 0.35, base], [l - d * 0.5, base + d * oy * 1.1], [l - d * 0.5, t + d * oy * 1.1], [l + w * 0.35, t]];
+      x.fillStyle = '#efe5cb'; for (const p of [side2, front, side]) { x.beginPath(); p.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.closePath(); x.fill(); }
+      hatch(side, 1.5, 1.15);
+      const roofF: [number, number][] = [[l + w * 0.35, t], [l + w * 0.65, t], [l + w * 0.65 + d * 0.9, t + d * oy * 1.2], [l - d * 0.5, t + d * oy * 1.1]];
+      x.fillStyle = '#e6d9b8'; x.beginPath(); roofF.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.closePath(); x.fill();
+      x.strokeStyle = INK; x.lineWidth = 0.9; x.stroke();
+      x.strokeStyle = INK; x.lineWidth = 0.9; for (const p of [side2, front, side]) { x.beginPath(); p.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.closePath(); x.stroke(); }
+      x.lineWidth = 0.35; for (let y = t + 4; y < base - 2; y += 2.6) { x.beginPath(); x.moveTo(l + w * 0.65, y); x.lineTo(l + w * 0.65 + d * 0.9, y + d * oy * 1.2); x.moveTo(l + w * 0.35, y); x.lineTo(l - d * 0.5, y + d * oy * 1.1); x.stroke(); }
+      x.lineWidth = 1.2; x.beginPath(); x.moveTo(l - d * 0.5, t + d * oy * 1.1 - 1.5); x.lineTo(l + w * 0.35, t - 1.5); x.lineTo(l + w * 0.65, t - 1.5); x.lineTo(l + w * 0.65 + d * 0.9, t + d * oy * 1.2 - 1.5); x.stroke();
+      continue;
+    }
+    const front: [number, number][] = [[l, base], [l + w, base], [l + w, t], [l, t]];
+    const side: [number, number][] = [[l + w, base], [l + w + dx, base + dy], [l + w + dx, t + dy], [l + w, t]];
+    const top: [number, number][] = [[l, t], [l + w, t], [l + w + dx, t + dy], [l + dx, t + dy]];
+    x.fillStyle = '#efe5cb'; for (const p of [front, side, top]) { x.beginPath(); p.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.closePath(); x.fill(); }
+    hatch(side, 1.5, 1.15);
+    // windows: short ink ticks in rows on the lit face
+    x.strokeStyle = 'rgba(43,33,24,.7)'; x.lineWidth = 0.5;
+    for (let y = t + 2.5; y < base - 2; y += 2.4) for (let u = l + 1.6; u < l + w - 1; u += 1.9) { x.beginPath(); x.moveTo(u, y); x.lineTo(u, y + 1.1); x.stroke(); }
+    x.strokeStyle = INK; x.lineWidth = 0.9; for (const p of [front, side, top]) { x.beginPath(); p.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.closePath(); x.stroke(); }
+    if (m.roof === 'cornice') { x.lineWidth = 1.3; x.beginPath(); x.moveTo(l - 1, t + 1.2); x.lineTo(l + w + 1, t + 1.2); x.lineTo(l + w + dx + 1, t + dy + 1.2); x.stroke(); }
+    if (m.roof === 'pyramid') { const px = l + w / 2 + dx / 2, py = t + dy / 2 - h * 1.1; x.fillStyle = 'rgba(176,122,12,.55)'; x.beginPath(); x.moveTo(l, t); x.lineTo(px, py); x.lineTo(l + w + dx, t + dy); x.lineTo(l + w, t); x.closePath(); x.fill(); x.lineWidth = 0.9; x.stroke(); x.beginPath(); x.moveTo(px, py); x.lineTo(l + w, t); x.stroke(); x.beginPath(); x.moveTo(px, py); x.lineTo(px, py - 4); x.stroke(); }
+    if (m.roof === 'mast') { const px = l + w / 2 + dx / 2; x.lineWidth = 1; x.beginPath(); x.moveTo(px, t + dy / 2); x.lineTo(px, t + dy / 2 - 16); x.stroke(); x.lineWidth = 0.5; x.beginPath(); x.moveTo(px, t + dy / 2 - 16); x.lineTo(px, t + dy / 2 - 26); x.stroke(); }
+    if (m.roof === 'clock') { const cx0 = l + w / 2, cy0 = t + 6; x.lineWidth = 0.7; x.fillStyle = '#efe5cb'; x.beginPath(); x.arc(cx0, cy0, Math.min(4.5, w / 3), 0, 7); x.fill(); x.stroke(); x.beginPath(); x.moveTo(cx0, cy0); x.lineTo(cx0, cy0 - 2.6); x.moveTo(cx0, cy0); x.lineTo(cx0 + 1.8, cy0); x.stroke(); }
+    base = t + dy / 2; cxm += dx / 2;
+  }
+  // trim to the drawing, then fade the bottom into the paper
+  const img = x.getImageData(0, 0, c.width, c.height), dd = img.data; let minY = c.height;
+  for (let y = 0; y < c.height; y++) for (let u = 0; u < c.width; u++) if (dd[(y * c.width + u) * 4 + 3] > 10) { minY = Math.min(minY, y); break; }
+  const top = Math.max(0, minY / DPR - 2), r = { c, w: W0, h: H0 - top };
+  const [c2, x2] = off(W0, H0 - top); x2.drawImage(c, 0, top * DPR, c.width, c.height - top * DPR, 0, 0, W0, H0 - top);
+  r.c = c2; vigCache.set(id, r); return r;
+}
+
 // ------------------------------------------------------------------ overlays: route, places, landmarks, player, labels
 async function overlays() {
   const L = new LabelPlacer(W, H, 2);
@@ -294,13 +368,32 @@ async function overlays() {
     L.reserve([sx - 8, sy - 8, sx + 8, sy + 8]);
   }
 
+  L.reserve([X(PLAYER.x) - 10, Y(PLAYER.z) - 10, X(PLAYER.x) + 10, Y(PLAYER.z) + 10]);
+  L.reserve([X(DEST.x) - 2, Y(DEST.z) - 17, X(DEST.x) + 11, Y(DEST.z) + 1]);
+  const vigLabel = new Map<string, [number, number]>(); // B: where each landmark's name goes (under its drawing)
   // landmarks: B gets ink vignettes (our 3D landmarks, drawn as ink), A and C get distinct silhouette glyphs
   for (const h of HEROES) {
     const sx = X(h.x), sy = Y(h.z);
     if (sx < LEG_W || sx > W || sy < TOP || sy > H - BOTTOM || underChrome(sx, sy, 10)) continue;
     if (DIR === 'B') {
-      const img = await loadImg(`/shots/map/vig_${h.id}.png`);
-      if (img) { const hh = h.id === 'empire' ? 74 : 54, ww = hh * img.width / img.height; g.drawImage(img, sx - ww / 2, sy - hh + 6, ww, hh); L.reserve([sx - ww / 2 + 6, sy - hh + 10, sx + ww / 2 - 6, sy + 6]); continue; }
+      // a drawing of the building, placed in the first free spot around its location, with a hairline to the spot
+      const v = vignette(h.id);
+      let placed = false;
+      for (const k of [0.62, 0.48]) { if (placed) break; const hh = v.h * k, ww = v.w * k;
+      const spots: [number, number][] = [[0, 0], [ww * 0.55, 0], [-ww * 0.55, 0], [ww * 0.6, hh * 0.55], [-ww * 0.6, hh * 0.55], [0, hh + 10], [ww * 0.6, hh + 6], [-ww * 0.6, hh + 6],
+        [-ww * 1.1, 0], [ww * 1.1, 0], [-ww * 1.1, -hh * 0.4], [ww * 1.1, -hh * 0.4], [-ww * 1.6, 0], [ww * 1.6, 0]];
+      for (const [ox, oy] of spots) {
+        const bx = sx + ox, by = sy + oy; // by = the drawing's base line
+        const box: Box = [bx - ww * 0.34, by - hh + 4, bx + ww * 0.34, by + 13];
+        if (box[1] < TOP + 2 || box[3] > H - 2 || box[2] > W - 2 || box[0] < LEG_W + 2 || !L.free(box)) continue;
+        L.reserve(box);
+        g.drawImage(v.c, bx - ww / 2, by - hh + 2, ww, hh);
+        if (ox || oy) { g.save(); g.strokeStyle = 'rgba(43,33,24,.55)'; g.lineWidth = 0.6; g.setLineDash([2, 1.5]); g.beginPath(); g.moveTo(sx, sy); g.lineTo(bx, by - 2); g.stroke(); g.restore(); }
+        g.save(); g.fillStyle = '#2b2118'; g.beginPath(); g.arc(sx, sy, 1.8, 0, 7); g.fill(); g.restore();
+        vigLabel.set(h.id, [bx, by + 10]);
+        placed = true; break;
+      } }
+      if (placed) continue; // otherwise fall through to the glyph
     }
     const sz = 22;
     g.save(); g.translate(sx, sy);
@@ -321,7 +414,12 @@ async function overlays() {
 
   // landmark names (priority), then districts, avenues, cross streets, then place names
   const lmFont = DIR === 'B' ? `italic 700 11px ${F_BODY}` : `700 10.5px ${F_COND}`;
-  for (const h of HEROES) { const sx = X(h.x), sy = Y(h.z); if (sx < LEG_W || sx > W || sy < TOP || sy > H) continue; labelPoint(L, h.name, sx, sy, lmFont, ink, halo, 22); }
+  for (const h of HEROES) {
+    const sx = X(h.x), sy = Y(h.z); if (sx < LEG_W || sx > W || sy < TOP || sy > H) continue;
+    const at = vigLabel.get(h.id);
+    if (at) { g.save(); g.font = lmFont; { const tw = g.measureText(h.name).width / 2; at[0] = Math.min(W - 6 - tw, Math.max(LEG_W + 6 + tw, at[0])); } L.reserve([at[0] - 40, at[1] - 10, at[0] + 40, at[1] + 3]); g.textAlign = 'center'; g.lineJoin = 'round'; g.lineWidth = 2.6; g.strokeStyle = halo; g.strokeText(h.name, at[0], at[1]); g.fillStyle = ink; g.fillText(h.name, at[0], at[1]); g.restore(); continue; }
+    labelPoint(L, h.name, sx, sy, lmFont, ink, halo, 22);
+  }
   const DIST = [{ t: 'CHELSEA', x: -1000, z: -170 }, { t: 'TENDERLOIN', x: -330, z: -470 }, { t: 'HERALD SQ.', x: -330, z: -800 }, { t: 'MADISON SQ.', x: 150, z: -190 }, { t: 'GARMENT CENTER', x: -700, z: -560 }];
   for (const d of DIST) {
     const sx = X(d.x), sy = Y(d.z);
