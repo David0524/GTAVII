@@ -88,7 +88,7 @@ body.touch .u-btn { min-height: 44px; }
 @media (prefers-reduced-motion: reduce) { .u-hub .u-hubbody > *, .u-toast { animation: a-fade .2s both; } }
 
 /* ------------------------------------------------------------------ the split: list column left, hero right (DESIGN_A §4) */
-.a-split { display: grid !important; grid-template-columns: minmax(300px, 5fr) 7fr; gap: 0 48px; padding: 22px calc(32px + var(--safe-r)) 24px calc(32px + var(--safe-l)) !important; align-items: start; }
+.a-split:not([style*="display: none"]) { display: grid !important; } .a-split { grid-template-columns: minmax(300px, 5fr) 7fr; gap: 0 48px; padding: 22px calc(32px + var(--safe-r)) 24px calc(32px + var(--safe-l)) !important; align-items: start; }
 .a-split > :first-child { min-width: 0; }
 .a-split > :last-child { min-width: 0; position: sticky; top: 0; }
 @media (max-height: 480px) { .a-split { grid-template-columns: 1fr 1fr; gap: 0 22px; padding: 12px calc(16px + var(--safe-r)) 14px calc(16px + var(--safe-l)) !important; } }
@@ -275,3 +275,10 @@ body.touch .t74-mapside { width: 200px !important; padding: 6px 10px 6px calc(12
 .u-mcard.on .lbl, .u-mcard.on h2, .u-mcard.on .why, .u-mcard.on .rows { opacity: 1; transform: none; }
 :root[data-motion="reduce"] .u-mcard .band, :root[data-motion="reduce"] .u-mcard h2 { transition: opacity .2s !important; clip-path: none !important; transform: none !important; }
 @media (max-height: 480px) { .u-mcard .band { padding: 18px 0 20px; } .u-mcard .in { margin-left: calc(9vw + var(--safe-l)); } .u-mcard h2 { font-size: 46px; } .u-mcard .row b { font-size: 19px; } }
+/* overlays over the live street (weapon ring, choices, shop, lead picker): the HUD steps back so nothing collides */
+body.u-modal .u-hud .t74-reveal, body.u-modal .u-hud .u-notes, body.u-modal .u-hud .u-objective, body.u-modal .u-hud .u-turn,
+body.u-modal .u-hud .t74-prompts, body.u-modal .u-hud .u-trav, body.u-modal .u-hud .u-cash, body.u-modal .u-hud .u-weapon { opacity: 0 !important; transition: opacity .15s; }
+body.touch .t74-clock { right: calc(88px + var(--safe-r)) !important; top: calc(12px + var(--safe-t)) !important; }
+body.touch .t74-clock .time { font-size: 24px !important; }
+body.touch .u-cash { right: calc(88px + var(--safe-r)) !important; top: calc(64px + var(--safe-t)) !important; }
+body.u-modal .tc .tc-btn { opacity: .22 !important; }

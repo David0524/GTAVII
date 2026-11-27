@@ -21,12 +21,12 @@ export class Modal {
   }
   protected show() {
     Modal.current?.hide(true);
-    Modal.current = this; this.open = true; this.root.style.display = ''; this.root.classList.add('modal-open');
+    Modal.current = this; this.open = true; this.root.style.display = ''; this.root.classList.add('modal-open'); document.body.classList.add('u-modal');
     if (document.pointerLockElement) document.exitPointerLock?.();
   }
   hide(silent = false) {
     if (!this.open) return;
-    this.open = false; this.root.style.display = 'none'; this.root.classList.remove('modal-open');
+    this.open = false; this.root.style.display = 'none'; this.root.classList.remove('modal-open'); document.body.classList.remove('u-modal');
     if (Modal.current === this) Modal.current = null;
     if (!silent) this.onClose?.();
   }
