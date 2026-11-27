@@ -1,5 +1,5 @@
 {
-  "_note": "Street vendors (STREET_VENDORS.md). Narrative: brands, cart/umbrella copy, menus and price boards in 1974 money, side content. All brands invented; adults only. Sim places them, Gameplay prices consumables from 'menus' (health/stamina from 'vendors').",
+  "_note": "Street vendors (STREET_VENDORS.md). Item names are keys for Gameplay (<menus key>.<slug of item>); tell Gameplay before renaming. Narrative: brands, cart/umbrella copy, menus and price boards in 1974 money, side content. All brands invented; adults only. Sim places them, Gameplay prices consumables from 'menus' (health/stamina from 'vendors').",
   "brands": [
     {
       "id": "brand.big_cyrus",
@@ -206,7 +206,8 @@
     "peddler": [
       {
         "item": "Umbrella (rain only)",
-        "price": "$2.00"
+        "price": "$2.00",
+        "rainOnly": true
       },
       {
         "item": "Sunglasses",

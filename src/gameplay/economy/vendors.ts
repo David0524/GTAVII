@@ -31,7 +31,7 @@ export const EFFECTS: Record<string, Partial<VendorGood>> = {
   'flower_stand.carnation': { item: 'item.flower' }, 'flower_stand.bunch_of_daisies': { item: 'item.flowers' }, 'flower_stand.a_dozen_roses': { item: 'item.roses' },
   'newsstand.daily_ticker': { item: 'item.newspaper' }, 'newsstand.manhattan_evening_dispatch': { item: 'item.newspaper' }, 'newsstand.cigarettes_pack': { item: 'item.cigarettes' },
   'newsstand.candy_bar': { heal: 1, stamina: 4, eatSeconds: 2 }, 'newsstand.gum': { stamina: 2, eatSeconds: 1 },
-  'peddler.umbrella_rain_only': { item: 'item.umbrella', rainOnly: true }, 'peddler.sunglasses': { item: 'item.sunglasses' }, 'peddler.gold_watch': { item: 'item.fake_watch' },
+  'peddler.umbrella_rain_only': { item: 'item.umbrella' }, // rain-only comes from the file's `rainOnly` 'peddler.sunglasses': { item: 'item.sunglasses' }, 'peddler.gold_watch': { item: 'item.fake_watch' },
   'peddler.8_track_tape_no_label': { item: 'item.eight_track' }, 'peddler.souvenir_pennant': { item: 'item.pennant' },
   // shoeshine goods are services (see shine below)
   'shoeshine.shine': {}, 'shoeshine.shine_and_tip': {},
@@ -45,7 +45,7 @@ export function parsePrice(p: string): number {
   return Math.round(parseFloat(t.replace('$', '')) * 100);
 }
 /** Load narrative's vendors.json into menus. `warn` lists goods with no effects row (they get the type default). */
-export function loadVendorMenus(json: { menus?: Record<string, { item: string; price: string }[]>; vendors?: { type: string; health?: number; stamina?: number }[] }, warn: (m: string) => void = () => {}): VendorMenus {
+export function loadVendorMenus(json: { menus?: Record<string, { item: string; price: string; rainOnly?: boolean }[]>; vendors?: { type: string; health?: number; stamina?: number }[] }, warn: (m: string) => void = () => {}): VendorMenus {
   const out = Object.fromEntries(VENDOR_KINDS.map((k) => [k, [] as VendorGood[]])) as VendorMenus;
   const def = new Map((json.vendors ?? []).map((v) => [v.type, v]));
   for (const [kind, items] of Object.entries(json.menus ?? {})) {
@@ -54,7 +54,7 @@ export function loadVendorMenus(json: { menus?: Record<string, { item: string; p
       const id = goodId(kind, x.item), fx = EFFECTS[id];
       if (!fx) warn(`${id}: no effects row; using the ${kind} default`);
       const d = def.get(kind);
-      out[kind as VendorKind].push({ id, name: x.item, cents: parsePrice(x.price), eatSeconds: 4, ...(fx ?? { heal: d?.health ?? 0, stamina: d?.stamina ?? 0 }) });
+      out[kind as VendorKind].push({ id, name: x.item, cents: parsePrice(x.price), eatSeconds: 4, ...(fx ?? { heal: d?.health ?? 0, stamina: d?.stamina ?? 0 }), ...(x.rainOnly !== undefined ? { rainOnly: x.rainOnly } : {}) });
     }
   }
   return out;
