@@ -790,6 +790,25 @@
     "c",
     "o"
    ]
+  },
+  {
+   "id": "lead_delphine_l1",
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 215544,
+   "tag": null,
+   "skinRGB": [
+    90,
+    56,
+    37
+   ],
+   "lead": "lead_delphine",
+   "ownHair": true,
+   "ktx2": [
+    "c",
+    "o"
+   ],
+   "tex": "lead_delphine",
+   "lodOf": "lead_delphine"
   }
  ]
 }

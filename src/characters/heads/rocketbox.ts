@@ -18,7 +18,7 @@ import { JOINT_INDEX as JI } from '../rig';
 import type { Appearance } from '../body/appearance';
 
 export interface HeadTag { sex: 0 | 1; age: [number, number]; anc: [number, number, number]; hair: 'short' | 'long' | 'curly' | 'bald' | 'tied' }
-export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean; /** maps also shipped as KTX2 (tools/characters/ktx2.ts) */ ktx2?: string[] }
+export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean; /** maps also shipped as KTX2 (tools/characters/ktx2.ts) */ ktx2?: string[]; /** lighter LOD of another head: textures are that head's */ tex?: string; lodOf?: string }
 export interface HeadAsset {
   id: string;
   meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; neckRing?: number[]; face?: { browZ: number; hx: number; zmin: number; zmax: number }; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
@@ -46,7 +46,7 @@ export class HeadLibrary {
   lead(name: string) { return this.index.find((h) => h.lead === name) ?? null; }
   load(id: string): Promise<HeadAsset> {
     let p = this.cache.get(id);
-    if (!p) { p = loadHead(this.base, id, this.ktx2 ? (this.index.find((h) => h.id === id)?.ktx2 ?? []) : [], this.ktx2); this.cache.set(id, p); }
+    if (!p) { const e = this.index.find((h) => h.id === id); p = loadHead(this.base, id, this.ktx2 ? (e?.ktx2 ?? []) : [], this.ktx2, e?.tex); this.cache.set(id, p); }
     return p;
   }
   /**
@@ -100,7 +100,7 @@ function hairCat(style: string): HeadTag['hair'] {
   return 'short';
 }
 
-async function loadHead(base: string, id: string, ktxMaps: string[] = [], ktx: { loadAsync(url: string): Promise<THREE.Texture> } | null = null): Promise<HeadAsset> {
+async function loadHead(base: string, id: string, ktxMaps: string[] = [], ktx: { loadAsync(url: string): Promise<THREE.Texture> } | null = null, tex = id): Promise<HeadAsset> {
   const buf = await (await fetch(`${base}${id}.bin`)).arrayBuffer();
   await formatReady();
   const c = readContainer(buf);
@@ -126,7 +126,7 @@ async function loadHead(base: string, id: string, ktxMaps: string[] = [], ktx: {
     }
     const t = await tl.loadAsync(`${base}${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t;
   };
-  const [color, normal, opacity] = await Promise.all([load(`${id}_c.webp`, true), load(`${id}_n.webp`, false), meta.cardIdx > 0 ? load(`${id}_o.webp`, true) : Promise.resolve(null)]);
+  const [color, normal, opacity] = await Promise.all([load(`${tex}_c.webp`, true), load(`${tex}_n.webp`, false), meta.cardIdx > 0 ? load(`${tex}_o.webp`, true) : Promise.resolve(null)]);
   meta.face = faceOf(pos, kind, meta.landmarks);
   if (!meta.neckRing) meta.neckRing = neckRingOf(meta.landmarks.Neck, pos, kind, B('idx'), meta.skinIdx);
   return { id, meta, pos, nrm, uv: uvs, sj, sw, kind, idx: B('idx'), color, normal, opacity, bytes: buf.byteLength, hair: c.blobs.get('hair') as Uint8Array | undefined, brow: c.blobs.get('brow') as Uint8Array | undefined };
