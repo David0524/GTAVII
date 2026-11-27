@@ -69,5 +69,6 @@
     "Part 4: The fourth piano is Nick's, sold in his Act 3 decline (if he sells)."
   ],
   "durationMin": 25,
-  "heat": 0
+  "heat": 0,
+  "discoveryNotify": "toast"
 }

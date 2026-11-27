@@ -67,5 +67,6 @@
     "Part 3: The print on the Ticker's front page."
   ],
   "durationMin": 20,
-  "heat": 1
+  "heat": 1,
+  "discoveryNotify": "toast"
 }

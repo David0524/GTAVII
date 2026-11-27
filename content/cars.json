@@ -8,7 +8,8 @@
       "where": "W 25th St & 9th Ave (open lot)",
       "stock": "used, $400–1,800",
       "quirk": "One car in five is a lemon. Dutch tells you which if your relationship with him is +2 or more.",
-      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship",
+      "discoveryNotify": "toast"
     },
     {
       "id": "cars.park_lane_motors",
@@ -16,7 +17,8 @@
       "where": "Madison Ave & E 39th St (showroom)",
       "stock": "new, $3,400–9,500",
       "quirk": "The salesman ignores Delphine until she pays cash (period commentary; she can make him regret it).",
-      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship"
+      "check": "batch-checked (multi-name query; weak). Re-check individually and USPTO before ship",
+      "discoveryNotify": "toast"
     },
     {
       "id": "cars.classifieds",
@@ -39,7 +41,8 @@
           "ad": "'Doctor's convertible, red, one owner.'",
           "truth": "Fine; the doctor wants to meet you at the hospital"
         }
-      ]
+      ],
+      "discoveryNotify": "toast"
     }
   ],
   "insurer": {

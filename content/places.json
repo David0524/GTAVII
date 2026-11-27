@@ -1,5 +1,5 @@
 {
-  "_note": "Narrative place ids. 'at' is a real intersection the engine resolves; 'between' narrows to the block face. Invented names are provisional until the N6 trademark search. Interior markers (content/interiors.json) come in N4/N6. Avoid 143 and 210 W 29th St (real fur houses).",
+  "_note": "Narrative place ids. 'at' is a real intersection the engine resolves; 'between' narrows to the block face. Invented names are provisional until the N6 trademark search. Interior markers (content/interiors.json) come in N4/N6. Avoid 143 and 210 W 29th St (real fur houses). discovery.notify: 'silent' (just appears on the map) or 'toast' (one 'Added to map · <name>' toast): only story contacts, mission givers, side quests and strangers, and properties or cars for sale (user feedback, 27 Nov 2026).",
   "places": [
     {
       "id": "loc.flatiron_prow",
@@ -13,7 +13,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -33,7 +34,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.dusk_on_broadway"
+        "mission": "mission.dusk_on_broadway",
+        "notify": "silent"
       }
     },
     {
@@ -53,7 +55,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.yes"
+        "mission": "mission.yes",
+        "notify": "silent"
       }
     },
     {
@@ -69,7 +72,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.yes"
+        "mission": "mission.yes",
+        "notify": "silent"
       }
     },
     {
@@ -85,7 +89,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.night_desk"
+        "mission": "mission.night_desk",
+        "notify": "silent"
       }
     },
     {
@@ -101,7 +106,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.contact_sheet"
+        "mission": "mission.contact_sheet",
+        "notify": "silent"
       }
     },
     {
@@ -124,7 +130,9 @@
         "tipFrom": [
           "char.bernard_ostrow"
         ],
-        "note": "Bernard: 'Men like that always eat at twelve-forty' (M5)"
+        "note": "Bernard: 'Men like that always eat at twelve-forty' (M5)",
+        "notify": "toast",
+        "notifyWhy": "story contact (Calloway's lunch spot)"
       }
     },
     {
@@ -140,7 +148,8 @@
         ],
         "shady": true,
         "hiddenUntilIntroduced": true,
-        "note": "Carriers' radio chatter on W 37th St (M4)"
+        "note": "Carriers' radio chatter on W 37th St (M4)",
+        "notify": "silent"
       }
     },
     {
@@ -161,7 +170,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sign: VARELAS & CO. FURS"
+        "note": "Sign: VARELAS & CO. FURS",
+        "notify": "silent"
       }
     },
     {
@@ -178,7 +188,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sign"
+        "note": "Sign",
+        "notify": "silent"
       }
     },
     {
@@ -198,7 +209,8 @@
           "char.yiannis_doukas",
           "char.carl_mayhew"
         ],
-        "note": "Yiannis or Mayhew (M14)"
+        "note": "Yiannis or Mayhew (M14)",
+        "notify": "silent"
       }
     },
     {
@@ -214,7 +226,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -230,7 +243,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -246,7 +260,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.the_club"
+        "mission": "mission.the_club",
+        "notify": "silent"
       }
     },
     {
@@ -263,7 +278,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sign: ROYAL CAFETERIA, OPEN ALL NIGHT"
+        "note": "Sign: ROYAL CAFETERIA, OPEN ALL NIGHT",
+        "notify": "silent"
       }
     },
     {
@@ -283,7 +299,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.the_club"
+        "mission": "mission.the_club",
+        "notify": "silent"
       }
     },
     {
@@ -300,7 +317,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Chasing bulbs on 42nd St"
+        "note": "Chasing bulbs on 42nd St",
+        "notify": "silent"
       }
     },
     {
@@ -319,7 +337,9 @@
         "tipFrom": [
           "char.dwayne_little"
         ],
-        "note": "Dwayne: 'Earl's the best on the street' (M4)"
+        "note": "Dwayne: 'Earl's the best on the street' (M4)",
+        "notify": "toast",
+        "notifyWhy": "mission giver (Earl Poole)"
       }
     },
     {
@@ -334,7 +354,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -354,7 +375,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.surcharge"
+        "mission": "mission.surcharge",
+        "notify": "silent"
       }
     },
     {
@@ -375,7 +397,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Palms on the W 28th St sidewalk at dawn"
+        "note": "Palms on the W 28th St sidewalk at dawn",
+        "notify": "silent"
       }
     },
     {
@@ -392,7 +415,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sign"
+        "note": "Sign",
+        "notify": "silent"
       }
     },
     {
@@ -412,7 +436,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.surcharge"
+        "mission": "mission.surcharge",
+        "notify": "silent"
       }
     },
     {
@@ -433,7 +458,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Hangul sign on W 32nd St"
+        "note": "Hangul sign on W 32nd St",
+        "notify": "silent"
       }
     },
     {
@@ -449,7 +475,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -466,7 +493,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sign"
+        "note": "Sign",
+        "notify": "silent"
       }
     },
     {
@@ -481,7 +509,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -496,7 +525,8 @@
         ],
         "sightM": 35,
         "shady": false,
-        "hiddenUntilIntroduced": false
+        "hiddenUntilIntroduced": false,
+        "notify": "silent"
       }
     },
     {
@@ -511,7 +541,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.exposure"
+        "mission": "mission.exposure",
+        "notify": "silent"
       }
     },
     {
@@ -531,7 +562,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.the_club"
+        "mission": "mission.the_club",
+        "notify": "silent"
       }
     },
     {
@@ -547,7 +579,8 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": true,
-        "mission": "mission.brownout"
+        "mission": "mission.brownout",
+        "notify": "silent"
       }
     },
     {
@@ -564,7 +597,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sign: PENNINGTON GENERAL, EMERGENCY"
+        "note": "Sign: PENNINGTON GENERAL, EMERGENCY",
+        "notify": "silent"
       }
     },
     {
@@ -580,7 +614,9 @@
         ],
         "shady": true,
         "hiddenUntilIntroduced": true,
-        "note": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest"
+        "note": "Maureen Kehoe's card, slipped under the Corwin desk glass after Teddy's first arrest",
+        "notify": "toast",
+        "notifyWhy": "story contact (bail lawyer)"
       }
     },
     {
@@ -597,7 +633,9 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail"
+        "note": "Neon: BAIL BONDS 24 HRS, across from the Shamrock Rail",
+        "notify": "toast",
+        "notifyWhy": "side-quest giver (Abend's Board of Skips)"
       }
     },
     {
@@ -613,7 +651,9 @@
         ],
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Sunday classifieds in The Daily Ticker"
+        "note": "Sunday classifieds in The Daily Ticker",
+        "notify": "toast",
+        "notifyWhy": "cars for sale"
       }
     },
     {
@@ -634,7 +674,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Green lamps outside"
+        "note": "Green lamps outside",
+        "notify": "silent"
       }
     },
     {
@@ -655,7 +696,8 @@
         "sightM": 35,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Green lamps outside"
+        "note": "Green lamps outside",
+        "notify": "silent"
       }
     },
     {
@@ -672,7 +714,8 @@
         "sightM": 220,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Seen down 42nd St from Fifth and Madison, and up Park Ave. The Pan Amity Building rises behind it."
+        "note": "Seen down 42nd St from Fifth and Madison, and up Park Ave. The Pan Amity Building rises behind it.",
+        "notify": "silent"
       }
     },
     {
@@ -689,7 +732,8 @@
         "sightM": 0,
         "shady": false,
         "hiddenUntilIntroduced": false,
-        "note": "Channel 'enter': discovered on first entry through the 42nd St doors."
+        "note": "Channel 'enter': discovered on first entry through the 42nd St doors.",
+        "notify": "silent"
       }
     }
   ],

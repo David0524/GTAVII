@@ -68,5 +68,6 @@
     "Part 3: He names the blocks that go dark next brownout; the player prepares."
   ],
   "durationMin": 15,
-  "heat": 0
+  "heat": 0,
+  "discoveryNotify": "toast"
 }

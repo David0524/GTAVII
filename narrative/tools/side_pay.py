@@ -74,6 +74,7 @@ for f in sorted(SIDE.glob("*.json")):
     if key not in P: raise SystemExit(f"no pay row for {key}")
     money, dur, heat, note = P[key]
     d["rewards"].update(money=money, payNote=note); d["durationMin"] = dur; d["heat"] = heat
+    d["discoveryNotify"] = "silent" if d.get("systemic") else "toast"  # user feedback 27 Nov: toast only for side quests/strangers
     import traversal; traversal.apply_side(d)
     f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n"); n += 1
 big = {k: v for k, v in P.items() if v[0] >= 5000}

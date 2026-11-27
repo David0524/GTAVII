@@ -82,5 +82,6 @@
   "slice": false,
   "systemic": true,
   "durationMin": 5,
-  "heat": 1
+  "heat": 1,
+  "discoveryNotify": "silent"
 }

@@ -62,5 +62,6 @@
   "rank": 20,
   "slice": false,
   "durationMin": 15,
-  "heat": 0
+  "heat": 0,
+  "discoveryNotify": "toast"
 }

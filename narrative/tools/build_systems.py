@@ -232,7 +232,7 @@ W("homes.json", {"_note": "Each lead's own home (user: 'The characters should al
   {"lead": "principal", "who": "char.odessa_pruitt", "interior": "interior.corwin_floor11", "where": "Corwin room 1104", "portrait": ["a window on the Empire Estate", "church hats in boxes", "the court notice in her Bible", "a folding chair"]}]})
 
 # ------------------------------------------------------------------ cars (HOMES_AND_CARS.md); makes come from the vehicles registry
-W("cars.json", {"_note": "Buying and owning cars (user: 'Should be able to buy/own cars too.'). Makes and models come from the vehicles chat's invented registry; narrative supplies sellers, prices, the insurer and the garage.", "sellers": [
+_CARS = ({"_note": "Buying and owning cars (user: 'Should be able to buy/own cars too.'). Makes and models come from the vehicles chat's invented registry; narrative supplies sellers, prices, the insurer and the garage.", "sellers": [
   {"id": "cars.galloway", "name": "Galloway Auto Exchange", "who": "char.dutch_galloway", "where": "W 25th St & 9th Ave (open lot)", "stock": "used, $400–1,800", "quirk": "One car in five is a lemon. Dutch tells you which if your relationship with him is +2 or more.", "check": WEAK},
   {"id": "cars.park_lane_motors", "name": "Park Lane Motors", "where": "Madison Ave & E 39th St (showroom)", "stock": "new, $3,400–9,500", "quirk": "The salesman ignores Delphine until she pays cash (period commentary; she can make him regret it).", "check": WEAK},
   {"id": "cars.classifieds", "name": "Classifieds (The Daily Ticker, Sundays)", "stock": "private sellers, $250–2,500", "listings": [
@@ -243,6 +243,8 @@ W("cars.json", {"_note": "Buying and owning cars (user: 'Should be able to buy/o
  "insurer": {"name": "Albemarle Casualty & Indemnity", "where": "Fifth Ave & W 33rd St (5th floor)", "policy": "$25/month; replaces a destroyed owned car once per act", "check": WEAK},
  "garages": [{"name": "Penn Garage", "who": "char.sully_garage", "where": "W 33rd St, 7th–8th Aves", "price": "$60/month", "note": "Owned cars persist here (engine E10)"},
              {"name": "Nick's building garage", "where": "Madison Ave & E 37th St", "price": "included (Nick)", "note": "Cas Wojcik has the keys"}]})
+for _sl in _CARS["sellers"]: _sl["discoveryNotify"] = "toast"  # cars for sale: one map toast (user feedback 27 Nov)
+W("cars.json", _CARS)
 
 # ------------------------------------------------------------------ police / combat barks
 def pool(pid, note, lines):

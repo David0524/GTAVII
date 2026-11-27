@@ -70,5 +70,6 @@
     "Part 4: The caller is revealed as Marjorie Kell."
   ],
   "durationMin": 25,
-  "heat": 1
+  "heat": 1,
+  "discoveryNotify": "toast"
 }

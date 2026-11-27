@@ -69,5 +69,6 @@
     "Part 3: Give Mrs. Cho one more evening watching him on screen; the Velvet Moon midnight screening opens."
   ],
   "durationMin": 30,
-  "heat": 0
+  "heat": 0,
+  "discoveryNotify": "toast"
 }

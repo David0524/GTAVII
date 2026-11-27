@@ -50,7 +50,7 @@
       ],
       "nonLethalAllowed": true,
       "traversalMobile": "One context button (climb/vault), auto-aligned. No precise timing. A missed roof jump catches the ledge or drops to the fire-escape landing below. The quarry rubber-bands (never more than ~40 m ahead), so no timer fails the player.",
-      "note": "The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down.",
+      "note": "The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down. The skip runs first: chase him on foot (route), then take him down.",
       "checkpointAfterMarker": "tv.w41_lot_fence",
       "traversal": [
         {
@@ -110,5 +110,6 @@
   "rank": 13,
   "slice": false,
   "durationMin": 35,
-  "heat": 3
+  "heat": 3,
+  "discoveryNotify": "toast"
 }

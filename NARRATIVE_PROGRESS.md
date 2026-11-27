@@ -969,3 +969,7 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - **Period fix:** the famous heart slogan is 1977 and real, so souvenir pennants read "NEW YORK · SEE IT TO BELIEVE IT".
   - **Image prompts:** 13 umbrella, cart, price-board and pennant prompts (82 in the queue; NOT YET RUNNABLE).
   - **Pre-ship:** USPTO checks on the 6 brands and the pennant line. Dominick's and Hot Nuts Harry are weak (unsearched).
+- **Discovery notifications (27 Nov 2026, user feedback via oversight):** discoveries are silent by default. A toast ("Added to map · <name>") appears only for story contacts, mission givers, side quests and strangers, and properties or cars for sale.
+  - `places.json` → `discovery.notify`: toast for Galloway's lot, Abend's bail bonds, Earl's shine, the bail lawyer and Calloway's luncheonette; everything else silent. Landmarks and mission-revealed places are silent, because the mission already announces them.
+  - Side specs get `discoveryNotify: toast` (systemic encounters are silent). Car sellers get toast.
+  - "Penciled in" appears nowhere in narrative content.
