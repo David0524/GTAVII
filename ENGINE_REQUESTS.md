@@ -43,3 +43,40 @@ Workstreams append requests here on their own branch under `## From <team>: N. T
 - **Why:** `docs/briefs/ART_ASSETS.md` asks for one shared source log; this workstream may not
   edit shared files.
 - **Fallback:** the full record (URLs, licence, edits) is already in `docs/CHARACTER_SOURCES.md`.
+
+## From characters: 5. Root-motion and IK contract for the movement brief (please confirm or amend)
+- **What:** a split of ownership for `docs/briefs/MOVEMENT.md`, so the controller and the animation
+  can't fight each other. Proposed:
+  1. **Free locomotion is capsule-driven** (GTA-style responsiveness).
+     - The controller moves the capsule from input using acceleration, deceleration and turn-rate
+       curves that characters supply as a tuning table (`characters.locomotionTuning`: walk, jog,
+       run and sprint; start, stop and pivot times).
+     - The animation matches the capsule by stride warping and plays start, stop, pivot and skid
+       clips from events the controller emits (`start`, `stop`, `pivot` with angle, `skid`).
+     - No root motion in free locomotion.
+  2. **Steps, kerbs and stairs:** the controller keeps its autostep and snap (physics stays exact).
+     - Characters smooth only the *visual* pelvis with a critically damped spring, and plant feet
+       with foot IK via request 2's ground query, so a 0.4 m step dips and recovers without a pop.
+     - Wanted from the engine: a `step` event `{ rise, position }` and a `stairs` flag when the
+       ground under the capsule is a stair run (traversal markup or a mesh tag), to switch to a
+       stair gait.
+  3. **Traversal is detection by the engine, motion by the animation.**
+     - The controller detects vault, climb, chain-link fence, ladder, drop ladder, hang-drop, roof gap
+       and turnstile, and emits `traversal { kind, ledgePoint, ledgeNormal, height, topY, landingPoint }`.
+     - Characters return a root-motion curve for that kind and height (sampled offsets over time) and
+       hand-IK targets on the ledge, rung or rail.
+     - The controller applies the curve to the capsule with collision off or shrunk, then hands
+       control back on `traversalEnd`.
+     - This replaces today's fixed 0.35 + 0.25·rise lerp in `stepClimb`.
+  4. **Ragdoll:** the engine owns the Rapier bodies (from `src/shared/rapier.ts`).
+     - Characters provide the body and joint definitions from the skeleton (capsule sizes, joint
+       limits), the powered-ragdoll target pose each frame (animation-driven, with stiffness
+       blended down on impact), and the get-up choice (front or back, from pelvis orientation) once
+       the bodies settle.
+  5. **Vehicles:** the engine provides per-door handle positions, seat transforms and the door hinge
+     state. Characters play enter, exit and carjack clips with hand IK on the handle and drive the
+     door angle through an event the engine applies.
+- **Why:** the brief splits detection (engine) from animation and IK (characters). Without a
+  contract, autostep pops, traversal lerps slide the feet, and ragdoll ownership is unclear.
+- **Fallback:** until the engine adopts this, the characters test course drives a local stand-in
+  controller with the same events, so the animation side can be built and measured on its own.
