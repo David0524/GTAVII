@@ -319,7 +319,83 @@ export function authoredClips(): ClipDef[] {
       { t: 0.75, j: { thigh_l: [0, 0, 6], thigh_r: [0, 0, 4] }, pelvis: [0.0, -0.016, 0] },
     ],
   });
+  defs.push(...traversalClips(R));
   return defs;
+}
+
+/**
+ * Traversal clips (docs/briefs/MOVEMENT.md), our own keys. Each is authored at a nominal 1 s
+ * (ladder: one climbing cycle) and played at whatever speed fills the traversal's duration
+ * (anim/Traversal.ts); the root path comes from the controller, so pelvis keys are small
+ * posture offsets only. Hands are pulled onto the obstacle by hand IK during each kind's
+ * contact windows, so the arm keys only need to bring them near.
+ */
+function traversalClips(R: Record<string, Euler>): ClipDef[] {
+  const grip = { ...handShape('l', 'grip'), ...handShape('r', 'grip') };
+  const crouchLand = { thigh_l: [-75, 0, -6], thigh_r: [-75, 0, 6], calf_l: [105, 0, 0], calf_r: [105, 0, 0], foot_l: [-20, 0, 0], foot_r: [-20, 0, 0], spine_01: [22, 0, 0], spine_02: [12, 0, 0], upperarm_l: [-35, -10, 25], upperarm_r: [-35, 10, -25], lowerarm_l: [0, 40, 0], lowerarm_r: [0, -40, 0] } as Record<string, Euler>;
+  return [
+    // speed vault over a rail or a car hood: plant both hands, tuck the knees, swing the legs
+    // through to the side, land running
+    { name: 'vault', duration: 1, loop: false, base: R, keys: [
+      { t: 0, j: { spine_01: [10, 0, 0], thigh_l: [-25, 0, 0], calf_l: [35, 0, 0], upperarm_l: [-40, -10, 10], upperarm_r: [-30, 10, -10] } },
+      { t: 0.22, j: { ...grip, spine_01: [32, 0, 0], spine_02: [14, 0, 0], neck_01: [-14, 0, 0], upperarm_l: [-78, -5, 18], upperarm_r: [-78, 5, -18], lowerarm_l: [0, 25, 0], lowerarm_r: [0, -25, 0], thigh_l: [-55, 0, 0], calf_l: [80, 0, 0], thigh_r: [-20, 0, 0], calf_r: [50, 0, 0] }, pelvis: [0, -0.04, 0] },
+      { t: 0.45, j: { ...grip, spine_01: [26, 0, -10], spine_02: [10, 0, -6], upperarm_l: [-70, -5, 22], upperarm_r: [-60, 5, -10], lowerarm_l: [0, 15, 0], thigh_l: [-80, 0, 25], calf_l: [95, 0, 0], thigh_r: [-75, 0, 30], calf_r: [100, 0, 0] }, pelvis: [0.05, -0.02, 0] },
+      { t: 0.7, j: { spine_01: [14, 0, -4], upperarm_l: [-30, -10, 30], upperarm_r: [-20, 10, -20], thigh_l: [-40, 0, 6], calf_l: [45, 0, 0], thigh_r: [-10, 0, 0], calf_r: [30, 0, 0] }, pelvis: [0.02, -0.03, 0] },
+      { t: 1, j: {} },
+    ] },
+    // climb onto a 1.2-2.2 m ledge: reach, hands on top, hop, chest over, knee up, stand
+    { name: 'climb', duration: 1, loop: false, base: R, keys: [
+      { t: 0, j: { spine_01: [-4, 0, 0], upperarm_l: [-120, -10, 10], upperarm_r: [-120, 10, -10], lowerarm_l: [0, 20, 0], lowerarm_r: [0, -20, 0] } },
+      { t: 0.18, j: { ...grip, spine_01: [4, 0, 0], neck_01: [-10, 0, 0], upperarm_l: [-160, -5, 15], upperarm_r: [-160, 5, -15], lowerarm_l: [0, 30, 0], lowerarm_r: [0, -30, 0], thigh_l: [-30, 0, 0], calf_l: [60, 0, 0], thigh_r: [-10, 0, 0], calf_r: [30, 0, 0] }, pelvis: [0, 0, -0.06] },
+      { t: 0.45, j: { ...grip, spine_01: [40, 0, 0], spine_02: [20, 0, 0], neck_01: [-20, 0, 0], upperarm_l: [-40, -10, 25], upperarm_r: [-40, 10, -25], lowerarm_l: [0, 95, 0], lowerarm_r: [0, -95, 0], thigh_l: [-100, 0, -5], calf_l: [125, 0, 0], thigh_r: [-20, 0, 0], calf_r: [60, 0, 0] }, pelvis: [0, -0.05, -0.04] },
+      { t: 0.7, j: { spine_01: [30, 0, 0], spine_02: [12, 0, 0], upperarm_l: [-15, -10, 25], upperarm_r: [-15, 10, -25], lowerarm_l: [0, 40, 0], lowerarm_r: [0, -40, 0], thigh_l: [-70, 0, 0], calf_l: [90, 0, 0], thigh_r: [-90, 0, 0], calf_r: [115, 0, 0] }, pelvis: [0, -0.12, 0] },
+      { t: 1, j: {} },
+    ] },
+    // chain-link fence: jump on, two scramble cycles, leg over the top, drop, land
+    { name: 'fence', duration: 1, loop: false, base: R, keys: [
+      { t: 0, j: { upperarm_l: [-120, -5, 10], upperarm_r: [-100, 5, -10], thigh_l: [-40, 0, 0], calf_l: [60, 0, 0] } },
+      { t: 0.12, j: { ...grip, upperarm_l: [-165, -5, 15], upperarm_r: [-130, 5, -15], lowerarm_l: [0, 30, 0], lowerarm_r: [0, -60, 0], thigh_l: [-60, 0, -10], calf_l: [90, 0, 0], thigh_r: [-30, 0, 10], calf_r: [60, 0, 0], spine_01: [8, 0, 0] } },
+      { t: 0.27, j: { ...grip, upperarm_l: [-130, -5, 15], upperarm_r: [-165, 5, -15], lowerarm_l: [0, 60, 0], lowerarm_r: [0, -30, 0], thigh_l: [-30, 0, -10], calf_l: [60, 0, 0], thigh_r: [-60, 0, 10], calf_r: [90, 0, 0], spine_01: [8, 0, 0] } },
+      { t: 0.42, j: { ...grip, upperarm_l: [-165, -5, 15], upperarm_r: [-130, 5, -15], lowerarm_l: [0, 30, 0], lowerarm_r: [0, -60, 0], thigh_l: [-60, 0, -10], calf_l: [90, 0, 0], thigh_r: [-30, 0, 10], calf_r: [60, 0, 0], spine_01: [8, 0, 0] } },
+      { t: 0.58, j: { ...grip, upperarm_l: [-80, -5, 20], upperarm_r: [-80, 5, -20], lowerarm_l: [0, 40, 0], lowerarm_r: [0, -40, 0], thigh_l: [-90, 0, 45], calf_l: [100, 0, 0], thigh_r: [-20, 0, 5], calf_r: [50, 0, 0], spine_01: [25, 0, 10] }, pelvis: [0.06, 0, 0] },
+      { t: 0.72, j: { upperarm_l: [-110, -5, 30], upperarm_r: [-110, 5, -30], thigh_l: [-30, 0, 0], calf_l: [40, 0, 0], thigh_r: [-30, 0, 0], calf_r: [40, 0, 0], spine_01: [5, 0, 0] } },
+      { t: 0.86, j: crouchLand, pelvis: [0, -0.18, 0] },
+      { t: 1, j: {} },
+    ] },
+    // ladder: one climbing cycle (opposite hand and foot), looped by rung
+    { name: 'ladder', duration: 1, loop: true, base: R, speed: 0, keys: [
+      { t: 0, j: { ...grip, spine_01: [6, 0, 0], neck_01: [-12, 0, 0], upperarm_l: [-165, -5, 12], upperarm_r: [-120, 5, -12], lowerarm_l: [0, 20, 0], lowerarm_r: [0, -70, 0], thigh_l: [-25, 0, -4], calf_l: [40, 0, 0], thigh_r: [-70, 0, 4], calf_r: [95, 0, 0] } },
+      { t: 0.5, j: { ...grip, spine_01: [6, 0, 0], neck_01: [-12, 0, 0], upperarm_l: [-120, -5, 12], upperarm_r: [-165, 5, -12], lowerarm_l: [0, 70, 0], lowerarm_r: [0, -20, 0], thigh_l: [-70, 0, -4], calf_l: [95, 0, 0], thigh_r: [-25, 0, 4], calf_r: [40, 0, 0] } },
+      { t: 1, j: { ...grip, spine_01: [6, 0, 0], neck_01: [-12, 0, 0], upperarm_l: [-165, -5, 12], upperarm_r: [-120, 5, -12], lowerarm_l: [0, 20, 0], lowerarm_r: [0, -70, 0], thigh_l: [-25, 0, -4], calf_l: [40, 0, 0], thigh_r: [-70, 0, 4], calf_r: [95, 0, 0] } },
+    ] },
+    // fire-escape drop ladder: jump, catch the bottom rung with both hands, pull it down
+    { name: 'ladder_pull', duration: 1, loop: false, base: R, keys: [
+      { t: 0, j: { thigh_l: [-40, 0, 0], calf_l: [70, 0, 0], thigh_r: [-40, 0, 0], calf_r: [70, 0, 0], upperarm_l: [-60, -5, 10], upperarm_r: [-60, 5, -10] }, pelvis: [0, -0.12, 0] },
+      { t: 0.3, j: { ...grip, upperarm_l: [-175, -5, 8], upperarm_r: [-175, 5, -8], lowerarm_l: [0, 10, 0], lowerarm_r: [0, -10, 0], thigh_l: [-10, 0, 0], calf_l: [30, 0, 0], thigh_r: [-10, 0, 0], calf_r: [30, 0, 0] } },
+      { t: 0.65, j: { ...grip, upperarm_l: [-120, -5, 10], upperarm_r: [-120, 5, -10], lowerarm_l: [0, 70, 0], lowerarm_r: [0, -70, 0], spine_01: [12, 0, 0], thigh_l: [-30, 0, 0], calf_l: [50, 0, 0], thigh_r: [-30, 0, 0], calf_r: [50, 0, 0] }, pelvis: [0, -0.08, 0] },
+      { t: 1, j: { ...grip, upperarm_l: [-160, -5, 12], upperarm_r: [-130, 5, -12], lowerarm_l: [0, 20, 0], lowerarm_r: [0, -60, 0] } },
+    ] },
+    // hang from a ledge before letting go (hang-drop)
+    { name: 'hang', duration: 1, loop: true, base: R, speed: 0, keys: [
+      { t: 0, j: { ...grip, upperarm_l: [-172, -5, 6], upperarm_r: [-172, 5, -6], lowerarm_l: [0, 8, 0], lowerarm_r: [0, -8, 0], neck_01: [-15, 0, 0], thigh_l: [-8, 0, 0], thigh_r: [-4, 0, 0], calf_l: [12, 0, 0], calf_r: [8, 0, 0] } },
+      { t: 1, j: { ...grip, upperarm_l: [-172, -5, 6], upperarm_r: [-172, 5, -6], lowerarm_l: [0, 8, 0], lowerarm_r: [0, -8, 0], neck_01: [-15, 0, 0], thigh_l: [-4, 0, 0], thigh_r: [-8, 0, 0], calf_l: [8, 0, 0], calf_r: [12, 0, 0] } },
+    ] },
+    // drop and land: arms up for balance in the air, absorb, stand
+    { name: 'drop_land', duration: 1, loop: false, base: R, keys: [
+      { t: 0, j: { upperarm_l: [-60, -10, 40], upperarm_r: [-60, 10, -40], thigh_l: [-25, 0, 0], calf_l: [35, 0, 0], thigh_r: [-15, 0, 0], calf_r: [25, 0, 0] } },
+      { t: 0.55, j: { upperarm_l: [-70, -10, 45], upperarm_r: [-70, 10, -45], thigh_l: [-30, 0, 0], calf_l: [40, 0, 0], thigh_r: [-30, 0, 0], calf_r: [40, 0, 0] } },
+      { t: 0.7, j: crouchLand, pelvis: [0, -0.22, 0] },
+      { t: 1, j: {} },
+    ] },
+    // running jump across a roof gap: take-off, knees up in flight, legs reach for the landing
+    { name: 'roof_jump', duration: 1, loop: false, base: R, keys: [
+      { t: 0, j: { thigh_l: [-70, 0, 0], calf_l: [40, 0, 0], thigh_r: [25, 0, 0], calf_r: [70, 0, 0], upperarm_l: [40, -10, 10], upperarm_r: [-90, 10, -10], spine_01: [12, 0, 0] } },
+      { t: 0.35, j: { thigh_l: [-65, 0, 0], calf_l: [85, 0, 0], thigh_r: [-55, 0, 0], calf_r: [95, 0, 0], upperarm_l: [-100, -10, 25], upperarm_r: [-100, 10, -25], spine_01: [18, 0, 0] } },
+      { t: 0.8, j: { thigh_l: [-55, 0, 0], calf_l: [35, 0, 0], thigh_r: [-45, 0, 0], calf_r: [30, 0, 0], upperarm_l: [-70, -10, 30], upperarm_r: [-70, 10, -30], spine_01: [10, 0, 0] } },
+      { t: 0.9, j: crouchLand, pelvis: [0, -0.15, 0] },
+      { t: 1, j: {} },
+    ] },
+  ];
 }
 
 /** Adds every authored clip to the library. */

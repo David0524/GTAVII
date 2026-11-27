@@ -8,6 +8,7 @@
 import * as THREE from 'three/webgpu';
 import type { CharacterFactory } from '../index';
 import { MoveCourseSim, FEATURES, moveGround, SIDEWALK, ROOF } from './moveCourseSim';
+import type { TraversalEvent, TraversalMotion } from '../anim/Traversal';
 
 function box(world: THREE.Scene, w: number, h: number, d: number, x: number, y: number, z: number, color: number, rough = 0.85) {
   const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardNodeMaterial({ color, roughness: rough }));
@@ -65,6 +66,41 @@ export function moveCourse(world: THREE.Scene, camera: THREE.PerspectiveCamera, 
   const sim = new MoveCourseSim();
   const near = qp.get('cam') === 'near';
   if (qp.has('nostep')) ch.stepSmoothing = false;
+  // --- traversal animation: clip timed to the root curve, hands onto the obstacle by IK ---------
+  type Cur = { label: string; ev: TraversalEvent; m: TraversalMotion; t: number; f: (typeof FEATURES)[number] | undefined; x0: number; y0: number; phase: number };
+  let cur: Cur | null = null;
+  const startTraversal = (label: string, ev: TraversalEvent, m: TraversalMotion) => {
+    const f = FEATURES.find((ff) => ff.label === label);
+    cur = { label, ev, m, t: 0, f, x0: sim.s.x, y0: sim.s.y, phase: 0 };
+    const k = ev.kind;
+    if (k === 'vault' || k === 'turnstile' || k === 'climb' || k === 'fence' || k === 'roofJump') void ch.play(m.clip, { speed: 1 / m.duration, blendIn: 0.08 });
+    else if (k === 'ladder') void ch.play('ladder', { loop: true, speed: 0.55 / 0.6, blendIn: 0.15 });
+    else if (k === 'dropLadder') void ch.play('ladder_pull', { speed: 1 / 1.4, blendIn: 0.1 });
+    else if (k === 'hangDrop') void ch.play('hang', { loop: true, blendIn: 0.15 });
+    else if (k === 'drop') void ch.play(m.roll ? 'drop_roll' : 'drop_land', { speed: m.roll ? 1 : 0.7 / Math.max(0.15, m.duration - 0.3), blendIn: 0.08 });
+  };
+  const fwd = new THREE.Vector3(), left = new THREE.Vector3();
+  const driveTraversal = (s: { x: number; y: number }, dt: number) => {
+    const c = cur!; c.t += dt;
+    const u = Math.min(1, c.t / c.m.duration), k = c.ev.kind;
+    // phase switches inside a traversal
+    if (k === 'dropLadder' && c.phase === 0 && c.t > 1.4) { c.phase = 1; void ch.play('ladder', { loop: true, speed: 0.55 / 0.6, blendIn: 0.15 }); }
+    if (k === 'hangDrop' && c.phase === 0 && c.t > 0.6) { c.phase = 1; void ch.play(c.m.roll ? 'drop_roll' : 'drop_land', { speed: 0.7 / Math.max(0.15, c.m.duration - 0.9), blendIn: 0.1 }); }
+    // hands: on the obstacle's top edge (vault, climb, turnstile, hang), on the mesh or rungs
+    // just above the head (fence, ladders), blended in and out over each window
+    fwd.set(1, 0, 0); left.set(0, 0, -1);
+    for (const side of ['l', 'r'] as const) {
+      const win = c.m.hands[side];
+      if (!win || !c.f) { ch.setHandTarget(side, null, 0); continue; }
+      const w = Math.min(1, Math.max(0, (u - win[0]) / 0.06)) * Math.min(1, Math.max(0, (win[1] - u) / 0.06));
+      const lat = side === 'l' ? 0.2 : -0.2;
+      let hx = c.f.x + 0.04, hy = c.f.top + 0.02;
+      if (k === 'vault' || k === 'turnstile') hx = c.f.x + Math.min(0.25, c.f.depth * 0.3);
+      if (k === 'fence') { hx = c.f.x - 0.06; hy = Math.min(c.f.top, s.y + (side === 'l' ? 1.85 : 1.6)); }
+      if (k === 'ladder' || k === 'dropLadder') { hx = c.f.x + 0.17; const rung = (yy: number) => Math.round((yy - 0.15) / 0.3) * 0.3 + 0.15; hy = Math.min(c.f.top, rung(s.y + (side === 'l' ? 1.8 : 1.5))); }
+      ch.setHandTarget(side, new THREE.Vector3(hx, hy, 0).addScaledVector(left, lat).addScaledVector(fwd, 0), w);
+    }
+  };
   let lastEvents = 0;
   // smoothness: the pelvis's vertical speed on grounded frames (a pop shows as a spike)
   let lastPelvis: number | null = null, maxVy = 0, sumVy = 0, nVy = 0;
@@ -74,13 +110,13 @@ export function moveCourse(world: THREE.Scene, camera: THREE.PerspectiveCamera, 
     for (; lastEvents < sim.events.length; lastEvents++) {
       const e = sim.events[lastEvents];
       report.events.push({ ...e, motion: undefined, x: +e.x.toFixed(2), t: +e.t.toFixed(2) });
-      // placeholder traversal poses until the authored traversal clips land (M4)
-      if (e.type === 'traversal' && e.motion.clip === 'climb') void ch.play('climb_ledge');
-      if (e.type === 'traversal' && e.motion.roll) void ch.play('roll');
+      if (e.type === 'traversal') startTraversal(e.label, e.event, e.motion);
+      if (e.type === 'traversalEnd') { ch.stop(); for (const side of ['l', 'r'] as const) ch.setHandTarget(side, null, 0); cur = null; }
     }
+    if (cur) driveTraversal(s, dt);
     ch.object.position.set(s.x, s.y, 0);
     const v = s.speed;
-    ch.setLocomotion({ velocity: [Math.sin(s.heading) * v, 0, Math.cos(s.heading) * v], grounded: s.grounded || s.traversal?.kind === 'climb', heading: s.heading, mode: v > 4.5 ? 'sprint' : v > 2 ? 'run' : 'walk' });
+    ch.setLocomotion({ velocity: [Math.sin(s.heading) * v, 0, Math.cos(s.heading) * v], grounded: s.grounded || !!s.traversal, heading: s.heading, mode: v > 4.5 ? 'sprint' : v > 2 ? 'run' : 'walk' });
     ch.update(dt);
     const d = near ? 4.2 : 8;
     camera.fov = 40; camera.updateProjectionMatrix();

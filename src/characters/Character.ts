@@ -49,6 +49,7 @@ export class Character {
   private lookTarget: THREE.Vector3 | null = null;
   private lookBlend = 0;
   private handTargets: Record<'l' | 'r', THREE.Vector3 | null> = { l: null, r: null };
+  private handW: Record<'l' | 'r', number> = { l: 1, r: 1 };
   private seat: THREE.Matrix4 | null = null;
   private listeners: Record<string, ((e: any) => void)[]> = {};
   private ground: GroundFn | null = null;
@@ -138,10 +139,11 @@ export class Character {
 
   /** Engine controller input. heading: yaw about +Y (radians); the rest pose faces +Z. */
   setLocomotion(s: LocoInput) { this.loco = s; }
-  play(action: string, opts?: { loop?: boolean; blendIn?: number }): Promise<void> { return this.animator.play(action, opts); }
+  play(action: string, opts?: { loop?: boolean; blendIn?: number; speed?: number }): Promise<void> { return this.animator.play(action, opts); }
   stop() { this.animator.stop(); }
   lookAt(target: THREE.Vector3 | null) { this.lookTarget = target ? target.clone() : null; }
-  setHandTarget(side: 'l' | 'r', target: THREE.Vector3 | null) { this.handTargets[side] = target ? target.clone() : null; }
+  /** Hand IK target in world space; weight blends from the animated hand (0) to the target (1). */
+  setHandTarget(side: 'l' | 'r', target: THREE.Vector3 | null, weight = 1) { this.handTargets[side] = target ? target.clone() : null; this.handW[side] = weight; }
   /** Vehicle seat pose (vehicles' seatPose, world matrix). null = stand up. */
   setSeat(pose: THREE.Matrix4 | null) {
     this.seat = pose ? pose.clone() : null;
@@ -267,7 +269,7 @@ export class Character {
       const t = this.handTargets[side]; if (!t) continue;
       const up = this.bones[JI[`upperarm_${side}`]], lo = this.bones[JI[`lowerarm_${side}`]], hand = this.bones[JI[`hand_${side}`]];
       const elbowPole = worldPos(lo, new THREE.Vector3()).add(new THREE.Vector3(side === 'l' ? 0.5 : -0.5, -0.4, -0.3).applyQuaternion(this.object.quaternion));
-      twoBoneIK(up, lo, hand, t, elbowPole, 1);
+      if (this.handW[side] > 0.001) twoBoneIK(up, lo, hand, t, elbowPole, this.handW[side]);
     }
   }
 
