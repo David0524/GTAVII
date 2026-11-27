@@ -288,6 +288,16 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
     `repair()` puts it back.
   - Shot: `doors.jpg`. Rig section `doors`.
 
+- **Taxi glasshouse, pass 2 (Bancroft family: sedan, cab, patrol).**
+  - The windshield is raked further (run 0.86 m, was 0.67), and so is the back light (0.72 m,
+    was 0.5).
+  - The roof is 2 cm lower and narrower, with more crown and bow.
+  - The cab no longer reads tall and upright.
+  - Caveat: the cab in 549869 is itself a fairly upright type, so this pass follows the sedan-based
+    cabs in 554331 instead.
+- **Hero triangle count:** hero sedans are now about 44k triangles (41k before), because the door
+  seams became loft stations.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
