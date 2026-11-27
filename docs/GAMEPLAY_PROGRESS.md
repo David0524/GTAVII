@@ -299,6 +299,11 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
   - If a report matches how you look, the vendor warns you instead: "They're asking about a man in a white shirt… Sounds a lot like you."
   - Spoken through narrative's barks: a `bark {id, bark, context, vars, at}` event with `barks.vendor_tip_warning {description}`, `barks.vendor_tip_cops` (context = hint kind, `{where}` = the nearest hint's corner) or `barks.vendor_tip_quiet`. Hints are sorted nearest first; the rest stay map hints. `line` is a plain-text fallback.
   - Tips, not money. Saved.
+- **Block standing (sim memory.ts, 39af2cb):**
+  - Every player crime goes to `sim.remember` through `crime()` (table `MEMORY_OF`): theft → theft, a robbed cart or a carjack → robbed, assaults, arson and hit-and-run → assault, shots → gunfire, homicide or a body seen → killed, vandalism and reckless → reckless. A bribe, a jumped turnstile or a gun on show are the police's business, not the street's. Sim records bumps and knockdowns itself; gameplay never sets `byPlayer`, so nothing counts twice.
+  - Kindness: the shoeshine tip → tipped; a lawful chase quarry tackled → helped.
+  - Vendors read `sim.reputation(x, z)`: on a well-liked block (≥ 2.5) you're a regular one visit sooner; on a resented one (≤ -4, e.g. a robbery there) the vendor won't serve or talk (`vendorMenu().refuses`, `notice {kind: 'vendorRefuses'}`) until it fades (about half an hour). Prices never change: a 1974 hot dog man refuses, he doesn't gouge.
+  - vs RDR2: Arthur's honour changes greetings and shop prices across the map. Ours is per block and decays, which suits a city where nobody knows you two streets over; we don't discount for good standing (yet), and sim's greetings (`pedGreets`) carry the street's side.
 - **Saved:** tills and overturned carts.
 
 #### vs GTA V / VI / RDR2

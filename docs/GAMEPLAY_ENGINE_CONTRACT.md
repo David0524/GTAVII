@@ -40,6 +40,9 @@ crimes (gameplay reports them); `g.exitCar()` (registers your own car with sim p
 `setContext({ vehicle: {...}, speed })` each frame: the police see the car (descriptions match plate, colour, class).
 Pursuit tactics drive sim police cars through `PoliceMirror` (built in `bindSim`); nothing extra to wire.
 
+Sim memory: if sim has `remember`/`reputation` (memory.ts), gameplay reports the player's crimes and kindnesses
+itself and reads the block standing for vendors; nothing for the engine to wire.
+
 ## 2. Mission runtime (next)
 - `g.missionBegin(id)` at start; `g.missionLines()` at the end → up to 3 `{label, value}` for UI's `missionEnd.lines`
   (Time, Witnesses, Heat). Cash and title are yours.

@@ -37,7 +37,24 @@ export class StandInSim {
   }
   kill(id: string) { const p = this.peds.find((q) => q.id === id); if (p) { p.alive = false; p.state = 'dead'; } }
 
+  // ---- block memory (the same weights and half-life as sim memory.ts; blocks are a 60 m grid here)
+  t = 0;
+  readonly memLog: { kind: string; x: number; z: number; pedId?: number }[] = [];
+  private mem = new Map<string, { score: number; t: number; last: string; lastT: number }>();
+  static MEM_WEIGHT: Record<string, number> = { helped: 3, tipped: 1.5, bumped: -0.4, knockdown: -1.2, reckless: -1, theft: -2, robbed: -4, assault: -4, gunfire: -3, killed: -6 };
+  private block(x: number, z: number) { return `${Math.floor(x / 60)},${Math.floor(z / 60)}`; }
+  private decayed(m: { score: number; t: number }) { return m.score * Math.pow(0.5, (this.t - m.t) / 900); }
+  remember(kind: any, x: number, z: number, opts: { pedId?: number } = {}) {
+    this.memLog.push({ kind, x, z, pedId: opts.pedId });
+    const b = this.block(x, z), m = this.mem.get(b) ?? { score: 0, t: this.t, last: kind, lastT: this.t };
+    m.score = this.decayed(m) + StandInSim.MEM_WEIGHT[kind]; m.t = this.t; m.last = kind; m.lastT = this.t; this.mem.set(b, m);
+  }
+  reputation(x: number, z: number) {
+    const m = this.mem.get(this.block(x, z));
+    return m ? { score: +this.decayed(m).toFixed(2), last: m.last as any, ago: this.t - m.lastT } : { score: 0, last: null, ago: Infinity };
+  }
   update(dt: number) {
+    this.t += dt;
     for (const p of this.peds) {
       if (!p.alive) { p.speed = 0; continue; }
       const c = p.cmd;
