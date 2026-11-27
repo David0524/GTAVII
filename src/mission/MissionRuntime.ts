@@ -47,7 +47,7 @@ export interface MissionHost {
   /** skip the clock forward to HH:MM (a fade, as in "Wait until 21:30") */
   waitTo?(hhmm: string): void;
   /** "Wait until 21:30?" (UI waitPrompt); resolves true to skip ahead */
-  askWait?(title: string, from: string, to: string): Promise<boolean>;
+  askWait?(missionId: string, title: string, from: string, to: string): Promise<boolean>;
   missionBegin?(id: string): void;
   missionLines?(): { label: string; value: string }[];
   /** a cast character walking with the player (escort/follow); returns a release */
@@ -176,7 +176,7 @@ export class MissionRuntime {
         // once per objective: ask (UI waitPrompt) or, headless, skip after 2 s
         if (o.until && a.t > 2 && !a.asked && this.host.waitTo && !inWindow(this.host.clock().minutes, [o.until, o.until])) {
           a.asked = true;
-          if (this.host.askWait) void this.host.askWait(a.def.title, o.until, o.until).then((ok) => { if (ok) this.host.waitTo!(o.until!); else a.asked = false; });
+          if (this.host.askWait) void this.host.askWait(a.def.id, a.def.title, o.until, o.until).then((ok) => { if (ok) this.host.waitTo!(o.until!); else a.asked = false; });
           else this.host.waitTo(o.until);
         }
         done = !o.until || inWindow(this.host.clock().minutes, [o.until, o.until.replace(/:(\d\d)$/, (_m, mm) => `:${String(Math.min(59, +mm + 30)).padStart(2, '0')}`)]); break;
