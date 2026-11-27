@@ -110,3 +110,13 @@ headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
     gates on the timetable.
 - **Fallback:** until then, Park Avenue around the terminal has no traffic on the viaduct and the
   concourse is empty.
+
+## From sim: 13. Street vendors: props and physics (STREET_VENDORS.md)
+- **What:** draw the stalls from `sim.vendorViews` (each frame or on `vendorSpawned` / `vendorGone`):
+  `prop` (cart_hot_dog, cart_pretzel, cart_ices, cart_nuts, cart_coffee, stand_fruit, stand_flowers,
+  stand_news, stand_shoeshine, peddler_case, monte_box), `cartX/cartZ/cartYaw`, `open`, `umbrella`,
+  `variant` (pick the brand panel from narrative's list). Carts move while pushed in and out (state
+  `arriving` / `leaving`). Steam on open hot-dog and nut carts. The vendor and crew are ordinary peds (`pedId`, `crew`).
+- **Physics (with vehicles):** carts pushable and knock-over when the player or a car hits them; send
+  gameplay `cartHit`, and gameplay sends the sim `cartOverturned`. Until then they're static props.
+- **Why:** street commerce is core to VISUAL_BAR "Life"; the sim already places, staffs and runs them.

@@ -277,6 +277,25 @@ async function densityRun(clock: number, where: { x: number; z: number }, preset
   return { label, preset, clock, vehiclesAvg: +(nv / n).toFixed(1), vehiclesMin: minV, pedsAvg: +(np / n).toFixed(1), pedsMin: minP };
 }
 
+/** Street vendors (STREET_VENDORS.md): types by place and hour, queues and sales, monte crowds and scatters. */
+async function vendorRun(clock: number, where: { x: number; z: number }, label: string) {
+  const sim = new Simulation({ seed: SEED, maxVehicles: 150, maxPeds: 400, fetchBinary });
+  await sim.load(); sim.setClock(clock);
+  const ev: Record<string, number> = {};
+  for (const t of ['vendorSpawned', 'vendorGone', 'vendorServed', 'vendorCall', 'litter', 'monteScatter', 'peddlerMovedOn']) sim.on(t as any, () => { ev[t] = (ev[t] ?? 0) + 1; });
+  let maxQueue = 0, maxWatch = 0, maxKinds = 0; const kinds = new Set<string>();
+  for (let k = 0; k < 180 / SIM_DT; k++) {
+    sim.setView(where.x, where.z, Math.sin(k * 0.002), -Math.cos(k * 0.002));
+    sim.update(SIM_DT, where);
+    if (k % 30 === 0) {
+      for (const v of sim.vendorViews) { maxQueue = Math.max(maxQueue, v.queue); kinds.add(v.kind); }
+      maxKinds = Math.max(maxKinds, new Set(sim.vendorViews.map((v) => v.kind)).size);
+      maxWatch = Math.max(maxWatch, sim.peds.filter((p) => p.state === 'watch').length);
+    }
+  }
+  return { label, clock, kinds: [...kinds].sort(), maxKindsAtOnce: maxKinds, maxQueue, maxWatchers: maxWatch, ...sim.debugVendors(), events: ev };
+}
+
 async function responseRun(clock: number, where: { x: number; z: number }, label: string) {
   const sim = new Simulation({ seed: SEED, maxVehicles: 150, maxPeds: 400, fetchBinary });
   await sim.load(); sim.setClock(clock);
@@ -332,6 +351,13 @@ async function main() {
     await densityRun(17 * 60 + 30, FOCI[1], [40, 120], 'Low, rush hour, Herald Square'),
   ];
   report.density = dens;
+  const vend = [
+    await vendorRun(12.5 * 60, FOCI[1], 'lunch, Herald Square'),
+    await vendorRun(13 * 60, FOCI[2], 'lunch, Times Square'),
+    await vendorRun(7 * 60, { x: -600, z: -1250 }, 'dawn, Garment District'),
+    await vendorRun(23.5 * 60, FOCI[1], 'late night, Herald Square'),
+  ];
+  report.vendors = vend;
   const h1 = (await run({ seconds: 60, maxVehicles: 150, maxPeds: 400, checks: false, label: 'determinism A' })).hash;
   const h2 = (await run({ seconds: 60, maxVehicles: 150, maxPeds: 400, checks: false, label: 'determinism B' })).hash;
   report.determinism = { a: h1, b: h2, equal: h1 === h2 };
@@ -386,6 +412,13 @@ async function main() {
     const kids = sim.debugAgents().core.reg.list.filter((a) => CHILD.test(a.def.id) || CHILD.test(a.def.wardrobe ?? '') || (a.def as any).age !== undefined);
     if (kids.length) problems.push(`child archetypes present: ${kids.map((a) => a.def.id).join(', ')}`);
     if (full.minorsSeen) problems.push(`child pedestrians in the street: ${full.minorsSeen}`);
+  }
+  {
+    const [herald, times, garment, night] = vend;
+    if (herald.maxKindsAtOnce < 3 || herald.sales < 10) problems.push(`vendors thin at Herald Square lunch: ${JSON.stringify(herald)}`);
+    if (!times.kinds.includes('monte') && !times.events.monteScatter && !herald.events.monteScatter) problems.push('no three-card monte on the Deuce / Herald Square');
+    if (!garment.kinds.includes('coffee_cart')) problems.push('no coffee carts in the Garment District at dawn');
+    if (night.count > 2) problems.push(`vendors still out at 23:30: ${JSON.stringify(night.byKind)}`);
   }
   for (const d of dens) {
     const [needV, needP] = d.preset[0] >= 150 ? [20, 60] : [8, 35];

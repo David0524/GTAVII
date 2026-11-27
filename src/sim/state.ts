@@ -56,6 +56,8 @@ export interface Ped {
   cop2: CopState | null;
   /** bump reactions (bump.ts) */
   bumpCd?: number; bumpPrev?: string; bumpResponse?: string;
+  /** street vendors (vendors.ts): the stall this ped works / queues at / watches; what they bought */
+  vendor?: string; carry?: string; carryUntil?: number; buyCd?: number;
 }
 
 export interface Hail { ped: number; road: number; side: number; x: number; z: number; claimedBy: number; t: number }
@@ -105,10 +107,12 @@ export interface SimCore {
   vehicles: Vehicle[]; peds: Ped[];
   occ: Vehicle[][]; occDirty: number[];
   pGrid: AgentGrid; vGrid: AgentGrid;
+  /** threats reach the vendor layer too (vendors.ts) */
+  onThreat?: (x: number, z: number, r: number) => void;
   /** connectors siren units are about to enter: cross traffic holds at the line */
   sirenWant: Set<number>;
   /** static sidewalk obstacles peds step around (engine street furniture via setObstacles, plus hydrants) */
-  obstacles: { x: number; z: number; r: number }[]; obsGrid: AgentGrid;
+  obstacles: { x: number; z: number; r: number }[]; obsGrid: AgentGrid; obsBase: { x: number; z: number; r: number }[];
   /** peds currently on each crosswalk edge */
   onWalk: Map<number, Ped[]>;
   srcLane: Int32Array;

@@ -5,7 +5,7 @@
  * and the 1974 period behaviours: double-parked trucks, cabs cutting to the curb for fares,
  * buses at stops, horns.
  */
-import { sampleAt } from './geom';
+import { projectOnPoly, sampleAt } from './geom';
 import { LinkFlag, LinkKind, RoadFlag, Turn, type Link } from './laneFormat';
 import { Sig } from './network';
 import type { SimCore, Vehicle, Hail } from './state';
@@ -70,6 +70,15 @@ export function gutterLat(S: SimCore, L: Link): number {
 }
 export function gutterSideOf(S: SimCore, L: Link): number { return S.net.g.roads[L.owner].oneway !== 0 ? -1 : 1; }
 
+/** The same place on a neighbouring lane: project the point at `s` on `from` onto `to` (lanes of different
+ *  lengths near junctions don't map proportionally). */
+const mapTmp = [0, 0, 0, 0];
+function mapS(S: SimCore, from: number, s: number, to: number): number {
+  const net = S.net;
+  sampleAt(net.g.links[from].pts, net.cum[from], s, mapTmp);
+  return Math.max(0, Math.min(net.len[to], projectOnPoly(net.g.links[to].pts, mapTmp[0], mapTmp[1]).s));
+}
+
 /** Point at arc distance d ahead (d<0: behind) of the vehicle's position along its path. */
 function pathPoint(S: SimCore, v: Vehicle, d: number, out: number[]) {
   const net = S.net;
@@ -99,8 +108,7 @@ export function placeVehicle(S: SimCore, v: Vehicle) {
   let dx = fx0 - tmp2[0], dz = fz0 - tmp2[1]; const dl = Math.hypot(dx, dz) || 1; dx /= dl; dz /= dl;
   let x = (fx0 + tmp2[0]) / 2 - dz * v.lat, z = (fz0 + tmp2[1]) / 2 + dx * v.lat;
   if (v.lcT < 1 && v.lcFrom >= 0) {
-    const r = net.len[v.lcFrom] / net.len[v.link];
-    sampleAt(net.g.links[v.lcFrom].pts, net.cum[v.lcFrom], v.s * r, tmp2);
+    sampleAt(net.g.links[v.lcFrom].pts, net.cum[v.lcFrom], mapS(S, v.link, v.s, v.lcFrom), tmp2);
     sampleAt(net.g.links[v.link].pts, net.cum[v.link], v.s, tmp);
     const e = v.lcT * v.lcT * (3 - 2 * v.lcT);
     x = tmp2[0] + (tmp[0] - tmp2[0]) * e; z = tmp2[1] + (tmp[1] - tmp2[1]) * e;
@@ -159,7 +167,7 @@ function chooseRoute(S: SimCore, v: Vehicle) {
  * that are below target: at the rim (0.55 R–R) where they can't be seen arriving, and anywhere beyond 30 m
  * that the camera isn't looking (`setView`), so the near field doesn't wait for traffic to drive in.
  */
-const FILL = 0.075; // vehicles per lane-metre at full density (about one per 13 m of every lane)
+const FILL = 0.065; // vehicles per lane-metre at full density (about one per 15 m of every lane; denser gridlocks Herald Square at rush hour)
 const BAND = 20;
 interface Field { x: number; z: number; R: number; lanes: number[]; laneM: Float32Array }
 let field: Field | null = null;
@@ -510,12 +518,12 @@ export function lookAhead(S: SimCore, v: Vehicle, t: number, out: Obs) {
   if (passSlow < Infinity && v.v > passSlow) consider(Math.max(4, v.v * 2), passSlow, 'passing');
   // while blending out of a lane, its vehicles ahead still matter
   if (v.lcT < 0.8 && v.lcFrom >= 0) {
-    const ms = v.s * (net.len[v.lcFrom] / len);
-    for (const w of S.occ[v.lcFrom]) if (w.s > ms) { consider(w.s - ms - (w.len + v.len) / 2, w.v, 'queue'); out.hard = Math.min(out.hard, (w.s - (w.len + v.len) / 2 - 0.3) * (len / net.len[v.lcFrom])); break; }
+    const ms = mapS(S, v.link, v.s, v.lcFrom);
+    for (const w of S.occ[v.lcFrom]) if (w.s > ms) { consider(w.s - ms - (w.len + v.len) / 2, w.v, 'queue'); out.hard = Math.min(out.hard, mapS(S, v.lcFrom, Math.max(0, w.s - (w.len + v.len) / 2 - 0.3), v.link)); break; }
   }
   // vehicles still blending out of this lane (lane change in progress) remain obstacles here
   for (const w of S.lcList) if (w !== v && w.lcFrom === v.link && w.lcT < 0.8) {
-    const ws = w.s * (net.len[v.link] / net.len[w.link]);
+    const ws = mapS(S, w.link, w.s, v.link);
     if (ws > v.s) { consider(ws - v.s - (w.len + v.len) / 2, w.v, 'queue'); out.hard = Math.min(out.hard, ws - (w.len + v.len) / 2 - 0.3); }
   }
   // lane blocks
@@ -607,7 +615,7 @@ function gapsOn(S: SimCore, lane: number, s: number, me: Vehicle): [number, numb
 
 function tryLaneChange(S: SimCore, v: Vehicle, toLane: number, aggressive: boolean): boolean {
   const net = S.net;
-  const s2 = v.s * (net.len[toLane] / net.len[v.link]);
+  const s2 = mapS(S, v.link, v.s, toLane);
   if (Math.abs(v.lat) > 0.2 || Math.abs(v.latTarget) > 0.35) return false; // mid pull-over / pass: finish it first
   const slowRouted = (v.dest || v.cop) && v.v < 2;
   if (s2 < 3 || s2 > net.len[toLane] - (slowRouted ? v.len / 2 + 0.5 : 6)) return false;
@@ -618,7 +626,7 @@ function tryLaneChange(S: SimCore, v: Vehicle, toLane: number, aggressive: boole
     const g = s2 + (net.len[c] - w.s) - (w.len + v.len) / 2;
     if (g < behind) { behind = g; foll = w; }
   }
-  const needA = aggressive ? 2.0 : 3 + v.v * 0.4;
+  const needA = aggressive ? Math.max(2.0, v.v * 0.6) : 3 + v.v * 0.4; // a pushy merge still needs room to stop
   const needB = aggressive ? Math.max(2.0, (foll?.v ?? 0) * 0.35) : Math.max(3, (foll?.v ?? 0) * 0.9);
   if (ahead < needA || behind < needB) return false;
   // vehicles in the lane we leave that are alongside or just ahead would overlap during the blend

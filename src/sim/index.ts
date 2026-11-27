@@ -22,7 +22,9 @@ import { boardCab, callCab, dispatchResponders, leaveCab } from './service';
 import { Parking, type ParkingRule } from './parking';
 import { Subway, type Station, type TrainCall } from './subway';
 import { Doors, type DoorRec, type DoorRate } from './doors';
+import { Vendors, type VendorView } from './vendors';
 export type { DoorRec, DoorRate } from './doors';
+export { VENDOR_KINDS, type VendorView, type VendorKind } from './vendors';
 export { DOOR_RATES } from './doors';
 export type { Station, TrainCall } from './subway';
 export type { ParkingRule } from './parking';
@@ -43,6 +45,8 @@ export interface PedView {
   nerve: number;
   /** in the roadway (vs on the sidewalk, a kerb height up): a change is a kerb step for foot IK */
   onRoad: boolean;
+  /** what they're carrying from a vendor ('' none): frank, pretzel, coffee, newspaper... */
+  carry: string;
   id: number; archetype: string;
   x: number; y: number; z: number; yaw: number; speed: number; state: string; variant: number;
 }
@@ -129,7 +133,7 @@ export class Simulation {
     const core: SimCore = {
       net, rng: new Rng(this.opts.seed), reg, t: 0, minute: this.minute, weather: this.weather,
       vehicles: [], peds: [], occ: g.links.map(() => []), occDirty: [],
-      pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), obstacles: [], obsGrid: new AgentGrid(4), sirenWant: new Set(), onWalk: new Map(), srcLane,
+      pGrid: new AgentGrid(4), vGrid: new AgentGrid(8), obstacles: [], obsGrid: new AgentGrid(4), obsBase: [], sirenWant: new Set(), onWalk: new Map(), srcLane,
       actors: [], blocks: [], threats: [], closedRoads: new Map(), hails: [], spotOwner: new Int32Array(g.spots.length).fill(-1),
       focus: { x: 0, z: 0 }, maxVehicles: this.opts.maxVehicles, maxPeds: this.opts.maxPeds,
       ringV: [rOutV * 0.6, rOutV], view: null, ringP: [rOutP * 0.6, rOutP], densityHook: this.densityHook,
@@ -150,6 +154,8 @@ export class Simulation {
     this.setObstacles([]);
     this.subway = new Subway(core);
     this.doors = new Doors(core);
+    this.vendors = new Vendors(core, () => this.parking.dow);
+    core.onThreat = (x, z, r) => this.vendors.onThreat(x, z, r);
     core.doorArrived = (p, id) => this.doors.arrived(p, id);
     core.doorStepIn = (p) => this.doors.stepIn(p);
     this.wild = new Wildlife(core, g.wild, Math.round(this.opts.maxPeds * 0.5), Math.round(this.opts.maxPeds * 0.15));
@@ -207,6 +213,7 @@ export class Simulation {
     this.parking.step(h);
     this.subway.step(h);
     this.doors.step(h);
+    this.vendors.step(h);
     // despawn
     const [, rV] = S.ringV, [, rP] = S.ringP;
     for (const v of S.vehicles) {
@@ -217,7 +224,7 @@ export class Simulation {
       if (d > rV + 30) despawnVehicle(S, v);
       else if (!dwelling && v.blockedBy !== 'red' && ((v.stopT > 60 && d > 70) || v.stopT > 150)) { despawnVehicle(S, v); S.stats.stuckDespawn++; const k = `${v.blockedBy || 'queue'}`; this.stuckWhy[k] = (this.stuckWhy[k] ?? 0) + 1; if (this.stuckLog.length < 60) this.stuckLog.push(this.queueHead(v)); }
     }
-    for (const p of S.peds) if (p.alive && !p.goal && !p.cop2 && p.state !== 'dead' && Math.hypot(p.x - S.focus.x, p.z - S.focus.z) > rP + 20) { despawnPed(S, p); S.stats.despawnedP++; }
+    for (const p of S.peds) if (p.alive && !p.goal && !p.cop2 && p.state !== 'dead' && p.state !== 'external' && !(p.vendor && p.state === 'vendor') && Math.hypot(p.x - S.focus.x, p.z - S.focus.z) > rP + 20) { despawnPed(S, p); S.stats.despawnedP++; }
     // compact
     if (S.vehicles.some((v) => !v.alive)) S.vehicles = S.vehicles.filter((v) => v.alive);
     if (S.peds.some((p) => !p.alive)) {
@@ -272,11 +279,11 @@ export class Simulation {
         : v.state === 'doubleParked' ? 'doublePark' : v.state === 'curb' ? (v.stopKind || 'pickup') : v.state;
     });
     const ps = this.peds as PedView[];
-    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', nerve: 0, onRoad: false, x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
+    while (ps.length < S.peds.length) ps.push({ id: 0, archetype: '', nerve: 0, onRoad: false, carry: '', x: 0, y: 0, z: 0, yaw: 0, speed: 0, state: '', variant: 0 });
     ps.length = S.peds.length;
     S.peds.forEach((p, i) => {
       const o = ps[i];
-      o.id = p.id; o.archetype = p.arch.def.id; o.nerve = p.nerve; o.onRoad = p.onRoad; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
+      o.id = p.id; o.archetype = p.arch.def.id; o.nerve = p.nerve; o.onRoad = p.onRoad; o.carry = p.carry ?? ''; o.x = p.px + (p.x - p.px) * alpha; o.z = p.pz + (p.z - p.pz) * alpha;
       // sidewalk top = road surface + kerb (src/shared/terrain.ts); in the roadway = road surface
       o.y = heightAt(o.x, o.z) + (p.y > 0 ? CURB_HEIGHT : 0);
       o.yaw = lerpYaw(p.pyaw, p.yaw); o.speed = p.v; o.variant = p.variant;
@@ -403,6 +410,43 @@ export class Simulation {
   exitFromDoor(doorId: string, archetypeId?: string): number { return this.doors.exitFromDoor(doorId, archetypeId); }
   /** A street ped goes in through a door. Event `pedEnteredDoor {doorId, pedId, archetype}` at the threshold. */
   enterDoor(pedId: number, doorId: string): boolean { const p = this.core.pedById.get(pedId); return !!p && p.alive && this.doors.enterDoor(p, doorId); }
+  // ---------------------------------------------------------------- street vendors (vendors.ts)
+  private vendors!: Vendors;
+  /** Vendors near the focus: stall/cart props and their state (engine renders the props, characters the people). */
+  get vendorViews(): readonly VendorView[] { return this.vendors.views; }
+  /** Gameplay: the vendor was robbed etc. (`flee` | `cower`, optionally away from x,z). */
+  vendorCommand(vendorId: string, cmd: { type: 'flee' | 'cower'; x?: number; z?: number }): boolean { return this.vendors.command(vendorId, cmd); }
+  /** Gameplay notices: `cartOverturned` (right it, close 2 h), `vendorSale` (serve + make change), `monteFolded` (crew walks off). */
+  vendorNotice(n: { kind: 'cartOverturned' | 'vendorSale' | 'monteFolded'; vendor: string; good?: string }): boolean { return this.vendors.notice(n); }
+  debugVendors() { return { count: this.vendors.count, byKind: this.vendors.byKind(), sales: this.vendors.sales, scatters: this.vendors.scatters, movedOn: this.vendors.movedOn, calls: this.vendors.calls }; }
+
+  // ---------------------------------------------------------------- handing a ped to gameplay (brawls)
+  /**
+   * Gameplay takes over a pedestrian's movement (a shoved man turned brawler, an angry vendor): the sim
+   * stops moving it, never despawns it, and draws it wherever `moveReleasedPed` puts it, until `reclaimPed`
+   * (or its death). Returns false for unknown/dead peds.
+   */
+  releasePed(pedId: number): boolean {
+    const p = this.core.pedById.get(pedId); if (!p || !p.alive || p.state === 'dead') return false;
+    if (p.vendor && p.state === 'vendor') this.vendors.setReleased(pedId, true);
+    p.goal = null; p.path = []; p.state = 'external'; p.v = 0; return true;
+  }
+  moveReleasedPed(pedId: number, x: number, z: number, yaw: number, speed = 0): boolean {
+    const p = this.core.pedById.get(pedId); if (!p || p.state !== 'external') return false;
+    p.px = p.x; p.pz = p.z; p.x = x; p.z = z; p.yaw = yaw; p.v = speed; return true;
+  }
+  /** Hand it back: it walks to the nearest sidewalk and carries on (a vendor goes back to the stall). */
+  reclaimPed(pedId: number): boolean {
+    const S = this.core, p = S.pedById.get(pedId); if (!p || p.state !== 'external') return false;
+    if (p.vendor) { this.vendors.setReleased(pedId, false); return true; }
+    let be = -1, bd = 60, bs = 0;
+    for (const e of this.net.sidewalksNear(p.x, p.z, 60, new Set())) { const pr = projectOnPoly(this.net.g.walkEdges[e].pts, p.x, p.z); if (pr.d < bd) { bd = pr.d; be = e; bs = pr.s; } }
+    if (be < 0) { despawnPed(S, p); return true; }
+    sampleAt(this.net.g.walkEdges[be].pts, this.net.walkCum[be], bs, tmp4);
+    p.toEdge = be; p.toS = bs; p.state = 'free'; p.tx = tmp4[0]; p.tz = tmp4[1]; p.then = 'attach';
+    S.emit('pedCalmed', { id: p.id }); return true;
+  }
+
   debugDoors() { return { doors: this.doors.count, entered: this.doors.entered, exited: this.doors.exited }; }
 
   // ---------------------------------------------------------------- violence and theft (gameplay)
@@ -571,7 +615,7 @@ export class Simulation {
    */
   setObstacles(list: { x: number; z: number; r: number }[]) {
     const S = this.core;
-    S.obstacles = [...this.hydrantObs, ...list];
+    S.obsBase = [...this.hydrantObs, ...list]; S.obstacles = [...S.obsBase];
     S.obsGrid.clear(); S.obstacles.forEach((o, i) => S.obsGrid.add(o.x, o.z, i));
   }
   private hydrantObs: { x: number; z: number; r: number }[] = [];

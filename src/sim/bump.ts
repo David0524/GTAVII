@@ -16,7 +16,7 @@
 import type { SimCore, Ped } from './state';
 
 const PED_R = 0.32;
-const STANDABLE = new Set(['walk', 'pause', 'waitCross', 'loiter', 'hail', 'waitBus', 'vendor', 'hold']);
+const STANDABLE = new Set(['walk', 'pause', 'waitCross', 'loiter', 'hail', 'waitBus', 'hold', 'queue', 'watch']); // stall vendors are the vendor layer's
 
 export function bumpReactions(S: SimCore, dt: number) {
   for (const a of S.actors) {

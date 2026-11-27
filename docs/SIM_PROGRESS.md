@@ -25,6 +25,8 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Visual bar "Life": density near the camera | Density-targeted spawning + `setView`; test asserts agents within 60 m (rush hour Herald Square: High 30 vehicles / 97 peds, Low 13 / 56) |
 | Movement brief (sim part) | Bump reactions (brush/stumble/knockdown, angry/frightened/annoyed), crowds part for a running player, `setObstacles` + hydrants, `PedView.onRoad`; adults only (test asserts no child archetype or pedestrian) |
 | Cutscene → play hand-off | `handOff({cast, x, z, yaw, speed?, after: companion|stay|ambient})`: a live ped at exactly the cutscene's last pose, then companion follow / hold / ambient; `actorHandedOff`; test asserts pose error 0 and the follow (requests item 11) |
+| Street vendors (STREET_VENDORS.md) | **First pass**: 11 narrative types placed by spot kind, district, hour and weather; carts pushed in/out; queues, sales, calls, litter; reactions (gunfire, reckless drivers, police move peddlers on, monte lookouts scatter the crew); gameplay commands/notices; `vendorViews`; test asserts per place and hour |
+| Hand a ped to gameplay (brawls) | `releasePed` / `moveReleasedPed` / `reclaimPed` (`pedCalmed`) |
 | Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
@@ -428,6 +430,64 @@ VISUAL_BAR.md: dense traffic and pedestrians, parked cars on every kerb, a stree
 - **Cost:** denser near-field traffic made siren units wait at busy junctions; fixed by cross traffic
   holding for a waiting siren unit and dispatch costing a stopped queue head. First unit on scene in the
   test: 13–28 s on both seeds (caps 60 s rush hour / 40 s off-peak).
+
+## Street vendors (STREET_VENDORS.md; sim leads the cross-stream plan)
+Types, hours and places come from narrative's `content/vendors.json` (`VENDOR_KINDS` in `src/sim/vendors.ts`
+mirrors them; brands and menus stay in content). Adults only.
+- **Placement:** every sidewalk spot (corner, storefront, subway mouth) gets, per day, a deterministic chance
+  of one vendor type from its spot kind and district: hot dogs at hotspot corners (Herald Sq, Penn, the
+  Deuce, Madison Sq, Bryant Park), pretzels and newsstands at subway mouths, nut roasters around Times Sq and
+  34th, coffee carts in the Garment and Flower Districts at dawn, ices by the parks and in Chelsea, fruit
+  stands on the Eighth Avenue strip, flowers by Madison Sq and Penn, shoeshine near Penn and the Deuce,
+  peddlers and three-card monte on the Deuce, Times Sq and 34th. Hours ±20 min per stall. Rain closes ices,
+  flowers, shoeshine and monte, puts umbrellas up, and turns peddlers into umbrella sellers.
+- **Life cycle:** carts are pushed in along the sidewalk in the first minutes of a shift and pushed away
+  at closing; a stall met mid-shift is simply there. Carts are sidewalk obstacles everyone steps around.
+- **Trade:** passers-by on the same stretch of sidewalk join a short queue (lunch ×2.5, coffee at dawn ×3),
+  are served one at a time (`vendorServed`), walk on carrying it (`PedView.carry`) and sometimes drop the
+  wrapper (`litter`). Vendors call out when people are about (`vendorCall`, bark set `barks.vendor_calls`).
+- **Reactions:** gunfire/threats: the vendor ducks behind the cart (`vendorCower`) or runs (`vendorFled`,
+  the stall shuts for 30 min); a car tearing past the cart: `vendorShout`; a cop lingering near an
+  unlicensed peddler: packs up and moves on (`peddlerMovedOn`); a cop within ~25 m of a monte lookout: the
+  crew bolts and the crowd breaks up (`monteScatter`). Nobody sets up a game under a foot cop's nose.
+- **Monte crew:** dealer behind a cardboard box mid-sidewalk, two shills either side, a lookout up the
+  block watching the street, and a loose crowd of passers-by drawn in (`watch` state).
+- **Measured (test, seed 1974):** Herald Sq at lunch 6 types (hot dog, pretzel, newsstand, shoeshine,
+  peddler, monte), ~70 sales in 3 min, queues up to 5, monte crowds up to ~8 and 4 scatters; the Deuce:
+  monte, peddlers, pretzels; Garment District at 07:00: coffee carts with queues of 6, ~85 sales;
+  nothing at 23:30.
+
+**Interfaces agreed / proposed**
+- **Gameplay** (proposal from gameplay, adopted): events `vendorSpawned {id, kind, pedId, crew, x, z, cart:
+  {prop, x, z, yaw}, licensed, goods, variant}` and `vendorGone {id, kind, reason: closed | movedOn | police |
+  fled | folded | gone}`; `kind` uses narrative's types. Vendor ids are stable strings (`vendor:<spot>`),
+  with `pedId` (and `crew` for monte) for commands. Gameplay → sim: `vendorCommand(id, {type: flee|cower})`
+  (robbed), `vendorNotice({kind: cartOverturned | vendorSale | monteFolded, vendor})`. `cartHit` comes from
+  vehicles/engine physics to gameplay (sim carts are only props). Brawlers: `releasePed(pedId)` hands the
+  ped's movement to gameplay (`moveReleasedPed` each frame) until `reclaimPed` (emits `pedCalmed`).
+- **Engine / vehicles** (requests item 13): render `sim.vendorViews` (prop id, cart x/z/yaw, `open`,
+  `umbrella`, `variant` → brand panel); carts as pushable / knock-over physics props when the player hits
+  them (then gameplay's `cartOverturned`). Prop ids: cart_hot_dog, cart_pretzel, cart_ices, cart_nuts,
+  cart_coffee, stand_fruit, stand_flowers, stand_news, stand_shoeshine, peddler_case, monte_box.
+- **Characters:** vendor wardrobes (archetypes `npc.cart_vendor`, `npc.grocer`, `npc.flower_seller`,
+  `npc.news_vendor`, `npc.shoeshine`, `npc.peddler`, `npc.monte_dealer`, `npc.monte_shill`,
+  `npc.monte_lookout`) and work animations keyed on PedView.state and events: `vendor` (idle at the cart),
+  push cart (state `vendor` while moving), serve and make change (`vendorServed`, `vendorAct serve`), call
+  out (`vendorCall`), duck (`cower`), right the cart (`vendorAct right_cart`), shine shoes, deal cards;
+  customers `queue` (wait, pay), `watch` (monte crowd), eating on the go (`carry`).
+- **Narrative:** names, brands and barks already in content; the sim passes `variant` and `bark` ids.
+- **Audio:** `vendorCall`, cart bell/sizzle near open carts, `monteScatter` shout, `vendorShout`.
+
+**vs GTA V / GTA VI / RDR2**
+- *Reference:* GTA V has hot-dog and burger stands you can buy from and blow up, but they're static props
+  with a clerk; RDR2's camp and town vendors have routines, greet you and react to theft; GTA VI's trailers
+  show dense, busy street commerce.
+- *Where we match:* vendors that arrive, trade, queue customers, call out, react to danger and police, and
+  leave on a schedule; a three-card monte crew with a working lookout (RDR2-like routine depth).
+- *Where we fall short:* no vendor memory of the player (RDR2 greets and remembers), customers don't eat
+  standing at the cart, no haggling, carts aren't physics props until vehicles/engine land them.
+- *Plan:* per-vendor memory of the player (served, robbed, tipped) for barks; stand-and-eat scenarios at
+  hot-dog carts; physics carts and spills via vehicles; protection-racket and permit beats with gameplay.
 
 ## Grand Central (user decision; after the merge sprint)
 The east edge moves to include Grand Central Terminal. Plan (requests item 12): the Park Avenue viaduct and

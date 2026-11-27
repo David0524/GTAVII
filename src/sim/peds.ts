@@ -127,7 +127,7 @@ export function spawnPeds(S: SimCore, budget: number, full: boolean) {
     // crowds thicken toward the playable edge (BOUNDARIES layer 3)
     const ramp = Math.max(0, Math.min(1, 1 - edgeDistance(tmp[0], tmp[1]) / EDGE.RAMP));
     if (!full && S.rng.next() > 0.5 + 0.5 * ramp) continue;
-    const arch = S.reg.pick((a) => a.behaviour !== 'driver' && a.behaviour !== 'critter', tmp[0], tmp[1], S.minute, S.rng.next());
+    const arch = S.reg.pick((a) => a.behaviour !== 'driver' && a.behaviour !== 'critter' && a.behaviour !== 'vendor', tmp[0], tmp[1], S.minute, S.rng.next()); // vendors: vendors.ts
     if (!arch) continue;
     const p = newPed(S, arch, edge, s);
     if (arch.behaviour === 'vendor') {
@@ -338,8 +338,10 @@ export function stepPeds(S: SimCore, dt: number) {
     if (!p.alive) continue;
     p.px = p.x; p.pz = p.z; p.pyaw = p.yaw;
     p.jayCd -= dt; p.hailCd -= dt;
+    if (p.carry && S.t > (p.carryUntil ?? 0)) { if (S.rng.chance(0.35)) S.emit('litter', { x: p.x, z: p.z, item: 'wrapper', from: p.carry }); p.carry = ''; }
     if (p.goal?.until !== undefined && S.t > p.goal.until && p.state !== 'dead') setPedGoal(S, p, null);
     switch (p.state) {
+      case 'external': break; // driven by gameplay (Simulation.releasePed) until reclaimed
       case 'dead': p.v = 0; if ((p.timer -= dt) <= 0) { despawnPed(S, p); S.stats.despawnedP++; } break;
       case 'act': // gameplay action (call box, payphone, hands up...): hold still, the crowd renderer animates
         p.v = 0;
@@ -355,10 +357,11 @@ export function stepPeds(S: SimCore, dt: number) {
         p.timer -= dt; p.v = 0;
         if (p.timer <= 0) { const e = g.walkEdges[p.edge]; sampleAt(e.pts, net.walkCum[p.edge], p.s, tmp); p.toEdge = p.edge; p.toS = p.s; goFree(p, tmp[0], tmp[1], 'attach'); }
         break;
-      case 'vendor': case 'loiter': case 'hail': case 'waitBus': case 'cower': case 'pause': {
+      case 'vendor': case 'loiter': case 'hail': case 'waitBus': case 'cower': case 'pause': case 'queue': case 'watch': {
         p.timer -= dt; p.v = 0;
         if (p.state === 'hail' && p.hail && p.hail.claimedBy >= 0) p.timer = Math.max(p.timer, 2); // wait for the cab
-        if (p.timer <= 0 && p.state !== 'vendor') {
+        if (p.timer <= 0 && p.state !== 'vendor' && !(p.state === 'cower' && p.vendor)) {
+          if (p.state === 'queue' || p.state === 'watch') p.vendor = undefined;
           if (p.state === 'pause') { const E = g.walkEdges[p.edge]; enterEdge(S, p, p.toEdge, p.dir > 0 ? E.b : E.a); p.state = 'walk'; break; }
           if (p.hail) { const k = S.hails.indexOf(p.hail); if (k >= 0) S.hails.splice(k, 1); p.hail = null; }
           if (p.spot >= 0 && S.spotOwner[p.spot] === p.id) S.spotOwner[p.spot] = -1;
@@ -399,8 +402,9 @@ export function stepPeds(S: SimCore, dt: number) {
             placeOnEdge(S, p);
           } else if (then === 'enterDoor') { S.doorStepIn?.(p); despawnPed(S, p); S.stats.despawnedP++; }
           else if (then === 'vanish') { despawnPed(S, p); S.stats.despawnedP++; S.emit('subwayEnter', { id: p.id, x: p.x, z: p.z }); }
-          else if (then === 'loiter') { p.state = 'loiter'; p.timer = S.rng.range(20, 120) * (S.minute > 20 * 60 || S.minute < 5 * 60 ? 2 : 1); p.yaw = g.spots[p.spot].heading; }
+          else if (then === 'loiter') { p.state = 'loiter'; p.timer = S.rng.range(20, 120) * (S.minute > 20 * 60 || S.minute < 5 * 60 ? 2 : 1); if (p.spot >= 0) p.yaw = g.spots[p.spot].heading; }
           else if (then === 'feed') { p.state = 'feed'; p.timer = S.rng.range(240, 600); }
+          else if (then === 'queue' || then === 'watch') { p.state = then; p.timer = then === 'queue' ? S.rng.range(60, 150) : S.rng.range(25, 80); } // at a street vendor (vendors.ts)
           else if (then === 'waitBus') { p.state = 'waitBus'; p.timer = S.rng.range(60, 240); p.yaw = g.spots[p.spot].heading; }
           else if (then === 'hail') {
             p.state = 'hail'; p.timer = S.rng.range(45, 100); // people wait a while for a cab
@@ -539,16 +543,19 @@ function walk(S: SimCore, p: Ped, dt: number) {
 /** Threat at a point: flee or cower. */
 export function threaten(S: SimCore, x: number, z: number, r: number) {
   const net = S.net, g = net.g;
+  S.onThreat?.(x, z, r);
   for (const p of S.peds) {
-    if (!p.alive || p.state === 'dead' || p.state === 'act' || p.cop2) continue;
+    if (!p.alive || p.state === 'dead' || p.state === 'act' || p.cop2 || p.state === 'external') continue;
+    if (p.vendor && (p.state === 'vendor' || (p.state === 'cower' && p.vendor))) continue; // the stall's own people: vendors.ts reacts
     const d = Math.hypot(p.x - x, p.z - z);
     if (d > r * 1.6) continue;
+    if (p.vendor && (p.state === 'queue' || p.state === 'watch')) p.vendor = undefined;
     if (p.hail) { const k = S.hails.indexOf(p.hail); if (k >= 0 && p.hail.claimedBy < 0) S.hails.splice(k, 1); p.hail = null; }
     p.fleeX = x; p.fleeZ = z; p.fleeSpeed = S.rng.range(3.4, 4.6); p.timer = S.rng.range(6, 12);
     if (d < r * 0.6 && S.rng.chance(0.2) && p.state !== 'free' && !p.onRoad) { p.state = 'cower'; p.timer = S.rng.range(4, 8); continue; }
     if (p.state === 'waitCross' || p.state === 'pause') { p.state = 'flee'; continue; }
     if (p.state === 'free') { p.then = p.then === 'attach' ? 'flee' : p.then === 'vanish' ? 'vanish' : 'flee'; if (p.then === 'flee' && p.toEdge < 0) p.toEdge = p.edge; continue; }
-    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'cower' || p.state === 'feed') {
+    if (p.state === 'vendor' || p.state === 'loiter' || p.state === 'hail' || p.state === 'waitBus' || p.state === 'cower' || p.state === 'feed' || p.state === 'queue' || p.state === 'watch') {
       if (p.spot >= 0 && S.spotOwner[p.spot] === p.id) S.spotOwner[p.spot] = -1;
       p.spot = -1; p.goalSpot = -1;
       const e = g.walkEdges[p.edge]; sampleAt(e.pts, net.walkCum[p.edge], p.s, tmp);

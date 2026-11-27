@@ -42,7 +42,17 @@ export const BUILTIN_ARCHETYPES: ArchetypeDef[] = [
   { id: 'npc.beat_cop', behaviour: 'beat_cop', palette: ['#1f2a44', '#c0c0c0'], wardrobe: 'Generic dark-blue patrol uniform, cap', props: ['nightstick'],
     density: { day: 0.12, night: 0.1 }, barks: 'barks.beat_cop', params: { walkSpeed: 1.0, jaywalk: 0 } },
   { id: 'npc.vendor', behaviour: 'vendor', palette: ['#e8e2d0', '#8b0000'], wardrobe: 'White apron, paper hat', props: ['vendor_cart'],
-    schedule: [{ from: '08:00', to: '21:00', activity: 'sell' }], density: { day: 0.25, night: 0.03 }, barks: 'barks.vendor' },
+    schedule: [{ from: '08:00', to: '21:00', activity: 'sell' }], density: { day: 0, night: 0 }, barks: 'barks.vendor' },
+  // street vendors (vendors.ts places them; never ambient spawns). Content archetypes with the same ids override.
+  { id: 'npc.cart_vendor', behaviour: 'vendor', palette: ['#ffffff', '#8b0000', '#2f4f4f'], wardrobe: 'White apron over shirtsleeves, paper cap, money belt', props: ['vendor_cart', 'tongs'], density: { day: 0, night: 0 } },
+  { id: 'npc.grocer', behaviour: 'vendor', palette: ['#f2efe6', '#3b5323'], wardrobe: 'Grocer\'s apron, rolled sleeves, pencil behind the ear', props: ['paper_bags'], density: { day: 0, night: 0 } },
+  { id: 'npc.flower_seller', behaviour: 'vendor', palette: ['#5b4a3a', '#c8b48a'], wardrobe: 'Cardigan, work apron, florist scissors on a string', props: ['flower_buckets'], density: { day: 0, night: 0 } },
+  { id: 'npc.news_vendor', behaviour: 'vendor', palette: ['#3a3a3a', '#7a6a4a'], wardrobe: 'Flat cap, change apron, cardigan, cigarette', props: ['change_apron'], density: { day: 0, night: 0 } },
+  { id: 'npc.shoeshine', behaviour: 'vendor', palette: ['#2e2e2e', '#6b4f2e'], wardrobe: 'Shirtsleeves, waistcoat, polish-stained rag', props: ['shine_box'], density: { day: 0, night: 0 } },
+  { id: 'npc.peddler', behaviour: 'vendor', palette: ['#4a4a4a', '#8a7a5a'], wardrobe: 'Long raincoat lined with watches, or a folding case', props: ['peddler_case'], density: { day: 0, night: 0 } },
+  { id: 'npc.monte_dealer', behaviour: 'vendor', palette: ['#5a2a2a', '#d0c090'], wardrobe: 'Leisure suit, open collar, gold chain, quick hands', props: ['cardboard_box', 'cards'], density: { day: 0, night: 0 } },
+  { id: 'npc.monte_shill', behaviour: 'vendor', palette: ['#3a4a5a', '#b0a080'], wardrobe: 'Ordinary office clothes, too eager', density: { day: 0, night: 0 } },
+  { id: 'npc.monte_lookout', behaviour: 'vendor', palette: ['#2a2a2a', '#7a7a7a'], wardrobe: 'Windbreaker, hands in pockets, watching the corner', density: { day: 0, night: 0 } },
   { id: 'npc.pigeon_feeder', behaviour: 'loiterer', palette: ['#5a5348', '#3c3a36', '#8a8070'], wardrobe: 'Old man, overcoat even in summer, paper bag of bread crumbs', props: ['bread_bag'],
     schedule: [{ from: '08:00', to: '18:00', activity: 'feed pigeons' }], density: { day: 0.03, night: 0 }, barks: 'barks.park', params: { walkSpeed: 0.8, jaywalk: 0.2 } },
   { id: 'npc.mounted_officer', behaviour: 'beat_cop', palette: ['#1f2a44', '#5a3e2b'], wardrobe: 'Generic mounted-patrol uniform and helmet, on a bay horse', props: ['horse'],
@@ -186,7 +196,7 @@ export function contains(a: Area, x: number, z: number) { return x >= a.minX && 
 export class ArchetypeRegistry {
   readonly list: ArchetypeRt[] = [];
   readonly warnings: string[] = [];
-  constructor(private areas: AreaResolver) {}
+  constructor(readonly areas: AreaResolver) {}
   register(defs: ArchetypeDef[]) {
     for (const d of defs) {
       const errs = validateArchetype(d);
