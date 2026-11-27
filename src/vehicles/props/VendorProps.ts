@@ -4,9 +4,10 @@ import { createMaterialSet, type MaterialSet, type Quality } from '../gen/materi
 import { FadeLOD } from '../fadeLod';
 import { Emitter } from '../effects';
 import { vehicleOfCollider } from '../Vehicle';
-import { shadowBake, groundPlane, shadowMaterial } from '../lighting';
+import { shadowBake, groundPlane, shadowMaterial, glowTexture, additiveMaterial, groundLightLevel } from '../lighting';
 import { GROUPS, G, groups } from '../../shared/physicsGroups';
-import { VENDOR_SPECS, VENDOR_BRANDS, GOODS, buildVendorProp, type VendorPropId, type VendorPropSpec, type GoodsKind } from './vendorModels';
+import { VENDOR_SPECS, GOODS, buildVendorProp, type VendorPropId, type VendorPropSpec, type GoodsKind } from './vendorModels';
+import { brandFor, type VendorBrand } from './brands';
 
 /**
  * One entry of sim.vendorViews (sim, claude/nice-sagan-2jh4m2). `id` is the stall instance
@@ -23,7 +24,9 @@ export interface VendorView {
 }
 export interface CartHitEvent { id: string; prop: VendorPropId; by: string | null; byVehicle?: string; speed: number }
 export interface CartTippedEvent { id: string; prop: VendorPropId; position: THREE.Vector3 }
-type EventMap = { cartHit: CartHitEvent; tipped: CartTippedEvent; spill: { id: string; count: number } };
+/** A shoved (not tipped) cart came to rest somewhere new: sim moves its queue (vendorCartMoved). */
+export interface CartMovedEvent { id: string; prop: VendorPropId; x: number; z: number; yaw: number }
+type EventMap = { cartHit: CartHitEvent; tipped: CartTippedEvent; spill: { id: string; count: number }; cartMoved: CartMovedEvent };
 
 const LOD_DIST: Record<Quality, number> = { low: 18, medium: 30, high: 40, ultra: 55 };
 const MAX_GOODS = 240;
@@ -43,8 +46,12 @@ interface Item {
   panelTex: THREE.CanvasTexture | null;
   shadow: THREE.Mesh;
   shadowMat: THREE.MeshBasicNodeMaterial;
+  /** Practical light (hot-dog and nut carts had a bare bulb): emissive bulb + ground glow. */
+  bulb: { mesh: THREE.Mesh; mat: THREE.MeshStandardNodeMaterial; glow: THREE.Mesh; glowMat: THREE.MeshBasicNodeMaterial } | null;
   steam: Emitter | null;
   geoKey: string;
+  brand: VendorBrand;
+  stripes: number;
   kinematic: boolean;
   /** Hit by something: stop following the sim until righted or a new push cycle begins. */
   hitLock: boolean;
@@ -52,6 +59,9 @@ interface Item {
   spilled: number;
   lastMoving: boolean;
   hitCooldown: number;
+  /** Last rest position reported (cartMoved) or placed by the sim. */
+  rest: { x: number; z: number; yaw: number };
+  restT: number;
   groundY: number;
 }
 interface Good { kind: GoodsKind; body: RAPIER.RigidBody; age: number }
@@ -106,6 +116,7 @@ export class VendorProps {
         it.groundY = this.ground(v.cartX, v.cartZ);
         _q.setFromAxisAngle(_v.set(0, 1, 0), v.cartYaw);
         it.body.setNextKinematicTranslation({ x: v.cartX, y: it.groundY, z: v.cartZ });
+        it.rest = { x: v.cartX, z: v.cartZ, yaw: v.cartYaw };
         it.body.setNextKinematicRotation({ x: _q.x, y: _q.y, z: _q.z, w: _q.w });
       } else if (it.kinematic) this.setKinematic(it, false); // parked: a dynamic body at rest
     }
@@ -128,8 +139,19 @@ export class VendorProps {
         const p = it.body.translation();
         this.emit('tipped', { id: it.view.id, prop: it.view.prop, position: new THREE.Vector3(p.x, p.y, p.z) });
       }
-      // visuals follow the body
+      // a shoved cart that stayed upright and came to rest somewhere new: tell the sim
       const p = it.body.translation();
+      if (it.hitLock && !it.tipped && !it.spec.fixed) {
+        const lv = it.body.linvel();
+        it.restT = Math.hypot(lv.x, lv.y, lv.z) < 0.05 ? it.restT + dt : 0;
+        if (it.restT > 0.5 && Math.hypot(p.x - it.rest.x, p.z - it.rest.z) > 0.25) {
+          const f = _s.set(0, 0, 1).applyQuaternion(_q);
+          const yaw = Math.atan2(f.x, f.z);
+          it.rest = { x: p.x, z: p.z, yaw };
+          this.emit('cartMoved', { id: it.view.id, prop: it.view.prop, x: p.x, z: p.z, yaw });
+        }
+      }
+      // visuals follow the body
       it.object.position.set(p.x, p.y, p.z);
       it.object.quaternion.copy(_q);
       // contact shadow on the ground under the prop, faded when it is lifted or on its side
@@ -137,6 +159,15 @@ export class VendorProps {
       it.shadow.position.set(p.x, it.groundY + 0.012, p.z);
       it.shadow.rotation.set(0, yaw, 0);
       it.shadowMat.opacity = Math.max(0, Math.min(1, (up - 0.3) / 0.6)) * Math.max(0, 1 - (p.y - it.groundY) / 1.5);
+      if (it.bulb) {
+        // lit after dark while the stall is open and standing (the bulb dies when it tips over)
+        const night = groundLightLevel();
+        const on = it.view.open && !it.tipped ? night : 0;
+        it.bulb.mat.emissiveIntensity = on * 6;
+        it.bulb.glow.visible = on > 0.02;
+        it.bulb.glow.position.set(p.x, it.groundY + 0.014, p.z);
+        it.bulb.glowMat.color.setRGB(1.0, 0.72, 0.4).multiplyScalar(0.42 * on);
+      }
       if (it.steam) {
         const hot = it.view.open && !it.tipped;
         const sp = it.object.localToWorld(_v.set(0, it.spec.h + 0.1, it.view.prop === 'cart_nuts' ? -0.38 : -0.2));
@@ -227,11 +258,11 @@ export class VendorProps {
     return hit ? 6 - hit.timeOfImpact : 0;
   }
 
-  private geometry(spec: VendorPropSpec, lod: 0 | 1, open: boolean, umbrella: boolean) {
-    const key = `${spec.id}|${lod}|${open ? 1 : 0}|${umbrella ? 1 : 0}`;
+  private geometry(spec: VendorPropSpec, lod: 0 | 1, open: boolean, umbrella: boolean, stripes = 1) {
+    const key = `${spec.id}|${lod}|${open ? 1 : 0}|${umbrella ? 1 : 0}|${stripes}`;
     let g = this.geoCache.get(key);
     if (!g) {
-      g = buildVendorProp(spec, lod, open, umbrella);
+      g = buildVendorProp(spec, lod, open, umbrella, stripes);
       this.geoCache.set(key, g);
     }
     return { g, key };
@@ -239,15 +270,19 @@ export class VendorProps {
 
   private create(v: VendorView): Item {
     const spec = VENDOR_SPECS[v.prop];
+    const brand = brandFor(v.prop, v.variant);
+    // umbrella / awning stripes in the brand's colours (Narrative's umbrellaLook)
+    const st = brand.stripes ?? [spec.canvas[v.variant % spec.canvas.length]];
     const mats = createMaterialSet(this.quality, {
-      paint: spec.paint[v.variant % spec.paint.length], paint2: spec.paint2, roof: 'paint', metallic: false,
-      vinyl: spec.canvas[v.variant % spec.canvas.length], dirt: 0.35 + (v.variant % 3) * 0.1, seat: 0x6a1a1a,
+      paint: spec.paint[v.variant % spec.paint.length], paint2: spec.paint2, roof: st.length >= 3 ? st[2] : st[1] ?? 0xf0ece0, metallic: false,
+      vinyl: st[0], dirt: 0.35 + (v.variant % 3) * 0.1, seat: 0x6a1a1a,
     });
     const object = new THREE.Group();
     object.name = `vendor:${v.prop}`;
     const lod = new FadeLOD();
-    const l0 = new THREE.Mesh(this.geometry(spec, 0, v.open, v.umbrella).g, mats.array);
-    const l1 = new THREE.Mesh(this.geometry(spec, 1, v.open, v.umbrella).g, mats.array);
+    const nStripes = Math.min(3, st.length);
+    const l0 = new THREE.Mesh(this.geometry(spec, 0, v.open, v.umbrella, nStripes).g, mats.array);
+    const l1 = new THREE.Mesh(this.geometry(spec, 1, v.open, v.umbrella, nStripes).g, mats.array);
     l0.castShadow = l1.castShadow = true; l0.receiveShadow = true;
     lod.addLevel(l0, 0); lod.addLevel(l1, LOD_DIST[this.quality]); lod.addLevel(new THREE.Object3D(), LOD_DIST[this.quality] * 4);
     object.add(lod);
@@ -256,7 +291,7 @@ export class VendorProps {
     const panels: THREE.Mesh[] = [];
     let panelTex: THREE.CanvasTexture | null = null;
     if (spec.panel) {
-      panelTex = new THREE.CanvasTexture(drawBrand(VENDOR_BRANDS[v.prop][v.variant % VENDOR_BRANDS[v.prop].length], spec.paint2));
+      panelTex = new THREE.CanvasTexture(drawBrand(brand.lines, spec.paint2));
       panelTex.colorSpace = THREE.SRGBColorSpace; panelTex.anisotropy = 4;
       const pm = new THREE.MeshStandardNodeMaterial({ map: panelTex, roughness: 0.55, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
       for (const sx of [1, -1]) {
@@ -286,9 +321,24 @@ export class VendorProps {
     if (!spec.fixed) cd.setMass(spec.mass);
     const collider = this.world.createCollider(cd, body);
     const steam = ['cart_hot_dog', 'cart_nuts', 'cart_coffee'].includes(v.prop) ? new Emitter(this.scene, 'smoke', 14) : null;
+    let bulb: Item['bulb'] = null;
+    if (v.prop === 'cart_hot_dog' || v.prop === 'cart_nuts') {
+      const mat = new THREE.MeshStandardNodeMaterial({ color: 0xfff2d0, emissive: 0xffc070, emissiveIntensity: 0, roughness: 0.2 });
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), mat);
+      // under the umbrella on its pole (hot dog), on the chimney bracket (nuts); a cord up to it
+      mesh.position.set(v.prop === 'cart_hot_dog' ? -spec.w / 2 + 0.22 : 0.0, v.prop === 'cart_hot_dog' ? 1.78 : 1.5, v.prop === 'cart_hot_dog' ? 0 : -0.38);
+      const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.25, 4), new THREE.MeshStandardNodeMaterial({ color: 0x111111 }));
+      cord.position.set(0, 0.14, 0); mesh.add(cord);
+      object.add(mesh);
+      const glowMat = additiveMaterial(glowTexture(), 0x000000);
+      const glow = new THREE.Mesh(groundPlane(4.4, 4.4, 0), glowMat);
+      glow.renderOrder = -1; glow.visible = false;
+      this.object.add(glow);
+      bulb = { mesh, mat, glow, glowMat };
+    }
     const it: Item = {
-      view: v, spec, body, collider, object, lod, meshes: [l0, l1], mats, panels, panelTex, shadow, shadowMat, steam,
-      geoKey: `${v.open}|${v.umbrella}`, kinematic: false, hitLock: false, tipped: false, spilled: 0, lastMoving: false, hitCooldown: 0, groundY: gy,
+      view: v, spec, body, collider, object, lod, meshes: [l0, l1], mats, panels, panelTex, shadow, shadowMat, steam, bulb,
+      geoKey: `${v.open}|${v.umbrella}`, brand, stripes: nStripes, rest: { x: v.cartX, z: v.cartZ, yaw: v.cartYaw }, restT: 0, kinematic: false, hitLock: false, tipped: false, spilled: 0, lastMoving: false, hitCooldown: 0, groundY: gy,
     };
     this.items.set(v.id, it);
     return it;
@@ -298,8 +348,8 @@ export class VendorProps {
     const key = `${it.view.open}|${it.view.umbrella}`;
     if (key === it.geoKey) return;
     it.geoKey = key;
-    it.meshes[0].geometry = this.geometry(it.spec, 0, it.view.open, it.view.umbrella).g;
-    it.meshes[1].geometry = this.geometry(it.spec, 1, it.view.open, it.view.umbrella).g;
+    it.meshes[0].geometry = this.geometry(it.spec, 0, it.view.open, it.view.umbrella, it.stripes).g;
+    it.meshes[1].geometry = this.geometry(it.spec, 1, it.view.open, it.view.umbrella, it.stripes).g;
   }
 
   private setKinematic(it: Item, on: boolean) {
@@ -392,6 +442,7 @@ export class VendorProps {
     it.mats.dispose(); it.panelTex?.dispose();
     for (const p of it.panels) { p.geometry.dispose(); (p.material as THREE.Material).dispose(); }
     it.steam?.dispose();
+    if (it.bulb) { it.bulb.mesh.geometry.dispose(); it.bulb.mat.dispose(); it.bulb.glow.removeFromParent(); it.bulb.glow.geometry.dispose(); it.bulb.glowMat.dispose(); }
   }
 }
 

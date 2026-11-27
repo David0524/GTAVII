@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { GeoBuilder, type V3 } from '../gen/builder';
+import { GeoBuilder, type V3, type Slot } from '../gen/builder';
 
 /**
  * Street-vendor props (docs/briefs/STREET_VENDORS.md): pushcarts, stands, the news kiosk and the
@@ -7,7 +7,7 @@ import { GeoBuilder, type V3 } from '../gen/builder';
  * they share the vehicle materials, CC0 textures, grime, LOD crossfade and contact shadows.
  *
  * Local frame: length along z (push handle at +z), width along x, the customer side is +x, the
- * vendor stands at -x, ground at y = 0. All brands are invented (see VENDOR_BRANDS).
+ * vendor stands at -x, ground at y = 0. All brands are invented (Narrative's content/vendors.json, see brands.ts).
  */
 export type VendorPropId = 'cart_hot_dog' | 'cart_pretzel' | 'cart_ices' | 'cart_nuts' | 'cart_coffee'
   | 'stand_fruit' | 'stand_flowers' | 'stand_news' | 'stand_shoeshine' | 'peddler_case' | 'monte_box';
@@ -48,21 +48,6 @@ export const VENDOR_SPECS: Record<VendorPropId, VendorPropSpec> = {
   monte_box: S({ id: 'monte_box', w: 0.5, l: 0.4, h: 0.75, mass: 4, wheeled: false, paint: [0x9a7a52], paint2: 0x6a5232, canvas: [0x9a7a52], goods: [{ kind: 'card', n: 3, at: [0, 0.76, 0], spread: [0.1, 0.06] }] }),
 };
 
-/** Invented brand copy per prop, picked by sim's `variant` (Narrative can replace these). */
-export const VENDOR_BRANDS: Record<VendorPropId, string[][]> = {
-  cart_hot_dog: [['PAPPAS', 'FRANKS · SODA'], ['KATZBERG\'S', 'HOT DOGS 35¢'], ['FIORELLI', 'FRANKS & KNISHES']],
-  cart_pretzel: [['HOT PRETZELS', '15¢ · 2 FOR 25¢'], ['KNISHES', 'POTATO · KASHA'], ['ZUCKERMAN', 'PRETZELS']],
-  cart_ices: [['NONNA ROSA', 'ITALIAN ICES'], ['LEMON ICE', 'CHERRY · LEMON 20¢'], ['MARINO\'S', 'ICES']],
-  cart_nuts: [['HOT NUTS', 'CASHEWS · PEANUTS'], ['ROASTED', 'NUTS 25¢'], ['CHESTNUTS', 'HOT']],
-  cart_coffee: [['COFFEE & ROLL', '30¢'], ['DANNY\'S', 'COFFEE · DANISH'], ['HOT COFFEE', 'BUTTERED ROLLS']],
-  stand_fruit: [['FRESH FRUIT', ''], ['ESPOSITO', 'FRUIT & VEG'], ['PRODUCE', '']],
-  stand_flowers: [['FLOWERS', ''], ['KIM\'S', 'FLOWERS'], ['FRESH CUT', 'FLOWERS']],
-  stand_news: [['NEWS', 'PAPERS · MAGAZINES'], ['NEWS · CIGARS', ''], ['PAPERS', 'CANDY · SMOKES']],
-  stand_shoeshine: [['SHINE 50¢', ''], ['SHOE SHINE', ''], ['SHINE', '']],
-  peddler_case: [['', '']],
-  monte_box: [['', '']],
-};
-
 // ------------------------------------------------------------------ helpers
 function wheel(b: GeoBuilder, x: number, y: number, z: number, r: number, w: number, spokes: number, lod: 0 | 1) {
   const segs = lod === 0 ? 24 : 8;
@@ -89,7 +74,7 @@ function handle(b: GeoBuilder, w: number, z: number, y: number) {
   b.tubePath('chrome', [[-w / 2 + 0.05, y - 0.15, z - 0.12], [-w / 2 + 0.05, y, z + 0.05], [w / 2 - 0.05, y, z + 0.05], [w / 2 - 0.05, y - 0.15, z - 0.12]], 0.014, 8);
 }
 /** Market umbrella: pole, 8 ribs, a striped canopy (alternating slots) with a scalloped valance. */
-function umbrella(b: GeoBuilder, x: number, z: number, y0: number, top: number, r: number, lod: 0 | 1) {
+function umbrella(b: GeoBuilder, x: number, z: number, y0: number, top: number, r: number, lod: 0 | 1, slots: Slot[] = ['vinyl', 'white']) {
   b.tubePath('chrome', [[x, y0, z], [x, top + 0.08, z]], 0.017, 8);
   const n = 8, rings = lod === 0 ? 4 : 2;
   for (let k = 0; k < n; k++) {
@@ -101,11 +86,12 @@ function umbrella(b: GeoBuilder, x: number, z: number, y0: number, top: number, 
       for (let j = 0; j <= (lod === 0 ? 3 : 1); j++) { const a = a0 + ((a1 - a0) * j) / (lod === 0 ? 3 : 1); row.push([x + Math.cos(a) * rr, yy, z + Math.sin(a) * rr]); }
       rows.push(row);
     }
-    b.grid(rows, k % 2 ? 'white' : 'vinyl', { facing: [0, 1, 0], smooth: false });
-    b.grid(rows, k % 2 ? 'white' : 'vinyl', { facing: [0, -1, 0], smooth: false }); // underside (seen from below)
+    const sl = slots[k % slots.length], sl2 = slots[(k + 1) % slots.length];
+    b.grid(rows, sl, { facing: [0, 1, 0], smooth: false });
+    b.grid(rows, sl, { facing: [0, -1, 0], smooth: false }); // underside (seen from below)
     // valance flap
     const va: V3[] = [[x + Math.cos(a0) * r, top - 0.38, z + Math.sin(a0) * r], [x + Math.cos(a1) * r, top - 0.38, z + Math.sin(a1) * r]];
-    b.grid([va, va.map((p) => [p[0], p[1] - 0.14, p[2]] as V3)], k % 2 ? 'vinyl' : 'white', { facing: [Math.cos((a0 + a1) / 2), 0, Math.sin((a0 + a1) / 2)], smooth: false });
+    b.grid([va, va.map((p) => [p[0], p[1] - 0.14, p[2]] as V3)], sl2, { facing: [Math.cos((a0 + a1) / 2), 0, Math.sin((a0 + a1) / 2)], smooth: false });
     if (lod === 0) b.tubePath('chrome', [[x, top - 0.04, z], [x + Math.cos(a0) * r, top - 0.4, z + Math.sin(a0) * r]], 0.006, 4);
   }
 }
@@ -122,8 +108,34 @@ function awning(b: GeoBuilder, w: number, l: number, yBack: number, yFront: numb
   for (const z of [-l / 2 + 0.05, l / 2 - 0.05]) b.tubePath('chrome', [[w / 2 + reach - 0.03, 0, z], [w / 2 + reach - 0.03, yFront, z]], 0.018, 6);
 }
 
+/** Slatted produce crate (open top), tilted toward the customer (rotation about z). */
+function crate(b: GeoBuilder, x: number, y: number, z: number, sx: number, sy: number, sz: number, tilt: number, lod: 0 | 1) {
+  const slats = lod === 0 ? 3 : 1, gap = sy / (slats * 2);
+  b.box('wood', x, y - sy / 2 + 0.008, z, sx, 0.016, sz, 0, 0, tilt);
+  for (let k = 0; k < slats; k++) {
+    const yy = y - sy / 2 + gap + k * 2 * gap;
+    for (const sgn of [-1, 1]) {
+      b.box('wood', x, yy, z + sgn * (sz / 2 - 0.008), sx, gap * 1.1, 0.016, 0, 0, tilt);
+      b.box('wood', x + sgn * (sx / 2 - 0.008), yy, z, 0.016, gap * 1.1, sz, 0, 0, tilt);
+    }
+  }
+  for (const sx2 of [-1, 1]) for (const sz2 of [-1, 1]) b.box('wood', x + sx2 * (sx / 2 - 0.015), y, z + sz2 * (sz / 2 - 0.015), 0.03, sy, 0.03, 0, 0, tilt);
+}
+/** A heap of round produce (low-poly spheres) filling a crate. */
+function heap(b: GeoBuilder, slot: Slot, x: number, y: number, z: number, hx: number, hz: number, tilt: number, n: number, r: number) {
+  if (n === 0) { b.box(slot, x, y, z, hx * 2, 0.06, hz * 2, 0, 0, tilt); return; }
+  const ct = Math.cos(tilt), st = Math.sin(tilt);
+  for (let i = 0; i < n * 2; i++) {
+    const u = ((i * 0.618) % 1) * 2 - 1, v = ((i * 0.382 + 0.17) % 1) * 2 - 1, lift = (i % 3) * r * 0.6;
+    const lx = u * hx, ly = lift;
+    b.add(slot, new THREE.SphereGeometry(r, 7, 5), new THREE.Matrix4().makeTranslation(x + lx * ct - ly * st, y + lx * st + ly * ct, z + v * hz));
+  }
+}
+
 /** Build a prop at a detail level. Returns the grouped geometry (car SLOTS order). */
-export function buildVendorProp(spec: VendorPropSpec, lod: 0 | 1, open = true, withUmbrella = true): THREE.BufferGeometry {
+/** Umbrella stripe slots by colour count: 1 colour + white, 2 colours, or 3 (colour, white, colour). */
+export const stripeSlots = (n: number): Slot[] => (n >= 3 ? ['vinyl', 'white', 'roof'] : n === 2 ? ['vinyl', 'roof'] : ['vinyl', 'white']);
+export function buildVendorProp(spec: VendorPropSpec, lod: 0 | 1, open = true, withUmbrella = true, stripeCount = 1): THREE.BufferGeometry {
   const b = new GeoBuilder();
   const { w, l, h } = spec;
   switch (spec.id) {
@@ -139,7 +151,7 @@ export function buildVendorProp(spec: VendorPropSpec, lod: 0 | 1, open = true, w
       wheel(b, 0, 0.3, -l / 2 + 0.3, 0.3, 0.05, 12, lod);
       for (const sx of [-1, 1]) b.box('trim', sx * (w / 2 - 0.06), 0.19, l / 2 - 0.15, 0.04, 0.38, 0.04);
       handle(b, w, l / 2, 0.95);
-      if (withUmbrella) umbrella(b, -w / 2 + 0.08, 0, h, 2.3, 1.05, lod);
+      if (withUmbrella) umbrella(b, -w / 2 + 0.08, 0, h, 2.3, 1.05, lod, stripeSlots(stripeCount));
       break;
     }
     case 'cart_pretzel': {
@@ -162,7 +174,7 @@ export function buildVendorProp(spec: VendorPropSpec, lod: 0 | 1, open = true, w
       wheel(b, 0, 0.27, -l / 2 + 0.28, 0.27, 0.05, 10, lod);
       for (const sx of [-1, 1]) b.box('trim', sx * (w / 2 - 0.06), 0.15, l / 2 - 0.14, 0.04, 0.3, 0.04);
       handle(b, w, l / 2, 0.92);
-      if (withUmbrella) umbrella(b, -w / 2 + 0.07, 0.1, h, 2.1, 0.8, lod);
+      if (withUmbrella) umbrella(b, -w / 2 + 0.07, 0.1, h, 2.1, 0.8, lod, stripeSlots(stripeCount));
       break;
     }
     case 'cart_nuts': {
@@ -195,54 +207,89 @@ export function buildVendorProp(spec: VendorPropSpec, lod: 0 | 1, open = true, w
       break;
     }
     case 'stand_fruit': {
-      // wooden frame with three slanted tiers of crates facing the customer side, an awning
+      // timber rack: four legs and rails, three stepped tiers of slatted crates heaped with fruit,
+      // a chalkboard price sign, and a striped awning on two poles
       for (const [x, z] of [[-w / 2 + 0.04, -l / 2 + 0.04], [-w / 2 + 0.04, l / 2 - 0.04], [w / 2 - 0.04, -l / 2 + 0.04], [w / 2 - 0.04, l / 2 - 0.04]] as const) b.box('wood', x, 0.45, z, 0.05, 0.9, 0.05);
+      for (const y of [0.18, 0.5]) for (const sx of [-1, 1]) b.box('wood', sx * (w / 2 - 0.04), y, 0, 0.04, 0.04, l - 0.08);
+      const fruitSlots = ['taillamp', 'indicator', 'paint2', 'taillamp'] as const;
       for (let t = 0; t < 3; t++) {
-        const x = w / 2 - 0.18 - t * 0.3, y = 0.55 + t * 0.2;
+        const x = w / 2 - 0.2 - t * 0.28, y = 0.58 + t * 0.2;
         for (let k = 0; k < 4; k++) {
           const z = -l / 2 + 0.25 + k * ((l - 0.5) / 3);
-          b.box('wood', x, y, z, 0.32, 0.12, 0.42, 0, 0, -0.25);
-          b.box(k % 2 ? 'taillamp' : 'indicator', x, y + 0.07, z, 0.28, 0.04, 0.38, 0, 0, -0.25); // the fruit bed (colour from the crate)
+          crate(b, x, y, z, 0.34, 0.14, 0.44, -0.22, lod);
+          heap(b, fruitSlots[(k + t) % 4], x, y + 0.08, z, 0.15, 0.2, -0.22, lod === 0 ? 9 : 0, 0.04 + ((k + t) % 2) * 0.006);
         }
       }
+      b.box('trim', w / 2 + 0.02, 0.32, 0, 0.02, 0.3, 0.5); // chalkboard
+      b.box('wood', w / 2 + 0.03, 0.32, 0, 0.01, 0.34, 0.54);
       awning(b, w, l, 1.95, 1.7, 0.35);
       break;
     }
     case 'stand_flowers': {
-      // stepped green bench with galvanised buckets, bunches as coloured cones
-      for (let t = 0; t < 3; t++) b.box('paint', w / 2 - 0.15 - t * 0.27, 0.25 + t * 0.22, 0, 0.27, 0.5 + t * 0.44, l);
+      // slatted green step bench with galvanised buckets (rolled rims), bunches of mixed colours in paper cones
+      for (let t = 0; t < 3; t++) {
+        const x = w / 2 - 0.15 - t * 0.27, top = 0.5 + t * 0.44;
+        for (let k = 0; k < 4; k++) b.box('paint', x - 0.1 + k * 0.067, top - 0.015, 0, 0.055, 0.03, l); // slats
+        for (const sz of [-1, 1]) b.box('paint', x, top / 2, sz * (l / 2 - 0.03), 0.25, top, 0.04);
+      }
       for (let t = 0; t < 3; t++) for (let k = 0; k < 5; k++) {
         const x = w / 2 - 0.15 - t * 0.27, y = 0.5 + t * 0.44, z = -l / 2 + 0.18 + k * ((l - 0.36) / 4);
-        b.add('chrome', new THREE.CylinderGeometry(0.11, 0.09, 0.24, lod === 0 ? 12 : 6), new THREE.Matrix4().makeTranslation(x, y + 0.12, z));
-        if (lod === 0) b.add((t + k) % 3 === 0 ? 'taillamp' : (t + k) % 3 === 1 ? 'white' : 'indicator', new THREE.SphereGeometry(0.12, 8, 5), new THREE.Matrix4().makeTranslation(x, y + 0.36, z));
+        b.add('chrome', new THREE.CylinderGeometry(0.11, 0.09, 0.24, lod === 0 ? 14 : 6, 1, true), new THREE.Matrix4().makeTranslation(x, y + 0.12, z));
+        b.add('chrome', new THREE.TorusGeometry(0.11, 0.008, 4, lod === 0 ? 14 : 6).rotateX(Math.PI / 2), new THREE.Matrix4().makeTranslation(x, y + 0.24, z));
+        b.add('under', new THREE.CircleGeometry(0.1, lod === 0 ? 12 : 6).rotateX(-Math.PI / 2), new THREE.Matrix4().makeTranslation(x, y + 0.2, z));
+        if (lod === 0) {
+          b.add('white', new THREE.ConeGeometry(0.1, 0.22, 8, 1, true), new THREE.Matrix4().makeTranslation(x, y + 0.3, z)); // paper cone
+          const cols = (['taillamp', 'white', 'indicator', 'paint2'] as const);
+          for (let f = 0; f < 5; f++) {
+            const a = (f / 5) * Math.PI * 2 + k;
+            b.add(cols[(f + t + k) % 4], new THREE.SphereGeometry(0.045, 6, 4), new THREE.Matrix4().makeTranslation(x + Math.cos(a) * 0.05, y + 0.42 + (f % 2) * 0.04, z + Math.sin(a) * 0.05));
+          }
+        }
       }
       awning(b, w, l, 1.85, 1.65, 0.25);
       break;
     }
     case 'stand_news': {
-      // kiosk: wooden box with a deep roof overhang, an open front counter, magazine racks
+      // kiosk: panelled wooden body with a roof cornice and a raised shutter, slanted magazine racks
+      // on the front, stacked papers on the counter, posters on the sides
       b.box('paint', -0.1, 1.0, 0, w - 0.2, 2.0, l);
+      for (let k = 0; k < 4; k++) for (const sz of [-1, 1]) b.box('paint2', -0.1 + (k - 1.5) * 0.24, 0.45, sz * (l / 2 + 0.004), 0.2, 0.6, 0.01); // panel mouldings
       b.box('paint2', -0.05, 2.12, 0, w + 0.15, 0.1, l + 0.2); // roof
+      b.box('paint', -0.05, 2.2, 0, w + 0.05, 0.06, l + 0.1);
+      b.box('paint', w / 2 + 0.05, 1.95, 0, 0.5, 0.03, l - 0.1, 0, 0, -0.35); // raised shutter
+      for (const sz of [-1, 1]) b.box('chrome', w / 2 + 0.2, 1.75, sz * (l / 2 - 0.1), 0.02, 0.45, 0.02, 0, 0, 0.5); // shutter props
       b.box('interior', w / 2 - 0.12, 1.45, 0, 0.02, 0.8, l - 0.3); // dark opening
       b.box('wood', w / 2 - 0.05, 0.9, 0, 0.35, 0.06, l - 0.1); // counter
-      for (let k = 0; k < 6; k++) for (let r = 0; r < 3; r++) {
-        const z = -l / 2 + 0.2 + k * ((l - 0.4) / 5), y = 1.2 + r * 0.25;
-        b.box(['taillamp', 'indicator', 'white', 'paint2', 'reverse', 'headlamp'][(k + r) % 6] as never, w / 2 - 0.1, y, z, 0.01, 0.2, 0.16);
+      const covers = ['taillamp', 'indicator', 'white', 'paint2', 'reverse', 'headlamp'] as const;
+      for (let r = 0; r < 3; r++) {
+        const x = w / 2 + 0.05 + r * 0.08, y = 0.25 + r * 0.2;
+        b.box('wood', x, y - 0.06, 0, 0.12, 0.02, l - 0.2, 0, 0, 0.5); // slanted shelf
+        for (let k = 0; k < 9; k++) b.box(covers[(k + r * 2) % 6], x - 0.02, y + 0.04, -l / 2 + 0.2 + k * ((l - 0.4) / 8), 0.01, 0.2, 0.15, 0, 0, 0.5);
       }
-      for (let k = 0; k < 4; k++) b.box('white', w / 2 + 0.02, 0.97 + k * 0.012, -0.5 + k * 0.32, 0.25, 0.04, 0.3);
+      for (let k = 0; k < 4; k++) for (let n = 0; n < (lod === 0 ? 6 : 1); n++) b.box(n % 2 ? 'white' : 'headlamp', w / 2 + 0.02, 0.945 + n * 0.012, -0.55 + k * 0.36, 0.26, 0.011, 0.32, 0.03 * n);
+      for (const sz of [-1, 1]) b.box(covers[sz > 0 ? 3 : 0], -0.1, 1.5, sz * (l / 2 + 0.006), 0.5, 0.7, 0.01); // posters
       break;
     }
     case 'stand_shoeshine': {
-      // wooden box with drawers, a raised armchair on top, two brass footrests in front
+      // wooden box with two drawers (brass pulls), a raised upholstered chair with armrests,
+      // chrome footrests on posts, polish tins and a brush on the step
       b.box('wood', 0, 0.3, 0, w, 0.6, l);
-      for (const y of [0.15, 0.42]) b.box('chrome', w / 2 + 0.003, y, 0, 0.01, 0.02, 0.18);
-      b.box('seat', -0.1, 0.72, 0, 0.5, 0.1, 0.6);
-      b.box('seat', -0.33, 1.0, 0, 0.08, 0.55, 0.6);
-      for (const sz of [-1, 1]) b.box('wood', -0.1, 0.86, sz * 0.3, 0.45, 0.06, 0.06);
-      for (const sz of [-1, 1]) {
-        b.box('chrome', w / 2 + 0.1, 0.48, sz * 0.14, 0.24, 0.02, 0.1);
-        b.box('chrome', w / 2 + 0.02, 0.3, sz * 0.14, 0.03, 0.36, 0.03);
+      b.box('wood', 0, 0.61, 0, w + 0.03, 0.03, l + 0.03);
+      for (const y of [0.15, 0.42]) {
+        b.box('wood', w / 2 + 0.004, y, 0, 0.01, 0.22, l - 0.12);
+        b.box('chrome', w / 2 + 0.014, y, 0, 0.01, 0.025, 0.16);
       }
+      b.box('wood', -0.12, 0.66, 0, 0.55, 0.08, 0.66);
+      b.box('seat', -0.1, 0.74, 0, 0.5, 0.08, 0.58);
+      b.box('seat', -0.33, 1.02, 0, 0.07, 0.52, 0.58);
+      b.box('wood', -0.37, 1.02, 0, 0.03, 0.62, 0.64);
+      for (const sz of [-1, 1]) { b.box('wood', -0.1, 0.92, sz * 0.31, 0.46, 0.05, 0.06); b.box('wood', 0.1, 0.83, sz * 0.31, 0.04, 0.14, 0.04); }
+      for (const sz of [-1, 1]) {
+        b.box('chrome', w / 2 + 0.12, 0.5, sz * 0.14, 0.26, 0.02, 0.11); // sole plate
+        b.box('chrome', w / 2 + 0.22, 0.52, sz * 0.14, 0.02, 0.05, 0.11); // heel stop
+        b.box('chrome', w / 2 + 0.02, 0.32, sz * 0.14, 0.03, 0.36, 0.03);
+      }
+      if (lod === 0) for (let k = 0; k < 3; k++) b.add(k % 2 ? 'paint2' : 'trim', new THREE.CylinderGeometry(0.035, 0.035, 0.025, 10), new THREE.Matrix4().makeTranslation(w / 2 - 0.12, 0.635, -0.3 + k * 0.08));
       break;
     }
     case 'peddler_case': {

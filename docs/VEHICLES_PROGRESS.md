@@ -187,6 +187,33 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   blades and pivots. Bus and truck arms are longer.
 - LOD0 triangles: bus 10.3k, cars 8.4–9.5k.
 
+- **Oversight review fixes (vendors.jpg, hero_interior.jpg):**
+  - **The "broken greenhouse" had two real causes.**
+    - The Tiverton coupe's rear bench back stuck up through the sloping back light. Seat backs
+      and headrests are now clamped under the glasshouse at their z, with 7 cm of clearance.
+    - The pillar and sail panels were one-sided, so from the seats the C-pillars looked missing.
+      Cars with cabins now get an inner skin on every opaque glasshouse panel.
+    - The "skylight" was the coupe's opera window on its steeply leaning sail panel: correct.
+    - `hero_interior.jpg` now has four angles: over the shoulder, through the glass, inside
+      looking up and out, and inside looking out the side.
+  - **Brands from Narrative:** `props/brands.ts` reads `content/vendors.json` at build time
+    (`import.meta.glob`; once the narrative branch merges, its file wins), with a fallback that
+    uses the same names. Cart panels carry the brand name and cart line. Umbrellas use the
+    brand's stripe colours ("yellow and red", "red, white and green", …). Stands get generic,
+    unbranded signs. `VENDOR_BRANDS` was removed.
+  - **Stands detail pass:**
+    - fruit: slatted crates on a stepped rack, fruit heaps, a chalkboard, an awning;
+    - flowers: a slatted step bench, rolled-rim buckets, paper cones with bunches;
+    - news: panelled body, roof cornice, raised shutter on props, three slanted magazine racks,
+      stacked papers, side posters;
+    - shoeshine: drawers with brass pulls, an upholstered chair with arms, chrome sole plates
+      with heel stops, polish tins.
+    - Poly Haven GLB props wait for the engine's shared loader.
+  - **Night:** the hot-dog and nut carts have a bare bulb (emissive) and a warm glow on the
+    sidewalk, scaled by `setGroundLightLevel`, off when closed or tipped.
+  - **For Sim:** a shoved cart that stays upright and settles more than 0.25 m away emits
+    `cartMoved {id, prop, x, z, yaw}`, which feeds `sim.vendorCartMoved`.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.

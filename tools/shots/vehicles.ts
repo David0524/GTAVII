@@ -322,7 +322,9 @@ async function main() {
       const it: Buffer[] = [];
       await camLocal([drv.d[0] + 0.12, drv.belt + 0.42, drv.d[2] + 0.12], [drv.d[0] + 0.08, drv.belt - 0.04, drv.d[2] - 0.6], 60, 'o'); it.push(await snap(page));
       await camLocal([-2.4, 1.45, drv.d[2] + 0.4], [0, 0.85, drv.d[2]], 40, 'o'); it.push(await snap(page));
-      await sheet(page, it, 2, 800, 450, 'hero_interior.jpg', ['over the shoulder: gauges, 3-spoke wheel, radio, column shift', 'through the side glass: bench seats, door cards, dash']);
+      await camLocal([-0.3, drv.belt + 0.17, drv.d[2] + 0.2], [-0.2, drv.belt + 0.62, drv.d[2] - 1.8], 75, 'o'); it.push(await snap(page));
+      await camLocal([0.2, drv.belt + 0.22, drv.d[2] + 0.1], [-2, drv.belt + 0.17, drv.d[2] - 0.3], 70, 'o'); it.push(await snap(page));
+      await sheet(page, it, 2, 800, 450, 'hero_interior.jpg', ['over the shoulder: gauges, 3-spoke wheel, radio, column shift', 'through the side glass: bench seats under the glass, opera window', 'inside, looking up and out: headliner, A-pillars, header, mirror', 'inside, looking out the side: solid C-pillar with the opera window']);
       // 3. glass: bullet into the windscreen (laminated web) and a side window (tempered dice)
       const gl: Buffer[] = [];
       const geo = await page.evaluate(() => { const s = window.__VEH.player.asset.spec, m = s.sF + s.wheelbase / 2; return { zF: (s.gh.sA0 + s.gh.sA1) / 2 - m, yF: (s.beltY + s.gh.roofY) / 2, zS: (s.gh.sA1 + s.gh.sC1) / 2 - m, hw: window.__VEH.player.asset.lod0.halfW }; });
@@ -410,6 +412,11 @@ async function main() {
       await page.evaluate(() => { const V = window.__VEH; V.simulate(2.5); });
       await page.evaluate(() => { const V = window.__VEH, it = V.vendors.items.get('stall0'), p = it.body.translation(); V.setCamera(p.x + 4.2, 2.4, p.z - 4.5, p.x - 0.5, 0.2, p.z + 0.5, 46); }); vs.push(await snap(page)); vl.push(`settled: franks and cans on the sidewalk (${res.goods} goods live)`);
       const righted = await page.evaluate(() => { const V = window.__VEH; V.vendors.right('stall0'); V.simulate(1); return V.vendors.liveGoods; });
+      // night: the hot-dog and nut carts' bare bulbs light the sidewalk
+      await page.evaluate(() => { const V = window.__VEH; V.setNight(1); V.simulate(0.1); V.setCamera(-3.0, 1.9, -10.5, -8.4, 0.8, -18.5, 48); });
+      vs.push(await snap(page)); vl.push('night: bare bulbs on the hot-dog and nut carts');
+      await page.evaluate(() => { const V = window.__VEH; V.setNight(0); });
+      await page.evaluate(() => window.__VEH.setCamera(11.5, 1.7, -12.0, 7.4, 0.9, -17.0, 44)); vs.push(await snap(page)); vl.push('stands from the sidewalk: kiosk racks and papers, flower buckets, fruit crates');
       report.vendors = { events: res.ev, goodsLive: res.goods, afterRight: righted };
       await sheet(page, vs, 2, 800, 450, 'vendors.jpg', vl);
       console.log('vendors', res);

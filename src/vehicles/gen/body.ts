@@ -656,11 +656,23 @@ function cabin(b: GeoBuilder, m: ModelSpec, Z: (s: number) => number, halfW: (s:
     b.add('chrome', new THREE.CylinderGeometry(0.006, 0.006, 0.22, 6).rotateZ(Math.PI / 2 - 0.3), new THREE.Matrix4().makeTranslation(d[0] + 0.14, wy - 0.07, wz + 0.1));
   }
   // bench seats with headrests (mandatory on new cars from 1969); the back leans 12°
+  // the inside of the glasshouse at a body z: seats must stay under it (a coupe's rear bench sits
+  // under the sloping back light and used to poke through the glass)
+  const mid = -Z(0);
+  const ghTop = (z: number) => {
+    const s = z + mid;
+    if (s <= g.sA1) return lerp(belt, g.roofY, clamp((s - g.sA0) / Math.max(0.05, g.sA1 - g.sA0), 0, 1));
+    if (s <= g.sC1) return g.roofY;
+    return lerp(g.roofY, belt, clamp((s - g.sC1) / Math.max(0.05, g.sC0 - g.sC1), 0, 1));
+  };
   const bench = (back: number, headrests: boolean) => {
     b.box('seat', 0, belt - 0.24, back - 0.27, hw * 2, 0.15, 0.52); // cushion (mostly below the belt)
     if (hero) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt - 0.16, back - 0.27, 0.5, 0.02, 0.46); // pleated top panels
-    b.add('seat', new THREE.BoxGeometry(hw * 2, 0.58, 0.13), new THREE.Matrix4().makeTranslation(0, belt + 0.04, back).multiply(new THREE.Matrix4().makeRotationX(-0.21)));
-    if (headrests) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt + 0.4, back + 0.07, 0.26, 0.2, 0.1, 0, -0.21);
+    // the back's top leans 0.06 m rearward: check the glass there, keep 7 cm of clearance
+    const bottom = belt - 0.25, top = Math.min(belt + 0.33, ghTop(back + 0.06) - 0.07);
+    const hb = Math.max(0.25, top - bottom);
+    b.add('seat', new THREE.BoxGeometry(hw * 2, hb, 0.13), new THREE.Matrix4().makeTranslation(0, bottom + hb / 2, back).multiply(new THREE.Matrix4().makeRotationX(-0.21)));
+    if (headrests && ghTop(back + 0.12) - 0.05 > belt + 0.5) for (const sx of [-1, 1]) b.box('seat', sx * Math.abs(d[0]), belt + 0.4, back + 0.07, 0.26, 0.2, 0.1, 0, -0.21);
   };
   const frontBack = hip + 0.22;
   bench(frontBack, true);
@@ -735,6 +747,15 @@ function greenhouse(b: GeoBuilder, m: ModelSpec, o: GenOptions, Z: (s: number) =
     paneSlot = sx > 0 ? 'glassR' : 'glassL';
     const rows = uList.map((u) => vList.map((v) => [sx * hwAt(v), yAt(v), Z(lerp(lerp(g.sA0, g.sC0, u), lerp(g.sA1, g.sC1, u), v))] as V3));
     b.grid(rows, (i, j) => sideCell((uList[i] + uList[i + 1]) / 2, (vList[j] + vList[j + 1]) / 2), { inside });
+    // cars with a cabin: an inner skin on the opaque pillar panels (one-sided faces vanished from
+    // inside, so the C-pillars and sail panels looked missing from the seats)
+    if (lod === 0 && PASSENGER.has(m.cls)) {
+      const inner = rows.map((r) => r.map((p) => [p[0] - sx * 0.012, p[1], p[2]] as V3));
+      b.grid(inner, (i, j) => {
+        const sl = sideCell((uList[i] + uList[i + 1]) / 2, (vList[j] + vList[j + 1]) / 2);
+        return sl === paneSlot ? null : 'interior';
+      }, { inside: [sx * 10, m.beltY, Z((g.sA0 + g.sC0) / 2)] });
+    }
   }
   // windshield + backlight: columns across the width (xf -1..1)
   const nx = lod === 0 ? 10 : 4;
