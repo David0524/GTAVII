@@ -278,15 +278,52 @@
       "emotion": "flat",
       "text": "Central, car six: the lights are out at {avenue}. We're directing traffic by hand.",
       "voice": "car"
+    },
+    {
+      "context": "hot",
+      "emotion": "urgent",
+      "text": "Central to all units: keep this channel clear. Emergency traffic only. Clear the air.",
+      "voice": "dispatcher"
+    },
+    {
+      "context": "hot",
+      "emotion": "breathless",
+      "text": "Car nine, on {avenue}, coming up on the scene now. Two minutes.",
+      "voice": "car"
+    },
+    {
+      "context": "hot",
+      "emotion": "breathless",
+      "text": "Car one-four, we're on {street}. We got the corner. Nobody's leaving.",
+      "voice": "car"
+    },
+    {
+      "context": "hot",
+      "emotion": "grave",
+      "text": "This is the sergeant. I'm taking the air. Every car, give me your position.",
+      "voice": "sergeant"
+    },
+    {
+      "context": "hot",
+      "emotion": "urgent",
+      "text": "Central: ambulance is rolling. Cars on {avenue}, clear them a lane.",
+      "voice": "dispatcher"
+    },
+    {
+      "context": "hot",
+      "emotion": "grave",
+      "text": "Sergeant to all cars: you see him, you call it in. You don't go alone. Understood?",
+      "voice": "sergeant"
     }
   ],
   "audio": {
     "filter": "1970s police two-way radio: band-limited 300-3000 Hz, squelch tail, light static; dispatcher slightly cleaner than cars",
     "voices": {
+      "sergeant": "one older adult voice, gravel, slow; the hot tier only (audio may map to the car urgent register)",
       "dispatcher": "one adult voice, calm, flat, fast, Midtown Central dispatch",
       "car": "several adult patrol voices, rotating; breathless on foot, louder in pursuit"
     },
-    "tiers": "heat1-heat5 map to Gameplay heat levels; escalate and cop_killed take over at 'officer down'",
+    "tiers": "heat1-heat5 map to Gameplay heat levels; escalate and cop_killed take over at 'officer down'; 'hot' plays in the 90 s after officer down (band clears, cars check in, a sergeant takes the air)",
     "slots": {
       "street": "numbered cross streets 21st-45th, spoken ('Thirty-Fourth')",
       "avenue": "Fifth, Sixth, Seventh, Eighth, Ninth, Madison, Park, Lexington, Broadway",

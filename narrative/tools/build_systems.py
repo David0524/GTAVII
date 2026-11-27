@@ -297,7 +297,13 @@ pool("barks.police_radio", "Dispatch ('Central') and car chatter: the main heat 
  ("all_clear", "weary", "Central, show us back in service. Nothing doing."),
  ("shift", "flat", "Central, all cars: four-to-midnight tour coming on. Look alive."),
  ("brownout", "urgent", "Central to all cars: Hudson Union says an hour. Treat every crossing as a stop."),
- ("brownout", "flat", "Central, car six: the lights are out at {avenue}. We're directing traffic by hand.")])
+ ("brownout", "flat", "Central, car six: the lights are out at {avenue}. We're directing traffic by hand."),
+ ("hot", "urgent", "Central to all units: keep this channel clear. Emergency traffic only. Clear the air."),
+ ("hot", "breathless", "Car nine, on {avenue}, coming up on the scene now. Two minutes."),
+ ("hot", "breathless", "Car one-four, we're on {street}. We got the corner. Nobody's leaving."),
+ ("hot", "grave", "This is the sergeant. I'm taking the air. Every car, give me your position."),
+ ("hot", "urgent", "Central: ambulance is rolling. Cars on {avenue}, clear them a lane."),
+ ("hot", "grave", "Sergeant to all cars: you see him, you call it in. You don't go alone. Understood?")])
 pool("barks.cop_killed", "Consequences of killing a police officer (user: 'Fully lethal everywhere'). Heat is Gameplay's; this is flavour. Teddy's lines are a meaningful contrast with his always-available non-lethal option.", [
  ("radio", "urgent", "Central to all cars: officer down, {street} and {avenue}. All units. All units."),
  ("radio", "grave", "Central, the officer is not breathing. Repeat: not breathing."),
@@ -335,10 +341,10 @@ _pr = json.loads((C / "barks" / "police_radio.json").read_text())
 _DISP = {"report", "description", "escalate", "cooldown", "brownout", "idle", "heat1", "heat2", "heat3", "heat4", "heat5", "all_clear", "shift", "bribe_heard"}
 for _l in _pr["lines"]:
     _t = _l["text"]
-    _l["voice"] = "dispatcher" if _t.startswith(("Central to", "Central:")) or _l["context"] in ("description", "shift") else "car"
+    _l["voice"] = "dispatcher" if _t.startswith(("Central to", "Central:")) or _l["context"] in ("description", "shift") else ("sergeant" if _t.startswith(("This is the sergeant", "Sergeant to")) else "car")
 _pr["audio"] = {"filter": "1970s police two-way radio: band-limited 300-3000 Hz, squelch tail, light static; dispatcher slightly cleaner than cars",
-                "voices": {"dispatcher": "one adult voice, calm, flat, fast, Midtown Central dispatch", "car": "several adult patrol voices, rotating; breathless on foot, louder in pursuit"},
-                "tiers": "heat1-heat5 map to Gameplay heat levels; escalate and cop_killed take over at 'officer down'",
+                "voices": {"sergeant": "one older adult voice, gravel, slow; the hot tier only (audio may map to the car urgent register)", "dispatcher": "one adult voice, calm, flat, fast, Midtown Central dispatch", "car": "several adult patrol voices, rotating; breathless on foot, louder in pursuit"},
+                "tiers": "heat1-heat5 map to Gameplay heat levels; escalate and cop_killed take over at 'officer down'; 'hot' plays in the 90 s after officer down (band clears, cars check in, a sergeant takes the air)",
                 "slots": {"street": "numbered cross streets 21st-45th, spoken ('Thirty-Fourth')", "avenue": "Fifth, Sixth, Seventh, Eighth, Ninth, Madison, Park, Lexington, Broadway",
                           "direction": ["uptown", "downtown", "east", "west"], "crime": ["a robbery", "an assault", "a car theft", "shots fired", "a hit-and-run"],
                           "sex": ["male", "female"], "build": ["thin", "heavy-set", "medium build", "tall", "short"],
