@@ -577,6 +577,93 @@ const parksJson = { trees: [] as number[][], benches: [] as number[][], lamps: [
   log(`parks: ${parksJson.trees.length - street} park trees, ${street} street trees, ${parksJson.benches.length} benches, ${parksJson.lamps.length} lamps, ${parksJson.rails.length} railing spans, ${parkPaths.length} path polygons`);
 }
 
+// ------------------------------------------------------------------ street furniture (Phase 3 block A; gameplay request 6)
+// User: "There are no street signs/traffic lights." Placed from data with 1974 placement rules, written to
+// public/data/furniture.json. The engine renders it (instanced); gameplay instantiates breakables and
+// colliders from the same records.
+//   items:   [type, x, z, yaw]  callbox | payphone | hydrant | mailbox | meter | newsstand | trash | busstop
+//   signals: [x, z, yaw]         a corner signal pole whose heads face along yaw (OSM traffic_signals junctions)
+//   signs:   [x, z, yaw, a, b]   a corner street-name pole: blade a faces along yaw, blade b across
+{
+  const furn = { items: [] as (string | number)[][], signals: [] as number[][], signs: [] as (string | number)[][] };
+  const rnd = (a: number, b: number) => { let h = Math.imul(Math.round(a * 10) ^ Math.imul(Math.round(b * 10), 0x27d4eb2d), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const G = 50, bIdx = new Map<string, number[]>();
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / G); gx <= Math.floor(bb.maxX / G); gx++) for (let gz = Math.floor(bb.minZ / G); gz <= Math.floor(bb.maxZ / G); gz++) { const key = `${gx},${gz}`; (bIdx.get(key) ?? bIdx.set(key, []).get(key)!).push(k); } });
+  const bAt = (p: P) => (bIdx.get(`${Math.floor(p[0] / G)},${Math.floor(p[1] / G)}`) ?? []).find((k) => pointInPoly(p, buildings[k].poly));
+  const free = (p: P) => inRegion(p) && bAt(p) === undefined && !parkUnion.some((q) => pointInPoly(p, q));
+  const isAve = (n?: string) => !!n && /Avenue|Broadway/.test(n);
+  // junction legs with street names
+  const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
+  const node = new Map<string, { p: P; legs: { dir: P; width: number; name?: string }[] }>();
+  for (const st of streets) st.pts.forEach((p, k) => {
+    const e = node.get(key(p)) ?? node.set(key(p), { p, legs: [] }).get(key(p))!;
+    for (const nb of [st.pts[k - 1], st.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: st.width, name: st.name }); }
+  });
+  const sigNodes = osm.filter((e: any) => e.type === 'node' && e.tags?.highway === 'traffic_signals').map((e: any) => nodes.get(e.id)!).filter(Boolean) as P[];
+  let junctions = 0;
+  for (const j of node.values()) {
+    if (j.legs.length < 3 || !inRegion(j.p)) continue; junctions++;
+    const legs = [...j.legs].sort((a, b) => Math.atan2(a.dir[1], a.dir[0]) - Math.atan2(b.dir[1], b.dir[0]));
+    const ave = legs.some((l) => isAve(l.name));
+    const corners: { p: P; a: typeof legs[0]; b: typeof legs[0] }[] = [];
+    for (let k = 0; k < legs.length; k++) {
+      const a = legs[k], b = legs[(k + 1) % legs.length];
+      const cross = a.dir[0] * b.dir[1] - a.dir[1] * b.dir[0], dot = a.dir[0] * b.dir[0] + a.dir[1] * b.dir[1];
+      if (cross <= 0.5 || dot < -0.5) continue; // only ~90 degree corners between consecutive legs
+      const p: P = [j.p[0] + a.dir[0] * (b.width / 2 + 1.4) + b.dir[0] * (a.width / 2 + 1.4), j.p[1] + a.dir[1] * (b.width / 2 + 1.4) + b.dir[1] * (a.width / 2 + 1.4)];
+      if (free(p)) corners.push({ p, a, b });
+    }
+    if (!corners.length) continue;
+    const r = (k: number) => rnd(j.p[0] + k * 17, j.p[1] - k * 31);
+    const pick = (k: number) => corners[Math.floor(r(k) * corners.length) % corners.length];
+    const off = (c: typeof corners[0], s: number, t: number): P => [c.p[0] + c.a.dir[0] * s + c.b.dir[0] * t, c.p[1] + c.a.dir[1] * s + c.b.dir[1] * t];
+    const yawOf = (d: P) => +Math.atan2(-d[0], -d[1]).toFixed(3);
+    // street-name sign: one corner pole per junction (both names)
+    const named = corners.find((c) => c.a.name && c.b.name);
+    if (named) furn.signs.push([+named.p[0].toFixed(2), +named.p[1].toFixed(2), yawOf(named.a.dir), named.a.name!, named.b.name!]);
+    // traffic signals: two diagonal corners when OSM marks the junction signalled
+    if (sigNodes.some((sp) => Math.hypot(sp[0] - j.p[0], sp[1] - j.p[1]) < 18)) {
+      for (const c of [corners[0], corners[Math.floor(corners.length / 2)]]) { const q = off(c, 0.6, -0.4); furn.signals.push([+q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.a.dir)]); }
+    }
+    if (r(1) < (ave ? 0.8 : 0.5)) { const c = pick(2), q = off(c, 1.2, 0.3); if (free(q)) furn.items.push(['callbox', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.a.dir)]); }
+    if (r(3) < 0.6) { const c = pick(4), q = off(c, 0.3, 1.3); if (free(q)) furn.items.push(['mailbox', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.b.dir)]); }
+    if (r(5) < 0.75) { const c = pick(6), q = off(c, 2.0, 0.2); if (free(q)) furn.items.push(['trash', +q[0].toFixed(2), +q[1].toFixed(2), 0]); }
+    if (ave && r(7) < 0.35) { const c = pick(8), q = off(c, 3.2, 0.9); if (free(q)) furn.items.push(['payphone', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.a.dir)]); }
+    if (ave && r(9) < 0.25) { const c = pick(10), q = off(c, 0.6, 4.0); if (free(q)) furn.items.push(['newsstand', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.b.dir)]); }
+  }
+  // along the kerbs: hydrants (~75 m), meters (commercial side streets, 6 m), bus stops (avenues, ~240 m)
+  for (const st of streets) {
+    if (!st.name || st.cls === 'motorway') continue;
+    const ave = isAve(st.name);
+    for (const side of [-1, 1]) {
+      let along = 0;
+      for (let k = 1; k < st.pts.length; k++) {
+        const a = st.pts[k - 1], b2 = st.pts[k]; const L = Math.hypot(b2[0] - a[0], b2[1] - a[1]); if (L < 1) continue;
+        const ux = (b2[0] - a[0]) / L, uz = (b2[1] - a[1]) / L, nx = -uz * side, nz = ux * side;
+        const at = (t: number, o: number): P => [a[0] + ux * t + nx * (st.width / 2 + o), a[1] + uz * t + nz * (st.width / 2 + o)];
+        const kerbYaw = +Math.atan2(-nx, -nz).toFixed(3);
+        for (let t = 37 + (side > 0 ? 0 : 37); t < L - 10; t += 75) { const q = at(t, 0.6); if (free(q)) furn.items.push(['hydrant', +q[0].toFixed(2), +q[1].toFixed(2), kerbYaw]); }
+        if (!ave) for (let t = 14; t < L - 14; t += 6.1) {
+          const q = at(t, 0.45), probe = at(t, 8); const bk = bAt(probe);
+          if (bk === undefined || buildings[bk].style === 1 || buildings[bk].style === 6 || !free(q)) continue;
+          if (rnd(q[0] * 3, q[1]) < 0.15) continue; // gaps: hydrant zones, driveways, missing heads
+          furn.items.push(['meter', +q[0].toFixed(2), +q[1].toFixed(2), kerbYaw]);
+        }
+        if (ave && side > 0) for (let t = 120 - (along % 240); t < L - 20; t += 240) { if (t < 20) continue; const q = at(t, 0.7); if (free(q)) furn.items.push(['busstop', +q[0].toFixed(2), +q[1].toFixed(2), kerbYaw]); }
+        along += L;
+      }
+    }
+  }
+  // payphones and newsstands at subway entrances
+  for (const e of osm) if (e.type === 'node' && e.tags?.railway === 'subway_entrance') {
+    const p = nodes.get(e.id); if (!p || !inRegion(p)) continue;
+    const q: P = [p[0] + 2.5, p[1] + 1.5]; if (free(q) && rnd(p[0], p[1]) < 0.6) furn.items.push(['payphone', +q[0].toFixed(2), +q[1].toFixed(2), 0]);
+  }
+  fs.writeFileSync(path.join(OUT, 'furniture.json'), JSON.stringify(furn));
+  const count = (t: string) => furn.items.filter((i) => i[0] === t).length;
+  log(`street furniture: ${junctions} junctions, ${furn.signals.length} signal poles, ${furn.signs.length} name signs, callbox ${count('callbox')}, payphone ${count('payphone')}, hydrant ${count('hydrant')}, mailbox ${count('mailbox')}, meter ${count('meter')}, newsstand ${count('newsstand')}, trash ${count('trash')}, busstop ${count('busstop')}`);
+}
+
 // ------------------------------------------------------------------ assign to chunks & write
 ensureDir(path.join(OUT, 'chunks'));
 for (const f of fs.readdirSync(path.join(OUT, 'chunks'))) fs.unlinkSync(path.join(OUT, 'chunks', f));

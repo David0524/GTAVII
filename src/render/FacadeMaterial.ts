@@ -152,7 +152,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const roomLevel = rnd2.mul(0.6).add(0.45);
   const falloff = mix(float(0.55), float(1.0), smoothstep(0.0, 1.0, fv.sub(sill).div(head.sub(sill)).clamp(0, 1)));
   const shadeGlow = select(shadeHere, float(0.55), float(1));
-  const emissiveSharp = select(isLit.or(storeLit), select(storeLit, vec3(1.0, 0.86, 0.66), lampCol).mul(select(storeLit, float(0.5), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
+  const emissiveSharp = select(isLit.or(storeLit), select(storeLit, vec3(1.0, 0.86, 0.66), lampCol).mul(select(storeLit, float(0.3).mul(roomLevel), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
   const emissiveAvg = lampCol.mul(litP.mul(0.38));
   const emissiveWin = mix(emissiveSharp, emissiveAvg, lodFade);
 

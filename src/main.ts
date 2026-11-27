@@ -19,6 +19,7 @@ import { promptStrip, PROMPT_CSS } from './ui/Prompts';
 import { loadReport } from './engine/debug/LoadReport';
 import { AdaptiveResolution } from './engine/AdaptiveResolution';
 import { Parks } from './world/Parks';
+import { StreetFurniture } from './world/StreetFurniture';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -86,6 +87,9 @@ async function main() {
   const parks = new Parks(quality);
   await parks.load(base + 'parks.json').catch((e) => console.warn('parks', e));
   scene.add(parks.root);
+  const furniture = new StreetFurniture(quality);
+  await furniture.load(base + 'furniture.json').catch((e) => console.warn('furniture', e));
+  scene.add(furniture.root);
   loadReport.mark('streets+lights');
 
   // ---------------------------------------------------------------- input
@@ -220,6 +224,7 @@ async function main() {
     { name: 'no skyline', ...hideObj(skyline) },
     { name: 'no street lights', ...hideObj(streetLights) },
     { name: 'no trees + park dressing', ...hideObj(parks.root) },
+    { name: 'no street furniture', ...hideObj(furniture.root) },
     { name: 'baseline again', apply: () => {}, revert: () => {} },
   ]) : null;
   // Per-frame safety net. It only DETECTS a change; the resize itself runs as a separate task, never
@@ -384,6 +389,7 @@ async function main() {
     facadeUniforms.night.value = nightOverride ?? light.night;
     facadeUniforms.minutes.value = worldClock.minutes;
     parks.update(dt, camera.position);
+    furniture.update(dt, camera.position);
     streetLightUniforms.lightsOn.value = light.lightsOn;
     renderer.toneMappingExposure = light.exposure * expMul;
     { const f = mode === 'onfoot' ? body.object.position : camera.position; atmosphere.followFocus(f.x, f.y, f.z); }
