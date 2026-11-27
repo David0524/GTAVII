@@ -220,13 +220,13 @@ export class Ambience {
     // Garment District: carts, dock plates, rack wheels, on working weekdays.
     const garment = (m.garment + m.fur * 0.6) * curve(CURVE.garment, h) * (wd >= 1 && wd <= 5 ? 1 : wd === 6 ? 0.3 : 0);
     if (garment > 0.05) {
-      if (this.every('cart', garment * 0.35, dt)) {
+      if (this.every('cart', garment * 0.6, dt)) {
         const c = env.canyon.state, s = this.rng.next() < 0.5 ? -1 : 1, d = Math.max(3, Math.min(s < 0 ? c.dL : c.dR, 12) - 2), along = this.rng.range(-30, 30);
         const p0: Vec3 = [lx - c.az * d * s + c.ax * along, 0.5, lz + c.ax * d * s + c.az * along]; const v = 1.4 * (this.rng.next() < 0.5 ? -1 : 1);
         const t0 = env.ctx.currentTime;
-        env.oneShot('cart.rattle', { category: 'emitter', gain: 0.7, at: () => { const t = env.ctx.currentTime - t0; return [p0[0] + c.ax * v * t, 0.5, p0[2] + c.az * v * t]; } });
+        env.oneShot('cart.rattle', { category: 'emitter', gain: 1.0, at: () => { const t = env.ctx.currentTime - t0; return [p0[0] + c.ax * v * t, 0.5, p0[2] + c.az * v * t]; } });
       }
-      if (this.every('dock', garment * 0.06, dt)) env.oneShot('dock.bang', { category: 'impact', gain: 0.6, at: this.around(25, 90, 1) });
+      if (this.every('dock', garment * 0.1, dt)) env.oneShot('dock.bang', { category: 'impact', gain: 0.8, at: this.around(25, 90, 1) });
     }
     if (this.every('jackhammer', (h > 7.5 && h < 16.5 && wd >= 1 && wd <= 5 ? 1 : 0) * 0.025, dt)) {
       const p = this.around(80, 220, 0.5); for (let k = 0; k < 4; k++) setTimeoutAudio(env, k * 3.6, () => env.oneShot('jackhammer', { category: 'impact', gain: 0.45, at: p }));
@@ -306,7 +306,7 @@ export class Ambience {
         env.oneShot('drip', { category: 'emitter', gain: 0.5, at: [e.x + (e.nx ?? 0) * 0.3, 0.16, e.z + (e.nz ?? 0) * 0.3], rate: this.rng.range(0.9, 1.1) });
       }
     }
-    const m = this.mix, h = env.clock.hour;
+    const m = this.mix, h = env.clock.hour; env.parkWeight = m.park;
     const t = env.traffic, inside = env.interior ? 1 : 0;
     const pw = power === 'on' ? 1 : power === 'dim' ? 0.45 : 0;
     // Roar: whole-city bed. Brighter and louder by day, sags in a brownout (the city's hum drops out).
@@ -318,9 +318,11 @@ export class Ambience {
     // Crowds: sim pedestrian count near the listener, else the clock curve by district.
     const peds = env.peds.fromSim ? env.peds.near : curve(CURVE.peds, h) * (0.35 + 0.5 * m.avenue + 0.6 * m.herald + 0.3 * m.garment * curve(CURVE.garment, h) + 0.7 * (m.eighth + m.deuce) * m.night);
     const rainK = 1 - 0.75 * env.weather.rain;
-    const crowd = Math.min(1, peds) * rainK * (1 - m.park * 0.5);
+    // Parks fill at lunch and on summer evenings regardless of the street pedestrian count.
+    const parkLife = m.park * Math.max(curve([[0, 0], [7, 0.1], [11.5, 0.5], [12.5, 1], [14, 0.6], [17, 0.5], [19, 0.7], [21, 0.2], [24, 0]], h), 0);
+    const crowd = Math.min(1, Math.max(peds * (1 - m.park * 0.5), parkLife)) * rainK;
     for (const k of ['wallaL', 'wallaR']) { this.beds[k].v.setGain(Math.min(1, 0.25 + crowd) * crowd * 1.1); this.setParam(k, 'density', Math.min(1, crowd * 1.2)); this.setParam(k, 'excite', Math.min(1, 0.2 + 0.6 * (m.eighth + m.deuce) * m.night + 0.2 * m.herald)); this.setParam(k, 'gain', 1); }
-    const kidsOn = h > 9 && h < 19.5 && env.weather.kind !== 'rain' ? (env.clock.weekday === 0 || env.clock.weekday === 6 ? 1 : 0.6) : 0;
+    const kidsOn = h > 9 && h < 19.5 && env.weather.kind !== 'rain' ? (env.clock.weekday === 0 || env.clock.weekday === 6 ? 1 : 0.8) : 0;
     this.beds.kids.v.setGain(kidsOn * 0.7); this.setParam('kids', 'density', 0.6); this.setParam('kids', 'child', 1); this.setParam('kids', 'excite', 0.8); this.setParam('kids', 'gain', 1);
     // Rain and its surfaces; after the rain, drips off fire escapes and AC units for minutes.
     const rain = env.weather.rain;

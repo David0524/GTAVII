@@ -72,7 +72,7 @@ export const CURVES: Record<Category, { ref: number; max: number; roll: number; 
  * Leq at 30 m), and the crowd reads clearly on the sidewalks.
  */
 export const MIX_DB: Record<Category, number> = {
-  vehicle: 14, horn: 15, siren: 3, tyre: 9, impact: 9, footstep: 8, voice: 0, crowd: -1, emitter: 6, subway: 8, radio: 4, animal: 6, weather: 0, bed: 0, ui: 0,
+  vehicle: 14, horn: 12, siren: 3, tyre: 9, impact: 9, footstep: 8, voice: 0, crowd: -1, emitter: 6, subway: 8, radio: 4, animal: 6, weather: 0, bed: 0, ui: 0,
 };
 export const MIX_GAIN = Object.fromEntries(Object.entries(MIX_DB).map(([k, v]) => [k, Math.pow(10, v / 20)])) as Record<Category, number>;
 

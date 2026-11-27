@@ -214,7 +214,9 @@ export class VehicleAudio {
     for (let s = 0; s < 4; s++) {
       const h = this.sectors[s]; if (!h) continue;
       const D = sectorD[s], S = D > 0 ? sectorS[s] / D : 0, Hh = D > 0 ? sectorH[s] / D : 0;
-      h.v.setGain(D > 0.005 ? Math.min(1.5, 0.7 + 0.3 * Math.sqrt(D)) : 0);
+      // Inside a park the traffic is across lawns and trees: open, further, lower.
+      const parkK = 1 - 0.45 * (env.parkWeight ?? 0);
+      h.v.setGain(D > 0.005 ? Math.min(1.5, 0.7 + 0.3 * Math.sqrt(D)) * parkK : 0);
       if (h.v.src && h.node) {
         const t = env.ctx.currentTime, P = h.node.parameters;
         P.get('density')!.setTargetAtTime(Math.min(6, D * 2.2), t, 0.4); P.get('speed')!.setTargetAtTime(S, t, 0.5); P.get('heavy')!.setTargetAtTime(Hh, t, 0.5);

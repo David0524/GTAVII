@@ -34,4 +34,6 @@ export interface Env {
   oneShot(family: string, o?: OneShotOpts): Voice | null;
   /** Gate for anything that schedules: false while the context is suspended or the game is paused. */
   live: boolean;
+  /** 0..1 how much the listener is in a park (set by the ambience mix). */
+  parkWeight?: number;
 }
