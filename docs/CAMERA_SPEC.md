@@ -82,6 +82,32 @@
   - fall lag before landing.
 - **Where we match (on paper):** every one of these is specified above, with numbers and an acceptance test.
 - **Where we fall short:**
-  - nothing is built yet; it waits for the ownership answer;
+  - it's built and tested on a synthetic alley course, but not yet felt in the city: that waits for the engine's wiring and a frame strip;
+  - pedestrians brushing the lens fade via the characters stream, which isn't hooked up yet;
   - RDR2's camera also reacts to horse and terrain slope, and that's out of scope here;
   - GTA V's fine-tuned per-weapon aim offsets will be a single aim pose here until gameplay lands its weapons list.
+
+## Implementation: `src/camera/ThirdPersonCamera.ts` (one new file, for the engine to review)
+Oversight ruled that UI writes it and the engine reviews and owns it. Tests: `tests/camera.test.ts` (8, real Rapier colliders):
+- no clipping on a 1,000-step random walk (alley, fire-escape rails, stoop, an L corner): **0 frames inside geometry**;
+- no pops: the arm never grows faster than 2.5 m/s;
+- ease-out holds for 0.25 s, then runs at 2.5 m/s;
+- the ignore list: a pedestrian is ignored and a parked car pulls in;
+- alley mode, and the automatic swap (0.4 s, sticky, never while aiming);
+- shoulder swap 0.22 s, look-behind 0.18 s, climb +0.8 m in 0.25 s;
+- fall pull-back, and the landing dip off under `reduceMotion`;
+- about 20 µs per update on desktop node, against the 150 µs phone budget.
+
+**Wiring for main.ts (the engine's file; about 10 lines):**
+```ts
+const orbit = new ThirdPersonCamera(director.gameplay, input, physics, player.collider); // was OrbitCamera
+const camTune = () => Object.assign(orbit.tune, { follow: settings.get('onFootFollow'), shake: settings.get('cameraShake'),
+  reduceMotion: settings.get('reduceMotion'), mobile: body.classList.contains('touch') });
+// per frame, in place of orbit.update(dt, rp):
+orbit.lookBehind = input.isHeld('lookBehind');
+if (input.pressed('shoulderSwap')) orbit.swapShoulder();
+orbit.update(dt, rp, player.loco());        // LocoState already matches CamLoco; add handY/ladder/aiming/rolling as they land
+orbit.onPlayerFade = (a) => body.setOpacity?.(a); // characters: dithered fade
+```
+- **Input.ts:** add `lookBehind` (B, pad L3-hold) and `shoulderSwap` (C, pad R3) to `ButtonAction`. The UI's remap screen and touch gestures pick them up.
+- **FOV:** the camera adds its offsets (aim −10°, sprint +6°) to whatever `camera.fov` the host set, and notices when the host resets it on resize.
