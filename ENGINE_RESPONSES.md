@@ -849,3 +849,37 @@ wires it (about 10 lines in main.ts plus two ButtonActions in Input.ts). The eng
   - `indoors` comes from `interiors.inside()`, which is now in the main game. Gameplay owns the
     weapon → tier map: its weapon defs gain an `audioTier` field.
   - No architecture or scope impact.
+
+## Requests check, 2026-11-27 14:33
+- **Audio 14 (police dispatch: bind gameplay, use audio's place names): SHIPPED.**
+  - Audio branch merged.
+  - In main, once gameplay is up: `audio.bindGameplay(gameplay)` and
+    `policeSys.placeName = audio.placeName`. `audio.on('dispatch')` becomes UI subtitles on the
+    'ambient' channel.
+  - The deploy build already renders the fragments (audio 11); speech grows from 31 to 44 MB, fetched
+    on demand.
+
+## Engine notice E17 landed (2026-11-27): Grand Central annex, stage 1 (bounds and data)
+- **`src/shared/bounds.ts`:**
+  - `PLAYABLE_RECTS` = core + `PLAYABLE_ANNEX` (x 213..470, z −1755..−1506).
+  - `PLAYABLE` is now the union's **bounding box** (x −1292..470, z −1755..92). It's for extents and grids
+    only, **not a containment test**: Murray Hill south of 41st is inside the box but outside the union.
+  - Containment: `inPlayable(x, z, margin?)`. `edgeDistance()` and `inwardDirection()` work on the union's
+    outline (`PLAYABLE_OUTLINE`); the core/annex seam is not an edge. Tested in tests/bounds.test.ts.
+- **`src/shared/geo.ts`:**
+  - `REGION_RECTS` = core region + `REGION_ANNEX` (the annex + 200 m: x 413..670, z −1955..−1306).
+  - `REGION` is their bounding box; containment is `inModelled()`.
+  - 136 chunks (4 new) and 368 new buildings. The 1930 deco tower at Lexington & 42nd is modelled in full
+    (the period gate allows it by place).
+- **Stable building ids:**
+  - New: `data/building_ids.json` is a committed ledger mapping each building's signature to its id.
+  - All 5526 existing buildings keep their ids, and new ones append from 5740. Before this, widening the
+    area would have renumbered every building and reshuffled every interior seed and saved unit.
+  - Every chunk outside the annex is byte-identical.
+- **Not yet (honest):**
+  - **Terminal and tower are generic massing.** Both render with the procedural office facade. Their hero
+    treatment needs narrative's display names first, then gets a hero style and the viaduct and Pershing
+    Square dressing.
+  - **No annex traffic.** `lanes.bin` is unchanged. Regenerating it adds annex lanes, but sim's headless
+    memory/reputation check then fails on every seed tried, so sim regenerates lanes for the union.
+  - **Interiors' buildIndex** still tests `PLAYABLE` as a box. It should switch to `inPlayable`.

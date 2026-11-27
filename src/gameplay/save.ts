@@ -34,6 +34,8 @@ export interface SaveV3 {
   arcade?: unknown;
   /** street vendors' tills and overturned carts */
   vendors?: unknown;
+  /** purchases per lead per vendor ('lead|vendorId'), for regulars */
+  vendorVisits?: unknown;
   /** bodies left lying, carried or in trunks; discoverAt is seconds remaining (-1 = never by passers-by) */
   bodies?: unknown;
   activeLead?: string;

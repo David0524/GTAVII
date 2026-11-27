@@ -101,3 +101,26 @@ Shots are in `shots/wiring/`.
 - **Doorway collisions are open before an interior is live.** Interiors stream within 30 m, so in
   practice the interior is always there first. A plug collider for not-yet-live units is queued as
   a safety net.
+
+**Storefront speckle: FIXED** (oversight review of 9dea15f). `storefronts_cut_noon.jpg` is re-shot.
+- **Root cause (interiors 52b2fdd):** the uber material compared the interpolated per-vertex pattern id
+  with `equal()`, so some pixels fell through to another pattern. The fix rounds the id first.
+- **Also fixed on the way:**
+  - the chunk door surround is skipped on enterable doors (7836d41);
+  - hidden plugs are collapsed to zero area (a82a26e);
+  - thin glass is a single pane (2752057);
+  - world position is wrapped before hashing (afa65de).
+- **Lesson** (same family as the earlier window flicker): never compare or hash interpolated
+  attributes without rounding them first.
+
+**Driving board** (`drive_w37th_1930.jpg`): the stolen red sedan on W 37th at 19:30, with the chase camera,
+parked rows and the Garment District HUD. The seated lead can't be seen from behind; that's expected.
+
+**Combat smoke in the built game** (`combat_madison_sq_after_shot.jpg`, `?webgl=1&quality=low`):
+- **Test:** Teddy equips `weapon.revolver_service`, aims and holds fire.
+- **Result:** 1 `shot` (the revolver is semi-auto) → 1 `impact`, with no page errors. Audio 13 got a gunshot,
+  a bullet pass and an impact. The sim got `gunfire`, and the peds across Madison Sq cower.
+- **Gap:** the drawn weapon isn't visible on the body. The hand prop and aim pose aren't wired to the
+  character yet; that's next on the combat list.
+- **Slow load:** headless swiftshader loads gameplay at 45–52 s (gameplay-content follows characters).
+  Measure this on a real GPU before treating it as a regression.

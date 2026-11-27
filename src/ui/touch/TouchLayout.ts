@@ -46,7 +46,7 @@ export class TouchLayout {
   private marks: HTMLElement[] = [];
   private arrows = { l: false, r: false, v: 0 };
   private tilt = 0;
-  private ctxT = 0; private lastLabel = '';
+  private ctxT = 0; private lastLabel = ''; private ctxAlt: { kind: string; label: string } | null = null; private lastAlt = '';
   private visible = true;
   private fs = document.createElement('button');
   private fsRoute: FullscreenRoute = 'api';
@@ -121,7 +121,11 @@ export class TouchLayout {
         case 'steerL': this.arrows.l = true; break;
         case 'steerR': this.arrows.r = true; break;
         case 'weapon': longTimer = window.setTimeout(() => { long = true; this.onWheel?.(); hap(); }, 300); break;
-        case 'ctx': if (this.mode === 'drive') longTimer = window.setTimeout(() => { long = true; t?.horn?.(true); }, 450); break;
+        case 'ctx':
+          if (this.mode === 'drive') longTimer = window.setTimeout(() => { long = true; t?.horn?.(true); }, 450);
+          // a context with an alt verb: hold for it (the ring fills over the hold), tap for the main one
+          else if (this.ctxAlt && t?.doAltContext) { el.classList.add('holding'); longTimer = window.setTimeout(() => { long = true; el.classList.remove('holding'); t.doAltContext!(); hap(); }, 450); }
+          break;
       }
     });
     el.addEventListener('pointermove', (e) => {
@@ -131,7 +135,7 @@ export class TouchLayout {
     const up = (e: PointerEvent) => {
       if (this.editing) { this.editEnd(); return; }
       if (!el.classList.contains('on')) return;
-      el.classList.remove('on'); clearTimeout(longTimer);
+      el.classList.remove('on', 'holding'); clearTimeout(longTimer);
       const tap = performance.now() - downT < 300;
       switch (d.id) {
         case 'jump': inp.touchHeld.delete('jump'); break;
@@ -145,7 +149,7 @@ export class TouchLayout {
         case 'weapon': if (!long && tap) t?.drawWeapon?.(); break;
         case 'reload': { const dx = e.clientX - sx; if (Math.abs(dx) > 28) t?.swapWeapon?.(dx > 0 ? 1 : -1); else t?.reload?.(); hap(); break; }
         case 'cover': t?.coverOrRoll?.(this.moveDir()); break;
-        case 'ctx': if (long) t?.horn?.(false); else if (t) t.doContext(this.moveDir()); else inp.tap('use'); hap(); break;
+        case 'ctx': if (long) { if (this.mode === 'drive') t?.horn?.(false); } else if (t) t.doContext(this.moveDir()); else inp.tap('use'); if (!long) hap(); break;
         case 'menu': inp.tap('pause'); break;
       }
     };
@@ -272,6 +276,14 @@ export class TouchLayout {
       const c = t?.context() ?? null;
       const label = c?.label ?? (this.mode === 'drive' ? 'Exit' : t ? '' : 'Use');
       if (label !== this.lastLabel) { this.lastLabel = label; (this.els.get('ctx')!.firstElementChild as HTMLElement).textContent = label; }
+      // the alt verb as a quiet second line ("Hold · Mouth off"), only on foot
+      this.ctxAlt = this.mode !== 'drive' && t?.doAltContext ? c?.alt ?? null : null;
+      const altL = this.ctxAlt?.label ?? '';
+      if (altL !== this.lastAlt) {
+        this.lastAlt = altL; const ctxEl = this.els.get('ctx')!; let sm = ctxEl.querySelector('small.alt') as HTMLElement | null;
+        if (!sm) { sm = document.createElement('small'); sm.className = 'alt'; ctxEl.appendChild(sm); }
+        sm.textContent = altL ? `Hold · ${altL}` : ''; ctxEl.classList.toggle('has-alt', !!altL);
+      }
       const cov = t?.coverLabel?.(); if (cov) (this.els.get('cover')!.firstElementChild as HTMLElement).textContent = cov;
       // the one jump button is also climb and vault (MOVEMENT.md): its label follows the engine's traversal check
       const tr = this.host.traversal?.() ?? null, jl = tr ? TRAVERSAL_VERB[tr.kind] : 'Jump';

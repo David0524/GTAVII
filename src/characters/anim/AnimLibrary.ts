@@ -3,7 +3,7 @@
  * cheap nlerp blending keep the per-character cost to a few microseconds per joint).
  * A Pose is local joint rotations (x,y,z,w per joint) + the pelvis offset from the root.
  */
-import { readContainer } from '../format';
+import { readContainer, formatReady } from '../format';
 import { NUM_JOINTS } from '../rig';
 
 export interface ClipInfo {
@@ -44,10 +44,12 @@ export class AnimLibrary {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`characters: ${url} ${r.status}`);
     const lib = new AnimLibrary();
+    await formatReady();
     lib.addContainer(await r.arrayBuffer());
     return lib;
   }
 
+  /** Callers must have awaited formatReady() (load() does). */
   addContainer(buf: ArrayBuffer) {
     const c = readContainer(buf);
     this.restPelvisHeight = c.meta.restPelvisHeight;

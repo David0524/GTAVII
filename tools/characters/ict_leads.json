@@ -1,0 +1,45 @@
+{
+  "note": "Synthesised ICT-FaceKit Light identities (coefficients on the unit-variance identity modes, designed by hand in ?characters=1&scene=ict; never fitted to photographs). Mode 0: masculine/broad (-) to feminine/fine (+); mode 2: (+) longer, older; mode 3: (+) broader, softer face, wider nose.",
+  "delphine": {
+    "c": [
+      2.4,
+      0.5,
+      -0.8,
+      2.2,
+      0.6,
+      0,
+      0,
+      0.8
+    ],
+    "tone": "#5a3825",
+    "status": "starting identity (candidate D); to refine with skin, eyes and hair",
+    "iris": "#4a2a16",
+    "detail": {
+      "png": "data/raw/characters/mh_skins/young_african_female.png",
+      "source": "MakeHuman system assets (CC0), skins/young_african_female/young_darkskinned_female_diffuse.png",
+      "crop": [
+        1540,
+        780,
+        440,
+        520
+      ],
+      "rotate": -90,
+      "eyes": [
+        [
+          172,
+          176
+        ],
+        [
+          312,
+          176
+        ]
+      ],
+      "mouth": [
+        245,
+        318
+      ],
+      "sigma": 6,
+      "strength": 0.85
+    }
+  }
+}

@@ -4,7 +4,7 @@
     "samplePeak": -1.5000000201300447,
     "safetyClamps": 0
   },
-  "generated": "2026-11-27T03:33:34.857Z",
+  "generated": "2026-11-27T14:22:41.175Z",
   "note": "Headless Chromium OfflineAudioContext in a CPU-only container: timings are CPU-only, not device numbers.",
   "selfTest": {
     "lufs": -22.993297143031644,
@@ -20,7 +20,7 @@
       "profile": "mobile",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 39890.5,
+      "renderMs": 30519.099999999977,
       "checks": {
         "nan": 0,
         "subnormals": 0,
@@ -28,28 +28,30 @@
         "maxRealVoices": 37,
         "voiceCap": 64,
         "maxTotalVoices": 38,
-        "connectedBeforeUnload": 447,
+        "connectedBeforeUnload": 449,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 5544,
+        "nodesCreated": 5550,
         "limiter": {
           "limiterGrDb": -5.785964799321649e-12,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.6439023586241921,
+          "peakIn": 0.643902249009392,
           "duckRadioDb": 0,
           "over1dB": 0.009518898001424374,
           "over3dB": 0,
-          "maxGrDb": -2.972170737840227
+          "maxGrDb": -2.9721664214359365,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
-        "p50": 0.30000000004656613,
-        "p95": 0.8000000000465661,
-        "p99": 1.6999999999534339,
-        "max": 13.5,
-        "mean": 0.41032000000054636
+        "p50": 0.2000000000698492,
+        "p95": 0.5999999999767169,
+        "p99": 1.2999999999301508,
+        "max": 10.300000000046566,
+        "mean": 0.3048000000001242
       },
       "stats": {
         "state": "closed",
@@ -62,24 +64,26 @@
           "promoted": 778,
           "demoted": 746,
           "occlusionChecks": 28471,
-          "updateMs": 0.2000000000698492
+          "updateMs": 0.09999999997671694
         },
         "mixer": {
           "limiterGrDb": -5.785964799321649e-12,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.6439023586241921,
+          "peakIn": 0.643902249009392,
           "duckRadioDb": 0,
           "over1dB": 0.009518898001424374,
           "over3dB": 0,
-          "maxGrDb": -2.972170737840227
+          "maxGrDb": -2.9721664214359365,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 52175520,
+          "decodedBytes": 57042540,
           "downloadedBytes": 228949,
-          "bakeMs": 2490.9999999984866,
+          "bakeMs": 2081.7000000008848,
           "streamed": 4,
-          "baked": 289,
+          "baked": 335,
           "evicted": 0,
           "codec": "opus",
           "failures": [],
@@ -151,6 +155,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -169,35 +196,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 136.30000000004657,
+          "buildMs": 84.59999999997672,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.7000000000698492,
-          "updateMaxMs": 13.5,
+          "updateMs": 0.2000000000698492,
+          "updateMaxMs": 10.300000000046566,
           "frames": 3750,
-          "sumMs": 1538.700000002049,
+          "sumMs": 1143.0000000004657,
           "parts": {
-            "canyon": 70.79999999946449,
-            "radio": 15.999999999883585,
-            "ambience": 347.80000000074506,
-            "vehicles": 276.4000000016531,
-            "footsteps": 107.39999999839347,
-            "voices": 705.5000000020955
+            "canyon": 56.900000000954606,
+            "radio": 12.399999998975545,
+            "ambience": 280.7999999988824,
+            "vehicles": 214.9000000001397,
+            "footsteps": 76.90000000060536,
+            "voices": 492.59999999962747
           },
           "partsMax": {
-            "canyon": 2.299999999930151,
-            "radio": 1,
-            "ambience": 2.800000000046566,
-            "vehicles": 2.199999999953434,
-            "footsteps": 0.7000000000698492,
-            "voices": 6
+            "canyon": 1.900000000023283,
+            "radio": 1.599999999976717,
+            "ambience": 1.7000000000698492,
+            "vehicles": 2.299999999930151,
+            "footsteps": 1.599999999976717,
+            "voices": 5.300000000046566
           }
         },
         "load": {
-          "loadMs": 1518.4000000000233
+          "loadMs": 1423.4000000000233,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -271,12 +299,14 @@
           28
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -15.74526086693446,
-        "momentaryMax": -8.125410624209685,
-        "shortTermMax": -11.55030438069412,
-        "lra": 6.80369122844351,
-        "truePeak": -1.5000670751035794,
+        "integrated": -15.745261000172965,
+        "momentaryMax": -8.125412875253984,
+        "shortTermMax": -11.550304495383097,
+        "lra": 6.803691404674131,
+        "truePeak": -1.5000670833599463,
         "samplePeak": -1.5000000201300447,
         "clipped": 0
       },
@@ -303,36 +333,38 @@
       "profile": "mobile",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 12599.199999999953,
+      "renderMs": 8147.20000000007,
       "checks": {
         "nan": 0,
         "subnormals": 0,
-        "samplePeak": 0.28827428817749023,
+        "samplePeak": 0.2882743179798126,
         "maxRealVoices": 13,
         "voiceCap": 64,
         "maxTotalVoices": 17,
-        "connectedBeforeUnload": 132,
+        "connectedBeforeUnload": 134,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 663,
+        "nodesCreated": 669,
         "limiter": {
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.261952651929157,
+          "peakIn": 0.261952701734081,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
         "p50": 0.09999999997671694,
-        "p95": 0.30000000004656613,
-        "p99": 0.5,
-        "max": 9.70000000006985,
-        "mean": 0.1367733333332464
+        "p95": 0.2000000000698492,
+        "p99": 0.40000000002328306,
+        "max": 4.699999999953434,
+        "mean": 0.08322666666607062
       },
       "stats": {
         "state": "closed",
@@ -351,18 +383,20 @@
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.261952651929157,
+          "peakIn": 0.261952701734081,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 52175520,
+          "decodedBytes": 57042540,
           "downloadedBytes": 228949,
-          "bakeMs": 2485.199999999604,
+          "bakeMs": 1983.3000000003958,
           "streamed": 4,
-          "baked": 289,
+          "baked": 335,
           "evicted": 0,
           "codec": "opus",
           "failures": [],
@@ -430,6 +464,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -448,35 +505,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 115.09999999997672,
+          "buildMs": 61.20000000006985,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.09999999997671694,
-          "updateMaxMs": 9.70000000006985,
+          "updateMs": 0.10000000009313226,
+          "updateMaxMs": 4.699999999953434,
           "frames": 3750,
-          "sumMs": 512.899999999674,
+          "sumMs": 312.0999999977648,
           "parts": {
-            "canyon": 50.79999999993015,
-            "radio": 8.900000000256114,
-            "ambience": 119.70000000018626,
-            "vehicles": 105.50000000011642,
-            "footsteps": 17.100000000209548,
-            "voices": 202.09999999927823
+            "canyon": 26.79999999946449,
+            "radio": 5.100000000209548,
+            "ambience": 75.60000000114087,
+            "vehicles": 69.39999999781139,
+            "footsteps": 9.600000000093132,
+            "voices": 120.19999999902211
           },
           "partsMax": {
-            "canyon": 1,
-            "radio": 0.7000000000698492,
-            "ambience": 0.7999999999301508,
-            "vehicles": 1.599999999976717,
-            "footsteps": 0.19999999995343387,
-            "voices": 9.400000000023283
+            "canyon": 0.30000000004656613,
+            "radio": 0.5999999999767169,
+            "ambience": 1.599999999976717,
+            "vehicles": 1.7999999999301508,
+            "footsteps": 0.10000000009313226,
+            "voices": 4.400000000023283
           }
         },
         "load": {
-          "loadMs": 1391
+          "loadMs": 1128.5999999999767,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -550,13 +608,15 @@
           11
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -26.197334978726367,
-        "momentaryMax": -21.61459762201079,
-        "shortTermMax": -22.008319620001384,
-        "lra": 6.336321032849472,
-        "truePeak": -10.80405197721715,
-        "samplePeak": -10.803881831401235,
+        "integrated": -26.197334968680952,
+        "momentaryMax": -21.614597611621097,
+        "shortTermMax": -22.00831954287852,
+        "lra": 6.336321028171362,
+        "truePeak": -10.804051183732168,
+        "samplePeak": -10.803880933438146,
         "clipped": 0
       },
       "ffmpeg": {
@@ -582,7 +642,7 @@
       "profile": "mobile",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 30830.099999999977,
+      "renderMs": 22244,
       "checks": {
         "nan": 0,
         "subnormals": 0,
@@ -590,28 +650,30 @@
         "maxRealVoices": 30,
         "voiceCap": 64,
         "maxTotalVoices": 31,
-        "connectedBeforeUnload": 323,
+        "connectedBeforeUnload": 325,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 4856,
+        "nodesCreated": 4862,
         "limiter": {
           "limiterGrDb": -5.785964799321649e-12,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.6124727114647133,
+          "peakIn": 0.6124727547762027,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": -0.9560864529046925
+          "maxGrDb": -0.9560864529046947,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
-        "p50": 0.2000000000698492,
-        "p95": 0.6999999999534339,
-        "p99": 1.3999999999068677,
-        "max": 6,
-        "mean": 0.3072266666669399
+        "p50": 0.19999999995343387,
+        "p95": 0.5,
+        "p99": 1,
+        "max": 5.099999999976717,
+        "mean": 0.21736000000142183
       },
       "stats": {
         "state": "closed",
@@ -624,24 +686,26 @@
           "promoted": 691,
           "demoted": 669,
           "occlusionChecks": 25759,
-          "updateMs": 0
+          "updateMs": 0.09999999997671694
         },
         "mixer": {
           "limiterGrDb": -5.785964799321649e-12,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.6124727114647133,
+          "peakIn": 0.6124727547762027,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": -0.9560864529046925
+          "maxGrDb": -0.9560864529046947,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 52175520,
+          "decodedBytes": 57042540,
           "downloadedBytes": 228949,
-          "bakeMs": 2533.1999999997206,
+          "bakeMs": 1991.699999999837,
           "streamed": 4,
-          "baked": 289,
+          "baked": 335,
           "evicted": 0,
           "codec": "opus",
           "failures": [],
@@ -711,6 +775,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -729,35 +816,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 93.59999999997672,
+          "buildMs": 67.70000000006985,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.2000000000698492,
-          "updateMaxMs": 6,
+          "updateMs": 0.19999999995343387,
+          "updateMaxMs": 5.099999999976717,
           "frames": 3750,
-          "sumMs": 1152.1000000010245,
+          "sumMs": 815.1000000053318,
           "parts": {
-            "canyon": 52.39999999839347,
-            "radio": 9.50000000023283,
-            "ambience": 294.30000000004657,
-            "vehicles": 186.80000000167638,
-            "footsteps": 56.60000000207219,
-            "voices": 539.399999999674
+            "canyon": 38.89999999990687,
+            "radio": 5.900000000256114,
+            "ambience": 215.9000000002561,
+            "vehicles": 132.80000000051223,
+            "footsteps": 30.70000000030268,
+            "voices": 381.7000000042608
           },
           "partsMax": {
-            "canyon": 0.5,
-            "radio": 0.6000000000931323,
-            "ambience": 2.3999999999068677,
-            "vehicles": 1.5,
+            "canyon": 1.099999999976717,
+            "radio": 0.40000000002328306,
+            "ambience": 1.1999999999534339,
+            "vehicles": 1.900000000023283,
             "footsteps": 0.30000000004656613,
-            "voices": 5.200000000069849
+            "voices": 4.799999999930151
           }
         },
         "load": {
-          "loadMs": 1417
+          "loadMs": 1149,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -831,12 +919,14 @@
           23
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -15.448348420623596,
-        "momentaryMax": -11.372040412598055,
-        "shortTermMax": -12.01729543573151,
-        "lra": 6.100218152719426,
-        "truePeak": -1.5000517657310384,
+        "integrated": -15.448348364421607,
+        "momentaryMax": -11.372040660450299,
+        "shortTermMax": -12.017295518044829,
+        "lra": 6.100218106779444,
+        "truePeak": -1.5000517380094616,
         "samplePeak": -1.5000000201300447,
         "clipped": 0
       },
@@ -863,7 +953,7 @@
       "profile": "homeTheatre",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 38991.10000000009,
+      "renderMs": 27220.300000000047,
       "checks": {
         "nan": 0,
         "subnormals": 0,
@@ -871,28 +961,30 @@
         "maxRealVoices": 37,
         "voiceCap": 64,
         "maxTotalVoices": 38,
-        "connectedBeforeUnload": 447,
+        "connectedBeforeUnload": 449,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 5544,
+        "nodesCreated": 5550,
         "limiter": {
           "limiterGrDb": -5.785964799321649e-12,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.3132090198046561,
+          "peakIn": 0.3132089872103338,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": -0.7521498810630984
+          "maxGrDb": -0.7521521881099797,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
-        "p50": 0.2999999999301508,
-        "p95": 0.6999999999534339,
-        "p99": 1.599999999976717,
-        "max": 6.5,
-        "mean": 0.3543200000004222
+        "p50": 0.19999999995343387,
+        "p95": 0.5,
+        "p99": 1,
+        "max": 4.400000000023283,
+        "mean": 0.23730666666716957
       },
       "stats": {
         "state": "closed",
@@ -911,18 +1003,20 @@
           "limiterGrDb": -5.785964799321649e-12,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.3132090198046561,
+          "peakIn": 0.3132089872103338,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": -0.7521498810630984
+          "maxGrDb": -0.7521521881099797,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 52175520,
+          "decodedBytes": 57042540,
           "downloadedBytes": 228949,
-          "bakeMs": 2471.1000000002095,
+          "bakeMs": 2069.300000000163,
           "streamed": 4,
-          "baked": 289,
+          "baked": 335,
           "evicted": 0,
           "codec": "opus",
           "failures": [],
@@ -994,6 +1088,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -1012,35 +1129,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 152.5,
+          "buildMs": 100,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.30000000004656613,
-          "updateMaxMs": 6.5,
+          "updateMs": 0.19999999995343387,
+          "updateMaxMs": 4.400000000023283,
           "frames": 3750,
-          "sumMs": 1328.7000000015832,
+          "sumMs": 889.9000000018859,
           "parts": {
-            "canyon": 62.80000000074506,
-            "radio": 10.300000000512227,
-            "ambience": 276.199999999837,
-            "vehicles": 238.0000000006985,
-            "footsteps": 102.80000000051223,
-            "voices": 626.399999999674
+            "canyon": 47.89999999990687,
+            "radio": 6.800000000279397,
+            "ambience": 192.1999999996042,
+            "vehicles": 159.2999999979511,
+            "footsteps": 62.399999998975545,
+            "voices": 412.10000000474975
           },
           "partsMax": {
-            "canyon": 4.300000000046566,
-            "radio": 0.5,
-            "ambience": 1.900000000023283,
-            "vehicles": 2.400000000023283,
-            "footsteps": 2.200000000069849,
-            "voices": 6.199999999953434
+            "canyon": 0.7000000000698492,
+            "radio": 0.40000000002328306,
+            "ambience": 0.8000000000465661,
+            "vehicles": 1.1000000000931323,
+            "footsteps": 0.2999999999301508,
+            "voices": 3.599999999976717
           }
         },
         "load": {
-          "loadMs": 1430.0999999999767
+          "loadMs": 1202,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -1114,12 +1232,14 @@
           28
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -22.661464497512654,
-        "momentaryMax": -9.014426364845232,
-        "shortTermMax": -17.025364145657875,
-        "lra": 10.192770917826898,
-        "truePeak": -1.5000692732142427,
+        "integrated": -22.661464511777208,
+        "momentaryMax": -9.014426457281656,
+        "shortTermMax": -17.02536420786116,
+        "lra": 10.192770917995102,
+        "truePeak": -1.5000692241780187,
         "samplePeak": -1.5012073434736863,
         "clipped": 0
       },
@@ -1146,36 +1266,38 @@
       "profile": "homeTheatre",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 12809.900000000023,
+      "renderMs": 8101,
       "checks": {
         "nan": 0,
         "subnormals": 0,
-        "samplePeak": 0.10241072624921799,
+        "samplePeak": 0.10241073369979858,
         "maxRealVoices": 13,
         "voiceCap": 64,
         "maxTotalVoices": 17,
-        "connectedBeforeUnload": 132,
+        "connectedBeforeUnload": 134,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 663,
+        "nodesCreated": 669,
         "limiter": {
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.09244364857249762,
+          "peakIn": 0.09244363758738312,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
         "p50": 0.09999999997671694,
-        "p95": 0.39999999990686774,
-        "p99": 0.6999999999534339,
+        "p95": 0.2000000000698492,
+        "p99": 0.30000000004656613,
         "max": 3.900000000023283,
-        "mean": 0.13706666666716338
+        "mean": 0.0760799999997951
       },
       "stats": {
         "state": "closed",
@@ -1188,24 +1310,26 @@
           "promoted": 91,
           "demoted": 80,
           "occlusionChecks": 15988,
-          "updateMs": 0
+          "updateMs": 0.09999999997671694
         },
         "mixer": {
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.09244364857249762,
+          "peakIn": 0.09244363758738312,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 52175520,
+          "decodedBytes": 57042540,
           "downloadedBytes": 228949,
-          "bakeMs": 2534.899999999907,
+          "bakeMs": 1944.2000000000698,
           "streamed": 4,
-          "baked": 289,
+          "baked": 335,
           "evicted": 0,
           "codec": "opus",
           "failures": [],
@@ -1273,6 +1397,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -1291,35 +1438,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 84.90000000002328,
+          "buildMs": 54.90000000002328,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.10000000009313226,
+          "updateMs": 0.09999999997671694,
           "updateMaxMs": 3.900000000023283,
           "frames": 3750,
-          "sumMs": 514.0000000018626,
+          "sumMs": 285.29999999923166,
           "parts": {
-            "canyon": 45.70000000006985,
-            "radio": 8.600000000093132,
-            "ambience": 137.70000000100117,
-            "vehicles": 97.40000000002328,
-            "footsteps": 13.600000000093132,
-            "voices": 199.9000000002561
+            "canyon": 24.099999999511056,
+            "radio": 5.599999999860302,
+            "ambience": 72.30000000062864,
+            "vehicles": 57.19999999913853,
+            "footsteps": 10.29999999993015,
+            "voices": 111.49999999988358
           },
           "partsMax": {
-            "canyon": 2.300000000046566,
-            "radio": 0.5,
-            "ambience": 2.900000000023283,
-            "vehicles": 1.8000000000465661,
-            "footsteps": 0.40000000002328306,
+            "canyon": 0.2000000000698492,
+            "radio": 0.40000000002328306,
+            "ambience": 0.5,
+            "vehicles": 0.5999999999767169,
+            "footsteps": 0.2000000000698492,
             "voices": 3.699999999953434
           }
         },
         "load": {
-          "loadMs": 1340.2999999999302
+          "loadMs": 1100.2999999999302,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -1393,13 +1541,15 @@
           11
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -35.275648022690056,
-        "momentaryMax": -30.673849214513147,
-        "shortTermMax": -31.0800595792759,
-        "lra": 6.343961879600801,
-        "truePeak": -19.793286815203174,
-        "samplePeak": -19.793091080617728,
+        "integrated": -35.275648023297805,
+        "momentaryMax": -30.673849219833482,
+        "shortTermMax": -31.0800595802535,
+        "lra": 6.343961879386846,
+        "truePeak": -19.793285880120937,
+        "samplePeak": -19.793090448702294,
         "clipped": 0
       },
       "ffmpeg": {
@@ -1425,7 +1575,7 @@
       "profile": "homeTheatre",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 32146.899999999907,
+      "renderMs": 22020.599999999977,
       "checks": {
         "nan": 0,
         "subnormals": 0,
@@ -1433,28 +1583,30 @@
         "maxRealVoices": 30,
         "voiceCap": 64,
         "maxTotalVoices": 31,
-        "connectedBeforeUnload": 323,
+        "connectedBeforeUnload": 325,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 4856,
+        "nodesCreated": 4862,
         "limiter": {
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.27647071156418296,
+          "peakIn": 0.27647070471016005,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
         "p50": 0.19999999995343387,
-        "p95": 0.6999999999534339,
-        "p99": 1.3999999999068677,
-        "max": 27.5,
-        "mean": 0.3081333333321847
+        "p95": 0.5,
+        "p99": 1,
+        "max": 5,
+        "mean": 0.20632000000126038
       },
       "stats": {
         "state": "closed",
@@ -1473,18 +1625,20 @@
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.27647071156418296,
+          "peakIn": 0.27647070471016005,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 52175520,
+          "decodedBytes": 57042540,
           "downloadedBytes": 228949,
-          "bakeMs": 2387.4999999996508,
+          "bakeMs": 1924,
           "streamed": 4,
-          "baked": 289,
+          "baked": 335,
           "evicted": 0,
           "codec": "opus",
           "failures": [],
@@ -1554,6 +1708,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -1572,35 +1749,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 59.199999999953434,
+          "buildMs": 44.800000000046566,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.20000000018626451,
-          "updateMaxMs": 27.5,
+          "updateMs": 0.10000000009313226,
+          "updateMaxMs": 5,
           "frames": 3750,
-          "sumMs": 1155.4999999956926,
+          "sumMs": 773.7000000047265,
           "parts": {
-            "canyon": 75.30000000214204,
-            "radio": 13.699999999720603,
-            "ambience": 272.4000000046799,
-            "vehicles": 186.99999999138527,
-            "footsteps": 58.09999999811407,
-            "voices": 536.9999999997672
+            "canyon": 36.90000000037253,
+            "radio": 7.499999999883585,
+            "ambience": 190.40000000107102,
+            "vehicles": 137.30000000307336,
+            "footsteps": 33.69999999983702,
+            "voices": 358.6000000005588
           },
           "partsMax": {
-            "canyon": 27.300000000046566,
-            "radio": 5.199999999953434,
-            "ambience": 4.100000000093132,
-            "vehicles": 2.6000000000931323,
-            "footsteps": 2.300000000046566,
-            "voices": 4.100000000093132
+            "canyon": 4.699999999953434,
+            "radio": 0.30000000004656613,
+            "ambience": 1.6999999999534339,
+            "vehicles": 2.900000000023283,
+            "footsteps": 0.2000000000698492,
+            "voices": 4.5
           }
         },
         "load": {
-          "loadMs": 1357.1000000000931
+          "loadMs": 1090.8000000000466,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -1674,12 +1852,14 @@
           23
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -22.7341007725444,
-        "momentaryMax": -16.645957596443985,
-        "shortTermMax": -17.14873057037983,
-        "lra": 9.275221251476161,
-        "truePeak": -4.759860268496391,
+        "integrated": -22.734100771644794,
+        "momentaryMax": -16.645957589256295,
+        "shortTermMax": -17.14873057107749,
+        "lra": 9.2752212490953,
+        "truePeak": -4.759860058853337,
         "samplePeak": -4.757561963183516,
         "clipped": 0
       },
@@ -1706,36 +1886,38 @@
       "profile": "mobile",
       "sr": 48000,
       "seconds": 60,
-      "renderMs": 25295.300000000047,
+      "renderMs": 17175.800000000047,
       "checks": {
         "nan": 0,
         "subnormals": 0,
-        "samplePeak": 0.7463051080703735,
+        "samplePeak": 0.7463048696517944,
         "maxRealVoices": 24,
         "voiceCap": 24,
         "maxTotalVoices": 30,
-        "connectedBeforeUnload": 313,
+        "connectedBeforeUnload": 315,
         "leakedNodes": 0,
         "leakedTypes": [],
-        "nodesCreated": 4007,
+        "nodesCreated": 4013,
         "limiter": {
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.640879123619053,
+          "peakIn": 0.6408791732766754,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         }
       },
       "timing": {
         "frames": 3750,
-        "p50": 0.19999999995343387,
-        "p95": 0.5999999998603016,
-        "p99": 1.3999999999068677,
-        "max": 4.100000000093132,
-        "mean": 0.2581866666642949
+        "p50": 0.10000000009313226,
+        "p95": 0.40000000002328306,
+        "p99": 1,
+        "max": 5,
+        "mean": 0.17503999999969577
       },
       "stats": {
         "state": "closed",
@@ -1748,25 +1930,27 @@
           "promoted": 441,
           "demoted": 417,
           "occlusionChecks": 11953,
-          "updateMs": 0
+          "updateMs": 0.10000000009313226
         },
         "mixer": {
           "limiterGrDb": 0,
           "nans": 0,
           "clips": 0,
-          "peakIn": 0.640879123619053,
+          "peakIn": 0.6408791732766754,
           "duckRadioDb": 0,
           "over1dB": 0,
           "over3dB": 0,
-          "maxGrDb": 0
+          "maxGrDb": 0,
+          "hdrDb": 0,
+          "hdrEvents": 0
         },
         "bank": {
-          "decodedBytes": 22553232,
+          "decodedBytes": 22870752,
           "downloadedBytes": 228949,
-          "bakeMs": 1946.6999999999534,
+          "bakeMs": 1610.0000000002328,
           "streamed": 4,
-          "baked": 196,
-          "evicted": 21,
+          "baked": 238,
+          "evicted": 36,
           "codec": "opus",
           "failures": [],
           "budget": 23814400,
@@ -1837,6 +2021,29 @@
           "sales": 0,
           "spills": 0
         },
+        "dispatch": {
+          "transmissions": 0,
+          "fragments": 0,
+          "garbled": 0,
+          "dropped": 0,
+          "officerDown": 0,
+          "coverage": 1
+        },
+        "crowd": {
+          "bumps": 0,
+          "lines": 0,
+          "gotUp": 0,
+          "litter": 0,
+          "scatters": 0
+        },
+        "gunfire": {
+          "shots": 0,
+          "echoes": 0,
+          "blocked": 0,
+          "whiz": 0,
+          "impacts": 0,
+          "lastShot": null
+        },
         "dialogue": {
           "lines": 0,
           "cut": 0,
@@ -1855,35 +2062,36 @@
         },
         "radioFeeds": 0,
         "geo": {
-          "buildMs": 66.5,
+          "buildMs": 48.59999999997672,
           "edges": 49116,
           "buildings": 5513,
           "intersections": 361
         },
         "timing": {
-          "updateMs": 0.19999999995343387,
-          "updateMaxMs": 4.100000000093132,
+          "updateMs": 0.2000000000698492,
+          "updateMaxMs": 5,
           "frames": 3750,
-          "sumMs": 968.1999999911059,
+          "sumMs": 656.3999999988591,
           "parts": {
-            "canyon": 45.5999999998603,
-            "radio": 7.69999999855645,
-            "ambience": 263.4999999925494,
-            "vehicles": 148.7999999972526,
-            "footsteps": 44.49999999511056,
-            "voices": 449.0000000083819
+            "canyon": 29.30000000016298,
+            "radio": 5.100000000093132,
+            "ambience": 185.89999999920838,
+            "vehicles": 100.30000000051223,
+            "footsteps": 23.99999999953434,
+            "voices": 307.39999999897555
           },
           "partsMax": {
             "canyon": 0.30000000004656613,
-            "radio": 0.4000000001396984,
-            "ambience": 3.0999999998603016,
-            "vehicles": 1.7999999998137355,
-            "footsteps": 0.8000000000465661,
-            "voices": 3.8999999999068677
+            "radio": 0.40000000002328306,
+            "ambience": 4.699999999953434,
+            "vehicles": 2,
+            "footsteps": 0.40000000002328306,
+            "voices": 3.199999999953434
           }
         },
         "load": {
-          "loadMs": 798.8999999999069
+          "loadMs": 725.6999999999534,
+          "hrtfLatencyMs": 6.35
         },
         "emitters": {
           "grating": 487,
@@ -1957,13 +2165,15 @@
           24
         ]
       },
+      "shots": [],
+      "dispatchLog": [],
       "loudness": {
-        "integrated": -16.708679255026862,
-        "momentaryMax": -13.787780383000507,
-        "shortTermMax": -14.601896787659767,
-        "lra": 3.5201079541315092,
-        "truePeak": -2.539929421072716,
-        "samplePeak": -2.541671716979237,
+        "integrated": -16.70867921803547,
+        "momentaryMax": -13.787780030821178,
+        "shortTermMax": -14.601896612917415,
+        "lra": 3.5201082976685054,
+        "truePeak": -2.539929868234163,
+        "samplePeak": -2.5416744918199488,
         "clipped": 0
       },
       "ffmpeg": {
@@ -1985,20 +2195,20 @@
   ],
   "session": {
     "high/mobile": {
-      "integrated": -16.281076418094624,
-      "momentaryMax": -8.125410624209685,
-      "shortTermMax": -11.55030438069412,
-      "lra": 15.037120409097344,
-      "truePeak": -1.5000517657310384,
+      "integrated": -16.281076452046594,
+      "momentaryMax": -8.125412875253984,
+      "shortTermMax": -11.550304495383097,
+      "lra": 15.037120276577467,
+      "truePeak": -1.5000517380094616,
       "samplePeak": -1.5000000201300447,
       "clipped": 0
     },
     "high/homeTheatre": {
-      "integrated": -23.04543390887407,
-      "momentaryMax": -9.014426364845232,
-      "shortTermMax": -17.025364145657875,
-      "lra": 18.700608899402756,
-      "truePeak": -1.5000692732142427,
+      "integrated": -23.045433915527976,
+      "momentaryMax": -9.014426457281656,
+      "shortTermMax": -17.02536420786116,
+      "lra": 18.70060890105137,
+      "truePeak": -1.5000692241780187,
       "samplePeak": -1.5012073434736863,
       "clipped": 0
     }
@@ -2012,7 +2222,7 @@
       "lufs": -19.205051736351773,
       "truePeak": -6.720200501545345,
       "nan": 0,
-      "realtimeFactor": 8.955758552749138
+      "realtimeFactor": 13.832215229268744
     },
     {
       "style": "easy",
@@ -2020,7 +2230,7 @@
       "lufs": -18.88485099854972,
       "truePeak": -3.330781659083078,
       "nan": 0,
-      "realtimeFactor": 10.724435626574348
+      "realtimeFactor": 15.946420028702669
     },
     {
       "style": "jazz",
@@ -2028,7 +2238,7 @@
       "lufs": -18.89085908523646,
       "truePeak": -8.283939666863033,
       "nan": 0,
-      "realtimeFactor": 7.967175238019582
+      "realtimeFactor": 11.269510339775293
     },
     {
       "style": "salsa",
@@ -2036,7 +2246,7 @@
       "lufs": -19.235845438634257,
       "truePeak": -3.9718019094251162,
       "nan": 0,
-      "realtimeFactor": 11.868731826004556
+      "realtimeFactor": 15.722034431255691
     }
   ]
 }

@@ -11,7 +11,7 @@ import type { Rng } from './worklets/dsp';
 export type Weather = 'clear' | 'overcast' | 'rain';
 export type Power = 'on' | 'dim' | 'off';
 
-export interface OneShotOpts { bus?: Exclude<BusId, 'master'>; category?: Category; gain?: number; rate?: number; priority?: number; at?: Vec3 | (() => Vec3); vel?: () => Vec3; wet?: number; doppler?: boolean }
+export interface OneShotOpts { bus?: Exclude<BusId, 'master'>; category?: Category; gain?: number; rate?: number; priority?: number; at?: Vec3 | (() => Vec3); vel?: () => Vec3; wet?: number; doppler?: boolean; /** Start delay in seconds (sample-accurate). */ delay?: number; /** Override occlusion (image-source echoes sit behind the wall they model). */ occlude?: boolean }
 
 export interface Env {
   ctx: BaseAudioContext;

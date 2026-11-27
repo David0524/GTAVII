@@ -32,6 +32,13 @@ export const ACTIONS: Record<string, { clip: string; layer: 'full' | 'upper'; lo
   drink: { clip: 'Consume', layer: 'upper' }, push_cart: { clip: 'Push_Loop', layer: 'full', loop: true }, carry: { clip: 'Walk_Carry_Loop', layer: 'upper', loop: true },
   drive: { clip: 'Driving_Loop', layer: 'full', loop: true }, kneel_fix: { clip: 'Fixing_Kneeling', layer: 'full', loop: true }, throw: { clip: 'OverhandThrow', layer: 'upper' },
   wave_off: { clip: 'wave_off', layer: 'upper', loop: true }, wave_off_bullhorn: { clip: 'wave_off_bullhorn', layer: 'upper', loop: true },
+  // street vendors (sim triggers: docs/SIM_PROGRESS.md "Street vendors")
+  vendor_serve: { clip: 'vendor_serve', layer: 'upper' }, vendor_call: { clip: 'vendor_call', layer: 'upper' }, vendor_shout: { clip: 'vendor_shout', layer: 'upper' },
+  duck_cart: { clip: 'duck_cart', layer: 'full', loop: true }, right_cart: { clip: 'right_cart', layer: 'full' }, shine_shoes: { clip: 'shine_shoes', layer: 'full', loop: true },
+  deal_cards: { clip: 'deal_cards', layer: 'full', loop: true }, queue: { clip: 'queue_wait', layer: 'full', loop: true }, pay: { clip: 'pay', layer: 'upper' },
+  watch: { clip: 'watch_lean', layer: 'full', loop: true }, eat_walk: { clip: 'eat_walk', layer: 'upper', loop: true }, sip_walk: { clip: 'sip_walk', layer: 'upper', loop: true },
+  fall_down: { clip: 'fall_down', layer: 'full' }, down: { clip: 'down_lie', layer: 'full', loop: true }, get_up: { clip: 'get_up', layer: 'full' }, angry: { clip: 'argue', layer: 'upper', loop: true },
+  car_enter_l: { clip: 'car_enter_l', layer: 'full' }, car_exit_l: { clip: 'car_exit_l', layer: 'full' }, pulled_out: { clip: 'pulled_out', layer: 'full' },
   idle_pockets: { clip: 'idle_pockets', layer: 'full', loop: true }, idle_hands_behind: { clip: 'idle_hands_behind', layer: 'full', loop: true }, idle_heat: { clip: 'idle_heat', layer: 'full', loop: true },
 };
 
@@ -118,7 +125,8 @@ export class Animator {
   }
   setRestJoints(j: Float32Array) { this.restJoints = j; this.buildHandPose(); }
 
-  setIdle(name: string) { const i = this.lib.byName.get(name); if (i !== undefined) this.idleClip = i; }
+  idleName = '';
+  setIdle(name: string) { const i = this.lib.byName.get(name); if (i !== undefined) { this.idleClip = i; this.idleName = name; } }
 
   setLocomotion(s: LocoInput, dt: number) {
     const ch = Math.cos(s.heading), sh = Math.sin(s.heading);

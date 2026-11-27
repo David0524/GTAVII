@@ -24,6 +24,10 @@ import { SignalHeads } from './world/SignalHeads';
 import { createGameplay, type GameplayGlue } from './engine/GameplayGlue';
 import { createAudio } from './engine/AudioGlue';
 import { createInteriors, type Interiors } from './interiors';
+import { Driving } from './engine/Driving';
+import { createMissions } from './engine/MissionGlue';
+import { gameplayTouch } from './ui/touch/adapters';
+import type { MissionRuntime } from './mission/MissionRuntime';
 import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
@@ -149,8 +153,22 @@ async function main() {
   type TrafficR = ReturnType<ReturnType<typeof createVehicleFactory>['createTrafficRenderer']>;
   let parked: TrafficR | null = null as TrafficR | null, parkedList: { id: number; vclass: string; variant: number; x: number; y: number; z: number; yaw: number; lights: number }[] = [];
   const parkedAt = { x: 1e9, z: 1e9, q: -1 };
+  // player driving (engine/Driving.ts): created with the vehicle factory after the title
+  let driving: Driving | null = null;
+  /** mission companions walking with the player (MissionGlue companion) */
+  const companions: { ch: ReturnType<CharacterFactory['spawn']>; vx: number; vz: number }[] = [];
+  let missions: MissionRuntime | null = null;
   if (sim) void afterTitle.then(() => {
     const vf = createVehicleFactory({ quality: quality.name });
+    driving = new Driving({
+      quality: quality.name, physics, scene, input, player, camera: director.gameplay as THREE.PerspectiveCamera, factory: vf, sim,
+      gameplay: () => gp?.g ?? null, lead: () => party.activeId,
+      parked: () => parkedList,
+      attachAudio: (v, vclass) => audioGlue?.audio.attachVehicle({ id: v.id, rpm: () => v.rpm, load: () => v.load, speed: () => v.speed, position: () => { const p = v.object.position; return [p.x, p.y, p.z]; }, on: (t, cb) => v.on(t as never, cb) }, vclass),
+      // seated (characters 396a88c): setSeat with the hip seat point starts the drive loop and places the root
+      seat: (m) => { (body as unknown as { setSeat?: (m: THREE.Matrix4 | null, o?: { hip?: boolean }) => void }).setSeat?.(m, { hip: true }); },
+      wheel: (w, steer) => { (body as unknown as { setWheel?: (w: unknown, s: number) => void }).setWheel?.(w, steer); },
+    });
     traffic = vf.createTrafficRenderer(quality.name === 'low' ? 100 : 160);
     scene.add(traffic.object);
     const pr = vf.createTrafficRenderer(quality.name === 'low' ? 160 : 400);
@@ -161,7 +179,7 @@ async function main() {
   const audioGlue = params.get('sound') === '0' ? null : createAudio({ quality: quality.name, streets, sim });
   // Pedestrians: the characters crowd renderer, fed from sim.peds (created with the factory).
   let crowd: ReturnType<CharacterFactory['createCrowdRenderer']> | null = null;
-  afterTitle.then(() => createCharacterFactory({ quality: quality.name })).then((f) => {
+  afterTitle.then(() => createCharacterFactory({ quality: quality.name, renderer } as never)).then((f) => {
     chars = f;
     // feet and footstep surfaces: the real collision ground (kerbs, stoops), else the terrain
     f.setGround((x, z) => { const top = heightAt(x, z) + 2.5, d = physics.ray(x, top, z, 0, -1, 0, 4, player.collider); return { y: d === null ? heightAt(x, z) : top - d, surface: 'concrete' }; });
@@ -263,6 +281,28 @@ async function main() {
     .then((x) => {
       gp = x; loadReport.mark('gameplay');
       // the one context button: "Go in" / "Knock" / "Locked" at interiors' doors (gameplay 15)
+      const bindVehicles = () => driving ? x.g.bindVehicles(driving.binding as never) : setTimeout(bindVehicles, 1000);
+      bindVehicles();
+      // the mission runtime: givers on the context button, fail on wasted/arrested
+      const bindMissions = () => {
+        if (!missions) return void setTimeout(bindMissions, 1000);
+        const M = missions;
+        x.g.bindTalk({ nearestTalkable: (px, pz, r) => M.nearestTalkable(px, pz, r), talk: (id) => M.talk(id) });
+        x.g.on('wasted', () => M.fail('Wasted')); x.g.on('arrested', () => M.fail('Arrested'));
+      };
+      bindMissions();
+      // police dispatch scanner (audio 14): audio voices gameplay's radio/police events; radio text uses audio's
+      // place names (the rendered vocabulary); dispatch lines show as subtitles
+      const bindDispatch = () => {
+        if (!audioGlue) return;
+        const A = audioGlue.audio as unknown as { bindGameplay?: (g: unknown) => void; placeName?: (x: number, z: number) => string; on: (t: 'dispatch', cb: (e: { text: string; speaker: string; duration: number }) => void) => void };
+        if (!A.bindGameplay || !A.placeName) return;
+        A.bindGameplay(x.g); x.g.policeSys.placeName = (px, pz) => A.placeName!(px, pz);
+        A.on('dispatch', (e) => uiEvents.emit('subtitle', { speaker: e.speaker, text: e.text, channel: 'ambient', seconds: e.duration }));
+      };
+      bindDispatch();
+      // audio 13: gunfire through audio (travel time, canyon echoes) and to the sim (peds/vendors react)
+      if (audioGlue) x.bindAudio(audioGlue.audio as never, () => insideKind !== null);
       const bindDoors = () => interiors ? x.g.bindDoors({ doorsForChunk: (i, j) => interiors!.doorsForChunk(i, j) as never, chunkSize: 200 }) : setTimeout(bindDoors, 1000);
       bindDoors();
     }).catch((e) => console.warn('gameplay', e)));
@@ -356,7 +396,7 @@ async function main() {
   let hudT = 0, frameCount = 0, syncT = 0, titleReady = false, heldFrames = 0, heldW = 0, heldH = 0;
   const uiRef: { ui?: Awaited<ReturnType<typeof bootUi>> } = {};
   const debug = {
-    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
+    backend, quality: quality.name, frames, world, renderer, scene, camera, load: loadReport, physics, player, party, input, RAPIER, sim, get missions() { return missions; }, get driving() { return driving; }, get interiors() { return interiors; }, get audio() { return audioGlue?.audio; }, get gameplay() { return gp; }, get body() { return body; }, director, THREE, get saves() { return saves; },
     get mode() { return mode; }, setMode, get screen() { return uiRef.ui?.state ?? 'loading'; }, get ui() { return uiRef.ui; },
     /** Resolves when every chunk the current view wants is resident and has been drawn once. */
     whenIdle: () => new Promise<void>((res) => { const t = () => (world.idle && frameCount > 3 && (mode === 'photo' || player.active || uiRef.ui?.state === 'title') ? requestAnimationFrame(() => requestAnimationFrame(() => res())) : setTimeout(t, 50)); t(); }),
@@ -377,7 +417,7 @@ async function main() {
   // replace the placeholder answers below as they merge (health, inventory, heat, objectives, shops...).
   const locator = new Locator(streets);
   let loc = { district: '', crossing: '' }, locT = 0, frozen = false;
-  let objective: { text: string } | null = null;
+  let objective: { text: string; target?: { x: number; z: number; label?: string }; mission?: string } | null = null;
   const uiEvents = new Emitter<UiEvents>();
   const LEAD_STYLE: Record<string, { colour: string; tagline: string }> = {
     'char.teddy_arce': { colour: '#c79a3c', tagline: 'Night desk, Hotel Corwin' }, 'char.delphine_moore': { colour: '#b2302a', tagline: 'Eighth Avenue' }, 'char.nick_varelas': { colour: '#2e4a6b', tagline: 'Varelas & Co., furs' },
@@ -385,7 +425,7 @@ async function main() {
   const placeAt = () => { const p = player.pos; player.active = false; orbit.snap(p, player.heading); mode = 'onfoot'; };
   const host: UiHost = {
     input, saves, streets, baseUrl: import.meta.env.BASE_URL, heroes: world.manifest.heroes,
-    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, heading: mode === 'onfoot' ? player.heading : fly.yaw, speed: mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: false, lead: party.activeId }; },
+    player: () => { const p = mode === 'onfoot' ? body.object.position : camera.position; return { x: p.x, z: p.z, yaw: mode === 'onfoot' ? orbit.yaw : fly.yaw, heading: mode === 'onfoot' ? player.heading : fly.yaw, speed: driving?.car ? driving.car.v.speed : mode === 'onfoot' ? Math.hypot(player.vel.x, player.vel.z) : 0, inVehicle: !!driving?.driving, lead: party.activeId }; },
     clock: () => ({ date: worldClock.date, minutes: worldClock.minutes, weather: worldClock.weather }),
     party: () => [...party.leads.values()].map((l) => ({ id: l.id, name: l.displayName, short: l.displayName, tagline: LEAD_STYLE[l.id]?.tagline ?? '', colour: LEAD_STYLE[l.id]?.colour ?? '#c79a3c', cash: l.money, where: l.id === party.activeId ? loc.crossing : 'Elsewhere in the city', available: true })),
     health: () => gp?.health() ?? { hp: 100, max: 100, injuries: [], stamina: 1, staminaMax: 1, heatExhaustion: 0 },
@@ -405,6 +445,12 @@ async function main() {
     },
     on: (k, cb) => uiEvents.on(k, cb),
     camera: director, scene,
+    project: (x, y, z) => {
+      const v = new THREE.Vector3(x, y, z).project(camera); if (v.z > 1) return null;
+      const r = view.getBoundingClientRect(); return { x: r.left + (v.x + 1) / 2 * r.width, y: r.top + (1 - v.y) / 2 * r.height };
+    },
+    // touch combat (UI TouchLayout reads it each frame): gameplay's verbs through UI's adapter once gameplay is up
+    get touch() { return gp ? (touchHost ??= gameplayTouch(gp.g as never, (x, y, z) => host.project!(x, y, z))) : undefined; },
     freezePlayer: (f) => { frozen = f; },
     playerVisible: (v) => { body.object.visible = v; },
     commit: (cue, data) => {
@@ -412,8 +458,13 @@ async function main() {
       const d = data as { text?: string } | undefined;
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
-    prompts: () => (mode === 'onfoot' ? [...(gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
-    newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
+    prompts: () => (driving?.driving ? [['use', driving.hotwiring ? 'Hot-wire' : 'Get out'], ['jump', 'Handbrake'], ['map', 'Map']] as [ButtonAction, string][] : mode === 'onfoot' ? [...(carPrompt ? [['use', carPrompt] as [ButtonAction, string]] : gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
+    // a new game starts where narrative's opening does (spawns.json spawn.player_start: the Flatiron's north prow, facing uptown)
+    newGame: () => {
+      loadReport.mark('new-game');
+      const p0 = missions?.resolve('Broadway & 5th Ave & E 23rd St'), s0 = p0 ? { x: p0.x, z: p0.z + 4, heading: 0 } : spawn;
+      const y = heightAt(s0.x, s0.z) + SIDEWALK_H; player.teleport(s0.x, y, s0.z, s0.heading); placeAt();
+    },
     continueGame: async () => {
       loadReport.mark('continue');
       const last = await saves.latest().catch(() => null);
@@ -423,6 +474,36 @@ async function main() {
   };
   const ui = await bootUi(host, { title: !skipTitle }); uiRef.ui = ui;
   if (skipTitle) releaseAfterTitle();
+  // ---------------------------------------------------------------- mission runtime (Phase 7; engine/MissionGlue.ts)
+  void afterTitle.then(() => {
+    missions = createMissions({
+      streets, heroes: world.manifest.heroes, ui: uiEvents,
+      player: () => ({ x: player.pos.x, z: player.pos.z, lead: party.activeId, inCar: !!driving?.driving, interior: insideKind }),
+      clock: () => ({ minutes: worldClock.minutes, date: worldClock.date }),
+      state: () => narrativeState as never,
+      setObjective: (o) => { objective = o; },
+      addMoney: (cents) => { party.active.money += cents / 100; },
+      waitTo: (t) => setTime(t),
+      audioPlay: (script, line) => audioGlue?.audio.dialogue?.play(script, line),
+      gameplay: () => gp?.g ?? null,
+      // escort/follow: the real cast character (characters factory) walks at the player's shoulder; the sim's
+      // registry has no cast archetypes, so handOff would have sent a random walker
+      companion: (castId) => {
+        if (!chars) return null;
+        const ch = chars.spawn(scene, { seed: 11, hero: castId });
+        ch.object.position.set(player.pos.x + 1.5, player.pos.y, player.pos.z + 1.5);
+        const c = { ch, vx: 0, vz: 0 }; companions.push(c);
+        return () => { companions.splice(companions.indexOf(c), 1); ch.object.removeFromParent(); ch.dispose(); };
+      },
+      spawnCast: (castId, x, y, z) => {
+        if (!chars) return null;
+        const ch = chars.spawn(scene, { seed: 7, hero: castId }); ch.object.position.set(x, y, z);
+        const tick = setInterval(() => ch.update(0.1), 100);
+        return () => { clearInterval(tick); ch.object.removeFromParent(); ch.dispose(); };
+      },
+    });
+    loadReport.mark('missions');
+  });
   if (!skipTitle) mode = 'photo';
   // title-screen camera: slow drift past the Flatiron at dusk
   const flat = world.manifest.heroes.find((h) => h.id === 'lm.flatiron') ?? { x: 0, z: 0 };
@@ -433,7 +514,8 @@ async function main() {
   const simFwd = new THREE.Vector3();
   // in-view spawns stay beyond this (sim fe9ba45); traffic dithers in over 0.4 s (vehicles 028f6e3), so it can be close
   const simFade = 45;
-  let gpContext: string | null = null, ctxT = 0;
+  let gpContext: string | null = null, ctxT = 0, carPrompt: string | null = null;
+  let touchHost: ReturnType<typeof gameplayTouch> | undefined;
 
   // ---------------------------------------------------------------- loop
   renderer.setAnimationLoop((t) => {
@@ -491,18 +573,33 @@ async function main() {
     if (!playing && ui.state !== 'title' && ui.state !== 'cutscene') {
       // paused: world frozen, camera holds
     } else if (mode === 'onfoot') {
-      physics.update(dt, (h) => { if (!frozen) player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; });
+      const inCar = !!driving?.driving;
+      physics.update(dt, (h) => { if (!frozen && !inCar) player.fixedUpdate(h, input, orbit.yaw, jumpLatch); jumpLatch = false; driving?.fixed(h); });
       const rp = player.renderPos(physics.alpha);
-      body.object.position.set(rp.x, rp.y, rp.z);
-      body.setLocomotion(player.loco());
+      if (!inCar) { body.object.position.set(rp.x, rp.y, rp.z); body.setLocomotion(player.loco()); }
+      driving?.update(dt, light.night, director.gameplay as THREE.PerspectiveCamera);
       body.update(dt);
-      orbit.lookBehind = input.isHeld('lookBehind');
-      if (input.pressed('shoulderSwap')) orbit.swapShoulder();
-      orbit.update(dt, rp, player.loco());
+      // combat input on foot (contract §3): aim/fire/reload/melee/cover/lock; aiming turns the body with the camera
+      let aimingNow = false;
+      if (gp && playing && !frozen && !inCar) {
+        aimingNow = gp.combat({ aim: input.isHeld('aim'), fire: input.isHeld('fire'), reload: input.pressed('reload'), melee: input.pressed('melee'), cover: input.pressed('cover'), lock: input.pressed('lock'), move: [input.move.x, input.move.y] });
+        if (aimingNow) player.heading = orbit.yaw;
+      }
+      if (!inCar) {
+        orbit.lookBehind = input.isHeld('lookBehind');
+        if (input.pressed('shoulderSwap')) orbit.swapShoulder();
+        orbit.update(dt, rp, { ...player.loco(), aiming: aimingNow });
+      }
+      // the one context button: in a car → get out; next to a car → get in; else gameplay's context
+      // car actions fire on the press; gameplay's context runs every frame (tap = main verb, 0.45 s hold = alternate)
+      if (playing && !frozen) {
+        if (inCar) { if (input.pressed('use') && driving!.useInCar() === 'exited') orbit.snap(player.pos, player.heading); }
+        else if (carPrompt && input.pressed('use')) driving!.tryEnter();
+        else if (gp && !carPrompt) gp.g.useButton(input.isHeld('use'), dt);
+      }
       if (gp && playing && !frozen) {
-        gp.update(dt, { minutes: worldClock.minutes, raining: worldClock.weather === 'rain', sprinting: player.mode === 'sprint', device: input.isTouch ? 'touch' : input.activeDevice === 'kbm' ? 'mouse' : 'pad' });
-        if ((ctxT -= dt) <= 0) { ctxT = 0.2; gpContext = gp.context(); }
-        if (input.pressed('use') && gpContext) gp.doContext();
+        gp.update(dt, { minutes: worldClock.minutes, raining: worldClock.weather === 'rain', sprinting: player.mode === 'sprint', device: input.isTouch ? 'touch' : input.activeDevice === 'kbm' ? 'mouse' : 'pad', inCar });
+        if ((ctxT -= dt) <= 0) { ctxT = 0.2; gpContext = gp.context(); carPrompt = driving && !driving.driving ? driving.nearestCar()?.label ?? null : null; }
       }
     } else if (ui.state === 'title') {
       physics.update(dt, () => { jumpLatch = false; });
@@ -520,12 +617,13 @@ async function main() {
       sim.setClock(worldClock.minutes); sim.setWeather(worldClock.weather);
       camera.getWorldDirection(simFwd); sim.setView(camera.position.x, camera.position.z, simFwd.x, simFwd.z, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)), simFade);
       const a = simActors[0]; a.x = player.pos.x; a.z = player.pos.z; a.vx = player.vel.x; a.vz = player.vel.z;
-      sim.setExternalActors(mode === 'onfoot' ? simActors : []);
+      const carActor = driving?.actor();
+      sim.setExternalActors(carActor ? [carActor] : mode === 'onfoot' ? simActors : []);
       sim.update(dt, f);
     }
     if (traffic && sim && simReady) {
       setGroundLightLevel(light.lightsOn);
-      if (carLights) updateCarLights(carLights, [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
+      if (carLights) updateCarLights(carLights, driving?.cars.map((c) => c.v) ?? [], camera.position, traffic.lightCandidates(sim.vehicles, camera.position));
       traffic.setInstances(sim.vehicles, camera.position, carLights ?? undefined);
     }
     if (interiors && (playing || ui.state === 'title')) {
@@ -538,6 +636,18 @@ async function main() {
         if (k !== insideKind) { insideKind = k; audioGlue?.interior(k, ins?.roomVolume); }
       }
     }
+    if (missions && playing && !frozen) missions.update(dt);
+    for (const c of companions) {
+      // keep 1.6 m off the player's right shoulder; walk to it (run if far), stop when there
+      const o = c.ch.object.position, h = player.heading, tx = player.pos.x + Math.cos(h) * 1.6, tz = player.pos.z - Math.sin(h) * 1.6;
+      const dx = tx - o.x, dz = tz - o.z, d = Math.hypot(dx, dz), sp = d < 0.4 ? 0 : Math.min(d > 6 ? 4.2 : 1.6, d * 2);
+      c.vx += ((d > 0 ? (dx / d) * sp : 0) - c.vx) * Math.min(1, dt * 4); c.vz += ((d > 0 ? (dz / d) * sp : 0) - c.vz) * Math.min(1, dt * 4);
+      if (d > 40) { o.set(tx, player.pos.y, tz); c.vx = c.vz = 0; } // left behind (cut, car): catch up
+      o.x += c.vx * dt; o.z += c.vz * dt; o.y = heightAt(o.x, o.z) + SIDEWALK_H;
+      const v = Math.hypot(c.vx, c.vz);
+      c.ch.setLocomotion({ velocity: [c.vx, 0, c.vz], grounded: true, heading: v > 0.2 ? Math.atan2(-c.vx, -c.vz) : h, mode: v > 3 ? 'run' : 'walk' });
+      c.ch.update(dt);
+    }
     if (signals && sim) { sigBuf = sim.signalStates(sigBuf); signals.update(dt, sigBuf); }
     if (parked && sim && simReady) {
       const f = mode === 'onfoot' ? player.pos : camera.position, quarter = Math.floor(worldClock.minutes / 15);
@@ -546,7 +656,7 @@ async function main() {
         const R = quality.name === 'low' ? 160 : 260;
         parkedList = sim.parkedCars(f.x, f.z, R).map((c) => ({ id: Math.round(c.x * 10) * 100003 + Math.round(c.z * 10), vclass: c.vclass as string, variant: c.variant, x: c.x, y: heightAt(c.x, c.z), z: c.z, yaw: c.yaw, lights: 0 }));
       }
-      parked.setInstances(parkedList as never, camera.position);
+      parked.setInstances((driving?.takenParked.size ? parkedList.filter((c) => !driving!.takenParked.has(c.id)) : parkedList) as never, camera.position);
     }
     if (crowd && sim && simReady) { crowd.setAgents(sim.peds); crowd.update?.(dt, camera); }
     checkSize(); // cheap: two clientWidth reads; catches every size change the events miss

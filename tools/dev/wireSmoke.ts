@@ -30,6 +30,9 @@ try {
   const info = await page.evaluate(() => { const T = (window as any).__T74; return { cars: T.sim?.vehicles.length, peds: T.sim?.peds.length, simMs: T.sim?.lastUpdateMs, draws: T.renderer.info.render.drawCalls, mode: T.mode, screen: T.screen, cam: T.camera.position.toArray().map((v: number) => +v.toFixed(1)), player: [T.player.pos.x, T.player.pos.y, T.player.pos.z].map((v: number) => +v.toFixed(1)), active: T.player.active, body: T.body ? { vis: T.body.object.visible, pos: T.body.object.position.toArray().map((v: number) => +v.toFixed(1)), inScene: !!T.body.object.parent, kind: T.body.constructor.name } : null, marks: T.load.marks.map(([n, t]: [string, number]) => `${n} ${(t / 1000).toFixed(1)}`).join(' | ') }; });
   console.log(JSON.stringify(info));
   if (process.env.PROBE) console.log('probe', await page.evaluate(process.env.PROBE)); // ad-hoc page expression
+  // HOLD=KeyW:8000 holds a key (ms) after the probe, then PROBE2 runs (e.g. driving a car for a while)
+  if (process.env.HOLD) { const [key, ms] = process.env.HOLD.split(':'); await page.keyboard.down(key); await page.waitForTimeout(+ms / 2); if (process.env.PROBEMID) console.log('probemid', await page.evaluate(process.env.PROBEMID)); await page.waitForTimeout(+ms / 2); await page.keyboard.up(key); }
+  if (process.env.PROBE2) console.log('probe2', await page.evaluate(process.env.PROBE2));
   await page.screenshot({ path: out, type: 'jpeg', quality: 85 });
 } finally { await browser.close(); stop(); }
 console.log(logs.slice(-20).join('\n'));

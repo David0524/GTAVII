@@ -222,7 +222,7 @@ export class TwoWheeler {
     let grounded = 0, sumH = 0, hF = 0, hR = 0;
     for (const w of this.g.wheels) {
       const o = new THREE.Vector3(w.x, 0.8, w.z).applyQuaternion(_q).add(_v.set(tr.x, tr.y, tr.z));
-      const hit = this.world.castRay(new RAPIER.Ray({ x: o.x, y: o.y, z: o.z }, { x: 0, y: -1, z: 0 }), 1.6, true, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, WHEEL_RAY_GROUPS, undefined, body);
+      const hit = this.world.castRay(new RAPIER.Ray({ x: o.x, y: o.y, z: o.z }, { x: 0, y: -1, z: 0 }), 1.6, false, RAPIER.QueryFilterFlags.EXCLUDE_SENSORS, WHEEL_RAY_GROUPS, undefined, body);
       if (hit) { const gy = o.y - hit.timeOfImpact; grounded++; sumH += gy; if (w.front) hF = gy; else hR = gy; }
     }
     if (grounded) {

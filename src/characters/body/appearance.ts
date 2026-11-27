@@ -15,7 +15,8 @@ export type HairStyle =
 export type FacialHair = 'none' | 'stubble' | 'moustache' | 'horseshoe' | 'sideburns' | 'moustacheSideburns' | 'beard' | 'goatee';
 
 export interface SkinDesc {
-  /** sRGB hex of the mid-tone (forearm) colour. */
+  /** sRGB hex of the mid-tone (forearm) colour. Kept within measured skin albedo (fair skin peaks
+   *  near 0.6-0.65 linear in red): brighter values clip to white under real sunlight. */
   tone: string;
   /** 0..1 melanin estimate (drives SSS colour and how freckles/redness read). */
   melanin: number;
@@ -58,13 +59,13 @@ const DARK_HAIR: [string, number][] = [['#1a1412', 5], ['#2a1e16', 3], ['#3e2a1c
 const BROWN_EYES: [string, number][] = [['#3a2414', 5], ['#5a3a1e', 2], ['#20140c', 2]];
 const BACKGROUNDS: Background[] = [
   // European-descended New Yorkers (Irish, Italian, Jewish, Greek, Polish …)
-  { w: 50, tone: ['#ecd0b8', '#c09070'], anc: [0.03, 0.02, 0.95], texture: [0, 0.45], hairCols: [['#2a1e16', 3], ['#4a3222', 3], ['#6a4a30', 2], ['#8a6a44', 1], ['#b89060', 0.6], ['#7a3a1e', 0.5], ['#1a1412', 2]], eyes: [['#3a2414', 3], ['#5a6a7a', 2], ['#4a6a4a', 1], ['#6a5a3a', 1]] },
+  { w: 50, tone: ['#d6b09a', '#b8896a'], anc: [0.03, 0.02, 0.95], texture: [0, 0.45], hairCols: [['#2a1e16', 3], ['#4a3222', 3], ['#6a4a30', 2], ['#8a6a44', 1], ['#b89060', 0.6], ['#7a3a1e', 0.5], ['#1a1412', 2]], eyes: [['#3a2414', 3], ['#5a6a7a', 2], ['#4a6a4a', 1], ['#6a5a3a', 1]] },
   // Black New Yorkers (African American, Caribbean)
   { w: 24, tone: ['#8a5a3c', '#3a2216'], anc: [0.85, 0.02, 0.13], texture: [0.75, 1], hairCols: DARK_HAIR, eyes: BROWN_EYES },
   // Puerto Rican, Dominican and other Latin American New Yorkers (a wide, mixed range)
-  { w: 18, tone: ['#d4aa84', '#6a4428'], anc: [0.3, 0.05, 0.65], texture: [0.2, 0.95], hairCols: [['#1a1412', 4], ['#2a1e16', 3], ['#4a3222', 1.5]], eyes: BROWN_EYES },
+  { w: 18, tone: ['#c9a07e', '#6a4428'], anc: [0.3, 0.05, 0.65], texture: [0.2, 0.95], hairCols: [['#1a1412', 4], ['#2a1e16', 3], ['#4a3222', 1.5]], eyes: BROWN_EYES },
   // Chinese and other East Asian New Yorkers
-  { w: 5, tone: ['#e0c09c', '#b88c64'], anc: [0.02, 0.9, 0.08], texture: [0, 0.15], hairCols: [['#141010', 5], ['#221814', 2]], eyes: [['#2a1a10', 5], ['#3a2414', 2]] },
+  { w: 5, tone: ['#d2ae8e', '#b08560'], anc: [0.02, 0.9, 0.08], texture: [0, 0.15], hairCols: [['#141010', 5], ['#221814', 2]], eyes: [['#2a1a10', 5], ['#3a2414', 2]] },
   // South Asian, Middle Eastern and others
   { w: 3, tone: ['#c8a07c', '#6e4a30'], anc: [0.15, 0.2, 0.65], texture: [0.1, 0.6], hairCols: DARK_HAIR, eyes: BROWN_EYES },
 ];
@@ -112,7 +113,13 @@ export function generateAppearance(seed: number, opts: AppearanceOpts = {}): App
   // men: flatten the pectoral shelf and nipple points (the base male mesh at average-plus weight
   // shades as a bust under shirts); heavier men keep a little more chest
   // (paired modifiers take their positive name; a negative value applies the opposite target)
-  else { locals['torso/torso-muscle-pectoral-incr'] = -Math.max(0, 0.6 - muscle * 0.4); locals['breast/breast-point-incr'] = -0.5; locals['breast/breast-volume-vert-up'] = 0.3; }
+  else {
+    // the soft, low chest of MakeHuman's average-plus-weight male reads as a bust: take the bust
+    // girth in (heavier men keep some), lift what remains, flatten the points
+    locals['measure/measure-bust-circ-incr'] = -Math.min(0.85, 0.55 + weight * 0.35);
+    locals['breast/breast-volume-vert-up'] = 0.6; locals['breast/breast-trans-up'] = 0.4;
+    locals['torso/torso-muscle-pectoral-incr'] = -Math.max(0, 0.4 - muscle * 0.3);
+  }
   if (clampAge > 55) { locals['head/head-age-incr'] = (clampAge - 55) / 35 * 0.8; locals['neck/neck-double-incr'] = weight > 0.55 ? r.body.range(0, 0.5) : 0; }
 
   // --- skin ---

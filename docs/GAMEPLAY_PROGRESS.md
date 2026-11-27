@@ -229,7 +229,7 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Values:**
   - Reach 2.4 m in a 60° cone; on touch, auto-align gives 2.9 m and a 120° cone.
   - Costs 12 stamina, hit or miss.
-  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away; ±12% for strength; reduced by a limp, drink or exhaustion.
+  - Hit chance: 85% at a run (≥ 3 m/s), 45% walking. Minus 25% if the quarry is pulling away (its speed is measured frame to frame, smoothed over 0.3 s; `measuredSpeed(id)`); ±12% for strength; reduced by a limp, drink or exhaustion.
   - Non-lethal: 5 hp, never below 1. The quarry is down 4 s (pinned 3 s). A caught chase quarry stays down for the mission to resolve; anyone else gets up and runs.
   - A miss sprawls you for 0.9 s.
 - **Heat:** a lawful quarry (a purse snatcher, a bail skip) is a citizen's arrest, no crime. A bystander is assault; a cop is assault on an officer.
@@ -255,10 +255,8 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Where we fall short:**
   - Restrain, escort and breaking free are in. A bolting prisoner is a short mash rather than RDR2's full struggle-and-chase scene; the chase that follows is ours.
   - The dive and ragdoll are characters' and the engine's work and not built yet.
-  - The quarry's speed is estimated from AI state, not measured.
 - **Plan:**
   - Tune the bolt rate in a touch playtest. Characters build the struggle animation from the `breakFree` events.
-  - Measure quarry velocity from the sim when its motion is available.
   - Characters own the dive, the tumble and the stumble animations (events above).
 
 ### Sidewalk bumps (sim's `pedBumped`)
@@ -266,13 +264,18 @@ An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s
 - **Angry pedestrian:** shoves back 35% of the time, a 0.5 s stumble for the player (`notice {kind: 'shovedBack'}`).
 - **Knockdown:** `reckless` (severity 0.6, a crime only if seen). The third knockdown inside 30 s is `assault`.
 - **Ownership:** the sim plays the reactions and the get-up.
+- **Brawlers** (sim's `releasePed` hand-off):
+  - An angry pedestrian who shoves back twice inside 60 s squares up. So does a robbed vendor with nerve when you're unarmed: hot dog 50%, newsstand 35%, pretzel and fruit 30%, coffee 25%; peddlers and the monte crew run.
+  - Gameplay takes the ped over as a 55 hp fist fighter and drives it each frame (`moveReleasedPed`).
+  - The brawl ends when someone's down, the brawler runs or gives up, the player walks off (25 m), or after 30 s. Then the ped goes back to the sim (`reclaimPed`), and a vendor returns to their cart.
+  - They started it, so fighting back isn't a crime.
 - **Test:** `simAdapter.test.ts`.
 
 #### vs GTA V / VI / RDR2
 - **References:** GTA V's shoulder-barge sends pedestrians stumbling and swearing, and repeated shoving starts fights. RDR2's jostling is weightier, NPCs remember you, and it can escalate to a brawl or a report.
 - **Where we match:** graded contact (brush, stumble, knockdown) with angry pushback, and heat only through witnesses, rising with repetition.
-- **Where we fall short:** an angry pedestrian never escalates to a fist fight (ambient peds have no combat AI), and nobody remembers you.
-- **Plan:** promote an angry pedestrian who was shoved twice into a brief melee brawler (the melee system already registers peds as fighters), and give bumps a short-term grudge per ped.
+- **Where we fall short:** escalation to a fist fight is in (shoved twice), but there's no longer memory: a ped forgets you after 60 s, and bystanders don't join in, as they can in GTA V.
+- **Plan:** a friend joining a brawl (a second release from the same group), and a per-block grudge that lasts the game day.
 
 ### Street vendors (STREET_VENDORS.md, user decision 2026-11-27; `economy/vendors.ts`, `vendors.test.ts`)
 Sim places and plays the vendors; gameplay owns the interaction. Adults only, invented brands, 1974 prices.
@@ -290,13 +293,34 @@ Sim places and plays the vendors; gameplay owns the interaction. Adults only, in
 - **Carts knocked over:** at 3 m/s or more, by the player, a car or a chase. The cart spills (`notice cartOverturned` lists the goods) and is closed for 2 game hours. The player on foot commits vandalism; in a car, reckless.
 - **Three-card monte** ("Find the lady"): $2–$20 a hand, and rigged, because the dealer palms the queen on a real bet. Catch the tell, the bent corner of the queen visible for 0.21–0.49 s during the 4 s deal (wider with stealth skill, narrower drunk), and you follow it to an even-money win. After two wins the dealer folds the box.
 - **Context button:** "Buy" (the UI gets `notice vendorMenu`), "Shine 50¢" or "Find the lady".
+- **Regulars and the sidewalk wire** (narrative's side.vendor_tipsters):
+  - Three purchases at a cart make you a regular there; narrative's `flag.sidewalk_wire` makes you one everywhere. `vendorMenu().regular` offers the question.
+  - `vendorTip(id)` gives the street's view within 600 m, once per vendor per game hour: beat posts, search cars, roadblocks and subway stakeouts as map hints `{at, kind, text}`.
+  - If a report matches how you look, the vendor warns you instead: "They're asking about a man in a white shirt… Sounds a lot like you."
+  - Spoken through narrative's barks: a `bark {id, bark, context, vars, at}` event with `barks.vendor_tip_warning {description}`, `barks.vendor_tip_cops` (context = hint kind, `{where}` = the nearest hint's corner) or `barks.vendor_tip_quiet`. Hints are sorted nearest first; the rest stay map hints. `line` is a plain-text fallback.
+  - Tips, not money. Saved.
+- **Greet / antagonize (the player's side of sim's greetings):**
+  - On foot, unarmed, beside a passer-by (2.5 m): the context button reads **Say hello**; its `alt` is **Mouth off** (`doAltContextAction()`: hold on touch, a second key elsewhere). Mission talkers still win the button.
+  - Hello: someone you mouthed off at in the last 10 min snaps back (steady, nerve ≥ 0.55) or shies (shaky); a resented block (reputation ≤ -3) complains or keeps clear; a liked block (≥ 2.5) or someone you've greeted before gets `greet_known`; otherwise a nod, and 4 in 10 don't answer. A hello is not remembered.
+  - Mouth off: shaky people back away (sim `goto` away). Steady ones give it back, shove you on the second taunt in 30 s, and square up on the third (a brawl they start: no crime on you). With a gun out it's `menacing` and they hurry off. Every taunt is `remember('bumped', pedId)` (sim has no "insulted" kind yet).
+  - Events: the player's line `bark {id: player, bark: 'barks.player_greet' (context 'warm' | 'plain') | 'barks.player_antagonize' (context 'first' | 'again'), to}`; the reply `bark {id: 'ped:N', bark/pool: 'barks.<archetype>', context: greet | greet_known | antagonize | fear | complain | ignore, mood, recall}` (sim's pedGreets shape) and `pedReply {id, context, mood, recall, archetype}`.
+  - **Apologise** (the defuse): for 8 s after a shove, or in a street fight's first 5 s, the button reads **Apologise** (alt still Mouth off). Accepted about 2 times in 3 from an average passer-by (less from the steadier, after more taunts, on a resented block, or mid-fight): the grudge is forgotten and a fight ends there (`brawlOver how: 'calmed'`). Rejected: a parting shot and they walk off; a fight carries on. Player line `barks.player_apologise` (context `shove` | `fight`); replies `accept_apology` | `reject_apology`. Not held against you by the street.
+  - A beat cop (sim's foot police, or a cop archetype) never shoves, fights or runs: the first two taunts get a warning (`antagonize`, mood `warning`), the third, or any with a gun out, is `menacing` in front of an officer (mood `stern`, `escalated: 'stop'`).
+  - Ped replies fall back to narrative's `barks.passerby` pool only if a ped has no archetype; brawlers keep theirs.
+  - Every player line carries `lead` ('teddy' | 'delphine' | 'nick') for narrative's per-lead variants.
+  - vs RDR2: Arthur's greet/antagonize/defuse on a lock-on; ours is the one context button with a hold alternative, escalating through shove and fight the same way, with a defuse window. No lock-on needed. GTA V has no equivalent; GTA VI is expected to add one.
+- **Block standing (sim memory.ts, 39af2cb):**
+  - Every player crime goes to `sim.remember` through `crime()` (table `MEMORY_OF`): theft → theft, a robbed cart or a carjack → robbed, assaults, arson and hit-and-run → assault, shots → gunfire, homicide or a body seen → killed, vandalism and reckless → reckless. A bribe, a jumped turnstile or a gun on show are the police's business, not the street's. Sim records bumps and knockdowns itself; gameplay never sets `byPlayer`, so nothing counts twice.
+  - Kindness: the shoeshine tip → tipped; a lawful chase quarry tackled → helped.
+  - Vendors read `sim.reputation(x, z)`: on a well-liked block (≥ 2.5) you're a regular one visit sooner; on a resented one (≤ -4, e.g. a robbery there) the vendor won't serve or talk (`vendorMenu().refuses`, `notice {kind: 'vendorRefuses'}`) until it fades (about half an hour). Prices never change: a 1974 hot dog man refuses, he doesn't gouge.
+  - vs RDR2: Arthur's honour changes greetings and shop prices across the map. Ours is per block and decays, which suits a city where nobody knows you two streets over; we don't discount for good standing (yet), and sim's greetings (`pedGreets`) carry the street's side.
 - **Saved:** tills and overturned carts.
 
 #### vs GTA V / VI / RDR2
 - **References:** GTA V's vendors are mostly ambient (hot-dog stands you can't really use, a few snack machines), and its street scams are scenery. RDR2's camps, stalls and general stores have real menus with stat effects and eating animations, and robbing a store is a full scenario. GTA VI is expected to deepen ambient commerce.
 - **Where we match or exceed:** every cart is usable, with period menus and small, meaningful effects (heal, breath, cooling in the 1974 heatwave, sobering). A rigged hustle you can beat by skill is something neither reference has as a playable minigame. Robbing and knocking over carts go through the same witness heat as everything else.
 - **Where we fall short:** no eating or shine animations yet (characters). The vendor's reaction to a robbery is a flee or cower command, not a scenario with pleading or a fight back. Vendors as tipsters and protection beats are narrative's side content, not wired yet.
-- **Plan:** wire narrative's vendor tipsters into the context button (a "Talk" beat when a vendor has a tip). Add a vendor who fights back (an angry hot-dog man with a ladle) once peds can become brawlers (asked of sim).
+- **Plan:** the vendor tipsters are in (regulars and heat hints); next, protection-racket beats on vendors for Nick. The vendor who fights back is in (brawler hand-off); give him the ladle once characters have a prop for it.
 
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):

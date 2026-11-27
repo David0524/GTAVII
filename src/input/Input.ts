@@ -22,7 +22,9 @@ export type ButtonAction =
   // UI stream (ENGINE_RESPONSES ui 3): pockets, weapon selector, cutscene skip (hold), map waypoint
   | 'inventory' | 'weaponSelect' | 'skip' | 'waypoint'
   // camera (CAMERA_SPEC): look behind (hold), shoulder swap
-  | 'lookBehind' | 'shoulderSwap';
+  | 'lookBehind' | 'shoulderSwap'
+  // combat (gameplay contract §3): aim / fire (mouse buttons, pad triggers on foot), reload, melee, cover, lock-on
+  | 'aim' | 'fire' | 'reload' | 'melee' | 'cover' | 'lock';
 export type Device = 'kbm' | 'touch' | PadFamily;
 
 const KEYMAP: Record<string, ButtonAction> = {
@@ -31,16 +33,17 @@ const KEYMAP: Record<string, ButtonAction> = {
   Enter: 'confirm', Backspace: 'back', ArrowUp: 'navUp', ArrowDown: 'navDown', ArrowLeft: 'navLeft', ArrowRight: 'navRight',
   BracketLeft: 'tabPrev', BracketRight: 'tabNext',
   KeyI: 'inventory', Tab: 'weaponSelect', KeyX: 'waypoint', KeyB: 'lookBehind', KeyC: 'shoulderSwap',
+  Mouse0: 'fire', Mouse2: 'aim', KeyR: 'reload', KeyV: 'melee', KeyT: 'lock',
 };
 /** Keys that also trigger a second action (a key may serve gameplay and a context like cutscenes). */
-const KEY_EXTRA: Record<string, ButtonAction[]> = { Space: ['skip'], Enter: ['skip'] };
+const KEY_EXTRA: Record<string, ButtonAction[]> = { Space: ['skip'], Enter: ['skip'], KeyQ: ['cover'] };
 
 /** Default keyboard binding per action (derived from KEYMAP; the settings screen shows and edits these). */
 export const DEFAULT_KEYS: Partial<Record<ButtonAction, string[]>> = {};
 for (const [code, a] of Object.entries(KEYMAP)) (DEFAULT_KEYS[a] ??= []).push(code);
 for (const [code, as] of Object.entries(KEY_EXTRA)) for (const a of as) (DEFAULT_KEYS[a] ??= []).push(code);
 /** Actions the player may rebind (menu navigation stays fixed so a bad binding can always be undone). */
-export const REBINDABLE: ButtonAction[] = ['sprint', 'jump', 'use', 'photo', 'map', 'pause', 'inventory', 'weaponSelect', 'waypoint', 'skip', 'rise', 'sink', 'hud', 'lookBehind', 'shoulderSwap'];
+export const REBINDABLE: ButtonAction[] = ['sprint', 'jump', 'use', 'photo', 'map', 'pause', 'inventory', 'weaponSelect', 'waypoint', 'skip', 'rise', 'sink', 'hud', 'lookBehind', 'shoulderSwap', 'aim', 'fire', 'reload', 'melee', 'cover', 'lock'];
 
 /** Effective code -> actions map: defaults, with any action the player rebound taking only its new keys. */
 function buildKeymap(bindings: Record<string, { keys: string[]; pad: number[] }>): Map<string, ButtonAction[]> {
@@ -68,10 +71,10 @@ function padMap(preset: [Btn, ButtonAction][], bindings: Record<string, { keys: 
   return out;
 }
 export const PAD_PRESETS: Record<'standard' | 'classic' | 'lefthanded', [Btn, ButtonAction][]> = {
-  standard: [[Btn.L3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], ...MENU_PAD],
-  classic: [[Btn.A, 'sprint'], [Btn.X, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], ...MENU_PAD],
+  standard: [[Btn.L3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], [Btn.X, 'reload'], [Btn.B, 'melee'], [Btn.RB, 'cover'], ...MENU_PAD],
+  classic: [[Btn.A, 'sprint'], [Btn.X, 'jump'], [Btn.Y, 'use'], [Btn.R3, 'photo'], [Btn.B, 'reload'], [Btn.RB, 'melee'], [Btn.Down, 'cover'], ...MENU_PAD],
   // left-handed: same face buttons as standard; sticks (and stick clicks) are swapped in poll()
-  lefthanded: [[Btn.R3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.L3, 'photo'], ...MENU_PAD],
+  lefthanded: [[Btn.R3, 'sprint'], [Btn.A, 'jump'], [Btn.Y, 'use'], [Btn.L3, 'photo'], [Btn.X, 'reload'], [Btn.B, 'melee'], [Btn.LB, 'cover'], ...MENU_PAD],
 };
 
 const MAX_YAW_RATE = 2.8; // rad/s at full stick, sensitivity 1
@@ -87,6 +90,7 @@ export class Input {
   private held = new Set<ButtonAction>();
   private edges = new Set<ButtonAction>();
   private keys = new Set<string>();
+  private trigHeld = { lt: false, rt: false };
   /** Analog move written by the touch stick; combined with keys/pad each frame. */
   readonly touchMove = { x: 0, y: 0 };
   readonly touchHeld = new Set<ButtonAction>();
@@ -121,6 +125,14 @@ export class Input {
       this.addLook(-e.movementX * k, -e.movementY * k * (settings.get('mouseInvertY') ? -1 : 1));
       this.setDevice('kbm');
     });
+    // mouse buttons as keys ('Mouse0' fire, 'Mouse2' aim) while the pointer is locked to the game
+    dom.addEventListener('mousedown', (e) => {
+      if (document.pointerLockElement !== dom) return;
+      const code = `Mouse${e.button}`; if (!this.keys.has(code)) for (const a of this.keymap.get(code) ?? []) this.edges.add(a);
+      this.keys.add(code); this.setDevice('kbm');
+    });
+    window.addEventListener('mouseup', (e) => this.keys.delete(`Mouse${e.button}`));
+    dom.addEventListener('contextmenu', (e) => e.preventDefault());
     dom.addEventListener('wheel', (e) => { this.wheel += Math.sign(e.deltaY); }, { passive: true });
     window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') this.setDevice('touch'); });
     this.pad.onConnect = (fam) => this.setDevice(fam);
@@ -173,6 +185,10 @@ export class Input {
     for (const a of this.touchHeld) this.held.add(a);
     if (this.padPreset !== s.controlPreset) { this.padPreset = s.controlPreset; this.padmap = padMap(PAD_PRESETS[s.controlPreset] ?? PAD_PRESETS.standard, s.bindings); }
     for (const [b, a] of this.padmap) { if (this.pad.down(b)) this.held.add(a); if (this.pad.pressed(b)) this.edges.add(a); }
+    // pad triggers: aim (LT) and fire (RT) on foot; the driving context reads them as pedals instead (gas/brake)
+    if (this.pad.lt > 0.5) { if (!this.trigHeld.lt) this.edges.add('aim'); this.held.add('aim'); }
+    if (this.pad.rt > 0.5) { if (!this.trigHeld.rt) this.edges.add('fire'); this.held.add('fire'); }
+    this.trigHeld.lt = this.pad.lt > 0.5; this.trigHeld.rt = this.pad.rt > 0.5;
 
     const kv = (this.held.has('rise') || this.held.has('jump') ? 1 : 0) - (this.held.has('sink') ? 1 : 0);
     this.vertical = Math.max(-1, Math.min(1, kv + this.pad.rt - this.pad.lt));

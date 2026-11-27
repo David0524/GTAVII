@@ -208,3 +208,17 @@ test('breaking free: a skip tries to bolt (more when the escort lags or a gun co
   for (let i = 0; i < 3000; i++) { r3.pos[0] += 0.4; r3.step(0.1, 0.1); }
   assert.ok(!tried, 'noBolt');
 });
+
+test('tackle reads the quarry\'s measured speed, not a guess from its AI state', () => {
+  const r = rig();
+  r.g.spawnCombatant({ id: 'runner', faction: 'hood', squad: 'q', pos: [0, 0, -2], weapon: null, hp: 30 });
+  assert.equal(r.g.measuredSpeed('runner'), null, 'no reading before two samples');
+  const a = r.g.ai.agents.get('runner')!;
+  // move it 7 m/s straight away for a second, by hand (a stand-in for sim motion)
+  for (let i = 0; i < 30; i++) { a.pos[2] -= 7 / 30; r.g.update(1 / 30); }
+  const v = r.g.measuredSpeed('runner')!;
+  assert.ok(Math.abs(v - 7) < 0.5, `measured ${v}`);
+  // standing still decays toward zero within about a second
+  for (let i = 0; i < 40; i++) r.g.update(1 / 30);
+  assert.ok(r.g.measuredSpeed('runner')! < 0.5);
+});

@@ -44,6 +44,8 @@ export interface VoiceOptions {
   /** Never virtualise (counts against the cap; used for the master radio feed and UI). */
   pinned?: boolean;
   onEnd?: () => void;
+  /** Start this many seconds from now, sample-accurately (sound propagation delay, echoes). */
+  delay?: number;
 }
 
 let nextId = 1;
@@ -54,7 +56,7 @@ export class Voice {
   t0: number; gain: number; stopped = false; stopAt = Infinity; audibility = 0; score = 0;
   dist = 0; occGain = 1; occLp = 20000; occCheckedAt = -1; app: Vec3 = [0, 0, 0]; pathLen = 0; pitch = 1;
   chain: { lp?: BiquadFilterNode; g: GainNode; pan?: PannerNode; send: GainNode; lg: number; ls: number; llp: number; px: number; py: number; pz: number } | null = null;
-  constructor(readonly o: VoiceOptions, now: number) { this.t0 = now; this.gain = o.gain ?? 1; }
+  constructor(readonly o: VoiceOptions, now: number) { this.t0 = now + Math.max(0, o.delay ?? 0); this.gain = o.gain ?? 1; }
   get positional() { return !!this.o.at; }
   pos(): Vec3 | null { const a = this.o.at; return !a ? null : typeof a === 'function' ? a() : a; }
   setGain(g: number) { this.gain = g; }
@@ -64,7 +66,27 @@ export class Voice {
 
 export interface Listener { position: Vec3; forward: Vec3; up: Vec3; velocity: Vec3 }
 
+/**
+ * The HRTF panner adds processing latency that equal-power panning doesn't (measured ~5.8 ms in Chromium). Echoes and
+ * direct sounds can be panned differently, so delayed voices that get HRTF start early by this much. Measured once at
+ * load by rendering an impulse through both panners offline (works in every browser; 0 if it can't be measured).
+ */
+export async function measureHrtfLatency(sr: number): Promise<number> {
+  try {
+    const peakAt = async (model: PanningModelType) => {
+      const c = new OfflineAudioContext(1, 4096, sr); const b = c.createBuffer(1, 64, sr); b.getChannelData(0)[0] = 1;
+      const s = c.createBufferSource(); s.buffer = b; const p = c.createPanner(); p.panningModel = model; p.distanceModel = 'linear'; p.rolloffFactor = 0;
+      p.positionX.value = 0; p.positionY.value = 0; p.positionZ.value = -1; s.connect(p).connect(c.destination); s.start(0);
+      const d = (await c.startRendering()).getChannelData(0); s.disconnect(); p.disconnect(); let m = 0, at = 0; for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > m) { m = Math.abs(d[i]); at = i; } return at;
+    };
+    const lat = ((await peakAt('HRTF')) - (await peakAt('equalpower'))) / sr;
+    return lat > 0 && lat < 0.05 ? lat : 0;
+  } catch { return 0; }
+}
+
 export class VoiceManager {
+  /** Seconds of extra latency in the HRTF panner (see measureHrtfLatency). */
+  hrtfLatency = 0;
   voices: Voice[] = [];
   private graveyard: { at: number; v: { src: SourceGraph; chain: Voice['chain'] } }[] = [];
   private rr = 0;
@@ -209,8 +231,10 @@ export class VoiceManager {
     }
     send.connect(this.mixer.sendIn[v.o.bus]);
     v.src = src; v.chain = { lp, g, pan, send, lg: -1, ls: -1, llp: -1, px: NaN, py: NaN, pz: NaN };
-    const offset = v.o.loop ? now - v.t0 : Math.max(0, now - v.t0);
-    src.start(now, offset);
+    // A delayed voice panned with HRTF starts early by the panner's latency so it lines up with equal-power voices.
+    const t0 = hrtf && v.t0 > now ? Math.max(now, v.t0 - this.hrtfLatency) : v.t0; // never skip an attack that's already due
+    const offset = Math.max(0, now - t0);
+    src.start(Math.max(now, t0), offset);
     this.stats.promoted++;
   }
 

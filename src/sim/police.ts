@@ -237,6 +237,14 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
     else if (v.v < 2 && L.kind === LinkKind.Lane) { v.stopLink = v.link; v.stopAt = v.s; v.stopKind = 'police'; } // no room ahead: this is the spot
     else c.pullInNext = true;
   }
+  // passing the scene within sight but routed the long way round (one-ways): pull in here, the crew walks
+  if (c.mode === 'goto' && !c.arrived) {
+    c.minD = Math.min(c.minD ?? Infinity, d);
+    if (c.minD < 90 && d > c.minD + 6 && L.kind === LinkKind.Lane && v.stopLink !== v.link) {
+      const at = v.s + Math.max(4, v.v * v.v / 5);
+      if (at < net.len[v.link] - 4) { v.stopLink = v.link; v.stopAt = at; v.stopKind = 'police'; } else c.pullInNext = true;
+    }
+  }
   // stuck in traffic within sight of the scene: stop where it stands, the crew goes the rest on foot
   // (a block away if it's stuck in a side street parked solid: nothing will let it through)
   const walkR = groupParked(S, L.group) && !groupMajor(S, L.group) ? 130 : 90;
@@ -246,7 +254,7 @@ export function policeVehicleTick(S: SimCore, v: Vehicle, dt: number): boolean {
   // carried over from the previous block: pull in at the start of this one
   if (c.pullInNext && L.kind === LinkKind.Lane && v.stopLink !== v.link && !c.arrived) {
     c.pullInNext = false;
-    const at = Math.max(v.s + 3, Math.min(8, net.len[v.link] - 4));
+    const at = Math.max(v.s + Math.max(3, v.v * v.v / 6), Math.min(8, net.len[v.link] - 4)); // a spot it can actually stop at from this speed
     if (at < net.len[v.link] - 2) { v.stopLink = v.link; v.stopAt = at; v.stopKind = 'police'; }
   }
   if ((c.mode === 'goto' || c.mode === 'roadblock') && !c.arrived && v.stopLink === v.link && v.s >= v.stopAt - 3 && v.v < 1) {
@@ -374,7 +382,7 @@ export function spawnPolice(S: SimCore, opts: { kind: 'foot' | 'car'; x: number;
 }
 
 export function setCopGoal(S: SimCore, c: CopState, agent: Vehicle | Ped, goal: PoliceGoal) {
-  c.arrived = false; c.route = []; c.stuckT = 0;
+  c.arrived = false; c.route = []; c.stuckT = 0; c.minD = undefined; c.arriveR = undefined;
   c.maxSpeed = goal.maxSpeed ?? (c.kind === 'car' ? 20 : 4);
   c.urgent = goal.kind === 'goto' ? !!goal.urgent : goal.kind === 'pursue' || goal.kind === 'boxIn' || goal.kind === 'roadblock';
   c.target = goal.kind === 'pursue' || goal.kind === 'boxIn' ? goal.target : null;

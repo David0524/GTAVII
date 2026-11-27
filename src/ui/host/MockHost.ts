@@ -198,7 +198,7 @@ export class MockHost implements UiHost {
   newspaper(): NewsIssue {
     return {
       id: 'news.1974-06-22', date: 'Saturday, June 22, 1974', masthead: 'The Evening Courier', price: '20¢', edition: 'Late City Final',
-      headline: 'HEAT WAVE GRIPS CITY', deck: 'Power company asks for cutbacks as mercury hits 94; brownouts feared in Midtown',
+      headline: 'HEAT WAVE GRIPS CITY', deck: 'Hudson Union asks for cutbacks as mercury hits 94; brownouts feared in Midtown',
       stories: [
         { head: 'Hotel tenants fight eviction', body: 'Residents of a West 31st Street hotel say a new owner wants them out by fall. "Where do we go?" asked one, 81.' },
         { head: 'Garment trucks hijacked', body: 'Police report the third truck taken on Ninth Avenue this month. No arrests.' },
@@ -377,16 +377,19 @@ export class MockHost implements UiHost {
   // ---------------------------------------------------------------- touch (TOUCH_CONTROLS.md), scripted
   /** Lab only: lockables are given straight in screen px (z = 0) and project() passes them through. */
   touchMode: import('../../shared/uiHost').TouchMode = 'foot';
+  /** lab ?ctx=greet: the greet/antagonize context (alt verb on hold). */
+  greet = false;
   touchLog: string[] = [];
   private lockedId: string | null = null;
   private enemies = [{ id: 'npc.goon_1', x: 0.58, y: 0.42 }, { id: 'npc.goon_2', x: 0.71, y: 0.47 }, { id: 'npc.goon_3', x: 0.46, y: 0.5 }];
   touch: import('../../shared/uiHost').TouchHost = {
     mode: () => this.touchMode,
     armed: () => true,
-    context: () => this.touchMode === 'foot' ? { kind: 'enterVehicle', label: 'Steal car' } : this.touchMode === 'combat' ? { kind: 'pickUp', label: 'Pick up .38' } : { kind: 'exitVehicle', label: 'Get out' },
+    context: () => this.greet && this.touchMode === 'foot' ? { kind: 'greet', label: 'Say hello', alt: { kind: 'antagonize', label: 'Mouth off' } } : this.touchMode === 'foot' ? { kind: 'enterVehicle', label: 'Steal car' } : this.touchMode === 'combat' ? { kind: 'pickUp', label: 'Pick up .38' } : { kind: 'exitVehicle', label: 'Get out' },
+    doAltContext: () => { this.touchLog.push(`alt:${this.touchMode}`); },
     doContext: () => {
       this.touchLog.push(`context:${this.touchMode}`);
-      this.touchMode = this.touchMode === 'foot' ? 'drive' : this.touchMode === 'drive' ? 'foot' : 'combat';
+      if (!this.greet) this.touchMode = this.touchMode === 'foot' ? 'drive' : this.touchMode === 'drive' ? 'foot' : 'combat';
     },
     lockables: () => this.enemies.map((e) => ({ id: e.id, x: e.x * innerWidth, y: e.y * innerHeight, z: 0, threat: 1 })),
     project: (x, y) => ({ x, y }),

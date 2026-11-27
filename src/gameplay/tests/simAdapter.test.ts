@@ -213,3 +213,190 @@ test('sidewalk bumps: an angry pedestrian sometimes shoves back; knockdowns are 
   g.update(0.5);
   assert.ok(kinds.some((k) => k.includes('reckless')) && kinds.some((k) => k.includes('assault')), `reckless, then assault: ${kinds.length} witnessed (${crimesBefore})`);
 });
+
+class HandoffSim extends ServiceSim {
+  released = new Set<number>(); acts: any[] = []; moves: any[] = []; reclaimed: number[] = []; vcmds: any[] = []; vnotes: any[] = [];
+  releasePed(id: number) { this.released.add(id); return true; }
+  pedAct(id: number, act: string) { this.acts.push({ id, act }); return true; }
+  moveReleasedPed(id: number, x: number, z: number) { this.moves.push({ id, x, z }); }
+  reclaimPed(id: number) { this.released.delete(id); this.reclaimed.push(id); }
+  vendorCommand(id: string, c: any) { this.vcmds.push({ id, ...c }); }
+  vendorNotice(n: any) { this.vnotes.push(n); }
+}
+function handoffRig() {
+  const sim = new HandoffSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  return { sim, g, pos };
+}
+
+test('brawler hand-off: shoved twice, a pedestrian squares up; gameplay drives them, then hands them back when it ends', () => {
+  const { sim, g, pos } = handoffRig();
+  sim.peds.push({ id: 51, archetype: 'npc.dockworker', x: 1.2, y: 0, z: 0, yaw: 0, speed: 0, state: 'angry', variant: 1, nerve: 0.9 });
+  let n = 0;
+  while (!g.brawls.size && n < 200) { sim.fire('pedBumped', { id: 51, kind: 'stumble', response: 'angry', x: 1.2, z: 0, dirX: 1, dirZ: 0, by: 'player' }); g.update(1); n++; }
+  assert.ok(g.brawls.has('brawl:51') && sim.released.has(51), 'released to gameplay as a brawler');
+  assert.ok(sim.acts.some((a) => a.id === 51 && a.act === 'shove'), 'the first shove is animated by the sim');
+  g.update(0.1); g.update(0.1);
+  assert.ok(sim.moves.some((m) => m.id === 51), 'gameplay moves the released ped each frame');
+  pos[0] = 60; for (let i = 0; i < 20; i++) g.update(0.2);
+  assert.ok(!g.brawls.size && sim.reclaimed.includes(51), 'walk off and the sim gets them back');
+});
+
+test('vendors through the sim: sales and overturned carts are animated there; an unarmed robbery sometimes gets the hot-dog man swinging', () => {
+  let swung = 0, fled = 0;
+  for (let seed = 0; seed < 12; seed++) {
+    const { sim, g } = handoffRig();
+    (g as any).rng.state = 1000 + seed;
+    g.loadVendorContent({ menus: { hot_dog: [{ item: 'Frank', price: '35¢' }] } });
+    sim.peds.push({ id: 70, archetype: 'npc.vendor', x: 1, y: 0, z: 0, yaw: 0, speed: 0, state: 'work', variant: 1, nerve: 0.8 });
+    sim.fire('vendorSpawned', { id: 'vendor:7th_31', kind: 'hot_dog', pedId: 70, crew: [], x: 1, z: 0, cart: null, licensed: true, goods: [], variant: 0, arriving: false });
+    if (seed === 0) {
+      assert.ok(g.buyFromVendor('vendor:7th_31', 'hot_dog.frank'));
+      assert.deepEqual(sim.vnotes[0], { kind: 'vendorSale', vendor: 'vendor:7th_31', good: 'hot_dog.frank' });
+      g.cartHit('vendor:7th_31', { by: 'car', speed: 8 });
+      assert.equal(sim.vnotes.at(-1).kind, 'cartOverturned');
+    }
+    g.robVendor('vendor:7th_31');
+    if (g.brawls.has('brawl:70')) swung++; else if (sim.vcmds.some((c) => c.type === 'flee')) fled++;
+  }
+  assert.ok(swung >= 2 && fled >= 2, `the hot-dog man fights back about half the time (${swung} swung, ${fled} fled)`);
+});
+
+// ---- greet / antagonize (the player's side of sim's memory greetings)
+class TalkSim extends HandoffSim {
+  rep = 0; mem: any[] = [];
+  remember(kind: string, x: number, z: number, o: any = {}) { this.mem.push({ kind, x, z, ...o }); }
+  reputation() { return { score: this.rep, last: null, ago: Infinity }; }
+}
+function talkRig(nerve: number) {
+  const sim = new TalkSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  sim.peds.push({ id: 7, archetype: 'npc.dockworker', x: 1.5, y: 0, z: 0, yaw: 0, speed: 0, state: 'walk', variant: 1, nerve });
+  const replies: any[] = []; g.on('pedReply', (e: any) => replies.push(e));
+  const barks: any[] = []; g.on('bark', (e: any) => barks.push(e));
+  return { sim, g, pos, replies, barks };
+}
+
+test('greet: the context button says hello to a passer-by; the answer comes from the block\'s standing and what you did to them', () => {
+  const { sim, g, replies, barks } = talkRig(0.8);
+  const c = g.contextAction()!;
+  assert.equal(c.kind, 'greet'); assert.equal(c.target, 'ped:7'); assert.equal(c.alt?.kind, 'antagonize');
+  // most New Yorkers: a nod or nothing
+  const ctx = new Set<string>();
+  for (let i = 0; i < 30; i++) { (g as any).rapport.clear(); g.greet('ped:7'); ctx.add(replies.at(-1).context); }
+  assert.deepEqual([...ctx].sort(), ['greet', 'ignore']);
+  assert.ok(barks.some((b) => b.bark === 'barks.player_greet') && barks.some((b) => b.pool === 'barks.dockworker'), 'player line and the ped\'s pool');
+  // greeted before: a warm hello
+  g.greet('ped:7'); assert.equal(replies.at(-1).context, 'greet_known');
+  // a block that likes you
+  (g as any).rapport.clear(); sim.rep = 3; g.greet('ped:7'); assert.equal(replies.at(-1).context, 'greet_known');
+  // a block that resents you: a steady one complains
+  (g as any).rapport.clear(); sim.rep = -5; g.greet('ped:7'); assert.equal(replies.at(-1).context, 'complain');
+  assert.equal(sim.mem.length, 0, 'a hello is not a favour: nothing remembered');
+});
+
+test('antagonize: a steady one gives it back, then shoves, then squares up (they start it: no crime); the street remembers', () => {
+  const { sim, g } = talkRig(0.85);
+  const crimes: any[] = []; g.on('crimeWitnessed', (e: any) => crimes.push(e));
+  const a1 = g.doAltContextAction()!; assert.equal(a1.context, 'antagonize'); assert.equal(a1.escalated, 'none');
+  assert.equal(sim.mem.at(-1).kind, 'bumped'); assert.equal(sim.mem.at(-1).pedId, 7);
+  const a2 = g.antagonize('ped:7')!; assert.equal(a2.escalated, 'shove'); assert.ok(g.stumbling);
+  const a3 = g.antagonize('ped:7')!; assert.equal(a3.escalated, 'brawl'); assert.ok(g.brawls.has('brawl:7') && sim.released.has(7));
+  assert.equal(crimes.length, 0, 'mouthing off unarmed is no crime');
+});
+
+test('antagonize: a shy one backs off; with a gun out it is menacing and they hurry away', () => {
+  const { sim, g, replies } = talkRig(0.3);
+  const a = g.antagonize('ped:7')!; assert.equal(a.context, 'fear'); assert.equal(sim.goals.get(7).kind, 'goto');
+  g.greet('ped:7'); // within ten minutes they remember
+  assert.equal(replies.at(-1).context, 'fear'); assert.equal(replies.at(-1).recall, 'antagonized');
+  const t2 = talkRig(0.9);
+  t2.g.addProp('box', 'call_box', 30, 0, -10);
+  t2.sim.peds.push({ id: 8, archetype: 'npc.commuter', x: 5, y: 0, z: -3, yaw: Math.PI, speed: 0, state: 'walk', variant: 1, nerve: 0.9 });
+  t2.g.equip('weapon.service');
+  const kinds: string[] = []; t2.g.on('crimeWitnessed', (e: any) => kinds.push(e.crime.kind));
+  const b = t2.g.antagonize('ped:7')!;
+  assert.equal(b.context, 'fear', 'nobody squares up to a gun');
+  assert.ok(t2.sim.goals.get(7).urgent);
+  assert.ok(kinds.includes('menacing'), kinds.join());
+  // no greet offer with a gun drawn (combat mode)
+  assert.notEqual(t2.g.contextAction()?.kind, 'greet');
+});
+
+test('apologise: after a shove the button offers an apology; calm people usually take it, it clears the grudge; a fight can be talked down early', () => {
+  let accepted = 0, rejected = 0;
+  for (let k = 0; k < 40; k++) {
+    const { g, barks } = talkRig(0.6);
+    (g as any).rng = new (Object.getPrototypeOf((g as any).rng).constructor)(1000 + k);
+    g.antagonize('ped:7'); const s = g.antagonize('ped:7')!; assert.equal(s.escalated, 'shove');
+    const c = g.contextAction()!; assert.equal(c.kind, 'apologise'); assert.equal(c.alt?.kind, 'antagonize');
+    const res: any = g.doContextAction();
+    void res;
+    const reply = barks.filter((b) => b.id === 'ped:7').at(-1).context;
+    assert.ok(barks.some((b) => b.bark === 'barks.player_apologise' && b.lead === 'teddy'));
+    if (reply === 'accept_apology') { accepted++; assert.notEqual(g.antagonize('ped:7')!.escalated, 'shove', 'grudge cleared: the next taunt starts over'); }
+    else { rejected++; assert.equal(reply, 'reject_apology'); }
+    assert.notEqual(g.contextAction()?.kind, 'apologise', 'offered once');
+  }
+  assert.ok(accepted > rejected && rejected > 0, `${accepted} accepted, ${rejected} rejected`);
+  // a fight in its first seconds
+  let calmed = 0;
+  for (let k = 0; k < 20; k++) {
+    const { g } = talkRig(0.7);
+    (g as any).rng = new (Object.getPrototypeOf((g as any).rng).constructor)(2000 + k);
+    g.antagonize('ped:7'); g.antagonize('ped:7'); assert.equal(g.antagonize('ped:7')!.escalated, 'brawl');
+    const c = g.contextAction(); assert.equal(c?.kind, 'apologise', JSON.stringify(c));
+    const r = g.apologise(c!.target)!;
+    g.update(0.1);
+    if (r.accepted) { calmed++; assert.ok(!g.brawls.size, 'handed back to sim'); }
+  }
+  assert.ok(calmed > 0 && calmed < 20, `${calmed}/20 fights talked down`);
+});
+
+test('player lines carry the lead for narrative\'s per-lead variants', () => {
+  const { g, barks } = talkRig(0.8);
+  g.greet('ped:7'); g.antagonize('ped:7');
+  assert.deepEqual(barks.filter((b) => b.id === 'player').map((b) => b.lead), ['teddy', 'teddy']);
+});
+
+test('antagonize a beat cop: no shove, no fight, no running; a warning, then a stop for menacing', () => {
+  const { sim, g } = talkRig(0.9);
+  (sim as any).police = [{ id: 3, kind: 'foot', x: 1.5, z: 0, yaw: 0, speed: 0, mode: 'patrol', siren: false, agentId: 7 }];
+  const kinds: string[] = []; g.on('crimeWitnessed', (e: any) => kinds.push(e.crime.kind));
+  assert.equal(g.antagonize('ped:7')!.escalated, 'none');
+  assert.equal(g.antagonize('ped:7')!.escalated, 'none', 'no shove from a cop');
+  const third = g.antagonize('ped:7')!;
+  assert.equal(third.escalated, 'stop'); assert.ok(!g.brawls.size && !sim.released.has(7));
+  assert.ok(!g.stumbling);
+  void kinds;
+  assert.deepEqual((sim as any).mem.map((m: any) => m.kind), ['bumped', 'bumped', 'assault'], 'two warnings, then menacing (an assault to the street)');
+});
+
+test('use button on pad/keyboard: tap = main verb, hold 0.45 s = the alternate at the threshold, nothing on release', () => {
+  const { g, replies } = talkRig(0.9);
+  assert.equal(g.contextPrompt('F'), 'Say hello · Hold [F] Mouth off');
+  g.setContext({ device: 'pad' }); assert.equal(g.contextPrompt(), 'Say hello · Hold [Y] Mouth off');
+  // a tap
+  assert.equal(g.useButton(true, 1 / 60), null);
+  assert.equal(g.useButton(true, 0.2), null);
+  assert.equal(g.useButton(false, 1 / 60), 'main');
+  assert.ok(['greet', 'ignore'].includes(replies.at(-1).context));
+  // a hold
+  const n = replies.length;
+  g.useButton(true, 1 / 60); assert.equal(g.useButton(true, 0.3), null);
+  assert.equal(g.useButton(true, 0.2), 'alt', 'fires at the threshold, while still held');
+  assert.equal(replies.at(-1).context, 'antagonize'); assert.equal(replies.length, n + 1);
+  assert.equal(g.useButton(true, 0.5), null); assert.equal(g.useButton(false, 1 / 60), null, 'nothing on release');
+  // no alternate on offer (nobody near): fires on the press
+  const r2 = talkRig(0.5); r2.sim.peds.length = 0;
+  r2.g.addCar('car', 0, 0, -2.5, Math.PI / 2);
+  assert.equal(r2.g.contextPrompt('F'), r2.g.contextAction()!.label);
+  assert.equal(r2.g.useButton(true, 1 / 60), 'main');
+  assert.equal(r2.g.useButton(false, 1 / 60), null);
+});

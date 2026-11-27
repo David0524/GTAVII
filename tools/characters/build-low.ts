@@ -6,7 +6,9 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { readContainer, writeContainer } from '../../src/characters/format.ts';
+import { readContainer, formatReady, writeContainer } from '../../src/characters/format.ts';
+import { repack } from './meshopt.ts';
+await formatReady(); // meshopt-coded index blobs
 
 const DIR = path.resolve(import.meta.dirname, '../../public/characters');
 const buf = fs.readFileSync(path.join(DIR, 'body.bin'));
@@ -64,4 +66,5 @@ const nmeta = {
 };
 const out = writeContainer(nmeta, blobs);
 fs.writeFileSync(path.join(DIR, 'body_low.bin'), out);
+await repack(path.join(DIR, 'body_low.bin')); // meshopt index coding
 console.log('body_low.bin', (out.length / 1048576).toFixed(2), 'MiB', 'src', ns, 'split', nsp, 'locals', newLocals.length);

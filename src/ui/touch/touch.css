@@ -70,3 +70,13 @@ body.touch .t74-clock { right: calc(70px + var(--safe-r)); }
 
 /* jump relabelled as a traversal (Vault / Climb / Over / Up / Drop): the accent ring says 'this does something here' */
 .tc-id-jump.trav { box-shadow: inset 0 0 0 2px var(--taxi); }
+/* context alt verb (gameplay greet/antagonize): a quiet second line; holding fills an amber ring over 0.45 s */
+.tc-btn.has-alt { align-content: center; gap: 1px; }
+.tc-btn small.alt { display: block; pointer-events: none; white-space: nowrap; font: 700 8px/1.1 var(--f-cond); letter-spacing: .03em; text-transform: uppercase; color: rgba(242,237,227,.62); text-align: center; padding: 0 6px; }
+.tc-btn small.alt:empty { display: none; }
+.tc-btn.on small.alt { color: rgba(17,17,17,.7); }
+.tc-btn.holding::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(var(--taxi) var(--p, 0%), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  animation: tc-hold .45s linear forwards; }
+@property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@keyframes tc-hold { to { --p: 100%; } }

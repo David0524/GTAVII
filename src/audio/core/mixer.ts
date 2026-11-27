@@ -29,10 +29,12 @@ export class Mixer {
   readonly limiter: AudioWorkletNode;
   private duckRadio: AudioWorkletNode; private duckAmb: AudioWorkletNode;
   private extFilter: BiquadFilterNode; private extGain: GainNode;
+  /** HDR window: world bed and radio dip after loud events (gunfire) so they stay loud without raising the integrated level. */
+  private hdrAmb: GainNode; private hdrRadio: GainNode; private hdrUntil = 0; private hdrDepth = 0;
   private reverbIn: GainNode; private early: AudioWorkletNode; private fdn: AudioWorkletNode; private reverbOut: GainNode;
   readonly output: AudioNode;
   private nodes: AudioNode[] = [];
-  readonly stats = { limiterGrDb: 0, nans: 0, clips: 0, peakIn: 0, duckRadioDb: 0, over1dB: 0, over3dB: 0, maxGrDb: 0 };
+  readonly stats = { limiterGrDb: 0, nans: 0, clips: 0, peakIn: 0, duckRadioDb: 0, over1dB: 0, over3dB: 0, maxGrDb: 0, hdrDb: 0, hdrEvents: 0 };
   meters: Partial<Record<BusId | 'reverb', AnalyserNode>> = {};
 
   constructor(private ctx: Ctx, q: AudioQuality, destination: AudioNode = ctx.destination) {
@@ -52,13 +54,13 @@ export class Mixer {
     this.duckRadio = duck(-11); this.duckAmb = duck(-5);
     this.duckRadio.port.onmessage = (e) => { this.stats.duckRadioDb = e.data; };
     this.extFilter = ctx.createBiquadFilter(); this.extFilter.type = 'lowpass'; this.extFilter.frequency.value = 20000; this.extFilter.Q.value = 0.5; this.nodes.push(this.extFilter);
-    this.extGain = g();
+    this.extGain = g(); this.hdrAmb = g(); this.hdrRadio = g();
 
     for (const b of BUSES) {
       this.busIn[b] = g(); this.busVol[b] = g(); this.sendIn[b] = g(); this.sendVol[b] = g();
       this.busIn[b].connect(this.busVol[b]);
-      if (b === 'radio') this.busVol[b].connect(this.duckRadio, 0, 0).connect(this.masterSum);
-      else if (b === 'ambience') this.busVol[b].connect(this.duckAmb, 0, 0).connect(this.extFilter).connect(this.extGain).connect(this.masterSum);
+      if (b === 'radio') this.busVol[b].connect(this.duckRadio, 0, 0).connect(this.hdrRadio).connect(this.masterSum);
+      else if (b === 'ambience') this.busVol[b].connect(this.duckAmb, 0, 0).connect(this.extFilter).connect(this.extGain).connect(this.hdrAmb).connect(this.masterSum);
       else this.busVol[b].connect(this.masterSum);
       this.sendIn[b].connect(this.sendVol[b]);
     }
@@ -79,6 +81,18 @@ export class Mixer {
   }
 
   get now() { return this.ctx.currentTime; }
+
+  /**
+   * HDR window: dip the ambience and radio buses by `db` (negative) right away, hold, then recover over
+   * `release` s. A deeper event inside an active window deepens it; a shallower one only extends the hold.
+   */
+  hdr(db: number, hold = 0.25, release = 0.9) {
+    const t = this.ctx.currentTime; const active = t < this.hdrUntil;
+    const depth = active ? Math.min(this.hdrDepth, db) : db; this.hdrDepth = depth; this.hdrUntil = t + hold + release;
+    const lin = Math.pow(10, depth / 20);
+    for (const p of [this.hdrAmb.gain, this.hdrRadio.gain]) { p.cancelScheduledValues(t); p.setValueAtTime(p.value, t); p.setTargetAtTime(lin, t, 0.008); p.setTargetAtTime(1, t + hold, release / 3); }
+    this.stats.hdrDb = depth; this.stats.hdrEvents++;
+  }
 
   setBusVolume(bus: BusId, v: number) {
     const lin = Math.max(0, Math.min(1, v)); const gv = lin * lin; // perceptual-ish (squared) taper for sliders

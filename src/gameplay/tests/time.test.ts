@@ -68,3 +68,18 @@ test('live clock: the engine feed runs tills, the calendar and restocks while yo
   const t0 = till(); r.g.setClock({ day: 5, minutes: 600 });
   assert.equal(till(), t0); assert.equal(ticks.length >= 30, true);
 });
+
+test('mission end card: Time, Witnesses and Heat lines for UI missionEnd', () => {
+  const r = rig();
+  r.g.missionBegin('mission.surcharge');
+  r.step(95, 1);
+  let lines = r.g.missionLines();
+  assert.deepEqual(lines, [{ label: 'Time', value: '1:35' }, { label: 'Witnesses', value: 'None' }, { label: 'Heat', value: 'Clean' }]);
+  r.g.addProp('box', 'call_box', 30, 0, -10);
+  (r.sim as any).add('ped_w', 5, -3, { nerve: 0.9, yaw: Math.PI / 2 });
+  r.g.equip('weapon.service'); r.g.crime('shots_fired', { noise: 120 });
+  r.step(40, 0.5);
+  lines = r.g.missionLines();
+  assert.notEqual(lines[1].value, 'None', 'someone saw it');
+  assert.notEqual(lines[2].value, 'Clean');
+});

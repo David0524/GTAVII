@@ -13,7 +13,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
-const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,vendors,parts,systems,bikes,subway,traffic,metrics').split(','));
+const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,vendors,parts,doors,systems,bikes,subway,traffic,metrics').split(','));
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
@@ -446,6 +446,30 @@ async function main() {
       report.parts = r;
       await sheet(page, ps, 2, 800, 450, 'damage_parts.jpg', pl);
       console.log('parts', r);
+    }
+
+    // ------------------------------------------------------------------ doors: open for enter/exit, ajar after side damage, torn off
+    if (only.has('doors')) {
+      await open(page, 'mode=drive&quality=high');
+      const ds: Buffer[] = [], dl: string[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 4, { x: 0, z: 30, yaw: 0.4 }); V.player.setLights({ head: false }); V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: true }); V.simulate(0.5);
+        for (const s of ['driver', 'passenger', 'rearLeft', 'rearRight']) V.player.setDoor(s, 1); V.simulate(1.2); });
+      await camRel(page, [-4.6, 2.1, -4.2], 42, 0.35); ds.push(await snap(page)); dl.push('setDoor(seat, 1): all four doors open (front-hinged, ~70°)');
+      await page.evaluate(() => { const V = window.__VEH; V.player.closeAllDoors(); V.player.setDoor('passenger', 0.5); V.simulate(1); });
+      await camRel(page, [4.2, 1.6, -4.0], 42, 0.35); ds.push(await snap(page)); dl.push('passenger door half open (exit animation)');
+      const r = await page.evaluate(() => {
+        const V = window.__VEH; V.player.closeAllDoors(); V.simulate(0.6);
+        V.player.applyDamage('left', 0.36); V.player.applyDamage('left', 0.36); // unlatched (zone > 0.55), each hit below the tear-off severity
+        V.setAuto({ throttle: 0.7, brake: 0, steer: 0, handbrake: false }); V.simulate(2.0);
+        V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: false }); V.simulate(0.45);
+        return { ajar: V.player.doorOpen('driver') };
+      });
+      await camRel(page, [-4.6, 1.8, -2.5], 42, 0.35); ds.push(await snap(page)); dl.push(`side damage unlatched the left doors: braking swings them open (${(r.ajar * 70).toFixed(0)}°)`);
+      const r2 = await page.evaluate(() => { const V = window.__VEH; V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: true }); V.simulate(1.5); V.player.applyDamage('right', 0.75); V.simulate(2.5); return V.player.detachedParts; });
+      await camRel(page, [4.6, 2.0, -3.0], 42, 0.35); ds.push(await snap(page)); dl.push(`hard right-side hit: ${r2.filter((x: string) => x.startsWith('door')).length} door torn off`);
+      report.doors = { ajarAfterBraking: r.ajar, detached: r2 };
+      await sheet(page, ds, 2, 800, 450, 'doors.jpg', dl);
+      console.log('doors', report.doors);
     }
 
     // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements

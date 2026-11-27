@@ -37,3 +37,13 @@ test('gyro forces aim assist off; combined configure reaches gameplay and the dr
   assert.deepEqual(calls.slice(-2), ['hb:true', 'horn:false']);
   assert.equal(t.mode(), 'combat', 'mode stays gameplay\'s');
 });
+
+test('gameplay adapter: the context alt verb (greet / antagonize) passes through and fires doAltContextAction', () => {
+  const { g, calls } = fakes();
+  g.contextAction = () => ({ kind: 'greet', label: 'Say hello', alt: { kind: 'antagonize', label: 'Mouth off' }, target: 'npc.b' });
+  g.doAltContextAction = () => calls.push('alt');
+  const t = gameplayTouch(g, () => null);
+  assert.deepEqual(t.context(), { kind: 'greet', label: 'Say hello', alt: { kind: 'antagonize', label: 'Mouth off' } });
+  t.doAltContext!();
+  assert.deepEqual(calls, ['alt']);
+});

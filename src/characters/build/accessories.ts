@@ -7,10 +7,10 @@ import type { HatDesc } from '../wardrobe/outfit';
 import { JOINT_INDEX as JI } from '../rig';
 import { PART } from './fields';
 import type { FaceFrame } from './face';
-import { fabricMat, lin, type GarmentCtx } from './garments';
+import { fabricMat, lin, torsoRadius, type GarmentCtx } from './garments';
 import { KIND, MeshBuilder, type MatData } from './MeshBuilder';
 
-export interface AccCtx extends GarmentCtx { face: FaceFrame; app: Appearance }
+export interface AccCtx extends GarmentCtx { face: FaceFrame; app: Appearance; /** a substituted head's face (Rocketbox/ICT): glasses sit on it */ subHead?: { browZ: number; hx: number; hz: number; cz: number } }
 
 type V3 = [number, number, number];
 
@@ -124,17 +124,23 @@ function hat(ctx: AccCtx, mb: MeshBuilder, h: HatDesc) {
   }
 }
 
+const thickDepth = (k: string) => (k === 'horn' || k === 'catEye' ? 0.004 : 0.0022);
 function glasses(ctx: AccCtx, mb: MeshBuilder) {
   const g = ctx.outfit.glasses!;
   const ff = ctx.face;
   const s = ff.eyeDist / 0.064;
   const J = JI.Head;
   const frameM: MatData = { cA: lin(g.frame), cB: lin(g.frame), m0: [0, 0, g.kind === 'aviator' || g.frame === '#b08a3a' || g.frame === '#9a9a98' ? 0.3 : 0.35, 0.6], m1: [g.kind === 'aviator' ? KIND.metal : KIND.leather, 0, 0, 0] };
-  const lensM: MatData = { cA: lin(g.tint > 0.3 ? '#2a2a22' : '#b8c0c0'), cB: [0, 0, 0], m0: [g.tint, 0, 0.05, 0], m1: [KIND.lens, 0, 0, 0] };
+  // drawn lenses are opaque (one material): they must read as dark sunglass lenses, not grey discs
+  const lensM: MatData = { cA: lin(g.tint > 0.3 ? '#2a2a22' : '#b8c0c0'), cB: [0, 0, 0], m0: [Math.max(g.tint, 0.85), 0, 0.05, 0], m1: [KIND.lens, 0, 0, 0] };
   const w = 0.026 * g.scale * s, h = (g.kind === 'aviator' ? 0.024 : g.kind === 'catEye' ? 0.018 : 0.021) * g.scale * s;
   const thick = g.kind === 'horn' || g.kind === 'catEye' ? 0.0035 : 0.0016;
-  const e = headExtents(ctx, ff.eyeL[1]);
-  const zf = Math.max(ff.eyeL[2], ff.eyeR[2]) + 0.016 * s;
+  const sh = ctx.subHead;
+  const e = sh ? { hx: sh.hx, hz: sh.hz, cz: sh.cz } : headExtents(ctx, ff.eyeL[1]);
+  // in front of the eyes, and clear of a substituted head's brow (its face can sit further forward
+  // than ours: lenses cut into it and showed as grey wedges)
+  const zf = Math.max(Math.max(ff.eyeL[2], ff.eyeR[2]) + 0.016 * s, sh ? sh.browZ + 0.007 : -Infinity);
+  const depth = thickDepth(g.kind);
   const seg = ctx.lod === 0 ? 20 : 12;
   const sj = [J, 0, 0, 0], sw = [1, 0, 0, 0];
   for (const eye of [ff.eyeL, ff.eyeR]) {
@@ -147,8 +153,14 @@ function glasses(ctx: AccCtx, mb: MeshBuilder) {
     };
     // rim as a flat ring band + lens disc
     const base = mb.count, i0 = mb.indexCount;
-    for (let i = 0; i <= seg; i++) { const a = (i / seg) * Math.PI * 2; mb.vertex(pt(a, 0), null, sj, sw, frameM); mb.vertex(pt(a, thick), null, sj, sw, frameM); }
-    for (let i = 0; i < seg; i++) { const a = base + i * 2; mb.tri(a, a + 2, a + 1); mb.tri(a + 1, a + 2, a + 3); mb.tri(a, a + 1, a + 2); mb.tri(a + 1, a + 3, a + 2); }
+    // a rim with depth (front face, back face, outer and inner walls): a flat band read as a
+    // floating line from most angles
+    const back = (p: V3): V3 => [p[0], p[1], p[2] - depth];
+    for (let i = 0; i <= seg; i++) { const a = (i / seg) * Math.PI * 2; const pi = pt(a, 0), po = pt(a, thick); mb.vertex(pi, null, sj, sw, frameM); mb.vertex(po, null, sj, sw, frameM); mb.vertex(back(pi), null, sj, sw, frameM); mb.vertex(back(po), null, sj, sw, frameM); }
+    for (let i = 0; i < seg; i++) {
+      const a = base + i * 4, b = a + 4; // 0 inner-front, 1 outer-front, 2 inner-back, 3 outer-back
+      for (const [x, y] of [[0, 1], [3, 2], [1, 3], [2, 0]]) { mb.tri(a + x, b + x, a + y); mb.tri(a + y, b + x, b + y); mb.tri(a + x, a + y, b + x); mb.tri(a + y, b + y, b + x); }
+    }
     mb.computeNormals(base, mb.count, i0);
     // clear lenses are left out (an opaque material can't show the eye through them); tinted ones are drawn
     if (g.tint >= 0.25) {
@@ -200,11 +212,13 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
   const sub = (a: V3, b: V3): V3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
   const nrm = (a: V3): V3 => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
   const cross = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const at = (p: V3, d: V3, k: number): V3 => [p[0] + d[0] * k, p[1] + d[1] * k, p[2] + d[2] * k];
   const handFrame = (side: 'l' | 'r') => {
     const h = jp(`hand_${side}`), mid = jp(`middle_01_${side}`), idx = jp(`index_01_${side}`), pk = jp(`pinky_01_${side}`);
     const along = nrm(sub(mid, h)), across = nrm(sub(idx, pk));
     const palm = nrm(cross(along, across));
-    return { c: [h[0] + along[0] * 0.06, h[1] + along[1] * 0.06, h[2] + along[2] * 0.06] as V3, along, across, palm, joint: JI[`hand_${side}`] };
+    // orthonormal (index->pinky isn't quite square to the fingers): boxes built on it stay square
+    return { c: [h[0] + along[0] * 0.06, h[1] + along[1] * 0.06, h[2] + along[2] * 0.06] as V3, along, across: nrm(cross(palm, along)), palm, joint: JI[`hand_${side}`] };
   };
   const paper: MatData = { cA: lin('#cfc8b4'), cB: lin('#3a3632'), m0: [0, 0.01, 0.9, 0], m1: [KIND.paper, 0.2, 0.2, 0] };
   const leather = (hex: string): MatData => ({ cA: lin(hex), cB: lin(hex), m0: [0, 0, 0.45, 0.3], m1: [KIND.leather, 0.1, 0.2, 0] });
@@ -218,31 +232,79 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
     }
     case 'briefcase': {
       const f = handFrame('r');
-      const down: V3 = [0, -1, 0];
-      box(mb, [f.c[0], f.c[1] - 0.17, f.c[2]], [0, 0, 1], down, [1, 0, 0], 0.21, 0.15, 0.05, leather('#3a2418'), f.joint);
+      // handle in the curled fingers, the case hanging beneath it. Built along the hand's own
+      // axes (height along the fingers, width along the knuckles, thickness through the palm), not
+      // the bind pose's world down: it is skinned rigidly to the hand, so it hangs plumb when the
+      // arm hangs (bind-pose 'down' swung it across the thighs once the idle lowered the arms)
+      const g: V3 = [f.c[0] - f.along[0] * 0.012 + f.palm[0] * 0.016, f.c[1] - f.along[1] * 0.012 + f.palm[1] * 0.016, f.c[2] - f.along[2] * 0.012 + f.palm[2] * 0.016];
+      box(mb, g, f.across, f.along, f.palm, 0.08, 0.01, 0.01, leather('#1e140e'), f.joint);
+      box(mb, at(g, f.along, 0.035 + 0.15), f.across, f.along, f.palm, 0.21, 0.15, 0.05, leather('#3a2418'), f.joint);
       break;
     }
-    case 'shoulderBag': { // strap across the body, bag at the left hip
-      const h = jp('thigh_l');
-      box(mb, [h[0] + 0.07, h[1] + 0.06, h[2] + 0.02], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.12, 0.09, 0.04, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), JI.pelvis);
+    case 'shoulderBag': { // over the left shoulder: strap down the side of the chest, the bag against the left hip
+      const h = jp('thigh_l'), cl = jp('clavicle_l'), ua = jp('upperarm_l');
+      const col = leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494');
+      const bag: V3 = [h[0] + 0.115, h[1] + 0.07, h[2] + 0.015];
+      box(mb, bag, [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.11, 0.085, 0.035, col, JI.pelvis);
+      // strap: bag top -> down the side of the chest -> over the top of the shoulder. Every point is
+      // seated on the clothed torso (its radius at that height and azimuth + the clothes + a hair of
+      // press), so the strap lies on the cloth instead of floating off the chest
+      // the clothed surface: the drape (garments hang from the bust/chest apex) when there is one
+      const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
+      const ctl: V3[] = [[bag[0] - 0.01, bag[1] + 0.085, bag[2] + 0.03], [ua[0] - 0.035, (ua[1] + bag[1]) / 2 + 0.06, ua[2] + 0.09], [(cl[0] + ua[0]) / 2, ua[1] + 0.06, ua[2] + 0.07], [(cl[0] + ua[0]) / 2, ua[1] + 0.085, ua[2] - 0.02]];
+      const clothOff = 0.014 + (ctx.outfit.outer ? 0.01 : 0);
+      const N = ctx.lod === 0 ? 24 : 10;
+      const path: V3[] = [];
+      for (let i = 0; i <= N; i++) {
+        const f = (i / N) * (ctl.length - 1), i0 = Math.min(ctl.length - 2, Math.floor(f)), u = f - i0;
+        const p: V3 = [0, 1, 2].map((k) => ctl[i0][k] + (ctl[i0 + 1][k] - ctl[i0][k]) * u) as V3;
+        const az = Math.atan2(p[0] - tr.center[0], p[2] - tr.center[1]);
+        const q = tr.at(p[1], az, clothOff);
+        // on the torso band the surface wins; the bag end eases into the bag top
+        // ...and the shoulder end is left on its own path (the torso map there runs into the neck)
+        const w = Math.min(1, i / 3) * Math.min(1, Math.max(0, (ua[1] + 0.02 - p[1]) / 0.05));
+        path.push([p[0] + (q[0] - p[0]) * w, p[1], p[2] + (q[2] - p[2]) * w]);
+      }
+      const base = mb.count, i0b = mb.indexCount, half = 0.016;
+      for (let i = 0; i <= N; i++) {
+        const p = path[i], a = path[Math.max(0, i - 1)], b = path[Math.min(N, i + 1)];
+        // the strap's face normal: radial on the chest, turning upward where it crosses the top of the shoulder
+        const up01 = Math.min(1, Math.max(0, (p[1] - (ua[1] - 0.03)) / 0.08));
+        const rad = nrm([p[0] - tr.center[0], 0, p[2] - tr.center[1]]);
+        const tg = nrm(sub(b, a)), out = nrm([rad[0] * (1 - up01), up01, rad[2] * (1 - up01)]);
+        const across = nrm(cross(tg, out)), up = nrm(cross(across, tg));
+        const j = p[1] < ctx.F.y.waist ? JI.pelvis : JI.spine_03;
+        for (const sd of [-1, 1]) for (const th of [0, 0.003]) mb.vertex([p[0] + across[0] * half * sd + up[0] * th, p[1] + across[1] * half * sd + up[1] * th, p[2] + across[2] * half * sd + up[2] * th], null, [j, 0, 0, 0], [1, 0, 0, 0], leather('#2a1e16'));
+      }
+      for (let i = 0; i < N; i++) {
+        const a = base + i * 4, b = a + 4; // 0 -s inner, 1 -s outer, 2 +s inner, 3 +s outer
+        mb.tri(a + 1, b + 1, a + 3); mb.tri(a + 3, b + 1, b + 3); // outer face
+        mb.tri(a, a + 2, b); mb.tri(a + 2, b + 2, b);             // inner face
+        mb.tri(a, b, a + 1); mb.tri(a + 1, b, b + 1);             // edges
+        mb.tri(a + 2, a + 3, b + 2); mb.tri(a + 3, b + 3, b + 2);
+      }
+      mb.computeNormals(base, mb.count, i0b);
       break;
     }
-    case 'handbag': case 'tote': { // held by its handle in the left hand
+    case 'handbag': case 'tote': { // held by its handle in the left hand: handle in the curled fingers, straps down to the bag
       const f = handFrame('l');
       const big = id === 'tote';
-      const hh = big ? 0.14 : 0.09;
-      box(mb, [f.c[0] + f.palm[0] * 0.03, f.c[1] - hh - 0.05, f.c[2] + f.palm[2] * 0.03], [0, 0, 1], [0, 1, 0], [1, 0, 0], big ? 0.16 : 0.12, hh, 0.045, leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494'), f.joint);
-      box(mb, [f.c[0] + f.palm[0] * 0.03, f.c[1] - 0.025, f.c[2] + f.palm[2] * 0.03], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.05, 0.03, 0.006, leather('#2a1e16'), f.joint);
+      const hh = big ? 0.14 : 0.09, col = leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494');
+      const g: V3 = [f.c[0] - f.along[0] * 0.012 + f.palm[0] * 0.016, f.c[1] - f.along[1] * 0.012 + f.palm[1] * 0.016, f.c[2] - f.along[2] * 0.012 + f.palm[2] * 0.016];
+      box(mb, g, f.across, f.along, f.palm, 0.07, 0.008, 0.008, leather('#2a1e16'), f.joint);
+      // straps and bag along the hand's axes (see briefcase): they hang plumb with the arm
+      for (const s of [-1, 1]) box(mb, at(at(g, f.across, 0.03 * s), f.along, 0.05), f.across, f.along, f.palm, 0.006, 0.05, 0.004, leather('#2a1e16'), f.joint);
+      box(mb, at(g, f.along, 0.1 + hh), f.across, f.along, f.palm, big ? 0.16 : 0.12, hh, 0.045, col, f.joint);
       break;
     }
     case 'shoppingBag': case 'paperBag': {
       const f = handFrame('r');
-      box(mb, [f.c[0], f.c[1] - 0.16, f.c[2]], [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.13, 0.17, 0.07, { cA: lin('#a8845a'), cB: lin('#a8845a'), m0: [0, 0, 0.95, 0], m1: [KIND.paper, 0.1, 0.3, 0] }, f.joint);
+      box(mb, at(f.c, f.along, 0.16), f.across, f.along, f.palm, 0.13, 0.17, 0.07, { cA: lin('#a8845a'), cB: lin('#a8845a'), m0: [0, 0, 0.95, 0], m1: [KIND.paper, 0.1, 0.3, 0] }, f.joint);
       break;
     }
     case 'umbrella': { // closed, carried
       const f = handFrame('r');
-      box(mb, [f.c[0], f.c[1] - 0.38, f.c[2] + 0.02], [1, 0, 0], [0, 1, 0], [0, 0, 1], 0.025, 0.4, 0.025, { cA: lin('#1a1818'), cB: lin('#1a1818'), m0: [0, 0, 0.6, 0.2], m1: [KIND.cloth, 0, 0.1, 0] }, f.joint);
+      box(mb, at(at(f.c, f.along, 0.38), f.palm, 0.02), f.across, f.along, f.palm, 0.025, 0.4, 0.025, { cA: lin('#1a1818'), cB: lin('#1a1818'), m0: [0, 0, 0.6, 0.2], m1: [KIND.cloth, 0, 0.1, 0] }, f.joint);
       break;
     }
     case 'cigarette': {

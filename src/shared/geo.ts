@@ -44,14 +44,27 @@ export function unproject(x: number, z: number): [number, number] {
 /** Direction of true north in world XZ (unit vector), for sun/sky placement. */
 export const TRUE_NORTH: [number, number] = [-S, -C];
 
-/** Modelled region in world metres (grid-aligned rectangle): the playable area (bounds.ts PLAYABLE)
- *  plus a 200 m full-detail buffer so the city continues past the edge (pipeline v2). */
-export const REGION = {
+/** Modelled regions in world metres (grid-aligned rectangles): each playable rectangle (bounds.ts
+ *  PLAYABLE_RECTS) plus a 200 m full-detail buffer so the city continues past the edge (pipeline v2).
+ *  Beyond them: skyline shells. */
+export const REGION_CORE = {
   minX: -1492, // past 10th Ave (playable edge: mid-block 9th-10th)
   maxX: 413, // past Park Ave (playable edge: mid-block Madison-Park)
   minZ: -1874, // ~46th St: Times Square stays visible and lit (playable edge: mid-block 43rd-44th)
   maxZ: 292, // ~19th St (playable edge: mid-block 21st-22nd)
 };
+/** Grand Central annex (E17) + 200 m: Lexington to past Third Ave, ~40th to ~47th St. */
+export const REGION_ANNEX = { minX: 413, maxX: 670, minZ: -1955, maxZ: -1306 };
+export const REGION_RECTS = [REGION_CORE, REGION_ANNEX] as const;
+/** Bounding box of the modelled regions (terrain grid, audio extents). Containment: inModelled. */
+export const REGION = {
+  minX: Math.min(REGION_CORE.minX, REGION_ANNEX.minX), maxX: Math.max(REGION_CORE.maxX, REGION_ANNEX.maxX),
+  minZ: Math.min(REGION_CORE.minZ, REGION_ANNEX.minZ), maxZ: Math.max(REGION_CORE.maxZ, REGION_ANNEX.maxZ),
+};
+/** Inside the full-detail modelled area, grown by margin m (negative shrinks). */
+export function inModelled(x: number, z: number, m = 0): boolean {
+  return REGION_RECTS.some((r) => x >= r.minX - m && x <= r.maxX + m && z >= r.minZ - m && z <= r.maxZ + m);
+}
 
 export const CHUNK_SIZE = 200; // metres; chunk (i,j) covers [i*S,(i+1)*S) x [j*S,(j+1)*S)
 

@@ -50,7 +50,7 @@ export function getAsset(spec: ModelSpec, v: Pick<Variant, 'vinyl' | 'whitewall'
   const lod0 = generate(spec, { lod: 0, ...v });
   addDamageMorphs(lod0.body, lod0, strHash(spec.id) % 97);
   if (lod0.hood) addDamageMorphs(lod0.hood, lod0, strHash(spec.id) % 97);
-  for (const bg of [lod0.bumperF, lod0.bumperR]) if (bg) addDamageMorphs(bg, lod0, strHash(spec.id) % 97);
+  for (const bg of [lod0.bumperF, lod0.bumperR, ...lod0.doors.map((d) => d.geo)]) if (bg) addDamageMorphs(bg, lod0, strHash(spec.id) % 97);
   const lod1 = generate(spec, { lod: 1, ...v }); // keeps the whitewalls: LOD1 must read like LOD0 across the crossfade
   a = { spec, lod0, lod1, lod2: impostor(spec, lod0) };
   cache.set(key, a);
@@ -116,7 +116,7 @@ export function getHeroModel(spec: ModelSpec, v: TrimKey): GeneratedModel {
   g = generate(spec, { lod: 0, hero: true, ...v });
   addDamageMorphs(g.body, g, strHash(spec.id) % 97);
   if (g.hood) addDamageMorphs(g.hood, g, strHash(spec.id) % 97);
-  for (const bg of [g.bumperF, g.bumperR]) if (bg) addDamageMorphs(bg, g, strHash(spec.id) % 97);
+  for (const bg of [g.bumperF, g.bumperR, ...g.doors.map((d) => d.geo)]) if (bg) addDamageMorphs(bg, g, strHash(spec.id) % 97);
   heroCache.set(key, g);
   return g;
 }

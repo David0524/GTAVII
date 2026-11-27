@@ -132,11 +132,14 @@ export const ROWS: Row[] = [
 export const SETTING_COUNT = ROWS.filter((r) => 'key' in r).length;
 
 const PAD_NAMES = ['A / ✕', 'B / ○', 'X / □', 'Y / △', 'LB / L1', 'RB / R1', 'LT / L2', 'RT / R2', 'View / Create', 'Menu / Options', 'L3', 'R3', 'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'Home'];
-const ACTION_NAMES: Partial<Record<ButtonAction, string>> = {
+// keyed by string so the engine's combat actions (aim, fire, reload, melee, cover, lock) are named before and after its Input lands here
+const ACTION_NAMES: Partial<Record<ButtonAction | 'aim' | 'fire' | 'reload' | 'melee' | 'cover' | 'lock', string>> & Record<string, string | undefined> = {
+  aim: 'Aim', fire: 'Fire', reload: 'Reload', melee: 'Melee', cover: 'Cover', lock: 'Lock on',
   sprint: 'Sprint', jump: 'Jump · climb', use: 'Use · enter · talk', photo: 'Free camera · photo', map: 'Map', pause: 'Pause', inventory: 'Pockets', weaponSelect: 'Weapon selector',
   waypoint: 'Set a waypoint (map)', skip: 'Skip cutscene (hold)', rise: 'Free camera up', sink: 'Free camera down', hud: 'Developer overlay',
 };
-const keyName = (c: string) => c.replace(/^Key/, '').replace(/^Digit/, '').replace('Left', ' (left)').replace('Right', ' (right)').replace('Backquote', '`').replace('BracketLeft', '[').replace('BracketRight', ']');
+const MOUSE: Record<string, string> = { Mouse0: 'Left mouse', Mouse1: 'Middle mouse', Mouse2: 'Right mouse', Mouse3: 'Mouse 4', Mouse4: 'Mouse 5' };
+const keyName = (c: string) => MOUSE[c] ?? c.replace(/^Key/, '').replace(/^Digit/, '').replace('Left', ' (left)').replace('Right', ' (right)').replace('Backquote', '`').replace('BracketLeft', '[').replace('BracketRight', ']');
 
 export class SettingsTab implements Tab {
   id = 'settings'; label = 'SETTINGS';
@@ -144,7 +147,8 @@ export class SettingsTab implements Tab {
   private view: 'options' | 'remap' = 'options';
   private section = 'Controls';
   private listening: { action: ButtonAction; device: 'keys' | 'pad' } | null = null;
-  private setNav: (i: NavItem[], keep?: boolean) => void = () => {};
+  private setNav: (i: NavItem[], keep?: boolean, focus?: number) => void = () => {};
+  private wantMain = false;
   onToast?: (t: string) => void;
   extraButtons: [string, () => void][] = [];
 
@@ -155,8 +159,15 @@ export class SettingsTab implements Tab {
       e.preventDefault(); e.stopPropagation();
       if (e.code !== 'Escape') this.bind(this.listening.action, 'keys', e.code); else { this.listening = null; this.render(); }
     }, true);
+    // mouse buttons bind as the engine's codes (Mouse0 fire, Mouse2 aim); listening starts on a click, so the next press is the binding
+    window.addEventListener('mousedown', (e) => {
+      if (!this.listening || this.listening.device !== 'keys') return;
+      e.preventDefault(); e.stopPropagation();
+      this.bind(this.listening.action, 'keys', `Mouse${e.button}`);
+    }, true);
+    window.addEventListener('contextmenu', (e) => { if (this.listening?.device === 'keys') e.preventDefault(); }, true);
   }
-  open(setNav: (items: NavItem[], keep?: boolean) => void) { this.setNav = setNav; this.render(); }
+  open(setNav: (items: NavItem[], keep?: boolean, focus?: number) => void) { this.setNav = setNav; this.render(); }
   update() {
     if (this.listening?.device === 'pad') {
       for (let b = 0; b < 17; b++) if (this.input.pad.pressed(b as never) && b !== 9) { this.bind(this.listening.action, 'pad', b); return; }
@@ -188,7 +199,10 @@ export class SettingsTab implements Tab {
       ${this.view === 'options' ? `<nav class="st-groups">${groups.map((g) => `<button data-g="${esc(g.group)}" class="${g === cur ? 'on' : ''}"><span>${esc(g.group)}</span><i>${g.keys?.length ?? 0}</i></button>`).join('')}</nav>` : ''}
       <div class="st-extra"></div></aside><section class="st-main"></section>`;
     this.el.querySelectorAll<HTMLElement>('.st-views button').forEach((b) => items.push({ el: b, activate: () => { this.view = b.dataset.v as 'options' | 'remap'; this.render(); } }));
-    this.el.querySelectorAll<HTMLElement>('.st-groups button').forEach((b) => items.push({ el: b, activate: () => { this.section = b.dataset.g!; this.render(); } }));
+    // choosing a group (confirm, or right on the rail) opens it and moves focus into its rows, like a console settings menu
+    const enter = (g: string) => { this.section = g; this.wantMain = true; this.render(); };
+    this.el.querySelectorAll<HTMLElement>('.st-groups button').forEach((b) => items.push({ el: b, activate: () => enter(b.dataset.g!), inc: () => enter(b.dataset.g!) }));
+    const mainStart = items.length;
     const main = this.el.querySelector('.st-main') as HTMLElement;
     const wrap = document.createElement('div'); wrap.className = 't74-rows st-rows';
     if (this.view === 'options') {
@@ -205,7 +219,9 @@ export class SettingsTab implements Tab {
     }
     const extra = this.el.querySelector('.st-extra')!;
     for (const [l, fn] of this.extraButtons) { const b = document.createElement('div'); b.className = 't74-row btn'; b.innerHTML = `<div class="k">${esc(l)}</div><div class="v">›</div>`; extra.appendChild(b); items.push({ el: b, activate: fn }); }
-    this.setNav(items, true);
+    // after choosing a group, land on its first row (past the Restore defaults button)
+    if (this.wantMain) { this.wantMain = false; let i = mainStart; if (items[i]?.el.classList.contains('st-reset') && items.length > i + 1) i++; this.setNav(items, true, i); }
+    else this.setNav(items, true);
   }
 
   private options(wrap: HTMLElement, items: NavItem[], only: string) {
@@ -253,7 +269,7 @@ export class SettingsTab implements Tab {
   private remap(wrap: HTMLElement, items: NavItem[]) {
     const b = settings.get('bindings');
     const preset = PAD_PRESETS[settings.get('controlPreset')];
-    wrap.insertAdjacentHTML('beforeend', '<p class="st-note">Choose a key or button, then press the new one. Esc cancels. Menu navigation (arrows, Enter, A/B) stays fixed so you can always get back here.</p>');
+    wrap.insertAdjacentHTML('beforeend', '<p class="st-note">Choose a key or button, then press the new one (mouse buttons too). Esc cancels. Menu navigation (arrows, Enter, A/B) stays fixed so you can always get back here.</p>');
     const head = document.createElement('div'); head.className = 'st-remap head'; head.innerHTML = '<span>Action</span><span>Keyboard</span><span>Controller</span><span></span>'; wrap.appendChild(head);
     for (const a of REBINDABLE) {
       const keys = b[a]?.keys.length ? b[a].keys : DEFAULT_KEYS[a] ?? [];

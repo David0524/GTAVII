@@ -22,7 +22,8 @@ export interface UiEvents {
   waitPrompt: { mission: string; title: string; windowStart: string; windowEnd: string; resolve: (accept: boolean) => void };
   /** A parking summons, a tow or a boot happened to one of the lead's cars. */
   notice: { kind: 'ticket' | 'tow' | 'boot'; car: string; text: string; amount?: number };
-  choices: { prompt?: string; choices: DialogueChoice[]; resolve: (id: string) => void };
+  /** speaker/line: who just spoke and what they said (the hero of the choice screen); prompt: a stage direction ("Mayhew waits."). */
+  choices: { prompt?: string; speaker?: string; line?: string; seconds?: number; choices: DialogueChoice[]; resolve: (id: string) => void };
   /** A mission ended: the end card (src/ui/hud/MissionCard.ts). `cash` = the player's cut; `lines` = extra label/value rows. */
   missionEnd: { result: 'passed' | 'failed'; title: string; reason?: string; cash?: number; lines?: { label: string; value: string }[] };
 }

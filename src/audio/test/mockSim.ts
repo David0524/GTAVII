@@ -34,6 +34,10 @@ export class MockSim {
     this.lens = this.cum.map((c) => c[c.length - 1]);
     this.drivable = streets.map((_, i) => i).filter((i) => this.lens[i] > 30 && !/Tunnel/.test(streets[i].n) && streets[i].c !== 'living_street');
   }
+  /** Street-vendor views in the sim's VendorView shape (tests drive them; the mock places none itself). */
+  vendorViews: { id: string; kind: string; state: string; cartX: number; cartZ: number; open: boolean }[] = [];
+  /** Tests: fire a sim event (vendorSpawned, vendorCall...) exactly as the real sim would. */
+  fire(type: string, e: unknown) { this.emit(type, e); }
   on(type: string, cb: (e: unknown) => void) { const a = this.handlers.get(type) ?? []; a.push(cb); this.handlers.set(type, a); }
   private emit(type: string, e: unknown) { for (const h of this.handlers.get(type) ?? []) h(e); }
 

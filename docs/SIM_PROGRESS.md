@@ -525,6 +525,66 @@ ramps as their own lane level (streets with grade `g` ≠ 0 are left out of the 
 can't make false junctions), taxi stands by the terminal, and rush-hour concourse crowds (adults only)
 on the timetable, once the engine posts the new PLAYABLE and the concourse walkable area.
 
+## Pedestrian separation (characters' crowd: no interpenetration)
+- People waiting to cross stand in slots on the sidewalk they arrived along: rows starting a step back from
+  the corner, up to four abreast (two shallow rows at the end of the crosswalk on a traffic island). On WALK
+  they walk up to the kerb and onto that crosswalk; they cross spread over its width, not in single file.
+- Walkers held up at the kerb join the waiting crowd instead of pressing in single file.
+- A separation pass after each step pushes any two people closer than 0.5 m apart (half the crowd each
+  step): walkers within their band (corner taper kept), others snapped to the nearest sidewalk band; stall
+  vendors, people in the road and reaction states hold their place.
+- Test: sampled pairs closer than 0.25 m average 0.4–0.6 per sample on High at rush hour (was ~150 at busy
+  corners); walkers passing within 0.2 m are brief transients at corner nodes (≤5 sampled per 10-min run).
+- Cost: High ~2.3–2.5 ms per step in this container (Low ~0.5 ms): over the 2 ms desktop budget, so the
+  sim should move to a worker on desktop (requests item 7; it has no DOM or three.js dependency).
+
+## Running in a Web Worker (`src/sim/remote.ts`, `src/sim/sim.worker.ts`)
+- `new RemoteSimulation(new Worker(new URL('./sim/sim.worker.ts', import.meta.url), { type: 'module' }), opts)`;
+  `await sim.load()`; per frame `setView`, `setExternalActors`, `update(dt, focus)`; read `vehicles`, `peds`,
+  `wildlife`, `police`, `vendorViews`, `signals` (the last snapshot: one frame behind) and `on(type, cb)`
+  for events. Setters: `cmd('setClock', m)`; queries: `await call('parkedCars', x, z, r)`.
+- Views travel as transferred typed arrays plus a string table; a busy worker drops a frame's post rather
+  than queueing them. `setDensityAreas(boxes)` replaces the function hook across the worker boundary.
+- Test: the same seed behind an in-memory port matches the direct sim (max view error 1e-4 m, same events).
+
+## NPC memory and greetings (`src/sim/memory.ts`; oversight gap list item 2)
+- **Block reputation:** each block (`blockAt`) keeps a decaying score of the player (half-life 15 sim minutes):
+  helped +3, tipped +1.5, bumped -0.4, knockdown -1.2, reckless -1, theft -2, robbed/assault -4, gunfire -3,
+  killed -6. Query with `sim.reputation(x, z)` -> `{score, last, ago}`.
+- **Witnesses:** peds within the kind's radius (8 m for a bump up to 70 m for gunfire) remember it personally
+  for 10 minutes; the worst thing they saw sticks.
+- **Sources:** player bumps (automatic), `kill(id, secs, byPlayer)`, `emit({type:'gunfire'|'threat', byPlayer})`,
+  and gameplay's `sim.remember(kind, x, z, {witnessR?, pedId?})` for everything else (helped, tipped, robbed...).
+- **Greetings:** as the player passes within 3.5 m, every 0.5 s, with a 45 s per-ped cooldown, people may react:
+  `greet_known` (recall a favour), `antagonize` (saw something bad, steady nerves) or `fear` (shaky nerves:
+  they hesitate), `complain`/`fear` on a block with a bad reputation, `player_running`, or a passing `greet`
+  (8%, more on a friendly block). Most New Yorkers say nothing.
+  Event `pedGreets {id, pool, context, mood, recall, archetype, x, z}`; `pool` is narrative's bark set
+  (`barks.<archetype>`), audio picks the line by `context`.
+- **Test:** a favour is recalled (greet_known), a robbery on another block draws complain/fear/antagonize, and
+  reputations have the right sign (seed 7: greet_known 8, fear 1; robbed -4, helped +2.7).
+- **vs RDR2 / GTA V / VI:** RDR2's per-town honour and greet/antagonise is the model; we key it to the city
+  block rather than a town, which suits Manhattan's density. GTA V NPCs only react in the moment. Not yet:
+  a player-initiated greet/antagonise button (gameplay input -> `remember`), and a reputation that spreads
+  between neighbouring blocks.
+
+## Ambient traffic incidents (`src/sim/incidents.ts`; oversight gap list item 3)
+- **Fender-benders:**
+  - In stop-and-go traffic a follower taps the car ahead, in the kerb lane of a multi-lane street, 35–140 m from the focus. It happens between 07:00 and 22:00, about every 150 s near the player (`setIncidentRate(s)`, 0 = off; `stageFenderBender(x, z)` for missions).
+  - Both cars stop with hazards on (vehicle state `incident`, not passable). Traffic queues and lane-changes past.
+  - The two drivers get out and stand between the bumpers on the kerb side: `inspect`, then `argue`, then sometimes `shove`/`stagger` with hot heads, then `argue`/`exchangeDetails`. After 40–75 s they `enterCar` and the cars drive on, the leader first.
+  - Events: `fenderBender {incident, a, b, x, z, drivers, until}`, `incidentAct {incident, id, act}` and `fenderBenderEnd`. Drivers are ordinary peds in `act:<name>`.
+- **Road rage:** an aggressive driver (aggression ≥ 0.55) stuck 9 s or more behind a double-parker, an accident, a kerb stop or a lane block reacts. He leans on the horn, shouts, gestures, or forces into the next lane. Event `roadRage {id, x, z, act, target}`.
+- **Horn chains:**
+  - A start: a honk at a green light, at a block, in rage, or after 12 s or more in a queue.
+  - Joining in: waiting drivers up to 26 m behind in the same street join, a beat apart (up to 6 deep).
+  - Every `honk` now carries `chain` and `chainDepth`. `hornChain {chain, x, z, length}` fires once 3 have joined, so audio can play one chorus.
+- **Double-parked delivery trucks:** already in traffic.ts. They block the kerb lane (narrow streets fully) and now feed road rage and horn chains.
+- **Test:** at 17:30 with the rate at 25 s, fender-benders play out completely (drivers out, argue, back in, cars move again), with at least one horn chain and at least one road rage. Seed 1974: 5 benders, 10 chains, 3 rages in 4 minutes.
+- **vs GTA V / VI / RDR2:** GTA V has scripted fender-benders where drivers get out and fight. We add the 1970s Manhattan texture: horn choruses behind a double-parker, and arguments that end in exchanging details. Not yet:
+  - a cop stopping by an accident;
+  - visible damage on the cars (vehicles stream).
+
 ## Known issues / next
 - [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
       (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.
