@@ -273,7 +273,31 @@ pool("barks.police_radio", "Dispatch ('Central') and car chatter: the main heat 
  ("brownout", "urgent", "Central to all cars: signals dark from Twenty-Sixth to Thirty-Fourth. Watch the crossings."),
  ("idle", "flat", "Central, car six, out of service for coffee. Ten minutes."),
  ("idle", "wry", "Central, any word on overtime? …Never mind."),
- ("idle", "flat", "Central to Midtown Central: hydrant open again, Thirty-Seventh and Ninth.")])
+ ("idle", "flat", "Central to Midtown Central: hydrant open again, Thirty-Seventh and Ninth."),
+ ("heat1", "flat", "Central to Midtown Central: a disturbance, {street} and {avenue}. One car."),
+ ("heat1", "flat", "Central: a complaint of a man acting suspicious, {street}. Take a look when you can."),
+ ("heat2", "flat", "Central to Midtown Central cars: suspect wanted for {crime}, last seen {street}."),
+ ("heat2", "flat", "Car one-four to Central: we'll swing by {avenue}. Ten-four."),
+ ("heat3", "urgent", "Central to all Midtown cars: armed suspect, {street} and {avenue}. Approach with caution."),
+ ("heat3", "urgent", "Central, car nine: we're setting up on {avenue}. Need another car on the corner."),
+ ("heat4", "urgent", "Central to all cars: shots fired at officers, {street}. Every car in the sector."),
+ ("heat4", "urgent", "Central: sawhorses at {avenue} and {street}. Nobody in or out."),
+ ("heat5", "urgent", "Central to all precincts, all units: Midtown is closed. Every car. Every man."),
+ ("heat5", "grave", "Central: the captain's on the air. Find this one. I don't care how."),
+ ("pursuit_foot", "breathless", "Car six, on foot! He's going {direction} on {street}! Over the fence!"),
+ ("pursuit_foot", "breathless", "Central, I lost him on the roofs. He's up top somewhere. Send a car to {street}."),
+ ("pursuit_car", "urgent", "Car eleven in pursuit, {carColor} {carType}, {direction} on {avenue}! Clear the crossings!"),
+ ("pursuit_car", "urgent", "He went the wrong way on {street}! Wrong way! Central, warn the sector!"),
+ ("responding", "flat", "Car one-four responding. Two minutes."),
+ ("responding", "flat", "Car nine, on our way. We're stuck behind a bus on {avenue}."),
+ ("responding", "wry", "Car three, responding. If the car starts."),
+ ("ack", "flat", "Central, ten-four."),
+ ("ack", "flat", "Ten-four, Central. On it."),
+ ("all_clear", "flat", "Central to Midtown Central: cancel the alarm on {street}. Suspect not located."),
+ ("all_clear", "weary", "Central, show us back in service. Nothing doing."),
+ ("shift", "flat", "Central, all cars: four-to-midnight tour coming on. Look alive."),
+ ("brownout", "urgent", "Central to all cars: Hudson Union says an hour. Treat every crossing as a stop."),
+ ("brownout", "flat", "Central, car six: the lights are out at {avenue}. We're directing traffic by hand.")])
 pool("barks.cop_killed", "Consequences of killing a police officer (user: 'Fully lethal everywhere'). Heat is Gameplay's; this is flavour. Teddy's lines are a meaningful contrast with his always-available non-lethal option.", [
  ("radio", "urgent", "Central to all cars: officer down, {street} and {avenue}. All units. All units."),
  ("radio", "grave", "Central, the officer is not breathing. Repeat: not breathing."),
@@ -307,6 +331,22 @@ pool("barks.route_calls", "No-GPS route call-outs (goto.routeCalledBy). Every vo
  ("nick", "expansive", "Left on {street}! I own a building on this block, I should know."), ("nick", "expansive", "Right on {street}. My first shop was here. Smaller than this car."),
  ("nick", "expansive", "Left on {avenue}! No, here! Yes, here!"), ("nick", "expansive", "Right on {avenue}. Everybody gets paid on {avenue}.")])
 
+_pr = json.loads((C / "barks" / "police_radio.json").read_text())
+_DISP = {"report", "description", "escalate", "cooldown", "brownout", "idle", "heat1", "heat2", "heat3", "heat4", "heat5", "all_clear", "shift", "bribe_heard"}
+for _l in _pr["lines"]:
+    _t = _l["text"]
+    _l["voice"] = "dispatcher" if _t.startswith(("Central to", "Central:")) or _l["context"] in ("description", "shift") else "car"
+_pr["audio"] = {"filter": "1970s police two-way radio: band-limited 300-3000 Hz, squelch tail, light static; dispatcher slightly cleaner than cars",
+                "voices": {"dispatcher": "one adult voice, calm, flat, fast, Midtown Central dispatch", "car": "several adult patrol voices, rotating; breathless on foot, louder in pursuit"},
+                "tiers": "heat1-heat5 map to Gameplay heat levels; escalate and cop_killed take over at 'officer down'",
+                "slots": {"street": "numbered cross streets 21st-45th, spoken ('Thirty-Fourth')", "avenue": "Fifth, Sixth, Seventh, Eighth, Ninth, Madison, Park, Lexington, Broadway",
+                          "direction": ["uptown", "downtown", "east", "west"], "crime": ["a robbery", "an assault", "a car theft", "shots fired", "a hit-and-run"],
+                          "sex": ["male", "female"], "build": ["thin", "heavy-set", "medium build", "tall", "short"],
+                          "topColor": ["dark", "light", "tan", "red", "blue", "green", "brown", "white"], "top": ["jacket", "coat", "shirt", "windbreaker", "dress", "suit"],
+                          "carColor": ["black", "white", "green", "brown", "maroon", "yellow", "blue"], "carType": ["sedan", "cab", "coupe", "wagon", "van", "truck"],
+                          "item": ["bag", "briefcase", "camera", "package", "suitcase"], "plate": "spoken letters and digits, e.g. 'K-L-four'"},
+                "renderNote": "For build-time voices: render each line's fixed parts once and concatenate slot words (slot lists above); or render the most common filled variants."}
+(C / "barks" / "police_radio.json").write_text(json.dumps(_pr, ensure_ascii=False, indent=2) + "\n")
 _rc = json.loads((C / "barks" / "route_calls.json").read_text())
 _rc["voiceByPassenger"] = {"npc.cab_fare_businessman": "fare", "npc.cab_fare_night_worker": "fare", "npc.cab_fare_tourist": "fare_tourist",
     "npc.cab_driver": "cabbie", "char.delroy_tate": "cabbie", "char.odessa_pruitt": "odessa", "char.delphine_moore": "delphine",
