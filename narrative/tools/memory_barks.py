@@ -154,7 +154,7 @@ def apply():
         f.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
     print(n, "memory barks across", len(M), "pools")
 
-# Player-side greet/antagonize (gameplay a1d32ef). context = warm|plain (greet), first|again (antagonize); lead = teddy|delphine|nick.
+# Player-side greet/antagonize (gameplay 8c27467). context = warm|plain (greet), first|again (antagonize); lead = teddy|delphine|nick.
 PLAYER = {
  "barks.player_greet": [
   ("warm", "teddy", "easy", "Evening. Keep your nose clean."), ("warm", "teddy", "warm", "How's the family? Tell 'em Teddy says hello."),
@@ -183,7 +183,7 @@ def apply_player():
     for pid, rows in PLAYER.items():
         for r in rows: assert len(r[3]) <= 90, r
         (B / f"{pid.split('.', 1)[1]}.json").write_text(json.dumps({"id": pid, "core": False,
-            "note": "Player greet/antagonize (gameplay a1d32ef). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
+            "note": "Player greet/antagonize (gameplay 8c27467). context: warm|plain (greet), first|again (antagonize); 'lead' picks the voice. Adults only.",
             "lines": [{"context": c, "lead": ld, "emotion": e, "text": t} for c, ld, e, t in rows]}, ensure_ascii=False, indent=2) + "\n")
     print(sum(len(v) for v in PLAYER.values()), "player greet/antagonize lines")
 
