@@ -25,6 +25,8 @@ export interface HeadAsset {
   pos: Float32Array; nrm: Float32Array; uv: Float32Array; sj: Uint16Array; sw: Float32Array; kind: Float32Array; idx: Uint16Array | Uint32Array;
   /** ICT heads: per-vertex scalp-hair weight (0..255) for the runtime coil shells. */
   hair?: Uint8Array;
+  /** ICT heads: per-vertex brow weight (0..255) for the brow shells. */
+  brow?: Uint8Array;
   color: THREE.Texture; normal: THREE.Texture; opacity: THREE.Texture | null;
   bytes: number;
 }
@@ -117,7 +119,7 @@ async function loadHead(base: string, id: string): Promise<HeadAsset> {
   const load = async (f: string, srgb: boolean) => { const t = await tl.loadAsync(`${base}${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t; };
   const [color, normal, opacity] = await Promise.all([load(`${id}_c.webp`, true), load(`${id}_n.webp`, false), meta.cardIdx > 0 ? load(`${id}_o.webp`, true) : Promise.resolve(null)]);
   if (!meta.neckRing) meta.neckRing = neckRingOf(meta.landmarks.Neck, pos, kind, B('idx'), meta.skinIdx);
-  return { id, meta, pos, nrm, uv: uvs, sj, sw, kind, idx: B('idx'), color, normal, opacity, bytes: buf.byteLength, hair: c.blobs.get('hair') as Uint8Array | undefined };
+  return { id, meta, pos, nrm, uv: uvs, sj, sw, kind, idx: B('idx'), color, normal, opacity, bytes: buf.byteLength, hair: c.blobs.get('hair') as Uint8Array | undefined, brow: c.blobs.get('brow') as Uint8Array | undefined };
 }
 
 const RING = 16;

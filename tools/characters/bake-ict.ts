@@ -255,7 +255,8 @@ const job = {
 const jf = path.join(TMP, `${id}.json`);
 fs.writeFileSync(jf, JSON.stringify(job));
 execFileSync('python3', ['-I', path.resolve(import.meta.dirname, 'ict_tex.py'), jf], { stdio: 'inherit' });
-const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj, sw, kind, hair: Uint8Array.from(JSON.parse(fs.readFileSync(path.join(OUT, `${id}_hair.json`), 'utf8'))), idx: n < 65536 ? Uint16Array.from(tris) : Uint32Array.from(tris) },
+const hairJ = JSON.parse(fs.readFileSync(path.join(OUT, `${id}_hair.json`), 'utf8'));
+const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj, sw, kind, hair: Uint8Array.from(hairJ.hair), brow: Uint8Array.from(hairJ.brow), idx: n < 65536 ? Uint16Array.from(tris) : Uint32Array.from(tris) },
   // vertex order follows first use in the triangle list, so deltas are small and gzip well
   { pos: { kind: 'delta3', seg: n * 3 }, nrm: { kind: 'delta3', seg: n * 3 }, uv: { kind: 'delta', seg: n * 2, stride: 2 }, idx: { kind: 'delta', seg: tris.length, stride: 1 } });
 fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);

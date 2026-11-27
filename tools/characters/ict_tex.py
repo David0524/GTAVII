@@ -154,6 +154,16 @@ stip = vnoise(p * 1800)
 hd = hairM * np.clip(0.55 + 0.6 * (stip - 0.4), 0, 1)
 col = col * (1 - hairM[:, None] * 0.35) * (1 - hd[:, None]) + lin(job['brow'])[None] * hd[:, None]
 
+# pore-level albedo (pits read slightly darker), uneven pigmentation (darker forehead band and
+# temples, lighter cheek centres), a few small dark macules
+pr_ = vnoise(p * 1100)
+col *= (1 - 0.1 * np.maximum(0, pr_ - 0.62) / 0.38 * skinMask * (1 - lipM))[:, None]
+fh = blob(u, v, 0.5, 0.875, 0.24, 0.035) * isF + np.maximum(blob(u, v, 0.2, 0.75, 0.06, 0.08), blob(u, v, 0.8, 0.75, 0.06, 0.08)) * isF
+col *= (1 - 0.1 * fh)[:, None]
+col *= (1 + 0.05 * np.maximum(blob(u, v, 0.36, 0.6, 0.05, 0.04), blob(u, v, 0.64, 0.6, 0.05, 0.04)) * isF)[:, None]
+mac = ss(0.86, 0.9, vnoise(p * 260 + 11.3)) * ss(0.5, 0.7, vnoise(p * 40 + 2.1)) * isF * (1 - lipM) * (1 - hairM)
+col *= (1 - 0.3 * mac)[:, None]
+
 # other regions
 def setc(mask, c, var=0.08, f=300):
     global col
@@ -303,5 +313,14 @@ earV = ss(0.12, 0.09, np.minimum(vu, 1 - vu)) * ss(0.44, 0.48, vv) * ss(0.71, 0.
 hwF = ss(hlv - 0.002, hlv + 0.03, vv) * (1 - earV) * vF
 hwS = ss(eyeY - 0.074, eyeY - 0.05, pos[:, 1]) * vS
 hw = np.maximum(hwF, hwS)
-json.dump([int(round(x * 255)) for x in hw], open(job['out'] + '_hair.json', 'w'))
+# brows (same arcs as the albedo, on vertices): short shells grow there at runtime
+def browV(side):
+    cu = 0.3475 if side < 0 else 0.6525
+    t = ((cu - vu) if side < 0 else (vu - cu)) / 0.0775
+    vb = 0.769 + 0.011 * (1 - np.clip(t, -1, 1) ** 2) - 0.004 * np.clip(-t, 0, 1)
+    th = 0.012 + 0.006 * np.clip(-t, 0, 1) - 0.005 * np.clip(t, 0, 1)
+    return ss(-1.1, -0.9, t) * (1 - ss(0.88, 1.06, t)) * (1 - ss(th * 0.5, th * 1.15, np.abs(vv - vb)))
+bw = np.maximum(browV(-1), browV(1)) * vF
+json.dump({'hair': [int(round(x * 255)) for x in hw], 'brow': [int(round(x * 255)) for x in bw]}, open(job['out'] + '_hair.json', 'w'))
+print('brow vertices', int((bw > 0.01).sum()))
 print('hair vertices', int((hw > 0.01).sum()))
