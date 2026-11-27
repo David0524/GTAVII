@@ -1,22 +1,187 @@
 {
   "id": "barks.road_rage",
   "core": false,
-  "note": "Traffic incident: shouts at a double-parker, a cut-off or a slow car (sim f9148be). context: double_park, cut_off, slow, horn_chain, bystander. Adults only.",
+  "note": "Traffic incidents (sim f9148be; audio contexts). Contexts: horn, shout, gesture, forceIn, shove, inspect, argue, details; plus double_park, cut_off, slow, horn_chain, bystander (sim's original states). Adults only; no slurs; 1974.",
   "lines": [
     {
-      "context": "double_park",
+      "context": "horn",
+      "emotion": "furious",
+      "text": "Lay off the horn! The horn don't make it move!"
+    },
+    {
+      "context": "horn",
+      "emotion": "exasperated",
+      "text": "Everybody honk! That'll fix it! Brilliant!"
+    },
+    {
+      "context": "horn",
+      "emotion": "impatient",
+      "text": "Come on, come on, come on!"
+    },
+    {
+      "context": "shout",
       "emotion": "furious",
       "text": "Hey! You double-parked! Move it or I move it for you!"
     },
     {
-      "context": "double_park",
+      "context": "shout",
       "emotion": "furious",
-      "text": "You think you own the street? Two minutes, he says! It's been twenty!"
+      "text": "Two minutes, he says! It's been twenty!"
     },
     {
-      "context": "double_park",
+      "context": "shout",
+      "emotion": "impatient",
+      "text": "It's green! Green! What are you waiting for, a letter?"
+    },
+    {
+      "context": "shout",
       "emotion": "sarcastic",
       "text": "Take your time, pal! I'll just live here now!"
+    },
+    {
+      "context": "gesture",
+      "emotion": "mocking",
+      "text": "Yeah? Yeah? Same to you, Mac!"
+    },
+    {
+      "context": "gesture",
+      "emotion": "mocking",
+      "text": "Oh, that's nice. Your mother teach you that?"
+    },
+    {
+      "context": "gesture",
+      "emotion": "dismissive",
+      "text": "Go back to Jersey!"
+    },
+    {
+      "context": "forceIn",
+      "emotion": "pushy",
+      "text": "Let me in! Come on, let me in, it's a merge!"
+    },
+    {
+      "context": "forceIn",
+      "emotion": "pushy",
+      "text": "I'm coming over! I'm coming over! Look out!"
+    },
+    {
+      "context": "forceIn",
+      "emotion": "smug",
+      "text": "Every man for himself. Welcome to New York."
+    },
+    {
+      "context": "shove",
+      "emotion": "furious",
+      "text": "Don't you touch my car! Don't you touch me!"
+    },
+    {
+      "context": "shove",
+      "emotion": "furious",
+      "text": "Back off! Back off or I swear to God!"
+    },
+    {
+      "context": "shove",
+      "emotion": "hard",
+      "text": "You want to go? We'll go. Right here on Ninth."
+    },
+    {
+      "context": "inspect",
+      "emotion": "groaning",
+      "text": "Look at that. Look at my bumper. It's a brand-new bumper."
+    },
+    {
+      "context": "inspect",
+      "emotion": "disgusted",
+      "text": "Oh, beautiful. That's a dent. That's a whole dent."
+    },
+    {
+      "context": "inspect",
+      "emotion": "worried",
+      "text": "My brother-in-law's gonna kill me. It's his car."
+    },
+    {
+      "context": "inspect",
+      "emotion": "dry",
+      "text": "You call that a dent? This whole car is a dent."
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You backed into me! I was parked! Parked is not moving!"
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You stopped short! Who stops short on Eighth Avenue?"
+    },
+    {
+      "context": "argue",
+      "emotion": "indignant",
+      "text": "The light was yellow! Yellow means go faster, everybody knows that!"
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "Don't you point at me! I've been driving since Truman!"
+    },
+    {
+      "context": "argue",
+      "emotion": "sarcastic",
+      "text": "Oh, it's my fault. Sure. I drove into my own car."
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You got a license? Show me the license! Who gave you a license?"
+    },
+    {
+      "context": "argue",
+      "emotion": "indignant",
+      "text": "I had the right of way! The right of way, pal!"
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "You were doing fifty on a side street! Fifty!"
+    },
+    {
+      "context": "argue",
+      "emotion": "sarcastic",
+      "text": "Oh, sure, blame the guy who was standing still."
+    },
+    {
+      "context": "argue",
+      "emotion": "furious",
+      "text": "My lawyer's gonna love you. He's got a boat to pay for."
+    },
+    {
+      "context": "argue",
+      "emotion": "indignant",
+      "text": "Don't raise your voice at me! I'm raising my voice at you!"
+    },
+    {
+      "context": "argue",
+      "emotion": "weary",
+      "text": "Look, it's ninety degrees. Can we yell faster?"
+    },
+    {
+      "context": "details",
+      "emotion": "grudging",
+      "text": "Alright, alright. Write down your insurance. Print, I can't read script."
+    },
+    {
+      "context": "details",
+      "emotion": "tired",
+      "text": "Let's just swap names and get out of the street before a cop comes."
+    },
+    {
+      "context": "details",
+      "emotion": "suspicious",
+      "text": "This your real name? 'John Smith'? You're kidding me."
+    },
+    {
+      "context": "details",
+      "emotion": "weary",
+      "text": "Forget the cops. Twenty bucks and we never met. Deal?"
     },
     {
       "context": "double_park",
@@ -26,27 +191,12 @@
     {
       "context": "cut_off",
       "emotion": "furious",
-      "text": "You cut me off! Where'd you learn to drive, Jersey?"
+      "text": "You cut me off! Where'd you learn to drive?"
     },
     {
       "context": "cut_off",
       "emotion": "furious",
       "text": "Signal! It's the stick by your hand! Use it!"
-    },
-    {
-      "context": "cut_off",
-      "emotion": "furious",
-      "text": "Nice! Real nice! You almost put me in the hydrant!"
-    },
-    {
-      "context": "slow",
-      "emotion": "impatient",
-      "text": "It's green! Green! What are you waiting for, a letter?"
-    },
-    {
-      "context": "slow",
-      "emotion": "impatient",
-      "text": "Go! Go! Christmas is coming!"
     },
     {
       "context": "slow",
@@ -55,13 +205,8 @@
     },
     {
       "context": "horn_chain",
-      "emotion": "furious",
-      "text": "Lay off the horn! The horn don't make it move!"
-    },
-    {
-      "context": "horn_chain",
       "emotion": "exasperated",
-      "text": "Everybody honk! That'll fix it! Brilliant!"
+      "text": "Listen to that. Twenty horns and not one brain."
     },
     {
       "context": "bystander",
@@ -76,7 +221,7 @@
     {
       "context": "bystander",
       "emotion": "amused",
-      "text": "Look at the cabbie. He's enjoying this."
+      "text": "Ten bucks says the guy in the plaid hat wins."
     }
   ]
 }
