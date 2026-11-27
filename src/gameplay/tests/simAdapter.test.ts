@@ -401,3 +401,46 @@ test('use button on pad/keyboard: tap = main verb, hold 0.45 s = the alternate a
   assert.equal(r2.g.useButton(true, 1 / 60), 'main');
   assert.equal(r2.g.useButton(false, 1 / 60), null);
 });
+
+// ---- measured on real streets (tools/gameplay/pursuitHeadless.ts): the fixes that kept chases alive
+test('pursuit on real streets: a car is kept in view at 140 m, picked out at 80 m; a face still needs 45 m', () => {
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const u = g.registerPolice('radio_car', 'pct.gramercy', 0, 0, { corrupt: 0 }); u.yaw = 0; // facing -z
+  assert.equal(g.policeSys.sightFor(u, { inVehicle: false }), 45);
+  assert.equal(g.policeSys.sightFor(u, { inVehicle: true }), 80);
+  u.state = 'pursuit';
+  assert.equal(g.policeSys.sightFor(u, { inVehicle: true }), 140);
+  assert.ok(g.policeSys.canSee(u, [0, 1, -120], g.policeSys.sightFor(u, { inVehicle: true })));
+  assert.ok(!g.policeSys.canSee(u, [0, 1, -120]));
+});
+
+test('pursuit on real streets: a cop who sees it radios it in; the house\'s posted cars join and get corners ahead', () => {
+  const sim = new FakeSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  const watcher = g.registerPolice('radio_car', 'pct.gramercy', 0, 30, { corrupt: 0 }); watcher.yaw = 0;
+  const posted = g.registerPolice('radio_car', 'pct.gramercy', 200, -150, { corrupt: 0 });
+  g.setContext({ vehicle: { id: 'stolen', vclass: 'sedan', colour: '#5a3a22' }, speed: 12, vehicleYaw: Math.PI / 2 });
+  g.policeSys.chokepoints = (n) => [{ x: n[0] - 200, z: n[1], yaw: 0 }, { x: n[0], z: n[1] - 200, yaw: 0 }];
+  g.crime('carjack', { noise: 20 });
+  assert.equal(watcher.state, 'pursuit');
+  for (let f = 0; f < 30 * 8; f++) { pos[0] -= 12 / 30; g.update(1 / 30); }
+  assert.notEqual(posted.state, 'post', 'heard the radio call and joined');
+  const role = g.mirror!.roles.get(posted.id)?.role;
+  assert.ok(role === 'cutoff' || role === 'tail', `rolling to the chase gets a pursuit role, not a stale point: ${role}`);
+});
+
+test('pursuit on real streets: losing sight round a corner for a couple of seconds is still a chase', () => {
+  const sim = new FakeSim();
+  const g = new Gameplay({ quality: 'high', content: { items: null, shops: null, weapons: null } });
+  const pos: [number, number, number] = [0, 0, 0];
+  g.bindPlayer({ id: 'player', lead: 'char.teddy_arce', position: () => pos, aim: () => ({ origin: [0, 1.5, 0], dir: [0, 0, -1] }) });
+  g.bindSim(sim as any);
+  g.setContext({ vehicle: { id: 'car', kind: 'car', seat: 'driver' } as any });
+  const u = g.registerPolice('radio_car', 'pct.gramercy', -40, 0, { corrupt: 0 });
+  u.state = 'pursuit'; u.lostFor = 2;
+  pos[0] = 5; g.update(1 / 30); u.state = 'pursuit'; u.lostFor = 2; g.update(1 / 30);
+  assert.equal(g.mirror!.roles.get(u.id)?.role, 'tail', '2 s out of sight: still tailing');
+});

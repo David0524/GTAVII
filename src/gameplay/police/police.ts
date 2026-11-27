@@ -75,6 +75,8 @@ export const OFFICER_DOWN_DECAY = 0.12;              // a dead cop is remembered
 /** Seconds a searching cop spends near a public interior before he looks inside. */
 export const INDOOR_CHECK = 8;
 export const STOP_MATCH = 0.55, LOSE_TIME = { foot: 12, car: 18 } as const;
+/** metres: keeping a car you're chasing in view, and picking out a described car (vs a person's face at u.sight) */
+export const VEHICLE_TRACK = 140, VEHICLE_SPOT = 80;
 const SPEC: Record<UnitKind, { delay: number; speed: number; fast: number; sight: number; fov: number; search: number }> = {
   foot: { delay: 15, speed: 1.6, fast: 4.6, sight: 35, fov: 140, search: 45 },
   radio_car: { delay: 25, speed: 8, fast: 15, sight: 45, fov: 120, search: 90 },
@@ -136,7 +138,8 @@ export class Police extends Emitter<PoliceEvents> {
     for (const p of this.precincts) { const d = Math.hypot(p.station[0] - x, p.station[1] - z); if (d < bd) { bd = d; best = p; } }
     return best;
   }
-  pct(id: string) { return this.precincts.find((p) => p.id === id)!; }
+  /** a house by id; an unknown id (bad content, an old save) falls back to the first house rather than crashing the frame */
+  pct(id: string) { return this.precincts.find((p) => p.id === id) ?? this.precincts[0]; }
   payoffOf(pct: string) { return this.payoff.get(pct) ?? 0; }
   /** Story/side activity: set the pad level for a house (0..1). */
   setPayoff(pct: string, level: number) { this.payoff.set(pct, Math.max(0, Math.min(1, level))); }
@@ -175,7 +178,8 @@ export class Police extends Emitter<PoliceEvents> {
     for (const u of this.units.values()) {
       if (u.state === 'down' || u.state === 'leave') continue;
       const d = Math.hypot(u.x - at[0], u.z - at[2]);
-      if (d <= u.sight && d < bd && this.canSee(u, s.pos)) { bd = d; best = u; }
+      const range = this.sightFor(u, s);
+      if (d <= range && d < bd && this.canSee(u, s.pos, range)) { bd = d; best = u; }
     }
     if (!best) return null;
     const r = this.file({ witness: best.id, perp: s.id, kinds: [kind], desc: observe(s.appearance, 0.95, this.rng), lastKnown: [s.pos[0], s.pos[2]], crimeAt: [at[0], at[2]], via: 'unit', unit: best.id, time: this.time });
@@ -183,6 +187,8 @@ export class Police extends Emitter<PoliceEvents> {
     best.ownDesc = observe(s.appearance, 1, this.rng);
     this.setState(best, SEVERITY[kind] >= 3.5 ? 'combat' : 'pursuit');
     if (best.state === 'combat') this.emit('engage', { unit: best.id, suspect: s.id }); else this.emit('pursuit', { unit: best.id, suspect: s.id });
+    // he radios it in: the house's posts in earshot and units on the report converge (relayDelay later)
+    if (best.state === 'pursuit') this.radioConverge(r, s, best.id);
     return best;
   }
 
@@ -259,9 +265,18 @@ export class Police extends Emitter<PoliceEvents> {
     return true;
   }
 
-  canSee(u: Unit, p: [number, number, number]) {
+  /**
+   * How far a unit can make out this suspect. A car is easier to pick out than a face, and one already on its
+   * tail keeps it in view down a straight avenue (measured on real streets: at 45 m the tail lost sight within
+   * seconds and every chase fell apart; docs/gameplay_pursuit_report.json).
+   */
+  sightFor(u: Unit, s: Pick<SuspectCtx, 'inVehicle'>) {
+    if (!s.inVehicle || u.kind === 'helicopter') return u.sight;
+    return u.state === 'pursuit' || u.state === 'approach' ? Math.max(u.sight, VEHICLE_TRACK) : Math.max(u.sight, VEHICLE_SPOT);
+  }
+  canSee(u: Unit, p: [number, number, number], range = u.sight) {
     const dx = p[0] - u.x, dz = p[2] - u.z, d = Math.hypot(dx, dz);
-    if (d > u.sight) return false;
+    if (d > range) return false;
     if (u.fov < Math.PI * 2 - 1e-3 && Math.abs(wrapAngle(Math.atan2(-dx, -dz) - u.yaw)) > u.fov / 2) return false;
     if (u.kind === 'helicopter') return true;
     const eyeY = this.world.ground(u.x, u.z) + (u.kind === 'foot' ? 1.65 : 1.25);
@@ -329,7 +344,7 @@ export class Police extends Emitter<PoliceEvents> {
       const rep = r ?? this.reportFor(s.id);
       const d = desc ?? rep?.description;
       if (!d || !rep || (rep.precinct !== u.precinct && !r && !this.isCitywide(rep))) continue;
-      if (!this.canSee(u, s.pos)) continue;
+      if (!this.canSee(u, s.pos, this.sightFor(u, s))) continue;
       seen = true;
       let m = match(d, s.appearance);
       if (u.ownDesc && (u.state === 'pursuit' || u.state === 'approach' || u.state === 'encounter')) m = 1; // still has eyes on them
@@ -339,7 +354,7 @@ export class Police extends Emitter<PoliceEvents> {
       const dist = Math.hypot(s.pos[0] - u.x, s.pos[2] - u.z);
       if (u.state === 'pursuit' || u.state === 'approach' || u.state === 'encounter') u.lastSeen = [s.pos[0], s.pos[2]];
       if (fit >= STOP_MATCH && (u.state === 'post' || u.state === 'search' || u.state === 'enroute' || u.state === 'suspicious' || u.state === 'roadblock')) {
-        const rate = (1.6 - dist / u.sight) * fit * (u.kind === 'helicopter' ? 0.6 : 1) * (1 + 0.25 * Math.min(3, this.priorsOf(s.id, u.precinct)));
+        const rate = (1.6 - dist / this.sightFor(u, s)) * fit * (u.kind === 'helicopter' ? 0.6 : 1) * (1 + 0.25 * Math.min(3, this.priorsOf(s.id, u.precinct)));
         u.recog = Math.min(1, u.recog + rate * dt);
         if (u.state !== 'suspicious' && u.state !== 'roadblock') { this.setState(u, 'suspicious'); this.emit('spotted', { unit: u.id, suspect: s.id, match: fit }); }
         if (u.recog >= 1) {

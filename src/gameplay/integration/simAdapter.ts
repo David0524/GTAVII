@@ -66,6 +66,8 @@ export type SimMemKind = 'helped' | 'tipped' | 'bumped' | 'knockdown' | 'reckles
 export const simPedNumber = (id: string) => { const n = Number(id.startsWith('ped:') ? id.slice(4) : id); return Number.isFinite(n) ? n : undefined; };
 const pedId = (id: string) => Number(id.startsWith('ped:') ? id.slice(4) : id);
 
+/** seconds out of sight that still count as contact: a car round a corner is still being chased */
+export const CORNER_GRACE = 4;
 /** 1. Pedestrian port over setGoal/kill. */
 export function simAgentPort(sim: SimLike): AgentPort {
   const snap = (p: SimPedView): PedSnapshot => ({ id: `ped:${p.id}`, x: p.x, y: p.y, z: p.z, yaw: p.yaw, alive: p.state !== 'dead', nerve: p.nerve });
@@ -100,8 +102,12 @@ export class PoliceMirror {
     this.roles.clear();
     const s = this.suspect?.();
     if (s) {
-      const chasers = [...this.police.units.values()].filter((u) => u.state === 'pursuit' && u.kind !== 'helicopter' && u.kind !== 'roadblock');
-      for (const a of assignPursuit(chasers.map((u) => ({ id: u.id, car: u.kind.endsWith('car'), x: u.x, z: u.z, seesSuspect: u.lostFor === 0 })), s, this.police.chokepoints)) this.roles.set(a.id, a);
+      // chasers: units in pursuit, plus cars already rolling to this chase on the radio call (they get corners ahead
+      // instead of driving to where he was a minute ago). Contact survives a corner: CORNER_GRACE seconds unseen.
+      const live = this.police.units; const pursuing = [...live.values()].filter((u) => u.state === 'pursuit');
+      const reports = new Set(pursuing.map((u) => u.report).filter((r): r is number => r !== null));
+      const chasers = [...live.values()].filter((u) => u.kind !== 'helicopter' && u.kind !== 'roadblock' && (u.state === 'pursuit' || (u.state === 'enroute' && u.kind.endsWith('car') && u.report !== null && reports.has(u.report))));
+      for (const a of assignPursuit(chasers.map((u) => ({ id: u.id, car: u.kind.endsWith('car'), x: u.x, z: u.z, seesSuspect: u.state === 'pursuit' && u.lostFor < CORNER_GRACE })), s, this.police.chokepoints)) this.roles.set(a.id, a);
     }
     for (const u of this.police.units.values()) {
       if (u.kind === 'helicopter' || u.state === 'combat' || u.state === 'down') { this.drop(u.id); continue; }
@@ -129,6 +135,7 @@ export class PoliceMirror {
     switch (u.state) {
       case 'post': return { kind: 'patrol', around: u.post ?? [u.x, u.z], radius: 12, maxSpeed: 1.4 };
       case 'search': return { kind: 'search', x: t[0], z: t[1], radius: 40, maxSpeed: max };
+      case 'enroute': { const r = this.roles.get(u.id); if (r?.role === 'cutoff' && r.to) return { kind: 'goto', x: r.to[0], z: r.to[1], urgent: true }; if (r?.role === 'tail' || r?.role === 'box') return { kind: 'pursue', target: this.player(), maxSpeed: max }; return { kind: 'goto', x: t[0], z: t[1], urgent: true, maxSpeed: max }; }
       case 'pursuit': {
         const r = this.roles.get(u.id);
         if (r?.role === 'box') return { kind: 'boxIn', target: this.player(), maxSpeed: max };
@@ -139,7 +146,7 @@ export class PoliceMirror {
       case 'approach': return { kind: 'pursue', target: this.player(), maxSpeed: u.kind === 'foot' ? 2.2 : 6 };
       case 'roadblock': return { kind: 'roadblock', x: u.x, z: u.z, yaw: u.yaw };
       case 'suspicious': case 'encounter': case 'arrest': return { kind: 'goto', x: u.x, z: u.z, maxSpeed: 0.5 };
-      default: return { kind: 'goto', x: t[0], z: t[1], urgent: u.state === 'enroute', maxSpeed: max };
+      default: return { kind: 'goto', x: t[0], z: t[1], urgent: false, maxSpeed: max };
     }
   }
   private drop(uid: string) { const id = this.agentOf.get(uid); if (id !== undefined) { this.sim.despawnPolice?.(id); this.agentOf.delete(uid); this.lastGoal.delete(uid); } }
