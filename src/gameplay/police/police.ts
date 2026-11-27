@@ -572,7 +572,7 @@ export class Police extends Emitter<PoliceEvents> {
 
 function crimeWords(k: CrimeKind[]) {
   const top = [...k].sort((a, b) => SEVERITY[b] - SEVERITY[a])[0];
-  const W: Record<CrimeKind, string> = { fare_evasion: 'a fare beater', arson: 'a fire set', weapon_seen: 'someone with a gun', vandalism: 'malicious mischief', reckless: 'a reckless driver', menacing: 'someone menacing people', resisting: 'someone resisting', bribery_attempt: 'a bribery attempt', assault: 'an assault', theft: 'a robbery', assault_weapon: 'an assault with a weapon', carjack: 'a car stolen at gunpoint', hit_and_run: 'a hit-and-run', shots_fired: 'shots fired', shooting: 'a shooting', assault_officer: 'an officer assaulted', homicide: 'a homicide', officer_down: 'officer down' };
+  const W: Record<CrimeKind, string> = { fare_evasion: 'a fare beater', arson: 'a fire set', weapon_seen: 'someone with a gun', vandalism: 'malicious mischief', reckless: 'a reckless driver', menacing: 'someone menacing people', resisting: 'someone resisting', bribery_attempt: 'a bribery attempt', assault: 'an assault', theft: 'a robbery', assault_weapon: 'an assault with a weapon', carjack: 'a car stolen at gunpoint', hit_and_run: 'a hit-and-run', shots_fired: 'shots fired', shooting: 'a shooting', assault_officer: 'an officer assaulted', homicide: 'a homicide', officer_down: 'officer down', body_seen: 'someone moving a body' };
   return W[top];
 }
 const capital = (s: string) => s.replace(/^…?(\w)/, (m, c) => m.replace(c, c.toUpperCase()));

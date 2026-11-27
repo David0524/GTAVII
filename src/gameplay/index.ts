@@ -46,6 +46,7 @@ import { TICKET, TICKET_MAJOR, Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
 import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
 import type { SuspectMotion } from './police/pursuit';
+import { Bodies, discoveryDelay, type Body } from './police/bodies';
 import { allowed as moveAllowed, locomotion as moveLocomotion, landing, bargeChance, BARGE_SECONDS, DOORS, LADDER_PER_M, STAMINA_COST, TURNSTILE, type Carrying, type DoorKind, type MoveAction, type MoverState } from './player/movement';
 import { Economy } from './economy';
 import { Arcade } from './arcade';
@@ -157,6 +158,9 @@ export class Gameplay {
   readonly essential = new Set<string>();
   private wasClear = true;
   private pendingDiscoveries: { at: number; perp: string; where: [number, number] }[] = [];
+  /** bodies: left lying they're found and called in; carried, dropped somewhere quiet, or stowed in a trunk */
+  readonly bodies = new Bodies();
+  private bodySeenAt = -1e9; private bodySeq = 0;
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
@@ -790,12 +794,17 @@ export class Gameplay {
 
   // ------------------------------------------------------------------ one context button (TOUCH_CONTROLS.md)
   /** What the single context button would do right now, highest priority first. The UI shows `label`. */
-  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door'; label: string; target?: string } | null {
+  contextAction(): { kind: 'surrender' | 'payOff' | 'pickUp' | 'enterVehicle' | 'exitVehicle' | 'answerPhone' | 'usePhone' | 'openHydrant' | 'takedown' | 'cover' | 'leaveCover' | 'talk' | 'door' | 'carryBody' | 'dropBody' | 'stowBody'; label: string; target?: string } | null {
     if (!this.player) return null;
     const p = this.player.position();
     const enc = [...this.policeSys.units.values()].find((u) => u.state === 'encounter' && Math.hypot(u.x - p[0], u.z - p[2]) < 6);
     if (enc) return this.inv.ensure(this.player.lead).money >= 1000 && enc.corrupt !== undefined ? { kind: 'payOff', label: 'Pay off', target: enc.id } : { kind: 'surrender', label: 'Hands up', target: enc.id };
     if (this.pc.vehicle) return { kind: 'exitVehicle', label: 'Get out' };
+    if (this.pc.carrying === 'body') {
+      for (const c of this.cars.cars.values()) if (Math.hypot(c.x - p[0], c.z - p[2]) < 3.5 && !this.bodies.inCar(c.id).length) return { kind: 'stowBody', label: 'Into the trunk', target: c.id };
+      return { kind: 'dropBody', label: 'Put down' };
+    }
+    { const b = this.bodies.nearest(p[0], p[2], 1.6); if (b && this.pc.carrying === 'none' && !(this.ai.agents.get(b.id)?.gun && !this.ai.agents.get(b.id)?.looted)) return { kind: 'carryBody', label: 'Carry', target: b.id }; }
     for (const a of this.ai.agents.values()) if (!a.alive && a.gun && !a.looted && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 2.5) return { kind: 'pickUp', label: `Pick up ${this.shortName(a.gun.def.id)}`, target: a.id };
     for (const a of this.ai.agents.values()) if (this.ai.unaware(a.id) && Math.hypot(a.pos[0] - p[0], a.pos[2] - p[2]) < 1.4) return { kind: 'takedown', label: 'Takedown', target: a.id };
     const ring = this.phones.pending.find((c) => c.ringing); if (ring) { const ph = this.phones.phones.get(ring.ringing!); if (ph && Math.hypot(ph.x - p[0], ph.z - p[2]) < 3) return { kind: 'answerPhone', label: 'Answer', target: ph.id }; }
@@ -825,6 +834,9 @@ export class Gameplay {
       case 'usePhone': this.phones.place(this.player.lead, a.target!, 'service'); break;
       case 'openHydrant': this.openHydrant(); break;
       case 'cover': case 'leaveCover': this.toggleCover(moveDir); break;
+      case 'carryBody': this.pickUpBody(); break;
+      case 'dropBody': this.dropBody(); break;
+      case 'stowBody': this.stowBody(a.target!); break;
       case 'door': { const d = this.nearestDoor(this.player.position()[0], this.player.position()[2]); if (d && !d.locked) this.doors?.open?.(d.id); this.emit('notice', { kind: 'door', id: a.target, locked: d?.locked ?? false }); break; }
       case 'talk': {
         if (this.talkers && this.talkers.nearestTalkable(this.player.position()[0], this.player.position()[2], 2)?.id === a.target) this.talkers.talk(a.target!);
@@ -938,6 +950,7 @@ export class Gameplay {
       this.policeSys.file({ witness: 'radio', perp: d.perp, kinds: ['officer_down'], desc: { clothes: [] }, lastKnown: d.where, crimeAt: d.where, via: 'unit', time: this.time });
     }
     this.trackMotion(dt); this.mirror?.update();
+    this.updateBodies();
     const clear = this.heatClear();
     if (clear && !this.wasClear) this.emit('cleared', { at: this.time });
     this.wasClear = clear;
@@ -1059,6 +1072,7 @@ export class Gameplay {
       }
       this.ai.onDied(e.id);
       const u = this.policeSys.units.get(e.id); if (u) u.state = 'down';
+      if (a && a.kind !== 'cop' && !u) { const q = a.pos(); this.bodies.add(e.id, q[0], q[2], e.source ?? null, this.time, this.bodyDelay(q[0], q[2])); }
       if (a?.kind === 'cop' || u) {
         const at = a?.pos() ?? [u!.x, 0, u!.z];
         this.emit('copKilled', { id: e.id, by: e.source, at, precinct: u?.precinct ?? null });
@@ -1102,6 +1116,7 @@ export class Gameplay {
     this.props.on('geyser', (e) => this.emit('geyser', e));
     for (const k of ['ignited', 'spread', 'out', 'engines'] as const) this.fire.on(k, (e: any) => this.emit('fire', { kind: k, ...e }));
     for (const k of ['bought', 'sold', 'ticket', 'booted', 'towed', 'released'] as const) this.ownership.on(k, (e: any) => this.emit('notice', { kind: `car_${k}`, ...e }));
+    this.ownership.on('towed', (e) => { for (const b of this.bodies.openTrunk(e.car)) this.bodyFound(b, e.car); });
     this.props.on('coins', (e) => { if (this.player) { this.inv.addMoney(this.player.lead, e.cents, 'coins'); this.emit('pickup', { kind: 'coins', ...e }); } });
     this.witnesses.on('witnessed', (e) => this.emit('witness', { kind: 'witnessed', ...e }));
     this.witnesses.on('heading', (e) => this.emit('witness', { kind: 'heading', ...e }));
@@ -1389,6 +1404,61 @@ export class Gameplay {
   /** The engine reports a fall from height (m) for any actor. */
   fell(id: string, dropM: number) { const d = fallDamage(dropM); if (d > 0) this.applyDamage(id, { amount: d, type: 'fall' }); }
 
+  // ------------------------------------------------------------------ bodies
+  /** How long until passers-by find a body here (crowd within 25 m, light, indoors). */
+  private bodyDelay(x: number, z: number, indoors = false) {
+    let n = 0; for (const q of this.port.peds()) if (q.alive && Math.hypot(q.x - x, q.z - z) < 25) n++;
+    return discoveryDelay(Math.min(1, n / 8), this.light(x, z), indoors);
+  }
+  private updateBodies() {
+    const carried = this.bodies.carried();
+    if (carried && this.player) {
+      const p = this.player.position(); carried.x = p[0]; carried.z = p[2];
+      // anyone who sees a man carrying a body calls it in (the witness system decides who saw)
+      if (!this.pc.indoors && this.time - this.bodySeenAt > 4) { this.bodySeenAt = this.time; this.crime('body_seen', { visible: true, noise: 0 }); }
+    }
+    for (const b of this.bodies.due(this.time)) this.bodyFound(b);
+  }
+  /** Someone found it: a homicide report (no description), unless the killing is already reported here. */
+  private bodyFound(b: Body, car?: string) {
+    this.emit('police', { kind: 'bodyFound', body: b.id, at: [b.x, b.z], car: car ?? null });
+    const known = this.policeSys.reports.some((r) => r.kinds.includes('homicide') && Math.hypot(r.crimeAt[0] - b.x, r.crimeAt[1] - b.z) < 30);
+    if (known && !car) return;
+    const c = car ? this.cars.cars.get(car) : null;
+    const perp = car ? (c?.owner === this.player?.lead || this.ownership.owned.get(car)?.owner === this.player?.lead ? this.player!.id : (b.killer ?? 'unknown')) : (b.killer ?? 'unknown');
+    const vehicle = c ? { id: c.id, vclass: { v: c.vclass, c: 1 }, colour: { v: c.colour, c: 1 }, plate: { v: this.cars.plate(c.id), c: 1 } } : undefined;
+    this.policeSys.file({ witness: `found:${b.id}`, perp, kinds: ['homicide'], crimeIds: [-20000 - this.bodySeq++], desc: { clothes: [], ...(vehicle ? { vehicle } : {}) }, lastKnown: [b.x, b.z], crimeAt: [b.x, b.z], via: 'payphone', time: this.time } as any);
+  }
+  /** Pick up the nearest body (both hands; the rules then apply: no guns, no climbing, no car). */
+  pickUpBody() {
+    if (!this.player || this.pc.carrying !== 'none' || this.pc.cuffed || this.pc.surrendered || this.pc.vehicle) return false;
+    const p = this.player.position(); const b = this.bodies.nearest(p[0], p[2], 2);
+    if (!b || !this.bodies.pickUp(b.id)) return false;
+    this.setContext({ carrying: 'body' }); this.aimer.release(); this.pc.aiming = false; this.pc.firing = false;
+    this.emit('notice', { kind: 'body', action: 'pickedUp', body: b.id });
+    return true;
+  }
+  /** Put it down here (a hiding-spot marker keeps it from passers-by). */
+  dropBody() {
+    const b = this.bodies.carried(); if (!b || !this.player) return false;
+    const p = this.player.position();
+    this.bodies.drop(b.id, p[0], p[2], this.time, this.bodyDelay(p[0], p[2], this.pc.indoors), this.pc.hiding);
+    this.setContext({ carrying: 'none' });
+    this.emit('notice', { kind: 'body', action: 'dropped', body: b.id, hidden: this.pc.hiding });
+    return true;
+  }
+  /** Into the trunk of a car within reach (one body per trunk). Found if the car is towed or searched. */
+  stowBody(carId: string) {
+    const b = this.bodies.carried(); const c = this.cars.cars.get(carId); if (!b || !c || !this.player) return false;
+    const p = this.player.position();
+    if (Math.hypot(c.x - p[0], c.z - p[2]) > 3.5 || this.bodies.inCar(carId).length) return false;
+    this.bodies.stow(b.id, carId); this.setContext({ carrying: 'none' });
+    this.emit('notice', { kind: 'body', action: 'stowed', body: b.id, car: carId });
+    return true;
+  }
+  /** The police open a car's trunk (a stop on a hot car, a roadblock): anything in it is found, and the report has the car. */
+  searchTrunk(carId: string) { const found = this.bodies.openTrunk(carId); for (const b of found) this.bodyFound(b, carId); return found.length; }
+
   // ------------------------------------------------------------------ movement rules (MOVEMENT.md)
   /** The rules' view of the player right now. */
   moverState(): MoverState {
@@ -1455,7 +1525,7 @@ export class Gameplay {
   serialize(): SaveV3 {
     const health: Record<string, unknown> = {};
     if (this.player) health[this.player.lead] = this.healthSys.serialize(this.player.id);
-    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), arcade: this.arcade.serialize(), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
+    return { v: SAVE_VERSION as 4, economy: this.economy.serialize(), arcade: this.arcade.serialize(), bodies: this.bodies.serialize().map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : Math.max(0, b.discoverAt - this.time), diedAt: 0 })), stats: this.stats.serialize(), ownership: this.ownership.serialize(), cars: this.cars.serialize(), inventory: this.inv.serialize(), health, police: this.policeSys.serialize(), shops: this.shops.serialize(), phones: this.phones.serialize(), props: this.props.serialize(), outcomes: this.outcomes.serialize(), activeLead: this.player?.lead };
   }
   deserialize(raw: unknown) {
     const s = migrate(raw);
@@ -1476,6 +1546,7 @@ export class Gameplay {
     this.stats.deserialize((s as any).stats);
     if ((s as any).economy) this.economy.restore((s as any).economy);
     if ((s as any).arcade) this.arcade.restore((s as any).arcade);
+    if ((s as any).bodies) this.bodies.restore(((s as any).bodies as any[]).map((b) => ({ ...b, discoverAt: b.discoverAt < 0 ? -1 : this.time + b.discoverAt })));
     if (this.player) {
       const h = (s.health as any)?.[this.player.lead]; if (h) this.healthSys.deserialize(this.player.id, h);
       this.pc.weapon = this.inv.ensure(this.player.lead).equipped; this.guns.clear();
