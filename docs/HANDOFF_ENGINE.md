@@ -43,6 +43,36 @@ Written 2026-11-27 because usage was about to run out. Everything below is commi
   4. Oversight items still open: denser street-level sources (car headlights come with sim and
      vehicles), a little bloom on lit windows (High only), and the sky colour and cloud ellipse.
 
+## Phase 3 block, required before Phase 3 is done (user report, 2026-11-27)
+The user wrote: "There are no street signs/traffic lights. All the trees look the same (no branches)."
+This block comes after the night and dusk fixes and before Phase 3 is called done.
+
+**A. Street furniture**, placed from data and period-correct: research DOCUMERICA and other
+public-domain 1970s photos per type; no real brands. Instanced, with chunk LOD and a draw and
+triangle budget measured on the phone tier.
+- **Traffic signals** at every OSM-signalled intersection (the POI Signal data already exists):
+  1970s NYC heads and poles, with phases synced to the sim's signal state. Agree the interface with
+  sim through ENGINE_REQUESTS.
+- **Street-name signs** on corner poles in the 1974 colour scheme, with text through the sign/atlas
+  system, legible at street level.
+- **Streetlights** at period spacing (they also feed the night street-level light).
+- **Small furniture:** hydrants, mailboxes, police and fire call boxes, phone booths, newsstands, trash
+  baskets, parking meters, bus-stop signs. Call boxes are gameplay interactables, so check gameplay's
+  contract (request 6, "street furniture as data").
+- **Subway entrances:** kiosks and railings at the OSM subway entrances (POI SubwayEntrance exists).
+- **Scaffolding and sidewalk sheds** where suitable.
+
+**B. Trees with real branching.**
+- Trunk and branch skeletons per species: London plane, honey locust, pin oak, ginkgo and Callery pear
+  for 1974 street trees; bigger elms and planes in Madison Square and Bryant Park.
+- Leaf cards and alpha-tested leaf clusters.
+- Per-instance variation (seed, scale, lean, crown shape, hue), so no two neighbouring trees are
+  identical.
+- Wind sway in the vertex shader, and impostors/LOD at distance.
+- Compare against park reference photos.
+
+Deliver shots of both beside references, measured, as JPEG.
+
 ## In flight: sim merge (NOT on the branch yet)
 - A local trial merge of `origin/claude/nice-sagan-2jh4m2` @ 0447d43 was clean apart from
   `package.json` scripts (keep both blocks). The sim's root `ENGINE_REQUESTS.md` should move to
