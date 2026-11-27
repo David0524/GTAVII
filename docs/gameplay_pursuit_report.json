@@ -1,0 +1,42 @@
+{
+ "summary": {
+  "speedMs": 13,
+  "minutes": 1,
+  "runs": 1,
+  "carsPerRun": 4,
+  "pursuitStarted": "1/1",
+  "gotAway": "1/1",
+  "medianGetAwayS": 31.3,
+  "meanSeenShare": 0.09,
+  "totalIntercepts": 1,
+  "gpMsPerFrame": 0.53,
+  "limits": "player car is kinematic (ignores traffic, lights, collisions; never slows to turn); police cars drive the sim lane graph"
+ },
+ "results": [
+  {
+   "run": 0,
+   "start": [
+    -20,
+    -51
+   ],
+   "pursuitAt": 0,
+   "seenShare": 0.09,
+   "intercepts": 1,
+   "closest": 3,
+   "gotAwayAt": 31.3,
+   "finalPhase": "searching",
+   "phases": [
+    "pursuit",
+    "lost",
+    "searching"
+   ],
+   "maxUnits": 8,
+   "roles": {
+    "tail": 108,
+    "search": 313
+   },
+   "gpMsPerFrame": 0.53,
+   "reports": 1
+  }
+ ]
+}

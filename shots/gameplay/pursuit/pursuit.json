@@ -1,0 +1,709 @@
+{
+ "seconds": 40,
+ "drive": [
+  {
+   "keys": [
+    "KeyW"
+   ],
+   "secs": 25
+  },
+  {
+   "keys": [
+    "KeyW",
+    "KeyA"
+   ],
+   "secs": 1.5
+  },
+  {
+   "keys": [
+    "KeyW"
+   ],
+   "secs": 25
+  }
+ ],
+ "crime": "carjack",
+ "samples": [
+  {
+   "gameT": 2,
+   "driving": true,
+   "speed": 0.1,
+   "pos": [
+    -20,
+    -51
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 16
+  },
+  {
+   "gameT": 2.8,
+   "driving": true,
+   "speed": 2.5,
+   "pos": [
+    -20,
+    -49
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 66
+  },
+  {
+   "gameT": 2.9,
+   "driving": true,
+   "speed": 2.7,
+   "pos": [
+    -20,
+    -49
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 72
+  },
+  {
+   "gameT": 3,
+   "driving": true,
+   "speed": 3.1,
+   "pos": [
+    -20,
+    -49
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 77
+  },
+  {
+   "gameT": 3.1,
+   "driving": true,
+   "speed": 3.4,
+   "pos": [
+    -20,
+    -48
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 83
+  },
+  {
+   "gameT": 3.2,
+   "driving": true,
+   "speed": 3.8,
+   "pos": [
+    -20,
+    -48
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 88
+  },
+  {
+   "gameT": 3.3,
+   "driving": true,
+   "speed": 4.1,
+   "pos": [
+    -20,
+    -48
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 94
+  },
+  {
+   "gameT": 3.4,
+   "driving": true,
+   "speed": 4.5,
+   "pos": [
+    -20,
+    -47
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 99
+  },
+  {
+   "gameT": 3.5,
+   "driving": true,
+   "speed": 4.8,
+   "pos": [
+    -20,
+    -47
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 105
+  },
+  {
+   "gameT": 3.6,
+   "driving": true,
+   "speed": 5.1,
+   "pos": [
+    -20,
+    -46
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 110
+  },
+  {
+   "gameT": 3.7,
+   "driving": true,
+   "speed": 5.5,
+   "pos": [
+    -20,
+    -46
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 115
+  },
+  {
+   "gameT": 3.8,
+   "driving": true,
+   "speed": 5.8,
+   "pos": [
+    -20,
+    -45
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 121
+  },
+  {
+   "gameT": 3.9,
+   "driving": true,
+   "speed": 6.1,
+   "pos": [
+    -20,
+    -45
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 127
+  },
+  {
+   "gameT": 4,
+   "driving": true,
+   "speed": 6.4,
+   "pos": [
+    -20,
+    -44
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 132
+  },
+  {
+   "gameT": 4.1,
+   "driving": true,
+   "speed": 6.7,
+   "pos": [
+    -20,
+    -43
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 138
+  },
+  {
+   "gameT": 4.2,
+   "driving": true,
+   "speed": 7,
+   "pos": [
+    -20,
+    -43
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 143
+  },
+  {
+   "gameT": 4.3,
+   "driving": true,
+   "speed": 7.3,
+   "pos": [
+    -20,
+    -42
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 148
+  },
+  {
+   "gameT": 4.4,
+   "driving": true,
+   "speed": 7.6,
+   "pos": [
+    -20,
+    -41
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 155
+  },
+  {
+   "gameT": 4.5,
+   "driving": true,
+   "speed": 7.9,
+   "pos": [
+    -20,
+    -40
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 160
+  },
+  {
+   "gameT": 4.6,
+   "driving": true,
+   "speed": 8.2,
+   "pos": [
+    -20,
+    -40
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 165
+  },
+  {
+   "gameT": 4.6,
+   "driving": true,
+   "speed": 8.2,
+   "pos": [
+    -20,
+    -40
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 165
+  },
+  {
+   "gameT": 5.3,
+   "driving": true,
+   "speed": 10.2,
+   "pos": [
+    -20,
+    -33
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 200
+  },
+  {
+   "gameT": 5.4,
+   "driving": true,
+   "speed": 10.5,
+   "pos": [
+    -20,
+    -32
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 205
+  },
+  {
+   "gameT": 5.5,
+   "driving": true,
+   "speed": 10.8,
+   "pos": [
+    -20,
+    -31
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 210
+  },
+  {
+   "gameT": 5.6,
+   "driving": true,
+   "speed": 11,
+   "pos": [
+    -20,
+    -30
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 215
+  },
+  {
+   "gameT": 5.7,
+   "driving": true,
+   "speed": 11.3,
+   "pos": [
+    -20,
+    -29
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 220
+  },
+  {
+   "gameT": 5.8,
+   "driving": true,
+   "speed": 11.4,
+   "pos": [
+    -20,
+    -28
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 225
+  },
+  {
+   "gameT": 6,
+   "driving": true,
+   "speed": 11.7,
+   "pos": [
+    -20,
+    -25
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 234
+  },
+  {
+   "gameT": 6.1,
+   "driving": true,
+   "speed": 11.8,
+   "pos": [
+    -19,
+    -24
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 238
+  },
+  {
+   "gameT": 6.2,
+   "driving": true,
+   "speed": 12,
+   "pos": [
+    -19,
+    -23
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 243
+  },
+  {
+   "gameT": 6.3,
+   "driving": true,
+   "speed": 12.3,
+   "pos": [
+    -19,
+    -22
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 247
+  },
+  {
+   "gameT": 6.4,
+   "driving": true,
+   "speed": 12.5,
+   "pos": [
+    -19,
+    -21
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 252
+  },
+  {
+   "gameT": 6.5,
+   "driving": true,
+   "speed": 12.8,
+   "pos": [
+    -19,
+    -19
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 256
+  },
+  {
+   "gameT": 6.6,
+   "driving": true,
+   "speed": 13.1,
+   "pos": [
+    -18,
+    -18
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 260
+  },
+  {
+   "gameT": 6.7,
+   "driving": true,
+   "speed": 13.3,
+   "pos": [
+    -18,
+    -17
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 265
+  },
+  {
+   "gameT": 6.8,
+   "driving": true,
+   "speed": 13.6,
+   "pos": [
+    -18,
+    -15
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 269
+  },
+  {
+   "gameT": 6.9,
+   "driving": true,
+   "speed": 13.8,
+   "pos": [
+    -17,
+    -14
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 273
+  },
+  {
+   "gameT": 7,
+   "driving": true,
+   "speed": 14.1,
+   "pos": [
+    -17,
+    -13
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 278
+  },
+  {
+   "gameT": 7.1,
+   "driving": true,
+   "speed": 14.4,
+   "pos": [
+    -17,
+    -11
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 282
+  },
+  {
+   "gameT": 7.2,
+   "driving": true,
+   "speed": 14.6,
+   "pos": [
+    -17,
+    -10
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 286
+  },
+  {
+   "gameT": 7.3,
+   "driving": true,
+   "speed": 14.9,
+   "pos": [
+    -16,
+    -8
+   ],
+   "phase": "none",
+   "reports": 0,
+   "heat": 0,
+   "simCops": 0,
+   "units": [],
+   "hp": 100,
+   "wall": 290
+  }
+ ],
+ "took": {
+  "ok": true,
+  "car": "sedan",
+  "at": [
+   -20,
+   -51
+  ],
+  "method": "carjack"
+ },
+ "fps": null,
+ "summary": {
+  "fps": null,
+  "gameSeconds": 5.3,
+  "firstReport": null,
+  "firstUnit": null,
+  "firstSighting": null,
+  "maxUnits": 0,
+  "closest": null,
+  "roles": [],
+  "phases": [
+   "none"
+  ],
+  "topSpeed": 14.9,
+  "distance": 43,
+  "errors": []
+ }
+}
