@@ -25,7 +25,7 @@ im = Image.open(sys.argv[1]).convert('RGBA').transpose(Image.FLIP_TOP_BOTTOM)
 open(sys.argv[2], 'wb').write(im.tobytes()); print(im.size[0], im.size[1])`, src, raw]).toString().trim().split(' ').map(Number);
   const data = new Uint8Array(fs.readFileSync(raw));
   const out = await encodeToKTX2(new Uint8Array(1), {
-    isUASTC: false, qualityLevel: m === 'c' ? 170 : 200, generateMipmap: true, isSetKTX2SRGBTransferFunc: m === 'c',
+    isUASTC: false, qualityLevel: 255, generateMipmap: true, isSetKTX2SRGBTransferFunc: m === 'c',
     imageDecoder: async () => ({ data, width: dims[0], height: dims[1] }),
   } as any);
   fs.writeFileSync(path.join(DIR, `${id}_${m}.ktx2`), out);

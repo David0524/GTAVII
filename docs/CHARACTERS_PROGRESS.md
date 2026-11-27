@@ -122,7 +122,11 @@ the size pass.
        Without a renderer, or on failure, heads fall back to WebP.
      - Visually the same as WebP in the leads shot.
      - The normal map stays WebP (ETC1S is too lossy for normals; UASTC was 0.95 MB).
-     - Next: KTX2 for the Rocketbox leads.
+     - Nick's colour map is KTX2 too (1024², 0.16 MB) and renders the same as WebP.
+     - **Teddy stays on WebP for now.** His KTX2 colour map renders lighter and more orange than
+       the WebP, even at ETC1S quality 255; Nick's and Delphine's match exactly. Not yet explained
+       (same source format and dimensions), to investigate.
+     - The encoder now uses quality 255 throughout (a size cost of ~+25%).
    - **Phone load** (`tools/characters/loadtime.ts`: Playwright Pixel 7 profile, CDP throttling at
      12 Mbit/s with 70 ms RTT):
 
