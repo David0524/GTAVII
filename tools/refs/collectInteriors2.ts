@@ -72,7 +72,22 @@ const P3_QUERIES: Record<string, string[]> = {
 async function search3(outFile: string) {
   const seen = new Map<string, Cand>(fs.existsSync(outFile) ? (JSON.parse(fs.readFileSync(outFile, 'utf8')) as Cand[]).map((c) => [c.id, c]) : []);
   const yr = (s: string) => parseInt(s.match(/\b(19\d\d)\b/)?.[1] ?? '0');
-  for (const [gap, qs] of Object.entries(P3_QUERIES)) for (const q of qs) for (const co of ['cph', 'gsc', 'hh', '']) {
+  // P3_QUERIES=<json {gap: [queries]}> replaces the built-in list (gap-filling rounds); P3_COMMONS=<json {gap: [queries]}> adds Commons DOCUMERICA/NARA searches
+  const qmap = process.env.P3_QUERIES ? (JSON.parse(fs.readFileSync(process.env.P3_QUERIES, 'utf8')) as Record<string, string[]>) : P3_QUERIES;
+  const cmap = process.env.P3_COMMONS ? (JSON.parse(fs.readFileSync(process.env.P3_COMMONS, 'utf8')) as Record<string, string[]>) : {};
+  for (const [gap, qs] of Object.entries(cmap)) for (const q of qs) {
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srnamespace=6&srlimit=40&format=json`;
+    const d = (await (await get(url)).json().catch(() => ({}))) as any;
+    for (const r of d?.query?.search ?? []) {
+      const f = String(r.title);
+      if (!/\.jpe?g$/i.test(f) || !/NARA/i.test(f) || /\(cropped\)|\(restored\)/i.test(f)) continue;
+      const nara = f.match(/NARA - (\d+)/)?.[1];
+      const id = `documerica_${nara ?? f.replace(/\W+/g, '_').slice(0, 50)}`;
+      if (!seen.has(id)) seen.set(id, { id, kind: 'commons', title: f.replace(/^File:/, '').replace(/ - NARA - \d+.*$/, '').replace(/\.jpe?g$/i, ''), date: '', creator: '', item: `https://commons.wikimedia.org/wiki/${encodeURIComponent(f.replace(/ /g, '_'))}`, img: `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(f.replace(/^File:/, ''))}?width=960`, gap, co: 'commons' });
+    }
+    console.log(`commons ${gap} "${q}": ${seen.size} kept`);
+  }
+  for (const [gap, qs] of Object.entries(qmap)) for (const q of qs) for (const co of ['cph', 'gsc', 'hh', '']) {
     const hits = await locSearch(co, q.replace(/^NYWTS /, ''), 1).catch(() => []);
     for (const h of hits) {
       const y = yr(h.created); if (y < 1955 || y > 1977 || /drawing|sketch/i.test(h.medium)) continue;

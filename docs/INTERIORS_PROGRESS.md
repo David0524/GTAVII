@@ -298,3 +298,12 @@ Plan in docs/interiors/GRAND_CENTRAL_PLAN.md: 1974 content list, engine/interior
     - The muster room is narrow (2.9 m) and the property room long (12.8 m): rebalance the back-room widths by the lot width.
     - The desk front is a flat dark slab; it needs panel mouldings.
     - The reference pass for precinct interiors is still running; judge against it when it lands.
+
+## Reference pass 3 (heroes: precinct, hospital, co-op, luxury apartment)
+29 entries (catalog 255 → 284); contact sheets in references/contact/pass3_*.jpg.
+- precinct 6: mostly 1950s NYWTS press photos of arrests (people-led; useful only for tiled and plaster walls, cell bars with a strap rail, a cell-block corridor). No desk, booking gear or property cage was found, so precinct_v1 keeps its period-grammar build.
+- hospital 9: curved nurses' station, ward ceiling curtain tracks, tile wards, 1961 NYC iron-bed wards, corridors.
+- coop_apartment 4: two are modest 1956 NYC compact flats; the 1970 dining nook with plants is a designer interior, not modest.
+- luxury_apartment 10: panelled living room with grand piano, library, doorman lobbies (Essex House penthouse noted as a hotel).
+- Rights: five NYWTS items read "No known copyright restriction" (LoC's NYWTS staff-photographer statement), not "No known restrictions". They are kept as internal references only; nothing ships. Press photos of identifiable people are reference-only, never textures.
+- Gaps: sewing machines in homes, ER triage desk, gurneys, waiting benches, a property cage.

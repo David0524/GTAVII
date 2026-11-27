@@ -159,7 +159,7 @@ export async function locItem(itemUrl: string) {
   const d = (await (await get(`${itemUrl.replace(/\/?$/, '/')}?fo=json`)).json()) as any;
   const it = d.item ?? {};
   const rights = clean(String(it.rights_information ?? ''));
-  if (d.unrestricted !== true || !/No known restrictions/i.test(rights)) return null;
+  if (d.unrestricted !== true || !/^No known (copyright )?restrictions?\b/i.test(rights)) return null;
   const places = Array.isArray(it.place) ? it.place.map((p: any) => String(p.title)) : [];
   const creators = Array.isArray(it.creators) ? it.creators.map((c: any) => String(c.title)) : [];
   return { rights, places, creators };
