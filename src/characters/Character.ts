@@ -54,6 +54,10 @@ export class Character {
   private ground: GroundFn | null = null;
   private footLock: Record<'l' | 'r', { pos: THREE.Vector3; w: number; was: boolean }> = { l: { pos: new THREE.Vector3(), w: 0, was: false }, r: { pos: new THREE.Vector3(), w: 0, was: false } };
   private pelvisDrop = 0;
+  /** Step smoothing: autostep moves the capsule instantly; the body absorbs it and springs back. */
+  stepSmoothing = true;
+  private stepOff = 0; private stepVel = 0; private lastRootY: number | null = null;
+  private stairT = 0; private stairSign = 0; private lastStepAt = -10; private clock = 0;
   private wardrobeSets: CharacterBuild['wardrobeSets'];
   private outfitCtx?: Partial<OutfitContext>;
   /** CPU time of the last update (ms), for budgets. */
@@ -167,11 +171,31 @@ export class Character {
       this.object.rotation.set(0, this.yaw, 0);
       this.animator.setLocomotion({ ...this.loco, heading: this.yaw }, dt);
     }
+    // steps (kerbs, stoops, stairs): the controller snaps the capsule up or down up to 0.4 m in
+    // one frame. Keep the body where it was and let a critically damped spring (about 0.25 s)
+    // carry it over, while foot IK plants each foot on the true ground: a dip and recover, no pop.
+    this.clock += dt;
+    const rootY = this.object.position.y;
+    if (this.lastRootY !== null && this.loco.grounded && !this.seat && this.stepSmoothing) {
+      const dy = rootY - this.lastRootY;
+      if (Math.abs(dy) > 0.02 && Math.abs(dy) < 0.45) {
+        this.stepOff -= dy;
+        // two steps within 0.9 s in the same direction: a staircase (stair gait)
+        if (this.clock - this.lastStepAt < 0.9 && Math.sign(dy) === this.stairSign) this.stairT = 1;
+        this.stairSign = Math.sign(dy); this.lastStepAt = this.clock;
+      }
+    }
+    this.lastRootY = rootY;
+    const w = 14;
+    this.stepVel += (-w * w * this.stepOff - 2 * w * this.stepVel) * dt;
+    this.stepOff += this.stepVel * dt;
+    this.stairT = Math.max(0, this.stairT - dt / 0.9);
+    this.animator.stair = this.stairT * this.stairSign;
     this.animator.update(dt);
     // apply pose
     const pose = this.animator.pose;
     for (let j = 0; j < this.bones.length; j++) this.bones[j].quaternion.fromArray(pose.q, j * 4);
-    this.bones[JI.pelvis].position.set(pose.pelvis[0], pose.pelvis[1] + this.asm.lift * 0 + this.pelvisDrop, pose.pelvis[2]);
+    this.bones[JI.pelvis].position.set(pose.pelvis[0], pose.pelvis[1] + this.asm.lift * 0 + this.pelvisDrop + this.stepOff, pose.pelvis[2]);
     this.object.updateMatrixWorld(true);
     // procedural layers
     if (!this.seat) this.footIK(dt);

@@ -64,7 +64,10 @@ export function moveCourse(world: THREE.Scene, camera: THREE.PerspectiveCamera, 
   const ch = factory.spawn(world, { seed: Number(qp.get('seed') ?? 12345) });
   const sim = new MoveCourseSim();
   const near = qp.get('cam') === 'near';
+  if (qp.has('nostep')) ch.stepSmoothing = false;
   let lastEvents = 0;
+  // smoothness: the pelvis's vertical speed on grounded frames (a pop shows as a spike)
+  let lastPelvis: number | null = null, maxVy = 0, sumVy = 0, nVy = 0;
   report.events = [];
   return (dt: number) => {
     const s = sim.step(dt);
@@ -82,6 +85,10 @@ export function moveCourse(world: THREE.Scene, camera: THREE.PerspectiveCamera, 
     const d = near ? 4.2 : 8;
     camera.fov = 40; camera.updateProjectionMatrix();
     camera.position.set(s.x + 0.6, s.y + 1.3, d); camera.lookAt(s.x + 0.6, s.y + 0.8, 0);
+    const py = ch.jointWorld('pelvis').y;
+    if (lastPelvis !== null && s.grounded && !s.traversal && dt > 0) { const vy = Math.abs(py - lastPelvis) / dt; maxVy = Math.max(maxVy, vy); sumVy += vy; nVy++; }
+    lastPelvis = py;
+    report.pelvis = { maxVerticalSpeed: +maxVy.toFixed(2), meanVerticalSpeed: +(sumVy / Math.max(1, nVy)).toFixed(3), note: 'grounded frames only; m/s' };
     report.state = { t: +s.t.toFixed(2), x: +s.x.toFixed(2), y: +s.y.toFixed(3), speed: +s.speed.toFixed(2), traversal: s.traversal, done: s.done };
     report.updateMs = +ch.lastUpdateMs.toFixed(3);
   };

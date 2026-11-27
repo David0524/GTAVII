@@ -97,6 +97,8 @@ export class Animator {
   }
   /** Lean (radians) applied by the procedural layer, exposed for IK/debug. */
   lean = { pitch: 0, roll: 0 };
+  /** Stair gait (-1 down .. +1 up, set by the character from step cadence): higher knee lift on the swing leg, a forward lean going up. */
+  stair = 0;
   /** Contact state per foot (true = planted) for foot locking. */
   readonly planted = { l: true, r: true };
 
@@ -262,6 +264,16 @@ export class Animator {
     rotLocal(out, JI.spine_03, breathe + slump * 0.3, 0, 0);
     rotLocal(out, JI.neck_01, slump * 0.4 - this.lean.pitch * 0.4, 0, -this.lean.roll * 0.3);
     rotLocal(out, JI.clavicle_l, breathe * 0.5, 0, -slump * 0.1); rotLocal(out, JI.clavicle_r, breathe * 0.5, 0, slump * 0.1);
+    // stair gait: the swing leg lifts higher (more going up), the torso leans into the climb
+    if (this.stair !== 0 && this.grounded && moveW > 0.3) {
+      const up = Math.max(0, this.stair), down = Math.max(0, -this.stair);
+      for (const side of ['l', 'r'] as const) {
+        if (this.planted[side]) continue;
+        rotLocal(out, side === 'l' ? JI.thigh_l : JI.thigh_r, -(0.38 * up + 0.14 * down), 0, 0);
+        rotLocal(out, side === 'l' ? JI.calf_l : JI.calf_r, 0.55 * up + 0.22 * down, 0, 0);
+      }
+      rotLocal(out, JI.spine_01, 0.07 * up - 0.03 * down, 0, 0);
+    }
     const g = this.p.girth ?? 0;
     if (g) { rotLocal(out, JI.upperarm_l, 0, 0, g); rotLocal(out, JI.upperarm_r, 0, 0, -g); }
   }
