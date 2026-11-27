@@ -1,5 +1,7 @@
 ✓ on foot shows ctx, jump, weapon, menu (jump,ctx,weapon,menu)
 ✓ context label from gameplay
+✓ traversal: the jump button relabels (Jump -> Climb)
+✓ traversal gone: back to Jump
 ✓ stick: forward walk (y=1.00)
 ✓ stick past the rim sprints
 ✓ release stops
@@ -28,4 +30,4 @@
 ✓ iPhone: fullscreen button opens the install card
 ✓ card: Safari steps, Add to Home Screen (Play full screen × iPhone only plays full screen from the Home Screen. Installed, your sav)
 ✓ card closes
-touch layer update: 0.008 ms (EMA, headless)
+touch layer update: 0.010 ms (EMA, headless)

@@ -404,4 +404,10 @@ export class MockHost implements UiHost {
     driveBy: (on) => this.touchLog.push(`driveby:${on}`),
     configure: (c) => this.touchLog.push(`configure:${c.fireMode}/${c.aimAssist}/${c.autoAccelerate}`),
   };
+
+  // ---------------------------------------------------------------- traversal hint (MOVEMENT.md), scripted
+  /** Lab only: the edge sits at a fixed screen point and project() passes it through. */
+  travKind: import('../../shared/uiHost').TraversalKind | null = null;
+  traversal = () => (this.travKind ? { kind: this.travKind, x: innerWidth * 0.56, y: innerHeight * 0.58, z: 0 } : null);
+  project = (x: number, y: number) => ({ x, y });
 }

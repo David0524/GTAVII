@@ -46,6 +46,11 @@ await withServer(async (base) => {
   let v = await visible(ALL); check('on foot shows ctx, jump, weapon, menu', ['ctx', 'jump', 'weapon', 'menu'].every((x) => v.includes(x)) && v.length === 4, v.join(','));
   check('context label from gameplay', (await page.locator('.tc-id-ctx').innerText()).includes('Steal car'));
   await shot('foot');
+  await page.evaluate(() => { (window as any).__UI.host.travKind = 'climb'; }); await page.waitForTimeout(400);
+  check('traversal: the jump button relabels (Jump -> Climb)', (await page.locator('.tc-id-jump').textContent())!.trim() === 'Climb');
+  await shot('foot_climb');
+  await page.evaluate(() => { (window as any).__UI.host.travKind = null; }); await page.waitForTimeout(400);
+  check('traversal gone: back to Jump', (await page.locator('.tc-id-jump').textContent())!.trim() === 'Jump');
   await drag({ x: 150, y: 290 }, { x: 160, y: 225 }, { hold: true });
   let s = await state(); check('stick: forward walk', s.move.y > 0.6 && Math.abs(s.move.x) < 0.3, `y=${s.move.y.toFixed(2)}`);
   await shot('foot_stick');

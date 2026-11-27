@@ -67,3 +67,6 @@ body.touch .t74-clock { right: calc(70px + var(--safe-r)); }
   font: 600 18px/1.3 var(--f-ui); text-align: center; padding: 24px; }
 .t74-rotate small { font-weight: 400; font-size: 13px; opacity: .7; }
 @media (orientation: portrait) and (pointer: coarse) { .t74-rotate { display: grid; } }
+
+/* jump relabelled as a traversal (Vault / Climb / Over / Up / Drop): the accent ring says 'this does something here' */
+.tc-id-jump.trav { box-shadow: inset 0 0 0 2px var(--taxi); }

@@ -186,6 +186,11 @@ export interface UiHost {
   continueGame?(): Promise<boolean>;
   /** Context button prompts for the HUD strip: [action, label]. */
   prompts?(): [import('../input/Input').ButtonAction, string][];
+  /** What pressing jump would do right now (engine climb/vault detection; MOVEMENT.md), with the edge's world point.
+   *  The touch primary button relabels itself; pad/keyboard show one small chip anchored there. */
+  traversal?(): { kind: TraversalKind; x: number; y: number; z: number } | null;
+  /** World point to CSS px for the gameplay camera (null when behind it). */
+  project?(x: number, y: number, z: number): { x: number; y: number } | null;
   /** Touch controls (docs/briefs/TOUCH_CONTROLS.md). Absent: the touch layer runs on foot only (move, look, jump, use). */
   touch?: TouchHost;
   /** Static map data. */
@@ -200,6 +205,9 @@ export interface UiHost {
  * touchPedals), so pad and keyboard stay untouched. Everything optional degrades to "not shown".
  */
 export type TouchMode = 'foot' | 'combat' | 'drive';
+export type TraversalKind = 'vault' | 'climb' | 'fence' | 'ladder' | 'drop' | 'gap';
+/** Verbs shown for each traversal (touch button label, HUD chip). */
+export const TRAVERSAL_VERB: Record<TraversalKind, string> = { vault: 'Vault', climb: 'Climb', fence: 'Over', ladder: 'Up', drop: 'Drop', gap: 'Jump' };
 export interface TouchContext { kind: string; label: string }
 export interface TouchHost {
   /** Which control state to show. Combat = a weapon drawn or under fire. */

@@ -645,3 +645,8 @@ body.touch .ts-sleepbody, body.touch .car-body, body.touch .hm-body { padding-to
 /* classifieds: black ink only */
 .cl-ad i { color: #111c; }
 .cl-none { color: #111a; }
+
+/* traversal prompt: one small chip at the edge (RDR2/GTA keep these minimal); fades in, never stacks */
+.u-trav { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px 4px 5px; background: rgba(10,10,10,.72);
+  color: #fff; font: 700 13px var(--f-ui); opacity: 0; transition: opacity .18s; pointer-events: none; white-space: nowrap; }
+.u-trav.on { opacity: 1; }

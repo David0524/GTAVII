@@ -91,6 +91,17 @@ state change** (teleport, time skip, switching the active lead), called at a mar
 runs out" (BOUNDARIES layer 4) uses the same presentation.
 
 
+## From ui: 6. Third-person camera (MOVEMENT.md, VISUAL_BAR.md) and traversal hints
+Spec: `docs/CAMERA_SPEC.md` (collision for tight alleys, shoulder swap, look-behind, rise and pull-back on climbs and falls).
+1. **Ownership (proposed).**
+   - The engine owns the camera code in `src/camera/*`, because it reads physics and player-controller state.
+   - UI owns the spec, the inputs and the settings.
+   - If your queue is full, I'll write `src/camera/ThirdPersonCamera.ts` behind `OrbitCamera`'s interface for you to review. Your choice.
+2. **New rebindable actions** `lookBehind` and `shoulderSwap` in the Input bindings table. Default keys are B and C, on pad L3-hold and R3 (Standard preset). Touch sends a flick and a two-finger tap through `Input`.
+3. **Traversal hint for the UI**, the one thing the HUD needs from your climb and vault detection:
+   `UiHost.traversal?(): { kind: 'vault' | 'climb' | 'fence' | 'ladder' | 'drop' | 'gap'; x: number; y: number; z: number } | null`.
+   That's what pressing jump would do right now, plus the world point of the edge or handhold. The touch primary button relabels itself (Jump → Vault / Climb / Over / Up / Drop) and still sends `jump`. Pad and keyboard get one small prompt chip anchored at that point. Poll cost: a cached result from your existing ledge raycast is enough.
+
 ---
 
 # ENGINE_REQUESTS: from the narrative team

@@ -22,7 +22,8 @@ const CALLS = Object.values(import.meta.glob<{ lines: CallLine[]; voiceByPasseng
 const CALL_POOL = CALLS?.lines ?? [];
 const VOICES = CALLS?.voiceByPassenger ?? {};
 import { esc, money, blocks, distance } from '../util';
-import { promptStrip } from '../Prompts';
+import { promptStrip, glyph } from '../Prompts';
+import { TRAVERSAL_VERB } from '../../shared/uiHost';
 
 const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -69,6 +70,7 @@ export class GameHud {
       <div class="u-stamina fade off"><i></i></div>
       <div class="u-turn fade off"></div>
       <div class="u-notes"></div>
+      <div class="u-trav"></div>
       <div class="t74-sub u-sub" style="opacity:0"></div>
       <div class="t74-prompts u-prompts"></div>`;
     this.minimap = new MiniMap(model, host.streets);
@@ -112,9 +114,24 @@ export class GameHud {
 
   setVisible(v: boolean) { this.visible = v; this.el.style.visibility = v ? '' : 'hidden'; }
 
+  /** One small prompt at the edge you'd climb or vault (pad/keyboard; touch shows it on the jump button). */
+  private trav(dt: number) {
+    const el = this.el.querySelector('.u-trav') as HTMLElement, h = this.host;
+    const tr = h.input.activeDevice === 'touch' ? null : h.traversal?.() ?? null;
+    if (!tr) { el.classList.remove('on'); return; }
+    const p = h.project?.(tr.x, tr.y, tr.z) ?? null;
+    const W = innerWidth, H = innerHeight;
+    const x = p ? Math.max(70, Math.min(W - 70, p.x)) : W / 2, y = p ? Math.max(60, Math.min(H - 90, p.y - 34)) : H * 0.62;
+    const verb = TRAVERSAL_VERB[tr.kind];
+    if (el.dataset.k !== tr.kind + h.input.promptStyle) { el.dataset.k = tr.kind + h.input.promptStyle; el.innerHTML = `${glyph('jump', h.input.promptStyle)}<b>${verb}</b>`; }
+    el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`; el.classList.add('on');
+    void dt;
+  }
+
   update(dt: number) {
     if (!this.visible) return;
     const t0 = performance.now();
+    this.trav(dt);
     this.t += dt;
     for (const [k, v] of this.shown) this.shown.set(k, v - dt);
     const h = this.host, p = h.player(), heat = h.heat(), obj = h.objective();

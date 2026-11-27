@@ -12,7 +12,7 @@
  * Movement, look, jump and the pedals go through Input (pad and keyboard untouched); the rest goes to
  * UiHost.touch. Layout edits (move, resize per element per state) live in settings.touchLayout.
  */
-import type { UiHost, TouchMode } from '../../shared/uiHost';
+import { TRAVERSAL_VERB, type UiHost, type TouchMode } from '../../shared/uiHost';
 import type { Input } from '../../input/Input';
 import { settings } from '../../settings/Settings';
 import { fullscreenRoute, enterFullscreen, showInstallCard, type FullscreenRoute } from './installCard';
@@ -273,6 +273,9 @@ export class TouchLayout {
       const label = c?.label ?? (this.mode === 'drive' ? 'Exit' : t ? '' : 'Use');
       if (label !== this.lastLabel) { this.lastLabel = label; (this.els.get('ctx')!.firstElementChild as HTMLElement).textContent = label; }
       const cov = t?.coverLabel?.(); if (cov) (this.els.get('cover')!.firstElementChild as HTMLElement).textContent = cov;
+      // the one jump button is also climb and vault (MOVEMENT.md): its label follows the engine's traversal check
+      const tr = this.host.traversal?.() ?? null, jl = tr ? TRAVERSAL_VERB[tr.kind] : 'Jump';
+      const jb = this.els.get('jump')!; if (jb.firstElementChild!.textContent !== jl) { jb.firstElementChild!.textContent = jl; jb.classList.toggle('trav', !!tr); }
       this.refresh();
       if (!t) this.els.get('ctx')!.classList.remove('off');
     }
