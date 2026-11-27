@@ -18,7 +18,7 @@
       "props": [],
       "tris": 16158,
       "draws": 2,
-      "buildMs": 128.6
+      "buildMs": 130.5
     },
     {
       "seed": 1,
@@ -35,9 +35,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 20094,
       "draws": 2,
-      "buildMs": 73.6
+      "buildMs": 61.9
     },
     {
       "seed": 1,
@@ -54,7 +54,7 @@
       "props": [],
       "tris": 24268,
       "draws": 2,
-      "buildMs": 166.1
+      "buildMs": 157.7
     }
   ],
   "updateMs": [
@@ -62,9 +62,29 @@
     0.1,
     0
   ],
+  "toneProbes": [
+    {
+      "hero": "char.delphine_moore",
+      "seed": 1,
+      "rb": null,
+      "tone": "#5a3825",
+      "cheek": [
+        0.5625,
+        0.1805
+      ],
+      "neck": [
+        0.5406,
+        0.2782
+      ],
+      "hand": [
+        0.2748,
+        1.055
+      ]
+    }
+  ],
   "renderMsSoftware": [
-    2.6000000005587935,
-    1.2999999998137355,
-    0.900000000372529
+    2.2999999998137355,
+    4.599999999627471,
+    4.5
   ]
 }

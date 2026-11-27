@@ -198,10 +198,10 @@ function toneProbes(chars: Character[], camera: THREE.PerspectiveCamera) {
     const off = (p: THREE.Vector3, x: number, y: number, z: number) => p.clone().add(v.set(x, y, z).applyQuaternion(q));
     const eye = c.jointWorld('eye_l');
     const head = c.jointWorld('Head'), neck = c.jointWorld('neck_01');
-    const mid = head.clone().lerp(neck, 0.62);
-    const hand = c.jointWorld('hand_r');
+    const mid = head.clone().lerp(neck, 0.55);
+    const hand = c.jointWorld('hand_r').lerp(c.jointWorld('hand_tip_r'), 0.4);
     return { hero: c.desc.hero ?? null, seed: c.desc.seed, rb: (c.desc.overrides?.rbHead as any)?.id ?? null, tone: c.appearance.skin.tone,
-      cheek: scr(off(eye, 0.006, -0.03, 0.01)), neck: scr(off(mid, 0.028, 0, 0.035)), hand: scr(off(hand, 0, -0.045, 0.012)) };
+      cheek: scr(off(eye, 0.006, -0.03, 0.01)), neck: scr(off(mid, 0.03, 0, 0.035)), hand: scr(hand) };
   });
 }
 

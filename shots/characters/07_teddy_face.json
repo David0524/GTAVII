@@ -18,7 +18,7 @@
       "props": [],
       "tris": 16158,
       "draws": 2,
-      "buildMs": 147.6
+      "buildMs": 129
     },
     {
       "seed": 1,
@@ -35,9 +35,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 20094,
       "draws": 2,
-      "buildMs": 59.1
+      "buildMs": 61.8
     },
     {
       "seed": 1,
@@ -54,17 +54,37 @@
       "props": [],
       "tris": 24268,
       "draws": 2,
-      "buildMs": 145.8
+      "buildMs": 143.2
     }
   ],
   "updateMs": [
     0,
-    0,
-    0.1
+    0.1,
+    0
+  ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.557,
+        0.2641
+      ],
+      "neck": [
+        0.54,
+        0.3421
+      ],
+      "hand": [
+        0.2322,
+        1.1191
+      ]
+    }
   ],
   "renderMsSoftware": [
-    2.2000000001862645,
-    1.2000000001862645,
+    2,
+    1.099999999627471,
     0.7999999998137355
   ]
 }

@@ -64,7 +64,7 @@ export class HeadLibrary {
       const hl = h.skinRGB.map(toLin);
       const toneRatio = Math.max(...[0, 1, 2].map((i) => Math.abs(Math.log((tone[i] + 0.01) / (hl[i] + 0.01)))));
       // tight gates: the tint is clamped to ±25%, so anything further apart would leave a tone break
-      if (ancGap > 0.6 || toneRatio > Math.log(1.3) || ageGap > 15) continue;
+      if (ancGap > 0.6 || toneRatio > Math.log(1.45) || ageGap > 15) continue;
       const hairGap = hairCat(app.hair.style) === t.hair ? 0 : 0.3;
       const score = ancGap * 2 + toneRatio * 2 + ageGap / 10 + hairGap;
       if (score < bestScore) { bestScore = score; best = h.id; }

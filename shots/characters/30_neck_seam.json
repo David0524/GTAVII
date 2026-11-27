@@ -18,7 +18,7 @@
     {
       "hero": "char.delphine_moore",
       "head": "lead_delphine",
-      "tris": 17081,
+      "tris": 17644,
       "draws": 2
     },
     {
@@ -56,7 +56,7 @@
       "props": [],
       "tris": 16158,
       "draws": 2,
-      "buildMs": 138.9
+      "buildMs": 122.7
     },
     {
       "seed": 1,
@@ -73,7 +73,7 @@
       "props": [],
       "tris": 23909,
       "draws": 2,
-      "buildMs": 91.5
+      "buildMs": 97.9
     },
     {
       "seed": 1,
@@ -90,9 +90,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17081,
+      "tris": 17644,
       "draws": 2,
-      "buildMs": 80.6
+      "buildMs": 71.9
     },
     {
       "seed": 1,
@@ -111,7 +111,7 @@
       ],
       "tris": 20094,
       "draws": 2,
-      "buildMs": 46.8
+      "buildMs": 60.9
     },
     {
       "seed": 1,
@@ -128,7 +128,7 @@
       "props": [],
       "tris": 24268,
       "draws": 2,
-      "buildMs": 121.7
+      "buildMs": 96.3
     },
     {
       "seed": 1,
@@ -145,20 +145,40 @@
       "props": [],
       "tris": 26140,
       "draws": 2,
-      "buildMs": 68.9
+      "buildMs": 77.6
     }
   ],
   "updateMs": [
     0,
     0,
+    0.2,
     0.1,
-    0,
     0,
     0
   ],
+  "toneProbes": [
+    {
+      "hero": "char.teddy_arce",
+      "seed": 1,
+      "rb": "lead_teddy",
+      "tone": "#b98a67",
+      "cheek": [
+        0.6384,
+        0.5103
+      ],
+      "neck": [
+        0.5605,
+        0.648
+      ],
+      "hand": [
+        1.1089,
+        2.3834
+      ]
+    }
+  ],
   "renderMsSoftware": [
-    4.400000000372529,
-    1.7999999998137355,
-    1.2999999998137355
+    4.2999999998137355,
+    1.400000000372529,
+    1.199999999254942
   ]
 }

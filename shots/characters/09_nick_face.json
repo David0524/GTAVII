@@ -18,7 +18,7 @@
       "props": [],
       "tris": 16158,
       "draws": 2,
-      "buildMs": 147.7
+      "buildMs": 123.3
     },
     {
       "seed": 1,
@@ -35,9 +35,9 @@
       "props": [
         "shoulderBag"
       ],
-      "tris": 17101,
+      "tris": 20094,
       "draws": 2,
-      "buildMs": 75.1
+      "buildMs": 57.9
     },
     {
       "seed": 1,
@@ -54,17 +54,37 @@
       "props": [],
       "tris": 24268,
       "draws": 2,
-      "buildMs": 141.3
+      "buildMs": 158.2
     }
   ],
   "updateMs": [
-    0.2,
+    0.1,
     0,
     0
   ],
+  "toneProbes": [
+    {
+      "hero": "char.nick_varelas",
+      "seed": 1,
+      "rb": "lead_nick",
+      "tone": "#c8a17e",
+      "cheek": [
+        0.5611,
+        0.3435
+      ],
+      "neck": [
+        0.5408,
+        0.4151
+      ],
+      "hand": [
+        0.2057,
+        1.1472
+      ]
+    }
+  ],
   "renderMsSoftware": [
-    2.6000000005587935,
-    1.599999999627471,
-    1
+    2.2000000001862645,
+    0.8999999994412065,
+    0.8000000007450581
   ]
 }
