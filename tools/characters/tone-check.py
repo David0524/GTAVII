@@ -7,7 +7,9 @@ median patch at each probe and compares them in CIELAB:
   dE00      CIEDE2000 between the patches (includes lighting: cheek and hand face different ways)
   dC        chroma/hue distance (a*, b* only): a tone or undertone mismatch, mostly lighting-free
   dL        lightness difference
-Fails (exit 1) when face-vs-neck dC > 8 or face-vs-hand dC > 10. Lightness isn't gated: under a
+Fails (exit 1) when face-vs-hand dC > 8 (the tone test: same light direction class, no beard or
+jaw shadow) or face-vs-neck dC > 20 (gross seam breaks only: the neck probe sits in the jaw's
+shadow and in stubble on bearded heads, so it reads 15-20 even on matching heads). Lightness isn't gated: under a
 key light from above the neck sits in the jaw's shadow (our own heads measure dL -9 to -15 too). It also writes
 <shot>_tone.jpg with the probes drawn, so you can check that each probe landed on skin.
 """
@@ -89,7 +91,7 @@ for base in sys.argv[1:]:
         for a, b in (('cheek', 'neck'), ('cheek', 'hand')):
             la, lb = lab[a], lab[b]
             res[b] = (de00(la, lb), math.hypot(la[1] - lb[1], la[2] - lb[2]), lb[0] - la[0])
-        bad = res['neck'][1] > 8 or res['hand'][1] > 10
+        bad = res['neck'][1] > 20 or res['hand'][1] > 8
         fail |= bad
         who = pr.get('hero') or f"seed {pr.get('seed')}"
         print(f"  {who:<22} head={pr.get('rb') or 'ours':<16} tone={pr.get('tone')}  face-neck dE00 {res['neck'][0]:5.1f} dC {res['neck'][1]:4.1f} dL {res['neck'][2]:+5.1f} | face-hand dE00 {res['hand'][0]:5.1f} dC {res['hand'][1]:4.1f} dL {res['hand'][2]:+5.1f}  {'FAIL' if bad else 'ok'}")
