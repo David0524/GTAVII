@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "data": "npm run data:fetch && npm run data:build && npm run data:audit",
     "data:audit": "python3 tools/pipeline/audit_report.py",
+    "shots:vehicles": "tsx tools/shots/vehicles.ts",
     "data:build": "tsx tools/pipeline/build.ts",
     "data:fetch": "tsx tools/pipeline/fetch.ts",
     "dev": "vite",

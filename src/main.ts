@@ -50,6 +50,7 @@ type Mode = 'onfoot' | 'photo';
 type Screen = 'title' | 'play' | 'paused';
 
 async function main() {
+  if (new URLSearchParams(location.search).has('vehicles')) return void (await import('./vehicles/testlot/TestLot')).runTestLot(); // vehicles workstream test scene
   loadReport.mark('main');
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
