@@ -1,0 +1,400 @@
+[
+  {
+    "id": "int.gc.sign_trackside_news",
+    "file": "int_gc_sign_trackside_news.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: TRACKSIDE NEWS; physical 2.4×0.5 m",
+    "aspect": "4.80:1",
+    "size": "2400×500",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: red enamel letters on a cream newsstand fascia. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"TRACKSIDE NEWS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 4.80:1.",
+    "text": "TRACKSIDE NEWS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_gate_shine",
+    "file": "int_gc_sign_gate_shine.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: GATE 30 SHINE; physical 1.6×0.4 m",
+    "aspect": "4.00:1",
+    "size": "1600×400",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: hand-painted gold letters on a dark wood board. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"GATE 30 SHINE\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 4.00:1.",
+    "text": "GATE 30 SHINE",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_eastbound_cigar",
+    "file": "int_gc_sign_eastbound_cigar.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: EASTBOUND CIGAR & PIPE; physical 2.0×0.45 m",
+    "aspect": "4.44:1",
+    "size": "2000×450",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: gilt serif letters on a black glass panel. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"EASTBOUND CIGAR & PIPE\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 4.44:1.",
+    "text": "EASTBOUND CIGAR & PIPE",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_last_train_liquor",
+    "file": "int_gc_sign_last_train_liquor.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: LAST TRAIN LIQUORS; physical 2.2×0.5 m",
+    "aspect": "4.40:1",
+    "size": "2200×500",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: red neon-style letters on a dark fascia. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"LAST TRAIN LIQUORS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 4.40:1.",
+    "text": "LAST TRAIN LIQUORS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_atlas_wire",
+    "file": "int_gc_sign_atlas_wire.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: ATLAS WIRE · TELEGRAMS; physical 2.6×0.5 m",
+    "aspect": "5.20:1",
+    "size": "2600×500",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: white letters on a yellow-and-black enamel panel. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"ATLAS WIRE · TELEGRAMS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 5.20:1.",
+    "text": "ATLAS WIRE · TELEGRAMS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_commuter_counter",
+    "file": "int_gc_sign_commuter_counter.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: THE COMMUTER'S COUNTER; physical 3.0×0.55 m",
+    "aspect": "5.45:1",
+    "size": "3000×550",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: chrome-edged diner fascia with red letters. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"THE COMMUTER'S COUNTER\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 5.45:1.",
+    "text": "THE COMMUTER'S COUNTER",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_platform_flowers",
+    "file": "int_gc_sign_platform_flowers.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: PLATFORM FLOWERS; physical 1.4×0.4 m",
+    "aspect": "3.50:1",
+    "size": "1400×400",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: green hand-painted letters on a white kiosk board. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"PLATFORM FLOWERS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3.50:1.",
+    "text": "PLATFORM FLOWERS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.sign_oyster_room",
+    "file": "int_gc_sign_oyster_room.png",
+    "owner": "interiors",
+    "use": "Grand Central tenant sign: THE CONCOURSE OYSTER ROOM; physical 3.2×0.6 m",
+    "aspect": "5.33:1",
+    "size": "3200×600",
+    "sizeFinal": true,
+    "prompt": "Create a shop sign: brass letters on a dark green board with a small tiled-arch motif. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"THE CONCOURSE OYSTER ROOM\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 5.33:1.",
+    "text": "THE CONCOURSE OYSTER ROOM",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.oyster_closed",
+    "file": "int_gc_oyster_closed.png",
+    "owner": "interiors",
+    "use": "The Concourse Oyster Room CLOSED card (from 1 Aug); physical 0.9×0.6 m",
+    "aspect": "1.50:1",
+    "size": "900×600",
+    "sizeFinal": true,
+    "prompt": "Create a typed-and-lettered card taped inside a glass door, slightly curled. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.50:1.",
+    "text": "CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.slat_blank",
+    "file": "int_gc_slat_blank.png",
+    "owner": "interiors",
+    "use": "Departure-board slat (blank; renderer sets destinations from content/grand_central.json); physical 1.2×0.12 m",
+    "aspect": "10.00:1",
+    "size": "2560×256",
+    "sizeFinal": true,
+    "prompt": "Create one blank black enamel destination slat with a thin white border and worn edges, as used on a 1970s train departure board. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 10.00:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "blank slat",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.slat_time_blank",
+    "file": "int_gc_slat_time_blank.png",
+    "owner": "interiors",
+    "use": "Departure-board time slat (blank); physical 0.4×0.12 m",
+    "aspect": "3.33:1",
+    "size": "853×256",
+    "sizeFinal": true,
+    "prompt": "Create one blank black enamel time slat with a thin white border. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 3.33:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "blank slat",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.slat_track_blank",
+    "file": "int_gc_slat_track_blank.png",
+    "owner": "interiors",
+    "use": "Departure-board track slat (blank); physical 0.25×0.12 m",
+    "aspect": "2.08:1",
+    "size": "533×256",
+    "sizeFinal": true,
+    "prompt": "Create one blank black enamel track-number slat with a thin white border. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 2.08:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "blank slat",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.window_next_window",
+    "file": "int_gc_window_next_window.png",
+    "owner": "interiors",
+    "use": "Ticket-window card: NEXT WINDOW PLEASE; physical 0.35×0.2 m",
+    "aspect": "1.75:1",
+    "size": "448×256",
+    "sizeFinal": true,
+    "prompt": "Create a small printed card in a brass holder at a ticket window, black letters on cream. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"NEXT WINDOW PLEASE\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.75:1.",
+    "text": "NEXT WINDOW PLEASE",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.window_closed",
+    "file": "int_gc_window_closed.png",
+    "owner": "interiors",
+    "use": "Ticket-window card: CLOSED; physical 0.35×0.2 m",
+    "aspect": "1.75:1",
+    "size": "448×256",
+    "sizeFinal": true,
+    "prompt": "Create a small printed card in a brass holder at a ticket window, black letters on cream. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"CLOSED\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.75:1.",
+    "text": "CLOSED",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.window_commutation",
+    "file": "int_gc_window_commutation.png",
+    "owner": "interiors",
+    "use": "Ticket-window card: COMMUTATION TICKETS; physical 0.35×0.2 m",
+    "aspect": "1.75:1",
+    "size": "448×256",
+    "sizeFinal": true,
+    "prompt": "Create a small printed card in a brass holder at a ticket window, black letters on cream. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"COMMUTATION TICKETS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.75:1.",
+    "text": "COMMUTATION TICKETS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.window_information",
+    "file": "int_gc_window_information.png",
+    "owner": "interiors",
+    "use": "Ticket-window card: INFORMATION; physical 0.35×0.2 m",
+    "aspect": "1.75:1",
+    "size": "448×256",
+    "sizeFinal": true,
+    "prompt": "Create a small printed card in a brass holder at a ticket window, black letters on cream. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"INFORMATION\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.75:1.",
+    "text": "INFORMATION",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.window_fare_notice_1",
+    "file": "int_gc_window_fare_notice_1.png",
+    "owner": "interiors",
+    "use": "Ticket-window card: NOTICE: COMMUTATION FARES REVISED JULY 1, 1974; physical 0.35×0.2 m",
+    "aspect": "1.75:1",
+    "size": "448×256",
+    "sizeFinal": true,
+    "prompt": "Create a small printed card in a brass holder at a ticket window, black letters on cream. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"NOTICE: COMMUTATION FARES REVISED JULY 1, 1974\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.75:1.",
+    "text": "NOTICE: COMMUTATION FARES REVISED JULY 1, 1974",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.window_fare_notice_2",
+    "file": "int_gc_window_fare_notice_2.png",
+    "owner": "interiors",
+    "use": "Ticket-window card: AFTER 9 P.M. TICKETS AT WINDOWS 1 TO 6 ONLY; physical 0.35×0.2 m",
+    "aspect": "1.75:1",
+    "size": "448×256",
+    "sizeFinal": true,
+    "prompt": "Create a small printed card in a brass holder at a ticket window, black letters on cream. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"AFTER 9 P.M. TICKETS AT WINDOWS 1 TO 6 ONLY\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.75:1.",
+    "text": "AFTER 9 P.M. TICKETS AT WINDOWS 1 TO 6 ONLY",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.gate_plate_blank",
+    "file": "int_gc_gate_plate_blank.png",
+    "owner": "interiors",
+    "use": "Gate sign plate (blank; renderer sets TRACK 15–42 in gold); physical 0.6×0.4 m",
+    "aspect": "1.50:1",
+    "size": "600×400",
+    "sizeFinal": true,
+    "prompt": "Create a blank black enamel gate sign plate with a thin gold border, period railroad style. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 1.50:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text anywhere",
+      "blank plate",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.clock_dial",
+    "file": "int_gc_clock_dial.png",
+    "owner": "interiors",
+    "use": "Information-booth clock dial (x4; opal glass); physical 0.6×0.6 m",
+    "aspect": "1.00:1",
+    "size": "600×600",
+    "sizeFinal": true,
+    "prompt": "Create a round opal-glass clock dial, softly backlit, with black Arabic numerals 1 to 12 and minute ticks, no hands (the game draws them), no maker's name. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"1 2 3 4 5 6 7 8 9 10 11 12\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.00:1.",
+    "text": "1 2 3 4 5 6 7 8 9 10 11 12",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "numerals 1–12 each exactly once in clock positions",
+      "no maker's name or other text",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.booth_fascia",
+    "file": "int_gc_booth_fascia.png",
+    "owner": "interiors",
+    "use": "Information-booth fascia; physical 2.0×0.3 m",
+    "aspect": "6.67:1",
+    "size": "2000×300",
+    "sizeFinal": true,
+    "prompt": "Create brass letters on a dark green band, curved booth fascia shown flat. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"INFORMATION · TIMETABLES\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 6.67:1.",
+    "text": "INFORMATION · TIMETABLES",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.locker_plate",
+    "file": "int_gc_locker_plate.png",
+    "owner": "interiors",
+    "use": "Locker-bank instruction plate; physical 0.3×0.2 m",
+    "aspect": "1.50:1",
+    "size": "384×256",
+    "sizeFinal": true,
+    "prompt": "Create a small stamped aluminium instruction plate. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"INSERT 25¢ · TURN KEY · 24 HOURS\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 1.50:1.",
+    "text": "INSERT 25¢ · TURN KEY · 24 HOURS",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "int.gc.phone_door",
+    "file": "int_gc_phone_door.png",
+    "owner": "interiors",
+    "use": "Phone-booth door sign; physical 0.5×0.15 m",
+    "aspect": "3.33:1",
+    "size": "853×256",
+    "sizeFinal": true,
+    "prompt": "Create a small lit glass sign over a wooden phone-booth door, white letters on blue. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit with no strong shadows, no perspective. No people, no logos or brand names other than the exact text given, no modern materials. Slightly grimy 1970s railroad-terminal finish. EXACT TEXT: \"TELEPHONE\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3.33:1.",
+    "text": "TELEPHONE",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no telephone company name",
+      "no real brand or logo"
+    ],
+    "priority": 2
+  }
+]

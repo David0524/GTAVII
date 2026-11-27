@@ -1,0 +1,49 @@
+{
+  "_note": "Grand Central copy (narrative) for interiors' renderer: departure-board slats, gates. Real geography (station names are place names). 1974 Penn Central commuter service, simplified.",
+  "destinations": {
+    "New Haven line": [
+      "Mount Vernon",
+      "Pelham",
+      "New Rochelle",
+      "Larchmont",
+      "Mamaroneck",
+      "Harrison",
+      "Rye",
+      "Port Chester",
+      "Greenwich",
+      "Stamford",
+      "Darien",
+      "Norwalk",
+      "Westport",
+      "Bridgeport",
+      "New Haven"
+    ],
+    "Harlem line": [
+      "Bronxville",
+      "Scarsdale",
+      "White Plains",
+      "North White Plains",
+      "Pleasantville",
+      "Chappaqua",
+      "Mount Kisco",
+      "Katonah",
+      "Brewster"
+    ],
+    "Hudson line": [
+      "Yonkers",
+      "Tarrytown",
+      "Ossining",
+      "Croton-Harmon",
+      "Peekskill",
+      "Poughkeepsie"
+    ]
+  },
+  "boardRows": 24,
+  "timeFormat": "5:52 (no a.m./p.m. on slats)",
+  "tracks": "15–42 upper level (gold on black)",
+  "fareNotices": [
+    "NOTICE: COMMUTATION FARES REVISED JULY 1, 1974",
+    "AFTER 9 P.M. TICKETS AT WINDOWS 1 TO 6 ONLY"
+  ],
+  "verify": "Station list is real geography; exact 1974 stopping patterns and the fare-notice date are flavour, not verified."
+}
