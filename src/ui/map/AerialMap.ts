@@ -8,7 +8,8 @@
 import { FoldingMap } from './FoldingMap';
 import { LabelPlacer, type Box } from './labels';
 import { CATEGORIES, type Category } from './places';
-import { PLAYABLE } from '../../shared/bounds';
+import { PLAYABLE, inPlayable } from '../../shared/bounds';
+import { playablePath } from './playablePath';
 import { iconSprite, spritePad, LANDMARK_ICON, type IconName } from '../icons';
 import { F_UI, F_COND } from '../fonts';
 
@@ -160,13 +161,13 @@ export class AerialMap extends FoldingMap {
     }
     // out of bounds: shade and hatch the baked buffer ring around the sheet (beyond it the region is already muted)
     const bx0 = bk.x0, bz0 = bk.z0, bx1 = bk.x1, bz1 = bk.z1;
-    g.save(); g.beginPath(); g.rect(X(bx0), Y(bz0), (bx1 - bx0) * this.zoom, (bz1 - bz0) * this.zoom); g.rect(X(PLAYABLE.minX), Y(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * this.zoom, (PLAYABLE.maxZ - PLAYABLE.minZ) * this.zoom); g.clip('evenodd');
+    g.save(); g.beginPath(); g.rect(X(bx0), Y(bz0), (bx1 - bx0) * this.zoom, (bz1 - bz0) * this.zoom); playablePath(g, X, Y); g.clip('evenodd');
     g.fillStyle = 'rgba(8,8,7,.72)'; g.fillRect(0, 0, W, H);
     g.strokeStyle = 'rgba(242,237,227,.05)'; g.lineWidth = 1; for (let d = -H; d < W; d += 7) { g.beginPath(); g.moveTo(d, H); g.lineTo(d + H, 0); g.stroke(); }
     g.restore();
     // pulled back: the sheet gets a hairline frame so "where you can go" reads at a glance
     const regional = this.zoom < 0.16;
-    if (regional) { g.strokeStyle = 'rgba(232,163,23,.7)'; g.lineWidth = 1.5; g.strokeRect(X(PLAYABLE.minX), Y(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * this.zoom, (PLAYABLE.maxZ - PLAYABLE.minZ) * this.zoom); }
+    if (regional) { g.strokeStyle = 'rgba(232,163,23,.7)'; g.lineWidth = 1.5; g.lineJoin = 'miter'; g.beginPath(); playablePath(g, X, Y); g.stroke(); }
 
     // ---- 3. labels and symbols share one placer (no collisions); chrome rects reserved first
     const Lp = new LabelPlacer(W, H, 2);
@@ -248,7 +249,7 @@ export class AerialMap extends FoldingMap {
     const g = this.g;
     for (const l of this.region!.labels) {
       const [sx, sy] = this.toScreen(l.x, l.z); if (sx < -80 || sy < -30 || sx > W + 80 || sy > H + 30) continue;
-      if (l.x > PLAYABLE.minX && l.x < PLAYABLE.maxX && l.z > PLAYABLE.minZ && l.z < PLAYABLE.maxZ) continue;
+      if (inPlayable(l.x, l.z)) continue;
       if (l.kind === 'place' && this.zoom < 0.1) continue;
       g.save();
       (g as unknown as { letterSpacing: string }).letterSpacing = l.kind === 'boro' ? '0.32em' : l.kind === 'water' ? '0.12em' : '0.04em';
@@ -279,7 +280,7 @@ export class AerialMap extends FoldingMap {
       // the longest on-screen run of this street
       let best: number[] | null = null, bestL = 0;
       for (const p of byName.get(n)!) {
-        const pts: number[] = []; for (let i = 0; i < p.length; i += 2) { const x = p[i], z = p[i + 1]; if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue; pts.push(X(x), Y(z)); }
+        const pts: number[] = []; for (let i = 0; i < p.length; i += 2) { const x = p[i], z = p[i + 1]; if (!inPlayable(x, z)) continue; pts.push(X(x), Y(z)); }
         let len = 0; for (let i = 0; i + 3 < pts.length; i += 2) len += Math.hypot(pts[i + 2] - pts[i], pts[i + 3] - pts[i + 1]);
         if (len > bestL) { bestL = len; best = pts; }
       }

@@ -12,6 +12,7 @@
  * the layers. Budget: HUD + minimap <= 0.5 ms CPU per frame on mobile Low (UI_PROGRESS has the numbers).
  */
 import { PLAYABLE } from '../../shared/bounds';
+import { playablePath } from './playablePath';
 import type { StreetRec } from './grid';
 import type { MapModel } from './MapModel';
 import type { HeatView, ObjectiveView } from '../host/types';
@@ -109,7 +110,7 @@ export class MiniMap {
     g.beginPath(); g.rect(X(PLAYABLE.minX - MARGIN), Z(PLAYABLE.minZ - MARGIN), (PLAYABLE.maxX - PLAYABLE.minX + 2 * MARGIN) * s, (PLAYABLE.maxZ - PLAYABLE.minZ + 2 * MARGIN) * s);
     g.fillStyle = PAPER; g.fill(); g.clip();
     // the printed area (playable) a touch darker than the margin, like a street-guide plate
-    g.fillStyle = PAPER_SHADE; g.fillRect(X(PLAYABLE.minX), Z(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * s, (PLAYABLE.maxZ - PLAYABLE.minZ) * s);
+    g.fillStyle = PAPER_SHADE; g.beginPath(); playablePath(g, X, Z); g.fill();
     g.lineCap = 'round'; g.lineJoin = 'round';
     const x0 = ox - 40, z0 = oz - 40, x1 = ox + TILE_M + 40, z1 = oz + TILE_M + 40;
     for (const pass of [0, 1]) for (let k = 0; k < this.streets.length; k++) {
@@ -139,7 +140,7 @@ export class MiniMap {
     if (this.aerial) {
       const done = drawAerial(g, this.aerial, ox, oz, ox + TILE_M, oz + TILE_M, s);
       g.fillStyle = 'rgba(8,8,7,.55)'; g.save(); g.beginPath(); g.rect(0, 0, c.width, c.height);
-      g.rect(X(PLAYABLE.minX), Z(PLAYABLE.minZ), (PLAYABLE.maxX - PLAYABLE.minX) * s, (PLAYABLE.maxZ - PLAYABLE.minZ) * s); g.clip('evenodd'); g.fillRect(0, 0, c.width, c.height); g.restore();
+      playablePath(g, X, Z); g.clip('evenodd'); g.fillRect(0, 0, c.width, c.height); g.restore();
       if (!done) { this.tilesPending = true; this.cost.tiles = performance.now() - t0; return c; } // not cached: retried next pass
     }
     this.tiles.set(key, c); this.tileOrder.push(key);

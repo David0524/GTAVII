@@ -11,7 +11,8 @@
  */
 import { F_BODY, F_COND, F_UI } from '../fonts';
 import { landmarks } from './landmarkData';
-import { PLAYABLE } from '../../shared/bounds';
+import { PLAYABLE, inPlayable } from '../../shared/bounds';
+import { playablePath } from './playablePath';
 import type { StreetRec } from './grid';
 import type { MapModel } from './MapModel';
 import type { Place } from './places';
@@ -123,7 +124,7 @@ export class FoldingMap {
     if (mi) { this.onSelect?.({ mission: mi }); return; }
     const p = this.pick(sx, sy);
     if (p) { this.model.discovery.markSeen([p.id]); this.model.version++; this.onSelect?.({ place: p }); }
-    else { const w = this.toWorld(sx, sy); if (w.x > PLAYABLE.minX && w.x < PLAYABLE.maxX && w.z > PLAYABLE.minZ && w.z < PLAYABLE.maxZ) this.onSelect?.({ at: w }); }
+    else { const w = this.toWorld(sx, sy); if (inPlayable(w.x, w.z)) this.onSelect?.({ at: w }); }
   }
 
   /** Gamepad / keyboard control while the map is open. Left stick or right stick pan, triggers zoom. */
@@ -181,7 +182,7 @@ export class FoldingMap {
       gr.addColorStop(0, `rgba(0,0,0,${a[0]})`); gr.addColorStop(1, `rgba(0,0,0,${a[1]})`);
       g.fillStyle = gr; g.fillRect(fx0, fz0, fx1 - fx0, fz1 - fz0);
     }
-    g.fillStyle = PAPER_SHADE; g.fillRect(px0, pz0, px1 - px0, pz1 - pz0); // blocks: pale; streets print white over them
+    g.fillStyle = PAPER_SHADE; g.beginPath(); playablePath(g, tx, tz); g.fill(); // blocks: pale; streets print white over them
     // district names are printed UNDER the street network, as on a printed street guide: the white streets break the
     // letters where they cross, so a name never sits on top of an avenue. They stay on the sheet, on screen, and clear of
     // the pencilled route.
@@ -190,7 +191,7 @@ export class FoldingMap {
       g.save(); g.font = `700 ${dSize}px ${F_UI}`; g.fillStyle = 'rgba(17,17,17,.22)'; g.textAlign = 'center'; g.textBaseline = 'middle';
       const route = this.model.route?.pts ?? [];
       for (const [n, x, z] of DISTRICTS) {
-        if (x < PLAYABLE.minX || x > PLAYABLE.maxX || z < PLAYABLE.minZ || z > PLAYABLE.maxZ) continue;
+        if (!inPlayable(x, z)) continue;
         const text = n.split('').join('\u2009'), w = g.measureText(text).width, cx = tx(x), cy = tz(z);
         const b = [cx - w / 2, cy - dSize * 0.6, cx + w / 2, cy + dSize * 0.6];
         if (b[0] < px0 + 6 || b[2] > px1 - 6 || b[1] < pz0 + 6 || b[3] > pz1 - 6 || b[0] < 2 || b[1] < 2 || b[2] > W - 2 || b[3] > H - 2) continue;
@@ -222,12 +223,12 @@ export class FoldingMap {
       }
     }
     // beyond the playable edge: still printed, but greyed and hatched (the city goes on; this sheet's coverage doesn't)
-    g.save(); g.beginPath(); g.rect(x0, z0, x1 - x0, z1 - z0); g.rect(px0, pz0, px1 - px0, pz1 - pz0); g.clip('evenodd');
+    g.save(); g.beginPath(); g.rect(x0, z0, x1 - x0, z1 - z0); playablePath(g, tx, tz); g.clip('evenodd');
     g.fillStyle = 'rgba(110,110,110,.32)'; g.fillRect(x0, z0, x1 - x0, z1 - z0);
     g.strokeStyle = 'rgba(40,40,40,.16)'; g.lineWidth = 1;
     for (let d = -(z1 - z0); d < x1 - x0; d += 7) { g.beginPath(); g.moveTo(x0 + d, z0); g.lineTo(x0 + d + (z1 - z0), z1); g.stroke(); }
     g.restore();
-    g.save(); g.strokeStyle = 'rgba(17,17,17,.75)'; g.lineWidth = 1.4; g.setLineDash([9, 4, 2, 4]); g.strokeRect(px0, pz0, px1 - px0, pz1 - pz0); g.restore();
+    g.save(); g.strokeStyle = 'rgba(17,17,17,.75)'; g.lineWidth = 1.4; g.setLineDash([9, 4, 2, 4]); g.beginPath(); playablePath(g, tx, tz); g.stroke(); g.restore();
     if (Z < 0.7) {
       g.save(); g.font = `700 11px ${F_COND}`; g.fillStyle = 'rgba(17,17,17,.7)'; g.textAlign = 'center';
       const note = 'C O V E R A G E   O F   T H I S   S H E E T   E N D S   ·   A D J O I N I N G   S H E E T S   S O L D   S E P A R A T E L Y';
