@@ -161,8 +161,10 @@ function eyes(model: BodyModel, shape: BodyShape, app: Appearance, lod: number, 
   // Our own eyeballs (UV spheres) sized from MakeHuman's eye helpers; iris faces +Z at rest and
   // the eye joints rotate them (look-at). Sclera, iris, pupil and the wet highlight are shaded.
   const P = shape.pos, J = shape.joints;
-  const iris = lin(app.eyeColor);
-  const sclera = lin(app.age > 60 ? '#d8cdb8' : '#e4dccf');
+  // very dark irises read as a black disc against the pupil: keep the iris visibly brown
+  const iris = lin(app.eyeColor).map((c, i) => Math.max(c, lin('#4a2c18')[i] * 0.9)) as [number, number, number];
+  // sclera is never paper-white: a warm off-white, a little darker with age
+  const sclera = lin(app.age > 60 ? '#c4b8a4' : '#d2c8b8');
   const seg = lod === 0 ? 20 : 12, rings = lod === 0 ? 14 : 8;
   for (const [g, joint] of [['helper-l-eye', JI.eye_l], ['helper-r-eye', JI.eye_r]] as const) {
     const c = [J[joint * 3], J[joint * 3 + 1], J[joint * 3 + 2]];

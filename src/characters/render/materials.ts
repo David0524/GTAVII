@@ -157,7 +157,8 @@ export function surfaceNodes(tint?: (col: any) => any) {
       const r = ang.div(iris);
       const streak = mx_noise_float(vec3(atan(p.x.mul(1000), p.y.mul(1000)).mul(6), r.mul(4), 0));
       const irisCol = cA.mul(mix(0.55, 1.25, streak)).mul(mix(1.0, 0.6, smoothstep(0.75, 1.0, r)));
-      const sclera = cB.mul(mix(1.0, 0.85, smoothstep(1.4, 2.2, r)));
+      // the sclera darkens toward the corners and under the lids (no lid AO otherwise)
+      const sclera = cB.mul(mix(1.0, 0.62, smoothstep(1.25, 2.3, r)));
       c.assign(mix(mix(vec3(0.01), irisCol, smoothstep(pupil.mul(0.95), pupil.mul(1.05), ang)), sclera, smoothstep(iris.mul(0.95), iris.mul(1.05), ang)));
     });
     If(kind.equal(KIND.lens), () => { c.assign(mix(vec3(0.55, 0.6, 0.6), vec3(0.02, 0.02, 0.015), m0.x)); });

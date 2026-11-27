@@ -244,7 +244,7 @@ export function buildHair(ctx: HairCtx): GeoArrays | null {
       const tri = [0, 1, 2].map((c) => {
         const sIdx = idx[i + c];
         let v = map.get(sIdx);
-        if (v === undefined) { const k = model.splitSrc[sIdx]; v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, { cA: lc, cB: lc, m0: [0.3, 1, 2000, 0], m1: [KIND.hair, 3, 0, 0] }, [model.splitUV[sIdx * 2], model.splitUV[sIdx * 2 + 1]]); map.set(sIdx, v); }
+        if (v === undefined) { const k = model.splitSrc[sIdx]; v = mb.vertex([P[k * 3], P[k * 3 + 1], P[k * 3 + 2]], null, sj, sw, { cA: lc, cB: lc, m0: [0.55, 0.62, 2600, 0], m1: [KIND.hair, 2, 0, 0] }, [model.splitUV[sIdx * 2], model.splitUV[sIdx * 2 + 1]]); map.set(sIdx, v); }
         return v;
       });
       mb.tri(tri[0], tri[1], tri[2]);
