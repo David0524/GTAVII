@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T04:12:36.072Z",
+  "date": "2026-11-27T08:46:20.072Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -542,5 +542,15 @@
         "roof 2.81 m none"
       ]
     }
+  },
+  "vendors": {
+    "events": [
+      "cartHit stall0 cart_hot_dog by=veh6 21mph",
+      "spill stall0 x13",
+      "spill stall0 x1",
+      "tipped stall0"
+    ],
+    "goodsLive": 14,
+    "afterRight": 14
   }
 }

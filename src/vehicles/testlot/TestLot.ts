@@ -17,6 +17,8 @@ import { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS } from '../assist';
 import { ZONES } from '../gen/morphs';
 import { VehicleLights, type VehicleClass } from '../../shared/traffic';
 import { CarLightPool, updateCarLights, setGroundLightLevel } from '../lighting';
+import { VENDOR_SPECS, type VendorPropId } from '../props/vendorModels';
+import type { VendorView } from '../props/VendorProps';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type N = any;
@@ -318,6 +320,23 @@ export async function runTestLot() {
     traffic.setInstances(tcars, camera.position, carLights);
   };
 
+  // ------------------------------------------------------------------ vendors (mode=vendors): a row of every prop on the sidewalk
+  const vendors = mode === 'vendors' || params.has('vendors') ? factory.createVendorProps(world, scene) : null;
+  const vendorViews: VendorView[] = [];
+  if (vendors) {
+    const ids = Object.keys(VENDOR_SPECS) as VendorPropId[];
+    // both sidewalks of the street at x = 0 (kerbs at x = ±6, 0.15 m high), 0.8 m in from the kerb, 3.2 m apart;
+    // the customer side (local +x) faces the pedestrians, away from the road
+    ids.forEach((prop, i) => {
+      const west = i < 6, k = west ? i : i - 6;
+      const halfW = VENDOR_SPECS[prop].w / 2;
+      vendorViews.push({ id: `stall${i}`, prop, cartX: west ? -6.8 - halfW : 6.8 + halfW, cartZ: -14 - k * 3.2, cartYaw: west ? Math.PI : 0, open: true, umbrella: true, variant: i, state: 'open' });
+    });
+    vendors.sync(vendorViews);
+    vendors.on('cartHit', (e) => { log.unshift(`cartHit ${e.id} (${e.prop}) by ${e.by ?? e.byVehicle ?? '?'} at ${(e.speed * 2.237).toFixed(0)} mph`); log.length = Math.min(log.length, 5); });
+    vendors.on('tipped', (e) => { log.unshift(`${e.id} tipped over`); });
+  }
+
   // ------------------------------------------------------------------ subway (mode=subway): straight track south of the lot
   let train: SubwayTrain | null = null;
   const trainSim = { s: 60, v: 0, phase: 'dwell' as 'dwell' | 'run', t: 0, dir: 1 };
@@ -441,7 +460,9 @@ export async function runTestLot() {
     for (const b of bikes) b.update(DT);
     for (const v of parked) v.update(DT);
     runTrain(DT);
+    vendors?.sync(vendorViews);
     world.step();
+    vendors?.update(DT);
     skids.update(DT);
     physMs = physMs * 0.95 + (performance.now() - t0) * 0.05;
   };
@@ -509,6 +530,7 @@ export async function runTestLot() {
     setNight, get night() { return night; }, carLights,
     /** Dent the player at a local point (metres of push), for damage close-ups. */
     dentAt(x: number, y: number, z: number, amount = 0.1, radius = 0.6) { player.object.updateMatrixWorld(); return player.dent(player.object.localToWorld(new THREE.Vector3(x, y, z)), amount, radius); },
+    vendors, vendorViews,
     hill: { x: HILL_X, heightAt: (x: number, z: number) => roadHeight(x, z) },
     moveTraffic,
     stats() {

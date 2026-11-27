@@ -23,6 +23,7 @@ import { BIKES, BIKE_BY_ID } from './twowheel/bikes';
 export type { TwoWheeler, TwoWheelerSave, CrashEvent } from './twowheel/TwoWheeler';
 export { BIKES } from './twowheel/bikes';
 import { TrafficRenderer } from './traffic';
+import { VendorProps } from './props/VendorProps';
 import { resolve } from './registry';
 import type { TrafficInstance, VehicleClass } from '../shared/traffic';
 import { loadDecalFonts } from './gen/decals';
@@ -36,6 +37,8 @@ export type { TrafficInstance, VehicleClass } from '../shared/traffic';
 export { CLASS_MODELS } from './registry';
 export { MODELS } from './models';
 export { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS, type AssistSettings } from './assist';
+export { VendorProps, type VendorView, type CartHitEvent, type CartTippedEvent } from './props/VendorProps';
+export { VENDOR_SPECS, VENDOR_BRANDS, type VendorPropId } from './props/vendorModels';
 export { CarLightPool, updateCarLights, setGroundLightLevel, LIGHT_BUDGET, type LightCandidate, type Lightable } from './lighting';
 import type { LightCandidate } from './lighting';
 import { FadeLOD } from './fadeLod';
@@ -51,6 +54,8 @@ export interface VehicleFactory {
   /** Rebuild a saved car exactly (vehicle.serialize() -> save -> restore). */
   restore(world: RAPIER.World, scene: THREE.Object3D, save: VehicleSave): Vehicle;
   /** Visual-only instanced proxies for AI traffic far from the player (no physics body). */
+  /** Street-vendor carts and stands as physics props (sync with sim.vendorViews). */
+  createVendorProps(world: RAPIER.World, scene: THREE.Object3D): VendorProps;
   createTrafficRenderer(maxInstances: number): {
     /** lit: the CarLightPool after assign(), so cars holding a real light skip their ground pools. */
     setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3, lit?: { litHead: Set<string>; litRear: Set<string> }): void;
@@ -84,6 +89,7 @@ export function createVehicleFactory(opts: { quality: Quality }): VehicleFactory
       const v = variantOf(spec, save.variant);
       return new Vehicle(world, scene, getAsset(spec, v), v, { x: save.pose.x, y: save.pose.y, z: save.pose.z, yaw: 0 }, q, { save });
     },
+    createVendorProps(world, scene) { return new VendorProps(world, scene, q); },
     createTrafficRenderer(max) { return new TrafficRenderer(max, q); },
     spawnBike(world, scene, modelId, pose, variant = 0) {
       const spec = BIKE_BY_ID.get(modelId);

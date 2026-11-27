@@ -13,7 +13,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
-const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,systems,bikes,subway,traffic,metrics').split(','));
+const only = new Set(arg('only', 'turntable,lineup,drive,damage,visual,visual2,hero,vendors,systems,bikes,subway,traffic,metrics').split(','));
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const OUT = path.join(ROOT, 'shots', 'vehicles');
 fs.mkdirSync(OUT, { recursive: true });
@@ -381,6 +381,38 @@ async function main() {
       });
       console.log('anchors', JSON.stringify(report.movementAnchors));
       console.log('hero', cost);
+    }
+
+    // ------------------------------------------------------------------ street-vendor props: look, hit, tip, spill
+    if (only.has('vendors')) {
+      await open(page, 'mode=vendors&quality=high');
+      const vs: Buffer[] = [], vl: string[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.simulate(1); V.setModel('bancroft', 3, { x: -2.2, z: 6, yaw: 0 }); V.player.setLights({ head: false }); V.simulate(0.3); });
+      await page.evaluate(() => window.__VEH.setCamera(-3.2, 1.9, -11, -8.6, 0.9, -19, 46)); vs.push(await snap(page)); vl.push('carts: hot dog (umbrella, steam), pretzel/knish, ices, nuts, coffee');
+      await page.evaluate(() => window.__VEH.setCamera(3.4, 1.9, -11, 8.8, 0.9, -19, 46)); vs.push(await snap(page)); vl.push('stands: news kiosk, flowers, fruit, shoeshine, peddler case, monte box');
+      // drive the car into the hot-dog cart (stall0 at x -7.2, z -14): steer onto the sidewalk at ~20 mph
+      const res = await page.evaluate(() => {
+        const V = window.__VEH, ev: string[] = [];
+        V.vendors.on('cartHit', (e: any) => ev.push(`cartHit ${e.id} ${e.prop} by=${e.byVehicle} ${(e.speed * 2.237).toFixed(0)}mph`));
+        V.vendors.on('tipped', (e: any) => ev.push(`tipped ${e.id}`));
+        V.vendors.on('spill', (e: any) => ev.push(`spill ${e.id} x${e.count}`));
+        V.player.driverId = 'player';
+        // straight down the sidewalk line (x -8.2, clear of the corner post at x -6.6), up the kerb at z -12
+        V.player.setPose({ x: -8.2, y: 0.3, z: -2, yaw: 0 });
+        V.player.body.setLinvel({ x: 0, y: 0, z: -9 }, true);
+        V.setAuto({ throttle: 0.3, brake: 0, steer: 0, handbrake: false });
+        V.simulate(1.35);
+        V.setAuto({ throttle: 0, brake: 1, steer: 0, handbrake: false });
+        V.simulate(0.15);
+        return { ev, goods: V.vendors.liveGoods };
+      });
+      await page.evaluate(() => window.__VEH.setCamera(-2.0, 2.2, -19, -7.2, 0.4, -12, 46)); vs.push(await snap(page)); vl.push('20 mph into the hot-dog cart: it tips, goods fly');
+      await page.evaluate(() => { const V = window.__VEH; V.simulate(2.5); });
+      await page.evaluate(() => { const V = window.__VEH, it = V.vendors.items.get('stall0'), p = it.body.translation(); V.setCamera(p.x + 4.2, 2.4, p.z - 4.5, p.x - 0.5, 0.2, p.z + 0.5, 46); }); vs.push(await snap(page)); vl.push(`settled: franks and cans on the sidewalk (${res.goods} goods live)`);
+      const righted = await page.evaluate(() => { const V = window.__VEH; V.vendors.right('stall0'); V.simulate(1); return V.vendors.liveGoods; });
+      report.vendors = { events: res.ev, goodsLive: res.goods, afterRight: righted };
+      await sheet(page, vs, 2, 800, 450, 'vendors.jpg', vl);
+      console.log('vendors', res);
     }
 
     // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements

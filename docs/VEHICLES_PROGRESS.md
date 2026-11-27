@@ -146,6 +146,38 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
     `props.right(id)`. The cart then goes to `leaving` (kinematic).
   - Sim uses the footprints above for pedestrian avoidance (kiosk 1.15 m, monte box 0.3 m).
 
+- **Street-vendor props (STREET_VENDORS.md, Sim's ids):** `src/vehicles/props/`, via
+  `factory.createVendorProps(world, scene)`.
+  - **API:** `sync(sim.vendorViews)` before the step; `update(dt)` after it; `on('cartHit' |
+    'tipped' | 'spill')`; `right(id)` (on Sim's `cartRighted`); `shove(id, from, impulse, byId)`
+    for characters; `anchors(id)` for the vendor stand point, three queue points and the push
+    handle, with facing yaws.
+  - **Props:** cart_hot_dog (striped umbrella, steam table, condiment bottles, spoked wheel,
+    steam), cart_pretzel (glass display case), cart_ices (tubs, syrup bottles, umbrella),
+    cart_nuts (brass roaster drum, chimney, coal glow, steam), cart_coffee (a pushcart per Sim:
+    two urns, a roll case, steam), stand_fruit (three tiers of crates, awning), stand_flowers
+    (stepped bench of buckets, awning), stand_news (fixed kiosk, magazine racks, paper stacks),
+    stand_shoeshine (raised chair on a drawer box, footrests), peddler_case (attaché on a stand),
+    monte_box.
+  - **Branding:** invented brand panels from `VENDOR_BRANDS`, picked by `variant`, for Narrative
+    to edit.
+  - **Rendering:** the car materials (grime, CC0 textures), FadeLOD LOD0/LOD1/culled, and a
+    contact shadow.
+  - **Physics:**
+    - Rapier bodies, kinematic while `arriving`/`leaving` and dynamic otherwise; a hit locks a
+      cart out of Sim's control until `right()` or a new push cycle.
+    - Vehicle contacts above 1 m/s emit `cartHit {id, prop, by: driverId, byVehicle, speed}`.
+    - The car's momentum is handed over (the kinematic case).
+    - Hits over 10 mph roll the cart over sideways, across its narrow base. Pitching it end over
+      end was absorbed by the ground contact.
+    - Hits over 3 m/s spill goods as small dynamic bodies (franks, cans, pretzels, cups, cones,
+      rolls, fruit, bunches, papers, tins, watches, cards, bottles), instanced per kind,
+      240 live at most, each lasting 60 s.
+  - **Test:** a 21 mph sidewalk hit on the hot-dog cart gave `cartHit`, a 13-item spill and
+    `tipped`. Shot: `vendors.jpg`. Test lot: `&mode=vendors`.
+  - **Not done yet:** `van_coffee`; instancing of parked carts (each cart is about 6 draws);
+    vendor-cart lights at night.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
