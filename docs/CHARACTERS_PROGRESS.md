@@ -100,7 +100,14 @@ the size pass.
    MakeHuman source skins, which aren't in this container. Brows are done (shells).
 3. Nape: done. Profile neck seam: needs the head-to-body weld (open).
 4. Dress collar spikes: fixed at the front.
-5. Size: decimate teeth and gums, meshopt.
+5. Size: the hidden back of the mouth (molars, back gums) and the back halves of the eyeballs
+   are cut in the bake. 25.7k → 20.5k vertices; the .bin goes from 391 to 317 KB gzip, and the
+   whole head is about 0.66 MB. meshopt is still to do.
+6. Oversight's board notes:
+   - Bag strap: it's a ribbon seated on the clothed (draped) torso surface, from the bag over the
+     shoulder, so it no longer floats. There's a small kink at the top of the shoulder.
+   - Relaxed idle in review shots: done.
+   - Ragged sleeve hems: still open.
 
 Close portrait references of Black women from 1973–74 are still missing from
 `references/catalog.json`. DOCUMERICA's John H. White Chicago series (public domain) has them;

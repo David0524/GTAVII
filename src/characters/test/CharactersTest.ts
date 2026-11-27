@@ -158,7 +158,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
   } else if (scene === 'leads') {
     const act = num('act', 1);
     // review shots: each lead in their own idle (relaxed weight shift, hands behind, hands in pockets)
-    const idles: Record<string, string> = { 'char.teddy_arce': 'idle_relaxed', 'char.delphine_moore': 'idle_hands_behind', 'char.nick_varelas': 'idle_pockets' };
+    const idles: Record<string, string> = { 'char.teddy_arce': 'idle_relaxed', 'char.delphine_moore': 'idle_relaxed', 'char.nick_varelas': 'idle_pockets' };
     for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) { const c = factory.spawn(world, { seed: 1, hero, act }); c.animator.setIdle(idles[hero]); chars.push(c); }
   } else {
     const page = num('page', 0), per = num('n', 10), seed0 = num('seed', 1974);

@@ -57,13 +57,22 @@ const inP = (k: number, p: string) => k >= parts[p][0] && k < parts[p][1];
 type Region = 'face' | 'scalp' | 'eye' | 'teeth' | 'gums' | 'lash' | 'mouth' | 'socket' | 'occl' | null;
 // eye shells: the first 770 vertices of each eye range are the outer shell (sclera + cornea)
 const outerEye = (k: number) => (k >= parts.eyeL[0] && k < parts.irisL[0]) || (k >= parts.eyeR[0] && k < parts.irisR[0]);
+// the mouth's back half (molars, back gums) is never seen with lips that only part a little: it
+// was ~28% of the head's vertices. Teeth/gums more than 2.6 cm behind the front of the mouth go.
+let mouthFrontZ = -Infinity;
+for (let k = parts.teeth[0]; k < parts.teeth[1]; k++) mouthFrontZ = Math.max(mouthFrontZ, P[k * 3 + 2]);
+const backOfMouth = (k: number) => P[k * 3 + 2] < mouthFrontZ - (spec.mouthDepth ?? 0.026);
+const eyeCzL = (() => { let a = Infinity, b = -Infinity; for (let k = parts.eyeL[0]; k < parts.irisL[0]; k++) { a = Math.min(a, P[k * 3 + 2]); b = Math.max(b, P[k * 3 + 2]); } return (a + b) / 2; })();
+const eyeCzR = (() => { let a = Infinity, b = -Infinity; for (let k = parts.eyeR[0]; k < parts.irisR[0]; k++) { a = Math.min(a, P[k * 3 + 2]); b = Math.max(b, P[k * 3 + 2]); } return (a + b) / 2; })();
+const eyeCz = (k: number) => (k < parts.eyeR[0] ? eyeCzL : eyeCzR);
 function regionOf(k: number, tileU: number): Region {
   if (inP(k, 'face') || inP(k, 'headNeck')) return tileU < 1 ? 'face' : 'scalp';
   if (inP(k, 'mouthSocket')) return 'mouth';
   if (inP(k, 'eyeSocketL') || inP(k, 'eyeSocketR')) return 'socket';
-  if (inP(k, 'gums')) return 'gums';
-  if (inP(k, 'teeth')) return 'teeth';
-  if (outerEye(k)) return 'eye';
+  if (inP(k, 'gums')) return backOfMouth(k) ? null : 'gums';
+  if (inP(k, 'teeth')) return backOfMouth(k) ? null : 'teeth';
+  // the back half of each eyeball sits inside the socket, never seen
+  if (outerEye(k)) return P[k * 3 + 2] < eyeCz(k) - 0.004 ? null : 'eye';
   if (inP(k, 'lashesL') || inP(k, 'lashesR')) return 'lash';
   // (the eye-occlusion film is not drawn: alpha-tested it would be a hard band; the lid shadow is
   // painted into the sclera from the lid contour instead, see ict_tex.py)

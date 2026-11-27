@@ -383,7 +383,7 @@ function trouserTube(ctx: GarmentCtx): { pos: Map<number, [number, number, numbe
 /** The neck alone (no trapezius/shoulders), around the neck joint: shirt collars stand on this. */
 function neckRadius(ctx: GarmentCtx) { return torsoRadius(ctx, true); }
 
-function torsoRadius(ctx: GarmentCtx, neckOnly = false, src?: Map<number, [number, number, number]>) {
+export function torsoRadius(ctx: GarmentCtx, neckOnly = false, src?: Map<number, [number, number, number]>) {
   const { F, shape } = ctx;
   const P = shape.pos, J = shape.joints;
   const NB = 48, y0 = neckOnly ? F.y.neck - 0.07 : F.y.crotch, y1 = F.y.neck + 0.08, NY = neckOnly ? 15 : 40;

@@ -7,7 +7,7 @@ import type { HatDesc } from '../wardrobe/outfit';
 import { JOINT_INDEX as JI } from '../rig';
 import { PART } from './fields';
 import type { FaceFrame } from './face';
-import { fabricMat, lin, type GarmentCtx } from './garments';
+import { fabricMat, lin, torsoRadius, type GarmentCtx } from './garments';
 import { KIND, MeshBuilder, type MatData } from './MeshBuilder';
 
 export interface AccCtx extends GarmentCtx { face: FaceFrame; app: Appearance; /** a substituted head's face (Rocketbox/ICT): glasses sit on it */ subHead?: { browZ: number; hx: number; hz: number; cz: number } }
@@ -246,13 +246,40 @@ function prop(ctx: AccCtx, mb: MeshBuilder, id: string) {
       const col = leather(ctx.app.seed % 3 === 0 ? '#6a3a22' : ctx.app.seed % 3 === 1 ? '#1e1a18' : '#c8b494');
       const bag: V3 = [h[0] + 0.115, h[1] + 0.07, h[2] + 0.015];
       box(mb, bag, [0, 0, 1], [0, 1, 0], [1, 0, 0], 0.11, 0.085, 0.035, col, JI.pelvis);
-      // strap: bag top -> front of the shoulder -> over the top of the shoulder
-      const pts: V3[] = [[bag[0] - 0.01, bag[1] + 0.085, bag[2] + 0.03], [ua[0] - 0.035, (ua[1] + bag[1]) / 2 + 0.06, ua[2] + 0.09], [(cl[0] + ua[0]) / 2, ua[1] + 0.06, ua[2] + 0.07], [(cl[0] + ua[0]) / 2, ua[1] + 0.085, ua[2] - 0.02]];
-      for (let i = 0; i + 1 < pts.length; i++) {
-        const a = pts[i], b = pts[i + 1], d = sub(b, a), len = Math.hypot(d[0], d[1], d[2]);
-        const ay = nrm(d), ax = nrm(cross(ay, [0, 0, 1])), az = cross(ax, ay);
-        box(mb, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2], ax, ay, az, 0.016, len / 2, 0.003, leather('#2a1e16'), i === 0 ? JI.pelvis : JI.spine_03);
+      // strap: bag top -> down the side of the chest -> over the top of the shoulder. Every point is
+      // seated on the clothed torso (its radius at that height and azimuth + the clothes + a hair of
+      // press), so the strap lies on the cloth instead of floating off the chest
+      // the clothed surface: the drape (garments hang from the bust/chest apex) when there is one
+      const tr = torsoRadius(ctx, false, (ctx as GarmentCtx & { drape?: Map<number, [number, number, number]> }).drape);
+      const ctl: V3[] = [[bag[0] - 0.01, bag[1] + 0.085, bag[2] + 0.03], [ua[0] - 0.035, (ua[1] + bag[1]) / 2 + 0.06, ua[2] + 0.09], [(cl[0] + ua[0]) / 2, ua[1] + 0.06, ua[2] + 0.07], [(cl[0] + ua[0]) / 2, ua[1] + 0.085, ua[2] - 0.02]];
+      const clothOff = 0.014 + (ctx.outfit.outer ? 0.01 : 0);
+      const N = ctx.lod === 0 ? 24 : 10;
+      const path: V3[] = [];
+      for (let i = 0; i <= N; i++) {
+        const f = (i / N) * (ctl.length - 1), i0 = Math.min(ctl.length - 2, Math.floor(f)), u = f - i0;
+        const p: V3 = [0, 1, 2].map((k) => ctl[i0][k] + (ctl[i0 + 1][k] - ctl[i0][k]) * u) as V3;
+        const az = Math.atan2(p[0] - tr.center[0], p[2] - tr.center[1]);
+        const q = tr.at(p[1], az, clothOff);
+        // on the torso band the surface wins; the bag end eases into the bag top
+        const w = Math.min(1, i / 3);
+        path.push([p[0] + (q[0] - p[0]) * w, p[1], p[2] + (q[2] - p[2]) * w]);
       }
+      const base = mb.count, i0b = mb.indexCount, half = 0.016;
+      for (let i = 0; i <= N; i++) {
+        const p = path[i], a = path[Math.max(0, i - 1)], b = path[Math.min(N, i + 1)];
+        const tg = nrm(sub(b, a)), out = nrm([p[0] - tr.center[0], 0, p[2] - tr.center[1]]);
+        const across = nrm(cross(tg, out)), up = nrm(cross(across, tg));
+        const j = p[1] < ctx.F.y.waist ? JI.pelvis : JI.spine_03;
+        for (const sd of [-1, 1]) for (const th of [0, 0.003]) mb.vertex([p[0] + across[0] * half * sd + up[0] * th, p[1] + across[1] * half * sd + up[1] * th, p[2] + across[2] * half * sd + up[2] * th], null, [j, 0, 0, 0], [1, 0, 0, 0], leather('#2a1e16'));
+      }
+      for (let i = 0; i < N; i++) {
+        const a = base + i * 4, b = a + 4; // 0 -s inner, 1 -s outer, 2 +s inner, 3 +s outer
+        mb.tri(a + 1, b + 1, a + 3); mb.tri(a + 3, b + 1, b + 3); // outer face
+        mb.tri(a, a + 2, b); mb.tri(a + 2, b + 2, b);             // inner face
+        mb.tri(a, b, a + 1); mb.tri(a + 1, b, b + 1);             // edges
+        mb.tri(a + 2, a + 3, b + 2); mb.tri(a + 3, b + 3, b + 2);
+      }
+      mb.computeNormals(base, mb.count, i0b);
       break;
     }
     case 'handbag': case 'tote': { // held by its handle in the left hand: handle in the curled fingers, straps down to the bag
