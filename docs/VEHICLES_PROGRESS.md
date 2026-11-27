@@ -104,6 +104,15 @@ Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`,
   - Plan: warm the upload when the worker delivers (engine: `renderer.compileAsync` or an
     off-screen draw).
 
+- **$0 / free assets (FREE_ASSETS.md):** four CC0 ambientCG materials, logged in
+  `docs/licenses/ASSETS.md` with the licence-page quote.
+  - Rubber004 → tyres; Leather026 → vinyl roofs and seats; Metal009 (roughness) → chrome wear;
+    SurfaceImperfections003 → rain-run dirt streaks on paint and road film on glass, scaled by
+    the car's dirt.
+  - Six greyscale 512² JPEGs, 396 KB in total, sampled triplanar in body space.
+  - Off on low (phone) quality: about 3 samples × 2 maps per material on desktop.
+  - The generator stays: no real car designs.
+
 ### vs GTA V / VI / RDR2 (vehicles)
 - **What the references do:**
   - GTA V player cars are high-poly hero meshes with full interiors and working gauges.
