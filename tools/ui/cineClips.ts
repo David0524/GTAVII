@@ -18,7 +18,7 @@ export function clipLibrary(): Set<string> {
   const build = read('tools/characters/build-anims.ts');
   const block = build.match(/const CLIPS[^=]*=\s*\{([\s\S]*?)\n\};/)?.[1] ?? '';
   for (const m of block.matchAll(/'([A-Za-z0-9_]+)'/g)) if (!m[1].endsWith('.glb') && m[1] !== 'A_TPose') lib.add(m[1]);
-  for (const m of read('src/characters/anim/authored.ts').matchAll(/name: '([a-z0-9_]+)'/g)) lib.add(m[1]);
+  for (const m of read('src/characters/anim/authored.ts').matchAll(/name: '([a-z0-9_.]+)'/g)) lib.add(m[1]);
   return lib;
 }
 
