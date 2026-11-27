@@ -205,10 +205,7 @@ const meta = {
   landmarks: { Head, Neck, LEye, REye, MNose, MJaw, LCheek, RCheek, MUpperLip, MBottomLip, LMouthCorner, RMouthCorner },
   tag: null, coef: spec.c, packed: true,
 };
-const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj, sw, kind, idx: n < 65536 ? Uint16Array.from(tris) : Uint32Array.from(tris) },
-  // vertex order follows first use in the triangle list, so deltas are small and gzip well
-  { pos: { kind: 'delta3', seg: n * 3 }, nrm: { kind: 'delta3', seg: n * 3 }, uv: { kind: 'delta', seg: n * 2, stride: 2 }, idx: { kind: 'delta', seg: tris.length, stride: 1 } });
-fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);
+
 
 // --- textures (procedural; texture.py) -------------------------------------------------------
 const job = {
@@ -219,6 +216,11 @@ const job = {
 const jf = path.join(TMP, `${id}.json`);
 fs.writeFileSync(jf, JSON.stringify(job));
 execFileSync('python3', ['-I', path.resolve(import.meta.dirname, 'ict_tex.py'), jf], { stdio: 'inherit' });
+const blob = writeContainer(meta, { pos: qp, nrm: qn, uv: quv, sj, sw, kind, hair: Uint8Array.from(JSON.parse(fs.readFileSync(path.join(OUT, `${id}_hair.json`), 'utf8'))), idx: n < 65536 ? Uint16Array.from(tris) : Uint32Array.from(tris) },
+  // vertex order follows first use in the triangle list, so deltas are small and gzip well
+  { pos: { kind: 'delta3', seg: n * 3 }, nrm: { kind: 'delta3', seg: n * 3 }, uv: { kind: 'delta', seg: n * 2, stride: 2 }, idx: { kind: 'delta', seg: tris.length, stride: 1 } });
+fs.writeFileSync(path.join(OUT, `${id}.bin`), blob);
+fs.rmSync(path.join(OUT, `${id}_hair.json`));
 const sizes = { c: fs.statSync(path.join(OUT, `${id}_c.webp`)).size, n: fs.statSync(path.join(OUT, `${id}_n.webp`)).size, o: fs.statSync(path.join(OUT, `${id}_o.webp`)).size };
 const bytes = blob.length + sizes.c + sizes.n + sizes.o;
 

@@ -272,3 +272,15 @@ oimg[..., 3] = np.clip(a * 1.15, 0, 1)
 srgbO = np.where(oimg[..., :3] <= 0.0031308, 12.92 * oimg[..., :3], 1.055 * oimg[..., :3] ** (1 / 2.4) - 0.055)
 Image.fromarray(np.clip(np.concatenate([srgbO, oimg[..., 3:]], -1) * 255 + 0.5, 0, 255).astype(np.uint8), 'RGBA').save(job['out'] + '_o.webp', 'WEBP', quality=90, exact=True)
 print('wrote', job['out'] + '_c.webp', job['out'] + '_n.webp', job['out'] + '_o.webp')
+
+# --- per-vertex hair weight (runtime coil shells grow from the scalp where this is > 0) -------
+vu, vv = orig[:, 0], orig[:, 1]
+vF = reg == FACE; vS = reg == SCALP
+au_ = np.abs(vu - 0.5)
+hlv = np.where(au_ < 0.3, 0.912 - 0.028 * (au_ / 0.2) ** 2, 0.849 - (au_ - 0.3) * 1.35)
+earV = ss(0.12, 0.09, np.minimum(vu, 1 - vu)) * ss(0.44, 0.48, vv) * ss(0.71, 0.67, vv)
+hwF = ss(hlv - 0.002, hlv + 0.03, vv) * (1 - earV) * vF
+hwS = ss(eyeY - 0.074, eyeY - 0.05, pos[:, 1]) * vS
+hw = np.maximum(hwF, hwS)
+json.dump([int(round(x * 255)) for x in hw], open(job['out'] + '_hair.json', 'w'))
+print('hair vertices', int((hw > 0.01).sum()))

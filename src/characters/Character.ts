@@ -9,6 +9,7 @@ import type { BodyModel } from './body/BodyModel';
 import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
+import { scalpHairMesh } from './heads/scalpHair';
 import { fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
@@ -119,6 +120,8 @@ export class Character {
     // leads: head + our hair in one draw; near ring: head (with its own hair cards) as the second draw
     if (merge) this.meshes.push(headWithHairMesh(rb!, this.rbFit!, this.asm.hair!, skeleton, main.bindMatrix, hopts));
     else if (rb && this.rbFit) this.meshes.push(headMesh(rb, this.rbFit, skeleton, main.bindMatrix, hopts));
+    // heads that carry their own scalp-hair weights (ICT) grow the hair from their own scalp
+    if (rb && this.rbFit && !merge && rb.hair) { const sh = scalpHairMesh(rb, this.rbFit, this.appearance, skeleton, main.bindMatrix, this.asm.lift, this.lod); if (sh) this.meshes.push(sh); }
     for (const m of this.meshes) this.object.add(m);
     const p = bones[JI.pelvis].position;
     this.restPelvis = [p.x, p.y, p.z];
