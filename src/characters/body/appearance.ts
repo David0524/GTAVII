@@ -112,7 +112,13 @@ export function generateAppearance(seed: number, opts: AppearanceOpts = {}): App
   // men: flatten the pectoral shelf and nipple points (the base male mesh at average-plus weight
   // shades as a bust under shirts); heavier men keep a little more chest
   // (paired modifiers take their positive name; a negative value applies the opposite target)
-  else { locals['torso/torso-muscle-pectoral-incr'] = -Math.max(0, 0.6 - muscle * 0.4); locals['breast/breast-point-incr'] = -0.5; locals['breast/breast-volume-vert-up'] = 0.3; }
+  else {
+    // the soft, low chest of MakeHuman's average-plus-weight male reads as a bust: take the bust
+    // girth in (heavier men keep some), lift what remains, flatten the points
+    locals['measure/measure-bust-circ-incr'] = -Math.min(0.85, 0.55 + weight * 0.35);
+    locals['breast/breast-volume-vert-up'] = 0.6; locals['breast/breast-trans-up'] = 0.4;
+    locals['torso/torso-muscle-pectoral-incr'] = -Math.max(0, 0.4 - muscle * 0.3);
+  }
   if (clampAge > 55) { locals['head/head-age-incr'] = (clampAge - 55) / 35 * 0.8; locals['neck/neck-double-incr'] = weight > 0.55 ? r.body.range(0, 0.5) : 0; }
 
   // --- skin ---

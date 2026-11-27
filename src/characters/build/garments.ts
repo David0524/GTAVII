@@ -128,7 +128,7 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
       const d = (q[0] - P[k * 3]) * Nb[k * 3] + (q[1] - P[k * 3 + 1]) * Nb[k * 3 + 1] + (q[2] - P[k * 3 + 2]) * Nb[k * 3 + 2];
       // mostly outwards (bridge hollows), but small convex details (nipples, muscle edges) may be
       // shaved by up to 12 mm on the torso: the skin under a shirt is culled, so nothing pokes through
-      const out = Math.max(F.part[k] === PART.torso && ctx.male ? -0.012 : 0, d);
+      const out = Math.max(0, d); // (the male chest is fixed in the body base now; shaving left dimples)
       sm.set(k, [P[k * 3] + Nb[k * 3] * out, P[k * 3 + 1] + Nb[k * 3 + 1] * out, P[k * 3 + 2] + Nb[k * 3 + 2] * out]);
     }
     // cloth hangs from the chest apex toward the waist instead of tucking under the pectorals
@@ -254,6 +254,8 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
 
   // ---- tie ---------------------------------------------------------------------------------------
   if (outfit.tie && !(o && o.open < 0.5 && o.lapel === 0)) trims.push((mb) => (mb.slot = 5, tie(ctx, mb, outfit.tie!, topOff + t.fit + 0.004)));
+  // test view (?characters=1 ...&baretop=1): no top, collar, tie or outer layer, to judge the body base under the cloth
+  if (typeof location !== 'undefined' && location.search.includes('baretop')) return { pieces: pieces.filter((p) => p.slot !== 1 && p.slot !== 3), trims: [] };
   return { pieces, trims };
 }
 
@@ -658,12 +660,30 @@ export function emitPiece(ctx: GarmentCtx, mb: MeshBuilder, p: PieceSpec) {
   const map = res.verts.map((v) => resolve(v, 0));
   for (let i = 0; i < res.tris.length; i += 3) mb.tri(map[res.tris[i]], map[res.tris[i + 1]], map[res.tris[i + 2]]);
   // hem bands: turn every cut edge inwards by the cloth thickness
+  const bEdges = boundaryEdges(res.tris);
+  const inner = new Map<number, number>();
   if (p.hem > 0) {
-    const inner = new Map<number, number>();
     const innerOf = (vi: number) => { let j = inner.get(vi); if (j === undefined) { j = resolve(res.verts[vi], -p.hem); inner.set(vi, j); } return j; };
-    for (const [a, b] of boundaryEdges(res.tris)) {
+    for (const [a, b] of bEdges) {
       const ia = innerOf(a), ib = innerOf(b);
       mb.tri(map[b], map[a], ia); mb.tri(map[b], ia, ib);
+    }
+  }
+  // finished edges: the cut follows the body's triangles and zigzags; relax each cut loop along
+  // itself (the outer surface and its hem band move together), so hems read as clean seams
+  {
+    const nb = new Map<number, number[]>();
+    for (const [a, b] of bEdges) { (nb.get(a) ?? nb.set(a, []).get(a)!).push(b); (nb.get(b) ?? nb.set(b, []).get(b)!).push(a); }
+    for (let it = 0; it < 6; it++) {
+      const moves: [number, number[]][] = [];
+      for (const [v, ns] of nb) {
+        if (ns.length !== 2) continue;
+        const pv = mb.posAt(map[v]), pa = mb.posAt(map[ns[0]]), pb = mb.posAt(map[ns[1]]);
+        moves.push([v, [0, 1, 2].map((c) => (pa[c] + pb[c]) * 0.25 - pv[c] * 0.5)]);
+      }
+      for (const [v, d] of moves) {
+        for (const vi of [map[v], inner.get(v)]) { if (vi === undefined) continue; const q = mb.posAt(vi); mb.setPos(vi, [q[0] + d[0], q[1] + d[1], q[2] + d[2]]); }
+      }
     }
   }
   mb.computeNormals(base, mb.count, i0);

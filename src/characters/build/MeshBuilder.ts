@@ -65,6 +65,7 @@ export class MeshBuilder {
   /** Position / normal of vertex i (after computeNormals for the normal). */
   posAt(i: number): [number, number, number] { const a = this.pos.a; return [a[i * 3], a[i * 3 + 1], a[i * 3 + 2]]; }
   normalAt(i: number): [number, number, number] { const a = this.nrm.a; return [a[i * 3], a[i * 3 + 1], a[i * 3 + 2]]; }
+  setPos(i: number, p: ArrayLike<number>) { const a = this.pos.a; a[i * 3] = p[0]; a[i * 3 + 1] = p[1]; a[i * 3 + 2] = p[2]; }
   translate(dy: number) { for (let i = 1; i < this.pos.n; i += 3) this.pos.a[i] += dy; }
 
   finish(): GeoArrays {
