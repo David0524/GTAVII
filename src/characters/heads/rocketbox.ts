@@ -21,7 +21,7 @@ export interface HeadTag { sex: 0 | 1; age: [number, number]; anc: [number, numb
 export interface HeadIndexEntry { id: string; source: string; bytes: number; tag: HeadTag | null; skinRGB: number[]; lead: string | null; ownHair?: boolean }
 export interface HeadAsset {
   id: string;
-  meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; neckRing?: number[]; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
+  meta: { bbox: { min: number[]; max: number[] }; skinIdx: number; cardIdx: number; skinRGB: number[]; neckRGB: number[]; neckMinY: number; neckRing?: number[]; face?: { browZ: number; hx: number; zmin: number; zmax: number }; landmarks: Record<string, number[]>; tag: HeadTag | null; lead: string | null };
   pos: Float32Array; nrm: Float32Array; uv: Float32Array; sj: Uint16Array; sw: Float32Array; kind: Float32Array; idx: Uint16Array | Uint32Array;
   /** ICT heads: per-vertex scalp-hair weight (0..255) for the runtime coil shells. */
   hair?: Uint8Array;
@@ -118,6 +118,7 @@ async function loadHead(base: string, id: string): Promise<HeadAsset> {
   const tl = new THREE.TextureLoader();
   const load = async (f: string, srgb: boolean) => { const t = await tl.loadAsync(`${base}${f}`); t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = 4; return t; };
   const [color, normal, opacity] = await Promise.all([load(`${id}_c.webp`, true), load(`${id}_n.webp`, false), meta.cardIdx > 0 ? load(`${id}_o.webp`, true) : Promise.resolve(null)]);
+  meta.face = faceOf(pos, kind, meta.landmarks);
   if (!meta.neckRing) meta.neckRing = neckRingOf(meta.landmarks.Neck, pos, kind, B('idx'), meta.skinIdx);
   return { id, meta, pos, nrm, uv: uvs, sj, sw, kind, idx: B('idx'), color, normal, opacity, bytes: buf.byteLength, hair: c.blobs.get('hair') as Uint8Array | undefined, brow: c.blobs.get('brow') as Uint8Array | undefined };
 }
@@ -183,6 +184,30 @@ export function fitHead(h: { meta: Pick<HeadAsset['meta'], 'landmarks' | 'neckMi
   };
   return { s, map, neckBottom, cutY: neckBottom + 0.018, ringY, ringR, neckAxis: [nk[0], nk[2]] as [number, number] };
 }
+
+/** The head's face in head space (eye-midpoint frame): brow depth in front of the eyes, half-width and depth at eye height. */
+function faceOf(pos: Float32Array, kind: Float32Array, lm: Record<string, number[]>) {
+  const L = lm.LEye, R = lm.REye, mid = [(L[0] + R[0]) / 2, (L[1] + R[1]) / 2, (L[2] + R[2]) / 2];
+  let browZ = -Infinity, hx = 0, zmin = Infinity, zmax = -Infinity;
+  for (let v = 0; v < kind.length; v++) {
+    if (kind[v]) continue;
+    const x = pos[v * 3] - mid[0], dy = pos[v * 3 + 1] - mid[1], z = pos[v * 3 + 2];
+    if (Math.abs(x) < 0.045 && dy > -0.015 && dy < 0.03) browZ = Math.max(browZ, z);
+    if (Math.abs(dy) < 0.012) { hx = Math.max(hx, Math.abs(x)); zmin = Math.min(zmin, z); zmax = Math.max(zmax, z); }
+  }
+  return { browZ, hx, zmin, zmax };
+}
+/**
+ * The substituted head's face in our space (pre-lift), so glasses sit on *its* face, not on the
+ * hidden one of ours. Works from the meta alone (the near-ring build worker has no geometry).
+ */
+export function headFaceExtents(h: { meta: Pick<HeadAsset['meta'], 'face'> }, fit: ReturnType<typeof fitHead>) {
+  const f = h.meta.face;
+  if (!f) return undefined;
+  const z = (v: number) => fit.map(0, 0, v)[2];
+  return { browZ: z(f.browZ), hx: f.hx * fit.s, hz: ((f.zmax - f.zmin) / 2) * fit.s, cz: z((f.zmax + f.zmin) / 2) };
+}
+export type HeadFace = NonNullable<ReturnType<typeof headFaceExtents>>;
 
 /**
  * Radial profile of our neck around the neck joint (pre-lift), for stitching the head's neck ring

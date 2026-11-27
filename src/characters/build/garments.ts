@@ -189,7 +189,10 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
   const topOff = 0.005 + t.fit * 0.7;
   pieces.push({
     surface: 'helper-tights', fabric: t.fabric, hem: 0.004, hides: true, slot: 1, basePos: drape,
-    fields: [neckline(neckFront, neckBack), sleeve(t.sleeve), above(topHem), noLegs],
+    // under a long-sleeved jacket or coat only the shirt's cuff is kept (none if the shirt sleeve is
+    // shorter): the sleeve poked through the coat sleeve's inner elbow as light patches by the hips
+    fields: [neckline(neckFront, neckBack), sleeve(t.sleeve), above(topHem), noLegs,
+      ...(outfit.outer && outfit.outer.sleeve > 1.5 ? [(k: number) => (isArm(k) ? F.armS[k] - (Math.min(outfit.outer!.sleeve, 1.94) - 0.04) : 1)] : [])],
     offset: (k) => topOff + (isArm(k) ? t.fit * 0.6 + smooth(0, 1.0, F.armS[k]) * 0.004 : t.fit * (0.5 + 0.5 * smooth(y.waist, y.chest, Y(k)))),
     sweat: sweatMask,
   });
@@ -291,8 +294,10 @@ function addOuter(ctx: GarmentCtx, o: OuterDesc, pieces: PieceSpec[], trims: ((m
     offset: (k) => off + (h.isArm(k) ? -0.001 + 0.003 * Math.min(1, F.armS[k]) : 0.004 * smooth(y.waist, y.chest, Y(k)) + 0.006 * (1 - smooth(y.waist - 0.1, y.waist + 0.05, Y(k)))),
     sweat: (k) => h.sweatMask(k) * 0.5,
   });
-  if (hemY < y.waist - 0.04) {
-    // tails / coat skirt from the skirt helper, overlapping the torso piece at the waist
+  // tails / coat skirt from the skirt helper, overlapping the torso piece at the waist: only for real
+  // coats hanging well below the crotch. The helper follows each thigh, so on hip-length jackets the
+  // short skirt split into two puffy pillows around the thighs; the torso piece already ends there.
+  if (hemY < y.crotch - 0.08) {
     pieces.push({
       surface: 'helper-skirt', fabric: o.fabric, hem: thick, hides: false, slot: 3, kind: o.kind === 'leather' ? KIND.leather : KIND.cloth,
       fields: [h.below(y.waist - 0.0), h.above(hemY), front],

@@ -10,7 +10,7 @@ import { generateAppearance, type Appearance } from './body/appearance';
 import { buildSkeleton } from './body/skeleton';
 import { generateOutfit, type Outfit, type OutfitContext } from './wardrobe/outfit';
 import { scalpHairMesh } from './heads/scalpHair';
-import { fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
+import { headFaceExtents, fitHead, headMesh, headWithHairMesh, type HeadAsset, type NeckData } from './heads/rocketbox';
 import { assemble, type Assembled } from './build/assemble';
 import { createSkinnedMeshes } from './render/meshes';
 import { Animator, type LocoInput } from './anim/Animator';
@@ -107,7 +107,7 @@ export class Character {
       const shape = this.model.evaluate({ ...this.appearance.body, stature: this.appearance.stature });
       const rb = this.desc.overrides?.rbHead as HeadAsset | undefined;
       this.rbFit = rb ? fitHead(rb, shape.joints) : null;
-      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, headRing: this.rbFit.ringY, headRingR: this.rbFit.ringR, headAxis: this.rbFit.neckAxis, keepHair: !!this.desc.overrides?.ourHair } : {});
+      this.asm = assemble(this.model, shape, this.appearance, this.outfit, this.lod, false, this.rbFit ? { headCutY: this.rbFit.cutY, headRing: this.rbFit.ringY, headRingR: this.rbFit.ringR, headAxis: this.rbFit.neckAxis, keepHair: !!this.desc.overrides?.ourHair, headFace: headFaceExtents(rb!, this.rbFit) } : {});
     }
     for (const m of this.meshes) { m.geometry.dispose(); m.removeFromParent(); }
     const { bones, skeleton, root } = buildSkeleton(this.asm.joints);

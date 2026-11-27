@@ -220,7 +220,24 @@ Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
     hand frame (height along the fingers), so they hang plumb at the side.
   - Still visible on coats: round bulges at the hips and light shirt patches under the arms
     (logged).
-- **Also seen:** glasses on some pedestrians render as floating frame lines (figure 1) or opaque
+- **Glasses and coats: fixed** (oversight priority: visible defects in the live crowd).
+  Shot: `shots/characters/44_coat_glasses_fix.jpg` (before coat, after coat, glasses on a
+  Rocketbox head).
+  - **Grey wedges:** glasses were fitted to our own face. On a substituted head
+    (Rocketbox/ICT) whose face sits further forward, the lenses cut into it. Each head's brow
+    depth and width are now measured at load (`meta.face`, which the near-ring build worker
+    gets too), and glasses sit in front of that face.
+  - **Floating frame lines:** rims are now closed sections with depth, not flat bands.
+  - Drawn lenses are opaque (one material), so they're now dark enough to read as sunglasses
+    rather than grey discs. Clear lenses stay rim-only.
+  - **Hip bulges:** jacket skirts built on the skirt helper split into two pillows around the
+    thighs. Only coats hanging well below the crotch get a skirt now; jackets end at the torso
+    piece.
+  - **Light patches under the arms:** shirt sleeves poked through the coat sleeve's inner elbow.
+    Under any long coat sleeve the shirt keeps only its cuff.
+  - Remaining: long coats worn open show the trousers between their front panels (correct). Their
+    skirt still follows each thigh when walking.
+- **Previously seen:** glasses on some pedestrians render as floating frame lines (figure 1) or opaque
   grey lens wedges (figure 8). Logged, not fixed.
 
 ## Status (2026-11-26)

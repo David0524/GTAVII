@@ -10,7 +10,7 @@ import type { FaceFrame } from './face';
 import { fabricMat, lin, type GarmentCtx } from './garments';
 import { KIND, MeshBuilder, type MatData } from './MeshBuilder';
 
-export interface AccCtx extends GarmentCtx { face: FaceFrame; app: Appearance }
+export interface AccCtx extends GarmentCtx { face: FaceFrame; app: Appearance; /** a substituted head's face (Rocketbox/ICT): glasses sit on it */ subHead?: { browZ: number; hx: number; hz: number; cz: number } }
 
 type V3 = [number, number, number];
 
@@ -124,17 +124,23 @@ function hat(ctx: AccCtx, mb: MeshBuilder, h: HatDesc) {
   }
 }
 
+const thickDepth = (k: string) => (k === 'horn' || k === 'catEye' ? 0.004 : 0.0022);
 function glasses(ctx: AccCtx, mb: MeshBuilder) {
   const g = ctx.outfit.glasses!;
   const ff = ctx.face;
   const s = ff.eyeDist / 0.064;
   const J = JI.Head;
   const frameM: MatData = { cA: lin(g.frame), cB: lin(g.frame), m0: [0, 0, g.kind === 'aviator' || g.frame === '#b08a3a' || g.frame === '#9a9a98' ? 0.3 : 0.35, 0.6], m1: [g.kind === 'aviator' ? KIND.metal : KIND.leather, 0, 0, 0] };
-  const lensM: MatData = { cA: lin(g.tint > 0.3 ? '#2a2a22' : '#b8c0c0'), cB: [0, 0, 0], m0: [g.tint, 0, 0.05, 0], m1: [KIND.lens, 0, 0, 0] };
+  // drawn lenses are opaque (one material): they must read as dark sunglass lenses, not grey discs
+  const lensM: MatData = { cA: lin(g.tint > 0.3 ? '#2a2a22' : '#b8c0c0'), cB: [0, 0, 0], m0: [Math.max(g.tint, 0.85), 0, 0.05, 0], m1: [KIND.lens, 0, 0, 0] };
   const w = 0.026 * g.scale * s, h = (g.kind === 'aviator' ? 0.024 : g.kind === 'catEye' ? 0.018 : 0.021) * g.scale * s;
   const thick = g.kind === 'horn' || g.kind === 'catEye' ? 0.0035 : 0.0016;
-  const e = headExtents(ctx, ff.eyeL[1]);
-  const zf = Math.max(ff.eyeL[2], ff.eyeR[2]) + 0.016 * s;
+  const sh = ctx.subHead;
+  const e = sh ? { hx: sh.hx, hz: sh.hz, cz: sh.cz } : headExtents(ctx, ff.eyeL[1]);
+  // in front of the eyes, and clear of a substituted head's brow (its face can sit further forward
+  // than ours: lenses cut into it and showed as grey wedges)
+  const zf = Math.max(Math.max(ff.eyeL[2], ff.eyeR[2]) + 0.016 * s, sh ? sh.browZ + 0.007 : -Infinity);
+  const depth = thickDepth(g.kind);
   const seg = ctx.lod === 0 ? 20 : 12;
   const sj = [J, 0, 0, 0], sw = [1, 0, 0, 0];
   for (const eye of [ff.eyeL, ff.eyeR]) {
@@ -147,8 +153,14 @@ function glasses(ctx: AccCtx, mb: MeshBuilder) {
     };
     // rim as a flat ring band + lens disc
     const base = mb.count, i0 = mb.indexCount;
-    for (let i = 0; i <= seg; i++) { const a = (i / seg) * Math.PI * 2; mb.vertex(pt(a, 0), null, sj, sw, frameM); mb.vertex(pt(a, thick), null, sj, sw, frameM); }
-    for (let i = 0; i < seg; i++) { const a = base + i * 2; mb.tri(a, a + 2, a + 1); mb.tri(a + 1, a + 2, a + 3); mb.tri(a, a + 1, a + 2); mb.tri(a + 1, a + 3, a + 2); }
+    // a rim with depth (front face, back face, outer and inner walls): a flat band read as a
+    // floating line from most angles
+    const back = (p: V3): V3 => [p[0], p[1], p[2] - depth];
+    for (let i = 0; i <= seg; i++) { const a = (i / seg) * Math.PI * 2; const pi = pt(a, 0), po = pt(a, thick); mb.vertex(pi, null, sj, sw, frameM); mb.vertex(po, null, sj, sw, frameM); mb.vertex(back(pi), null, sj, sw, frameM); mb.vertex(back(po), null, sj, sw, frameM); }
+    for (let i = 0; i < seg; i++) {
+      const a = base + i * 4, b = a + 4; // 0 inner-front, 1 outer-front, 2 inner-back, 3 outer-back
+      for (const [x, y] of [[0, 1], [3, 2], [1, 3], [2, 0]]) { mb.tri(a + x, b + x, a + y); mb.tri(a + y, b + x, b + y); mb.tri(a + x, a + y, b + x); mb.tri(a + y, b + y, b + x); }
+    }
     mb.computeNormals(base, mb.count, i0);
     // clear lenses are left out (an opaque material can't show the eye through them); tinted ones are drawn
     if (g.tint >= 0.25) {

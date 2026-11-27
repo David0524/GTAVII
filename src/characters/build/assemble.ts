@@ -30,7 +30,7 @@ export interface Assembled {
 
 /** lod: 0 hero, 1 near crowd, 2 mid, 3 far. ultraSkin uses the full-resolution skin at LOD0 (cutscenes). */
 /** opts.headCutY: drop our head (skin above this height, eyes, teeth, hair) for a substituted head (evaluation). */
-export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean } = {}): Assembled {
+export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, outfit: Outfit, lod: number, ultraSkin = false, opts: { headCutY?: number; headRing?: (x: number, z: number) => number; headRingR?: (x: number, z: number) => number; headAxis?: [number, number]; keepHair?: boolean; headFace?: { browZ: number; hx: number; hz: number; cz: number } } = {}): Assembled {
   const t0 = performance.now();
   // heeled shoes stand the body on its heels (foot pitched in the bind pose)
   const shape = pitchFeet(model, shape0, heelRise(outfit.shoes));
@@ -130,7 +130,7 @@ export function assemble(model: BodyModel, shape0: BodyShape, app: Appearance, o
 
   // --- hats, glasses, props ---
   mb.slot = 5;
-  buildAccessories({ ...ctx, face: ff, app }, mb);
+  buildAccessories({ ...ctx, face: ff, app, subHead: opts.headFace }, mb);
 
   const hair = lod <= 3 && (cutY === undefined || opts.keepHair) ? buildHair({ ...ctx, face: ff, app, covered }) : null;
 
