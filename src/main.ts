@@ -152,6 +152,7 @@ async function main() {
   const parkedAt = { x: 1e9, z: 1e9, q: -1 };
   // player driving (engine/Driving.ts): created with the vehicle factory after the title
   let driving: Driving | null = null;
+  let seated = false; const seatDrop = new THREE.Matrix4().makeTranslation(0, -0.38, 0);
   if (sim) void afterTitle.then(() => {
     const vf = createVehicleFactory({ quality: quality.name });
     driving = new Driving({
@@ -159,7 +160,13 @@ async function main() {
       gameplay: () => gp?.g ?? null, lead: () => party.activeId,
       parked: () => parkedList,
       attachAudio: (v, vclass) => audioGlue?.audio.attachVehicle({ id: v.id, rpm: () => v.rpm, load: () => v.load, speed: () => v.speed, position: () => { const p = v.object.position; return [p.x, p.y, p.z]; }, on: (t, cb) => v.on(t as never, cb) }, vclass),
-      seat: (m) => { (body as unknown as { setSeat?: (m: THREE.Matrix4 | null) => void }).setSeat?.(m); },
+      // seated: the stoop-sitting clip stands in for a driving pose (characters asked for one); the root drops so the
+      // pelvis lands on the seat (sit_stoop sits ~0.35 m above its feet)
+      seat: (m) => {
+        const ch = body as unknown as { setSeat?: (m: THREE.Matrix4 | null) => void; play?: (a: string, o?: { loop?: boolean }) => Promise<void>; stop?: () => void };
+        if (m) { const sm = m.clone(); sm.multiply(seatDrop); ch.setSeat?.(sm); if (!seated) { seated = true; void ch.play?.('sit_stoop', { loop: true }); } }
+        else { ch.setSeat?.(null); if (seated) { seated = false; ch.stop?.(); } }
+      },
     });
     traffic = vf.createTrafficRenderer(quality.name === 'low' ? 100 : 160);
     scene.add(traffic.object);

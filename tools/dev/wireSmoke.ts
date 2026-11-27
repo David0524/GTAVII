@@ -31,7 +31,7 @@ try {
   console.log(JSON.stringify(info));
   if (process.env.PROBE) console.log('probe', await page.evaluate(process.env.PROBE)); // ad-hoc page expression
   // HOLD=KeyW:8000 holds a key (ms) after the probe, then PROBE2 runs (e.g. driving a car for a while)
-  if (process.env.HOLD) { const [key, ms] = process.env.HOLD.split(':'); await page.keyboard.down(key); await page.waitForTimeout(+ms); await page.keyboard.up(key); }
+  if (process.env.HOLD) { const [key, ms] = process.env.HOLD.split(':'); await page.keyboard.down(key); await page.waitForTimeout(+ms / 2); if (process.env.PROBEMID) console.log('probemid', await page.evaluate(process.env.PROBEMID)); await page.waitForTimeout(+ms / 2); await page.keyboard.up(key); }
   if (process.env.PROBE2) console.log('probe2', await page.evaluate(process.env.PROBE2));
   await page.screenshot({ path: out, type: 'jpeg', quality: 85 });
 } finally { await browser.close(); stop(); }
