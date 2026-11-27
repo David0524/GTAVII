@@ -25,7 +25,7 @@ export function buildStreetLights(streets: StreetRec[]): THREE.Group {
   for (const s of streets) {
     if (!s.n) continue;
     const sodium = AVENUE.test(s.n);
-    const spacing = sodium ? 34 : 42, off = s.w / 2 + 0.55;
+    const spacing = sodium ? 27 : 34, off = s.w / 2 + 0.55; // denser (oversight: street level too dark at night)
     let carry = spacing / 2, side = 1;
     for (let k = 2; k < s.p.length; k += 2) {
       const ax = s.p[k - 2], az = s.p[k - 1], bx = s.p[k], bz = s.p[k + 1];

@@ -388,6 +388,7 @@ async function main() {
     renderer.toneMappingExposure = light.exposure * expMul;
     { const f = mode === 'onfoot' ? body.object.position : camera.position; atmosphere.followFocus(f.x, f.y, f.z); }
     postUniforms.bloomStrength.value = 0.12 + 0.38 * light.lightsOn;
+    postfx?.setTimeOfDay(light.night, light.blueHour);
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }

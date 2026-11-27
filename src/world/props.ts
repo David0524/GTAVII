@@ -72,7 +72,18 @@ const AWNINGS: RGB[] = [[0.12, 0.22, 0.12], [0.32, 0.07, 0.06], [0.08, 0.1, 0.22
  * dozen metres) in four chunk quadrants (x<0/x>=0 by z<0/z>=0, chunk-local) so they cull on a short
  * radius at 100 m granularity (first iPhone report: 380k triangles on Low, ~56% of them AC units).
  */
-export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; detail: MeshArrays[] } {
+/** Quads with uv (light meshes: storefront spill pools on the sidewalk, marquee bulb bands). */
+class UVGeo {
+  p: number[] = []; n: number[] = []; c: number[] = []; uv: number[] = []; idx: number[] = [];
+  quad(q: number[][], nrm: number[], col: RGB) {
+    const v = this.p.length / 3; const U = [[0, 0], [1, 0], [1, 1], [0, 1]];
+    q.forEach((pt, i) => { this.p.push(pt[0], pt[1], pt[2]); this.n.push(nrm[0], nrm[1], nrm[2]); this.c.push(col[0], col[1], col[2]); this.uv.push(U[i][0], U[i][1]); });
+    this.idx.push(v, v + 1, v + 2, v, v + 2, v + 3);
+  }
+  finish(): MeshArrays { return { position: new Float32Array(this.p), normal: new Float32Array(this.n), color: new Float32Array(this.c), index: new Uint32Array(this.idx), uv: new Float32Array(this.uv) }; }
+}
+
+export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; detail: MeshArrays[]; spill: MeshArrays; marquee: MeshArrays } {
   const g = new Geo();
   const dq = [new Geo(), new Geo(), new Geo(), new Geo()];
   const D = (x: number, z: number, cat: string) => { const q = dq[(x >= 0 ? 1 : 0) + (z >= 0 ? 2 : 0)]; q.cat = cat; return q; };
@@ -162,9 +173,10 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
       }
     }
   }
-  buildDoors(data, hf, g);
+  const spill = new UVGeo(), marquee = new UVGeo();
+  buildDoors(data, hf, g, spill, marquee);
   for (const geo of [g, ...dq]) for (const [k, v] of Object.entries(geo.tris)) propTris[k] = (propTris[k] ?? 0) + v;
-  return { props: g.finish(), detail: dq.map((q) => q.finish()) };
+  return { props: g.finish(), detail: dq.map((q) => q.finish()), spill: spill.finish(), marquee: marquee.finish() };
 }
 /**
  * Door geometry from the chunk's door records (one per building, interiors' DoorRec fields): a stone or iron
@@ -174,7 +186,7 @@ export function buildProps(data: ChunkData, hf: HeightFn): { props: MeshArrays; 
  */
 const WOOD: RGB = [0.11, 0.065, 0.04], GLASS: RGB = [0.045, 0.05, 0.055], BRONZE: RGB = [0.2, 0.15, 0.08], STONE: RGB = [0.26, 0.2, 0.16];
 const BROWNSTONE: RGB = [0.22, 0.13, 0.1], STEEL_GREEN: RGB = [0.13, 0.15, 0.12], GATE: RGB = [0.1, 0.1, 0.1];
-function buildDoors(data: ChunkData, hf: HeightFn, g: Geo) {
+function buildDoors(data: ChunkData, hf: HeightFn, g: Geo, spill: UVGeo, marquee: UVGeo) {
   g.cat = 'door';
   for (const d of data.doors) {
     if (d.style === 'internal') continue;
@@ -199,6 +211,19 @@ function buildDoors(data: ChunkData, hf: HeightFn, g: Geo) {
     }
     if (d.nightGate) { const [px, pz] = at(0, 0.2); g.box(px, base + H + 0.62, pz, hw + 0.25, 0.16, 0.2, ux, uz, GATE, true); } // roll-down gate housing
     if (d.style === 'revolving') { const [px, pz] = at(0, 0.55); g.cylinder(px, base, pz, 1.1, H, GLASS, 10); g.box(px, base + H + 0.08, pz, 1.15, 0.08, 1.15, ux, uz, BRONZE); }
+    // night street level (oversight: 'the street is black at 23:00, 1974 42nd St was brightest at street level'):
+    // a warm spill pool on the sidewalk in front of every shop door; a bulb-lit marquee band over Deuce doors
+    if (d.nightGate) {
+      const len = d.marquee ? 9 : 6, dep = d.marquee ? 6 : 4.2, ys = y0 + 0.04;
+      const c0 = at(-len / 2, 0.2), c1 = at(len / 2, 0.2), c2 = at(len / 2, dep), c3 = at(-len / 2, dep);
+      spill.quad([[c0[0], ys, c0[1]], [c1[0], ys, c1[1]], [c2[0], ys, c2[1]], [c3[0], ys, c3[1]]], [0, 1, 0], d.marquee ? [1, 0.86, 0.6] : [1, 0.72, 0.42]);
+    }
+    if (d.marquee) {
+      const len = 9, yb = base + H + 0.9, yt = yb + 1.3, out = 1.6;
+      const a0 = at(-len / 2, out), a1 = at(len / 2, out);
+      const mb = at(0, out / 2); g.box(mb[0], yb + 0.65, mb[1], len / 2, 0.65, out / 2, ux, uz, [0.08, 0.07, 0.06]); // marquee body
+      marquee.quad([[a0[0], yb, a0[1]], [a1[0], yb, a1[1]], [a1[0], yt, a1[1]], [a0[0], yt, a0[1]]], [nx, 0, nz], [1, 0.9, 0.7]);
+    }
     // steps: stoop (brownstone, 4 risers + landing, cheek walls) or church steps (2 risers, wide)
     if (d.rise > 0.01) {
       const risers = d.style === 'stoop' ? 4 : 2, r = d.rise / risers, tread = 0.3, landing = d.style === 'stoop' ? 1.2 : 0.6;
