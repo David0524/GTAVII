@@ -1,0 +1,59 @@
+/* Map mockup chrome. A and C: the game's UI layer (one sans, dark translucent, one accent). B: the atlas's own
+   printed index on the sheet (ink on paper), because in that direction the map is the artefact. */
+html, body { margin: 0; height: 100%; overflow: hidden; background: #111; }
+#map { position: fixed; inset: 0; }
+#chrome { position: fixed; inset: 0; font-family: var(--f-ui); color: var(--cream); pointer-events: none; }
+
+.tabs { position: absolute; left: 0; right: 0; top: 0; height: 32px; display: flex; align-items: center; gap: 18px; padding: 0 16px;
+  background: linear-gradient(#0b0b0bd9, #0b0b0bb3); font: 600 11px var(--f-cond); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.tabs b { color: var(--cream); box-shadow: inset 0 -2px 0 var(--taxi); padding: 9px 0; }
+.tabs i { margin-left: auto; font-style: normal; color: var(--cream); }
+
+.legend { position: absolute; left: 0; top: 32px; bottom: 22px; width: 206px; box-sizing: border-box; padding: 10px 12px 8px;
+  background: linear-gradient(90deg, #0b0b0bd6 70%, #0b0b0b9e); display: flex; flex-direction: column; gap: 6px; }
+.legend header { display: flex; align-items: baseline; justify-content: space-between; }
+.legend header b { font: 700 11px var(--f-cond); letter-spacing: .14em; text-transform: uppercase; }
+.legend header span { font-size: 10px; color: var(--dim); }
+.legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.legend li { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 8px; height: 22px; padding: 0 6px; font-size: 11.5px; border-top: 1px solid var(--hair); }
+.legend li:first-child { background: linear-gradient(90deg, #e8a3172e, transparent); box-shadow: inset 2px 0 0 var(--taxi); }
+.legend li img { width: 14px; height: 14px; }
+.legend li em { font-style: normal; font-size: 10.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.legend li.off { opacity: .42; }
+.legend li.off span { text-decoration: line-through; text-decoration-color: #fff6; }
+.fogkey { margin-top: auto; display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: var(--dim); }
+.fogkey i { width: 16px; height: 10px; background: repeating-linear-gradient(45deg, #ffffff30 0 2px, #0000 2px 4px), #1c1c1c; box-shadow: inset 0 0 0 1px var(--hair); }
+
+.card { position: absolute; right: 10px; top: 40px; width: 180px; padding: 7px 10px 8px; background: #0b0b0bd6; display: grid; gap: 1px; }
+.card small { font: 600 9.5px var(--f-cond); letter-spacing: .12em; text-transform: uppercase; color: var(--taxi); }
+.card b { font: 700 13px var(--f-ui); }
+.card span { font-size: 10.5px; color: var(--dim); }
+
+.btns { position: absolute; right: 10px; bottom: 30px; display: flex; gap: 6px; }
+.btns button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: #0b0b0bc7; color: var(--cream); font: 600 15px var(--f-ui); box-shadow: inset 0 0 0 1px #ffffff40; }
+
+.odbl { position: absolute; left: 214px; bottom: 28px; font-size: 9px; padding: 2px 6px; color: #f4f1eab8; background: #0b0b0b99; }
+
+footer { position: absolute; left: 0; right: 0; bottom: 0; height: 22px; display: flex; align-items: center; gap: 18px; padding: 0 14px;
+  background: #0b0b0bd9; font-size: 10px; color: var(--dim); }
+footer kbd { font: 700 9px var(--f-cond); letter-spacing: .06em; text-transform: uppercase; color: var(--cream); padding: 1px 4px; box-shadow: inset 0 0 0 1px #ffffff4d; margin-right: 3px; }
+
+/* ---- C: same UI layer as A, the card picks up the print's paper on a dark band */
+body[data-dir="C"] .odbl { background: #efe9dccc; color: #1e1b18b3; }
+
+/* ---- B: the atlas's own index, printed on the sheet */
+body[data-dir="B"] .legend { background: linear-gradient(90deg, #eadfc5f2 85%, #eadfc5c4); color: #2b2118; font-family: var(--f-body); box-shadow: inset -1px 0 0 #2b211833; }
+body[data-dir="B"] .legend header b { font: 400 12px var(--f-body); letter-spacing: .22em; }
+body[data-dir="B"] .legend header span { color: #2b2118a0; font-style: italic; }
+body[data-dir="B"] .legend li { border-top: 1px solid #2b211826; font-size: 12px; }
+body[data-dir="B"] .legend li:first-child { background: none; box-shadow: inset 2px 0 0 #a8281e; }
+body[data-dir="B"] .legend li em { color: #2b2118a0; font-style: italic; }
+body[data-dir="B"] .legend li.off span { text-decoration-color: #2b211888; }
+body[data-dir="B"] .fogkey { color: #2b2118a8; font-style: italic; }
+body[data-dir="B"] .fogkey i { background: repeating-linear-gradient(45deg, #2b21181f 0 1px, #0000 1px 4px), #ece2c9; box-shadow: inset 0 0 0 1px #2b211840; }
+body[data-dir="B"] .card { background: #eadfc5ee; color: #2b2118; font-family: var(--f-body); box-shadow: 0 0 0 1px #2b211840; }
+body[data-dir="B"] .card small { color: #a8281e; font-family: var(--f-body); font-style: italic; text-transform: none; letter-spacing: .02em; font-size: 10.5px; }
+body[data-dir="B"] .card b { font: 700 13px var(--f-body); }
+body[data-dir="B"] .card span { color: #2b2118b0; font-style: italic; }
+body[data-dir="B"] .btns button { background: #eadfc5e6; color: #2b2118; box-shadow: inset 0 0 0 1px #2b211880; }
+body[data-dir="B"] .odbl { background: #eadfc5d9; color: #2b2118b3; font-family: var(--f-ui); }
