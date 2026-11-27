@@ -59,6 +59,11 @@ export const VENDOR_KINDS: Record<VendorKind, KindDef> = {
   monte: { hours: ['11:00', '23:00'], spots: [SpotKind.Corner, SpotKind.Storefront], areas: ['42nd street', 'times square', 'herald square'], only: true, base: 0.2, licensed: false, prop: 'monte_box', pushed: false, queue: 0, serve: [0, 0], goods: [], pull: 0.1, rain: 'close', crew: 3, archetype: 'npc.monte_dealer' },
 };
 const KIND_LIST = Object.keys(VENDOR_KINDS) as VendorKind[];
+/** Footprint radius (m) of each prop for pedestrian avoidance (vehicles' prop sizes: W x L, about half the length). */
+const PROP_R: Record<string, number> = {
+  cart_hot_dog: 0.8, cart_pretzel: 0.7, cart_ices: 0.65, cart_nuts: 0.6, cart_coffee: 0.75, stand_fruit: 1.0,
+  stand_flowers: 0.85, stand_news: 1.15, stand_shoeshine: 0.55, peddler_case: 0.35, monte_box: 0.3,
+};
 
 export type VendorState = 'arriving' | 'open' | 'serving' | 'closing' | 'leaving' | 'cower' | 'fled' | 'righting' | 'released';
 export interface VendorView {
@@ -144,7 +149,7 @@ export class Vendors {
     if (this.obsDirty) { // carts and stands are sidewalk obstacles for everyone else
       this.obsDirty = false;
       const S = this.S, carts: { x: number; z: number; r: number }[] = [];
-      for (const v of this.list.values()) if (v.def.prop && v.state !== 'arriving' && v.state !== 'leaving') carts.push({ x: v.cx, z: v.cz, r: v.kind === 'monte' ? 0.4 : 0.75 });
+      for (const v of this.list.values()) if (v.def.prop && v.state !== 'arriving' && v.state !== 'leaving') carts.push({ x: v.cx, z: v.cz, r: PROP_R[v.def.prop] ?? 0.75 });
       S.obstacles = [...S.obsBase, ...carts];
       S.obsGrid.clear(); S.obstacles.forEach((o, i) => S.obsGrid.add(o.x, o.z, i));
     }
@@ -299,7 +304,7 @@ export class Vendors {
         if (v.kind === 'monte') this.monteCrowd(v);
         break;
       }
-      case 'righting': if ((v.timer -= dt) <= 0) { v.state = 'closing'; v.timer = 10; this.closed.set(v.spot, S.t + 2 * 3600); } break;
+      case 'righting': if ((v.timer -= dt) <= 0) { v.state = 'closing'; v.timer = 10; this.closed.set(v.spot, S.t + 2 * 3600); S.emit('cartRighted', { id: v.id }); } break; // props.right(id)
       case 'closing': {
         for (const q of v.queue) if (q.alive && q.state === 'queue') q.timer = 0;
         v.queue = [];
