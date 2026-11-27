@@ -120,6 +120,14 @@ Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
   - The real fix is a strand texture with mips on redesigned cards: narrower cards,
     more of them, clumped. That's a block of its own, after the vendors unless oversight
     reorders.
+- **"Jagged brown coat edges" were briefcases.**
+  - Cause: hand-held items were built hanging along the bind pose's world down and skinned
+    rigidly to the hand. When the idle lowered the arms (~45°), they swung across the thighs as
+    flat brown slabs.
+  - Fix: briefcase, handbag, tote, shopping bag and umbrella are now built on an orthonormal
+    hand frame (height along the fingers), so they hang plumb at the side.
+  - Still visible on coats: round bulges at the hips and light shirt patches under the arms
+    (logged).
 - **Also seen:** glasses on some pedestrians render as floating frame lines (figure 1) or opaque
   grey lens wedges (figure 8). Logged, not fixed.
 
