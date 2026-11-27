@@ -429,6 +429,29 @@ async function main() {
       if (err > 0.05 || gap > 5) problems.push(`handOff: pose error ${err.toFixed(2)} m, companion ${gap.toFixed(1)} m behind`);
     }
   }
+  // NPC memory and greetings: a favour is recalled by the people who saw it; a robbery sours the block
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 30, maxPeds: 120, fetchBinary }); await sim.load(); sim.setClock(14 * 60);
+    const f = FOCI[1];
+    for (let k = 0; k < 90; k++) sim.update(SIM_DT, f);
+    const ctx: Record<string, number> = {}; let badPool = 0;
+    sim.on('pedGreets', (e) => { ctx[e.context] = (ctx[e.context] ?? 0) + 1; if (!e.pool || !e.archetype) badPool++; });
+    const stand = (x: number, z: number, secs: number) => { for (let k = 0; k < secs / SIM_DT; k++) { sim.setExternalActors([{ id: 'player', x, z, vx: 0, vz: 0, radius: 0.4, kind: 'player' }]); sim.update(SIM_DT, { x, z }); } };
+    const at = (i: number) => { const w = sim.debugAgents().peds.filter((p) => p.state === 'walk'); const p = w[i % Math.max(1, w.length)]; return p ? { x: p.x, z: p.z } : { x: f.x, z: f.z }; };
+    const a = at(0);
+    const helpedAt = { ...a };
+    sim.remember('helped', a.x, a.z, { witnessR: 30 });
+    stand(a.x, a.z, 60);
+    const b = sim.debugAgents().peds.filter((p) => p.state === 'walk').map((p) => ({ x: p.x, z: p.z })).find((q) => Math.hypot(q.x - a.x, q.z - a.z) > 90) ?? at(7);
+    sim.remember('robbed', b.x, b.z);
+    const rep = sim.reputation(b.x, b.z);
+    stand(b.x, b.z, 60);
+    report.memory = { contexts: ctx, robbedRep: rep.score, helpedRep: sim.reputation(helpedAt.x, helpedAt.z).score, greetings: sim.greetings };
+    if (!ctx.greet_known) problems.push(`memory: nobody recalled the favour ${JSON.stringify(ctx)}`);
+    if (!(ctx.complain || ctx.fear || ctx.antagonize)) problems.push(`memory: no one resented the robbery ${JSON.stringify(ctx)}`);
+    if (rep.score >= -3 || report.memory.helpedRep <= 0) problems.push(`memory: reputation ${JSON.stringify(report.memory)}`);
+    if (badPool) problems.push(`memory: ${badPool} greetings without a bark pool`);
+  }
   // walkers passing within 0.2 m (half a body): only brief transients where two sidewalk edges meet a corner
   if (full.pedWalkingThrough > 5) problems.push(`people walking through each other: ${full.pedWalkingThrough} sampled pairs under 0.2 m (${full.pedWalkingThroughEx.join('; ')})`);
   if (full.pedCloseAvg > 1.0) problems.push(`people standing inside each other: ${full.pedCloseAvg} pairs closer than 0.25 m per sample`);

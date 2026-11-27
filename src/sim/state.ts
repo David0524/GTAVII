@@ -58,6 +58,8 @@ export interface Ped {
   bumpCd?: number; bumpPrev?: string; bumpResponse?: string;
   /** street vendors (vendors.ts): the stall this ped works / queues at / watches; what they bought */
   vendor?: string; carry?: string; carryUntil?: number; buyCd?: number;
+  /** memory of the player (memory.ts): the worst thing they saw the player do and when; greeting cooldown */
+  memKind?: string; memT?: number; greetCd?: number;
   /** seconds held up near the kerb (joins the crossing crowd) */
   kerbT?: number;
   /** waiting slot at the kerb (edge s and lat; -1: none, e.g. on a traffic island) */
