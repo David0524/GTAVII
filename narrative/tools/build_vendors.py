@@ -116,8 +116,8 @@ SIDE = [
 
 def write():
     (C / "vendors.json").write_text(json.dumps({
-        "_note": "Street vendors (STREET_VENDORS.md). Narrative: brands, cart/umbrella copy, menus and price boards in 1974 money, side content. All brands invented; adults only. Sim places them, Gameplay prices consumables from 'menus' (health/stamina from 'vendors').",
-        "brands": BRANDS, "menus": {k: [{"item": i, "price": p} for i, p in v] for k, v in MENUS.items()}, "vendors": VENDORS}, ensure_ascii=False, indent=2) + "\n")
+        "_note": "Street vendors (STREET_VENDORS.md). Item names are keys for Gameplay (<menus key>.<slug of item>); tell Gameplay before renaming. Narrative: brands, cart/umbrella copy, menus and price boards in 1974 money, side content. All brands invented; adults only. Sim places them, Gameplay prices consumables from 'menus' (health/stamina from 'vendors').",
+        "brands": BRANDS, "menus": {k: [dict({"item": i, "price": p}, **({"rainOnly": True} if "rain only" in i else {})) for i, p in v] for k, v in MENUS.items()}, "vendors": VENDORS}, ensure_ascii=False, indent=2) + "\n")
     (C / "barks" / "vendor_calls.json").write_text(json.dumps({"id": "barks.vendor_calls", "core": False,
         "note": "Vendor calls and reactions (context = vendor type, or 'any'). Adults only. 1974 prices match content/vendors.json.",
         "lines": [{"context": c, "emotion": e, "text": t} for c, e, t in pool_lines]}, ensure_ascii=False, indent=2) + "\n")
