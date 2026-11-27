@@ -1,0 +1,92 @@
+{
+  "id": "barks.grand_central",
+  "core": false,
+  "note": "Grand Central: commuters, redcaps and the information-booth clerk (context). Adults only.",
+  "lines": [
+    {
+      "context": "commuter",
+      "emotion": "hurried",
+      "text": "Five-twelve to Stamford! Excuse me! Excuse me!"
+    },
+    {
+      "context": "commuter",
+      "emotion": "annoyed",
+      "text": "They moved the track again. They move it to keep us humble."
+    },
+    {
+      "context": "commuter",
+      "emotion": "tired",
+      "text": "Two hours a day on that train. I've read Tolstoy twice."
+    },
+    {
+      "context": "commuter",
+      "emotion": "wry",
+      "text": "Meet me under the clock. Everybody says that. The clock's sick of us."
+    },
+    {
+      "context": "commuter",
+      "emotion": "hurried",
+      "text": "If I miss this one it's the six-forty and my wife files papers."
+    },
+    {
+      "context": "commuter",
+      "emotion": "gloomy",
+      "text": "Fare's up again. Next year I'm buying a horse."
+    },
+    {
+      "context": "redcap",
+      "emotion": "cheerful",
+      "text": "Bags, mister? Track's a long walk with two suitcases."
+    },
+    {
+      "context": "redcap",
+      "emotion": "easy",
+      "text": "Redcap! Carry it to the car, keep your hands for your hat."
+    },
+    {
+      "context": "redcap",
+      "emotion": "wry",
+      "text": "Forty years on these floors. I know every crack by its first name."
+    },
+    {
+      "context": "redcap",
+      "emotion": "warning",
+      "text": "Mind the cart! Mind the cart, lady, it don't brake."
+    },
+    {
+      "context": "clerk",
+      "emotion": "precise",
+      "text": "Track twenty-nine, five fifty-two, all stops. Next."
+    },
+    {
+      "context": "clerk",
+      "emotion": "patient",
+      "text": "The shuttle's downstairs, sir. Follow the people who look late."
+    },
+    {
+      "context": "clerk",
+      "emotion": "dry",
+      "text": "No, the clock doesn't tell the future. It tells the time. Next."
+    },
+    {
+      "context": "clerk",
+      "emotion": "precise",
+      "text": "Lost and found is on the lower level. Bring patience. Next."
+    },
+    {
+      "context": "any",
+      "emotion": "awed",
+      "text": "Look up. Look at that ceiling. Somebody painted the sky backwards."
+    },
+    {
+      "context": "any",
+      "emotion": "wry",
+      "text": "Biggest room in the city and still no place to sit."
+    },
+    {
+      "context": "any",
+      "emotion": "amused",
+      "text": "That photo up there's bigger than my apartment. Nicer, too."
+    }
+  ]
+}

@@ -56,6 +56,25 @@ pool("barks.chase_bystander", False, "Bystanders as a foot chase passes through 
  ("lot", "warning", "That fence bites! Watch your pants!"),
  ("newsstand", "outraged", "My papers! The evening edition's all over Eighth!"))
 
+pool("barks.grand_central", False, "Grand Central: commuters, redcaps and the information-booth clerk (context). Adults only.",
+ ("commuter", "hurried", "Five-twelve to Stamford! Excuse me! Excuse me!"),
+ ("commuter", "annoyed", "They moved the track again. They move it to keep us humble."),
+ ("commuter", "tired", "Two hours a day on that train. I've read Tolstoy twice."),
+ ("commuter", "wry", "Meet me under the clock. Everybody says that. The clock's sick of us."),
+ ("commuter", "hurried", "If I miss this one it's the six-forty and my wife files papers."),
+ ("commuter", "gloomy", "Fare's up again. Next year I'm buying a horse."),
+ ("redcap", "cheerful", "Bags, mister? Track's a long walk with two suitcases."),
+ ("redcap", "easy", "Redcap! Carry it to the car, keep your hands for your hat."),
+ ("redcap", "wry", "Forty years on these floors. I know every crack by its first name."),
+ ("redcap", "warning", "Mind the cart! Mind the cart, lady, it don't brake."),
+ ("clerk", "precise", "Track twenty-nine, five fifty-two, all stops. Next."),
+ ("clerk", "patient", "The shuttle's downstairs, sir. Follow the people who look late."),
+ ("clerk", "dry", "No, the clock doesn't tell the future. It tells the time. Next."),
+ ("clerk", "precise", "Lost and found is on the lower level. Bring patience. Next."),
+ ("any", "awed", "Look up. Look at that ceiling. Somebody painted the sky backwards."),
+ ("any", "wry", "Biggest room in the city and still no place to sit."),
+ ("any", "amused", "That photo up there's bigger than my apartment. Nicer, too."))
+
 pool("barks.garment", True, "Pushboys, cutters, pressers, fur workers. Garment and Fur Districts, daytime.",
  ("greet", "cocky", "Morning! Watch the rack, it bites."),
  ("greet", "friendly", "Hey, you new? You look new. Everybody looks new at seven."),

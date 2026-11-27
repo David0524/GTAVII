@@ -5,14 +5,15 @@
     "radius": 120,
     "alsoAt": [
       "W 34th St & 6th Ave",
-      "W 42nd St & 7th Ave"
+      "W 42nd St & 7th Ave",
+      "E 42nd St & Park Ave"
     ]
   },
   "when": {
     "flags": [],
     "time": [
       "07:00",
-      "10:00"
+      "19:30"
     ],
     "weather": [
       "any"
@@ -27,7 +28,36 @@
       "type": "encounter",
       "spec": "mission.side_platform_dip",
       "systemic": true,
-      "note": "Systemic chase (ENGINE_REQUESTS 16). Uses the authored traversal beats; a tackle finishes it (Gameplay b4f05e9). Ignoring it is fine."
+      "note": "Systemic chase (ENGINE_REQUESTS 16). Uses the authored traversal beats; a tackle finishes it (Gameplay b4f05e9). Ignoring it is fine.",
+      "variants": [
+        {
+          "at": "E 42nd St & Park Ave",
+          "interior": "interior.grand_central_concourse",
+          "traversal": [
+            {
+              "move": "crowd_push",
+              "at": "the evening rush under the clock",
+              "marker": "tv.gc_clock_crowd"
+            },
+            {
+              "move": "vault",
+              "at": "a redcap's luggage cart",
+              "marker": "tv.gc_redcap_cart"
+            },
+            {
+              "move": "subway_stairs",
+              "at": "down the ramp to the lower level",
+              "marker": "tv.gc_ramp"
+            },
+            {
+              "move": "turnstile_vault",
+              "at": "the shuttle turnstiles (heat if a transit cop sees)",
+              "marker": "tv.gc_shuttle_turnstiles"
+            }
+          ],
+          "note": "Grand Central concourse variant: same spec, Grand Central route; 16:30–19:30 as well as the morning window."
+        }
+      ]
     }
   ]
 }

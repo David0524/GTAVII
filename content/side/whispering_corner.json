@@ -1,0 +1,80 @@
+{
+  "id": "mission.side_whispering_corner",
+  "kind": "side",
+  "title": "The Whispering Corner",
+  "number": null,
+  "leads": [
+    "any"
+  ],
+  "acts": [
+    1,
+    2,
+    3
+  ],
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "dialogue",
+      "text": "The clerk under Grand Central's clock",
+      "script": "dlg.side_whispering_corner_1"
+    },
+    {
+      "id": "o2",
+      "type": "goto",
+      "text": "Ask the redcaps by Grand Central's gates",
+      "to": "E 42nd St & Park Ave",
+      "radius": 40,
+      "note": "A redcap remembers a lady with a cane who took the 41st St side exit."
+    },
+    {
+      "id": "o3",
+      "type": "goto",
+      "text": "Rooming house, E 41st St",
+      "to": "E 41st St & Madison Ave",
+      "radius": 25
+    },
+    {
+      "id": "o4",
+      "type": "dialogue",
+      "text": "Ida Lorne, ankle in plaster",
+      "script": "dlg.side_whispering_corner_2"
+    },
+    {
+      "id": "o5",
+      "type": "enter_interior",
+      "text": "Thursday 5:40, Grand Central's arches",
+      "marker": "interior.gc_whispering_gallery",
+      "weekday": "thursday",
+      "time": [
+        "17:30",
+        "18:30"
+      ]
+    },
+    {
+      "id": "o6",
+      "type": "dialogue",
+      "text": "Face the tile. Say it for her.",
+      "script": "dlg.side_whispering_corner_3"
+    }
+  ],
+  "fail": [],
+  "checkpoints": [
+    "o4"
+  ],
+  "rewards": {
+    "text": "Feeney's thanks; he slips you tomorrow's track changes (a fast-travel tip)",
+    "money": 0,
+    "payNote": "Kindness: no pay. Feeney's track-change tips instead."
+  },
+  "where": "Grand Central, information booth and the whispering arches; E 41st St",
+  "systems": [
+    "dialogue",
+    "schedule (Thursday)",
+    "interiors"
+  ],
+  "mobile": "No timers; the Thursday window repeats weekly and the map marks it.",
+  "rank": 55,
+  "slice": false,
+  "durationMin": 20,
+  "heat": 0
+}

@@ -164,6 +164,22 @@ s("dlg.side_weather_prophet_2", "Reporting the first reading.", (OBA, "satisfied
 s("dlg.side_pigeon_bands_1", "Banded pigeons around the core; the Commodore's lost birds.", ("char.ignatz_hallisey", "wistful", "Fifteen of my lost birds still wear my bands. Photograph them. I want to know they're fed."))
 s("dlg.side_pigeon_bands_2", "Bringing the band photos back.", ("char.ignatz_hallisey", "moved", "Admiral Nelson's granddaughter! On the Library steps! She's fat. Good. Race day, Sunday."))
 
+WF, IL = "char.walter_feeney", "char.ida_lorne"
+s("dlg.side_whispering_corner_1", "Grand Central, the information booth under the clock. Evening rush.",
+  (WF, "precise", "Track twenty-nine. Next. Oh. You're not asking about a train."),
+  (WF, "low", "Thursdays, five-forty, a woman says good night to me across the arches. Eleven years."),
+  (WF, "low", "I've never seen her face. That was the arrangement. Three Thursdays now, nothing."),
+  (WF, "precise", "She mentioned a switchboard once. And a cane she hated. That's all I have."))
+s("dlg.side_whispering_corner_2", "A rooming house on E 41st St. Ida Lorne, ankle in plaster, by the window.",
+  (IL, "sharp", "Walter sent you? Walter doesn't send people. Walter answers questions."),
+  (IL, "softer", "Broken ankle. Six weeks of stairs I can't do. Tell him the ankle, not the age."),
+  (IL, "dry", "Better: stand in my corner Thursday and say it for me. You'll do it badly. Good."))
+s("dlg.side_whispering_corner_3", "Thursday, 17:40, the whispering arches. The player faces the tile in Ida's corner and delivers her message (shown as text, not voiced).",
+  (WF, "whisper", "That's not Ida. Did she send you? Tell me she's all right."),
+  (WF, "whisper", "An ankle. Not the age. Of course she'd say that."),
+  (WF, "whisper", "Good night, Ida. Tell her the five fifty-two still runs. Tell her I'll wait."))
+
 for sid, d in S.items():
     (C / "dialogue" / f"{sid.split('.', 1)[1]}.json").write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
 print(len(S), "scripts,", sum(len([l for l in d['lines'] if 'text' in l]) for d in S.values()), "lines;", len(CAST), "side givers")
+

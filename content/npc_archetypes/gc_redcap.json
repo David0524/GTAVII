@@ -1,0 +1,27 @@
+{
+  "id": "npc.gc_redcap",
+  "behaviour": "worker",
+  "palette": [
+    "#B22222",
+    "#1C1C1C"
+  ],
+  "wardrobe": "Red cap, porter's jacket, a numbered badge (invented line, no railroad name).",
+  "props": [
+    "luggage cart"
+  ],
+  "schedule": [
+    {
+      "from": "06:00",
+      "to": "23:00",
+      "area": "Grand Central, Main Concourse and track gates",
+      "activity": "work"
+    }
+  ],
+  "density": {
+    "day": 0.25,
+    "night": 0.1
+  },
+  "barks": "barks.grand_central",
+  "scripted": false,
+  "note": ""
+}

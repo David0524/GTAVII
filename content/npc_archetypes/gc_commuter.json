@@ -1,0 +1,35 @@
+{
+  "id": "npc.gc_commuter",
+  "behaviour": "walker",
+  "palette": [
+    "#2F4F4F",
+    "#F5F5DC",
+    "#696969"
+  ],
+  "wardrobe": "Suits, briefcases, folded evening papers, hats. Adults only.",
+  "props": [
+    "briefcase",
+    "folded newspaper"
+  ],
+  "schedule": [
+    {
+      "from": "07:00",
+      "to": "10:00",
+      "area": "Grand Central, Main Concourse",
+      "activity": "commute"
+    },
+    {
+      "from": "16:30",
+      "to": "19:30",
+      "area": "Grand Central, Main Concourse",
+      "activity": "commute"
+    }
+  ],
+  "density": {
+    "day": 0.9,
+    "night": 0.2
+  },
+  "barks": "barks.grand_central",
+  "scripted": false,
+  "note": ""
+}

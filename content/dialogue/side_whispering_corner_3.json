@@ -1,0 +1,24 @@
+{
+  "id": "dlg.side_whispering_corner_3",
+  "context": "Thursday, 17:40, the whispering arches. The player faces the tile in Ida's corner and delivers her message (shown as text, not voiced).",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.walter_feeney",
+      "emotion": "whisper",
+      "text": "That's not Ida. Did she send you? Tell me she's all right."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.walter_feeney",
+      "emotion": "whisper",
+      "text": "An ankle. Not the age. Of course she'd say that."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.walter_feeney",
+      "emotion": "whisper",
+      "text": "Good night, Ida. Tell her the five fifty-two still runs. Tell her I'll wait."
+    }
+  ]
+}

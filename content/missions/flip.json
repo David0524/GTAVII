@@ -37,8 +37,15 @@
     {
       "id": "o1",
       "type": "enter_interior",
-      "text": "Calloway, Herald Square lunch counter",
-      "marker": "interior.herald_lunch_counter"
+      "text": "Calloway, under the Grand Central clock",
+      "marker": "interior.grand_central_concourse",
+      "note": "Set piece: noon rush. Calloway won't be seen with Nick, so she walks him down to the whispering arches. They stand in opposite corners, faces to the tile, and the deal crosses the arch in whispers while commuters stream between them."
+    },
+    {
+      "id": "o1b",
+      "type": "enter_interior",
+      "text": "Face the tile, the whispering arches",
+      "marker": "interior.gc_whispering_gallery"
     },
     {
       "id": "o2",

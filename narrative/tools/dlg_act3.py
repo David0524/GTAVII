@@ -115,7 +115,8 @@ S("dlg.m23_token_booth", "M23 o4. Herald Square station mezzanine. Delphine at t
   (D, "inner", "The old passage to Penn Station. Half the lights dead. Marcus says the rats own it."))
 
 # ---------------- M24 Flip
-S("dlg.m24_calloway", "M24 o2. (Nick.) Herald Square lunch counter. Calloway slides a single typed page across.",
+S("dlg.m24_calloway", "M24 o2. (Nick.) Grand Central, the whispering arches: Nick and Calloway in opposite corners, faces to the tile; the offer crosses the arch in whispers.",
+  (CAL, "whisper", "Don't turn around, Mr. Varelas. The arch carries. Nothing else does."),
   (CAL, "crisp", "Mr. Varelas. Insurance fraud in a brownout. Lieutenant's men on the corner. Photographs."),
   (CAL, "crisp", "Testify against Lisle, and the insurance matter becomes a misunderstanding."),
   (N, "proud", "You're asking me to sell my lawyer."),

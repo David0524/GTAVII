@@ -293,7 +293,9 @@ M.append(mission(23, "mission.shoebox", "Shoebox", 3, 8, D, "1974-08-12", ("21:0
   design="Two credit clubs, side by side: the kye's back room takes in the women's money for safekeeping. Tina confesses that Lonnie is her cousin and that the leak and the $1,100 went to him. Choices set flag.delphine_forgave_tina and/or flag.club_count_settled (in dialogue)."))
 M.append(mission(24, "mission.flip", "Flip", 3, 8, N, "1974-08-14", ("11:00", "16:00"), ["any"], 13, ["P4", "P1"],
   "char.ruth_calloway", [
-   O("o1", "enter_interior", "Calloway, Herald Square lunch counter", marker="interior.herald_lunch_counter"),
+   O("o1", "enter_interior", "Calloway, under the Grand Central clock", marker="interior.grand_central_concourse",
+     note="Set piece: noon rush. Calloway won't be seen with Nick, so she walks him down to the whispering arches. They stand in opposite corners, faces to the tile, and the deal crosses the arch in whispers while commuters stream between them."),
+   O("o1b", "enter_interior", "Face the tile, the whispering arches", marker="interior.gc_whispering_gallery"),
    O("o2", "dialogue", "She has an offer. It expires.", script="dlg.m24_calloway"),
    O("o3", "enter_interior", "Augie's garage, 38th & Ninth", marker="interior.carriers_garage"),
    O("o4", "dialogue", "Augie's selling. To whom?", script="dlg.m24_augie"),

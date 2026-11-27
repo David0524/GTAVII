@@ -1,27 +1,33 @@
 {
   "id": "dlg.m24_calloway",
-  "context": "M24 o2. (Nick.) Herald Square lunch counter. Calloway slides a single typed page across.",
+  "context": "M24 o2. (Nick.) Grand Central, the whispering arches: Nick and Calloway in opposite corners, faces to the tile; the offer crosses the arch in whispers.",
   "lines": [
     {
       "id": "l1",
       "speaker": "char.ruth_calloway",
-      "emotion": "crisp",
-      "text": "Mr. Varelas. Insurance fraud in a brownout. Lieutenant's men on the corner. Photographs."
+      "emotion": "whisper",
+      "text": "Don't turn around, Mr. Varelas. The arch carries. Nothing else does."
     },
     {
       "id": "l2",
       "speaker": "char.ruth_calloway",
       "emotion": "crisp",
-      "text": "Testify against Lisle, and the insurance matter becomes a misunderstanding."
+      "text": "Mr. Varelas. Insurance fraud in a brownout. Lieutenant's men on the corner. Photographs."
     },
     {
       "id": "l3",
+      "speaker": "char.ruth_calloway",
+      "emotion": "crisp",
+      "text": "Testify against Lisle, and the insurance matter becomes a misunderstanding."
+    },
+    {
+      "id": "l4",
       "speaker": "char.nick_varelas",
       "emotion": "proud",
       "text": "You're asking me to sell my lawyer."
     },
     {
-      "id": "l4",
+      "id": "l5",
       "speaker": "char.ruth_calloway",
       "emotion": "dry",
       "text": "I'm asking you to stop being his merchandise. The offer expires in September. So do I."

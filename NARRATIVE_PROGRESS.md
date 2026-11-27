@@ -940,3 +940,12 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - Pre-ship USPTO additions: the airline name, Amalgamated, and the Lacy's banner line.
 - **Airline (user pick via oversight, 27 Nov):** **Pan Amity** ("Pan Amity World Airways"; the Pan Amity Building). Rooftop-letter prompt queued; added to the pre-ship USPTO list.
 - **Signage hints:** each lit landmark sign now carries `animate` hints (bulb chase timing, neon flicker, news-zipper speed) and a night/day state. The image queue now holds day/night twins for the lit signs: 67 entries, still NOT YET RUNNABLE.
+- **Grand Central (27 Nov 2026, user decision via oversight: the map extends east, and the terminal is enterable):**
+  - **Interiors:** the Main Concourse, the whispering arches, and the lower level with the shuttle and Lexington links.
+  - **M24 set piece:** Calloway meets Nick under the clock. She won't be seen with him, so the deal crosses the whispering arches from opposite corners, faces to the tile, with commuters streaming between them. It has a new o1b and a new opening line.
+  - **Side quest "The Whispering Corner":** information-booth clerk Walter Feeney and his Thursday voice, Ida Lorne, a retired switchboard operator with a broken ankle. The player says good night for her. It's a kindness quest.
+  - **Pickpocket:** a Grand Central concourse variant (evening rush) of the platform pickpocket, with routes through a redcap cart, the ramp and the shuttle turnstiles.
+  - **barks.grand_central:** 17 lines (commuters, redcaps, the clerk). New archetypes npc.gc_redcap and npc.gc_commuter, adults only.
+  - **The photo display** is the **Halcyon Color Window** ("HALCYON COLOR · CAPTURE THE CITY"). An exact-name search found nothing; Lumachrome was rejected (too close to LomoChrome). The real brand and the "-rama" suffix are never used. Two prompts were queued (69 entries in total).
+  - **Pending:** the boundaries.json update once the engine posts the new PLAYABLE numbers.
+  - Pre-ship USPTO list additions: Halcyon Color.

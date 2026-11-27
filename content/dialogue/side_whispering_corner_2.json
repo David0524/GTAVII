@@ -1,0 +1,24 @@
+{
+  "id": "dlg.side_whispering_corner_2",
+  "context": "A rooming house on E 41st St. Ida Lorne, ankle in plaster, by the window.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.ida_lorne",
+      "emotion": "sharp",
+      "text": "Walter sent you? Walter doesn't send people. Walter answers questions."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.ida_lorne",
+      "emotion": "softer",
+      "text": "Broken ankle. Six weeks of stairs I can't do. Tell him the ankle, not the age."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.ida_lorne",
+      "emotion": "dry",
+      "text": "Better: stand in my corner Thursday and say it for me. You'll do it badly. Good."
+    }
+  ]
+}

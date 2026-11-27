@@ -50,6 +50,7 @@ P = {
  "purse_snatch": (50, 5, 1, "The owner's thanks."),
  "platform_dip": (40, 5, 1, "The commuter's tip; keep the wallet instead for about $60 and +1 heat if seen."),
  "coop_thief": (75, 8, 0, "Hallisey pays in cash and a race tip."),
+ "whispering_corner": (0, 20, 0, "Kindness: no pay. Feeney's track-change tips instead."),
  "rent_day": (2000, 20, 0, "A month's rent roll (Nick)."),
  "rizo_147": (0, 20, 1, "The front page, not money."),
  "runaway_rack": (0, 8, 0, "A free suit instead of cash."),

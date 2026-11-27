@@ -105,12 +105,15 @@ for id, name, trade, where, sign in [
     ("cormorant", "The Cormorant", "Grindhouse cinema (ex-legit house)", "W 42nd St, 7th–8th Aves (north side)", "CORMORANT · KUNG FU · HORROR · CONTINUOUS"),
     ("gilded_lyre", "The Gilded Lyre", "Grindhouse cinema (gilt 1910s house, peeling)", "W 42nd St, 7th–8th Aves (south side)", "GILDED LYRE · 2 HITS · AIR COOLED"),
     ("pharaoh", "The Pharaoh", "Grindhouse cinema (Egyptian-revival facade)", "W 42nd St, 7th–8th Aves (south side)", "PHARAOH · ACTION · 24 HRS · 99¢"),
+    ("halcyon", "Halcyon Color", "Film and camera maker (the Grand Central display)", "Grand Central, east balcony", "HALCYON COLOR · CAPTURE THE CITY"),
     ("comet", "The Comet", "Grindhouse cinema (narrow 1930s front)", "W 42nd St, west of 8th Ave", "COMET · LATE SHOW · 3 FEATURES")]:
     biz(f"biz.{id}", name, trade, where, "Ambient shopfront.", [sign], GENERIC, story=False)
 for b in B:
     if b["where"].startswith("loc."):
         pass
 for b in B:
+    if b["id"] == "biz.halcyon":
+        b["check"] = "cleared: exact-name search (Nov 2026), no film or camera brand 'Halcyon Color'; rejected 'Lumachrome' (too close to LomoChrome). The real display's brand and the '-rama' suffix are never used."
     if b["id"] in ("biz.cormorant", "biz.gilded_lyre", "biz.pharaoh", "biz.comet"):
         b["check"] = "cleared: exact-name search (Nov 2026), no NYC cinema/theatre of that name; avoided real Deuce houses (Lyric, Victory, Selwyn, Apollo, Times Square, Liberty, Empire, Harris, Anco, Cine 42, Times, Bryant)"
 

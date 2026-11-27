@@ -344,5 +344,40 @@
       "night version matches the day version's layout exactly"
     ],
     "priority": 2
+  },
+  {
+    "id": "lm.halcyon_window",
+    "file": "lm_halcyon_window.png",
+    "owner": "narrative",
+    "use": "Grand Central Main Concourse, east balcony: the Halcyon Color Window (giant backlit photo display; the image swaps by act)",
+    "aspect": "3:1",
+    "size": "3072×1024",
+    "sizeFinal": false,
+    "prompt": "Create a giant backlit colour photograph for a 1970s train-station display: a sunny American seaside boardwalk with picnic blankets and striped umbrellas seen from a distance (no faces readable, adults only, no children), saturated Kodachrome-era colour. Photograph only, filling the frame, no frame or text. Manhattan, 1974 period. No logos, no brand names. NO TEXT AT ALL: no letters, numbers or symbols that read as writing. Aspect ratio 3:1.",
+    "text": null,
+    "textPolicy": "none",
+    "accept": [
+      "no legible text",
+      "no readable faces; adults only (no child characters)",
+      "no real logo or brand"
+    ],
+    "priority": 2
+  },
+  {
+    "id": "lm.halcyon_sign",
+    "file": "lm_halcyon_sign.png",
+    "owner": "narrative",
+    "use": "Name strip under the Halcyon Color Window",
+    "aspect": "8:1",
+    "size": "4096×512",
+    "sizeFinal": false,
+    "prompt": "Create a long backlit name strip under a giant station photo display, white letters on a deep orange band, 1970s rounded sans serif. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit, no perspective. No logos. EXACT TEXT: \"HALCYON COLOR · CAPTURE THE CITY\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 8:1.",
+    "text": "HALCYON COLOR · CAPTURE THE CITY",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real logo or brand"
+    ],
+    "priority": 2
   }
 ]

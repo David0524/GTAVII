@@ -742,6 +742,64 @@
         "bicycles"
       ],
       "usedBy": "side.telegrams"
+    },
+    {
+      "id": "interior.grand_central_concourse",
+      "address": "E 42nd St & Park Ave (Grand Central)",
+      "facade": "street",
+      "name": "Grand Central: Main Concourse",
+      "kind": "station",
+      "hours": [
+        "05:30",
+        "01:30"
+      ],
+      "contains": [
+        "four-faced clock over the information booth",
+        "departures board (split-flap)",
+        "ticket windows",
+        "the Halcyon Color Window (giant backlit photo display, east balcony)",
+        "benches",
+        "redcaps' stand",
+        "newsstands"
+      ],
+      "usedBy": "mission.flip (M24), side.whispering_corner, trigger.enc_platform_dip (concourse variant)",
+      "note": "Real public place; plain place name. The real photo display's brand is never used: ours is the Halcyon Color Window."
+    },
+    {
+      "id": "interior.gc_whispering_gallery",
+      "address": "Grand Central, dining-concourse level (the tiled arches)",
+      "facade": "interior",
+      "name": "Grand Central: the whispering arches",
+      "kind": "station",
+      "hours": [
+        "05:30",
+        "01:30"
+      ],
+      "contains": [
+        "low tiled vaulted arches",
+        "four corners where a whisper carries across"
+      ],
+      "usedBy": "mission.flip (M24 o1b), side.whispering_corner",
+      "note": "A real acoustic feature (plain description). No real restaurant names nearby."
+    },
+    {
+      "id": "interior.grand_central_lower",
+      "address": "Grand Central, lower level",
+      "facade": "interior",
+      "name": "Grand Central: lower level, shuttle and Lexington links",
+      "kind": "station",
+      "hours": [
+        "05:30",
+        "01:30"
+      ],
+      "contains": [
+        "suburban track gates",
+        "the passage to the Times Square shuttle",
+        "the passage to the Lexington Ave subway",
+        "lockers",
+        "a shoeshine"
+      ],
+      "usedBy": "trigger.enc_platform_dip, ambient"
     }
   ]
 }

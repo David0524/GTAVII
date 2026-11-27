@@ -198,6 +198,44 @@
       "note": ""
     },
     {
+      "id": "char.walter_feeney",
+      "tier": "service",
+      "name": "Walter Feeney",
+      "age": 63,
+      "role": "Information-booth clerk, Grand Central (side quest giver)",
+      "at": "Grand Central, the information booth under the clock",
+      "schedule": "07:00–19:00 in the booth; 17:40 Thursdays at the whispering arches",
+      "speech": {
+        "samples": [
+          "Track 29, five fifty-two, all stops. Don't run, sir, it's a terminal, not a racetrack.",
+          "Every question in the world comes to this booth. Nobody asks how I am.",
+          "Eleven years she said good night across the arch. Three Thursdays now, nothing."
+        ]
+      },
+      "visual": "Grey booth jacket, a gold watch chain, half-glasses he never uses; stands perfectly still in a moving crowd.",
+      "edges": [],
+      "note": ""
+    },
+    {
+      "id": "char.ida_lorne",
+      "tier": "service",
+      "name": "Ida Lorne",
+      "age": 66,
+      "role": "Retired switchboard operator; Feeney's Thursday voice (side quest)",
+      "at": "A rooming house on E 41st St (Madison–Park); Thursdays, the far corner of the arches",
+      "schedule": "Home with a broken ankle (offscreen until found); afterwards Thursdays 17:40 at the arches",
+      "speech": {
+        "samples": [
+          "I never once looked at his face. Eleven years. That was the arrangement.",
+          "Tell him the ankle, not the age. Men worry about the wrong things.",
+          "Good night, Walter. There. Say it back. Louder. The arch is old."
+        ]
+      },
+      "visual": "Cardigan over a print dress, a cane she resents, a switchboard operator's precise diction.",
+      "edges": [],
+      "note": ""
+    },
+    {
       "id": "char.ignatz_hallisey",
       "tier": "service",
       "name": "Ignatz “The Commodore” Hallisey",

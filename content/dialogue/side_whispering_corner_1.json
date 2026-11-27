@@ -1,0 +1,30 @@
+{
+  "id": "dlg.side_whispering_corner_1",
+  "context": "Grand Central, the information booth under the clock. Evening rush.",
+  "lines": [
+    {
+      "id": "l1",
+      "speaker": "char.walter_feeney",
+      "emotion": "precise",
+      "text": "Track twenty-nine. Next. Oh. You're not asking about a train."
+    },
+    {
+      "id": "l2",
+      "speaker": "char.walter_feeney",
+      "emotion": "low",
+      "text": "Thursdays, five-forty, a woman says good night to me across the arches. Eleven years."
+    },
+    {
+      "id": "l3",
+      "speaker": "char.walter_feeney",
+      "emotion": "low",
+      "text": "I've never seen her face. That was the arrangement. Three Thursdays now, nothing."
+    },
+    {
+      "id": "l4",
+      "speaker": "char.walter_feeney",
+      "emotion": "precise",
+      "text": "She mentioned a switchboard once. And a cane she hated. That's all I have."
+    }
+  ]
+}
