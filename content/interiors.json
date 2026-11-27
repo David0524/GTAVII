@@ -763,7 +763,13 @@
         "newsstands"
       ],
       "usedBy": "mission.flip (M24), side.whispering_corner, trigger.enc_platform_dip (concourse variant)",
-      "note": "Real public place; plain place name. The real photo display's brand is never used: ours is the Halcyon Color Window."
+      "note": "Real public place; plain place name. The real photo display's brand is never used: ours is the Halcyon Color Window.",
+      "tenants": [
+        "biz.gc_trackside_news",
+        "biz.gc_gate_shine",
+        "biz.gc_atlas_wire",
+        "biz.gc_platform_flowers"
+      ]
     },
     {
       "id": "interior.gc_whispering_gallery",
@@ -799,7 +805,24 @@
         "lockers",
         "a shoeshine"
       ],
-      "usedBy": "trigger.enc_platform_dip, ambient"
+      "usedBy": "trigger.enc_platform_dip, ambient",
+      "tenants": [
+        "biz.gc_oyster_room",
+        "biz.gc_last_train_liquor",
+        "biz.gc_commuter_counter",
+        "biz.gc_eastbound_cigar"
+      ],
+      "note": "1974 beat (sources disagree on the dates): the real vaulted seafood restaurant is reported as closing on 31 July 1974 and reopening later that year under new management. In the game, The Concourse Oyster Room is open but tired until 31 Jul, then dark behind a REOPENING sign through Aug–Sep (dateVariants for interiors). Plan: docs/interiors/GRAND_CENTRAL_PLAN.md.",
+      "dateVariants": [
+        {
+          "until": "1974-07-31",
+          "state": "open, tired, half-empty"
+        },
+        {
+          "from": "1974-08-01",
+          "state": "shuttered; tile vaults dark; sign 'CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT'"
+        }
+      ]
     }
   ]
 }

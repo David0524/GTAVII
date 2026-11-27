@@ -973,3 +973,9 @@ ChatGPT image prompts if necessary for signs, branding, etc".
   - `places.json` → `discovery.notify`: toast for Galloway's lot, Abend's bail bonds, Earl's shine, the bail lawyer and Calloway's luncheonette; everything else silent. Landmarks and mission-revealed places are silent, because the mission already announces them.
   - Side specs get `discoveryNotify: toast` (systemic encounters are silent). Car sellers get toast.
   - "Penciled in" appears nowhere in narrative content.
+- **Police radio (27 Nov 2026):** 46 lines in total, now including heat tiers 1–5, foot and car pursuits, responding, ack, all-clear and shift lines, plus more brownout lines. Every line is tagged `voice` (dispatcher or car), and an `audio` block gives the radio filter, voice notes and slot vocabularies for the audio chat's build-time voices.
+- **Grand Central tenants:** 8 tenants, all invented, for the interiors plan:
+  - The Concourse Oyster Room: open until 31 Jul, then dark with a REOPENING sign. This mirrors the real restaurant's 1974 closing and reopening; sources disagree on the dates.
+  - Trackside News, Gate Thirty Shine, Eastbound Cigar & Pipe, Last Train Liquors, Atlas Wire Telegrams, The Commuter's Counter and Platform Flowers.
+
+  The names are generic and descriptive, not searched (weak), and listed for the pre-ship check.

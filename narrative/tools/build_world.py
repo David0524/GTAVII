@@ -106,6 +106,14 @@ for id, name, trade, where, sign in [
     ("gilded_lyre", "The Gilded Lyre", "Grindhouse cinema (gilt 1910s house, peeling)", "W 42nd St, 7th–8th Aves (south side)", "GILDED LYRE · 2 HITS · AIR COOLED"),
     ("pharaoh", "The Pharaoh", "Grindhouse cinema (Egyptian-revival facade)", "W 42nd St, 7th–8th Aves (south side)", "PHARAOH · ACTION · 24 HRS · 99¢"),
     ("halcyon", "Halcyon Color", "Film and camera maker (the Grand Central display)", "Grand Central, east balcony", "HALCYON COLOR · CAPTURE THE CITY"),
+    ("gc_oyster_room", "The Concourse Oyster Room", "Vaulted seafood restaurant, Grand Central lower level. Tired and half-empty until 31 Jul 1974; then shuttered, with a REOPENING sign through August and September", "Grand Central, lower level", "THE CONCOURSE OYSTER ROOM · CHOWDER · PAN ROASTS (from 1 Aug: CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT)"),
+    ("gc_trackside_news", "Trackside News", "Newsstand, Grand Central concourse", "Grand Central, Main Concourse", "TRACKSIDE NEWS · PAPERS · MAGAZINES · CIGARETTES"),
+    ("gc_gate_shine", "Gate Thirty Shine", "Shoeshine stand, Grand Central", "Grand Central, by the upper-level gates", "GATE 30 SHINE · 50¢"),
+    ("gc_eastbound_cigar", "Eastbound Cigar & Pipe", "Cigar counter, Grand Central passage", "Grand Central, Lexington passage", "EASTBOUND CIGAR & PIPE · IMPORTED · DOMESTIC"),
+    ("gc_last_train_liquor", "Last Train Liquors", "Liquor store, Grand Central lower level", "Grand Central, lower level", "LAST TRAIN LIQUORS · OPEN TILL 1 A.M."),
+    ("gc_atlas_wire", "Atlas Wire Telegrams", "Telegraph office, Grand Central", "Grand Central, Main Concourse (south side)", "ATLAS WIRE · TELEGRAMS · MONEY ORDERS"),
+    ("gc_commuter_counter", "The Commuter's Counter", "Lunch counter, Grand Central", "Grand Central, dining concourse", "THE COMMUTER'S COUNTER · COFFEE 20¢ · EGGS ANY STYLE"),
+    ("gc_platform_flowers", "Platform Flowers", "Florist kiosk, Grand Central", "Grand Central, Main Concourse", "PLATFORM FLOWERS · FOR THE 5:52"),
     ("comet", "The Comet", "Grindhouse cinema (narrow 1930s front)", "W 42nd St, west of 8th Ave", "COMET · LATE SHOW · 3 FEATURES")]:
     biz(f"biz.{id}", name, trade, where, "Ambient shopfront.", [sign], GENERIC, story=False)
 for b in B:

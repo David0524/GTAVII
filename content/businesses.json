@@ -639,6 +639,110 @@
       "note": ""
     },
     {
+      "id": "biz.gc_oyster_room",
+      "name": "The Concourse Oyster Room",
+      "trade": "Vaulted seafood restaurant, Grand Central lower level. Tired and half-empty until 31 Jul 1974; then shuttered, with a REOPENING sign through August and September",
+      "where": "Grand Central, lower level",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "THE CONCOURSE OYSTER ROOM · CHOWDER · PAN ROASTS (from 1 Aug: CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT)"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_trackside_news",
+      "name": "Trackside News",
+      "trade": "Newsstand, Grand Central concourse",
+      "where": "Grand Central, Main Concourse",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "TRACKSIDE NEWS · PAPERS · MAGAZINES · CIGARETTES"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_gate_shine",
+      "name": "Gate Thirty Shine",
+      "trade": "Shoeshine stand, Grand Central",
+      "where": "Grand Central, by the upper-level gates",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "GATE 30 SHINE · 50¢"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_eastbound_cigar",
+      "name": "Eastbound Cigar & Pipe",
+      "trade": "Cigar counter, Grand Central passage",
+      "where": "Grand Central, Lexington passage",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "EASTBOUND CIGAR & PIPE · IMPORTED · DOMESTIC"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_last_train_liquor",
+      "name": "Last Train Liquors",
+      "trade": "Liquor store, Grand Central lower level",
+      "where": "Grand Central, lower level",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "LAST TRAIN LIQUORS · OPEN TILL 1 A.M."
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_atlas_wire",
+      "name": "Atlas Wire Telegrams",
+      "trade": "Telegraph office, Grand Central",
+      "where": "Grand Central, Main Concourse (south side)",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "ATLAS WIRE · TELEGRAMS · MONEY ORDERS"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_commuter_counter",
+      "name": "The Commuter's Counter",
+      "trade": "Lunch counter, Grand Central",
+      "where": "Grand Central, dining concourse",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "THE COMMUTER'S COUNTER · COFFEE 20¢ · EGGS ANY STYLE"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
+      "id": "biz.gc_platform_flowers",
+      "name": "Platform Flowers",
+      "trade": "Florist kiosk, Grand Central",
+      "where": "Grand Central, Main Concourse",
+      "era": "Ambient shopfront.",
+      "sign": [
+        "PLATFORM FLOWERS · FOR THE 5:52"
+      ],
+      "check": "descriptive or generic pattern; low risk; not searched",
+      "story": false,
+      "note": ""
+    },
+    {
       "id": "biz.comet",
       "name": "The Comet",
       "trade": "Grindhouse cinema (narrow 1930s front)",
