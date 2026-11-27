@@ -49,7 +49,7 @@ export function getAsset(spec: ModelSpec, v: Pick<Variant, 'vinyl' | 'whitewall'
   const lod0 = generate(spec, { lod: 0, ...v });
   addDamageMorphs(lod0.body, lod0, strHash(spec.id) % 97);
   if (lod0.hood) addDamageMorphs(lod0.hood, lod0, strHash(spec.id) % 97);
-  const lod1 = generate(spec, { lod: 1, ...v, whitewall: false });
+  const lod1 = generate(spec, { lod: 1, ...v }); // keeps the whitewalls: LOD1 must read like LOD0 across the crossfade
   a = { spec, lod0, lod1, lod2: impostor(spec, lod0) };
   cache.set(key, a);
   return a;

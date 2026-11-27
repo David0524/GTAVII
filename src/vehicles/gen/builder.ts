@@ -154,7 +154,7 @@ export class GeoBuilder {
       for (const i of l) all.push(i);
     }
     g.setIndex(all);
-    g.computeVertexNormals();
+    angleWeightedNormals(g);
     g.computeBoundingBox(); g.computeBoundingSphere();
     return g;
   }
@@ -184,3 +184,44 @@ export function pw(pts: [number, number][], t: number): number {
   return pts[pts.length - 1][1];
 }
 export { rng } from './rng';
+
+/**
+ * Vertex normals weighted by each triangle's corner angle (not its area). Loft stations are
+ * unevenly spaced (1 cm next to 40 cm), and area weighting made a vertex's normal depend on its
+ * neighbours' widths: alternating normals along the belt line read as vertical shading bands.
+ * Angle weighting is independent of spacing and of the quad diagonal.
+ */
+export function angleWeightedNormals(g: THREE.BufferGeometry) {
+  const pos = g.getAttribute('position') as THREE.BufferAttribute;
+  const idx = g.index;
+  const n = new Float32Array(pos.count * 3);
+  const P = pos.array as ArrayLike<number>;
+  const tri = (ia: number, ib: number, ic: number) => {
+    const ax = P[ia * 3], ay = P[ia * 3 + 1], az = P[ia * 3 + 2];
+    const bx = P[ib * 3], by = P[ib * 3 + 1], bz = P[ib * 3 + 2];
+    const cx = P[ic * 3], cy = P[ic * 3 + 1], cz = P[ic * 3 + 2];
+    const e0x = bx - ax, e0y = by - ay, e0z = bz - az, e1x = cx - ax, e1y = cy - ay, e1z = cz - az, e2x = cx - bx, e2y = cy - by, e2z = cz - bz;
+    let fx = e0y * e1z - e0z * e1y, fy = e0z * e1x - e0x * e1z, fz = e0x * e1y - e0y * e1x;
+    const fl = Math.hypot(fx, fy, fz);
+    if (fl < 1e-12) return;
+    fx /= fl; fy /= fl; fz /= fl;
+    const l0 = Math.hypot(e0x, e0y, e0z), l1 = Math.hypot(e1x, e1y, e1z), l2 = Math.hypot(e2x, e2y, e2z);
+    const ang = (dx: number, dy: number, dz: number, ex: number, ey: number, ez: number, la: number, lb: number) =>
+      Math.acos(Math.max(-1, Math.min(1, (dx * ex + dy * ey + dz * ez) / (la * lb || 1))));
+    const wa = ang(e0x, e0y, e0z, e1x, e1y, e1z, l0, l1);
+    const wb = ang(-e0x, -e0y, -e0z, e2x, e2y, e2z, l0, l2);
+    const wc = Math.PI - wa - wb;
+    n[ia * 3] += fx * wa; n[ia * 3 + 1] += fy * wa; n[ia * 3 + 2] += fz * wa;
+    n[ib * 3] += fx * wb; n[ib * 3 + 1] += fy * wb; n[ib * 3 + 2] += fz * wb;
+    n[ic * 3] += fx * wc; n[ic * 3 + 1] += fy * wc; n[ic * 3 + 2] += fz * wc;
+  };
+  if (idx) { const I = idx.array as ArrayLike<number>; for (let k = 0; k < idx.count; k += 3) tri(I[k], I[k + 1], I[k + 2]); }
+  else for (let k = 0; k < pos.count; k += 3) tri(k, k + 1, k + 2);
+  for (let i = 0; i < pos.count; i++) {
+    const l = Math.hypot(n[i * 3], n[i * 3 + 1], n[i * 3 + 2]);
+    if (l > 1e-12) { n[i * 3] /= l; n[i * 3 + 1] /= l; n[i * 3 + 2] /= l; } else n[i * 3 + 1] = 1;
+  }
+  const attr = g.getAttribute('normal') as THREE.BufferAttribute | undefined;
+  if (attr && attr.count === pos.count) { (attr.array as Float32Array).set(n); attr.needsUpdate = true; }
+  else g.setAttribute('normal', new THREE.BufferAttribute(n, 3));
+}

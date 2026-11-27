@@ -6,7 +6,8 @@ import { buildDecals, drawPlate } from './gen/decals';
 import { VehiclePhysics, type DriveInput } from './physics';
 import { Emitter } from './effects';
 import { ZONES, type Zone } from './gen/morphs';
-import { SLOTS } from './gen/builder';
+import { SLOTS, angleWeightedNormals } from './gen/builder';
+import { FadeLOD } from './fadeLod';
 import { shadowBake, groundPlane, shadowMaterial, headPoolGeometry, groundLightMats, groundLightLevel, type LightCandidate, type Lightable } from './lighting';
 import { CLASS_MODELS, PROPOSED_CLASS_MODELS } from './registry';
 import {
@@ -216,7 +217,7 @@ export class Vehicle implements Lightable {
     if (g1.beacon) lod1.add(new THREE.Mesh(g1.beacon, this.mats.array));
     const lod2 = new THREE.Mesh(asset.lod2, opaque);
     const [d1, d2] = LOD_DIST[quality];
-    this.lod = new THREE.LOD();
+    this.lod = new FadeLOD();
     this.lod.addLevel(lod0, 0); this.lod.addLevel(lod1, d1); this.lod.addLevel(lod2, d2);
     this.object.add(this.lod);
 
@@ -249,14 +250,14 @@ export class Vehicle implements Lightable {
         const grp = new THREE.Group();
         const offs = w.dual ? [-(spec.tireW / 2 + 0.02), spec.tireW / 2 + 0.02] : [0];
         for (const o of offs) {
-          const m = new THREE.Mesh(geo, this.mats.array);
+          const m = new THREE.Mesh(geo, this.mats.wheelArray);
           m.position.x = o * w.side;
           m.castShadow = true;
           grp.add(m);
         }
         return grp;
       };
-      const wl = new THREE.LOD();
+      const wl = new FadeLOD();
       wl.addLevel(mk(w.side > 0 ? g0.wheelR : g0.wheelL), 0);
       wl.addLevel(mk(w.side > 0 ? g1.wheelR : g1.wheelL), d1);
       wl.addLevel(new THREE.Object3D(), d2);
@@ -795,7 +796,7 @@ export class Vehicle implements Lightable {
         pos.setXYZ(i, pos.getX(i) + d.x * k, pos.getY(i) + d.y * k, pos.getZ(i) + d.z * k);
         moved++;
       }
-      if (moved) { pos.needsUpdate = true; geo.computeVertexNormals(); }
+      if (moved) { pos.needsUpdate = true; angleWeightedNormals(geo); }
       return moved;
     };
     let moved = one(this.dentGeo.body, null);

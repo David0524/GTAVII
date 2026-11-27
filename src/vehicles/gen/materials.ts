@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { uniform, mix, smoothstep, color, float, vec3, positionLocal, mx_fractal_noise_float, mx_noise_float, clamp, fract, abs, sin, time, step } from 'three/tsl';
+import { uniform, mix, smoothstep, color, float, vec3, positionLocal, positionView, normalLocal, normalWorld, mx_fractal_noise_float, mx_noise_float, mx_worley_noise_float, clamp, fract, abs, sin, time, step, atan, length, max, bumpMap, select, interleavedGradientNoise, screenCoordinate } from 'three/tsl';
 import { SLOTS, type Slot } from './builder';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
@@ -22,6 +22,8 @@ export interface MatUniforms {
 export interface MaterialSet {
   /** Indexed by SLOTS order (matches geometry group materialIndex). */
   array: THREE.Material[];
+  /** Same, with the tyre material (tread / sidewall detail) in the rubber slot: for wheels. */
+  wheelArray: THREE.Material[];
   bySlot: Record<Slot, THREE.Material>;
   u: MatUniforms;
   /** Per-pane glass state uniforms (0/1). */
@@ -42,7 +44,32 @@ function grime(base: N, u: MatUniforms, lowCut = 0.95): { col: N; mask: N } {
   return { col: mix(dirty, color(CHAR), u.burnt as N), mask };
 }
 
-let shared: Partial<Record<Slot, THREE.Material>> & { _q?: Quality } = {};
+// ------------------------------------------------------------------ dithered LOD crossfade
+/**
+ * Per-object LOD fade read in every vehicle material (see FadeLOD). Encoded in
+ * mesh.userData.lodFade: v in [0,1] shows pixels whose dither < v (outgoing level),
+ * v in [2,3] shows pixels whose dither >= v-2 (incoming level). Complementary, so no holes.
+ * Default 1 = fully shown.
+ */
+const lodFade: N = uniform(1).onObjectUpdate(({ object }) => (object?.userData.lodFade as number | undefined) ?? 1);
+let crossfade = true;
+/** Off on phones: an always-present discard costs early-z on tiled GPUs. Set before creating cars. */
+export function setLodCrossfade(on: boolean) { crossfade = on; }
+export function lodCrossfadeEnabled() { return crossfade; }
+function lodMask(): N {
+  const n: N = interleavedGradientNoise(screenCoordinate.xy);
+  return select(lodFade.lessThan(1.5), n.lessThan(lodFade), n.greaterThanEqual(lodFade.sub(2)));
+}
+/** Add the LOD dither mask to a material (no-op when crossfade is off). */
+export function withLodMask<T extends THREE.Material>(m: T): T {
+  if (crossfade) (m as unknown as { maskNode: N }).maskNode = lodMask();
+  return m;
+}
+
+/** Fades high-frequency detail out with distance (it would only shimmer further away). */
+const near = (d0: number, d1: number): N => smoothstep(float(d1), float(d0), length(positionView));
+
+let shared: Partial<Record<Slot, THREE.Material>> & { _q?: Quality; tyre?: THREE.Material } = {};
 function sharedMats(q: Quality) {
   if (shared._q === q) return shared;
   const std = (o: THREE.MeshStandardNodeMaterialParameters) => new THREE.MeshStandardNodeMaterial(o);
@@ -56,13 +83,45 @@ function sharedMats(q: Quality) {
     grille: std({ color: 0x090909, metalness: 0.3, roughness: 0.6 }),
     interior: std({ color: 0x171310, metalness: 0, roughness: 0.95 }),
     reverse: std({ color: 0xd8d6d0, metalness: 0, roughness: 0.2, emissive: 0xffffff, emissiveIntensity: 0 }),
+    tyre: std({ color: 0x161616, metalness: 0, roughness: 0.9 }),
   };
+  if (q !== 'low') {
+    const p: N = positionLocal;
+    // chrome: fine pitting and polish swirl in the roughness, a whisper of bump up close
+    const pit: N = (mx_noise_float(p.mul(260)) as N).mul(0.5).add(0.5);
+    const chrome = shared.chrome as THREE.MeshStandardNodeMaterial;
+    chrome.roughnessNode = float(0.13).add(pit.mul(0.08).mul(near(1, 6)));
+    chrome.normalNode = bumpMap(smoothstep(float(0.78), float(0.9), pit).mul(0.00025).mul(near(0.8, 4)));
+    // grille: egg-crate bars (raised, catching light at the edges)
+    const grille = shared.grille as THREE.MeshStandardNodeMaterial;
+    const gx: N = abs(fract(p.x.mul(1 / 0.034)).sub(0.5)), gy: N = abs(fract(p.y.mul(1 / 0.028)).sub(0.5));
+    const bars: N = max(smoothstep(float(0.36), float(0.44), gx), smoothstep(float(0.36), float(0.44), gy));
+    grille.colorNode = mix(color(0x050505), color(0x2e2d2b), bars);
+    grille.roughnessNode = mix(float(0.75), float(0.35), bars);
+    grille.normalNode = bumpMap(bars.mul(0.004).mul(near(1, 10)));
+    // tyres: tread blocks and circumferential grooves on the crown, fine rings and dust on the
+    // sidewall. Wheels are lathed around local X, centred on the hub.
+    const tyre = shared.tyre as THREE.MeshStandardNodeMaterial;
+    const side: N = abs(normalLocal.x);
+    const crown: N = float(1).sub(smoothstep(float(0.35), float(0.75), side));
+    const ang: N = atan(p.y, p.z);
+    const groove: N = smoothstep(float(0.38), float(0.46), abs(fract(p.x.mul(1 / 0.03)).sub(0.5)));
+    const sipe: N = smoothstep(float(0.4), float(0.48), abs(fract(ang.mul(56 / (2 * Math.PI)).add(abs(p.x).mul(9))).sub(0.5)));
+    const treadH: N = float(1).sub(max(groove, sipe.mul(0.8)));
+    const rad: N = length(p.yz);
+    const rings: N = (sin(rad.mul(520)) as N).mul(0.5).add(0.5).mul(0.25);
+    const dust: N = (mx_noise_float(p.mul(30)) as N).mul(0.5).add(0.5);
+    tyre.normalNode = bumpMap(mix(rings.mul(0.0015), treadH.mul(0.006), crown).mul(near(1, 9)));
+    tyre.colorNode = mix(mix(color(0x262422), color(0x36322d), dust.mul(0.7)), mix(color(0x0b0b0b), color(0x181818), treadH), crown);
+    tyre.roughnessNode = mix(float(0.82), mix(float(0.97), float(0.86), treadH), crown);
+  }
+  for (const k of Object.keys(shared)) if (k !== '_q') withLodMask(shared[k as Slot] as THREE.Material);
   // Woodgrain: long streaks along the body with knots, framed lighter edges come from geometry.
   const wood = new THREE.MeshStandardNodeMaterial({ roughness: 0.5, metalness: 0 });
   const g: N = (mx_noise_float(positionLocal.mul(vec3(18, 30, 0.6))) as N).mul(0.5).add(0.5);
   const streak: N = (sin(positionLocal.y.mul(140).add(g.mul(6))) as N).mul(0.5).add(0.5);
   wood.colorNode = mix(color(0x5a341a), color(0x8a5a32), streak.mul(0.6).add(g.mul(0.4)));
-  shared.wood = wood;
+  shared.wood = withLodMask(wood);
   return shared;
 }
 
@@ -72,14 +131,17 @@ function vinylMat(hex: number) {
   if (!m) {
     const v = new THREE.MeshStandardNodeMaterial({ roughness: 0.78, metalness: 0 });
     // fine grain texture in the colour
-    const n: N = (mx_noise_float(positionLocal.mul(140)) as N).mul(0.012);
-    v.colorNode = (color(hex) as N).add(n);
-    VINYL_CACHE.set(hex, (m = v));
+    const g: N = mx_noise_float(positionLocal.mul(140));
+    v.colorNode = (color(hex) as N).add(g.mul(0.012));
+    // pebbled vinyl grain
+    v.normalNode = bumpMap((mx_worley_noise_float(positionLocal.mul(260)) as N).mul(0.00035).mul(near(0.8, 5)));
+    VINYL_CACHE.set(hex, (m = withLodMask(v)));
   }
   return m;
 }
 
 export function createMaterialSet(q: Quality, o: { paint: number; paint2?: number; roof: 'paint' | 'paint2' | number; metallic: boolean; vinyl: number; dirt: number; seat?: number; seeThroughGlass?: boolean }): MaterialSet {
+  if (q === 'low') crossfade = false; // phones: no always-on discard
   const s = sharedMats(q);
   const u: MatUniforms = { dirt: uniform(o.dirt), wet: uniform(0), burnt: uniform(0), cracked: uniform(0) };
   const physical = q !== 'low';
@@ -91,8 +153,25 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
       : new THREE.MeshStandardNodeMaterial({ metalness: metallic ? 0.45 : 0.0, roughness: 0.42 });
     const base = uniform(new THREE.Color(hex));
     const g = grime(base, u);
-    p.colorNode = g.col;
-    p.roughnessNode = mix(float(metallic ? 0.34 : 0.42), float(0.95), clamp(g.mask.add(u.burnt), 0, 1));
+    const wet: N = u.wet;
+    const pl: N = positionLocal;
+    const rough0 = metallic ? 0.34 : 0.42;
+    // metallic flake: sparse bright specks that lower the roughness (faded with distance)
+    const flake: N = metallic ? (smoothstep(float(0.55), float(0.8), mx_noise_float(pl.mul(700))) as N).mul(near(0.6, 5)) : float(0);
+    // wet: water darkens the paint and the dirt, the clearcoat sharpens, beads stand on the panels
+    const upF: N = smoothstep(float(-0.2), float(0.8), normalWorld.y);
+    const cells: N = mx_worley_noise_float(pl.mul(85));
+    const bead: N = (smoothstep(float(0.32), float(0.0), cells) as N).mul(wet).mul(float(0.35).add(upF.mul(0.65))).mul(clamp(float(1).sub(g.mask.mul(1.5)), 0, 1));
+    p.colorNode = (mix(g.col, (g.col as N).mul(0.72), wet.mul(0.8)) as N).add(flake.mul(0.06));
+    p.roughnessNode = mix(mix(float(rough0).sub(flake.mul(0.2)), float(rough0 * 0.45), wet), float(0.95), clamp(g.mask.mul(float(1).sub(wet.mul(0.5))).add(u.burnt), 0, 1));
+    if (physical) {
+      const pm = p as THREE.MeshPhysicalNodeMaterial;
+      pm.clearcoatRoughnessNode = mix(float(0.12), float(0.03), wet);
+      // orange peel (subtle, only in reflections) + water beads
+      const peel: N = (mx_noise_float(pl.mul(70)) as N).mul(0.00012).mul(near(1.2, 7));
+      pm.normalNode = bumpMap(peel.add(bead.mul(0.0012).mul(near(1, 8))));
+    }
+    withLodMask(p);
     (p as unknown as { userData: { base: typeof base } }).userData.base = base;
     owned.push(p);
     return p;
@@ -123,6 +202,7 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
       glass.transparent = true; glass.depthWrite = false;
       glass.opacityNode = mix(mix(float(0.58), float(0.88), (cracked as N)), float(0.0), br);
     }
+    withLodMask(glass);
     owned.push(glass);
     return glass;
   };
@@ -134,8 +214,8 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
   const see = o.seeThroughGlass ?? false;
   const glassF = makeGlass(panes.front.cracked, panes.front.broken, see), glassB = makeGlass(panes.rear.cracked, panes.rear.broken, see);
   const glassL = makeGlass(panes.left.cracked, panes.left.broken, see), glassR = makeGlass(panes.right.cracked, panes.right.broken, see);
-  const lamp = (c: number, e: number) => { const m = new THREE.MeshStandardNodeMaterial({ color: c, roughness: 0.15, metalness: 0, emissive: e, emissiveIntensity: 0 }); owned.push(m); return m; };
-  const seat = new THREE.MeshStandardNodeMaterial({ color: o.seat ?? 0x5a4632, roughness: 0.55, metalness: 0 }); // vinyl upholstery
+  const lamp = (c: number, e: number) => { const m = withLodMask(new THREE.MeshStandardNodeMaterial({ color: c, roughness: 0.15, metalness: 0, emissive: e, emissiveIntensity: 0 })); owned.push(m); return m; };
+  const seat = withLodMask(new THREE.MeshStandardNodeMaterial({ color: o.seat ?? 0x5a4632, roughness: 0.55, metalness: 0 })); // vinyl upholstery
   owned.push(seat);
   const headlamp = lamp(0xe8e4d8, 0xfff0cc);
   headlamp.metalness = 0.6; headlamp.roughness = 0.06; // glassy lens over a silvered reflector
@@ -147,8 +227,10 @@ export function createMaterialSet(q: Quality, o: { paint: number; paint2?: numbe
     paint, paint2, roof, vinyl: vinylMat(o.vinyl), chrome: s.chrome!, trim: s.trim!, rubber: s.rubber!, glass, glassF, glassB, glassL, glassR, under: s.under!, wood: s.wood!,
     white: s.white!, headlamp, taillamp, indicator, reverse, grille: s.grille!, interior: s.interior!, seat,
   };
+  const array = SLOTS.map((sl) => bySlot[sl]);
   return {
-    array: SLOTS.map((sl) => bySlot[sl]), bySlot, u, panes,
+    array, bySlot, u, panes,
+    wheelArray: array.map((m) => (m === s.rubber ? s.tyre! : m)),
     setPaint(hex: number) { ((paint as unknown as { userData: { base: { value: THREE.Color } } }).userData.base.value).setHex(hex); },
     dispose() { for (const m of owned) m.dispose(); },
   };

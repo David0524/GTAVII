@@ -96,7 +96,7 @@ export class TwoWheeler {
     this.visual.add(this.steerNode);
     for (const w of g0.wheels) {
       const pivot = new THREE.Object3D(), spinN = new THREE.Object3D();
-      spinN.add(new THREE.Mesh(g0.wheel, this.mats.array));
+      spinN.add(new THREE.Mesh(g0.wheel, this.mats.wheelArray));
       pivot.add(spinN);
       pivot.position.set(w.x, w.y, w.z);
       // single front wheels hang from the steering assembly

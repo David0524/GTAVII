@@ -4,6 +4,53 @@ This file is the source of truth for the vehicles workstream: read it first, upd
 Brief: `docs/briefs/VEHICLES_BRIEF.md`. Branch: `claude/youthful-newton-py223e`, based on
 `claude/tenderloin-74-engine-qi54lt`.
 
+## Session 5b: visual bar 6, 7, 8 (surface detail, wet paint, LOD crossfade) + a shading bug
+- **The vertical shading bands on every car's sides were a real bug, now fixed:**
+  - Loft stations are unevenly spaced (1 cm next to 40 cm around the arches and lamps).
+  - Area-weighted vertex normals made each belt-line vertex lean toward whichever neighbour
+    was wider. Normals alternated station to station, which read as stripes in the reflections.
+  - `angleWeightedNormals()` (gen/builder.ts) now builds the normals for every generated mesh and
+    after every dent. Side rows also keep a fixed order at every station: they used to drop rows
+    at the arches, which twisted the quads.
+  - Visible in `visual_detail.jpg` (bottom right) and the new turntables.
+- **6, normal detail.** TSL bump maps, faded out with distance so they don't shimmer:
+  - paint: orange peel, plus metallic flake on metallic variants;
+  - chrome: pitting in the roughness and the bump;
+  - grilles: egg-crate bars;
+  - vinyl roofs: pebbled grain;
+  - tyres: a new `tyre` material on the wheels (`mats.wheelArray`), with tread blocks and grooves
+    on the crown and fine rings and dust on the sidewall.
+  - Wheels now have 18 segments at LOD0 (was 14). LOD1 wheels have 10 segments, a cover disc
+    and whitewalls, so LOD1 reads like LOD0.
+- **7, wet paint.** `setWetness(w)` now darkens the paint and the dirt, sharpens the clearcoat
+  (roughness 0.12 → 0.03) and raises water beads, which are stronger on upward faces and absent on
+  dirt. The glass already had rain streaks. Shot: `visual_wet.jpg`.
+- **8, no LOD pops.** `FadeLOD` (src/vehicles/fadeLod.ts) replaces THREE.LOD for bodies and wheels.
+  - 10% hysteresis band.
+  - 0.35 s screen-space dither crossfade: a per-object `lodFade` uniform read by a `maskNode` in
+    every vehicle material. The outgoing and incoming levels show complementary pixels, so there
+    are no holes.
+  - Camera cuts (more than 0.25 s since the last update, or a jump of 2 levels) switch instantly.
+  - Only the view camera drives it. Engine: call `setVehicleViewCamera(camera)`. Without it,
+    shadow-pass cameras flipped the levels, which hid whole cars in the first try.
+  - Off on low quality, where an always-on discard costs early-z on tiled phone GPUs; that path
+    keeps the hysteresis only. Shot: `visual_lod_fade.jpg`.
+- **Budgets (triangles):**
+  - LOD0: 6.1k (courier) to 8.8k (Bancroft), CT-40 bus 9.1k. The rounder wheels cost 480 per car.
+    Bancroft and the bus are now about 10% over the ≈8k target.
+  - LOD1: 1.5–2.0k for cars, 2.7k for the bus. Whitewalls and wheel covers are back, so LOD1
+    matches LOD0 through the fade.
+
+**Critique, honest:**
+- Tyre tread reads only in grazing light. In shadow under the arch it is black on black, as in
+  life.
+- The egg-crate bump is subtle next to the modelled vertical bars on the Tiverton grille.
+- Metallic flake needs a sunny close-up to show. SwiftShader shots under-sell all three.
+- LOD1 still has opaque glass (no cabin) and no side trim strip, so the dissolve is visible as a
+  glass-darkness change at 40 m.
+- Traffic instances switch LOD1→box at 160 m with no fade. A per-instance dither would need an
+  instance attribute: next.
+
 ## Session 5: visual bar (VISUAL_BAR.md): contact shadows, lights that light, local dents
 Gap list sent to oversight: 1 reflections (partial), 2 damage deformation (partial), 3 interiors
 (done, basic), 4 lights cast light (missing), 5 contact shadows (missing), 6 normal detail

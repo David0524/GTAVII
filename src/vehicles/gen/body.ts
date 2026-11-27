@@ -87,6 +87,13 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   if (m.stripe) extraY.push(...m.stripe);
   if (m.wood) extraY.push(m.wood.y0, m.wood.y1);
   if (m.trim.side) extraY.push(m.trim.side.y - 0.02, m.trim.side.y + 0.02);
+  // Row order from the nominal (mid-body) heights.
+  const nominal = (lod0: boolean) => {
+    const yb = m.beltY, c = lerp(m.sillY, m.beltY, m.crease);
+    return [m.sillY, m.sillY + 0.05, c, ...(lod0 ? extraY : []), yb - 0.07, yb - 0.025, yb];
+  };
+  const order = nominal(lod === 0).map((y, k) => [y, k]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((e) => e[1]);
+  const SIDE_ORDER = (n: number) => (n === order.length ? order : [...Array(n).keys()]);
 
   const sideX = (s: number, y: number) => {
     const hw = halfW(s), y0 = bottomY(s), yb = beltAt(s);
@@ -99,9 +106,16 @@ export function generate(m: ModelSpec, o: GenOptions): GeneratedModel {
   const section = (s: number): Section => {
     const hw = halfW(s), y0 = bottomY(s), yt = topY(s), yb = Math.min(beltAt(s), yt);
     const creaseY = lerp(m.sillY, m.beltY, m.crease);
-    let ys = [y0, y0 + 0.05, creaseY, yb - 0.07, yb - 0.025, yb];
-    if (lod === 0) ys.push(...extraY);
-    ys = [...new Set(ys.filter((y) => y >= y0 && y <= yb).map((y) => Math.round(y * 1000) / 1000))].sort((a, b) => a - b);
+    // Every station gets the same rows in the same order (the order they have mid-body), clamped
+    // into [y0, yb] and kept monotonic. Dropping rows at the arches (as before) shifted row
+    // indices between neighbouring stations, twisting the quads into visible shading bands.
+    const raw = [y0, y0 + 0.05, creaseY, ...(lod === 0 ? extraY : []), yb - 0.07, yb - 0.025, yb];
+    let prev = -Infinity;
+    const ys = SIDE_ORDER(raw.length).map((k) => {
+      let y = clamp(raw[k], y0, yb);
+      if (y < prev + 0.0015) y = prev + 0.0015;
+      return (prev = y);
+    });
     const side: V3[] = ys.map((y) => [sideX(s, y), y, Z(s + rake(s, y))]);
     const crown = m.crown * (yt > yb + 0.02 ? 1 : 0);
     const topPts: [number, number][] = lod === 0
@@ -712,7 +726,7 @@ function bumper(b: GeoBuilder, bp: NonNullable<ModelSpec['rearBumper']>, end: 'f
 function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry {
   const b = new GeoBuilder();
   const R = m.wheelR, w = m.tireW;
-  const segs = o.lod === 0 ? 14 : 7;
+  const segs = o.lod === 0 ? 18 : 10;
   const rim = R * (m.cls === 'bus' || m.cls === 'boxtruck' || m.cls === 'garbage' ? 0.56 : 0.62);
   const mir = side < 0;
   const tire: [number, number][] = o.lod === 0
@@ -722,8 +736,9 @@ function wheel(m: ModelSpec, o: GenOptions, side: 1 | -1): THREE.BufferGeometry 
   // inboard back of the wheel, so far-side wheels seen under the body never look hollow
   if (m.sillY > 0.4) b.latheX('under', [[rim * 0.99, -w / 2 + 0.004], [0.001, -w / 2 + 0.004]], segs, [0, 0, 0], mir, w);
   const style = o.wheelStyle;
-  if (o.lod === 1) { // flat disc in the trim colour
-    b.latheX(style === 'fullcover' || style === 'wire' ? 'chrome' : 'trim', [[rim, w / 2], [0.001, w / 2 + 0.02]], segs, [0, 0, 0], mir);
+  if (o.lod === 1) { // shallow disc in the cover colour, plus the whitewall: LOD1 must read like LOD0 at 40 m
+    b.latheX(style === 'fullcover' || style === 'wire' || style === 'hubcap' || style === 'dogdish' ? 'chrome' : 'trim', [[rim, w / 2], [rim * 0.6, w / 2 + 0.025], [0.001, w / 2 + 0.04]], segs, [0, 0, 0], mir, -w);
+    if (o.whitewall) b.latheX('white', [[rim + 0.012, w / 2 + 0.004], [R - 0.04, w / 2 + 0.004]], segs, [0, 0, 0], mir, -w);
     return b.build();
   }
   const face = w / 2;

@@ -38,6 +38,10 @@ export { MODELS } from './models';
 export { DriverAssist, TOUCH_DEFAULTS, PAD_DEFAULTS, type AssistSettings } from './assist';
 export { CarLightPool, updateCarLights, setGroundLightLevel, LIGHT_BUDGET, type LightCandidate, type Lightable } from './lighting';
 import type { LightCandidate } from './lighting';
+import { FadeLOD } from './fadeLod';
+/** The camera the game renders with: LOD crossfades follow it (not shadow-map cameras). */
+export function setVehicleViewCamera(camera: THREE.Camera) { FadeLOD.viewCamera = camera; }
+export { setLodCrossfade } from './gen/materials';
 
 export interface VehicleFactory {
   models: readonly { id: string; class: string; displayName: string }[];

@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-27T02:44:02.602Z",
+  "date": "2026-11-27T03:09:41.961Z",
   "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
   "crash30mph": {
     "impacts": [
@@ -10,7 +10,7 @@
       }
     ],
     "model": "bancroft",
-    "tris": 8060,
+    "tris": 8476,
     "speed": -0.379531287743848,
     "damage": 0.43694901490822813,
     "stage": "battered",
@@ -22,7 +22,7 @@
     },
     "gear": 1,
     "rpm": 778.1587838700437,
-    "physMs": 0.43623249737145864,
+    "physMs": 0.4444497874470457,
     "stepMs": 0
   },
   "traffic": {
@@ -244,83 +244,83 @@
   },
   "triangles": {
     "bancroft": {
-      "lod0": 8284,
-      "lod1": 1430,
+      "lod0": 8764,
+      "lod1": 1630,
       "lod2": 72
     },
     "bancroft_patrol": {
-      "lod0": 7960,
-      "lod1": 1550,
+      "lod0": 8376,
+      "lod1": 1750,
       "lod2": 72
     },
     "bancroft_cab": {
-      "lod0": 7724,
-      "lod1": 1454,
+      "lod0": 8140,
+      "lod1": 1654,
       "lod2": 72
     },
     "tiverton": {
-      "lod0": 7636,
-      "lod1": 1400,
+      "lod0": 8052,
+      "lod1": 1600,
       "lod2": 72
     },
     "ferris": {
-      "lod0": 6846,
-      "lod1": 1222,
+      "lod0": 7530,
+      "lod1": 1422,
       "lod2": 72
     },
     "homestead": {
-      "lod0": 7988,
-      "lod1": 1374,
+      "lod0": 8404,
+      "lod1": 1574,
       "lod2": 72
     },
     "fareway": {
-      "lod0": 7162,
-      "lod1": 1360,
+      "lod0": 7578,
+      "lod1": 1560,
       "lod2": 72
     },
     "ct40": {
-      "lod0": 8076,
-      "lod1": 2228,
+      "lod0": 8700,
+      "lod1": 2564,
       "lod2": 72
     },
     "b60": {
-      "lod0": 6256,
-      "lod1": 1498,
+      "lod0": 6880,
+      "lod1": 1834,
       "lod2": 84
     },
     "walkin": {
-      "lod0": 5550,
-      "lod1": 1260,
+      "lod0": 5966,
+      "lod1": 1484,
       "lod2": 72
     },
     "b80": {
-      "lod0": 6270,
-      "lod1": 1500,
+      "lod0": 6894,
+      "lod1": 1836,
       "lod2": 84
     },
     "medic": {
-      "lod0": 6416,
-      "lod1": 1784,
+      "lod0": 7040,
+      "lod1": 2120,
       "lod2": 84
     },
     "pumper": {
-      "lod0": 6754,
-      "lod1": 1668,
+      "lod0": 7378,
+      "lod1": 2004,
       "lod2": 84
     },
     "ladder": {
-      "lod0": 6888,
-      "lod1": 1736,
+      "lod0": 7512,
+      "lod1": 2072,
       "lod2": 84
     },
     "courier": {
-      "lod0": 5360,
-      "lod1": 1158,
+      "lod0": 5776,
+      "lod1": 1382,
       "lod2": 72
     },
     "scoop": {
-      "lod0": 5548,
-      "lod1": 1366,
+      "lod0": 5996,
+      "lod1": 1590,
       "lod2": 84
     }
   },

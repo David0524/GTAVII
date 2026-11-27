@@ -6,9 +6,10 @@ import { qualityFromUrl } from '../../engine/quality';
 import { Input } from '../../input/Input';
 import { TouchControls } from '../../ui/TouchControls';
 import { DebugHud, FrameStats } from '../../engine/debug/DebugHud';
-import { createVehicleFactory, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
+import { createVehicleFactory, setVehicleViewCamera, type Vehicle, type SkidEvent, type ImpactEvent, type DamageEvent } from '../index';
 import { SkidMarks } from '../SkidMarks';
 import { MODELS } from '../models';
+import { variantOf } from '../assets';
 import { BIKES } from '../twowheel/bikes';
 import type { TwoWheeler } from '../twowheel/TwoWheeler';
 import { SubwayTrain } from '../subway/SubwayTrain';
@@ -79,6 +80,7 @@ export async function runTestLot() {
   scene.fog = new THREE.Fog(0xb0a494, 120, 600);
   try { scene.environment = streetEnvironment(renderer); scene.environmentIntensity = 0.9; } catch (e) { console.warn('env map failed', e); }
   const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2000);
+  setVehicleViewCamera(camera);
   const sun = new THREE.DirectionalLight(0xffe2bc, 2.4);
   sun.position.set(-40, 60, 25);
   sun.castShadow = quality.shadows;
@@ -487,6 +489,8 @@ export async function runTestLot() {
       const n = camera.position.clone().sub(target).normalize();
       return player.applyHit({ point: target, normal: n, type: 'bullet', source: 'tester' });
     },
+    /** Variant options (paint, metallic, vinyl...) of a model. */
+    variantOf: (id: string, v: number) => variantOf(MODELS.find((m) => m.id === id)!, v),
     /** 0 = afternoon, 1 = night. */
     setNight, get night() { return night; }, carLights,
     /** Dent the player at a local point (metres of push), for damage close-ups. */

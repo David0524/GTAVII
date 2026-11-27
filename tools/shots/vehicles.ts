@@ -240,6 +240,54 @@ async function main() {
       console.log('visual');
     }
 
+    // ------------------------------------------------------------------ visual bar 2: surface detail, wet paint, LOD crossfade
+    if (only.has('visual2')) {
+      await open(page, 'mode=turntable&quality=high');
+      // pick a metallic variant with a vinyl roof for the Tiverton, and a plain one for the Bancroft
+      const pickVar = (id: string, want: { metallic?: boolean; vinyl?: boolean }) => page.evaluate(([id, want]: [string, any]) => {
+        const V = window.__VEH; const m = V.factory.models.find((x: any) => x.id === id);
+        for (let v = 0; v < 60; v++) { const r = V.variantOf(id, v); if ((want.metallic === undefined || r.metallic === want.metallic) && (want.vinyl === undefined || (r.vinyl !== 'none') === want.vinyl)) return v; }
+        void m; return 0;
+      }, [id, want] as [string, any]);
+      const vT = await pickVar('tiverton', { metallic: true, vinyl: true });
+      const dt: Buffer[] = [];
+      await page.evaluate((v: number) => { const V = window.__VEH; V.setModel('tiverton', v, { x: 0, z: 30, yaw: 0.5 }); V.player.setLights({ head: false }); V.simulate(0.8); }, vT);
+      // camera and target in the car's local frame; 'w' = front-right wheel centre, 'f' = front bumper centre
+      const camLocal = (c: number[], t: number[], fov: number, ref: 'w' | 'f' | 'o' = 'o') => page.evaluate(([c, t, fov, ref]: [number[], number[], number, string]) => {
+        const V = window.__VEH, o = V.player.object, g = V.player.asset.lod0;
+        const w = g.wheels.find((x: any) => x.front && x.side > 0);
+        const r = ref === 'w' ? [w.x, w.y, w.z] : ref === 'f' ? [0, 0, g.minZ] : [0, 0, 0];
+        const C = o.localToWorld(new o.position.constructor(r[0] + c[0], r[1] + c[1], r[2] + c[2])), T = o.localToWorld(new o.position.constructor(r[0] + t[0], r[1] + t[1], r[2] + t[2]));
+        V.setCamera(C.x, C.y, C.z, T.x, T.y, T.z, fov);
+      }, [c, t, fov, ref] as [number[], number[], number, string]);
+      await camLocal([0.55, 0.0, -1.0], [0.05, -0.06, 0], 34, 'w'); dt.push(await snap(page)); // front tyre, tread side
+      await camLocal([0.55, 0.62, -1.25], [0.05, 0.55, 0.05], 34, 'f'); dt.push(await snap(page)); // grille + bumper chrome
+      await camLocal([1.3, 2.05, 0.9], [0, 1.25, -0.4], 30); dt.push(await snap(page)); // vinyl roof + metallic paint
+      await camRel(page, [3.4, 1.25, 3.0], 34, 0.45); dt.push(await snap(page)); // rear quarter
+      await sheet(page, dt, 2, 800, 450, 'visual_detail.jpg', ['tyre: tread blocks, grooves, sidewall rings', 'egg-crate grille, pitted chrome', `vinyl grain, metallic flake (variant ${vT})`, 'orange peel in the reflections']);
+      // wet paint
+      const wt: Buffer[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.setModel('bancroft', 4, { x: 0, z: 30, yaw: 0.5 }); V.player.setLights({ head: false }); V.simulate(0.8); });
+      await camRel(page, [4.2, 1.7, -4.4], 38, 0.4); wt.push(await snap(page));
+      await page.evaluate(() => { window.__VEH.player.setWetness(1, 2); });
+      wt.push(await snap(page));
+      await page.evaluate(() => { window.__VEH.player.setWetness(0); });
+      await camRel(page, [0.9, 1.5, -2.8], 30, 0.75); wt.push(await snap(page));
+      await page.evaluate(() => { window.__VEH.player.setWetness(1, 2); });
+      wt.push(await snap(page));
+      await sheet(page, wt, 2, 800, 450, 'visual_wet.jpg', ['dry', 'wet: darker paint, sharper clearcoat, beads', 'hood, dry', 'hood, wet']);
+      // LOD crossfade: slow the fade down and catch it mid-switch (telephoto so the car stays large)
+      const lf: Buffer[] = [], ll: string[] = [];
+      await page.evaluate(() => { const V = window.__VEH; V.player.setWetness(0); V.setModel('bancroft', 4, { x: 0, z: 30, yaw: 0.9 }); V.simulate(0.5); V.player.object.traverse((o: any) => { if (o.fadeTime !== undefined) { o.fadeTime = 4; o.constructor.cutGap = 1e9; } }); });
+      const at = (d: number) => page.evaluate((d: number) => { const V = window.__VEH, p = V.player.object.position; V.setCamera(p.x + d * 0.7, 1.2 + d * 0.05, p.z - d * 0.7, p.x, 0.6, p.z, 6.5); }, d);
+      await at(36); await snap(page); lf.push(await snap(page)); ll.push('LOD0 at 36 m');
+      await at(47); await snap(page); lf.push(await snap(page)); ll.push('crossing 44 m: dither starts');
+      await page.waitForTimeout(1600); lf.push(await snap(page)); ll.push('mid-fade');
+      await page.waitForTimeout(3000); lf.push(await snap(page)); ll.push('LOD1 settled');
+      await sheet(page, lf, 2, 800, 450, 'visual_lod_fade.jpg', ll);
+      console.log('visual2');
+    }
+
     // ------------------------------------------------------------------ systems: bullets, heat, theft, respray, plates + measurements
     if (only.has('systems')) {
       await open(page, 'mode=drive&quality=high');
