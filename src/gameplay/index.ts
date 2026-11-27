@@ -46,6 +46,7 @@ import { TICKET, TICKET_MAJOR, Ownership } from './cars/ownership';
 import { Stats } from './meta/stats';
 import { PoliceMirror, simAgentPort, type SimLike } from './integration/simAdapter';
 import type { SuspectMotion } from './police/pursuit';
+import { allowed as moveAllowed, locomotion as moveLocomotion, landing, bargeChance, BARGE_SECONDS, DOORS, LADDER_PER_M, STAMINA_COST, TURNSTILE, type Carrying, type DoorKind, type MoveAction, type MoverState } from './player/movement';
 import { Economy } from './economy';
 import { Arcade } from './arcade';
 import { cabFare, cabTip, rideMinutes, TOKEN, SUBWAY_KMH } from './meta/travel';
@@ -96,6 +97,8 @@ export interface PlayerCombatState {
   crouch: boolean;
   /** touch fire mode (TOUCH_CONTROLS.md): 'auto' fires when the reticle is on a locked target; 'tap' and 'button' wait for input */
   fireMode: 'auto' | 'tap' | 'button'; gyro: boolean;
+  /** what's in the player's hands (MOVEMENT.md rules): a bag, a crate, a body */
+  carrying: Carrying; cuffed: boolean;
   /** Interiors: inside a public place (diner, shop, lobby) / in a hiding spot marker */
   indoorsPublic: boolean; hiding: boolean;
   lockLimb: Limb; device: 'touch' | 'pad' | 'mouse'; assist: AssistLevel;
@@ -157,7 +160,7 @@ export class Gameplay {
   readonly pc: PlayerCombatState = {
     weapon: 'weapon.fists', aiming: false, firing: false, cover: null, peek: false, blind: false, surrendered: false, vehicle: null,
     indoors: false, subway: false, atHome: false, speed: 0, lockLimb: 'torso', device: 'mouse', assist: 'standard',
-    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false, indoorsPublic: false, hiding: false, fireMode: 'auto', gyro: false,
+    sprinting: false, tempF: 84, raining: false, unlimitedSprint: false, jamClear: 0, vehicleYaw: 0, crouch: false, indoorsPublic: false, hiding: false, fireMode: 'auto', gyro: false, carrying: 'none', cuffed: false,
   };
   /** Last frame's shot results (debug overlay tracers). */
   lastShots: ShotResult[] = [];
@@ -365,8 +368,8 @@ export class Gameplay {
   // ------------------------------------------------------------------ player commands (input layer → gameplay)
   equip(weaponId: string) { if (!this.player) return false; if (!this.inv.equip(this.player.lead, weaponId)) return false; this.pc.weapon = weaponId; this.melee.setWeapon(this.player.id, this.meleeWeapon()); this.aimer.release(); return true; }
   cycleWeapon(dir: 1 | -1) { if (!this.player) return; const ws = this.inv.weapons(this.player.lead); const i = ws.indexOf(this.pc.weapon); this.equip(ws[(i + dir + ws.length) % ws.length]); }
-  setAiming(on: boolean) { this.pc.aiming = on; if (!on && this.pc.device !== 'touch') this.aimer.release(); if (on && this.pc.cover) this.pc.peek = true; if (!on) this.pc.peek = false; }
-  setFiring(on: boolean) { this.pc.firing = on; }
+  setAiming(on: boolean) { if (on && !this.canMove('aim').ok) return; this.pc.aiming = on; if (!on && this.pc.device !== 'touch') this.aimer.release(); if (on && this.pc.cover) this.pc.peek = true; if (!on) this.pc.peek = false; }
+  setFiring(on: boolean) { this.pc.firing = on && this.canMove('fire').ok; }
   reload() { const g = this.currentGun(); if (g && this.player) g.startReload(this.inv.reserve(this.player.lead, g.def.id), this.mods()); }
   /** Touch lock-on. */
   /** Touch lock-on: needs no precise aim. Searches a wide cone around where the camera faces (pitch
@@ -391,10 +394,10 @@ export class Gameplay {
   /** Assist strength setting (off | low | standard | strong); gyro aim forces it off. */
   setAssist(level: AssistLevel) { this.pc.assist = this.pc.gyro ? 'off' : level; }
   setLimb(l: Limb) { this.aimer.limb = l; this.pc.lockLimb = l; }
-  meleeAttack(kind: AttackKind) { if (!this.player) return false; this.syncPlayerFighter(); return this.melee.attack(this.player.id, kind); }
+  meleeAttack(kind: AttackKind) { if (!this.player || !this.canMove('melee').ok) return false; this.syncPlayerFighter(); return this.melee.attack(this.player.id, kind); }
   block(held: boolean) { if (this.player) { this.syncPlayerFighter(); this.melee.block(this.player.id, held); } }
   dodge(dir: [number, number]) {
-    if (!this.player) return false; this.syncPlayerFighter();
+    if (!this.player || !this.canMove('roll').ok) return false; this.syncPlayerFighter();
     const ok = this.melee.dodge(this.player.id, dir);
     if (ok && this.healthSys.state(this.player.id)?.burning) this.healthSys.treat(this.player.id, { extinguish: this.rng.chance(0.7) }); // stop, drop and roll
     return ok;
@@ -404,6 +407,7 @@ export class Gameplay {
   /** Toggle cover: enter the nearest point in the move direction, or leave. */
   toggleCover(moveDir: [number, number] | null) {
     if (!this.player) return null;
+    if (!this.pc.cover && !this.canMove('cover').ok) return null;
     if (this.pc.cover) { this.cover.release(this.player.id); this.pc.cover = null; this.pc.peek = false; return null; }
     const p = this.player.position();
     const c = this.cover.near(p[0], p[2], moveDir);
@@ -412,7 +416,7 @@ export class Gameplay {
   }
   setBlindFire(on: boolean) { this.pc.blind = on; }
   surrender(on: boolean) { this.pc.surrendered = on; }
-  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch' | 'indoorsPublic' | 'hiding' | 'fireMode' | 'gyro'>>) { Object.assign(this.pc, c); if (c.gyro) this.pc.assist = 'off'; }
+  setContext(c: Partial<Pick<PlayerCombatState, 'vehicle' | 'indoors' | 'subway' | 'atHome' | 'device' | 'assist' | 'speed' | 'sprinting' | 'tempF' | 'raining' | 'unlimitedSprint' | 'vehicleYaw' | 'crouch' | 'indoorsPublic' | 'hiding' | 'fireMode' | 'gyro' | 'carrying' | 'cuffed'>>) { Object.assign(this.pc, c); if (c.gyro) this.pc.assist = 'off'; }
   /** Take the gun and rounds off a downed enemy within reach. Guns come in random condition and tier. */
   loot(): { weapon: string | null; rounds: number } | null {
     if (!this.player) return null;
@@ -503,6 +507,7 @@ export class Gameplay {
   }
   /** Get into a car by a given method. Crimes go through the witness system with the method's noise. */
   enterCar(carId: string, method: EntryMethod, timing?: number) {
+    if (!this.canMove('enterVehicle').ok) return { ok: false as const, reason: 'carrying' as const };
     if (!this.player) return null;
     const lead = this.player.lead, sk = skillFx(this.inv.ensure(lead).skills);
     const c = this.cars.cars.get(carId);
@@ -753,7 +758,7 @@ export class Gameplay {
   enterSubway(jump = false) {
     if (!this.player) return false;
     if (!jump && !this.inv.spend(this.player.lead, TOKEN, 'token')) return false;
-    if (jump) this.crime('fare_evasion', { noise: 10 });
+    if (jump) this.crime('fare_evasion', { noise: TURNSTILE.noise });
     const p = this.player.position(), st = this.stationNear(p[0], p[2]);
     if (st) {
       const ph = this.policeSys.phase(this.player.id), seen = ph === 'pursuit' || ph === 'spotted';
@@ -1383,6 +1388,68 @@ export class Gameplay {
   }
   /** The engine reports a fall from height (m) for any actor. */
   fell(id: string, dropM: number) { const d = fallDamage(dropM); if (d > 0) this.applyDamage(id, { amount: d, type: 'fall' }); }
+
+  // ------------------------------------------------------------------ movement rules (MOVEMENT.md)
+  /** The rules' view of the player right now. */
+  moverState(): MoverState {
+    const p = this.player; const lead = p ? this.inv.ensure(p.lead) : null;
+    const fx = p ? this.healthSys.effects(p.id) : { limp: 0, canSprint: true };
+    const inj = p ? this.healthSys.get(p.id).injuries : [];
+    const wear = p ? (this.healthSys.serialize(p.id)?.wear as Record<string, number> | undefined) : undefined;
+    return {
+      carrying: this.pc.carrying, limp: fx.limp, legCrippled: !fx.canSprint, armWear: Math.max(wear?.arm_l ?? 0, wear?.arm_r ?? 0),
+      intox: lead?.intox ?? 0, staminaValue: lead ? lead.stamina.value : 100, exhausted: lead?.stamina.exhausted ?? false,
+      aiming: this.pc.aiming, inCover: !!this.pc.cover, inVehicle: !!this.pc.vehicle, surrendered: this.pc.surrendered, cuffed: this.pc.cuffed,
+      burning: inj.includes('burning'), bleeding: inj.includes('bleeding'),
+    };
+  }
+  /** May the player do this now? The engine asks before committing a traversal; the UI greys the button with `reason`. */
+  canMove(a: MoveAction) { return moveAllowed(a, this.moverState()); }
+  /** Speed, sway, turn, stop and stumble multipliers, plus the gait layer for characters. */
+  locomotion() { const st = this.player ? this.inv.ensure(this.player.lead).stamina : null; return moveLocomotion(this.moverState(), st ? st.value / st.max : 1); }
+  /**
+   * The engine performed a traversal: pay its stamina (ladders per metre). Returns false (and spends nothing)
+   * when it's not allowed; the engine should have asked `canMove` first.
+   */
+  traversed(a: MoveAction, metres = 0) {
+    if (!this.player || !this.canMove(a).ok) return false;
+    const st = this.inv.ensure(this.player.lead).stamina;
+    const cost = a === 'sprint' ? 0 : STAMINA_COST[a] + (a === 'ladder' ? LADDER_PER_M * metres : 0);
+    st.value = Math.max(0, st.value - cost); if (st.value <= 0) st.exhausted = true;
+    if (a === 'climb' || a === 'fenceClimb' || a === 'roofJump' || a === 'vault') this.emit('notice', { kind: 'traversal', action: a });
+    return true;
+  }
+  /** The engine's landing: height fallen (m) and whether the roll was timed. Damage, leg wear and ragdoll. */
+  landed(heightM: number, rolled = false) {
+    if (!this.player) return null;
+    const l = landing(heightM, rolled);
+    if (l.damage > 0) this.applyDamage(this.player.id, { amount: l.damage, type: 'fall' });
+    if (l.ragdoll || l.damage > 0) this.emit('notice', { kind: 'landing', height: heightM, ...l });
+    return l;
+  }
+  /**
+   * Shoulder-barge a locked door. One attempt: stamina, noise, maybe it gives. Somebody else's door is a heard
+   * crime (vandalism). Returns the outcome for the engine (play the hit, open the door on `opened`).
+   */
+  bargeDoor(door: { id: string; kind: DoorKind; mine?: boolean; at?: [number, number] }) {
+    if (!this.player) return null;
+    const v = this.canMove('shoulderBarge'); if (!v.ok) return { opened: false, refused: v.reason, seconds: 0 };
+    this.traversed('shoulderBarge');
+    const chance = bargeChance(door.kind, this.inv.ensure(this.player.lead).skills.strength ?? 50, this.moverState());
+    const opened = this.rng.chance(chance);
+    const p = this.player.position();
+    if (!door.mine) this.crime('vandalism', { noise: DOORS[door.kind].noise, at: door.at ? [door.at[0], p[1], door.at[1]] : undefined });
+    this.emit('notice', { kind: 'barge', door: door.id, opened, chance: +chance.toFixed(2) });
+    if (opened) this.doors?.open?.(door.id);
+    return { opened, chance, seconds: BARGE_SECONDS };
+  }
+  /** Over the turnstile instead of paying the 35¢ token: fare evasion, if the clerk or a transit cop sees. */
+  vaultTurnstile() {
+    if (!this.player) return false;
+    if (!this.canMove('turnstileVault').ok) return false;
+    this.traversed('turnstileVault');
+    return this.enterSubway(true);
+  }
 
   // ------------------------------------------------------------------ save
   serialize(): SaveV3 {

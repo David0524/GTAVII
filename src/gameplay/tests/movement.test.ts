@@ -1,0 +1,99 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { rig } from './harness';
+import { allowed, locomotion, landing, bargeChance, IDLE_MOVER, STAMINA_COST, FALL, DRUNK, HEIGHTS, type MoveAction } from '../player/movement';
+
+const ALL: MoveAction[] = ['sprint', 'vault', 'climb', 'fenceClimb', 'ladder', 'dropLadder', 'roofJump', 'hangDrop', 'turnstileVault', 'shoulderBarge', 'roll', 'cover', 'aim', 'fire', 'melee', 'enterVehicle', 'crouch'];
+
+test('movement rules: a fit, sober, empty-handed lead can do everything; kerbs are autostep below any rule', () => {
+  for (const a of ALL) assert.ok(allowed(a, IDLE_MOVER).ok, a);
+  assert.ok(HEIGHTS.step >= 0.4 && HEIGHTS.vaultMin > HEIGHTS.step, 'a granite kerb (0.15-0.25 m) and a stoop step are taken in stride');
+});
+
+test('movement rules: carrying a body takes both hands (no climbing, guns, cover or the car), a bag only stops roof jumps', () => {
+  const body = { ...IDLE_MOVER, carrying: 'body' as const };
+  for (const a of ['sprint', 'vault', 'climb', 'fenceClimb', 'ladder', 'roofJump', 'aim', 'fire', 'melee', 'cover', 'enterVehicle', 'roll', 'shoulderBarge'] as MoveAction[]) assert.equal(allowed(a, body).ok, false, a);
+  assert.equal(allowed('enterVehicle', body).reason, 'put it in the trunk');
+  for (const a of ['crouch', 'hangDrop'] as MoveAction[]) assert.ok(allowed(a, body).ok, a);
+  const bag = { ...IDLE_MOVER, carrying: 'bag' as const };
+  for (const a of ['sprint', 'vault', 'climb', 'fenceClimb', 'ladder', 'aim', 'fire', 'cover', 'enterVehicle'] as MoveAction[]) assert.ok(allowed(a, bag).ok, `bag: ${a}`);
+  assert.equal(allowed('roofJump', bag).reason, 'not with the bag');
+  const crate = { ...IDLE_MOVER, carrying: 'crate' as const };
+  assert.ok(allowed('sprint', crate).ok && allowed('cover', crate).ok && !allowed('aim', crate).ok && !allowed('vault', crate).ok);
+});
+
+test('movement rules: injuries, drink, breath, hands up and cuffs', () => {
+  const leg = { ...IDLE_MOVER, limp: 0.9, legCrippled: true };
+  for (const a of ['sprint', 'vault', 'climb', 'fenceClimb', 'roofJump', 'turnstileVault'] as MoveAction[]) assert.equal(allowed(a, leg).reason, 'bad leg', a);
+  assert.ok(allowed('ladder', leg).ok, 'a ladder is arms');
+  const arm = { ...IDLE_MOVER, armWear: 1.1 };
+  for (const a of ['climb', 'fenceClimb', 'ladder', 'dropLadder'] as MoveAction[]) assert.equal(allowed(a, arm).reason, 'bad arm', a);
+  assert.ok(allowed('vault', arm).ok && allowed('sprint', arm).ok);
+  assert.equal(allowed('roofJump', { ...IDLE_MOVER, intox: DRUNK.tipsy }).reason, 'too drunk', 'no roof jumps after a couple');
+  assert.equal(allowed('vault', { ...IDLE_MOVER, intox: DRUNK.drunk }).reason, 'too drunk');
+  assert.equal(allowed('sprint', { ...IDLE_MOVER, intox: DRUNK.legless }).reason, 'too drunk');
+  assert.ok(allowed('climb', { ...IDLE_MOVER, intox: DRUNK.drunk }).ok, 'a drunk can still get up a wall, slowly');
+  assert.equal(allowed('climb', { ...IDLE_MOVER, staminaValue: STAMINA_COST.climb - 1 }).reason, 'out of breath');
+  assert.ok(allowed('hangDrop', { ...IDLE_MOVER, staminaValue: 0, exhausted: true }).ok, 'you can always let go');
+  for (const a of ALL) if (a !== 'crouch' && a !== 'hangDrop') assert.equal(allowed(a, { ...IDLE_MOVER, surrendered: true }).ok, false, `hands up: ${a}`);
+  for (const a of ALL) if (a !== 'crouch') assert.equal(allowed(a, { ...IDLE_MOVER, cuffed: true }).reason, 'cuffed');
+  assert.equal(allowed('sprint', { ...IDLE_MOVER, inCover: true }).reason, 'in cover');
+});
+
+test('locomotion: limp, drink, load and breath change speed, sway, turns, stops and stumbles', () => {
+  const n = locomotion(IDLE_MOVER);
+  assert.deepEqual([n.speedMul, n.swayDeg, n.turnMul, n.stopMul, n.stumbleOnStep, n.gait], [1, 0, 1, 1, 0, 'normal']);
+  const limp = locomotion({ ...IDLE_MOVER, limp: 1, legCrippled: true });
+  assert.ok(limp.speedMul <= 0.56 && !limp.canSprint && limp.gait === 'limp' && limp.stumbleOnStep > 0.2);
+  const drunk = locomotion({ ...IDLE_MOVER, intox: 0.7 });
+  assert.ok(drunk.swayDeg > 3 && drunk.turnMul < 0.9 && drunk.stopMul > 1.3 && drunk.stumblePerSprintS > 0 && drunk.gait === 'drunk');
+  const legless = locomotion({ ...IDLE_MOVER, intox: 0.9 });
+  assert.ok(!legless.canSprint && legless.speedMul <= 0.71 && legless.swayDeg >= 7);
+  const body = locomotion({ ...IDLE_MOVER, carrying: 'body' });
+  assert.ok(body.speedMul === 0.55 && body.gait === 'carry_heavy' && !body.canSprint);
+  assert.equal(locomotion(IDLE_MOVER, 0.1).gait, 'tired');
+});
+
+test('landing: free below ~2.9 m, a roll halves it to 6 m, ragdoll from 6 m, about 14 m kills', () => {
+  assert.equal(landing(FALL.safe - 0.1, false).damage, 0);
+  const four = landing(4.5, false), fourRoll = landing(4.5, true);
+  assert.ok(four.damage > 0 && fourRoll.damage <= Math.ceil(four.damage / 2) && fourRoll.rolled);
+  assert.ok(!landing(8, true).rolled, 'no rolling out of a two-storey drop');
+  assert.ok(landing(6, false).ragdoll && !landing(5.9, false).ragdoll);
+  assert.ok(landing(14, false).damage >= 100, `five storeys (${landing(14, false).damage})`);
+  assert.ok(landing(10, false).damage < 100, 'three storeys hurts, usually survivable');
+});
+
+test('shoulder barge: interior doors give, apartments sometimes, steel and the police lock never; strength helps', () => {
+  assert.equal(bargeChance('steel', 100, IDLE_MOVER), 0);
+  assert.equal(bargeChance('police_lock', 100, IDLE_MOVER), 0);
+  assert.ok(bargeChance('interior', 50, IDLE_MOVER) > bargeChance('apartment', 50, IDLE_MOVER));
+  assert.ok(bargeChance('apartment', 90, IDLE_MOVER) > bargeChance('apartment', 20, IDLE_MOVER));
+  assert.ok(bargeChance('apartment', 50, { ...IDLE_MOVER, armWear: 0.8 }) < bargeChance('apartment', 50, IDLE_MOVER));
+});
+
+test('facade: the rules hold in play (body in hands, landings, barging a door is heard, the turnstile vault)', () => {
+  const r = rig();
+  r.g.setContext({ carrying: 'body' });
+  r.g.equip('weapon.service'); r.g.setAiming(true);
+  assert.equal(r.g.pc.aiming, false, 'no aiming with a body in your arms');
+  assert.equal(r.g.canMove('climb').ok, false);
+  assert.equal(r.g.locomotion().gait, 'carry_heavy');
+  r.g.setContext({ carrying: 'none' });
+  // stamina: a fence costs 18
+  const st = r.g.stamina()!.value; assert.ok(r.g.traversed('fenceClimb')); assert.equal(Math.round(st - r.g.stamina()!.value), 18);
+  assert.ok(r.g.traversed('ladder', 10)); // 16 for ten metres
+  // a rolled drop off a 4.5 m fire-escape platform leaves the legs working; the turnstile vault is fare evasion
+  r.g.landed(4.5, true);
+  assert.ok(r.g.canMove('turnstileVault').ok, 'rolled: legs fine');
+  assert.ok(r.g.vaultTurnstile()); assert.ok(r.g.pc.subway);
+  r.g.setContext({ subway: false });
+  // a two-storey drop without a roll breaks a leg: no sprint, no climbing
+  const hp0 = r.g.health.get('player').hp; const l = r.g.landed(7)!;
+  assert.ok(l.damage > 0 && l.ragdoll && r.g.health.get('player').hp < hp0);
+  assert.equal(r.g.canMove('sprint').reason, 'bad leg'); assert.equal(r.g.canMove('climb').reason, 'bad leg');
+  // barging somebody's door: a heard crime even when it holds
+  r.g.addProp('box', 'call_box', 30, 0, -10);
+  for (let i = 0; i < 3; i++) r.g.bargeDoor({ id: 'door.4b', kind: 'apartment' });
+  assert.ok(r.events.some((e) => e.type === 'notice' && e.e.kind === 'barge'));
+});

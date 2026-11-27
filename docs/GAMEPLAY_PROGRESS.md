@@ -140,6 +140,86 @@ Context labels are kept short enough for a button (≤ 14 chars): Pay off, Hands
 
 Tests: `touch.test.ts` (11 cases; the camera aims at the sky in all of them).
 
+### Movement rules (MOVEMENT.md; `player/movement.ts`, `movement.test.ts`)
+The engine detects traversal and moves the body, and characters animate it. Gameplay decides what's allowed, what it costs and what it does to you. The engine calls `g.canMove(action)` before it commits, `g.traversed(action, metres)` after (to pay the stamina), `g.landed(height, rolled)` on landing, and `g.locomotion()` every frame for its multipliers.
+
+**Heights (m).** Up to 0.40 is autostep, no action: granite kerbs (0.15–0.25) and stoop steps. 0.5–1.2 is a vault, taken at speed. 1.2–2.2 is a climb, with a hand plant. Up to 3.6 is a chain-link fence.
+
+**Stamina (points; a fit lead has 60–100).**
+- Sprint drains 11/s (more in the heat).
+- Each action costs:
+
+  | Action | Cost |
+  |---|---|
+  | Vault | 6 |
+  | Climb | 14 |
+  | Fence | 18 |
+  | Ladder or fire-escape stairs | 1.6 per metre |
+  | Pull down a drop ladder | 4 |
+  | Roof jump | 12 |
+  | Turnstile vault | 5 |
+  | Shoulder barge | 10 |
+  | Dodge roll | 5 |
+- A hang-drop and a crouch are free.
+- An action you can't pay for is refused ("out of breath"); you can always let go of a ledge.
+
+**What's allowed when** (the `reason` greys the UI button):
+
+| State | Can't |
+|---|---|
+| Carrying a body (both hands) | sprint, vault, climb, fence, ladders, roof jumps, aim/fire, melee, roll, cover, barge, get in a car ("put it in the trunk") |
+| Carrying a crate | vault, climb, ladders, aim/fire, melee (it can be set down behind cover) |
+| Carrying a bag | roof jumps ("not with the bag"); everything else is fine, and the bag goes over a fence first |
+| Broken leg (wear ≥ 1) | sprint, vault, climb, fence, roof jump, turnstile vault (ladders are arms) |
+| Limp > 0.3 | roof jumps |
+| Crippled arm | climb, fence, ladders |
+| Tipsy (intox 0.3) | roof jumps |
+| Drunk (0.6) | vault, fence |
+| Legless (0.85) | sprint, climb, ladders |
+| Hands up | everything but crouch and let go |
+| Cuffed | everything but crouch |
+| In cover | sprint |
+| In a car | everything but aim/fire (drive-by) |
+
+**Locomotion layers.** Speed multiplier:
+- limp: 1 − 0.45 × limp;
+- carrying: body 0.55, crate 0.75, bag 0.95;
+- drink: up to −30% at legless;
+- bleeding: 0.92.
+
+Drink also brings sway of 1.5–7.5°, wider turns (up to −35%), longer stops (up to +80%), and a stumble chance per kerb or stair taken at a sprint (up to 60%, from drink, a limp or low breath). The gait layer for characters is normal, limp, drunk, carry_heavy or tired.
+
+**Combat movement** (multiples of run speed):
+- strafe while aiming 0.42;
+- jog with a pistol, still firing, 0.62;
+- cover shuffle 0.32;
+- cover-to-cover dash 1.0;
+- crouch walk 0.45;
+- blind-fire spread ×2.6;
+- sprinting drops aim, and there's no firing at a sprint.
+
+**Cover by object** (existing, `cover.ts`): parked cars are low cover, and the engine block stops rounds. Stoop walls are low (masonry), mailboxes and trash cans low, newsstands and phone booths high (thin, penetrable). A kerb is only partial cover (0.3) when you're crouched or down, and AI never picks it.
+
+**Landing** (`landed`):
+- free below about 2.9 m;
+- a timed roll halves the damage up to 6 m;
+- fall damage goes to a leg: unrolled, a limp from about 4.4 m and a broken leg from about 6 m;
+- ragdoll from 6 m;
+- about 14 m (five storeys) is fatal.
+
+**Doors** (`bargeDoor`): chance per attempt (scaled 0.6–1.4× by strength):
+
+| Door | Chance |
+|---|---|
+| Interior | 0.6 |
+| Apartment (deadbolt and chain) | 0.25 |
+| Shop back door | 0.15 |
+| Police lock (brace bar), steel | never |
+
+An arm injury cuts the chance to 0.6×, drink to 0.8×. Each attempt takes 1.3 s. Somebody else's door is vandalism, heard at 18–30 m.
+
+**Turnstile** (`vaultTurnstile`): fare evasion, noise 10 m. It's a crime only if seen: the clerk watches their own turnstiles (witness chance 0.9 within 15 m), and a transit cop makes it an immediate stop.
+
 ## Measured performance (CPU-only, headless Node in this container, no GPU, no rendering)
 `shots/gameplay/bench.json` (avg / p95 / p99 / max, ms per frame, about 3,500 frames; rerun on 2026-11-26 after the crowd cache):
 | Case | Avg | p95 | p99 | Max | Budget |
