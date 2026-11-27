@@ -271,7 +271,44 @@
           "text": "GRAND CENTRAL TERMINAL",
           "note": "Carved letters over the 42nd St facade (real public name)."
         }
+      ],
+      "displayConfirmed": "'Grand Central Terminal' (full); 'Grand Central' (short / map label)"
+    },
+    {
+      "id": "lm.chrysler",
+      "real": "Chrysler Building",
+      "aliases": [
+        "405 Lexington Avenue"
+      ],
+      "name": "Chrysalis Building",
+      "short": "Chrysalis Bldg",
+      "pending": "user pick between Chrysalis / Crestler / Chromecrest (oversight)",
+      "mapCard": [
+        "1930 Art Deco: a stainless-steel crown of sunbursts, the tallest building in the world for eleven months.",
+        "1974: still the most beautiful thing on the skyline, and half empty."
+      ],
+      "signage": [
+        {
+          "slot": "entrance",
+          "text": "CHRYSALIS BUILDING",
+          "note": "Stainless Art Deco letters over the Lexington Ave entrance. No rooftop name, true to the real tower.",
+          "animate": {
+            "night": "floodlit crown",
+            "effect": "crown triangles lit in rows"
+          }
+        }
       ]
+    },
+    {
+      "id": "lm.pershing_sq",
+      "real": "Pershing Square",
+      "aliases": [
+        "Pershing Square viaduct"
+      ],
+      "name": "Pershing Square",
+      "short": "Pershing Sq",
+      "keepReal": "Plain place name (a street-named square under the Park Ave viaduct), like Herald Square.",
+      "signage": []
     }
   ]
 }

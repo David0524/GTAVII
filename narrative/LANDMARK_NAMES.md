@@ -118,3 +118,18 @@ The tower carries the airline's name on its roof, so the airline needs a sound-a
 
 ## Signage copy
 All landmark signage is in `content/landmarks.json` → `signage` (slot, text, note). Image prompts are in `assets/prompts/sources/landmarks.json`. **Pre-ship USPTO list additions:** Pan Amity (or the pick), Amalgamated Chemical Tower, plus the banner line "A WHOLE CITY BLOCK OF EVERYTHING".
+
+---
+
+## 11. The 1930 Art Deco tower at Lexington & 42nd (the stainless crown): proposal, the user picks
+
+| Option | Why | Search (exact phrase, Nov 2026) |
+|---|---|---|
+| ★ **Chrysalis Building** | The same pattern as Lacy's and the Empire Estate: the real name's sound swapped for a real word. A chrysalis is a shell something beautiful hatches from, which suits the crown. Instantly evocative and clearly different. | Clear: no building or company found. |
+| **Crestler Building** | Closer in sound, with "crest" for the crown. | Clear: no building or company of that exact name (only Crestline and Crest construction firms). |
+| **Chromecrest Building** | Descriptive: the stainless crown. The least punny and the least evocative. | Clear: no building of that name (a Chromer Building exists in Seattle). |
+
+**Also decided in the same message:**
+- **Grand Central**: keeps its real name. The display string is "Grand Central Terminal" in full and "Grand Central" as the short form and map label.
+- **Pershing Square**: a plain place name, kept like Herald Square.
+- **Pan Amity**: confirmed.
