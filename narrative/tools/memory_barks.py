@@ -14,7 +14,11 @@ M = {
   ("antagonize", None, "hard", "Move along. I won't say it twice. I'll say it once, with the stick."),
   ("antagonize", "violence", "hard", "You shot up this block and you walk back on it? You got nerve."),
   ("fear", "violence", "tense", "Easy. Easy now. Hands where I can see 'em. Central, I need a car."),
-  ("fear", None, "tense", "Don't do nothing stupid, pal. I got a pension coming.")],
+  ("fear", None, "tense", "Don't do nothing stupid, pal. I got a pension coming."),
+  ("antagonize", None, "warning", "Keep talking, pal. I got all night and a nightstick."),
+  ("cop_stop", None, "stern", "That's it. Hands on the wall. You're coming with me."),
+  ("cop_stop", None, "stern", "Alright, wise guy. Turn around. We're taking a ride to the precinct."),
+  ("cop_stop", "violence", "stern", "Drop it. Drop it now. You're under arrest. Don't make me draw.")],
  "cab_driver": [
   ("greet_known", None, "easy", "Hey, Mac! Where to? Not Brooklyn, I'm begging you."),
   ("greet_known", "helped", "warm", "You! You pushed my hack out of the intersection. Half fare, today only."),
@@ -144,7 +148,7 @@ def apply():
     for pool, lines in M.items():
         f = B / f"{pool}.json"
         d = json.loads(f.read_text())
-        d["lines"] = [l for l in d["lines"] if l["context"] not in ("greet_known", "antagonize", "fear")]
+        d["lines"] = [l for l in d["lines"] if l["context"] not in ("greet_known", "antagonize", "fear", "cop_stop")]
         for c, rec, emo, txt in lines:
             assert len(txt) <= 90, txt
             l = {"context": c, "emotion": emo, "text": txt}
