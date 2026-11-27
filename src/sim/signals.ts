@@ -1,5 +1,5 @@
 /**
- * Signal heads for the engine's traffic-signal props (ENGINE_REQUESTS "From sim" 9).
+ * Signal heads for the engine's traffic-signal props (docs/requests/sim.md, item 9).
  *
  * The sim decides which junctions are signalised (OSM traffic_signals POIs plus synthesized ones at real
  * grid crossings), so the engine should place heads from this list, not from the raw POIs: a head where

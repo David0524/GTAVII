@@ -411,6 +411,20 @@ function canEnter(S: SimCore, v: Vehicle, t: number): string {
       if (w !== v && w.state === 'drive' && net.len[side] - w.s < 8 && (w.len <= LONG || w.id < v.id)) return 'conflict';
     }
   }
+  // merges within one approach (lanes funnelling into fewer): zipper. Whoever is nearer the line goes first;
+  // a tie goes to the lower id, so two cars never wait for each other
+  if (!v.force && !v.cop?.siren) {
+    const dMe = net.len[v.link] - v.s - v.len / 2;
+    for (const cf of C.conflicts) {
+      const O = net.g.links[cf.link]; if (O.startArm !== C.startArm || O.startJ !== C.startJ) continue;
+      const src = S.srcLane[cf.link]; if (src === v.link || src < 0) continue;
+      for (const w of S.occ[src]) {
+        if (w.next !== cf.link) continue;
+        const dW = net.len[src] - w.s - w.len / 2;
+        if (dW < 3 && (dW < dMe - 0.5 || (Math.abs(dW - dMe) <= 0.5 && w.id < v.id))) return 'merge';
+      }
+    }
+  }
   // pedestrians on crosswalks this connector crosses
   for (const cr of C.crossings) {
     const peds = S.onWalk.get(cr.walkEdge);

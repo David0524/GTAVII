@@ -21,9 +21,10 @@ Source of truth for the sim workstream (brief: `docs/briefs/SIM_BRIEF.md`). Read
 | Parking enforcement, tows, street cleaning | **Done (first pass)**: `parkingRule(x,z,minute?,dow?)`, `hydrantsNear`, `setDay`, `registerParkedCar`/`unregisterParkedCar`; traffic agents ticket (`ticketIssued`), tow trucks tow (`towDispatched`, `vehicleTowed`), street sweepers run alternate-side windows (`sweeperOut`) |
 | Subway schedule and platform crowds | **Done (first pass)**: 15 stations (narrative's canonical 1974 list + PATH 33rd St), `complex` for Herald Sq / Times Sq; deterministic timetable; `subwayStations`, `nextTrains`, `platformCrowd`, `stationNear`, `boardSubway`; events `trainArriving`, `trainDeparted`; riders surface from the stairs |
 | Interiors door hand-off | **Done (first pass)**: `setDoors`/`clearDoors` (engine feeds interiors' `doorsForChunk`), passers-by step in (`pedEnteredDoor`), occupants come out (`pedExitedDoor`), `exitFromDoor(doorId, archetype?)`, `enterDoor(pedId, doorId)`; opening hours honoured; per-kind rates (`DOOR_RATES`, `setDoorRates`) |
-| Signal heads for the engine's props (Phase 3 block A) | `signalHeads()` (static: vehicle heads per signalised approach, WALK/DON'T WALK heads at crosswalk ends) + `signalStates(out)` (one byte per head per frame); ENGINE_REQUESTS sim 9 |
+| Signal heads for the engine's props (Phase 3 block A) | `signalHeads()` (static: vehicle heads per signalised approach, WALK/DON'T WALK heads at crosswalk ends) + `signalStates(out)` (one byte per head per frame); docs/requests/sim.md item 9 |
 | Visual bar "Life": density near the camera | Density-targeted spawning + `setView`; test asserts agents within 60 m (rush hour Herald Square: High 30 vehicles / 97 peds, Low 13 / 56) |
 | Movement brief (sim part) | Bump reactions (brush/stumble/knockdown, angry/frightened/annoyed), crowds part for a running player, `setObstacles` + hydrants, `PedView.onRoad`; adults only (test asserts no child archetype or pedestrian) |
+| Cutscene → play hand-off | `handOff({cast, x, z, yaw, speed?, after: companion|stay|ambient})`: a live ped at exactly the cutscene's last pose, then companion follow / hold / ambient; `actorHandedOff`; test asserts pose error 0 and the follow (requests item 11) |
 | Street graph queries | `nearestIntersections(x, z, radius, max?)`: real junctions (2+ named streets) nearest first, with street names, signal flag and approach yaws (gameplay chokepoints) |
 | Wildlife: pigeons and rats | **Done (first pass)**: `sim.wildlife: WildlifeView[]`, flocks/swarms near the focus only (LOD), driven by `npc.pigeon_flock` / `npc.rat_swarm` (behaviour `critter`) |
 | Debug view `?sim=1` (`src/sim/debug/SimDebugView.ts`), one guarded line in `src/main.ts` | **Done** |
@@ -402,7 +403,9 @@ NPCs go and how they react.
   junction geometry the build step's conflict zones miss); siren units keep their gutter line straight on
   until their rear clears the queue head, wait to turn across it, and cross traffic holds at the line for
   a waiting siren unit; nobody swings back from the kerb or gutter beside someone; cars never spawn on a
-  pedestrian in the roadway; jaywalkers read a moving car's next 1.5 s.
+  pedestrian in the roadway; jaywalkers read a moving car's next 1.5 s. Lanes funnelling into fewer at
+  one approach zipper (nearer the line goes first). Pedestrians with a goal pick the shorter way round
+  from mid-block and walk straight to a target on the same block; followers ease in to ~2.5 m.
 
 ## vs GTA V / GTA VI / RDR2 (reference games; behaviour and quality only, nothing copied)
 | Area | What the reference does | Where we match | Where we fall short | Plan |
@@ -426,7 +429,17 @@ VISUAL_BAR.md: dense traffic and pedestrians, parked cars on every kerb, a stree
   holding for a waiting siren unit and dispatch costing a stopped queue head. First unit on scene in the
   test: 13–28 s on both seeds (caps 60 s rush hour / 40 s off-peak).
 
+## Grand Central (user decision; after the merge sprint)
+The east edge moves to include Grand Central Terminal. Plan (requests item 12): the Park Avenue viaduct and
+ramps as their own lane level (streets with grade `g` ≠ 0 are left out of the ground graph today, so they
+can't make false junctions), taxi stands by the terminal, and rush-hour concourse crowds (adults only)
+on the timetable, once the engine posts the new PLAYABLE and the concourse walkable area.
+
 ## Known issues / next
+- [ ] Rush-hour gridlock margin: the longest standstill in the test is ~160 s at Herald Square / 34th St
+      (deadlock cap 180 s) since the near field got denser; watch it after the integration pass.
+- [ ] Park Avenue's divided carriageways get a default 3 m kerb band on both sides, including the mall
+      side; the mall itself (planted medians, crossings at the cross streets) isn't modelled yet.
 - [ ] Police vehicle agents (pursuit, box-in, roadblocks), foot cops on the walk graph, car-owner
       reactions, plate/description recognition: Gameplay will request these through ENGINE_REQUESTS.
 - [ ] Edge layer 3 extras: rubbernecking at edge blockers, chase roadblocks; retune when bounds shrink.

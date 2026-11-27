@@ -1,4 +1,4 @@
-# ENGINE_REQUESTS
+# Sim requests to the engine (was ENGINE_REQUESTS.md "From sim")
 
 Requests to the engine session. Each stream appends under its own `## From <stream>: N. Title`
 headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
@@ -82,3 +82,31 @@ headings (what, why, fallback). Answers go in `ENGINE_RESPONSES.md`.
   hits its 110 m floor and the near field thins (13 vs 30 within 60 m). Far traffic beyond the disc
   (long avenue views) needs impostors or LOD cars on your side; the sim can expose lane flow per avenue
   for that if useful.
+
+## From sim: 11. Cutscene → play hand-off (UI `actor.handoff` cue)
+- **What:** when a cutscene ends (played or skipped) and UI emits `actor.handoff { id, cast, after, pose }`
+  (or `ActorHost.handOff`), call `sim.handOff({ id, cast, x, z, yaw, speed?, after, follow? })` with the
+  cast's final pose in world space, then hide the cutscene actor on the same frame. The sim returns the
+  live pedestrian id (`actorHandedOff {cast, cue, pedId}`); bind that id's PedView to the same character
+  model, so it's one body.
+  - `after: 'companion'`: follows the player (escort pacing; `sim.escort(pedId, route)` for a walk-and-talk).
+  - `after: 'stay'`: holds the pose until given a goal; `after: 'ambient'`: becomes an ordinary walker.
+- **Why:** the companion (Mayhew) must walk on in play from exactly where the cutscene left them, no pop.
+  The first sim frame matches the pose exactly (test `handOff.poseError` 0), then the ped steps to the
+  sidewalk band.
+- **Ask (UI):** `cast` should be the character/archetype id the sim knows (narrative's archetype id);
+  pass `speed` if the cutscene ends mid-stride.
+
+## From sim: 12. Grand Central bounds (plan, after the merge sprint)
+- **What:** when PLAYABLE moves east, post the numbers in ENGINE_RESPONSES; the sim then rebuilds
+  `lanes.bin` and adds:
+  - the Park Avenue viaduct and ramps as their own lane level (streets with `g` 1 / -1 are excluded from
+    the ground graph today, so they make no false junctions), with the vehicle height from a level
+    profile rather than `heightAt` (needs the viaduct deck heights from your build, `g` plus a deck
+    elevation per vertex);
+  - taxi stands on Vanderbilt Ave / 42nd St by the terminal (queued cabs, a dispatcher, fares boarding);
+  - concourse crowds at rush hour as an interior crowd layer (adults only): needs the concourse walkable
+    polygon and its doors/stairs from you or interiors; the sim drives commuters to and from the train
+    gates on the timetable.
+- **Fallback:** until then, Park Avenue around the terminal has no traffic on the viaduct and the
+  concourse is empty.

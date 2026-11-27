@@ -348,7 +348,7 @@ export function stepPeds(S: SimCore, dt: number) {
       case 'hold': { // scripted goal reached / escort waiting: stand, face the target, resume when told
         p.v = 0;
         if (p.goal?.kind === 'escort' || p.goal?.kind === 'follow') { const sp = goalSpeed(S, p); if (sp > 0.05 && p.path.length) { const E = g.walkEdges[p.edge]; enterEdge(S, p, p.path.shift()!, p.dir > 0 ? E.b : E.a); p.state = 'walk'; } }
-        if (p.goal?.kind === 'follow' && (p.goal.replanT = (p.goal.replanT ?? 0) - dt) <= 0) { p.goal.replanT = 2; const E = g.walkEdges[p.edge]; replan(S, p, p.dir > 0 ? E.b : E.a); }
+        if (p.goal?.kind === 'follow' && (p.goal.replanT = (p.goal.replanT ?? 0) - dt) <= 0) { p.goal.replanT = 2; replanHere(S, p); }
         break;
       }
       case 'feed': // pigeon feeder on his bench spot; walks back to the sidewalk when done
@@ -621,6 +621,27 @@ function goalTarget(S: SimCore, p: Ped): { x: number; z: number; vx: number; vz:
   }
   return null;
 }
+/**
+ * Replan from the middle of the current edge: on a sidewalk, pick the end that gets there sooner (or just
+ * turn toward a target on this same block) instead of carrying on the way the ped happened to face.
+ * Crosswalks keep their direction (nobody turns back mid-crossing).
+ */
+function replanHere(S: SimCore, p: Ped) {
+  const net = S.net, E = net.g.walkEdges[p.edge], G = p.goal;
+  if (!G || E.kind !== WalkKind.Sidewalk || (G.kind !== 'follow' && G.kind !== 'escort' && G.kind !== 'goto')) { replan(S, p, p.dir > 0 ? E.b : E.a); return; }
+  let tx = G.x ?? p.x, tz = G.z ?? p.z;
+  if (G.kind === 'escort' && G.waypoints) { const w = G.waypoints[G.segment ?? 0]; tx = w.x; tz = w.z; }
+  if (G.kind === 'follow') { const t = goalTarget(S, p); if (t) { tx = t.x; tz = t.z; } }
+  if (G.kind === 'goto' && G.edge === p.edge && G.s !== undefined) { p.dir = G.s >= p.s ? 1 : -1; p.path = []; return; }
+  const pr = projectOnPoly(E.pts, tx, tz);
+  if (G.kind !== 'goto' && pr.d < 8) { p.dir = pr.s >= p.s ? 1 : -1; p.path = []; return; } // same block: just walk to them
+  const len = net.walkLen[p.edge], tn = nearestNode(S, tx, tz);
+  const pa = walkPath(S, E.a, tn), pb = walkPath(S, E.b, tn);
+  const cost = (path: number[]) => path.reduce((a, e) => a + net.walkLen[e], 0);
+  const la = p.s + cost(pa), lb = len - p.s + cost(pb);
+  p.dir = la < lb ? -1 : 1;
+  replan(S, p, p.dir > 0 ? E.b : E.a);
+}
 function replan(S: SimCore, p: Ped, node: number) {
   const G = p.goal!;
   let tx = G.x ?? p.x, tz = G.z ?? p.z;
@@ -662,7 +683,7 @@ function goalSpeed(S: SimCore, p: Ped): number {
   const t = goalTarget(S, p);
   if (!t) return base;
   const d = Math.hypot(t.x - p.x, t.z - p.z), wait = G.waitRadius ?? 8, max = G.maxSpeed ?? 2.2;
-  if (G.kind === 'follow') return d < 2.5 ? 0 : Math.min(max, d > 8 ? max : Math.hypot(t.vx, t.vz) + 0.3);
+  if (G.kind === 'follow') return d < 2.5 ? 0 : Math.min(max, d > 8 ? max : Math.max(Math.hypot(t.vx, t.vz) + 0.3, (d - 2.5) * 0.45)); // ease in to ~2.5 m
   if (d > wait) return 0;
   const wp = G.waypoints?.[G.segment ?? 0];
   const leadAhead = wp ? Math.hypot(t.x - wp.x, t.z - wp.z) < Math.hypot(p.x - wp.x, p.z - wp.z) : false;
@@ -693,8 +714,7 @@ export function setPedGoal(S: SimCore, p: Ped, goal: PedGoal | null) {
     p.spot = -1; p.goalSpot = -1;
     if (p.state !== 'free') { const e = S.net.g.walkEdges[p.edge]; sampleAt(e.pts, S.net.walkCum[p.edge], p.s, tmp); p.toEdge = p.edge; p.toS = p.s; goFree(p, tmp[0], tmp[1], 'attach'); }
   }
-  const E = S.net.g.walkEdges[p.edge];
-  replan(S, p, p.dir > 0 ? E.b : E.a);
+  replanHere(S, p);
   if (p.state === 'hold') p.state = 'walk';
 }
 function threatenOne(S: SimCore, p: Ped, x: number, z: number, speed?: number) {

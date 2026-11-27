@@ -58,8 +58,11 @@ function rightOfWay(name: string): number {
 }
 
 // ------------------------------------------------------------------ input
-interface SRec { n: string; c: string; w: number; o: number; p: number[] }
-const streets: SRec[] = JSON.parse(fs.readFileSync(path.join(DATA, 'streets.json'), 'utf8'));
+interface SRec { n: string; c: string; w: number; o: number; p: number[]; g?: number }
+/** Ground level only: the Park Ave viaduct (g 1) and the tunnels and their portal ramps (g -1) are other
+ *  levels; they would make false junctions with the streets they pass over or under. (Their own lane
+ *  level comes with the Grand Central bounds change.) */
+const streets: SRec[] = (JSON.parse(fs.readFileSync(path.join(DATA, 'streets.json'), 'utf8')) as SRec[]).filter((s) => !s.g);
 const world = JSON.parse(fs.readFileSync(path.join(DATA, 'world.json'), 'utf8'));
 
 // chunk ground + POIs in world coords
@@ -213,7 +216,9 @@ for (const e of edges) {
   const park = isLink || e.w - 2 * PARK_W < MIN_LANE_W * (e.oneway === 0 ? 2 : 1) ? 0 : PARK_W;
   const per = (e.w - 2 * park) / (e.oneway === 0 ? 2 : 1);
   const nLanes = Math.max(1, Math.min(5, Math.floor(per / MIN_LANE_W)));
-  const row = rightOfWay(e.name);
+  // divided carriageways (Park Avenue's one-way halves): the right-of-way spans both and the mall between,
+  // so it says nothing about this half's sidewalk; use the default kerb-side band
+  const row = e.oneway !== 0 && /^Park Avenue( South)?$/.test(e.name) ? 0 : rightOfWay(e.name);
   const sidewalk = row > e.w ? (row - e.w) / 2 : 3.0;
   const pathOff = Math.max(1.0, Math.min(2.4, sidewalk * 0.42));
   const half = Math.max(0.3, Math.min(pathOff - 0.5, sidewalk - pathOff - 0.6, 1.5));

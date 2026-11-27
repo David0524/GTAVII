@@ -358,6 +358,28 @@ async function main() {
     const kinds = Object.keys(full.bumps);
     if (!kinds.some((k) => k.startsWith('brush')) || !kinds.some((k) => k.startsWith('stumble') || k.startsWith('knockdown'))) problems.push(`bump reactions missing: ${JSON.stringify(full.bumps)}`);
   }
+  // cutscene hand-off: the live companion appears at exactly the cutscene's last pose and follows
+  {
+    const sim = new Simulation({ seed: SEED, maxVehicles: 30, maxPeds: 60, fetchBinary }); await sim.load(); sim.setClock(14 * 60);
+    const f = FOCI[1];
+    for (let k = 0; k < 60; k++) sim.update(SIM_DT, f);
+    const ref = sim.debugAgents().peds.find((p) => p.state === 'walk');
+    if (ref) {
+      const pose = { x: ref.x, z: ref.z, yaw: 1.2 };
+      const id = sim.handOff({ id: 'test', cast: 'npc.commuter', ...pose, after: 'companion' });
+      sim.update(SIM_DT, f);
+      const q0 = sim.peds.find((p) => p.id === id), v0 = q0 && { x: q0.x, z: q0.z }; // views are reused objects: copy now
+      // the player waits ~15 m along the same sidewalk: the companion walks up and stops beside them
+      const net = sim.network, len = net.walkLen[ref.edge], o = [0, 0, 0, 0];
+      sampleAt(net.g.walkEdges[ref.edge].pts, net.walkCum[ref.edge], ref.s + 15 < len ? ref.s + 15 : Math.max(0, ref.s - 15), o);
+      const px = o[0], pz = o[1];
+      for (let k = 0; k < 15 / SIM_DT; k++) { sim.setExternalActors([{ id: 'player', x: px, z: pz, vx: 0, vz: 0, radius: 0.4, kind: 'player' }]); sim.update(SIM_DT, f); }
+      const v1 = sim.peds.find((p) => p.id === id);
+      const err = v0 ? Math.hypot(v0.x - pose.x, v0.z - pose.z) : 99, gap = v1 ? Math.hypot(v1.x - px, v1.z - pz) : 99;
+      report.handOff = { poseError: +err.toFixed(3), followGap: +gap.toFixed(1) };
+      if (err > 0.05 || gap > 5) problems.push(`handOff: pose error ${err.toFixed(2)} m, companion ${gap.toFixed(1)} m behind`);
+    }
+  }
   // adults only: no child archetype may exist in the spawn tables, and none may appear in the street
   {
     const sim = new Simulation({ seed: SEED, maxVehicles: 10, maxPeds: 10, fetchBinary }); await sim.load();

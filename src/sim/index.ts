@@ -37,6 +37,7 @@ export { BUILTIN_ARCHETYPES, validateArchetype } from './archetypes';
 /** @deprecated old name, kept for compatibility. */
 export type AgentView = PedView;
 /** Pedestrian view (contract). Vehicles use TrafficVehicleView from src/shared/traffic.ts. */
+const tmp4 = [0, 0, 0, 0];
 export interface PedView {
   /** nerve 0..1: courage (gameplay decides who runs to a call box and who freezes) */
   nerve: number;
@@ -521,6 +522,34 @@ export class Simulation {
   escort(pedId: number, route: { x: number; z: number }[], opts: { waitRadius?: number; maxSpeed?: number; target?: string | number } = {}): boolean {
     return this.setGoal(pedId, { kind: 'escort', waypoints: route, ...opts });
   }
+  /**
+   * Cutscene → play hand-off (UI `actor.handoff` cue / ActorHost.handOff): a live pedestrian appears at
+   * exactly the cutscene's last pose (position, yaw, and the walking speed it ended on, so there's no pop),
+   * steps onto the sidewalk band and then:
+   *  - `companion`: follows `follow` (default the player) with escort pacing; give it a route later with
+   *    `escort(pedId, ...)` for a walk-and-talk;
+   *  - `stay`: holds at the pose (talking, waiting) until given a goal;
+   *  - `ambient`: becomes an ordinary walker.
+   * `cast` is the archetype/character id (unknown ids fall back to a plain walker with a warning).
+   * Returns the pedestrian id (or -1); emits `actorHandedOff {cast, cue, pedId}`. Companions never despawn.
+   */
+  handOff(cue: { id?: string; cast: string; x: number; z: number; yaw: number; speed?: number; after: 'companion' | 'stay' | 'ambient'; follow?: string | number; waitRadius?: number; maxSpeed?: number }): number {
+    const S = this.core;
+    let arch = S.reg.list.find((a) => a.def.id === cue.cast);
+    if (!arch) { S.reg.warnings.push(`handOff: unknown cast '${cue.cast}', using a walker`); arch = S.reg.pick((a) => a.behaviour === 'walker' || a.behaviour === 'commuter', cue.x, cue.z, S.minute, 0.5) ?? undefined; }
+    if (!arch) return -1;
+    const p = spawnPedNear(S, cue.x, cue.z, arch, 25);
+    if (!p) return -1;
+    // exactly the cutscene pose, then step to the walking band
+    p.x = p.px = cue.x; p.z = p.pz = cue.z; p.yaw = p.pyaw = cue.yaw; p.v = cue.speed ?? 0;
+    const e = S.net.g.walkEdges[p.edge]; sampleAt(e.pts, S.net.walkCum[p.edge], p.s, tmp4);
+    p.state = 'free'; p.then = 'attach'; p.toEdge = p.edge; p.toS = p.s; p.tx = tmp4[0]; p.tz = tmp4[1];
+    if (cue.after === 'companion') setPedGoal(S, p, { kind: 'follow', target: cue.follow ?? 'player', waitRadius: cue.waitRadius ?? 10, maxSpeed: cue.maxSpeed ?? 2.4 });
+    else if (cue.after === 'stay') setPedGoal(S, p, { kind: 'act', name: 'idle' });
+    S.emit('actorHandedOff', { cast: cue.cast, cue: cue.id ?? '', pedId: p.id, after: cue.after });
+    return p.id;
+  }
+
   /** Brownout (narrative N2): signals inside the circle go dark (all-way stop) or come back. */
   setSignalPower(area: { x: number; z: number; radius: number }, powered: boolean) {
     this.net.g.junctions.forEach((j, i) => { if (Math.hypot(j.x - area.x, j.z - area.z) <= area.radius) { if (powered) this.net.dark.delete(i); else this.net.dark.add(i); } });
