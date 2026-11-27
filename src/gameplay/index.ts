@@ -868,6 +868,23 @@ export class Gameplay {
     return a;
   }
 
+  // ------------------------------------------------------------------ mission end card stats (UI missionEnd.lines)
+  private missionMark: { id: string; t: number; witnessed: number; money: number } | null = null;
+  private witnessedCount = 0;
+  /** The mission runtime calls this when a mission or side job starts. */
+  missionBegin(id: string) { this.missionMark = { id, t: this.time, witnessed: this.witnessedCount, money: this.player ? this.inv.ensure(this.player.lead).money : 0 }; }
+  /**
+   * Up to three plain stat lines for UI's `missionEnd` card: Time, Witnesses (how many saw something), Heat (what the
+   * police have now). The runtime emits the card (title, result, cash) and appends these.
+   */
+  missionLines(): { label: string; value: string }[] {
+    const m = this.missionMark; if (!m) return [];
+    const secs = Math.max(0, this.time - m.t), mm = Math.floor(secs / 60), ss = Math.floor(secs % 60);
+    const w = this.witnessedCount - m.witnessed;
+    const rep = this.player ? this.policeSys.reportFor(this.player.id) : null;
+    const heat = !rep ? 'Clean' : rep.heat >= 4.5 ? 'Every precinct' : rep.heat >= 2.5 ? 'Hot' : 'Warm';
+    return [{ label: 'Time', value: `${mm}:${String(ss).padStart(2, '0')}` }, { label: 'Witnesses', value: w === 0 ? 'None' : String(w) }, { label: 'Heat', value: heat }];
+  }
   /** Mission "lose the police" gate: no open report on the player and no unit with eyes on / closing on them. */
   heatClear(): boolean {
     const id = this.player?.id; if (!id) return true;
@@ -1175,6 +1192,7 @@ export class Gameplay {
   }
 
   private wireStats() {
+    this.bus.on('crimeWitnessed', () => { this.witnessedCount++; });
     const L = () => this.player?.lead ?? '';
     const me = () => this.player?.id;
     this.bus.on('shot', (e) => { if (e.player && !e.jammed) this.stats.add(L(), 'shotsFired'); });
