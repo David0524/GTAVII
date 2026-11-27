@@ -83,6 +83,7 @@ async function main() {
   const world = new World(quality);
   // interiors hookup: facades cut at doors and storefronts, plugs fill them until an interior streams in; ?cuts=0 off
   world.interiorCuts = params.get('cuts') !== '0';
+  if (world.interiorCuts) facadeUniforms.storeScale.value = 0; // the shops' light comes from the plugs and interiors
   await world.load();
   loadReport.mark('manifest');
   scene.add(world.root);

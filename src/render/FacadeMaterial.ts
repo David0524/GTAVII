@@ -30,6 +30,8 @@ export const facadeUniforms = {
   minutes: uniform(0),
   /** Area power 0 (blackout) / 0.45 (brownout) / 1 (normal); per-area masks come with N2. */
   areaPower: uniform(1),
+  /** Painted ground-floor storefront glow. 0 once facades are cut: plugs and interiors light the shops. */
+  storeScale: uniform(1),
   /** Global scale on window emission (exposure tuning / debugging). */
   litScale: uniform(0.5),
   /** Radians per drawing-buffer pixel (2 tan(fov/2) / height): rotation-invariant window LOD. Set on resize. */
@@ -152,7 +154,7 @@ export function createFacadeMaterial(): THREE.MeshStandardNodeMaterial {
   const roomLevel = rnd2.mul(0.6).add(0.45);
   const falloff = mix(float(0.55), float(1.0), smoothstep(0.0, 1.0, fv.sub(sill).div(head.sub(sill)).clamp(0, 1)));
   const shadeGlow = select(shadeHere, float(0.55), float(1));
-  const emissiveSharp = select(isLit.or(storeLit), select(storeLit, vec3(1.0, 0.86, 0.66), lampCol).mul(select(storeLit, float(0.3).mul(roomLevel), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
+  const emissiveSharp = select(isLit.or(storeLit), select(storeLit, vec3(1.0, 0.86, 0.66), lampCol).mul(select(storeLit, float(0.3).mul(roomLevel).mul(facadeUniforms.storeScale), float(0.38).mul(roomLevel).mul(falloff).mul(shadeGlow))), vec3(0));
   const emissiveAvg = lampCol.mul(litP.mul(0.38));
   const emissiveWin = mix(emissiveSharp, emissiveAvg, lodFade);
 
