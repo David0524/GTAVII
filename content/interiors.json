@@ -823,6 +823,35 @@
           "state": "shuttered; tile vaults dark; sign 'CLOSED · REOPENING THIS FALL UNDER NEW MANAGEMENT'"
         }
       ]
+    },
+    {
+      "id": "interior.pennington_er",
+      "address": "W 26th St, 9th–10th Aves",
+      "facade": "street",
+      "name": "Pennington General: emergency room",
+      "kind": "hospital",
+      "hours": [
+        "00:00",
+        "24:00"
+      ],
+      "contains": [
+        "triage window",
+        "cashier window",
+        "curtained bays",
+        "trauma room",
+        "waiting-room TV"
+      ],
+      "markers": [
+        "spawn: respawn after death (Pennington General)",
+        "service: triage",
+        "register: cashier window",
+        "6 bay beds",
+        "trauma table",
+        "TV",
+        "locked drug-cabinet stash"
+      ],
+      "usedBy": "respawn after death (barks.ambulance), side.baby_cab (Pennington General), loc.hospital",
+      "note": "Built by interiors as a hero interior (invented hospital). Adults only."
     }
   ]
 }

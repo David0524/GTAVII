@@ -113,5 +113,23 @@
       "1974-plausible materials only"
     ],
     "priority": 2
+  },
+  {
+    "id": "int.pennington_triage_notice",
+    "file": "int_pennington_triage_notice.png",
+    "owner": "interiors",
+    "use": "Pennington General ER: notice over the triage window (1.0 × 0.3 m); ingest to art/interiors/pennington_triage_notice.png",
+    "aspect": "3.33:1",
+    "size": "3333×1000",
+    "sizeFinal": true,
+    "prompt": "Create a hospital notice board: white enamel sign with black block letters and a thin red border, a little scuffed, mounted over a triage window. Manhattan, 1974. Photorealistic texture, flat and frontal, evenly lit, no perspective. No people, no logos, no real hospital name, no modern materials. EXACT TEXT: \"ALL PATIENTS MUST REGISTER AT THE WINDOW\". Render these characters only, spelled exactly, with no other words or numbers anywhere. Aspect ratio 3.33:1.",
+    "text": "ALL PATIENTS MUST REGISTER AT THE WINDOW",
+    "textPolicy": "exact",
+    "accept": [
+      "text letter-perfect",
+      "no real hospital name or logo",
+      "1974 materials"
+    ],
+    "priority": 1
   }
 ]
