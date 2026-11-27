@@ -794,14 +794,14 @@
   {
    "id": "lead_delphine_l1",
    "source": "ICT-FaceKit Light, synthesised identity",
-   "bytes": 215544,
+   "bytes": 215620,
    "tag": null,
    "skinRGB": [
     90,
     56,
     37
    ],
-   "lead": "lead_delphine",
+   "lead": null,
    "ownHair": true,
    "ktx2": [
     "c",

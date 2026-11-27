@@ -21,6 +21,8 @@ import { tintFor } from '../heads/rocketbox';
 
 const qp = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (qp.has(k) ? +qp.get(k)! : d);
+// ?t= captures are meant to repeat exactly: seed Math.random (animator idle phases etc.)
+if (qp.has('t')) { let s = 0x9e3779b9 ^ num('rseed', 1); Math.random = () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; }; }
 
 export async function runCharactersTest() {
   const scene = qp.get('scene') ?? 'lineup';

@@ -35,7 +35,13 @@ const lock = new Uint8Array(n);
 for (const [k, cnt] of edge) if (cnt === 1) for (const q of k.split(',')) lock[+q] = 1;
 let nLock = 0; for (let v = 0; v < n; v++) nLock += lock[v];
 
-const [simp, err] = MeshoptSimplifier.simplifyWithAttributes(skin, pos, 3, uv, 2, [1.0, 1.0], lock, target * 3, 0.01, []);
+// attributes: UV, plus the scalp-hair and brow weights (the runtime grows hair/brow shells from them,
+// so their edges must survive; without them the hairline steps and the brows thicken)
+const hw: Uint8Array = B('hair'), bw: Uint8Array = B('brow');
+const AW = Number(process.env.LOD_AW ?? 1.0);
+const attr = new Float32Array(n * 4);
+for (let v = 0; v < n; v++) { attr[v * 4] = uv[v * 2]; attr[v * 4 + 1] = uv[v * 2 + 1]; attr[v * 4 + 2] = hw ? hw[v] / 255 : 0; attr[v * 4 + 3] = bw ? bw[v] / 255 : 0; }
+const [simp, err] = MeshoptSimplifier.simplifyWithAttributes(skin, pos, 3, attr, 4, [1.0, 1.0, AW, AW], lock, Math.min(target * 3, skin.length), target * 3 >= skin.length ? 0 : 0.01, []);
 console.log(srcId, 'skin tris', skin.length / 3, '->', simp.length / 3, 'rel err', err.toFixed(5), 'abs err mm', (err * MeshoptSimplifier.getScale(pos, 3) * 1000).toFixed(2), 'locked', nLock);
 
 // compact
@@ -62,6 +68,6 @@ console.log(outId, 'verts', n, '->', m, 'tris', all.length / 3, 'bin bytes', byt
 const idxFile = path.join(OUT, 'index.json');
 const index = JSON.parse(fs.readFileSync(idxFile, 'utf8'));
 const src = index.heads.find((h: any) => h.id === srcId);
-index.heads = [...index.heads.filter((h: any) => h.id !== outId), { ...src, id: outId, tex: src.tex ?? srcId, lodOf: srcId, bytes }];
+index.heads = [...index.heads.filter((h: any) => h.id !== outId), { ...src, id: outId, lead: null, tex: src.tex ?? srcId, lodOf: srcId, bytes }];
 fs.writeFileSync(idxFile, JSON.stringify(index, null, 1));
 void encodeFilter;
