@@ -9,6 +9,7 @@ import earcut from 'earcut';
 import { type ChunkData, type BuildingRec, GroundKind, Style, BuildingFlag } from '../shared/chunkFormat';
 import { buildingCondition } from '../shared/condition';
 import { buildProps } from './props';
+import { floorHeight } from '../shared/facade';
 
 export const SIDEWALK_H = 0.15;
 /** Ground height in chunk-local coordinates (road surface). */
@@ -38,6 +39,10 @@ export interface ChunkMeshes {
   buildingsLod1: MeshArrays;
   /** LOD0 props: water towers, fire escapes, AC units, awnings (vertex colours). */
   props: MeshArrays;
+  /** Small props (AC units, fire escapes, balconies) in 4 chunk quadrants: [x-z-, x+z-, x-z+, x+z+]. */
+  detail: MeshArrays[];
+  /** Night light meshes: storefront spill pools (additive) and marquee bulb bands (emissive), may be empty. */
+  spill: MeshArrays; marquee: MeshArrays;
   stats: { buildings: number; tris: number; trisLod1: number };
   /** Axis-aligned bounds (chunk-local). */
   maxHeight: number;
@@ -114,7 +119,7 @@ function extrude(b: Builder, rec: BuildingRec, col: RGB, roofCol: RGB, hf: Heigh
   const top = gAvg + Math.max(rec.height, rec.minHeight + 0.5);
   const bottom = rec.minHeight > 0 ? gAvg + rec.minHeight : gMin - 0.6; // sink into the ground: no light leaks at the sidewalk
   // Facade record: real floor-to-floor height from the data (clamped to period-plausible values).
-  const floorH = rec.floors > 0 ? Math.min(5.6, Math.max(2.9, rec.height / Math.max(1, rec.floors))) : 3.5;
+  const floorH = floorHeight(rec.height, rec.minHeight, rec.floors);
   const seed = ((Math.imul(rec.id, 2654435761) >>> 0) % 100000) / 100000;
   b.curFac = [rec.style, cond, floorH, seed];
   for (let r = 0; r < rec.rings.length; r++) {
@@ -253,9 +258,9 @@ export function buildChunk(data: ChunkData, chunkSize: number, hf: HeightFn = ()
     }
   }
   const buildings = bAll.finish(), ground = g.finish(), buildingsLod1 = bLod.finish();
-  const props = buildProps(data, hf);
+  const { props, detail, spill, marquee } = buildProps(data, hf);
   return {
-    key: `${data.i}_${data.j}`, i: data.i, j: data.j, buildings, ground, buildingsLod1, props, maxHeight,
+    key: `${data.i}_${data.j}`, i: data.i, j: data.j, buildings, ground, buildingsLod1, props, detail, spill, marquee, maxHeight,
     stats: { buildings: data.buildings.length, tris: (buildings.index.length + ground.index.length) / 3, trisLod1: buildingsLod1.index.length / 3 },
   };
 }

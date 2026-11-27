@@ -18,6 +18,9 @@ import { TouchControls } from './ui/TouchControls';
 import { promptStrip, PROMPT_CSS } from './ui/Prompts';
 import { loadReport } from './engine/debug/LoadReport';
 import { AdaptiveResolution } from './engine/AdaptiveResolution';
+import { Parks } from './world/Parks';
+import { StreetFurniture } from './world/StreetFurniture';
+import { Bench } from './engine/debug/Bench';
 import { buildReport, mountReportButton, perfSamples } from './engine/debug/PerfReport';
 import { Physics } from './physics/Physics';
 import RAPIER from '@dimforge/rapier3d-compat';
@@ -47,13 +50,15 @@ type Mode = 'onfoot' | 'photo';
 type Screen = 'title' | 'play' | 'paused';
 
 async function main() {
+  if (new URLSearchParams(location.search).has('vehicles')) return void (await import('./vehicles/testlot/TestLot')).runTestLot(); // vehicles workstream test scene
   loadReport.mark('main');
   const params = new URLSearchParams(location.search);
   const quality = qualityFromUrl();
   const app = document.getElementById('app')!;
   const { renderer, backend } = await createRenderer(app, quality.pixelRatio);
   loadReport.mark('renderer');
-  const trackGpu = params.get('hud') === '1' || params.has('gpu');
+  const expMul = Number(params.get('exp') ?? 1) || 1; // ?exp=: exposure multiplier for look A/B
+  const trackGpu = (params.get('hud') === '1' || params.get('gpu') === '1') && params.get('gpu') !== '0';
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.15, 30000);
@@ -80,6 +85,12 @@ async function main() {
   scene.add(skyline);
   const streetLights = buildStreetLights(streets);
   scene.add(streetLights);
+  const parks = new Parks(quality);
+  await parks.load(base + 'parks.json').catch((e) => console.warn('parks', e));
+  scene.add(parks.root);
+  const furniture = new StreetFurniture(quality);
+  await furniture.load(base + 'furniture.json').catch((e) => console.warn('furniture', e));
+  scene.add(furniture.root);
   loadReport.mark('streets+lights');
 
   // ---------------------------------------------------------------- input
@@ -193,6 +204,30 @@ async function main() {
   const adaptive = adaptiveOn ? new AdaptiveResolution(basePr, basePr * 0.8, Math.max(basePr, Math.min(window.devicePixelRatio || 1, 2)), (pr) => {
     renderer.setPixelRatio(pr); onResize(true); // also refreshes the drawing buffer size and the window-LOD pixel angle
   }) : null;
+  // ?bench=1: on-device A/B of each cost suspect (see engine/debug/Bench.ts); results go into the perf report
+  const benchFlags = { noPost: false, noDom: false, noResolve: false };
+  let lastGpuMs: number | null = null;
+  const domHide = document.createElement('style'); domHide.textContent = 'body > *:not(#app):not(.t74-bench) { visibility: hidden !important }';
+  const prFixed = (v: number) => ({ apply: () => { renderer.setPixelRatio(v); onResize(true); }, revert: () => { renderer.setPixelRatio(adaptive?.scale ?? basePr); onResize(true); } });
+  const hideMesh = (n: string) => ({ apply: () => { world.debugHide.add(n); }, revert: () => { world.clearDebugHide(); } });
+  const hideObj = (o: THREE.Object3D) => ({ apply: () => { o.visible = false; }, revert: () => { o.visible = true; } });
+  const bench = params.get('bench') === '1' ? new Bench([
+    { name: 'baseline', apply: () => {}, revert: () => {} },
+    { name: 'post stack off', apply: () => { benchFlags.noPost = true; }, revert: () => { benchFlags.noPost = false; } },
+    { name: 'DOM overlays hidden', apply: () => { benchFlags.noDom = true; document.head.appendChild(domHide); }, revert: () => { benchFlags.noDom = false; domHide.remove(); } },
+    { name: 'gpu timing reads off', apply: () => { benchFlags.noResolve = true; }, revert: () => { benchFlags.noResolve = false; } },
+    { name: 'dpr 1.0', ...prFixed(1.0) },
+    { name: 'dpr 2.0', ...prFixed(Math.min(2, window.devicePixelRatio || 1)) },
+    { name: 'no props', ...hideMesh('props') },
+    { name: 'no near buildings', ...hideMesh('buildings') },
+    { name: 'no ground', ...hideMesh('ground') },
+    { name: 'no far shells (lod1)', ...hideMesh('lod1') },
+    { name: 'no skyline', ...hideObj(skyline) },
+    { name: 'no street lights', ...hideObj(streetLights) },
+    { name: 'no trees + park dressing', ...hideObj(parks.root) },
+    { name: 'no street furniture', ...hideObj(furniture.root) },
+    { name: 'baseline again', apply: () => {}, revert: () => {} },
+  ]) : null;
   // Per-frame safety net. It only DETECTS a change; the resize itself runs as a separate task, never
   // inside the frame callback (resizing the WebGPU canvas mid-frame broke rendering).
   let resizeQueued = false;
@@ -223,7 +258,7 @@ async function main() {
   const report = mountReportButton(() => buildReport({
     renderer, backend, quality: quality.name, frames, world, device: input.activeDevice,
     view: `${camera.position.x.toFixed(0)},${camera.position.y.toFixed(0)},${camera.position.z.toFixed(0)} ${mode}`,
-    extra: [adaptive ? adaptive.describe() : 'adaptive dpr off', `props radius ${quality.propsRadius} m · lod0 ${quality.lod0Radius} m · lod1 ${quality.lod1Radius} m`],
+    extra: [adaptive ? adaptive.describe() : 'adaptive dpr off', ...(bench ? [bench.text()] : []), `props radius ${quality.propsRadius} m · lod0 ${quality.lod0Radius} m · lod1 ${quality.lod1Radius} m`],
   }));
   report.show(hud.visible);
   document.getElementById('loading')?.remove();
@@ -257,6 +292,7 @@ async function main() {
     if (c.kind === 'settings') { pause.show('settings'); return; }
     if (c.kind === 'credits') { pause.show('credits'); return; }
     if (c.kind === 'continue') {
+      loadReport.mark('continue');
       const last = await saves.latest().catch(() => null);
       if (last) { try { await saves.load(last.slot); } catch (e) { toast(`Could not load: ${(e as Error).message}`); return; } }
     } else {
@@ -284,7 +320,6 @@ async function main() {
   let lastRenderT = -1e9, pausedFrameDrawn = false, heldW = 0, heldH = 0;
   const TITLE_RADIUS = 300; // m around the title camera's target
   let shaderWarm: Promise<void> | null = null, shadersReady = false;
-  const attributionEl = document.getElementById('attribution');
   const fsEl = document.querySelector('.t74-fs') as HTMLElement | null;
 
   // Quick save / load until the pause menu lands (UI pass): F5 / F9.
@@ -312,7 +347,7 @@ async function main() {
     const cpu0 = performance.now();
     clock.update(t);
     const rawDt = clock.getDelta(); loadReport.frame(rawDt * 1000); if (frameCount > 0) perfSamples.interval.push(rawDt * 1000);
-    if (adaptive && frameCount > 0 && (screen === 'play' || titleReady) && world.idle) adaptive.update(rawDt * 1000, rawDt);
+    if (adaptive && !(bench && !bench.done) && frameCount > 0 && (screen === 'play' || titleReady) && world.idle) adaptive.update(rawDt * 1000, rawDt);
     const dt = Math.min(rawDt, 0.1);
     frames.push(dt * 1000);
     facadeUniforms.time.value += dt;
@@ -342,7 +377,6 @@ async function main() {
     }
     const playing = screen === 'play' && !pause.open;
     gameHud.setVisible(playing);
-    if (attributionEl) attributionEl.style.display = screen === 'title' || playing ? '' : 'none';
     if (fsEl) fsEl.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
     if (touch) touch.root.style.display = playing && input.activeDevice === 'touch' ? '' : 'none';
     if (playing && input.pressed('hud')) { hud.toggle(); report.show(hud.visible); }
@@ -354,10 +388,13 @@ async function main() {
     atmosphere.updateEnvironment(renderer);
     facadeUniforms.night.value = nightOverride ?? light.night;
     facadeUniforms.minutes.value = worldClock.minutes;
+    parks.update(dt, camera.position);
+    furniture.update(dt, camera.position);
     streetLightUniforms.lightsOn.value = light.lightsOn;
-    renderer.toneMappingExposure = light.exposure;
+    renderer.toneMappingExposure = light.exposure * expMul;
     { const f = mode === 'onfoot' ? body.object.position : camera.position; atmosphere.followFocus(f.x, f.y, f.z); }
     postUniforms.bloomStrength.value = 0.12 + 0.38 * light.lightsOn;
+    postfx?.setTimeOfDay(light.night, light.blueHour);
 
     // physics colliders stream around the player; the player waits until the ground under it exists
     if ((syncT -= dt) <= 0) { physics.sync(player.pos.x, player.pos.z, world.manifest.chunkSize); syncT = 0.2; }
@@ -389,15 +426,16 @@ async function main() {
     // (a resize clears the canvas, so a held frame is only kept while the drawing buffer size is unchanged)
     const holdPaused = (screen === 'paused' || pause.open) && screen !== 'title' && pausedFrameDrawn && view.width === heldW && view.height === heldH;
     if (!capTitle && !holdPaused) {
-      if (postfx) postfx.render(); else renderer.render(scene, camera);
+      if (postfx && !benchFlags.noPost) postfx.render(); else renderer.render(scene, camera);
       lastRenderT = t; pausedFrameDrawn = screen === 'paused' || pause.open; heldW = view.width; heldH = view.height;
     }
     if (frameCount === 0) loadReport.mark('first-frame');
     loadReport.frameCpu(performance.now() - cpu0); perfSamples.cpu.push(performance.now() - cpu0);
-    if (trackGpu && frameCount % 6 === 0) {
+    if (bench && frameCount > 0 && (screen === 'play' || mode === 'photo') && world.idle && (player.active || mode === 'photo')) bench.update(dt, rawDt * 1000, performance.now() - cpu0, lastGpuMs);
+    if (trackGpu && !benchFlags.noResolve && frameCount % 6 === 0) {
       const be = renderer.backend as unknown as { trackTimestamp?: boolean };
       perfSamples.gpuAvailable = !!be.trackTimestamp;
-      if (be.trackTimestamp) void renderer.resolveTimestampsAsync().then((ms) => { if (typeof ms === 'number' && ms > 0) perfSamples.gpu.push(ms); }).catch(() => undefined);
+      if (be.trackTimestamp) void renderer.resolveTimestampsAsync().then((ms) => { if (typeof ms === 'number' && ms > 0) { perfSamples.gpu.push(ms); lastGpuMs = ms; } }).catch(() => undefined);
     }
     frameCount++;
 
@@ -406,7 +444,7 @@ async function main() {
     if ((streetT -= dt) <= 0 && minimap) { streetName = minimap.nearestStreet(p.x, p.z); streetT = 0.5; }
     if ((locT -= dt) <= 0) { locT = 0.5; district = locator.district(p.x, p.z); crossing = locator.intersection(p.x, p.z); streetLabel = crossing; }
     if (screen === 'play') gameHud.update(dt, district, crossing);
-    if (minimap) { minimap.canvas.style.display = screen === 'play' && settings.get('hud') ? '' : 'none'; minimap.draw(p.x, p.z, yaw); }
+    if (minimap && !benchFlags.noDom) { minimap.canvas.style.display = screen === 'play' && settings.get('hud') ? '' : 'none'; minimap.draw(p.x, p.z, yaw); }
     if ((hudT -= dt) <= 0) {
       hudT = 0.25;
       const s = frames.summary();

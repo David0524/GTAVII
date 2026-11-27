@@ -7,6 +7,7 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import net from 'node:net';
 
 const args = process.argv.slice(2);
 const arg = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d; };
@@ -43,7 +44,8 @@ const on = (name: string, x: number, z: number, y = 1.8): [number, number, numbe
 const esb = hero('lm.empire_state'), macys = hero('lm.macys'), msg = hero('lm.msg'), chelsea = hero('lm.hotel_chelsea'), flat = hero('lm.flatiron');
 
 /** Phase 3 judged set (PROGRESS.md look target): matched to reference frames A-D, each at four times of day. */
-const P3_TIMES = ['12:30', '19:30', '20:14', '23:00'];
+// noon, golden hour (sun ~9 deg), blue hour (sun ~4 deg below; sunset 21 June 1974 is ~20:27 EDT), night
+const P3_TIMES = ['12:30', '19:30', '20:50', '23:00'];
 const P3_VIEWS: { name: string; cam: string; ref?: string }[] = [
   { name: 'A_42nd_west_of_7th', cam: (() => { const c = on('West 42nd Street', -700, -1550, 1.7); return `${c[0]},${c[1]},${c[2]},90,3`; })(), ref: 'documerica_554297' },
   { name: 'B_6th_and_32nd_uptown', cam: (() => { const c = on('6th Avenue', -300, -790, 1.7); return `${c[0] + 6},${c[1]},${c[2]},0,4`; })(), ref: 'documerica_554293' },
@@ -51,6 +53,9 @@ const P3_VIEWS: { name: string; cam: string; ref?: string }[] = [
   { name: 'D_herald_square', cam: (() => { const c = on('Broadway', macys.x + 40, macys.z + 170, 1.7); return `${c[0]},${c[1]},${c[2]},12,5`; })(), ref: 'documerica_549869' },
   { name: 'E_flatiron_from_madison_sq', cam: '25,1.7,-150,173.5,10' },
   { name: 'F_spawn_up_broadway', cam: '-8,1.7,-30,14,6' },
+  { name: 'G_user_report_looking_up', cam: '-8,1.7,-30,14,30' }, // iPhone report 2026-11-26 ('the building is weird')
+  { name: 'H_madison_sq_park_inside', cam: '40,1.7,-160,30,6' },
+  { name: 'I_flatiron_looking_north_to_park', cam: '-5,1.7,-45,10,6' },
 ];
 
 /** Fixed viewpoints. 'spawn' uses the game's own spawn logic (no cam param). */
@@ -70,10 +75,10 @@ const VIEWS: { name: string; cam?: string; at?: string }[] = [
 ];
 
 async function main() {
-  const port = 4173;
-  const p3 = phase === 'phase3';
-  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { cwd: ROOT, stdio: 'pipe' });
-  await new Promise((r) => setTimeout(r, 2500));
+  const port = await new Promise<number>((res) => { const srv = net.createServer(); srv.listen(0, () => { const p = (srv.address() as net.AddressInfo).port; srv.close(() => res(p)); }); });
+  const p3 = phase.startsWith('phase3');
+  const server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--bypass-lock'], { cwd: ROOT, stdio: 'ignore', detached: true });
+  for (let k = 0; k < 120; k++) { try { if ((await fetch(`http://localhost:${port}/`)).ok) break; } catch { /* not up */ } await new Promise((r) => setTimeout(r, 500)); }
   const browser = await chromium.launch({
     args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
@@ -98,13 +103,14 @@ async function main() {
       const t = (window as any).__T74; const s = t.frames.summary(); const i = t.renderer.info.render;
       return { backend: t.backend, ...s, drawCalls: i.drawCalls, triangles: i.triangles, chunks: { ...t.world.stats } };
     });
-    const file = path.join(outDir, `${v.name}.png`);
-    await page.screenshot({ path: file });
+    // JPEG q85, 1600 px wide (oversight policy: full PNGs were ~1.5 MB each in git)
+    const file = path.join(outDir, `${v.name}.jpg`);
+    await page.screenshot({ path: file, type: 'jpeg', quality: 85 });
     report.push({ view: v.name, cam: v.cam ?? 'spawn', ...stats });
     console.log(v.name, `${stats.backend} avg ${stats.avg.toFixed(1)} ms p95 ${stats.p95.toFixed(1)} draws ${stats.drawCalls} tris ${stats.triangles}`);
   }
   fs.writeFileSync(path.join(outDir, 'report.json'), JSON.stringify({ quality, forceWebGL, date: new Date().toISOString(), ua: await page.evaluate(() => navigator.userAgent), views: report, logs: logs.slice(0, 200) }, null, 2));
   await browser.close();
-  server.kill();
+  (() => { try { process.kill(-server.pid!, 'SIGTERM'); } catch { /* gone */ } })();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

@@ -1,0 +1,459 @@
+{
+  "date": "2026-11-27T02:44:02.602Z",
+  "note": "Headless Chromium; WebGL2 via SwiftShader (software). CPU/physics timings meaningful, frame times are not.",
+  "crash30mph": {
+    "impacts": [
+      {
+        "speedChange": 13.25,
+        "zone": "front",
+        "damage": 0.437
+      }
+    ],
+    "model": "bancroft",
+    "tris": 8060,
+    "speed": -0.379531287743848,
+    "damage": 0.43694901490822813,
+    "stage": "battered",
+    "zones": {
+      "front": 0.8738980298164563,
+      "rear": 0,
+      "left": 0.11651973730886084,
+      "right": 0.11651973730886084
+    },
+    "gear": 1,
+    "rpm": 778.1587838700437,
+    "physMs": 0.43623249737145864,
+    "stepMs": 0
+  },
+  "traffic": {
+    "high_150": {
+      "instances": 150,
+      "setInstancesMsAvg": 0.08333333333430346,
+      "setInstancesMsP95": 0.2000000000698492,
+      "drawCalls": 330,
+      "triangles": 340079
+    },
+    "low_40": {
+      "instances": 40,
+      "setInstancesMsAvg": 0.045833333334303464,
+      "setInstancesMsP95": 0.19999999995343387,
+      "drawCalls": 170,
+      "triangles": 30347
+    }
+  },
+  "driving": {
+    "bancroft": {
+      "t0_60s": 12,
+      "t0_30s": 4.3,
+      "topMph": 91,
+      "squatDeg": 1.8,
+      "brake60to0_ft": 186,
+      "diveDeg": 3,
+      "lockedFrames": 237,
+      "rollDeg": 6.4,
+      "maxLatG": 0.76,
+      "updateMs": 0.018,
+      "updatePlusWorldStepMs": 0.028
+    },
+    "bancroft_patrol": {
+      "t0_60s": 10.2,
+      "t0_30s": 4.4,
+      "topMph": 102,
+      "squatDeg": 0.6,
+      "brake60to0_ft": 180,
+      "diveDeg": 1,
+      "lockedFrames": 229,
+      "rollDeg": 1.4,
+      "maxLatG": 1.05,
+      "updateMs": 0.018,
+      "updatePlusWorldStepMs": 0.026
+    },
+    "bancroft_cab": {
+      "t0_60s": 21.6,
+      "t0_30s": 6.6,
+      "topMph": 75,
+      "squatDeg": 1,
+      "brake60to0_ft": 198,
+      "diveDeg": 1.8,
+      "lockedFrames": 252,
+      "rollDeg": 3.1,
+      "maxLatG": 0.73,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.027
+    },
+    "tiverton": {
+      "t0_60s": 14.9,
+      "t0_30s": 5.3,
+      "topMph": 85,
+      "squatDeg": 2,
+      "brake60to0_ft": 201,
+      "diveDeg": 3.3,
+      "lockedFrames": 257,
+      "rollDeg": 7.1,
+      "maxLatG": 0.7,
+      "updateMs": 0.018,
+      "updatePlusWorldStepMs": 0.027
+    },
+    "ferris": {
+      "t0_60s": 29,
+      "t0_30s": 6.2,
+      "topMph": 63,
+      "squatDeg": 1.4,
+      "brake60to0_ft": 202,
+      "diveDeg": 2.4,
+      "lockedFrames": 258,
+      "rollDeg": 4.8,
+      "maxLatG": 0.74,
+      "updateMs": 0.018,
+      "updatePlusWorldStepMs": 0.026
+    },
+    "homestead": {
+      "t0_60s": 16,
+      "t0_30s": 5.3,
+      "topMph": 82,
+      "squatDeg": 2.2,
+      "brake60to0_ft": 190,
+      "diveDeg": 3.2,
+      "lockedFrames": 244,
+      "rollDeg": 7,
+      "maxLatG": 0.68,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.027
+    },
+    "fareway": {
+      "t0_60s": 22.9,
+      "t0_30s": 6.8,
+      "topMph": 73,
+      "squatDeg": 0.9,
+      "brake60to0_ft": 197,
+      "diveDeg": 1.8,
+      "lockedFrames": 251,
+      "rollDeg": 3.3,
+      "maxLatG": 0.76,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.026
+    },
+    "ct40": {
+      "t0_30s": 27.4,
+      "topMph": 35,
+      "squatDeg": 0.2,
+      "brake60to0_ft": 236,
+      "diveDeg": 0.3,
+      "lockedFrames": 303,
+      "rollDeg": 1.4,
+      "maxLatG": 0.5,
+      "updateMs": 0.018,
+      "updatePlusWorldStepMs": 0.026
+    },
+    "b60": {
+      "t0_30s": 8.6,
+      "topMph": 48,
+      "squatDeg": 0.4,
+      "brake60to0_ft": 190,
+      "diveDeg": 0.7,
+      "lockedFrames": 6,
+      "rollDeg": 1.7,
+      "maxLatG": 0.61,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.028
+    },
+    "walkin": {
+      "t0_30s": 8.7,
+      "topMph": 52,
+      "squatDeg": 0.5,
+      "brake60to0_ft": 179,
+      "diveDeg": 1.2,
+      "lockedFrames": 9,
+      "rollDeg": 2,
+      "maxLatG": 0.7,
+      "updateMs": 0.018,
+      "updatePlusWorldStepMs": 0.027
+    },
+    "b80": {
+      "t0_30s": 13.9,
+      "topMph": 42,
+      "squatDeg": 0.6,
+      "brake60to0_ft": 213,
+      "diveDeg": 1,
+      "lockedFrames": 10,
+      "rollDeg": 1.9,
+      "maxLatG": 0.59,
+      "updateMs": 0.017,
+      "updatePlusWorldStepMs": 0.03
+    },
+    "medic": {
+      "t0_30s": 7.5,
+      "topMph": 54,
+      "squatDeg": 0.9,
+      "brake60to0_ft": 181,
+      "diveDeg": 1.8,
+      "lockedFrames": 231,
+      "rollDeg": 2.8,
+      "maxLatG": 0.73,
+      "updateMs": 0.017,
+      "updatePlusWorldStepMs": 0.03
+    },
+    "pumper": {
+      "t0_30s": 13.3,
+      "topMph": 42,
+      "squatDeg": 0.4,
+      "brake60to0_ft": 206,
+      "diveDeg": 0.7,
+      "lockedFrames": 5,
+      "rollDeg": 1.8,
+      "maxLatG": 0.6,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.029
+    },
+    "ladder": {
+      "t0_30s": 15.5,
+      "topMph": 40,
+      "squatDeg": 0.3,
+      "brake60to0_ft": 225,
+      "diveDeg": 0.6,
+      "lockedFrames": 5,
+      "rollDeg": 1.8,
+      "maxLatG": 0.55,
+      "updateMs": 0.017,
+      "updatePlusWorldStepMs": 0.03
+    },
+    "courier": {
+      "t0_30s": 8.2,
+      "topMph": 51,
+      "squatDeg": 0.9,
+      "brake60to0_ft": 211,
+      "diveDeg": 1.8,
+      "lockedFrames": 264,
+      "rollDeg": 2.6,
+      "maxLatG": 0.79,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.026
+    },
+    "scoop": {
+      "t0_30s": 9.9,
+      "topMph": 49,
+      "squatDeg": 0.7,
+      "brake60to0_ft": 187,
+      "diveDeg": 1.7,
+      "lockedFrames": 240,
+      "rollDeg": 2.5,
+      "maxLatG": 0.72,
+      "updateMs": 0.016,
+      "updatePlusWorldStepMs": 0.029
+    }
+  },
+  "triangles": {
+    "bancroft": {
+      "lod0": 8284,
+      "lod1": 1430,
+      "lod2": 72
+    },
+    "bancroft_patrol": {
+      "lod0": 7960,
+      "lod1": 1550,
+      "lod2": 72
+    },
+    "bancroft_cab": {
+      "lod0": 7724,
+      "lod1": 1454,
+      "lod2": 72
+    },
+    "tiverton": {
+      "lod0": 7636,
+      "lod1": 1400,
+      "lod2": 72
+    },
+    "ferris": {
+      "lod0": 6846,
+      "lod1": 1222,
+      "lod2": 72
+    },
+    "homestead": {
+      "lod0": 7988,
+      "lod1": 1374,
+      "lod2": 72
+    },
+    "fareway": {
+      "lod0": 7162,
+      "lod1": 1360,
+      "lod2": 72
+    },
+    "ct40": {
+      "lod0": 8076,
+      "lod1": 2228,
+      "lod2": 72
+    },
+    "b60": {
+      "lod0": 6256,
+      "lod1": 1498,
+      "lod2": 84
+    },
+    "walkin": {
+      "lod0": 5550,
+      "lod1": 1260,
+      "lod2": 72
+    },
+    "b80": {
+      "lod0": 6270,
+      "lod1": 1500,
+      "lod2": 84
+    },
+    "medic": {
+      "lod0": 6416,
+      "lod1": 1784,
+      "lod2": 84
+    },
+    "pumper": {
+      "lod0": 6754,
+      "lod1": 1668,
+      "lod2": 84
+    },
+    "ladder": {
+      "lod0": 6888,
+      "lod1": 1736,
+      "lod2": 84
+    },
+    "courier": {
+      "lod0": 5360,
+      "lod1": 1158,
+      "lod2": 72
+    },
+    "scoop": {
+      "lod0": 5548,
+      "lod1": 1366,
+      "lod2": 84
+    }
+  },
+  "systems": {
+    "police": [
+      {
+        "variant": 0,
+        "trim": "police",
+        "mileage": 87201,
+        "t0_60s": 9.2,
+        "topMph": 107
+      },
+      {
+        "variant": 1,
+        "trim": "police",
+        "mileage": 30801,
+        "t0_60s": 9,
+        "topMph": 112
+      },
+      {
+        "variant": 2,
+        "trim": "police",
+        "mileage": 15201,
+        "t0_60s": 9,
+        "topMph": 112
+      }
+    ],
+    "civilian": [
+      {
+        "variant": 0,
+        "trim": "standard",
+        "mileage": 9601,
+        "t0_60s": 12.1,
+        "topMph": 88
+      },
+      {
+        "variant": 1,
+        "trim": "standard",
+        "mileage": 55601,
+        "t0_60s": 13.6,
+        "topMph": 84
+      },
+      {
+        "variant": 2,
+        "trim": "economy",
+        "mileage": 30101,
+        "t0_60s": 15.4,
+        "topMph": 81
+      },
+      {
+        "variant": 3,
+        "trim": "economy",
+        "mileage": 103701,
+        "t0_60s": 19.3,
+        "topMph": 76
+      },
+      {
+        "variant": 4,
+        "trim": "economy",
+        "mileage": 52501,
+        "t0_60s": 15.4,
+        "topMph": 81
+      },
+      {
+        "variant": 5,
+        "trim": "standard",
+        "mileage": 4801,
+        "t0_60s": 11.9,
+        "topMph": 89
+      }
+    ],
+    "brake40to0_ft": {
+      "dry": 86,
+      "wetFirstMinutes": 148,
+      "wetLater": 119,
+      "wetRadials": 93
+    },
+    "flatFrontRightDrift3s_m": 4.35,
+    "saveRoundTrip": {
+      "diffs": [],
+      "bytes": 1261,
+      "physicsIdentical": true
+    }
+  },
+  "bikes": {
+    "calder650": {
+      "t0_30s": 1.6,
+      "topMph": 93,
+      "updateMs": 0.003
+    },
+    "calder_patrol": {
+      "t0_30s": 1.6,
+      "topMph": 90,
+      "updateMs": 0.003
+    },
+    "wexford_roadster": {
+      "t0_30s": null,
+      "topMph": 17,
+      "updateMs": 0.003
+    },
+    "wexford_carrier": {
+      "t0_30s": null,
+      "topMph": 14,
+      "updateMs": 0.004
+    }
+  },
+  "subway": {
+    "cars": 4,
+    "updateMs": 0.003
+  },
+  "lights": {
+    "budget": {
+      "low": {
+        "spots": 1,
+        "glows": 1
+      },
+      "medium": {
+        "spots": 3,
+        "glows": 2
+      },
+      "high": {
+        "spots": 6,
+        "glows": 4
+      },
+      "ultra": {
+        "spots": 8,
+        "glows": 6
+      }
+    }
+  },
+  "dents": {
+    "vertices": 210,
+    "msPerDent": 1.7,
+    "bodyVertices": 5247
+  }
+}

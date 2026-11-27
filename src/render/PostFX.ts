@@ -24,7 +24,7 @@ import type { QualitySettings } from '../engine/quality';
 export const postUniforms = {
   gradeAmount: uniform(1),
   shadowTint: uniform(new THREE.Color(1.1, 0.88, 0.9)),
-  highlightTint: uniform(new THREE.Color(1.02, 0.96, 0.86)),
+  highlightTint: uniform(new THREE.Color(1.05, 0.95, 0.8)), // cream highlights (target #d1b59e; the noon sky read grey-blue)
   coolDesat: uniform(0.58), // saturation kept on greens/blues
   warmSat: uniform(1.06),
   blackLift: uniform(new THREE.Color(0.03, 0.015, 0.018)),
@@ -32,12 +32,14 @@ export const postUniforms = {
   grain: uniform(0.035),
   frame: uniform(0),
   bloomStrength: uniform(0.38),
-  midTint: uniform(new THREE.Color(1.06, 0.96, 0.9)),
+  midTint: uniform(new THREE.Color(1.12, 0.95, 0.86)), // rose-brown mids (target #794d44)
   halation: uniform(0.55),
 };
 
 export class PostFX {
   readonly post: THREE.PostProcessing;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private bloomNode: any = null;
 
   constructor(renderer: THREE.WebGPURenderer, scene: THREE.Scene, camera: THREE.Camera, q: QualitySettings) {
     const P = postUniforms;
@@ -48,7 +50,7 @@ export class PostFX {
     // Clamp what feeds bloom/halation: the sun disc is enormous in HDR and would otherwise flood the whole
     // frame when looking toward the sunset. Lamps, neon and windows (~1-4) still bloom fully.
     const glowIn = min(vec4(color), vec4(3.0, 3.0, 3.0, 1.0));
-    if (q.bloom) hdr = hdr.add(bloom(glowIn, 1, 0.45, 1.2).mul(P.bloomStrength)); // threshold above sky: only lamps, neon, windows
+    if (q.bloom) { this.bloomNode = bloom(glowIn, 1, 0.45, 1.2); hdr = hdr.add(this.bloomNode.mul(P.bloomStrength)); } // threshold above sky by day; lowered at night
     if (q.halation) hdr = hdr.add(vec4(bloom(glowIn, 1, 0.08, 1.0).rgb.mul(vec3(1.0, 0.3, 0.1)).mul(P.halation), 0));
 
     const ldr = renderOutput(hdr); // renderer tone mapping (ACES filmic) + sRGB
@@ -86,6 +88,15 @@ export class PostFX {
     }
     this.post.outputNode = q.taa || q.grade ? fxaa(out) : out;
     this.post.outputColorTransform = false;
+  }
+
+  /** Time-of-day look: night lowers the bloom threshold (lit windows and lamps get a little glow); blue hour
+   *  relaxes the cool desaturation and the warm shadow tint so cool fill can sit against warm practicals. */
+  setTimeOfDay(night: number, blueHour: number) {
+    if (this.bloomNode?.threshold) this.bloomNode.threshold.value = 1.2 - 0.85 * night;
+    const P = postUniforms, k = Math.max(blueHour, night * 0.4);
+    P.coolDesat.value = 0.58 + 0.37 * k;
+    (P.shadowTint.value as THREE.Color).setRGB(1.1 - 0.16 * k, 0.88 + 0.08 * k, 0.9 + 0.16 * k);
   }
 
   render() { postUniforms.frame.value = (postUniforms.frame.value + 1) % 4096; this.post.render(); }

@@ -19,7 +19,7 @@ self.onmessage = async (ev: MessageEvent<ChunkRequest>) => {
     const ox = (i + 0.5) * chunkSize, oz = (j + 0.5) * chunkSize;
     const mesh = buildChunk(data, chunkSize, (x, z) => heightAt(ox + x, oz + z), ox);
     const msg: ChunkResponse = { ok: true, mesh, parseMs: performance.now() - t0 };
-    (self as unknown as Worker).postMessage(msg, [...transfer(mesh.buildings), ...transfer(mesh.ground), ...transfer(mesh.buildingsLod1), ...transfer(mesh.props)] as Transferable[]);
+    (self as unknown as Worker).postMessage(msg, [...transfer(mesh.buildings), ...transfer(mesh.ground), ...transfer(mesh.buildingsLod1), ...transfer(mesh.props), ...mesh.detail.flatMap(transfer), ...transfer(mesh.spill), ...transfer(mesh.marquee)] as Transferable[]);
   } catch (e) {
     (self as unknown as Worker).postMessage({ ok: false, key, error: String(e) } satisfies ChunkResponse);
   }

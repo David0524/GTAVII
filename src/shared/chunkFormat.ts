@@ -50,7 +50,7 @@ export interface BuildingRec {
 export interface GroundRec { kind: number; rings: Float32Array[] }
 export interface PoiRec { kind: number; x: number; z: number; heading: number }
 export interface PaintRec { kind: number; width: number; pts: Float32Array }
-export interface ChunkData { i: number; j: number; buildings: BuildingRec[]; ground: GroundRec[]; pois: PoiRec[]; paint: PaintRec[] }
+export interface ChunkData { i: number; j: number; buildings: BuildingRec[]; ground: GroundRec[]; pois: PoiRec[]; paint: PaintRec[]; doors: DoorRecC[] }
 
 const tag = (s: string) => s.charCodeAt(0) | (s.charCodeAt(1) << 8) | (s.charCodeAt(2) << 16) | (s.charCodeAt(3) << 24);
 export const TAG_BLDG = tag('BLDG') >>> 0;
@@ -60,6 +60,13 @@ export const TAG_PNT = tag('PNT ') >>> 0;
 /** Wall occlusion (optional): per building, per ring, per edge (starting at vertex k): openDist u8 (0.5 m,
  *  255 = open sky to 127 m) | oppHeight u8 (2 m units; height of what the wall faces). Baked by the pipeline. */
 export const TAG_WAO = tag('WAO ') >>> 0;
+/** Doors (optional): per door buildingId u32 | x,z i16 (cm, chunk-local) | yaw i16 (centi-rad, outward) |
+ *  style u8 | width u8 (dm) | height u8 (dm) | rise u8 (cm) | flags u8 (1 nightGate, 2 enterable, 4 marquee).
+ *  Same fields as interiors' DoorRec; interiors' doorsForChunk replaces these at its merge. */
+export const TAG_DOOR = tag('DOOR') >>> 0;
+export const DOOR_STYLES = ['shop', 'shop_recessed', 'stoop', 'vestibule', 'brass_double', 'revolving', 'freight', 'service', 'boarded', 'garage', 'church', 'rear', 'internal'] as const;
+export type DoorStyle = (typeof DOOR_STYLES)[number];
+export interface DoorRecC { buildingId: number; x: number; z: number; yaw: number; style: DoorStyle; width: number; height: number; rise: number; nightGate: boolean; enterable: boolean; marquee?: boolean }
 
 // ---------------------------------------------------------------- reader
 export function readChunk(buf: ArrayBuffer): ChunkData {
@@ -68,7 +75,7 @@ export function readChunk(buf: ArrayBuffer): ChunkData {
   if (dv.getUint32(0, true) !== MAGIC) throw new Error('bad chunk magic');
   const ver = dv.getUint16(4, true);
   if (ver !== VERSION) throw new Error(`chunk version ${ver} != ${VERSION}`);
-  const out: ChunkData = { i: dv.getInt16(8, true), j: dv.getInt16(10, true), buildings: [], ground: [], pois: [], paint: [] };
+  const out: ChunkData = { i: dv.getInt16(8, true), j: dv.getInt16(10, true), buildings: [], ground: [], pois: [], paint: [], doors: [] };
   o = 12;
   const rings = (): Float32Array[] => {
     const rc = dv.getUint16(o, true); o += 2;
@@ -99,6 +106,13 @@ export function readChunk(buf: ArrayBuffer): ChunkData {
     } else if (t === TAG_WAO) {
       for (let k = 0; k < count && k < out.buildings.length; k++) {
         const b = out.buildings[k]; b.ao = b.rings.map((r) => { const n = r.length; const a = new Uint8Array(buf, o, n).slice(); o += n; return a; });
+      }
+    } else if (t === TAG_DOOR) {
+      for (let k = 0; k < count; k++) {
+        const fl = dv.getUint8(o + 14); // byte 15 is padding
+        out.doors.push({ buildingId: dv.getUint32(o, true), x: dv.getInt16(o + 4, true) / 100, z: dv.getInt16(o + 6, true) / 100, yaw: dv.getInt16(o + 8, true) / 100,
+          style: DOOR_STYLES[dv.getUint8(o + 10)] ?? 'shop', width: dv.getUint8(o + 11) / 10, height: dv.getUint8(o + 12) / 10, rise: dv.getUint8(o + 13) / 100, nightGate: !!(fl & 1), enterable: !!(fl & 2), marquee: !!(fl & 4) });
+        o += 16;
       }
     } else if (t === TAG_PNT) {
       for (let k = 0; k < count; k++) {
@@ -150,7 +164,7 @@ export interface WGround { kind: number; rings: [number, number][][] }
 export interface WPoi { kind: number; x: number; z: number; heading: number }
 export interface WPaint { kind: number; width: number; pts: [number, number][] }
 
-export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p: WPoi[], paint: WPaint[] = []): Uint8Array {
+export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p: WPoi[], paint: WPaint[] = [], doors: DoorRecC[] = []): Uint8Array {
   const w = new ByteWriter();
   w.u32(MAGIC); w.u16(VERSION); w.u16(0); w.i16(i); w.i16(j);
   const section = (t: number, count: number, body: () => void) => {
@@ -168,6 +182,13 @@ export function writeChunk(i: number, j: number, b: WBuilding[], g: WGround[], p
   section(TAG_GRND, g.length, () => { for (const x of g) { w.u8(x.kind); writeRings(w, x.rings); } });
   section(TAG_PNT, paint.length, () => {
     for (const x of paint) { w.u8(x.kind); w.u8(Math.min(255, Math.round(x.width * 100))); w.u16(x.pts.length); for (const [px, pz] of x.pts) { w.i16(clampI16(px * 100)); w.i16(clampI16(pz * 100)); } }
+  });
+  if (doors.length) section(TAG_DOOR, doors.length, () => {
+    for (const d of doors) {
+      w.u32(d.buildingId); w.i16(clampI16(d.x * 100)); w.i16(clampI16(d.z * 100)); w.i16(clampI16(d.yaw * 100));
+      w.u8(Math.max(0, DOOR_STYLES.indexOf(d.style))); w.u8(Math.min(255, Math.round(d.width * 10))); w.u8(Math.min(255, Math.round(d.height * 10)));
+      w.u8(Math.min(255, Math.round(d.rise * 100))); w.u8((d.nightGate ? 1 : 0) | (d.enterable ? 2 : 0) | (d.marquee ? 4 : 0)); w.u8(0);
+    }
   });
   section(TAG_POIS, p.length, () => {
     for (const x of p) { w.u8(x.kind); w.i16(clampI16(x.x * 100)); w.i16(clampI16(x.z * 100)); w.i16(clampI16(x.heading * 100)); }

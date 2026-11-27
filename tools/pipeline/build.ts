@@ -8,7 +8,7 @@ import { union, intersect, difference, bufferLines } from './clip.ts';
 import { CHUNK_SIZE, GRID_ROTATION_DEG, REGION, project, chunkKey } from '../../src/shared/geo.ts';
 import {
   BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter, PaintKind,
-  type WBuilding, type WGround, type WPoi, type WPaint,
+  type WBuilding, type WGround, type WPoi, type WPaint, type DoorRecC, type DoorStyle,
 } from '../../src/shared/chunkFormat.ts';
 import { RAW, OUT, ROOT, ensureDir, log } from './common.ts';
 import { dateBuilding, osmYear, type Dating } from './dating.ts';
@@ -327,9 +327,63 @@ for (const r of RESTORED_BUILDINGS) {
   log(`no-floating pass: ${lowered} raised parts lowered onto their real support`);
 }
 
+// Overlap pass (user report 2026-11-26, iPhone: "the building is weird"). Footprints from different sources
+// can overlap in volume (758 pairs): both drew walls and window grids in the same place, and the grids fought.
+// Taller buildings win: each lower building that a taller one covers from its base up is clipped by it.
+// Exact duplicates vanish; partial overlaps leave the lower building's real remainder.
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  const add = (k: number) => { const bb = bbox(buildings[k].poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } };
+  buildings.forEach((_b, k) => add(k));
+  const order = buildings.map((_b, k) => k).sort((a, b) => buildings[b].height - buildings[a].height || polyArea(buildings[b].poly) - polyArea(buildings[a].poly));
+  const rank = new Map(order.map((k, r) => [k, r]));
+  let clipped = 0, removed = 0, pieces = 0; const drop = new Set<number>(); const extra: Bldg[] = [];
+  for (const k of order) {
+    const b = buildings[k]; const bb = bbox(b.poly); const cutters: Poly[] = []; const seen = new Set<number>();
+    for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) for (const o of index.get(`${gx},${gz}`) ?? []) {
+      if (o === k || seen.has(o) || drop.has(o) || rank.get(o)! > rank.get(k)!) continue; seen.add(o);
+      const a = buildings[o];
+      if (a.minHeight > b.minHeight + 1) continue; // a starts above b's base: clipping would leave a hole under it
+      if (Math.min(a.height, b.height) <= Math.max(a.minHeight, b.minHeight) + 1) continue; // no vertical overlap
+      const ob = bbox(a.poly); if (ob.maxX <= bb.minX || ob.minX >= bb.maxX || ob.maxZ <= bb.minZ || ob.minZ >= bb.maxZ) continue;
+      cutters.push(a.poly);
+    }
+    if (!cutters.length) continue;
+    const before = polyArea(b.poly);
+    const rest = difference([b.poly], cutters).map((q) => cleanPoly(q)).filter((q): q is Poly => !!q && polyArea(q) >= 4).sort((x, y) => polyArea(y) - polyArea(x));
+    const after = rest.reduce((sum, q) => sum + polyArea(q), 0);
+    if (after > before - 0.5) continue; // touching only
+    if (!rest.length) { drop.add(k); removed++; continue; }
+    clipped++; b.poly = rest[0];
+    for (const q of rest.slice(1)) { extra.push({ ...b, id: nextId++, poly: q, name: undefined, flags: b.flags & ~BuildingFlag.Hero }); pieces++; }
+  }
+  const kept = buildings.filter((_b, k) => !drop.has(k));
+  buildings.length = 0; buildings.push(...kept, ...extra);
+  log(`overlap pass: ${clipped} buildings clipped by taller neighbours, ${removed} duplicates removed, ${pieces} split pieces`);
+}
+
+// Floor sanity (same report: some windows looked ~3 m wide). Floor-to-floor height comes from height / floors,
+// but source floor counts are sometimes wrong for the modelled height. Outside period-plausible ranges per
+// style, floors are re-derived from the height and the style's typical floor-to-floor.
+{
+  const TYPICAL: Record<number, [number, number, number]> = { // [min, typical, max] metres
+    0: [2.8, 3.5, 4.6], 1: [2.8, 3.2, 3.8], 2: [3.4, 4.4, 5.4], 3: [3.2, 4.0, 5.0], 4: [3.2, 3.8, 4.6], 5: [3.2, 3.7, 4.4],
+    6: [2.7, 3.0, 3.8], 7: [3.0, 4.0, 5.5], 8: [3.0, 5.0, 9.0], 9: [3.3, 3.75, 4.2], 10: [3.3, 4.0, 4.8], 11: [3.2, 3.6, 4.2],
+  };
+  let fixed = 0;
+  for (const b of buildings) {
+    const [lo, typ, hi] = TYPICAL[b.style] ?? TYPICAL[0];
+    const h = b.height - b.minHeight; const f = b.floors > 0 ? h / b.floors : 0;
+    if (f < lo || f > hi) { b.floors = Math.max(1, Math.round(h / typ)); fixed++; }
+  }
+  log(`floor sanity: ${fixed} buildings re-derived floors from height (period floor-to-floor by style)`);
+}
+
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
 const DRIVABLE = new Set(['motorway', 'motorway_link', 'trunk', 'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'residential', 'unclassified', 'living_street']);
-interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean }
+/** `grade`: 0 at street level; 1 elevated (Park Ave viaduct: bridge / layer > 0); -1 below grade (tunnels and
+ *  their portal ramps). Non-zero grades are not paved at ground level and get no lights or furniture. */
+interface Street { name: string; cls: string; width: number; oneway: number; pts: P[]; changed?: boolean; grade?: number }
 const streets: Street[] = [];
 const dirStats: Record<string, number> = {};
 for (const w of ways) {
@@ -352,12 +406,18 @@ for (const w of ways) {
     if (era.dir !== 'two') { const want = (era.dir === 'north') === runsNorth ? 1 : -1; changed = want !== oneway; oneway = want; }
   } else if (TWO_WAY_STREETS.test(name)) { changed = oneway !== 0; oneway = 0; }
   if (changed) dirStats[name] = (dirStats[name] ?? 0) + 1;
-  streets.push({ name, cls: hw, width: roadwayWidth(name, hw), oneway, pts, changed });
+  // Park Ave bug (user report 2026-11-27: no sidewalks, odd light posts): a two-way avenue mapped as two
+  // divided one-way carriageways got the full avenue width on EACH way, so the pair paved over the median
+  // and both sidewalks. A divided carriageway is half the avenue's roadway.
+  let width = roadwayWidth(name, hw);
+  if (era?.dir === 'two' && (t.oneway === 'yes' || t.oneway === '1' || t.oneway === '-1')) width /= 2;
+  const grade = t.bridge === 'yes' || (t.layer && parseInt(t.layer) > 0) ? 1 : /Tunnel/.test(name) ? -1 : 0;
+  streets.push({ name, cls: hw, width, oneway, pts, changed, grade });
 }
 log(`streets: ${streets.length}; 1974 direction overrides applied to`, dirStats);
 
 // ------------------------------------------------------------------ ground polygons (per chunk)
-const roadLines = streets.map((s) => ({ pts: s.pts, half: s.width / 2, bb: bbox([s.pts]) }));
+const roadLines = streets.filter((s) => !s.grade).map((s) => ({ pts: s.pts, half: s.width / 2, bb: bbox([s.pts]) })); // ground-level roadways only
 
 // ------------------------------------------------------------------ road paint (1974 NYC markings)
 // White dashed lane lines (10 ft dash / 30 ft gap) between lanes, double yellow on two-way streets,
@@ -367,7 +427,7 @@ const paintStrokes: WPaint[] = [];
 {
   const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
   const nodeUse = new Map<string, { p: P; legs: { dir: P; width: number }[] }>();
-  for (const s of streets) s.pts.forEach((p, k) => {
+  for (const s of streets.filter((x) => !x.grade)) s.pts.forEach((p, k) => {
     const e = nodeUse.get(key(p)) ?? nodeUse.set(key(p), { p, legs: [] }).get(key(p))!;
     for (const nb of [s.pts[k - 1], s.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: s.width }); }
   });
@@ -376,7 +436,7 @@ const paintStrokes: WPaint[] = [];
   for (const j of junctions) { const k = `${Math.floor(j.p[0] / 40)},${Math.floor(j.p[1] / 40)}`; (jIndex.get(k) ?? jIndex.set(k, []).get(k)!).push(j.p); }
   const nearJunction = (x: number, z: number, r: number) => { for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const q of jIndex.get(`${Math.floor(x / 40) + a},${Math.floor(z / 40) + b}`) ?? []) if (Math.hypot(q[0] - x, q[1] - z) < r) return true; return false; };
   const DASH = 3.05, GAP = 9.15;
-  for (const s of streets) {
+  for (const s of streets.filter((x) => !x.grade)) {
     if (s.cls === 'motorway' || s.cls === 'motorway_link') continue;
     const lanes = Math.max(1, Math.round(s.width / 3.4)), laneW = s.width / lanes;
     const offsets: [number, number][] = []; // [offset, kind]
@@ -421,6 +481,195 @@ for (const w of ways) {
   if (!PARK_TAGS(w.tags)) continue;
   const pts = wayPts(w); if (pts.length < 4) continue;
   const poly = cleanPoly([pts]); if (poly && pts.some((p) => inRegion(p, 50))) parks.push(poly);
+}
+
+// ------------------------------------------------------------------ park paths, trees, park furniture
+// User: "Also trees. Madison square park is bare". OSM here has no tree nodes, so trees are generated:
+//  - parks: blue-noise sampled inside the real park polygons, clear of the real path layout (OSM footways),
+//    mature London planes and elms (June canopy), denser and wilder in Bryant Park (1974: overgrown);
+//  - street trees: sparse, residential side streets only (tenement frontage), none on the avenues (DOCUMERICA);
+//  - furniture: benches and lamp posts along park paths, iron railings along park edges.
+// Park paths become paved ground (GroundKind.Plaza) so lawns and walks read. Output: public/data/parks.json.
+const parkUnion = union(parks);
+const parkPathLines: { pts: P[]; half: number }[] = [];
+for (const w of ways) {
+  const hw = w.tags?.highway; if (hw !== 'footway' && hw !== 'path' && hw !== 'pedestrian' && hw !== 'steps') continue;
+  const pts = wayPts(w); if (pts.length < 2 || !pts.some((p) => inRegion(p, 50))) continue;
+  const insideShare = pts.filter((p) => parkUnion.some((q) => pointInPoly(p, q))).length / pts.length;
+  if (insideShare >= 0.5) parkPathLines.push({ pts, half: hw === 'pedestrian' ? 2.5 : 1.6 });
+}
+const parkPaths = parkPathLines.length ? intersect(bufferLines(parkPathLines), parkUnion) : [];
+const parksJson = { trees: [] as number[][], benches: [] as number[][], lamps: [] as number[][], rails: [] as number[][] };
+{
+  const rnd = (a: number, b: number) => { let h = Math.imul(Math.round(a * 10) ^ Math.imul(Math.round(b * 10), 0x27d4eb2d), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const inAny = (p: P, list: Poly[]) => list.some((q) => pointInPoly(p, q));
+  const clearOfPaths = parkPathLines.length ? union(bufferLines(parkPathLines.map((l) => ({ ...l, half: l.half + 1.8 })))) : [];
+  const pathBuf = parkPathLines.length ? union(bufferLines(parkPathLines)) : [];
+  const bldIndex = new Map<string, number[]>(); const G = 50;
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / G); gx <= Math.floor(bb.maxX / G); gx++) for (let gz = Math.floor(bb.minZ / G); gz <= Math.floor(bb.maxZ / G); gz++) { const key = `${gx},${gz}`; (bldIndex.get(key) ?? bldIndex.set(key, []).get(key)!).push(k); } });
+  const nearBld = (p: P) => bldIndex.get(`${Math.floor(p[0] / G)},${Math.floor(p[1] / G)}`) ?? [];
+  const inBuilding = (p: P) => nearBld(p).some((k) => pointInPoly(p, buildings[k].poly));
+  // park trees: jittered grid (blue-noise-like), spacing by park
+  for (const park of parkUnion) {
+    const bb = bbox(park); if (!inRegion([(bb.minX + bb.maxX) / 2, (bb.minZ + bb.maxZ) / 2], 50)) continue;
+    const area = polyArea(park); if (area < 150) continue;
+    const c = centroid(park[0]);
+    const bryant = Math.hypot(c[0] + 1060, c[1] + 1420) < 220; // overgrown in 1974: denser
+    const sp = bryant ? 7.5 : area > 8000 ? 9.5 : 11;
+    for (let x = bb.minX + sp / 2; x < bb.maxX; x += sp) for (let z = bb.minZ + sp / 2; z < bb.maxZ; z += sp) {
+      const p: P = [x + (rnd(x, z) - 0.5) * sp * 0.8, z + (rnd(z, x) - 0.5) * sp * 0.8];
+      if (!pointInPoly(p, park) || inAny(p, clearOfPaths) || inBuilding(p) || rnd(p[0] * 3, p[1]) < 0.12) continue;
+      const kind = rnd(p[1] * 7, p[0]) < (bryant ? 0.85 : 0.7) ? 0 : 1; // 0 London plane, 1 elm
+      const h = (kind === 0 ? 15 : 17) + rnd(p[0], p[1] * 5) * 7, r = 4.5 + rnd(p[1], p[0] * 5) * 3.5;
+      parksJson.trees.push([+p[0].toFixed(1), +p[1].toFixed(1), +h.toFixed(1), +r.toFixed(1), kind, 0]);
+    }
+    // railing along the park edge (gaps where paths leave the park)
+    for (const ring of park) for (let k = 0; k < ring.length; k++) {
+      const a = ring[k], b2 = ring[(k + 1) % ring.length]; const L = Math.hypot(b2[0] - a[0], b2[1] - a[1]); if (L < 2) continue;
+      const steps = Math.max(1, Math.round(L / 6));
+      for (let q = 0; q < steps; q++) {
+        const t0 = q / steps, t1 = (q + 1) / steps;
+        const p0: P = [a[0] + (b2[0] - a[0]) * t0, a[1] + (b2[1] - a[1]) * t0], p1: P = [a[0] + (b2[0] - a[0]) * t1, a[1] + (b2[1] - a[1]) * t1];
+        const m: P = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];
+        if (inAny(m, pathBuf) || !inRegion(m)) continue;
+        parksJson.rails.push([+p0[0].toFixed(2), +p0[1].toFixed(2), +p1[0].toFixed(2), +p1[1].toFixed(2)]);
+      }
+    }
+  }
+  // benches and lamps along park paths
+  for (const l of parkPathLines) {
+    let carry = 6, lampCarry = 12, side = 1;
+    for (let k = 1; k < l.pts.length; k++) {
+      const a = l.pts[k - 1], b2 = l.pts[k]; const L = Math.hypot(b2[0] - a[0], b2[1] - a[1]); if (L < 0.5) continue;
+      const ux = (b2[0] - a[0]) / L, uz = (b2[1] - a[1]) / L, nx = -uz, nz = ux;
+      for (let t = carry; t < L; t += 12) {
+        const off = l.half + 0.7, p: P = [a[0] + ux * t + nx * off * side, a[1] + uz * t + nz * off * side];
+        if (inAny(p, parkUnion) && !inBuilding(p) && inRegion(p)) parksJson.benches.push([+p[0].toFixed(2), +p[1].toFixed(2), +Math.atan2(nx * side, nz * side).toFixed(3)]);
+        side = -side; carry = t + 12 - L;
+      }
+      if (carry < 0) carry = 6;
+      for (let t = lampCarry; t < L; t += 26) {
+        const p: P = [a[0] + ux * t + nx * (l.half + 0.4), a[1] + uz * t + nz * (l.half + 0.4)];
+        if (inAny(p, parkUnion) && inRegion(p)) parksJson.lamps.push([+p[0].toFixed(2), +p[1].toFixed(2)]);
+        lampCarry = t + 26 - L;
+      }
+      if (lampCarry < 0) lampCarry = 12;
+    }
+  }
+  // street trees: sparse, residential side streets (tenement frontage within 12 m), none on avenues
+  let street = 0;
+  for (const st of streets.filter((x) => !x.grade)) {
+    if (!st.name || /Avenue|Broadway|Place|Plaza|Highway|Drive/.test(st.name) || st.cls === 'motorway') continue;
+    for (const side of [-1, 1]) {
+      let along = 0;
+      for (let k = 1; k < st.pts.length; k++) {
+        const a = st.pts[k - 1], b2 = st.pts[k]; const L = Math.hypot(b2[0] - a[0], b2[1] - a[1]); if (L < 1) continue;
+        const ux = (b2[0] - a[0]) / L, uz = (b2[1] - a[1]) / L, nx = -uz * side, nz = ux * side;
+        for (let t = 14; t < L - 14; t += 9) {
+          const block = Math.floor((along + t) / 70);
+          if (rnd(block * 13 + side, st.pts[0][0] + st.pts[0][1]) > 0.35) continue; // ~1 block in 3 has trees
+          const off = st.width / 2 + 1.0, p: P = [a[0] + ux * t + nx * off, a[1] + uz * t + nz * off];
+          if (!inRegion(p) || inBuilding(p) || inAny(p, parkUnion)) continue;
+          const probe: P = [p[0] + nx * 8, p[1] + nz * 8];
+          if (!nearBld(probe).some((q) => buildings[q].style === 1 && pointInPoly(probe, buildings[q].poly))) continue; // tenement frontage
+          if (rnd(p[0] * 11, p[1]) < 0.3) continue; // gaps: dead or missing trees
+          const kind = rnd(p[1] * 3, p[0]) < 0.6 ? 0 : 2; // plane or honey locust, young and thin
+          parksJson.trees.push([+p[0].toFixed(1), +p[1].toFixed(1), +(7 + rnd(p[0], p[1]) * 4).toFixed(1), +(2.2 + rnd(p[1], p[0]) * 1.6).toFixed(1), kind, rnd(p[0] * 5, p[1] * 5) < 0.4 ? 1 : 0]);
+          street++;
+        }
+        along += L;
+      }
+    }
+  }
+  fs.writeFileSync(path.join(OUT, 'parks.json'), JSON.stringify(parksJson));
+  log(`parks: ${parksJson.trees.length - street} park trees, ${street} street trees, ${parksJson.benches.length} benches, ${parksJson.lamps.length} lamps, ${parksJson.rails.length} railing spans, ${parkPaths.length} path polygons`);
+}
+
+// ------------------------------------------------------------------ street furniture (Phase 3 block A; gameplay request 6)
+// User: "There are no street signs/traffic lights." Placed from data with 1974 placement rules, written to
+// public/data/furniture.json. The engine renders it (instanced); gameplay instantiates breakables and
+// colliders from the same records.
+//   items:   [type, x, z, yaw]  callbox | payphone | hydrant | mailbox | meter | newsstand | trash | busstop
+//   signals: [x, z, yaw]         a corner signal pole whose heads face along yaw (OSM traffic_signals junctions)
+//   signs:   [x, z, yaw, a, b]   a corner street-name pole: blade a faces along yaw, blade b across
+{
+  const furn = { items: [] as (string | number)[][], signals: [] as number[][], signs: [] as (string | number)[][] };
+  const rnd = (a: number, b: number) => { let h = Math.imul(Math.round(a * 10) ^ Math.imul(Math.round(b * 10), 0x27d4eb2d), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const G = 50, bIdx = new Map<string, number[]>();
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / G); gx <= Math.floor(bb.maxX / G); gx++) for (let gz = Math.floor(bb.minZ / G); gz <= Math.floor(bb.maxZ / G); gz++) { const key = `${gx},${gz}`; (bIdx.get(key) ?? bIdx.set(key, []).get(key)!).push(k); } });
+  const bAt = (p: P) => (bIdx.get(`${Math.floor(p[0] / G)},${Math.floor(p[1] / G)}`) ?? []).find((k) => pointInPoly(p, buildings[k].poly));
+  const free = (p: P) => inRegion(p) && bAt(p) === undefined && !parkUnion.some((q) => pointInPoly(p, q));
+  const isAve = (n?: string) => !!n && /Avenue|Broadway/.test(n);
+  // junction legs with street names
+  const key = (p: P) => `${Math.round(p[0] * 2)},${Math.round(p[1] * 2)}`;
+  const node = new Map<string, { p: P; legs: { dir: P; width: number; name?: string }[] }>();
+  for (const st of streets.filter((x) => !x.grade)) st.pts.forEach((p, k) => {
+    const e = node.get(key(p)) ?? node.set(key(p), { p, legs: [] }).get(key(p))!;
+    for (const nb of [st.pts[k - 1], st.pts[k + 1]]) if (nb) { const dx = nb[0] - p[0], dz = nb[1] - p[1], L = Math.hypot(dx, dz) || 1; e.legs.push({ dir: [dx / L, dz / L], width: st.width, name: st.name }); }
+  });
+  const sigNodes = osm.filter((e: any) => e.type === 'node' && e.tags?.highway === 'traffic_signals').map((e: any) => nodes.get(e.id)!).filter(Boolean) as P[];
+  let junctions = 0;
+  for (const j of node.values()) {
+    if (j.legs.length < 3 || !inRegion(j.p)) continue; junctions++;
+    const legs = [...j.legs].sort((a, b) => Math.atan2(a.dir[1], a.dir[0]) - Math.atan2(b.dir[1], b.dir[0]));
+    const ave = legs.some((l) => isAve(l.name));
+    const corners: { p: P; a: typeof legs[0]; b: typeof legs[0] }[] = [];
+    for (let k = 0; k < legs.length; k++) {
+      const a = legs[k], b = legs[(k + 1) % legs.length];
+      const cross = a.dir[0] * b.dir[1] - a.dir[1] * b.dir[0], dot = a.dir[0] * b.dir[0] + a.dir[1] * b.dir[1];
+      if (cross <= 0.5 || dot < -0.5) continue; // only ~90 degree corners between consecutive legs
+      const p: P = [j.p[0] + a.dir[0] * (b.width / 2 + 1.4) + b.dir[0] * (a.width / 2 + 1.4), j.p[1] + a.dir[1] * (b.width / 2 + 1.4) + b.dir[1] * (a.width / 2 + 1.4)];
+      if (free(p)) corners.push({ p, a, b });
+    }
+    if (!corners.length) continue;
+    const r = (k: number) => rnd(j.p[0] + k * 17, j.p[1] - k * 31);
+    const pick = (k: number) => corners[Math.floor(r(k) * corners.length) % corners.length];
+    const off = (c: typeof corners[0], s: number, t: number): P => [c.p[0] + c.a.dir[0] * s + c.b.dir[0] * t, c.p[1] + c.a.dir[1] * s + c.b.dir[1] * t];
+    const yawOf = (d: P) => +Math.atan2(-d[0], -d[1]).toFixed(3);
+    // street-name sign: one corner pole per junction (both names)
+    const named = corners.find((c) => c.a.name && c.b.name);
+    if (named) furn.signs.push([+named.p[0].toFixed(2), +named.p[1].toFixed(2), yawOf(named.a.dir), named.a.name!, named.b.name!]);
+    // traffic signals: two diagonal corners when OSM marks the junction signalled
+    if (sigNodes.some((sp) => Math.hypot(sp[0] - j.p[0], sp[1] - j.p[1]) < 18)) {
+      for (const c of [corners[0], corners[Math.floor(corners.length / 2)]]) { const q = off(c, 0.6, -0.4); furn.signals.push([+q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.a.dir)]); }
+    }
+    if (r(1) < (ave ? 0.8 : 0.5)) { const c = pick(2), q = off(c, 1.2, 0.3); if (free(q)) furn.items.push(['callbox', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.a.dir)]); }
+    if (r(3) < 0.6) { const c = pick(4), q = off(c, 0.3, 1.3); if (free(q)) furn.items.push(['mailbox', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.b.dir)]); }
+    if (r(5) < 0.75) { const c = pick(6), q = off(c, 2.0, 0.2); if (free(q)) furn.items.push(['trash', +q[0].toFixed(2), +q[1].toFixed(2), 0]); }
+    if (ave && r(7) < 0.35) { const c = pick(8), q = off(c, 3.2, 0.9); if (free(q)) furn.items.push(['payphone', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.a.dir)]); }
+    if (ave && r(9) < 0.25) { const c = pick(10), q = off(c, 0.6, 4.0); if (free(q)) furn.items.push(['newsstand', +q[0].toFixed(2), +q[1].toFixed(2), yawOf(c.b.dir)]); }
+  }
+  // along the kerbs: hydrants (~75 m), meters (commercial side streets, 6 m), bus stops (avenues, ~240 m)
+  for (const st of streets.filter((x) => !x.grade)) {
+    if (!st.name || st.cls === 'motorway') continue;
+    const ave = isAve(st.name);
+    for (const side of [-1, 1]) {
+      let along = 0;
+      for (let k = 1; k < st.pts.length; k++) {
+        const a = st.pts[k - 1], b2 = st.pts[k]; const L = Math.hypot(b2[0] - a[0], b2[1] - a[1]); if (L < 1) continue;
+        const ux = (b2[0] - a[0]) / L, uz = (b2[1] - a[1]) / L, nx = -uz * side, nz = ux * side;
+        const at = (t: number, o: number): P => [a[0] + ux * t + nx * (st.width / 2 + o), a[1] + uz * t + nz * (st.width / 2 + o)];
+        const kerbYaw = +Math.atan2(-nx, -nz).toFixed(3);
+        for (let t = 37 + (side > 0 ? 0 : 37); t < L - 10; t += 75) { const q = at(t, 0.6); if (free(q)) furn.items.push(['hydrant', +q[0].toFixed(2), +q[1].toFixed(2), kerbYaw]); }
+        if (!ave) for (let t = 14; t < L - 14; t += 6.1) {
+          const q = at(t, 0.45), probe = at(t, 8); const bk = bAt(probe);
+          if (bk === undefined || buildings[bk].style === 1 || buildings[bk].style === 6 || !free(q)) continue;
+          if (rnd(q[0] * 3, q[1]) < 0.15) continue; // gaps: hydrant zones, driveways, missing heads
+          furn.items.push(['meter', +q[0].toFixed(2), +q[1].toFixed(2), kerbYaw]);
+        }
+        if (ave && side > 0) for (let t = 120 - (along % 240); t < L - 20; t += 240) { if (t < 20) continue; const q = at(t, 0.7); if (free(q)) furn.items.push(['busstop', +q[0].toFixed(2), +q[1].toFixed(2), kerbYaw]); }
+        along += L;
+      }
+    }
+  }
+  // payphones and newsstands at subway entrances
+  for (const e of osm) if (e.type === 'node' && e.tags?.railway === 'subway_entrance') {
+    const p = nodes.get(e.id); if (!p || !inRegion(p)) continue;
+    const q: P = [p[0] + 2.5, p[1] + 1.5]; if (free(q) && rnd(p[0], p[1]) < 0.6) furn.items.push(['payphone', +q[0].toFixed(2), +q[1].toFixed(2), 0]);
+  }
+  fs.writeFileSync(path.join(OUT, 'furniture.json'), JSON.stringify(furn));
+  const count = (t: string) => furn.items.filter((i) => i[0] === t).length;
+  log(`street furniture: ${junctions} junctions, ${furn.signals.length} signal poles, ${furn.signs.length} name signs, callbox ${count('callbox')}, payphone ${count('payphone')}, hydrant ${count('hydrant')}, mailbox ${count('mailbox')}, meter ${count('meter')}, newsstand ${count('newsstand')}, trash ${count('trash')}, busstop ${count('busstop')}`);
 }
 
 // ------------------------------------------------------------------ assign to chunks & write
@@ -486,6 +735,53 @@ function wallAO(b: Bldg): [number, number][][] {
   log(`wall occlusion baked for ${n} buildings in ${((Date.now() - t) / 1000).toFixed(1)} s`);
 }
 
+// ------------------------------------------------------------------ doors (one per building, on the street frontage)
+// User: "not sure if we have doors in all the buildings". Every building gets a door on its longest wall that
+// faces open space, centred on the facade grid's nearest bay (src/shared/facade.ts), in a period style by
+// building type. Same fields as interiors' DoorRec; interiors' doorsForChunk replaces these at its merge.
+const doorOf = new Map<number, DoorRecC>();
+{
+  const GRID = 50, index = new Map<string, number[]>();
+  buildings.forEach((b, k) => { const bb = bbox(b.poly); for (let gx = Math.floor(bb.minX / GRID); gx <= Math.floor(bb.maxX / GRID); gx++) for (let gz = Math.floor(bb.minZ / GRID); gz <= Math.floor(bb.maxZ / GRID); gz++) { const key = `${gx},${gz}`; (index.get(key) ?? index.set(key, []).get(key)!).push(k); } });
+  const open = (p: P) => !(index.get(`${Math.floor(p[0] / GRID)},${Math.floor(p[1] / GRID)}`) ?? []).some((k) => pointInPoly(p, buildings[k].poly));
+  const rnd = (id: number, k: number) => { let h = Math.imul(id ^ (k * 0x9e3779b1), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const DIMS: Record<string, [number, number]> = { shop: [1.0, 2.3], shop_recessed: [1.0, 2.3], stoop: [1.1, 2.5], vestibule: [1.1, 2.4], brass_double: [1.8, 2.7], revolving: [2.2, 2.6], freight: [3.0, 3.2], church: [1.8, 3.0] };
+  const BAY: Record<number, number> = { 9: 1.55, 10: 1.8, 11: 2.4, 1: 2.6, 2: 3.3, 3: 3.3, 6: 1.9 };
+  let n = 0;
+  for (const b of buildings) {
+    if (b.minHeight > 0 || polyArea(b.poly) < 20 || b.height < 2.5) continue;
+    const r = b.poly[0]; const N = r.length;
+    const along: number[] = [0]; for (let k = 0; k < N; k++) { const a = r[k], c = r[(k + 1) % N]; const L = Math.hypot(c[0] - a[0], c[1] - a[1]); along.push(along[k] + (L < 1e-3 ? 0 : L)); }
+    let best = -1, bestL = 0, bn: P = [0, 0];
+    for (let k = 0; k < N; k++) {
+      const a = r[k], c = r[(k + 1) % N]; const L = Math.hypot(c[0] - a[0], c[1] - a[1]); if (L < 3.2 || L <= bestL) continue;
+      let nx = (c[1] - a[1]) / L, nz = -(c[0] - a[0]) / L; const m: P = [(a[0] + c[0]) / 2, (a[1] + c[1]) / 2];
+      if (pointInRing([m[0] + nx * 0.4, m[1] + nz * 0.4], r)) { nx = -nx; nz = -nz; }
+      if (!open([m[0] + nx * 4, m[1] + nz * 4]) || !open([m[0] + nx * 1.5, m[1] + nz * 1.5])) continue;
+      best = k; bestL = L; bn = [nx, nz];
+    }
+    if (best < 0) continue;
+    const st = b.style, big = b.height > 80;
+    const style: DoorStyle = b.flags & BuildingFlag.Hero ? (b.name === 'Empire State Building' ? 'revolving' : 'brass_double')
+      : st === 1 ? (rnd(b.id, 1) < 0.55 ? 'stoop' : 'vestibule')
+      : st === 2 || st === 3 ? (rnd(b.id, 2) < 0.3 ? 'freight' : 'shop')
+      : st === 4 || st === 5 ? (big && rnd(b.id, 3) < 0.4 ? 'revolving' : 'brass_double')
+      : st === 6 ? 'brass_double' : st === 8 ? 'church' : rnd(b.id, 4) < 0.5 ? 'shop' : 'shop_recessed';
+    const [w, h] = DIMS[style];
+    const a = r[best], c = r[(best + 1) % N]; const L = bestL, ux = (c[0] - a[0]) / L, uz = (c[1] - a[1]) / L;
+    const bay = BAY[st] ?? 2.45, mid = along[best] + L / 2;
+    let sAlong = (Math.round(mid / bay - 0.5) + 0.5) * bay - along[best]; // centre of the nearest bay
+    sAlong = Math.min(L - w / 2 - 0.3, Math.max(w / 2 + 0.3, sAlong));
+    const x = a[0] + ux * sAlong, z = a[1] + uz * sAlong;
+    // The Deuce (W 42nd St between 7th and 8th Aves, 1974: a row of grindhouse marquees): placeholder marquees
+    // over doors facing 42nd St until sign slots land.
+    const deuce = x > -881 && x < -605 && Math.abs(z + 1548) < 32 && Math.abs(bn[1]) > 0.7;
+    doorOf.set(b.id, { buildingId: b.id, x, z, yaw: Math.atan2(-bn[0], -bn[1]), style: deuce && style !== 'revolving' ? 'shop' : style, width: w, height: h, rise: style === 'stoop' ? 0.75 : style === 'church' ? 0.45 : 0, nightGate: style === 'shop' || style === 'shop_recessed' || deuce, enterable: false, marquee: deuce });
+    n++;
+  }
+  log(`doors: ${n} buildings got a street door`);
+}
+
 const toLocal = (poly: Poly, ox: number, oz: number): [number, number][][] => poly.map((r) => r.map(([x, z]) => [x - ox, z - oz] as [number, number]));
 const signals: P[] = [], entrances: P[] = [];
 for (const e of osm) if (e.type === 'node' && e.tags) {
@@ -503,12 +799,14 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
   const rect = rectPoly(minX, minZ, maxX, maxZ);
   const near = roadLines.filter((r) => r.bb.maxX + r.half > minX && r.bb.minX - r.half < maxX && r.bb.maxZ + r.half > minZ && r.bb.minZ - r.half < maxZ);
   const roads = intersect(bufferLines(near), [rect]);
-  const parkHere = difference(intersect(union(parks), [rect]), roads);
+  const parkAll = difference(intersect(parkUnion, [rect]), roads);
+  const pathsHere = parkPaths.length ? intersect(parkAll, parkPaths) : [];
+  const parkHere = pathsHere.length ? difference(parkAll, pathsHere) : parkAll;
   const lotsHere = lots.filter((l) => { const c = centroid(l[0]); return c[0] >= minX && c[0] < maxX && c[1] >= minZ && c[1] < maxZ; });
-  const sidewalks = difference([rect], [...roads, ...parkHere]);
+  const sidewalks = difference([rect], [...roads, ...parkAll]);
   const ground: WGround[] = [];
   const pushG = (kind: number, list: Poly[]) => { for (const p of list) { const c = cleanPoly(p); if (c) ground.push({ kind, rings: toLocal(c, ox, oz) }); } };
-  pushG(GroundKind.Road, roads); pushG(GroundKind.Sidewalk, sidewalks); pushG(GroundKind.Park, parkHere); pushG(GroundKind.Lot, lotsHere);
+  pushG(GroundKind.Road, roads); pushG(GroundKind.Sidewalk, sidewalks); pushG(GroundKind.Park, parkHere); pushG(GroundKind.Plaza, pathsHere); pushG(GroundKind.Lot, lotsHere);
 
   const bl = (chunkBuildings.get(chunkKey(i, j)) ?? []).map<WBuilding>((b) => ({
     id: b.id, year: b.year, use: b.use, style: b.style, floors: b.floors, flags: b.flags, height: b.height, minHeight: b.minHeight, rings: toLocal(b.poly, ox, oz), ao: (b as any).ao,
@@ -520,7 +818,8 @@ for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
   ];
   const paintHere = paintStrokes.filter((st) => { const m: P = [(st.pts[0][0] + st.pts[st.pts.length - 1][0]) / 2, (st.pts[0][1] + st.pts[st.pts.length - 1][1]) / 2]; return m[0] >= minX && m[0] < maxX && m[1] >= minZ && m[1] < maxZ; })
     .map((st) => ({ ...st, pts: st.pts.map(([x, z]) => [x - ox, z - oz] as [number, number]) }));
-  const bytes = writeChunk(i, j, bl, ground, pois, paintHere);
+  const doorsHere = bl.map((b) => doorOf.get(b.id)).filter((d): d is DoorRecC => !!d).map((d) => ({ ...d, x: d.x - ox, z: d.z - oz }));
+  const bytes = writeChunk(i, j, bl, ground, pois, paintHere, doorsHere);
   fs.writeFileSync(path.join(OUT, 'chunks', `${chunkKey(i, j)}.bin`), bytes);
   totalBytes += bytes.length;
   const maxH = bl.reduce((m, b) => Math.max(m, b.height), 0);
@@ -634,7 +933,7 @@ const world = {
 };
 fs.writeFileSync(path.join(OUT, 'world.json'), JSON.stringify(world));
 const r1 = (v: number) => Math.round(v * 10) / 10;
-fs.writeFileSync(path.join(OUT, 'streets.json'), JSON.stringify(streets.map((s) => ({ n: s.name, c: s.cls, w: s.width, o: s.oneway, p: s.pts.flatMap(([x, z]) => [r1(x), r1(z)]) }))));
+fs.writeFileSync(path.join(OUT, 'streets.json'), JSON.stringify(streets.map((s) => ({ n: s.name, c: s.cls, w: s.width, o: s.oneway, ...(s.grade ? { g: s.grade } : {}), p: s.pts.flatMap(([x, z]) => [r1(x), r1(z)]) }))));
 log('stats', world.stats);
 log('spawn', spawn, 'heroes', heroes.map((h) => `${h.name} (${h.ids.length} parts, ${h.height} m)`));
 

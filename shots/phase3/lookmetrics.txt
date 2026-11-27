@@ -1,0 +1,12 @@
+A_42nd_west_of_7th_1230.png: shadow #211514 mid #59443b high #e4d6bd | luma p2/p50/p98 7/37/227 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:PASS warm>=0.70:PASS
+D_herald_square_1230.png: shadow #251816 mid #5f4539 high #e0d5c0 | luma p2/p50/p98 6/41/221 | sat warm 1.0 cool 0.0
+    shadow:PASS mid:FAIL high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:PASS warm>=0.70:PASS
+E_flatiron_from_madison_sq_1230.png: shadow #281d16 mid #664f3d high #e5d2b0 | luma p2/p50/p98 20/75/231 | sat warm 1.0 cool 0.0
+    shadow:PASS mid:PASS high:FAIL p2<=20:PASS p50 50..80:PASS p98 200..235:PASS warm>=0.70:PASS
+G_user_report_looking_up_1230.png: shadow #1f1715 mid #6c5546 high #dfd5c1 | luma p2/p50/p98 20/132/228 | sat warm 1.0 cool 0.0
+    shadow:FAIL mid:PASS high:FAIL p2<=20:PASS p50 50..80:FAIL p98 200..235:PASS warm>=0.70:PASS
+H_madison_sq_park_inside_1230.png: shadow #281b14 mid #5e4936 high #dfcdb4 | luma p2/p50/p98 14/54/218 | sat warm 1.0 cool 0.0
+    shadow:PASS mid:FAIL high:FAIL p2<=20:PASS p50 50..80:PASS p98 200..235:PASS warm>=0.70:PASS
+I_flatiron_looking_north_to_park_1230.png: shadow #2d1f1c mid #71594a high #e5d7bd | luma p2/p50/p98 21/108/229 | sat warm 1.0 cool 0.0
+    shadow:PASS mid:PASS high:FAIL p2<=20:FAIL p50 50..80:FAIL p98 200..235:PASS warm>=0.70:PASS

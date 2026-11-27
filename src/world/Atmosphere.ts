@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { SkyMesh } from 'three/addons/objects/SkyMesh.js';
+import { uniform, positionLocal, normalize, vec3, mix, smoothstep, max, dot, float } from 'three/tsl';
 import { TRUE_NORTH } from '../shared/geo';
 import { worldClock, exactMinutes, sunPosition } from './Clock';
 
@@ -24,6 +25,8 @@ export interface LightState {
   lightsOn: number;
   /** Tone-mapping exposure: stopped down at noon, opened up at night (cinematographer's iris). */
   exposure: number;
+  /** 0..1 civil-twilight blue hour (sun ~1-9 deg below the horizon): cool sky fill against warm practicals. */
+  blueHour: number;
 }
 
 /**
@@ -36,6 +39,21 @@ export class Atmosphere {
   readonly sun = new THREE.DirectionalLight(0xffb27a, 2.2);
   readonly hemi = new THREE.HemisphereLight(0x9aa2c4, 0x3a302a, 1.7);
   readonly sunDir = new THREE.Vector3();
+  /** Twilight dome: the sky model renders black once the sun is below the horizon, but blue hour is a
+   *  luminous deep-blue sky (lighter and slightly violet at the horizon, a warm glow toward the set sun).
+   *  An additive gradient sphere drawn over the sky, scaled by the blue-hour factor. */
+  private readonly twilight = (() => {
+    const amount = uniform(0), sunDir = uniform(new THREE.Vector3(0, -1, 0));
+    const m = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, depthWrite: false, transparent: true, blending: THREE.AdditiveBlending, fog: false });
+    const d = normalize(positionLocal);
+    const up = max(d.y, 0);
+    const zenith = vec3(0.05, 0.1, 0.32), horizon = vec3(0.22, 0.2, 0.38);
+    const sunward = max(dot(vec3(d.x, 0, d.z).normalize(), vec3(sunDir.x, 0, sunDir.z).normalize()), 0).pow(3).mul(float(1).sub(smoothstep(0.0, 0.35, up)));
+    m.colorNode = mix(horizon, zenith, smoothstep(0.0, 0.6, up)).add(vec3(0.35, 0.16, 0.08).mul(sunward)).mul(amount);
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), m);
+    mesh.scale.setScalar(20000); mesh.renderOrder = -1; mesh.frustumCulled = false;
+    return { mesh, amount, sunDir };
+  })();
   readonly lightDir = new THREE.Vector3();
 
   constructor(private scene: THREE.Scene) {
@@ -45,7 +63,7 @@ export class Atmosphere {
     this.sky.mieCoefficient.value = 0.012;
     this.sky.mieDirectionalG.value = 0.9;
     this.sky.cloudCoverage.value = 0.25;
-    scene.add(this.sky, this.sun, this.sun.target, this.hemi);
+    scene.add(this.sky, this.sun, this.sun.target, this.hemi, this.twilight.mesh);
     scene.fog = new THREE.Fog(0x7a6a66, 250, 3800);
     this.setSun(298, 4); // NYC, late June, ~20:15 EDT
   }
@@ -71,7 +89,7 @@ export class Atmosphere {
     this.sun.position.set(sx + this.lightDir.x * 500, y + this.lightDir.y * 500, sz + this.lightDir.z * 500);
     this.sun.target.updateMatrixWorld();
   }
-  readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0, exposure: 1 };
+  readonly state: LightState = { sunElevation: 0, night: 0, lightsOn: 0, exposure: 1, blueHour: 0 };
 
   /** Recompute sun, sky, lights and haze from the world clock. Cheap; call every frame. */
   update(): LightState {
@@ -90,20 +108,32 @@ export class Atmosphere {
     if (moonUp > 0.5) this.sun.color.set(0.55, 0.62, 0.85);
     this.sun.intensity = moonUp > 0.5 ? 0.12 * moonUp : 3.1 * day * (1 - 0.45 * golden);
     // sky / ground fill: blue skylight by day, sodium-lit city glow bouncing up at night
-    lerpC(C(0.62, 0.68, 0.82), C(0.42, 0.4, 0.52), golden, this.tmp.a);
-    lerpC(this.tmp.a, C(0.09, 0.1, 0.17), night, this.hemi.color);
-    lerpC(C(0.32, 0.27, 0.22), C(0.3, 0.18, 0.09), night, this.hemi.groundColor);
-    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.55 * night + 0.2;
+    // Midday fill: hazy summer skylight, less blue than a clean sky (1974 Midtown haze; refs read warm, not blue)
+    lerpC(C(0.7, 0.68, 0.7), C(0.42, 0.4, 0.52), golden, this.tmp.a);
+    lerpC(this.tmp.a, C(0.16, 0.13, 0.13), night, this.hemi.color); // night: sodium-lit sky glow (1974 Midtown never went black)
+    // blue hour: the sky fill turns cool while the street lights are already on (the warm/cool split of the look)
+    const blue = smooth(-0.5, -3, el) * (1 - smooth(-7, -11, el));
+    this.hemi.color.lerp(C(0.22, 0.3, 0.55), blue * 0.85);
+    lerpC(C(0.42, 0.32, 0.24), C(0.3, 0.18, 0.09), night, this.hemi.groundColor); // warm street / brick bounce
+    this.hemi.intensity = (this.envEnabled ? 1.0 : 1.5) * day + 0.9 * night + 0.2;
+    // blue hour: the twilight sky is still a big, bright, blue light source; golden hour: low sun, but the
+    // whole midsummer sky still lights the canyons (D at 19:30 measured p50 25 against 50..80)
+    this.hemi.intensity += 1.1 * blue + 1.4 * golden * day;
     // sky dome
+    // (Tried higher turbidity/mie for a hazier noon: this sky model turns a saturated deep blue instead. Kept.)
     this.sky.turbidity.value = 6 + 4 * golden;
-    this.sky.rayleigh.value = 1.6 + 1.2 * golden;
+    this.sky.rayleigh.value = 1.6 + 1.2 * golden + 2.8 * blue; // luminous deep-blue twilight dome
     // haze colour follows the sky: bleached day, rose dusk, sodium-brown night
     lerpC(C(0.66, 0.63, 0.6), C(0.52, 0.42, 0.42), golden, this.tmp.b);
     lerpC(this.tmp.b, C(0.09, 0.075, 0.07), night, (this.scene.fog as THREE.Fog).color);
+    (this.scene.fog as THREE.Fog).color.lerp(C(0.16, 0.2, 0.32), blue * 0.7);
     // late-night windows thin out between 1:00 and 5:30
     const m = worldClock.minutes, late = m > 60 && m < 330 ? 0.45 : 1;
+    this.state.blueHour = blue;
+    this.twilight.amount.value = blue + 0.35 * night * (1 - blue) * 0.3; // a faint sky glow lingers at night
+    this.twilight.sunDir.value.copy(this.sunDir);
     this.state.sunElevation = el; this.state.night = night * late; this.state.lightsOn = smooth(6, -1, el);
-    this.state.exposure = 0.5 + 0.38 * golden + 0.35 * night; // ~0.5 noon, ~0.88 golden, ~1.2 night
+    this.state.exposure = 0.6 + 0.5 * golden + 0.6 * night; // ~0.6 noon, ~1.1 golden, ~1.7 night (night shots: p50 5-9 vs band 12-40)
     return this.state;
   }
 

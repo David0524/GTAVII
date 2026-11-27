@@ -1,0 +1,102 @@
+{
+  "quality": "high",
+  "forceWebGL": true,
+  "date": "2026-11-27T03:00:01.319Z",
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.36 Safari/537.36",
+  "views": [
+    {
+      "view": "A_42nd_west_of_7th_2050",
+      "cam": "-700,1.7,-1548.5,90,3",
+      "backend": "webgl2",
+      "avg": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 174,
+      "triangles": 667290,
+      "chunks": {
+        "ready": 132,
+        "lod0": 42,
+        "lod1": 90,
+        "loading": 0,
+        "parseMsTotal": 7785.6999999806285,
+        "failed": 0
+      }
+    },
+    {
+      "view": "A_42nd_west_of_7th_1930",
+      "cam": "-700,1.7,-1548.5,90,3",
+      "backend": "webgl2",
+      "avg": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 174,
+      "triangles": 666835,
+      "chunks": {
+        "ready": 132,
+        "lod0": 42,
+        "lod1": 90,
+        "loading": 0,
+        "parseMsTotal": 6316.89999999851,
+        "failed": 0
+      }
+    },
+    {
+      "view": "D_herald_square_2050",
+      "cam": "-308.2,1.7,-826.3,12,5",
+      "backend": "webgl2",
+      "avg": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 196,
+      "triangles": 760466,
+      "chunks": {
+        "ready": 132,
+        "lod0": 54,
+        "lod1": 78,
+        "loading": 0,
+        "parseMsTotal": 5928.799999963492,
+        "failed": 0
+      }
+    },
+    {
+      "view": "D_herald_square_1930",
+      "cam": "-308.2,1.7,-826.3,12,5",
+      "backend": "webgl2",
+      "avg": 100,
+      "p50": 100,
+      "p95": 100,
+      "max": 100,
+      "fps": 10,
+      "drawCalls": 198,
+      "triangles": 766582,
+      "chunks": {
+        "ready": 132,
+        "lod0": 54,
+        "lod1": 78,
+        "loading": 0,
+        "parseMsTotal": 5703.499999996275,
+        "failed": 0
+      }
+    }
+  ],
+  "logs": [
+    "[warning] [.WebGL-0x131c003b8400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] THREE.PostProcessing: \"PostProcessing\" has been renamed to \"RenderPipeline\". Please update your code to use \"THREE.RenderPipeline\" instead.",
+    "[warning] THREE.WebGPURenderer: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+    "[warning] [.WebGL-0x131c003b8400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x131c003b8400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[warning] [.WebGL-0x131c003b8400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)",
+    "[warning] THREE.PostProcessing: \"PostProcessing\" has been renamed to \"RenderPipeline\". Please update your code to use \"THREE.RenderPipeline\" instead.",
+    "[warning] THREE.WebGPURenderer: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+    "[warning] THREE.PostProcessing: \"PostProcessing\" has been renamed to \"RenderPipeline\". Please update your code to use \"THREE.RenderPipeline\" instead.",
+    "[warning] THREE.WebGPURenderer: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.",
+    "[warning] THREE.PostProcessing: \"PostProcessing\" has been renamed to \"RenderPipeline\". Please update your code to use \"THREE.RenderPipeline\" instead.",
+    "[warning] THREE.WebGPURenderer: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."
+  ]
+}
