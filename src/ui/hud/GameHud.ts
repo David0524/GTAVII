@@ -14,7 +14,7 @@ import type { UiHost, HeatView, ObjectiveView } from '../host/types';
 import type { MapModel } from '../map/MapModel';
 import { MiniMap } from '../map/MiniMap';
 import { CATEGORIES, type RevealVia } from '../map/places';
-import { pictogramURL } from '../map/pictograms';
+import { icon, type IconName } from '../icons';
 import { uiSettings, type Mode3, type UiSettingsData } from '../settings/uiSettings';
 import { radioLine } from './radio';
 import { callout, voicedCallout, routeVoice, type CallLine } from '../map/Route';
@@ -90,7 +90,7 @@ export class GameHud {
     model.discovery.on((e) => {
       if (uiSettings.get('hudDiscovery') === 'off') return;
       const how = VIA_SHORT[e.via];
-      this.note('PENCILLED IN', `<img alt="" src="${pictogramURL(e.place.cat, 16, 'disc')}">${esc(e.place.name)}${how ? ` <span style="opacity:.7">· ${how}</span>` : ''}`, 4.5);
+      this.note('NEW ON YOUR MAP', `${icon(e.place.cat as IconName, 18)}<span class="nm">${esc(e.place.name)}</span>${how ? `<span class="how">${how}</span>` : ''}`, 4.5);
       this.ping('minimap', 8);
     });
     uiSettings.subscribe((_s, k) => this.applySetting(k));

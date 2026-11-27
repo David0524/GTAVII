@@ -163,3 +163,50 @@ body.touch .u-btn { min-height: 44px; }
 .u-record .rc-a b { font: 800 16px var(--f-voice); } .u-record .rc-a p { margin: 3px 0 2px; font: 400 13px/1.4 var(--f-ui); color: var(--dim); } .u-record .rc-a small { font: 700 10px var(--f-cond); letter-spacing: .12em; text-transform: uppercase; color: var(--taxi); }
 .u-record .rc-a.locked b, .u-record .rc-a.locked small { color: var(--faint); }
 @media (max-height: 480px) { .u-record .rc-pct { font-size: 64px; } .u-record .rc-sub { margin: 6px 0 10px; } .u-record .rc-data { columns: 1; } }
+
+/* ------------------------------------------------------------------ HUD (DESIGN_A): type on the world, no plates; legibility from a soft local shade */
+.u-hud { --hud-shade: 0 1px 2px rgba(0,0,0,.7), 0 0 14px rgba(0,0,0,.45); }
+.u-objective { left: calc(30px + var(--safe-l)) !important; top: calc(24px + var(--safe-t)) !important; text-shadow: var(--hud-shade) !important; max-width: 40vw; }
+.u-objective .lbl { background: none !important; box-shadow: none !important; padding: 0 !important; font: 700 10.5px var(--f-cond) !important; letter-spacing: .16em !important; color: var(--taxi) !important; display: flex !important; align-items: center; gap: 8px; }
+.u-objective .lbl::before { content: ''; width: 14px; height: 2px; background: var(--taxi); }
+.u-objective .txt { font: 800 21px/1.15 var(--f-voice) !important; letter-spacing: -.01em; margin-top: 5px !important; }
+.u-objective .dist { font: 400 12.5px var(--f-ui) !important; color: var(--dim) !important; margin-top: 3px !important; }
+.t74-clock { right: calc(30px + var(--safe-r)) !important; top: calc(20px + var(--safe-t)) !important; }
+.u-clockel { background: none !important; }
+.t74-clock .time { font: 800 30px/1 var(--f-voice) !important; letter-spacing: -.015em; text-shadow: var(--hud-shade); }
+.t74-clock .time i, .t74-clock .time small { font-size: .5em; }
+.t74-clock .date { font: 700 10.5px var(--f-cond) !important; letter-spacing: .14em !important; color: var(--dim) !important; margin-top: 6px !important; text-shadow: var(--hud-shade); }
+.u-cash { right: calc(30px + var(--safe-r)) !important; top: calc(84px + var(--safe-t)) !important; text-shadow: var(--hud-shade) !important; }
+.u-cash .amt { font: 800 22px/1 var(--f-voice) !important; color: var(--cream) !important; }
+.u-cash .delta { font: 800 15px var(--f-voice) !important; } .u-cash .delta.pos { color: #7fc493 !important; } .u-cash .delta.neg { color: #ef7a64 !important; }
+.u-weapon { right: calc(30px + var(--safe-r)) !important; top: calc(124px + var(--safe-t)) !important; }
+.u-weapon .nm { font: 700 11px var(--f-cond) !important; letter-spacing: .14em !important; }
+.u-weapon .rounds b { border-radius: 0 !important; width: 4px !important; height: 12px !important; background: var(--cream) !important; box-shadow: 0 1px 2px #000a !important; } .u-weapon .rounds b.spent { background: rgba(242,237,227,.25) !important; }
+
+/* location reveal: the name set big over the world on an amber rule, wiped in */
+.t74-reveal { background: none !important; border: 0 !important; box-shadow: none !important; padding: 2px 0 2px 16px !important; right: calc(30px + var(--safe-r)) !important; bottom: calc(40px + var(--safe-b)) !important;
+  text-shadow: var(--hud-shade); clip-path: inset(0 100% 0 0); transition: clip-path .5s var(--ease-out), opacity .3s !important; transform: none !important; }
+.t74-reveal::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 3px; background: var(--taxi); }
+.t74-reveal.show { clip-path: inset(0 0 0 0); }
+.t74-reveal .name { font: 900 clamp(26px, 3vw, 40px)/1 var(--f-voice) !important; letter-spacing: -.02em !important; }
+.t74-reveal .street { font: 700 11px var(--f-cond) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--dim) !important; margin-top: 7px !important; }
+body.touch .t74-reveal { top: auto !important; left: auto !important; right: calc(96px + var(--safe-r)) !important; bottom: calc(150px + var(--safe-b)) !important; transform: none !important; }
+
+/* notes / discoveries: a left-edge stack, slid in on an amber rule */
+.u-notes { left: calc(30px + var(--safe-l)) !important; top: 34% !important; bottom: auto !important; transform: none !important; align-items: flex-start !important; gap: 6px !important; }
+.u-note { display: grid !important; grid-template-columns: auto auto; align-items: center; gap: 2px 10px; padding: 8px 16px 9px 14px !important; background: var(--focus-surf) !important; border: 0 !important; border-radius: 0 !important;
+  box-shadow: inset 3px 0 0 var(--taxi) !important; font: 400 13.5px var(--f-ui) !important; color: var(--cream); opacity: 0; transform: translateX(-18px) !important; transition: opacity .25s, transform .3s var(--ease-out) !important; }
+.u-note.show { opacity: 1; transform: none !important; }
+.u-note b { grid-column: 1 / -1; font: 700 10px var(--f-cond) !important; letter-spacing: .16em !important; color: var(--taxi) !important; background: none !important; padding: 0 !important; }
+.u-note .ic { width: 18px; height: 18px; } .u-note .nm { font-weight: 700; } .u-note .how { grid-column: 2; font-size: 12px; color: var(--dim); margin-top: -2px; }
+.u-note:has(.ic) { grid-template-columns: 18px auto; }
+body.touch .u-notes { top: 30% !important; }
+
+/* minimap: a square window on the city, hairline frame, no rounded corners */
+.t74-minimap { border-radius: 0 !important; box-shadow: 0 0 0 1px rgba(242,237,227,.22), 0 6px 24px rgba(0,0,0,.45) !important; left: calc(30px + var(--safe-l)) !important; bottom: calc(30px + var(--safe-b)) !important; }
+body.touch .t74-minimap { left: calc(16px + var(--safe-l)) !important; top: calc(12px + var(--safe-t)) !important; bottom: auto !important; }
+.t74-minimap .turn { background: var(--focus-surf) !important; font: 700 10.5px var(--f-cond) !important; letter-spacing: .1em; text-transform: uppercase; }
+
+/* key prompts: square keycaps */
+.t74-key { border-radius: 2px !important; }
+.t74-sub .who { font: 700 13px var(--f-cond) !important; letter-spacing: .12em !important; }
