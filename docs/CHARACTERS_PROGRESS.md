@@ -220,6 +220,22 @@ Crowd close-ups (`scene=lineup&zoom=head&focus=0|4`):
     hand frame (height along the fingers), so they hang plumb at the side.
   - Still visible on coats: round bulges at the hips and light shirt patches under the arms
     (logged).
+- **Hair-card block, in progress** (oversight's order: hair is on every head in every shot):
+  - **Done:**
+    - A mipmapped strand texture (`tools/characters/hair_strands.py`, ours) on the cards, with a
+      mip-level coverage boost and alpha sharpening.
+    - One solid scalp shell under the cards (the stacked shells drew horizontal scan lines).
+    - Cards are narrower and more numerous (0.62× width, 1.6× count).
+  - **Honest state:** strands now read on the cards, but the tops of heads still show flat layered
+    card sheets. Headless renders exaggerate the stair-stepped alpha edges (SwiftShader has no
+    MSAA, so alpha-to-coverage can't smooth them).
+  - **Afro:** the volume is capped at 4.5 cm. Shells grown off the helper-hair mesh stretch into
+    flat facets with a centre fold (a full taper made it worse: a paper-hat wedge).
+  - **Next:**
+    1. A dedicated afro and coil volume: a dense sphere-patch mesh around the head with clumped
+       coil shells, as on Delphine's ICT scalp, which works.
+    2. Card clumping and lift, so cards stop lying flat on the crown.
+    3. A crowd street board (oversight).
 - **Glasses and coats: fixed** (oversight priority: visible defects in the live crowd).
   Shot: `shots/characters/44_coat_glasses_fix.jpg` (before coat, after coat, glasses on a
   Rocketbox head).
