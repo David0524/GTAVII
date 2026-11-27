@@ -7,6 +7,7 @@ import { MODEL_BY_ID } from './models';
 import { BIKE_BY_ID, buildBike, type BikeSpec } from './twowheel/bikes';
 import { resolve } from './registry';
 import { VehicleLights, type TrafficInstance } from '../shared/traffic';
+import { attribute, interleavedGradientNoise, screenCoordinate } from 'three/tsl';
 import { shadowBake, groundPlane, shadowMaterial, headPoolGeometry, groundLightMats, groundLightLevel, type Footprint, type LightCandidate } from './lighting';
 
 /**
@@ -140,6 +141,11 @@ export class TrafficRenderer {
   };
   private mats: { paint: THREE.Material; fixed: THREE.Material; lamp: THREE.Material; vinyl: THREE.Material };
   private _m = new THREE.Matrix4(); private _q = new THREE.Quaternion(); private _p = new THREE.Vector3(); private _s = new THREE.Vector3(1, 1, 1); private _y = new THREE.Vector3(0, 1, 0);
+  /** Seconds to dither a car in when it first appears (and out when it goes). */
+  fadeTime = 0.4;
+  private fades = new Map<string, { t: number; seen: number; gone: boolean; last: TrafficInstance }>();
+  private frame = 0;
+  private lastT = -1;
   /** Distance (m) beyond which the box impostor is used. */
   lod2Distance: number;
   lastMs = 0;
@@ -153,6 +159,7 @@ export class TrafficRenderer {
       lamp: new THREE.MeshBasicNodeMaterial({}),
       vinyl: new THREE.MeshStandardNodeMaterial({ roughness: 0.78, metalness: 0 }),
     };
+    for (const m of Object.values(this.mats)) fadeMask(m);
   }
 
   private batch(modelId: string, lod: 0 | 1): ModelBatch {
@@ -174,6 +181,7 @@ export class TrafficRenderer {
       this.dims.set(modelId, { minZ: fp.minZ, maxZ: fp.maxZ, halfW: fp.halfW, headY });
       const bake = shadowBake('traffic:' + modelId, fp);
       const smat = shadowMaterial(bake.tex);
+      fadeMask(smat);
       this.shadowMats.push(smat);
       const shadowGeo = groundPlane(bake.w, bake.l, bake.cz);
       const poolGeo = headPoolGeometry(fp.minZ, fp.halfW);
@@ -183,10 +191,12 @@ export class TrafficRenderer {
         const parts = spec
           ? splitForInstancing({ paint2: spec.paint2, roofColor: spec.roofColor, signWhite: spec.cls !== 'icecream' && (spec.cls === 'taxi' || !!getAsset(spec, { vinyl: 'none', whitewall: false, wheelStyle: spec.wheelStyle }).lod1.beacon) }, withWheels(spec, lodLevel))
           : splitForInstancing({ paint2: bike!.paint2, signWhite: !!bike!.police }, bikeGeometry(bike!));
-        const im = (geo: THREE.BufferGeometry, mat: THREE.Material, colored: boolean) => {
+        const im = (geo0: THREE.BufferGeometry, mat: THREE.Material, colored: boolean, fadeable = true) => {
+          const geo = geo0.clone(); // each mesh owns its geometry: the fade attribute is per mesh
           const m = new THREE.InstancedMesh(geo, mat, this.maxInstances);
           m.count = 0; m.frustumCulled = false;
           if (colored) m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(this.maxInstances * 3), 3);
+          if (fadeable) { const a = new THREE.InstancedBufferAttribute(new Float32Array(this.maxInstances).fill(1), 1); a.setUsage(THREE.DynamicDrawUsage); geo.setAttribute('instFade', a); }
           m.castShadow = lodLevel === 1;
           this.object.add(m);
           return m;
@@ -196,9 +206,9 @@ export class TrafficRenderer {
         const tail = im(parts.tail, this.mats.lamp, true), head = im(parts.head, this.mats.lamp, true);
         const sign = parts.sign.getAttribute('position').count ? im(parts.sign, this.mats.lamp, true) : null;
         const vinyl = parts.vinyl.getAttribute('position').count ? im(parts.vinyl, this.mats.vinyl, true) : null;
-        const flat = (geo: THREE.BufferGeometry, mat: THREE.Material) => { const m = im(geo, mat, false); m.castShadow = false; m.renderOrder = -1; return m; };
-        const shadow = flat(shadowGeo, smat);
-        const pool = flat(poolGeo, gm.head), brake = flat(glowGeo, gm.brake), tailGlow = flat(glowGeo, gm.tail);
+        const flat = (geo: THREE.BufferGeometry, mat: THREE.Material, fadeable: boolean) => { const m = im(geo, mat, false, fadeable); m.castShadow = false; m.renderOrder = -1; return m; };
+        const shadow = flat(shadowGeo, smat, true);
+        const pool = flat(poolGeo, gm.head, false), brake = flat(glowGeo, gm.brake, false), tailGlow = flat(glowGeo, gm.tail, false);
         return { paint, fixed, tail, head, sign, vinyl, shadow, pool, brake, tailGlow, meshes: [paint, fixed, tail, head, shadow, ...(sign ? [sign] : []), ...(vinyl ? [vinyl] : [])], n: 0, np: 0, nb: 0, nt: 0 };
       };
       b = [mk(1), mk(2)];
@@ -224,26 +234,32 @@ export class TrafficRenderer {
   /** Instances follow the shared contract (src/shared/traffic.ts); light bits drive the lamp parts. */
   setInstances(list: readonly TrafficInstance[], camera?: THREE.Vector3, lit?: { litHead: Set<string>; litRear: Set<string> }) {
     const t0 = performance.now();
+    const dt = this.lastT < 0 ? 1e9 : Math.min(0.25, (t0 - this.lastT) / 1000);
+    const first = this.lastT < 0;
+    this.lastT = t0; this.frame++;
     for (const pair of this.batches.values()) for (const b of pair) { b.n = 0; b.np = 0; b.nb = 0; b.nt = 0; }
     const pools = groundLightLevel() > 0.02;
-    let idx = -1;
     const d2 = this.lod2Distance * this.lod2Distance;
     const blink = Math.floor(t0 / 380) % 2 === 0;
     const L = this.lampCols;
-    for (const it of list) {
-      idx++;
+    const step = this.fadeTime > 0 ? dt / this.fadeTime : 1e9;
+    const draw = (it: TrafficInstance, idx: number, fade: number) => {
       const r = this.resolved(it.vclass, it.variant);
       const far = camera ? (it.x - camera.x) ** 2 + (it.z - camera.z) ** 2 > d2 : false;
       const b = this.batch(r.modelId, far ? 1 : 0);
-      if (b.n >= this.maxInstances) continue;
+      if (b.n >= this.maxInstances) return;
       this._q.setFromAxisAngle(this._y, it.yaw);
       this._m.compose(this._p.set(it.x, it.y, it.z), this._q, this._s);
       const i = b.n++;
-      for (const m of b.meshes) m.setMatrixAt(i, this._m);
+      for (const m of b.meshes) {
+        m.setMatrixAt(i, this._m);
+        const fa = m.geometry.getAttribute('instFade') as THREE.InstancedBufferAttribute | undefined;
+        if (fa) fa.setX(i, fade);
+      }
       b.paint.setColorAt(i, r.paint);
       b.vinyl?.setColorAt(i, r.vinyl);
       const lt = it.lights;
-      if (pools) {
+      if (pools && idx >= 0 && fade > 0.5) {
         const key = 'traffic:' + idx;
         if (lt & VehicleLights.Head && !lit?.litHead.has(key)) b.pool.setMatrixAt(b.np++, this._m);
         if (!lit?.litRear.has(key)) {
@@ -258,11 +274,32 @@ export class TrafficRenderer {
         const police = MODEL_BY_ID.get(r.modelId)?.cls !== 'taxi'; // emergency beacons (cars and police bikes) follow the Siren bit
         b.sign.setColorAt(i, police ? (lt & VehicleLights.Siren && blink ? L.beacon : L.beaconOff) : lt & VehicleLights.RoofLight ? L.signOn : L.signOff);
       }
+    };
+    // live instances: new keys (sim view id, else class+variant) dither in over fadeTime
+    list.forEach((it, idx) => {
+      const key = keyOf(it);
+      let f = this.fades.get(key);
+      if (!f) { f = { t: first ? 1 : 0, seen: 0, gone: false, last: it }; this.fades.set(key, f); }
+      f.gone = false; f.seen = this.frame; f.last = it;
+      f.t = Math.min(1, f.t + step);
+      draw(it, idx, f.t);
+    });
+    // instances that left: dither out where they were last seen
+    for (const [key, f] of this.fades) {
+      if (f.seen === this.frame) continue;
+      f.gone = true;
+      f.t -= step;
+      if (f.t <= 0) { this.fades.delete(key); continue; }
+      draw(f.last, -1, f.t);
     }
     for (const pair of this.batches.values()) for (const b of pair) {
       for (const m of b.meshes) {
         m.count = b.n;
-        if (b.n) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+        if (b.n) {
+          m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true;
+          const fa = m.geometry.getAttribute('instFade') as THREE.InstancedBufferAttribute | undefined;
+          if (fa) fa.needsUpdate = true;
+        }
         m.visible = b.n > 0;
       }
       for (const [m, n] of [[b.pool, b.np], [b.brake, b.nb], [b.tailGlow, b.nt]] as [THREE.InstancedMesh, number][]) {
@@ -305,4 +342,14 @@ export class TrafficRenderer {
     Object.values(this.mats).forEach((m) => m.dispose());
     this.object.removeFromParent();
   }
+}
+
+/** Stable identity for fading: the sim's view id when present, else class + variant. */
+function keyOf(it: TrafficInstance): string {
+  const id = (it as TrafficInstance & { id?: number | string }).id;
+  return id !== undefined ? 'i' + id : it.vclass + ':' + it.variant;
+}
+/** Screen-door dissolve driven by the per-instance 'instFade' attribute (stays in the opaque pass). */
+function fadeMask(m: THREE.Material) {
+  (m as unknown as { maskNode: unknown }).maskNode = (interleavedGradientNoise(screenCoordinate.xy) as unknown as { lessThan(x: unknown): unknown }).lessThan(attribute('instFade', 'float'));
 }
