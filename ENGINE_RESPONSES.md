@@ -837,3 +837,15 @@ wires it (about 10 lines in main.ts plus two ButtonActions in Input.ts). The eng
   - The engine supplies only the markup the markers sit on: roofs, fire escapes and platforms (interiors
     hookup, after the wiring).
   - Nothing here forces an architecture or scope decision.
+
+## Requests check, 2026-11-27 10:33
+- **Audio 13, forward gunfire from gameplay: ACCEPTED, wired together with combat input** (gameplay
+  request 3). Combat input isn't in the main game yet; aim, fire and reload come next, after driving.
+  - The glue lives in `src/engine/GameplayGlue.ts`, between gameplay's events and audio:
+    - `shot`: `audio.gunshot(origin, tierOf(weapon), { indoors })`, plus a `bulletPass` per round;
+    - `impact`: `audio.bulletImpact(point, material)`;
+    - reload / pump / dry: `audio.gunFoley`;
+    - the same shots: `sim.emit({ type: 'gunfire', x, z })`.
+  - `indoors` comes from `interiors.inside()`, which is now in the main game. Gameplay owns the
+    weapon → tier map: its weapon defs gain an `audioTier` field.
+  - No architecture or scope impact.
