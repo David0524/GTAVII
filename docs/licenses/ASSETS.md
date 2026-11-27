@@ -17,13 +17,13 @@ Full records with edits are in `docs/CHARACTER_SOURCES.md`; the head-source rese
 | MakeHuman system assets (base mesh, targets, rig, weights, 18 default skins, eyes and teeth) | CC0 1.0 | each .mhmat: "explicitly released as CC0 in september 2020"; makehumancommunity.org asset pages list CC0 | every body; skin detail for all tiers |
 | Quaternius Universal Animation Library 1 and 2 | CC0 1.0 | quaternius.com: "CC0" | locomotion and action clips |
 | Poly Haven fabric scans (6) | CC0 1.0 | polyhaven.com/license: "CC0" | cloth relief maps |
+| ICT-FaceKit "Light" (USC ICT) | MIT | github.com/ICT-VGL/ICT-FaceKit LICENSE: "Permission is hereby granted, free of charge... to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"; notice shipped in `public/characters/rb/LICENSE-ICT-FaceKit.md` | Delphine's head (`lead_delphine`): one synthesised identity baked by `tools/characters/bake-ict.ts`; the basis is dev-only and never ships; textures are procedural (ours). Synthesised identities only, never fitted to photos of real people. The separately licensed "Full ICT Face Model" is not used. |
 | Microsoft Rocketbox (adult heads) | MIT | repo LICENSE.md "Permission is hereby granted, free of charge... to deal in the Software without restriction"; notice shipped in `public/characters/rb/LICENSE-Rocketbox.md` | Teddy and Nick heads, near-ring heads |
 
 ### Approved to adopt (passes the gate)
 
 | Asset | Licence | Key clause (source) | Plan |
 |---|---|---|---|
-| **ICT-FaceKit "Light" (USC ICT)** | MIT | github.com/ICT-VGL/ICT-FaceKit LICENSE: "Permission is hereby granted, free of charge... to use, copy, modify, merge, publish, distribute, sublicense, and/or sell" (notice must ship) | head source for Delphine and the leads/near ring where Rocketbox can't match. Contents: 100 identity modes, 53 ARKit-style expressions, eyes, teeth, gums, lashes; 26.7k vertices; **no textures** (albedo is our own procedural work). Statistical model built from about 178 scanned volunteers; we use synthesised identities only and never fit to photos of real people. The "Full ICT Face Model" (separate USC licence, unreleased) is **not** covered and not used. |
 | CMU Graphics Lab Motion Capture Database | free use | mocap.cs.cmu.edu FAQ: "may be copied, modified, or redistributed without permission"; home: "may include this data in commercially-sold products, but you may not resell this data directly" | cutscene body performance (retargeted); never sold as an animation pack |
 | 100STYLE | CC BY 4.0 | ianxmason.com/100style: "licensed under a Creative Commons Attribution 4.0 International License" | locomotion styles; credit required |
 | ACCAD Open Motion Project files | CC BY 3.0 | accad.osu.edu motion-lab system-data page | supplementary mocap; credit required |

@@ -66,7 +66,7 @@ export async function createCharacterFactory(opts: { quality: Quality; baseUrl?:
   const leadHeads = new Map<string, HeadAsset>();
   // Delphine: no Rocketbox base matches her sheet (the adult library has no woman who reads as
   // Black), so she keeps our parametric head until a suitable head exists (CHARACTERS_PROGRESS)
-  if (heads) await Promise.all(['teddy', 'nick'].map(async (n) => { const e = heads.lead(`lead_${n}`); if (e) leadHeads.set(n, await heads.load(e.id)); })).catch((e) => console.warn('characters: lead heads', e));
+  if (heads) await Promise.all(['teddy', 'nick', 'delphine'].map(async (n) => { const e = heads.lead(`lead_${n}`); if (e) leadHeads.set(n, await heads.load(e.id)); })).catch((e) => console.warn('characters: lead heads', e));
   const leadOf = (hero: string) => (/teddy/.test(hero) ? 'teddy' : /delphine/.test(hero) ? 'delphine' : /nick/.test(hero) ? 'nick' : '');
   let ground: GroundFn | null = null;
   const archetypes = new ArchetypeRegistry();

@@ -773,13 +773,13 @@
   },
   {
    "id": "lead_delphine",
-   "source": "Female_Party_02",
-   "bytes": 478398,
+   "source": "ICT-FaceKit Light, synthesised identity",
+   "bytes": 1139084,
    "tag": null,
    "skinRGB": [
-    80,
-    50,
-    31
+    90,
+    56,
+    37
    ],
    "lead": "lead_delphine",
    "ownHair": true
