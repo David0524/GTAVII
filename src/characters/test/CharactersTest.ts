@@ -199,6 +199,7 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       { kind: 'pistol', how: 'aim', at: [1.5, 3.2, 5] }, { kind: 'snub', how: 'aim', at: [0, 0.3, 4], crouch: true },
       { kind: 'shotgun', how: 'holster' }, { kind: 'shotgun', how: 'ready' }, { kind: 'shotgun', how: 'aim', at: [0, 1.4, 8], fire: true },
       { kind: 'sawnoff', how: 'aim', at: [-1, 1.2, 5] }, { kind: 'pistol', how: 'aim', at: [2, 1.5, 6], cover: 'high' },
+      { kind: 'smg', how: 'aim', at: [0, 1.4, 7] },
     ];
     const only = qp.get('w')?.split(',').map(Number);
     S.forEach((w, i) => {

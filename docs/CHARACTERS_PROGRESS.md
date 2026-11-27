@@ -852,6 +852,20 @@ Board: `shots/characters/49_weapons_aim.jpg` (`?characters=1&scene=weapons&t=1.4
 - **Hands.** The right arm reaches the grip by two-bone IK, and the hand turns exactly onto the gun. The left hand wraps the grip (handguns) or goes under the forend (long guns). When a hand is out of reach, the clavicle swings the shoulder toward it, as shooters do.
 - **Recoil:** a critically damped spring kicks the muzzle up and the gun back, per weapon.
 
+**Pose pass after oversight review.**
+- Chest kept upright (spine_01 to neck ~6° forward of vertical).
+- Head looks along the aim.
+- Handguns 0.55 m out on the eye line, so the arms are near straight (isosceles), elbows pointing down.
+- The crouch keeps the hips low with an upright torso and the gun at eye line.
+- The shirt shoulder tear is gone in these poses. Small seams remain at the sleeve opening and collar in extreme turns.
+- Board re-shot in side and three-quarter views.
+
+**Engine aliases.**
+- `setHeldWeapon(id)`: a gameplay weapon id, mapped by name to a mesh, then drawn automatically.
+- `setAim(on, pitch)`: aims along the heading at the camera pitch.
+- `melee('light' | 'heavy')`: Punch_Jab or Punch_Cross.
+- New SMG mesh (submachine gun).
+
 **Measured** (report `weapons` in the test):
 - Barrel to target: 0.2–0.8° across all aim setups (handgun level, high, crouched, shotgun, sawn-off, high cover).
 - Right hand on the grip: 0 cm error.

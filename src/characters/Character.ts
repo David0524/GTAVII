@@ -20,6 +20,19 @@ import { JOINT_INDEX as JI } from './rig';
 import { WeaponRig, handProp, aimBroom, type CoverState, type WeaponState } from './weaponRig';
 import type { WeaponKind } from './build/weapons';
 
+/** Gameplay weapon ids to mesh kinds (by name: snub, revolver, shotgun/coach/pump, sawn, smg/tommy, automatic/pistol). */
+export function weaponKindOf(id: string | null): WeaponKind | null {
+  if (!id) return null;
+  const s = id.toLowerCase();
+  if (/fist|unarmed|none|bat|knife|club|pipe/.test(s)) return null;
+  if (/snub|detective|bulldog/.test(s)) return 'snub';
+  if (/sawn|sawed|coach|double/.test(s)) return 'sawnoff';
+  if (/shotgun|pump|riot/.test(s)) return 'shotgun';
+  if (/smg|tommy|submachine|grease|machine/.test(s)) return 'smg';
+  if (/revolver|service|magnum|\.38|357/.test(s)) return 'revolver';
+  return 'pistol';
+}
+
 export interface CharacterDesc { seed: number; archetype?: string; hero?: string; act?: number; overrides?: Record<string, unknown> }
 export type GroundFn = (x: number, z: number) => { y: number; surface?: string } | null;
 export interface FootstepEvent { type: 'footstep'; foot: 'l' | 'r'; position: THREE.Vector3; surface: string; speed: number; character: Character }
@@ -166,8 +179,19 @@ export class Character {
   draw() { this.animator.setHands('relaxed', 'grip'); return this.rig().draw(); }
   /** Holster: resolves when it is put away. */
   holster() { return this.rig().holster().then(() => this.animator.setHands('relaxed', 'relaxed')); }
-  /** Aim at a world point (null lowers to low-ready). Upper body only: walk, crouch and cover keep the legs. */
-  setAim(target: THREE.Vector3 | null) { this.rig().setAim(target); }
+  /** Aim at a world point (null lowers to low-ready), or setAim(on, pitch): along the heading at a
+   * camera pitch (radians, + up). Upper body only: walk, crouch and cover keep the legs. */
+  setAim(target: THREE.Vector3 | null | boolean, pitch = 0) { if (typeof target === 'boolean') this.rig().setAimPitch(target, pitch); else this.rig().setAim(target); }
+  /** Engine contract: the gameplay weapon id (weapon.revolver_service, weapon.shotgun_pump, ...; fists or
+   * null = none). Equips the matching mesh and draws it (holsters the old one first). */
+  setHeldWeapon(id: string | null) {
+    const kind = weaponKindOf(id);
+    if (kind === (this.wrig?.def?.kind ?? null)) return;
+    const swap = () => { this.setWeapon(kind); if (kind) void this.draw(); };
+    if (this.wrig && (this.wrig.state === 'drawn' || this.wrig.state === 'drawing')) void this.holster().then(swap); else swap();
+  }
+  /** Melee: a jab (light) or a cross (heavy), upper body. */
+  melee(kind: 'light' | 'heavy' = 'light') { return this.animator.play(kind === 'heavy' ? 'punch_heavy' : 'punch_light'); }
   /** A shot: recoil, and a 'shot' event { muzzle, dir } (ballistics and FX are the caller's). False if not drawn. */
   fire() { return this.wrig?.fire() ?? false; }
   /** Reload clip (upper body). */

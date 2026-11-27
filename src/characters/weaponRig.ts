@@ -15,7 +15,7 @@
  */
 import * as THREE from 'three/webgpu';
 import { WEAPONS, weaponMesh, type WeaponDef, type WeaponKind } from './build/weapons';
-import { twoBoneIK, worldPos } from './anim/IK';
+import { twoBoneIK, worldPos, lookAt as ikLookAt } from './anim/IK';
 import { JOINT_INDEX as JI } from './rig';
 import type { Animator } from './anim/Animator';
 
@@ -159,7 +159,10 @@ export class WeaponRig {
     this.resolve?.();
     return new Promise((r) => { this.resolve = r; });
   }
-  setAim(target: THREE.Vector3 | null) { this.aimTarget = target ? (this.aimTarget ?? new THREE.Vector3()).copy(target) : null; }
+  setAim(target: THREE.Vector3 | null) { this.aimPitch = null; this.aimTarget = target ? (this.aimTarget ?? new THREE.Vector3()).copy(target) : null; }
+  /** Aim along the body's heading at a pitch (radians, + up): the target is re-derived each frame. */
+  setAimPitch(on: boolean, pitch: number) { this.aimPitch = on ? pitch : null; if (!on) this.aimTarget = null; }
+  private aimPitch: number | null = null;
 
   /** World muzzle position and barrel direction (null when not in hand). */
   muzzle(pos = new THREE.Vector3(), dir = new THREE.Vector3()) {
@@ -222,6 +225,11 @@ export class WeaponRig {
       if (this.t >= 1) { this.state = this.state === 'drawing' ? 'drawn' : 'holstered'; this.resolve?.(); this.resolve = null; }
     }
     const drawn = this.state === 'drawn';
+    if (this.aimPitch !== null) {
+      const q = this.root.getWorldQuaternion(new THREE.Quaternion()), f = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
+      const eye = worldPos(this.bones[JI.Head], new THREE.Vector3()).addScaledVector(UP, 0.03);
+      this.aimTarget = (this.aimTarget ?? new THREE.Vector3()).copy(eye).addScaledVector(f, 20 * Math.cos(this.aimPitch)).addScaledVector(UP, 20 * Math.sin(this.aimPitch));
+    }
     const aiming = drawn && !!this.aimTarget;
     this.animator.gun.aim = aiming;
     this.aimW += ((aiming ? 1 : 0) - this.aimW) * Math.min(1, dt * 12);
@@ -232,6 +240,26 @@ export class WeaponRig {
     this.coverLean += ((this.cover?.height === 'high' && aiming ? (this.cover.side === 'l' ? 1 : -1) : 0) - this.coverLean) * Math.min(1, dt * 8);
 
     const long = this.def.long;
+    {
+      const rq = this.root.getWorldQuaternion(new THREE.Quaternion());
+      const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(rq), right = new THREE.Vector3().crossVectors(UP, fwd).negate();
+      const uw = drawn ? Math.max(this.aimW, this.readyW * 0.8) : 0;
+      if (uw > 0.01) {
+    // upright: GTA/RDR aim stances keep the chest up over the hips (the pistol clips and a crouch
+    // both fold the torso forward). Bring the spine_01 -> neck line to ~6 degrees forward of vertical.
+    {
+      const s1 = worldPos(this.bones[JI.spine_01], new THREE.Vector3());
+      for (const [bone, share] of [[JI.spine_02, 0.5], [JI.spine_03, 1]] as const) {
+        const v = worldPos(this.bones[JI.neck_01], new THREE.Vector3()).sub(s1);
+        const vs = v.clone().addScaledVector(right, -v.dot(right)).normalize(); // in the sagittal plane
+        const d = UP.clone().multiplyScalar(Math.cos(0.1)).addScaledVector(fwd, Math.sin(0.1));
+        const ang = vs.angleTo(d); if (ang < 0.01) continue;
+        const ax = vs.clone().cross(d).normalize();
+        rotateWorld(this.bones[bone], ax, ang * share * uw);
+      }
+    }
+      }
+    }
     const poseW = long ? this.readyW : this.aimW; // handguns at low-ready ride the pistol idle clip
     if (poseW < 0.01 || !drawn) return;
     const rootQ = this.root.getWorldQuaternion(new THREE.Quaternion());
@@ -266,7 +294,7 @@ export class WeaponRig {
       const z = dir.clone(), y = UP.clone().addScaledVector(z, -z.dot(UP)).normalize(), x = y.clone().cross(z).normalize();
       const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z));
       let p: THREE.Vector3;
-      if (!long) p = eye2.clone().addScaledVector(dir, 0.42).addScaledVector(y, -0.085);
+      if (!long) p = eye2.clone().addScaledVector(dir, 0.55).addScaledVector(y, -0.055); // arms near straight (isosceles), sights under the eye
       else if (this.def!.butt && !low) {
         const pocket = sR.clone().lerp(sL, 0.14).addScaledVector(UP, -0.03).addScaledVector(fwd, 0.04);
         p = pocket.sub(this.def!.butt.clone().applyQuaternion(q));
@@ -303,7 +331,7 @@ export class WeaponRig {
     const handM = gunM.clone().multiply(_m2.copy(this.grip).invert());
     const hp = new THREE.Vector3().setFromMatrixPosition(handM), hq = new THREE.Quaternion().setFromRotationMatrix(handM);
     const upR = this.bones[JI.upperarm_r], loR = this.bones[JI.lowerarm_r];
-    const poleR = worldPos(loR, new THREE.Vector3()).addScaledVector(UP, -0.5).addScaledVector(right, long ? 0.25 : 0.35);
+    const poleR = worldPos(loR, new THREE.Vector3()).addScaledVector(UP, -0.7).addScaledVector(right, long ? 0.3 : 0.1); // elbows down, not splayed
     reachAssist(this.bones, 'r', hp, poseW);
     twoBoneIK(upR, loR, hand, hp, poleR, poseW);
     this.lastHand = hp.clone();
@@ -325,10 +353,12 @@ export class WeaponRig {
     const lWrist = lp.clone().addScaledVector(F, -0.055).addScaledVector(gy, long ? -0.035 : -0.01);
     reachAssist(this.bones, 'l', lWrist, lw);
     const upL = this.bones[JI.upperarm_l], loL = this.bones[JI.lowerarm_l];
-    const poleL = worldPos(loL, new THREE.Vector3()).addScaledVector(UP, -0.6).addScaledVector(right, -0.3);
+    const poleL = worldPos(loL, new THREE.Vector3()).addScaledVector(UP, -0.7).addScaledVector(right, long ? -0.15 : -0.1);
     twoBoneIK(upL, loL, handL, lWrist, poleL, lw);
     // (f, a) are the hand's local axes, so R with R*f = F, R*a = A is its world rotation
     setWorldQuat(handL, lq, lw);
+    // head up behind the sights: neck and head look along the aim (eyes over the gun)
+    if (this.aimTarget && this.aimW > 0.01) ikLookAt([{ bone: this.bones[JI.neck_01], w: 0.45 }, { bone: this.bones[JI.Head], w: 0.55 }], [this.bones[JI.eye_l], this.bones[JI.eye_r]], this.bones[JI.Head], this.aimTarget, this.aimW);
     this.dbgL = { wrist: worldPos(handL, new THREE.Vector3()).distanceTo(lWrist), rot: THREE.MathUtils.radToDeg(handL.getWorldQuaternion(new THREE.Quaternion()).angleTo(lq)), reach: worldPos(upL, new THREE.Vector3()).distanceTo(lWrist) };
   }
 }

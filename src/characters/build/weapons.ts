@@ -1,6 +1,7 @@
 /**
  * Gameplay firearms as meshes (invented makes; period-plausible 1974 shapes): a service revolver,
- * a snub-nose revolver, a semi-automatic pistol, a pump shotgun and a sawn-off double-barrel.
+ * a snub-nose revolver, a semi-automatic pistol, a pump shotgun, a sawn-off double-barrel and a
+ * submachine gun.
  * Each is one mesh with two material groups (blued steel, wood/rubber grips) in its own frame:
  *   origin = the centre of the grip where the palm closes, +Z = barrel direction, +Y = sights up.
  * Points (same frame): muzzle, forend (support hand on long guns), butt (stock end at the shoulder).
@@ -9,7 +10,7 @@
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
-export type WeaponKind = 'revolver' | 'snub' | 'pistol' | 'shotgun' | 'sawnoff';
+export type WeaponKind = 'revolver' | 'snub' | 'pistol' | 'shotgun' | 'sawnoff' | 'smg';
 export interface WeaponDef {
   kind: WeaponKind;
   /** two-handed shouldered weapon (shotgun, sawn-off) vs handgun */
@@ -89,18 +90,33 @@ function sawnoff(): G {
   ]);
 }
 
+function smg(): G {
+  // a 1940s-pattern submachine gun (invented make): receiver, finned barrel, box magazine, wooden grips
+  return build([
+    box(0.034, 0.05, 0.26, 0, 0.035, 0.08), // receiver
+    tube(0.014, 0.21, 0.42, 0, 0.042, 10), // finned barrel shroud
+    box(0.026, 0.13, 0.04, 0, -0.04, 0.17), // box magazine
+    ring(0.014, 0.0025, 0, -0.002, 0.03),
+  ], [
+    box(0.03, 0.08, 0.04, 0, -0.03, -0.012, 0.3), // pistol grip
+    box(0.032, 0.06, 0.05, 0, -0.025, 0.27, -0.2), // fore grip
+    box(0.032, 0.07, 0.22, 0, 0.0, -0.17, 0.08), // stock
+  ]);
+}
+
 export const WEAPONS: Record<WeaponKind, WeaponDef> = {
   revolver: { kind: 'revolver', long: false, muzzle: new THREE.Vector3(0, 0.036, 0.132), forend: null, butt: null, carry: 'hip', kick: [0.32, 0.02] },
   snub: { kind: 'snub', long: false, muzzle: new THREE.Vector3(0, 0.036, 0.083), forend: null, butt: null, carry: 'hip', kick: [0.38, 0.018] },
   pistol: { kind: 'pistol', long: false, muzzle: new THREE.Vector3(0, 0.034, 0.152), forend: null, butt: null, carry: 'hip', kick: [0.26, 0.022] },
   shotgun: { kind: 'shotgun', long: true, muzzle: new THREE.Vector3(0, 0.042, 0.72), forend: new THREE.Vector3(0, 0.018, 0.3), butt: new THREE.Vector3(0, -0.04, -0.31), carry: 'back', kick: [0.16, 0.05] },
+  smg: { kind: 'smg', long: true, muzzle: new THREE.Vector3(0, 0.042, 0.42), forend: new THREE.Vector3(0, -0.01, 0.27), butt: new THREE.Vector3(0, -0.01, -0.28), carry: 'hidden', kick: [0.08, 0.015] },
   sawnoff: { kind: 'sawnoff', long: true, muzzle: new THREE.Vector3(0, 0.04, 0.36), forend: new THREE.Vector3(0, 0.022, 0.18), butt: null, carry: 'hidden', kick: [0.42, 0.04] },
 };
 
 const CACHE = new Map<WeaponKind, G>();
 export function weaponGeometry(kind: WeaponKind): G {
   let g = CACHE.get(kind);
-  if (!g) { g = kind === 'revolver' ? revolver(0.1) : kind === 'snub' ? revolver(0.051) : kind === 'pistol' ? pistol() : kind === 'shotgun' ? shotgun() : sawnoff(); CACHE.set(kind, g); }
+  if (!g) { g = kind === 'revolver' ? revolver(0.1) : kind === 'snub' ? revolver(0.051) : kind === 'pistol' ? pistol() : kind === 'shotgun' ? shotgun() : kind === 'smg' ? smg() : sawnoff(); CACHE.set(kind, g); }
   return g;
 }
 export function weaponMesh(kind: WeaponKind): THREE.Mesh {
