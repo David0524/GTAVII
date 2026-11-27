@@ -106,3 +106,9 @@ Dimensions are approximate, from published figures, to be checked against the HA
   - Pickpocket variant: slots tv.gc_clock_crowd, tv.gc_redcap_cart, tv.gc_ramp, tv.gc_shuttle_turnstiles.
   - Archetypes: npc.gc_redcap, npc.gc_commuter.
   - These ids become slots and markers in the build.
+
+- **Art (narrative queue, assets/prompts/sources/interiors_gc.json, 23 entries `int.gc.*`):**
+  - Board slats and gate plates are generated blank; the renderer sets the copy in the period font from content/grand_central.json (24 board rows, New Haven / Harlem / Hudson destinations, time format "5:52", tracks 15–42).
+  - The clock dial is opal glass with numerals, no hands (hands are drawn in the build) and no maker's name.
+  - Six exact-text ticket cards (two fare notices flagged as unverified flavour).
+  - Oyster Room open sign plus the CLOSED card; locker plate "INSERT 25¢ · TURN KEY · 24 HOURS"; phone door "TELEPHONE".

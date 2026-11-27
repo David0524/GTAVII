@@ -303,6 +303,8 @@ function teddy(k: Kit, rc: [number, number, number, number], y0: number, win?: {
   if (win) {
     const zw = win.wall === 'z0' ? z0 : z1, dir = win.wall === 'z0' ? 1 : -1, ax0 = win.x0 + 0.05, ax1 = Math.min(win.x1 - 0.05, ax0 + 0.8);
     G.windowAC(k, ax0, ax1, win.sill, zw, M.enamelCream, dir);
+    // the Corwin's own broken vertical neon (HOT  CO WIN) just outside: red, blinking all night (content/homes.json)
+    if (win.wall === 'z0') k.light((win.x0 + win.x1) / 2 + 0.6, win.sill + 1.0, zw - dir * 0.6, [1, 0.22, 0.15], 0.9, 'neon', 2);
     const tz = zw + dir * 0.37; k.box(ax0 + 0.1, win.sill + 0.25, Math.min(tz, tz + dir * 0.03), ax1 - 0.1, win.sill + 0.37, Math.max(tz, tz + dir * 0.03), tint(M.fabricRust, '#c9a24a'), { occlude: false }); // the towel
   }
   // shelf: Carmen's tupperware (washed, never returned), hot plate and one pan
