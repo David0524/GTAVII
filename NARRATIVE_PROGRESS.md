@@ -929,3 +929,4 @@ ChatGPT image prompts if necessary for signs, branding, etc".
     - the boundaries note.
   - Offscreen mentions in dialogue ("I got four kids") stay, as words only.
   - **Validator:** `content.py` now errors on any child entity id, any `ageRange` under 18, and on-screen child cues in text across archetypes, missions, dialogue, barks, triggers, spawns, side specs and activities.
+- **When radio un-pauses:** sweep `content/radio.json` for the no-child rule. One DJ line, "Hydrant's open on Twenty-Seventh. Kids are happy. Turn it up for the kids.", is words only and was left alone because radio is frozen (oversight, 27 Nov).
