@@ -45,7 +45,13 @@ Shots are in `shots/wiring/`.
 6. **Street-sign accuracy check: not done yet.** It needs 1970s reference photos for typeface,
    abbreviations, blade proportions and mounting. It is next on the list, with the landmark signage
    sweep.
-7. The minimap in these shots is the pre-Design-A one; the build predates the UI merge (dec2dfa).
+7. **Fixed after oversight's review (1fe5e00):**
+   - `onfoot_madison_sq.jpg` and `A_42nd_noon.jpg` are re-shot on the post-merge build. They show
+     Design A: the aerial minimap with fog of war, the location wipe and the clock.
+   - Free-camera key hints now only appear with `?debug=1`.
+   - Low density is now 90/240. That gives 54–57 cars and 200–246 pedestrians around the camera, and
+     sim cost rises to 3.4 ms headless, over the 2 ms budget. The phone bench decides.
+   - Parked cars on every kerb wait on sim's `parkedCars()`.
 
 ## vs GTA V / GTA VI / RDR2
 
