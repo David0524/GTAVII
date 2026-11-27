@@ -15,7 +15,9 @@ SETS = {
 for shot, refs in SETS.items():
     lineup = Image.open(os.path.join(ROOT, 'shots/characters', shot)).convert('RGB')
     w, h = lineup.size
-    lineup = lineup.crop((0, int(h * 0.22), w, int(h * 0.78)))
+    # leads are judged head to toe; the lineups only need the band the people stand in
+    top, bot = (0.04, 0.96) if 'leads' in shot else (0.22, 0.78)
+    lineup = lineup.crop((0, int(h * top), w, int(h * bot)))
     row_h = 420
     photos = []
     for rid in refs:

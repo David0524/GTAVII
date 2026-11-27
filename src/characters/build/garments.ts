@@ -127,6 +127,24 @@ export function garmentPieces(ctx: GarmentCtx): { pieces: PieceSpec[]; trims: ((
       const out = Math.max(0, d);
       sm.set(k, [P[k * 3] + Nb[k * 3] * out, P[k * 3 + 1] + Nb[k * 3 + 1] * out, P[k * 3 + 2] + Nb[k * 3 + 2] * out]);
     }
+    // cloth hangs from the chest apex toward the waist instead of tucking under the pectorals
+    // (which shaded as a bust on men): per azimuth, below the apex the radius may not drop faster
+    // than a straight fall to the waist
+    const J = ctx.shape.joints, cx = J[JI.spine_02 * 3], cz = J[JI.spine_02 * 3 + 2], NB = 32;
+    const binOf = (x: number, z: number) => Math.floor(((Math.atan2(x - cx, z - cz) / (2 * Math.PI) + 1) % 1) * NB) % NB;
+    const apexR = new Float32Array(NB), apexY = new Float32Array(NB), waistR = new Float32Array(NB);
+    for (const [, q] of sm) {
+      const b = binOf(q[0], q[2]), r = Math.hypot(q[0] - cx, q[2] - cz);
+      if (q[1] > y.chest - 0.09 && q[1] < y.chest + 0.04 && r > apexR[b]) { apexR[b] = r; apexY[b] = q[1]; }
+      if (Math.abs(q[1] - y.waist) < 0.02) waistR[b] = Math.max(waistR[b], r);
+    }
+    for (const [k, q] of sm) {
+      const b = binOf(q[0], q[2]);
+      if (!apexR[b] || !waistR[b] || q[1] >= apexY[b] || q[1] <= y.waist) continue;
+      const t = (apexY[b] - q[1]) / Math.max(0.05, apexY[b] - y.waist);
+      const need = apexR[b] + (waistR[b] - apexR[b]) * Math.pow(t, 1.6), r = Math.hypot(q[0] - cx, q[2] - cz);
+      if (r < need && r > 1e-4) { const f = need / r; sm.set(k, [cx + (q[0] - cx) * f, q[1], cz + (q[2] - cz) * f]); }
+    }
     return sm;
   })() : undefined;
 

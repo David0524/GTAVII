@@ -15,7 +15,7 @@ last.
 | Hair | Strand cards (alpha-to-coverage) for 14 straight/wavy styles, combed by per-style geodesic flow fields over a radial head map, on solid volume shells; clumped Worley shells for afros and curls; set-curl bumps; ponytail/braid/bun pieces; crowds keep the opaque outer shell |
 | Skin, cloth, hair materials | TSL: SSS approximation, procedural patterns, wear/sweat; CC0 Poly Haven fabric scans as triplanar bump detail (wool, denim, jersey, poplin, corduroy, leather) |
 | Animation | Animator (blend space with stride warp, layers, posture, lean), foot IK with locking, look-at, hand IK, seat pose, events |
-| Faces | **User decision: Rocketbox for leads and nearby people.** Leads wear altered Rocketbox-based heads (feature deformations, recolour); the near ring (Medium+) gets matched pool heads (30); distant crowds and Low keep our heads; every body has MakeHuman CC0 skin detail |
+| Faces | **User decision: Rocketbox for leads and nearby people.** Teddy and Nick wear altered Rocketbox-based heads (feature deformations, recolour); **Delphine keeps our head** (no Rocketbox base matches her sheet); the near ring (Medium+) gets matched pool heads (31; Black women keep ours: none in the library); distant crowds and Low keep our heads; every body has MakeHuman CC0 skin detail |
 | Heroes | Teddy, Delphine and Nick from the narrative appearance sheets (7fffd4f), wardrobe sets per act; 2 draws each |
 | Crowd | GPU-instanced templates (baked half-float bone atlas), LOD2/LOD3, a worker-built near ring of full characters, per-agent colour variation, hand carts |
 | Test scenes | `?characters=1&scene=lineup|leads|course|slide|crowd|shoes|hair|street|rocketbox` (deterministic with `&t=`); `street` runs the crowd on a real street of the engine's city. All shots: `bash tools/characters/shots.sh` |
@@ -109,9 +109,9 @@ is reproducible with `bash tools/characters/shots.sh` (URLs listed there).
 
 **Downloads** (re-measured after the faces block)
 - **High:** body 6.9 + anims 0.97 + fabric maps 0.26 + skin detail 0.15 = 8.28 MiB at start, plus
-  the three lead heads, 0.83 MiB, preloaded = **9.12 MiB**. The near-ring pool, 30 heads of 79–342
-  KiB (mean 187), loads only on demand; if every one of them were fetched, the worst case is
-  **14.59 MiB** (budget 15). In practice the 10-person near ring needs 10–20 heads per area.
+  the two Rocketbox lead heads (Teddy and Nick), 0.44 MiB, preloaded = **8.73 MiB**. The near-ring
+  pool, 31 heads of 79–342 KiB, loads only on demand; if every one were fetched, the worst case
+  is **14.38 MiB** (budget 15).
 - **Mobile Low:** body_low 0.95 + anims 0.97 + fabric maps 0.07 + skin detail 0.02 = **2.01 MiB**
   (budget 6; oversight's target was about 2 MiB). No Rocketbox heads on Low.
 
@@ -233,6 +233,8 @@ user's decision (base-mesh choices are theirs).**
   for everyone, including Low and the leads, without a second asset family.
 
 ## Faces block (user decision: "Rocketbox for leads + nearby people")
+**Superseded for Delphine:** she now keeps our head. See "Fidelity review" below; what follows describes the block as first delivered.
+
 Shots: `27_rocketbox_ab` (each lead: Rocketbox-based head beside our head), `28a`–`28f` (head
 close-ups of the same), `29_pool_heads` (generated pedestrians with matched pool heads), `30_neck_seam`,
 leads `04`–`09` and the street `24`–`26` (near-ring heads); the leads beside the references:
@@ -303,6 +305,36 @@ leads `04`–`09` and the street `24`–`26` (near-ring heads); the leads beside
 - Nick's grey slick hair (our cards) looks noisy up close in SwiftShader shots, which have no
   MSAA, so alpha-to-coverage falls back to dither. Needs a real-GPU check.
 - Collars: no longer oversized, but still flat ribbons without a visible roll.
+
+## Fidelity review (oversight, after the faces block)
+Oversight's review found Delphine's head truncated and her face not matching her sheet. Both were
+real problems, and the cause went deeper than tuning:
+- **No Rocketbox woman matches Delphine.** I checked all 40 adult previews: none of the 19 women
+  reads as Black. Female_Adult_11, her first base, reads East/Southeast Asian (a tagging error on
+  my part). The closest, Female_Party_02, was tried: light-medium skin, features that don't read
+  as Delphine, and hair that's a modelled bob plus curl cards that can't be compressed into a
+  cropped natural style. The tone check fails it (face vs neck dC 25).
+  - **Decision taken for now:** Delphine wears our parametric head (African macro, sheet tone,
+    MakeHuman skin detail, our afroShort hair). The candidate stays in `scene=rocketbox` for
+    comparison only.
+  - **Options for the user:** (a) commission or source a suitable CC0/MIT head; (b) invest in our
+    own head for Delphine (face texture, hair rebuilt as cropped natural); (c) accept
+    Female_Party_02 with heavy edits (not recommended).
+- **The truncated crown** came from the hair compression pulling the crown inside the forehead
+  shell. It's moot for Delphine now, and the compression is excluded from the face.
+- **Pool fidelity:** tags were re-checked against the previews (Female_Adult_11 back in the pool,
+  as East Asian). The tone gate is tightened to a 1.3× ratio, so the remaining tint after the ±25%
+  cap is small. With no Black women in the library, Black women in the near ring keep our heads.
+  That's an uneven quality bar to fix with a suitable head source.
+- **Automated tone check:** `python3 tools/characters/tone-check.py <shot> ...`. Test scenes
+  write screen probes (cheek, side of neck, back of hand) into each shot's JSON. The tool reports
+  CIEDE2000, chroma/hue distance (dC) and lightness per character, writes `<shot>_tone.jpg` with
+  the probes drawn, and fails when face-neck dC > 8 or face-hand dC > 10. Lightness isn't gated:
+  under the key light the neck sits in the jaw's shadow, and our own heads measure dL −9 to −15.
+- **Teddy's shirt shaded as a bust:** shirts and jackets now hang straight from the chest apex
+  toward the waist instead of tucking under the pectorals (a drape fill per azimuth).
+- **Framing:** `04_leads_act1_vs_refs` now shows the leads head to toe. The lineups (`01`, `02`)
+  now show the Medium+ near ring with matched Rocketbox heads, which is what players see close up.
 
 ## Known issues (honest)
 - **Faces** (our heads, distant crowds and Low): still mannequin-like close up; they're only seen

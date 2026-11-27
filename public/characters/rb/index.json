@@ -747,9 +747,34 @@
    "ownHair": true
   },
   {
-   "id": "lead_delphine",
+   "id": "Female_Adult_11",
    "source": "Female_Adult_11",
-   "bytes": 412390,
+   "bytes": 191020,
+   "tag": {
+    "sex": 0,
+    "age": [
+     20,
+     35
+    ],
+    "anc": [
+     0,
+     1,
+     0
+    ],
+    "hair": "tied"
+   },
+   "skinRGB": [
+    167,
+    115,
+    83
+   ],
+   "lead": null,
+   "ownHair": false
+  },
+  {
+   "id": "lead_delphine",
+   "source": "Female_Party_02",
+   "bytes": 478398,
    "tag": null,
    "skinRGB": [
     80,

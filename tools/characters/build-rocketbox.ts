@@ -37,7 +37,8 @@ fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(TMP, { recursive: true });
  * ancestry weights african/asian/caucasian for matching our generated bodies, hair category).
  * Excluded: heads whose mesh includes headwear implausible on 1974 Midtown streets (hijab,
  * burqa, keffiyeh, hood up), and the heads used as the leads' bases (Male_Adult_07, Male_Adult_14,
- * Female_Adult_11): no pedestrian shares a lead's base face.
+ * Female_Party_02): no pedestrian shares a lead's base face. Tags were checked against the
+ * library's own preview renders (the adult library has no woman who reads as Black).
  */
 interface Tag { sex: 0 | 1; age: [number, number]; anc: [number, number, number]; hair: 'short' | 'long' | 'curly' | 'bald' | 'tied' }
 const POOL: Record<string, Tag> = {
@@ -49,6 +50,7 @@ const POOL: Record<string, Tag> = {
   Female_Adult_07: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'tied' },
   Female_Adult_08: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
   Female_Adult_09: { sex: 0, age: [35, 55], anc: [0, 0, 1], hair: 'tied' },
+  Female_Adult_11: { sex: 0, age: [20, 35], anc: [0, 1, 0], hair: 'tied' },
   Female_Adult_12: { sex: 0, age: [20, 35], anc: [0, 0, 1], hair: 'long' },
   Female_Adult_13: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'short' },
   Female_Adult_14: { sex: 0, age: [20, 40], anc: [0, 0, 1], hair: 'long' },

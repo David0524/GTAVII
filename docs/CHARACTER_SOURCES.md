@@ -14,7 +14,7 @@ Only the derived binaries in `public/characters/` are shipped; raw downloads liv
 | `public/characters/body_low.bin` | 0.95 MiB | `tools/characters/build-low.ts` | subset of `body.bin` (Low quality) | CC0 1.0 (MakeHuman assets) |
 | `public/characters/fabric_{a,b}_{hi,lo}.webp` | 275 KiB (hi, 512²) / 74 KiB (lo, 256²) | see §5 | Poly Haven displacement maps, high-passed and channel-packed | CC0 1.0 |
 | `public/characters/skins_{hi,lo}.webp` | 150 KiB / 21 KiB | `tools/characters/build-skins.py` | MakeHuman default skins, detail only (§7) | CC0 1.0 |
-| `public/characters/rb/*` | 0.83 MiB leads + 5.5 MiB near-ring pool (on demand; none on Low) | `tools/characters/build-rocketbox.ts` | Microsoft Rocketbox adult heads (§6) | MIT (notice shipped) |
+| `public/characters/rb/*` | 0.44 MiB leads used in game (+0.46 MiB Delphine candidate, test only) + 5.7 MiB near-ring pool (on demand; none on Low) | `tools/characters/build-rocketbox.ts` | Microsoft Rocketbox adult heads (§6) | MIT (notice shipped) |
 
 Everything else is generated at runtime by our own code (fabric *relief* uses the §5 maps, skin detail the §7 maps; faces close to the camera are §6 heads): garments, shoes, hats, glasses,
 props, hair, eyeballs, skin and cloth shading, the authored animation clips, the crowd bake.
@@ -118,13 +118,19 @@ props, hair, eyeballs, skin and cloth shading, the authored animation clips, the
 ## 6. Microsoft Rocketbox (MIT): lead heads and the near-ring pool
 - **What:** heads (skin, eyes, teeth, eyelashes and hair cards; WebP colour, normal and opacity
   textures) of **adult** avatars only. The library's `Children` folder is never used.
-  - **Near-ring pool** (Medium and above, people close to the camera): 30 heads, `Female_Adult_01–05,
-    07–09, 12–15, 17`, `Female_Party_01`, `Male_Adult_01–06, 08–13, 15–17, 20` (512² textures,
-    about 5.5 MiB in all, fetched on demand only when a pedestrian needs one). Excluded: heads whose
+  - **Near-ring pool** (Medium and above, people close to the camera): 31 heads, `Female_Adult_01–05,
+    07–09, 11–15, 17`, `Female_Party_01`, `Male_Adult_01–06, 08–13, 15–17, 20` (512² textures,
+    about 5.7 MiB in all, fetched on demand only when a pedestrian needs one). Excluded: heads whose
     mesh includes headwear implausible on 1974 Midtown streets (hijab, burqa, keffiyeh, hood up),
-    and the three leads' bases (no pedestrian shares a lead's base face).
-  - **Leads** (1024² textures, 0.83 MiB for all three): `lead_teddy` from `Male_Adult_07`,
-    `lead_delphine` from `Female_Adult_11`, `lead_nick` from `Male_Adult_14`.
+    and the leads' bases incl. the Delphine candidate (no pedestrian shares a lead's base face). Tags (sex, age band, ancestry
+    weights, hair) were checked against the library's own preview renders; `Female_Adult_11` was
+    mis-tagged and is now tagged East Asian. **The adult library has no woman who reads as Black**
+    (and only three men: `Male_Adult_04`, `12`, and `18`, who wears a hood), so Black women in
+    the near ring keep our generated heads.
+  - **Leads** (1024² textures): `lead_teddy` from `Male_Adult_07` and `lead_nick` from
+    `Male_Adult_14`. **Delphine wears our generated head:** no Rocketbox base matches her sheet.
+    `lead_delphine` (from `Female_Party_02`, the closest available) is built only as a candidate
+    for comparison in the test scene; it doesn't pass the tone check and isn't used in the game.
 - **Source:** https://github.com/microsoft/Microsoft-Rocketbox (fetched 2026-11-26; blobless
   sparse clone, HEAD of `master`).
 - **Licence:** the repository's `LICENSE.md` is MIT; the README says "November 2020 License
@@ -165,14 +171,10 @@ SOFTWARE.
   Rocketbox face:
   - landmark-driven feature deformations, all listed in `tools/characters/rb_leads.json`:
     - Teddy: nose widened and lengthened, jaw broadened, cheeks lowered, inner brows lowered;
-    - Delphine: cheekbones raised and widened, eyes set wider, nose wider and less projecting, jaw
-      narrowed and lengthened, lower lip fuller;
     - Nick: jaw and masseters widened, nose enlarged, brow ridge heavier, outer brows lowered.
   - Lab colour transfer of skin and hair to each character's appearance sheet (Teddy `#b98a67`,
-    hair `#1c1814`; Delphine `#50321f` (her sheet's `#5a3825`, set a little darker because the head's material renders lighter than our body's skin), hair `#141010`; Nick `#c8a17e`, hair `#7a7570`).
+    hair `#1c1814`; Nick `#c8a17e`, hair `#7a7570`).
   - Hair:
-    - Delphine: the base's slicked-back hair; the crown volume is compressed onto the skull, the
-      bun is kept as a low bun, and the bun's loose cards are removed;
     - Teddy: the base's own short crop (it matches his sheet, a near-black side parting);
     - Nick: our generated strand cards, because his base is bald.
   - Rocketbox avatars are generic library characters, not scans of named public people; the edits

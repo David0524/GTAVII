@@ -85,7 +85,9 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     // generated head; then (pool=1) generated pedestrians with their matched pool heads.
     const act = num('act', 1);
     if (!qp.has('pool')) for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) {
-      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, ...(qp.has('rbhair') ? { ourHair: false } : {}), ...JSON.parse(qp.get('ov') ?? '{}') } }));
+      // Delphine's candidate head isn't preloaded as a lead (no matching base); load it to compare
+      const cand = /delphine/.test(hero) && factory.heads?.lead('lead_delphine') ? { rbHead: await factory.heads.load('lead_delphine'), ourHair: false } : {};
+      chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, ...cand, ...(qp.has('rbhair') ? { ourHair: false } : {}), ...JSON.parse(qp.get('ov') ?? '{}') } }));
       chars.push(factory.spawn(world, { seed: 1, hero, act, overrides: { hat: null, rbHead: false } }));
     }
     if (qp.has('pool')) {
@@ -143,7 +145,15 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
     for (const hero of ['char.teddy_arce', 'char.delphine_moore', 'char.nick_varelas']) chars.push(factory.spawn(world, { seed: 1, hero, act }));
   } else {
     const page = num('page', 0), per = num('n', 10), seed0 = num('seed', 1974);
-    for (let i = 0; i < per; i++) chars.push(factory.spawn(world, { seed: hash2(seed0, page * per + i) }));
+    // what players see on Medium and above: close pedestrians wear matched Rocketbox heads (rb=0: ours)
+    const used = new Set<string>();
+    for (let i = 0; i < per; i++) {
+      const seed = hash2(seed0, page * per + i);
+      const a = generateAppearance(seed), heads = num('rb', 1) && factory.heads;
+      const id = heads ? heads.pick(a, used) : null;
+      if (heads && id) { used.add(id); const asset = await heads.load(id); chars.push(factory.spawn(world, { seed, overrides: { rbHead: asset, headTint: tintFor(asset, a.skin.tone) } })); }
+      else chars.push(factory.spawn(world, { seed }));
+    }
   }
   const n = chars.length;
   const gap = scene === 'leads' ? 1.1 : scene === 'shoes' ? 0.5 : 0.85;
@@ -171,7 +181,28 @@ async function lineup(world: THREE.Scene, camera: THREE.PerspectiveCamera, facto
       c.update(dt);
     }
     report.updateMs = chars.map((c) => +c.lastUpdateMs.toFixed(3));
+    report.toneProbes = toneProbes(chars, camera);
   };
+}
+
+/**
+ * Screen positions (0..1) of skin probes per visible character, for tools/characters/tone-check.py:
+ * cheek (below the left eye), side of the neck (between jaw and neck base) and the back of the
+ * right hand. Offsets are in the character's own frame.
+ */
+function toneProbes(chars: Character[], camera: THREE.PerspectiveCamera) {
+  const v = new THREE.Vector3(), q = new THREE.Quaternion();
+  const scr = (p: THREE.Vector3) => { const s = p.clone().project(camera); return [+(s.x * 0.5 + 0.5).toFixed(4), +(0.5 - s.y * 0.5).toFixed(4)]; };
+  return chars.filter((c) => c.object.visible).map((c) => {
+    c.object.getWorldQuaternion(q);
+    const off = (p: THREE.Vector3, x: number, y: number, z: number) => p.clone().add(v.set(x, y, z).applyQuaternion(q));
+    const eye = c.jointWorld('eye_l');
+    const head = c.jointWorld('Head'), neck = c.jointWorld('neck_01');
+    const mid = head.clone().lerp(neck, 0.62);
+    const hand = c.jointWorld('hand_r');
+    return { hero: c.desc.hero ?? null, seed: c.desc.seed, rb: (c.desc.overrides?.rbHead as any)?.id ?? null, tone: c.appearance.skin.tone,
+      cheek: scr(off(eye, 0.006, -0.03, 0.01)), neck: scr(off(mid, 0.028, 0, 0.035)), hand: scr(off(hand, 0, -0.045, 0.012)) };
+  });
 }
 
 // ------------------------------------------------------------------------------------------------

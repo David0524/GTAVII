@@ -58,11 +58,11 @@
   },
   {
     "id": "lead_delphine",
-    "base": "Female_Adult_11",
+    "base": "Female_Party_02",
     "skinTarget": "#50321f",
     "hairTarget": "#141010",
     "texSize": 1024,
-    "hairScale": 0.65,
+    "hairScale": 0.85,
     "deform": [
       {
         "at": "LCheek",
@@ -75,40 +75,39 @@
         "mirror": true
       },
       {
-        "at": "LEye",
-        "radius": 0.022,
-        "offset": [
-          0.0022,
-          0,
-          0
-        ],
-        "mirror": true
-      },
-      {
         "at": "MNose",
         "radius": 0.028,
         "scale": [
-          1.1,
+          1.16,
           1.0,
-          0.96
+          0.95
         ]
       },
       {
-        "at": "MJaw",
-        "radius": 0.06,
+        "at": "MUpperLip",
+        "radius": 0.018,
         "scale": [
-          0.95,
-          1.03,
-          1.0
+          1.06,
+          1.12,
+          1.06
         ]
       },
       {
         "at": "MBottomLip",
         "radius": 0.02,
         "scale": [
-          1.05,
-          1.08,
-          1.04
+          1.06,
+          1.12,
+          1.06
+        ]
+      },
+      {
+        "at": "MJaw",
+        "radius": 0.06,
+        "scale": [
+          0.97,
+          1.03,
+          1.0
         ]
       }
     ],

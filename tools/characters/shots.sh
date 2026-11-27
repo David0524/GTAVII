@@ -40,7 +40,7 @@ declare -a SHOTS=(
   "28e_nick_rb|$C&scene=rocketbox&t=0.6&zoom=head&focus=4&yaw=-25|900|900"
   "28f_nick_ours|$C&scene=rocketbox&t=0.6&zoom=head&focus=5&yaw=-25|900|900"
   "29_pool_heads|$C&scene=rocketbox&pool=1&n=8&t=0.6|1600|900"
-  "30_neck_seam|$C&scene=rocketbox&t=0.6&zoom=head&focus=2&yaw=150|900|900"
+  "30_neck_seam|$C&scene=rocketbox&t=0.6&zoom=head&focus=0&yaw=150|900|900"
 )
 for s in "${SHOTS[@]}"; do
   IFS='|' read -r name url w h <<< "$s"
