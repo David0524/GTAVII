@@ -69,7 +69,7 @@ export class GameHud {
     const ready = m ? this.addQ.filter((q) => q.mission === m) : this.addQ.slice();
     if (!ready.length) return;
     this.addQ = this.addQ.filter((q) => !ready.includes(q));
-    if (ready.length === 1) { const q = ready[0]; this.note('ADDED TO MAP', `${icon(q.cat as IconName, 18)}<span class="nm">${esc(q.name)}</span><span class="how">${esc(q.how || (CATEGORIES as Record<string, { label: string }>)[q.cat]?.label || '')}</span>`, 4.5); }
+    if (ready.length === 1) { const q = ready[0]; this.note('ADDED TO MAP', `${icon(q.cat as IconName, 18)}<span class="nm">${esc(q.name)}</span><span class="how">${esc(q.why || q.how || (CATEGORIES as Record<string, { label: string }>)[q.cat]?.label || '')}</span>`, 4.5); }
     else this.note('ADDED TO MAP', `${icon('pin', 18)}<span class="nm">${ready.length} places</span><span class="how">${esc(ready.slice(0, 3).map((q) => q.name).join(' · '))}${ready.length > 3 ? ' …' : ''}</span>`, 5);
     this.addT = 5.5;
   }
@@ -114,7 +114,7 @@ export class GameHud {
       this.ping('minimap', 4);
       const wants = h?.notify ? h.notify === 'toast' : e.place.notify === 'toast' && e.via !== 'mission';
       if (!wants || uiSettings.get('hudDiscovery') === 'off') return;
-      this.addQ.push({ name: e.place.name, cat: e.place.cat, why: e.place.notifyWhy, how: VIA_SHORT[e.via] ?? '', mission: h?.mission });
+      this.addQ.push({ name: e.place.name, cat: e.place.cat, why: e.place.notifyLine, how: VIA_SHORT[e.via] ?? '', mission: h?.mission });
     });
     uiSettings.subscribe((_s, k) => this.applySetting(k));
     for (const k of ['minimapSize', 'subtitleBackground', 'textScale'] as const) this.applySetting(k);

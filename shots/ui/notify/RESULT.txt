@@ -1,8 +1,8 @@
 ✓ routine places are silent ([])
-✓ a tagged place gets one "Added to map" note (ADDED TO MAP Abend Bail Bonds Shop)
+✓ a tagged place gets one "Added to map" note (ADDED TO MAP Abend Bail Bonds Abend posts bail, and pays for skips)
 ✓ a burst waits while one is showing
 ✓ then merges into one note (ADDED TO MAP 3 places Maureen Kehoe, Esq. · Earl Poole's shoeshine stand · Galloway Auto Exchange)
 ✓ held during a mission
-✓ shown once the mission ends (ADDED TO MAP The Fifth Avenue Luncheonette a tip)
+✓ shown once the mission ends (ADDED TO MAP The Fifth Avenue Luncheonette The parked-car lady eats here)
 ✓ no "pencil" wording anywhere on screen
 all passed

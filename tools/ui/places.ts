@@ -47,7 +47,7 @@ const tooClose = (x: number, z: number, m: number) => places.some((p) => Math.hy
 // ------------------------------------------------------------ 1. narrative
 /** narrative's per-place `discovery` field (content/places.json) -> catalogue reveal rules. Homes stay
  *  known from the start for their own lead (HOMES_AND_CARS) whatever the field says. */
-interface NarrDiscovery { notify?: 'silent' | 'toast'; notifyWhy?: string; via?: string[]; sightM?: number; shady?: boolean; hiddenUntilIntroduced?: boolean; tipFrom?: string[]; mission?: string; note?: string }
+interface NarrDiscovery { notify?: 'silent' | 'toast'; notifyWhy?: string; notifyLine?: string; via?: string[]; sightM?: number; shady?: boolean; hiddenUntilIntroduced?: boolean; tipFrom?: string[]; mission?: string; note?: string }
 function narrativeDiscovery(d: NarrDiscovery | undefined, fallback: Place['reveal']): Pick<Place, 'reveal' | 'sightM' | 'shady'> {
   if (!d?.via?.length || fallback.includes('start')) return { reveal: fallback, sightM: 35 };
   const map: Record<string, Place['reveal'][number]> = { landmark: 'sight', sight: 'sight', tip: 'tip', overheard: 'overheard', newspaper: 'news', news: 'news', card: 'card', mission: 'mission', call: 'call', enter: 'enter' };
@@ -82,7 +82,7 @@ if (np) {
       address: p.between ? `${shortStreet(normaliseStreet(p.at))}, ${shortStreet(normaliseStreet(p.between[0]))}–${shortStreet(normaliseStreet(p.between[1]))}` : p.at.split('&').map((s) => shortStreet(normaliseStreet(s))).join(' & '),
       ...narrativeDiscovery(p.discovery, lead ? ['start'] : cat === 'landmark' ? ['sight', 'mission'] : ['mission', 'tip', 'enter', 'sight']),
       lead: lead?.id, source: 'narrative',
-      ...(p.discovery?.notify === 'toast' ? { notify: 'toast' as const, ...(p.discovery.notifyWhy ? { notifyWhy: p.discovery.notifyWhy } : {}) } : {}),
+      ...(p.discovery?.notify === 'toast' ? { notify: 'toast' as const, ...(p.discovery.notifyLine ? { notifyLine: p.discovery.notifyLine } : {}) } : {}),
       blurb: lead ? `${lead.name.replace(/“.*?”\s*/, '')} lives here.` : undefined,
     });
   }

@@ -28,7 +28,8 @@ export interface Place {
   /** 'toast' = worth coming back to (a story contact, side-quest giver, seller): one "Added to map" note.
    *  Everything else appears on the map silently (narrative: places.json discovery.notify). */
   notify?: 'toast';
-  notifyWhy?: string;
+  /** Player-facing second line of the toast (narrative: discovery.notifyLine). */
+  notifyLine?: string;
 }
 
 export interface PlacesFile { format: 't74-ui-places'; version: 1; generatedFrom: string[]; places: Place[] }
