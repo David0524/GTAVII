@@ -68,6 +68,9 @@ export class MissionRuntime {
     this.interiorsById = new Map(interiors.map((i) => [i.id, i]));
   }
 
+  /** Resolve a narrative place reference (loc.*, interior.*, intersection, address) to world x/z. */
+  resolve(ref: string) { return this.where(ref); }
+
   status(id: string): Status {
     const s = this.host.state().missions[id] as Status | undefined;
     if (s === 'done' || s === 'active' || s === 'failed') return s;

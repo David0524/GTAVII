@@ -438,7 +438,12 @@ async function main() {
       if (cue === 'mission.objective' && d?.text) { objective = { text: d.text }; uiEvents.emit('objective', objective); }
     },
     prompts: () => (driving?.driving ? [['use', driving.hotwiring ? 'Hot-wire' : 'Get out'], ['jump', 'Handbrake'], ['map', 'Map']] as [ButtonAction, string][] : mode === 'onfoot' ? [...(carPrompt ? [['use', carPrompt] as [ButtonAction, string]] : gpContext ? [['use', gpContext] as [ButtonAction, string]] : []), ['sprint', 'Sprint'], ['jump', 'Jump · climb'], ['map', 'Map'], ['inventory', 'Pockets']] : [['sprint', 'Fast'], ['rise', 'Up'], ['sink', 'Down'], ['photo', 'Back to player']].filter(() => devTools)) as [ButtonAction, string][],
-    newGame: () => { loadReport.mark('new-game'); const y = heightAt(spawn.x, spawn.z) + SIDEWALK_H; player.teleport(spawn.x, y, spawn.z, spawn.heading); placeAt(); },
+    // a new game starts where narrative's opening does (spawns.json spawn.player_start: the Flatiron's north prow, facing uptown)
+    newGame: () => {
+      loadReport.mark('new-game');
+      const p0 = missions?.resolve('Broadway & 5th Ave & E 23rd St'), s0 = p0 ? { x: p0.x, z: p0.z + 4, heading: 0 } : spawn;
+      const y = heightAt(s0.x, s0.z) + SIDEWALK_H; player.teleport(s0.x, y, s0.z, s0.heading); placeAt();
+    },
     continueGame: async () => {
       loadReport.mark('continue');
       const last = await saves.latest().catch(() => null);
