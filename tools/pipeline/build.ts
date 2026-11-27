@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { union, intersect, difference, bufferLines } from './clip.ts';
-import { CHUNK_SIZE, GRID_ROTATION_DEG, REGION, project, chunkKey } from '../../src/shared/geo.ts';
+import { CHUNK_SIZE, GRID_ROTATION_DEG, REGION, REGION_RECTS, inModelled, project, chunkKey } from '../../src/shared/geo.ts';
 import {
   BuildingFlag, GroundKind, PoiKind, Style, writeChunk, ByteWriter, PaintKind,
   type WBuilding, type WGround, type WPoi, type WPaint, type DoorRecC, type DoorStyle,
@@ -59,7 +59,7 @@ function cleanPoly(poly: Poly): Poly | null {
   return out;
 }
 const rectPoly = (minX: number, minZ: number, maxX: number, maxZ: number): Poly => [[[minX, minZ], [maxX, minZ], [maxX, maxZ], [minX, maxZ]]];
-const inRegion = ([x, z]: P, m = 0) => x >= REGION.minX - m && x <= REGION.maxX + m && z >= REGION.minZ - m && z <= REGION.maxZ + m;
+const inRegion = ([x, z]: P, m = 0) => inModelled(x, z, m); // union of modelled rectangles (core + Grand Central annex)
 
 // ------------------------------------------------------------------ load raw
 log('loading raw data');
@@ -377,6 +377,28 @@ for (const r of RESTORED_BUILDINGS) {
     if (f < lo || f > hi) { b.floors = Math.max(1, Math.round(h / typ)); fixed++; }
   }
   log(`floor sanity: ${fixed} buildings re-derived floors from height (period floor-to-floor by style)`);
+}
+
+// Stable building ids (E17). Ids used to be assigned in raw-data order, so widening the modelled area shifted
+// every id after the first new building. Interiors seed units from the id, and saves name units, so ids must
+// survive pipeline changes. The ledger (committed) maps a geometric signature (outer-ring centroid, base and
+// top height) to an id; known buildings keep theirs and new ones append after the highest id ever given.
+// A building whose footprint changes gets a new id, which is correct: it is a different building to interiors.
+{
+  const LEDGER = path.join(ROOT, 'data/building_ids.json');
+  const ledger: { next: number; ids: Record<string, number> } = fs.existsSync(LEDGER) ? JSON.parse(fs.readFileSync(LEDGER, 'utf8')) : { next: 1, ids: {} };
+  const seeding = !fs.existsSync(LEDGER);
+  const sig = (b: Bldg) => { const c = centroid(b.poly[0]); return `${c[0].toFixed(1)},${c[1].toFixed(1)},${b.minHeight.toFixed(1)},${b.height.toFixed(1)}`; };
+  const seen = new Map<string, number>(); // duplicate signatures (rare) get #n in build order
+  const keys = buildings.map((b) => { const k = sig(b), n = seen.get(k) ?? 0; seen.set(k, n + 1); return n ? `${k}#${n}` : k; });
+  if (seeding) { buildings.forEach((b, k) => { ledger.ids[keys[k]] = b.id; }); ledger.next = Math.max(0, ...buildings.map((b) => b.id)) + 1; }
+  let kept = 0, fresh = 0;
+  const taken = new Set<number>();
+  buildings.forEach((b, k) => { const id = ledger.ids[keys[k]]; if (id !== undefined && !taken.has(id)) { b.id = id; taken.add(id); kept++; } else b.id = -1; });
+  buildings.forEach((b, k) => { if (b.id === -1) { b.id = ledger.next++; ledger.ids[keys[k]] = b.id; fresh++; } });
+  // keep the ledger to what this build emits plus everything ever given (so a building that comes back keeps its id)
+  fs.writeFileSync(LEDGER, JSON.stringify({ next: ledger.next, ids: Object.fromEntries(Object.entries(ledger.ids).sort((a, b) => a[1] - b[1])) }));
+  log(`building ids: ${kept} kept, ${fresh} new${seeding ? ' (ledger seeded)' : ''}, next ${ledger.next}`);
 }
 
 // ------------------------------------------------------------------ streets (centrelines, 1974 directions)
@@ -793,10 +815,16 @@ const chunkIndex: any[] = [];
 let totalBytes = 0;
 const t0 = Date.now();
 for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
-  const minX = Math.max(i * CHUNK_SIZE, REGION.minX), maxX = Math.min((i + 1) * CHUNK_SIZE, REGION.maxX);
-  const minZ = Math.max(j * CHUNK_SIZE, REGION.minZ), maxZ = Math.min((j + 1) * CHUNK_SIZE, REGION.maxZ);
+  // the chunk's ground is its square clipped to the modelled regions (one or two rectangles; skip if none)
+  const pieces = REGION_RECTS.map((r) => [Math.max(i * CHUNK_SIZE, r.minX), Math.max(j * CHUNK_SIZE, r.minZ), Math.min((i + 1) * CHUNK_SIZE, r.maxX), Math.min((j + 1) * CHUNK_SIZE, r.maxZ)])
+    .filter(([a, b, c, d]) => c - a > 0.01 && d - b > 0.01);
+  if (!pieces.length) continue;
+  const minX = Math.min(...pieces.map((p) => p[0])), minZ = Math.min(...pieces.map((p) => p[1]));
+  const maxX = Math.max(...pieces.map((p) => p[2])), maxZ = Math.max(...pieces.map((p) => p[3]));
   const ox = (i + 0.5) * CHUNK_SIZE, oz = (j + 0.5) * CHUNK_SIZE;
-  const rect = rectPoly(minX, minZ, maxX, maxZ);
+  const merged = pieces.length === 1 ? [rectPoly(minX, minZ, maxX, maxZ)] : union(pieces.map(([a, b, c, d]) => rectPoly(a, b, c, d)));
+  if (merged.length !== 1) throw new Error(`chunk ${i},${j}: modelled pieces do not join (${merged.length})`);
+  const rect = merged[0];
   const near = roadLines.filter((r) => r.bb.maxX + r.half > minX && r.bb.minX - r.half < maxX && r.bb.maxZ + r.half > minZ && r.bb.minZ - r.half < maxZ);
   const roads = intersect(bufferLines(near), [rect]);
   const parkAll = difference(intersect(parkUnion, [rect]), roads);
@@ -918,12 +946,16 @@ const heroes = [...heroMap.values()].map(({ area: _a, name, ...h }) => {
 // Period regression gate (audio request 10): nothing in the modelled city may exceed 260 m except the
 // Empire State Building. Modern tower heights leaking in (e.g. via OSM parts) fail the build.
 {
-  const offenders = buildings.filter((b) => b.height > 260 && b.name !== 'Empire State Building');
+  // Pre-1974 towers over 260 m, allowed by place (not by year, so a mis-dated modern part still fails):
+  // the 1930 deco tower at Lexington & 42nd (319 m to the spire), modelled since the Grand Central annex (E17).
+  const PERIOD_TALL = [{ x: 488, z: -1594, r: 45, maxH: 320 }];
+  const allowed = (b: Bldg) => { const c = centroid(b.poly[0]); return PERIOD_TALL.some((t) => Math.hypot(c[0] - t.x, c[1] - t.z) < t.r && b.height <= t.maxH); };
+  const offenders = buildings.filter((b) => b.height > 260 && b.name !== 'Empire State Building' && !allowed(b));
   if (offenders.length) {
     for (const o of offenders) log('PERIOD GATE FAIL', o.id, o.height.toFixed(0), 'm', o.year, centroid(o.poly[0]).map((v) => v.toFixed(0)).join(','));
     throw new Error(`period gate: ${offenders.length} building(s) taller than 260 m (see log)`);
   }
-  log('period gate: ok (tallest non-ESB', Math.max(...buildings.filter((b) => b.name !== 'Empire State Building').map((b) => b.height)).toFixed(0), 'm)');
+  log('period gate: ok (tallest non-ESB, not allowed by place', Math.max(...buildings.filter((b) => b.name !== 'Empire State Building' && !allowed(b)).map((b) => b.height)).toFixed(0), 'm)');
 }
 const world = {
   format: 'T74C', version: 1, generatedFrom: JSON.parse(fs.readFileSync(path.join(RAW, 'manifest.json'), 'utf8')),

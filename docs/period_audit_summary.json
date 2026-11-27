@@ -1,25 +1,25 @@
 {
   "summary": {
-    "footprintsInRegion": 3998,
-    "kept": 3468,
-    "removed": 508,
+    "footprintsInRegion": 4099,
+    "kept": 3561,
+    "removed": 516,
     "notBuildings": 22,
-    "flaggedForReview": 52,
+    "flaggedForReview": 53,
     "overrides": 4,
     "byRule": {
       "0": 22,
       "1": 4,
-      "2": 220,
-      "3": 328,
-      "4": 3286,
+      "2": 242,
+      "3": 331,
+      "4": 3359,
       "5": 17,
       "2b": 3,
       "2c": 0,
-      "3b": 5,
+      "3b": 6,
       "L0": 44,
       "L1": 6,
-      "L2": 39,
-      "L3": 24
+      "L2": 40,
+      "L3": 25
     },
     "skyline": {
       "kept": 1180,

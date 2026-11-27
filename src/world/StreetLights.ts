@@ -12,7 +12,7 @@ import * as THREE from 'three/webgpu';
 import { uniform, instanceIndex, hash, smoothstep, uv, float, vec3, attribute, length, sub, vec2 } from 'three/tsl';
 import type { StreetRec } from '../ui/Minimap';
 import { heightAt, CURB_HEIGHT } from '../shared/terrain';
-import { REGION } from '../shared/geo';
+import { inModelled } from '../shared/geo';
 
 export const streetLightUniforms = { lightsOn: uniform(0) };
 
@@ -33,7 +33,7 @@ export function buildStreetLights(streets: StreetRec[]): THREE.Group {
       const ux = dx / L, uz = dz / L, nx = -uz, nz = ux;
       for (let t = carry; t < L; t += spacing) {
         const x = ax + ux * t + nx * off * side, z = az + uz * t + nz * off * side;
-        if (x < REGION.minX || x > REGION.maxX || z < REGION.minZ || z > REGION.maxZ) { side = -side; continue; }
+        if (!inModelled(x, z)) { side = -side; continue; }
         // arm points back over the roadway
         pts.push({ x, y: heightAt(x, z) + CURB_HEIGHT, z, yaw: Math.atan2(nx * side, nz * side), sodium });
         side = -side;
