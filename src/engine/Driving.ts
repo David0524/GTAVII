@@ -179,13 +179,10 @@ export class Driving {
       const p = o.v.object.position;
       const seat = o.v.seatPose('driver');
       this.d.seat(seat);
-      // steering wheel: approximated from the seat until vehicles exposes it (0.45 m ahead, 0.33 m up, tilted 25°)
+      // hands on the real rim (vehicles steeringWheelPose: centre/axis/up/radius in world space; the rim turns with steer)
       if (this.d.wheel) {
-        const q = new THREE.Quaternion().setFromRotationMatrix(seat), f = new THREE.Vector3(0, 0, -1).applyQuaternion(q), u = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
-        const center = new THREE.Vector3().setFromMatrixPosition(seat).addScaledVector(f, 0.45).addScaledVector(u, 0.33);
-        const tilt = 25 * Math.PI / 180, axis = f.clone().negate().multiplyScalar(Math.cos(tilt)).addScaledVector(u, Math.sin(tilt)).normalize();
-        const up = u.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(f, Math.sin(tilt)).normalize();
-        this.d.wheel({ center, axis, up, radius: 0.2 }, Math.max(-1, Math.min(1, this.d.input.move.x)));
+        const w = o.v.steeringWheelPose();
+        this.d.wheel({ center: w.centre, axis: w.axis, up: w.up, radius: w.radius }, Math.max(-1, Math.min(1, this.d.input.move.x)));
       }
       // the player stays with the car (streaming, physics colliders, the UI and sim focus read player.pos)
       this.d.player.teleport(p.x, p.y, p.z, o.v.object.rotation.y);
